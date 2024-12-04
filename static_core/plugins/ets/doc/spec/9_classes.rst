@@ -297,14 +297,15 @@ A :index:`compile-time error` occurs if:
 
 -  The ``extends`` graph has a cycle.
 
--  ``typeReference`` refers directly to, or is an alias of primitive,
-   array, string, enumeration, union, interface, or function types.
+-  ``typeReference`` refers directly to, or is an alias of interface or any
+   non-class type like primitive, array, string, enumeration, union, function
+   or utility types.
 
 
 *Class extension* implies that a class inherits all members of the direct
 superclass.
 
-**Note**: Private members are inherited from superclasses, but are not
+**Note**. Private members are inherited from superclasses, but are not
 accessible (see :ref:`Accessible`) within subclasses:
 
 .. index::
@@ -675,6 +676,7 @@ A *class body* can contain declarations of the following members:
         ;
 
     classBodyDeclaration:
+        annotationUsage?
         accessModifier?
         ( constructorDeclaration
         | classFieldDeclaration
@@ -686,6 +688,8 @@ A *class body* can contain declarations of the following members:
 Declarations can be inherited or immediately declared in a class. Any
 declaration within a class has a class scope. The class scope is fully
 defined in :ref:`Scopes`.
+
+The usage of annotations is defined in :ref:`Using Annotations`.
 
 .. index::
    class body

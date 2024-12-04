@@ -19,10 +19,10 @@ Expressions
     frontend_status: Partly
 
 This chapter describes the meanings of expressions and the rules for the
-evaluation of  expressions, except for the expressions related to coroutines
+evaluation of expressions, except the expressions related to coroutines
 (see :ref:`Create and Launch a Coroutine` for ``launch`` expressions, and
-:ref:`Awaiting a Coroutine` for ``await`` expressions) and expressions 
-that are described as experimental (see :ref:`Lambda Expressions with Receiver`).
+:ref:`Awaiting a Coroutine` for ``await`` expressions) and expressions
+described as experimental (see :ref:`Lambda Expressions with Receiver`).
 
 .. index::
    evaluation
@@ -238,8 +238,8 @@ follows:
 -  If the value of an array index expression is negative, or greater than, or
    equal to the length of the array, then an *array indexing expression* (see
    :ref:`Array Indexing Expression`) throws ``ArrayIndexOutOfBoundsError``.
--  If a cast cannot be performed at runtime, then a *cast expression* (see
-   :ref:`Cast Expressions`) throws ``ClassCastError``.
+-  If a conversion cannot be performed at runtime, then a *cast expression*
+   (see :ref:`Cast Expressions`) throws ``ClassCastError``.
 -  If the right-hand operand expression has the zero value, then integer
    division (see :ref:`Division`), or integer remainder (see :ref:`Remainder`)
    operators throw ``ArithmeticError``.
@@ -528,7 +528,7 @@ Literal
 .. meta:
     frontend_status: Done
 
-Literals (see :ref:`Literals`) denote fixed and unchanging value. The type of
+Literals (see :ref:`Literals`) denote fixed and unchanging values. The type of
 the literal (see :ref:`Literals`) is the type of the expression.
 
 .. index::
@@ -566,16 +566,17 @@ A *simple name* refers to the following:
 A *qualifiedName* that is not a *simple name* refers to the following:
    
 -  An entity imported from a compilation unit, or
+-  An entity exported from a namespace, or
 -  A member of some class or interface.
 
 If *typeArguments* are provided, then *qualifiedName* is a valid instantiation
 of the generic method or function. Otherwise, a :index:`compile-time error`
 occurs.
 
-A :index:`compile-time error` occurs if:
+A :index:`compile-time error` occurs in the following situations:
 
--  The name referred by *qualifiedName* is undefined or inaccessible; or
--  Ambiguity occurs while resolving the name.
+-  If the name referred by *qualifiedName* is undefined or inaccessible; or
+-  If ambiguity occurs while resolving the name.
 
 The type of the *named reference* is the type of the expression.
 
@@ -657,8 +658,6 @@ An *array literal* is a comma-separated list of *initializer expressions*
 enclosed between '``[``' and '``]``'. A trailing comma after the last
 expression in an array literal is ignored:
 
-The type of the expression is the type of the *array literal*.
-
 .. index::
    array literal
    expression
@@ -673,6 +672,8 @@ The type of the expression is the type of the *array literal*.
 
     let x = [1, 2, 3] // ok
     let y = [1, 2, 3,] // ok, trailing comma is ignored
+
+The type of the expression is the type of the *array literal*.
 
 The number of initializer expressions enclosed in braces of the array
 initializer determines the length of the array to be constructed.
@@ -691,11 +692,12 @@ are initialized to the values specified by initializer expressions.
    initializer expression
    value
 
-On the contrary, the evaluation of the array initializer completes abruptly if:
+On the contrary, the evaluation of the array initializer completes abruptly
+in the following situations:
 
--  The space allocated for the new array is insufficient, and 
+-  If the space allocated for the new array is insufficient, and
    ``OutOfMemoryError`` is thrown; or
--  Some initialization expression completes abruptly.
+-  If some initialization expression completes abruptly.
 
 .. index::
    evaluation
@@ -838,7 +840,9 @@ union type. Otherwise, it is a :index:`compile-time error`:
 
     let union_of_arrays: number[] | string[] = [1, 2] // OK, type of literal is number[]
     let incorrect_union_of_arrays: number[] | string[] = [1, 2, "string"]
-     // compile-time error: number|string[] is not compatible with number[] | string[]
+     /* compile-time error: (number|string)[] (type of the literal) is not compatible with 
+        number[] | string[] (type of the variable)
+     */
 
 .. index::
    tuple type
@@ -1393,7 +1397,7 @@ The type of the *spread expression* is a sequence of types of these values.
     }
 
 
-**Note**: If an array is spread while calling a function, then an appropriate
+**Note**. If an array is spread while calling a function, then an appropriate
 parameter must be of the spread array kind. If an array is spread into a
 sequence of ordinary parameters, then a :index:`compile-time error` occurs:
 
@@ -1404,7 +1408,7 @@ sequence of ordinary parameters, then a :index:`compile-time error` occurs:
     bar (...an_array) // compile-time error
     function bar (n1: number, n2: number) { ... }
 
-**Note**: If a tuple is spread while calling a function, an appropriate
+**Note**. If a tuple is spread while calling a function, an appropriate
 parameter must be of spread tuple kind. A :index:`compile-time error` occurs if
 a tuple is spread into a sequence of ordinary parameters:
 
@@ -1467,18 +1471,19 @@ the contained expression.
 
 The keyword ``this`` can be used as an expression in the body of an instance
 method of a class (see :ref:`Method Body`) or interface (see
-:ref:`Default Interface Method Declarations`). The type of *this expression*
-will be the appropriate class or interface type.
+:ref:`Default Interface Method Declarations`). The type of expression *this*
+is the appropriate class or interface type.
 
 It can be used in a lambda expression only if it is allowed in the
-context the lambda expression appears in.
+context the lambda expression occurs in.
 
-The keyword ``this`` in a direct call expression *this(...)* can only
-be used in the explicit constructor call statement.  XXX
+The keyword ``this`` in a direct call expression *this(...)* can only be used
+in the explicit constructor call statement (see
+:ref:`Explicit Constructor Call`). 
 
-Also the keyword ``this`` can be used in the body of the functiosn with
-receiver (see :ref:`Functions with Receiver`). The type of *this expression*
-will be the declared type of ``this`` parameter of the function.
+The keyword ``this`` can also be used in the body of a function with
+receiver (see :ref:`Functions with Receiver`). The type of expression *this*
+is the declared type of ``this`` parameter of the function.
 
 A :index:`compile-time error` occurs if the keyword ``this`` appears elsewhere.
 
@@ -1569,7 +1574,7 @@ Field access expression is valid if the identifier refers to an accessible
 (see :ref:`Accessible`) member field in type ``T``. A :index:`compile-time error`
 occurs otherwise.
 
-The type of the *field access expression* is the type of the member field.
+The type of a *field access expression* is the type of the member field.
 
 .. index::
    access
@@ -1875,10 +1880,10 @@ semantic checks must be performed:
    type argument
 
 
-.. _Type of the method call expression:
+.. _Type of Method Call Expression:
 
-Type of the method call expression
-==================================
+Type of Method Call Expression
+==============================
 
 .. meta:
     frontend_status: None
@@ -1910,10 +1915,10 @@ A *function call expression* is used to call a function (see
 A special syntactic form that contains a block associated with the function
 call is called *trailing lambda call* (see :ref:`Trailing Lambdas` for details).
 
-A :index:`compile-time error` occurs if:
+A :index:`compile-time error` occurs in the following situations:
 
--  The expression type is different than the function type;
--  The expression type is nullish but without '``?.``' (see
+-  If the expression type is different than the function type;
+-  If the expression type is nullish but without '``?.``' (see
    :ref:`Chaining Operator`).
 
 .. index::
@@ -1933,8 +1938,8 @@ If the operator '``?.``' (see :ref:`Chaining Operator`) is present, and the
 *expression* evaluates to a nullish value, then:
 
 -  *Arguments* are not evaluated;
--  Call is not performed; and thus
--  The result of *functionCallExpression* is not produced.
+-  Call is not performed; and
+-  The result of *functionCallExpression* is not produced as a consequence.
 
 The function call is *safe* because it handles nullish values properly.
 
@@ -2004,7 +2009,7 @@ The example below represents different forms of function calls:
     ((): void => { console.log ("Lambda is called") }) () // function call uses lambda expression to call it
 
 
-The type of the *function call expression* is defined below
+The type of a *function call expression* is defined below
 - TBD
 
 
@@ -2330,7 +2335,7 @@ If the value of the expression to the left of '``?.``' is ``undefined`` or
 ``null``, then the evaluation of the entire surrounding *primary expression*
 stops. The result of the entire primary expression is then ``undefined``. Thus
 the type of the entire primary expression is the union ``undefined`` |
-*the non-nullish type of the entire primary expression*.
+*non-nullish type of the entire primary expression*:
 
 .. code-block-meta:
 
@@ -2466,8 +2471,8 @@ A :index:`compile-time error` occurs if ``typeReference`` is a type parameter.
 .. meta:
     frontend_status: Done
 
-*Cast expressions* apply *cast operator* ``as`` to some *expression* by
-issuing a value of the specified ``type``.
+*Cast expressions* apply *cast operator* ``as`` to some *expression* by issuing
+a value of the specified ``type``.
 
 .. code-block:: abnf
 
@@ -2488,8 +2493,8 @@ The cast operator converts the value *V* of one type (as denoted by the
 expression) at runtime to a value of another type.
 
 The cast expression introduces the target type for the casting context (see
-:ref:`Casting Contexts and Conversions`). The target type can be either ``type``
-or ``typeReference``.
+:ref:`Casting Contexts and Conversions`). The target type can be either
+``type`` or ``typeReference``.
 
 .. index::
    cast operator
@@ -2506,15 +2511,11 @@ A cast expression type is always the target type.
 The result of a cast expression is a value, not a variable (even if the operand
 expression is a variable).
 
-The casting conversion (see :ref:`Casting Contexts and Conversions`) converts
-the operand value at runtime to the target type specified by the cast operator
-(if needed).
-
-A :index:`compile-time error` occurs if the casting conversion cannot convert
-the compile-time type of the operand to the target type specified by the cast
+A :index:`compile-time error` occurs if the cast operator cannot convert the
+compile-time type of the operand to the target type specified by the cast
 operator.
 
-If the ``as`` cast cannot be performed during program execution, then
+If the casting conversion cannot be performed during program execution, then
 ``ClassCastError`` is thrown.
 
 .. index::
@@ -2524,7 +2525,6 @@ If the ``as`` cast cannot be performed during program execution, then
    variable
    operand expression
    variable
-   casting conversion
    operand value
    compile-time type
    cast operator
@@ -2615,13 +2615,12 @@ system, and the result of the ``instanceof`` expression cannot be determined.
         'typeof' expression
         ;
 
-Any ``typeof`` expression is of type ``string``.  Its evaluation starts with
-``expression`` evaluation. If such evaluation causes exception or error, then
-the result of the ``typeof`` expression cannot be determined in that case
-otherwise the ``typeof`` expression value is defined like this
+Any ``typeof`` expression is of type ``string``. Its evaluation starts with the
+``expression`` evaluation. If this evaluation causes exception or error, then
+the result of the ``typeof`` expression cannot be determined. Otherwise, the
+``typeof`` expression value is defined as follows:
 
-- for the below types it is known at compile time:
-
+- The following types are defined at compile time:
 
 .. index::
    typeof expression
@@ -2660,6 +2659,12 @@ otherwise the ``typeof`` expression value is defined like this
 |                                 |                         |  let B: BigInt = ...        |
 |                                 |                         |  typeof B                   |
 +---------------------------------+-------------------------+-----------------------------+
+
+(table cont'd)
+
++---------------------------------+-------------------------+-----------------------------+
+|     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
++=================================+=========================+=============================+
 | any class or interface          | "object"                | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  let a: Object = ...        |
@@ -2678,12 +2683,6 @@ otherwise the ``typeof`` expression value is defined like this
 |                                 |                         |                             |
 |                                 |                         |  typeof null                |
 +---------------------------------+-------------------------+-----------------------------+
-
-(table cont'd)
-
-+---------------------------------+-------------------------+-----------------------------+
-|     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
-+=================================+=========================+=============================+
 | ``T|null``, when ``T`` is a     | "object"                | .. code-block:: typescript  |
 | class (but not Object -         |                         |                             |
 | see next table),                |                         |  class C {}                 |
@@ -2706,7 +2705,7 @@ otherwise the ``typeof`` expression value is defined like this
 | ``Double``, ``char``, ``Char``  |                         |                             |
 +---------------------------------+-------------------------+-----------------------------+
 
-- for all other types is evaluated during program execution:
+- All other types are evaluated at runtime:
 
 +------------------------+-----------------------------+
 | **Type of Expression** | **Code Example**            |
@@ -4034,7 +4033,7 @@ Numeric types conversion (see :ref:`Primitive Types Conversions`) is performed
 separately on each operand to ensure that both operands are of primitive
 integer type.
 
-**Note**: If the initial type of one or both operands is ``double`` or
+**Note**. If the initial type of one or both operands is ``double`` or
 ``float``, then such operand or operands are  first truncated to the appropriate
 integer type. If both operands are of type ``bigint``, then shift operator
 is applied to bigint operands.
@@ -4733,7 +4732,7 @@ The following example illustrates an equality with a value of type ``Object``:
     equ("aa", "aa") // true, string equality
     equ(1, "aa") // false, not compatible types
 
-**Note**: The actual type of an ``Object`` value can be none of the following:
+**Note**. The actual type of an ``Object`` value can be none of the following:
 
 - Union type, as only the current value of a union type variable can be assigned
   to an ``Object`` variable;
@@ -4776,7 +4775,7 @@ then a :index:`compile-time error` occurs if ``T``:sub:`1` and ``T``:sub:`2`
 have no overlap (i.e., if no value belongs to both ``T``:sub:`1` and
 ``T``:sub:`2`).
 
-**Note**: Any union type has an overlap with a value of type ``Object``.
+**Note**. Any union type has an overlap with a value of type ``Object``.
 
 The following example illustrates an equality with values of two union types:
 
@@ -5063,7 +5062,7 @@ is performed first on the operands of an operator '``&``', '``^``', or '``|``'
 if both operands are of a type convertible (see :ref:`Implicit Conversions`)
 to a primitive integer type.
 
-**Note**: If the initial type of one or both operands is ``double`` or
+**Note**. If the initial type of one or both operands is ``double`` or
 ``float``, then that operand or operands are truncated first to the appropriate
 integer type. If both operands are of type ``bigint``, then no conversion is
 required.
@@ -5370,7 +5369,7 @@ Simple Assignment Operator
 .. meta:
     frontend_status: Done
 
-A simple assignment expression has the form *E1 = E2*.
+The form of a simple assignment expression is ``E1 = E2``.
 
 A :index:`compile-time error` occurs if the type of the right-hand operand
 (*rhsExpression*) is not compatible (see :ref:`Type Compatibility`) with
@@ -5931,7 +5930,7 @@ has no function name specified, and can have types of parameters omitted:
 .. code-block:: abnf
 
     lambdaExpression:
-        ('async'|typeParameters)? lambdaSignature '=>' lambdaBody
+        annotationUsage? ('async'|typeParameters)? lambdaSignature '=>' lambdaBody
         ;
 
     lambdaBody:
@@ -5969,6 +5968,8 @@ has no function name specified, and can have types of parameters omitted:
     lambdaOptionalParameter:
         identifier '?' (':' 'readonly'? type)?
         ;
+
+The usage of annotations is defined in :ref:`Using Annotations`.
 
 .. index::
    lambda expression
@@ -6151,7 +6152,7 @@ that has the following:
 -  Lambda return type as the return type of the function type.
 
 
-**Note**: Lambda return type can be inferred from the *lambda body*.
+**Note**. Lambda return type can be inferred from the *lambda body*.
 
 .. index::
    lambda expression type
@@ -6293,7 +6294,8 @@ Dynamic Import Expression
 *************************
 
 .. meta:
-    frontend_status: None
+    frontend_status: Partly
+    todo: need runtime support
 
 *Dynamic import expression* allows loading a compilation unit asynchronously
 and dynamically.
@@ -6346,7 +6348,7 @@ of the following:
 -  Literals of a primitive type, and literals of type ``string`` (see
    :ref:`Literals`);
 
--  Casts to primitive types, and casts to type ``string`` (see
+-  Conversions to primitive types, and conversions to type ``string`` (see
    :ref:`Cast Expressions`);
 
 -  Unary operators '``+``', '``-``', '``~``', and '``!``', but not '``++``'

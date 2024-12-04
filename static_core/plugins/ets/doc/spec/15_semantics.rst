@@ -318,12 +318,18 @@ constructor call:
 
 - Type of each argument corresponding to the rest parameter without the spread
   operator (:ref:`Spread Expression`) must be compatible with the element type
-  of the rest type parameter;
+  of the array rest type parameter. If the rest parameter is a tuple then the
+  number of arguments must be equal to the number of tuple elements and
+  argument types must be compatible with the appropriate tuple types;
 
 - If a single argument corresponding to the rest parameter has the spread
   operator (:ref:`Spread Expression`), then the *expression* that follows the
-  operator must refer to an array of a type compatible with the type of the
-  rest parameter.
+  operator must refer to 
+
+    - an array of a type compatible with the type of the array rest parameter;
+      or
+    - a tuple of types compatible with the proper types of the tuple rest
+      parameter.
 
 .. index::
    call argument
@@ -394,16 +400,17 @@ Smart Types
    frontend_status: Partly
    todo: implement a dataflow check for loops and try-catch blocks
 
-Every data entity
+Data entities include the following:
 
--  a variable (see :ref:`Variable and Constant Declarations`),
--  a class field (see :ref:`Field Declarations`),
--  a parameter of a function or method (see :ref:`Parameter List`)
+-  Variable (see :ref:`Variable and Constant Declarations`),
+-  Class field (see :ref:`Field Declarations`), and
+-  Parameter of a function or method (see :ref:`Parameter List`).
 
-has its static type, which is specified explicitly or inferred at the
-point of declaration. This type defines the set of operations that can
-be applied to the entity (namely, what methods can be called, and what other
-entities can be accessed if the entity acts as a receiver of the operation):
+Every data entity has its static type, which is specified explicitly or
+inferred at the point of declaration. This type defines the set of operations
+that can be applied to the entity (namely, what methods can be called, and what
+other entities can be accessed if the entity acts as a receiver of the
+operation):
 
 .. code-block:: typescript
    :linenos:
@@ -476,7 +483,8 @@ Other examples are explicit calls to ``instanceof``
    conditional expression
 
 In cases like this, the smart compiler can deduce the smart type of an entity
-without requiring unnecessary ``as`` conversions (see :ref:`Cast Expressions`).
+without requiring unnecessary casting conversions (see
+:ref:`Cast Expressions`).
 
 Overloading (see :ref:`Function and Method Overloading`) can cause tricky
 situations when a smart type leads to the call of a function or a method
@@ -500,7 +508,7 @@ implementation.
    compiler
    smart type
    entity
-   as conversion
+   casting conversion
    conversion
    function
    method
@@ -925,7 +933,7 @@ Overloading and Overriding in Classes
 Both *overloading* and *overriding* must be considered in case of classes for
 methods and partly for constructors.
 
-**Note**: Only accessible (see :ref:`Accessible`) methods are subject for
+**Note**. Only accessible (see :ref:`Accessible`) methods are subject for
 overloading and overriding. For example, neither overriding nor overloading
 is considered if a superclass contains a ``private`` method, and a subclass
 has a method with the same name. Accessors are considered methods here.
@@ -1166,7 +1174,7 @@ The overload resolution is performed in two steps as follows:
 #. If there is more than one *applicable candidate*, then select the best
    candidate.
 
-**Note**: The first step is performed in all cases, even if there is
+**Note**. The first step is performed in all cases, even if there is
 only one *applicable candidate* to check *call signature compatibility*.
 
 .. index::
@@ -1192,7 +1200,7 @@ The selection of *applicable candidates* is the process of checking
 *potentially applicable candidates*. If any argument is not compatible with
 the corresponding parameter type, then the entity is deleted from the set.
 
-**Note**: Compile-time errors are not reported on this stage.
+**Note**. Compile-time errors are not reported on this stage.
 
 After processing all entities, one of the following results is achieved:
 

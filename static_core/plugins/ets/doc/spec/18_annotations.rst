@@ -10,7 +10,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-.. Annotations:
+.. _Annotations:
 
 Annotations
 ###########
@@ -88,7 +88,7 @@ Declaring Annotations
 *********************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 The declaration of a *annotation* is similar to that of an interface where the
 keyword ``interface`` is prefixed with the character '``@``':
@@ -165,7 +165,7 @@ Types of Annotation Fields
 ==========================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 The choice of types for annotation fields is limited to the following:
 
@@ -173,10 +173,11 @@ The choice of types for annotation fields is limited to the following:
 - Type ``boolean``;
 - Type ``string``;
 - Enumeration types;
-- Array of above types, e.g., ``string[]``, including multi-dimensional arrays, like ``string[][]``.
+- Array of the above types (e.g., ``string[]``), including multidimensional
+  arrays (e.g., ``string[][]``).
 
-A :index:`compile-time error` occurs if any other type is used as type of an
-*annotation field*.
+A :index:`compile-time error` occurs if any other type is used as the type of
+an *annotation field*.
 
 .. index::
    annotation field
@@ -231,7 +232,8 @@ a :index:`compile-time error` occurs.
    object literal
    expression
 
-The usage of annotation is presented in the example below:
+The usage of annotation is presented in the example below
+where annotations are applied to class declarations:
 
 .. code-block:: typescript
    :linenos:
@@ -245,11 +247,23 @@ The usage of annotation is presented in the example below:
     @MyAnno()
     class C3 {/*body*/}
 
-The current version of |LANG| allows using annotations only with the following:
+Annotations can be applied to:
 
-- Non-abstract class declarations;
-- Method declarations in non-abstract classes; and
-- Function declaration.
+- A top-level declaration (see :ref:`Top-Level Declarations`), 
+  except abstract class declarations;
+
+- A class member (see :ref:`Class Body`)
+  or interface member (see :ref:`Interface Body`), 
+  except members of abstract class declaration;
+
+- A type usage (see :ref:`Using Types`);
+
+- A parameter (see :ref:`Parameter List`, :ref:`Optional Parameters`);
+
+- A lambda expression (see :ref:`Lambda Expressions`,
+  :ref:`Lambda Expressions with Receiver`);
+
+- A local declarataion (see :ref:`Local Declarations`).
 
 .. index::
    annotation
@@ -343,7 +357,7 @@ Using Single Field Annotations
 ==============================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 If annotation declaration defines only one field, then it can be used with a
 short notation to specify just one expression instead of an object literal:
@@ -376,6 +390,9 @@ with an object literal.
 
 Exporting and Importing Annotations
 ***********************************
+
+.. meta:
+    frontend_status: Done
 
 An annotation can be exported and imported. However, a few forms of export and
 import directives are supported.
@@ -460,6 +477,9 @@ Annotations are forbidden in the following cases:
 
 Ambient Annotations
 *******************
+
+.. meta:
+    frontend_status: Partly
 
 Ambient annotations can be specified in :ref:`Declaration Modules` only.
 

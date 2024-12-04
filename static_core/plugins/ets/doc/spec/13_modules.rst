@@ -645,8 +645,8 @@ The output of Import with No Binding is as follows:
 - Package initialization code; or
 - MainProgram code.
 
-The import with an empty list of selective bindings has the same semantics as
-just import with no binding at all.
+The semantics of import with an empty list of selective bindings is the same
+as that of plain import with no binding at all:
 
 .. code-block:: typescript
    :linenos:
@@ -989,6 +989,7 @@ functions (see :ref:`Function Declarations`), or namespaces (see
 
     topDeclaration:
         ('export' 'default'?)?
+        annotationUsage?
         ( typeDeclaration
         | variableDeclarations
         | constantDeclarations
@@ -1015,6 +1016,8 @@ functions (see :ref:`Function Declarations`), or namespaces (see
    constant
    function
    export
+
+The usage of annotations is defined in :ref:`Using Annotations`.
 
 |
 
@@ -1152,7 +1155,7 @@ An example of usage is presented below:
     }
 
 **Note**: Namespaces with identical namespace names in a single compilation
-units (including embedded namespaces cases) form a single namespace:
+unit (including embedded namespaces cases) form a single namespace:
 
 .. code-block:: typescript
    :linenos:
@@ -1529,7 +1532,7 @@ Separate modules can act as programs (applications). The two kinds of program
 - Top-level statements (see :ref:`Top-Level Statements`);
 - Top-level ``main`` function (see below).
 
-Thus, a separate module can have:
+Thus, a separate module can have the following:
 
 - Sole top-level ``main`` function (that is the entry point);
 - Sole top-level statements (the first statement in the top-level statements
@@ -1601,7 +1604,7 @@ Program Exit
     frontend_status: Done
 
 Separate modules can act as programs (applications). Thus, a separate module
-can have:
+can have the following:
 
 - Only a top-level ``main`` function;
 - Only top-level statements;

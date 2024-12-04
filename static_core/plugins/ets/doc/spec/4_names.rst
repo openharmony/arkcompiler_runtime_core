@@ -161,9 +161,8 @@ The examples below represent declarations distinguishable by names:
         static field: number = PI + pi
     }
 
-If a declaration is not distinguishable by name for functions, methods, or
-constructors (except a valid overloading as in
-:ref:`Function and Method Overloading` and
+If a declaration is not distinguishable by name (except a valid overloading as
+in :ref:`Function and Method Overloading` and
 :ref:`Declaration Distinguishable by Signatures`), then a
 :index:`compile-time error` occurs:
 
@@ -185,6 +184,15 @@ constructors (except a valid overloading as in
           return this.counter
         }
     }
+
+    /* compile-time error: Name of the declaration clashes with the predefined
+        type or standard library entity name. */
+    let number: number = 1 
+    let String = true
+    function Record () {}
+    interface Object {}
+    let Array = 666
+
 
     // Functions have the same name but they are distinguishable by signatures
     function foo() {}
@@ -211,8 +219,9 @@ Different entity declarations introduce new names in different *scopes*. Scope
 along with other regions it can be used in. The following entities are always
 referred to by their qualified names only:
 
--  Class and interface members (both static and instance ones);
--  Entities imported via qualified import.
+- Class and interface members (both static and instance ones);
+- Entities imported via qualified import;
+- Entities declared in namespaces (see :ref:`Namespace Declarations`).
 
 Other entities are referred to by their simple (unqualified) names.
 
@@ -254,6 +263,14 @@ The scope of an entity depends on the context the entity is declared in:
    declared on the module level is accessible (see :ref:`Accessible`)
    throughout the entire module. If exported, a name can be accessed in other
    compilation units.
+
+.. _namespace-access:
+
+-  *Namespace level scope* is applicable for namespaces only. A name
+   declared in the namespace is accessible (see :ref:`Accessible`)
+   throughout the entire namespace and in all embedded namespaces. If exported,
+   a name can be accessed outside the namespace with mandatory namespace name
+   qualification.
 
 .. index::
    module level scope
@@ -604,7 +621,7 @@ a type argument:
    
     type A<T> = Array<A> // compile-time error
 
-**Note**: There is no restriction on using a type parameter *T* in
+**Note**. There is no restriction on using a type parameter *T* in
 the right side of a type alias declaration. The following code
 is valid:
 
@@ -693,7 +710,7 @@ variable is determined as follows:
    :linenos:
 
     let a: number // ok
-    let b = 1 // ok, number type is inferred
+    let b = 1 // ok, type 'int' is inferred
     let c: number = 6, d = 1, e = "hello" // ok
 
     // ok, type of lambda and type of 'f' can be inferred
@@ -707,20 +724,19 @@ Every variable in a program must have an initial value before it can be used:
 
 - Otherwise, the following situations are possible:
 
-   + If a type of a variable is ``T`` and ``T`` has a *default value*
-     (see :ref:`Default Values for Types`), it is initialized with the 
-     default value.
-   + If a type of a variable is ``T[]``
-     (or multidimensional array with elements of type ``T``)
-     and *T* has a *default value* (see :ref:`Default Values for Types`), 
-     all array elements are initialized with the default value.
-   + If a variable does not have a default value, its value must be set 
-     by :ref:`Simple Assignment Operator` before any attempt to use its 
-     value. Note, the variable of an array type must be initalized as whole
-     by single assignment.
+   + If the type of a variable is ``T``, and ``T`` has a *default value*
+     (see :ref:`Default Values for Types`), then the variable is initialized
+     with the default value.
+   + If the type of a variable is ``T[]`` (or a multidimensional array with
+     elements of type ``T``), and ``T`` has a *default value* (see
+     :ref:`Default Values for Types`), then all array elements are initialized
+     with the default value.
+   + If a variable has no default value, then a value must be set by the
+     :ref:`Simple Assignment Operator` before attempting to use the variable.
 
-Otherwise, the variable is not initialized, and a :index:`compile-time error`
-occurs.
+**Note**. A variable of an array type must be initalized as a whole by a single
+assignment. Otherwise, the variable is not initialized, and a
+:index:`compile-time error` occurs.
 
 If an initializer expression is provided, then additional restrictions apply to
 the content of the expression as described in
@@ -1092,7 +1108,7 @@ the function or the method has no parameters.
         ;
 
     parameter:
-        identifier ':' 'readonly'? type
+        annotationUsage? identifier ':' 'readonly'? type
         ;
 
     restParameter:
@@ -1204,8 +1220,10 @@ Optional Parameters
         ;
     
     optionalParameter:
-        identifier ':' 'readonly'? type '=' expression
+        annotationUsage?
+        ( identifier ':' 'readonly'? type '=' expression
         | identifier '?' ':' 'readonly'? type
+        )
         ;
 
 

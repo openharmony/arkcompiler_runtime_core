@@ -167,7 +167,7 @@ Ambient function declarations cannot specify function bodies.
     declare function bar(y: number = 1): void // compile-time error
     
 
-**Note**: The modifier ``async`` cannot be used in an ambient context.
+**Note**. The modifier ``async`` cannot be used in an ambient context.
 
 .. index::
    ambient function declaration
@@ -298,7 +298,7 @@ in an ambient context. This feature is provided for |TS| compatibility:
     }
 
 
-**Note**: *Ambient indexer declaration* is supported in ambient contexts only.
+**Note**. *Ambient indexer declaration* is supported in ambient contexts only.
 If ambient class implementation is written in |LANG|, then it must conform to
 :ref:`Indexable Types`.
 
@@ -334,7 +334,7 @@ in an ambient context. This feature is provided for |TS| compatibility:
         (someArg: number): boolean
     }
 
-**Note**: *Ambient class signature declaration* is supported in ambient contexts
+**Note**. *Ambient class signature declaration* is supported in ambient contexts
 only. If ambient class implementation is written in |LANG|, then it must conform
 to :ref:`Callable Types with Invoke Method`.
 
@@ -377,7 +377,7 @@ implements ``Iterator`` interface defined in the standard library (see
     }
 
 
-**Note**: *Ambient iterable declaration* is supported in ambient contexts only.
+**Note**. *Ambient iterable declaration* is supported in ambient contexts only.
 If ambient class implementation is written in |LANG|, then it must conform to
 :ref:`Iterable Types`.
 
