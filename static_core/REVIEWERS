@@ -122,6 +122,7 @@ static_core/plugins/ets/tests/stdlib-templates/                               @i
 static_core/plugins/ets/tests/test-lists/                                     @shirunova_viktoria @kuchkovairina
 static_core/plugins/ets/tools/declgen_ts2sts/                                 @semenovaleksandr
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   @ivan-tyulyandin @anton-sysoev
+static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting @dmitriitr @udav
 static_core/plugins/ets/stdlib/std/containers/BlockingQueue.sts               @konstanting
 static_core/plugins/ets/stdlib/std/core/Coroutine.sts                         @dmitriitr @konstanting
 static_core/plugins/ets/stdlib/std/core/EnumConstant.sts                      @smirnovandrei @anton-sysoev
