@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 panda_ets_interop_js_test(ets_interop_js_test_promise1
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
@@ -282,4 +284,18 @@ panda_ets_interop_js_test(ets_interop_js_test_resolve_js_promise_from_non_main_c
 panda_ets_interop_js_test(ets_interop_js_test_schedule_main_coro
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/schedule_main_coro.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/schedule_main_coro.js
+)
+
+panda_ets_interop_js_test(ets_interop_js_test_promise_proxy
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.sts
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.js
+    ETS_CONFIG ${ETS_CONFIG}
+    LAUNCHER_ARGS "testProxyPromise"
+)
+
+panda_ets_interop_js_test(ets_interop_js_test_promise_proxy_with_await
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.sts
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.js
+    ETS_CONFIG ${ETS_CONFIG}
+    LAUNCHER_ARGS "testAwaitPromiseProxy"
 )

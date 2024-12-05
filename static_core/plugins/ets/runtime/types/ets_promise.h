@@ -143,6 +143,15 @@ public:
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, linkedPromise_), p->GetCoreType());
     }
 
+    static void CreateLink(EtsObject *source, EtsPromise *target)
+    {
+        EtsCoroutine *currentCoro = EtsCoroutine::GetCurrent();
+        auto *jobQueue = currentCoro->GetPandaVM()->GetJobQueue();
+        if (jobQueue != nullptr) {
+            jobQueue->CreateLink(source, target->AsObject());
+        }
+    }
+
     EtsMutex *GetMutex(EtsCoroutine *coro)
     {
         auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, mutex_));

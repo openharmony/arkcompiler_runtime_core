@@ -1,0 +1,85 @@
+/**
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {jsAsync} from 'promiseProxy'
+
+class Test {
+    private static UNSET: int = 0;
+    private static SUCCESS: int = 1;
+
+    constructor() {
+        this.result = Test.UNSET;
+    }
+
+    success(): void {
+        if (this.result == Test.UNSET) {
+            this.result = Test.SUCCESS;
+        }
+    }
+
+    fail(): void {
+        console.println("Test failed");
+        throw new Error();
+    }
+
+    check(): void {
+        if (this.result == Test.SUCCESS) {
+            return;
+        }
+        if (this.result == Test.UNSET) {
+            console.println("Test result is not set");
+        }
+        throw new Error();
+    }
+
+    private result: int;
+}
+
+let globalTest : Test | null = null;
+
+function check() : int {
+    globalTest!.check();
+    return 0;
+}
+
+async function doTest(p : Promise<Object>) : Promise<void> {
+    p.then((x:Object): void => {
+        if (x as string == "success") {
+            globalTest!.success();
+        }
+    });
+}
+
+async function doTestWithAwait(p : Promise<Object>) : Promise<void> {
+    p.then((x:Object): void => {
+        if (x as string == "success") {
+            globalTest!.success();
+        }
+    });
+
+    await p;
+}
+
+function testProxyPromise() : void {
+    globalTest = new Test();
+    let p = jsAsync() as Promise<Object>;
+    doTest(p);
+}
+
+function testAwaitPromiseProxy() : void {
+    globalTest = new Test();
+    let p = jsAsync() as Promise<Object>;
+    doTestWithAwait(p);
+}

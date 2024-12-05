@@ -145,15 +145,6 @@ void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
     EtsPromise::LaunchCallback(coro, hcallback.GetPtr(), launchMode);
 }
 
-void EtsPromiseCreateLink(EtsObject *source, EtsPromise *target)
-{
-    EtsCoroutine *currentCoro = EtsCoroutine::GetCurrent();
-    auto *jobQueue = currentCoro->GetPandaVM()->GetJobQueue();
-    if (jobQueue != nullptr) {
-        jobQueue->CreateLink(source, target->AsObject());
-    }
-}
-
 static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsPromise> &promiseHandle)
 {
     /**
@@ -170,7 +161,6 @@ static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsProm
      *          (the last two steps are actually the cm->await()'s job)
      *      - return promise.value() if resolved or throw() it if rejected
      */
-    EtsPromiseCreateLink(promiseHandle->GetLinkedPromise(currentCoro), promiseHandle.GetPtr());
 
     promiseHandle->Wait();
     ASSERT(!promiseHandle->IsPending());
