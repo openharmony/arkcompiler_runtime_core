@@ -52,8 +52,8 @@ public:
             EXPECT_TRUE(ver.VerifyConstantPoolIndex());
             EXPECT_TRUE(ver.VerifyConstantPool());
         } else {
-            EXPECT_TRUE(ver.VerifyConstantPoolIndex());
-            EXPECT_TRUE(ver.VerifyConstantPool());
+            EXPECT_FALSE(ver.VerifyConstantPoolIndex());
+            EXPECT_FALSE(ver.VerifyConstantPool());
         }
     }
 };
