@@ -13,11 +13,21 @@
  * limitations under the License.
  */
 
-import { RootState } from '..';
-import { Theme, Versions } from '../slices/appState';
+import { IServiceResponse } from './types';
+import { fetchGetEntity, fetchPostEntity } from './common';
+import { IVersionsFetch, IVersionsResponse, versionsModel } from '../models/versions';
 
-export const theme = (state: RootState): Theme => state.appState.theme;
-export const primaryColor = (state: RootState): string => state.appState.primaryColor;
-export const withDisasm = (state: RootState): boolean => state.appState.disasm;
-export const versions = (state: RootState): Versions => state.appState.versions;
-export const isVersionsLoading = (state: RootState): boolean => state.appState.versionsLoading;
+export enum EVersionsEndpoints {
+    VERSIONS = '/versions',
+}
+
+export const versionService = {
+    fetchVersions: async (): Promise<IServiceResponse<IVersionsResponse>> => {
+        // @ts-ignore
+        return fetchGetEntity<IVersionsFetch, IVersionsResponse>(
+            EVersionsEndpoints.VERSIONS,
+            {},
+            versionsModel.fromApi,
+        );
+    },
+};

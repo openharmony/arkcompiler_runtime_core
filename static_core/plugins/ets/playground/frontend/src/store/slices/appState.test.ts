@@ -21,6 +21,13 @@ describe('appStateSlice reducer', () => {
         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
         disasm: false,
         primaryColor: '#e32b49',
+        versions: {
+            arktsVersion: '',
+            backendVersion: '',
+            es2panda: '',
+            frontend: '',
+        },
+        versionsLoading: false
     };
 
     it('should return the initial state when passed an empty action', () => {

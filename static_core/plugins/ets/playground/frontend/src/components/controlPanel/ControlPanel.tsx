@@ -52,16 +52,6 @@ const ControlPanel = (): JSX.Element => {
     return (
         <div className={styles.container}>
             <Button
-                icon={isCompileLoading
-                    ? <div className={styles.icon}><Icon icon="build" size={11} /></div>
-                    : <div className={styles.icon}><Icon icon="code-block" size={11}/></div>}
-                className={styles.btn}
-                onClick={handleCompile}
-                disabled={isCompileLoading}
-            >
-                Compile
-            </Button>
-            <Button
                 icon={isRunLoading
                     ? <div className={styles.icon}><Icon icon="build" size={11}/></div>
                     : <div className={styles.icon}><Icon icon="play" size={16}/></div>}
@@ -70,6 +60,16 @@ const ControlPanel = (): JSX.Element => {
                 disabled={isRunLoading}
             >
                 Run
+            </Button>
+            <Button
+                icon={isCompileLoading
+                    ? <div className={styles.icon}><Icon icon="build" size={11} /></div>
+                    : <div className={styles.icon}><Icon icon="code-block" size={11}/></div>}
+                className={styles.btn}
+                onClick={handleCompile}
+                disabled={isCompileLoading}
+            >
+                Compile
             </Button>
             <Checkbox
                 checked={disasm}

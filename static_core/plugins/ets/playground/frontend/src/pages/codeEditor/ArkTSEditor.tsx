@@ -81,7 +81,7 @@ const ArkTSEditor: React.FC = () => {
         <Editor
             height="90vh"
             defaultLanguage="arkts"
-            defaultValue="function main(): void {}"
+            defaultValue={'function main(): void {\n\tconsole.log("Hello, ArkTS!");\n}'}
             theme={theme === 'dark' ? 'vs-dark' : 'light'}
             onChange={handleEditorChange}
             className={styles.editor}

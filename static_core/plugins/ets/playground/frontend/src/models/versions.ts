@@ -13,11 +13,21 @@
  * limitations under the License.
  */
 
-import { RootState } from '..';
-import { Theme, Versions } from '../slices/appState';
+export interface IVersionsResponse {
+    frontend?: string;
+    backendVersion?: string;
+    arktsVersion?: string;
+    es2panda?: string;
+}
 
-export const theme = (state: RootState): Theme => state.appState.theme;
-export const primaryColor = (state: RootState): string => state.appState.primaryColor;
-export const withDisasm = (state: RootState): boolean => state.appState.disasm;
-export const versions = (state: RootState): Versions => state.appState.versions;
-export const isVersionsLoading = (state: RootState): boolean => state.appState.versionsLoading;
+export interface IVersionsFetch {
+}
+
+export const versionsModel = {
+    fromApi: (data: Partial<IVersionsResponse>): IVersionsResponse => ({
+        frontend: data.frontend || '0.0.1',
+        backendVersion: data.backendVersion || '0.0.1',
+        arktsVersion: data.arktsVersion || '0.0.1',
+        es2panda: data.es2panda || '0.0.1',
+    }),
+};

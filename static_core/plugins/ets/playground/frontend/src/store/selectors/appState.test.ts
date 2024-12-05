@@ -21,6 +21,8 @@ export const mockAllState: RootState = {
         theme: 'light',
         primaryColor: '#e32b49',
         disasm: false,
+        versions: {},
+        versionsLoading: false
     },
     options: {
         isLoading: false,

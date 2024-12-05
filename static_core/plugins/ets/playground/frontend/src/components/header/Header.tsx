@@ -13,16 +13,26 @@
  * limitations under the License.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {Icon, Menu, MenuItem, Popover, Switch} from '@blueprintjs/core';
 import {useTheme} from '../theme/ThemeContext';
 import cx from 'classnames';
 import styles from './styles.module.scss';
 import { useClickOutside } from '../../utils/useClickOutside';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from '../../store';
+import { fetchVersions } from '../../store/actions/appState';
+import { versions } from '../../store/selectors/appState';
+import { Versions } from '../../store/slices/appState';
 
 export const primaryColors = ['#e32b49', '#da70d6', '#0F6894', '#1C6E42', '#935610', '#634DBF', '#00A396', '#D1980B'];
 
-const exampleMenu = (theme: string, toggleTheme: () => void, togglePrimaryColor: (val: string) => void): JSX.Element => (
+const exampleMenu = (
+    theme: string,
+    toggleTheme: () => void,
+    togglePrimaryColor: (val: string) => void,
+    versionsData: Versions
+): JSX.Element => (
     <Menu className={styles.menu}>
         <MenuItem
             icon="moon"
@@ -53,12 +63,37 @@ const exampleMenu = (theme: string, toggleTheme: () => void, togglePrimaryColor:
                     onClick={(): void => togglePrimaryColor(color)}
                 />))}
         </div>
+        <div className={styles.hr} />
+        <div className={styles.versionsContainer}>
+            <pre className={styles.preTag}>
+                <span className={styles.versionTitle}>frontend:</span>
+                {versionsData?.frontend}
+            </pre>
+            <pre className={styles.preTag}>
+                <span className={styles.versionTitle}>backend:</span>
+                {versionsData?.backendVersion}
+            </pre>
+            <pre className={styles.preTag}>
+                <span className={styles.versionTitle}>ArkTS:</span>
+                {versionsData?.arktsVersion}
+            </pre>
+            <pre className={styles.preTag}>
+                <span className={styles.versionTitle}>es2panda:</span>
+                {versionsData?.es2panda}
+            </pre>
+        </div>
     </Menu>
 );
 
 const Header = (): JSX.Element => {
     const popoverRef = useRef<HTMLDivElement | null>(null);
     const { theme, toggleTheme, togglePrimaryColor } = useTheme();
+    const dispatch = useDispatch<AppDispatch>();
+    const versionsData = useSelector(versions);
+
+    useEffect(() => {
+        dispatch(fetchVersions());
+    }, []);
 
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -81,7 +116,7 @@ const Header = (): JSX.Element => {
         >
             <span className={cx({[styles.title]: true})}>ArkTS playground</span>
             <Popover
-                content={exampleMenu(theme, toggleTheme, togglePrimaryColor)}
+                content={exampleMenu(theme, toggleTheme, togglePrimaryColor, versionsData)}
                 placement="bottom"
                 className={styles.settings}
                 popoverClassName={styles.pop}

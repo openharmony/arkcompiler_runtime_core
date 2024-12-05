@@ -14,7 +14,9 @@
  */
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import {setDisasm, setPrimaryColor, setTheme, Theme} from '../slices/appState';
+import {setDisasm, setPrimaryColor, setTheme, setVersions, setVersionsLoading, Theme} from '../slices/appState';
+import { RootState } from '..';
+import { versionService } from '../../services/versions';
 
 export const setThemeAction = createAsyncThunk(
     '@theme/change',
@@ -33,4 +35,32 @@ export const setDisasmAction = createAsyncThunk(
     (data: boolean, thunkAPI) => {
         thunkAPI.dispatch(setDisasm(data));
     },
+);
+
+export const fetchVersions = createAsyncThunk(
+    '@versions/fetchVersions',
+    async (_, thunkAPI) => {
+        thunkAPI.dispatch(setVersionsLoading(true));
+        const state: RootState = thunkAPI.getState() as RootState;
+        try {
+            const response = await versionService.fetchVersions();
+            if (response.error) {
+                console.error(response.error);
+                thunkAPI.dispatch(setVersionsLoading(false));
+                return;
+            }
+            thunkAPI.dispatch(setVersions(response.data));
+        } catch (error) {
+            console.error('Failed to fetch versions:', error);
+        } finally {
+            thunkAPI.dispatch(setVersionsLoading(false));
+        }
+    }
+);
+
+export const setVersionAction = createAsyncThunk(
+    '@versions/setVersion',
+    (data: { frontend: string; backend: string; arkts: string; es2panda: string }, thunkAPI) => {
+        thunkAPI.dispatch(setVersions(data));
+    }
 );
