@@ -17,6 +17,7 @@
 #define PANDA_RUNTIME_MEM_GC_STATIC_GC_MARKER_STATIC_INL_H
 
 #include "runtime/mem/gc/gc_marker.h"
+#include "runtime/mem/gc/workers/gc_workers_task_pool.h"
 
 namespace ark::mem {
 
@@ -84,7 +85,39 @@ void GCMarker<Marker, LANG_TYPE_STATIC>::HandleArrayClass(GCMarkingStackType *ob
     ASSERT(cls->IsObjectArrayClass());
 
     LOG(DEBUG, GC) << "Iterate over: " << arrayLength << " elements in array";
-    for (coretypes::ArraySizeT i = 0; i < arrayLength; i++) {
+    size_t currentPartition = 0;
+    size_t partitionSize = 0;
+    constexpr size_t THRESHOLD_ARRAY_SIZE = 50000U;
+    auto *gc = GetGC();
+    bool useGcWorkers = gc->GetSettings()->ParallelMarkingEnabled();
+    auto taskType = objectsStack->GetTaskType();
+    ASSERT(taskType != GCWorkersTaskTypes::TASK_HUGE_ARRAY_MARKING_REMARK);
+    if (arrayLength >= THRESHOLD_ARRAY_SIZE && useGcWorkers && taskType == GCWorkersTaskTypes::TASK_REMARK) {
+        size_t gcWorkersNum = Runtime::GetOptions().GetTaskmanagerWorkersCount();
+        ASSERT(gcWorkersNum > 0);
+        ArraySizeT arrayPartitionsNumber = gcWorkersNum;
+        partitionSize = arrayLength / arrayPartitionsNumber;
+        auto allocator = gc->GetInternalAllocator();
+        // The rest of the array (last partition till the end of the array) is going to be traversed in current worker
+        for (; currentPartition < arrayPartitionsNumber - 1; ++currentPartition) {
+            auto *newStack = allocator->template New<GCAdaptiveMarkingStack>(
+                gc, useGcWorkers ? gc->GetSettings()->GCRootMarkingStackMaxSize() : 0,
+                useGcWorkers ? gc->GetSettings()->GCWorkersMarkingStackMaxSize() : 0,
+                GCWorkersTaskTypes::TASK_HUGE_ARRAY_MARKING_REMARK);
+            static_cast<GCAdaptiveStack<ObjectHeader *> *>(newStack)->PushToStack(
+                const_cast<coretypes::Array *>(arrayObject));
+            size_t taskStartIndex = currentPartition * partitionSize;
+            void *markingRangeInfo =
+                allocator->template New<std::pair<size_t, size_t>>(taskStartIndex, taskStartIndex + partitionSize);
+            newStack->SetAdditionalMarkingInfo(markingRangeInfo);
+            if (!gc->GetWorkersTaskPool()->AddTask(GCMarkWorkersTask(newStack->GetTaskType(), newStack))) {
+                // Couldn't create a new task. Going to process the rest of the array here
+                allocator->Delete(newStack);
+                break;
+            }
+        }
+    }
+    for (coretypes::ArraySizeT i = currentPartition * partitionSize; i < arrayLength; i++) {
         auto *arrayElement = arrayObject->Get<ObjectHeader *>(i);
         if (arrayElement == nullptr) {
             continue;

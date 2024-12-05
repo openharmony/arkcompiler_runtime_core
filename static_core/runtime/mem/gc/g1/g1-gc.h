@@ -477,6 +477,14 @@ private:
     void ExecuteMarkingTask(GCMarkWorkersTask::StackType *objectsStack);
     template <typename Marker>
     void ExecuteRemarkTask(GCMarkWorkersTask::StackType *objectsStack, Marker &marker);
+    /**
+     * @brief Method gets stack with only one array object initially.
+     * The stack also has an information about the interval in the array
+     * that should be traversed in the current task
+     * @param objectsStack stack, initially having one array object
+     */
+    template <typename Marker>
+    void ExecuteHugeArrayMarkTask(GCMarkWorkersTask::StackType *objectsStack, Marker &marker);
     void ExecuteFullMarkingTask(GCMarkWorkersTask::StackType *objectsStack);
     void ExecuteCompactingTask(Region *region, const ObjectVisitor &movedObjectsSaver);
     void ExecuteEnqueueRemsetsTask(GCUpdateRefsWorkersTask<false>::MovedObjectsRange *movedObjectsRange);

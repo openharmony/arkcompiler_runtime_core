@@ -548,6 +548,11 @@ void G1GC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_unu
             ExecuteRemarkTask(task->Cast<GCMarkWorkersTask>()->GetMarkingStack(), marker_);
             break;
         }
+        case GCWorkersTaskTypes::TASK_HUGE_ARRAY_MARKING_REMARK: {
+            auto *hugeArrayTask = task->Cast<GCMarkWorkersTask>();
+            ExecuteHugeArrayMarkTask(hugeArrayTask->GetMarkingStack(), marker_);
+            break;
+        }
         case GCWorkersTaskTypes::TASK_FULL_MARK: {
             ExecuteFullMarkingTask(task->Cast<GCMarkWorkersTask>()->GetMarkingStack());
             break;
@@ -594,6 +599,35 @@ void G1GC<LanguageConfig>::ExecuteRemarkTask(GCMarkWorkersTask::StackType *objec
     this->MarkStack(&marker, objectsStack, CalcLiveBytesMarkPreprocess);
     ASSERT(objectsStack->Empty());
     this->GetInternalAllocator()->Delete(objectsStack);
+}
+
+template <class LanguageConfig>
+template <typename Marker>
+void G1GC<LanguageConfig>::ExecuteHugeArrayMarkTask(GCMarkWorkersTask::StackType *objectsStack, Marker &marker)
+{
+    ASSERT(objectsStack->Size() == 1);
+    auto *markingRanges = reinterpret_cast<std::pair<size_t, size_t> *>(objectsStack->GetAdditionalMarkingInfo());
+    ASSERT(markingRanges != nullptr);
+    auto [traversingStartIndex, traversingEndIndex] = *markingRanges;
+    auto *arrayObject = coretypes::Array::Cast(objectsStack->PopFromStack());
+    ASSERT(traversingEndIndex <= arrayObject->GetLength());
+    objectsStack->SetTaskType(GCWorkersTaskTypes::TASK_REMARK);
+    for (size_t i = traversingStartIndex; i < traversingEndIndex; ++i) {
+        auto *arrayElement = arrayObject->Get<ObjectHeader *>(i);
+        if (arrayElement == nullptr) {
+            continue;
+        }
+#ifndef NDEBUG
+        auto arrayElementCls = arrayElement->ClassAddr<Class>();
+        LOG_IF(arrayElementCls == nullptr, ERROR, GC)
+            << " object's class is nullptr: " << arrayElement << " from array: " << arrayObject;
+        ASSERT(arrayElementCls != nullptr);
+#endif
+        if (marker_.MarkIfNotMarked(arrayElement)) {
+            objectsStack->PushToStack(arrayObject, arrayElement);
+        }
+    }
+    ExecuteRemarkTask(objectsStack, marker);
 }
 
 template <class LanguageConfig>
