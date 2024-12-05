@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -485,6 +485,22 @@ public:
         ObjectHeader *obj2 = this->GetFrame()->GetVReg(v2).GetReference();
 
         bool res = EtsReferenceEquals(GetCoro(), EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2));
+        this->GetAccAsVReg().SetPrimitive(res);
+        this->template MoveToNextInst<FORMAT, true>();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleEtsStrictequals()
+    {
+        uint16_t v1 = this->GetInst().template GetVReg<FORMAT, 0>();
+        uint16_t v2 = this->GetInst().template GetVReg<FORMAT, 1>();
+
+        LOG_INST() << "ets.strictequals v" << v1 << ", v" << v2;
+
+        ObjectHeader *obj1 = this->GetFrame()->GetVReg(v1).GetReference();
+        ObjectHeader *obj2 = this->GetFrame()->GetVReg(v2).GetReference();
+
+        bool res = EtsReferenceEquals<true>(GetCoro(), EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2));
         this->GetAccAsVReg().SetPrimitive(res);
         this->template MoveToNextInst<FORMAT, true>();
     }

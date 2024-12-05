@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -400,6 +400,16 @@ inline AbckitInst *IcreateEquals(AbckitGraph *graph, AbckitInst *input0, AbckitI
     return DEFAULT_INST;
 }
 
+inline AbckitInst *IcreateStrictEquals(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(graph == DEFAULT_GRAPH);
+    EXPECT_TRUE(input0 == DEFAULT_INST);
+    EXPECT_TRUE(input1 == DEFAULT_INST);
+    return DEFAULT_INST;
+}
+
 inline AbckitInst *IcreateCallStatic(AbckitGraph *graph, AbckitCoreFunction *function, size_t argCount, ...)
 {
     g_calledFuncs.push(__func__);
@@ -590,6 +600,7 @@ AbckitIsaApiStatic g_isaApiStaticImpl = {
     IcreateLoadUndefined,
     IcreateReturnVoid,
     IcreateEquals,
+    IcreateStrictEquals,
     IcreateCallStatic,
     IcreateCallVirtual,
     IcreateAddI,

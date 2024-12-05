@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@ class EtsClass;
 class EtsString;
 
 // Generic comparator for ets reference types
+template <bool IS_STRICT = false>
 inline bool EtsReferenceEquals(EtsCoroutine *coro, EtsObject *ref1, EtsObject *ref2);
 
 inline bool EtsReferenceNullish(EtsCoroutine *coro, EtsObject *ref);

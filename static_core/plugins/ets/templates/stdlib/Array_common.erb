@@ -1,4 +1,4 @@
-%# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+%# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 %# Licensed under the Apache License, Version 2.0 (the "License");
 %# you may not use this file except in compliance with the License.
 %# You may obtain a copy of the License at
@@ -558,7 +558,7 @@
         return this.lastIndexOfLong(searchElement, k)
     } else if (searchElement instanceof Int) {
         return this.lastIndexOfInt(searchElement, k)
-    } else if (__runtimeIsSameReference(searchElement, undefined)) {
+    } else if (searchElement === undefined) {
         return this.lastIndexOfUndefined(k)
     } else if (searchElement == null) {
             return this.lastIndexOfNull(k)
@@ -619,11 +619,11 @@
     if (<%= this_len_int %> == 0) {
         return ""
     }
-    const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
+    const sepReal = sep === undefined ? "," : sep!
     <% if el_type == "T" %>// NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583
     const first_el = <%= get_unsafe.(this, '0') %>
     let first_str = "undefined"
-    if (!__runtimeIsSameReference(first_el, undefined)) {
+    if (first_el !== undefined) {
         first_str = new String(first_el)
     } 
     let sb = new StringBuilder(first_str)<% else %>let sb = new StringBuilder(new String(<%= get_unsafe.(this, '0') %>))<% end %>
@@ -631,7 +631,7 @@
         const tmp = <%= get_unsafe.(this, 'i') %>
         sb.append(sepReal);
         <% if el_type == "T" %>// NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583  
-        if (!__runtimeIsSameReference(tmp, undefined)) {
+        if (tmp !== undefined) {
             sb.append(new String(tmp))
         } else {
             sb.append("undefined")
@@ -687,7 +687,7 @@
             sb.append(",")
         }
         let x = <%= get_unsafe.(this, 'i') %> as NullishType;
-        if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
+        if ((null !== x) && (undefined !== x)) {
             sb.append(x!.toLocaleString())
         }
     }
@@ -807,7 +807,7 @@
         return this.searchLong(val, fi, len)
     } else if (val instanceof Int) {
         return this.searchInt(val, fi, len)
-    } else if (__runtimeIsSameReference(val, undefined)) {
+    } else if (val === undefined) {
         return this.searchUndefined(fi, len)
     } else if (val == null) {
         return this.searchNull(fi, len)
@@ -855,9 +855,9 @@
         return this.indexOfLong(val, fromIndex, len)
     } else if (val instanceof Int) {
         return this.indexOfInt(val, fromIndex, len)
-    } else if (__runtimeIsSameReference(val, undefined)) {
+    } else if (val === undefined) {
         return this.indexOfUndefined(fromIndex, len)
-    } else if (val == null) {
+    } else if (val === null) {
         return this.indexOfNull(fromIndex, len)
     } else {
         return this.indexOfCommon(val, fromIndex, len) 

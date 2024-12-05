@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,19 +27,24 @@ ALWAYS_INLINE inline bool EtsReferenceNullish(EtsCoroutine *coro, EtsObject *ref
     return ref == nullptr || ref == EtsObject::FromCoreType(coro->GetUndefinedObject());
 }
 
-ALWAYS_INLINE inline bool IsRefNullish(EtsCoroutine *coro, EtsObject *ref)
+ALWAYS_INLINE inline bool IsReferenceNullish(EtsCoroutine *coro, EtsObject *ref)
 {
     return ref == nullptr || ref == EtsObject::FromCoreType(coro->GetUndefinedObject());
 }
 
+template <bool IS_STRICT>
 ALWAYS_INLINE inline bool EtsReferenceEquals(EtsCoroutine *coro, EtsObject *ref1, EtsObject *ref2)
 {
     if (UNLIKELY(ref1 == ref2)) {
         return true;
     }
 
-    if (IsRefNullish(coro, ref1) || IsRefNullish(coro, ref2)) {
-        return IsRefNullish(coro, ref1) && IsRefNullish(coro, ref2);
+    if (IsReferenceNullish(coro, ref1) || IsReferenceNullish(coro, ref2)) {
+        if constexpr (IS_STRICT) {
+            return false;
+        } else {
+            return IsReferenceNullish(coro, ref1) && IsReferenceNullish(coro, ref2);
+        }
     }
 
     if (LIKELY(!(ref1->GetClass()->IsValueTyped() && ref2->GetClass()->IsValueTyped()))) {

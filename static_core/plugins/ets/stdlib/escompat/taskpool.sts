@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -252,11 +252,11 @@ export class taskpoolTask {
      */
     static sendData(...args: Object[]): void {
         const item: taskpoolTask | undefined = taskpool.getCurrentTask();
-        if (item == undefined) {
+        if (item === undefined) {
             throw new Error("The function is not called in the TaskPool thread");
         }
         const task: taskpoolTask = item;
-        if (task.onReceiveCallback == undefined) {
+        if (task.onReceiveCallback === undefined) {
             throw new Error("The callback is not registered on the host side");
         }
         ConcurrencyHelpers.mutexLock(task.dataMutex);
@@ -405,7 +405,7 @@ export class taskpoolTask {
      * @see taskpool.SequenceRunner.execute
      */
     internal getOnReceivePromise(p: Promise<NullishType>): Promise<NullishType> {
-        if (this.onReceiveCallback == undefined) {
+        if (this.onReceiveCallback === undefined) {
             return p;
         }
         return p.then<NullishType>((value: NullishType): NullishType => {
@@ -635,8 +635,7 @@ export class taskpoolSequenceRunner {
         }
         ConcurrencyHelpers.mutexLock(taskpoolSequenceRunner.mutex);
         let impl: SeqRunnerImpl | undefined = taskpoolSequenceRunner.namedRunners.get(name);
-        // NOTE(ipetrov, #18518): Change to === when scrict equals will be supported into frontend
-        if (impl == undefined) {
+        if (impl === undefined) {
             // No sequence runner with passed name, so create instance and set to named runners set
             impl = new SeqRunnerImpl(taskpoolSequenceRunner.generateSeqRunnerId());
             taskpoolSequenceRunner.namedRunners.set(name, impl);
@@ -1057,7 +1056,7 @@ export final class taskpool {
     internal static isCancel(): boolean {
         ConcurrencyHelpers.mutexLock(taskpool.mutex);
         const item: taskpoolTask | undefined = taskpool.getCurrentTaskUnsafe();
-        if (item == undefined) {
+        if (item === undefined) {
             ConcurrencyHelpers.mutexUnlock(taskpool.mutex);
             // No task on current coroutine
             return false;

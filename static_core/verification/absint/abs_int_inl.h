@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2980,14 +2980,8 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsEquals()
+    bool HandleEtsEqualityHelper(uint16_t v1, uint16_t v2)
     {
-        LOG_INST();
-        DBGBRK();
-        uint16_t v1 = inst_.GetVReg<FORMAT, 0x00>();
-        uint16_t v2 = inst_.GetVReg<FORMAT, 0x01>();
-        Sync();
-
         if (!CheckRegType(v1, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
@@ -3002,6 +2996,30 @@ public:
 
         MoveToNextInst<FORMAT>();
         return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsEquals()
+    {
+        LOG_INST();
+        DBGBRK();
+        uint16_t v1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t v2 = inst_.GetVReg<FORMAT, 0x01>();
+        Sync();
+
+        return HandleEtsEqualityHelper<FORMAT>(v1, v2);
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsStrictequals()
+    {
+        LOG_INST();
+        DBGBRK();
+        uint16_t v1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t v2 = inst_.GetVReg<FORMAT, 0x01>();
+        Sync();
+
+        return HandleEtsEqualityHelper<FORMAT>(v1, v2);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>

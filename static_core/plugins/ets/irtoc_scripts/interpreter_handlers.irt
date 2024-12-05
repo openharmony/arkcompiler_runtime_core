@@ -1,5 +1,5 @@
 # plugin interpreter_handlers
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -263,24 +263,30 @@ macro(:is_valuetyped_cls) do |obj|
   call_runtime("IsClassValueTypedEntrypoint", obj).b
 end
 
-macro(:handle_ets_equals) do |v1, v2|
-  If(Compare(v1, v2).b, 0).NE.Unlikely {
-    result_0 := 1
-  } Else {
-    v1isnullish = is_nullish(v1)
-    v2isnullish = is_nullish(v2)
-    If(Or(v1isnullish, v2isnullish).b, 0).NE {
-      result_1 := And(v1isnullish, v2isnullish).b
+['', '_strict'].each do |suffix|
+  macro(:"handle_ets_equals#{suffix}") do |v1, v2|
+    If(Compare(v1, v2).b, 0).NE.Unlikely {
+      result_0 := 1
     } Else {
-      v1cls := GetInstanceClass(v1).ref
-      v2cls := GetInstanceClass(v2).ref
-      If(And(is_valuetyped_cls(v1cls), is_valuetyped_cls(v2cls)).b, 0).EQ.Likely {
-        result_2 := 0
+      v1isnullish = is_nullish(v1)
+      v2isnullish = is_nullish(v2)
+      If(Or(v1isnullish, v2isnullish).b, 0).NE {
+        if suffix.empty?
+          result_1 := And(v1isnullish, v2isnullish).b
+        else
+          result_1 := 0
+        end
       } Else {
-        result_3 := call_runtime("CompareETSValueTypedEntrypoint", %tr, v1, v2).b
+        v1cls := GetInstanceClass(v1).ref
+        v2cls := GetInstanceClass(v2).ref
+        If(And(is_valuetyped_cls(v1cls), is_valuetyped_cls(v2cls)).b, 0).EQ.Likely {
+          result_2 := 0
+        } Else {
+          result_3 := call_runtime("CompareETSValueTypedEntrypoint", %tr, v1, v2).b
+        }
       }
     }
-  }
-  result := Phi(result_0, result_1, result_2, result_3).b
-  set_acc_primitive(btou8(result))
+    result := Phi(result_0, result_1, result_2, result_3).b
+    set_acc_primitive(btou8(result))
+  end
 end

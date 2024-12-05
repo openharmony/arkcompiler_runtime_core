@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -230,6 +230,7 @@ void InstBuilder::BuildIsUndefined(const BytecodeInstruction *bcInst)
     UpdateDefinitionAcc(cmpInst);
 }
 
+template <bool IS_STRICT>
 void InstBuilder::BuildEquals(const BytecodeInstruction *bcInst)
 {
     auto pc = GetPc(bcInst->GetAddress());
@@ -237,10 +238,17 @@ void InstBuilder::BuildEquals(const BytecodeInstruction *bcInst)
     Inst *obj1 = GetDefinition(bcInst->GetVReg(0));
     Inst *obj2 = GetDefinition(bcInst->GetVReg(1));
 
-    RuntimeInterface::IntrinsicId intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_EQUALS;
+    auto intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_EQUALS;
+    if constexpr (IS_STRICT) {
+        intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRICT_EQUALS;
+    }
 #if defined(ENABLE_LIBABCKIT)
     if (GetGraph()->IsAbcKit()) {
-        intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_EQUALS;
+        if constexpr (IS_STRICT) {
+            intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_STRICT_EQUALS;
+        } else {
+            intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_EQUALS;
+        }
     }
 #endif
     auto intrinsic = GetGraph()->CreateInstIntrinsic(DataType::BOOL, pc, intrinsicId);
@@ -255,4 +263,6 @@ void InstBuilder::BuildEquals(const BytecodeInstruction *bcInst)
     UpdateDefinitionAcc(intrinsic);
 }
 
+template void InstBuilder::BuildEquals<true>(const BytecodeInstruction *bcInst);
+template void InstBuilder::BuildEquals<false>(const BytecodeInstruction *bcInst);
 }  // namespace ark::compiler

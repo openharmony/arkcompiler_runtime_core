@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -316,7 +316,7 @@ function newChain(): int {
 //! INST_NEXT    "Intrinsic.JSRuntimeSetPropertyJSValue"
 //! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
 //! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
-//! INST_NEXT    "Intrinsic.JSRuntimeStrictEqual"
+//! INST_NEXT    "Intrinsic.CompilerEtsStrictEquals"
 
 //! CHECKER      JS load and store JIT (fast)
 //! RUN          force_jit: true, entry: "loadStoreChain", options: "--compiler-regex=ETSGLOBAL::loadStoreChain"
@@ -339,7 +339,7 @@ function newChain(): int {
 //! INST_NEXT    "Intrinsic.JSRuntimeSetPropertyJSValue"
 //! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
 //! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
-//! INST_NEXT    "Intrinsic.JSRuntimeStrictEqual"
+//! INST_NEXT    "Intrinsic.CompilerEtsStrictEquals"
 
 //! CHECKER      JS load and store AOT (slow)
 //! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::loadStoreChain --compiler-enable-fast-interop=false"
@@ -352,7 +352,7 @@ function newChain(): int {
 //! INST_NEXT    "Intrinsic.JSRuntimeSetPropertyJSValue"
 //! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
 //! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
-//! INST_NEXT    "Intrinsic.JSRuntimeStrictEqual"
+//! INST_NEXT    "Intrinsic.CompilerEtsStrictEquals"
 //! RUN          entry: "loadStoreChain"
 
 //! CHECKER      JS load and store LLVMAOT (slow)
@@ -380,7 +380,7 @@ function newChain(): int {
 //! INST_NEXT    "Intrinsic.JSRuntimeSetPropertyJSValue"
 //! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
 //! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
-//! INST_NEXT    "Intrinsic.JSRuntimeStrictEqual"
+//! INST_NEXT    "Intrinsic.CompilerEtsStrictEquals"
 //! RUN          entry: "loadStoreChain"
 
 function loadStoreChain(): int {

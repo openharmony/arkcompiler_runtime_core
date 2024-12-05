@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -365,7 +365,7 @@ export class RegExp extends Object {
      * @param flags description of flags to be used
      */
     public constructor(regexp: RegExp, flags?: String) {
-        this.init(regexp.pattern_, __runtimeIsSameReference(flags, undefined) ? regexp.flags : flags!)
+        this.init(regexp.pattern_, flags === undefined ? regexp.flags : flags!)
     }
 
     /**
@@ -397,7 +397,7 @@ export class RegExp extends Object {
      */
     public compile(pattern: String, flags?: String): RegExp {
         this.pattern_ = pattern
-        this.flags_ = __runtimeIsSameReference(flags, undefined) ? "" : flags!
+        this.flags_ = flags === undefined ? "" : flags!
         this.source_ = RegExp.escapePattern(pattern)
         return this.compile()
     }
@@ -702,7 +702,7 @@ export class RegExp extends Object {
      */
     private init(pattern: String, flags?: String) {
         this.pattern_ = pattern
-        this.flags_ = __runtimeIsSameReference(flags, undefined) ? "" : flags!
+        this.flags_ = flags === undefined ? "" : flags!
         this.source_ = RegExp.escapePattern(pattern)
         this.compile()
     }
@@ -715,6 +715,6 @@ export class RegExp extends Object {
      * @param flags description of flags to be used
      */
     private init(regexp: RegExp, flags?: String) {
-        this.init(regexp.pattern_, __runtimeIsSameReference(flags, undefined) ? regexp.flags : flags!)
+        this.init(regexp.pattern_, flags === undefined ? regexp.flags : flags!)
     }
 }

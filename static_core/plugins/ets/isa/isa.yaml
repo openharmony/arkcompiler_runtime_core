@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -226,13 +226,25 @@ groups:
 
   - title: Check if two references are loosely equal
     description: >
-      Check if two references are loosely equal
+      Check if two references are loosely equal.
     verification:
       - v1_obj_or_null
       - v2_obj_or_null
       - acc_type
     exceptions:
       - x_none
+    pseudo:
+      if v1 == v2 then
+        acc = 1
+      else if is_nullish(v1) or is_nullish(v2) then
+        acc = is_nullish(v1) and is_nullish(v2)
+      else
+        if is_value_typed(v1) and is_value_typed(v2) then
+          acc = value_equals(v1, v2) then
+        else
+          acc = 0
+        end
+      end
     namespace: ets
     instructions:
       - sig: ets.equals v1:in:ref, v2:in:ref
@@ -240,3 +252,32 @@ groups:
         acc: out:i32
         format: [pref_op_v1_4_v2_4]
         intrinsic_name: INTRINSIC_COMPILER_ETS_EQUALS
+
+  - title: Strict check if two references are strictly equal
+    description: >
+      Check if two references are strictly equal.
+    verification:
+      - v1_obj_or_null
+      - v2_obj_or_null
+      - acc_type
+    exceptions:
+      - x_none
+    pseudo:
+      if v1 == v2 then
+        acc = 1
+      else if is_nullish(v1) or is_nullish(v2) then
+        acc = 0
+      else
+        if is_value_typed(v1) and is_value_typed(v2) then
+          acc = value_equals(v1, v2) then
+        else
+          acc = 0
+        end
+      end
+    namespace: ets
+    instructions:
+      - sig: ets.strictequals v1:in:ref, v2:in:ref
+        prefix: ets
+        acc: out:i32
+        format: [pref_op_v1_4_v2_4]
+        intrinsic_name: INTRINSIC_COMPILER_ETS_STRICT_EQUALS

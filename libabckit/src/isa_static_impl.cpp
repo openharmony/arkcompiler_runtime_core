@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -515,6 +515,21 @@ extern "C" AbckitInst *IcreateEquals(AbckitGraph *graph, AbckitInst *input0, Abc
     return IcreateEqualsStatic(graph, input0, input1);
 }
 
+extern "C" AbckitInst *IcreateStrictEquals(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(input0, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(input1, nullptr);
+
+    LIBABCKIT_WRONG_CTX(graph, input0->graph, nullptr);
+    LIBABCKIT_WRONG_CTX(graph, input1->graph, nullptr);
+    LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
+    return IcreateStrictEqualsStatic(graph, input0, input1);
+}
+
 extern "C" AbckitInst *IcreateCallStatic(AbckitGraph *graph, AbckitCoreFunction *inputFunction, size_t argCount,
                                          ... /* inputFunction params */)
 {
@@ -870,6 +885,7 @@ AbckitIsaApiStatic g_isaApiStaticImpl = {
     IcreateLoadUndefined,
     IcreateReturnVoid,
     IcreateEquals,
+    IcreateStrictEquals,
     IcreateCallStatic,
     IcreateCallVirtual,
     IcreateAddI,
