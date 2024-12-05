@@ -72,13 +72,13 @@ public:
 
     static bool HasReference(EtsObject *etsObject)
     {
-        return etsObject->IsHashed();
+        return etsObject->HasInteropIndex();
     }
 
     static uint32_t ExtractMaybeIndex(EtsObject *etsObject)
     {
         ASSERT(HasReference(etsObject));
-        return etsObject->GetInteropHash();
+        return etsObject->GetInteropIndex();
     }
 
     bool HasETSFlag() const

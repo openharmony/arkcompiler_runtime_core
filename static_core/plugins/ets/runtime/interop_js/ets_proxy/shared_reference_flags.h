@@ -28,7 +28,7 @@ namespace ark::ets::interop::js::ets_proxy {
 class SharedReferenceFlags {
 public:
     using ValueType = uint32_t;
-    using IndexType = decltype(std::declval<EtsObject>().GetInteropHash());
+    using IndexType = decltype(std::declval<EtsObject>().GetInteropIndex());
     static_assert(sizeof(IndexType) <= sizeof(ValueType));
 
     enum class Bit : ValueType {
