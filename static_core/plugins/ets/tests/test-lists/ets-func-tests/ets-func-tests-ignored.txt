@@ -567,17 +567,3 @@ std/core/IntlNumberFormatRangeInfTest.sts
 ### Issue 20525 begin
 std/concurrency/AsyncLockTest.sts
 ### Issue 20525 end
-
-# Issue 18866
-std/core/std_core_typedarrays_methods__BigInt64Array.sts
-std/core/std_core_typedarrays_methods__Float32Array.sts
-std/core/std_core_typedarrays_methods__Float64Array.sts
-std/core/std_core_typedarrays_methods__Float64Array_001.sts
-std/core/std_core_typedarrays_methods__Int16Array.sts
-std/core/std_core_typedarrays_methods__Int32Array.sts
-std/core/std_core_typedarrays_methods__Int8Array.sts
-std/core/std_core_typeduarrays_methods__Uint16Array.sts
-std/core/std_core_typeduarrays_methods__Uint32Array.sts
-std/core/std_core_typeduarrays_methods__Uint8Array.sts
-std/core/std_core_typeduarrays_methods__Uint8ClampedArray.sts
-escompat/ErrorsTest.sts
