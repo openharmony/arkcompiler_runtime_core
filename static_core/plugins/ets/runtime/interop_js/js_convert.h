@@ -297,28 +297,24 @@ JSCONVERT_UNWRAP(String)
 JSCONVERT_DEFINE_TYPE(BigInt, EtsBigInt *);
 JSCONVERT_WRAP(BigInt)
 {
-    auto size = etsVal->GetBytes()->GetActualLength();  // size includes extra sign element
-    auto data = etsVal->GetBytes()->GetData();
+    auto size = etsVal->GetBytes()->GetLength();
+    auto data = etsVal->GetBytes();
 
     std::vector<uint32_t> etsArray;
     etsArray.reserve(size);
     for (size_t i = 0; i < size; ++i) {
-        etsArray.emplace_back(static_cast<uint32_t>(data->Get(i)->GetValue()));
+        etsArray.emplace_back(static_cast<uint32_t>(data->Get(i)));
     }
 
     SmallVector<uint64_t, 4U> jsArray;
-    int sign = 0;
-    if (size > 1) {
-        sign = GeBigIntSign(etsArray);
-        if (sign == 1) {
-            ConvertFromTwosComplement(etsArray);
-        }
-
+    if (size > 0) {
         jsArray = ConvertBigIntArrayFromEtsToJs(etsArray);
     } else {
         jsArray = {0};
     }
+
     napi_value jsVal;
+    int sign = etsVal->GetSign() < 0 ? 1 : 0;
     NAPI_CHECK_FATAL(napi_create_bigint_words(env, sign, jsArray.size(), jsArray.data(), &jsVal));
 
     return jsVal;
@@ -331,22 +327,17 @@ JSCONVERT_UNWRAP(BigInt)
     }
 
     auto [words, signBit] = GetBigInt(env, jsVal);
-    std::vector<EtsInt> array = ConvertBigIntArrayFromJsToEts(words, signBit);
+    std::vector<EtsInt> array = ConvertBigIntArrayFromJsToEts(words);
 
-    auto arrayKlass = EtsClass::FromRuntimeClass(ctx->GetArrayClass());
-    auto etsIntArray = EtsTypedObjectArray<EtsBoxPrimitive<EtsInt>>::Create(arrayKlass, array.size());
-
-    for (size_t i = 0; i < array.size(); ++i) {
-        etsIntArray->Set(i, EtsBoxPrimitive<EtsInt>::Create(EtsCoroutine::GetCurrent(), array[i]));
+    auto etsIntArray = EtsIntArray::Create(array.size());
+    for (uint32_t i = 0; i < array.size(); ++i) {
+        etsIntArray->Set(i, array[i]);
     }
-
-    auto bigIntArrayField = EtsBoxedIntArray::FromEtsObject(EtsObject::Create(arrayKlass));
-    bigIntArrayField->SetFieldPrimitive<EtsInt>(EtsBoxedIntArray::GetActualLengthOffset(), false, array.size());
-    bigIntArrayField->SetFieldObject(EtsBoxedIntArray::GetBufferOffset(), reinterpret_cast<EtsObject *>(etsIntArray));
 
     auto bigintKlass = EtsClass::FromRuntimeClass(ctx->GetBigIntClass());
     auto bigInt = EtsBigInt::FromEtsObject(EtsObject::Create(bigintKlass));
-    bigInt->SetFieldObject(EtsBigInt::GetBytesOffset(), bigIntArrayField);
+    bigInt->SetFieldObject(EtsBigInt::GetBytesOffset(), reinterpret_cast<EtsObject *>(etsIntArray));
+    bigInt->SetFieldPrimitive(EtsBigInt::GetSignOffset(), array.empty() ? 0 : signBit == 0 ? 1 : -1);
 
     return bigInt;
 }

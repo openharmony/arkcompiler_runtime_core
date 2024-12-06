@@ -60,27 +60,18 @@ static bool EtsBigIntEquality(EtsBigInt *obj1, EtsBigInt *obj2)
     auto bytes2 = obj2->GetBytes();
     ASSERT(bytes1 != nullptr && bytes2 != nullptr);
 
-    auto size1 = bytes1->GetActualLength();
-    auto size2 = bytes2->GetActualLength();
-    ASSERT(size1 != 0 && size2 != 0);
-    auto data1 = bytes1->GetData();
-    auto data2 = bytes2->GetData();
-    ASSERT(data1 != nullptr && data2 != nullptr);
-    ASSERT(data1->GetLength() >= size1 && data2->GetLength() >= size2);
-
-    auto const readElem = [](auto *arr, uint32_t i) { return arr->Get(i)->GetValue(); };
-
+    auto size1 = bytes1->GetLength();
+    auto size2 = bytes2->GetLength();
     if (size1 != size2) {
         return false;
     }
 
-    // start with check of MSD, which is sign.
-    for (int i = size1 - 1; i >= 0; --i) {
-        if (readElem(data1, i) != readElem(data2, i)) {
-            return false;
-        }
+    if (obj1->GetSign() != obj2->GetSign()) {
+        return false;
     }
-    return true;
+
+    return (std::memcmp(bytes1->GetCoreType()->GetData(), bytes2->GetCoreType()->GetData(), size1 * sizeof(EtsInt)) ==
+            0);
 }
 
 template <typename BoxedType>
