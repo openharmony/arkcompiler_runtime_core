@@ -31,6 +31,7 @@ public:
 
         if constexpr (IN_ETS_MANAGED) {
             ASSERT(coro_->IsManagedCode());
+            ctx->UpdateInteropStackInfoIfNeeded();
         } else if (UNLIKELY(!coro_->IsManagedCode())) {
             coro_->ManagedCodeBegin();
             switched_ = true;
@@ -70,6 +71,7 @@ public:
 
     ~JSNapiEnvScope()
     {
+        ctx_->UpdateInteropStackInfoIfNeeded();
         ctx_->SetJSEnv(saved_);
     }
 

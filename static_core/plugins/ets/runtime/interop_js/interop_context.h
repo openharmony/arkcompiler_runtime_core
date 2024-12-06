@@ -27,6 +27,8 @@
 #include "plugins/ets/runtime/interop_js/intrinsics/std_js_jsruntime.h"
 #include "runtime/include/value.h"
 
+#include "plugins/ets/runtime/interop_js/stack_info.h"
+
 #include <node_api.h>
 #include <unordered_map>
 
@@ -463,6 +465,11 @@ public:
         return &constStringStorage_;
     }
 
+    ALWAYS_INLINE void UpdateInteropStackInfoIfNeeded()
+    {
+        stackInfoManager_.UpdateStackInfoIfNeeded();
+    }
+
 protected:
     static InteropCtx *Current(CoroutineWorker *worker)
     {
@@ -554,6 +561,8 @@ private:
 
     // hybrid call stack support
     InteropCallStack interopStk_ {};
+
+    StackInfoManager stackInfoManager_;
 
     // needs to access the jsEnv_ without the nullptr assert
     friend class JSNapiEnvScope;
