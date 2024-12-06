@@ -523,3 +523,6 @@ spec/05.Generics/tuple_as_generic_args_0030.sts
 
 # Issue 21176
 spec/09.classes/9.5.Field_Declaration/class_with_optional_attributes_0006.sts
+
+# Issue 21090
+spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0014.sts
