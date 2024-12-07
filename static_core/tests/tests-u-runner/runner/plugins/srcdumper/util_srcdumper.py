@@ -46,7 +46,8 @@ class AstComparator:
         AstComparator.remove_loc_nodes(ast)
         AstComparator.remove_empty_statements(ast)
         AstComparator.replace_null_literals(ast)
-        AstComparator.flatten_block_statements(ast)
+        AstComparator.flatten_similar_nested_nodes(ast, "BlockStatement", "statements")
+        AstComparator.flatten_similar_nested_nodes(ast, "ETSUnionType", "types")
         AstComparator.remove_duplicate_undefined_types(ast)
 
         return ast
@@ -84,27 +85,34 @@ class AstComparator:
 
 
     @staticmethod
-    def flatten_block_statements(ast: Any) -> None:
-        """Flattens BlockStatement nodes where possible."""
+    def list_extend_in_pos(nodes: list, extend_nodes: list, pos: int) -> None:
+        """Removes the element in 'pos' position and inserts extend_nodes instead."""
+        nodes.pop(pos)
+        for i, extend_node in enumerate(extend_nodes):
+            nodes.insert(pos + i, extend_node)
+
+
+    @staticmethod
+    def flatten_similar_nested_nodes(ast: Any, node_type: str, nested_key: str) -> None:
+        """Flattens nested nodes with similar type e.g. BlockStatement in BlockStatement."""
 
         if isinstance(ast, list):
             for i in range(len(ast) - 1, -1, -1):
-                if isinstance(ast[i], dict) and ast[i].get("type") == "BlockStatement":
-                    AstComparator.flatten_block_statements(ast[i].get("statements"))
-                    ast.extend(ast[i].get("statements", []))
-                    ast.pop(i)
+                if isinstance(ast[i], dict) and ast[i].get("type") == node_type:
+                    AstComparator.flatten_similar_nested_nodes(ast[i].get(nested_key), node_type, nested_key)
+                    AstComparator.list_extend_in_pos(ast, ast[i].get(nested_key, []), i)
                 else:
-                    AstComparator.flatten_block_statements(ast[i])
+                    AstComparator.flatten_similar_nested_nodes(ast[i], node_type, nested_key)
 
         elif isinstance(ast, dict):
             for key, value in ast.items():
-                if not isinstance(value, dict) or value.get("type") != "BlockStatement":
-                    AstComparator.flatten_block_statements(value)
-                elif (statements := value.get("statements", [])) and len(statements) == 1:
-                    AstComparator.flatten_block_statements(statements[0])
-                    ast[key] = statements[0]
+                if not isinstance(value, dict) or value.get("type") != node_type:
+                    AstComparator.flatten_similar_nested_nodes(value, node_type, nested_key)
+                elif (nested_nodes := value.get(nested_key, [])) and len(nested_nodes) == 1:
+                    AstComparator.flatten_similar_nested_nodes(nested_nodes[0], node_type, nested_key)
+                    ast[key] = nested_nodes[0]
                 else:
-                    AstComparator.flatten_block_statements(value)
+                    AstComparator.flatten_similar_nested_nodes(value, node_type, nested_key)
 
 
     @staticmethod
