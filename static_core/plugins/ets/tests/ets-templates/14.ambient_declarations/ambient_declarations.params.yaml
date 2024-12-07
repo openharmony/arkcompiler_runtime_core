@@ -229,7 +229,7 @@ declarations:
     }
   - >
     declare namespace Ambient {
-      foo(): void
+      function foo(): void
     }
   - >
     declare namespace Ambient {
