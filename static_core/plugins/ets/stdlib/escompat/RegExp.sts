@@ -148,7 +148,15 @@ export class RegExp extends Object {
     private static lastParen_: String = ""
     private static leftContext_: String = ""
     private static rightContext_: String = ""
-    private static $1_: String = "", $2_: String = "", $3_: String = "", $4_: String = "", $5_: String = "", $6_: String = "", $7_: String = "", $8_: String = "", $9_: String = ""
+    private static $1_: String = ""
+    private static $2_: String = ""
+    private static $3_: String = ""
+    private static $4_: String = ""
+    private static $5_: String = ""
+    private static $6_: String = ""
+    private static $7_: String = ""
+    private static $8_: String = ""
+    private static $9_: String = ""
 
     private groupNames: String[] = []
     private buffer: int[] = []

@@ -1010,7 +1010,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 % }
 % ctx.array_of_type = Proc.new { |t| "Array<#{t}>" }
 % ctx.this_call = Proc.new { |f| "this.#{f}(" }
-% ctx.arr_method_call = Proc.new { |t, f| "#{t}.#{f}(" }
+% ctx.arr_method_call = Proc.new { |t, f, *args| "#{t}.#{f}(#{args.join(', ')})" }
 % ctx.this_generic = ''
 % ctx.this_generic_one = ''
 % ctx.this_iterator_generic = '<T>'

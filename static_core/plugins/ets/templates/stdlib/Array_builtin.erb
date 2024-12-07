@@ -60,7 +60,7 @@ class BuiltinArrayKeysIterator implements IterableIterator<number> {
 % ctx.override = ''
 % ctx.get_unsafe = Proc.new { |t, i| "#{t}[#{i}]" }
 % ctx.set_unsafe = Proc.new { |t, i, v| "#{t}[#{i}] = #{v}" }
-% ctx.arr_method_call = Proc.new { |t, f| "#{f}(#{t}, " }
+% ctx.arr_method_call = Proc.new { |t, f, *args| "#{f}(#{args.prepend(t).join(', ')})" }
 % primitive_types = ['boolean', 'byte', 'short', 'int', 'long', 'float', 'double', 'char']
 % # NOTE(kprokopenko): primitive_types + ['T']
 % (primitive_types).each { |el_type|
@@ -189,7 +189,7 @@ export function sort<%= ctx.this_generic %>(<%= ctx.this_arg %>comparator: (a: <
  *
  * @note Mutating method
  */
-export function sort<%= ctx.this_generic %>(<%= ctx.this_arg %>): <%= ctx.this_return_type %> {
+export function sort<%= ctx.this_generic %>(<%= ctx.this_arg.chomp(', ') %>): <%= ctx.this_return_type %> {
 % if !primitive_types.include?(ctx.el_type)
     sort_subarray(self<%= ctx.el_type == 'T' ? ' as NullishType[]' : '' %>, 0, self.length, (l: <%= sort_elem_type %>, r: <%= sort_elem_type %>): boolean => {
         return new String(l).compareTo(new String(r)) < 0;

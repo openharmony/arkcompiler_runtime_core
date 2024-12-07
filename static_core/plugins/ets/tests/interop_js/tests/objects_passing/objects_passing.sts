@@ -27,7 +27,7 @@ import {
   changeName,
   getEdu,
   getObjectId,
-  getId
+  getId,
   getObjectName
   } from "js_import"
 

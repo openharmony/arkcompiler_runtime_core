@@ -997,7 +997,7 @@ export function join(self: boolean[], sep?: String): string {
  *
  * @returns string representation
  */
-export function toString(self: boolean[], ): string {
+export function toString(self: boolean[]): string {
     return join(self, ",");
 }
 
@@ -1030,7 +1030,7 @@ export function toLocaleString(self: boolean[], locales: Object): string {
  *
  * @returns string representation
  */
-export function toLocaleString(self: boolean[], ): string {
+export function toLocaleString(self: boolean[]): string {
     const sb = new StringBuilder()
     const len = self.length;
     for (let i = 0; i < len; i++) {
@@ -1178,9 +1178,9 @@ export function indexOf(self: boolean[], val: boolean, fromIndex?: Number): numb
  *
  * @returns sorted copy of hte current instance using default comparator
  */
-export function toSorted(self: boolean[], ): boolean[] {
+export function toSorted(self: boolean[]): boolean[] {
     let arr = cloneArray(self);
-    sort(arr, )
+    sort(arr)
     return arr
 }
 
@@ -1204,7 +1204,7 @@ export function toSorted(self: boolean[], comparator: (a: boolean, b: boolean) =
  *
  * @note Mutating method
  */
-export function reverse(self: boolean[], ): boolean[] {
+export function reverse(self: boolean[]): boolean[] {
     for (let i = 0; i < self.length / 2; i++) {
         const tmp = self[i];
         const idx_r = self.length - 1 - i;
@@ -1221,7 +1221,7 @@ export function reverse(self: boolean[], ): boolean[] {
  *
  * @returns reversed copy of the current Array
  */
-export function toReversed(self: boolean[], ): boolean[] {
+export function toReversed(self: boolean[]): boolean[] {
     let arr = new boolean[self.length]
     for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
@@ -1268,14 +1268,14 @@ export function with(self: boolean[], index: int, value: boolean): boolean[] {
 /**
  * Returns an iterator over all values
  */
-export function values(self: boolean[], ): IterableIterator<boolean> {
+export function values(self: boolean[]): IterableIterator<boolean> {
     return new ArrayValuesIterator_boolean(self);
 }
 
 /**
  * Returns an iterable of key, value pairs for every entry in the array
  */
-export function entries(self: boolean[], ): IterableIterator<[number, boolean]> {
+export function entries(self: boolean[]): IterableIterator<[number, boolean]> {
     return new ArrayEntriesIterator_boolean(self);
 }
 
@@ -1687,7 +1687,7 @@ export function sort(self: boolean[], comparator: (a: boolean, b: boolean) => nu
  *
  * @note Mutating method
  */
-export function sort(self: boolean[], ): boolean[] {
+export function sort(self: boolean[]): boolean[] {
     sort(self, 0, self.length);
     return self;
 }
@@ -2677,7 +2677,7 @@ export function join(self: byte[], sep?: String): string {
  *
  * @returns string representation
  */
-export function toString(self: byte[], ): string {
+export function toString(self: byte[]): string {
     return join(self, ",");
 }
 
@@ -2710,7 +2710,7 @@ export function toLocaleString(self: byte[], locales: Object): string {
  *
  * @returns string representation
  */
-export function toLocaleString(self: byte[], ): string {
+export function toLocaleString(self: byte[]): string {
     const sb = new StringBuilder()
     const len = self.length;
     for (let i = 0; i < len; i++) {
@@ -2858,9 +2858,9 @@ export function indexOf(self: byte[], val: byte, fromIndex?: Number): number {
  *
  * @returns sorted copy of hte current instance using default comparator
  */
-export function toSorted(self: byte[], ): byte[] {
+export function toSorted(self: byte[]): byte[] {
     let arr = cloneArray(self);
-    sort(arr, )
+    sort(arr)
     return arr
 }
 
@@ -2884,7 +2884,7 @@ export function toSorted(self: byte[], comparator: (a: byte, b: byte) => number)
  *
  * @note Mutating method
  */
-export function reverse(self: byte[], ): byte[] {
+export function reverse(self: byte[]): byte[] {
     for (let i = 0; i < self.length / 2; i++) {
         const tmp = self[i];
         const idx_r = self.length - 1 - i;
@@ -2901,7 +2901,7 @@ export function reverse(self: byte[], ): byte[] {
  *
  * @returns reversed copy of the current Array
  */
-export function toReversed(self: byte[], ): byte[] {
+export function toReversed(self: byte[]): byte[] {
     let arr = new byte[self.length]
     for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
@@ -2948,14 +2948,14 @@ export function with(self: byte[], index: int, value: byte): byte[] {
 /**
  * Returns an iterator over all values
  */
-export function values(self: byte[], ): IterableIterator<byte> {
+export function values(self: byte[]): IterableIterator<byte> {
     return new ArrayValuesIterator_byte(self);
 }
 
 /**
  * Returns an iterable of key, value pairs for every entry in the array
  */
-export function entries(self: byte[], ): IterableIterator<[number, byte]> {
+export function entries(self: byte[]): IterableIterator<[number, byte]> {
     return new ArrayEntriesIterator_byte(self);
 }
 
@@ -3367,7 +3367,7 @@ export function sort(self: byte[], comparator: (a: byte, b: byte) => number): by
  *
  * @note Mutating method
  */
-export function sort(self: byte[], ): byte[] {
+export function sort(self: byte[]): byte[] {
     sort(self, 0, self.length);
     return self;
 }
@@ -4357,7 +4357,7 @@ export function join(self: short[], sep?: String): string {
  *
  * @returns string representation
  */
-export function toString(self: short[], ): string {
+export function toString(self: short[]): string {
     return join(self, ",");
 }
 
@@ -4390,7 +4390,7 @@ export function toLocaleString(self: short[], locales: Object): string {
  *
  * @returns string representation
  */
-export function toLocaleString(self: short[], ): string {
+export function toLocaleString(self: short[]): string {
     const sb = new StringBuilder()
     const len = self.length;
     for (let i = 0; i < len; i++) {
@@ -4538,9 +4538,9 @@ export function indexOf(self: short[], val: short, fromIndex?: Number): number {
  *
  * @returns sorted copy of hte current instance using default comparator
  */
-export function toSorted(self: short[], ): short[] {
+export function toSorted(self: short[]): short[] {
     let arr = cloneArray(self);
-    sort(arr, )
+    sort(arr)
     return arr
 }
 
@@ -4564,7 +4564,7 @@ export function toSorted(self: short[], comparator: (a: short, b: short) => numb
  *
  * @note Mutating method
  */
-export function reverse(self: short[], ): short[] {
+export function reverse(self: short[]): short[] {
     for (let i = 0; i < self.length / 2; i++) {
         const tmp = self[i];
         const idx_r = self.length - 1 - i;
@@ -4581,7 +4581,7 @@ export function reverse(self: short[], ): short[] {
  *
  * @returns reversed copy of the current Array
  */
-export function toReversed(self: short[], ): short[] {
+export function toReversed(self: short[]): short[] {
     let arr = new short[self.length]
     for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
@@ -4628,14 +4628,14 @@ export function with(self: short[], index: int, value: short): short[] {
 /**
  * Returns an iterator over all values
  */
-export function values(self: short[], ): IterableIterator<short> {
+export function values(self: short[]): IterableIterator<short> {
     return new ArrayValuesIterator_short(self);
 }
 
 /**
  * Returns an iterable of key, value pairs for every entry in the array
  */
-export function entries(self: short[], ): IterableIterator<[number, short]> {
+export function entries(self: short[]): IterableIterator<[number, short]> {
     return new ArrayEntriesIterator_short(self);
 }
 
@@ -5047,7 +5047,7 @@ export function sort(self: short[], comparator: (a: short, b: short) => number):
  *
  * @note Mutating method
  */
-export function sort(self: short[], ): short[] {
+export function sort(self: short[]): short[] {
     sort(self, 0, self.length);
     return self;
 }
@@ -6037,7 +6037,7 @@ export function join(self: int[], sep?: String): string {
  *
  * @returns string representation
  */
-export function toString(self: int[], ): string {
+export function toString(self: int[]): string {
     return join(self, ",");
 }
 
@@ -6070,7 +6070,7 @@ export function toLocaleString(self: int[], locales: Object): string {
  *
  * @returns string representation
  */
-export function toLocaleString(self: int[], ): string {
+export function toLocaleString(self: int[]): string {
     const sb = new StringBuilder()
     const len = self.length;
     for (let i = 0; i < len; i++) {
@@ -6218,9 +6218,9 @@ export function indexOf(self: int[], val: int, fromIndex?: Number): number {
  *
  * @returns sorted copy of hte current instance using default comparator
  */
-export function toSorted(self: int[], ): int[] {
+export function toSorted(self: int[]): int[] {
     let arr = cloneArray(self);
-    sort(arr, )
+    sort(arr)
     return arr
 }
 
@@ -6244,7 +6244,7 @@ export function toSorted(self: int[], comparator: (a: int, b: int) => number): i
  *
  * @note Mutating method
  */
-export function reverse(self: int[], ): int[] {
+export function reverse(self: int[]): int[] {
     for (let i = 0; i < self.length / 2; i++) {
         const tmp = self[i];
         const idx_r = self.length - 1 - i;
@@ -6261,7 +6261,7 @@ export function reverse(self: int[], ): int[] {
  *
  * @returns reversed copy of the current Array
  */
-export function toReversed(self: int[], ): int[] {
+export function toReversed(self: int[]): int[] {
     let arr = new int[self.length]
     for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
@@ -6308,14 +6308,14 @@ export function with(self: int[], index: int, value: int): int[] {
 /**
  * Returns an iterator over all values
  */
-export function values(self: int[], ): IterableIterator<int> {
+export function values(self: int[]): IterableIterator<int> {
     return new ArrayValuesIterator_int(self);
 }
 
 /**
  * Returns an iterable of key, value pairs for every entry in the array
  */
-export function entries(self: int[], ): IterableIterator<[number, int]> {
+export function entries(self: int[]): IterableIterator<[number, int]> {
     return new ArrayEntriesIterator_int(self);
 }
 
@@ -6727,7 +6727,7 @@ export function sort(self: int[], comparator: (a: int, b: int) => number): int[]
  *
  * @note Mutating method
  */
-export function sort(self: int[], ): int[] {
+export function sort(self: int[]): int[] {
     sort(self, 0, self.length);
     return self;
 }
@@ -7717,7 +7717,7 @@ export function join(self: long[], sep?: String): string {
  *
  * @returns string representation
  */
-export function toString(self: long[], ): string {
+export function toString(self: long[]): string {
     return join(self, ",");
 }
 
@@ -7750,7 +7750,7 @@ export function toLocaleString(self: long[], locales: Object): string {
  *
  * @returns string representation
  */
-export function toLocaleString(self: long[], ): string {
+export function toLocaleString(self: long[]): string {
     const sb = new StringBuilder()
     const len = self.length;
     for (let i = 0; i < len; i++) {
@@ -7898,9 +7898,9 @@ export function indexOf(self: long[], val: long, fromIndex?: Number): number {
  *
  * @returns sorted copy of hte current instance using default comparator
  */
-export function toSorted(self: long[], ): long[] {
+export function toSorted(self: long[]): long[] {
     let arr = cloneArray(self);
-    sort(arr, )
+    sort(arr)
     return arr
 }
 
@@ -7924,7 +7924,7 @@ export function toSorted(self: long[], comparator: (a: long, b: long) => number)
  *
  * @note Mutating method
  */
-export function reverse(self: long[], ): long[] {
+export function reverse(self: long[]): long[] {
     for (let i = 0; i < self.length / 2; i++) {
         const tmp = self[i];
         const idx_r = self.length - 1 - i;
@@ -7941,7 +7941,7 @@ export function reverse(self: long[], ): long[] {
  *
  * @returns reversed copy of the current Array
  */
-export function toReversed(self: long[], ): long[] {
+export function toReversed(self: long[]): long[] {
     let arr = new long[self.length]
     for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
@@ -7988,14 +7988,14 @@ export function with(self: long[], index: int, value: long): long[] {
 /**
  * Returns an iterator over all values
  */
-export function values(self: long[], ): IterableIterator<long> {
+export function values(self: long[]): IterableIterator<long> {
     return new ArrayValuesIterator_long(self);
 }
 
 /**
  * Returns an iterable of key, value pairs for every entry in the array
  */
-export function entries(self: long[], ): IterableIterator<[number, long]> {
+export function entries(self: long[]): IterableIterator<[number, long]> {
     return new ArrayEntriesIterator_long(self);
 }
 
@@ -8407,7 +8407,7 @@ export function sort(self: long[], comparator: (a: long, b: long) => number): lo
  *
  * @note Mutating method
  */
-export function sort(self: long[], ): long[] {
+export function sort(self: long[]): long[] {
     sort(self, 0, self.length);
     return self;
 }
@@ -9397,7 +9397,7 @@ export function join(self: float[], sep?: String): string {
  *
  * @returns string representation
  */
-export function toString(self: float[], ): string {
+export function toString(self: float[]): string {
     return join(self, ",");
 }
 
@@ -9430,7 +9430,7 @@ export function toLocaleString(self: float[], locales: Object): string {
  *
  * @returns string representation
  */
-export function toLocaleString(self: float[], ): string {
+export function toLocaleString(self: float[]): string {
     const sb = new StringBuilder()
     const len = self.length;
     for (let i = 0; i < len; i++) {
@@ -9586,9 +9586,9 @@ export function indexOf(self: float[], val: float, fromIndex?: Number): number {
  *
  * @returns sorted copy of hte current instance using default comparator
  */
-export function toSorted(self: float[], ): float[] {
+export function toSorted(self: float[]): float[] {
     let arr = cloneArray(self);
-    sort(arr, )
+    sort(arr)
     return arr
 }
 
@@ -9612,7 +9612,7 @@ export function toSorted(self: float[], comparator: (a: float, b: float) => numb
  *
  * @note Mutating method
  */
-export function reverse(self: float[], ): float[] {
+export function reverse(self: float[]): float[] {
     for (let i = 0; i < self.length / 2; i++) {
         const tmp = self[i];
         const idx_r = self.length - 1 - i;
@@ -9629,7 +9629,7 @@ export function reverse(self: float[], ): float[] {
  *
  * @returns reversed copy of the current Array
  */
-export function toReversed(self: float[], ): float[] {
+export function toReversed(self: float[]): float[] {
     let arr = new float[self.length]
     for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
@@ -9676,14 +9676,14 @@ export function with(self: float[], index: int, value: float): float[] {
 /**
  * Returns an iterator over all values
  */
-export function values(self: float[], ): IterableIterator<float> {
+export function values(self: float[]): IterableIterator<float> {
     return new ArrayValuesIterator_float(self);
 }
 
 /**
  * Returns an iterable of key, value pairs for every entry in the array
  */
-export function entries(self: float[], ): IterableIterator<[number, float]> {
+export function entries(self: float[]): IterableIterator<[number, float]> {
     return new ArrayEntriesIterator_float(self);
 }
 
@@ -10095,7 +10095,7 @@ export function sort(self: float[], comparator: (a: float, b: float) => number):
  *
  * @note Mutating method
  */
-export function sort(self: float[], ): float[] {
+export function sort(self: float[]): float[] {
     sort(self, 0, self.length);
     return self;
 }
@@ -11085,7 +11085,7 @@ export function join(self: double[], sep?: String): string {
  *
  * @returns string representation
  */
-export function toString(self: double[], ): string {
+export function toString(self: double[]): string {
     return join(self, ",");
 }
 
@@ -11118,7 +11118,7 @@ export function toLocaleString(self: double[], locales: Object): string {
  *
  * @returns string representation
  */
-export function toLocaleString(self: double[], ): string {
+export function toLocaleString(self: double[]): string {
     const sb = new StringBuilder()
     const len = self.length;
     for (let i = 0; i < len; i++) {
@@ -11274,9 +11274,9 @@ export function indexOf(self: double[], val: double, fromIndex?: Number): number
  *
  * @returns sorted copy of hte current instance using default comparator
  */
-export function toSorted(self: double[], ): double[] {
+export function toSorted(self: double[]): double[] {
     let arr = cloneArray(self);
-    sort(arr, )
+    sort(arr)
     return arr
 }
 
@@ -11300,7 +11300,7 @@ export function toSorted(self: double[], comparator: (a: double, b: double) => n
  *
  * @note Mutating method
  */
-export function reverse(self: double[], ): double[] {
+export function reverse(self: double[]): double[] {
     for (let i = 0; i < self.length / 2; i++) {
         const tmp = self[i];
         const idx_r = self.length - 1 - i;
@@ -11317,7 +11317,7 @@ export function reverse(self: double[], ): double[] {
  *
  * @returns reversed copy of the current Array
  */
-export function toReversed(self: double[], ): double[] {
+export function toReversed(self: double[]): double[] {
     let arr = new double[self.length]
     for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
@@ -11364,14 +11364,14 @@ export function with(self: double[], index: int, value: double): double[] {
 /**
  * Returns an iterator over all values
  */
-export function values(self: double[], ): IterableIterator<double> {
+export function values(self: double[]): IterableIterator<double> {
     return new ArrayValuesIterator_double(self);
 }
 
 /**
  * Returns an iterable of key, value pairs for every entry in the array
  */
-export function entries(self: double[], ): IterableIterator<[number, double]> {
+export function entries(self: double[]): IterableIterator<[number, double]> {
     return new ArrayEntriesIterator_double(self);
 }
 
@@ -11783,7 +11783,7 @@ export function sort(self: double[], comparator: (a: double, b: double) => numbe
  *
  * @note Mutating method
  */
-export function sort(self: double[], ): double[] {
+export function sort(self: double[]): double[] {
     sort(self, 0, self.length);
     return self;
 }
@@ -12773,7 +12773,7 @@ export function join(self: char[], sep?: String): string {
  *
  * @returns string representation
  */
-export function toString(self: char[], ): string {
+export function toString(self: char[]): string {
     return join(self, ",");
 }
 
@@ -12806,7 +12806,7 @@ export function toLocaleString(self: char[], locales: Object): string {
  *
  * @returns string representation
  */
-export function toLocaleString(self: char[], ): string {
+export function toLocaleString(self: char[]): string {
     const sb = new StringBuilder()
     const len = self.length;
     for (let i = 0; i < len; i++) {
@@ -12954,9 +12954,9 @@ export function indexOf(self: char[], val: char, fromIndex?: Number): number {
  *
  * @returns sorted copy of hte current instance using default comparator
  */
-export function toSorted(self: char[], ): char[] {
+export function toSorted(self: char[]): char[] {
     let arr = cloneArray(self);
-    sort(arr, )
+    sort(arr)
     return arr
 }
 
@@ -12980,7 +12980,7 @@ export function toSorted(self: char[], comparator: (a: char, b: char) => number)
  *
  * @note Mutating method
  */
-export function reverse(self: char[], ): char[] {
+export function reverse(self: char[]): char[] {
     for (let i = 0; i < self.length / 2; i++) {
         const tmp = self[i];
         const idx_r = self.length - 1 - i;
@@ -12997,7 +12997,7 @@ export function reverse(self: char[], ): char[] {
  *
  * @returns reversed copy of the current Array
  */
-export function toReversed(self: char[], ): char[] {
+export function toReversed(self: char[]): char[] {
     let arr = new char[self.length]
     for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
@@ -13044,14 +13044,14 @@ export function with(self: char[], index: int, value: char): char[] {
 /**
  * Returns an iterator over all values
  */
-export function values(self: char[], ): IterableIterator<char> {
+export function values(self: char[]): IterableIterator<char> {
     return new ArrayValuesIterator_char(self);
 }
 
 /**
  * Returns an iterable of key, value pairs for every entry in the array
  */
-export function entries(self: char[], ): IterableIterator<[number, char]> {
+export function entries(self: char[]): IterableIterator<[number, char]> {
     return new ArrayEntriesIterator_char(self);
 }
 
@@ -13463,7 +13463,7 @@ export function sort(self: char[], comparator: (a: char, b: char) => number): ch
  *
  * @note Mutating method
  */
-export function sort(self: char[], ): char[] {
+export function sort(self: char[]): char[] {
     sort(self, 0, self.length);
     return self;
 }
