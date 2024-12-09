@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package conversion_int.test;
+package conversion_types.test;
 
 const buffer = new ArrayBuffer(1);
 const dataView = new DataView(buffer);
@@ -31,4 +31,15 @@ class DeferentIntTypes {
     double: double = 1;
     char: char = 1;
     byte = dataView.getUint8(0);
+}
+
+class DeferentStringTypes {
+    char: char = 'a';
+    string: string = "hello";
+    literal: "one" | "two" = "one";
+}
+
+class NullAndUndefinedTypes {
+    stsNull: null = null;
+    stsUndefined: undefined = undefined;
 }

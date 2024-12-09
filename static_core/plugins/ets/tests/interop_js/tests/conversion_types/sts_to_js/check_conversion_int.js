@@ -15,7 +15,7 @@
 
 const {
     DeferentIntTypes,
-} = require('conversion_int.test');
+} = require('conversion_types.test');
 
 const deferentTypes = new DeferentIntTypes();
 

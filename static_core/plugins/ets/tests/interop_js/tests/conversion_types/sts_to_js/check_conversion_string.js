@@ -13,10 +13,27 @@
  * limitations under the License.
  */
 
-const stsVm = require('lib/module/ets_interop_js_napi');
+const {
+    DeferentStringTypes,
+} = require('conversion_types.test');
 
-const DeferentIntTypes = stsVm.getClass('Lconversion_int/test/DeferentIntTypes;');
+const deferentTypes = new DeferentStringTypes();
 
-module.exports = {
-    DeferentIntTypes,
-};
+function checkChar() {
+    ASSERT_TRUE(typeof deferentTypes.char === 'string');
+    ASSERT_TRUE(deferentTypes.char === 'a');
+}
+
+function checkString() {
+    ASSERT_TRUE(typeof deferentTypes.string === 'string');
+    ASSERT_TRUE(deferentTypes.string === 'hello');
+}
+
+function checkLiteral() {
+    ASSERT_TRUE(typeof deferentTypes.literal === 'string');
+    ASSERT_TRUE(deferentTypes.literal === 'one');
+}
+
+checkChar();
+checkString();
+checkLiteral();
