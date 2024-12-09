@@ -90,12 +90,19 @@ export final class Set<K> implements ReadonlySet<K> {
      * Constructs a Set from collection
      * @param elements initial collection
      */
-    constructor(elements?: ArrayLike<K> | Iterable<K> | null) {
-        if (elements != null) {
-            const entriesIter = new MappingIterator<K, [K, K]>(elements.$_iterator(), (element: K): [K, K] => [element, element])
+    constructor(elements?: Iterable<K> | readonly K[] | null) {
+        if (elements == null) {
+            this.elements = new Map<K, K>();
+        } else if (elements instanceof Iterable) {
+            const it = (elements as Iterable<K>).$_iterator()
+            const entriesIter = new MappingIterator<K, [K, K]>(it, (element: K): [K, K] => [element, element])
             this.elements = new Map<K, K>(entriesIter)
         } else {
-            this.elements = new Map<K, K>()
+            const entries: (readonly [K, K])[] = new (readonly [K, K])[elements.length]
+            for (let i = 0; i < elements.length; ++i) {
+                entries[i] = [elements[i], elements[i]] as [K, K]
+            }
+            this.elements = new Map<K, K>(entries)
         }
     }
 
@@ -105,6 +112,16 @@ export final class Set<K> implements ReadonlySet<K> {
      */
     constructor(set: Set<K>) {
         this.elements = new Map<K, K>(set.elements)
+    }
+
+    // NOTE(templin.konstantin): Temporary workaround due #20944 internal issue
+    //  if we remove this constructor we got error on "readonly K[]" branch
+    //  at constructor from union type
+    constructor(values: K[]) {
+        this.elements = new Map<K, K>()
+        for (let i = 0; i < values.length; ++i) {
+            this.elements.set(values[i], values[i])
+        }
     }
 
     private toStringVals(): String {

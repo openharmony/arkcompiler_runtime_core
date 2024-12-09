@@ -196,6 +196,26 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return ret
     }
 
+    public static from<T, U>(values: T[], mapfn: (v: T, k: number) => U): Array<U> {
+        const ret = new Array<U>(values.length)
+        for (let i = 0; i < values.length; ++i) {
+            ret[i] = mapfn(values[i], i)
+        }
+        return ret
+    }
+
+    public static from<T, U>(values: T[], mapfn: (v: T) => U): Array<U> {
+        const newFn: (v: T, k: number) => U =
+            (v: T, k: number): U => { return mapfn(v) }
+        return Array.from(values, newFn)
+    }
+
+    public static from<T, U>(values: T[], mapfn: () => U): Array<U> {
+        const newFn: (v: T, k: number) => U =
+            (v: T, k: number): U => { return mapfn() }
+        return Array.from(values, newFn)
+    }
+
     /**
     * Creates a new `Array` instance from `Object[]` primitive array.
     *

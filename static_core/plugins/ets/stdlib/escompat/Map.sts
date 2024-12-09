@@ -181,9 +181,11 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      * Constructs a Map from collection
      * @param entries initial collection
      */
-    constructor(entries?: ArrayLike<[K, V]> | Iterable<[K, V]> | null) {
-        if (entries != null) {
-            const entriesIter = entries.$_iterator()
+    constructor(entries?: Iterable<[K, V]> | readonly (readonly [K, V])[] | null) {
+        if (entries == null) {
+            this.buckets = new MapBucket<K, V>[Map.MIN_BUCKETS_COUNT]
+        } else if (entries instanceof Iterable) {
+            const entriesIter = (entries as Iterable<[K, V]>).$_iterator()
             const entriesBuf = new Array<[K, V]>()
             for (let iterRes = entriesIter.next();!iterRes.done;iterRes = entriesIter.next()) {
                 const entry = iterRes.value
@@ -191,7 +193,6 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
                     entriesBuf.push(entry)
                 }
             }
-
             const bucketsCount = this.getInitialBucketsCount(entriesBuf.actualLength)
             this.buckets = new MapBucket<K, V>[bucketsCount]
 
@@ -199,7 +200,14 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
                 this.set(e[Map.ENTRY_KEY], e[Map.ENTRY_VAL])
             })
         } else {
-            this.buckets = new MapBucket<K, V>[Map.MIN_BUCKETS_COUNT]
+            const bucketsCount = this.getInitialBucketsCount(entries.length)
+            this.buckets = new MapBucket<K, V>[bucketsCount]
+            for (let i = 0; i < entries.length; ++i) {
+                if (entries[i] == null) {
+                    continue
+                }
+                this.set(entries[i][Map.ENTRY_KEY], entries[i][Map.ENTRY_VAL])
+            }
         }
     }
 
@@ -227,6 +235,20 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         entries.forEach((entry: [K, V]) => {
             this.set(entry[Map.ENTRY_KEY], entry[Map.ENTRY_VAL])
         })
+    }
+
+    // NOTE(templin.konstantin): Temporary workaround due #20944 internal issue
+    //  if we remove this constructor we got error on "readonly (readonly [K,V])[]"
+    //  branch at constructor from union type
+    constructor(values: [K, V][]) {
+        const bucketsCount = this.getInitialBucketsCount(values.length)
+        this.buckets = new MapBucket<K, V>[bucketsCount]
+        for (let i = 0; i < values.length; ++i) {
+            if (values[i] == null) {
+                continue
+            }
+            this.set(values[i][Map.ENTRY_KEY], values[i][Map.ENTRY_VAL])
+        }
     }
 
     override toString(): String {
