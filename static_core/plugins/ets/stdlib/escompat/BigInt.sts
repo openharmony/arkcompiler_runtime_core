@@ -49,6 +49,7 @@ export final class BigInt {
     private static readonly maskSys: long = BigInt.baseSys - (1 as long)
     private static readonly INVALID_RADIX_MESSAGE: string = "toString() radix argument must be between 2 and 36"
     private static readonly BITS_PER_1024_DEC = 3402
+    private static readonly BIGINT64_MASK = new BigInt(0xffffffffffffffff)
 
     internal static resetBytes(b: int[]):void {
         for (let i = 0; i<b.length; i++) {
@@ -1058,7 +1059,18 @@ export final class BigInt {
         return this.sign * buff
     }
 
-    public getULong(): long {
-        return BigInt.asUintN(64, this).getLong()
+    /**
+     * Return clipped bigint num to 64 bits
+     */
+    private static asUint64(num: BigInt): BigInt {
+        return num & BigInt.BIGINT64_MASK
     }
+
+    /**
+     * Return current value clipped to unsigned long
+     */
+    public getULong(): long {
+        return BigInt.asUint64(this).getLong()
+    }
+
 }

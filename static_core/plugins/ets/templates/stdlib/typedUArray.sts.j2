@@ -126,16 +126,18 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     public constructor(elements: Iterable<{{element['subsetTypeValues']}}>) {
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
-            const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
+            const arr = Types.identity_cast<{{element['subsetTypeValues']}}>(items as ArrayLike<{{element['subsetTypeValues']}}>)
             this.byteLengthInt = arr.length as int * {{element['name']}}Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                {%- if element.get('clamped', False) %}
-                this.setUnsafe(i, {{element['name']}}Array.clamp(arr.$_get(i).{{element['primitiveType']}}Value()))
+                {%- if element.get('name') == 'BigUint64' %}
+                this.setUnsafeClamp(i, arr.$_get(i){{numberBigIntToPrimitive}})
+                {%- elif element.get('name') != 'Uint8Clamped' %}
+                this.setUnsafeClamp(i, this.zeroIfInfinity(arr.$_get(i)) as {{element['primitiveType']}})
                 {%- else %}
-                this.setUnsafe(i, arr.$_get(i).{{element['primitiveType']}}Value())
+                this.setUnsafeClamp(i, arr.$_get(i) as {{element['primitiveType']}})
                 {%- endif %}
             }
         } else {

@@ -116,7 +116,7 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, Uint8ClampedArray.clamp(arr.$_get(i).intValue()))
+                this.setUnsafeClamp(i, arr.$_get(i) as int)
             }
         } else {
             let x = Uint8ClampedArray.from(elements)
@@ -2718,7 +2718,7 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).intValue())
+                this.setUnsafeClamp(i, this.zeroIfInfinity(arr.$_get(i)) as int)
             }
         } else {
             let x = Uint8Array.from(elements)
@@ -5337,7 +5337,7 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).intValue())
+                this.setUnsafeClamp(i, this.zeroIfInfinity(arr.$_get(i)) as int)
             }
         } else {
             let x = Uint16Array.from(elements)
@@ -7948,7 +7948,7 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).longValue())
+                this.setUnsafeClamp(i, this.zeroIfInfinity(arr.$_get(i)) as long)
             }
         } else {
             let x = Uint32Array.from(elements)
@@ -10595,13 +10595,13 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
     public constructor(elements: Iterable<BigInt>) {
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
-            const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
+            const arr = Types.identity_cast<BigInt>(items as ArrayLike<BigInt>)
             this.byteLengthInt = arr.length as int * BigUint64Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).longValue())
+                this.setUnsafeClamp(i, arr.$_get(i).getULong())
             }
         } else {
             let x = BigUint64Array.from(elements)
