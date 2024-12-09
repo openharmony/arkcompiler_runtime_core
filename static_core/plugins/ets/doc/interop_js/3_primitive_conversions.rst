@@ -53,7 +53,7 @@ If the value is changed in one VM it doesn't affect another one.
 | ``null``                | ``null``          |
 +-------------------------+-------------------+
 
--  Numeric ArkTS types map to JS ``number``.
+-  Numeric ArkTS 2.0 types map to JS ``number``.
 
 .. code-block:: typescript
   :linenos:
@@ -62,48 +62,94 @@ If the value is changed in one VM it doesn't affect another one.
   export let stsInt: int = 1;
   export let stsDouble: double = 2.1;
 
+.. code-block:: javascript
+  :linenos:
+
   // 2.js
   import { stsInt, stsDouble } from "converted_sts_source";
 
-  let jsInt = stsInt; // jsInt is 1
-  typeof jsInt; // 'number'
+  let jsInt = stsInt; // jsInt is 'number' and equal 1
+  let jsDouble = stsDouble; // jsDouble is 'number' and equal 2.1
 
-  let jsDouble = stsDouble; // jsDouble is 2.1
-  typeof jsDouble; // 'double'
-
--  ``boolean``, ``string``, ``bigint``, ``undefined``, and ``null`` map to JS ``boolean``, ``string``, ``bigint``, ``undefined``, and ``null`` accordingly.
+-  ArkTS 2.0 ``boolean`` maps to JS ``boolean``.
 
 .. code-block:: typescript
   :linenos:
 
   // 1.sts
-  export let stsNum: int = 1;
   export let stsBool: boolean = true;
-  export let stsStr: string = "hello";
-  export let stsBigInt: bigint = 10n;
-  export let stsUndef: undefined = undefined;
-  export let stsNull:null = null;
+
+.. code-block:: javascript
+  :linenos:
 
   // 2.js
-  import { stsBool, stsStr, stsBigInt, stsUndef, stsNull } from "converted_sts_source";
+  import { stsBool } from "converted_sts_source";
 
-  let jsInt = stsNum; // jsInt is 1
-  typeof jsInt; // 'number'
+  let jsBool = stsBool; // jsBool is 'boolean' and equal true
 
-  let jsBool = stsBool; // jsBool is true
-  typeof jsBool; // 'boolean'
+-  ArkTS 2.0 ``string`` maps to JS ``string``.
 
-  let jsStr = stsStr; // jsStr is "hello"
-  typeof jsStr; // 'string'
+.. code-block:: typescript
+  :linenos:
 
-  let jsBigInt = stsBigInt; // jsBigInt is 10
-  typeof jsBigInt; // 'bigint'
+  // 1.sts
+  export let stsStr: string = "hello";
 
-  let jsUndef = stsUndef; // jsUndef is undefined
-  typeof jsUndef; // 'undefined'
+.. code-block:: javascript
+  :linenos:
 
-  let jsNull = stsNull; // jsNull is null
-  typeof jsNull; // 'null'
+  // 2.js
+  import { stsStr } from "converted_sts_source";
+
+  let jsStr = stsStr; // jsStr is 'string' and equal "hello"
+
+-  ArkTS 2.0 ``bigint`` maps to JS ``bigint``.
+
+.. code-block:: typescript
+  :linenos:
+
+  // 1.sts
+  export let stsBigInt: bigint = 10n;
+
+.. code-block:: javascript
+  :linenos:
+
+  // 2.js
+  import { stsBigInt } from "converted_sts_source";
+
+  let jsBigInt = stsBigInt; // jsBigInt is 'bigint' and equal 10
+
+-  ArkTS 2.0 ``undefined`` maps to JS ``undefined``.
+
+.. code-block:: typescript
+  :linenos:
+
+  // 1.sts
+  export let stsUndef: undefined = undefined;
+
+.. code-block:: javascript
+  :linenos:
+
+  // 2.js
+  import { stsUndef } from "converted_sts_source";
+
+  let jsUndef = stsUndef; // jsUndef is 'undefined' and equal undefined
+
+-  ArkTS 2.0 ``null`` maps to JS ``null``.
+
+.. code-block:: typescript
+  :linenos:
+
+  // 1.sts
+  export let stsNull: null = null;
+
+.. code-block:: javascript
+  :linenos:
+
+  // 2.js
+  import { stsNull } from "converted_sts_source";
+
+  let jsNull = stsNull; // jsNull is 'object' and equal null
 
 -  Boxed types(e.g. Number, Char, etc) map to primitive JS types.
 
@@ -111,13 +157,15 @@ If the value is changed in one VM it doesn't affect another one.
   :linenos:
 
   // 1.sts
-  export let x: Number = 1;
-  typeof x; // 'object'
+  export let x: Number = 1; // x is 'object'
+
+.. code-block:: javascript
+  :linenos:
 
   // 2.js
   import { x } from "converted_sts_source";
 
-  typeof x; // 'number'
+  let a = x; // x is 'number'
 
 -  ``enum`` conversion depends on the type of enumeration. Numeric ``enum`` converts to ``number``. String ``enum`` converts to ``string``.
 
@@ -137,18 +185,17 @@ If the value is changed in one VM it doesn't affect another one.
       Red = 'red'
   }
 
+.. code-block:: javascript
+  :linenos:
+
   // 2.js
   import { Direction, Color } from "converted_sts_source";
 
-  let val = typeof Direction.Up; // val is -1
-  typeof val; // 'number'
-  val = typeof Direction.Down; // val is 1
-  typeof val; // 'number'
+  let a = Direction.Up; // a is 'number' and equal -1
+  let b = Direction.Down; // b is 'number' and equal 1
 
-  val = typeof Color.Green; // val is 'green'
-  typeof val; // 'string'
-  val = typeof Color.Red; // val is 'red'
-  typeof val; // 'string'
+  let c = Color.Green; // c is 'string' and equal 'green'
+  let d = Color.Red; // d is 'string' and equal 'red'
 
 -  ``literal type string`` map to JS ``string``
 
@@ -159,6 +206,9 @@ If the value is changed in one VM it doesn't affect another one.
   export let stsLiteral: "literal" = "literal";
   stsLiteral = "not literal"; // compilation error
 
+.. code-block:: javascript
+  :linenos:
+
   // 2.js
   import { stsLiteral } from "converted_sts_source";
 
@@ -168,77 +218,170 @@ If the value is changed in one VM it doesn't affect another one.
 2. JS to ArkTS conversion
 *************************
 
-+-------------------------+---------------+
-| JS type                 | ArkTS type    |
-+=========================+===============+
-| ``null/Null``           | ``null``      |
-+-------------------------+---------------+
-| ``undefined/Undefined`` | ``undefined`` |
-+-------------------------+---------------+
-| ``boolean/Boolean``     | ``boolean``   |
-+-------------------------+---------------+
-| ``number/Number``       | ``number``    |
-+-------------------------+---------------+
-| ``bigint/Bigint``       | ``bigint``    |
-+-------------------------+---------------+
-| ``string/String``       | ``string``    |
-+-------------------------+---------------+
-| ``symbol/Symbol``       | ``ESObject``  |
-+-------------------------+---------------+
++---------------+---------------+
+| JS type       | ArkTS type    |
++===============+===============+
+| ``null``      | ``null``      |
++---------------+---------------+
+| ``undefined`` | ``undefined`` |
++---------------+---------------+
+| ``boolean``   | ``boolean``   |
++---------------+---------------+
+| ``number``    | ``number``    |
++---------------+---------------+
+| ``bigint``    | ``bigint``    |
++---------------+---------------+
+| ``string``    | ``string``    |
++---------------+---------------+
+| ``symbol``    | ``ESObject``  |
++---------------+---------------+
 
--  Value imported from JS to ArkTS, should be converted explicitly using ``as`` keyword.
+Value imported from JS to ArkTS 2.0, should be converted explicitly using ``as`` keyword.
 
-.. code-block:: typescript
-  :linenos:
-
-  // 1.js
-  export a = 1;
-  export b = "abc";
-  export c = true;
-  export d = undefined;
-  export e = null;
-  export f = 10n;
-
-  // 2.sts
-  import { a, b, c, d, e, f } from "1.js";
-
-  const valNum = a as number; // valNum is 1
-  typeof valNum; // 'number'
-
-  const valStr = b as string; // valStr is "abc"
-  typeof valStr; // 'string'
-
-  const valBool = c as boolean; // valBool is true
-  typeof valBool; // 'boolean'
-
-  const valUnDef = d as undefined; // valUnDef is undefined
-  typeof valUnDef; // 'undefined'
-
-  const valNull = e as null; // valNull is null
-  typeof valNull; // 'null'
-
-  const valBigInt = f as bigint; // valBigInt is 10
-  typeof valBigInt; // 'bigint'
-
--  JS object wrapper classes become primitive types in ArkTS.
+- JS ``null`` maps to ArkTS 2.0 ``null``.
 
 .. code-block:: javascript
   :linenos:
 
   // 1.js
-  export let a = new Number(1);
+  export let a = null;
 
 .. code-block:: typescript
   :linenos:
 
   // 2.sts
   import { a } from "1.js";
-  let val = a as number; // ok
 
--  TODO: symbol -> ESObject
+  const valNull = a as null; // valNull is 'null' and equal null
+
+- JS ``undefined`` maps to ArkTS 2.0 ``undefined``.
+
+.. code-block:: javascript
+  :linenos:
+
+  // 1.js
+  export let a = undefined;
+
+.. code-block:: typescript
+  :linenos:
+
+  // 2.sts
+  import { a } from "1.js";
+
+  const valUnDef = a as undefined; // valUnDef is 'undefined' and equal undefined
+
+- JS ``boolean`` maps to ArkTS 2.0 ``boolean``.
+
+.. code-block:: javascript
+  :linenos:
+
+  // 1.js
+  export let a = true;
+
+.. code-block:: typescript
+  :linenos:
+
+  // 2.sts
+  import { a } from "1.js";
+
+  const valBool = a as boolean; // valBool is 'boolean' and equal true
+
+- JS ``number`` maps to ArkTS 2.0 ``number``.
+
+.. code-block:: javascript
+  :linenos:
+
+  // 1.js
+  export let a = 1;
+
+.. code-block:: typescript
+  :linenos:
+
+  // 2.sts
+  import { a } from "1.js";
+
+  const valNum = a as number; // valNum is 'number' and equal 1
+
+- JS ``bigint`` maps to ArkTS 2.0 ``bigint``.
+
+.. code-block:: javascript
+  :linenos:
+
+  // 1.js
+  export let a = 10n;
+
+.. code-block:: typescript
+  :linenos:
+
+  // 2.sts
+  import { a } from "1.js";
+
+  const valBigInt = a as bigint; // valBigInt is 'bigint' and equal 10
+
+- JS ``string`` maps to ArkTS 2.0 ``string``.
+
+.. code-block:: javascript
+  :linenos:
+
+  // 1.js
+  export let a = "abc";
+
+.. code-block:: typescript
+  :linenos:
+
+  // 2.sts
+  import { a } from "1.js";
+
+  const valStr = a as string; // valStr is 'string' and equal "abc"
+
+- There is no such type as ``Symbol`` in ArkTS 2.0 so it's proxing to ESObject.
+
+.. code-block:: javascript
+  :linenos:
+
+  // 1.js
+  export let jsSymbol = Symbol("id");
+
+.. code-block:: typescript
+  :linenos:
+
+  // 2.sts
+  import { jsSymbol } from "1.js";
+  let val = jsSymbol; // ok, val is ESObject
 
 Limitations
 ***********
+
+Object wrapper types
+====================
+
+- Object wrapper types for primitive values such as ``Null``, ``Undefined``, ``Bolean``, ``Number``, ``Bigint``, ``String``, and ``Symbol``
+  can't be copied by default to ArkTS 2.0 values
+
+.. code-block:: typescript
+  :linenos:
+
+  // 1.js
+  let a = Number(123);
+
+  // 2.sts
+  import { a } from "1.js";
+  let b = a as int; // RTE
+
+Solutions
+---------
+
+- Use ``valueOf`` to get primitive values from wrapper objects and copy them to ArkTS 2.0
+
+.. code-block:: typescript
+  :linenos:
+
+  // 1.js
+  let a = Number(123);
+
+  // 2.sts
+  import { a } from "1.js";
+  let b = a.valueOf() as int; // ok
 
 Copy semantic
 =============
