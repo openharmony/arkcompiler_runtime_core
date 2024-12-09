@@ -16,7 +16,7 @@ limitations under the License.
 /*---
 desc: Multiple member inheritance.
 assert: There might be several paths by which the same member type declaration is inherited from an interface. In such a situation, the member type is considered to be inherited only once.
-tags: [compile-only]
+tags: [compile-only, negative]
 ---*/
 
 interface A {

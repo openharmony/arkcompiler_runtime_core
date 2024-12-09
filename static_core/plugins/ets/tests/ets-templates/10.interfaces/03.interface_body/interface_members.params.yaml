@@ -13,9 +13,6 @@
 
 --- # List of valid interface members
 interface_members:
-  - "f: int = 1;"
+  - "f: int;"
   - "m(): int { return 5; }"
   - "m(): int;"
-  - "class B{}"
-  - "interface I{}"
-  - "enum Color {Red, Green}"

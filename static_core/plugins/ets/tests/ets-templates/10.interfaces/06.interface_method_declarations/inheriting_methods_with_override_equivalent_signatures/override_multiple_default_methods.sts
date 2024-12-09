@@ -16,7 +16,7 @@ limitations under the License.
 /*---
 desc: Inheritance multiple default method from superinterface with override-equivalent signature.
 assert: It is possible for an interface to inherit several methods with override-equivalent signatures (link to signatures).
-tags: [compile-only]
+tags: [compile-only, negative]
 ---*/
 
 interface A {

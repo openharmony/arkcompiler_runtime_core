@@ -11,6 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of valid class members
+--- # List of valid interface members
 interface_members:
-  - "enum Color {Red, Green}"
+  - "f: int;"

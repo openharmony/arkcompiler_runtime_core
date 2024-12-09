@@ -17,8 +17,8 @@ limitations under the License.
 {% for item in default_value %}
 /*---
 desc: Interface fields without types
-tags: [compile-only]
-params: "{{id}}  = {{item.value}}"
+tags: [compile-only, negative]
+params: "{{id}} = {{item.value}}"
 ---*/
 
 interface Name {

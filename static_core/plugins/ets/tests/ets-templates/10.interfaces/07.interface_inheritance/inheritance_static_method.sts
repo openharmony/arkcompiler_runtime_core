@@ -16,7 +16,7 @@ limitations under the License.
 /*---
 desc: Inheritance static method from superinterface.
 assert: An interface does not inherit private or static methods from its superinterfaces.
-tags: [negative]
+tags: [compile-only, negative]
 ---*/
 
 interface A {

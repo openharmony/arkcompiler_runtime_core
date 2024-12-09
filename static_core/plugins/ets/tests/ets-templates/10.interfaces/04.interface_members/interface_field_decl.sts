@@ -18,13 +18,13 @@ desc: Interface field declaration
 ---*/
 
 interface BaseColors {
-  RED:   int = 1;
-  GREEN: int = 2;
-  BLUE:  int = 3;
+  RED:   int;
+  GREEN: int;
+  BLUE:  int;
 }
 
 interface ExtendedColors extends BaseColors {
-  YELLOW: int = 4;
+  YELLOW: int;
 }
 
 function main(): void {}
