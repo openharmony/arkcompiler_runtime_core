@@ -55,6 +55,15 @@ inline auto FromString(std::string_view str) {
     return MAP.at(str);
 }
 
+constexpr std::string_view ToString(Enum e) {
+    constexpr std::array<std::string_view, COUNT> MAP {
+%   op.flat_enum.each do |enumerator|
+        "<%= enumerator %>",
+%   end
+    };
+    return MAP[e];
+}
+
 }  // namespace <%= op.camel_name.snakecase %>
 
 % end

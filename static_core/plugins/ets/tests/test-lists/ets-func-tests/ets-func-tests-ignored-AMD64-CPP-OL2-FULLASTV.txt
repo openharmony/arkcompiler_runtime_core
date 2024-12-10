@@ -1,4 +1,4 @@
-# VariableHasScopeForAll::NULL_VARIABLE
+# VariableHasScope::NULL_VARIABLE
 algorithms/ChecksumsTest.sts
 algorithms/division-by-zero-in-class.sts
 algorithms/PrimesTest.sts
