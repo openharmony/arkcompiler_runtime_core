@@ -503,7 +503,7 @@ bool HumongousObjAllocator<AllocConfigT, LockConfigT>::IsLive(const ObjectHeader
     ASSERT(ContainObject(obj));
     auto *memHeader = static_cast<MemoryPoolHeader *>(ToVoidPtr(ToUintPtr(obj) & PAGE_SIZE_MASK));
     ASSERT(PoolManager::GetMmapMemPool()->GetStartAddrPoolForAddr(
-               // CC-OFFNXT(G.FMT.06-CPP) project code style
+               // CC-OFFNXT(G.FMT.06,G.FMT.06-CPP) project code style
                static_cast<void *>(const_cast<ObjectHeader *>(obj))) == static_cast<void *>(memHeader));
     return memHeader->GetMemory() == static_cast<void *>(const_cast<ObjectHeader *>(obj));
 }
