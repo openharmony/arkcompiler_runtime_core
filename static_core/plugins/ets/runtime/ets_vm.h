@@ -360,7 +360,7 @@ public:
     PandaUniquePtr<CallbackPoster> CreateCallbackPoster()
     {
         auto *coro = EtsCoroutine::GetCurrent();
-        if (coro != coro->GetPandaVM()->GetCoroutineManager()->GetMainThread()) {
+        if (!coro->GetPandaVM()->GetCoroutineManager()->IsMainWorker(coro)) {
             return nullptr;
         }
         ASSERT(callbackPosterFactory_ != nullptr);

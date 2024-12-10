@@ -47,20 +47,17 @@ StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, 
 void StackfulCoroutineWorker::AddRunnableCoroutine(Coroutine *newCoro, bool prioritize)
 {
     PushToRunnableQueue(newCoro, prioritize);
+    coroManager_->OnRunnableCoroAdded(this);
 }
 
-bool StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
+void StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
 {
     // precondition: this method is not called by the schedule loop coroutine
 
     Coroutine *waiter = Coroutine::GetCurrent();
     ASSERT(GetCurrentContext()->GetWorker() == this);
     ASSERT(awaitee != nullptr);
-
-    if (awaitee->Happened()) {
-        awaitee->Unlock();
-        return false;
-    }
+    ASSERT(!awaitee->Happened());
 
     waitersLock_.Lock();
     awaitee->Unlock();
@@ -72,8 +69,6 @@ bool StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
     ScopedNativeCodeThread n(Coroutine::GetCurrent());
     // will unlock waiters_lock_ and switch ctx
     BlockCurrentCoroAndScheduleNext();
-
-    return true;
 }
 
 void StackfulCoroutineWorker::UnblockWaiters(CoroutineEvent *blocker)
@@ -84,7 +79,7 @@ void StackfulCoroutineWorker::UnblockWaiters(CoroutineEvent *blocker)
         auto *coro = w->second;
         waiters_.erase(w);
         coro->RequestUnblock();
-        PushToRunnableQueue(coro);
+        AddRunnableCoroutine(coro);
         w = waiters_.find(blocker);
     }
 }

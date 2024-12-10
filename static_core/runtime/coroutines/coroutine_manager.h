@@ -18,6 +18,7 @@
 #include "runtime/coroutines/coroutine_context.h"
 #include "runtime/thread_manager.h"
 #include "runtime/include/runtime.h"
+#include "runtime/include/external_callback_poster.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/coroutine_events.h"
 
@@ -192,6 +193,12 @@ public:
     virtual bool IsCoroutineSwitchDisabled() = 0;
 
     virtual bool IsMainWorker(Coroutine *coro) const = 0;
+
+    /// Set CallbackPoster to post some callbacks outside (e.g. schedule worker in event loop)
+    virtual void SetCallbackPoster([[maybe_unused]] PandaUniquePtr<CallbackPoster> poster) {}
+
+    /// Try to reset CallbackPoster if it is not used anywhere
+    virtual void TryResetCallbackPoster() {}
 
 protected:
     /// Create native coroutine context instance (implementation dependent)

@@ -71,7 +71,8 @@ void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, Corouti
 {
     // Post callback to js env
     auto *jobQueue = coro->GetPandaVM()->GetJobQueue();
-    if (launchMode == CoroutineLaunchMode::MAIN_WORKER && jobQueue != nullptr) {
+    if (launchMode == CoroutineLaunchMode::MAIN_WORKER && jobQueue != nullptr &&
+        coro->GetCoroutineManager()->IsMainWorker(coro)) {
         jobQueue->Post(callback);
         return;
     }

@@ -36,7 +36,7 @@ uv_loop_t *EventLoopCallbackPoster::GetEventLoop()
 EventLoopCallbackPoster::EventLoopCallbackPoster()
 {
     [[maybe_unused]] auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
+    ASSERT(coro->GetCoroutineManager()->IsMainWorker(coro));
     auto loop = GetEventLoop();
     async_ = Runtime::GetCurrent()->GetInternalAllocator()->New<uv_async_t>();
     callbackQueue_ = Runtime::GetCurrent()->GetInternalAllocator()->New<ThreadSafeCallbackQueue>();
@@ -61,7 +61,12 @@ EventLoopCallbackPoster::~EventLoopCallbackPoster()
 void EventLoopCallbackPoster::PostImpl(WrappedCallback &&callback)
 {
     ASSERT(callback != nullptr);
-    PostToEventLoop(std::move(callback));
+    PostToEventLoop([callback = std::move(callback)] {
+        auto *coro = EtsCoroutine::GetCurrent();
+        auto jsEnv = InteropCtx::Current(coro)->GetJsEnvForEventLoopCallbacks();
+        INTEROP_CODE_SCOPE_JS(coro, jsEnv);
+        callback();
+    });
 }
 
 void EventLoopCallbackPoster::PostToEventLoop(WrappedCallback &&callback)
@@ -80,8 +85,10 @@ void EventLoopCallbackPoster::AsyncEventToExecuteCallbacks(uv_async_t *async)
 
 void EventLoopCallbackPoster::ThreadSafeCallbackQueue::PushCallback(WrappedCallback &&callback, uv_async_t *async)
 {
-    os::memory::LockHolder lh(lock_);
-    callbackQueue_.push(std::move(callback));
+    {
+        os::memory::LockHolder lh(lock_);
+        callbackQueue_.push(std::move(callback));
+    }
     ASSERT(async != nullptr);
     [[maybe_unused]] auto uvstatus = uv_async_send(async);
     ASSERT(uvstatus == 0);
@@ -89,12 +96,24 @@ void EventLoopCallbackPoster::ThreadSafeCallbackQueue::PushCallback(WrappedCallb
 
 void EventLoopCallbackPoster::ThreadSafeCallbackQueue::ExecuteAllCallbacks()
 {
-    os::memory::LockHolder lh(lock_);
-    while (!callbackQueue_.empty()) {
-        auto callback = callbackQueue_.front();
-        callback();
-        callbackQueue_.pop();
+    while (!IsEmpty()) {
+        auto localQueue = CallbackQueue {};
+        {
+            os::memory::LockHolder lh(lock_);
+            std::swap(localQueue, callbackQueue_);
+        }
+        while (!localQueue.empty()) {
+            auto callback = std::move(localQueue.front());
+            callback();
+            localQueue.pop();
+        }
     }
+}
+
+bool EventLoopCallbackPoster::ThreadSafeCallbackQueue::IsEmpty()
+{
+    os::memory::LockHolder lh(lock_);
+    return callbackQueue_.empty();
 }
 
 PandaUniquePtr<CallbackPoster> EventLoopCallbackPosterFactoryImpl::CreatePoster()

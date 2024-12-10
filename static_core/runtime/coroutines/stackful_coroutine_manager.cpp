@@ -68,6 +68,7 @@ void StackfulCoroutineManager::CreateWorkers(size_t howMany, Runtime *runtime, P
     auto *mainCo = CreateMainCoroutine(runtime, vm);
     mainCo->GetContext<StackfulCoroutineContext>()->SetWorker(wMain);
     Coroutine::SetCurrent(mainCo);
+    activeCoroutines_ = 1;    // 1 is for MAIN
     activeWorkersCount_ = 1;  // 1 is for MAIN
 
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::CreateWorkers(): waiting for workers startup";
@@ -183,6 +184,7 @@ bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
     if (co->HasManagedEntrypoint()) {
         // profiling: start interval here, end in ctxswitch after finalization request is done
         GetCurrentWorker()->GetPerfStats().StartInterval(CoroutineTimeStats::SCH_ALL);
+        OnCoroBecameNonActive();
     } else {
         // profiling: no need. MAIN and NATIVE EP coros are deleted from the SCHEDULER itself
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::TerminateCoroutine(): terminating "
@@ -305,10 +307,16 @@ void StackfulCoroutineManager::Await(CoroutineEvent *awaitee)
     ASSERT(awaitee != nullptr);
     [[maybe_unused]] auto *waiter = Coroutine::GetCurrent();
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::Await started by " + waiter->GetName();
-    if (!GetCurrentWorker()->WaitForEvent(awaitee)) {
+
+    if (awaitee->Happened()) {
+        awaitee->Unlock();
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::Await finished (no await happened)";
         return;
     }
+
+    OnCoroBecameNonActive();
+
+    GetCurrentWorker()->WaitForEvent(awaitee);
     // NB: at this point the awaitee is likely already deleted
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::Await finished by " + waiter->GetName();
 }
@@ -538,6 +546,7 @@ void StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion()
         programCompletionEvent_->Lock();
         programCompletionLock_.Unlock();
         ScopedManagedCodeThread s(main);  // perf?
+        OnCoroBecameNonActive();
         GetCurrentWorker()->WaitForEvent(programCompletionEvent_);
         LOG(DEBUG, COROUTINES)
             << "StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion(): possibly spurious wakeup from wait...";
@@ -574,6 +583,10 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
             GetCurrentWorker()->GetPerfStats().StartInterval(CoroutineTimeStats::SCH_ALL);
         }
     }
+
+    // Only main coroutine is left
+    ASSERT(activeCoroutines_ == 1);
+    OnCoroBecameNonActive();
 
     LOG(DEBUG, COROUTINES)
         << "StackfulCoroutineManager::MainCoroutineCompleted(): stopping await loop on the main worker";
@@ -614,7 +627,7 @@ StackfulCoroutineWorker *StackfulCoroutineManager::GetCurrentWorker()
 bool StackfulCoroutineManager::IsMainWorker(Coroutine *co) const
 {
     auto *worker = co->GetContext<StackfulCoroutineContext>()->GetWorker();
-    return worker->GetId() == stackful_coroutines::MAIN_WORKER_ID;
+    return worker->IsMainWorker();
 }
 
 bool StackfulCoroutineManager::IsJsMode()
@@ -672,6 +685,71 @@ Coroutine *StackfulCoroutineManager::CreateNativeCoroutine(Runtime *runtime, Pan
 void StackfulCoroutineManager::DestroyNativeCoroutine(Coroutine *co)
 {
     DestroyEntrypointlessCoroutine(co);
+}
+
+void StackfulCoroutineManager::SetCallbackPoster(PandaUniquePtr<CallbackPoster> poster)
+{
+    os::memory::LockHolder l(posterLock_);
+    if (callbackPoster_ != nullptr) {
+        return;
+    }
+    callbackPoster_ = std::move(poster);
+}
+
+void StackfulCoroutineManager::TryResetCallbackPoster()
+{
+    ASSERT(activeCoroutines_ >= 0);
+    PostExternalCallback([this] {
+        // actually we need more complex logic here or
+        // re-creation of the callbackPoster_ in js -> ets call
+        if (IsNoActiveCoroutinesExceptCurrent()) {
+            os::memory::LockHolder l(posterLock_);
+            callbackPoster_.reset();
+            return;
+        }
+    });
+}
+
+void StackfulCoroutineManager::OnRunnableCoroAdded(StackfulCoroutineWorker *receiver)
+{
+    IncrementActiveCoroutines();
+    if (receiver->IsMainWorker()) {
+        PostExternalCallback([this]() { Schedule(); });
+    }
+}
+
+void StackfulCoroutineManager::OnCoroBecameNonActive()
+{
+    DecrementActiveCoroutines();
+    TryResetCallbackPoster();
+}
+
+void StackfulCoroutineManager::PostExternalCallback(std::function<void()> cb)
+{
+    os::memory::LockHolder l(posterLock_);
+    if (callbackPoster_ == nullptr) {
+        return;
+    }
+    callbackPoster_->Post(std::move(cb));
+}
+
+void StackfulCoroutineManager::IncrementActiveCoroutines()
+{
+    activeCoroutines_++;
+}
+
+void StackfulCoroutineManager::DecrementActiveCoroutines()
+{
+    activeCoroutines_--;
+}
+
+bool StackfulCoroutineManager::IsNoActiveCoroutinesExceptCurrent()
+{
+    // acitveCorouitens_ == 1 means that only current or main coroutine is left
+    // acitveCorouitens_ == 0 means that main coroutine is terminating
+    // or all coroutines are blocked (deadlock in managed code happen)
+    ASSERT(activeCoroutines_ >= 0);
+    return activeCoroutines_ <= 1;
 }
 
 }  // namespace ark

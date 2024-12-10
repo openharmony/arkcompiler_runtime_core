@@ -37,9 +37,10 @@ class EventLoopCallbackPoster : public CallbackPoster {
 
         void PushCallback(WrappedCallback &&callback, uv_async_t *async);
         void ExecuteAllCallbacks();
+        bool IsEmpty();
 
     private:
-        os::memory::RecursiveMutex lock_;
+        os::memory::Mutex lock_;
         CallbackQueue callbackQueue_ GUARDED_BY(lock_);
     };
 

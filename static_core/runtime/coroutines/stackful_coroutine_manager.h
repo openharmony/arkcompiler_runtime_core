@@ -91,6 +91,13 @@ public:
 
     bool IsMainWorker(Coroutine *co) const override;
 
+    void SetCallbackPoster(PandaUniquePtr<CallbackPoster> poster) override;
+
+    void TryResetCallbackPoster() override;
+
+    /// Should be called when runnable/running coro is added
+    void OnRunnableCoroAdded(StackfulCoroutineWorker *receiver);
+
 protected:
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
                               unsigned int xorMask) const override;
@@ -151,6 +158,16 @@ private:
     uint8_t *AllocCoroutineStack();
     void FreeCoroutineStack(uint8_t *stack);
 
+    /// Post external callback (e.g. to event loop)
+    void PostExternalCallback(std::function<void()> cb);
+    /// @return true if there is no active coroutines
+    bool IsNoActiveCoroutinesExceptCurrent();
+    /// Increment/decrement active corotuines count
+    void IncrementActiveCoroutines();
+    void DecrementActiveCoroutines();
+    // Should be called when running coro is being blocked or terminated
+    void OnCoroBecameNonActive();
+
     // for thread safety with GC
     mutable os::memory::Mutex coroListLock_;
     // all registered coros
@@ -171,6 +188,8 @@ private:
     size_t coroutineCountLimit_ = 0;
     size_t coroStackSizeBytes_ = 0;
     bool jsMode_ = false;
+    // active coroutines are runnable + running coroutines
+    std::atomic_int32_t activeCoroutines_ = 0;
 
     /**
      * @brief holds pointers to the cached coroutine instances in order to speedup coroutine creation and destruction.
@@ -182,6 +201,10 @@ private:
 
     // stats
     CoroutineStats stats_;
+
+    // event loop poster
+    os::memory::Mutex posterLock_;
+    PandaUniquePtr<CallbackPoster> callbackPoster_ GUARDED_BY(posterLock_);
 };
 
 }  // namespace ark
