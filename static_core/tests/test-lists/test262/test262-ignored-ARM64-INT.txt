@@ -1,2 +1,0 @@
-# #15490 timeout
-built-ins/Array/prototype/reduceRight/15.4.4.22-9-c-ii-7.js
