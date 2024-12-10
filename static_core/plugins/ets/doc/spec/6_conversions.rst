@@ -41,7 +41,6 @@ Otherwise, the expression is *non-standalone*:
 .. code-block-meta:
    skip
 
-
 .. code-block:: typescript
    :linenos:
 
@@ -49,7 +48,6 @@ Otherwise, the expression is *non-standalone*:
 
     function foo(s: string) {}
     foo(expr) // target type of 'expr' is string
-
 
 The type of some expressions cannot be inferred from the expression itself
 (see :ref:`Object Literal` as an example). A :index:`compile-time error` occurs
@@ -118,15 +116,14 @@ also be ``readonly``. Otherwise, a :index:`compile-time error` occurs:
       let writable_array: number [] = [1, 2, 3]
       foo1 (writable_array) // OK, as always safe
 
-
 Contexts can be of the following kinds:
 
 -  :ref:`Assignment-like Contexts` where the expression value is bound to a
    variable;
 
--  :ref:`String Operator Contexts` with ``string`` concatenation (operator ``+``);
+-  :ref:`String Operator Contexts` with ``string`` concatenation (operator '``+``');
 
--  :ref:`Numeric Operator Contexts` with all numeric operators (``+``, ``-``, etc.);
+-  :ref:`Numeric Operator Contexts` with all numeric operators ('``+``', '``-``', etc.);
 
 -  :ref:`Casting Contexts and Conversions`, i.e., the conversion of an
    expression value to a type explicitly specified by a cast expression (see
@@ -234,7 +231,7 @@ The examples are presented below:
       let a: number[] = [str.length, 11]
 
 In all these cases, the expression type either must be equal to the *target
-type* or can be converted to the *target type* by using one of the conversions
+type*, or can be converted to the *target type* by using one of the conversions
 discussed below. Otherwise, a :index:`compile-time error` occurs.
 
 Assignment-like contexts allow using of one of the following:
@@ -291,14 +288,14 @@ String Operator Contexts
     frontend_status: Done
 
 *String context* applies only to a non-*string* operand of the binary operator
-``+`` if the other operand is ``string``.
+'``+``' if the other operand is ``string``.
 
 *String conversion* for a non-``string`` operand is evaluated as follows:
 
 -  The operand of a nullish type that has a nullish value is converted as
    described below:
 
-     - The operand ``null`` is converted to string ``null``.
+     - The operand ``null`` is converted to string ``null``;
      - The operand ``undefined`` is converted to string ``undefined``.
 
 -  An operand of a reference type or ``enum`` type is converted by applying the
@@ -306,16 +303,16 @@ String Operator Contexts
 
 -  An operand of an integer type (see :ref:`Integer Types and Operations`)
    is converted to type ``string`` with a value that represents the operand in
-   the decimal form;
+   the decimal form.
 
 -  An operand of a floating-point type (see :ref:`Floating-Point Types and Operations`)
    is converted to type ``string`` with a value that represents the operand in
-   the decimal form (without the loss of information);
+   the decimal form (without the loss of information).
 
 -  An operand of type ``boolean`` is converted to type ``string`` with the
-   values ``true`` or ``false``;
+   values ``true`` or ``false``.
 
--  An operand of type ``char`` is converted by using :ref:`Character to String Conversions`;
+-  An operand of type ``char`` is converted by using :ref:`Character to String Conversions`.
 
 -  An operand of enumeration type (see :ref:`Enumerations`) is converted to
    type ``string`` with the value of the corresponding enumeration constant
@@ -381,17 +378,17 @@ The type of this operand is assumed to be ``int``.
    string context
    type int
 
-The numeric contexts are actually the forms of the following expressions:
+Numeric contexts actually take the following forms:
 
--  Unary (see :ref:`Unary Expressions`);
--  Multiplicative (see :ref:`Multiplicative Expressions`);
--  Additive (see :ref:`Additive Expressions`);
--  Shift (see :ref:`Shift Expressions`);
--  Relational (see :ref:`Relational Expressions`);
--  Equality (see :ref:`Equality Expressions`);
--  Bitwise and Logical (see :ref:`Bitwise and Logical Expressions`);
--  Conditional-And (see :ref:`Conditional-And Expression`);
--  Conditional-Or (see :ref:`Conditional-Or Expression`).
+-  :ref:`Unary Expressions`;
+-  :ref:`Multiplicative Expressions`;
+-  :ref:`Additive Expressions`;
+-  :ref:`Shift Expressions`;
+-  :ref:`Relational Expressions`;
+-  :ref:`Equality Expressions`;
+-  :ref:`Bitwise and Logical Expressions`;
+-  :ref:`Conditional-And Expression`;
+-  :ref:`Conditional-Or Expression`.
 
 .. index::
    numeric context
@@ -483,7 +480,7 @@ conversion can lose precision or range, resulting in the following:
 
 Double ``NaN`` is converted to float ``NaN``.
 
-Double infinity is converted to same-signed floating-point infinity.
+Double infinity is converted to the same-signed floating-point infinity.
 
 A numeric conversion of a floating-point type operand to target types ``long``
 or ``int`` is performed by the following rules:
@@ -499,7 +496,7 @@ or ``int`` is performed by the following rules:
   *round-toward-zero* mode.
 
 A numeric casting conversion of a floating-point type operand to types
-``short``, ``byte``, or ``char`` is performed in the following two steps:
+``short``, ``byte``, or ``char`` is performed in two steps as follows:
 
 - The casting conversion to ``int`` is performed first (see above);
 - Then, the ``int`` operand is cast to the target type.
@@ -523,7 +520,6 @@ type (or char) ``I`` discards all bits except the *N* lowest ones, where *N* is
 the number of bits used to represent type ``I``. This conversion can lose the
 information on the magnitude of the numeric value. The sign of the resulting
 value can differ from that of the original value.
-
 
 .. index::
    IEEE 754
@@ -605,7 +601,7 @@ Casting Conversions from Type Parameter
 .. meta:
     frontend_status: Done
 
-A *casting conversion from a type parameter* attempts to convert an expression
+*Casting conversion from a type parameter* attempts to convert an expression
 of the type parameter to any reference type (see :ref:`Reference Types`) which
 is to be specified as a target type.
 
@@ -627,7 +623,6 @@ is to be specified as a target type.
 
 |
 
-
 .. _Casting Conversions from Union:
 
 Casting Conversions from Union
@@ -636,7 +631,7 @@ Casting Conversions from Union
 .. meta:
     frontend_status: Done
 
-A *casting conversion from union* converts an expression of union type to one
+*Casting conversion from union* converts an expression of union type to one
 of the types of the union, or to a type that is derived from such one type.
 
 For union type ``U = T``:sub:`1` ``| ... | T``:sub:`N`, the *casting conversion
@@ -650,7 +645,6 @@ A :index:`compile-time error` occurs if target type ``TT`` is not one of
 ``T``:sub:`i`, and not derived from one of ``T``:sub:`i`.
 
 .. code-block-meta:
-
 
 .. code-block:: typescript
    :linenos:
@@ -687,9 +681,9 @@ type of an expression is not the *target type*.
 Another form of *conversion from union* is implicit conversion from union type
 to the target type. The conversion is only possible if each type in a union is
 compatible (see :ref:`Type Compatibility`) with the target type. If so, the
-conversion never causes a runtime error. If at least one type of a union is not
-compatible with the target type, then the conversion causes a
-:index:`compile-time error`:
+conversion never causes a runtime error. The conversion causes a
+:index:`compile-time error` if at least one type of a union is not compatible
+with the target type:
 
 .. code-block-meta:
    expect-cte
@@ -705,7 +699,7 @@ compatible with the target type, then the conversion causes a
     let b: Base = d // OK, as Derived1 and Derived2 are compatible with Base
 
     let x: Double | Base = ...
-    let y: double = x // Compile-time error, as Base cannot be converted into double
+    let y: double = x // Compile-time error, as Base cannot be converted to double
 
 .. index::
    target type
@@ -752,7 +746,7 @@ Primitive Types Conversions
 .. meta:
     frontend_status: Done
 
-A *primitive type conversion* is one of the following:
+*Primitive type conversion* is one of the following:
 
 - :ref:`Widening Primitive Conversions`;
 
@@ -894,13 +888,11 @@ corresponding reference type.
 If the unboxed *target type* is larger than the expression type, then a
 *widening primitive conversion* is performed as the first step of a *boxing
 conversion* of numeric types and type ``char``.
-
 For example, a *boxing conversion* converts *i* of primitive value type ``int``
-into a reference *n* of class type ``Number``:
+to a reference *n* of class type ``Number`` as follows:
 
 .. code-block-meta:
    not-subset
-
 
 .. code-block:: typescript
    :linenos:
@@ -911,9 +903,8 @@ into a reference *n* of class type ``Number``:
     let c: char = 'a'
     let l: Long = c // char -> long  -> Long
 
-These conversions can cause ``OutOfMemoryError`` thrown if the storage
-available for the creation of a new instance of the reference type is
-not sufficient.
+*Boxing conversions* can cause ``OutOfMemoryError`` to be thrown if the storage
+available to create a new instance of the reference type is not sufficient.
 
 .. index::
    widening conversion
@@ -939,13 +930,11 @@ a corresponding primitive type.
 If the *target type* is larger than the unboxed expression type, then a
 *widening primitive conversion* is performed as the second step of
 the *unboxing conversion* of numeric types and type ``char``.
-
 For example, the *unboxing conversion* converts *i* of reference type ``Int``
-into type ``long``:
+to type ``long`` as follows:
 
 .. code-block-meta:
    not-subset
-
 
 .. code-block:: typescript
    :linenos:
@@ -973,18 +962,18 @@ Widening Union Conversions
 .. meta:
     frontend_status: Done
 
-There are three options of *widening union conversion* as follows:
+*Widening union conversion* can be of the following three options:
 
 - Conversion from a union type to a wider union type;
 - Conversion from a non-union type to a union type;
 - Conversion from a union type that consists of literals only to a non-union
   type.
 
-These conversions never cause runtime errors.
+*Widening union conversions* never cause runtime errors.
 
-Union type ``U`` (``U``:sub:`1` ``| ... | U``:sub:`n`) can be converted into a
-different union type ``V`` (``V``:sub:`1` ``| ... | V``:sub:`m`) if the following
-is true after normalization (see :ref:`Union Types Normalization`):
+Union type ``U`` (``U``:sub:`1` ``| ... | U``:sub:`n`) can be converted to a
+different union type ``V`` (``V``:sub:`1` ``| ... | V``:sub:`m`) if after
+normalization (see :ref:`Union Types Normalization`) the following is true:
 
 ..
    lines 724 764  initially was *U*:sub:`1` | ... | *U*:sub:`n` line  725 initially was *V*:sub:`1` | ... | *V*:sub:`m`
@@ -1008,7 +997,6 @@ is true after normalization (see :ref:`Union Types Normalization`):
 
 **Note**. If union type normalization issues a single type or value, then
 this type or value is used instead of the initial set of union types or values.
-
 This concept is illustrated by the example below:
 
 .. code-block:: typescript
@@ -1033,7 +1021,6 @@ This concept is illustrated by the example below:
     u5 = u4 // compile-time error as Base is not compatible with both
        // Derived1 and Derived2
 
-
 Non-union type ``T`` can be converted to union type ``U`` = ``U``:sub:`1` ``| ... | U``:sub:`n`
 if ``T`` is compatible with one of ``U``:sub:`i` types.
 
@@ -1044,7 +1031,7 @@ if ``T`` is compatible with one of ``U``:sub:`i` types.
     u = "aa" // ok
     u = true // compile-time error
 
-Union type ``U`` (``U``:sub:`1` ``| ... | U``:sub:`n`) can be converted into
+Union type ``U`` (``U``:sub:`1` ``| ... | U``:sub:`n`) can be converted to
 non-union type ``T`` if each ``U``:sub:`i` is a literal that can be implicitly
 converted to type ``T``.
 
@@ -1053,7 +1040,6 @@ converted to type ``T``.
 
     let a: "1" | "2" = "1"
     let b: string = a // ok, literals fit type 'string'
-
 
 .. index::
    normalization
@@ -1075,7 +1061,7 @@ Widening Reference Conversions
 .. meta:
     frontend_status: Done
 
-A *widening reference conversion* handles any subtype (see :ref:`Subtyping`) as
+*Widening reference conversion* handles any subtype (see :ref:`Subtyping`) as
 a supertype (see :ref:`Supertyping`). It requires no special action at runtime,
 and never causes an error.
 
@@ -1198,12 +1184,8 @@ Constant String to Character Conversions
 *Constant string to character conversion* converts an expression of type
 ``string`` to type ``char``. The initial type ``string`` expression must be a
 constant expression (see :ref:`Constant Expressions`). The length of this
-expression equals 1.
-
-The resultant ``char`` is the first and only character of the converted
-``string``.
-
-This conversion never causes runtime errors.
+expression equals 1. The resultant ``char`` is the first and only character
+of the converted ``string``. This conversion never causes runtime errors.
 
 .. index::
    character to string conversion
@@ -1230,7 +1212,8 @@ A *function types conversion* is valid if the following conditions are met:
   parameter;
 - Return types are converted by using *covariance* (:ref:`Covariance`).
 
-See :ref:`Type Compatibility` for details.
+Contravariance and covariance are discussed in detail in
+:ref:`Type Compatibility`.
 
 .. index::
    function types conversion
@@ -1261,7 +1244,7 @@ See :ref:`Type Compatibility` for details.
        bb = bd
        /* OK: identical (invariant) parameter types, and compatible return type */
        bb = dd
-       /* Compile-time error: compatible parameter type(covariance), type unsafe */
+       /* Compile-time error: compatible parameter type (covariance), type unsafe */
        db = bd
        /* OK: contravariant parameter types, and compatible return type */
     }
@@ -1271,7 +1254,7 @@ See :ref:`Type Compatibility` for details.
      /* OK: identical (invariant) parameter types, and compatible return type */
 
     let foo2: (p: Base) => Base = (p: Derived): Derived => new Derived()
-     /* Compile-time error: compatible parameter type(covariance), type unsafe */
+     /* Compile-time error: compatible parameter type (covariance), type unsafe */
 
     let foo3: (p: Derived) => Base = (p: Base): Derived => new Derived()
      /* OK: contravariant parameter types, and compatible return type */
@@ -1282,7 +1265,6 @@ See :ref:`Type Compatibility` for details.
     let foo5: (p: Base) => void = (p?: Base): void => {}
      /* Compile-time error: as Base|undefined is not compatible with Base */
 
-
 A *throwing function* type variable can have a *non-throwing function* value.
 
 .. code-block:: typescript
@@ -1290,16 +1272,36 @@ A *throwing function* type variable can have a *non-throwing function* value.
 
     let foo: () => void throws = (): void => {} // OK
 
-
 A :index:`compile-time error` occurs if a *throwing function* value is assigned
 to a *non-throwing function* type variable.
-
 
 .. code-block:: typescript
    :linenos:
 
     let foo: () => void = (): void throws => {} // Compile-time error
 
+In addition a function type with less parameters is compatible with another
+function type with more parameters.
+
+.. code-block:: typescript
+   :linenos:
+
+    let f: (p: number)=> void = ():void => {} // OK
+    f(5)
+
+Worth to mention that overriding is governed by
+:ref:`Override-Compatible Signatures` and example below leads to 
+compile-time error:
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {
+        foo(p: (p: number)=> void) {}
+    }
+    class Derived extends Base {
+        override foo(p: ()=> void) {} // Compile-time error
+    }
 
 .. index::
    throwing function
@@ -1321,7 +1323,7 @@ Tuple Types Conversions
 *Tuple types conversion* is the conversion of one tuple type to another.
 
 Tuple type ``T`` = [``T``:sub:`1`, ``T``:sub:`2`, ``...``, ``T``:sub:`n`] can be
-converted into tuple type ``U`` = [``U``:sub:`1`, ``U``:sub:`2`, ``...``, ``U``:sub:`m`]
+converted to tuple type ``U`` = [``U``:sub:`1`, ``U``:sub:`2`, ``...``, ``U``:sub:`m`]
 if the following conditions are met:
 
 - Tuple types have the same number of elements, thus n == m.
@@ -1330,7 +1332,6 @@ if the following conditions are met:
 .. index::
    tuple type
    conversion
-
 
 |
 
@@ -1344,7 +1345,6 @@ Enumeration to Constants Type Conversions
 
 A value of an *enumeration* type is converted to type ``int``
 if enumeration constants of this type are of type ``int``.
-
 This conversion never causes runtime errors.
 
 .. code-block:: typescript
@@ -1366,7 +1366,6 @@ This conversion never causes runtime errors.
 
 A value of ``enumeration`` type is converted to type ``string`` if enumeration
 constants of this type are of type ``string``.
-
 This conversion never causes runtime errors.
 
 .. code-block:: typescript
@@ -1393,10 +1392,10 @@ Constant to Enumeration Conversions
 .. meta:
     frontend_status: None
 
-A constant value of some integer type is converted to *enumeration* type if
+A constant value of some integer type is converted to *enumeration* type if:
 
--  enumeration constants are of type ``int``.
--  a value is equal to the value of an enumeration constant.
+-  Enumeration constants are of type ``int``;
+-  Value is equal to the value of an enumeration constant.
 
 This conversion never causes runtime errors.
 
@@ -1444,7 +1443,6 @@ The reverse conversion is not possible.
    literal
    conversion
    runtime error
-
 
 .. raw:: pdf
 

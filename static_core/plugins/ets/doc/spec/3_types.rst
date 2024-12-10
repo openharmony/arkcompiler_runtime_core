@@ -82,7 +82,6 @@ Predefined types include the following:
 
      - Boolean type: ``boolean``;
 
-
 -  Built-in reference types: ``object``, ``string``, ``[]`` (``array``),
    ``bigint``, ``void``, ``never``, ``null``, ``undefined``;
 
@@ -142,7 +141,6 @@ of each predefined value type: ``Number``, ``Byte``, ``Short``, ``Int``,
    predefined value
    wrap
 
-
 |
 
 .. _Numeric Types:
@@ -155,7 +153,6 @@ Numeric Types
 
 Integer (see :ref:`Integer Types and Operations`) and floating-point (see
 :ref:`Floating-Point Types and Operations`) types are *numeric types*.
-
 
 |
 
@@ -227,7 +224,6 @@ All |LANG| types are summarized in the following table:
 
                              ``undefined``, ``[]``                                                          
    ========================= ========================= ========================= =========================
-
 
 **Note**. Type ``string`` (see :ref:`Type string`), type ``bigint`` (see
 :ref:`BigInt Type`), literal types (see :ref:`Literal Types`), and all boxed
@@ -451,7 +447,6 @@ interface type. A type reference is valid if its type arguments (see
       // MyType<number> is a type reference  - alias reference
       // A<number> is a type reference - class type reference
 
-
 If a type reference refers to the type by a type alias (see
 :ref:`Type Alias Declaration`), then the type alias is replaced (potentially
 recursively) for a non-aliased type in all cases when dealing with types
@@ -471,7 +466,6 @@ in this document.
    type reference
    type alias
    non-aliased type
-
 
 |
 
@@ -621,7 +615,6 @@ If neither operand is of type ``long``, then:
 -  The operation implementation uses 32-bit precision.
 -  The result of the numerical operator is of type ``int``.
 
-
 If one operand (or neither operand) is of type ``int``, then the numeric
 promotion must be used to widen it first to type ``int``.
 
@@ -736,7 +729,6 @@ discussed below.
    ``string`` with a value represented in the decimal form (without loss
    of information), and then creates a concatenation of the two strings as a
    new ``string``.
-
 
 .. index::
    floating-point type
@@ -972,7 +964,6 @@ The boolean operators are as follows:
    ``false``), and then creates a concatenation of the two strings as a new
    ``string``.
 
-
 The conversion of an integer or floating-point expression *x* to a boolean
 value must follow the *C* language convention: any nonzero value is converted
 to ``true``, and the value of zero is converted to ``false``. In other words,
@@ -993,7 +984,6 @@ as the result of comparison *x != 0*.
    comparison
    conversion
    nonzero value
-
 
 |
 
@@ -1103,7 +1093,6 @@ The operations on references to objects are as follows:
 -  Reference equality operators '``==``' and '``!=``' (see
    :ref:`Reference Equality`);
 -  Conditional expression '``?:``' (see :ref:`Conditional Expressions`).
-
 
 Multiple references to an object are possible.
 
@@ -1253,7 +1242,6 @@ Only three literal types are supported.
         console.log (p1, p2, p3)
     }
 
-
 .. index::
    literal type
    truncation
@@ -1289,7 +1277,6 @@ The supertype for ``string`` literals (see :ref:`String Literals`) is type
        Function result of type string accepts "1" (value) of literal type "1"
     */
 
-
 ``Null`` and ``undefined`` literals (see :ref:`Null Literal` and
 :ref:`Undefined Literal`) have no supertype:
 
@@ -1299,7 +1286,6 @@ The supertype for ``string`` literals (see :ref:`String Literals`) is type
     let o: Object = new Object
     o = null      // compile-time error
     o = undefined // compile-time error
-
 
 .. index::
    literal type
@@ -1334,7 +1320,6 @@ itself:
    literal type
    variable
    supertype
-
 
 |
 
@@ -1440,7 +1425,6 @@ A :index:`compile-time error` occurs if:
 Type ``void`` can be used as type argument that instantiates a generic type
 if a specific value of type argument is irrelevant. In this case, it is a
 synonym for type ``undefined`` (see :ref:`Type undefined`):
-
 
 .. code-block-meta:
    expect-cte:
@@ -1556,7 +1540,6 @@ The examples are presented below:
     y = a[2] // OK, 2 is the index of the last element now
     y = a[3] // Will lead to runtime error - attempt to access non-existing array element
 
-
 A type alias can set a name for an array type (see :ref:`Type Alias Declaration`):
 
 .. code-block:: typescript
@@ -1567,7 +1550,6 @@ A type alias can set a name for an array type (see :ref:`Type Alias Declaration`
 An array as an object is assignable to a variable of type ``Object``:
 
 .. code-block-meta:
-
 
 .. code-block:: typescript
    :linenos:
@@ -1697,7 +1679,6 @@ default value.
        // Types of p1 and p2 are identical
     }
 
-
 All function types are subtypes of special type ``Function`` (see
 :ref:`Type Function`), which in turn is a subtype of ``Object`` (see
 :ref:`Object Class Type`). More details on function types assignability are
@@ -1792,7 +1773,7 @@ Tuple Types
 .. code-block:: abnf
 
     tupleType:
-        '[' (type (',' type)*)? ']'
+        '[' (type (',' type)* ','?)? ']'
         ;
 
 *Tuple type* is a reference type created as a fixed set of other types.
@@ -1885,7 +1866,6 @@ If a *union* type contains more than one numeric type (see
    literal type
    primitive type
 
-
 Examples of incorrect union types are represented below:
 
 .. code-block:: typescript
@@ -1900,7 +1880,6 @@ Examples of incorrect union types are represented below:
    type BadUnion4 = 1 | 2      // Compile-time error
    type BadUnion5 = 1 | 2.0    // Compile-time error
    type BadUnion6 = 1 | 1.0    // Compile-time error
-
 
 Typical usage examples of *union* type are represented below:
 
@@ -1960,7 +1939,6 @@ Different mechanisms can be used to get values of particular types from a
 
     animal.sleep () // Any animal can sleep
 
-
 The following example represents primitive types:
 
 .. code-block:: typescript
@@ -2011,7 +1989,6 @@ values of the *union* type:
        if (car_code == code) { ... }
        // This test is to be resolved during program execution
     }
-
 
 .. index::
    union type
@@ -2178,8 +2155,8 @@ A :index:`compile-time error` occurs otherwise:
     let x = u.n // ok, common field
     u.foo() // ok, common method
     
-    console.log(u.s) // compile-time error, field types are not equal
-    u.goo() // compile-time error, signatures are not equal
+    console.log(u.s) // compile-time error as field types differ
+    u.goo() // compile-time error as signatures differ
 
 .. index::
    union type
@@ -2188,7 +2165,6 @@ A :index:`compile-time error` occurs otherwise:
    method
    accessor
    signature
-
 
 |
 
@@ -2295,9 +2271,6 @@ The following nullish-safe options exist for dealing with nullish type ``T``:
                       'AnyClassOrInterfaceType|null|undefined' is not
                       compatible with Object */
    }
-
-
-
 
 .. index::
    method call
@@ -2441,8 +2414,6 @@ Default values of literal types are literals of such types:
         // Output: string literal null undefined 
     }
 
-
-
 Default values of nullish union types are as follows:
 
 +----------------------+--------------------+
@@ -2469,7 +2440,6 @@ Default values of nullish union types are as follows:
    console.log (a.f1, a.f2, a.f3)
    // Output: null, undefined, undefined
 
-
 .. index::
    number
    byte
@@ -2491,9 +2461,6 @@ Default values of nullish union types are as follows:
    Any mention of IEEE 754 in this Specification refers to the latest
    revision of "754-2019--IEEE Standard for Floating-Point Arithmetic".
 
-
 .. raw:: pdf
 
    PageBreak
-
-

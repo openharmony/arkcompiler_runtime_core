@@ -43,7 +43,6 @@ below), and all their respective *supertypes*. More formally speaking, the set
 is obtained by reflexive and transitive closure over the direct supertype
 relation.
 
-
 .. index::
    subtyping
    subtype
@@ -70,7 +69,6 @@ are **all** of the following:
 
 -  Class ``Object`` if ``C`` is an interface type with no direct superinterfaces
    (see :ref:`Superinterfaces and Subinterfaces`).
-
 
 .. index::
    subclass
@@ -99,7 +97,6 @@ with *n*>0) are **all** of the following:
 
 -  Type ``Object`` if ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`> is a generic
    interface type with no direct superinterfaces.
-
 
 The direct supertype of a type parameter is the type specified as the
 constraint of that type parameter.
@@ -269,7 +266,6 @@ On the contrary, the following code causes compile-time errors:
       override method_tree(p: Derived): Base {}
    }
 
-
 |
 
 .. _Type Compatibility:
@@ -290,7 +286,6 @@ Type ``T``:sub:`1` is compatible with type ``T``:sub:`2` if:
 *Type compatibility* relationship  is asymmetric, i.e., that ``T``:sub:`1`
 is compatible with type ``T``:sub:`2` does not imply that ``T``:sub:`2` is
 compatible with type ``T``:sub:`1`.
-
 
 .. index::
    type compatibility
@@ -616,7 +611,6 @@ Signatures in the following series are *overload-equivalent*:
    (x: number): void
    (y: number): void
 
-
 .. code-block-meta:
 
 .. code-block:: typescript
@@ -624,7 +618,6 @@ Signatures in the following series are *overload-equivalent*:
 
    (x: number): void
    (y: number): number
-
 
 .. code-block-meta:
 
@@ -635,7 +628,6 @@ Signatures in the following series are *overload-equivalent*:
    (y: Number): void
    (x: T): void
 
-
 .. code-block-meta:
 
 .. code-block:: typescript
@@ -644,7 +636,6 @@ Signatures in the following series are *overload-equivalent*:
    class G<T>
    (y: G<Number>): void
    (x: G<T>): void
-
 
 .. code-block-meta:
 
@@ -665,7 +656,6 @@ Signatures in the following series are not *overload-equivalent*:
    (x: number): void
    (y: string): void
 
-
 .. code-block-meta:
 
 .. code-block:: typescript
@@ -675,7 +665,6 @@ Signatures in the following series are not *overload-equivalent*:
    class B extends A { /*body*/}
    (x: A): void
    (y: B): void
-
 
 |
 
@@ -774,7 +763,6 @@ The following rule applies in case of generics:
    class B2 <ContravariantTypeParameter extends Base> extends A2<ContravariantTypeParameter> {}
        // Compile-time error, derived class cannot have non-compatible constraints of type parameters
 
-
 Variances to be used for types that can be override-compatible in different
 positions are represented in the following table:
 
@@ -796,7 +784,6 @@ positions are represented in the following table:
 |6| Type parameter        | Contravariance >:   | Contravariance >: |
 | | constraint            |                     |                   |
 +-+-----------------------+---------------------+-------------------+
-
 
 .. index::
    variance
@@ -1072,7 +1059,6 @@ table:
       static method_1() {} // hiding
       static method_2(p: string) {} // overloading
    }
-
 
 +-------------------------------------+--------------------------------------------+
 | A *constructor* is defined          | All base class constructors are available  |
@@ -1541,6 +1527,38 @@ The examples below represent code with compile-time errors:
 
 |
 
+.. _Initializer Block:
+
+Initializer Block
+***********************
+
+.. meta:
+    frontend_status: None
+
+*Initializer block* is used in classes (see :ref:`Class Initializer`),
+packages (see :ref:`Package Initializer`) , and namespaces (see
+:ref:`Namespace Declarations`) to ensure that all their variables (see
+:ref:`Variable and Constant Declarations`) and fields (see
+:ref:`Field Declarations`) have valid initial values.
+
+The appropriate syntax is presented below:
+
+.. code-block:: abnf
+
+      initializerBlock:
+          'static' block
+          ;
+
+A :index:`compile-time error` occurs if an *initializer block* contains the
+following:
+
+-  A ``return <expression>`` statement (see :ref:`Return Statements`).
+-  A ``throw`` statement (see :ref:`Throw Statements`) without a surrounding
+   ``try`` statement (see :ref:`Try Statements`) to handle the error or
+   exception.
+
+|
+
 .. _Compatibility Features:
 
 Compatibility Features
@@ -1577,7 +1595,6 @@ It affects the semantics of
 -  ``for`` statements (see :ref:`For Statements`);
 
 -  ``if`` statements (see :ref:`if Statements`).
-
 
 **Note:** The extended semantics is to be deprecated in one of the future
 versions of the language.
@@ -1643,7 +1660,6 @@ as follows:
 -  A *conditional-or* expression ``A || B`` is of type ``B`` if the result of
    ``A`` is handled as ``false``. Otherwise, it is of type ``A``.
 
-
 The example below illustrates the way this approach works in practice. Any
 ``nonzero`` number is handled as ``true``. The loop continues until it becomes
 ``zero`` that is handled as ``false``:
@@ -1677,9 +1693,6 @@ The example below illustrates the way this approach works in practice. Any
    conditional-or expression
    loop
 
-
 .. raw:: pdf
 
    PageBreak
-
-

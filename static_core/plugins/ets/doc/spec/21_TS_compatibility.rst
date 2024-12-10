@@ -334,7 +334,6 @@ These situations are illustrated by the examples below:
 .. code-block:: typescript
    :linenos:
 
-
    class Base {
      field: number = 666
    }
@@ -379,7 +378,6 @@ illustrated by the example below:
 .. code-block:: typescript
    :linenos:
 
-
    class Base {
      foo(): Number { return 5 }
    }
@@ -391,37 +389,6 @@ illustrated by the example below:
    overriding
    primitive type
    class type
-
-|
-
-.. _Excessive Arguments:
-
-Excessive Arguments
-*******************
-
-.. meta:
-    frontend_status: None
-
-|TS| allows calling functions stored in function type variables with more
-arguments than were declared. |LANG| allows no such calls:
-
-
-.. code-block:: typescript
-   :linenos:
-
-
-    let foo: (x?: number, y?: string) => void = ():void => {}
-        /* compile-time error in ArkTS as a call with more than zero arguments
-           is invalid while it is OK for the Typescript */
-
-    foo = (p?: number):void => {} 
-        /* compile-time error in ArkTS as a call with two arguments is
-           invalid while it is OK for the Typescript */
-
-.. index::
-   argument
-   function type
-   variable
 
 |
 
@@ -516,10 +483,8 @@ standard, and the following calls produce the result *1* (one):
 - ``Math.pow(1, -Infinity)``,
 - ``Math.pow(-1, -Infinity)``.
 
-
 The function ``Math.pow`` in |TS| conforms to the outdated 2008 version of the
 standard, and the same calls produce ``NaN``.
 
 .. index::
    IEEE 754
-

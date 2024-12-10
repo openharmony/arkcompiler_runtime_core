@@ -301,7 +301,6 @@ A :index:`compile-time error` occurs if:
    non-class type, e.g., of primitive, array, string, enumeration, union,
    function, or utility type.
 
-
 *Class extension* implies that a class inherits all members of the direct
 superclass.
 
@@ -359,7 +358,6 @@ relationship. Class ``A`` can be a subclass of class ``C`` if:
 -  Class ``A`` is a subclass of some class ``B``,  which is in turn a subclass
    of ``C`` (i.e., the definition applies recursively).
 
-
 Class ``C`` is a *superclass* of class ``A`` if ``A`` is its subclass.
 
 .. index::
@@ -416,7 +414,6 @@ For the class declaration ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`> (:math:`n\ge
   are the types specified in the ``implements`` clause of the declaration of
   ``C`` (if there is an ``implements`` clause).
 
-
 For the generic class declaration ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`> (*n* > *0*):
 
 -  *Direct superinterfaces* of the parameterized class type ``C``
@@ -445,7 +442,6 @@ the following:
    (see :ref:`Superinterfaces and Subinterfaces` that defines superinterface
    of an interface); or
 -  Superinterface of the direct superclass of ``C``.
-
 
 A class *implements* all its superinterfaces.
 
@@ -485,7 +481,6 @@ If superinterfaces have default implementations (see
 - All these methods refer to the same implementation, and this default
   implementation is the current class method.
 
-
 Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
@@ -504,7 +499,6 @@ Otherwise, a :index:`compile-time error` occurs.
     class C3 implements I3, I4 {
        // OK, as foo() from I3 and foo() from I4 refer to the same implementation
     }
-
 
 A single method declaration in a class is allowed to implement methods of one
 or more superinterfaces.
@@ -544,7 +538,6 @@ setter, or both. Providing implementation for the property in the form of
 a field is not necessary:
 
 .. code-block-meta:
-
 
 .. code-block:: typescript
    :linenos:
@@ -640,7 +633,6 @@ form as follows:
 
     how_to_write (new StyleClassThree)
 
-
 .. index::
    property
    readonly
@@ -665,7 +657,7 @@ A *class body* can contain declarations of the following members:
 -  Methods,
 -  Accessors,
 -  Constructors, and
--  Static initializers for the class.
+-  Class initializers.
 
 .. code-block:: abnf
 
@@ -703,7 +695,6 @@ The usage of annotations is discussed in :ref:`Using Annotations`.
    interface
    constructor
    class initializer
-   static initializer
    inheritance
    scope
 
@@ -724,7 +715,6 @@ Class members are as follows:
 -  Members declared in a direct superinterface (see
    :ref:`Superinterfaces and Subinterfaces`).
 -  Members declared in the class body (see :ref:`Class Body`).
-
 
 Class members declared ``private`` are not accessible (see :ref:`Accessible`)
 to all subclasses of the class.
@@ -754,7 +744,6 @@ Members can be as follows:
 -  Methods (see :ref:`Method Declarations`), and
 -  Accessors (see :ref:`Accessor Declarations`).
 
-
 A *method* is defined by the following:
 
 #. *Type parameter*, i.e., the declaration of any type parameter of the
@@ -771,7 +760,6 @@ Members can be as follows:
    by using a qualified name notation (see :ref:`Names`) anywhere the class
    name is accessible (see :ref:`Accessible`); and
 -  Non-static, or instance members that belong to any instance of the class.
-
 
 All names in both static and non-static class declaration scopes (see
 :ref:`Scopes`) must be unique, i.e., fields and methods cannot have the
@@ -1039,7 +1027,6 @@ superclasses of the class for they are in fact different fields:
     A {field: 1} 
     B {field: 1, field: "a string"} 
     C {field: 1, field: "a string", field: true} 
-
 
 .. index::
    accessibility
@@ -1483,7 +1470,6 @@ A :index:`compile-time error` occurs if:
 -  A method declaration contains modifiers ``abstract`` or ``static``
    along with the modifier ``override``.
 
-
 If the signature of the overridden method contains parameters with default
 values (see :ref:`Optional Parameters`), then the overriding method always
 uses the default parameter values of the overridden method.
@@ -1633,7 +1619,6 @@ In particular, a :index:`compile-time error` occurs if:
 -  The body of an abstract or native method declaration is a block.
 -  The method declaration is neither abstract nor native, but its body
    is either empty or a semicolon.
-
 
 See :ref:`Return Statements` for the rules that apply to return statements
 in a method body.
@@ -1826,7 +1811,6 @@ accessor for overloading is not allowed:
       get name(): number {  return 100 }  // Compile-time error: getters overloading is not permitted
     }
 
-
 In the process of inheriting and overriding (see :ref:`Overloading and Overriding`),
 accessors behave as methods. The getter parameter type follows the covariance
 pattern, and the setter parameter type follows the contravariance pattern (see
@@ -1874,27 +1858,27 @@ execution is from the top superclass to the current class. Class initializers
 :ref:`Field Initialization`) ensure that all static fields receive their
 initial values before they are used for the first time.
 
+Syntactically *class initializer* is identical to the initializer block and
+reuses its semantics (see :ref:`Initializer Block`).
+
 .. code-block:: abnf
 
-    classInitializer
-        : 'static' block
+    classInitializer:
+        initializerBlock
         ;
 
-A :index:`compile-time error` occurs if a class initializer contains the
-following:
+In addition a :index:`compile-time error` occurs if a class initializer
+contains the following:
 
--  A ``return <expression>`` statement (see :ref:`Return Statements`).
--  A ``throw`` statement (see :ref:`Throw Statements`) without a surrounding
-   ``try`` statement (see :ref:`Try Statements`) to handle the error or exception.
 -  Keywords ``this`` (see :ref:`this Expression`) or ``super`` (see
    :ref:`Method Call Expression` and :ref:`Field Access Expression`), or any
    type of a variable declared outside the class initializer.
 
-
 Restrictions of class initializers’ ability to refer to static fields (even
-those within the scope) are specified in :ref:`Exceptions and Errors Inside Field Initializers`.
-Class initializers cannot throw exceptions as they are effectively
-non-throwing functions (see :ref:`Non-Throwing Functions`).
+those within the scope) are specified in
+:ref:`Exceptions and Errors Inside Field Initializers`. Class initializers
+cannot throw exceptions as they are effectively non-throwing functions (see
+:ref:`Non-Throwing Functions`).
 
 .. index::
    class initializer
@@ -2189,7 +2173,6 @@ The example below represents *primary constructors*:
       }
     }
 
-
 The high-level sequence of a *secondary constructor* body includes the following:
 
 1. Optional arbitrary code that does not use ``this`` or ``super``.
@@ -2273,7 +2256,6 @@ There are two kinds of *explicit constructor call* statements:
    that begin with the keyword ``super``, and can be prefixed with explicit
    type arguments.
 
-
 A :index:`compile-time error` occurs if the constructor body of an explicit
 constructor call statement:
 
@@ -2349,13 +2331,11 @@ performed as follows:
    executed before ``J`` if a non-static field initializer *I* textually
    precedes another non-static field initializer *J*.
 
-
    Non-static field initializers are executed if the superclass constructor
    call:
 
    -  Has an explicit constructor call statement; or
    -  Is implicit.
-
 
    An alternate constructor call does not perform the implicit execution.
 
@@ -2421,7 +2401,6 @@ the superclass:
    class Base {}
    class Derived extends Base {}
 
-
    // Class declarations with default constructors declared implicitly
    class Object {
      constructor () {} // Empty body - as there is no superclass
@@ -2449,8 +2428,6 @@ the superclass:
    class B extends A { constructor () { super () } } // Default constructor added
    // that leads to compile-time error as default constructor is not marked as throws
    // but it calls super() which throws
-
-
 
 |
 
@@ -2484,7 +2461,6 @@ of ``C`` (see :ref:`Constructor Body`).
 If ``C`` defines a static or instance field ``F`` with the same name as that of
 a field accessible from its direct superclass (see :ref:`Accessible`), then ``F``
 hides the inherited field:
-
 
 .. index::
    inheritance
@@ -2526,7 +2502,6 @@ hides the inherited field:
 
    Base.foo()    // this is a call to a static method foo() declared in Base
    Derived.foo() // this is a call to a static method foo() declared in Derived
-
 
 .. index::
    inheritance
@@ -2606,7 +2581,6 @@ function:
       LocalClass.method()
     }
 
-
 The example below represents local classes and interfaces in a class method. The
 algorithm is similar to that in a top-level function. However, the
 surrounding class members are not accessible from local classes (see
@@ -2658,7 +2632,6 @@ surrounding class members are not accessible from local classes (see
       }
     }
 
-
 -------------
 
 .. [1]
@@ -2667,5 +2640,3 @@ surrounding class members are not accessible from local classes (see
 .. raw:: pdf
 
    PageBreak
-
-

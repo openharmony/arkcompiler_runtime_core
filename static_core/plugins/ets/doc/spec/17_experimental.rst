@@ -157,7 +157,6 @@ defining non-exported, i.e., ``internal`` declarations that are not accessible
 In addition, |LANG| supports the *package* initialization semantics that
 makes a *package* even more independent from the environment.
 
-
 .. index::
    package
    construct
@@ -193,7 +192,6 @@ A ``char literal`` represents the following:
 -  A value with a single character; or
 -  A single escape sequence preceded by the characters *single quote* (U+0027)
    and '*c*' (U+0063), and followed by a *single quote* U+0027).
-
 
 .. code-block:: abnf
 
@@ -240,8 +238,8 @@ Character Type and Operations
 | **Type**  | **Type's Set of Values**         | **Corresponding Class Type** |
 +===========+==================================+==============================+
 | ``char``  | Symbols with codes from \U+0000  | *Char*                       |
-|           | to \U+FFFF inclusive, that is,   |                              |
-|           | from *0* to *65,535*             |                              |
+| (32-bits) | to \U+10FFFF (maximum valid      |                              |
+|           | unicode code point) inclusive    |                              |
 +-----------+----------------------------------+------------------------------+
 
 |LANG| provides a number of operators to act on character values as discussed
@@ -366,7 +364,6 @@ Otherwise, a :index:`compile-time error` occurs.
       function foo (size: number) {
          let y = new number[size]  // runtime error
       }
-
 
 A :index:`compile-time error` occurs if ``arrayElelementType`` refers to a
 class that does not contain an accessible (see :ref:`Accessible`) parameterless
@@ -540,7 +537,6 @@ expressions (see :ref:`Indexing Expressions`) is available:
     setClass = setClass[0] // Error - no $_get function available
     setClass[0] = setClass
 
-
 .. index::
    function
    signature
@@ -692,7 +688,6 @@ this code prints out the following:
     "a"
     "b"
     "c"
-
 
 The function ``$_iterator`` is an ordinary function with a compiler-known
 signature. The function can be used like any other function. It can be
@@ -927,7 +922,6 @@ Statements
 
 |
 
-
 .. _For-of Type Annotation:
 
 For-of Type Annotation
@@ -1045,7 +1039,6 @@ A :index:`compile-time error` occurs if:
           // Handle all other errors or exceptions
         }
       }
-
 
 All exceptions that the ``try`` block can throw are caught by the function
 *process*. Special handling is provided for the ``ZeroDivisor`` exception,
@@ -1225,8 +1218,6 @@ interface:
      }
      function foo (instantiation: ITemplate<number>) { ... }
        // Leads to two *overload-equivalent* methods
-
-
 
 If the signatures of two or more methods with the same name are not
 *overload-equivalent* (see :ref:`Overload-Equivalent Signatures`), then the
@@ -1541,6 +1532,9 @@ the method that implements the interface.
 Adding Functionality to Existing Types
 **************************************
 
+.. meta:
+    frontend_status: Partly
+
 |LANG| supports adding functions and accessors to already defined types. The
 usage of functions so added looks the same as if they are methods and accessors
 of these types. The mechanism so used is called :ref:`Functions with Receiver`
@@ -1560,8 +1554,7 @@ Functions with Receiver
 =======================
 
 .. meta:
-    frontend_status: None
-    todo: import/export of them, function with receiver of primitive types or array
+    frontend_status: Done
 
 A *function with receiver* declaration is a top-level declaration
 (see :ref:`Top-Level Declarations`) that looks almost the same as 
@@ -1615,7 +1608,9 @@ called the *receiver type* (see :ref:`Receiver Type`).
 
 If the *receiver type* is a class type, then ``private`` or ``protected``
 members are not accessible (see :ref:`Accessible`) within the body of a
-*function with receiver*. Only ``public`` members can be accessed:
+*function with receiver*. Only ``public`` and  ``internal`` members can be
+accessed, the latter only when *function with receiver* and class type are
+declared in the same compilation unit:
 
 .. index::
    keyword this
@@ -1645,10 +1640,19 @@ members are not accessible (see :ref:`Accessible`) within the body of a
       a.foo() // Ordinary class method is called
       a.bar() // Function with receiver is called
 
-The name of a *function with receiver* cannot be the same as the name of a
-public receiver method or field. Otherwise, a :index:`compile-time error` occurs.
-It also means that a *function with receiver* cannot overload a method
-defined for the receiver type.
+The name of a *function with receiver* cannot be the same as the name of an
+accessible method or field as well as the global function with the only
+explicit first parameter of the reciever type. Otherwise, a
+:index:`compile-time error` occurs. It also means that a *function with
+receiver* cannot overload a method defined for the receiver type or the global
+function with the only explicit first parameter of the reciever type.
+
+.. code-block:: typescript
+   :linenos:
+
+      function foo(this: A) { ... }
+      function foo(param: A) { ... } /* Compile-time error as it is a
+                                        non-distinguishable declaration */
 
 *Function with receiver* can be generic as in the following example:
 
@@ -1715,6 +1719,9 @@ defined in a compilation unit other than the one that defines the receiver type:
 
 Receiver Type
 =============
+
+.. meta:
+    frontend_status: Done
 
 A *receiver type* is the type of the *receiver parameter* in a function,
 function type, and lamdba with receiver. A *receiver type* may be an interface
@@ -1826,7 +1833,6 @@ The type of a *receiver parameter* is called the *receiver type* (see
 
       type FB<T> = (this: B<T>, x: T): void
       type FBS = (this: B<string>, x: string): void
-
 
 The usual rule of function type compatibility (see :ref:`Function Types Conversions`)
 is applied to *function type with receiver*, and parameter names are ignored.
@@ -1971,7 +1977,6 @@ The formal syntax of the *trailing lambda* is presented below:
         arguments block
         ;
 
-
 Currently, no parameter can be specified for the trailing lambda. Otherwise,
 a :index:`compile-time error` occurs.
 
@@ -2020,7 +2025,6 @@ argument (see :ref:`Optional Parameters`).
       // function 'bar' receives last argument as an inline lambda,
       bar(); { console.log ("that is the block code") }
       // function 'bar' is called with 'p' parameter set to 'undefined'
-
 
 .. code-block:: typescript
    :linenos:
@@ -2224,7 +2228,6 @@ it is called. The propagation of an *exception* occurs if:
 -  The enclosed ``try`` statement does not contain a clause that can catch the
    exception.
 
-
 In the example below, the function call is not enclosed in a ``try``
 statement; any exception raised by ``canThrow`` function is propagated:
 
@@ -2242,7 +2245,6 @@ statement; any exception raised by ``canThrow`` function is propagated:
       function propagate1(x: int): int throws {
         return y = canThrow(x) // exception is propagated
       }
-
 
 In the example below, the ``try`` statement can catch only ``this`` exceptions.
 Any exception raised by ``canThrow`` function---except for ``MyException``
@@ -2509,7 +2511,6 @@ method call (see :ref:`Method Call Expression`):
 
       launchExpression:
         'launch' functionCallExpression | methodCallExpression;
-
 
 .. code-block:: typescript
    :linenos:
@@ -2916,7 +2917,6 @@ The wrapper can raise an error if:
    assignment
    assigned value
 
-
 |
 
 .. _DynamicObject Method Call:
@@ -2973,7 +2973,6 @@ The wrapper must raise an error if:
 
 The indexing access expression *D[index]*, where *D* is of type
 ``DynamicObject``, is handled as an indexing access to an underlying object.
-
 
 .. code-block-meta:
 
@@ -3130,7 +3129,7 @@ have the same *package header*:
           ;
 
       packageTopDeclaration:
-          topDeclaration | packageInitializer
+          topDeclaration | initializerBlock
           ;
 
 A :index:`compile-time error` occurs if:
@@ -3221,8 +3220,11 @@ Package Initializer
 
 Among all *package modules* there can be one to contain a code that performs
 initialization actions (e.g., setting initial values for variables across all
-package modules) as described in detail in :ref:`Compilation Unit Initialization`.
-The appropriate syntax is presented below:
+package modules) as described in detail in
+:ref:`Compilation Unit Initialization` and in :ref:`Initializer Block`.
+
+A :index:`compile-time error` occurs if a package contains more than one
+*package initializer*.
 
 .. index::
    package initializer
@@ -3230,16 +3232,6 @@ The appropriate syntax is presented below:
    initialization
    compilation unit
    variable
-   package initializer
-
-.. code-block:: abnf
-
-      packageInitializer:
-          'static' block
-          ;
-
-A :index:`compile-time error` occurs if a package contains more than one
-*package initializer*.
 
 |
 
@@ -3302,7 +3294,6 @@ The two situations are illustrated by the examples below:
         foo("A string") // Call to P2.foo(string)
         foo(3.141592653589) // Call to local foo(double)
       }
-
 
       // Declaration duplication case
       package P1
@@ -3387,7 +3378,6 @@ possibility:
       result = a.foo(void)      // void! => never
       result = b.foo(null)      // null! => never
       result = c.foo(undefined) // undefined! => never
-
 
 .. raw:: pdf
 

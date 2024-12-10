@@ -95,7 +95,6 @@ White spaces include the following:
 
 - Zero-width no-break space (U+FEFF).
 
-
 White spaces improve source code readability and help avoiding ambiguities.
 White spaces are ignored by the syntactic grammar (see :ref:`Grammar Summary`).
 White spaces never occur within a single token, but can occur within a comment.
@@ -145,7 +144,6 @@ separators is considered a single separator.
    line separator character
    paragraph separator character
 
-
 |
 
 .. _Tokens:
@@ -162,7 +160,6 @@ Tokens form the vocabulary of the language. There are four classes of tokens:
 -  :ref:`Keywords`,
 -  :ref:`Operators and Punctuators`, and
 -  :ref:`Literals`.
-
 
 *Token* is the only lexical input element that can act as a terminal symbol
 of the syntactic grammar (see :ref:`Grammar Summary`). In the process of
@@ -377,7 +374,6 @@ otherwise restricted:
 | ``void``      |               |               |               |               |               |
 +---------------+---------------+---------------+---------------+---------------+---------------+
 
-
 See also :ref:`Reserved Names of TS Types`.
 
 4. The following identifiers are also treated as *soft keywords* reserved for
@@ -392,7 +388,6 @@ the future use (or used in |TS|):
 +=======================+=======================+=======================+=======================+
 |      ``keyof``        |       ``is``          |      ``var``          |      ``yield``        |
 +-----------------------+-----------------------+-----------------------+-----------------------+
-
 
 |
 
@@ -489,8 +484,7 @@ Numeric Literals
 .. meta:
     frontend_status: Done
 
-Integer and Floating-Point literals are numeric literals.
-
+Integer and floating-point literals are numeric literals.
 
 |
 
@@ -514,7 +508,6 @@ an exponential part. Integer literals can be written with radices 16
    octal
    binary
    radix
-
 
 .. code-block:: abnf
 
@@ -629,7 +622,6 @@ examples below:
     9223372036854775808 // max(long) + 1
     0xFFFF_FFFF_FFFF_FFFF_0
 
-
 An integer literal in variable and constant declarations can be implicitly
 converted to another numeric type  (see :ref:`Numeric Types`) or type ``char``
 (see :ref:`Type Compatibility with Initializer`). An casting conversion must be
@@ -703,7 +695,6 @@ follows:
 - ``float`` if *float type suffix* is present; or
 - ``double`` otherwise (type ``number`` is an alias to ``double``).
 
-
 A floating-point literal in variable and constant declarations can be implicitly
 converted to type ``float`` (see :ref:`Type Compatibility with Initializer`).
 
@@ -753,7 +744,6 @@ The concept is presented by the examples below:
     1_153n // BigInt literal
     -153n // negative BigInt literal
 
-
 The underscore character '``_``' used between successive digits can be used to
 denote a ``BigInt`` literal and improve readability. Underscore characters in
 such positions do not change the values of literals. However, the underscore
@@ -762,7 +752,6 @@ literal.
 
 Strings that represent numbers or any integer value can be converted to
 ``bigint`` by using built-in functions:
-
 
 .. code-block-meta:
     skip
@@ -794,7 +783,6 @@ are both possible as seen below:
    static method
    decimal
    radix
-
 
 .. _Boolean Literals:
 
@@ -840,12 +828,10 @@ single or double quotes. A special form of string literals is
 If an operator is applied to the literal, then the literal type is replaced
 for ``string`` (see :ref:`Type String`).
 
-
 .. index::
    string literal
    multiline string
    predefined reference type
-
 
 .. code-block:: abnf
 
@@ -887,7 +873,6 @@ some others. An escape sequence always starts with the backslash character
    backslash
    single quote
    double quotes
-
 
 -  ``"`` (double quote, U+0022),
 
@@ -932,7 +917,6 @@ some others. An escape sequence always starts with the backslash character
    vertical tab
    hexadecimal
    Unicode escape sequence
-
 
 The examples are provided below:
 
@@ -986,7 +970,6 @@ Multiline String Literal
         '\\' [\r\n\u2028\u2029]+
         ;
 
-
 The grammar of *embeddedExpression* is described in
 :ref:`String Interpolation Expressions`.
 
@@ -1029,7 +1012,6 @@ represented by the keyword ``null``:
     NullLiteral:
         'null'
         ;
-
 
 The value is typically used for types like ``T | null``
 (see :ref:`Nullish Types`).
@@ -1087,7 +1069,6 @@ or sequence of characters between them is allowed but ignored.
    :linenos:
 
     // This is a line comment
-
 
 *Multiline comments* begin with the sequence of characters '``\*``' (as seen
 in the example below) and end with the first subsequent sequence of characters
@@ -1151,9 +1132,6 @@ syntax productions written in one line, or to avoid ambiguity.
 .. [2]
    https://unicode.org/reports/tr31/
 
-
 .. raw:: pdf
 
    PageBreak
-
-

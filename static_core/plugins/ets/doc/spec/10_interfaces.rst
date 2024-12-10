@@ -261,7 +261,6 @@ If superinterfaces have default implementations (see
 - All these methods refer to the same implementation, and this default
   implementation is the current class method.
 
-
 Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
@@ -280,7 +279,6 @@ Otherwise, a :index:`compile-time error` occurs.
     interface C3 extends I3, I4 {
        // OK, as foo() from I3 and foo() from I4 refer to the same implementation
     }
-
 
 .. index::
    compile-time error
@@ -402,7 +400,6 @@ the following:
 
 If '``?``' is used after the name of the property, then the property type is semantically 
 equivalent to ``type | undefined``.
-
 
 .. index::
    property
@@ -610,5 +607,3 @@ A :index:`compile-time error` occurs if:
 .. raw:: pdf
 
    PageBreak
-
-

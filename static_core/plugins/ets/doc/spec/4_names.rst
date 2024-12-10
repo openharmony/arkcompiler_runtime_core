@@ -84,7 +84,6 @@ tokens), *N* can name the following:
 
 -  A class or interface type variable with ``x`` to name its instance member.
 
-
 .. index::
    name
    entity
@@ -193,11 +192,9 @@ in :ref:`Function and Method Overloading` and
     interface Object {}
     let Array = 666
 
-
     // Functions have the same name but they are distinguishable by signatures
     function foo() {}
     function foo(p: number) {}
-
 
 .. index::
    distinguishable declaration
@@ -388,10 +385,8 @@ of two names overlap, then:
 -  The innermost declaration takes precedence; and
 -  Access to the outer name is not possible.
 
-
 Class, interface, and enum members can only be accessed by applying the dot
 operator '``.``' to an instance. Accessing them otherwise is not possible.
-
 
 .. index::
    name
@@ -425,7 +420,7 @@ follows:
   or interface properties;
 - Function or method name is used to call the function or method;
 - Variable name is used to read or change the value of the variable;
-- Compilation unit name introduced as a result of import with Bind All with
+- Name of a compilation unit introduced as a result of import with Bind All with
   Qualified Access (see :ref:`Bind All with Qualified Access`) is used to deal
   with exported entities.
 
@@ -488,7 +483,6 @@ following:
 
 -  Names for anonymous types (array, function, and union types); or
 -  Alternative names for existing types.
-
 
 Scopes of type aliases are package or module level scopes. Names
 of all type aliases must be unique across all types in the current
@@ -575,7 +569,6 @@ if it is one of the following:
 
     type D = string | Array<D> // ok
 
-
 Any other use causes a :index:`compile-time error`, because the compiler
 does not have enough information about the defined alias:
 
@@ -584,7 +577,6 @@ does not have enough information about the defined alias:
 
     type E = E // compile-time error
     type F = string | E // compile-time error
-
 
 .. index::
    alias
@@ -608,7 +600,6 @@ The same rules apply to a generic type alias defined as
     type A<T> = string | Array<A<T>> // ok
 
     type A<T> = A<T> // compile-time error
-
 
 A :index:`compile-time error` occurs if a generic type alias is used without
 a type argument:
@@ -777,7 +768,6 @@ variables. Otherwise, a :index:`compile-time error` occurs.
      b = this.a // b uses a for its initialization
    }
 
-
 If the type of a variable declaration has the prefix ``readonly``, then the
 type must be of the *array* kind, and the restrictions on its operations
 apply to the variable as described in :ref:`Readonly Parameters`, and in
@@ -787,7 +777,6 @@ non-array type, then a :index:`compile-time error` occurs:
 .. code-block-meta:
    expect-cte:
 
-
 .. code-block:: typescript
    :linenos:
 
@@ -796,7 +785,6 @@ non-array type, then a :index:`compile-time error` occurs:
        x[0] = 666 // compile-time error as array itself is readonly
        console.log (x[0]) // read operation is OK
     }
-
 
 .. index::
    variable declaration
@@ -1231,7 +1219,6 @@ Optional Parameters
         )
         ;
 
-
 The first form contains an expression that specifies a *default value*. It is
 called a *parameter with default value*. The value of the parameter is set
 to the *default value* if the argument corresponding to that parameter is
@@ -1329,7 +1316,6 @@ arbitrary numbers of arguments. *Rest parameters* have the ``spread`` operator
         foo (...p: [undefined, null, Object]) {} // method
     }
 
-
 A :index:`compile-time error` occurs if a rest parameter:
 
 -  Is not the last parameter in a parameter list;
@@ -1369,12 +1355,10 @@ can accept any number of arguments of types that are compatible (see
     sum(1) // returns 1
     sum(1, 2, 3) // returns 6
 
-
 If an argument of array type ``T[]`` is to be passed to a function or a method
 with the rest parameter, then the spread expression (see
 :ref:`Spread Expression`) must be used with the ``spread`` operator '``...``'
 as prefix before the array argument:
-
 
 .. code-block-meta:
 
@@ -1427,12 +1411,10 @@ compatible (see :ref:`Type Compatibility`) with the corresponding ``Ti``:
     sum(1)       // compile-time error: incorrect number of arguments, 1 instead of 3
     sum(1, 2, 3) // returns 6
 
-
 If an argument of tuple type ``[T1, T2, ... Tn]`` is to be passed to a function
 or a method with the rest parameter, then a spread expression (see
 :ref:`Spread Expression`) must have the ``spread`` operator '``...``' as a
 prefix before the tuple argument:
-
 
 .. code-block-meta:
 
@@ -1607,7 +1589,6 @@ The example below represents type inference:
     }
     // That is a compile-time error as there is an execution path with no return
 
-
 If the compiler fails to recognize a particular type inference case, then
 a corresponding :index:`compile-time error` occurs.
 
@@ -1665,7 +1646,6 @@ parameterless, and other two have one parameter each):
     foo("aa")      // ok, call fits 2nd and 3rd signatures
     foo(undefined) // ok, call fits the 3rd signature
 
-
 The call of ``foo()`` is executed as a call of the implementation function
 with the ``undefined`` argument. The call of ``foo(x)`` is executed as a call
 of the implementation function with the ``x`` argument.
@@ -1688,9 +1668,6 @@ If not all overload signatures are either exported or non-exported, then a
    overload signature
    compatibility
 
-
 .. raw:: pdf
 
    PageBreak
-
-
