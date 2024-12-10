@@ -61,6 +61,16 @@ napi_mark_from_object([[maybe_unused]] napi_env env, [[maybe_unused]] napi_ref r
 // NOLINTEND(readability-identifier-naming)
 #endif  // PANDA_JS_ETS_HYBRID_MODE
 
+#ifdef PANDA_TARGET_OHOS
+// NOLINTBEGIN(readability-identifier-naming)
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_register_appstate_callback([[maybe_unused]] napi_env env, [[maybe_unused]] void (*f)(int a1, int64_t a2))
+{
+    return napi_ok;
+}
+// NOLINTEND(readability-identifier-naming)
+#endif  // PANDA_TARGET_OHOS
+
 namespace ark::ets::interop::js {
 
 static NapiImpl gNapiImpl;
