@@ -70,8 +70,8 @@ void EtsPromise::OnPromiseCompletion(EtsCoroutine *coro)
 void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, CoroutineLaunchMode launchMode)
 {
     // Post callback to js env
-    auto *jobQueue = coro->GetPandaVM()->GetJobQueue();
-    if (launchMode == CoroutineLaunchMode::MAIN_WORKER && jobQueue != nullptr &&
+    auto *jobQueue = coro->GetExternalIfaceTable()->GetJobQueue();
+    if ((launchMode == CoroutineLaunchMode::MAIN_WORKER) && (jobQueue != nullptr) &&
         coro->GetCoroutineManager()->IsMainWorker(coro)) {
         jobQueue->Post(callback);
         return;

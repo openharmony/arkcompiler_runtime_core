@@ -96,16 +96,12 @@ public:
         return rpcCallContext_.Execute(lambda, &requester->context_, &context_);
     }
 
-    /// assign this coroutine to a worker thread
-    void SetWorker(StackfulCoroutineWorker *w)
-    {
-        worker_ = w;
-    }
-
     /// get the currently assigned worker thread
     StackfulCoroutineWorker *GetWorker() const
     {
-        return worker_;
+        auto *coro = GetCoroutine();
+        ASSERT(coro != nullptr);
+        return reinterpret_cast<StackfulCoroutineWorker *>(coro->GetWorker());
     }
 
     /// @return current coroutine's affinity bits
@@ -121,6 +117,7 @@ public:
 
 protected:
     void SetStatus(Coroutine::Status newStatus) override;
+    StackfulCoroutineManager *GetManager() const;
 
 private:
     void ThreadProcImpl();
@@ -177,7 +174,6 @@ private:
     size_t stackSizeBytes_ = 0;
     fibers::FiberContext context_;
     Coroutine::Status status_ {Coroutine::Status::CREATED};
-    StackfulCoroutineWorker *worker_ = nullptr;
     stackful_coroutines::AffinityMask affinityMask_ = stackful_coroutines::AFFINITY_MASK_NONE;
 };
 

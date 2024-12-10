@@ -528,8 +528,13 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     // NOTE(vpukhov): forbid "true" ets-field overriding in js-derived class, as it cannot be proxied back
     if (!etsClass->IsFinal()) {
         auto ungroupedMethods = CollectAllPandaMethods(methods.begin(), methods.end());
-        _this->jsproxyWrapper_ =
-            js_proxy::JSProxy::Create(etsClass, {ungroupedMethods.data(), ungroupedMethods.size()});
+        _this->jsproxyWrapper_ = ctx->GetJsProxyInstance(etsClass);
+        if (_this->jsproxyWrapper_ == nullptr) {
+            // NOTE(konstanting): we assume that the method list stays the same for every proxied class
+            _this->jsproxyWrapper_ =
+                js_proxy::JSProxy::Create(etsClass, {ungroupedMethods.data(), ungroupedMethods.size()});
+            ctx->SetJsProxyInstance(etsClass, _this->jsproxyWrapper_);
+        }
     }
 
     napi_value jsCtor {};

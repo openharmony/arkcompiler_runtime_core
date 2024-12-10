@@ -192,10 +192,6 @@ PandaEtsVM::~PandaEtsVM()
     allocator->Delete(stringTable_);
     allocator->Delete(compiler_);
 
-    if (destroyExternalData_) {
-        destroyExternalData_(&externalData_);
-    }
-
     ASSERT(mm_ != nullptr);
     mm_->Finalize();
     mem::MemoryManager::Destroy(mm_);

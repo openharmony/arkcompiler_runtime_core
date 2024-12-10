@@ -31,28 +31,41 @@ void ThreadedCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
         LOG(FATAL, COROUTINES) << "ThreadedCoroutineManager(): JS emulation is not supported!";
         UNREACHABLE();
     }
-    if (config.workersCount > 0) {
-        SetWorkersCount(static_cast<uint32_t>(config.workersCount));
-        LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager(): setting number of coroutine workers to "
-                               << GetWorkersCount();
-    } else {
-        SetWorkersCount(std::thread::hardware_concurrency());
-        LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager(): setting number of coroutine workers to CPU count = "
-                               << GetWorkersCount();
+    // create and activate workers
+    size_t numberOfAvailableCores = std::max(std::thread::hardware_concurrency() / 4ULL, 2ULL);
+    size_t targetNumberOfWorkers = (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO)
+                                       ? numberOfAvailableCores
+                                       : config.workersCount;
+    if (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO) {
+        LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager(): AUTO mode selected, will set number of coroutine "
+                                  "workers to number of CPUs / 4, but not less than 2 = "
+                               << targetNumberOfWorkers;
     }
+    os::memory::LockHolder lock(workersLock_);
+    CreateWorkers(targetNumberOfWorkers, runtime, vm);
+    LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager(): successfully created and activated " << workers_.size()
+                           << " coroutine workers";
+}
+
+uint32_t ThreadedCoroutineManager::GetActiveWorkersCount() const
+{
+    os::memory::LockHolder lkWorkers(workersLock_);
+    return activeWorkersCount_;
+}
+
+void ThreadedCoroutineManager::CreateWorkers(size_t howMany, Runtime *runtime, PandaVM *vm)
+{
+    auto allocator = runtime->GetInternalAllocator();
+    for (size_t id = 0; id < howMany; ++id) {
+        auto *w = allocator->New<CoroutineWorker>(runtime, vm);
+        workers_.push_back(w);
+        ASSERT(workers_[id] == w);
+    }
+    activeWorkersCount_ = howMany;
 
     auto *mainCo = CreateMainCoroutine(runtime, vm);
+    mainCo->SetWorker(workers_[0]);
     Coroutine::SetCurrent(mainCo);
-}
-
-uint32_t ThreadedCoroutineManager::GetWorkersCount() const
-{
-    return workersCount_;
-}
-
-void ThreadedCoroutineManager::SetWorkersCount(uint32_t n)
-{
-    workersCount_ = n;
 }
 
 CoroutineContext *ThreadedCoroutineManager::CreateCoroutineContext([[maybe_unused]] bool coroHasEntrypoint)
@@ -336,6 +349,15 @@ void ThreadedCoroutineManager::ScheduleImpl()
     }
 }
 
+CoroutineWorker *ThreadedCoroutineManager::ChooseWorkerForCoroutine([[maybe_unused]] Coroutine *co)
+{
+    ASSERT(co != nullptr);
+    // Currently this function is a stub: we assign everything to the main worker and hope for the best.
+    // Later on, we will emulate the correct worker selection.
+    os::memory::LockHolder lkWorkers(workersLock_);
+    return workers_[0];
+}
+
 Coroutine *ThreadedCoroutineManager::LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint,
                                                 PandaVector<Value> &&arguments, bool startSuspended)
 {
@@ -344,16 +366,21 @@ Coroutine *ThreadedCoroutineManager::LaunchImpl(CompletionEvent *completionEvent
     PrintRunnableQueue("LaunchImpl begin");
 #endif
     auto coroName = entrypoint->GetFullName();
-    Coroutine *co = CreateCoroutineInstance(completionEvent, entrypoint, std::move(arguments), std::move(coroName));
+    Coroutine *co = CreateCoroutineInstance(completionEvent, entrypoint, std::move(arguments), std::move(coroName),
+                                            Coroutine::Type::MUTATOR);
     Runtime::GetCurrent()->GetNotificationManager()->ThreadStartEvent(co);
     if (co == nullptr) {
         LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::LaunchImpl: failed to create a coroutine!";
         return co;
     }
+    // assign a worker
+    auto *w = ChooseWorkerForCoroutine(co);
+    co->SetWorker(w);
+    // run
     auto *ctx = co->GetContext<ThreadedCoroutineContext>();
     if (startSuspended) {
         ctx->WaitUntilInitialized();
-        if (runningCorosCount_ >= GetWorkersCount()) {
+        if (runningCorosCount_ >= GetActiveWorkersCount()) {
             PushToRunnableQueue(co);
         } else {
             ++runningCorosCount_;
@@ -389,6 +416,16 @@ void ThreadedCoroutineManager::MainCoroutineCompleted()
                                << coroutineCount_ << " coroutines exist...";
     }
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::MainCoroutineCompleted(): await_all() done";
+
+    LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::MainCoroutineCompleted(): deleting workers";
+    {
+        os::memory::LockHolder lkWorkers(workersLock_);
+        for (auto *worker : workers_) {
+            Runtime::GetCurrent()->GetInternalAllocator()->Delete(worker);
+        }
+        workers_.clear();
+    }
+    LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::MainCoroutineCompleted(): DONE";
 }
 
 void ThreadedCoroutineManager::Finalize() {}

@@ -58,7 +58,7 @@ static void InitProxyMethod(Class *cls, Method *src, Method *proxy)
 }
 
 /*static*/
-std::unique_ptr<JSProxy> JSProxy::Create(EtsClass *etsClass, Span<Method *> targetMethods)
+JSProxy *JSProxy::Create(EtsClass *etsClass, Span<Method *> targetMethods)
 {
     Class *cls = etsClass->GetRuntimeClass();
     ASSERT(!IsProxyClass(cls) && !etsClass->IsFinal());
@@ -94,8 +94,7 @@ std::unique_ptr<JSProxy> JSProxy::Create(EtsClass *etsClass, Span<Method *> targ
 
     ASSERT(IsProxyClass(proxyCls));
 
-    // CC-OFFNXT(G.RES.09) private constructor
-    auto jsProxy = std::unique_ptr<JSProxy>(new JSProxy(EtsClass::FromRuntimeClass(proxyCls)));
+    auto jsProxy = Runtime::GetCurrent()->GetInternalAllocator()->New<JSProxy>(EtsClass::FromRuntimeClass(proxyCls));
     return jsProxy;
 }
 

@@ -28,7 +28,7 @@ namespace ark::ets::interop::js::js_proxy {
 
 class JSProxy {
 public:
-    static std::unique_ptr<JSProxy> Create(EtsClass *etsClass, Span<Method *> targetMethods);
+    static JSProxy *Create(EtsClass *etsClass, Span<Method *> targetMethods);
 
     EtsClass *GetProxyClass() const
     {
@@ -54,6 +54,9 @@ private:
     EtsClass *const proxyKlass_ {};
     // NOTE(vpukhov): add flag if original class has final methods or public fields
     // NOTE(vpukhov): must ensure compat-class methods except accessors do not access its private state
+
+    // Allocator calls our private ctor
+    friend class mem::Allocator;
 };
 
 }  // namespace ark::ets::interop::js::js_proxy

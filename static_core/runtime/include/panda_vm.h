@@ -228,7 +228,9 @@ public:
     void IterateOverMarkQueue(const std::function<void(ObjectHeader *)> &visitor);
     void ClearMarkQueue();
 
-    virtual void ClearInteropHandleScopes([[maybe_unused]] Frame *frame) {}
+    // NOTE(konstanting): a potential candidate for moving out of the core part
+    // Cleans up language-specific CFrame resources
+    virtual void CleanupCompiledFrameResources([[maybe_unused]] Frame *frame) {}
 
     virtual bool SupportGCSinglePassCompaction() const
     {

@@ -89,12 +89,27 @@ private:
 
 class ConstStringStorage {
 public:
+    explicit ConstStringStorage(InteropCtx *ctx) : ctx_(ctx) {}
+
     void LoadDynamicCallClass(Class *klass);
 
     template <typename Callback>
     bool EnumerateStrings(size_t startFrom, size_t count, Callback cb);
 
     napi_value GetConstantPool();
+
+    uint32_t AllocateSlotsInStringBuffer(uint32_t count)
+    {
+        // Atomic with relaxed order reason: ordering constraints are not required
+        return qnameBufferSize_.fetch_add(count, std::memory_order_relaxed);
+    }
+
+protected:
+    uint32_t GetStringBufferSize()
+    {
+        // Atomic with relaxed order reason: ordering constraints are not required
+        return qnameBufferSize_.load(std::memory_order_relaxed);
+    }
 
 private:
     napi_value InitBuffer(size_t length);
@@ -104,27 +119,32 @@ private:
     std::vector<napi_value> stringBuffer_ {};
     napi_ref jsStringBufferRef_ {};
     Class *lastLoadedClass_ {};
+    InteropCtx *ctx_ = nullptr;
+    static std::atomic_uint32_t qnameBufferSize_;
 };
 
 class InteropCtx {
 public:
+    NO_COPY_SEMANTIC(InteropCtx);
+    NO_MOVE_SEMANTIC(InteropCtx);
+
     PANDA_PUBLIC_API static void Init(EtsCoroutine *coro, napi_env env);
+    virtual ~InteropCtx();
 
     static void Destroy(void *ptr)
     {
-        reinterpret_cast<InteropCtx *>(ptr)->~InteropCtx();
-    }
-
-    static InteropCtx *Current(PandaEtsVM *etsVm)
-    {
-        static_assert(sizeof(PandaEtsVM::ExternalData) >= sizeof(InteropCtx));
-        static_assert(alignof(PandaEtsVM::ExternalData) >= alignof(InteropCtx));
-        return reinterpret_cast<InteropCtx *>(etsVm->GetExternalData());
+        auto *instance = reinterpret_cast<InteropCtx *>(ptr);
+        Runtime::GetCurrent()->GetInternalAllocator()->Delete(instance);
+        SharedEtsVmState::TryReleaseInstance();
     }
 
     static InteropCtx *Current(EtsCoroutine *coro)
     {
-        return Current(coro->GetPandaVM());
+        // NOTE(konstanting): we may want to optimize this and take the cached pointer from the coroutine
+        // itself. Just need to make sure that the worker's interop context ptr state is coherent
+        // with coroutine's.
+        auto *w = coro->GetWorker();
+        return Current(w);
     }
 
     static InteropCtx *Current()
@@ -134,7 +154,7 @@ public:
 
     PandaEtsVM *GetPandaEtsVM()
     {
-        return PandaEtsVM::FromExternalData(reinterpret_cast<void *>(this));
+        return sharedEtsVmState_->pandaEtsVm;
     }
 
     napi_env GetJSEnv() const
@@ -156,17 +176,18 @@ public:
 
     mem::GlobalObjectStorage *Refstor() const
     {
-        return refstor_;
+        return sharedEtsVmState_->pandaEtsVm->GetGlobalObjectStorage();
     }
 
     ClassLinker *GetClassLinker() const
     {
-        return classLinker_;
+        // NOTE(konstanting): do we REALLY need this method here?
+        return Runtime::GetCurrent()->GetClassLinker();
     }
 
     ClassLinkerContext *LinkerCtx() const
     {
-        return linkerCtx_;
+        return sharedEtsVmState_->linkerCtx;
     }
 
     JSValueStringStorage *GetStringStor()
@@ -275,87 +296,97 @@ public:
 
     Class *GetJSValueClass() const
     {
-        return jsValueClass_;
+        return sharedEtsVmState_->jsValueClass;
     }
 
     Class *GetJSErrorClass() const
     {
-        return jsErrorClass_;
+        return sharedEtsVmState_->jsErrorClass;
     }
 
     Class *GetObjectClass() const
     {
-        return objectClass_;
+        return sharedEtsVmState_->objectClass;
     }
 
     Class *GetStringClass() const
     {
-        return stringClass_;
+        return sharedEtsVmState_->stringClass;
     }
 
     Class *GetBigIntClass() const
     {
-        return bigintClass_;
+        return sharedEtsVmState_->bigintClass;
     }
 
     Class *GetArrayAsListIntClass() const
     {
-        return arrayAsListIntClass_;
+        return sharedEtsVmState_->arrayAsListIntClass;
     }
 
     Class *GetUndefinedClass() const
     {
-        return undefinedClass_;
+        return sharedEtsVmState_->undefinedClass;
     }
 
     Class *GetPromiseClass() const
     {
-        return promiseClass_;
+        return sharedEtsVmState_->promiseClass;
     }
 
     Method *GetPromiseInteropConnectMethod() const
     {
-        return promiseInteropConnectMethod_;
+        return sharedEtsVmState_->promiseInteropConnectMethod;
     }
 
     Class *GetErrorClass() const
     {
-        return errorClass_;
+        return sharedEtsVmState_->errorClass;
     }
 
     Class *GetExceptionClass() const
     {
-        return exceptionClass_;
+        return sharedEtsVmState_->exceptionClass;
     }
 
     Class *GetTypeClass() const
     {
-        return typeClass_;
+        return sharedEtsVmState_->typeClass;
     }
 
     Class *GetBoxIntClass() const
     {
-        return boxIntClass_;
+        return sharedEtsVmState_->boxIntClass;
     }
 
     Class *GetBoxLongClass() const
     {
-        return boxLongClass_;
+        return sharedEtsVmState_->boxLongClass;
     }
 
     Class *GetArrayClass() const
     {
-        return arrayClass_;
+        return sharedEtsVmState_->arrayClass;
     }
 
     Class *GetArrayBufferClass() const
     {
-        return arraybufClass_;
+        return sharedEtsVmState_->arraybufClass;
     }
 
     bool IsFunctionalInterface(Class *klass) const
     {
-        return functionalInterfaces_.count(klass) > 0;
+        return sharedEtsVmState_->functionalInterfaces.count(klass) > 0;
+    }
+
+    js_proxy::JSProxy *GetJsProxyInstance(EtsClass *cls) const
+    {
+        return sharedEtsVmState_->GetJsProxyInstance(cls);
+    }
+
+    void SetJsProxyInstance(EtsClass *cls, js_proxy::JSProxy *proxy)
+    {
+        sharedEtsVmState_->SetJsProxyInstance(cls, proxy);
     }
 
     EtsObject *CreateETSCoreJSError(EtsCoroutine *coro, JSValue *jsvalue);
@@ -419,7 +450,7 @@ public:
 
     ets_proxy::SharedReferenceStorage *GetSharedRefStorage()
     {
-        return etsProxyRefStorage_.get();
+        return sharedEtsVmState_->etsProxyRefStorage.get();
     }
 
     EtsObject *GetUndefinedObject()
@@ -432,78 +463,102 @@ public:
         return &constStringStorage_;
     }
 
-    uint32_t AllocateSlotsInStringBuffer(uint32_t count)
+protected:
+    static InteropCtx *Current(CoroutineWorker *worker)
     {
-        // Atomic with relaxed order reason: ordering constraints are not required
-        return qnameBufferSize_.fetch_add(count, std::memory_order_relaxed);
-    }
-
-    uint32_t GetStringBufferSize()
-    {
-        // Atomic with relaxed order reason: ordering constraints are not required
-        return qnameBufferSize_.load(std::memory_order_relaxed);
-    }
-
-    static InteropCtx *FromConstStringStorage(ConstStringStorage *constStringStorage)
-    {
-        return reinterpret_cast<InteropCtx *>(reinterpret_cast<uintptr_t>(constStringStorage) -
-                                              MEMBER_OFFSET(InteropCtx, constStringStorage_));
+        return worker->GetLocalStorage().Get<CoroutineWorker::DataIdx::INTEROP_CTX_PTR, InteropCtx *>();
     }
 
 private:
     explicit InteropCtx(EtsCoroutine *coro, napi_env env);
-    void CacheClasses(EtsClassLinker *etsClassLinker);
+    void InitJsValueFinalizationRegistry(EtsCoroutine *coro);
+    void InitSharedEtsVmState(PandaEtsVM *vm);
+    void InitExternalInterfaces();
 
+    // per-EtsVM data, should be shared between contexts.
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
+    struct SharedEtsVmState {
+        NO_COPY_SEMANTIC(SharedEtsVmState);
+        NO_MOVE_SEMANTIC(SharedEtsVmState);
+
+        static std::shared_ptr<SharedEtsVmState> GetInstance(PandaEtsVM *vm);
+        // should be called when we would like to check if there are no more InteropCtx instances left
+        static void TryReleaseInstance();
+        ~SharedEtsVmState() = default;
+
+        js_proxy::JSProxy *GetJsProxyInstance(EtsClass *cls) const;
+        void SetJsProxyInstance(EtsClass *cls, js_proxy::JSProxy *proxy);
+
+        // Intentionally leaving these members public to avoid duplicating the InteropCtx's accessors.
+        // Maybe its worth to add some e.g. VmState() method to the InteropCtx and move all its accessors here
+        Class *jsRuntimeClass {};
+        Class *jsValueClass {};
+        Class *jsErrorClass {};
+        Class *objectClass {};
+        Class *stringClass {};
+        Class *bigintClass {};
+        Class *arrayAsListIntClass {};
+        Class *undefinedClass {};
+        Class *promiseClass {};
+        Class *errorClass {};
+        Class *exceptionClass {};
+        Class *typeClass {};
+        Class *arrayClass {};
+        Class *arraybufClass {};
+        Class *boxIntClass {};
+        Class *boxLongClass {};
+        PandaSet<Class *> functionalInterfaces {};
+        Method *promiseInteropConnectMethod = nullptr;
+        PandaEtsVM *pandaEtsVm = nullptr;
+        // NOTE(konstanting): do we REALLY want to cache the classlinker context?
+        ClassLinkerContext *linkerCtx {};
+        PandaUniquePtr<ets_proxy::SharedReferenceStorage> etsProxyRefStorage {};
+
+    private:
+        explicit SharedEtsVmState(PandaEtsVM *vm);
+        void CacheClasses(EtsClassLinker *etsClassLinker);
+
+        // class -> proxy instance, should be accessed under a mutex, hence private
+        PandaMap<EtsClass *, PandaUniquePtr<js_proxy::JSProxy>> jsProxies_;
+
+        static std::shared_ptr<SharedEtsVmState> instance_;
+        static os::memory::Mutex mutex_;
+
+        // Allocator calls our private ctor
+        friend class mem::Allocator;
+    };
+    // NOLINTEND(misc-non-private-member-variables-in-classes)
+    std::shared_ptr<SharedEtsVmState> sharedEtsVmState_;
+
+    // JSVM context
     napi_env jsEnv_ {};
-
     napi_env jsEnvForEventLoopCallbacks_ {};
 
-    mem::GlobalObjectStorage *refstor_ {};
-    ClassLinker *classLinker_ {};
-    ClassLinkerContext *linkerCtx_ {};
+    // various per-JSVM interfaces
+    ExternalIfaceTable interfaceTable_;
+
+    // caches
     JSValueStringStorage jsValueStringStor_ {};
-    ConstStringStorage constStringStorage_ {};
-
+    ConstStringStorage constStringStorage_;
     LocalScopesStorage localScopesStorage_ {};
-    mem::Reference *jsvalueFregistryRef_ {};
-
-    InteropCallStack interopStk_ {};
-
     JSRefConvertCache refconvertCache_;
 
-    Class *jsRuntimeClass_ {};
-    Class *jsValueClass_ {};
-    Class *jsErrorClass_ {};
-    Class *objectClass_ {};
-    Class *stringClass_ {};
-    Class *bigintClass_ {};
-    Class *arrayAsListIntClass_ {};
-    Class *undefinedClass_ {};
-    Class *promiseClass_ {};
-    Class *errorClass_ {};
-    Class *exceptionClass_ {};
-    Class *typeClass_ {};
-    Class *arrayClass_ {};
-    Class *arraybufClass_ {};
-
-    Class *boxIntClass_ {};
-    Class *boxLongClass_ {};
-
-    std::set<Class *> functionalInterfaces_ {};
-
+    // finalization registry for JSValues
+    mem::Reference *jsvalueFregistryRef_ {};
     Method *jsvalueFregistryRegister_ {};
-    Method *promiseInteropConnectMethod_ = nullptr;
 
     // ets_proxy data
     EtsObject *pendingNewInstance_ {};
     ets_proxy::EtsMethodWrappersCache etsMethodWrappersCache_ {};
     ets_proxy::EtsClassWrappersCache etsClassWrappersCache_ {};
-    std::unique_ptr<ets_proxy::SharedReferenceStorage> etsProxyRefStorage_ {};
 
-    // should be one per VM when we will have multiple InteropContexts
-    std::atomic_uint32_t qnameBufferSize_ {};
+    // hybrid call stack support
+    InteropCallStack interopStk_ {};
 
+    // needs to access the jsEnv_ without the nullptr assert
     friend class JSNapiEnvScope;
+    // Allocator calls our protected ctor
+    friend class mem::Allocator;
 };
 
 inline JSRefConvertCache *RefConvertCacheFromInteropCtx(InteropCtx *ctx)

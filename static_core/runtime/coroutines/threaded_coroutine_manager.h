@@ -78,10 +78,14 @@ protected:
     size_t GetCoroutineCount() override;
     size_t GetCoroutineCountLimit() override;
 
-    /// Sets number of coroutines that can execute simultaniously
-    void SetWorkersCount(uint32_t n);
-    /// Returns number of coroutines that can execute simultaniously
-    uint32_t GetWorkersCount() const;
+    /// @return number of coroutines that can execute simultaniously
+    uint32_t GetActiveWorkersCount() const;
+    /**
+     * Create the required number of worker instances. They are required only for the interface
+     * level compatibility with other parts of the runtime.
+     */
+    void CreateWorkers(size_t howMany, Runtime *runtime, PandaVM *vm) REQUIRES(workersLock_);
+    CoroutineWorker *ChooseWorkerForCoroutine([[maybe_unused]] Coroutine *co);
 
 private:
     Coroutine *LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
@@ -119,7 +123,12 @@ private:
     os::memory::ConditionVariable cvAwaitAll_;
     os::memory::Mutex cvAwaitAllMutex_;
 
-    uint32_t workersCount_ = 1;
+    // worker related members
+    PandaVector<CoroutineWorker *> workers_ GUARDED_BY(workersLock_);
+    size_t activeWorkersCount_ GUARDED_BY(workersLock_) = 0;
+    mutable os::memory::RecursiveMutex workersLock_;
+    mutable os::memory::ConditionVariable workersCv_;
+
     // main is running from the very beginning
     std::atomic_uint32_t runningCorosCount_ = 1;
     std::atomic_uint32_t coroutineCount_ = 0;

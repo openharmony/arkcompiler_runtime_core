@@ -17,15 +17,10 @@
 
 #include "runtime/include/histogram-inl.h"
 #include "runtime/include/mem/panda_containers.h"
+#include "runtime/coroutines/utils.h"
 #include <array>
 
 namespace ark {
-
-template <class T>
-constexpr size_t ToIndex(T idx)
-{
-    return static_cast<size_t>(idx);
-}
 
 template <class T>
 constexpr size_t COROUTINE_STATS_ENUM_SIZE = static_cast<size_t>(T::LAST_ID);

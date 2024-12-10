@@ -38,7 +38,7 @@ public:
         co_ = co;
     }
     /// Get linked coroutine instance (contains managed portion of state)
-    Coroutine *GetCoroutine()
+    Coroutine *GetCoroutine() const
     {
         return co_;
     }

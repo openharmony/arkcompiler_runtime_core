@@ -26,7 +26,7 @@ CoroutineManager::CoroutineManager(CoroutineFactory factory) : coFactory_(factor
 Coroutine *CoroutineManager::CreateMainCoroutine(Runtime *runtime, PandaVM *vm)
 {
     CoroutineContext *ctx = CreateCoroutineContext(false);
-    auto *main = coFactory_(runtime, vm, "_main_", ctx, std::nullopt);
+    auto *main = coFactory_(runtime, vm, "_main_", ctx, std::nullopt, Coroutine::Type::MUTATOR);
     ASSERT(main != nullptr);
 
     Coroutine::SetCurrent(main);
@@ -49,7 +49,7 @@ void CoroutineManager::DestroyMainCoroutine()
 }
 
 Coroutine *CoroutineManager::CreateEntrypointlessCoroutine(Runtime *runtime, PandaVM *vm, bool makeCurrent,
-                                                           PandaString name)
+                                                           PandaString name, Coroutine::Type type)
 {
     if (GetCoroutineCount() >= GetCoroutineCountLimit()) {
         // resource limit reached
@@ -60,7 +60,7 @@ Coroutine *CoroutineManager::CreateEntrypointlessCoroutine(Runtime *runtime, Pan
         // do not proceed if we cannot create a context for the new coroutine
         return nullptr;
     }
-    auto *co = coFactory_(runtime, vm, std::move(name), ctx, std::nullopt);
+    auto *co = coFactory_(runtime, vm, std::move(name), ctx, std::nullopt, type);
     ASSERT(co != nullptr);
     co->InitBuffers();
     if (makeCurrent) {
@@ -83,7 +83,8 @@ void CoroutineManager::DestroyEntrypointlessCoroutine(Coroutine *co)
 }
 
 Coroutine *CoroutineManager::CreateCoroutineInstance(CompletionEvent *completionEvent, Method *entrypoint,
-                                                     PandaVector<Value> &&arguments, PandaString name)
+                                                     PandaVector<Value> &&arguments, PandaString name,
+                                                     Coroutine::Type type)
 {
     if (GetCoroutineCount() >= GetCoroutineCountLimit()) {
         // resource limit reached
@@ -97,7 +98,7 @@ Coroutine *CoroutineManager::CreateCoroutineInstance(CompletionEvent *completion
     // assuming that the main coro is already created and Coroutine::GetCurrent is not nullptr
     ASSERT(Coroutine::GetCurrent() != nullptr);
     auto *coro = coFactory_(Runtime::GetCurrent(), Coroutine::GetCurrent()->GetVM(), std::move(name), ctx,
-                            Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)});
+                            Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)}, type);
     return coro;
 }
 

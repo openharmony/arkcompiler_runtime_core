@@ -16,8 +16,8 @@
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/thread_scopes.h"
-#include "runtime/coroutines/coroutine_manager.h"
 #include "runtime/coroutines/stackful_coroutine.h"
+#include "runtime/coroutines/stackful_coroutine_manager.h"
 
 namespace ark {
 
@@ -35,8 +35,7 @@ void StackfulCoroutineContext::AttachToCoroutine(Coroutine *co)
     if (co->HasManagedEntrypoint() || co->HasNativeEntrypoint()) {
         fibers::UpdateContext(&context_, CoroThreadProc, this, stack_, stackSizeBytes_);
     }
-    auto *cm = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
-    cm->RegisterCoroutine(co);
+    co->GetManager()->RegisterCoroutine(co);
     SetStatus(Coroutine::Status::RUNNABLE);
 }
 
@@ -53,13 +52,22 @@ Coroutine::Status StackfulCoroutineContext::GetStatus() const
     return status_;
 }
 
+StackfulCoroutineManager *StackfulCoroutineContext::GetManager() const
+{
+    ASSERT(GetCoroutine() != nullptr);
+    return static_cast<StackfulCoroutineManager *>(GetCoroutine()->GetManager());
+}
+
 void StackfulCoroutineContext::SetStatus(Coroutine::Status newStatus)
 {
+    ASSERT(GetCoroutine() != nullptr);
 #ifndef NDEBUG
     PandaString setter = (Thread::GetCurrent() == nullptr) ? "null" : Coroutine::GetCurrent()->GetName();
     LOG(DEBUG, COROUTINES) << GetCoroutine()->GetName() << ": " << status_ << " -> " << newStatus << " by " << setter;
 #endif
+    Coroutine::Status oldStatus = status_;
     status_ = newStatus;
+    GetCoroutine()->OnStatusChanged(oldStatus, newStatus);
 }
 
 void StackfulCoroutineContext::Destroy()
@@ -73,9 +81,9 @@ void StackfulCoroutineContext::Destroy()
     ASSERT(co->GetStatus() != ThreadStatus::FINISHED);
 
     co->UpdateStatus(ThreadStatus::TERMINATING);
+    SetStatus(Coroutine::Status::TERMINATING);
 
-    auto *threadManager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
-    if (threadManager->TerminateCoroutine(co)) {
+    if (co->GetManager()->TerminateCoroutine(co)) {
         // detach
         Coroutine::SetCurrent(nullptr);
     }
@@ -90,7 +98,6 @@ void StackfulCoroutineContext::CleanUp()
     RetrieveStackInfo(contextStackP, contextStackSize, contextGuardSize);
     ASAN_UNPOISON_MEMORY_REGION(contextStackP, contextStackSize);
 #endif  // PANDA_ASAN_ON
-    worker_ = nullptr;
     affinityMask_ = stackful_coroutines::AFFINITY_MASK_NONE;
 }
 
@@ -102,13 +109,12 @@ void StackfulCoroutineContext::CoroThreadProc(void *ctx)
 
 void StackfulCoroutineContext::ThreadProcImpl()
 {
+    auto *co = GetCoroutine();
     // profiling: the interval was started in the ctxswitch
     GetWorker()->GetPerfStats().FinishInterval(CoroutineTimeStats::CTX_SWITCH);
     // consider changing this to INIT later on...
     GetWorker()->GetPerfStats().StartInterval(CoroutineTimeStats::SCH_ALL);
 
-    auto *co = GetCoroutine();
-    auto *coroutineManager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
     co->NativeCodeBegin();
     SetStatus(Coroutine::Status::RUNNING);
     if (co->HasManagedEntrypoint()) {
@@ -123,7 +129,7 @@ void StackfulCoroutineContext::ThreadProcImpl()
         co->GetNativeEntrypoint()(co->GetNativeEntrypointParam());
     }
     SetStatus(Coroutine::Status::TERMINATING);
-    coroutineManager->TerminateCoroutine(co);
+    co->GetManager()->TerminateCoroutine(co);
 }
 
 bool StackfulCoroutineContext::SwitchTo(StackfulCoroutineContext *target)

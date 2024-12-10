@@ -17,8 +17,10 @@
 
 #include "runtime/coroutines/coroutine_context.h"
 #include "plugins/ets/runtime/ets_napi_env.h"
+#include "plugins/ets/runtime/external_iface_table.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/coroutine_manager.h"
+#include "runtime/coroutines/local_storage.h"
 
 namespace ark::ets {
 class PandaEtsVM;
@@ -29,6 +31,9 @@ public:
     NO_COPY_SEMANTIC(EtsCoroutine);
     NO_MOVE_SEMANTIC(EtsCoroutine);
 
+    enum class DataIdx { INTEROP_CTX_PTR, LAST_ID };
+    using LocalStorage = StaticLocalStorage<DataIdx>;
+
     /**
      * @brief EtsCoroutine factory: the preferrable way to create a coroutine. See CoroutineManager::CoroutineFactory
      * for details.
@@ -38,11 +43,11 @@ public:
      */
     template <class T>
     static T *Create(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *context,
-                     std::optional<EntrypointInfo> &&epInfo = std::nullopt)
+                     std::optional<EntrypointInfo> &&epInfo = std::nullopt, Type type = Type::MUTATOR)
     {
         mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
         auto co = allocator->New<EtsCoroutine>(os::thread::GetCurrentThreadId(), allocator, vm, std::move(name),
-                                               context, std::move(epInfo));
+                                               context, std::move(epInfo), type);
         co->Initialize();
         return co;
     }
@@ -62,6 +67,8 @@ public:
         }
         return nullptr;
     }
+
+    ExternalIfaceTable *GetExternalIfaceTable();
 
     void SetPromiseClass(void *promiseClass)
     {
@@ -98,13 +105,22 @@ public:
     }
 
     void Initialize() override;
+    void CleanUp() override;
     void RequestCompletion(Value returnValue) override;
     void FreeInternalMemory() override;
+
+    LocalStorage &GetLocalStorage()
+    {
+        return localStorage_;
+    }
+
+    // event handlers
+    void OnHostWorkerChanged() override;
 
 protected:
     // we would like everyone to use the factory to create a EtsCoroutine
     explicit EtsCoroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, PandaString name,
-                          CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo);
+                          CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo, Type type);
 
 private:
     panda_file::Type GetReturnType();
@@ -115,6 +131,10 @@ private:
     void *promiseClassPtr_ {nullptr};
 
     ObjectHeader *undefinedObj_ {};
+
+    static ExternalIfaceTable emptyExternalIfaceTable_;
+
+    LocalStorage localStorage_;
 
     // Allocator calls our protected ctor
     friend class mem::Allocator;

@@ -145,7 +145,7 @@ private:
     napi_ref jsBuiltinCtorRef_ {};
     std::function<EtsObject *(InteropCtx *, napi_value, bool)> jsBuiltinMatcher_;
 
-    std::unique_ptr<js_proxy::JSProxy> jsproxyWrapper_ {};
+    js_proxy::JSProxy *jsproxyWrapper_ {};
 
     // NOTE(vpukhov): allocate inplace to reduce memory consumption
     std::unique_ptr<LazyEtsMethodWrapperLink[]> etsMethodWrappers_;  // NOLINT(modernize-avoid-c-arrays)

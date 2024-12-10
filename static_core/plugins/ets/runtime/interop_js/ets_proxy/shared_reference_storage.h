@@ -36,7 +36,7 @@ using SharedReferencePool = ItemsPool<SharedReference, SharedReference::MAX_MARK
 
 class SharedReferenceStorage : private SharedReferencePool {
 public:
-    PANDA_PUBLIC_API static std::unique_ptr<SharedReferenceStorage> Create();
+    PANDA_PUBLIC_API static PandaUniquePtr<SharedReferenceStorage> Create();
     ~SharedReferenceStorage() = default;
 
     static bool HasReference(EtsObject *etsObject)
@@ -73,6 +73,8 @@ private:
     PANDA_PUBLIC_API bool CheckAlive(void *data);
     friend class SharedReference;
     friend class testing::SharedReferenceStorage1GTest;
+    // Allocator calls our protected ctor
+    friend class mem::Allocator;
 };
 
 }  // namespace ark::ets::interop::js::ets_proxy
