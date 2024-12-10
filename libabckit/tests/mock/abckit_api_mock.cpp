@@ -33,14 +33,14 @@ inline AbckitStatus GetLastError()
 inline AbckitFile *OpenAbc(const char *path)
 {
     g_calledFuncs.push(__func__);
-    EXPECT_TRUE(strncmp(path, DEFAULT_PATH, sizeof(DEFAULT_PATH)) == 0);
+    EXPECT_TRUE(strncmp(path, DEFAULT_PATH, DEFAULT_PATH_SIZE) == 0);
     return DEFAULT_FILE;
 }
 
 inline void WriteAbc(AbckitFile *file, const char *path)
 {
     g_calledFuncs.push(__func__);
-    EXPECT_TRUE(strncmp(path, DEFAULT_PATH, sizeof(DEFAULT_PATH)) == 0);
+    EXPECT_TRUE(strncmp(path, DEFAULT_PATH, DEFAULT_PATH_SIZE) == 0);
     EXPECT_TRUE(file == DEFAULT_FILE);
 }
 
