@@ -34,6 +34,9 @@ host_unittest_action("PandaGuardUnitTest") {
   sources = [
     "unittest/guard_args_parser_test.cpp",
     "unittest/guard_context_test.cpp",
+    "unittest/guard_options_test.cpp",
+    "unittest/string_util_test.cpp",
+    "util/test_util.cpp",
   ]
   include_dirs = panda_guard_include_dirs
   configs = panda_guard_test_configs

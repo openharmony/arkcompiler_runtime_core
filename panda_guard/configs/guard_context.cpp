@@ -19,7 +19,7 @@
 #include "guard_args_parser.h"
 
 namespace {
-    const std::string TAG = "[Guard_Context]";
+constexpr std::string_view TAG = "[Guard_Context]";
 }
 
 std::shared_ptr<panda::guard::GuardContext> panda::guard::GuardContext::GetInstance()

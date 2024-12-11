@@ -13,16 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_GUARD_GUARD_DRIVER_H
-#define PANDA_GUARD_GUARD_DRIVER_H
+#ifndef PANDA_GUARD_UTIL_FILE_UTIL_H
+#define PANDA_GUARD_UTIL_FILE_UTIL_H
+
+#include <string>
+#include <vector>
 
 namespace panda::guard {
 
-class GuardDriver {
+class FileUtil {
 public:
-    void Run(int argc, const char **argv);
+    static std::string GetFileContent(const std::string &filePath);
+
+    static std::vector<std::string> GetLineDataFromFile(const std::string &filePath);
+
+    static void WriteFile(const std::string &filePath, const std::string &content);
 };
 
 }  // namespace panda::guard
 
-#endif  // PANDA_GUARD_GUARD_DRIVER_H
+#endif  // PANDA_GUARD_UTIL_FILE_UTIL_H

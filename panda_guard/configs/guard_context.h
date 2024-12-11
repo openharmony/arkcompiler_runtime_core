@@ -19,17 +19,19 @@
 #include <memory>
 
 namespace panda::guard {
-    class GuardContext {
-    public:
-        static std::shared_ptr<GuardContext> GetInstance();
 
-        void Init(int argc, const char **argv);
+class GuardContext {
+public:
+    static std::shared_ptr<GuardContext> GetInstance();
 
-        [[nodiscard]] bool IsDebugMode() const;
+    void Init(int argc, const char **argv);
 
-    private:
-        bool debugMode_ = false;
-    };
-}
+    [[nodiscard]] bool IsDebugMode() const;
 
-#endif //PANDA_GUARD_CONFIGS_GUARD_CONTEXT_H
+private:
+    bool debugMode_ = false;
+};
+
+}  // namespace panda::guard
+
+#endif  // PANDA_GUARD_CONFIGS_GUARD_CONTEXT_H
