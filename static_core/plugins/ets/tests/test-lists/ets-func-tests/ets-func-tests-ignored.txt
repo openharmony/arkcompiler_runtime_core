@@ -215,14 +215,8 @@ spec/05.Generics/issue15380_1.sts
 ### Import-export issues
 ### cannot create runtime (compound tests not supported)
 spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/05.default_import_binding/default_import_binding.sts
-### Issue 19695
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/06.type_binding/type_binding_01.sts
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/06.type_binding/type_binding_02.sts
 ### Issue 19710
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/02.export_type_directives/export_type_directive_01.sts
-#19709
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/06.type_binding/type_binding_03.sts
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/06.type_binding/type_binding_04.sts
 ### Issue 19935
 spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/07.import_path/import_path_03.sts
 spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/non_linux_path_separators.sts

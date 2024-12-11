@@ -16,11 +16,12 @@
 /*---
  desc: 13.03 Import Directives
  name: 13.compilation_units_packages_and_modules/13.03.import_directives/13.03.06.type_binding/type_binding_04
- tags: [negative]
+ files: ["./to_export.sts"]
+ tags:
  ---*/
 
 import {StandardExportedClass as GIT1, ClassForExport as GIT2} from "./to_export.sts"
 
 function main () {
-  let c4 = new GIT2 // compile-time error: cannot create objects of type GIT2
+  let c4 = new GIT2
 }
