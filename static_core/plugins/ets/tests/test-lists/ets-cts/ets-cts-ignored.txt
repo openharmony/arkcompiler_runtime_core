@@ -2251,5 +2251,8 @@
 # 20761 no support for package initializer
 13.compilation_units_packages_and_modules/07.compilation_unit_initialization/package/init_once/test.sts
 
-# 20763 cyclic dependencies don't cause comile-time error
+# 20762 Failed to export enumeration
+13.compilation_units_packages_and_modules/10.export_directives/02.single_export_directive/single_export_8.sts
+
+# 20763 cyclic dependencies don't cause compile-time error
 13.compilation_units_packages_and_modules/07.compilation_unit_initialization/package/cyclic_dependency/pkgA/test.sts
