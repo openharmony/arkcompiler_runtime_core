@@ -18,12 +18,7 @@ std/core/std_core_array_forEach_float_array_func_float.sts
 std/core/std_core_array_forEach_long_array_func_long.sts
 std/core/std_core_array_forEach_short_array_func_short.sts
 ### Issue 11468 end
-### Issue I8PRJS begin
-std/core/std_core_typeduarrays__Uint8Array.sts
-std/core/std_core_typeduarrays__Uint16Array.sts
-std/core/std_core_typeduarrays__Uint32Array.sts
-### Issue I8PRJS end
-### Issue 11474 ###
+
 ### Issue 11544 begin
 std/math/std_math_tan_double.sts
 std/math/std_math_asin_double.sts
@@ -44,10 +39,6 @@ std/math/std_math_clz64_long.sts
 regression/12581_custom_class_Engine_array.sts
 
 ### Union issues
-### literal types not supported yet #19926
-spec/03.types/References_Types/unions/union_assignment_12_01.sts
-spec/03.types/References_Types/unions/union_assignment_12_02.sts
-spec/03.types/References_Types/unions/union_assignment_12_03.sts
 ### undefined not supported yet
 spec/03.types/References_Types/unions/union_generics_03.sts
 ### generics + unions not everything supported yet
@@ -109,8 +100,6 @@ spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-as-name_2.sts
 ### Start enum
 ### Issue 19954
 spec/11.Enumerations/enumCallToStringFromAsyncLambda.sts
-### Issue 19957
-spec/11.Enumerations/enum_trailing_comma_03.sts
 ### Issue 19956
 spec/11.Enumerations/enum_trailing_comma_04.sts
 ### Issue 14654
@@ -384,8 +373,6 @@ spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interf
 ### Issue 19728
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_05.sts
 
-### Issue 19928
-spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_05.sts
 ### End of Overriding
 ### Issue 13952
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload1.sts
@@ -499,22 +486,11 @@ spec/partial_type/partialType_main.sts
 ### Issue 18766 end
 
 ### ES2PANDA_FAIL - fails of negative, compile-only
-### Issue 19676
-spec/07.expressions/7.5.Object_Literal/issue14680.sts
-### Issue 19677
-spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_03.sts
-
-### Issue 20454
-regression/20454_bad_iterator_interface.sts
-### End of Issue 20454
 
 ### Issue 15808
 regression/15588_wrong_readonly_field_return.sts
 ### Issue 15808 end
 
-### Issue 20260
-regression/16169_false_unreachable_statement_after_class.sts
-### Issue 20260 end
 ### Issue 19529 begin
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-0004.sts
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-0007.sts
@@ -543,14 +519,6 @@ spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/t
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0039.sts
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0040.sts
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0041.sts
-spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0086.sts
 ### Issue 19529 end
 # Issue 20687
 spec/05.Generics/tuple_as_generic_args_0030.sts
-
-# Issue 20760
-std/core/IntlNumberFormatRangeInfTest.sts
-
-### Issue 20525 begin
-std/concurrency/AsyncLockTest.sts
-### Issue 20525 end

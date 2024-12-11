@@ -387,7 +387,6 @@
 09.classes/06.method_declarations/02.instanse_methods/instance_method_call.sts
 #19909
 09.classes/06.method_declarations/04.final_methods/final_method_derived_class_call.sts
-09.classes/06.method_declarations/04.final_methods/final_declaration_with_modifiers_positive_0.sts
 09.classes/06.method_declarations/04.final_methods/final_declaration_with_modifiers_positive_1.sts
 09.classes/06.method_declarations/hiding_by_class_methods/hided_method_access_by_cast.sts
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_2.sts
@@ -519,11 +518,6 @@
 13.compilation_units_packages_and_modules/04.import_directives/import_1.sts
 13.compilation_units_packages_and_modules/04.import_directives/import_2.sts
 
-#19909
-13.compilation_units_packages_and_modules/05.standard_library_usage/core_default_import_0.sts
-13.compilation_units_packages_and_modules/05.standard_library_usage/core_default_import_23.sts
-13.compilation_units_packages_and_modules/05.standard_library_usage/core_default_import_25.sts
-
 13.compilation_units_packages_and_modules/08.top-level_declarations/top_level_declarations_11.sts
 17.experimental_features/15.exceptions/01.throwing_functions/lambda_call_with_catch.sts
 17.experimental_features/15.exceptions/01.throwing_functions/lambda_call_with_default_catch.sts
@@ -645,19 +639,7 @@
 # end of 15808
 
 # 20051 Wrong type inferred from a conditional expression with enums
-07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_10.sts
 07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_2.sts
-07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_6.sts
-07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_7.sts
-07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_8.sts
-07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_9.sts
-
-# es2panda fails: panda#15188 es2panda aborts on enum in tuple type
-07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_10.sts
-07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_6.sts
-07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_7.sts
-07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_8.sts
-07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_9.sts
 
 # 20483 es2panda aborts on literal type conversion in field initialization expression
 06.contexts_and_conversions/05.implicit_conversions/14.literal_type_conversions/decl_field/decl-field2_0.sts
@@ -736,12 +718,6 @@
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_18.sts
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_19.sts
 
-# 19596 es2panda aborts on this reference from async method
-17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_38.sts
-
-# 19985 es2panda aborts on using async methods
-17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_17.sts
-
 # es2panda fails: panda#11752
 13.compilation_units_packages_and_modules/11.top-level_statements/block_declaration_10.sts
 13.compilation_units_packages_and_modules/11.top-level_statements/block_declaration_11.sts
@@ -808,20 +784,10 @@
 17.experimental_features/06.statements/01.for-of_type_annotation/for_of_25.sts
 
 # es2panda fails: 7.6.2 Object Literal of Interface Type is not implemented
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_1.sts
 07.expressions/05.object_literal/02.object_literal_of_interface_type/in_10.sts
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_2.sts
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_3.sts
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_4.sts
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_5.sts
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_6.sts
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_7.sts
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_9.sts
-07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex1.sts
 # end of es2panda fails
 
 # 20309 Cannot infer Record value type in spec example
-07.expressions/05.object_literal/03.object_literal_of_record_type/spec_ex2.sts
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_7.sts
 
 # 20328 Unexpected CTE in Record indexing expression: Value is possibly nullish
@@ -1534,20 +1500,9 @@
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_var/decl-var_8.sts
 
 # 13947 Object Literal of Interface Type is not implemented
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_0.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_1.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_11.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_17.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_2.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_20.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_21.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_22.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_3.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_4.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_5.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_6.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_7.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_8.sts
 
 # 18550 [ArkTS frontend] es2panda aborts on implicit number conversion
 06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_const/decl-const_6.sts
@@ -1589,17 +1544,6 @@
 06.contexts_and_conversions/05.implicit_conversions/08.char_to_string_conversion/call-func.sts
 06.contexts_and_conversions/05.implicit_conversions/08.char_to_string_conversion/call-lmbd.sts
 06.contexts_and_conversions/05.implicit_conversions/08.char_to_string_conversion/call-meth.sts
-
-# 11978 casting from Double.MIN_VALUE
-06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_121.sts
-06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_122.sts
-06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_162.sts
-06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_163.sts
-06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_202.sts
-06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_203.sts
-06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_284.sts
-06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_40.sts
-06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_81.sts
 
 # 17110 failed while merging 05.09 dev branch shuttle
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var_6.sts
@@ -1707,13 +1651,10 @@
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_9.sts
 
 # 20336, 20073 es2panda endlessly outputs identical errors in the console until gets killed by timeout
-07.expressions/06.spread_expression/spex_const_0.sts
-07.expressions/06.spread_expression/spex_const_1.sts
 07.expressions/06.spread_expression/spex_const_10.sts
 07.expressions/06.spread_expression/spex_const_11.sts
 07.expressions/06.spread_expression/spex_const_12.sts
 07.expressions/06.spread_expression/spex_const_13.sts
-07.expressions/06.spread_expression/spex_const_14.sts
 07.expressions/06.spread_expression/spex_const_15.sts
 07.expressions/06.spread_expression/spex_const_16.sts
 07.expressions/06.spread_expression/spex_const_17.sts
@@ -1744,10 +1685,7 @@
 
 # 20003, 20046 Fails on spread expression with tuple, tuples in rest parameters not supported
 07.expressions/06.spread_expression/spex_42.sts
-07.expressions/06.spread_expression/spex_44.sts
-07.expressions/06.spread_expression/spex_45.sts
 07.expressions/06.spread_expression/spex_46.sts
-07.expressions/06.spread_expression/spex_48.sts
 07.expressions/06.spread_expression/spex_const_32.sts
 07.expressions/06.spread_expression/spex_const_33.sts
 07.expressions/06.spread_expression/spex_const_34.sts
@@ -1809,54 +1747,16 @@
 
 # 20006 Cannot infer type of array literal containing spread expression of char array
 # 20356 ClassCastError on spread of char array
-07.expressions/06.spread_expression/spex_4.sts
-07.expressions/06.spread_expression/spex_21.sts
-
-# 20008 SegFault on spread expression with floats
-07.expressions/06.spread_expression/spex_5.sts
-07.expressions/06.spread_expression/spex_6.sts
-07.expressions/06.spread_expression/spex_8.sts
-07.expressions/06.spread_expression/spex_9.sts
-
-# 20357 Verifier error when spread of doubles: Bad array element type
-07.expressions/06.spread_expression/spex_10.sts
-
-# 20022 es2panda aborts on spreading array of lambdas
-07.expressions/06.spread_expression/spex_11.sts
-07.expressions/06.spread_expression/spex_func_9.sts
-07.expressions/06.spread_expression/spex_meth_9.sts
 
 # 20024 es2panda fails to infer type of spread expression of enum array
 07.expressions/06.spread_expression/spex_12.sts
 
 # 20358 es2panda aborts on function call in spread expression
-07.expressions/06.spread_expression/spex_18.sts
 07.expressions/06.spread_expression/spex_32.sts
-
-# 20360 Verifier error on 'new' expression in spread expression
-07.expressions/06.spread_expression/spex_19.sts
-07.expressions/06.spread_expression/spex_20.sts
-
-# 20361 SegFault on 'this' expression in spread expression
-07.expressions/06.spread_expression/spex_24.sts
-07.expressions/06.spread_expression/spex_25.sts
 
 # 20362 Class linker error: Cannot find class Lf64[]
 07.expressions/06.spread_expression/spex_26.sts
 07.expressions/06.spread_expression/spex_27.sts
-
-# 20364 SegFault on spread expression with enum array
-
-# 20366 Verifier error 41: Bad accumulator type
-07.expressions/06.spread_expression/spex_func_23.sts
-07.expressions/06.spread_expression/spex_func_24.sts
-07.expressions/06.spread_expression/spex_meth_23.sts
-07.expressions/06.spread_expression/spex_meth_24.sts
-
-# 20369 Verifier error on spread of arrays: Verifier error 8: Bad array element type3
-07.expressions/06.spread_expression/spex_func_26.sts
-07.expressions/06.spread_expression/spex_meth_26.sts
-07.expressions/06.spread_expression/spex_7.sts
 
 # 20371 Unexpected Type Error on string array
 07.expressions/06.spread_expression/spex_func_31.sts
@@ -2016,9 +1916,6 @@
 # 18272 Smart cast fails on lambda expression
 15.semantic_rules/06.type_inference/01.smart_types/un1_15.sts
 15.semantic_rules/06.type_inference/01.smart_types/un1_17.sts
-
-# 20668 Segfault when CTE expected on a call of a nullish type
-15.semantic_rules/06.type_inference/01.smart_types/un1_16.sts
 
 10.interfaces/05.interface_properties/external_interface_with_property_0.sts
 10.interfaces/05.interface_properties/external_interface_with_property_1.sts
@@ -2195,26 +2092,13 @@
 15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_18.sts
 
 # 18550 es2panda aborts on implicit number conversion
-17.experimental_features/03.indexable_types/ind_interface_4.sts
-17.experimental_features/03.indexable_types/ind_interface_5.sts
-17.experimental_features/03.indexable_types/ind_interface_6.sts
 17.experimental_features/03.indexable_types/ind_interface_7.sts
-17.experimental_features/03.indexable_types/ind_class_4.sts
-17.experimental_features/03.indexable_types/ind_class_5.sts
 17.experimental_features/03.indexable_types/ind_class_6.sts
 17.experimental_features/03.indexable_types/ind_class_7.sts
-17.experimental_features/03.indexable_types/ind_interface_12.sts
 17.experimental_features/03.indexable_types/ind_interface_13.sts
 17.experimental_features/03.indexable_types/ind_class_12.sts
 17.experimental_features/03.indexable_types/ind_class_13.sts
-17.experimental_features/03.indexable_types/ind_interface_16.sts
 17.experimental_features/03.indexable_types/ind_class_16.sts
-
-# 18553 Int.MIN_VALUE is interpreted as long
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_cons/call-cons-ident_2.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_func/call-func-ident_2.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_lmbd/call-lmbd-ident_2.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_meth/call-meth-ident_2.sts
 
 # es2panda: #17635: Smart cast problem
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_1.sts
@@ -2317,8 +2201,6 @@
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/interface_args_neg_21.sts
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_10.sts
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_11.sts
-07.expressions/04.array_literal/arr_n_0.sts
-07.expressions/04.array_literal/arr_n_1.sts
 07.expressions/10.method_call_expression/03.step_3_checking_method_modifiers/step3a_n_4.sts
 09.classes/09.constructor_declaration/02.constructor_overload_signatures/constructor_implementation_0.sts
 09.classes/09.constructor_declaration/02.constructor_overload_signatures/constructor_implementation_2.sts
@@ -2464,9 +2346,6 @@
 05.generics/03.utility_types/01.partial_utility_type/partial_type_7.sts
 05.generics/03.utility_types/01.partial_utility_type/partial_type_9.sts
 
-# 20398 partial/required/readonly + extend
-05.generics/03.utility_types/01.partial_utility_type/partial_inherit.sts
-
 # 20486 interface variable is not available
 05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_0.sts
 05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_12.sts
@@ -2480,12 +2359,6 @@
 05.generics/03.utility_types/01.partial_utility_type/type_4.sts
 05.generics/03.utility_types/incorrect_utility_type_1.sts
 
-# 20643 literal type as const assertion
-03.types/08.reference_types/04.literal_types/as_const_0.sts
-03.types/08.reference_types/04.literal_types/as_const_1.sts
-03.types/08.reference_types/04.literal_types/as_const_2.sts
-# end of 20643
-
 # 20774 rest parameter doesn`t work with tuples
 03.types/08.reference_types/04.literal_types/function_literal_type_18.sts
 # end of 20774
@@ -2497,5 +2370,4 @@
 13.compilation_units_packages_and_modules/07.compilation_unit_initialization/package/init_once/test.sts
 
 # 20763 cyclic dependencies don't cause comile-time error
-13.compilation_units_packages_and_modules/07.compilation_unit_initialization/module/cyclic_dependency/test.sts
 13.compilation_units_packages_and_modules/07.compilation_unit_initialization/package/cyclic_dependency/pkgA/test.sts
