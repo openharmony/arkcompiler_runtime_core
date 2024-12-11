@@ -27,3 +27,4 @@
    /8_arkts_std_library
    /9_async_and_concurrency_js_features
    /10_async_and_concurrency_arkts_features
+   /backlog_features_js
