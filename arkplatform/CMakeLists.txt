@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,18 +11,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if (!defined(ark_standalone_build)) {
-  ark_standalone_build = false
-}
+cmake_minimum_required(VERSION 3.10)
 
-if (ark_standalone_build) {
-  import("//arkcompiler/toolchain/build/config/sanitizers/sanitizers.gni")
-  import("$build_root/ark.gni")
-  import("$build_root/config/build_type.gni")
-} else {
-  import("//build/config/components/toolchain/build_type.gni")
-  import("//build/config/sanitizers/sanitizers.gni")
-  import("//build/ohos.gni")
-}
+project(arkplatform)
 
-arkplatform_root = "//arkcompiler/runtime_core/arkplatform"
+set(ARKPLATFORM_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+
+set(ARTPLATFORM_SOURCES
+    hybrid/xgc/xgc.cpp
+)
+
+add_library(arkplatform SHARED ${ARTPLATFORM_SOURCES})
+target_include_directories(arkplatform PUBLIC ${ARKPLATFORM_ROOT})
+
+if(PANDA_WITH_RUNTIME)
+    panda_target_link_libraries(arkruntime_obj arkplatform)
+endif(PANDA_WITH_RUNTIME)

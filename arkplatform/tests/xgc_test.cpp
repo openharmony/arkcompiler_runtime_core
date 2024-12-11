@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ARKPLATFORM_JSNAPI_H
-#define PANDA_ARKPLATFORM_JSNAPI_H
+#include "hybrid/xgc/xgc.h"
 
-#include "ecmascript/napi/include/jsnapi.h"
-#include "ecmascript/napi/include/jsnapi_internals.h"
+#include <gtest/gtest.h>
 
-namespace arkplatform {
+namespace arkplatform::mem::test {
 
-using panda::LocalScope;
-using panda::Local;
-using panda::JSNApi;
-using panda::NumberRef;
-using panda::BooleanRef;
-using panda::JSValueRef;
-using panda::JSValueRefInternals;
-using panda::JSTaggedType;
+TEST(XGCTest, CreateDestroyTest) {
+    auto xgcCreated = XGC::Create();
+    ASSERT_EQ(xgcCreated, true);
+    xgcCreated = XGC::Create();
+    ASSERT_EQ(xgcCreated, false) << "Create singleton XGC class twice";
+    auto *xgc = XGC::GetInstance();
+    ASSERT_NE(xgc, nullptr);
+    auto xgcDestroyed = XGC::Destroy();
+    ASSERT_EQ(xgcDestroyed, true);
+}
 
-} // namespace arkplatform
-
-#endif // PANDA_ARKPLATFORM_JSNAPI_H
+} // namespace arkplatform::mem::test

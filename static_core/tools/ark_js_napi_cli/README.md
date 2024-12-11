@@ -20,3 +20,8 @@ $ vim ./arkcompiler/runtime_core/BUILD.gn
 ```bash
 $ ./build.sh --product-name rk3568 --build-target ark_js_napi_cli
 ```
+
+## How to build in standalone mode
+```bash
+python3 ark.py x64.debug hybrid
+```

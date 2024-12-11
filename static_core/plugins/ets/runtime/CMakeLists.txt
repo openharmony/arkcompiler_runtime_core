@@ -129,6 +129,10 @@ if(PANDA_TARGET_OHOS)
 endif()
 
 if (PANDA_ETS_INTEROP_JS)
+    if (PANDA_JS_ETS_HYBRID_MODE)
+        add_subdirectory(${PANDA_ROOT}/../arkplatform ${PANDA_BINARY_ROOT}/arkplatform)
+        panda_target_compile_definitions(arkruntime_obj PRIVATE PANDA_JS_ETS_HYBRID_MODE)
+    endif(PANDA_JS_ETS_HYBRID_MODE)
     add_subdirectory(interop_js)
 endif()
 
