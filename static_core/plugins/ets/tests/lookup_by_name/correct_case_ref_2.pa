@@ -46,11 +46,16 @@
     return.void
 }
 
-.union_field std.core.Exception bar
-.union_field std.core.NoSuchFieldError baz
+.record $NamedAccessMeta-std-core-Exception {
+    std.core.Exception bar
+}
+
+.record $NamedAccessMeta-std-core-NoSuchFieldError {
+    std.core.NoSuchFieldError baz
+}
 
 .function void test(std.core.Object a0, std.core.Object a1) {
-    ets.ldobj.name.obj a0, baz
+    ets.ldobj.name.obj a0, $NamedAccessMeta-std-core-NoSuchFieldError.baz
     sta.obj v0
     ldobj.v.obj v1, v0, std.core.NoSuchFieldError.message
     lda.str "42"
@@ -61,13 +66,13 @@
     lda.str "44"
     stobj.obj v0, std.core.NoSuchFieldError.message
     lda.obj v0
-    ets.stobj.name.obj a1, bar
+    ets.stobj.name.obj a1, $NamedAccessMeta-std-core-Exception.bar
     return.void
 fail_test:
     lda.str "88"
     stobj.obj v0, std.core.NoSuchFieldError.message
     lda.obj v0
-    ets.stobj.name.obj a1, bar
+    ets.stobj.name.obj a1, $NamedAccessMeta-std-core-Exception.bar
     return.void
 }
 

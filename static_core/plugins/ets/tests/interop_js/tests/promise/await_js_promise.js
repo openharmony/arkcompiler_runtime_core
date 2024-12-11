@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,7 +81,7 @@ function runAwaitTest(name, promiseCreator, promiseResolver) {
 	let etsVm = init();
 	let promise = promiseCreator();
 	// similar to async JS function call. Returns a Promise instance
-	let res = etsVm.call('testAwaitJsPromise', promise);
+	let res = etsVm.call('.testAwaitJsPromise', promise);
 	msg('Called testAwaitJsPromise OK, result:', INFO);
 	msg(res, INFO);
 	if (typeof res !== 'object') {

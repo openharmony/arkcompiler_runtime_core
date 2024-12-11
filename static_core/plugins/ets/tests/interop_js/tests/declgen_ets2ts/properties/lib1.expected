@@ -14,7 +14,11 @@
  */
 
 declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
+let ETSGLOBAL: any = (globalThis as any).Panda.getClass('Llib1/ETSGLOBAL;');
+
+function main(): void { return {} as any; };
+(main as any) = ETSGLOBAL.main;
+
 
 function _$init$_(): void { return {} as any; };
 (_$init$_ as any) = ETSGLOBAL._$init$_;
@@ -26,7 +30,7 @@ class DynPropertiesWrapper {
     public getPropertyExternal(key: string): string { return {} as any; };
     constructor() {};
 };
-(DynPropertiesWrapper as any) = (globalThis as any).Panda.getClass('LDynPropertiesWrapper;');
+(DynPropertiesWrapper as any) = (globalThis as any).Panda.getClass('Llib1/DynPropertiesWrapper;');
 export {DynPropertiesWrapper};
 exports.DynPropertiesWrapper = DynPropertiesWrapper;
 

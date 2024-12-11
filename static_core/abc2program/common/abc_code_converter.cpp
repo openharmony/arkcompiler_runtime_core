@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,11 +49,7 @@ std::string AbcCodeConverter::IDToString(BytecodeInstruction bcIns, panda_file::
         panda_file::FieldDataAccessor fieldAccessor(*file_, id);
 
         auto recordName = keyData_.GetFullRecordNameById(fieldAccessor.GetClassId());
-        if (!panda_file::IsDummyClassName(recordName)) {
-            name << recordName;
-            name << '.';
-        }
-        name << stringTable_->GetStringById(fieldAccessor.GetNameId());
+        name << recordName << "." << stringTable_->GetStringById(fieldAccessor.GetNameId());
     } else if (bcIns.HasFlag(BytecodeInstruction::Flags::LITERALARRAY_ID)) {
         auto index = bcIns.GetId().AsIndex();
         name << "array_" << index;

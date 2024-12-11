@@ -75,7 +75,7 @@ function findMethodByName(ct: InterfaceType, name: string): Method | null {
 function testInterfaceTypeC(): int {
     let ict = (Type.of(new InstanceC()) as ClassType).getInterface(0)
     let iat = ict.getInterface(0)
-    return  test(ict.getName() == "C",                           "InterfaceName: C") +
+    return  test(ict.getName() == "TypeInterfaceTypeTest.C",                     "InterfaceName: C") +
             test(ict.getInterfacesNum() == 1,                   "   1 Interfaces:") +
             test(ict.getInterface(0).equals(iat),               "       A interface") +
             test(ict.getMethodsNum() == 2,                      "   2 Methods:") +
@@ -87,7 +87,7 @@ function testInterfaceTypeD(): int {
     let idt = (Type.of(new InstanceD()) as ClassType).getInterface(0)
     let ibt = idt.getInterface(0)
     let ict = idt.getInterface(1)
-    return test(idt.getName() == "D",                   "InterfaceName: D") +
+    return test(idt.getName() == "TypeInterfaceTypeTest.D",              "InterfaceName: D") +
             test(idt.getInterfacesNum() == 2,           "   2 Interfaces:") +
             test(idt.getInterface(0).equals(ibt),       "       B interface") +
             test(idt.getInterface(1).equals(ict),       "       C interface") +

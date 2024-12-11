@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -149,6 +149,7 @@ TEST_F(Abc2ProgramFunctionsTest, Functions)
         "ETSGLOBAL._cctor_:void;",
         "ETSGLOBAL.bar:f64;std.core.String;",
         "ETSGLOBAL.foo:std.core.String;std.core.String;",
+        "ETSGLOBAL.main:void;",
         "std.core.StringBuilder._ctor_:std.core.StringBuilder;void;",
         "std.core.StringBuilder.append:std.core.StringBuilder;f64;std.core.StringBuilder;",
         "std.core.StringBuilder.append:std.core.StringBuilder;std.core.String;std.core.StringBuilder;",

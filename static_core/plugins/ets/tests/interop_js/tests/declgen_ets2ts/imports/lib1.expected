@@ -14,9 +14,13 @@
  */
 
 declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
+let ETSGLOBAL: any = (globalThis as any).Panda.getClass('Llib1/ETSGLOBAL;');
 
 import { Lib2Class, Lib2Class2, IntAlias } from "./lib2";
+
+function main(): void { return {} as any; };
+(main as any) = ETSGLOBAL.main;
+
 
 function _$init$_(): void { return {} as any; };
 (_$init$_ as any) = ETSGLOBAL._$init$_;
@@ -28,7 +32,7 @@ class C {
     public o2: Lib2Class2 = {} as any;
     public v1: number = {} as any;
 };
-(C as any) = (globalThis as any).Panda.getClass('LC;');
+(C as any) = (globalThis as any).Panda.getClass('Llib1/C;');
 export {C};
 exports.C = C;
 
@@ -36,7 +40,7 @@ class DynObjWrapper {
     public dynObj_: any = {} as any;
     constructor() {};
 };
-(DynObjWrapper as any) = (globalThis as any).Panda.getClass('LDynObjWrapper;');
+(DynObjWrapper as any) = (globalThis as any).Panda.getClass('Llib1/DynObjWrapper;');
 export {DynObjWrapper};
 exports.DynObjWrapper = DynObjWrapper;
 

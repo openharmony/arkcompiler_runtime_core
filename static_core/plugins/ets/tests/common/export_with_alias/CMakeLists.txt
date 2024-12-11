@@ -15,6 +15,14 @@ if (PANDA_TARGET_ARM32)
     return()
 endif()
 
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/selective_binding_with_alias.sts ${CMAKE_CURRENT_BINARY_DIR} export_with_alias_1 EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/a_module.sts)
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/all_binding.sts ${CMAKE_CURRENT_BINARY_DIR} export_with_alias_2 EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/b_module.sts)
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/selective_binding.sts ${CMAKE_CURRENT_BINARY_DIR} export_with_alias_3 EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/c_module.sts)
+run_int_ets_code(export_with_alias_1 ${CMAKE_CURRENT_BINARY_DIR} SOURCES
+                 ${CMAKE_CURRENT_SOURCE_DIR}/selective_binding_with_alias.sts;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/a_module.sts)
+
+run_int_ets_code(export_with_alias_2 ${CMAKE_CURRENT_BINARY_DIR} SOURCES
+                 ${CMAKE_CURRENT_SOURCE_DIR}/all_binding.sts;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/b_module.sts)
+
+run_int_ets_code(export_with_alias_3 ${CMAKE_CURRENT_BINARY_DIR} SOURCES
+                 ${CMAKE_CURRENT_SOURCE_DIR}/selective_binding.sts;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/c_module.sts)

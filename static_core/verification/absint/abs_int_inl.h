@@ -2721,7 +2721,7 @@ public:
             return false;
         }
 
-        // currently all union types are encoded as single one class “$UNION_FIELD_DUMMY_CLASS”
+        // currently all union type named access sites are encoded as “$NamedAccessMeta” class fields
         // at bytecode level, thus we do not have accurate union type info to verify each variables
         // so the current temporary solution would be to skip verification for union types.This
         // actually introduce insecure possibilities here. Accurate verification for union types
@@ -2730,7 +2730,7 @@ public:
         // based on the above,here we skip:
         // 1. checking whether a field existed in the union or not
         // 2. skip checking member access violiations
-        if (ark::panda_file::IsDummyClassName(rawField->GetClass()->GetName())) {
+        if (strstr(utf::Mutf8AsCString(rawField->GetClass()->GetDescriptor()), "$NamedAccessMeta") != nullptr) {
             return true;
         }
 

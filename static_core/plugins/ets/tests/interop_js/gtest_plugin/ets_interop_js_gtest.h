@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 
 #include <fstream>
 #include <sstream>
-#include <regex>
 #include <gtest/gtest.h>
 #include <node_api.h>
 
@@ -66,7 +65,14 @@ public:
     [[nodiscard]] std::optional<R> CallJsMethod(std::string_view fnName, std::string fileName)
     {
         LoadModuleAs(fileName, fileName);
-        return DoCallJsMethod<R>(fnName, {fileName}, jsEnv_);
+        return DoCallJsFunction<R>(fileName, fnName, jsEnv_);
+    }
+
+    // legacy API to work with unnamed packages
+    template <typename R, typename... Args>
+    [[nodiscard]] std::optional<R> CallEtsMethod(std::string_view fnName, Args &&...args)
+    {
+        return DoCallEtsFunction<R>("", fnName, jsEnv_, std::forward<Args>(args)...);
     }
 
     [[nodiscard]] static bool RunJsScript(const std::string &script)
@@ -80,9 +86,9 @@ public:
     }
 
     template <typename R, typename... Args>
-    [[nodiscard]] std::optional<R> CallEtsMethod(std::string_view fnName, Args &&...args)
+    [[nodiscard]] std::optional<R> CallEtsFunction(std::string_view pkg, std::string_view fnName, Args &&...args)
     {
-        return DoCallEtsMethod<R>(fnName, jsEnv_, std::forward<Args>(args)...);
+        return DoCallEtsFunction<R>(pkg, fnName, jsEnv_, std::forward<Args>(args)...);
     }
 
     static napi_env GetJsEnv()
@@ -316,8 +322,8 @@ private:
         return jsObject;
     }
 
-    [[nodiscard]] static bool CallEtsMethodViaJs(napi_env env, napi_value jsFunctionName,
-                                                 const std::initializer_list<napi_value> &napiArgs)
+    [[nodiscard]] static bool CallEtsFunctionViaJs(napi_env env, napi_value jsFunctionName,
+                                                   const std::initializer_list<napi_value> &napiArgs)
     {
         napi_value jsGtestObject = GetJsGtestObject(env);
 
@@ -350,7 +356,8 @@ private:
     }
 
     template <typename R, typename... Args>
-    [[nodiscard]] static std::optional<R> DoCallEtsMethod(std::string_view fnName, napi_env env, Args &&...args)
+    [[nodiscard]] static std::optional<R> DoCallEtsFunction(std::string_view package, std::string_view fnName,
+                                                            napi_env env, Args &&...args)
     {
         [[maybe_unused]] napi_status status;
 
@@ -358,8 +365,9 @@ private:
         napi_value jsGtestObject = GetJsGtestObject(env);
 
         // Set globalThis.gtest.functionName
+        std::string qualifiedName = std::string(package) + '.' + fnName.data();
         napi_value jsFunctionName;
-        status = napi_create_string_utf8(env, fnName.data(), fnName.length(), &jsFunctionName);
+        status = napi_create_string_utf8(env, qualifiedName.data(), qualifiedName.length(), &jsFunctionName);
         ASSERT(status == napi_ok);
         status = napi_set_named_property(env, jsGtestObject, "functionName", jsFunctionName);
         ASSERT(status == napi_ok);
@@ -377,7 +385,7 @@ private:
         status = napi_set_named_property(env, jsGtestObject, "args", jsArgs);
         ASSERT(status == napi_ok);
 
-        auto res = CallEtsMethodViaJs(env, jsFunctionName, napiArgs);
+        auto res = CallEtsFunctionViaJs(env, jsFunctionName, napiArgs);
         if (!res) {
             return std::nullopt;
         }
@@ -388,9 +396,10 @@ private:
         ASSERT(status == napi_ok);
         return GetRetValue<R>(env, jsRetValue);
     }
+
     template <typename R, typename... Args>
-    [[nodiscard]] static std::optional<R> DoCallJsMethod(std::string_view fnName, std::string_view modName,
-                                                         napi_env env)
+    [[nodiscard]] static std::optional<R> DoCallJsFunction(std::string_view modName, std::string_view fnName,
+                                                           napi_env env)
     {
         napi_value calledFn;
         napi_value arg;
@@ -413,6 +422,7 @@ private:
         ASSERT(status == napi_ok);
         return GetRetValue<R>(env, returnVal);
     }
+
     friend class JsEnvAccessor;
     static napi_env jsEnv_;
 

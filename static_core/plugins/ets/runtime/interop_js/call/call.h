@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_CALL_H
 
 #include <node_api.h>
+#include "include/mem/panda_string.h"
 #include "utils/expected.h"
 #include "utils/span.h"
 #include "libpandabase/mem/mem.h"
@@ -42,7 +43,7 @@ PANDA_PUBLIC_API napi_value CallETSInstance(EtsCoroutine *coro, InteropCtx *ctx,
                                             Span<napi_value> jsargv, EtsObject *thisObj);
 PANDA_PUBLIC_API napi_value CallETSStatic(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv);
 
-PANDA_PUBLIC_API Expected<Method *, char const *> ResolveEntryPoint(InteropCtx *ctx, std::string_view entryPoint);
+PANDA_PUBLIC_API Expected<Method *, PandaString> ResolveEntryPoint(InteropCtx *ctx, std::string_view entryPoint);
 uint8_t JSRuntimeInitJSCallClass();
 uint8_t JSRuntimeInitJSNewClass();
 

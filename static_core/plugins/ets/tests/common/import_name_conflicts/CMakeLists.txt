@@ -15,5 +15,7 @@ if (PANDA_TARGET_ARM32)
     return()
 endif()
 
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/main.sts ${CMAKE_CURRENT_BINARY_DIR} import_name_conflicts EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/imported_module_1.sts;${CMAKE_CURRENT_SOURCE_DIR}/imported_module_2.sts
-)
+run_int_ets_code(import_name_conflicts ${CMAKE_CURRENT_BINARY_DIR} SOURCES
+                 ${CMAKE_CURRENT_SOURCE_DIR}/main.sts;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/imported_module_1.sts;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/imported_module_2.sts)

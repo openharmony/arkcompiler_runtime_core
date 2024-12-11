@@ -15,4 +15,6 @@ if (PANDA_TARGET_ARM32)
     return()
 endif()
 
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/sourceA.sts ${CMAKE_CURRENT_BINARY_DIR} single_export EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/sourceB.sts)
+run_int_ets_code(single_export ${CMAKE_CURRENT_BINARY_DIR} SOURCES
+                 ${CMAKE_CURRENT_SOURCE_DIR}/sourceA.sts;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/sourceB.sts)

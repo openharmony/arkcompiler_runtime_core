@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -292,7 +292,7 @@ static bool InitExports()
     ark::ScopedManagedCodeThread sj(thread);
 
     for (const auto &[name, impl] : G_IMPLS) {
-        if (!ark::ets::BindNative("LETSGLOBAL;", name.data(), impl)) {
+        if (!ark::ets::BindNative("Lbouncing_peas_unit_native/ETSGLOBAL;", name.data(), impl)) {
             return false;
         }
     }
@@ -320,7 +320,7 @@ TEST(EtsVMConfing, PeasINT)
 
     ASSERT_TRUE(ark::ets::CreateRuntime(stdlibAbc, pathAbc, false, false));
     EXPECT_TRUE(InitExports());
-    auto res = ark::ets::ExecuteMain();
+    auto res = ark::ets::ExecuteModule("bouncing_peas_unit_native");
     EXPECT_TRUE(res.first == true);
     EXPECT_TRUE(res.second == 0);
     ASSERT_TRUE(ark::ets::DestroyRuntime());
@@ -345,7 +345,7 @@ TEST(EtsVMConfing, PeasJIT)
 
     ASSERT_TRUE(ark::ets::CreateRuntime(stdlibAbc, pathAbc, true, false));
     EXPECT_TRUE(InitExports());
-    auto res = ark::ets::ExecuteMain();
+    auto res = ark::ets::ExecuteModule("bouncing_peas_unit_native");
     EXPECT_TRUE(res.first == true);
     EXPECT_TRUE(res.second == 0);
     ASSERT_TRUE(ark::ets::DestroyRuntime());
@@ -377,7 +377,7 @@ TEST(EtsVMConfing, PeasAOT)
 
     ASSERT_TRUE(ark::ets::CreateRuntime(stdlibAbc, pathAbc, false, true));
     EXPECT_TRUE(InitExports());
-    auto res = ark::ets::ExecuteMain();
+    auto res = ark::ets::ExecuteModule("bouncing_peas_unit_native");
     EXPECT_TRUE(res.first == true);
     EXPECT_TRUE(res.second == 0);
     ASSERT_TRUE(ark::ets::DestroyRuntime());
@@ -413,7 +413,7 @@ TEST(EtsVMConfing, PeasLLVMAOT)
 
     ASSERT_TRUE(ark::ets::CreateRuntime(stdlibAbc, pathAbc, false, true));
     EXPECT_TRUE(InitExports());
-    auto res = ark::ets::ExecuteMain();
+    auto res = ark::ets::ExecuteModule("bouncing_peas_unit_native");
     EXPECT_TRUE(res.first == true);
     EXPECT_TRUE(res.second == 0);
     ASSERT_TRUE(ark::ets::DestroyRuntime());

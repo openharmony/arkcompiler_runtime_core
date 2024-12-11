@@ -42,7 +42,7 @@ panda_target_link_libraries(sampler_asm_test arkruntime)
 panda_target_include_directories(sampler_asm_test PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/napi)
 add_custom_target(sampler_asm_test_suite COMMENT "Running signal alternate stack sampler test")
 
-set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=sts --opt-level=0)
+set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=sts --ets-unnamed --opt-level=0)
 
 set(RUNTIME_ARGUMENTS
     --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc

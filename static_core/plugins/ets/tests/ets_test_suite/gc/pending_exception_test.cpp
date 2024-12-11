@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,7 +53,7 @@ DEATH_TEST_P(PendingEtsExceptionTest, MovingGcException)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-    const std::string mainFunc = "ETSGLOBAL::main";
+    const std::string mainFunc = "pending_exception_gc_test.ETSGLOBAL::main";
     const std::string fileName = "pending_exception_gc_test.abc";
     EXPECT_EXIT(Runtime::GetCurrent()->ExecutePandaFile(fileName.c_str(), mainFunc.c_str(), {}),
                 testing::ExitedWithCode(1), "");

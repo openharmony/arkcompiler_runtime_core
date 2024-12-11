@@ -13,27 +13,25 @@
  * limitations under the License.
  */
 
-import { Error as EsError, AssertionError as EsAssertionError } from "escompat"
-
 const RESULT_SUCCESS = 0
 const RESULT_FAILURE = 1
 
 class Assertions {
   static assertEquals(expected: number, actual: number, message: string): void {
-    if (expected != actual) throw new EsAssertionError(`${message} - expected: ${expected} but was ${actual}`)
+    if (expected != actual) throw new AssertionError(`${message} - expected: ${expected} but was ${actual}`)
   }
 
   static assertSame(expected: Object, actual: Object, message: string): void {
-    if (expected !== actual) throw new EsAssertionError(message)
+    if (expected !== actual) throw new AssertionError(message)
 
   } 
 
   static assertTrue(condition: boolean, message: string): void {
-    if (!condition) throw new EsAssertionError(message) 
+    if (!condition) throw new AssertionError(message) 
   }
 
   static assertFalse(condition: boolean, message: string): void {
-    if (condition) throw new EsAssertionError(message)
+    if (condition) throw new AssertionError(message)
   }
 }
 
@@ -66,8 +64,8 @@ function runTest(test: () => int, message: String) {
 
     return testResult
   } catch (e) {
-    if (e instanceof EsAssertionError) {
-      const error = e as EsAssertionError
+    if (e instanceof AssertionError) {
+      const error = e as AssertionError
       console.println(`FAILED: '${message}' with exception: ${error.name}(${error.message})`)
     } else {
       console.println(`FAILED '${message}' with exception ` + e)

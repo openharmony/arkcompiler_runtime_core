@@ -14,7 +14,11 @@
  */
 
 declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
+let ETSGLOBAL: any = (globalThis as any).Panda.getClass('Llib/ETSGLOBAL;');
+
+function main(): void { return {} as any; };
+(main as any) = ETSGLOBAL.main;
+
 
 function _$init$_(): void { return {} as any; };
 (_$init$_ as any) = ETSGLOBAL._$init$_;
@@ -36,7 +40,7 @@ class Base {
     public a: number = {} as any;
     public constructor(a: number) {};
 };
-(Base as any) = (globalThis as any).Panda.getClass('LBase;');
+(Base as any) = (globalThis as any).Panda.getClass('Llib/Base;');
 export {Base};
 exports.Base = Base;
 
@@ -46,7 +50,7 @@ class Derived extends Base implements I0, I1 {
     public b: number = {} as any;
     public constructor(a: number, b: number){ super(...{} as (ConstructorParameters<typeof Base>)); };
 };
-(Derived as any) = (globalThis as any).Panda.getClass('LDerived;');
+(Derived as any) = (globalThis as any).Panda.getClass('Llib/Derived;');
 export {Derived};
 exports.Derived = Derived;
 

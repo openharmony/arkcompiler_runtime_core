@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -265,6 +265,9 @@ public:
         return ETS_CreateVM(&vm_, &env_, &args) == ETS_OK;
     }
 
+    // CC-OFFNXT(G.NAM.03,G.NAM.03)-CPP) project code style
+    static constexpr char const *PEAS_MODULE_GLOBAL = "bouncing_peas_unit_native/ETSGLOBAL";
+
     bool InitExports()
     {
         const std::array<EtsNativeMethod, 43> impls = {
@@ -332,7 +335,7 @@ public:
              {"_getEngine", nullptr, reinterpret_cast<void *>(GetEngine)},
              {"_skoala_enqueue_run", nullptr, reinterpret_cast<void *>(SkoalaEnqueueRun)}}};
 
-        auto globalClass = env_->FindClass("ETSGLOBAL");
+        auto globalClass = env_->FindClass(PEAS_MODULE_GLOBAL);
         if (globalClass == nullptr) {
             return false;
         }
@@ -347,7 +350,7 @@ public:
 
     int ExecuteMain() const
     {
-        auto klass = env_->FindClass("ETSGLOBAL");
+        auto klass = env_->FindClass(PEAS_MODULE_GLOBAL);
         auto method = env_->GetStaticp_method(klass, "main", ":I");
         return env_->CallStaticIntMethod(klass, method);  // NOLINT(cppcoreguidelines-pro-type-vararg)
     }

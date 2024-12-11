@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "package": "@app",
+        "outDir": "${CMAKE_CURRENT_BINARY_DIR}/modules-build/abc",
+        "baseUrl": ".",
+        "paths": {
+            "@foo": ["../foo"]
+        }
+    },
+    "include": [
+        "./**/*.sts"
+    ],
+    "references": [
+        { "path": "../foo" }
+    ]
+}

@@ -127,6 +127,7 @@
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_7.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_8.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_9.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_7.sts
 
 # 20935 Runtime aborts on access to common field with generics
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_11.sts
@@ -1933,6 +1934,7 @@
 13.compilation_units_packages_and_modules/10.export_directives/02.single_export_directive/single_export_8.sts
 
 # 20763 cyclic dependencies don't cause compile-time error
+13.compilation_units_packages_and_modules/07.compilation_unit_initialization/module/cyclic_dependency/test.sts
 13.compilation_units_packages_and_modules/07.compilation_unit_initialization/package/cyclic_dependency/pkgA/test.sts
 
 # 21278 binvalid code does not generate CTE

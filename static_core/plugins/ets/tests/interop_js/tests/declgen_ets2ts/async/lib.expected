@@ -14,7 +14,11 @@
  */
 
 declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
+let ETSGLOBAL: any = (globalThis as any).Panda.getClass('Llib/ETSGLOBAL;');
+
+function main(): void { return {} as any; };
+(main as any) = ETSGLOBAL.main;
+
 
 function _$init$_(): void { return {} as any; };
 (_$init$_ as any) = ETSGLOBAL._$init$_;
@@ -36,7 +40,7 @@ class PromiseWrapper {
     public promise_: Promise<string> = {} as any;
     constructor() {};
 };
-(PromiseWrapper as any) = (globalThis as any).Panda.getClass('LPromiseWrapper;');
+(PromiseWrapper as any) = (globalThis as any).Panda.getClass('Llib/PromiseWrapper;');
 export {PromiseWrapper};
 exports.PromiseWrapper = PromiseWrapper;
 

@@ -15,5 +15,7 @@ if (PANDA_TARGET_ARM32)
     return()
 endif()
 
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/a.sts ${CMAKE_CURRENT_BINARY_DIR} imported_modules_TL_exec_1A EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/b.sts;${CMAKE_CURRENT_SOURCE_DIR}/c.sts
-)
+run_int_ets_code(imported_modules_TL_exec_1A ${CMAKE_CURRENT_BINARY_DIR} SOURCES
+                 ${CMAKE_CURRENT_SOURCE_DIR}/a.sts;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/b.sts;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/c.sts)

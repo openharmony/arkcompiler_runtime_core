@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -72,7 +72,7 @@ class Tool(ToolBase):
         )
         self.default_arktsconfig = str(Path(self.panda_root).joinpath(
             'tools', 'es2panda', 'generated', 'arktsconfig.json'))
-        self.opts = '--gen-stdlib=false --extension=sts --opt-level=2 ' \
+        self.opts = '--gen-stdlib=false --extension=sts --ets-unnamed --opt-level=2 ' \
             f'{self.custom}'
         self.es2panda = self.ensure_file(self.panda_root, 'bin', 'es2panda')
 
@@ -99,8 +99,7 @@ class Tool(ToolBase):
             abc = lib.with_suffix('.abc')
             if abc.is_file():
                 continue
-            opts = '--ets-module ' + self.opts
-            self.run_es2panda(lib, abc, opts, bu)
+            self.run_es2panda(lib, abc, self.opts, bu)
         src = bu.src('.ts', '.sts')
         abc = src.with_suffix('.abc')
         res = self.run_es2panda(src, abc, self.opts, bu)
