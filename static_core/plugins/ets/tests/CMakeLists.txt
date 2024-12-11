@@ -17,7 +17,8 @@ if (NOT TARGET es2panda)
 endif()
 
 add_custom_target(ets_gtests)
-add_dependencies(ets_tests ets_gtests)
+add_custom_target(ets_panda_gtests)
+add_dependencies(ets_tests ets_gtests ets_panda_gtests)
 
 include(cmake/native_gtest.cmake)
 
@@ -25,7 +26,7 @@ add_panda_assembly(TARGET mock_stdlib SOURCE integrational/mock_stdlib.pa)
 
 function(panda_ets_add_gtest)
     panda_add_gtest(
-        TEST_GROUP ets_tests
+        TEST_GROUP ets_panda_gtests
         STASH_LIST ets_stash_list
         ${ARGV}
     )
@@ -58,6 +59,8 @@ panda_add_asm_file(
 )
 
 add_dependencies(tests ets_tests)
+
+add_custom_target(ets_deterministic_tests)
 
 function(run_deterministic_tests ETS_SRC TARGET)
     set(oneValueArgs ITER_NUM)
@@ -97,8 +100,11 @@ function(run_deterministic_tests ETS_SRC TARGET)
         COMMENT "Running ${ETS_SRC} determenistic compilation test"
         DEPENDS ${dependencies}
     )
-    add_dependencies(ets_tests ${TARGET})
+    add_dependencies(ets_deterministic_tests ${TARGET})
 endfunction()
+
+add_dependencies(ets_tests ets_deterministic_tests)
+add_custom_target(ets_code_verifier_tests)
 
 function(run_ets_code_verifier ETS_SRC WORK_DIR TARGET)
     if (NOT TARGET verifier)
@@ -122,8 +128,10 @@ function(run_ets_code_verifier ETS_SRC WORK_DIR TARGET)
         DEPENDS verifier etsstdlib ${ABC_TARGET}
     )
 
-    add_dependencies(ets_tests ${TARGET})
+    add_dependencies(ets_code_verifier_tests ${TARGET})
 endfunction()
+
+add_dependencies(ets_tests ets_code_verifier_tests)
 
 function(compile_int_ets_export_files INTERPRETER_TYPE WORK_DIR TARGET EXTRA_BOOT_PANDAFILES)
     set(oneValueArgs OPT_LEVEL)
@@ -143,6 +151,8 @@ function(compile_int_ets_export_files INTERPRETER_TYPE WORK_DIR TARGET EXTRA_BOO
 
     set(${EXTRA_BOOT_PANDAFILES} ${RESULT} PARENT_SCOPE)
 endfunction()
+
+add_custom_target(ets_run_int_ets_code_impl_tests)
 
 function(run_int_ets_code_impl INTERPRETER_TYPE ETS_SRC WORK_DIR TARGET)
     if (NOT TARGET es2panda)
@@ -195,7 +205,7 @@ function(run_int_ets_code_impl INTERPRETER_TYPE ETS_SRC WORK_DIR TARGET)
             COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=stw 1>"${BUILD_OUT}" 2>>"${BUILD_ERR}" || (${CAT_PROGRAM} ${BUILD_ERR} && false)
             DEPENDS ark etsstdlib ${ABC_TARGET}
         )
-        add_dependencies(ets_tests ${TARGET}-gc)
+        add_dependencies(ets_run_int_ets_code_impl_tests ${TARGET}-gc)
     endif()
 
     set(COUNTER 0)
@@ -208,8 +218,11 @@ function(run_int_ets_code_impl INTERPRETER_TYPE ETS_SRC WORK_DIR TARGET)
         endif()
     endforeach()
 
-    add_dependencies(ets_tests ${TARGET})
+    add_dependencies(ets_run_int_ets_code_impl_tests ${TARGET})
 endfunction()
+
+add_dependencies(ets_tests ets_run_int_ets_code_impl_tests)
+add_custom_target(ets_run_int_ets_code_tests)
 
 function(run_int_ets_code ETS_SRC WORK_DIR TARGET)
     set(oneValueArgs OPT_LEVEL)
@@ -217,7 +230,7 @@ function(run_int_ets_code ETS_SRC WORK_DIR TARGET)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     add_custom_target(${TARGET})
-    add_dependencies(ets_tests ${TARGET})
+    add_dependencies(ets_run_int_ets_code_tests ${TARGET})
 
     run_int_ets_code_impl(cpp ${ETS_SRC} ${WORK_DIR} ${TARGET}-cpp OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS} EXPORT_FILES ${ARG_EXPORT_FILES})
     run_int_ets_code_impl(irtoc ${ETS_SRC} ${WORK_DIR} ${TARGET}-irtoc OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS} EXPORT_FILES ${ARG_EXPORT_FILES})
@@ -227,6 +240,9 @@ function(run_int_ets_code ETS_SRC WORK_DIR TARGET)
         add_dependencies(${TARGET} ${TARGET}-llvmirtoc)
     endif()
 endfunction()
+
+add_dependencies(ets_tests ets_run_int_ets_code_tests)
+add_custom_target(ets_run_jit_ets_code_tests)
 
 function(run_jit_ets_code ETS_SRC WORK_DIR TARGET)
     set(oneValueArgs OPT_LEVEL)
@@ -263,8 +279,11 @@ function(run_jit_ets_code ETS_SRC WORK_DIR TARGET)
         DEPENDS ark etsstdlib ${ABC_TARGET}
     )
 
-    add_dependencies(ets_tests ${TARGET})
+    add_dependencies(ets_run_jit_ets_code_tests ${TARGET})
 endfunction()
+
+add_dependencies(ets_tests ets_run_jit_ets_code_tests)
+add_custom_target(ets_run_jit_osr_ets_code_tests)
 
 function(run_jit_osr_ets_code ETS_SRC WORK_DIR TARGET)
     set(oneValueArgs OPT_LEVEL)
@@ -301,8 +320,10 @@ function(run_jit_osr_ets_code ETS_SRC WORK_DIR TARGET)
         DEPENDS ark etsstdlib ${ABC_TARGET}
     )
 
-    add_dependencies(ets_tests ${TARGET})
+    add_dependencies(ets_run_jit_osr_ets_code_tests ${TARGET})
 endfunction()
+
+add_dependencies(ets_tests ets_run_jit_osr_ets_code_tests)
 
 function(compile_aot_ets_code PAOC_MODE ETS_ABC OUTPUT_AN TARGET ABC_TARGET)
     set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
@@ -324,6 +345,8 @@ function(compile_aot_ets_code PAOC_MODE ETS_ABC OUTPUT_AN TARGET ABC_TARGET)
         DEPENDS ark_aot etsstdlib ${ABC_TARGET}
     )
 endfunction()
+
+add_custom_target(ets_run_aot_ets_code_tests)
 
 function(run_aot_ets_code PAOC_MODE ETS_SRC WORK_DIR TARGET)
     if (CMAKE_CROSSCOMPILING)
@@ -365,8 +388,10 @@ function(run_aot_ets_code PAOC_MODE ETS_SRC WORK_DIR TARGET)
         DEPENDS ark etsstdlib ${TARGET_AOT}
     )
 
-    add_dependencies(ets_tests ${TARGET})
+    add_dependencies(ets_run_aot_ets_code_tests ${TARGET})
 endfunction()
+
+add_dependencies(ets_tests ets_run_aot_ets_code_tests)
 
 function(run_deterministic_test ETS_SRC WORK_DIR TARGET)
     # deterministic binary
@@ -493,6 +518,8 @@ if(NOT CMAKE_CROSSCOMPILING)
     endif()
 endif()
 
+add_custom_target(ets-compile-stdlib)
+
 if(PANDA_TEST_COMPILE_STDLIB)
     set (ARK_AOT_RUNNER ${CMAKE_SOURCE_DIR}/plugins/ets/compiler/tools/paoc_compile_stdlib.sh)
     if (NOT PANDA_CI_TESTING_MODE STREQUAL "Nightly")
@@ -512,7 +539,6 @@ if(PANDA_TEST_COMPILE_STDLIB)
             set (COMPILER_OPTIONS_LLVM_PRE_OPT "--llvmaot-threads=4" "--llvmaot-methods-per-module=512" ${COMPILER_OPTIONS_LLVM_PRE_OPT})
         endif()
     endif ()
-    add_custom_target(ets-compile-stdlib)
     if (PANDA_COMPILER_TARGET_X86_64)
         compile_stdlib(x86_64)
     endif()
@@ -602,3 +628,65 @@ if (PANDA_ETS_INTEROP_JS)
 endif()
 
 add_subdirectory(debugger)
+
+# This section should be located at the end of this file to include all targets created here!
+# Targets to divide ets_tests subtargets by execution time to ensure that
+# each group is not executed more that 1 hour.
+# All this ets_timeXXX_tests targets should contain all ets_tests subtargets.
+# It's not very important what subtarget where is included
+add_custom_target(ets_time01_tests)
+add_custom_target(ets_time02_tests)
+add_custom_target(ets_time03_tests)
+add_custom_target(ets_time04_tests)
+add_custom_target(ets_time05_tests)
+
+add_dependencies(ets_tests
+    ets_time01_tests
+    ets_time02_tests
+    ets_time03_tests
+    ets_time04_tests
+    ets_time05_tests)
+
+function(ADD_TARGET_TO_GROUP group test_target)
+    if (TARGET ${test_target})
+        message("Target ${test_target} added to group '${group}'")
+        add_dependencies(${group} ${test_target})
+    else()
+        message("Target ${test_target} does not exist")
+    endif()
+endfunction()
+
+add_target_to_group(ets_time01_tests ets_deterministic_tests)
+add_target_to_group(ets_time01_tests ets_run_jit_osr_ets_code_tests)
+add_target_to_group(ets_time01_tests ets_tests_lookup_by_name)
+add_target_to_group(ets_time01_tests etsnapi_test_suite)
+if(NOT PANDA_ENABLE_THREAD_SANITIZER OR PANDA_CI_TESTING_MODE STREQUAL "Nightly")
+    add_target_to_group(ets_time01_tests es2panda_tests)
+endif()
+if(PANDA_COMPILER_ENABLE)
+    add_target_to_group(ets_time01_tests ets_checked_tests)
+endif()
+
+add_target_to_group(ets_time02_tests etsnative_symbols_test)
+add_target_to_group(ets_time02_tests ets_code_verifier_tests)
+add_target_to_group(ets_time02_tests ets_run_jit_ets_code_tests)
+add_target_to_group(ets_time02_tests ets_tests_equals)
+
+if (PANDA_USE_CUSTOM_SIGNAL_STACK)
+    add_target_to_group(ets_time01_tests sampler_asm_test_suite)
+    add_target_to_group(ets_time02_tests sampler_etsnapi_test_suite)
+    add_target_to_group(ets_time02_tests sampler_test_suite)
+endif()
+
+add_target_to_group(ets_time03_tests ets_gtests)
+add_target_to_group(ets_time03_tests ets_panda_gtests)
+add_target_to_group(ets_time03_tests ets_run_aot_ets_code_tests)
+add_target_to_group(ets_time03_tests ets_napi_tests)
+if(PANDA_TEST_COMPILE_STDLIB)
+    add_target_to_group(ets_time03_tests ets-compile-stdlib)
+endif()
+
+add_target_to_group(ets_time04_tests ets_run_int_ets_code_impl_tests)
+
+add_target_to_group(ets_time05_tests ets_run_int_ets_code_tests)
+# ---- end of groups by time
