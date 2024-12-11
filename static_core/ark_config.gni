@@ -23,6 +23,15 @@ if (ark_standalone_build) {
 ark_subsystem_name = "arkcompiler"
 ark_part_name = "runtime_core"
 
+hiviewdfx_ext_deps = []
+enable_hilog =
+    !ark_standalone_build && is_standard_system && current_os == "ohos" &&
+    (current_cpu == "arm64" || current_cpu == "arm")
+
+if (enable_hilog) {
+  hiviewdfx_ext_deps += [ "hilog:libhilog" ]
+}
+
 if (is_standard_system || ark_standalone_build) {
   import("$ark_root/platforms/ohos/ark_config.gni")
 } else {

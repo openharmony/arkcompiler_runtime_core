@@ -84,6 +84,8 @@ ohos_shared_library("libarkinspector") {
                    "target_gen_dir"),
   ]
 
+  external_deps += hiviewdfx_ext_deps
+
   if (is_mingw || is_win) {
     output_extension = "dll"
   } else {
