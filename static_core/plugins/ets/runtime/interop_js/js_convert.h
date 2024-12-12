@@ -461,6 +461,7 @@ JSCONVERT_UNWRAP(Promise)
     hpromise->SetInteropObject(coro, href.GetPtr());
     storage->CreateJSObjectRef(ctx, href.GetPtr(), jsVal);
     hpromise->SetLinkedPromise(coro, href->AsObject());
+    EtsPromise::CreateLink(hpromise->GetLinkedPromise(coro), hpromise.GetPtr());
     return hpromise.GetPtr();
 }
 
