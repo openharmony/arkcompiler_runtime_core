@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { tsBigInt } from 'main_js';
+import { tsBigInt, returnBigInt, returnBigIntObj } from 'main_js';
 
 function checkTypeBigInt(): boolean {
     return typeof tsBigInt == 'object';
@@ -65,4 +65,16 @@ function checkConversionBigIntToChar(): boolean {
     const val = Number(tsBigInt) as char;
 
     return typeof val == 'number';
+}
+
+function checkReturnBigInt(): boolean {
+    const val = returnBigInt() as bigint;
+
+    return typeof val == 'bigint' && val == 1000000n;
+}
+
+function checkReturnBigIntObj(): boolean {
+    const val = returnBigIntObj() as bigint;
+
+    return typeof val == 'bigint' && val == 1n;
 }
