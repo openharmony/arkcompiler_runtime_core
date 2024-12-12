@@ -116,7 +116,7 @@ inline AbckitValue *CreateValueString(AbckitFile *file, const char *value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
-    EXPECT_TRUE(strncmp(value, DEFAULT_CONST_CHAR, sizeof(DEFAULT_CONST_CHAR)) == 0);
+    EXPECT_TRUE(strncmp(value, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
     return DEFAULT_VALUE;
 }
 
@@ -137,7 +137,7 @@ inline AbckitString *CreateString(AbckitFile *file, const char *value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
-    EXPECT_TRUE(strncmp(value, DEFAULT_CONST_CHAR, sizeof(DEFAULT_CONST_CHAR)) == 0);
+    EXPECT_TRUE(strncmp(value, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
     return DEFAULT_STRING;
 }
 
@@ -229,7 +229,7 @@ inline AbckitLiteral *CreateLiteralString(AbckitFile *file, const char *value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
-    EXPECT_TRUE(strncmp(value, DEFAULT_CONST_CHAR, sizeof(DEFAULT_CONST_CHAR)) == 0);
+    EXPECT_TRUE(strncmp(value, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
     return DEFAULT_LITERAL;
 }
 
