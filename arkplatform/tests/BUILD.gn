@@ -24,13 +24,11 @@ host_unittest_action("ArkplatformTest") {
 
   configs = [ "$ark_root/arkplatform:arkplatform_public_config" ]
 
-  deps = [
-    "$ark_root/arkplatform:libarkplatform",
-    "$ark_third_party_root/icu/icu4c:shared_icui18n",
-  ]
+  deps = [ "$ark_root/arkplatform:libarkplatform" ]
 
   external_deps = [
     "ets_runtime:libark_jsruntime",
+    "icu:shared_icui18n",
     sdk_libc_secshared_dep,
   ]
 }
