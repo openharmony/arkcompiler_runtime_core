@@ -169,7 +169,7 @@ const testTypedArraySort = parametrize<ObjectTypeAndExpectations<number[]>>(
         // descending
         array.sort(
             (x: {{.item.type}}, y: {{.item.type}}) => {
-                return y - x
+                return (y - x){{.item.cast2primitive}}
             }
         )
 
@@ -244,7 +244,7 @@ function testTypedArrayMap(): number {
         {{.item.create}}(10)
     )
 
-    let mapWithConst = ta.map((): {{.item.type}} => (ta[0] as number))
+    let mapWithConst = ta.map((): {{.item.type}} => (ta[0] as {{.item.type}}))
     const isMappedWithConst = mapWithConst.every((num: {{.item.type}}) => num == (ta[0] as {{.item.type}}))
 
     let squared = ta.map((num: {{.item.type}}) => (num * num) as {{.item.type}})
