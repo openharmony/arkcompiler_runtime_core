@@ -35,7 +35,7 @@ function TestFunctionArgTypeConflictArraybuffer(): boolean {
 }
 
 function TestFunctionArgTypeConflictBoolean(): boolean {
-    const value = js.functionArgTypeConflictBoolean() as Boolean;
+    const value = js.functionArgTypeConflictBoolean().valueOf() as Boolean;
     return value == true;
 }
 
