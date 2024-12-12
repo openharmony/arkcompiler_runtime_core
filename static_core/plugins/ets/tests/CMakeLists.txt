@@ -647,12 +647,9 @@ add_dependencies(ets_tests
     ets_time04_tests
     ets_time05_tests)
 
-function(ADD_TARGET_TO_GROUP group test_target)
+function(add_target_to_group group test_target)
     if (TARGET ${test_target})
-        message("Target ${test_target} added to group '${group}'")
         add_dependencies(${group} ${test_target})
-    else()
-        message("Target ${test_target} does not exist")
     endif()
 endfunction()
 
