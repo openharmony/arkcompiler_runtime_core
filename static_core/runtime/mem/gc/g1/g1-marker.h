@@ -18,62 +18,44 @@
 #include "runtime/mem/gc/gc_marker.h"
 
 namespace ark::mem {
-template <class LanguageConfig>
-class G1GCPauseMarker : public GCMarker<G1GCPauseMarker<LanguageConfig>, LanguageConfig::LANG_TYPE> {
+template <class LanguageConfig, bool ATOMIC>
+class G1GCMarker : public GCMarker<G1GCMarker<LanguageConfig, ATOMIC>, LanguageConfig::LANG_TYPE> {
 public:
-    explicit G1GCPauseMarker(GC *gc) : GCMarker<G1GCPauseMarker<LanguageConfig>, LanguageConfig::LANG_TYPE>(gc) {}
+    explicit G1GCMarker(GC *gc) : GCMarker<G1GCMarker<LanguageConfig, ATOMIC>, LanguageConfig::LANG_TYPE>(gc) {}
 
     ALWAYS_INLINE bool MarkIfNotMarked(ObjectHeader *object) const
     {
         MarkBitmap *bitmap = ObjectToRegion(object)->GetMarkBitmap();
         ASSERT(bitmap != nullptr);
-        return !bitmap->AtomicTestAndSet(object);
+        if constexpr (ATOMIC) {
+            return !bitmap->AtomicTestAndSet(object);
+        } else {
+            bool result = !bitmap->Test(object);
+            bitmap->Set(object);
+            return result;
+        }
     }
 
     ALWAYS_INLINE static bool IsMarked(const ObjectHeader *object)
     {
         MarkBitmap *bitmap = ObjectToRegion(object)->GetMarkBitmap();
         ASSERT(bitmap != nullptr);
-        return bitmap->AtomicTest(object);
+        if constexpr (ATOMIC) {
+            return bitmap->AtomicTest(object);
+        } else {
+            return bitmap->Test(object);
+        }
     }
 
     ALWAYS_INLINE static void Mark(ObjectHeader *object)
     {
         MarkBitmap *bitmap = ObjectToRegion(object)->GetMarkBitmap();
         ASSERT(bitmap != nullptr);
-        bitmap->AtomicTestAndSet(object);
-    }
-};
-
-template <class LanguageConfig>
-class G1GCConcurrentMarker : public GCMarker<G1GCConcurrentMarker<LanguageConfig>, LanguageConfig::LANG_TYPE> {
-public:
-    explicit G1GCConcurrentMarker(GC *gc)
-        : GCMarker<G1GCConcurrentMarker<LanguageConfig>, LanguageConfig::LANG_TYPE>(gc)
-    {
-    }
-
-    ALWAYS_INLINE bool MarkIfNotMarked(ObjectHeader *object) const
-    {
-        MarkBitmap *bitmap = ObjectToRegion(object)->GetMarkBitmap();
-        ASSERT(bitmap != nullptr);
-        bool result = !bitmap->Test(object);
-        bitmap->Set(object);
-        return result;
-    }
-
-    ALWAYS_INLINE bool IsMarked(const ObjectHeader *object) const
-    {
-        MarkBitmap *bitmap = ObjectToRegion(object)->GetMarkBitmap();
-        ASSERT(bitmap != nullptr);
-        return bitmap->Test(object);
-    }
-
-    ALWAYS_INLINE void Mark(ObjectHeader *object)
-    {
-        MarkBitmap *bitmap = ObjectToRegion(object)->GetMarkBitmap();
-        ASSERT(bitmap != nullptr);
-        bitmap->Set(object);
+        if constexpr (ATOMIC) {
+            bitmap->AtomicTestAndSet(object);
+        } else {
+            bitmap->Set(object);
+        }
     }
 };
 
@@ -103,12 +85,12 @@ public:
 
     ALWAYS_INLINE bool IsMarked(const ObjectHeader *object) const
     {
-        return G1GCPauseMarker<LanguageConfig>::IsMarked(object);
+        return G1GCMarker<LanguageConfig, true>::IsMarked(object);
     }
 
     ALWAYS_INLINE void Mark(ObjectHeader *object) const
     {
-        G1GCPauseMarker<LanguageConfig>::Mark(object);
+        G1GCMarker<LanguageConfig, true>::Mark(object);
     }
 };
 
