@@ -115,9 +115,10 @@ void TimerModule::FreeTimer(uv_handle_t *timer)
     delete timer;
 }
 
+/* static */
 uv_loop_t *TimerModule::GetMainEventLoop()
 {
-#if defined(PANDA_TARGET_OHOS)
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
     uv_loop_t *loop;
     napi_get_uv_event_loop(ark::ets::interop::js::InteropCtx::Current()->GetJSEnv(), &loop);
     return loop;

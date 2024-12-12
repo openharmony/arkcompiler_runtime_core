@@ -70,8 +70,6 @@ bool ArkJsRuntime::Init()
     engine_->SetGetAssetFunc(utils::GetAsset);
     engine_->SetCleanEnv([this] { JSNApi::DestroyJSVM(vm_); });
 
-    uv_loop_init(&loop_);
-
     return true;
 }
 
@@ -81,11 +79,14 @@ bool ArkJsRuntime::Execute(const std::string &filename)
     return JSNApi::Execute(vm_, filename, options_.GetEntryPoint());
 }
 
+uv_loop_t *ArkJsRuntime::GetUVLoop()
+{
+    return engine_->GetUVLoop();
+}
+
 void ArkJsRuntime::Loop()
 {
-    while (uv_run(&loop_, UV_RUN_NOWAIT)) {
-        uv_run(engine_->GetUVLoop(), UV_RUN_NOWAIT);
-    }
+    engine_->Loop(LoopMode::LOOP_NOWAIT, false);
 }
 
 }  // namespace panda
