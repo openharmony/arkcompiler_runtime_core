@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 
 #include "stacktrace.h"
 #include "os/mutex.h"
+#include "utils/string_helpers.h"
 
 #include <cxxabi.h>
 #include <dlfcn.h>
@@ -246,8 +247,9 @@ private:
                 tokenizer.Next();
                 tokenizer.Next();
                 std::string objFilename = tokenizer.Next();
-                vmas_.emplace_back(stoul(startAddr, nullptr, HEX_RADIX), stoul(endAddr, nullptr, HEX_RADIX),
-                                   stoul(offset, nullptr, HEX_RADIX), objFilename);
+                vmas_.emplace_back(strtoull(startAddr.data(), nullptr, HEX_RADIX),
+                                   strtoull(endAddr.data(), nullptr, HEX_RADIX),
+                                   strtoull(offset.data(), nullptr, HEX_RADIX), objFilename);
             }
         }
     }

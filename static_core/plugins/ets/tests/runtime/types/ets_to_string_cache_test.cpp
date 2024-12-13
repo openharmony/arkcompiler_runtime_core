@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,7 +97,7 @@ public:
             intrinsics::helpers::FpToStringDecimalRadix(value,
                                                         [&res](std::string_view expected) { ASSERT(expected == res); });
 
-            auto resValue = std::stod(std::string(res));
+            auto resValue = PandaStringToD(res);
             auto eps = std::numeric_limits<double>::epsilon() * 2 * std::abs(value);
             ASSERT(std::abs(resValue - value) < eps);
         }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,15 +90,15 @@ int GcHung::GetConfig()
     }
 
 #ifdef HUNG_SYSTEM_SERVER_ONLY
-    enabled_ = (stoi(PandaStringToStd(paraVec[GC_PARA_ENABLE])) == 1) && is_systemserver_;
+    enabled_ = (PandaStringToLL(paraVec[GC_PARA_ENABLE]) == 1) && is_systemserver_;
 #else
-    enabled_ = (stoi(PandaStringToStd(paraVec[GC_PARA_ENABLE])) == 1);
+    enabled_ = (PandaStringToLL(paraVec[GC_PARA_ENABLE]) == 1);
 #endif  // HUNG_SYSTEM_SERVER_ONLY
     LOG(INFO, GC) << "GcHung: module enable:" << enabled_;
 
-    intervalLimitMs_ = static_cast<uint64_t>(std::stoi(PandaStringToStd(paraVec[GC_PARA_INTERVAL])));
-    waterMarkLimit_ = std::stoi(PandaStringToStd(paraVec[GC_PARA_WATERMARK]));
-    overTimeLimitMs_ = static_cast<uint64_t>(std::stoi(PandaStringToStd(paraVec[GC_PARA_OVERTIME])));
+    intervalLimitMs_ = PandaStringToULL(paraVec[GC_PARA_INTERVAL]);
+    waterMarkLimit_ = PandaStringToLL(paraVec[GC_PARA_WATERMARK]);
+    overTimeLimitMs_ = PandaStringToULL(paraVec[GC_PARA_OVERTIME]);
     LOG(DEBUG, GC) << "GcHung: set parameter: interval_limit_ms_ = " << intervalLimitMs_ << "ms";
     LOG(DEBUG, GC) << "GcHung: set parameter: water_mark_limit_ = " << waterMarkLimit_;
     LOG(DEBUG, GC) << "GcHung: set parameter: over_time_limit_ms_ = " << overTimeLimitMs_ << "ms";
