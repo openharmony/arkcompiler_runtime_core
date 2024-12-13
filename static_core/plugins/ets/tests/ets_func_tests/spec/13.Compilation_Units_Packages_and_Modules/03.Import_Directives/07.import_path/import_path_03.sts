@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
  desc: 13.03 Import Directives
  name: 13.compilation_units_packages_and_modules/13.03.import_directives/13.03.07.import_path/import_path_03
  tags: 
+ files: ["./to_export.sts"]
  ---*/
 
 import {Foo} from "spec/import-export/03.import_directives/07.import_path/to_export" 
