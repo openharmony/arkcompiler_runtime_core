@@ -17,7 +17,7 @@ cases:
     - decl: |-
           interface I {}
           class A implements I {}
-          function I.test(n: int) { return n }
+          function test(this: A, n: int) { return n }
       use: |-
           let a = new A()
           assert a.test(99) == 99
@@ -26,9 +26,9 @@ cases:
     - decl: |-
           interface I {}
           class A implements I {}
-          function I.test(n: double) { return 1 }
-          function I.test(n: string) { return 2 }
-          function I.test(n: int) { return 3 }
+          function test(this: A, n: double) { return 1 }
+          function test(this: A, n: string) { return 2 }
+          function test(this: A, n: int) { return 3 }
       use: |-
           let a = new A()
           assert a.test(1) == 3
@@ -43,31 +43,20 @@ cases:
               }
           }
           class A implements I {}
-          function I.test(n1: int, n2: int) { 
+          function test(this: A, n1: int, n2: int) { 
               return this.sum(n1, n2) 
           }
       use: |-
           let a = new A()
           assert a.test(99, 100) == 199
 
-    # 3. Extension function is shadowed by a interface member function
-    - decl: |-
-          interface I {
-              test(): int { return 1 }
-          }
-          class A implements I {}
-          function I.test(): int { return 2 }
-      use: |-
-          let a = new A()
-          assert a.test() == 1
-
-    # 4. Extension function and member function with different signatures
+    # 3. Extension function and member function with different signatures
     - decl: |-
           interface I {
               test(n: long): int { return 1 }
           }
           class A implements I {}
-          function I.test(n: double): int { return 2 }
+          function test(this: I, n: double): int { return 2 }
       use: |-
           let a = new A()
           assert a.test(4140100.0) == 2
