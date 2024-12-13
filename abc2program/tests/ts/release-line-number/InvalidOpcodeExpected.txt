@@ -1,11 +1,11 @@
-# source binary: /mnt/data/shixiaowei/oh2/out/rk3568/clang_x64/obj/arkcompiler/runtime_core/abc2program/tests/InvalidOpcode.abc
+# source binary: out/rk3568/clang_x64/obj/arkcompiler/runtime_core/abc2program/tests/InvalidOpcode.abc
 
 # ====================
 # LITERALS
 
-_ESModuleRecord_607 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
+_ESModuleRecord_616 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
 
-_ESScopeNamesRecord_603 
+_ESScopeNamesRecord_612 
 
 
 
@@ -19,13 +19,13 @@ _ESScopeNamesRecord_603
 
 .language ECMAScript
 .record _ESModuleRecord {
-	u32 /mnt/data/shixiaowei/oh2/arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/InvalidOpcode.ts _ESModuleRecord_607
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/InvalidOpcode.ts _ESModuleRecord_616
 }
 .record.source_file 
 
 .language ECMAScript
 .record _ESScopeNamesRecord {
-	u32 /mnt/data/shixiaowei/oh2/arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/InvalidOpcode.ts _ESScopeNamesRecord_603
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/InvalidOpcode.ts _ESScopeNamesRecord_612
 }
 .record.source_file 
 

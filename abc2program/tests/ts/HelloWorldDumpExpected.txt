@@ -350,7 +350,7 @@ _GLOBAL_1676 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 .function any .#*#hoo(any a0, any a1, any a2) {
 	fldai 1.230000e+00                       # line: 71           # column: 0
 	trystglobalbyname 0x0, varA              # line: 71           # column: 0
-	createobjectwithbuffer 0x1, _GLOBAL_1609 # line: 72           # column: 0
+	createobjectwithbuffer 0x1, _GLOBAL_1590 # line: 72           # column: 0
 	ldundefined                              # line: 18446744073709551615           # column: 0
 	returnundefined                          # line: 73           # column: 0
 }
@@ -495,15 +495,15 @@ _GLOBAL_1676 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	stmodulevar 0x0                          # line: 17           # column: 0
 	ldhole                                   # line: 21           # column: 0
 	sta v3                                   # line: 21           # column: 0
-	defineclasswithbuffer 0x5, .#~@0=#HelloWorld, _GLOBAL_1626, 0x0, v3 # line: 21           # column: 0
+	defineclasswithbuffer 0x5, .#~@0=#HelloWorld, _GLOBAL_1607, 0x0, v3 # line: 21           # column: 0
 	ldobjbyname 0x6, prototype               # line: 21           # column: 0
 	ldhole                                   # line: 25           # column: 0
 	sta v3                                   # line: 25           # column: 0
-	defineclasswithbuffer 0x8, .#~@1=#Lit, _GLOBAL_1635, 0x0, v3 # line: 25           # column: 0
+	defineclasswithbuffer 0x8, .#~@1=#Lit, _GLOBAL_1616, 0x0, v3 # line: 25           # column: 0
 	ldobjbyname 0x9, prototype               # line: 25           # column: 0
 	ldhole                                   # line: 29           # column: 0
 	sta v3                                   # line: 29           # column: 0
-	callruntime.definesendableclass 0xb, .#~@2=#NestedLiteralArray, _GLOBAL_1676, 0x0, v3 # line: 29           # column: 0
+	callruntime.definesendableclass 0xb, .#~@2=#NestedLiteralArray, _GLOBAL_1657, 0x0, v3 # line: 29           # column: 0
 	lda.str                                  # line: 37           # column: 0
 	trystglobalbyname 0xc, string            # line: 37           # column: 0
 	definefunc 0xd, .#*#add, 0x2             # line: 75           # column: 0

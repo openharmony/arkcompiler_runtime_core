@@ -414,16 +414,18 @@ AnnotationItem *AsmEmitter::CreateAnnotationItem(ItemContainer *container, const
     const Program &program, const AsmEmitter::AsmEntityCollections &entities)
 {
     auto record_name = annotation.GetName();
-    auto it = program.record_table.find(record_name);
-    if (it == program.record_table.cend()) {
-        SetLastError("Record " + record_name + " not found");
-        return nullptr;
-    }
+    if (!program.isGeneratedFromMergedAbc) {
+        auto it = program.record_table.find(record_name);
+        if (it == program.record_table.cend()) {
+            SetLastError("Record " + record_name + " not found");
+            return nullptr;
+        }
 
-    auto &record = it->second;
-    if (!record.metadata->IsAnnotation()) {
-        SetLastError("Record " + record_name + " isn't annotation");
-        return nullptr;
+        auto &record = it->second;
+        if (!record.metadata->IsAnnotation()) {
+            SetLastError("Record " + record_name + " isn't annotation");
+            return nullptr;
+        }
     }
 
     std::vector<AnnotationItem::Elem> item_elements;
@@ -497,6 +499,17 @@ bool AsmEmitter::AddAnnotations(T *item, ItemContainer *container, const Annotat
         auto *annotation_item = CreateAnnotationItem(container, annotation, program, entities);
         if (annotation_item == nullptr) {
             return false;
+        }
+
+        /**
+         * When abc is used as input, the function annotation and its corresponding record
+         * are placed into two different programs, which causes the record to be missing
+         * from the record_table of the program that contains the function annotation.
+         */
+        if (program.isGeneratedFromMergedAbc &&
+            program.record_table.find(annotation.GetName()) == program.record_table.cend()) {
+            item->AddAnnotation(annotation_item);
+            continue;
         }
 
         auto &record = program.record_table.find(annotation.GetName())->second;
