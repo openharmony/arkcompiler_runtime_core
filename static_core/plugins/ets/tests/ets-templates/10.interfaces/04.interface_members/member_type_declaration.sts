@@ -17,7 +17,7 @@ limitations under the License.
 /*---
 desc: Type declaration inside interface.
 assert: Interfaces may contain member type declarations.
-tags: [compile-only]
+tags: [compile-only, negative]
 ---*/
 
 interface A {

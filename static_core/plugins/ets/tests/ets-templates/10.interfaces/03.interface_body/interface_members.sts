@@ -16,7 +16,7 @@ limitations under the License.
 {% for im in interface_members %}
 /*---
 desc: Interface members.
-assert: The body of an interface may declare members of the interface, that is, fields, methods, classes, interfaces, and enumerations.
+assert: The body of an interface may declare members of the interface, that is, fields and methods.
 tags: [compile-only]
 ---*/
 

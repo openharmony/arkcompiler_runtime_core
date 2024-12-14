@@ -13,6 +13,4 @@
 
 --- # List of valid class members
 interface_members:
-  - {decl: "class B {}", call: "function main(): void { let c: A.B = new A.B(); }"}
-  - {decl: "interface I {}", call: "class B implements I {}"}
   - {decl: "enum Color {Red, Green}", call: "function main(): void { assert A.E.Red.ordinal() == 0; }"}

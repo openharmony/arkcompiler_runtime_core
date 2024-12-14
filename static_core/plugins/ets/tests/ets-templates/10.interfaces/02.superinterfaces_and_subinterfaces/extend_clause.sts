@@ -35,6 +35,6 @@ interface C extends A, B {}
 
 class D implements C {
     public sum(): void {
-        let r: int = foo + bar();
+        let r: int = this.foo() + this.bar();
     }
 }

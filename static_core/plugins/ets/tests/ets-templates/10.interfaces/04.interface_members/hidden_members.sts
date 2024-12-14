@@ -13,15 +13,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for im in interface_members %}
 /*---
-desc: Declaring subinterface C that extend superclass B with superclass A.
-assert: An interface I depends on a reference type T if any of the following is true. I directly depends on an interface J that depends on T (using this definition recursively).
-tags: [compile-only, negative]
+desc: Hide inheritance members.
+assert: The interface inherits, from the interfaces it extends, all members of those interfaces, except for fields that it hides.
+tags: [compile-only]
 ---*/
 
-
-class A {
-  inner class B {
-    interface C {}
-  }
+interface A {
+  {{im}}
 }
+
+interface B extends A {
+  {{im}}
+}
+
+{% endfor %}
