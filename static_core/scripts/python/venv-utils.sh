@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,15 +14,29 @@
 
 set -e
 
+function get_my_home()
+{
+    local user_name=$1
+    local my_home
+    my_home=$(grep "^${user_name}:" /etc/passwd | cut -d: -f6)
+    if [[ ! -e "${my_home}" ]]; then
+        my_home=/home/${user_name}
+    fi
+    echo "${my_home}"
+}
+
+DOT_VENV_PANDA=.venv-panda
 MY_USERNAME=${SUDO_USER}
 if [[ -z "${VENV_DIR}" && -n "${MY_USERNAME}" ]]; then
-    MY_HOME=$(grep "^${MY_USERNAME}:" /etc/passwd | cut -d: -f6)
-    if [[ ! -e "${MY_HOME}" ]]; then
-        MY_HOME=/home/${MY_USERNAME}
-    fi
-    VENV_DIR=${MY_HOME}/.venv-panda
+    my_home=$( get_my_home "${MY_USERNAME}" )
+    VENV_DIR=${my_home}/${DOT_VENV_PANDA}
 elif [[ -z "${VENV_DIR}" && -z "${MY_USERNAME}" ]]; then
-    VENV_DIR=/root/.venv-panda
+    if [[ -n "${USER}" ]]; then
+        my_home=$( get_my_home "${USER}" )
+        VENV_DIR=${my_home}/${DOT_VENV_PANDA}
+    else
+        VENV_DIR=/root/${DOT_VENV_PANDA}
+    fi
 fi
 
 function activate_venv()
