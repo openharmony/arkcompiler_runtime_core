@@ -198,8 +198,6 @@ spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-para
 spec/05.Generics/generic_02.sts
 ### Negative tests
 spec/05.Generics/wrongUsingInT.sts
-### Issue #19668
-spec/05.Generics/issue15380_1.sts
 ### End of Generic
 ### Import-export issues
 ### cannot create runtime (compound tests not supported)
