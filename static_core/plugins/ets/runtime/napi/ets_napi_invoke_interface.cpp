@@ -218,6 +218,7 @@ static arg_list_t SplitString(const std::string &from, char delim)
     return pathes;
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) big switch-case
 static void ParseOptionsHelper(RuntimeOptions &runtimeOptions, ParsedOptions &parsedOptions,
                                Span<const EtsVMOption> &options)
 {
@@ -267,6 +268,9 @@ static void ParseOptionsHelper(RuntimeOptions &runtimeOptions, ParsedOptions &pa
                 break;
             case EtsOptionType::ETS_NATIVE_LIBRARY_PATH:
                 runtimeOptions.SetNativeLibraryPath(SplitString(extraStr, ':'));
+                break;
+            case EtsOptionType::ETS_VERIFICATION_MODE:
+                runtimeOptions.SetVerificationMode(extraStr);
                 break;
             default:
                 LOG(ERROR, RUNTIME) << "No such option";
