@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,7 +99,7 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to read
      * @returns read value (big endian)
      */
-    public get{{methodName}}(byteOffset: int): {{type2name[bit]}} {
+    public get{{methodName}}(byteOffset: int): {{type2nameCompat[bit]}} {
         return this.get{{methodName}}Big(byteOffset)
     }
 
@@ -177,7 +177,7 @@ export final class DataView implements ArrayBufferView {
      * @param littleEndian read as little or big endian
      * @returns read value
      */
-    public get{{methodName}}(byteOffset: int, littleEndian: boolean): {{type2name[bit]}} {
+    public get{{methodName}}(byteOffset: int, littleEndian: boolean): {{type2nameCompat[bit]}} {
         if (littleEndian) {
             return this.get{{methodName}}Little(byteOffset)
         } else {
@@ -188,7 +188,7 @@ export final class DataView implements ArrayBufferView {
 
     {%- for suffix in impls: %}
     {%- set getIdx = '+' if suffix == 'Little' else '+ {} -'.format(bit // 8 - 1) %}
-    private get{{methodName}}{{suffix}}(byteOffset: int): {{type2name[bit]}} {
+    private get{{methodName}}{{suffix}}(byteOffset: int): {{type2nameCompat[bit]}} {
         if (byteOffset + {{bit // 8}} > this.byteLength_) {
             throw new RangeError("wrong index")
         }
@@ -204,6 +204,10 @@ export final class DataView implements ArrayBufferView {
         return Float.bitCastFromInt(res)
         {%- elif bit == 64 and mode == "Float" %}
         return Double.bitCastFromLong(res)
+        {%- elif bit == 64 and mode == "Int" %}
+        return new BigInt(res)
+        {%- elif bit == 64 and mode == "Uint" %}
+        return DataView.bigintFromULong(res)
         {%- elif mode == 'Int' %}
         return (res as {{type2nameBits[bit]}}) as {{resType}}
         {%- else %}
@@ -212,13 +216,7 @@ export final class DataView implements ArrayBufferView {
     }
     private get{{methodName}}{{suffix}}(byteOffset: number): {{type2nameCompat[bit]}} {
         let res = this.get{{methodName}}{{suffix}}(byteOffset as int)
-        {%- if bit == 64 and mode == "Int" %}
-        return new BigInt(res)
-        {%- elif bit == 64 and mode == "Uint" %}
-        return DataView.bigintFromULong(res)
-        {%- else %}
-        return res;
-        {%- endif %}
+        return res
     }
 
     private set{{methodName}}{{suffix}}(byteOffset: int, value: {{type2name[bit]}}): void {
