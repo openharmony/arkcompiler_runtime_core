@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@ export namespace interop {
 globalThis.test = {};
 globalThis.test.etsVm = requireNapiPreview('ets_interop_js_napi', true);
 if (!globalThis.test.etsVm.createEtsRuntime('etsstdlib.abc', 
-    'gc_test_sts_common_sts.abc', false, false)) {
+    'gc_test_sts_common.abc', false, false)) {
         throw new Error('Failed to create ETS runtime');
     }
 

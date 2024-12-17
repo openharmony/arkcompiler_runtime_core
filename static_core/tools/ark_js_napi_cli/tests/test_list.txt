@@ -1,0 +1,1 @@
+js_2_sts_obj_pass_check_mem_test.ts, gc_test_sts_common.sts
