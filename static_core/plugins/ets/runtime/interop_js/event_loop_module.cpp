@@ -24,7 +24,7 @@ namespace ark::ets::interop::js {
 uv_loop_t *EventLoopCallbackPoster::GetEventLoop()
 {
     uv_loop_t *loop = nullptr;
-#if defined(PANDA_TARGET_OHOS)
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
     [[maybe_unused]] auto nstatus = napi_get_uv_event_loop(InteropCtx::Current()->GetJSEnv(), &loop);
     ASSERT(nstatus == napi_ok);
 #else
@@ -62,12 +62,7 @@ EventLoopCallbackPoster::~EventLoopCallbackPoster()
 void EventLoopCallbackPoster::PostImpl(WrappedCallback &&callback)
 {
     ASSERT(callback != nullptr);
-    PostToEventLoop([callback = std::move(callback)] {
-        auto *coro = EtsCoroutine::GetCurrent();
-        auto jsEnv = InteropCtx::Current(coro)->GetJsEnvForEventLoopCallbacks();
-        INTEROP_CODE_SCOPE_JS(coro, jsEnv);
-        callback();
-    });
+    PostToEventLoop(std::move(callback));
 }
 
 void EventLoopCallbackPoster::PostToEventLoop(WrappedCallback &&callback)
@@ -81,6 +76,11 @@ void EventLoopCallbackPoster::AsyncEventToExecuteCallbacks(uv_async_t *async)
 {
     auto *callbackQueue = reinterpret_cast<ThreadSafeCallbackQueue *>(async->data);
     ASSERT(callbackQueue != nullptr);
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *interopCtx = InteropCtx::Current(coro);
+    auto env = interopCtx->GetJsEnvForEventLoopCallbacks();
+    InteropCodeScope<false> codeScope(coro, __PRETTY_FUNCTION__);
+    JSNapiEnvScope jsEnvScope(interopCtx, env);
     callbackQueue->ExecuteAllCallbacks();
 }
 
