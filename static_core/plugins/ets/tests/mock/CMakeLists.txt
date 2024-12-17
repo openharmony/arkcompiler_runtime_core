@@ -147,3 +147,8 @@ panda_ets_napi_add_gtest(
     CPP_SOURCE coroswitch_in_cctor.cpp
     ETS_SOURCE coroswitch_in_cctor.sts
 )
+
+panda_ets_napi_add_gtest(
+    NAME test_exception
+    CPP_SOURCE test_exception.cpp
+)

@@ -154,6 +154,7 @@ private:
             std::make_tuple("Lstd/core/UnsupportedOperationException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
             std::make_tuple("Lstd/core/IllegalMonitorStateException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
             std::make_tuple("Lstd/core/IllegalArgumentException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
+            std::make_tuple("Lstd/core/RuntimeException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
         };
         for (const auto &[descr, mirror, ovl] : STD_EXCEPTIONS_LIST) {
             RegisterClass(descr, mirror, ovl);
