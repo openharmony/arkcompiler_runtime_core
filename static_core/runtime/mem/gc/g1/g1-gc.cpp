@@ -710,7 +710,7 @@ void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
                 EnsurePreWrbDisabledInThreads();
 
                 if (this->GetSettings()->LogDetailedGCInfoEnabled()) {
-                    PrintFragmentationMetrics("Before GC fragmentation metrics");
+                    PrintFragmentationMetrics("Fragmentation before GC: ");
                 }
 
                 if (NeedFullGC(task)) {
@@ -721,7 +721,7 @@ void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
                 }
 
                 if (this->GetSettings()->LogDetailedGCInfoEnabled()) {
-                    PrintFragmentationMetrics("After GC fragmentation metrics");
+                    PrintFragmentationMetrics("Fragmentation after GC: ");
                 }
             }
         }
@@ -2686,11 +2686,11 @@ size_t G1GC<LanguageConfig>::GetUniqueRemsetRefsCount() const
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::PrintFragmentationMetrics(const char *title)
 {
-    LOG_INFO_GC << title;
-    LOG_INFO_GC << "Internal Old fragmentation " << this->GetG1ObjectAllocator()->CalculateInternalOldFragmentation();
-    LOG_INFO_GC << "Internal humongous fragmentation "
+    LOG_INFO_GC << title << "internal Old fragmentation "
+                << this->GetG1ObjectAllocator()->CalculateInternalOldFragmentation();
+    LOG_INFO_GC << title << "internal humongous fragmentation "
                 << this->GetG1ObjectAllocator()->CalculateInternalHumongousFragmentation();
-    LOG_INFO_GC << "Nonmovable external fragmentation "
+    LOG_INFO_GC << title << "nonmovable external fragmentation "
                 << this->GetG1ObjectAllocator()->CalculateNonMovableExternalFragmentation();
 }
 
