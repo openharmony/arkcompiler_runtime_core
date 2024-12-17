@@ -440,7 +440,8 @@ void HandlePendingException(UnwindPolicy policy)
     ASSERT(thread->HasPendingException());
     LOG(DEBUG, INTEROP) << "HandlePendingException";
 
-    thread->GetVM()->ClearInteropHandleScopes(thread->GetCurrentFrame());
+    // NOTE(konstanting): a potential candidate for moving out of the core part
+    thread->GetVM()->CleanupCompiledFrameResources(thread->GetCurrentFrame());
 
     auto stack = StackWalker::Create(thread, policy);
     ASSERT(stack.IsCFrame());

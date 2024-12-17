@@ -91,9 +91,11 @@ public:
      * If ep_info is provided then the newly created coroutine will execute the specified method and do all the
      * initialization/finalization steps, including completion_event management and notification of waiters.
      *
+     * @param type type of work, which the coroutine performs: whether it is a mutator, a schedule loop or some other
+     * thing
      */
     using CoroutineFactory = Coroutine *(*)(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *ctx,
-                                            std::optional<Coroutine::EntrypointInfo> &&epInfo);
+                                            std::optional<Coroutine::EntrypointInfo> &&epInfo, Coroutine::Type type);
 
     NO_COPY_SEMANTIC(CoroutineManager);
     NO_MOVE_SEMANTIC(CoroutineManager);
@@ -161,7 +163,8 @@ public:
      *
      * @return nullptr if resource limit reached or something went wrong; ptr to the coroutine otherwise
      */
-    Coroutine *CreateEntrypointlessCoroutine(Runtime *runtime, PandaVM *vm, bool makeCurrent, PandaString name);
+    Coroutine *CreateEntrypointlessCoroutine(Runtime *runtime, PandaVM *vm, bool makeCurrent, PandaString name,
+                                             Coroutine::Type type);
     void DestroyEntrypointlessCoroutine(Coroutine *co);
 
     /// Destroy a coroutine with an entrypoint
@@ -181,19 +184,6 @@ public:
         return false;
     }
 
-    /* debugging tools */
-    /**
-     * Disable coroutine switch for the current worker.
-     * If an attempt to switch the active coroutine is performed when coroutine switch is disabled, the exact actions
-     * are defined by the concrete CoroutineManager implementation (they could include no-op, program halt or something
-     * else).
-     */
-    virtual void DisableCoroutineSwitch() = 0;
-    /// Enable coroutine switch for the current worker.
-    virtual void EnableCoroutineSwitch() = 0;
-    /// @return true if coroutine switch for the current worker is disabled
-    virtual bool IsCoroutineSwitchDisabled() = 0;
-
     virtual bool IsMainWorker(Coroutine *coro) const = 0;
 
     /// Set CallbackPoster to post some callbacks outside (e.g. schedule worker in event loop)
@@ -212,6 +202,28 @@ public:
         return false;
     }
 
+    /* events */
+    /// Should be called when a coro makes the non_active->active transition (see the state diagram in coroutine.h)
+    virtual void OnCoroBecameActive([[maybe_unused]] Coroutine *co) {};
+    /**
+     * Should be called when a running coro is being blocked or terminated, i.e. makes
+     * the active->non_active transition (see the state diagram in coroutine.h)
+     */
+    virtual void OnCoroBecameNonActive([[maybe_unused]] Coroutine *co) {};
+
+    /* debugging tools */
+    /**
+     * Disable coroutine switch for the current worker.
+     * If an attempt to switch the active coroutine is performed when coroutine switch is disabled, the exact actions
+     * are defined by the concrete CoroutineManager implementation (they could include no-op, program halt or something
+     * else).
+     */
+    virtual void DisableCoroutineSwitch() = 0;
+    /// Enable coroutine switch for the current worker.
+    virtual void EnableCoroutineSwitch() = 0;
+    /// @return true if coroutine switch for the current worker is disabled
+    virtual bool IsCoroutineSwitchDisabled() = 0;
+
 protected:
     /// Create native coroutine context instance (implementation dependent)
     virtual CoroutineContext *CreateCoroutineContext(bool coroHasEntrypoint) = 0;
@@ -225,7 +237,7 @@ protected:
      * @return nullptr if resource limit reached or something went wrong; ptr to the coroutine otherwise
      */
     Coroutine *CreateCoroutineInstance(CompletionEvent *completionEvent, Method *entrypoint,
-                                       PandaVector<Value> &&arguments, PandaString name);
+                                       PandaVector<Value> &&arguments, PandaString name, Coroutine::Type type);
     /// Returns number of existing coroutines
     virtual size_t GetCoroutineCount() = 0;
     /**

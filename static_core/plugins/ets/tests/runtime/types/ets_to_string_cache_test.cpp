@@ -107,8 +107,8 @@ public:
     void TestConcurrentInsertion(const std::array<double, TEST_ARRAY_SIZE> &values)
     {
         auto runtime = Runtime::GetCurrent();
-        auto coro = mainCoro_->GetCoroutineManager()->CreateEntrypointlessCoroutine(runtime, runtime->GetPandaVM(),
-                                                                                    true, "worker");
+        auto coro = mainCoro_->GetCoroutineManager()->CreateEntrypointlessCoroutine(
+            runtime, runtime->GetPandaVM(), true, "worker", Coroutine::Type::MUTATOR);
         std::mt19937 engine(std::random_device {}());
         std::uniform_real_distribution<> dis(-VALUE_RANGE, VALUE_RANGE);
         std::bernoulli_distribution bern(1.0 / TEST_THREADS);

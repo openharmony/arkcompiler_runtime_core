@@ -513,7 +513,8 @@ static uint8_t InitCallJSClass(bool isNewCall)
         auto fields = klass->GetStaticFields();
         INTEROP_FATAL_IF(fields.Size() != 1);
         INTEROP_FATAL_IF(klass->GetFieldPrimitive<uint32_t>(fields[0]) != 0);
-        klass->SetFieldPrimitive<uint32_t>(fields[0], ctx->AllocateSlotsInStringBuffer(*qnameCount));
+        auto *stringStorage = ctx->GetConstStringStorage();
+        klass->SetFieldPrimitive<uint32_t>(fields[0], stringStorage->AllocateSlotsInStringBuffer(*qnameCount));
     }
     return 1;
 }

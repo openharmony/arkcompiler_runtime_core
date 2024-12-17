@@ -70,7 +70,7 @@ public:
     }
 
 protected:
-    std::unique_ptr<SharedReferenceStorage> storage_ {};  // NOLINT(misc-non-private-member-variables-in-classes)
+    PandaUniquePtr<SharedReferenceStorage> storage_ {};  // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
     static constexpr size_t MAX_OBJECTS = 128;

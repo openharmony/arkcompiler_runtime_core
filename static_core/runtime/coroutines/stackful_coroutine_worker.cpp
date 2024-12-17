@@ -22,8 +22,7 @@ namespace ark {
 
 StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, StackfulCoroutineManager *coroManager,
                                                  ScheduleLoopType type, PandaString name, size_t id)
-    : runtime_(runtime),
-      vm_(vm),
+    : CoroutineWorker(runtime, vm),
       coroManager_(coroManager),
       threadId_(os::thread::GetCurrentThreadId()),
       exclusiveWorkerCompletionEvent_(coroManager),
@@ -39,16 +38,24 @@ StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, 
         t.detach();
         // will create the schedule loop coroutine in the thread proc in order to set the stack protector correctly
     } else {
-        scheduleLoopCtx_ =
-            coroManager->CreateNativeCoroutine(runtime, vm, ScheduleLoopProxy, this, "[fiber_sch] " + GetName());
-        PushToRunnableQueue(scheduleLoopCtx_);
+        scheduleLoopCtx_ = coroManager->CreateNativeCoroutine(GetRuntime(), GetPandaVM(), ScheduleLoopProxy, this,
+                                                              "[fiber_sch] " + GetName(), Coroutine::Type::SCHEDULER);
+        AddRunnableCoroutine(scheduleLoopCtx_);
     }
 }
 
 void StackfulCoroutineWorker::AddRunnableCoroutine(Coroutine *newCoro, bool prioritize)
 {
+    ASSERT(newCoro != nullptr);
+    os::memory::LockHolder lock(runnablesLock_);
     PushToRunnableQueue(newCoro, prioritize);
-    coroManager_->OnRunnableCoroAdded(this);
+    RegisterIncomingActiveCoroutine(newCoro);
+}
+
+void StackfulCoroutineWorker::AddRunningCoroutine(Coroutine *newCoro)
+{
+    ASSERT(newCoro != nullptr);
+    RegisterIncomingActiveCoroutine(newCoro);
 }
 
 void StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
@@ -76,13 +83,16 @@ void StackfulCoroutineWorker::UnblockWaiters(CoroutineEvent *blocker)
 {
     Coroutine *unblockedCoro = nullptr;
     {
-        os::memory::LockHolder lock(waitersLock_);
+        os::memory::LockHolder lockW(waitersLock_);
         auto w = waiters_.find(blocker);
         if (w != waiters_.end()) {
             unblockedCoro = w->second;
             waiters_.erase(w);
             unblockedCoro->RequestUnblock();
-            AddRunnableCoroutine(unblockedCoro);
+            {
+                os::memory::LockHolder lockR(runnablesLock_);
+                PushToRunnableQueue(unblockedCoro);
+            }
         }
     }
     if (unblockedCoro != nullptr && InExclusiveMode()) {
@@ -93,7 +103,7 @@ void StackfulCoroutineWorker::UnblockWaiters(CoroutineEvent *blocker)
 void StackfulCoroutineWorker::RequestFinalization(Coroutine *finalizee)
 {
     // precondition: current coro and finalizee belong to the current worker
-    ASSERT(finalizee->GetContext<StackfulCoroutineContext>()->GetWorker() == this);
+    ASSERT(finalizee->GetWorker() == this);
     ASSERT(GetCurrentContext()->GetWorker() == this);
 
     finalizationQueue_.push(finalizee);
@@ -184,10 +194,11 @@ void StackfulCoroutineWorker::PrintRunnables(const PandaString &requester)
 void StackfulCoroutineWorker::ThreadProc()
 {
     threadId_ = os::thread::GetCurrentThreadId();
-    scheduleLoopCtx_ = coroManager_->CreateEntrypointlessCoroutine(runtime_, vm_, false, "[thr_sch] " + GetName());
-    scheduleLoopCtx_->GetContext<StackfulCoroutineContext>()->SetWorker(this);
+    scheduleLoopCtx_ = coroManager_->CreateEntrypointlessCoroutine(
+        GetRuntime(), GetPandaVM(), false, "[thr_sch] " + GetName(), Coroutine::Type::SCHEDULER);
     Coroutine::SetCurrent(scheduleLoopCtx_);
     scheduleLoopCtx_->RequestResume();
+    AddRunningCoroutine(scheduleLoopCtx_);
     scheduleLoopCtx_->NativeCodeBegin();
     coroManager_->OnWorkerStartup();
 
@@ -223,16 +234,12 @@ void StackfulCoroutineWorker::ScheduleLoopProxy(void *worker)
 
 void StackfulCoroutineWorker::PushToRunnableQueue(Coroutine *co, bool pushFront)
 {
-    os::memory::LockHolder lock(runnablesLock_);
-    co->GetContext<StackfulCoroutineContext>()->SetWorker(this);
-
     if (pushFront) {
         runnables_.push_front(co);
     } else {
         runnables_.push_back(co);
     }
     UpdateLoadFactor();
-
     runnablesCv_.Signal();
 }
 
@@ -268,6 +275,12 @@ void StackfulCoroutineWorker::WaitForRunnables()
             LOG(DEBUG, COROUTINES) << "StackfulCoroutineWorker::WaitForRunnables: wakeup!";
         }
     }
+}
+
+void StackfulCoroutineWorker::RegisterIncomingActiveCoroutine(Coroutine *newCoro)
+{
+    ASSERT(newCoro != nullptr);
+    newCoro->SetWorker(this);
 }
 
 void StackfulCoroutineWorker::RequestScheduleImpl()
@@ -312,6 +325,7 @@ void StackfulCoroutineWorker::SuspendCurrentCoroGeneric()
     auto *currentCoro = Coroutine::GetCurrent();
     currentCoro->RequestSuspend(SUSPEND_AS_BLOCKED);
     if constexpr (!SUSPEND_AS_BLOCKED) {
+        os::memory::LockHolder lock(runnablesLock_);
         PushToRunnableQueue(currentCoro, false);
     }
 }

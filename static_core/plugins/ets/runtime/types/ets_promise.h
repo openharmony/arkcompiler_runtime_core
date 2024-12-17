@@ -146,7 +146,7 @@ public:
     static void CreateLink(EtsObject *source, EtsPromise *target)
     {
         EtsCoroutine *currentCoro = EtsCoroutine::GetCurrent();
-        auto *jobQueue = currentCoro->GetPandaVM()->GetJobQueue();
+        auto *jobQueue = currentCoro->GetExternalIfaceTable()->GetJobQueue();
         if (jobQueue != nullptr) {
             jobQueue->CreateLink(source, target->AsObject());
         }

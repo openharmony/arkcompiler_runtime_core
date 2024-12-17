@@ -294,9 +294,12 @@ export final class JSRuntime {
     }
 
     private static createFinalizationRegistry(): FinalizationRegistry<Object> {
-        assert JSRuntime.finQueue == null;
-        JSRuntime.finQueue = new FinalizationRegistry<Object>((obj: Object): void => { JSRuntime.finalizationRegistryCallback(obj); });
-        return JSRuntime.finQueue!;
+        let fq = new FinalizationRegistry<Object>((obj: Object): void => { JSRuntime.finalizationRegistryCallback(obj); });
+        if (JSRuntime.finQueue == null)
+        {
+            JSRuntime.finQueue = fq;
+        }
+        return fq;
     }
 
     public static __initJSCallClass(): boolean {
@@ -319,5 +322,9 @@ export final class JSRuntime {
         throw new Error(msg);
     }
 
+    // NOTE(konstanting): currently we keep the reference to the finQueue for the first interop context only.
+    // As this field is used only in the tests, it is okay for now, because the Interop Context instances obtain 
+    // the correct finreg values during their initialization. But of course we should keep all the finreg references
+    // here and use the tests to verify that they function correctly.
     private static finQueue: FinalizationRegistry<Object> | null = null;
 }

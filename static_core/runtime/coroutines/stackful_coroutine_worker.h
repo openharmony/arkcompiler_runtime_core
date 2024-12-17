@@ -17,6 +17,7 @@
 #define PANDA_RUNTIME_COROUTINES_STACKFUL_COROUTINE_WORKER_H
 
 #include "runtime/coroutines/coroutine.h"
+#include "runtime/coroutines/coroutine_worker.h"
 #include "runtime/coroutines/coroutine_events.h"
 #include "runtime/coroutines/stackful_common.h"
 #include "runtime/coroutines/coroutine_stats.h"
@@ -30,7 +31,7 @@ class StackfulCoroutineManager;
  * Represents a worker thread for stackful coroutines.
  * Contains local part of the scheduling machinery (local coroutine queues, methods)
  */
-class StackfulCoroutineWorker {
+class StackfulCoroutineWorker : public CoroutineWorker {
 public:
     enum class ScheduleLoopType { THREAD, FIBER };
 
@@ -45,7 +46,7 @@ public:
      */
     StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, StackfulCoroutineManager *coroManager, ScheduleLoopType type,
                             PandaString name, size_t id);
-    ~StackfulCoroutineWorker() = default;
+    ~StackfulCoroutineWorker() override = default;
 
     /// @return false if the worker is stopped and does not schedule anything, otherwise true
     bool IsActive() const
@@ -89,11 +90,21 @@ public:
     }
 
     /**
-     * @brief Adds a coroutine to the runnables queue
-     * @param new_coro coroutine to add
+     * @brief Adds a coroutine to the runnables queue. Any new incoming RUNNABLE coroutine should be added
+     * via this interface! And vice versa: no intra-worker queue transitions should be done via this
+     * interface
+     * @param newCoro coroutine to add
      * @param prioritize if true, add to the beginning of the queue (otherwise to the end)
      */
     void AddRunnableCoroutine(Coroutine *newCoro, bool prioritize = false);
+
+    /**
+     * @brief Registers the RUNNING coroutine in the worker's structures.
+     * Any incoming running coroutine should be added via this interface! And vice versa: no
+     * intra-worker queue transitions should be done via this interface.
+     * @param newCoro coroutine to add
+     */
+    void AddRunningCoroutine(Coroutine *newCoro);
 
     /**
      * @brief Block current coroutine till an event happens and switch context to the next ready one
@@ -166,10 +177,15 @@ private:
     static void ScheduleLoopProxy(void *worker);
 
     /* runnables queue management */
-    void PushToRunnableQueue(Coroutine *co, bool pushFront = false);
+    void PushToRunnableQueue(Coroutine *co, bool pushFront = false) REQUIRES(runnablesLock_);
     Coroutine *PopFromRunnableQueue();
     bool RunnableCoroutinesExist() const;
     void WaitForRunnables() REQUIRES(runnablesLock_);
+    /**
+     * @brief Register a new active (= runnable or running) coroutine on this worker.
+     * @param newCoro the incoming coroutine to register
+     */
+    void RegisterIncomingActiveCoroutine(Coroutine *newCoro);
 
     /* scheduling machinery from high level functions to elementary helpers */
     /**
@@ -203,8 +219,6 @@ private:
      */
     void EnsureCoroutineSwitchEnabled();
 
-    Runtime *runtime_ = nullptr;
-    PandaVM *vm_ = nullptr;
     StackfulCoroutineManager *coroManager_;
     Coroutine *scheduleLoopCtx_ = nullptr;
     bool active_ GUARDED_BY(runnablesLock_) = true;

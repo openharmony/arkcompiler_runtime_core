@@ -58,7 +58,6 @@
 #include "plugins/ets/runtime/ets_native_library_provider.h"
 #include "plugins/ets/runtime/napi/ets_napi.h"
 #include "plugins/ets/runtime/types/ets_object.h"
-#include "plugins/ets/runtime/job_queue.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 
@@ -251,33 +250,6 @@ public:
 
     [[noreturn]] static void Abort(const char *message = nullptr);
 
-    void *GetExternalData()
-    {
-        return externalData_.data;
-    }
-
-    static PandaEtsVM *FromExternalData(void *externalData)
-    {
-        ASSERT(externalData != nullptr);
-        return reinterpret_cast<PandaEtsVM *>(ToUintPtr(externalData) - MEMBER_OFFSET(PandaEtsVM, externalData_));
-    }
-
-    struct alignas(16U) ExternalData {  // NOLINT(readability-magic-numbers)
-        static constexpr size_t SIZE = 256U * 3;
-        uint8_t data[SIZE];  // NOLINT(modernize-avoid-c-arrays)
-    };
-
-    JobQueue *GetJobQueue() const
-    {
-        return jobQueue_.get();
-    }
-
-    void InitJobQueue(JobQueue *jobQueue)
-    {
-        ASSERT(jobQueue_ == nullptr);
-        jobQueue_.reset(jobQueue);
-    }
-
     std::mt19937 &GetRandomEngine()
     {
         ASSERT(randomEngine_);
@@ -289,22 +261,13 @@ public:
         return true;
     }
 
-    void SetClearInteropHandleScopesFunction(const std::function<void(Frame *)> &func)
+    void CleanupCompiledFrameResources(Frame *frame) override
     {
-        clearInteropHandleScopes_ = func;
-    }
-
-    void ClearInteropHandleScopes(Frame *frame) override
-    {
-        if (clearInteropHandleScopes_) {
-            clearInteropHandleScopes_(frame);
+        auto *coro = EtsCoroutine::GetCurrent();
+        auto *ifaces = coro->GetExternalIfaceTable();
+        if (ifaces->GetClearInteropHandleScopesFunction()) {
+            ifaces->GetClearInteropHandleScopesFunction()(frame);
         }
-    }
-
-    void SetDestroyExternalDataFunction(const std::function<void(void *)> &func)
-    {
-        ASSERT(!destroyExternalData_);
-        destroyExternalData_ = func;
     }
 
     os::memory::Mutex &GetAtomicsMutex()
@@ -413,19 +376,14 @@ private:
     NativeLibraryProvider nativeLibraryProvider_;
     os::memory::Mutex finalizationRegistryLock_;
     PandaList<EtsObject *> registeredFinalizationRegistryInstances_ GUARDED_BY(finalizationRegistryLock_);
-    PandaUniquePtr<JobQueue> jobQueue_;
     PandaUniquePtr<CallbackPosterFactoryIface> callbackPosterFactory_;
     // optional for lazy initialization
     std::optional<std::mt19937> randomEngine_;
-    std::function<void(Frame *)> clearInteropHandleScopes_;
-    std::function<void(void *)> destroyExternalData_;
     // for JS Atomics
     os::memory::Mutex atomicsMutex_;
     DoubleToStringCache *doubleToStringCache_ {nullptr};
     FloatToStringCache *floatToStringCache_ {nullptr};
     LongToStringCache *longToStringCache_ {nullptr};
-
-    ExternalData externalData_ {};
 
     NO_MOVE_SEMANTIC(PandaEtsVM);
     NO_COPY_SEMANTIC(PandaEtsVM);

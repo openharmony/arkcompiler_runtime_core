@@ -34,7 +34,7 @@ public:
 };
 
 /*static*/
-std::unique_ptr<SharedReferenceStorage> SharedReferenceStorage::Create()
+PandaUniquePtr<SharedReferenceStorage> SharedReferenceStorage::Create()
 {
     size_t realSize = SharedReferenceStorage::MAX_POOL_SIZE;
 
@@ -44,7 +44,7 @@ std::unique_ptr<SharedReferenceStorage> SharedReferenceStorage::Create()
         return nullptr;
     }
     // CC-OFFNXT(G.RES.09) private constructor
-    return std::unique_ptr<SharedReferenceStorage>(new SharedReferenceStorage(data, realSize));
+    return MakePandaUnique<SharedReferenceStorage>(data, realSize);
 }
 
 SharedReference *SharedReferenceStorage::GetReference(EtsObject *etsObject)

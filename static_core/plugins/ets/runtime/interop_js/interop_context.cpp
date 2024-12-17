@@ -45,6 +45,8 @@ static Class *CacheClass(EtsClassLinker *etsClassLinker, std::string_view descri
     return klass;
 }
 
+std::atomic_uint32_t ConstStringStorage::qnameBufferSize_ {0U};
+
 void ConstStringStorage::LoadDynamicCallClass(Class *klass)
 {
     if (klass == lastLoadedClass_) {
@@ -57,11 +59,11 @@ void ConstStringStorage::LoadDynamicCallClass(Class *klass)
     napi_value jsArr;
     auto *env = Ctx()->GetJSEnv();
     if (jsStringBufferRef_ == nullptr) {
-        jsArr = InitBuffer(Ctx()->GetStringBufferSize());
+        jsArr = InitBuffer(GetStringBufferSize());
     } else {
         jsArr = GetReferenceValue(env, jsStringBufferRef_);
         if (startFrom >= stringBuffer_.size()) {
-            stringBuffer_.resize(Ctx()->GetStringBufferSize());
+            stringBuffer_.resize(GetStringBufferSize());
         } else if (stringBuffer_[startFrom] != nullptr) {
             return;
         }
@@ -106,90 +108,145 @@ napi_value ConstStringStorage::InitBuffer(size_t length)
     napi_value jsArr;
     NAPI_CHECK_FATAL(napi_create_array_with_length(Ctx()->GetJSEnv(), length, &jsArr));
     NAPI_CHECK_FATAL(napi_create_reference(Ctx()->GetJSEnv(), jsArr, 1, &jsStringBufferRef_));
-    stringBuffer_.resize(Ctx()->GetStringBufferSize());
+    stringBuffer_.resize(GetStringBufferSize());
     return jsArr;
 }
 
 InteropCtx *ConstStringStorage::Ctx()
 {
-    return InteropCtx::FromConstStringStorage(this);
+    ASSERT(ctx_ != nullptr);
+    return ctx_;
 }
 
-InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
+std::shared_ptr<InteropCtx::SharedEtsVmState> InteropCtx::SharedEtsVmState::GetInstance(PandaEtsVM *vm)
 {
-    JSNapiEnvScope envscope(this, env);
+    os::memory::LockHolder lock(mutex_);
+    if (instance_ == nullptr) {
+        instance_ = MakePandaShared<SharedEtsVmState>(vm);
+    }
+    return instance_;
+}
 
-    jsEnvForEventLoopCallbacks_ = env;
-    PandaEtsVM *vm = coro->GetPandaVM();
+// should be called when we would like to check if there are no more InteropCtx instances left
+void InteropCtx::SharedEtsVmState::TryReleaseInstance()
+{
+    os::memory::LockHolder lock(mutex_);
+    if (instance_.unique()) {
+        // assuming that if the main InteropCtx is destroyed, then the VM shuts down
+        instance_ = nullptr;
+    }
+}
+
+js_proxy::JSProxy *InteropCtx::SharedEtsVmState::GetJsProxyInstance(EtsClass *cls) const
+{
+    os::memory::LockHolder lock(mutex_);
+    auto item = jsProxies_.find(cls);
+    if (item != jsProxies_.end()) {
+        return item->second.get();
+    }
+    return nullptr;
+}
+
+void InteropCtx::SharedEtsVmState::SetJsProxyInstance(EtsClass *cls, js_proxy::JSProxy *proxy)
+{
+    os::memory::LockHolder lock(mutex_);
+    jsProxies_.insert_or_assign(cls, PandaUniquePtr<js_proxy::JSProxy>(proxy));
+}
+
+InteropCtx::SharedEtsVmState::SharedEtsVmState(PandaEtsVM *vm)
+{
     EtsClassLinker *etsClassLinker = vm->GetClassLinker();
-    refstor_ = vm->GetGlobalObjectStorage();
-    classLinker_ = Runtime::GetCurrent()->GetClassLinker();
-    linkerCtx_ = etsClassLinker->GetEtsClassLinkerExtension()->GetBootContext();
-
-    auto *jobQueue = Runtime::GetCurrent()->GetInternalAllocator()->New<JsJobQueue>();
-    vm->InitJobQueue(jobQueue);
-
+    pandaEtsVm = vm;
+    linkerCtx = etsClassLinker->GetEtsClassLinkerExtension()->GetBootContext();
     CacheClasses(etsClassLinker);
+    etsProxyRefStorage = ets_proxy::SharedReferenceStorage::Create();
+    ASSERT(etsProxyRefStorage.get() != nullptr);
 
-    RegisterBuiltinJSRefConvertors(this);
-
-    {
-        auto method = EtsClass::FromRuntimeClass(jsRuntimeClass_)->GetMethod("createFinalizationRegistry");
-        ASSERT(method != nullptr);
-        auto res = method->GetPandaMethod()->Invoke(coro, nullptr);
-        ASSERT(!coro->HasPendingException());
-        auto queue = EtsObject::FromCoreType(res.GetAs<ObjectHeader *>());
-        jsvalueFregistryRef_ = Refstor()->Add(queue->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
-        ASSERT(jsvalueFregistryRef_ != nullptr);
-
-        jsvalueFregistryRegister_ = queue->GetClass()
-                                        ->GetMethod("register", "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:V")
-                                        ->GetPandaMethod();
-        ASSERT(jsvalueFregistryRegister_ != nullptr);
-    }
-
-    {
-        EtsClass *promiseInteropClass =
-            EtsClass::FromRuntimeClass(CacheClass(etsClassLinker, "Lstd/interop/js/PromiseInterop;"));
-        ASSERT(promiseInteropClass != nullptr);
-        promiseInteropConnectMethod_ =
-            promiseInteropClass->GetMethod("connectPromise", "Lstd/core/Promise;J:V")->GetPandaMethod();
-        ASSERT(promiseInteropConnectMethod_ != nullptr);
-    }
-
-    etsProxyRefStorage_ = ets_proxy::SharedReferenceStorage::Create();
-    ASSERT(etsProxyRefStorage_.get() != nullptr);
-
-    // Set InteropCtx::DestroyLocalScopeForTopFrame to VM for call it it deoptimization and exception handlers
-    vm->SetClearInteropHandleScopesFunction([this](Frame *frame) { this->DestroyLocalScopeForTopFrame(frame); });
-    vm->SetDestroyExternalDataFunction(Destroy);
+    EtsClass *promiseInteropClass =
+        EtsClass::FromRuntimeClass(CacheClass(etsClassLinker, "Lstd/interop/js/PromiseInterop;"));
+    ASSERT(promiseInteropClass != nullptr);
+    promiseInteropConnectMethod =
+        promiseInteropClass->GetMethod("connectPromise", "Lstd/core/Promise;J:V")->GetPandaMethod();
+    ASSERT(promiseInteropConnectMethod != nullptr);
 }
 
-void InteropCtx::CacheClasses(EtsClassLinker *etsClassLinker)
+void InteropCtx::SharedEtsVmState::CacheClasses(EtsClassLinker *etsClassLinker)
 {
-    jsRuntimeClass_ = CacheClass(etsClassLinker, descriptors::JS_RUNTIME);
-    jsValueClass_ = CacheClass(etsClassLinker, descriptors::JS_VALUE);
-    jsErrorClass_ = CacheClass(etsClassLinker, descriptors::JS_ERROR);
-    objectClass_ = CacheClass(etsClassLinker, descriptors::OBJECT);
-    stringClass_ = CacheClass(etsClassLinker, descriptors::STRING);
-    bigintClass_ = CacheClass(etsClassLinker, descriptors::BIG_INT);
-    undefinedClass_ = CacheClass(etsClassLinker, descriptors::INTERNAL_UNDEFINED);
-    promiseClass_ = CacheClass(etsClassLinker, descriptors::PROMISE);
-    errorClass_ = CacheClass(etsClassLinker, descriptors::ERROR);
-    exceptionClass_ = CacheClass(etsClassLinker, descriptors::EXCEPTION);
-    typeClass_ = CacheClass(etsClassLinker, descriptors::TYPE);
+    jsRuntimeClass = CacheClass(etsClassLinker, descriptors::JS_RUNTIME);
+    jsValueClass = CacheClass(etsClassLinker, descriptors::JS_VALUE);
+    jsErrorClass = CacheClass(etsClassLinker, descriptors::JS_ERROR);
+    objectClass = CacheClass(etsClassLinker, descriptors::OBJECT);
+    stringClass = CacheClass(etsClassLinker, descriptors::STRING);
+    bigintClass = CacheClass(etsClassLinker, descriptors::BIG_INT);
+    undefinedClass = CacheClass(etsClassLinker, descriptors::INTERNAL_UNDEFINED);
+    promiseClass = CacheClass(etsClassLinker, descriptors::PROMISE);
+    errorClass = CacheClass(etsClassLinker, descriptors::ERROR);
+    exceptionClass = CacheClass(etsClassLinker, descriptors::EXCEPTION);
+    typeClass = CacheClass(etsClassLinker, descriptors::TYPE);
 
-    boxIntClass_ = CacheClass(etsClassLinker, descriptors::BOX_INT);
-    boxLongClass_ = CacheClass(etsClassLinker, descriptors::BOX_LONG);
+    boxIntClass = CacheClass(etsClassLinker, descriptors::BOX_INT);
+    boxLongClass = CacheClass(etsClassLinker, descriptors::BOX_LONG);
 
-    arrayClass_ = CacheClass(etsClassLinker, descriptors::ARRAY);
-    arraybufClass_ = CacheClass(etsClassLinker, descriptors::ARRAY_BUFFER);
+    arrayClass = CacheClass(etsClassLinker, descriptors::ARRAY);
+    arraybufClass = CacheClass(etsClassLinker, descriptors::ARRAY_BUFFER);
 
-    arrayAsListIntClass_ = CacheClass(etsClassLinker, descriptors::ARRAY_AS_LIST_INT);
+    arrayAsListIntClass = CacheClass(etsClassLinker, descriptors::ARRAY_AS_LIST_INT);
 
     for (auto descr : FUNCTION_INTERFACE_DESCRIPTORS) {
-        functionalInterfaces_.insert(CacheClass(etsClassLinker, descr));
+        functionalInterfaces.insert(CacheClass(etsClassLinker, descr));
     }
+}
+
+// NOLINTBEGIN(fuchsia-statically-constructed-objects)
+std::shared_ptr<InteropCtx::SharedEtsVmState> InteropCtx::SharedEtsVmState::instance_ {nullptr};
+os::memory::Mutex InteropCtx::SharedEtsVmState::mutex_;
+// NOLINTEND(fuchsia-statically-constructed-objects)
+
+void InteropCtx::InitSharedEtsVmState(PandaEtsVM *vm)
+{
+    sharedEtsVmState_ = SharedEtsVmState::GetInstance(vm);
+    RegisterBuiltinJSRefConvertors(this);
+}
+
+void InteropCtx::InitExternalInterfaces()
+{
+    interfaceTable_.SetJobQueue(MakePandaUnique<JsJobQueue>());
+    // should be called in the deoptimization and exception handlers
+    interfaceTable_.SetClearInteropHandleScopesFunction(
+        [this](Frame *frame) { this->DestroyLocalScopeForTopFrame(frame); });
+}
+
+InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env) : constStringStorage_(this)
+{
+    JSNapiEnvScope envscope(this, env);
+    jsEnvForEventLoopCallbacks_ = env;
+
+    // the per-EtsVM part has to be initialized first
+    InitSharedEtsVmState(coro->GetPandaVM());
+
+    InitExternalInterfaces();
+    InitJsValueFinalizationRegistry(coro);
+}
+
+InteropCtx::~InteropCtx()
+{
+    Refstor()->Remove(jsvalueFregistryRef_);
+}
+
+void InteropCtx::InitJsValueFinalizationRegistry(EtsCoroutine *coro)
+{
+    auto *method =
+        EtsClass::FromRuntimeClass(sharedEtsVmState_->jsRuntimeClass)->GetMethod("createFinalizationRegistry");
+    ASSERT(method != nullptr);
+    auto res = method->GetPandaMethod()->Invoke(coro, nullptr);
+    ASSERT(!coro->HasPendingException());
+    auto queue = EtsObject::FromCoreType(res.GetAs<ObjectHeader *>());
+    jsvalueFregistryRef_ = Refstor()->Add(queue->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+    ASSERT(jsvalueFregistryRef_ != nullptr);
+    jsvalueFregistryRegister_ = queue->GetClass()
+                                    ->GetMethod("register", "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:V")
+                                    ->GetPandaMethod();
+    ASSERT(jsvalueFregistryRegister_ != nullptr);
 }
 
 EtsObject *InteropCtx::CreateETSCoreJSError(EtsCoroutine *coro, JSValue *jsvalue)
@@ -444,8 +501,10 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
 
 void InteropCtx::Init(EtsCoroutine *coro, napi_env env)
 {
-    // Initialize InteropCtx in VM ExternalData
-    new (InteropCtx::Current(coro)) InteropCtx(coro, env);
+    auto *ctx = Runtime::GetCurrent()->GetInternalAllocator()->New<InteropCtx>(coro, env);
+    auto *worker = coro->GetWorker();
+    worker->GetLocalStorage().Set<CoroutineWorker::DataIdx::INTEROP_CTX_PTR>(ctx, Destroy);
+    worker->GetLocalStorage().Set<CoroutineWorker::DataIdx::EXTERNAL_IFACES>(&ctx->interfaceTable_);
 }
 
 }  // namespace ark::ets::interop::js

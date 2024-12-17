@@ -25,9 +25,13 @@
 
 namespace ark::ets {
 
+// ExternalIfaceTable contains std::function, which cannot be trivially constructed even for nullptr
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+ExternalIfaceTable EtsCoroutine::emptyExternalIfaceTable_ = ExternalIfaceTable();
+
 EtsCoroutine::EtsCoroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, PandaString name,
-                           CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo)
-    : Coroutine(id, allocator, vm, ark::panda_file::SourceLang::ETS, std::move(name), context, std::move(epInfo))
+                           CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo, Type type)
+    : Coroutine(id, allocator, vm, ark::panda_file::SourceLang::ETS, std::move(name), context, std::move(epInfo), type)
 {
     ASSERT(vm != nullptr);
 }
@@ -64,6 +68,12 @@ void EtsCoroutine::Initialize()
     ASSERT(promiseClassPtr_ != nullptr || !HasManagedEntrypoint());
 
     Coroutine::Initialize();
+}
+
+void EtsCoroutine::CleanUp()
+{
+    Coroutine::CleanUp();
+    // add the required local storage entries cleanup here!
 }
 
 void EtsCoroutine::FreeInternalMemory()
@@ -162,4 +172,23 @@ EtsObject *EtsCoroutine::GetReturnValueAsObject(panda_file::Type returnType, Val
     }
     return nullptr;
 }
+
+ExternalIfaceTable *EtsCoroutine::GetExternalIfaceTable()
+{
+    auto *worker = GetWorker();
+    auto *table = worker->GetLocalStorage().Get<CoroutineWorker::DataIdx::EXTERNAL_IFACES, ExternalIfaceTable *>();
+    if (table != nullptr) {
+        return table;
+    }
+    return &emptyExternalIfaceTable_;
+}
+
+void EtsCoroutine::OnHostWorkerChanged()
+{
+    // update the interop context pointer
+    auto *worker = GetWorker();
+    auto *ptr = worker->GetLocalStorage().Get<CoroutineWorker::DataIdx::INTEROP_CTX_PTR, void *>();
+    GetLocalStorage().Set<DataIdx::INTEROP_CTX_PTR>(ptr);
+}
+
 }  // namespace ark::ets

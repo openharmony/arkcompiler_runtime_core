@@ -49,6 +49,12 @@ public:
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
 
+    void SetCallbackPoster(PandaUniquePtr<CallbackPoster> poster) override;
+    void TryResetCallbackPoster() override;
+    bool IsMainWorker(Coroutine *co) const override;
+    Coroutine *CreateExclusiveWorkerForThread(Runtime *runtime, PandaVM *vm) override;
+    bool DestroyExclusiveWorker() override;
+
     /* ThreadManager interfaces, see ThreadManager class for the details */
     void WaitForDeregistration() override;
     void SuspendAllThreads() override;
@@ -62,16 +68,26 @@ public:
      */
     Coroutine *CreateNativeCoroutine(Runtime *runtime, PandaVM *vm,
                                      Coroutine::NativeEntrypointInfo::NativeEntrypointFunc entry, void *param,
-                                     PandaString name);
+                                     PandaString name, Coroutine::Type type);
     /// destroy the "native" coroutine created earlier
     void DestroyNativeCoroutine(Coroutine *co);
-
     void DestroyEntrypointfulCoroutine(Coroutine *co) override;
 
+    /// get next free worker id
+    size_t GetNextFreeWorkerId() const;
+
+    /* events */
     /// called when a coroutine worker thread ends its execution
     void OnWorkerShutdown();
     /// called when a coroutine worker thread starts its execution
     void OnWorkerStartup();
+    /// Should be called when a coro makes the non_active->active transition (see the state diagram in coroutine.h)
+    void OnCoroBecameActive(Coroutine *co) override;
+    /**
+     * Should be called when a running coro is being blocked or terminated, i.e. makes
+     * the active->non_active transition (see the state diagram in coroutine.h)
+     */
+    void OnCoroBecameNonActive(Coroutine *co) override;
 
     /* debugging tools */
     /**
@@ -88,22 +104,6 @@ public:
     {
         return stats_;
     }
-
-    /// get next free worker id
-    size_t GetNextFreeWorkerId() const;
-
-    bool IsMainWorker(Coroutine *co) const override;
-
-    void SetCallbackPoster(PandaUniquePtr<CallbackPoster> poster) override;
-
-    void TryResetCallbackPoster() override;
-
-    /// Should be called when runnable/running coro is added
-    void OnRunnableCoroAdded(StackfulCoroutineWorker *receiver);
-
-    Coroutine *CreateExclusiveWorkerForThread(Runtime *runtime, PandaVM *vm) override;
-
-    bool DestroyExclusiveWorker() override;
 
 protected:
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
@@ -168,12 +168,10 @@ private:
     /// Post external callback (e.g. to event loop)
     void PostExternalCallback(std::function<void()> cb);
     /// @return true if there is no active coroutines
-    bool IsNoActiveCoroutinesExceptCurrent();
+    bool IsNoActiveMutatorsExceptCurrent();
     /// Increment/decrement active corotuines count
     void IncrementActiveCoroutines();
     void DecrementActiveCoroutines();
-    // Should be called when running coro is being blocked or terminated
-    void OnCoroBecameNonActive();
 
     // for thread safety with GC
     mutable os::memory::Mutex coroListLock_;
@@ -198,7 +196,9 @@ private:
     size_t coroStackSizeBytes_ = 0;
     bool jsMode_ = false;
     // active coroutines are runnable + running coroutines
-    std::atomic_int32_t activeCoroutines_ = 0;
+    std::atomic_uint32_t activeCoroutines_ = 0;
+    // NOTE(konstanting): make it a map once number of the coroutine types gets bigger
+    std::atomic_uint32_t systemCoroutineCount_ = 0;
 
     /**
      * @brief holds pointers to the cached coroutine instances in order to speedup coroutine creation and destruction.
