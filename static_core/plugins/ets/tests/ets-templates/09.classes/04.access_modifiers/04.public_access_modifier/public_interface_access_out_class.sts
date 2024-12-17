@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: Check interface with public access modifier out class.
 assert: Member or constructor with public modifier can be accessed everywhere.
+tags: [negative, compile-only]
 ---*/
 
 class A {

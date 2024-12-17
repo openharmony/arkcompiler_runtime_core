@@ -18,6 +18,9 @@ limitations under the License.
 desc: Check members with internal access modifier.
 assert: Member or constructor with private modifier can be accessed only within their declaring class.
 params: "{{member.body}}"
+{%- if member.unsupported == "true" %}
+tags: [negative, compile-only]
+{%- endif %}
 ---*/
 
 class A {

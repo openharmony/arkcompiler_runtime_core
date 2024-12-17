@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: Check interface with protected access modifier in derived class.
 assert: Member or constructor with protected modifier can be accessed only within their declaring class and classes derived from their declaring class.
+tags: [negative, compile-only]
 ---*/
 
 class A {
@@ -24,7 +25,7 @@ class A {
 
 class B extends A {
 
-  inner class C implements this.I {
+  class C implements this.I {
     public override fee(): int {
       return 1;
     }

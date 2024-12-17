@@ -18,6 +18,9 @@ limitations under the License.
 desc: Check member with public access modifier out class.
 assert: Member or constructor with public modifier can be accessed everywhere.
 params: "{{member.body}}"
+{%- if member.unsupported == "true" %}
+tags: [negative, compile-only]
+{%- endif %}
 ---*/
 
 class A {
