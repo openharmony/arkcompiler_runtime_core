@@ -317,7 +317,7 @@ properties (see :ref:`Interface Properties`) and methods (see
 The scope of declaration of a member *m* that the interface type ``I``
 declares or inherits is specified in :ref:`Scopes`.
 
-The usage of annotations is defined in :ref:`Using Annotations`.
+The usage of annotations is discussed in :ref:`Using Annotations`.
 
 .. index::
    interface body

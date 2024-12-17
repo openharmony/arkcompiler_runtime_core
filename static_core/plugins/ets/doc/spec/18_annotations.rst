@@ -169,10 +169,10 @@ Types of Annotation Fields
 
 The choice of types for annotation fields is limited to the following:
 
-- Numeric types (:ref:`Numeric Types Hierarchy`);
-- Type ``boolean``;
-- Type ``string``;
-- Enumeration types;
+- Numeric types (see :ref:`Numeric Types`);
+- Type ``boolean`` (see :ref:`Boolean Types and Operations`);
+- Type ``string`` (see :ref:`Type string`);
+- Enumeration types (see :ref:`Enumerations`);
 - Array of the above types (e.g., ``string[]``), including multidimensional
   arrays (e.g., ``string[][]``).
 
@@ -182,6 +182,7 @@ an *annotation field*.
 .. index::
    annotation field
    numeric type
+   boolean
    string
    enumeration type
    array
@@ -232,8 +233,8 @@ a :index:`compile-time error` occurs.
    object literal
    expression
 
-The usage of annotation is presented in the example below
-where annotations are applied to class declarations:
+The usage of annotation is presented in the example below. The annotations in
+this example are applied to class declarations:
 
 .. code-block:: typescript
    :linenos:
@@ -247,23 +248,22 @@ where annotations are applied to class declarations:
     @MyAnno()
     class C3 {/*body*/}
 
-Annotations can be applied to:
+Annotations can be applied to the following:
 
-- A top-level declaration (see :ref:`Top-Level Declarations`), 
+- Top-level declarations (see :ref:`Top-Level Declarations`),
   except abstract class declarations;
 
-- A class member (see :ref:`Class Body`)
-  or interface member (see :ref:`Interface Body`), 
-  except members of abstract class declaration;
+- Class members (see :ref:`Class Body`) or interface members (see
+  :ref:`Interface Body`), except members of abstract class declarations;
 
-- A type usage (see :ref:`Using Types`);
+- Type usage (see :ref:`Using Types`);
 
-- A parameter (see :ref:`Parameter List`, :ref:`Optional Parameters`);
+- Parameters (see :ref:`Parameter List`, :ref:`Optional Parameters`);
 
 - A lambda expression (see :ref:`Lambda Expressions`,
   :ref:`Lambda Expressions with Receiver`);
 
-- A local declarataion (see :ref:`Local Declarations`).
+- Local declarataions (see :ref:`Local Declarations`).
 
 .. index::
    annotation

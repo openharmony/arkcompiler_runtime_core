@@ -220,7 +220,7 @@ along with other regions it can be used in. The following entities are always
 referred to by their qualified names only:
 
 - Class and interface members (both static and instance ones);
-- Entities imported via qualified import;
+- Entities imported via qualified import; and
 - Entities declared in namespaces (see :ref:`Namespace Declarations`).
 
 Other entities are referred to by their simple (unqualified) names.
@@ -259,15 +259,15 @@ The scope of an entity depends on the context the entity is declared in:
 
 .. _module-access:
 
--  *Module level scope* is applicable for separate modules only. A name
+-  *Module level scope* is applicable to separate modules only. A name
    declared on the module level is accessible (see :ref:`Accessible`)
    throughout the entire module. If exported, a name can be accessed in other
    compilation units.
 
 .. _namespace-access:
 
--  *Namespace level scope* is applicable for namespaces only. A name
-   declared in the namespace is accessible (see :ref:`Accessible`)
+-  *Namespace level scope* is applicable to namespaces only. A name
+   declared in a namespace is accessible (see :ref:`Accessible`)
    throughout the entire namespace and in all embedded namespaces. If exported,
    a name can be accessed outside the namespace with mandatory namespace name
    qualification.
@@ -1102,13 +1102,18 @@ the function or the method has no parameters.
 .. code-block:: abnf
 
     parameterList:
-        parameter (',' parameter)* (',' optionalParameters|restParameter)? 
-        | restParameter
-        | optionalParameters
+        requiredParameters ','?
+        | requiredParameters ',' optionalParameters ','?
+        | optionalParameters ','?
+        | requiredParameters ',' restParameter
+        | restParameter 
         ;
 
+    requiredParameters:
+        parameter (',' parameter)* 
+
     parameter:
-        annotationUsage? identifier ':' 'readonly'? type
+        annotationUsage? identifier ':' type
         ;
 
     restParameter:
@@ -1118,8 +1123,8 @@ the function or the method has no parameters.
 If a parameter type is prefixed with ``readonly``, then there are additional
 restrictions on the parameter as described in :ref:`Readonly Parameters`.
 
-The last parameter of a function or a method can be a *rest parameter*
-(see :ref:`Rest Parameter`), or a sequence of *optional parameters*
+The last parameter of a function or a method can be a single *rest parameter*
+(see :ref:`Rest Parameter`), or several *optional parameters*
 (see :ref:`Optional Parameters`). This construction allows omitting
 the corresponding argument when calling the function or the method.
 
@@ -1221,8 +1226,8 @@ Optional Parameters
     
     optionalParameter:
         annotationUsage?
-        ( identifier ':' 'readonly'? type '=' expression
-        | identifier '?' ':' 'readonly'? type
+        ( identifier ':' type '=' expression
+        | identifier '?' ':' type
         )
         ;
 

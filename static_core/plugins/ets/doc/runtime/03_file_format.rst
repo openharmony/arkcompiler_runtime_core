@@ -10,44 +10,9 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
+.. _Executable File Format:
 
-.. _Contributors:
+Executable File Format
+######################
 
-Contributors
-############
-
-Language design lead:
-
-- Nedoria Aleksei
-
-Contributors:
-
-- Bronnikov Georgy
-- Gavrin Evgeny
-- Kanatov Alexey
-- Nedoria Aleksei
-- Pavlyuk Alexander
-- Polyakov Alexander
-- Rubanov Vladimir
-- Soldatov Anton
-- Solomennikov Dmitry
-- Trubenkov Dmitrii
-- Velikanov Michael
-- Zouev Evgeniy
-
-Authors of the language specification:
-
-- Kanatov Alexey
-- Nedoria Aleksei
-- Trubenkov Dmitrii
-- Zouev Evgeniy
-
-Technical writer:
-
-- Baranov Dmitry
-
-.. raw:: pdf
-
-   PageBreak
-
-
+For details, see https://gitee.com/openharmony/arkcompiler_runtime_core/blob/master/static_core/docs/file_format.md

@@ -163,17 +163,15 @@ errors in a manner similar to the handling of exceptions.
 .. code-block:: typescript
    :linenos:
 
-    class Exception extends Error {}
-
     function handleAll(
       actions : () => void,
       error_handling_actions : () => void,
-      exception_handling_actions : () => void)
+      other_handling_actions : () => void)
     {
       try {
         actions()
       }
-      catch (x) {
+      catch (x) { // Type of x is the union Exception | Error
         if (x instanceof Exception)
           exception_handling_actions()
         else if (x instanceof Error)

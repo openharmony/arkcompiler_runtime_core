@@ -336,7 +336,7 @@ in an ambient context. This feature is provided for |TS| compatibility:
 
 **Note**. *Ambient class signature declaration* is supported in ambient contexts
 only. If ambient class implementation is written in |LANG|, then it must conform
-to :ref:`Callable Types with Invoke Method`.
+to :ref:`Callable Types with $_invoke Method`.
 
 .. index::
    ambient call signature declaration

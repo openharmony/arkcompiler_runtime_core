@@ -63,7 +63,7 @@ in many OOP languages provides a way to restrict class inheritance and method
 overriding. Making a class *final* prohibits defining classes derived from it,
 whereas making a method *final* prevents it from overriding in derived classes.
 
-Section :ref:`Adding Functionality to Existing Types` discusses the way to 
+Section :ref:`Adding Functionality to Existing Types` discusses the way to
 add new functionality to an already defined type. This feature can be used
 for GUI programming (:ref:`Support for GUI Programming`).
 
@@ -741,12 +741,13 @@ Callable Types
 **************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+    todo: add $_ to names
 
 A type is *callable* if the name of the type can be used in a call expression.
 A call expression that uses the name of a type is called a *type call
 expression*. Only class type can be callable. To make a type
-callable, a static method with the name ``invoke`` or ``instantiate`` must be
+callable, a static method with the name ``$_invoke`` or ``$_instantiate`` must be
 defined or inherited:
 
 .. code-block-meta:
@@ -755,14 +756,14 @@ defined or inherited:
    :linenos:
 
     class C {
-        static invoke() { console.log("invoked") }
+        static $_invoke() { console.log("invoked") }
     }
     C() // prints: invoked
-    C.invoke() // also prints: invoked
+    C.$_invoke() // also prints: invoked
 
 In the above example, ``C()`` is a *type call expression*. It is the short
-form of the normal method call ``C.invoke()``. Using an explicit call is always
-valid for the methods ``invoke`` and ``instantiate``.
+form of the normal method call ``C.$_invoke()``. Using an explicit call is always
+valid for the methods ``$_invoke`` and ``$_instantiate``.
 
 .. index::
    callable type
@@ -773,7 +774,7 @@ valid for the methods ``invoke`` and ``instantiate``.
    method call
    instantiation
 
-**Note**. Only a constructor---not the methods ``invoke`` or ``instantiate``---is
+**Note**. Only a constructor---not the methods ``$_invoke`` or ``$_instantiate``---is
 called in a *new expression*:
 
 .. code-block-meta:
@@ -782,16 +783,16 @@ called in a *new expression*:
    :linenos:
 
     class C {
-        static invoke() { console.log("invoked") }
+        static $_invoke() { console.log("invoked") }
         constructor() { console.log("constructed") }
     }
     let x = new C() // constructor is called
 
-The methods ``invoke`` and ``instantiate`` are similar but have differences as
+The methods ``$_invoke`` and ``$_instantiate`` are similar but have differences as
 discussed below.
 
 A :index:`compile-time error` occurs if a callable type contains both methods
-``invoke`` and ``instantiate``.
+``invoke`` and ``$_instantiate``.
 
 .. index::
    method
@@ -799,15 +800,15 @@ A :index:`compile-time error` occurs if a callable type contains both methods
 
 |
 
-.. _Callable Types with Invoke Method:
+.. _Callable Types with $_invoke Method:
 
-Callable Types with Invoke Method
-=================================
+Callable Types with ``$_invoke`` Method
+=======================================
 
 .. meta:
     frontend_status: Done
 
-The method ``invoke`` can have an arbitrary signature. The method can be used
+The method ``$_invoke`` can have an arbitrary signature. The method can be used
 in a *type call expression* in either case above. If the signature has
 parameters, then the call must contain corresponding arguments.
 
@@ -817,7 +818,7 @@ parameters, then the call must contain corresponding arguments.
    :linenos:
 
     class Add {
-        static invoke(a: number, b: number): number {
+        static $_invoke(a: number, b: number): number {
             return a + b
         }
     }
@@ -832,19 +833,19 @@ parameters, then the call must contain corresponding arguments.
 
 |
 
-.. _Callable Types with Instantiate Method:
+.. _Callable Types with $_instantiate Method:
 
-Callable Types with Instantiate Method
-======================================
+Callable Types with ``$_instantiate`` Method
+============================================
 
 .. meta:
     frontend_status: Partly
     todo: es2panda segfaults on the first example
 
-The method ``instantiate`` can have an arbitrary signature by itself.
+The method ``$_instantiate`` can have an arbitrary signature by itself.
 If it is to be used in a *type call expression*, then its first parameter
 must be a ``factory`` (i.e., it must be a *parameterless function type
-returning some class or struct type*).
+returning some class type*).
 The method can have or not have other parameters, and those parameters can
 be arbitrary.
 
@@ -855,14 +856,14 @@ parameter is passed implicitly:
    :linenos:
 
     class C {
-        static instantiate(factory: () => C): C {
+        static $_instantiate(factory: () => C): C {
             return factory()
         }
     }
     let x = C() // factory is passed implicitly
 
-    // Explicit call of 'instantiate' requires explicit 'factory':
-    let y = C.instantiate(() => { return new C()})
+    // Explicit call of '$_instantiate' requires explicit 'factory':
+    let y = C.$_instantiate(() => { return new C()})
 
 .. index::
    method
@@ -872,7 +873,7 @@ parameter is passed implicitly:
    parameterless function type
    struct type
 
-If the method ``instantiate`` has additional parameters, then the call must
+If the method ``$_instantiate`` has additional parameters, then the call must
 contain corresponding arguments:
 
 .. code-block:: typescript
@@ -880,7 +881,7 @@ contain corresponding arguments:
 
     class C {
         name = ""
-        static instantiate(factory: () => C, name: string): C {
+        static $_instantiate(factory: () => C, name: string): C {
             let x = factory()
             x.name = name
             return x
@@ -891,8 +892,8 @@ contain corresponding arguments:
 A :index:`compile-time error` occurs in a *type call expression* with type ``T``,
 if:
 
-- ``T`` has neither method ``invoke`` nor  method ``instantiate``; or
-- ``T`` has the method ``instantiate`` but its first parameter is not
+- ``T`` has neither method ``$_invoke`` nor  method ``$_instantiate``; or
+- ``T`` has the method ``$_instantiate`` but its first parameter is not
   a ``factory``.
 
 .. index::
@@ -908,11 +909,11 @@ if:
    :linenos:
 
     class C {
-        static instantiate(factory: string): C {
+        static $_instantiate(factory: string): C {
             return factory()
         }
     }
-    let x = C() // compile-time error, wrong 'instantiate' 1st parameter
+    let x = C() // compile-time error, wrong '$_instantiate' 1st parameter
 
 |
 
@@ -1578,7 +1579,7 @@ and the keyword ``this`` is used as its name:
         ;
 
     receiverParameter:
-        'this' ':' 'readonly'? type
+        'this' ':' type
         ;
 
 There two ways to call a *function with receiver* are as follows:
@@ -1720,7 +1721,7 @@ function type, and lamdba with receiver. A *receiver type* may be an interface
 type, a class type, an array type, or a type parameter. Otherwise, a
 :index:`compile-time error` occurs.
 
-The example below represents the use of an array type as receiever type:
+Using an array type as receiver type is illustrated by the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -1885,7 +1886,7 @@ the first parameter is mandatory, and the keyword ``this`` is used as its name:
         returnType? throwMark? '=>' lambdaBody
         ;
 
-The usage of annotations is defined in :ref:`Using Annotations`.
+The usage of annotations is discussed in :ref:`Using Annotations`.
 
 The keyword ``this`` can be used inside a *lamdba expression with receiver*,
 It corresponds to the first parameter:
@@ -1899,7 +1900,7 @@ It corresponds to the first parameter:
           console.log(this.name)
       }
 
-The example below represents the use of lambda:
+The use of lambada is illustrated by the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -2130,7 +2131,6 @@ There are additional methods for instances of any enumeration type:
    instance
    enumeration type
    value
-   numeric type
    enumeration constant
    type int
    type string

@@ -12,12 +12,12 @@
 @rem limitations under the License.
 
 @echo off
-echo Building all ArkTS docs ...
-call build_annotations.bat
-call build_cookbook.bat
-call build_stdlib.bat
-call build_tutorial.bat
-call build_system.bat
-call build_spec.bat
-call build_runtime.bat
-echo all pdf files are in appropriate 'build' sub-folder for every document
+md __build
+cd runtime
+sphinx-build -n -b latex . ..\__build
+cd ..\__build
+latexmk -f -silent -pdf -dvi- -ps- *.tex
+md ..\runtime\build
+move *.pdf ..\runtime\build
+cd ..
+rmdir /S /Q __build

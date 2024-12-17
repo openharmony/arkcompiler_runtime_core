@@ -10,44 +10,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
+============================
+|LANG| Runtime Specification
+============================
 
-.. _Contributors:
+.. toctree::
+    :numbered:
+    :maxdepth: 3
 
-Contributors
-############
-
-Language design lead:
-
-- Nedoria Aleksei
-
-Contributors:
-
-- Bronnikov Georgy
-- Gavrin Evgeny
-- Kanatov Alexey
-- Nedoria Aleksei
-- Pavlyuk Alexander
-- Polyakov Alexander
-- Rubanov Vladimir
-- Soldatov Anton
-- Solomennikov Dmitry
-- Trubenkov Dmitrii
-- Velikanov Michael
-- Zouev Evgeniy
-
-Authors of the language specification:
-
-- Kanatov Alexey
-- Nedoria Aleksei
-- Trubenkov Dmitrii
-- Zouev Evgeniy
-
-Technical writer:
-
-- Baranov Dmitry
-
-.. raw:: pdf
-
-   PageBreak
-
+    /01_intro
+    /02_bytecode
+    /03_file_format
+    /04_names
+    /05_imports
 

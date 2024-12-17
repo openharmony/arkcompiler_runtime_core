@@ -541,7 +541,7 @@ as used in other languages, application areas, or industries.
       the entire package, and in other packages if exported.
 
    module level scope
-     -- a name that is applicable for separate modules only. It is accessible
+     -- a name that is applicable to separate modules only. It is accessible
      throughout the entire module and in other packages if exported.
 
    class level scope

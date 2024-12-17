@@ -564,8 +564,8 @@ A *simple name* refers to the following:
 -  A local variable or parameter of the surrounding function or method.
 
 A *qualifiedName* that is not a *simple name* refers to the following:
-   
--  An entity imported from a compilation unit, or
+
+-  An entity imported from a compilation unit,
 -  An entity exported from a namespace, or
 -  A member of some class or interface.
 
@@ -641,8 +641,8 @@ Array Literal
     todo: let x = ([1,2,3][1]) - should be CTE, but it isn't
     todo: implement it properly for invocation context to get type from the context, not from the first element
 
-An *array literal* is an expression that can be used to create an array, and
-to provide some initial values:
+An *array literal* is an expression that can be used to create an array or
+tuple in some cases, and to provide some initial values:
 
 .. code-block:: abnf
 
@@ -778,9 +778,16 @@ of an assignment, call parameter type, or type of a cast expression:
     }
     min([1., 3.14, 0.99]); // ok, parameter type is used
 
-    // ...
+    // Two-dimensional array initialization
     type Matrix = number[][]
     let m: Matrix = [[1, 2], [3, 4], [5, 6]]
+
+    class aClass {}
+    let b1: Array <aClass> = [new aClass, new aClass]
+    let b2: Array <Number> = [ 1, 2, 3]
+      /* Type of literal is inferred from the context
+         taken from b1 and b2 declarations */
+
 
 All valid conversions are applied to the initializer expression, i.e., each
 initializer expression type must be compatible (see :ref:`Type Compatibility`)
@@ -805,6 +812,26 @@ In the example above, the first literal and 'value' are implicitly boxed to
 ``Number``, and the types of a string literal and the instance of type
 ``Error`` are compatible (see :ref:`Type Compatibility`) with ``Object``
 because the corresponding classes are inherited from Object.
+
+Note, that there are cases when every array or tuple element of primitve type
+is boxed (see :ref:`Boxing Conversions`) according to the type of the context
+creating a new array or tuple. Such transformation is performed during the
+compile-time to ensure new array or tuple fits the context type.
+
+.. code-block:: typescript
+   :linenos:
+
+    let array: Number[] = [1, 2, 3]   // assignment context
+    function foo (array: Number[]) {}
+    foo ([1, 2, 3])                   // call context
+    [1, 2, 3] as Number[]             // casting conversion
+
+    let tuple: [Number, Boolean] = [1, true]    // assignment context
+    bar ([1, true])                             // call context
+    function bar (tuple: [Number, Boolean]) {}
+    [1, true] as [Number, Boolean]              // casting conversion
+   
+
 
 .. index::
    literal
@@ -840,7 +867,7 @@ union type. Otherwise, it is a :index:`compile-time error`:
 
     let union_of_arrays: number[] | string[] = [1, 2] // OK, type of literal is number[]
     let incorrect_union_of_arrays: number[] | string[] = [1, 2, "string"]
-     /* compile-time error: (number|string)[] (type of the literal) is not compatible with 
+     /* compile-time error: (number|string)[] (type of the literal) is not compatible with
         number[] | string[] (type of the variable)
      */
 
@@ -876,8 +903,8 @@ used to infer it from the initialization expressions:
 #. If the type of the expression cannot be determined, then the type of the
    array literal cannot be inferred, and a :index:`compile-time error` occurs.
 
-#. If each initialization expression is of a numeric type, then the
-   type is ``number[]``.
+#. If each initialization expression is of a numeric type (see
+   :ref:`Numeric Types`), then the type is ``number[]``.
 
 #. If all initialization expressions are of the same type ``T``, then the
    type is ``T[]``.
@@ -903,10 +930,10 @@ used to infer it from the initialization expressions:
 .. code-block:: typescript
    :linenos:
 
-    let a = [] // type is Object[]
-    let b = ["a"] // type is string[]
-    let c = [1, 2, 3] // type is number[]
-    let d = ["a", 1, 3.14] // type is (string | number)[]
+    let a = []                        // compile-time error, type cannot be inferred
+    let b = ["a"]                     // type is string[]
+    let c = [1, 2, 3]                 // type is number[]
+    let d = ["a", 1, 3.14]            // type is (string | number)[]
     let e = [(): void => {}, new A()] // type is (() => void | A)[]
 
 |
@@ -1054,10 +1081,11 @@ A :index:`compile-time error` occurs if the identifier does not name an
     class Friend {
       name: string = ""
       private nick: string = ""
-      age: number = 0
+      age: number
+      sex?: "male"|"female"
     }
     // compile-time error, nick is private:
-    let f: Friend = {name: "aa", age: 55, nick: "bb"}
+    let f: Friend = {name: "Alexander", age: 55, nick: "Alex"}
 
 A :index:`compile-time error` occurs if the type of an expression in a
 *name-value pair* is not compatible (see :ref:`Type Compatibility`) with the
@@ -1066,8 +1094,19 @@ field type:
 .. code-block:: typescript
    :linenos:
 
-    let f: Friend = {name: 123 /* compile-time error - type of right hand-side
+    let f: Friend = {name: 123} /* compile-time error - type of right hand-side
     is not compatible to the type of the left hand-side */
+
+If some class fields have default values (see :ref:`Default Values for Types`)
+or explict initializers (see :ref:`Variable and Constant Declarations`) then
+such fields can be skiped in the object literal.
+
+.. code-block:: typescript
+   :linenos:
+
+    let f: Friend = {} /* OK, as name, nick, age, and sex have either default
+                          value or explicit initializer */
+
 
 If class ``C`` is to be used in an object literal, then it must have a
 *parameterless* constructor (explicit or default) that is *accessible*
@@ -1115,6 +1154,26 @@ These situations are presented in the examples below:
     let c: C = {} /* compile-time error - constructor is not
         accessible */
 
+
+If a class has accessors (see :ref:`Accessor Declarations`) for some property
+then this properety can be used as a part of object literal if its setter is
+provided. Otherwise it is a :index:`compile-time error`.
+
+.. code-block:: typescript
+   :linenos:
+
+    class OK {
+        set attr (attr: number) {}
+    }
+    const a: OK = {attr: 666} // OK, as the setter be called
+
+    class CTE {
+        get attr (): number { return 666 }
+    }
+    const b: CTE = {attr: 666} // compile-time error - no setter for 'attr'
+
+
+
 |
 
 .. _Object Literal of Interface Type:
@@ -1123,8 +1182,7 @@ Object Literal of Interface Type
 ================================
 
 .. meta:
-    frontend_status: Partly
-    todo: implement generic types
+    frontend_status: Done
 
 If the interface type ``I`` is inferred from the context, then the type of the
 object literal is an anonymous class implicitly created for interface *I*:
@@ -1136,12 +1194,30 @@ object literal is an anonymous class implicitly created for interface *I*:
       name: string
       age: number
     }
-    let b : Person = {name: "Bob", age: 25}
+    let b: Person = {name: "Bob", age: 25}
 
 In the example above, the type of *b* is an anonymous class that contains the
-same fields as the interface *I*.
+same fields as the interface *I* properties.
 
-The interface type ``I`` must contain fields only. A :index:`compile-time error`
+If some interface properties are of optional type then such properties can be
+skiped in the object literal as they have default value *undefined* (see
+:ref:`Default Values for Types`) according to its union type nature (see
+:ref:`Variable Declarations`).
+
+.. code-block:: typescript
+   :linenos:
+
+    interface Person {
+      name: string
+      age: number
+      sex?: "male"|"female"
+    }
+    let b: Person = {name: "Bob", age: 25}
+         // 'sex' field will have 'undefined' value
+
+
+
+The interface type ``I`` must contain properties only. A :index:`compile-time error`
 occurs if the interface type ``I`` contains a method:
 
 .. index::
@@ -1152,7 +1228,7 @@ occurs if the interface type ``I`` contains a method:
    anonymous class
    interface
    anonymous class
-   field
+   property
    method
    compile-time error
 
@@ -1164,6 +1240,26 @@ occurs if the interface type ``I`` contains a method:
       foo()
     }
     let i : I = {name: "Bob"} // compile-time error, interface has methods
+
+If an interface has accessors (see :ref:`Accessor Declarations`) for some
+property then if properety is used in an object literal then a
+:index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I1 {
+        set attr (attr: number)
+    }
+    const a: I1 = {attr: 666} /* compile-time error - 'attr' cannot be used
+                                 in object literal */
+
+    interface I2 {
+        get attr (): number
+    }
+    const b: I2 = {attr: 666} /* compile-time error - 'attr' cannot be used
+                                 in object literal */
+
 
 |
 
@@ -1479,7 +1575,7 @@ context the lambda expression occurs in.
 
 The keyword ``this`` in a direct call expression *this(...)* can only be used
 in the explicit constructor call statement (see
-:ref:`Explicit Constructor Call`). 
+:ref:`Explicit Constructor Call`).
 
 The keyword ``this`` can also be used in the body of a function with
 receiver (see :ref:`Functions with Receiver`). The type of expression *this*
@@ -2090,7 +2186,8 @@ Array Indexing Expression
     frontend_status: Partly
     todo: implement floating point index support - #14001
 
-For array indexing, the *index expression* must be of a numeric type.
+For array indexing, the *index expression* must be of a numeric type (see
+:ref:`Numeric Types`).
 
 If *index expression* is of type ``number`` or other floating-point type,
 and the fractional part differs from 0, then errors occur as follows:
@@ -2620,7 +2717,7 @@ Any ``typeof`` expression is of type ``string``. Its evaluation starts with the
 the result of the ``typeof`` expression cannot be determined. Otherwise, the
 ``typeof`` expression value is defined as follows:
 
-- The following types are defined at compile time:
+1. Types defined at compile time
 
 .. index::
    typeof expression
@@ -2659,17 +2756,17 @@ the result of the ``typeof`` expression cannot be determined. Otherwise, the
 |                                 |                         |  let B: BigInt = ...        |
 |                                 |                         |  typeof B                   |
 +---------------------------------+-------------------------+-----------------------------+
+| any class or interface          | "object"                | .. code-block:: typescript  |
+|                                 |                         |                             |
+|                                 |                         |  let a: Object = ...        |
+|                                 |                         |  typeof a                   |
++---------------------------------+-------------------------+-----------------------------+
 
 (table cont'd)
 
 +---------------------------------+-------------------------+-----------------------------+
 |     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
 +=================================+=========================+=============================+
-| any class or interface          | "object"                | .. code-block:: typescript  |
-|                                 |                         |                             |
-|                                 |                         |  let a: Object = ...        |
-|                                 |                         |  typeof a                   |
-+---------------------------------+-------------------------+-----------------------------+
 | any function type               | "function"              | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  let f: () => void = ...    |
@@ -2705,7 +2802,7 @@ the result of the ``typeof`` expression cannot be determined. Otherwise, the
 | ``Double``, ``char``, ``Char``  |                         |                             |
 +---------------------------------+-------------------------+-----------------------------+
 
-- All other types are evaluated at runtime:
+2. All other types evaluated at runtime
 
 +------------------------+-----------------------------+
 | **Type of Expression** | **Code Example**            |
@@ -2906,7 +3003,7 @@ operator '``++``'.
 
 A :index:`compile-time error` occurs if the type of the variable resultant from
 the *expression* is not convertible (see :ref:`Implicit Conversions`) to a
-numeric type.
+numeric type (see :ref:`Numeric Types`).
 
 The type of a postfix increment expression is the type of the variable. The
 result of a postfix increment expression is a value, not a variable.
@@ -2966,7 +3063,7 @@ operator '``--``'.
 
 A :index:`compile-time error` occurs if the type of the variable resultant from
 the *expression* is not convertible (see :ref:`Implicit Conversions`) to a
-numeric type.
+numeric type (see :ref:`Numeric Types`).
 
 The type of a postfix decrement expression is the type of the variable. The
 result of a postfix decrement expression is a value, not a variable.
@@ -3027,7 +3124,7 @@ A *prefix increment expression* is an expression preceded by the operator
 
 A :index:`compile-time error` occurs if the type of the variable resultant from
 the *expression* is not convertible (see :ref:`Implicit Conversions`) to a
-numeric type.
+numeric type (see :ref:`Numeric Types`).
 
 The type of a prefix increment expression is the type of the variable. The
 result of a prefix increment expression is a value, not a variable.
@@ -3085,7 +3182,7 @@ A *prefix decrement expression* is an expression preceded by the operator
 
 A :index:`compile-time error` occurs if the type of the variable resultant from
 the *expression* is not convertible (see :ref:`Implicit Conversions`) to a
-numeric type.
+numeric type (see :ref:`Numeric Types`).
 
 The type of a prefix decrement expression is the type of the variable. The
 result of a prefix decrement expression is a value, not a variable.
@@ -3142,8 +3239,8 @@ Unary Plus
 A *unary plus expression* is an expression preceded by the operator '``+``'.
 
 The type of the operand *expression* with the unary operator '``+``' must
-be convertible  (see :ref:`Implicit Conversions`) to a numeric type. Otherwise,
-a :index:`compile-time error` occurs.
+be convertible  (see :ref:`Implicit Conversions`) to a numeric type (see
+:ref:`Numeric Types`). Otherwise, a :index:`compile-time error` occurs.
 
 The numeric types conversion (see :ref:`Primitive Types Conversions`) is
 performed on the operand to ensure that the resultant type is that of the
@@ -3181,8 +3278,8 @@ Unary Minus
 A *unary minus expression* is an expression preceded by the operator '``-``'.
 
 The type of the operand *expression* with the unary operator '``-``' must
-be convertible (see :ref:`Implicit Conversions`) to a numeric type. Otherwise,
-a :index:`compile-time error` occurs.
+be convertible (see :ref:`Implicit Conversions`) to a numeric type (see
+:ref:`Numeric Types`). Otherwise, a :index:`compile-time error` occurs.
 
 The numeric types conversion (see :ref:`Primitive Types Conversions`)
 is performed on the operand to ensure that the resultant type is that of the
@@ -3318,8 +3415,9 @@ A *logical complement expression* is an expression preceded by the operator
 '``!``'.
 
 The type of the operand *expression* with the unary '``!``' operator must be
-``boolean`` or ``Boolean``. Otherwise, a :index:`compile-time error` occurs.
-See :ref:`Extended Conditional Expressions` for extended semantics.
+``boolean`` or ``Boolean`` or type mentioned in
+:ref:`Extended Conditional Expressions`. Otherwise, a
+:index:`compile-time error` occurs.
 
 The unary logical complement expression’s type is ``boolean``.
 
@@ -3370,8 +3468,8 @@ and '``%``':
 The multiplicative operators group left-to-right.
 
 The type of each operand in a multiplicative operator must be convertible (see
-:ref:`Contexts and Conversions`) to a numeric type. Otherwise, a
-:index:`compile-time error` occurs.
+:ref:`Contexts and Conversions`) to a numeric type (see :ref:`Numeric Types`).
+Otherwise, a :index:`compile-time error` occurs.
 
 The numeric types conversion (see :ref:`Primitive Types Conversions`)
 is performed on both operands to ensure that the resultant type is the type of
@@ -3791,12 +3889,13 @@ The additive operators group left-to-right.
 If either operand of the operator is '``+``' of type ``string``, then the
 operation is a string concatenation (see :ref:`String Concatenation`). In all
 other cases, the type of each operand of the operator '``+``' must be
-convertible (see :ref:`Primitive Types Conversions`) to a numeric type.
-Otherwise, a :index:`compile-time error` occurs.
+convertible (see :ref:`Primitive Types Conversions`) to a numeric type (see
+:ref:`Numeric Types`). Otherwise, a :index:`compile-time error` occurs.
 
 The type of each operand of the binary operator '``-``' must be convertible
-(see :ref:`Primitive Types Conversions`) to a numeric type in all cases.
-Otherwise, a :index:`compile-time error` occurs.
+(see :ref:`Primitive Types Conversions`) to a numeric type (see
+:ref:`Numeric Types`) in all cases. Otherwise, a :index:`compile-time error`
+occurs.
 
 .. index::
    additive expression
@@ -3967,9 +4066,10 @@ by using the IEEE 754 *round-to-nearest* mode. The |LANG| programming language
 requires gradual underflow support as defined by IEEE 754 (see
 :ref:`Floating-Point Types and Operations`).
 
-When applied to two numeric type operands, the binary operator '``-``' performs
-subtraction, and returns the difference of such operands (``minuend`` as
-left-hand, and ``subtrahend`` as the right-hand operand).
+When applied to two numeric type (see :ref:`Numeric Types`) operands, the
+binary operator '``-``' performs subtraction, and returns the difference of
+such operands (``minuend`` as left-hand, and ``subtrahend`` as the right-hand
+operand).
 
 The result of *a-b* is always the same as that of *a+(-b)* in both integer and
 floating-point subtraction.
@@ -4175,8 +4275,8 @@ Numerical Relational Operators
     frontend_status: Done
 
 The type of each operand in a numerical relational operator must be convertible
-(see :ref:`Implicit Conversions`) to a numeric type. Otherwise, a
-:index:`compile-time error` occurs.
+(see :ref:`Implicit Conversions`) to a numeric type (see :ref:`Numeric Types`).
+Otherwise, a :index:`compile-time error` occurs.
 
 Numeric types conversions (see :ref:`Primitive Types Conversions`) are
 performed on each operand as follows:
@@ -4418,8 +4518,9 @@ operands used as follows:
 
 Operators '``===``' and '``==``', or '``!==``' and '``!=``' are used for:
 
-- :ref:`Numerical Equality Operators` if operands are of numeric types,
-  type ``char``, or the boxed version of numeric types;
+- :ref:`Numerical Equality Operators` if operands are of numeric types (see
+  :ref:`Numeric Types`),   type ``char``, or the boxed version of numeric
+  types;
 
 - :ref:`String Equality Operators` if both operands are of type ``string``;
 
@@ -4474,8 +4575,8 @@ Numerical Equality Operators
     frontend_status: Done
 
 The type of each operand in a numerical equality operator must be convertible
-(see :ref:`Implicit Conversions`) to a numeric type. Otherwise, a
-:index:`compile-time error` occurs. 
+(see :ref:`Implicit Conversions`) to a numeric type (see :ref:`Numeric Types`).
+Otherwise, a :index:`compile-time error` occurs.
 
 A widening conversion can occur (see :ref:`Widening Primitive Conversions`)
 if type of one operand is smaller than type of the other operand (see
@@ -5171,9 +5272,8 @@ result, and the same side effects occur in the same order for any *a*, *b*, and
 A *conditional-and* expression is always of type ``boolean``.
 
 Each operand of the *conditional-and* operator must be of type ``boolean``, or
-``Boolean``. Otherwise, a :index:`compile-time error` occurs.
-See :ref:`Extended Conditional Expressions` for extended semantics, operands
-and result type.
+``Boolean`` or type mentioned in :ref:`Extended Conditional Expressions`.
+Otherwise, a :index:`compile-time error` occurs.
 
 The left-hand operand expression is first evaluated at runtime. If the result
 is of type ``Boolean``, then the unboxing conversion (see
@@ -5242,9 +5342,8 @@ A *conditional-or* expression is always of type ``boolean``.
    boolean type
 
 Each operand of the *conditional-or* operator must be of type ``boolean`` or
-``Boolean``. Otherwise, a :index:`compile-time error` occurs.
-See :ref:`Extended Conditional Expressions` for extended semantics, operands
-and result type.
+``Boolean`` or type mentioned in :ref:`Extended Conditional Expressions`.
+Otherwise, a :index:`compile-time error` occurs.
 
 The left-hand operand expression is first evaluated at runtime. If the result
 is of type ``Boolean``, then the *unboxing conversion ()* is performed as
@@ -5784,7 +5883,8 @@ with the separators '``?``' between the first and the second, and
 '``:``' between the second and the third expression.
 
 A :index:`compile-time error` occurs if the first expression is not of type
-``boolean`` or ``Boolean``.
+``boolean`` or ``Boolean`` or type mentioned in
+:ref:`Extended Conditional Expressions`.
 
 .. index::
    conditional expression
@@ -5948,13 +6048,13 @@ has no function name specified, and can have types of parameters omitted:
 
     lambdaParameterList:
         lambdaParameter (',' lambdaParameter)*
-               (',' lambdaOptionalParameters|lambdaRestParameter)? 
+               (',' lambdaOptionalParameters|lambdaRestParameter)?
         | lambdaRestParameter
         | optionalParameters
         ;
 
     lambdaParameter:
-        identifier (':' 'readonly'? type)?
+        identifier (':' type)?
         ;
 
     lambdaRestParameter:
@@ -5964,12 +6064,12 @@ has no function name specified, and can have types of parameters omitted:
     lambdaOptionalParameters:
         lambdaOptionalParameter (',' lambdaOptionalParameter)
         ;
-    
+
     lambdaOptionalParameter:
-        identifier '?' (':' 'readonly'? type)?
+        identifier '?' (':' type)?
         ;
 
-The usage of annotations is defined in :ref:`Using Annotations`.
+The usage of annotations is discussed in :ref:`Using Annotations`.
 
 .. index::
    lambda expression
@@ -5992,7 +6092,7 @@ The examples of usage are presented below:
     p1, p2 => p1 + p2
 
     function foo<T> (a: (p1: T, ...p2: T[]) => T) {}
-    // All calls to foo pass valid lambda expressions in different forms 
+    // All calls to foo pass valid lambda expressions in different forms
     foo (e => e)
     foo ((e1, e2) => e1)
     foo ((e1, e2: Object) => e1)
@@ -6085,7 +6185,7 @@ Lambda Body
 *Lambda body* can be a single expression or a block (see :ref:`Block`).
 Similarly to the body of a method or a function, a lambda body describes the
 code to be executed when a lambda expression call occurs (see
-:ref:`Function Call Expression`). 
+:ref:`Function Call Expression`).
 
 The meanings of names, and of the keywords ``this`` and ``super`` (along with
 the accessibility of the referred declarations) are the same as in the
@@ -6094,7 +6194,7 @@ surrounding context. However, lambda parameters introduce new names.
 If a *lambda body* is a single expression, then it is equivalent to the block
 with one return statement that returns that single expression
 *{ return singleExpression }*.
- 
+
 If any local variable or formal parameter of the surrounding context is
 used but not declared in a lambda body, then the local variable or formal
 parameter is *captured* by the lambda.
@@ -6348,7 +6448,7 @@ of the following:
 -  Literals of a primitive type, and literals of type ``string`` (see
    :ref:`Literals`);
 
--  Conversions to primitive types, and conversions to type ``string`` (see
+-  Conversions to primitive types and conversions to type ``string`` (see
    :ref:`Cast Expressions`);
 
 -  Unary operators '``+``', '``-``', '``~``', and '``!``', but not '``++``'
@@ -6360,16 +6460,19 @@ of the following:
 
 -  Additive operators '``+``' and '``-``' (see :ref:`Additive Expressions`);
 
--  Shift operators '``<<``', '``>>``', and '``>>>``' (see :ref:`Shift Expressions`);
+-  Shift operators '``<<``', '``>>``', and '``>>>``' (see
+   :ref:`Shift Expressions`);
 
--  Relational operators '``<``', '``<=``', '``>``', and '``>=``' (see :ref:`Relational Expressions`);
+-  Relational operators '``<``', '``<=``', '``>``', and '``>=``' (see
+   :ref:`Relational Expressions`);
 
 -  Equality operators '``==``' and '``!=``' (see :ref:`Equality Expressions`);
 
--  Bitwise and logical operators '``&``', '``^``', and '``|``' (see :ref:`Bitwise and Logical Expressions`);
+-  Bitwise and logical operators '``&``', '``^``', and '``|``' (see
+   :ref:`Bitwise and Logical Expressions`);
 
--  Conditional-and operator '``&&``' (see :ref:`Conditional-And Expression`), and
-   conditional-or operator '``||``' (see :ref:`Conditional-Or Expression`);
+-  Conditional-and operator '``&&``' (see :ref:`Conditional-And Expression`),
+   and conditional-or operator '``||``' (see :ref:`Conditional-Or Expression`);
 
 -  Ternary conditional operator '``? :``' (see :ref:`Conditional Expressions`);
 

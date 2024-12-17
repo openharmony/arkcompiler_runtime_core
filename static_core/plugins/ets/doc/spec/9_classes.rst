@@ -297,9 +297,9 @@ A :index:`compile-time error` occurs if:
 
 -  The ``extends`` graph has a cycle.
 
--  ``typeReference`` refers directly to, or is an alias of interface or any
-   non-class type like primitive, array, string, enumeration, union, function
-   or utility types.
+-  ``typeReference`` refers directly to, or is an alias of interface, or of any
+   non-class type, e.g., of primitive, array, string, enumeration, union,
+   function, or utility type.
 
 
 *Class extension* implies that a class inherits all members of the direct
@@ -689,7 +689,7 @@ Declarations can be inherited or immediately declared in a class. Any
 declaration within a class has a class scope. The class scope is fully
 defined in :ref:`Scopes`.
 
-The usage of annotations is defined in :ref:`Using Annotations`.
+The usage of annotations is discussed in :ref:`Using Annotations`.
 
 .. index::
    class body
@@ -1151,7 +1151,7 @@ Field Initialization
 .. meta:
     frontend_status: Done
 
-Any field must be initialized before the first use (see
+Any field must be initialized before it is used for the first time (see
 :ref:`Field Access Expression`). The initialization is performed by using the
 result of the evaluation of the following:
 
@@ -1872,7 +1872,7 @@ executed along with all *class initializers* of all superclasses. The order of
 execution is from the top superclass to the current class. Class initializers
 (along with field initializers for static fields as described in
 :ref:`Field Initialization`) ensure that all static fields receive their
-initial values before the first use.
+initial values before they are used for the first time.
 
 .. code-block:: abnf
 

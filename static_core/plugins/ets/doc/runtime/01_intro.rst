@@ -10,44 +10,9 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
+.. _Introduction:
 
-.. _Contributors:
-
-Contributors
+Introduction
 ############
 
-Language design lead:
-
-- Nedoria Aleksei
-
-Contributors:
-
-- Bronnikov Georgy
-- Gavrin Evgeny
-- Kanatov Alexey
-- Nedoria Aleksei
-- Pavlyuk Alexander
-- Polyakov Alexander
-- Rubanov Vladimir
-- Soldatov Anton
-- Solomennikov Dmitry
-- Trubenkov Dmitrii
-- Velikanov Michael
-- Zouev Evgeniy
-
-Authors of the language specification:
-
-- Kanatov Alexey
-- Nedoria Aleksei
-- Trubenkov Dmitrii
-- Zouev Evgeniy
-
-Technical writer:
-
-- Baranov Dmitry
-
-.. raw:: pdf
-
-   PageBreak
-
-
+TBD
