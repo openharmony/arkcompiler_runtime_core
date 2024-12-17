@@ -17,6 +17,7 @@ function main() {
     console.log('Starting...');
     let penv = process.env;
     let stsVm = require(penv.MODULE_PATH + '/ets_interop_js_napi.node');
+    console.log(penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH);
     const stsRT = stsVm.createRuntime({
         'boot-panda-files': penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
         'panda-files': penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
@@ -30,18 +31,33 @@ function main() {
         return 1;
     }
 
-    const State = stsVm.getClass('LMapCallbackJ2a;');
+    const stsVoid = stsVm.getFunction('LETSGLOBAL;', 'stsVoid');
+    const returnAnonymous = stsVm.getFunction('LETSGLOBAL;', 'returnAnonymous');
 
-    const start = process.hrtime.bigint();
-    let bench = new State();
-    bench.setup();
+    const iterations = 1000000;
+    let totalTime = 0;
 
-    for (let i = 0; i < 1000; i++) {
-        bench.test();
+    function callFunction(fun, target) {
+        let start;
+        let loopTime = 0;
+
+        for (let i = 0; i < iterations; i++) {
+            start = process.hrtime.bigint();
+            fun(iterations, iterations);
+            loopTime += Number(process.hrtime.bigint() - start);
+        }
+
+        totalTime += loopTime;
+        console.log(`Benchmark result: call_import_function_j2a ${target} ` + loopTime);
     }
-    const end = process.hrtime.bigint();
-    let timeNs = end - start;
-    console.log('Benchmark result: map_callback_j2a ' + timeNs);
+
+    const anonymous = returnAnonymous();
+
+    callFunction(anonymous, 'anonymous fu');
+
+    callFunction(stsVoid, 'function');
+
+    console.log('Benchmark result: call_import_function_j2a ' + totalTime);
 
     return null;
 }

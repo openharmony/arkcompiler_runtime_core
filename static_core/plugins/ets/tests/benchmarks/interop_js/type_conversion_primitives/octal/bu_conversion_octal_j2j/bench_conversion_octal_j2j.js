@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,34 +14,35 @@
  */
 
 function main() {
-    console.log('Starting...');
-    let penv = process.env;
-    let stsVm = require(penv.MODULE_PATH + '/ets_interop_js_napi.node');
-    const stsRT = stsVm.createRuntime({
-        'boot-panda-files': penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-        'panda-files': penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-        'gc-trigger-type': 'heap-trigger',
-        'compiler-enable-jit': 'false',
-        'run-gc-in-place': 'false',
-    });
+    const seed = 123;
+    let octalString = '';
+    let result;
 
-    if (!stsRT) {
-        console.error('Failed to create ETS runtime');
-        return 1;
+    function generateNumber(seed) {
+        const modulus = Math.pow(2, 32);
+        const a = 1664525;
+        const c = 1013904223;
+      
+        seed = (a * seed + c) % modulus;
+        
+        return Math.floor((seed / modulus) * 100); 
     }
 
-    const State = stsVm.getClass('LMapCallbackJ2a;');
+    function octalStringToNumberToString(str) {
+        const res = parseInt(str, 8);
+        return String(res);
+    }
 
+    const data = generateNumber(seed);
+    octalString = data.toString(8);
     const start = process.hrtime.bigint();
-    let bench = new State();
-    bench.setup();
 
     for (let i = 0; i < 1000; i++) {
-        bench.test();
+        result = octalStringToNumberToString(octalString);
     }
     const end = process.hrtime.bigint();
-    let timeNs = end - start;
-    console.log('Benchmark result: map_callback_j2a ' + timeNs);
+    timing = end - start;
+    console.log('Benchmark result: conversion_octal_j2j ' + timing);
 
     return null;
 }

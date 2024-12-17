@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ function main() {
         return 1;
     }
 
-    const State = stsVm.getClass('LMapCallbackJ2a;');
+    const State = stsVm.getClass('LConversionOctalJ2a;');
 
     const start = process.hrtime.bigint();
     let bench = new State();
@@ -40,8 +40,8 @@ function main() {
         bench.test();
     }
     const end = process.hrtime.bigint();
-    let timeNs = end - start;
-    console.log('Benchmark result: map_callback_j2a ' + timeNs);
+    let time_ns = end - start;
+    console.log('Benchmark result: conversion_octal_j2a ' + time_ns);
 
     return null;
 }

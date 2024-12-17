@@ -16,7 +16,9 @@
 function main() {
     console.log('Starting...');
     let penv = process.env;
+    console.log('penv.MODULE_PATH: ' + penv.MODULE_PATH);
     let stsVm = require(penv.MODULE_PATH + '/ets_interop_js_napi.node');
+    console.log(penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH);
     const stsRT = stsVm.createRuntime({
         'boot-panda-files': penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
         'panda-files': penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
@@ -30,19 +32,20 @@ function main() {
         return 1;
     }
 
-    const State = stsVm.getClass('LMapCallbackJ2a;');
+    const getObj = stsVm.getFunction('LETSGLOBAL;', 'getStsObj');
 
-    const start = process.hrtime.bigint();
-    let bench = new State();
-    bench.setup();
+    let totalTime = 0n;
 
-    for (let i = 0; i < 1000; i++) {
-        bench.test();
+    for (let i = 0; i < 10000; i++) { // Number of iterations was picked experimentally
+        const stsObj = getObj();
+        let start = process.hrtime.bigint();
+
+        const stringVal = stsObj.stsString;
+
+        totalTime += (process.hrtime.bigint() - start);
     }
-    const end = process.hrtime.bigint();
-    let timeNs = end - start;
-    console.log('Benchmark result: map_callback_j2a ' + timeNs);
 
+    console.log('Benchmark result: get_string_a2j ' + totalTime);
     return null;
 }
 

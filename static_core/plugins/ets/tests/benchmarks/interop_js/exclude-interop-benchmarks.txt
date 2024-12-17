@@ -1,0 +1,49 @@
+# 697 benchmarks requiring manual involvement to run properly
+call_import_function_a2j
+call_import_function_j2j
+class_init_by_rest_a2j
+class_init_by_rest_j2j
+conversion_binary_a2j
+conversion_char_a2j
+conversion_decimal_a2j
+conversion_hex_a2j
+conversion_octal_a2j
+equality_extra_a2j
+equality_extra_j2j
+equality_numeric_a2j
+equality_numeric_j2j
+equality_objects_a2j
+equality_objects_j2j
+equality_primitives_a2j
+equality_primitives_j2j
+equality_string_a2j
+equality_string_j2j
+get_numeric_j2a
+get_numeric_j2j
+get_specific_j2a
+get_specific_j2j
+get_string_j2a
+get_string_j2j
+map_callback_a2j
+promise_a2j
+reduce_callback_a2j
+stringify_a2j
+
+# 1942 mistakes in benchmarks code
+promise_a2a
+promise_a2j
+promise_j2a
+
+# 1943 issues with VMB or Panda build cause benchmarks failures
+get_specific_a2a
+get_string_a2a
+
+# 19307 Panda issue
+call_import_function_a2a
+call_import_function_a2j
+
+# 17965 Panda issue
+class_init_by_rest_j2a
+
+# 19331 Panda issue
+class_init_by_rest_a2a

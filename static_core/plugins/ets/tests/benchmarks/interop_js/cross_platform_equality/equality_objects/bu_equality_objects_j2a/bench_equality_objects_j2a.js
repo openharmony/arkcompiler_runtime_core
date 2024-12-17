@@ -30,18 +30,47 @@ function main() {
         return 1;
     }
 
-    const State = stsVm.getClass('LMapCallbackJ2a;');
+    const noEqual = '===';
+    const equal = '!==';
+    const MS2NS = 1000000;
 
-    const start = process.hrtime.bigint();
-    let bench = new State();
-    bench.setup();
-
-    for (let i = 0; i < 1000; i++) {
-        bench.test();
+    function message(data) {
+        console.log('Benchmark result: equality_objects_j2a ' + data);
     }
-    const end = process.hrtime.bigint();
-    let timeNs = end - start;
-    console.log('Benchmark result: map_callback_j2a ' + timeNs);
+
+    let totalTime = 0;
+    function comparison(valueA, valueB, compare, target) {
+        let start;
+
+        let loopTime = 0;
+        for (let i = 0; i < MS2NS; i++) {
+            start = process.hrtime.bigint();
+
+            if (compare === equal && valueA !== valueB) {
+                throw Error();
+            }
+            if (compare === noEqual && valueA === valueB) {
+                throw Error();
+            }
+
+            loopTime += Number(process.hrtime.bigint() - start);
+        }
+
+        totalTime += loopTime;
+        message(target + loopTime);
+    }
+
+    const State = stsVm.getClass('LEqualityObjectsJ2a;');
+
+    const bench = new State();
+
+    comparison(bench.stsObj, bench.stsObj, equal, 'object ');
+
+    comparison(bench.stsObj, bench.stsObjCopy, equal, 'object by link ');
+
+    comparison(bench.stsObj, bench.stsObjOther, noEqual, 'object different object ');
+
+    message(totalTime);
 
     return null;
 }

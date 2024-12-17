@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-function main() {
+async function main() {
     console.log('Starting...');
     let penv = process.env;
     let stsVm = require(penv.MODULE_PATH + '/ets_interop_js_napi.node');
+    
     const stsRT = stsVm.createRuntime({
         'boot-panda-files': penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
         'panda-files': penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
@@ -24,25 +25,39 @@ function main() {
         'compiler-enable-jit': 'false',
         'run-gc-in-place': 'false',
     });
-
+    
     if (!stsRT) {
         console.error('Failed to create ETS runtime');
         return 1;
     }
 
-    const State = stsVm.getClass('LMapCallbackJ2a;');
+    const iterations = 1000000; // this value worked reasonably well in trial runs
+    const promise = stsVm.getFunction('LETSGLOBAL;', 'promise');
 
-    const start = process.hrtime.bigint();
-    let bench = new State();
-    bench.setup();
+    async function checkPromise() {
+        let start;
+        let loopTime = 0;
+        
+        for (let i = 0; i < iterations; i++) {
+            await (() => {
+                console.log(i);
 
-    for (let i = 0; i < 1000; i++) {
-        bench.test();
+                start = process.hrtime.bigint();
+                return promise();
+            }
+            )().then(() => {
+                loopTime = Number(process.hrtime.bigint() - start);
+            });
+        }
+
+        return loopTime;
     }
-    const end = process.hrtime.bigint();
-    let timeNs = end - start;
-    console.log('Benchmark result: map_callback_j2a ' + timeNs);
 
+    //NOTE issue(19656) enable this after fix global reference storage
+    if (false) {
+        const timeNs = await checkPromise();
+        console.log('Benchmark result: promise_j2a ' + (timeNs));
+    }
     return null;
 }
 

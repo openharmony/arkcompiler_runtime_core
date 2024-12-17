@@ -41,7 +41,7 @@ function main() {
     }
     const end = process.hrtime.bigint();
     let timeNs = end - start;
-    console.log('Benchmark result: ReduceCallbackJ2a ' + timeNs);
+    console.log('Benchmark result: reduce_callback_j2a ' + timeNs);
 
     return null;
 }

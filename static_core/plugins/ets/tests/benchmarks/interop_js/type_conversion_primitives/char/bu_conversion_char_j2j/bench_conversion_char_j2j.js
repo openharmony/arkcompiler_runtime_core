@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,37 +15,22 @@
 
 function main() {
 
-    const min = 0;
-    const max = 9999999;
-    const arrayLength = 100;
-    let testArray = [];
-    let sumArray;
+    const char = 'A';
+    let result;
 
-    function generateRandomNumber(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
+    function charToNumberToString(chr) {
+        const res = chr.charCodeAt(0);
+        return String(res);
     }
-
-    function generateRandomArray(length, min, max, arr ) {
-        for (let i = 0; i < length; i++) {
-            const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-            arr.push(randomNumber);
-        }
-    }
-
-    function sumFunction(acc, curr) {
-        return acc + curr;
-    }
-
-    generateRandomArray(arrayLength, min, max, testArray);
 
     const start = process.hrtime.bigint();
 
-    for (let i = 0; i < 1000; i++) {
-        sumArray = testArray.reduce(sumFunction, 0);
+    for (let i = 0; i < 10000; i++) {
+        result = charToNumberToString(char);
     }
     const end = process.hrtime.bigint();
     timing = end - start;
-    console.log('Benchmark result: reduce_callback_j2j ' + timing);
+    console.log('Benchmark result: conversion_char_j2j ' + timing);
 
     return null;
 }

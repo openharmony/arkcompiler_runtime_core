@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 function main() {
+    let binaryString = '';
+    const seed = 123;
     console.log('Starting...');
     let penv = process.env;
     let stsVm = require(penv.MODULE_PATH + '/ets_interop_js_napi.node');
@@ -30,18 +31,30 @@ function main() {
         return 1;
     }
 
-    const State = stsVm.getClass('LMapCallbackJ2a;');
+    function generateNumber(seed) {
+        const modulus = Math.pow(2, 32);
+        const a = 1664525;
+        const c = 1013904223;
+      
+        seed = (a * seed + c) % modulus;
+        
+        return Math.floor((seed / modulus) * 100); 
+    }
+
+    const data = generateNumber(seed);
+    binaryString = data.toString(2);
+    const State = stsVm.getClass('LConversionBinaryJ2a;');
 
     const start = process.hrtime.bigint();
     let bench = new State();
     bench.setup();
 
-    for (let i = 0; i < 1000; i++) {
-        bench.test();
+    for (let i = 0; i < 10000; i++) {
+        bench.test(binaryString);
     }
     const end = process.hrtime.bigint();
-    let timeNs = end - start;
-    console.log('Benchmark result: map_callback_j2a ' + timeNs);
+    let time_ns = end - start;
+    console.log('Benchmark result: conversion_binary_J2a ' + time_ns);
 
     return null;
 }

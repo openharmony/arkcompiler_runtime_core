@@ -22,7 +22,7 @@ export class MapCallbackA2a {
     arrayLength: number = 100;
     stringLength: number = 25;
     testArray: Array<string> = new Array<string>();
-    newTestArray: Array<string>;
+    newTestArray: Array<string> = new Array<string>();
 
     generateRandomString(length: number): string {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
