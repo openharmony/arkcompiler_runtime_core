@@ -121,6 +121,9 @@ public:
     /// @brief call to delete the fake "schedule loop" coroutine
     void FinalizeFiberScheduleLoop();
 
+    /// @brief schedule runnable exclusive coroutines and wait for blocked coroutines
+    void CompleteAllExclusiveCoroutines() NO_THREAD_SAFETY_ANALYSIS;
+
     /* debugging tools */
     // See CoroutineManager/StackfulCoroutineManager for details
     void DisableCoroutineSwitch();
@@ -135,6 +138,20 @@ public:
     CoroutineWorkerStats &GetPerfStats()
     {
         return stats_;
+    }
+
+    /// @brief get exclusive status of worker
+    bool InExclusiveMode() const
+    {
+        // Atomic with relaxed order reason: sync is not needed here
+        return inExclusiveMode_.load(std::memory_order_relaxed);
+    }
+
+    /// @brief set exclusive status of worker
+    void SetExclusiveMode(bool inExclusiveMode)
+    {
+        // Atomic with relaxed order reason: sync is not needed here
+        inExclusiveMode_.store(inExclusiveMode, std::memory_order_relaxed);
     }
 
 private:
@@ -199,12 +216,20 @@ private:
     PandaDeque<Coroutine *> runnables_ GUARDED_BY(runnablesLock_);
     // blocked coros-related members: Coroutine AWAITS CoroutineEvent
     mutable os::memory::Mutex waitersLock_;
-    PandaMultiMap<CoroutineEvent *, Coroutine *> waiters_ GUARDED_BY(waitersLock_);
+    PandaMap<CoroutineEvent *, Coroutine *> waiters_ GUARDED_BY(waitersLock_);
     // terminated coros (waiting for deletion)
     PandaQueue<Coroutine *> finalizationQueue_;
 
     /// the moving average number of coroutines in the runnable queue
     std::atomic<double> loadFactor_ = 0;
+
+    /**
+     * If worker is in exclusive mode, it means that:
+     * 1. launch/transition of coroutine from other workers to e-worker is disabled
+     * 2. child e-worker coroutines will be scheduled on the same worker
+     */
+    std::atomic<bool> inExclusiveMode_ = false;
+    GenericEvent exclusiveWorkerCompletionEvent_;
 
     /**
      * This counter is incremented on DisableCoroutineSwitch calls and decremented on EnableCoroutineSwitch calls.

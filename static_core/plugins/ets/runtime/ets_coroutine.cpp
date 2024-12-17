@@ -51,7 +51,7 @@ void EtsCoroutine::Initialize()
     }
     etsNapiEnv_ = std::move(etsNapiEnv.Value());
     // Main EtsCoroutine is Initialized before class linker and promise_class_ptr_ will be set after creating the class
-    if (HasManagedEntrypoint()) {
+    if (Runtime::GetCurrent()->IsInitialized()) {
         promiseClassPtr_ = GetPandaVM()->GetClassLinker()->GetPromiseClass()->GetRuntimeClass();
         undefinedObj_ = GetPandaVM()->GetUndefinedObject();
         // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields

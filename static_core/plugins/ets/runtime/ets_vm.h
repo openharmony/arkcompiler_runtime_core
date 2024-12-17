@@ -28,6 +28,7 @@
 #include "libpandabase/mem/mem.h"
 #include "libpandabase/utils/expected.h"
 #include "libpandabase/os/mutex.h"
+#include "runtime/coroutines/stackful_coroutine.h"
 #include "runtime/include/compiler_interface.h"
 #include "runtime/include/external_callback_poster.h"
 #include "runtime/include/gc_task.h"
@@ -360,7 +361,8 @@ public:
     PandaUniquePtr<CallbackPoster> CreateCallbackPoster()
     {
         auto *coro = EtsCoroutine::GetCurrent();
-        if (!coro->GetPandaVM()->GetCoroutineManager()->IsMainWorker(coro)) {
+        auto *worker = coro->GetContext<StackfulCoroutineContext>()->GetWorker();
+        if (!coro->GetPandaVM()->GetCoroutineManager()->IsMainWorker(coro) && !worker->InExclusiveMode()) {
             return nullptr;
         }
         ASSERT(callbackPosterFactory_ != nullptr);

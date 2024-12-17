@@ -89,6 +89,9 @@ public:
         return stats_;
     }
 
+    /// get next free worker id
+    size_t GetNextFreeWorkerId() const;
+
     bool IsMainWorker(Coroutine *co) const override;
 
     void SetCallbackPoster(PandaUniquePtr<CallbackPoster> poster) override;
@@ -97,6 +100,10 @@ public:
 
     /// Should be called when runnable/running coro is added
     void OnRunnableCoroAdded(StackfulCoroutineWorker *receiver);
+
+    Coroutine *CreateExclusiveWorkerForThread(Runtime *runtime, PandaVM *vm) override;
+
+    bool DestroyExclusiveWorker() override;
 
 protected:
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
@@ -186,6 +193,8 @@ private:
     // various counters
     std::atomic_uint32_t coroutineCount_ = 0;
     size_t coroutineCountLimit_ = 0;
+    size_t exclusiveWorkersLimit_ = 0;
+    size_t commonWorkersCount_ = 0;
     size_t coroStackSizeBytes_ = 0;
     bool jsMode_ = false;
     // active coroutines are runnable + running coroutines
@@ -205,6 +214,8 @@ private:
     // event loop poster
     os::memory::Mutex posterLock_;
     PandaUniquePtr<CallbackPoster> callbackPoster_ GUARDED_BY(posterLock_);
+
+    os::memory::Mutex eWorkerCreationLock_;
 };
 
 }  // namespace ark

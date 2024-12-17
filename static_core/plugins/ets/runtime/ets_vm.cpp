@@ -123,11 +123,13 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
 
     CoroutineManagerConfig cfg {
         // emulate_js
-        Runtime::GetOptions().IsCoroutineJsMode(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        options.IsCoroutineJsMode(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
         // workers_count
-        Runtime::GetOptions().GetCoroutineWorkersCount(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        options.GetCoroutineWorkersCount(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // exclusive workers limit
+        options.GetCoroutineEWorkersLimit(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
         // enable perf stats
-        Runtime::GetOptions().IsCoroutineDumpStats(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))};
+        options.IsCoroutineDumpStats(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))};
     vm->coroutineManager_->Initialize(cfg, runtime, vm);
 
     return vm;
