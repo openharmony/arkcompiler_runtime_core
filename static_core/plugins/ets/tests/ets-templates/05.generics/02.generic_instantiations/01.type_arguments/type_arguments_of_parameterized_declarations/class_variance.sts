@@ -29,7 +29,7 @@ class X {}
 class Y extends X {}
 class Z extends Y {}
 
-class A<T> {
+class A<{{c.variance}}T> {
     private t: T
 
     public constructor(t: T) {
