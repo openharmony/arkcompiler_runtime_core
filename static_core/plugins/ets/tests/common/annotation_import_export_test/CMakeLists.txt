@@ -15,7 +15,7 @@ if (PANDA_TARGET_ARM32)
     return()
 endif()
 
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/ImportAll.sts ${CMAKE_CURRENT_BINARY_DIR}/ImportAll ImportAll EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/expAnnotationsSrcort.sts)
+run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/ImportAll.sts ${CMAKE_CURRENT_BINARY_DIR}/ImportAll ImportAll EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/AnnotationsSrc.sts)
 run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/MixedImport.sts ${CMAKE_CURRENT_BINARY_DIR}/MixedImport MixedImport EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/AnnotationsSrc.sts)
 run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/SeveralImport.sts ${CMAKE_CURRENT_BINARY_DIR}/SeveralImport SeveralImport EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/AnnotationsSrc.sts)
 run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/SingleNameImport.sts ${CMAKE_CURRENT_BINARY_DIR}/SingleNameImport SingleNameImport EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/AnnotationsSrc.sts)
