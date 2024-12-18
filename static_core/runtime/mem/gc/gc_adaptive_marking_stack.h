@@ -41,7 +41,7 @@ public:
     NO_COPY_SEMANTIC(GCAdaptiveMarkingStack);
     NO_MOVE_SEMANTIC(GCAdaptiveMarkingStack);
 
-    ~GCAdaptiveMarkingStack() override = default;
+    ~GCAdaptiveMarkingStack() override;
 
     /**
      * This method should be used when we find new object by field from another object.
@@ -63,9 +63,22 @@ public:
      */
     MarkedObjects MarkObjects(const ObjectVisitor &visitor);
 
+    void *GetAdditionalMarkingInfo() const
+    {
+        return additionalMarkingInfo_;
+    }
+
+    void SetAdditionalMarkingInfo(void *infoPtr)
+    {
+        additionalMarkingInfo_ = infoPtr;
+    }
+
 protected:
     GCAdaptiveMarkingStack *CreateStack() override;
     GCWorkersTask CreateTask(GCAdaptiveStack<ObjectHeader *> *stack) override;
+
+private:
+    void *additionalMarkingInfo_ {nullptr};
 };
 
 }  // namespace ark::mem
