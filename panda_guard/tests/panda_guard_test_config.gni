@@ -13,7 +13,7 @@
 
 import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 
-panda_guard_root = "//arkcompiler/ets_frontend/panda_guard"
+panda_guard_root = "//arkcompiler/runtime_core/panda_guard"
 
 template("generate_project_abc") {
   _target_name_ = "${target_name}"

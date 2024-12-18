@@ -13,16 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_GUARD_GUARD_DRIVER_H
-#define PANDA_GUARD_GUARD_DRIVER_H
+#ifndef PANDA_GUARD_TESTS_UTIL_TEST_UTIL_H
+#define PANDA_GUARD_TESTS_UTIL_TEST_UTIL_H
+
+#include <string>
 
 namespace panda::guard {
 
-class GuardDriver {
+class TestUtil {
 public:
-    void Run(int argc, const char **argv);
+    static void RemoveFile(const std::string &filePath);
 };
 
 }  // namespace panda::guard
 
-#endif  // PANDA_GUARD_GUARD_DRIVER_H
+#endif  // PANDA_GUARD_TESTS_UTIL_TEST_UTIL_H

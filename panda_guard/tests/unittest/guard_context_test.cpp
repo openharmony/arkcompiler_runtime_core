@@ -14,13 +14,14 @@
  */
 
 #include <gtest/gtest.h>
+
 #include "configs/guard_context.h"
 
 using namespace testing::ext;
 using namespace panda;
 
 namespace {
-    const std::string CONTEXT_TEST_01_CONFIG_FILE = PANDA_GUARD_UNIT_TEST_DIR "configs/context_test_01_config.json";
+const std::string CONTEXT_TEST_01_CONFIG_FILE = PANDA_GUARD_UNIT_TEST_DIR "configs/context_test_01_config.json";
 }
 
 /**

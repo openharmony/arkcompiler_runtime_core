@@ -19,21 +19,23 @@
 #include <string>
 
 namespace panda::guard {
-    class GuardArgsParser {
-    public:
-        bool Parse(int argc, const char **argv);
 
-        [[nodiscard]] const std::string &GetConfigFilePath() const;
+class GuardArgsParser {
+public:
+    bool Parse(int argc, const char **argv);
 
-        [[nodiscard]] bool IsDebugMode() const;
+    [[nodiscard]] const std::string &GetConfigFilePath() const;
 
-    private:
-        static void PrintErrorMsg(const std::string &helpInfo);
+    [[nodiscard]] bool IsDebugMode() const;
 
-        std::string configFilePath_;
+private:
+    static void PrintErrorMsg(const std::string &helpInfo);
 
-        bool debugMode_ = false;
-    };
-}
+    std::string configFilePath_;
 
-#endif //PANDA_GUARD_CONFIGS_GUARD_ARGS_PARSER_H
+    bool debugMode_ = false;
+};
+
+}  // namespace panda::guard
+
+#endif  // PANDA_GUARD_CONFIGS_GUARD_ARGS_PARSER_H

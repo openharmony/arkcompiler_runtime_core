@@ -14,7 +14,9 @@
  */
 
 #include <gtest/gtest.h>
+
 #include "utils/string_helpers.h"
+
 #include "configs/guard_args_parser.h"
 
 using namespace testing::ext;
@@ -40,14 +42,14 @@ HWTEST(GuardArgsParserUnitTest, guard_args_parser_test_001, TestSize.Level4)
 
     std::string err = testing::internal::GetCapturedStderr();
     std::string res = panda::helpers::string::Format(
-            "Usage:\n"
-            "panda_guard [options] config-file-path\n"
-            "Supported options:\n"
-            "--debug: enable debug messages (will be printed to standard output if no --debug-file was specified)\n"
-            "--debug-file: (--debug-file FILENAME) set debug file name. default is std::cout\n"
-            "--help: Print this message and exit\n"
-            "Tail arguments:\n"
-            "config-file-path: configuration file path\n\n");
+        "Usage:\n"
+        "panda_guard [options] config-file-path\n"
+        "Supported options:\n"
+        "--debug: enable debug messages (will be printed to standard output if no --debug-file was specified)\n"
+        "--debug-file: (--debug-file FILENAME) set debug file name. default is std::cout\n"
+        "--help: Print this message and exit\n"
+        "Tail arguments:\n"
+        "config-file-path: configuration file path\n\n");
     EXPECT_EQ(err, res);
 }
 

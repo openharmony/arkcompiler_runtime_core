@@ -2,43 +2,50 @@
   "abcFilePath": "xxx",
   "obfAbcFilePath": "xxx",
   "obfPaFilePath": "xxx",
-  "compileSdkVersion": "",
+  "compileSdkVersion": "xxx",
   "targetApiVersion": 12,
   "targetApiSubVersion": "beta3",
   "filesInfoPath": "",
   "sourceMapsPath": "",
-  "entryPackageInfo": "",
-  "defaultNameCachePath": "",
-  "skippedRemoteHarList": [],
-  "useNormalizedOHMUrl": false,
+  "entryPackageInfo": "xxx",
+  "defaultNameCachePath": "xxx",
+  "skippedRemoteHarList": ["xxx"],
+  "useNormalizedOHMUrl": true,
   "obfuscationRules": {
     "disableObfuscation": false,
     "enableExportObfuscation": true,
     "enableRemoveLog": true,
     "printNameCache": "",
-    "applyNameCache": "./clang_x64/obj/arkcompiler/runtime_core/panda_guard/tests/configs/context_test_01_name_cache.json",
-    "reservedNames": [],
+    "applyNameCache": "",
+    "reservedNames": [
+      "xxx"
+    ],
     "propertyObfuscation": {
       "enable": true,
-      "reservedProperties": [],
+      "reservedProperties": [
+        "xxx"
+      ],
       "universalReservedProperties": []
     },
     "toplevelObfuscation": {
       "enable": true,
-      "reservedToplevelNames": [],
+      "reservedToplevelNames": [
+        "xxx"
+      ],
       "universalReservedToplevelNames": []
     },
     "fileNameObfuscation": {
       "enable": true,
-      "reservedFileNames": ["xxx"],
+      "reservedFileNames": [
+        "xxx"
+      ],
       "universalReservedFileNames": []
     },
     "keepOptions": {
       "enable": true,
-      "keepPaths": [],
-      "universalKeepPaths": [],
-      "excludePaths": [],
-      "universalExcludePaths": []
+      "keepPaths": [
+        "xxx"
+      ]
     }
   }
 }
