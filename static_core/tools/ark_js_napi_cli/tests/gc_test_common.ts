@@ -1,0 +1,44 @@
+/**
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// This is a test common file on JS VM side
+
+export namespace interop {
+
+globalThis.test = {};
+globalThis.test.etsVm = requireNapiPreview('ets_interop_js_napi', true);
+if (!globalThis.test.etsVm.createEtsRuntime('etsstdlib.abc', 
+    'gc_test_sts_common_sts.abc', false, false)) {
+        throw new Error('Failed to create ETS runtime');
+    }
+
+export let GetSTSObject: () => Object = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetSTSObject');
+export let GetSTSArrayOfObjects: () => Object[] = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetSTSArrayOfObjects');
+export let GetSTSObjectAndKeepIt: () => Object = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetSTSObjectAndKeepIt');
+export let GetSTSObjectWithWeakRef: () => Object = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetSTSObjectWithWeakRef');
+export let GetSTSStringArrayAsObject: () => Object = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetSTSStringArrayAsObject');
+export let isSTSObjectCollected: () => boolean = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'isSTSObjectCollected');
+export let isSTSPromiseCollected: () => boolean = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'isSTSPromiseCollected');
+export let SetJSObject: (obj: Object) => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'SetJSObject');
+export let SetJSObjectAndKeepIt: (obj: Object) => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'SetJSObjectAndKeepIt');
+export let SetJSObjectWithWeakRef: (obj: Object) => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'SetJSObjectWithWeakRef');
+export let SetJSPromiseWithWeakRef: (prms: Promise<Object>) => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'SetJSPromiseWithWeakRef');
+export let AddPandaArray: (arr: Object[]) => number[] = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'AddPandaArray');
+export let RunPandaGC: () => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'RunPandaGC');
+export let RunInteropGC: () => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'RunInteropGC');
+export let GetPandaFreeHeapSize: () => number = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetPandaFreeHeapSize');
+export let GetPandaUsedHeapSize: () => number = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetPandaUsedHeapSize');
+export const PandaBaseClass = globalThis.test.etsVm.getClass('LPandaGC/PandaBaseClass;');
+}
