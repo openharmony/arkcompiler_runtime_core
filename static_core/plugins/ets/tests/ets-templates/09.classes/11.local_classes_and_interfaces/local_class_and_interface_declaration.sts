@@ -19,6 +19,7 @@ limitations under the License.
 desc: >-
     Local classes and interfaces are declared within the body of a function, method, or any block delimited
     by balanced braces in a group of zero or more statements.
+tags: [{{c.tags}}]
 ---*/
 
 {{c.decl}}

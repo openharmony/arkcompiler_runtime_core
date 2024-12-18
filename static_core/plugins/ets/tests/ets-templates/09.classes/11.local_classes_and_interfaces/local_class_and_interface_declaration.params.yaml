@@ -14,100 +14,14 @@
 ---
 cases:
   - decl: |-
-      // Local class declaration inside class body
-      class A {
-        class B {
-          i: int = 1;
-        }
-        getInner(): int {
-          return new B().i;
-        }
-      }
-    check: |-
-      function main() {
-        let a: A = new A();
-        assert(a.getInner() == 1);
-      }
-
-  - decl: |-
-      // Final local class declaration inside class body
-      class A {
-        final class B {
-          i: int = 1;
-        }
-        getInner(): int {
-          return new B().i;
-        }
-      }
-    check: |-
-      function main() {
-        let a: A = new A();
-        assert(a.getInner() == 1);
-      }
-
-  - decl: |-
-      // Deep local class declaration in class body inside another local class.
-      class A {
-        class B {
-          i: int = 1;
-
-          class C {
-            i: int = 2;
-          }
-          getInner(): int {
-            return new C().i;
-          }
-        }
-
-        getInner(): int {
-          b = new B();
-          return b.i + b.getInner();
-        }
-      }
-    check: |-
-      function main() {
-        let a: A = new A();
-        assert(a.getInner() == 3);
-      }
-
-  - decl: |-
-      // Deep interface declaration in class body inside another local class.
-      class A {
-        class B {
-          i: int = 1;
-
-          interface I {
-            i: int;
-          }
-          
-          getInner(): int {
-            class C implements I {
-              i = 2;
-            }
-            return new C().i;
-          }
-        }
-
-        getInner(): int {
-          b = new B();
-          return b.i + b.getInner();
-        }
-      }
-    check: |-
-      function main() {
-        let a: A = new A();
-        assert(a.getInner() == 3);
-      }
-
-  - decl: |-
       // Local class declaration inside class method
       class A {
         public bar(): int {
           class B {
             i: int = 1;
           }
-          b = new B();
-          return B.b;
+          let b = new B();
+          return b.i;
         }
       }
     check: |-
@@ -126,7 +40,7 @@ cases:
           class B implements I {
             i = 2;
           }
-          return new B().b;
+          return new B().i;
         }
       }
     check: |-
@@ -140,13 +54,13 @@ cases:
       class A {
         i: int;
         constructor(i: int) {
-          class B() {
+          class B {
             i: int;
             constructor(i: int) {
               this.i = i + 1;
             }
           }
-          b: B = new B(i);
+          let b = new B(i);
           this.i = b.i + 1;
         }
       }
@@ -157,65 +71,12 @@ cases:
       }
 
   - decl: |-
-      // Deep local class declaration inside class method inside another local class.
-      class A {
-        public bar(): int {
-          class B {
-            class C {
-              i: int = 1;
-            }
-            getInner(): int {
-              b = new B();
-              return b.i;
-            }
-          }
-          b = new B();
-          return B.getInner();
-        }
-      }
-    check: |-
-      function main() {
-        let a: A = new A();
-        assert(a.bar() == 1);
-      }
-
-  - decl: |-
-      // Deep local interface declaration inside interface method inside another local class.
-      interface I {
-        foo(): int {
-      
-          class B {
-            interface I {
-              i: int;
-            }
-            getInner(): int {
-              class C implements I {
-                i = 3;
-              }
-              return new C().i;
-            }
-          }
-      
-          b = new B();
-          return B.getInner();
-        }
-      }
-      
-      class A implements I {}
-
-    check: |-
-      function main() {
-        let a: A = new A();
-        assert(a.bar() == 3);
-      }
-
-  - decl: |-
       // Local class with no-arg constructor declaration inside a function
-      function foo: int {
+      function foo(): int {
         class A {
           i: int = 1;
           constructor() {
-            i = 2;
+            this.i = 2;
           }
         }
         return new A().i;
@@ -238,7 +99,7 @@ cases:
       // Local interface declaration inside main()
       function main() {
         interface I {
-          let i: int;
+          i: int;
         }
         class A implements I {
           i = 1;
@@ -247,68 +108,9 @@ cases:
       }
 
   - decl: |-
-      // Deep local class declaration inside a function and multiple local classes
-      function foo: int {
-        class A {
-          i: int = 1;
-
-          class B {
-            i: int = 2;
-            foo(): int {
-              class C {
-                i: int = 4;
-              }
-              return new C().i;
-            }
-          }
-
-          getInner(): int {
-            b = new B();
-            return b.i + b.foo() + this.i;
-          }
-        }
-        return new A().getInner();
-      }
-    check: |-
-      function main() {
-        assert(foo() == 7);
-      }
-
-  - decl: |-
-      // Deep local interface declaration inside a function and multiple local classes
-      function foo: int {
-        class A {
-          i: int = 1;
-
-          class B {
-            i: int = 2;
-            foo(): int {
-              interface I {
-                i: int;
-              }
-              class C implements I {
-                i 4;
-              }
-              return new C().i;
-            }
-          }
-
-          getInner(): int {
-            b = new B();
-            return b.i + b.foo() + this.i;
-          }
-        }
-        return new A().getInner();
-      }
-    check: |-
-      function main() {
-        assert(foo() == 7);
-      }
-
-  - decl: |-
       // Local class extends abstract
       abstract class A {
-        bar(): int;
+        abstract bar(): int;
       }
 
       function foo(): A {
@@ -322,44 +124,6 @@ cases:
     check: |-
       function main() {
         assert(foo().bar() == 1);
-      }
-
-  - decl: |-
-      // Local class implements outer interface
-      interface I {
-        bar(): int;
-      }
-
-      class A {
-        class B implements I {
-          bar(): int {
-            return 1;
-          }
-        }
-        foo(): I {
-          return new B();
-        }
-      }
-    check: |-
-      function main() {
-        let a = new A();
-        assert(a.foo().bar() == 1);
-      }
-
-  - decl: |-
-      // inner interface inside class body
-      class A {
-        interface I {}
-        class B implements I {}
-        foo(): boolean {
-          let b = new B();
-          return b instanceof I;
-        }
-      }
-    check: |-
-      function main() {
-        let a = new A();
-        assert(a.foo());
       }
 
   - decl: |-
@@ -380,7 +144,7 @@ cases:
 
   - decl: |-
       // inner interface inside function
-      foo(): boolean {
+      function foo(): boolean {
         interface I {}
         class B implements I {}
         let b = new B();
@@ -408,11 +172,11 @@ cases:
 
       function foo(): A {
         let a: A;
-        for (i = 0; i < 4; i++) {
+        for (let i = 0; i < 4; i++) {
           interface I {
             i: int;
           }
-          class B implements I extends A {
+          class B extends A implements I {
             i = -1;
             constructor(i: int) {
               this.i = i;
@@ -443,7 +207,7 @@ cases:
           interface I {
             i: int;
           }
-          class B implements I extends A {
+          class B extends A implements I {
             i = 0;
             constructor(i: int) {
               this.i = i;
@@ -474,7 +238,7 @@ cases:
           interface I {
             i: int;
           }
-          class B implements I extends A {
+          class B extends A implements I {
             i = 0;
             constructor(i: int) {
               this.i = i;
@@ -569,98 +333,6 @@ cases:
       }
 
   - decl: |-
-      // Local class with a static field declaration inside class body
-      class A {
-        class B {
-          static i: int = 1;
-        }
-        getInner(): int {
-          return B.i;
-        }
-      }
-    check: |-
-      function main() {
-        let a: A = new A();
-        assert(a.getInner() == 1);
-      }
-
-  - decl: |-
-      // Local class with a static method declaration inside class body
-      class A {
-        class B {
-          static foo(): int {
-            return 1;
-          }
-        }
-        getInner(): int {
-          return B.foo();
-        }
-      }
-    check: |-
-      function main() {
-        let a: A = new A();
-        assert(a.getInner() == 1);
-      }
-
-  - decl: |-
-      // Local interface with a static method declaration inside class body
-      class A {
-        interface I {
-          static foo(): int {
-            return 1;
-          }
-        }
-        getInner(): int {
-          return I.foo();
-        }
-      }
-    check: |-
-      function main() {
-        let a: A = new A();
-        assert(a.getInner() == 1);
-      }
-
-  - decl: |-
-      // Local class gets access to static method of the local interface inside class body
-      class A {
-        interface I {
-          static foo(): int {
-            return 1;
-          }
-        }
-        class B {
-          i: int = I.foo();
-        }
-        getInner(): int {
-          return new B().i;
-        }
-      }
-    check: |-
-      function main() {
-        let a: A = new A();
-        assert(a.getInner() == 1);
-      }
-
-  - decl: |-
-      // Local class with a static initializer declaration inside class body
-      class A {
-        class B {
-          static a: int;
-          static {
-            this.a = 1;
-          }
-        }
-        getInner(): int {
-          return B.a;
-        }
-      }
-    check: |-
-      function main() {
-        let a: A = new A();
-        assert(a.getInner() == 1);
-      }
-
-  - decl: |-
       // Access to superclass static field from local class, declared in a method
       class A {
         static f: int = 1;
@@ -678,4 +350,288 @@ cases:
       function main() {
         let a: A = new A();
         assert(a.foo() == 1);
+      }
+
+  - tags: |-
+        negative, compile-only
+    decl: |-
+      // Local class declaration inside class body
+      class A {
+        class B {
+          i: int = 1;
+        }
+        getInner(): int {
+          return new B().i;
+        }
+      }
+
+  - tags: |-
+        negative, compile-only
+    decl: |-
+      // Final local class declaration inside class body
+      class A {
+        final class B {
+          i: int = 1;
+        }
+        getInner(): int {
+          return new B().i;
+        }
+      }
+
+  - tags: |-
+        negative, compile-only
+    decl: |-
+      // Deep local class declaration in class body inside another local class.
+      class A {
+        class B {
+          i: int = 1;
+
+          class C {
+            i: int = 2;
+          }
+          getInner(): int {
+            return new C().i;
+          }
+        }
+
+        getInner(): int {
+          b = new B();
+          return b.i + b.getInner();
+        }
+      }
+
+  - tags: |-
+        negative, compile-only
+    decl: |-
+      // Deep local class declaration inside class method inside another local class.
+      class A {
+        public bar(): int {
+          class B {
+            class C {
+              i: int = 1;
+            }
+            getInner(): int {
+              b = new B();
+              return b.i;
+            }
+          }
+          b = new B();
+          return B.getInner();
+        }
+      }
+
+  - tags: |-
+        negative, compile-only
+    decl: |-
+      // Deep local interface declaration inside interface method inside another local class.
+      interface I {
+        foo(): int {
+
+          class B {
+            interface I {
+              i: int;
+            }
+            getInner(): int {
+              class C implements I {
+                i = 3;
+              }
+              return new C().i;
+            }
+          }
+
+          b = new B();
+          return B.getInner();
+        }
+      }
+
+      class A implements I {}
+
+  - tags: |-
+        negative, compile-only
+    decl: |-
+      // Deep interface declaration in class body inside another local class.
+      class A {
+        class B {
+          i: int = 1;
+
+          interface I {
+            i: int;
+          }
+
+          getInner(): int {
+            class C implements I {
+              i = 2;
+            }
+            return new C().i;
+          }
+        }
+
+        getInner(): int {
+          b = new B();
+          return b.i + b.getInner();
+        }
+      }
+
+  - tags: |-
+        negative, compile-only
+    decl: |-
+      // Deep local class declaration inside a function and multiple local classes
+      function foo: int {
+        class A {
+          i: int = 1;
+
+          class B {
+            i: int = 2;
+            foo(): int {
+              class C {
+                i: int = 4;
+              }
+              return new C().i;
+            }
+          }
+
+          getInner(): int {
+            b = new B();
+            return b.i + b.foo() + this.i;
+          }
+        }
+        return new A().getInner();
+      }
+
+  - tags: |-
+        negative, compile-only
+    decl: |-
+      // Deep local interface declaration inside a function and multiple local classes
+      function foo: int {
+        class A {
+          i: int = 1;
+
+          class B {
+            i: int = 2;
+            foo(): int {
+              interface I {
+                i: int;
+              }
+              class C implements I {
+                i 4;
+              }
+              return new C().i;
+            }
+          }
+
+          getInner(): int {
+            b = new B();
+            return b.i + b.foo() + this.i;
+          }
+        }
+        return new A().getInner();
+      }
+
+  - tags: |-
+        negative, compile-only
+    decl: |-
+      // Local class implements outer interface
+      interface I {
+        bar(): int;
+      }
+
+      class A {
+        class B implements I {
+          bar(): int {
+            return 1;
+          }
+        }
+        foo(): I {
+          return new B();
+        }
+      }
+
+  - tags: |-
+        negative, compile-only
+    decl: |-
+      // inner interface inside class body
+      class A {
+        interface I {}
+        class B implements I {}
+        foo(): boolean {
+          let b = new B();
+          return b instanceof I;
+        }
+      }
+
+  - tags: |-
+        negative, compile-only
+    decl: |-
+      // Local class with a static field declaration inside class body
+      class A {
+        class B {
+          static i: int = 1;
+        }
+        getInner(): int {
+          return B.i;
+        }
+      }
+
+  - tags: |-
+        negative, compile-only
+    decl: |-
+      // Local class with a static method declaration inside class body
+      class A {
+        class B {
+          static foo(): int {
+            return 1;
+          }
+        }
+        getInner(): int {
+          return B.foo();
+        }
+      }
+
+  - tags: |-
+        negative, compile-only
+    decl: |-
+      // Local interface with a static method declaration inside class body
+      class A {
+        interface I {
+          static foo(): int {
+            return 1;
+          }
+        }
+        getInner(): int {
+          return I.foo();
+        }
+      }
+
+  - tags: |-
+        negative, compile-only
+    decl: |-
+      // Local class gets access to static method of the local interface inside class body
+      class A {
+        interface I {
+          static foo(): int {
+            return 1;
+          }
+        }
+        class B {
+          i: int = I.foo();
+        }
+        getInner(): int {
+          return new B().i;
+        }
+      }
+
+  - tags: |-
+        negative, compile-only
+    decl: |-
+      // Local class with a static initializer declaration inside class body
+      class A {
+        class B {
+          static a: int;
+          static {
+            this.a = 1;
+          }
+        }
+        getInner(): int {
+          return B.a;
+        }
       }
