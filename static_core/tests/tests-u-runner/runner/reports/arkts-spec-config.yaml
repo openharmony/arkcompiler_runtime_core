@@ -890,7 +890,7 @@
     status: ''
 13.8.1:
     title: Exported Declarations
-    status: ''
+    status: Finished
 '13.9':
     title: Namespace Declarations
     status: ''
@@ -902,7 +902,7 @@
     status: ''
 13.10.2:
     title: Single Export Directive
-    status: ''
+    status: Finished
 13.10.3:
     title: Export Type Directive
     status: ''
