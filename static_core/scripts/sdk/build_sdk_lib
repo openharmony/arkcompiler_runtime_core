@@ -144,3 +144,9 @@ function ets_std_lib() {
     mkdir -p "$PANDA_SDK_PATH"/ets
     cp -r "$ARK_ROOT"/plugins/ets/stdlib "$PANDA_SDK_PATH"/ets
 }
+
+function icu_dat_file() {
+    echo "> Copying icu data file into SDK..."
+    mkdir -p "$PANDA_SDK_PATH"/icu/data
+    cp -r "$ARK_ROOT"/third_party/icu/ohos_icu4j/data/icu*dat "$PANDA_SDK_PATH"/icu/data/
+}
