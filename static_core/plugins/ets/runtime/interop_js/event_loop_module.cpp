@@ -39,8 +39,10 @@ EventLoopCallbackPoster::EventLoopCallbackPoster()
     [[maybe_unused]] auto *worker = coro->GetContext<StackfulCoroutineContext>()->GetWorker();
     ASSERT(coro->GetCoroutineManager()->IsMainWorker(coro) || worker->InExclusiveMode());
     auto loop = GetEventLoop();
-    async_ = Runtime::GetCurrent()->GetInternalAllocator()->New<uv_async_t>();
-    callbackQueue_ = Runtime::GetCurrent()->GetInternalAllocator()->New<ThreadSafeCallbackQueue>();
+    // These resources will be deleted in the event loop callback after Runtime destruction,
+    // so we need to use a standard allocator
+    async_ = new uv_async_t();
+    callbackQueue_ = new ThreadSafeCallbackQueue();
     [[maybe_unused]] auto uvstatus = uv_async_init(loop, async_, AsyncEventToExecuteCallbacks);
     ASSERT(uvstatus == 0);
     async_->data = callbackQueue_;
@@ -52,8 +54,8 @@ EventLoopCallbackPoster::~EventLoopCallbackPoster()
     PostToEventLoop([async = this->async_]() {
         auto deleter = [](uv_handle_t *handle) {
             auto *poster = reinterpret_cast<ThreadSafeCallbackQueue *>(handle->data);
-            Runtime::GetCurrent()->GetInternalAllocator()->Delete(poster);
-            Runtime::GetCurrent()->GetInternalAllocator()->Delete(handle);
+            delete poster;
+            delete handle;
         };
         uv_close(reinterpret_cast<uv_handle_t *>(async), deleter);
     });
