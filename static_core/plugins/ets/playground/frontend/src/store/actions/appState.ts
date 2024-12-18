@@ -14,7 +14,7 @@
  */
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import {setDisasm, setPrimaryColor, setTheme, setVersions, setVersionsLoading, Theme} from '../slices/appState';
+import {setClearLogsEachRun, setDisasm, setPrimaryColor, setTheme, setVersions, setVersionsLoading, Theme} from '../slices/appState';
 import { RootState } from '..';
 import { versionService } from '../../services/versions';
 
@@ -22,6 +22,12 @@ export const setThemeAction = createAsyncThunk(
     '@theme/change',
     (data: Theme, thunkAPI) => {
         thunkAPI.dispatch(setTheme(data));
+    },
+);
+export const setClearLogsAction = createAsyncThunk(
+    '@clearLogs/change',
+    (data: boolean, thunkAPI) => {
+        thunkAPI.dispatch(setClearLogsEachRun(data));
     },
 );
 export const setPrimaryColorAction = createAsyncThunk(

@@ -50,26 +50,30 @@ const ArkTSEditor: React.FC = () => {
             // @ts-ignore
             monaco.languages.setMonarchTokensProvider('arkts', cloneSyntax);
             monaco.languages.setLanguageConfiguration('arkts', {
-            brackets: [
-                ['{', '}'],
-                ['[', ']'],
-                ['(', ')'],
-            ],
-            autoClosingPairs: [
-                { open: '{', close: '}' },
-                { open: '[', close: ']' },
-                { open: '(', close: ')' },
-                { open: '"', close: '"' },
-                { open: "'", close: "'" },
-            ],
-            surroundingPairs: [
-                { open: '{', close: '}' },
-                { open: '[', close: ']' },
-                { open: '(', close: ')' },
-                { open: '"', close: '"' },
-                { open: "'", close: "'" },
-            ],
-        });
+                comments: {
+                    lineComment: '//',
+                    blockComment: ['/*', '*/'],
+                },
+                brackets: [
+                    ['{', '}'],
+                    ['[', ']'],
+                    ['(', ')'],
+                ],
+                autoClosingPairs: [
+                    { open: '{', close: '}' },
+                    { open: '[', close: ']' },
+                    { open: '(', close: ')' },
+                    { open: '"', close: '"' },
+                    { open: "'", close: "'" },
+                ],
+                surroundingPairs: [
+                    { open: '{', close: '}' },
+                    { open: '[', close: ']' },
+                    { open: '(', close: ')' },
+                    { open: '"', close: '"' },
+                    { open: "'", close: "'" },
+                ],
+            });
         }
     }, [monaco, syn]);
 
@@ -79,7 +83,6 @@ const ArkTSEditor: React.FC = () => {
 
     return (
         <Editor
-            height="90vh"
             defaultLanguage="arkts"
             defaultValue={'function main(): void {\n\tconsole.log("Hello, ArkTS!");\n}'}
             theme={theme === 'dark' ? 'vs-dark' : 'light'}

@@ -58,11 +58,10 @@ describe('Header component', () => {
         renderWithProviders(<Header />);
         const settingsIcon = screen.getByTestId('settings-icon');
         fireEvent.click(settingsIcon);
-
-        const darkModeSwitch = screen.getByTestId('mocked-switch');
-        expect(darkModeSwitch).toHaveTextContent('Off');
-        fireEvent.click(darkModeSwitch);
-        expect(darkModeSwitch).toHaveTextContent('On');
+        const darkModeSwitch = screen.getAllByTestId('mocked-switch');
+        expect(darkModeSwitch[0]).toHaveTextContent('Off');
+        fireEvent.click(darkModeSwitch[0]);
+        expect(darkModeSwitch[0]).toHaveTextContent('On');
     });
 
     it('changes primary color when a color option is clicked', () => {

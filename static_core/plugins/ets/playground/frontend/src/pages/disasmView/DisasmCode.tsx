@@ -89,7 +89,6 @@ const DisasmEditor: React.FC = () => {
 
     return (
         <Editor
-            height="90vh"
             defaultLanguage={DISASM}
             defaultValue={code}
             value={isCompileLoading || isRunLoading ? 'Loading...' : code}

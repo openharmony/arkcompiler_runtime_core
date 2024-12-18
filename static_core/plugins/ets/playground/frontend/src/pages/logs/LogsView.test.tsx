@@ -17,8 +17,13 @@ import React from 'react';
 import {fireEvent, render, screen} from '@testing-library/react';
 import LogsView from './LogsView';
 import {ELogType, ILog} from '../../models/logs';
+import { AppDispatch } from '../../store';
+import { Provider } from 'react-redux';
+import { ThemeProvider } from '../../components/theme/ThemeContext';
+import configureMockStore from 'redux-mock-store';
 
 const mockClearFilters = jest.fn();
+const mockStore = configureMockStore<AppDispatch>();
 
 const mockLogs: ILog[] = [
     { message: 'This is a log message', from: ELogType.RUN_OUT },
@@ -26,12 +31,29 @@ const mockLogs: ILog[] = [
 ];
 
 describe('LogsView component', () => {
+    let store: ReturnType<typeof mockStore>;
+
+    beforeEach(() => {
+        store = mockStore({
+            // @ts-ignore
+            appState: { theme: 'light', primaryColor: '#e32b49', disasm: false, clearLogsEachRun: true },
+        });
+        store.dispatch = jest.fn();
+    });
+
+    const renderWithProviders = (component: JSX.Element): ReturnType<typeof render> => {
+        return render(
+            <Provider store={store}>
+                <ThemeProvider>{component}</ThemeProvider>
+            </Provider>
+        );
+    };
     beforeEach(() => {
         jest.clearAllMocks();
     });
 
     it('renders log messages', () => {
-        render(<LogsView logArr={mockLogs} clearFilters={mockClearFilters} />);
+        renderWithProviders(<LogsView logArr={mockLogs} clearFilters={mockClearFilters} logType='out' />);
 
         expect(screen.getByText('[LOG]:')).toBeInTheDocument();
         expect(screen.getByText('[ERR]:')).toBeInTheDocument();
@@ -40,7 +62,7 @@ describe('LogsView component', () => {
     });
 
     it('filters log messages based on input', () => {
-        render(<LogsView logArr={mockLogs} clearFilters={mockClearFilters} />);
+        renderWithProviders(<LogsView logArr={mockLogs} logType='out' clearFilters={mockClearFilters} />);
 
         const filterInput = screen.getByPlaceholderText('Filter');
         fireEvent.change(filterInput, { target: { value: 'error' } });
@@ -50,7 +72,7 @@ describe('LogsView component', () => {
     });
 
     it('resets log messages on empty input', () => {
-        render(<LogsView logArr={mockLogs} clearFilters={mockClearFilters} />);
+        renderWithProviders(<LogsView logArr={mockLogs} logType='out' clearFilters={mockClearFilters} />);
 
         const filterInput = screen.getByPlaceholderText('Filter');
         fireEvent.change(filterInput, { target: { value: 'log' } });
@@ -63,7 +85,7 @@ describe('LogsView component', () => {
     });
 
     it('calls clearFilters when clear icon is clicked', () => {
-        render(<LogsView logArr={mockLogs} clearFilters={mockClearFilters} />);
+        renderWithProviders(<LogsView logArr={mockLogs} logType='out' clearFilters={mockClearFilters} />);
 
         const clearIcon = screen.getByTestId('clear-icon');
         fireEvent.click(clearIcon);
