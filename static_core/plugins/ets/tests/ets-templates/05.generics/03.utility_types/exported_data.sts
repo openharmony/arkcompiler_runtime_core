@@ -35,12 +35,12 @@ export interface I {
     j: string;
 }
 
-//export class CI implements I {
-//    set i(i: number) { this.i = i }
-//    get i(): number { return this.i }
-//    set j(j: string) { this.j = j }
-//    get j(): string { return this.j }
-//}
+export class CI implements I {
+    set i(i: number) { this.i = i }
+    get i(): number { return this.i }
+    set j(j: string) { this.j = j }
+    get j(): string { return this.j }
+}
 
 export class CA extends AC { }
 

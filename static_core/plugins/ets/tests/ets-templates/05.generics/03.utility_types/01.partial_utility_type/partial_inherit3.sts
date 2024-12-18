@@ -33,12 +33,12 @@ class B extends A {
 function main() {
   let f: Partial<B> = { }
   assert( !f.k )
-  assert( f.i == 0 )
+  assert( f.i == undefined )
   assert( f.j == undefined )
 
   f = { k: false }
   assert( !f.k )
-  assert( f.i == 0 )
+  assert( f.i == undefined )
   assert( f.j == undefined )
   f.i = 2;
   f.j = "new str"
@@ -47,20 +47,20 @@ function main() {
 
   f = { j: "str" }
   assert( !f.k )
-  assert( f.i == 0 )
+  assert( f.i == undefined )
   assert( f.j == "str" )
 
-  f = { i = 4 }
+  f = { i: 4 }
   assert( !f.k )
   assert( f.i == 4 )
   assert( f.j == undefined )
 
-  f = { i = 5, j: "some str" }
+  f = { i: 5, j: "some str" }
   assert( !f.k )
   assert( f.i == 5 )
   assert( f.j == "some str" )
 
-  f = { k: true , i = 5, j: "some str" }
+  f = { k: true , i: 5, j: "some str" }
   assert( f.k )
   assert( f.i == 5 )
   assert( f.j == "some str" )

@@ -2005,7 +2005,6 @@
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_levels_default_export_3.sts
 05.generics/03.utility_types/01.partial_utility_type/module_interface_0.sts
 05.generics/03.utility_types/01.partial_utility_type/module_interface_2.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_4.sts
 
 # es2panda: #15667 Invalid tests, This cases should be allowed
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_abstract_method.sts
@@ -2084,44 +2083,8 @@
 07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum2_neg_3.sts
 
 # 20290
-05.generics/03.utility_types/01.partial_utility_type/partial_getter_and_setter_2.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_1.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_2.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_3.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_13.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_14.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_15.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_17.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_18.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_19.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_21.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_22.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_23.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_25.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_26.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_27.sts
-05.generics/03.utility_types/01.partial_utility_type/type_1.sts
-05.generics/03.utility_types/01.partial_utility_type/type_2.sts
-05.generics/03.utility_types/01.partial_utility_type/type_5.sts
-05.generics/03.utility_types/01.partial_utility_type/type_6.sts
-05.generics/03.utility_types/01.partial_utility_type/type_7.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_1.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_10.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_11.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_19.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_21.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_23.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_27.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_3.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_5.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_6.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_7.sts
 05.generics/03.utility_types/02.required_utility_type/required_module_interface_1.sts
 05.generics/03.utility_types/01.partial_utility_type/module_extends_1.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_compatibility_4.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_compatibility_5.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_compatibility_6.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_compatibility_7.sts
 05.generics/03.utility_types/02.required_utility_type/type_10.sts
 05.generics/03.utility_types/02.required_utility_type/type_11.sts
 05.generics/03.utility_types/02.required_utility_type/type_13.sts
@@ -2143,18 +2106,10 @@
 05.generics/03.utility_types/incorrect_utility_type_usage_2.sts
 
 # 20359 interface T should not be compatible to Partial<T>/Required<T>
-05.generics/03.utility_types/01.partial_utility_type/partial_compatibility_4.sts
 05.generics/03.utility_types/02.required_utility_type/required_compatibility_1.sts
 05.generics/03.utility_types/02.required_utility_type/required_compatibility_0.sts
 
 # 20365: readonly in interface doesn`t work
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_16.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_17.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_20.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_22.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_24.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_25.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_26.sts
 05.generics/03.utility_types/03.readonly_utility_type/readonly_type_reassignment_0.sts
 05.generics/03.utility_types/03.readonly_utility_type/readonly_type_reassignment_1.sts
 
@@ -2174,17 +2129,11 @@
 05.generics/03.utility_types/01.partial_utility_type/partial_generic.sts
 
 # 20383 missing CTE for incorrect variable initialization
-05.generics/03.utility_types/01.partial_utility_type/partial_method4.sts
 05.generics/03.utility_types/02.required_utility_type/required_method_1.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_getter_and_setter_3.sts
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_4.sts
 05.generics/03.utility_types/02.required_utility_type/required_module_interface_3.sts
 
 # 20387 custom getter/setter for interfaces is not working
-05.generics/03.utility_types/01.partial_utility_type/partial_getter_and_setter_int_0.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_getter_and_setter_int_1.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_getter_and_setter_int_2.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_getter_and_setter_int_3.sts
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_0.sts
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_1.sts
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_2.sts
@@ -2195,25 +2144,7 @@
 05.generics/03.utility_types/01.partial_utility_type/module_implements_2.sts
 05.generics/03.utility_types/01.partial_utility_type/module_implements_3.sts
 
-# 20380 compilation aborted: optional parameter+partial
-05.generics/03.utility_types/01.partial_utility_type/partial_type_10.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_11.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_5.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_6.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_7.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_9.sts
-
 # 20486 interface variable is not available
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_0.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_12.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_13.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_14.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_15.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_18.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_2.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_8.sts
-05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_9.sts
-05.generics/03.utility_types/01.partial_utility_type/type_4.sts
 05.generics/03.utility_types/incorrect_utility_type_1.sts
 
 # 20774 rest parameter doesn`t work with tuples
