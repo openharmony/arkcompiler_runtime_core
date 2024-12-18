@@ -221,9 +221,9 @@ type (see :ref:`Nullish Types`), then *T* is also non-nullish.
     let h3 = new H<SomeType> // OK
     let h4 = new H<Object>   // Compile-time : Object is not compatible with Base|SomeType
 
-    class Exotic<T extends 1|2|3> {}
-    let e1 = new Exotic<2>   // OK
-    let e2 = new Exotic<64>  // Compile-time : 64 is not compatible with 1|2|3
+    class Exotic<T extends "aa"| "bb"> {}
+    let e1 = new Exotic<"aa">   // OK
+    let e2 = new Exotic<"cc">  // Compile-time : "cc" is not compatible with "aa"| "bb"
 
     class A {
       f1: number = 0
@@ -517,7 +517,7 @@ generic instantiation, then the compiler actually replaces it as follows:
     Array<number>  // replaced with Array<Number>
     Array<boolean> // replaced with Array<Boolean>
     enum Color {Red, Green, Blue}
-    Array<Color>   // replaced with Array<0|1|2>
+    Array<Color>   // replaced with Array<Color.Red|Color.Green|Color.Blue>
     enum Reply {Yes="yes", No="no"}
     Array<Reply>   // replaced with Array<"yes"|"no">
 

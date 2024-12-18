@@ -494,15 +494,11 @@ Interface Method Overloading
 A :index:`compile-time error` occurs if signatures of these methods are
 overload-equivalent (see :ref:`Overload-Equivalent Signatures`).
 
-A class that implements such interface can use :ref:`Class Method Overloading`
-or :ref:`Method Overload Signatures`. *Method overloading* is recommended.
-
 .. index::
    interface
    method
    overloading
    method overloading
-   signature
    overload-equivalent method
 
 Overloading methods used in a class are represented in the example below:
@@ -525,32 +521,6 @@ Overloading methods used in a class are represented in the example below:
        i.foo()           // ok, 1st method is called
        i.foo("aa")       // ok, 2nd method is called
     }
-
-Overload signatures are represented in the example below:
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-    interface I {
-        foo()           // 1st method
-        foo(x: string)  // 2st method
-    }
-    class C implements I {
-        foo(): void;
-        foo(x: string): void;
-        foo(x?: string): void { // implementation method
-            /*body*/
-        }
-    }
-    function demo(i: I) {
-       i.foo()           // ok, implementation method is called
-       i.foo("aa")       // ok, implementation method is called
-    }
-
-Class ``C`` above defines only the *implementation* method that is called in
-all cases.
 
 .. index::
    implementation

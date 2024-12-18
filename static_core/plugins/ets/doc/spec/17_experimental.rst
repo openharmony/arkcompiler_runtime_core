@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -38,6 +38,7 @@ The feature *function and method overloading* is supported in many
 (if not all) modern programming languages. Overloading functions/methods
 is a practical and convenient way to write program actions that are similar
 in logic but different in implementation.
+See :ref:`Function, Method and Constructor Overloading` for more details.
 
 .. index::
    implementation
@@ -46,13 +47,6 @@ in logic but different in implementation.
    array
    array literal
    construct
-   function overloading
-   method overloading
-
-The |LANG| language supports (as an experimental feature at the moment) two
-semantically and syntactically different implementations of overloading: the
-|TS|-like implementation, and that of other languages. See
-:ref:`Function and Method Overloading` for more details.
 
 Section :ref:`Native Functions and Methods` introduces practically important
 and useful mechanisms for the inclusion of components written in other languages
@@ -1103,27 +1097,27 @@ are propagated to the surrounding scope if no ``catch`` clause is found.
 
 |
 
-.. _Function and Method Overloading:
+.. _Function, Method and Constructor Overloading:
 
-Function and Method Overloading
-*******************************
+Function, Method and Constructor Overloading
+********************************************
 
 .. meta:
     frontend_status: Done
 
-Similarly to |TS|, the |LANG| language supports overload signatures that allow
-specifying several headers for a function or method with different signatures.
-Most other languages support a different form of overloading that specifies
-a separate body for each overloaded header.
+As many other languages, the |LANG| language supports
+overloading allowing to declare several functions or
+methods with the same name but different signatures.
+|LANG| does not support |TS| overload signatures that allow
+specifying several headers for a function or method with different signatures
+but a single body (see :ref:`TS Overload Signatures`).
 
-Both approaches have their advantages and disadvantages. The latter approach
-supported by |LANG| can deliver better performance because no extra checks
+The |LANG| approach delivers better performance because no extra checks
 are performed during the execution of a specific body at runtime.
 
 .. index::
    function overloading
    method overloading
-   overload signature
    header
    function
    method
@@ -1306,7 +1300,7 @@ The example below represents the functions distinguishable by signatures:
       function foo(x: number[]) {}
       function foo(x: string) {}
 
-The following example represents the functions undistinguishable by signatures
+The following example represents the functions indistinguishable by signatures
 that cause a :index:`compile-time error`:
 
 .. code-block:: typescript
@@ -1386,6 +1380,9 @@ A :index:`compile-time error` occurs if:
 -  The ``native`` method has a body (see :ref:`Method Body`) that is a block
    instead of a simple semicolon or empty body.
 
+-  The ``native`` method is defined in a local class
+   (see :ref:`Local Classes and Interfaces`).
+
 .. index::
    native method
    implementation
@@ -1406,7 +1403,7 @@ Native Constructors
 ===================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 A native constructor is a constructor that marked with ``native`` keyword (see :ref:`Constructor Declaration`).
 
@@ -1416,6 +1413,9 @@ written in another programming language (e.g., *C*).
 A :index:`compile-time error` occurs if:
 
 -  The ``native`` constructor has a non-empty body (see :ref:`Constructor Body`).
+
+-  The ``native`` constructor is defined in a local class
+   (see :ref:`Local Classes and Interfaces`).
 
 .. index::
    native constructor
@@ -1557,7 +1557,7 @@ Functions with Receiver
     frontend_status: Done
 
 A *function with receiver* declaration is a top-level declaration
-(see :ref:`Top-Level Declarations`) that looks almost the same as 
+(see :ref:`Top-Level Declarations`) that looks almost the same as
 :ref:`Function Declarations`, except that the first parameter is mandatory,
 and the keyword ``this`` is used as its name:
 
@@ -1642,10 +1642,10 @@ declared in the same compilation unit:
 
 The name of a *function with receiver* cannot be the same as the name of an
 accessible method or field as well as the global function with the only
-explicit first parameter of the reciever type. Otherwise, a
+explicit first parameter of the receiver type. Otherwise, a
 :index:`compile-time error` occurs. It also means that a *function with
 receiver* cannot overload a method defined for the receiver type or the global
-function with the only explicit first parameter of the reciever type.
+function with the only explicit first parameter of the receiver type.
 
 .. code-block:: typescript
    :linenos:
@@ -1724,7 +1724,7 @@ Receiver Type
     frontend_status: Done
 
 A *receiver type* is the type of the *receiver parameter* in a function,
-function type, and lamdba with receiver. A *receiver type* may be an interface
+function type, and lambda with receiver. A *receiver type* may be an interface
 type, a class type, an array type, or a type parameter. Otherwise, a
 :index:`compile-time error` occurs.
 
@@ -1733,12 +1733,12 @@ Using an array type as receiver type is illustrated by the example below:
 .. code-block:: typescript
    :linenos:
 
-      function addElements(this: number[], ...s: number[]) { 
+      function addElements(this: number[], ...s: number[]) {
        ...
       }
 
       let x: number[] = [1, 2]
-      x.addElements(3, 4) 
+      x.addElements(3, 4)
 
 |
 
@@ -1748,7 +1748,7 @@ Accessors with Receiver
 =======================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 An *accessor with receiver* declaration is a top-level declaration (see
 :ref:`Top-Level Declarations`) that can be used as class or interface accessor
@@ -1847,7 +1847,7 @@ is applied to *function type with receiver*, and parameter names are ignored.
 
       function foo(this: A) => boolean {}
       function goo(a: A) => boolean {}
-      
+
       let f1: F1 = foo // ok
       f1 = goo // ok
 
@@ -1855,7 +1855,7 @@ is applied to *function type with receiver*, and parameter names are ignored.
       f2 = foo // ok
       f1 = f2 // ok
 
-The only difference is that only entity of function type with receiver can be 
+The only difference is that only entity of function type with receiver can be
 used in :ref:`Method Call Expression`. The definitions from the previous example
 are reused in the example below:
 
@@ -1865,7 +1865,7 @@ are reused in the example below:
       let a = new A()
       a.f1() // ok, function type with receiver
       f1(a)  // ok
-      
+
       a.f2() // compile-time error
       f2(a) // ok
 
@@ -1887,14 +1887,14 @@ the first parameter is mandatory, and the keyword ``this`` is used as its name:
 .. code-block:: abnf
 
     lambdaExpressionWithReceiver:
-        annotationUsage? typeParameters? 
-        '(' receiverParameter (',' lambdaParameterList)? ')' 
+        annotationUsage? typeParameters?
+        '(' receiverParameter (',' lambdaParameterList)? ')'
         returnType? throwMark? '=>' lambdaBody
         ;
 
 The usage of annotations is discussed in :ref:`Using Annotations`.
 
-The keyword ``this`` can be used inside a *lamdba expression with receiver*,
+The keyword ``this`` can be used inside a *lambda expression with receiver*,
 It corresponds to the first parameter:
 
 .. code-block:: typescript
@@ -1911,21 +1911,84 @@ The use of lambada is illustrated by the example below:
 .. code-block:: typescript
    :linenos:
 
-      class A { 
+      class A {
         name: string
         constructor (n: string) {
             this.name = n
         }
       }
-      
+
       function apply(aa: A[], f: (this: A) => void) {
         for (let a of aa) {
             a.f()
         }
       }
 
-      let aa: A[] = [new A("aa"), new A("bb")]  
+      let aa: A[] = [new A("aa"), new A("bb")]
       foo(aa, (this: A) => { console.log(this.name)} ) // output: "aa" "bb"
+
+|
+
+.. _Implicit this in Lambda with Receiver Body:
+
+Implicit ``this`` in Lambda with Receiver Body
+==============================================
+
+.. meta:
+    frontend_status: None
+
+Implicit ``this`` can be used in *lambada expression with receiver* body when
+
+- calling methods of lambda receiver type
+- calling functions with receiver of the same
+  receiver type (see :ref:`Receiver Type`).
+
+In other words ``this.`` prefix can be omitted in such cases.
+TBD: fields and properties?
+
+It is illustrated by the examples below:
+
+.. code-block:: typescript
+   :linenos:
+
+     class C {
+       foo(): void {}
+     }
+
+     function process(context: (this: C) => void) {}
+
+     process(
+        (this: C): void => {
+            this.foo() // ok - normal call
+            foo()      // ok - implicit 'this'
+        }
+     )
+
+The same applies if *lambda expression with receiver* is defined as
+*trailing lambda* (see :ref:`Trailing Lambdas`).
+The lambda signature is inferred in this case from the context:
+
+.. code-block:: typescript
+   :linenos:
+
+     process() {
+        this.foo() // ok - normal call
+        foo()      // ok - implicit 'this'
+     }
+
+This example illustrates using implicit ``this`` when calling a function
+with receiver:
+
+.. code-block:: typescript
+   :linenos:
+
+     function bar(this: C) {}
+     function otherBar(this: OtherClass) {}
+
+     process() {
+        bar()      // ok -  implicit 'this'
+        otherBar() // compile-time error, wrong type of implicit 'this'
+     }
 
 |
 
@@ -1977,8 +2040,9 @@ The formal syntax of the *trailing lambda* is presented below:
         arguments block
         ;
 
-Currently, no parameter can be specified for the trailing lambda. Otherwise,
-a :index:`compile-time error` occurs.
+Currently, no parameter can be specified for the trailing lambda,
+except a receiver parameter (see :ref:`Lambda Expressions with Receiver`).
+Otherwise, a :index:`compile-time error` occurs.
 
 **Note**. If a call is followed by a block, and the function or method
 being called has no last function type parameter, then such block is
@@ -2545,13 +2609,13 @@ the return type of the function being called:
 .. code-block:: typescript
    :linenos:
 
-      function foo(): int {}
+      function foo(): int { return 0 }
       function bar() {}
-      let resfoo = launch foo()
-      let resbar = launch bar()
+      let foo_result = launch foo()
+      let bar_result = launch bar()
 
-In the example above the type of ``resfoo`` is ``Promise<int>``, and the
-type of ``resbar`` is ``Promise<void>``.
+In the example above the type of ``foo_result`` is ``Promise<int>``, and the
+type of ``bar_result`` is ``Promise<void>``.
 
 Similarly to |TS|, |LANG| supports the launching of a coroutine by calling
 the function ``async`` (see :ref:`Async Functions`). No restrictions apply as
@@ -2571,7 +2635,7 @@ to from what scope to call the function ``async``:
       async function foo(): Promise<int> {}
 
       // This will create and launch coroutine
-      let resfoo = foo()
+      let foo_result = foo()
 
 |
 
@@ -2606,8 +2670,8 @@ A :index:`compile-time error` occurs if the expression type is not ``Promise<T>`
       let promise = launch (): int { return 1 } ()
       console.log(await promise) // output: 1
 
-If the coroutine result must be ignored, then the expression statement
-``await`` is used:
+If the coroutine result is ignored, then the expression statement ``await`` is
+used:
 
 .. code-block:: typescript
    :linenos:
@@ -2616,7 +2680,7 @@ If the coroutine result must be ignored, then the expression statement
       let promise = launch foo()
       await promise
 
-The ``await`` cannot return ``Promise<T>`` or union type that contains
+The ``await`` never returns ``Promise<T>`` or union type that contains
 ``Promise<T>``. If the actual type argument of ``T`` in ``Promise<T>`` contains
 ``Promise``, then the compiler eliminates any such usage.
 
@@ -2655,9 +2719,8 @@ Return types of ``await`` expressions are represented in the example below:
     frontend_status: Done
 
 The class ``Promise<T>`` represents the values returned by launch expressions
-(see :ref:`Create and Launch a Coroutine`) and dynamic import expressions (see
-:ref:`Dynamic Import Expression`). It belongs to the core packages of the
-standard library (see :ref:`Standard Library`), and can be used without
+(see :ref:`Create and Launch a Coroutine`). It belongs to the core packages of
+the standard library (see :ref:`Standard Library`), and can be used without
 any qualification.
 
 The methods are used as follows:
@@ -2831,18 +2894,14 @@ DynamicObject Type
     frontend_status: Partly
 
 The interface ``DynamicObject`` is used to provide seamless interoperability
-with dynamic languages (e.g., |JS| and |TS|), and to support advanced
-language features such as *dynamic import* (see :ref:`Dynamic Import Expression`).
+with dynamic languages (e.g., |JS| and |TS|).
 
 This interface (defined in :ref:`Standard Library`) is common for a set of
 wrappers (also defined in :ref:`Standard Library`) that provide access to
 underlying objects.
 
 An instance of ``DynamicObject`` cannot be created directly. Only an
-instance of a specific wrapper object can be instantiated. For example, a
-*dynamic import* expression (see :ref:`Dynamic Import Expression`) can produce
-an instance of the dynamic object implementation class that wraps an object
-containing exported entities of an imported module.
+instance of a specific wrapper object can be instantiated.
 
 ``DynamicObject`` is a predefined type. The following operations applied to an
 object of type ``DynamicObject`` are handled by the compiler in a special manner:
@@ -3144,6 +3203,28 @@ packages of the standard library (see :ref:`Standard Library Usage`).
 A *package module* can directly access all top-level entities declared in all
 modules that constitute the package.
 
+If a top declaration in any package module contains initializer for variable or
+constant such initializer must be in a form of constantExpression otherwise a
+:index:`compile-time error` occurs. Initializer block is to be used for
+the initialization purpose to ensure an explicit order of initialization.
+
+.. code-block:: typescript
+   :linenos:
+
+   package P
+     let v1 = foo() // Compile-time error as call to foo() is not a constant expression
+     function foo() { return 1 }
+
+     let v2 = 2 + 3 * 4 // OK
+
+     let v2: number
+     static {
+        v2 = foo() // OK
+     }
+
+
+
+
 .. index::
    package module
    package header
@@ -3223,8 +3304,26 @@ initialization actions (e.g., setting initial values for variables across all
 package modules) as described in detail in
 :ref:`Compilation Unit Initialization` and in :ref:`Initializer Block`.
 
-A :index:`compile-time error` occurs if a package contains more than one
-*package initializer*.
+A :index:`compile-time error` occurs if a package contains *package initializer*
+in more than one source file.
+
+.. code-block:: typescript
+   :linenos:
+
+      // Source file 1
+      package P
+         static { // P initializer part one
+         }
+         function foo() {}
+         static { // P initializer part two
+         }
+
+
+      // Source file 2
+      package P
+         static {} // compile-time error as initializer in a different source file
+
+
 
 .. index::
    package initializer
@@ -3319,6 +3418,9 @@ The two situations are illustrated by the examples below:
 Generics Experimental
 *********************
 
+.. meta:
+    frontend_status: Done
+
 |
 
 .. _NonNullish Type Parameter:
@@ -3327,7 +3429,7 @@ NonNullish Type Parameter
 =========================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Partly
 
 If some generic class has a type parameter with nullish union type constraint,
 then special syntax for type annotation can be used to get a non-nullish

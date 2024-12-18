@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 Support for GUI Programming
 ###########################
 
-This section describes the built-in mechanisms that |LANG| provides to create
+This Chapter describes the built-in mechanisms that |LANG| provides to create
 graphical user interface (GUI) programs. The section is based on the ArkUI
 Declarative Core Language Specification available at
 <https://gitee.com/arkui-finland/arkui-edsl-core-spec/blob/master/arkui-core-spec.md>.
@@ -24,7 +24,7 @@ ArkUI provides a set of extensions of the standard to declaratively describe
 the programs’ GUI, and the interaction between the GUI components. |LANG| aims
 to adopt ArkUI syntax and semantics as long as they do not contradict |LANG|.
 
-This section is actively under development, and some of its parts can be still
+This Chapter is actively under development, and some of its parts can be still
 underspecified. In such cases please refer to the original specification.
 
 .. index::

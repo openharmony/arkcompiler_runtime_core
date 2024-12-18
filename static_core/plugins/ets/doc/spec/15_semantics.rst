@@ -481,7 +481,7 @@ In like cases, the smart compiler can deduce the smart type of an entity
 without requiring unnecessary casting conversions (see
 :ref:`Cast Expressions`).
 
-Overloading (see :ref:`Function and Method Overloading`) can cause tricky
+Overloading (see :ref:`Function, Method and Constructor Overloading`) can cause tricky
 situations when a smart type leads to the call of a function or a method
 (see :ref:`Overload Resolution`) that suits the smart type rather than the
 static type of an argument:
@@ -883,22 +883,17 @@ The correctness check for functions overloading is performed if two or more
 functions with the same name are accessible (see :ref:`Accessible`) in a scope
 (see :ref:`Scopes`). 
 
-A function can be declared in, or imported to a scope. To prevent uncontrolled
-overloading, mixing functions that are declared and imported, or imported from
-different compilation units, is not allowed. In particular, a
-:index:`compile-time error` occurs to same-name functions if:
+A function can be declared in, or imported to a scope. 
 
--  Functions are imported from different compilation units;
-
--  Some functions are imported, while others are declared.
-
-It means that only the functions declared in the scope can be overloaded.
 The semantic check for these functions is as follows:
 
 -  If signatures of functions are *overload-equivalent*, then
    a :index:`compile-time error` occurs.
 
 -  Otherwise, *overloading* is valid.
+
+More details can be found in :ref:`Function Overloading` and in
+:ref:`Import and Overloading of Function Names`.
 
 .. index::
    overloading
@@ -1414,119 +1409,6 @@ occurs. Examples of error cases are presented below:
 
 |
 
-.. _Overload Signatures:
-
-Overload Signatures
-*******************
-
-|LANG| supports *overload signatures* to ensure better |TS| alignment for
-functions (:ref:`Function Overload Signatures`), static and instance methods
-(:ref:`Method Overload Signatures`), and constructors
-(:ref:`Constructor Overload Signatures`).
-
-All signatures except the last *implementation signature* are considered
-*syntactic sugar*. The compiler uses the *implementation signature* only
-as it considers overloading, overriding, shadowing, or calls.
-
-.. index::
-   overload signature
-   alignment
-   constructor
-   implementation signature
-   syntactic sugar
-   signature
-   overloading
-   overriding
-   shadowing
-   call
-
-|
-
-.. _Overload Signature Correctness Check:
-
-Overload Signature Correctness Check
-====================================
-
-If a function, method, or constructor has several *overload signatures*
-that share the same body, then all first signatures without bodies must
-*fit* into the *implementation signature* that has the body. Otherwise,
-a :index:`compile-time error` occurs.
-
-Signature *S*:sub:`i` with *n* parameters *fits* into implementation signature
-*IS* if **all** of the following conditions are met:
-
-- *S*:sub:`i` has *n* parameters, *IS* has *m* parameters, and:
-
-   -  ``n <= m``;
-   -  All ``n`` parameter types in *S*:sub:`i` are compatible (see
-      :ref:`Type Compatibility`) with parameter types in the same positions
-      in *IS*:sub:`2`;
-   -  All *IS* parameters in positions from ``n + 1`` up to ``m`` are optional
-      (see :ref:`Optional Parameters`) if ``n < m``.
-
-- *IS* return type is ``void`` (see :ref:`Type void`), then *S*:sub:`i` return
-  type must also be ``void``.
-
-- *IS* return type is not ``void``, then *S*:sub:`i` return type must be
-  ``void`` (see :ref:`Type void`) or compatible with the return type of *IS*
-  (see :ref:`Type Compatibility`).
-
-.. index::
-   overload signature
-   correctness check
-   parameter
-   implementation signature
-   function
-   method
-   constructor
-   compatibility
-   return type
-
-The examples below represent valid overload signatures:
-
-.. code-block-meta:
-   expect-cte:
-
-.. code-block:: typescript
-   :linenos:
-
-    function f1(): void
-    function f1(x: number): void
-    function f1(x?: number): void {
-        /*body*/
-    }
-
-    function f2(x: number): void
-    function f2(x: string): void
-    function f2(x: number | string): void {
-        /*body*/
-    }
-
-    function f3(x: number): void
-    function f3(x: string): number
-    function f3(x: number | string): number {
-        return 1
-    }
-
-The examples below represent code with compile-time errors:
-
-.. code-block:: typescript
-   :linenos:
-
-    function f4(x: number): void
-    function f4(x: boolean): number // This signature does not fit
-    function f4(x: number | string): void {
-        /*body*/
-    }
-
-    function f5(x: number): void
-    function f5(x: string): number // Wrong return type
-    function f5(x: number | string): void {
-        /*body*/
-    }
-
-|
-
 .. _Initializer Block:
 
 Initializer Block
@@ -1569,7 +1451,6 @@ Using these features while doing the |LANG| programming is not recommended in
 most cases.
 
 .. index::
-   overload signature compatibility
    compatibility
 
 |
