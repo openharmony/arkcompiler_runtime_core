@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -386,7 +386,7 @@ protected:
     static void VisitThrow(GraphVisitor *v, Inst *inst);
     static void VisitCatchPhi(GraphVisitor *v, Inst *inst);
     static void VisitLoadRuntimeClass(GraphVisitor *v, Inst *inst);
-    static void VisitLoadUndefined(GraphVisitor *v, Inst *inst);
+    static void VisitLoadUniqueObject(GraphVisitor *v, Inst *inst);
     static void VisitCallLaunchVirtual(GraphVisitor *v, Inst *inst);
     static void VisitCallResolvedLaunchStatic(GraphVisitor *v, Inst *inst);
     static void VisitCallResolvedLaunchVirtual(GraphVisitor *v, Inst *inst);

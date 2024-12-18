@@ -31,9 +31,9 @@ export abstract class RuntimeLinker {
      *
      * @param clsName name of the class.
      *
-     * @returns Class if it was found, null otherwise.
+     * @returns Class if it was found, undefined otherwise.
      */
-    public final native findLoadedClass(clsName: string): Class | null;
+    public final native findLoadedClass(clsName: string): Class | undefined;
 
     /**
      * Loads class into this linker's context.
@@ -61,16 +61,16 @@ export abstract class RuntimeLinker {
      *
      * @param init indicator whether class must be initialized.
      *
-     * @returns Class if it was found, null otherwise.
+     * @returns Class if it was found, undefined otherwise.
      *
      * @throws errors happened during class initialization.
      */
-    protected abstract findAndLoadClass(clsName: string, init: boolean): Class | null;
+    protected abstract findAndLoadClass(clsName: string, init: boolean): Class | undefined;
 
     /**
      * Version of loadClass which does not throw NoClassDefFoundError.
      */
-    protected final loadClassSafe(clsName: string, init: boolean): Class | null {
+    protected final loadClassSafe(clsName: string, init: boolean): Class | undefined {
         let optClass = this.findLoadedClass(clsName);
         if (optClass) {
             if (init) {
@@ -83,7 +83,7 @@ export abstract class RuntimeLinker {
         if (optClass) {
             return optClass;
         }
-        return null;
+        return undefined;
     }
 
     /**

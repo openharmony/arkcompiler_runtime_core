@@ -29,12 +29,12 @@ static constexpr const char *SETTER_PREFIX = "<set>";
 
 ALWAYS_INLINE inline bool EtsReferenceNullish(EtsCoroutine *coro, EtsObject *ref)
 {
-    return ref == nullptr || ref == EtsObject::FromCoreType(coro->GetUndefinedObject());
+    return ref == nullptr || ref == EtsObject::FromCoreType(coro->GetNullValue());
 }
 
 ALWAYS_INLINE inline bool IsReferenceNullish(EtsCoroutine *coro, EtsObject *ref)
 {
-    return ref == nullptr || ref == EtsObject::FromCoreType(coro->GetUndefinedObject());
+    return ref == nullptr || ref == EtsObject::FromCoreType(coro->GetNullValue());
 }
 
 template <bool IS_STRICT>

@@ -325,31 +325,31 @@ public:
     }
 
     template <BytecodeInstruction::Format FORMAT>
-    ALWAYS_INLINE void HandleEtsLdundefined()
+    ALWAYS_INLINE void HandleEtsLdnullvalue()
     {
-        LOG_INST() << "ets.ldundefined";
+        LOG_INST() << "ets.ldnullvalue";
 
-        this->GetAccAsVReg().SetReference(GetCoro()->GetUndefinedObject());
+        this->GetAccAsVReg().SetReference(GetCoro()->GetNullValue());
         this->template MoveToNextInst<FORMAT, true>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
-    ALWAYS_INLINE void HandleEtsMovundefined()
+    ALWAYS_INLINE void HandleEtsMovnullvalue()
     {
         uint16_t vd = this->GetInst().template GetVReg<FORMAT>();
-        LOG_INST() << "ets.movundefined v" << vd;
+        LOG_INST() << "ets.movnullvalue v" << vd;
 
-        this->GetFrameHandler().GetVReg(vd).SetReference(GetCoro()->GetUndefinedObject());
+        this->GetFrameHandler().GetVReg(vd).SetReference(GetCoro()->GetNullValue());
         this->template MoveToNextInst<FORMAT, true>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
-    ALWAYS_INLINE void HandleEtsIsundefined()
+    ALWAYS_INLINE void HandleEtsIsnullvalue()
     {
-        LOG_INST() << "ets.isundefined";
+        LOG_INST() << "ets.isnullvalue";
 
         ObjectHeader *obj = this->GetAcc().GetReference();
-        this->GetAccAsVReg().SetPrimitive(obj == GetCoro()->GetUndefinedObject());
+        this->GetAccAsVReg().SetPrimitive(obj == GetCoro()->GetNullValue());
         this->template MoveToNextInst<FORMAT, true>();
     }
 

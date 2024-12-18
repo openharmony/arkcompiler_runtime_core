@@ -157,13 +157,13 @@ static void VisitEtsStObjByName(BytecodeGen *enc, compiler::IntrinsicInst *inst)
     }
 }
 
-static void VisitLoadUndefined(GraphVisitor *visitor, Inst *inst)
+static void VisitLoadUniqueObject(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<BytecodeGen *>(visitor);
     if (inst->GetDstReg() == compiler::GetAccReg()) {
-        enc->result_.emplace_back(pandasm::Create_ETS_LDUNDEFINED());
+        enc->result_.emplace_back(pandasm::Create_ETS_LDNULLVALUE());
     } else {
-        enc->result_.emplace_back(pandasm::Create_ETS_MOVUNDEFINED(inst->GetDstReg()));
+        enc->result_.emplace_back(pandasm::Create_ETS_MOVNULLVALUE(inst->GetDstReg()));
     }
 }
 

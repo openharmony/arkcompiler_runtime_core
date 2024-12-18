@@ -12,20 +12,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// Before AOP:
 
-#include "plugins/ets/runtime/types/ets_weak_reference.h"
-#include "plugins/ets/runtime/ets_vm.h"
+class A {}
 
-namespace ark::ets {
-
-void EtsWeakReference::ClearReferent()
-{
-    referent_ = nullptr;
+function foo() {
+    let a = new A();
+    return a;
 }
 
-void EtsWeakReference::SetReferent(EtsObject *addr)
-{
-    ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsWeakReference, referent_), addr->GetCoreType());
+function main() {
+    console.log(foo())
 }
 
-}  // namespace ark::ets
+// After AOP:
+//
+// class A {}
+//
+// function foo() {
+//     let a = new A();
+//     return null;
+// }
+// function main() {
+//     console.log(foo())
+// }

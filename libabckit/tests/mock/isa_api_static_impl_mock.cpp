@@ -374,7 +374,7 @@ inline AbckitInst *IcreateIsInstance(AbckitGraph *graph, AbckitInst *inputObj, A
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateLoadUndefined(AbckitGraph *graph)
+inline AbckitInst *IcreateLoadNullValue(AbckitGraph *graph)
 {
     g_calledFuncs.push(__func__);
 
@@ -597,7 +597,7 @@ AbckitIsaApiStatic g_isaApiStaticImpl = {
     IcreateLoadConstArray,
     IcreateCheckCast,
     IcreateIsInstance,
-    IcreateLoadUndefined,
+    IcreateLoadNullValue,
     IcreateReturnVoid,
     IcreateEquals,
     IcreateStrictEquals,

@@ -1648,9 +1648,9 @@ AbckitInst *IcreateIsInstanceStatic(AbckitGraph *graph, AbckitInst *inputObj, Ab
     return CreateInstFromImpl(graph, intrImpl);
 }
 
-AbckitInst *IcreateLoadUndefinedStatic(AbckitGraph *graph)
+AbckitInst *IcreateLoadNullValueStatic(AbckitGraph *graph)
 {
-    auto instImpl = graph->impl->CreateInstLoadUndefined(compiler::DataType::REFERENCE);
+    auto instImpl = graph->impl->CreateInstLoadUniqueObject(compiler::DataType::REFERENCE);
     return CreateInstFromImpl(graph, instImpl);
 }
 
@@ -1670,7 +1670,7 @@ AbckitInst *IcreateIsUndefinedStatic(AbckitGraph *graph, AbckitInst *inputObj)
 {
     LIBABCKIT_LOG_FUNC;
     auto intrImpl = graph->impl->CreateInstIntrinsic(
-        compiler::DataType::BOOL, 0, compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_IS_UNDEFINED);
+        compiler::DataType::BOOL, 0, compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_IS_NULL_VALUE);
     size_t argsCount {1U};
     intrImpl->ReserveInputs(argsCount);
     intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);

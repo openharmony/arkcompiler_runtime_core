@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -412,10 +412,10 @@ void EtsClass::SetValueTyped()
     flags_ = flags_ | IS_VALUE_TYPED;
     ASSERT(IsValueTyped());
 }
-void EtsClass::SetUndefined()
+void EtsClass::SetNullValue()
 {
-    flags_ = flags_ | IS_UNDEFINED;
-    ASSERT(IsUndefined());
+    flags_ = flags_ | IS_NULLVALUE;
+    ASSERT(IsNullValue());
 }
 void EtsClass::SetBoxed()
 {

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -249,12 +249,12 @@ test_ets_files = [
   "ut/isa/isa_static/call/call_virtual_static",
   "ut/ir_core/catchphi/catchphi_static",
   "ut/isa/isa_static/cmp/create_cmp_static",
+  "ut/isa/isa_static/load_nullvalue/load_nullvalue_static",
   "ut/isa/isa_static/load_string/load_string_static",
-  "ut/isa/isa_static/load_undefined/load_undefined_static",
   "ut/isa/isa_static/equals/equals_static",
   "ut/isa/isa_static/get_opcode/get_opcode_static",
   "ut/isa/isa_static/is_instance/is_instance_static",
-  "ut/isa/isa_static/is_undefined/is_undefined_static",
+  "ut/isa/isa_static/is_nullvalue/is_nullvalue_static",
   "ut/isa/isa_static/create_if/create_if_static",
   "ut/isa/isa_static/objects/objects",
   "ut/isa/isa_static/throw/throw_static",
@@ -597,9 +597,9 @@ libabckit_host_unittest_action("abckit_gtests") {
     "ut/isa/isa_static/equals/equals_static.cpp",
     "ut/isa/isa_static/get_opcode/get_opcode_static.cpp",
     "ut/isa/isa_static/is_instance/is_instance.cpp",
-    "ut/isa/isa_static/is_undefined/is_undefined.cpp",
+    "ut/isa/isa_static/is_nullvalue/is_nullvalue.cpp",
+    "ut/isa/isa_static/load_nullvalue/load_nullvalue_static.cpp",
     "ut/isa/isa_static/load_string/load_string_static.cpp",
-    "ut/isa/isa_static/load_undefined/load_undefined_static.cpp",
     "ut/isa/isa_static/objects/objects.cpp",
     "ut/isa/isa_static/return/return_static.cpp",
     "ut/isa/isa_static/throw/throw_static.cpp",

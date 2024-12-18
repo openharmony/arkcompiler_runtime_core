@@ -233,7 +233,7 @@ public:
 
     PANDA_PUBLIC_API ObjectHeader *GetOOMErrorObject() override;
 
-    PANDA_PUBLIC_API ObjectHeader *GetUndefinedObject();
+    PANDA_PUBLIC_API ObjectHeader *GetNullValue();
 
     compiler::RuntimeInterface *GetCompilerRuntimeInterface() const override
     {
@@ -408,7 +408,7 @@ private:
     CoroutineManager *coroutineManager_ {nullptr};
     mem::Reference *oomObjRef_ {nullptr};
     compiler::RuntimeInterface *runtimeIface_ {nullptr};
-    mem::Reference *undefinedObjRef_ {nullptr};
+    mem::Reference *nullValueRef_ {nullptr};
     mem::Reference *finalizableWeakRefList_ {nullptr};
     os::memory::Mutex finalizableWeakRefListLock_;
     NativeLibraryProvider nativeLibraryProvider_;

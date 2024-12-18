@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5058,11 +5058,11 @@ void LLVMIrConstructor::VisitLoadRuntimeClass(GraphVisitor *v, Inst *inst)
     ctor->ValueMapAdd(inst, result);
 }
 
-void LLVMIrConstructor::VisitLoadUndefined(GraphVisitor *v, Inst *inst)
+void LLVMIrConstructor::VisitLoadUniqueObject(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
 
-    auto offset = ctor->GetGraph()->GetRuntime()->GetTlsUndefinedObjectOffset(ctor->GetGraph()->GetArch());
+    auto offset = ctor->GetGraph()->GetRuntime()->GetTlsUniqueObjectOffset(ctor->GetGraph()->GetArch());
     auto result = llvmbackend::runtime_calls::LoadTLSValue(&ctor->builder_, ctor->arkInterface_, offset,
                                                            ctor->builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
     ctor->ValueMapAdd(inst, result);

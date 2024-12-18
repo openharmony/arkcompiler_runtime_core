@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1524,11 +1524,11 @@ void Inlining::MoveConstants(Graph *graphInl)
         auto exisingNullptr = GetGraph()->GetOrCreateNullPtr();
         graphInl->GetNullPtrInst()->ReplaceUsers(exisingNullptr);
     }
-    // Move LoadUndefined instruction
-    if (graphInl->HasUndefinedInst()) {
-        startBb->EraseInst(graphInl->GetUndefinedInst());
-        auto exisingUndefined = GetGraph()->GetOrCreateUndefinedInst();
-        graphInl->GetUndefinedInst()->ReplaceUsers(exisingUndefined);
+    // Move LoadUniqueObject instruction
+    if (graphInl->HasUniqueObjectInst()) {
+        startBb->EraseInst(graphInl->GetUniqueObjectInst());
+        auto exisingUniqueObject = GetGraph()->GetOrCreateUniqueObjectInst();
+        graphInl->GetUniqueObjectInst()->ReplaceUsers(exisingUniqueObject);
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -197,7 +197,7 @@ export final class Promise<out T> implements PromiseLike<T> {
 
     static reject(): Promise<void> {
         let p = new Promise<void>();
-        p.rejectImpl(null);
+        p.rejectImpl(undefined);
         return p;
     }
 
@@ -343,13 +343,13 @@ export final class Promise<out T> implements PromiseLike<T> {
     // 1. Reference fields
     // 2. Primitive fields in mostly size decreasing order
     // filling alignment holes
-    private value: NullishType = null;
+    private value: NullishType = undefined;
     private mutex = new Mutex();
     private event = new Event();
-    private callbackQueue: Object[] | null = null;
-    private launchModeQueue: int[] | null = null;
-    private interopObject: Object|null = null;
-    private linkedPromise: Object | null = null;
+    private callbackQueue: Object[] | undefined = undefined;
+    private launchModeQueue: int[] | undefined = undefined;
+    private interopObject: Object|undefined = undefined;
+    private linkedPromise: Object | undefined = undefined;
     private queueSize: int = 0;
     private remotePromiseResolver: long = 0;
     private state: int = Promise.STATE_PENDING;
@@ -455,7 +455,7 @@ class AllSettledPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
 
     private resolvedCnt = 0;
     private rejectedCnt = 0;
-    private values: PromiseSettledResultBase[]|null = null;
+    private values: PromiseSettledResultBase[]|undefined = undefined;
     private resolve: (value: PromiseSettledResult<T>[]) => void;
     private reject: (error: NullishType) => void;
 }
@@ -495,7 +495,7 @@ class AnyPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
 
     private rejectImpl(error: NullishType, idx: int) {
         ++this.rejectedCnt;
-        if (error == null || error instanceof Error) {
+        if (error == undefined || error instanceof Error) {
             this.errors![idx] = error as Error;
         } else {
             this.errors![idx] = new Error(error!.toString());
@@ -507,7 +507,7 @@ class AnyPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
 
     private resolvedCnt = 0;
     private rejectedCnt = 0;
-    private errors: Error[]|null = null;
+    private errors: Error[]|undefined = undefined;
     private resolve: (value: T) => void;
     private reject: (error: NullishType) => void;
 }
@@ -548,4 +548,4 @@ class RacePromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
     private reject: (error: NullishType) => void;
 }
 
-export type NullablePromise<out T> = Promise<T> | null;
+export type NullablePromise<out T> = Promise<T> | undefined;

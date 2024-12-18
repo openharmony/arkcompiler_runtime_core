@@ -36,7 +36,7 @@ final class BootRuntimeLinker extends RuntimeLinker {
      *
      * @param init indicator whether class must be initialized.
      *
-     * @returns Class if it was found, null otherwise.
+     * @returns Class if it was found, undefined otherwise.
      */
-    public native override findAndLoadClass(clsName: string, init: boolean): Class | null;
+    public native override findAndLoadClass(clsName: string, init: boolean): Class | undefined;
 }

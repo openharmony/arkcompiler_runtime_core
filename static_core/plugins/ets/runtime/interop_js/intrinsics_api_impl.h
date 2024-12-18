@@ -175,10 +175,8 @@ std::conditional_t<USE_RET, void *, void> CompilerJSCallFunction(void *obj, void
 
 inline void HandleExceptions(napi_env env, InteropCtx *ctx)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-
     if (NapiIsExceptionPending(env)) {
-        ctx->ForwardJSException(coro);
+        ctx->ForwardJSException(EtsCoroutine::GetCurrent());
     }
     ASSERT(ctx->SanityETSExceptionPending());
 }
@@ -208,15 +206,13 @@ inline JSValue *ConvertFromLocal<JSConvertJSValue>(void *value)
     INTEROP_CODE_SCOPE_ETS(EtsCoroutine::GetCurrent());
 
     auto ctx = InteropCtx::Current(EtsCoroutine::GetCurrent());
-    if (!IsNull(ctx->GetJSEnv(), ToLocal(value))) {
-        auto res = JSConvertJSValue::Unwrap(ctx, ctx->GetJSEnv(), ToLocal(value));
-        if (res.has_value()) {
-            return res.value();
-        }
-
-        HandleExceptions(ctx->GetJSEnv(), ctx);
+    if (IsUndefined(ctx->GetJSEnv(), ToLocal(value))) {
+        return nullptr;
     }
-
+    if (auto res = JSConvertJSValue::Unwrap(ctx, ctx->GetJSEnv(), ToLocal(value)); res.has_value()) {
+        return res.value();
+    }
+    HandleExceptions(ctx->GetJSEnv(), ctx);
     return nullptr;
 }
 

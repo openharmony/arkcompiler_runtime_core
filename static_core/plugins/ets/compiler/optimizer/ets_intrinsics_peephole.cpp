@@ -269,22 +269,22 @@ static void ReplaceWithCompareNullish(IntrinsicInst *intrinsic, Inst *input)
 
     auto compareNull = graph->CreateInstCompare(DataType::BOOL, intrinsic->GetPc(), input, graph->GetOrCreateNullPtr(),
                                                 DataType::REFERENCE, ConditionCode::CC_EQ);
-    auto compareUndef =
-        graph->CreateInstCompare(DataType::BOOL, intrinsic->GetPc(), input, graph->GetOrCreateUndefinedInst(),
+    auto compareUniqueObj =
+        graph->CreateInstCompare(DataType::BOOL, intrinsic->GetPc(), input, graph->GetOrCreateUniqueObjectInst(),
                                  DataType::REFERENCE, ConditionCode::CC_EQ);
 
-    auto orInst = graph->CreateInstOr(DataType::BOOL, intrinsic->GetPc(), compareNull, compareUndef);
+    auto orInst = graph->CreateInstOr(DataType::BOOL, intrinsic->GetPc(), compareNull, compareUniqueObj);
 
     bb->InsertAfter(compareNull, intrinsic);
-    bb->InsertAfter(compareUndef, compareNull);
-    bb->InsertAfter(orInst, compareUndef);
+    bb->InsertAfter(compareUniqueObj, compareNull);
+    bb->InsertAfter(orInst, compareUniqueObj);
 
     intrinsic->ReplaceUsers(orInst);
 }
 
 static bool IsNullish(const Inst *input)
 {
-    return input->IsNullPtr() || input->IsLoadUndefined();
+    return input->IsNullPtr() || input->IsLoadUniqueObject();
 }
 
 static bool ReplaceIfNonValueTyped(IntrinsicInst *intrinsic, compiler::Graph *graph)

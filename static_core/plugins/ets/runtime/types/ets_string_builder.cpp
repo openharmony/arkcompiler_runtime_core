@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,6 @@ static constexpr uint32_t SB_LENGTH_OFFSET = SB_INDEX_OFFSET + sizeof(int32_t);
 static constexpr uint32_t SB_COMPRESS_OFFSET = SB_LENGTH_OFFSET + sizeof(int32_t);
 
 /// "null", "true" and "false" packed to integral types
-static constexpr uint64_t NULL_CODE = 0x006C006C0075006E;
 static constexpr uint64_t TRUE_CODE = 0x0065007500720074;
 static constexpr uint64_t FALS_CODE = 0x0073006c00610066;
 static constexpr uint16_t E_CODE = 0x0065;
@@ -185,8 +184,14 @@ static void ReconstructStringAsUtf16(EtsString *dstString, EtsObjectArray *buffe
 
 static inline EtsCharArray *NullToCharArray()
 {
-    EtsCharArray *arr = EtsCharArray::Create(std::char_traits<char>::length("null"));
-    *arr->GetData<uint64_t>() = NULL_CODE;
+    static constexpr std::array<uint16_t, 9U> UNDEFINED_UTF16 = {0x7500, 0x6e00, 0x6400, 0x6500, 0x6600,
+                                                                 0x6900, 0x6e00, 0x6500, 0x6400};
+
+    EtsCharArray *arr = EtsCharArray::Create(UNDEFINED_UTF16.size());
+    if (memcpy_s(arr->GetData<uint16_t>(), UNDEFINED_UTF16.size(), UNDEFINED_UTF16.data(), UNDEFINED_UTF16.size()) !=
+        EOK) {
+        UNREACHABLE();
+    }
     return arr;
 }
 

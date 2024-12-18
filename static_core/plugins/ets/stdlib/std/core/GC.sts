@@ -95,10 +95,10 @@ export final class GC {
      * - -1 in case the task is canceled.
      */
     public static startGC(cause: int, inPlaceMode: boolean = GC.NOT_IN_PLACE_MODE): long throws {
-        return GC.startGCImpl(cause, null, inPlaceMode);
+        return GC.startGCImpl(cause, undefined, inPlaceMode);
     }
     
-    private static native startGCImpl(cause: int, callback: Object | null, runInPlace: boolean): long throws;
+    private static native startGCImpl(cause: int, callback: Object | undefined, runInPlace: boolean): long throws;
 
     /**
     * The function returns when the specified GC gets finished

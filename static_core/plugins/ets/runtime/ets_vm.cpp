@@ -239,13 +239,13 @@ bool PandaEtsVM::Initialize()
         using namespace panda_file_items::class_descriptors;
 
         PreallocSpecialReference(this, oomObjRef_, OUT_OF_MEMORY_ERROR.data());
-        PreallocSpecialReference(this, undefinedObjRef_, INTERNAL_UNDEFINED.data(), true);
+        PreallocSpecialReference(this, nullValueRef_, NULL_VALUE.data(), true);
         PreallocSpecialReference(this, finalizableWeakRefList_, FINALIZABLE_WEAK_REF.data());
 
         if (Thread::GetCurrent() != nullptr) {
             ASSERT(GetThreadManager()->GetMainThread() == Thread::GetCurrent());
             auto *coro = EtsCoroutine::GetCurrent();
-            coro->SetUndefinedObject(GetUndefinedObject());
+            coro->SetupNullValue(GetNullValue());
 
             doubleToStringCache_ = DoubleToStringCache::Create(coro);
             floatToStringCache_ = FloatToStringCache::Create(coro);
@@ -498,9 +498,9 @@ ObjectHeader *PandaEtsVM::GetOOMErrorObject()
     return obj;
 }
 
-ObjectHeader *PandaEtsVM::GetUndefinedObject()
+ObjectHeader *PandaEtsVM::GetNullValue()
 {
-    auto obj = GetGlobalObjectStorage()->Get(undefinedObjRef_);
+    auto obj = GetGlobalObjectStorage()->Get(nullValueRef_);
     ASSERT(obj != nullptr);
     return obj;
 }
@@ -553,7 +553,7 @@ static void PrintExceptionInfo(EtsCoroutine *coro, EtsHandle<EtsObject> exceptio
         std::array<Value, 1> args = {Value(exception->GetCoreType())};
         EtsObject *callRes = EtsObject::FromCoreType(
             EtsMethod::ToRuntimeMethod(method)->Invoke(coro, args.data()).GetAs<ObjectHeader *>());
-        if (coro->HasPendingException() || callRes == EtsObject::FromCoreType(coro->GetUndefinedObject())) {
+        if (coro->HasPendingException() || callRes == EtsObject::FromCoreType(coro->GetNullValue())) {
             return std::nullopt;
         }
         return EtsString::FromEtsObject(callRes)->ConvertToStringView(&strBuf);

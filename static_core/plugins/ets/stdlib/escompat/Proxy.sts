@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -567,7 +567,7 @@ abstract class ArrayProxy<T> extends Array<T> {
             ArrayProxy.getArrayMethod("splice", Type.of(1), Type.of(1), Type.of(new Object[0]))
 
     private static readonly SPLICE_METHOD_NUM_OBJ_ARR: Method =
-            ArrayProxy.getArrayMethod("splice", Type.of(1.0), ObjectType, Type.of(new Object[0]))
+            ArrayProxy.getArrayMethod("splice", Type.of(1.0), Type.of(new Number(0)), Type.of(new Object[0]))
 
     constructor(target: Array<T>, handler: ArrayProxyHandler<T>) {
         this.target = target

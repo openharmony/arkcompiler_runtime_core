@@ -458,7 +458,7 @@ EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda(EtsLong methodPtr,
     fn.AddInstruction(pandasm::Create_CALL_VIRT(LMB_REG, RECV_REG, ARR_REG, 0, lambda.GetFunctionName()));
 
     fn.AddInstruction(pandasm::Create_STA_OBJ(0));
-    if (!fn.returnType.IsObject()) {
+    if (!fn.returnType.IsObject() && !fn.returnType.IsVoid()) {
         auto destr = m->Ctx()->DeclarePrimitive(fn.returnType.GetComponentName()).second;
         fn.AddInstruction(pandasm::Create_CALL_SHORT(0, 0, destr));
     }

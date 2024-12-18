@@ -221,11 +221,11 @@ void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, compiler::
 template void InstBuilder::BuildStObjByName<true>(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
 template void InstBuilder::BuildStObjByName<false>(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
 
-void InstBuilder::BuildIsUndefined(const BytecodeInstruction *bcInst)
+void InstBuilder::BuildIsNullValue(const BytecodeInstruction *bcInst)
 {
-    auto undefInst = graph_->GetOrCreateUndefinedInst();
-    auto cmpInst = graph_->CreateInstCompare(DataType::BOOL, GetPc(bcInst->GetAddress()), GetDefinitionAcc(), undefInst,
-                                             DataType::REFERENCE, ConditionCode::CC_EQ);
+    auto uniqueObjInst = graph_->GetOrCreateUniqueObjectInst();
+    auto cmpInst = graph_->CreateInstCompare(DataType::BOOL, GetPc(bcInst->GetAddress()), GetDefinitionAcc(),
+                                             uniqueObjInst, DataType::REFERENCE, ConditionCode::CC_EQ);
     AddInstruction(cmpInst);
     UpdateDefinitionAcc(cmpInst);
 }

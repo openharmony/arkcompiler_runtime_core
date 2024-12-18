@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,7 +126,7 @@ struct EtsFieldAccessorREFERENCE {
     {
         EtsObject *etsValue = etsObject->GetFieldObject(etsFieldWrapper->GetObjOffset());
         if (etsValue == nullptr) {
-            return GetNull(env);
+            return GetUndefined(env);
         }
         auto refconv = JSRefConvertResolve(ctx, etsValue->GetClass()->GetRuntimeClass());
         ASSERT(refconv != nullptr);
@@ -137,10 +137,10 @@ struct EtsFieldAccessorREFERENCE {
                        napi_value jsValue)
     {
         EtsObject *etsValue;
-        if (IsNull(env, jsValue)) {
+        if (IsUndefined(env, jsValue)) {
             etsValue = nullptr;
-        } else if (IsUndefined(env, jsValue)) {
-            etsValue = ctx->GetUndefinedObject();
+        } else if (IsNull(env, jsValue)) {
+            etsValue = ctx->GetNullValue();
         } else {
             JSRefConvert *refconv = etsFieldWrapper->GetRefConvert<true>(ctx);
             if (UNLIKELY(refconv == nullptr)) {

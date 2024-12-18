@@ -86,16 +86,16 @@ end
   end
 end
 
-macro(:handle_ets_ldundefined) do
-  set_acc_object(ets_undefined).ref
+macro(:handle_ets_ldnullvalue) do
+  set_acc_object(ets_nullvalue).ref
 end
 
-macro(:handle_ets_movundefined) do |vd|
-  set_object(vd, ets_undefined).ref
+macro(:handle_ets_movnullvalue) do |vd|
+  set_object(vd, ets_nullvalue).ref
 end
 
-macro(:handle_ets_isundefined) do
-  set_acc_primitive(btou32(Compare(acc.ref, ets_undefined).b))
+macro(:handle_ets_isnullvalue) do
+  set_acc_primitive(btou32(Compare(acc.ref, ets_nullvalue).b))
 end
 
 macro(:"load_field_short") do |field, klass|
@@ -246,12 +246,12 @@ macro(:is_null) do |obj|
   Compare(obj, 0).b
 end
 
-macro(:is_undefined) do |obj|
-  Compare(obj, ets_undefined).b
+macro(:is_nullvalue) do |obj|
+  Compare(obj, ets_nullvalue).b
 end
 
 macro(:is_nullish) do |obj|
-  Or(is_null(obj).b, is_undefined(obj).b).b
+  Or(is_null(obj).b, is_nullvalue(obj).b).b
 end
 
 macro(:is_string_cls) do |obj|

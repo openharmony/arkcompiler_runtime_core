@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@ type CollectTypesCB = (tc: TypeOrCreator) => void
  * Base for all type creators, supports creation of {@link Type}
  */
 export abstract class TypeCreator {
-    internal typ: Type | null = null // not null if already created
+    internal typ: Type | undefined = undefined // not undefined if already created
     internal ctxItemPtr: long = 0 // resides in ctx, no need to free
 
     /**
@@ -50,7 +50,7 @@ export abstract class TypeCreator {
      * @returns created Type instance
      */
     public create(): Type {
-        if (this.typ == null) {
+        if (this.typ == undefined) {
             const ctx = new TypeCreatorCtx()
             try {
                 ctx.create(this)
@@ -86,7 +86,7 @@ export abstract class TypeCreator {
      * Functions that verifies that this can be modified
      */
     protected checkNotCreated(): void {
-        if (this.typ != null) throw new TypeAPICreateError("type already created, no modifications allowed")
+        if (this.typ != undefined) throw new TypeAPICreateError("type already created, no modifications allowed")
     }
 
     /**
@@ -94,7 +94,7 @@ export abstract class TypeCreator {
      * @note will be called only after {@link define}
      */
     internal getTypeDescriptor(): string {
-        if (this.typ != null) {
+        if (this.typ != undefined) {
             return this.typ!.td
         }
         assert this.ctxItemPtr != 0
@@ -122,7 +122,7 @@ abstract class TypeOrCreator {
      * @returns created {@link TypeOrCreator_Creator} or TypeOrCreator_Type if it was already created
      */
     static from(typ: TypeCreator): TypeOrCreator {
-        if (typ.typ != null) {
+        if (typ.typ != undefined) {
             return new TypeOrCreator_Type(typ.typ!)
         }
         return new TypeOrCreator_Creator(typ)
@@ -160,34 +160,34 @@ final class TypeCreatorCtx {
 
     private static native createCtx(): long
     private static native destroyCtx(ctxPtr: long): void
-    private static native commit(ctxPtr: long, objects: Object[]): string | null
-    private static native getError(ctxPtr: long): string | null
+    private static native commit(ctxPtr: long, objects: Object[]): string | undefined
+    private static native getError(ctxPtr: long): string | undefined
     internal static native getObjectsArrayForCCtor(ctxPtr: long): Object[]
 
     internal static native getTypeDescFromPointer(ctxItemPtr: long): string
 
     internal static native classCreate(ctxPtr: long, name: string, attrs: int): long
-    internal static native classSetBase(classPtr: long, base: TypeDesc): string | null
-    internal static native classAddIface(classPtr: long, iface: TypeDesc): string | null
-    internal static native classAddField(classPtr: long, name: string, field: TypeDesc, attrs: int, access: int): string | null
+    internal static native classSetBase(classPtr: long, base: TypeDesc): string | undefined
+    internal static native classAddIface(classPtr: long, iface: TypeDesc): string | undefined
+    internal static native classAddField(classPtr: long, name: string, field: TypeDesc, attrs: int, access: int): string | undefined
 
     internal static native interfaceCreate(ctxPtr: long, name: string): long
-    internal static native interfaceAddBase(ifacePtr: long, base: TypeDesc): string | null
+    internal static native interfaceAddBase(ifacePtr: long, base: TypeDesc): string | undefined
 
     internal static native lambdaTypeCreate(ctxPtr: long, attrs: int): long
-    internal static native lambdaTypeAddParam(ftPtr: long, param: TypeDesc, attrs: int): string | null
-    internal static native lambdaTypeAddResult(ftPtr: long, result: TypeDesc): string | null
-    internal static native lambdaTypeAdd(ftPtr: long): string | null
+    internal static native lambdaTypeAddParam(ftPtr: long, param: TypeDesc, attrs: int): string | undefined
+    internal static native lambdaTypeAddResult(ftPtr: long, result: TypeDesc): string | undefined
+    internal static native lambdaTypeAdd(ftPtr: long): string | undefined
 
     internal static native methodCreate(ctxItemPtr: long, name: string, attrs: int): long
-    internal static native methodAddAccessMod(methPtr: long, access: int): string | null
-    internal static native methodAddParam(methPtr: long, td: TypeDesc, name: string, attrs: int): string | null
-    internal static native methodAddResult(methPtr: long, result: TypeDesc): string | null
-    internal static native methodAddBodyFromMethod(methPtr: long, meth: string): string | null
-    internal static native methodAddBodyFromLambda(methPtr: long, id: int, lambdaType: TypeDesc): string | null
-    internal static native methodAddBodyFromErasedLambda(methPtr: long, id: int): string | null
-    internal static native methodAddBodyDefault(methPtr: long): string | null
-    internal static native methodAdd(methPtr: long): string | null
+    internal static native methodAddAccessMod(methPtr: long, access: int): string | undefined
+    internal static native methodAddParam(methPtr: long, td: TypeDesc, name: string, attrs: int): string | undefined
+    internal static native methodAddResult(methPtr: long, result: TypeDesc): string | undefined
+    internal static native methodAddBodyFromMethod(methPtr: long, meth: string): string | undefined
+    internal static native methodAddBodyFromLambda(methPtr: long, id: int, lambdaType: TypeDesc): string | undefined
+    internal static native methodAddBodyFromErasedLambda(methPtr: long, id: int): string | undefined
+    internal static native methodAddBodyDefault(methPtr: long): string | undefined
+    internal static native methodAdd(methPtr: long): string | undefined
 
     /**
      * checks that context is errorneous
@@ -240,7 +240,7 @@ final class TypeCreatorCtx {
                 return
             }
             const typeCreator = (tc as TypeOrCreator_Creator).typ
-            if (typeCreator.typ != null) {
+            if (typeCreator.typ != undefined) {
                 return
             }
             if (visited.has(typeCreator)) {
@@ -319,8 +319,8 @@ final class TypeCreatorCtx {
      * Checks if ctx function returned an error
      * @throws TypeAPICreateError if error was found
      */
-    internal checkError(arg: string | null): void {
-        if (arg != null) {
+    internal checkError(arg: string | undefined): void {
+        if (arg != undefined) {
             throw new TypeAPICreateError(arg as string)
         }
     }
@@ -611,7 +611,7 @@ export final class LambdaTypeCreator extends TypeCreator {
     public addParameter(param: ParameterCreator): LambdaTypeCreator {
         this.checkNotCreated()
         param.frozen.freeze()
-        if (param.name != null && param.name != '' + this.params.length) {
+        if (param.name != undefined && param.name != '' + this.params.length) {
             throw new TypeAPICreateError("can't have such lambda parameter name")
         }
         this.params.push(param)
@@ -724,7 +724,7 @@ final class FreezableCreator implements Freezable {
     }
 
     override isFrozen(): boolean {
-        return this.creator.typ != null
+        return this.creator.typ != undefined
     }
 }
 
@@ -878,7 +878,7 @@ export final class FieldCreator {
  */
 export final class ParameterCreator {
     internal typ: TypeOrCreator
-    internal name: string | null = null
+    internal name: string | undefined = undefined
     internal frozen: FreezableImpl = new FreezableImpl()
     internal attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.PARAMETER)
 
@@ -957,7 +957,7 @@ export final class MethodCreator {
     internal name: string
     internal params: Array<ParameterCreator> = new Array<ParameterCreator>();
     internal result: TypeOrCreator = TypeOrCreator.from(VoidType.REF);
-    internal body: CallableBody | null = null
+    internal body: CallableBody | undefined = undefined
     internal frozen: FreezableImpl = new FreezableImpl()
     internal attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.METHOD)
     internal accessMod: HasAccessMod = new HasAccessMod(this.frozen)
@@ -971,9 +971,9 @@ export final class MethodCreator {
 
     /**
      * Adds body to method
-     * @param body new body; null can be used in abstract methods
+     * @param body new body; undefined can be used in abstract methods
      */
-    public addBody(body: CallableBody | null): MethodCreator {
+    public addBody(body: CallableBody | undefined): MethodCreator {
         checkNotFrozen(this.frozen)
         this.body = body
         return this;
@@ -1106,9 +1106,9 @@ export final class MethodCreator {
         }
         ctx.checkError(TypeCreatorCtx.methodAddResult(fptr, this.result.getTypeDescriptor()))
         const isAbstract = this.attrs.has(Attributes.ABSTRACT)
-        const hasBody = this.body != null
+        const hasBody = this.body != undefined
         if (isAbstract == hasBody) {
-            ctx.checkError("only and only abstract methods don't have a body; abstract = " + isAbstract + "; body = " + (this.body == null ? "null" : this.body!.toString()))
+            ctx.checkError("only and only abstract methods don't have a body; abstract = " + isAbstract + "; body = " + (this.body == undefined ? "undefined" : this.body!.toString()))
         }
         if (!isAbstract) {
             const body = this.body!

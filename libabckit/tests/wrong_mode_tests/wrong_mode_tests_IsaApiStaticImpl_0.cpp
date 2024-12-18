@@ -191,11 +191,11 @@ TEST_F(LibAbcKitWrongModeTestsIsaApiStaticImpl0, iCreateLoadString)
     helpers_mode::TestMode(g_isaApiStaticImp->iCreateLoadString, false);
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadUndefined,
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadNullValue,
 // abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiStaticImpl0, iCreateLoadUndefined)
+TEST_F(LibAbcKitWrongModeTestsIsaApiStaticImpl0, iCreateLoadNullValue)
 {
-    helpers_mode::TestMode(g_isaApiStaticImp->iCreateLoadUndefined, false);
+    helpers_mode::TestMode(g_isaApiStaticImp->iCreateLoadNullValue, false);
 }
 
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateMod,

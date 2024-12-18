@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,13 +32,13 @@ auto g_implM = AbckitGetModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 auto g_implG = AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 auto g_statG = AbckitGetIsaApiStaticImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
-void TransformLoadUndefinedIr(AbckitGraph *graph)
+void TransformLoadNullValueIr(AbckitGraph *graph)
 {
     auto *ret = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_RETURN);
     ASSERT_NE(ret, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    auto *undef = g_statG->iCreateLoadUndefined(graph);
+    auto *undef = g_statG->iCreateLoadNullValue(graph);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_implG->iInsertBefore(undef, ret);
@@ -50,24 +50,24 @@ void TransformLoadUndefinedIr(AbckitGraph *graph)
 
 }  // namespace
 
-class LibAbcKitLoadUndefinedStaticTest : public ::testing::Test {};
+class LibAbcKitLoadNullValueStaticTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadUndefined, abc-kind=ArkTS2, category=positive
-TEST_F(LibAbcKitLoadUndefinedStaticTest, LibAbcKitTestLoadUndefined)
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadNullValue, abc-kind=ArkTS2, category=positive
+TEST_F(LibAbcKitLoadNullValueStaticTest, LibAbcKitTestLoadNullValue)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_undefined/load_undefined_static.abc",
-                                            "load_undefined_static/ETSGLOBAL", "main");
-    EXPECT_TRUE(helpers::Match(output, "load_undefined_static.A \\{\\}\n"));
+    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_nullvalue/load_nullvalue_static.abc",
+                                            "load_nullvalue_static/ETSGLOBAL", "main");
+    EXPECT_TRUE(helpers::Match(output, "load_nullvalue_static.A \\{\\}\n"));
 
     helpers::TransformMethod(
-        ABCKIT_ABC_DIR "ut/isa/isa_static/load_undefined/load_undefined_static.abc",
-        ABCKIT_ABC_DIR "ut/isa/isa_static/load_undefined/load_undefined_static_modified.abc", "foo",
+        ABCKIT_ABC_DIR "ut/isa/isa_static/load_nullvalue/load_nullvalue_static.abc",
+        ABCKIT_ABC_DIR "ut/isa/isa_static/load_nullvalue/load_nullvalue_static_modified.abc", "foo",
         [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            TransformLoadUndefinedIr(graph);
+            TransformLoadNullValueIr(graph);
         },
         [](AbckitGraph *graph) {
             std::vector<helpers::InstSchema<AbckitIsaApiStaticOpcode>> insts1({
-                {2, ABCKIT_ISA_API_STATIC_OPCODE_LOADUNDEFINED, {}},
+                {2, ABCKIT_ISA_API_STATIC_OPCODE_LOADNULLVALUE, {}},
             });
             std::vector<helpers::InstSchema<AbckitIsaApiStaticOpcode>> insts2({
                 {0, ABCKIT_ISA_API_STATIC_OPCODE_INITOBJECT, {}},
@@ -81,9 +81,9 @@ TEST_F(LibAbcKitLoadUndefinedStaticTest, LibAbcKitTestLoadUndefined)
         });
 
     output =
-        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_undefined/load_undefined_static_modified.abc",
-                                  "load_undefined_static/ETSGLOBAL", "main");
-    EXPECT_TRUE(helpers::Match(output, "undefined\n"));
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_nullvalue/load_nullvalue_static_modified.abc",
+                                  "load_nullvalue_static/ETSGLOBAL", "main");
+    EXPECT_TRUE(helpers::Match(output, "null\n"));
 }
 
 }  // namespace libabckit::test

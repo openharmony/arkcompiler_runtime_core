@@ -2890,7 +2890,7 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLdundefined()
+    bool HandleEtsLdnullvalue()
     {
         LOG_INST();
         DBGBRK();
@@ -2901,7 +2901,7 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsMovundefined()
+    bool HandleEtsMovnullvalue()
     {
         LOG_INST();
         DBGBRK();
@@ -2913,7 +2913,7 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsIsundefined()
+    bool HandleEtsIsnullvalue()
     {
         LOG_INST();
         DBGBRK();

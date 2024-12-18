@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,13 +58,13 @@ class LibAbcKitIsUndefinedStaticTest : public ::testing::Test {};
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateIsUndefined, abc-kind=ArkTS2, category=positive
 TEST_F(LibAbcKitIsUndefinedStaticTest, LibAbcKitTestIsUndefined)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/is_undefined/is_undefined_static.abc",
-                                            "is_undefined_static/ETSGLOBAL", "main");
+    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/is_nullvalue/is_nullvalue_static.abc",
+                                            "is_nullvalue_static/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output, "true\n"));
 
     helpers::TransformMethod(
-        ABCKIT_ABC_DIR "ut/isa/isa_static/is_undefined/is_undefined_static.abc",
-        ABCKIT_ABC_DIR "ut/isa/isa_static/is_undefined/is_undefined_static_modified.abc", "foo",
+        ABCKIT_ABC_DIR "ut/isa/isa_static/is_nullvalue/is_nullvalue_static.abc",
+        ABCKIT_ABC_DIR "ut/isa/isa_static/is_nullvalue/is_nullvalue_static_modified.abc", "foo",
         [](AbckitFile * /*file*/, AbckitCoreFunction *method, AbckitGraph *graph) {
             auto *module = g_implI->functionGetModule(method);
             helpers::ClassByNameContext classCtxFinder = {nullptr, "A"};
@@ -76,7 +76,7 @@ TEST_F(LibAbcKitIsUndefinedStaticTest, LibAbcKitTestIsUndefined)
             helpers::BBSchema<AbckitIsaApiStaticOpcode> bb1({{}, {1}, {{}}});
             std::vector<helpers::InstSchema<AbckitIsaApiStaticOpcode>> insts({
                 {0, ABCKIT_ISA_API_STATIC_OPCODE_INITOBJECT, {}},
-                {2, ABCKIT_ISA_API_STATIC_OPCODE_ISUNDEFINED, {0}},
+                {2, ABCKIT_ISA_API_STATIC_OPCODE_ISNULLVALUE, {0}},
                 {1, ABCKIT_ISA_API_STATIC_OPCODE_RETURN, {2}},
             });
             helpers::BBSchema<AbckitIsaApiStaticOpcode> bb2({{0}, {2}, insts});
@@ -85,8 +85,8 @@ TEST_F(LibAbcKitIsUndefinedStaticTest, LibAbcKitTestIsUndefined)
             helpers::VerifyGraph(graph, bbSchemas);
         });
 
-    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/is_undefined/is_undefined_static_modified.abc",
-                                       "is_undefined_static/ETSGLOBAL", "main");
+    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/is_nullvalue/is_nullvalue_static_modified.abc",
+                                       "is_nullvalue_static/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output, "false\n"));
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -498,8 +498,8 @@ void GraphChecker::CheckStartBlock()
         [[maybe_unused]] Opcode opc = inst->GetOpcode();
         CHECKER_DO_IF_NOT_AND_PRINT(
             opc == Opcode::Constant || opc == Opcode::Parameter || opc == Opcode::SafePoint ||
-                opc == Opcode::SpillFill || opc == Opcode::NullPtr || opc == Opcode::NOP || opc == Opcode::LiveIn ||
-                opc == Opcode::LoadUndefined,
+                opc == Opcode::SpillFill || opc == Opcode::NullPtr || opc == Opcode::LoadUniqueObject ||
+                opc == Opcode::NOP || opc == Opcode::LiveIn,
             std::cerr
                 << "Entry block can contain Constant, Parameter, NullPtr, SafePoint, NOP or SpillFill instructions"
                 << *inst << std::endl);
@@ -1930,15 +1930,15 @@ void GraphChecker::VisitNullPtr([[maybe_unused]] GraphVisitor *v, [[maybe_unused
          inst->GetBasicBlock()->Dump(&std::cerr)));
 }
 
-void GraphChecker::VisitLoadUndefined([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
+void GraphChecker::VisitLoadUniqueObject([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, inst->GetType() == DataType::REFERENCE,
-        (std::cerr << "LoadUndefined instruction should have REFERENCE type only\n", inst->Dump(&std::cerr)));
+        (std::cerr << "LoadUniqueObject instruction should have REFERENCE type only\n", inst->Dump(&std::cerr)));
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        v, static_cast<GraphChecker *>(v)->IncrementLoadUndefinedInstCounterAndGet() == 1,
-        (std::cerr << "There should be not more than one LoadUndefined instruction in graph\n",
+        v, static_cast<GraphChecker *>(v)->IncrementLoadUniqueObjectInstCounterAndGet() == 1,
+        (std::cerr << "There should be not more than one LoadUniqueObject instruction in graph\n",
          inst->GetBasicBlock()->Dump(&std::cerr)));
 }
 

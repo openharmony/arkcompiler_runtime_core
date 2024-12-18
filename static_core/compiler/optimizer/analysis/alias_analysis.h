@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -303,7 +303,7 @@ public:
 
     /// Instructions that definitely are not an alias of anything.
     static void VisitNullPtr(GraphVisitor *v, Inst *inst);
-    static void VisitLoadUndefined(GraphVisitor *v, Inst *inst);
+    static void VisitLoadUniqueObject(GraphVisitor *v, Inst *inst);
     static void VisitInitObject(GraphVisitor *v, Inst *inst);
     static void VisitNewObject(GraphVisitor *v, Inst *inst);
     static void VisitNewArray(GraphVisitor *v, Inst *inst);

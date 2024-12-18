@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,7 +57,7 @@ void EtsCoroutine::Initialize()
     // Main EtsCoroutine is Initialized before class linker and promise_class_ptr_ will be set after creating the class
     if (Runtime::GetCurrent()->IsInitialized()) {
         promiseClassPtr_ = GetPandaVM()->GetClassLinker()->GetPromiseClass()->GetRuntimeClass();
-        undefinedObj_ = GetPandaVM()->GetUndefinedObject();
+        nullValue_ = GetPandaVM()->GetNullValue();
         // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields
         // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
         auto *linkExt = GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
@@ -143,11 +143,12 @@ panda_file::Type EtsCoroutine::GetReturnType()
     return entrypoint->GetReturnType();
 }
 
+// The result will be used to resolve a promise, so this function perfoms a "box" operation on ark::Value
 EtsObject *EtsCoroutine::GetReturnValueAsObject(panda_file::Type returnType, Value returnValue)
 {
     switch (returnType.GetId()) {
         case panda_file::Type::TypeId::VOID:
-            return EtsObject::FromCoreType(undefinedObj_);
+            return nullptr;  // a representation of ets "undefined"
         case panda_file::Type::TypeId::U1:
             return EtsBoxPrimitive<EtsBoolean>::Create(this, returnValue.GetAs<EtsBoolean>());
         case panda_file::Type::TypeId::I8:

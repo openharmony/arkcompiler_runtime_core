@@ -329,9 +329,9 @@ public:
         return sharedEtsVmState_->arrayAsListIntClass;
     }
 
-    Class *GetUndefinedClass() const
+    Class *GetNullValueClass() const
     {
-        return sharedEtsVmState_->undefinedClass;
+        return sharedEtsVmState_->nullValueClass;
     }
 
     Class *GetPromiseClass() const
@@ -458,9 +458,9 @@ public:
         return sharedEtsVmState_->etsProxyRefStorage.get();
     }
 
-    EtsObject *GetUndefinedObject()
+    EtsObject *GetNullValue()
     {
-        return EtsObject::FromCoreType(GetPandaEtsVM()->GetUndefinedObject());
+        return EtsObject::FromCoreType(GetPandaEtsVM()->GetNullValue());
     }
 
     ConstStringStorage *GetConstStringStorage()
@@ -525,7 +525,7 @@ private:
         Class *stringClass {};
         Class *bigintClass {};
         Class *arrayAsListIntClass {};
-        Class *undefinedClass {};
+        Class *nullValueClass {};
         Class *promiseClass {};
         Class *errorClass {};
         Class *exceptionClass {};

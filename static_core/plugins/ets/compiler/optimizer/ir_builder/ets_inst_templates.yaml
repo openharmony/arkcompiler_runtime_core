@@ -31,12 +31,12 @@
     } else {
       BuildStObjByName<false>(instruction, <%= get_type(inst.type(0)) %>);
     }
-    % when "LDUNDEFINED"
-    UpdateDefinitionAcc(graph_->GetOrCreateUndefinedInst());
-    % when "MOVUNDEFINED"
-    UpdateDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>(), graph_->GetOrCreateUndefinedInst());
-    % when "ISUNDEFINED"
-    BuildIsUndefined(instruction);
+    % when "LDNULLVALUE"
+    UpdateDefinitionAcc(graph_->GetOrCreateUniqueObjectInst());
+    % when "MOVNULLVALUE"
+    UpdateDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>(), graph_->GetOrCreateUniqueObjectInst());
+    % when "ISNULLVALUE"
+    BuildIsNullValue(instruction);
     % when "STRICTEQUALS"
     BuildEquals<true>(instruction);
     % when "EQUALS"
