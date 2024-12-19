@@ -14,5 +14,5 @@
 # Arguments for hybrid build of JS and STS VMs
 # Use this unified place to avoid duplication of arguments declaration
 declare_args() {
-  ark_ets_hybrid = false
+  ark_ets_hybrid = true
 }
