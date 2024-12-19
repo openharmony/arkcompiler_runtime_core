@@ -29,6 +29,7 @@ chapters:
     - 13.modules_and_compilation_units
     - 14.semantic_rules
     - 17.experimental_features
+    - 18.annotations
 
   # One folder - one chapter
   - chapter02:
@@ -59,6 +60,8 @@ chapters:
     - 14.semantic_rules
   - chapter17:
     - 17.experimental_features
+  - chapter18:
+    - 18.annotations
 
   # chapters by several folders
   - chapters02-05:
