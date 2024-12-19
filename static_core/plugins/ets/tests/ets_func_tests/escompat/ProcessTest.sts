@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -196,8 +196,9 @@ function testProcessManagerGetEnvironmentVar(): int {
     let output : String[] = runChildAndGetOutput("printenv","\n");
     let entries: Map<String, String> = new Map<String, String>();
     for (let i = 0; i < output.length - 1 && i < 4; ++i) {
-        let entry = output[i].split("=", 2);
-        entries.set(entry[0], entry[1]);
+        const line = output[i]
+        const sepPos = line.indexOf("=");
+        entries.set(line.substring(0, sepPos), line.substring(sepPos + 1));
     }
 
     let res: int = 0;
