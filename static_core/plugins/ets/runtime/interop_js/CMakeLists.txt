@@ -30,6 +30,7 @@ panda_ets_interop_js_plugin(ets_interop_js_napi
         ets_vm_plugin.cpp
         event_loop_module.cpp
         timer_module.cpp
+        stack_info.cpp
     LIBRARIES
         arkruntime
 )
@@ -57,6 +58,7 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/ts2ets_copy.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_job_queue.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_remote_promise_resolver.cpp
+        ${ETS_EXT_SOURCES}/interop_js/stack_info.cpp
         ${ETS_INTEROP_ARCH_SOURCES}
 )
 if(PANDA_TARGET_OHOS)

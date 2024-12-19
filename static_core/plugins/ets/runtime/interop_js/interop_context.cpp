@@ -216,10 +216,11 @@ void InteropCtx::InitExternalInterfaces()
         [this](Frame *frame) { this->DestroyLocalScopeForTopFrame(frame); });
 }
 
-InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env) : constStringStorage_(this)
+InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env) : constStringStorage_(this), stackInfoManager_(this, coro)
 {
     JSNapiEnvScope envscope(this, env);
     jsEnvForEventLoopCallbacks_ = env;
+    stackInfoManager_.InitStackInfoIfNeeded();
 
     // the per-EtsVM part has to be initialized first
     InitSharedEtsVmState(coro->GetPandaVM());
