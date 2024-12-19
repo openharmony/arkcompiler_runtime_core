@@ -70,10 +70,6 @@
 03.types/08.reference_types/12.union_types/union_types_normalization/norm_n_4.sts
 03.types/08.reference_types/12.union_types/union_types_normalization/norm_40.sts
 
-# 20909 SegFault on `new null()`, `new undefined()`
-03.types/01.predefined_types/01.primitive_types/pt_constructor_9.sts
-03.types/01.predefined_types/01.primitive_types/pt_constructor_10.sts
-
 # XXXXX Aborts on assignment of char to union normalized to string
 03.types/08.reference_types/12.union_types/union_types_normalization/norm_10.sts
 03.types/08.reference_types/12.union_types/union_types_normalization/norm_15.sts
@@ -665,10 +661,6 @@
 17.experimental_features/06.statements/01.for-of_type_annotation/for_of_15.sts
 17.experimental_features/06.statements/01.for-of_type_annotation/for_of_25.sts
 
-# es2panda fails: 7.6.2 Object Literal of Interface Type is not implemented
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_10.sts
-# end of es2panda fails
-
 # 20309 Cannot infer Record value type in spec example
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_7.sts
 
@@ -881,9 +873,7 @@
 # end of es2panda fails
 
 # 14654 Cannot use constant expressions in enum initialization
-11.enumerations/01.enumeration_integer_values/enum_int_2.sts
 11.enumerations/01.enumeration_integer_values/enum_int_3.sts
-11.enumerations/01.enumeration_integer_values/enum_int_5.sts
 11.enumerations/02.enumeration_string_values/enum_str_10.sts
 11.enumerations/02.enumeration_string_values/enum_str_5.sts
 11.enumerations/02.enumeration_string_values/enum_str_6.sts
@@ -1533,37 +1523,10 @@
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_9.sts
 
 # 20336, 20073 es2panda endlessly outputs identical errors in the console until gets killed by timeout
-07.expressions/06.spread_expression/spex_const_10.sts
-07.expressions/06.spread_expression/spex_const_11.sts
-07.expressions/06.spread_expression/spex_const_12.sts
-07.expressions/06.spread_expression/spex_const_13.sts
-07.expressions/06.spread_expression/spex_const_15.sts
-07.expressions/06.spread_expression/spex_const_16.sts
-07.expressions/06.spread_expression/spex_const_17.sts
-07.expressions/06.spread_expression/spex_const_18.sts
-07.expressions/06.spread_expression/spex_const_19.sts
-07.expressions/06.spread_expression/spex_const_2.sts
-07.expressions/06.spread_expression/spex_const_20.sts
-07.expressions/06.spread_expression/spex_const_21.sts
-07.expressions/06.spread_expression/spex_const_22.sts
-07.expressions/06.spread_expression/spex_const_23.sts
-07.expressions/06.spread_expression/spex_const_24.sts
-07.expressions/06.spread_expression/spex_const_25.sts
-07.expressions/06.spread_expression/spex_const_26.sts
 07.expressions/06.spread_expression/spex_const_27.sts
-07.expressions/06.spread_expression/spex_const_28.sts
-07.expressions/06.spread_expression/spex_const_29.sts
-07.expressions/06.spread_expression/spex_const_3.sts
-07.expressions/06.spread_expression/spex_const_30.sts
 07.expressions/06.spread_expression/spex_const_31.sts
-07.expressions/06.spread_expression/spex_const_4.sts
 07.expressions/06.spread_expression/spex_const_44.sts
 07.expressions/06.spread_expression/spex_const_45.sts
-07.expressions/06.spread_expression/spex_const_5.sts
-07.expressions/06.spread_expression/spex_const_6.sts
-07.expressions/06.spread_expression/spex_const_7.sts
-07.expressions/06.spread_expression/spex_const_8.sts
-07.expressions/06.spread_expression/spex_const_9.sts
 
 # 20003, 20046 Fails on spread expression with tuple, tuples in rest parameters not supported
 07.expressions/06.spread_expression/spex_42.sts
@@ -1626,9 +1589,6 @@
 07.expressions/06.spread_expression/spex_meth_45.sts
 07.expressions/06.spread_expression/spex_meth_46.sts
 07.expressions/06.spread_expression/spex_meth_47.sts
-
-# 20006 Cannot infer type of array literal containing spread expression of char array
-# 20356 ClassCastError on spread of char array
 
 # 20024 es2panda fails to infer type of spread expression of enum array
 07.expressions/06.spread_expression/spex_12.sts
@@ -1805,9 +1765,6 @@
 # 20683 No CTE on duplicate fields in object literal
 07.expressions/05.object_literal/01.object_literal_of_class_type/cl_n_7.sts
 07.expressions/05.object_literal/02.object_literal_of_interface_type/in_n_3.sts
-
-# 20685 Segfault on readonly field in object literal of interface type
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_10.sts
 
 # 20737 Compiler complains on return statement without expression in constructor
 09.classes/09.constructor_declaration/03.constructor_body/constructor_with_return_expression3.sts
