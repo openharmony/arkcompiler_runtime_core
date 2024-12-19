@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+
+/*---
+files:
+- ./re-export.ets
+---*/
+
 import {test_func} from "./re-export"
 
 function main(): void {

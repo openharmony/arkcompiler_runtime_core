@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  files: [b.ets, c.ets]
+---*/
+
 import * as b from "./b.ets";
 import * as c from "./c.ets"
 

@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+    files: [b.ets]
+---*/
+
 import {foo} from "./b"
 function main() {
     let x = foo()

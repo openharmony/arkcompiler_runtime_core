@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+files:
+- ./selective_export.ets
+---*/
+
 import * as all from "./selective_export"
 import {func} from "./selective_export"
 

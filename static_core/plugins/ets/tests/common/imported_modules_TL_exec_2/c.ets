@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+---*/
+
 export let c : int = 0;
 
 {

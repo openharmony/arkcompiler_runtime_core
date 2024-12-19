@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+tags: [not-a-test]
+---*/
+
+
 export class BObj {
     static foo(){
         assertEQ(1, 1)

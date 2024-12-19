@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+    tags: [not-a-test]
+---*/
+
 import {fooIC} from "HarC"
 export function fooIB() {
     fooIC()

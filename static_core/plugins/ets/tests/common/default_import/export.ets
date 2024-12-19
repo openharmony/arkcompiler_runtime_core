@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+tags: [not-a-test]
+---*/
+
 export let foo : int = 5;
 export default let a : int = 10;
 export let bar : int = 7;

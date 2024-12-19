@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+    tags: [not-a-test]
+---*/
+
 interface I {
     f1(): string;
     f1(s: string) : string

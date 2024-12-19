@@ -459,6 +459,9 @@ std/core/TypeCreateClassTest.ets
 std/core/TypeCreateInterfaceTest.ets
 std/core/TypeCreatePrimitiveNameTest.ets
 
+# Issue 23211 Fails on CI
+escompat/ProcessTest.sts
+
 #23111
 20.implementation_details/06.keyword_struct_and_arkui/struct_class_test.ets
 20.implementation_details/06.keyword_struct_and_arkui/struct_empty_class.ets

@@ -13,6 +13,10 @@
  * limitations under the License.
 */
 
+/*---
+  tags: [not-a-test]
+---*/
+
 export {ClassAuthor, C, MyAnno}
 enum Color{RED, BLUE, GREEN}
 

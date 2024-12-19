@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  files: [imported_module_1.ets, imported_module_2.ets]
+---*/
+
 import {foo_1, foo_1} from "./imported_module_1.ets"
 import {foo_2_1param as foo_2_1param} from "./imported_module_2.ets"
 

@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+files:
+- ./c_module.ets
+---*/
+
 import {CC} from "./c_module"
 
 function main(): void {

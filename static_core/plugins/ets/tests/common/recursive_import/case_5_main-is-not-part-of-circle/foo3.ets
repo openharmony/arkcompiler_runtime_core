@@ -12,6 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*---
+tags: [not-a-test]
+---*/
+
 import {A} from "./foo2"
 
 export function foo_in_3(): int {

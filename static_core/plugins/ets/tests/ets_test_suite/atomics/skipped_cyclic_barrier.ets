@@ -19,7 +19,7 @@ let arr = new Int32Array(s, 0, 1);
 let N = 5
 
 function main() {
-    let corArrayTmp = new Array<Promise<int>>>();
+    let corArrayTmp = new Array<Promise<int>>();
     setUpBarrier(N)
     for (let i = 0; i < N; i++) {
         corArrayTmp.push(launch task());

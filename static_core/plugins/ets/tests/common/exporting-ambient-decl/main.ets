@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  files: [ambient_const_vars.ets]
+---*/
+
 import { int_1, int_2, int_3, int_4, int_5, int_6 } from "./ambient_const_vars.ets";
 import { double_1, double_2, double_3, double_4, double_5, double_6 } from "./ambient_const_vars.ets";
 

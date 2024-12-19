@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+---*/
+
 export class BothInt {
   static a: int = 24;
   a: int = 42;

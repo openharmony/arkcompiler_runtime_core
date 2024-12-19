@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+files:
+- ./sourceB.ets
+---*/
+
 import {v} from "./sourceB.ets"
 import * as all from "./sourceB.ets"
 

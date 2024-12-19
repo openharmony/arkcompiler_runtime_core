@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/*---
+files:
+- ./foo2.ets
+tags: [not-a-test]
+---*/
+
 import {foo_in_2} from "./foo2"
 
 export function main() : void {

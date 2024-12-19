@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+---*/
+
 export class TestClass {
   static a :int = 50;
   static foo() {}

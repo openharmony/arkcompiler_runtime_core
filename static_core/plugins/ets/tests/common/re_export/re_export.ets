@@ -13,4 +13,9 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+  files: [export.ets]
+---*/
+
 export * from "./export"

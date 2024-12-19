@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+  files: [c.ets]
+  tags: [not-a-test]
+---*/
+
 import * as c from "./c.ets"
 
 export let b : int = 1;

@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+tags: [not-a-test]
+---*/
+
 class A {}
 
 export type {A as AA};

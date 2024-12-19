@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+---*/
+
 export enum Color{RED = "1", BLUE = "2", GREEN = "3"}
 
 export declare @interface ClassAuthor {

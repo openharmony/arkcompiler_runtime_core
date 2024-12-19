@@ -13,6 +13,10 @@
  * limitations under the License.
 */
 
+/*---
+  files: [AmbientAnnotationsSrc.ets]
+---*/
+
 import * as AnnoSrc from "./AmbientAnnotationsSrc"
 
 @interface AnnoSrc.ClassAuthor {

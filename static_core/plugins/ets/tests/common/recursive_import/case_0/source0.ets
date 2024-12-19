@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+files:
+- ./source1.ets
+---*/
 
 import {func} from "./source1"
 

@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+
+/*---
+files: [./export.ets]
+tags: [not-a-test]
+---*/
+
 import {test_func} from "./export"
 
 export {test_func}

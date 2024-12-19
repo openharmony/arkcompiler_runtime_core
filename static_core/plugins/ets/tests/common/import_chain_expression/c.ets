@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+    files: [d.ets]
+---*/
+
 import {foo, foo2} from "./d"
 function main() {
     assertEQ(foo(), "hello")

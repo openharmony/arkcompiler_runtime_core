@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+files:
+- ./b_module.ets
+---*/
+
 import * as B from "./b_module"
 
 function main(): void {

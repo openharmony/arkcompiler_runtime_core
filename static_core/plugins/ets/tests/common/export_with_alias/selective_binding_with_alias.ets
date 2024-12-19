@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+files:
+- ./a_module.ets
+---*/
+
 import {AA as AAA} from "./a_module"
 
 function main(): void {

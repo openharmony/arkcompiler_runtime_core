@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+/*---
+    files: [foo1.ets]
+---*/
 
 import {main as foo_main} from "./foo1"
 
