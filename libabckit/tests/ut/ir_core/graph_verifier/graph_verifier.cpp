@@ -95,11 +95,11 @@ class LibAbcKitGraphVerifierTest : public ::testing::Test {};
 // Test: test-kind=internal, abc-kind=ArkTS2, category=internal
 TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierInst)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc",
-                                            "graph_verifier/ETSGLOBAL", "main");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc";
+    auto output = helpers::ExecuteStaticAbc(INPUT_PATH, "graph_verifier/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output, "123\nfalse\n"));
 
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc");
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     auto *method = helpers::FindMethodByName(file, "foo");
     ASSERT_NE(method, nullptr);
     auto *module = g_implI->functionGetModule(method);
@@ -120,11 +120,11 @@ TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierInst)
 // Test: test-kind=internal, abc-kind=ArkTS2, category=internal
 TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierBB)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc",
-                                            "graph_verifier/ETSGLOBAL", "main");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc";
+    auto output = helpers::ExecuteStaticAbc(INPUT_PATH, "graph_verifier/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output, "123\nfalse\n"));
 
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc");
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     auto *method = helpers::FindMethodByName(file, "bar");
     ASSERT_NE(method, nullptr);
 
@@ -141,11 +141,11 @@ TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierBB)
 // Test: test-kind=internal, abc-kind=ArkTS2, category=internal
 TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierBinInst)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc",
-                                            "graph_verifier/ETSGLOBAL", "main");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc";
+    auto output = helpers::ExecuteStaticAbc(INPUT_PATH, "graph_verifier/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output, "123\nfalse\n"));
 
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc");
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     auto *method = helpers::FindMethodByName(file, "foo");
     ASSERT_NE(method, nullptr);
 

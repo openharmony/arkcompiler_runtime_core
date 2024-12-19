@@ -35,20 +35,20 @@ auto g_implG = AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 auto g_icreateGettemplateobject1Lambda = [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-    auto *worldStr = g_implM->createString(file, "world");
+    auto *worldStr = g_implM->createString(file, "world", strlen("world"));
     auto *loadStringWorld = g_dynG->iCreateLoadString(graph, worldStr);
-    auto *stringPrint = g_implM->createString(file, "print");
+    auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
     auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
     auto *createemptyarray1 = g_dynG->iCreateCreateemptyarray(graph);
     auto *createemptyarray2 = g_dynG->iCreateCreateemptyarray(graph);
-    auto *helloStr = g_implM->createString(file, "Hello ");
+    auto *helloStr = g_implM->createString(file, "Hello ", strlen("Hello "));
     auto *loadStringHello = g_dynG->iCreateLoadString(graph, helloStr);
     auto *const0 = g_implG->gFindOrCreateConstantU64(graph, 0);
     auto *definefieldbyvalue1 =
         g_dynG->iCreateCallruntimeDefinefieldbyvalue(graph, loadStringHello, const0, createemptyarray1);
     auto *definefieldbyvalue2 =
         g_dynG->iCreateCallruntimeDefinefieldbyvalue(graph, loadStringHello, const0, createemptyarray2);
-    auto *str2 = g_implM->createString(file, "!");
+    auto *str2 = g_implM->createString(file, "!", strlen("!"));
     auto *loadString2 = g_dynG->iCreateLoadString(graph, str2);
     auto *const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
     auto *definefieldbyvalue3 =

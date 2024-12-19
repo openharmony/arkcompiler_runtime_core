@@ -182,13 +182,13 @@ TEST_F(LibAbcKitArkTSInspectApiModulesTest, DynamicFillModule)
     EXPECT_EQ(m->ed[idx]->GetArkTSImpl()->payload.GetDynamicPayload().hasServiceImport, false);
     EXPECT_EQ(m->ed[idx]->GetArkTSImpl()->payload.GetDynamicPayload().moduleRecordIndexOff, 0);
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/extensions/arkts/inspect_api/modules/modules_dynamic_modified.abc");
+    constexpr auto OUTPUT_PATH = ABCKIT_ABC_DIR "ut/extensions/arkts/inspect_api/modules/modules_dynamic_modified.abc";
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    auto output2 = helpers::ExecuteDynamicAbc(
-        ABCKIT_ABC_DIR "ut/extensions/arkts/inspect_api/modules/modules_dynamic_modified.abc", "modules_dynamic");
+    auto output2 = helpers::ExecuteDynamicAbc(OUTPUT_PATH, "modules_dynamic");
     EXPECT_TRUE(helpers::Match(output2, expected));
 }
 

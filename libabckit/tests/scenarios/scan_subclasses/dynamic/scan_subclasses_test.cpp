@@ -31,7 +31,8 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestScanSubclasses)
     constexpr auto VERSION = ABCKIT_VERSION_RELEASE_1_0_0;
 
     auto *impl = AbckitGetApiImpl(VERSION);
-    AbckitFile *file = impl->openAbc(ABCKIT_ABC_DIR "scenarios/scan_subclasses/dynamic/scan_subclasses.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "scenarios/scan_subclasses/dynamic/scan_subclasses.abc";
+    AbckitFile *file = impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_NE(file, nullptr);
 
     const std::vector<ClassInfo> baseClassInfo = {{"modules/base", "Base"}};

@@ -47,7 +47,7 @@ TEST_F(LibAbcKitCreateDynGetunmappedargs, IcreateGetunmappedargs_1)
         auto *ldobjbyvalue =
             g_dynG->iCreateLdobjbyvalue(graph, g_implG->gFindOrCreateConstantU64(graph, 0), getunmappedargs);
         // CC-OFFNXT(G.FMT.02)
-        auto *stringPrint = g_implM->createString(file, "print");
+        auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
         auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
         auto *callarg1 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbyvalue);
         auto *ldundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
@@ -80,7 +80,7 @@ TEST_F(LibAbcKitCreateDynGetunmappedargs, IcreateGetunmappedargs_2)
         [&](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             auto *getunmappedargs = g_dynG->iCreateGetunmappedargs(graph);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *stringPrint = g_implM->createString(file, "print");
+            auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
             auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
             auto *ldobjbyvalue0 =
                 g_dynG->iCreateLdobjbyvalue(graph, g_implG->gFindOrCreateConstantU64(graph, 0), getunmappedargs);

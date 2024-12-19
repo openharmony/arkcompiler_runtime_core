@@ -90,7 +90,7 @@ TEST_F(LibAbcKitCreateDynamicImport, IcreateDynamicimport_2)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/import/dynamicimport_dynamic_modified.abc",
         "dynamicimport_dynamic.func_main_0",
         [&](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            auto *moduleStr = g_implM->createString(file, "./modules/moduleB.js");
+            auto *moduleStr = g_implM->createString(file, "./modules/moduleB.js", strlen("./modules/moduleB.js"));
             auto *loadString = g_dynG->iCreateLoadString(graph, moduleStr);
             auto *dynamicimport = g_dynG->iCreateDynamicimport(graph, loadString);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -137,7 +137,7 @@ TEST_F(LibAbcKitCreateDynamicImport, IcreateDynamicimport_3)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/import/dynamicimport_dynamic_modified.abc",
         "dynamicimport_dynamic.func_main_0",
         [&](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            auto *moduleStr = g_implM->createString(file, "module");
+            auto *moduleStr = g_implM->createString(file, "module", strlen("module"));
             auto *loadString = g_dynG->iCreateLoadString(graph, moduleStr);
             auto *dynamicimport = g_dynG->iCreateDynamicimport(graph, loadString);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -214,12 +214,12 @@ TEST_F(LibAbcKitCreateDynamicImport, IcreateDynamicimport_4)
             auto *dynamicimport = g_dynG->iCreateDynamicimport(graph, inst);
 
             auto *deffunc = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINEFUNC);
-            auto *thenStr = g_implM->createString(file, "then");
+            auto *thenStr = g_implM->createString(file, "then", strlen("then"));
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, dynamicimport, thenStr);
             auto *callthis1 = g_dynG->iCreateCallthis1(graph, ldobjbyname, dynamicimport, deffunc);
             auto *ldobjbyname2 = g_dynG->iCreateLdobjbyname(graph, callthis1, thenStr);
             auto *callthis0 = g_dynG->iCreateCallthis0(graph, ldobjbyname2, callthis1);
-            auto *catchStr = g_implM->createString(file, "catch");
+            auto *catchStr = g_implM->createString(file, "catch", strlen("catch"));
             auto *ldobjbyname3 = g_dynG->iCreateLdobjbyname(graph, callthis0, catchStr);
             auto *callthis03 = g_dynG->iCreateCallthis0(graph, ldobjbyname3, callthis0);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

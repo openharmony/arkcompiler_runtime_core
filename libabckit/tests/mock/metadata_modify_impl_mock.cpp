@@ -112,11 +112,12 @@ AbckitValue *CreateValueDouble(AbckitFile *file, double value)
     return DEFAULT_VALUE;
 }
 
-AbckitValue *CreateValueString(AbckitFile *file, const char *value)
+AbckitValue *CreateValueString(AbckitFile *file, const char *value, size_t len)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
     EXPECT_TRUE(strncmp(value, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
+    EXPECT_TRUE(len + 1 == DEFAULT_CONST_CHAR_SIZE);
     return DEFAULT_VALUE;
 }
 
@@ -132,11 +133,12 @@ AbckitValue *CreateLiteralArrayValue(AbckitFile *file, [[maybe_unused]] AbckitVa
 // String
 // ========================================
 
-AbckitString *CreateString(AbckitFile *file, const char *value)
+AbckitString *CreateString(AbckitFile *file, const char *value, size_t len)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
     EXPECT_TRUE(strncmp(value, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
+    EXPECT_TRUE(len + 1 == DEFAULT_CONST_CHAR_SIZE);
     return DEFAULT_STRING;
 }
 
@@ -224,11 +226,12 @@ AbckitLiteral *CreateLiteralLiteralArray(AbckitFile *file, AbckitLiteralArray *l
     return DEFAULT_LITERAL;
 }
 
-AbckitLiteral *CreateLiteralString(AbckitFile *file, const char *value)
+AbckitLiteral *CreateLiteralString(AbckitFile *file, const char *value, size_t len)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
     EXPECT_TRUE(strncmp(value, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
+    EXPECT_TRUE(len + 1 == DEFAULT_CONST_CHAR_SIZE);
     return DEFAULT_LITERAL;
 }
 

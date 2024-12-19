@@ -18,6 +18,9 @@
 
 #ifndef __cplusplus
 #include <stdbool.h>
+#include <stddef.h>
+#else
+#include <cstddef>
 #endif
 
 #include "./statuses.h"
@@ -47,23 +50,25 @@ struct AbckitApi {
      * @brief Opens abc file from given `path`.
      * @return Pointer to the `AbckitFile`.
      * @param [ in ] path - Path to abc file.
+     * @param [ in ] len - length of `path`.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `path` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `path` doesn't point to a valid abc file.
      * @note Allocates
      */
-    AbckitFile *(*openAbc)(const char *path);
+    AbckitFile *(*openAbc)(const char *path, size_t len);
 
     /**
      * @brief Writes `file` to the specified `path`.
      * @return None.
      * @param [ in ] file - File to write.
      * @param [ in ] path - Path where file will be written.
+     * @param [ in ] len - length of `path`.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `path` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `path` is not valid.
      * @note Allocates
      */
-    void (*writeAbc)(AbckitFile *file, const char *path);
+    void (*writeAbc)(AbckitFile *file, const char *path, size_t len);
 
     /**
      * @brief Closes file, frees resources.

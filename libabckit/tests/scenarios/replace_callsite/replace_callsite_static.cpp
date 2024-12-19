@@ -72,10 +72,10 @@ class AbckitScenarioTest : public ::testing::Test {};
 // Test: test-kind=scenario, abc-kind=ArkTS2, category=positive
 TEST_F(AbckitScenarioTest, LibAbcKitTestReplaceCallSite)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios/replace_callsite/replace_callsite_static.abc",
-                                            "replace_callsite_static/ETSGLOBAL", "main");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "scenarios/replace_callsite/replace_callsite_static.abc";
+    auto output = helpers::ExecuteStaticAbc(INPUT_PATH, "replace_callsite_static/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output, "4\n3\n"));
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "scenarios/replace_callsite/replace_callsite_static.abc");
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
 
     helpers::TransformMethod(file, "main", [file](AbckitFile *, AbckitCoreFunction *, AbckitGraph *ctxG) {
         auto *newMethod = helpers::FindMethodByName(file, "fixedApi");
@@ -85,10 +85,10 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestReplaceCallSite)
         ReplaceContext rctx = {ctxG, oldMethod, newMethod};
         TransformIR(&rctx);
     });
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "scenarios/replace_callsite/replace_callsite_static_modified.abc");
+    constexpr auto OUTPUT_PATH = ABCKIT_ABC_DIR "scenarios/replace_callsite/replace_callsite_static_modified.abc";
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
     g_impl->closeFile(file);
-    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios/replace_callsite/replace_callsite_static_modified.abc",
-                                       "replace_callsite_static/ETSGLOBAL", "main");
+    output = helpers::ExecuteStaticAbc(OUTPUT_PATH, "replace_callsite_static/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output, "5\n4\n"));
 }
 

@@ -27,6 +27,11 @@ static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implM = AbckitGetModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implG = AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
+static constexpr auto MODIFIED_DYNAMIC =
+    ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc";
+static constexpr auto MODIFIED_STATIC =
+    ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static_modified.abc";
+
 class LibAbcKitModifyApiLiteralsTest : public ::testing::Test {};
 
 // Test: test-kind=api, api=ModifyApiImpl::createLiteralBool, abc-kind=ArkTS1, category=positive
@@ -38,7 +43,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralBool_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -53,7 +58,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralU8_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -68,7 +73,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralU16_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -83,7 +88,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralMethodAffiliate_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -98,7 +103,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralU32_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -113,7 +118,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralU64_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -128,7 +133,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralFloat_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -143,7 +148,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralDouble_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -163,7 +168,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralLiteralArray_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -174,11 +179,11 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralString_1)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic.abc", &file);
-    AbckitLiteral *res = g_implM->createLiteralString(file, "asdf");
+    AbckitLiteral *res = g_implM->createLiteralString(file, "asdf", strlen("asdf"));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -193,7 +198,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralMethod_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -205,7 +210,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralArray_1)
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic.abc", &file);
     auto arr = std::vector<AbckitLiteral *>();
-    AbckitLiteral *res1 = g_implM->createLiteralString(file, "asdf");
+    AbckitLiteral *res1 = g_implM->createLiteralString(file, "asdf", strlen("asdf"));
     AbckitLiteral *res2 = g_implM->createLiteralDouble(file, 1.0);
     arr.emplace_back(res1);
     arr.emplace_back(res2);
@@ -214,7 +219,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralArray_1)
     ASSERT_NE(litArr, nullptr);
 
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -226,7 +231,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralArray_2)
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic.abc", &file);
     auto arr = std::vector<AbckitLiteral *>();
-    AbckitLiteral *res1 = g_implM->createLiteralString(file, "asdf");
+    AbckitLiteral *res1 = g_implM->createLiteralString(file, "asdf", strlen("asdf"));
     AbckitLiteral *res2 = g_implM->createLiteralDouble(file, 1.0);
     arr.emplace_back(res1);
     arr.emplace_back(res2);
@@ -235,7 +240,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralArray_2)
     ASSERT_NE(litArr, nullptr);
 
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -250,7 +255,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralBool_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -265,7 +270,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralU8_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -280,7 +285,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralU16_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -295,7 +300,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralMethodAffiliate_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -310,7 +315,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralU32_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -325,7 +330,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralU64_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -340,7 +345,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralFloat_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -355,7 +360,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralDouble_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -375,7 +380,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralLiteralArray_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_UNSUPPORTED);
     ASSERT_EQ(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -386,11 +391,11 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralString_2)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static.abc", &file);
-    AbckitLiteral *res = g_implM->createLiteralString(file, "asdf");
+    AbckitLiteral *res = g_implM->createLiteralString(file, "asdf", strlen("asdf"));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -405,7 +410,7 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralMethod_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

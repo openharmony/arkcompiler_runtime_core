@@ -46,7 +46,7 @@ TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinefieldbyname_1)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic_modified.abc", "instance_initializer",
         [&](AbckitFile *file, AbckitCoreFunction *, AbckitGraph *graph) {
-            auto *name = g_implM->createString(file, "b");
+            auto *name = g_implM->createString(file, "b", strlen("b"));
             ASSERT_NE(name, nullptr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -87,11 +87,11 @@ TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinefieldbyname_2)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic_modified.abc", "instance_initializer",
         [&](AbckitFile *file, AbckitCoreFunction *, AbckitGraph *graph) {
-            auto *name = g_implM->createString(file, "b");
+            auto *name = g_implM->createString(file, "b", strlen("b"));
             ASSERT_NE(name, nullptr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-            auto *str = g_implM->createString(file, "Hello");
+            auto *str = g_implM->createString(file, "Hello", strlen("Hello"));
             ASSERT_NE(str, nullptr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -134,7 +134,7 @@ TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinepropertybyname_1)
                              ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic_modified.abc",
                              "instance_initializer",
                              [&](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                                 auto *name = g_implM->createString(file, "b");
+                                 auto *name = g_implM->createString(file, "b", strlen("b"));
                                  ASSERT_NE(name, nullptr);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -174,11 +174,11 @@ TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinepropertybyname_2)
                              ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic_modified.abc",
                              "instance_initializer",
                              [&](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                                 auto *name = g_implM->createString(file, "b");
+                                 auto *name = g_implM->createString(file, "b", strlen("b"));
                                  ASSERT_NE(name, nullptr);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-                                 auto *str = g_implM->createString(file, "World");
+                                 auto *str = g_implM->createString(file, "World", strlen("World"));
                                  ASSERT_NE(str, nullptr);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 

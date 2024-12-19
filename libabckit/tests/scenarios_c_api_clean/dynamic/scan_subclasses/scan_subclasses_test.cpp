@@ -250,9 +250,9 @@ class AbckitScenarioTestClean : public ::testing::Test {};
 TEST_F(AbckitScenarioTestClean, LibAbcKitTestScanSubclassesClean)
 {
     // CC-OFFNXT(G.NAM.03) project code style
-
     AbckitFile *file =
-        g_impl->openAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/scan_subclasses/scan_subclasses.abc");
+        g_impl->openAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/scan_subclasses/scan_subclasses.abc",
+                        strlen(ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/scan_subclasses/scan_subclasses.abc"));
     ASSERT_NE(file, nullptr);
 
     std::vector<ClassInfo> subClasses;

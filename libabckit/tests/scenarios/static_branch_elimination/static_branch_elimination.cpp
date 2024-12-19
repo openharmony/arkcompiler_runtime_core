@@ -97,9 +97,8 @@ class AbckitScenarioTest : public ::testing::Test {};
 // Test: test-kind=scenario, abc-kind=ArkTS2, category=positive
 TEST_F(AbckitScenarioTest, LibAbcKitTestStaticBranchElimination)
 {
-    auto output =
-        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios/static_branch_elimination/static_branch_elimination.abc",
-                                  "static_branch_elimination/ETSGLOBAL", "main");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "scenarios/static_branch_elimination/static_branch_elimination.abc";
+    auto output = helpers::ExecuteStaticAbc(INPUT_PATH, "static_branch_elimination/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output,
                                "MyFunc start...\n"
                                "MyFunc start...\n"
@@ -108,22 +107,20 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestStaticBranchElimination)
                                "MyFunc end...\n"
                                "MyFunc end...\n"));
 
-    AbckitFile *file =
-        g_impl->openAbc(ABCKIT_ABC_DIR "scenarios/static_branch_elimination/static_branch_elimination.abc");
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     // Transform method
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "MyFunc", g_libAbcKitTestStaticBranchEliminationLambda0);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
+    constexpr auto OUTPUT_PATH =
+        ABCKIT_ABC_DIR "scenarios/static_branch_elimination/static_branch_elimination_transformed.abc";
     // Write output file
-    g_impl->writeAbc(file,
-                     ABCKIT_ABC_DIR "scenarios/static_branch_elimination/static_branch_elimination_transformed.abc");
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR
-                                       "scenarios/static_branch_elimination/static_branch_elimination_transformed.abc",
-                                       "static_branch_elimination/ETSGLOBAL", "main");
+    output = helpers::ExecuteStaticAbc(OUTPUT_PATH, "static_branch_elimination/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output,
                                "MyFunc start...\n"
                                "MyFunc start...\n"

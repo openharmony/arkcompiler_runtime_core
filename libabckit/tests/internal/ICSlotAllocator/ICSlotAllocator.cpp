@@ -160,11 +160,12 @@ TEST_F(LibAbcKitInternalTest, LibAbcKitTestICSlotAllocator)
         ABCKIT_ABC_DIR "internal/ICSlotAllocator/ICSlotAllocator_modified.abc", "handle",
         [](AbckitFile *file, AbckitCoreFunction *, AbckitGraph *graph) {
             UserData data = {};
-            data.print = g_implM->createString(file, "print");
-            data.date = g_implM->createString(file, "Date");
-            data.getTime = g_implM->createString(file, "getTime");
-            data.str = g_implM->createString(file, "file: src/MyClass, function: MyClass.handle");
-            data.consume = g_implM->createString(file, "Ellapsed time:");
+            data.print = g_implM->createString(file, "print", strlen("print"));
+            data.date = g_implM->createString(file, "Date", strlen("Date"));
+            data.getTime = g_implM->createString(file, "getTime", strlen("getTime"));
+            data.str = g_implM->createString(file, "file: src/MyClass, function: MyClass.handle",
+                                             strlen("file: src/MyClass, function: MyClass.handle"));
+            data.consume = g_implM->createString(file, "Ellapsed time:", strlen("Ellapsed time:"));
             TransformIr(graph, &data);
         },
         [](AbckitGraph *graph) {

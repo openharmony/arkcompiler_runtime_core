@@ -39,14 +39,17 @@ auto g_implG = AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 }  // namespace
 
+static constexpr auto CREATE_EMPTY_INPUT_PATH =
+    ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc";
+
 class LibAbcKitBasicBlocksDynamicTest : public ::testing::Test {};
 
 // Test: test-kind=api, api=GraphApiImpl::bbCreateEmpty, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBcreateEmptyBlock_1)
 {
     helpers::TransformMethod(
-        ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc",
-        ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic_modified.abc", "test",
+        CREATE_EMPTY_INPUT_PATH, ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic_modified.abc",
+        "test",
         [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
             auto *start = g_implG->gGetStartBasicBlock(graph);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -112,7 +115,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBeraseSuccBlock)
         g_implG->bbAppendSuccBlock(start, next);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     };
-    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc", "test", cb);
+    helpers::InspectMethod(CREATE_EMPTY_INPUT_PATH, "test", cb);
 }
 
 // Test: test-kind=api, api=GraphApiImpl::bbGetGraph, abc-kind=ArkTS1, category=positive
@@ -143,7 +146,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetGraph_1)
         helpers::VerifyGraph(graph, bbSchemas);
         ASSERT_EQ(graph, graph);
     };
-    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc", "test", cb);
+    helpers::InspectMethod(CREATE_EMPTY_INPUT_PATH, "test", cb);
 }
 
 // Test: test-kind=api, api=GraphApiImpl::bbGetFirstInst, abc-kind=ArkTS1, category=positive
@@ -155,7 +158,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetFirstInst_2)
         auto *inst = g_implG->bbGetFirstInst(bb);
         ASSERT_EQ(g_dynG->iGetOpcode(inst), ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
     };
-    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc", "test", cb);
+    helpers::InspectMethod(CREATE_EMPTY_INPUT_PATH, "test", cb);
 }
 
 // Test: test-kind=api, api=GraphApiImpl::bbGetLastInst, abc-kind=ArkTS1, category=positive
@@ -169,7 +172,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetLastInst_1)
         // CC-OFFNXT(G.FMT.02)
         ASSERT_EQ(g_dynG->iGetOpcode(inst), ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
     };
-    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc", "test", cb);
+    helpers::InspectMethod(CREATE_EMPTY_INPUT_PATH, "test", cb);
 }
 
 // Test: test-kind=api, api=GraphApiImpl::bbGetTrueBranch, abc-kind=ArkTS1, category=positive
@@ -217,7 +220,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetTrueBranch_1)
              {{2, 3}, {}, {}}});
         helpers::VerifyGraph(graph, bbSchemas);
     };
-    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc", "test2", cb);
+    helpers::InspectMethod(CREATE_EMPTY_INPUT_PATH, "test2", cb);
 }
 
 // Test: test-kind=api, api=GraphApiImpl::bbGetFalseBranch, abc-kind=ArkTS1, category=positive
@@ -265,15 +268,15 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetFalseBranch_1)
              {{2, 3}, {}, {}}});
         helpers::VerifyGraph(graph, bbSchemas);
     };
-    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc", "test2", cb);
+    helpers::InspectMethod(CREATE_EMPTY_INPUT_PATH, "test2", cb);
 }
 
 // Test: test-kind=api, api=GraphApiImpl::bbAddInstFront, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBaddInstFront_4)
 {
     helpers::TransformMethod(
-        ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc",
-        ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic_instfront.abc", "test",
+        CREATE_EMPTY_INPUT_PATH, ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic_instfront.abc",
+        "test",
         [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
             auto *start = g_implG->gGetStartBasicBlock(graph);
             auto *bb = helpers::BBgetSuccBlocks(start)[0];
@@ -308,8 +311,8 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBaddInstFront_4)
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBaddInstBack_2)
 {
     helpers::TransformMethod(
-        ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc",
-        ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic_instback.abc", "test",
+        CREATE_EMPTY_INPUT_PATH, ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic_instback.abc",
+        "test",
         [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
             auto *start = g_implG->gGetStartBasicBlock(graph);
             auto *bb = helpers::BBgetSuccBlocks(start)[0];
@@ -357,8 +360,8 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBaddInstBack_2)
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBaddInstBack_4)
 {
     helpers::TransformMethod(
-        ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc",
-        ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic_instback.abc", "test",
+        CREATE_EMPTY_INPUT_PATH, ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic_instback.abc",
+        "test",
         [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
             auto *start = g_implG->gGetStartBasicBlock(graph);
             auto *newIns = g_implG->gFindOrCreateConstantI64(graph, 1);
@@ -401,7 +404,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBvisitSuccBlocks_1)
         ASSERT_EQ(counter, 1);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     };
-    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc", "test", cb);
+    helpers::InspectMethod(CREATE_EMPTY_INPUT_PATH, "test", cb);
 }
 
 // Test: test-kind=api, api=GraphApiImpl::bbVisitPredBlocks, abc-kind=ArkTS1, category=positive
@@ -420,13 +423,13 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBvisitPredBlocks_1)
         ASSERT_EQ(counter, 1);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     };
-    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc", "test", cb);
+    helpers::InspectMethod(CREATE_EMPTY_INPUT_PATH, "test", cb);
 }
 
 // Test: test-kind=api, api=GraphApiImpl::bbVisitDominatedBlocks, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBvisitDominatedBlocks_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
@@ -447,7 +450,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBvisitDominatedBlocks_1)
 // Test: test-kind=api, api=GraphApiImpl::bbGetSuccBlock, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetSuccBlock_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
@@ -462,7 +465,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetSuccBlock_1)
 // Test: test-kind=api, api=GraphApiImpl::bbIsStart, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBisStart_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
@@ -476,7 +479,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBisStart_1)
 // Test: test-kind=api, api=GraphApiImpl::bbIsEnd, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBisEnd_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *end = g_implG->gGetEndBasicBlock(graph);
@@ -490,7 +493,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBisEnd_1)
 // Test: test-kind=api, api=GraphApiImpl::bbGetImmediateDominator, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetImmediateDominator_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
@@ -504,7 +507,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetImmediateDominator_1)
 // Test: test-kind=api, api=GraphApiImpl::bbGetSuccBlockCount, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetSuccBlockCount_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
@@ -518,7 +521,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetSuccBlockCount_1)
 // Test: test-kind=api, api=GraphApiImpl::bbGetPredBlockCount, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetPredBlockCount_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
@@ -533,7 +536,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetPredBlockCount_1)
 // Test: test-kind=api, api=GraphApiImpl::bbDump, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBdump_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
@@ -546,7 +549,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBdump_1)
 // Test: test-kind=api, api=GraphApiImpl::bbGetNumberOfInstructions, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetNumberOfInstructions_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
@@ -560,7 +563,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetNumberOfInstructions_1)
 // Test: test-kind=api, api=GraphApiImpl::gGetBasicBlock, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetBasicBlock_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *bb = g_implG->gGetBasicBlock(graph, 1);
@@ -573,7 +576,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetBasicBlock_1)
 // Test: test-kind=api, api=GraphApiImpl::gGetBasicBlock, abc-kind=ArkTS1, category=negative
 TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetBasicBlockBigId)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto bbVectorSize = g_implG->gGetNumberOfBasicBlocks(graph);
@@ -587,7 +590,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetBasicBlockBigId)
 // Test: test-kind=api, api=GraphApiImpl::gGetParameter, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetParameter_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test2", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
@@ -601,7 +604,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetParameter_1)
 // Test: test-kind=api, api=GraphApiImpl::gGetParameter, abc-kind=ArkTS1, category=negative
 TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetParameterBigId)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test2", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto size = g_implG->gGetNumberOfParameters(graph);
@@ -615,7 +618,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetParameterBigId)
 // Test: test-kind=api, api=GraphApiImpl::gGetNumberOfParameters, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetNumberOfParameters)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test2", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         uint32_t num = g_implG->gGetNumberOfParameters(graph);
@@ -628,7 +631,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetNumberOfParameters)
 // Test: test-kind=api, api=GraphApiImpl::gGetNumberOfBasicBlocks, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetNumberOfBasicBlocks_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test2", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         g_implG->gGetNumberOfBasicBlocks(graph);
@@ -641,7 +644,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetNumberOfBasicBlocks_1)
 // Test: test-kind=api, api=GraphApiImpl::bbGetId, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetId_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test2", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
@@ -654,7 +657,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetId_1)
 // Test: test-kind=api, api=GraphApiImpl::bbGetPredBlock, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetPredBlock_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
@@ -668,7 +671,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetPredBlock_1)
 // Test: test-kind=api, api=GraphApiImpl::bbInsertSuccBlock, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBinsertSuccBlock_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test2", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
@@ -685,7 +688,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBinsertSuccBlock_1)
 // Test: test-kind=api, api=GraphApiImpl::bbAppendSuccBlock, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBappendSuccBlock_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test2", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
@@ -702,7 +705,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBappendSuccBlock_1)
 // Test: test-kind=api, api=GraphApiImpl::bbRemoveAllInsts, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, bbRemoveAllInsts_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test2", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *empty = g_implG->bbCreateEmpty(graph);
@@ -720,7 +723,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, bbRemoveAllInsts_1)
 // Test: test-kind=api, api=GraphApiImpl::bbIsLoopPrehead, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBisLoopPrehead_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test4", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
@@ -734,7 +737,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBisLoopPrehead_1)
 // Test: test-kind=api, api=GraphApiImpl::bbIsLoopHead, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBisLoopHead_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test4", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
@@ -749,7 +752,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBisLoopHead_1)
 // Test: test-kind=api, api=GraphApiImpl::bbSplitBlockAfterInstruction, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBsplitBlockAfterInstruction_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test2", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
@@ -768,7 +771,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBsplitBlockAfterInstruction_1)
 // Test: test-kind=api, api=GraphApiImpl::bbCheckDominance, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBcheckDominance_1)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test2", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);

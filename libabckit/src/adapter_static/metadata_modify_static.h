@@ -26,7 +26,7 @@ namespace libabckit {
 // Create / Update
 // ========================================
 
-AbckitString *CreateStringStatic(AbckitFile *file, const char *value);
+AbckitString *CreateStringStatic(AbckitFile *file, const char *value, size_t len);
 
 void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph);
 
@@ -38,13 +38,13 @@ AbckitLiteral *FindOrCreateLiteralU32Static(AbckitFile *file, uint32_t value);
 AbckitLiteral *FindOrCreateLiteralU64Static(AbckitFile *file, uint64_t value);
 AbckitLiteral *FindOrCreateLiteralFloatStatic(AbckitFile *file, float value);
 AbckitLiteral *FindOrCreateLiteralDoubleStatic(AbckitFile *file, double value);
-AbckitLiteral *FindOrCreateLiteralStringStatic(AbckitFile *file, const char *value);
+AbckitLiteral *FindOrCreateLiteralStringStatic(AbckitFile *file, const char *value, size_t len);
 AbckitLiteral *FindOrCreateLiteralMethodStatic(AbckitFile *file, AbckitCoreFunction *function);
 AbckitLiteralArray *CreateLiteralArrayStatic(AbckitFile *file, AbckitLiteral **value, size_t size);
 
 AbckitValue *FindOrCreateValueU1Static(AbckitFile *file, bool value);
 AbckitValue *FindOrCreateValueDoubleStatic(AbckitFile *file, double value);
-AbckitValue *FindOrCreateValueStringStatic(AbckitFile *file, const char *value);
+AbckitValue *FindOrCreateValueStringStatic(AbckitFile *file, const char *value, size_t len);
 }  // namespace libabckit
 
 #endif

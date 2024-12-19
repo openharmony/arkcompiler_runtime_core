@@ -22,7 +22,7 @@
 
 namespace libabckit {
 
-AbckitString *CreateStringDynamic(AbckitFile *file, const char *value);
+AbckitString *CreateStringDynamic(AbckitFile *file, const char *value, size_t len);
 void FunctionSetGraphDynamic(AbckitCoreFunction *function, AbckitGraph *graph);
 AbckitJsModule *FileAddExternalJsModule(AbckitFile *file, const struct AbckitJsExternalModuleCreateParams *params);
 AbckitArktsModule *FileAddExternalArkTsV1Module(AbckitFile *file,
@@ -48,14 +48,14 @@ AbckitLiteral *FindOrCreateLiteralU32Dynamic(AbckitFile *file, uint32_t value);
 AbckitLiteral *FindOrCreateLiteralU64Dynamic(AbckitFile *file, uint64_t value);
 AbckitLiteral *FindOrCreateLiteralFloatDynamic(AbckitFile *file, float value);
 AbckitLiteral *FindOrCreateLiteralDoubleDynamic(AbckitFile *file, double value);
-AbckitLiteral *FindOrCreateLiteralStringDynamic(AbckitFile *file, const char *value);
+AbckitLiteral *FindOrCreateLiteralStringDynamic(AbckitFile *file, const char *value, size_t len);
 AbckitLiteral *FindOrCreateLiteralMethodDynamic(AbckitFile *file, AbckitCoreFunction *function);
 AbckitLiteral *FindOrCreateLiteralLiteralArrayDynamic(AbckitFile *file, AbckitLiteralArray *litarr);
 AbckitLiteralArray *CreateLiteralArrayDynamic(AbckitFile *file, AbckitLiteral **value, size_t size);
 
 AbckitValue *FindOrCreateValueU1Dynamic(AbckitFile *file, bool value);
 AbckitValue *FindOrCreateValueDoubleDynamic(AbckitFile *file, double value);
-AbckitValue *FindOrCreateValueStringDynamic(AbckitFile *file, const char *value);
+AbckitValue *FindOrCreateValueStringDynamic(AbckitFile *file, const char *value, size_t len);
 AbckitValue *FindOrCreateLiteralArrayValueDynamic(AbckitFile *file, AbckitValue **value, size_t size);
 
 AbckitArktsAnnotationInterface *ModuleAddAnnotationInterfaceDynamic(

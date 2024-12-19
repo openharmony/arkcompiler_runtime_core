@@ -92,7 +92,7 @@ static void GeneralBranchEliminatorTest(bool configIsDebugFinal)
     auto expectOutput = GetExpectOutput(CONFIG_IS_DEBUG_ORIGIN_VALUE);
     ASSERT_EQ(originOutput, expectOutput);
 
-    AbckitFile *file = impl->openAbc(INPUT.c_str());
+    AbckitFile *file = impl->openAbc(INPUT.c_str(), INPUT.size());
     ASSERT_NE(file, nullptr);
     ASSERT_TRUE(MethodHasBranch("modules/myfoo", "myfoo", file));
     ASSERT_TRUE(MethodHasBranch("modules/mybar", "test1", file));
@@ -106,7 +106,7 @@ static void GeneralBranchEliminatorTest(bool configIsDebugFinal)
     ASSERT_FALSE(MethodHasBranch("modules/mybar", "test2", file));
 
     const auto modifiedPath = DIR + "branch_eliminator_modified.abc";
-    impl->writeAbc(file, modifiedPath.c_str());
+    impl->writeAbc(file, modifiedPath.c_str(), modifiedPath.size());
     g_impl->closeFile(file);
     auto output = helpers::ExecuteDynamicAbc(modifiedPath, "branch_eliminator");
     auto expectOutput2 = GetExpectOutput(configIsDebugFinal);

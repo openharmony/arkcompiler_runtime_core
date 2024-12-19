@@ -312,7 +312,7 @@ TEST_F(LibAbcKitCreateDynThrow, CreateDynThrowUndefinedifholewithnameValid)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/throw/throw_dynamic.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/throw/throw_dynamic_modified.abc", "bar",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitString *str = g_implM->createString(file, "GeneratedStr");
+            AbckitString *str = g_implM->createString(file, "GeneratedStr", strlen("GeneratedStr"));
             TransformIrThrowUndefinedifholewithnameValid(graph, str);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         },

@@ -127,7 +127,7 @@ static std::function<void(AbckitCoreModule *)> g_cbModule = [](AbckitCoreModule 
 TEST_F(AbckitRegressionTestCAPI, LibAbcKitTestIssueIB2T4M)
 {
     std::string inputPath = ABCKIT_ABC_DIR "regression/issue_IB2T4M/issue_IB2T4M.abc";
-    AbckitFile *file = g_impl->openAbc(inputPath.c_str());
+    AbckitFile *file = g_impl->openAbc(inputPath.c_str(), inputPath.size());
     EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_cbClass = [](AbckitCoreClass *c) -> bool {

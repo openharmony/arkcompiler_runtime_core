@@ -37,7 +37,7 @@ enum TestTypes {
 
 static void TestNamespaces(const std::string &namespaceName, const std::string &expectedNamespaceName)
 {
-    AbckitFile *file = g_impl->openAbc(INPUT_PATH);
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     auto *n = helpers::FindNamespaceByName(file, namespaceName);
@@ -59,7 +59,7 @@ static void TestNamespaces(const std::string &namespaceName, const std::string &
 
 static void TestFunctions(const std::string &functionName, const std::string &expectedNamespaceName)
 {
-    AbckitFile *file = g_impl->openAbc(INPUT_PATH);
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     auto *func = helpers::FindMethodByName(file, functionName);
@@ -81,7 +81,7 @@ static void TestFunctions(const std::string &functionName, const std::string &ex
 
 static void TestClasses(const std::string &className, const std::string &expectedNamespaceName)
 {
-    AbckitFile *file = g_impl->openAbc(INPUT_PATH);
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     auto *func = helpers::FindMethodByName(file, className);

@@ -43,33 +43,35 @@ extern "C" AbckitStatus GetAbckitLastError()
     return statuses::GetLastError();
 }
 
-extern "C" AbckitFile *OpenAbc(const char *path)
+extern "C" AbckitFile *OpenAbc(const char *path, size_t len)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
     LIBABCKIT_BAD_ARGUMENT(path, nullptr);
+    LIBABCKIT_ZERO_ARGUMENT(len, nullptr);
 
-    LIBABCKIT_LOG(DEBUG) << path << '\n';
+    auto spath = std::string(path, len);
+    LIBABCKIT_LOG(DEBUG) << spath << '\n';
 
     MemManager::Initialize(g_abckitOptions.GetMemorySizeLimit());
 
     AbckitFile *file = nullptr;
 
-    file = OpenAbcStatic(path);
+    file = OpenAbcStatic(path, len);
     if (file != nullptr) {
         return file;
     }
 
-    LIBABCKIT_LOG(DEBUG) << (std::string() + "Load file with path '" + path +
+    LIBABCKIT_LOG(DEBUG) << (std::string() + "Load file with path '" + spath +
                              "' failed for static mode, trying dynamic mode\n");
 
-    file = OpenAbcDynamic(path);
+    file = OpenAbcDynamic(path, len);
     if (file != nullptr) {
         return file;
     }
 
-    LIBABCKIT_LOG(DEBUG) << (std::string() + "Load file with path '" + path + "' failed for both modes\n");
+    LIBABCKIT_LOG(DEBUG) << (std::string() + "Load file with path '" + spath + "' failed for both modes\n");
 
     // Input abc file is neither for dynamic vm nor static vm
     statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
@@ -77,19 +79,20 @@ extern "C" AbckitFile *OpenAbc(const char *path)
     return nullptr;
 }
 
-extern "C" void WriteAbc(AbckitFile *file, const char *path)
+extern "C" void WriteAbc(AbckitFile *file, const char *path, size_t len)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(file)
     LIBABCKIT_BAD_ARGUMENT_VOID(path)
+    LIBABCKIT_ZERO_ARGUMENT_VOID(len)
 
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return WriteAbcDynamic(file, path);
+            return WriteAbcDynamic(file, path, len);
         case Mode::STATIC:
-            return WriteAbcStatic(file, path);
+            return WriteAbcStatic(file, path, len);
         default:
             LIBABCKIT_UNREACHABLE;
     }

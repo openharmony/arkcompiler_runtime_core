@@ -267,7 +267,7 @@ inline Instruction Instruction::SetLiteralArray(LiteralArray la) const
 inline Instruction Instruction::SetString(std::string_view s) const
 {
     const ApiConfig *conf = GetApiConfig();
-    auto *str = conf->cMapi_->createString(GetResource()->GetFile()->GetResource(), s.data());
+    auto *str = conf->cMapi_->createString(GetResource()->GetFile()->GetResource(), s.data(), s.size());
     CheckError(GetApiConfig());
     conf->cGapi_->iSetString(GetView(), str);
     CheckError(conf);

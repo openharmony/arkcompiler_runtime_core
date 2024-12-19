@@ -197,7 +197,7 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestDynamicReplaceCallSite)
     auto output = helpers::ExecuteDynamicAbc(inputPath, "replace_call_site");
     EXPECT_TRUE(helpers::Match(output, "3\n"));
 
-    AbckitFile *ctxI = g_impl->openAbc(inputPath.c_str());
+    AbckitFile *ctxI = g_impl->openAbc(inputPath.c_str(), inputPath.size());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     auto visitor = VisitHelper(ctxI, g_impl, g_implI, g_implG, g_dynG);
@@ -222,7 +222,7 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestDynamicReplaceCallSite)
         visitor.EnumerateModuleClasses(mod, [&](AbckitCoreClass *klass) { ClassReplaceCallSite(visitor, ud, klass); });
     });
 
-    g_impl->writeAbc(ctxI, outputPath.c_str());
+    g_impl->writeAbc(ctxI, outputPath.c_str(), outputPath.size());
     g_impl->closeFile(ctxI);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 

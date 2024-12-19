@@ -83,7 +83,7 @@ AbckitString *ClassGetNameStatic(AbckitCoreClass *klass)
     auto *record = klass->GetArkTSImpl()->impl.GetStaticClass();
     auto [moduleName, className] = ClassGetNames(record->name);
 
-    return CreateStringStatic(klass->owningModule->file, className.data());
+    return CreateStringStatic(klass->owningModule->file, className.data(), className.size());
 }
 
 // ========================================
@@ -96,7 +96,7 @@ AbckitString *FunctionGetNameStatic(AbckitCoreFunction *function)
 
     auto functionName = pandasm::MangleFunctionName(functionImpl->name, functionImpl->params, functionImpl->returnType);
     auto croppedName = FuncNameCropModule(functionName);
-    return CreateStringStatic(function->owningModule->file, croppedName.data());
+    return CreateStringStatic(function->owningModule->file, croppedName.data(), croppedName.size());
 }
 
 bool GetMethodOffset(pandasm::Function *func, pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps,
@@ -503,7 +503,7 @@ AbckitString *ValueGetStringStatic(AbckitValue *value)
 
     auto *pVal = reinterpret_cast<pandasm::ScalarValue *>(value->val.get());
     auto valImpl = pVal->GetValue<std::string>();
-    return CreateStringStatic(value->file, valImpl.data());
+    return CreateStringStatic(value->file, valImpl.data(), valImpl.size());
 }
 
 AbckitLiteralArray *ArrayValueGetLiteralArrayStatic(AbckitValue * /*value*/)

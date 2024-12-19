@@ -47,10 +47,10 @@ TEST_F(LibAbcKitCreateDynDefineFieldRuntime, IcreateCallruntimeDefinefieldbyvalu
         auto *obj = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEOBJECTWITHBUFFER);
 
         // CC-OFFNXT(G.FMT.02)
-        auto *keyStr = g_implM->createString(file, "key3");
+        auto *keyStr = g_implM->createString(file, "key3", strlen("key3"));
         auto *key = g_dynG->iCreateLoadString(graph, keyStr);
 
-        auto *valStr = g_implM->createString(file, "val3");
+        auto *valStr = g_implM->createString(file, "val3", strlen("val3"));
         auto *val = g_dynG->iCreateLoadString(graph, valStr);
 
         auto *field = g_dynG->iCreateCallruntimeDefinefieldbyvalue(graph, val, key, obj);
@@ -80,10 +80,10 @@ TEST_F(LibAbcKitCreateDynDefineFieldRuntime, IcreateCallruntimeDefinefieldbyvalu
     auto cb = [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
         auto *obj = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEARRAYWITHBUFFER);
         // CC-OFFNXT(G.FMT.02)
-        auto *keyStr = g_implM->createString(file, "key3");
+        auto *keyStr = g_implM->createString(file, "key3", strlen("key3"));
         auto *key = g_dynG->iCreateLoadString(graph, keyStr);
 
-        auto *valStr = g_implM->createString(file, "val3");
+        auto *valStr = g_implM->createString(file, "val3", strlen("val3"));
         auto *val = g_dynG->iCreateLoadString(graph, valStr);
 
         auto *field = g_dynG->iCreateCallruntimeDefinefieldbyvalue(graph, val, key, obj);
@@ -113,7 +113,7 @@ TEST_F(LibAbcKitCreateDynDefineFieldRuntime, IcreateCallruntimeDefinefieldbyinde
     auto cb = [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
         auto *obj = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEOBJECTWITHBUFFER);
         // CC-OFFNXT(G.FMT.02)
-        auto *valStr = g_implM->createString(file, "val3");
+        auto *valStr = g_implM->createString(file, "val3", strlen("val3"));
         auto *val = g_dynG->iCreateLoadString(graph, valStr);
 
         auto *field = g_dynG->iCreateCallruntimeDefinefieldbyindex(graph, val, 0x4, obj);
@@ -142,7 +142,7 @@ TEST_F(LibAbcKitCreateDynDefineFieldRuntime, IcreateCallruntimeDefinefieldbyinde
     auto cb = [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
         auto *obj = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEARRAYWITHBUFFER);
 
-        auto *valStr = g_implM->createString(file, "val3");
+        auto *valStr = g_implM->createString(file, "val3", strlen("val3"));
         auto *val = g_dynG->iCreateLoadString(graph, valStr);
 
         auto *field = g_dynG->iCreateCallruntimeDefinefieldbyindex(graph, val, 0x4, obj);

@@ -47,7 +47,7 @@ static bool IsAbstract(pandasm::ItemMetadata *meta)
 
 AbckitString *CreateNameString(AbckitFile *file, std::string &name)
 {
-    return CreateStringStatic(file, name.data());
+    return CreateStringStatic(file, name.data(), name.size());
 }
 
 pandasm::Function *FunctionGetImpl(AbckitCoreFunction *function)
@@ -135,7 +135,8 @@ std::unique_ptr<AbckitCoreFunction> CollectFunction(
         for (auto &annoElemImpl : annoImpl.GetElements()) {
             auto annoElem = std::make_unique<AbckitCoreAnnotationElement>();
             annoElem->ann = anno.get();
-            annoElem->name = CreateStringStatic(file, annoElemImpl.GetName().data());
+            auto annoElemImplName = annoElemImpl.GetName();
+            annoElem->name = CreateStringStatic(file, annoElemImplName.data(), annoElemImplName.size());
             annoElem->impl = std::make_unique<AbckitArktsAnnotationElement>();
             annoElem->GetArkTSImpl()->core = annoElem.get();
             auto value = FindOrCreateValueStatic(file, *annoElemImpl.GetValue());
@@ -163,7 +164,7 @@ static void CreateModule(AbckitFile *file, std::unordered_set<std::string> &glob
         auto m = std::make_unique<AbckitCoreModule>();
         m->file = file;
         m->target = ABCKIT_TARGET_ARK_TS_V2;
-        m->moduleName = CreateStringStatic(file, moduleName.data());
+        m->moduleName = CreateStringStatic(file, moduleName.data(), moduleName.size());
         m->impl = std::make_unique<AbckitArktsModule>();
         m->GetArkTSImpl()->core = m.get();
         nameToModule.insert({moduleName, std::move(m)});
@@ -307,13 +308,14 @@ struct CtxIInternal {
     ark::abc2program::Abc2ProgramDriver *driver = nullptr;
 };
 
-AbckitFile *OpenAbcStatic(const char *path)
+AbckitFile *OpenAbcStatic(const char *path, size_t len)
 {
     LIBABCKIT_LOG_FUNC;
-    LIBABCKIT_LOG(DEBUG) << path << '\n';
+    auto spath = std::string(path, len);
+    LIBABCKIT_LOG(DEBUG) << spath << '\n';
     auto *abc2program = new ark::abc2program::Abc2ProgramDriver();
-    if (!abc2program->Compile(path)) {
-        LIBABCKIT_LOG(DEBUG) << "Failed to open " << path << "\n";
+    if (!abc2program->Compile(spath)) {
+        LIBABCKIT_LOG(DEBUG) << "Failed to open " << spath << "\n";
         delete abc2program;
         return nullptr;
     }
@@ -322,7 +324,7 @@ AbckitFile *OpenAbcStatic(const char *path)
     file->frontend = Mode::STATIC;
     CreateWrappers(&prog, file);
 
-    auto pf = panda_file::File::Open(path);
+    auto pf = panda_file::File::Open(spath);
     if (pf == nullptr) {
         LIBABCKIT_LOG(DEBUG) << "Failed to panda_file::File::Open\n";
         delete abc2program;
@@ -352,10 +354,11 @@ void CloseFileStatic(AbckitFile *file)
     delete file;
 }
 
-void WriteAbcStatic(AbckitFile *file, const char *path)
+void WriteAbcStatic(AbckitFile *file, const char *path, size_t len)
 {
     LIBABCKIT_LOG_FUNC;
-    LIBABCKIT_LOG(DEBUG) << path << '\n';
+    auto spath = std::string(path, len);
+    LIBABCKIT_LOG(DEBUG) << spath << '\n';
 
     auto program = file->GetStaticProgram();
 
@@ -363,7 +366,7 @@ void WriteAbcStatic(AbckitFile *file, const char *path)
     std::map<std::string, size_t> *statp = nullptr;
     ark::pandasm::AsmEmitter::PandaFileToPandaAsmMaps *mapsp = nullptr;
 
-    if (!pandasm::AsmEmitter::Emit(path, *program, statp, mapsp, emitDebugInfo)) {
+    if (!pandasm::AsmEmitter::Emit(spath, *program, statp, mapsp, emitDebugInfo)) {
         LIBABCKIT_LOG(DEBUG) << "FAILURE: " << pandasm::AsmEmitter::GetLastError() << '\n';
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
         return;

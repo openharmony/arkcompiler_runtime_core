@@ -40,7 +40,8 @@ struct ModuleData {
 // Test: test-kind=api, api=ModifyApiImpl::functionSetGraph, abc-kind=ArkTS2, category=positive
 TEST_F(LibAbcKitGraphStuff, FunctionSetGraphStatic)
 {
-    auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "internal/implementation_api/abc_static.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_static.abc";
+    auto *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     std::vector<struct ClassData> userData = {{"ClassA", {"foo", "bar"}}, {"ClassB", {"baz", "func"}}};
@@ -80,7 +81,8 @@ TEST_F(LibAbcKitGraphStuff, FunctionSetGraphStatic)
 // Test: test-kind=api, api=ModifyApiImpl::functionSetGraph, abc-kind=ArkTS2, category=positive
 TEST_F(LibAbcKitGraphStuff, CreateGraphFromFunctionStatic)
 {
-    auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "internal/implementation_api/abc_static.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_static.abc";
+    auto *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     std::vector<struct ClassData> userData = {{"ClassA", {"foo", "bar"}}, {"ClassB", {"baz", "func"}}};
@@ -120,7 +122,8 @@ TEST_F(LibAbcKitGraphStuff, CreateGraphFromFunctionStatic)
 // Test: test-kind=api, api=ApiImpl::destroyGraph, abc-kind=ArkTS2, category=positive
 TEST_F(LibAbcKitGraphStuff, DestroyGraphStatic)
 {
-    auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "internal/implementation_api/abc_static.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_static.abc";
+    auto *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     std::vector<struct ClassData> userData = {{"ClassA", {"foo", "bar"}}, {"ClassB", {"baz", "func"}}};
@@ -159,7 +162,8 @@ TEST_F(LibAbcKitGraphStuff, DestroyGraphStatic)
 // Test: test-kind=api, api=InspectApiImpl::createGraphFromFunction, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitGraphStuff, CreateGraphFromFunctionDynamic)
 {
-    auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "internal/implementation_api/abc_dynamic.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_dynamic.abc";
+    auto *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     struct ModuleData userData = {"abc_dynamic", {"foo", "bar", "baz", "func"}};
@@ -188,7 +192,8 @@ TEST_F(LibAbcKitGraphStuff, CreateGraphFromFunctionDynamic)
 // Test: test-kind=api, api=ModifyApiImpl::functionSetGraph, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitGraphStuff, FunctionSetGraphDynamic)
 {
-    auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "internal/implementation_api/abc_dynamic.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_dynamic.abc";
+    auto *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     struct ModuleData userData = {"abc_dynamic", {"foo", "bar", "baz", "func"}};
@@ -217,7 +222,8 @@ TEST_F(LibAbcKitGraphStuff, FunctionSetGraphDynamic)
 // Test: test-kind=api, api=ApiImpl::destroyGraph, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitGraphStuff, DestroyGraphDynamic)
 {
-    auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "internal/implementation_api/abc_dynamic.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_dynamic.abc";
+    auto *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     struct ModuleData userData = {"abc_dynamic", {"foo", "bar", "baz", "func"}};

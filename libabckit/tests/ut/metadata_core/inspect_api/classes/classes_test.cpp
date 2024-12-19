@@ -27,6 +27,13 @@ namespace libabckit::test {
 static auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
+static constexpr auto MODIFIED_DYNAMIC =
+    ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic_modified.abc";
+static constexpr auto MODIFIED_STATIC =
+    ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static_modified.abc";
+static constexpr auto MODIFIED_EMPTY_DYNAMIC =
+    ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_empty_dynamic_modified.abc";
+
 class LibAbcKitInspectApiClassesTest : public ::testing::Test {};
 
 static bool ClassCountrer(AbckitCoreClass *klass, void *data)
@@ -150,7 +157,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetNameSmoke)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -186,7 +193,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetNameSmoke)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -256,7 +263,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetName)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -341,7 +348,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsSmoke)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -414,7 +421,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsEmpty)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_empty_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_EMPTY_DYNAMIC, strlen(MODIFIED_EMPTY_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -482,7 +489,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsSeveralMethod
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_empty_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_EMPTY_DYNAMIC, strlen(MODIFIED_EMPTY_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -542,7 +549,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetFile)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -571,7 +578,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetModule)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -600,7 +607,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, StaticClassGetModule)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -638,7 +645,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetParentFunction)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

@@ -323,8 +323,8 @@ AbckitInst *ret = dynG->iCreateReturnundefined(ctxG);
 ### _Create 'print("Hello")' for ArkTS1.0_
 
 ```cpp
-AbckitInst *str = dynG->iCreateLoadString(ctxG, implM->createString(file, "Hello"));
-AbckitInst *print = dynG->iCreateTryldglobalbyname(ctxG, implM->createString(file, "print"));
+AbckitInst *str = dynG->iCreateLoadString(ctxG, implM->createString(file, "Hello", strlen("Hello")));
+AbckitInst *print = dynG->iCreateTryldglobalbyname(ctxG, implM->createString(file, "print", strlen("print")));
 AbckitInst *callArg = dynG->iCreateCallarg1(ctxG, print, str);
 ```
 

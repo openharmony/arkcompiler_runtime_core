@@ -133,7 +133,7 @@ inline abckit::Literal File::CreateLiteralLiteralArray(const abckit::LiteralArra
 inline std::string File::CreateString(std::string_view val) const
 {
     const ApiConfig *conf = GetApiConfig();
-    AbckitString *cString = conf->cMapi_->createString(GetResource(), val.data());
+    AbckitString *cString = conf->cMapi_->createString(GetResource(), val.data(), val.size());
     CheckError(conf);
     std::string str = conf->cIapi_->abckitStringToString(cString);
     CheckError(conf);
@@ -142,14 +142,14 @@ inline std::string File::CreateString(std::string_view val) const
 
 inline abckit::Literal File::CreateLiteralString(std::string_view val) const
 {
-    AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralString(GetResource(), val.data());
+    AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralString(GetResource(), val.data(), val.size());
     CheckError(GetApiConfig());
     return abckit::Literal(literal, GetApiConfig(), this);
 }
 
-inline Value File::CreateValueString(const char *value) const
+inline Value File::CreateValueString(std::string_view value) const
 {
-    auto val = GetApiConfig()->cMapi_->createValueString(GetResource(), value);
+    auto val = GetApiConfig()->cMapi_->createValueString(GetResource(), value.data(), value.size());
     CheckError(GetApiConfig());
     return Value(val, GetApiConfig(), this);
 }

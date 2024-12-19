@@ -30,9 +30,11 @@ class LibAbcKitMemoryHandling : public ::testing::Test {};
 // Test: test-kind=api, api=ApiImpl::openAbc, abc-kind=ArkTS2, category=positive
 TEST_F(LibAbcKitMemoryHandling, OpenAbcStatic)
 {
-    auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "internal/mem_manager/abc_static_1.abc");
+    constexpr auto PATH1 = ABCKIT_ABC_DIR "internal/mem_manager/abc_static_1.abc";
+    constexpr auto PATH2 = ABCKIT_ABC_DIR "internal/mem_manager/abc_static_2.abc";
+    auto *file = g_impl->openAbc(PATH1, strlen(PATH1));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto *ctxI2 = g_impl->openAbc(ABCKIT_ABC_DIR "internal/mem_manager/abc_static_2.abc");
+    auto *ctxI2 = g_impl->openAbc(PATH2, strlen(PATH2));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     auto *main = helpers::FindMethodByName(file, "main");
@@ -55,11 +57,11 @@ TEST_F(LibAbcKitMemoryHandling, OpenAbcStatic)
     transformMain(main2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "internal/mem_manager/abc_static_1.abc");
+    g_impl->writeAbc(file, PATH1, strlen(PATH1));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    g_impl->writeAbc(ctxI2, ABCKIT_ABC_DIR "internal/mem_manager/abc_static_2.abc");
+    g_impl->writeAbc(ctxI2, PATH2, strlen(PATH2));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(ctxI2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -68,9 +70,11 @@ TEST_F(LibAbcKitMemoryHandling, OpenAbcStatic)
 // Test: test-kind=api, api=ApiImpl::openAbc, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitMemoryHandling, OpenAbcDynamic)
 {
-    auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "internal/mem_manager/abc_dynamic_1.abc");
+    constexpr auto PATH1 = ABCKIT_ABC_DIR "internal/mem_manager/abc_dynamic_1.abc";
+    constexpr auto PATH2 = ABCKIT_ABC_DIR "internal/mem_manager/abc_dynamic_2.abc";
+    auto *file = g_impl->openAbc(PATH1, strlen(PATH1));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto *ctxI2 = g_impl->openAbc(ABCKIT_ABC_DIR "internal/mem_manager/abc_dynamic_2.abc");
+    auto *ctxI2 = g_impl->openAbc(PATH2, strlen(PATH2));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     auto *main = helpers::FindMethodByName(file, "func_main_0");
@@ -93,11 +97,11 @@ TEST_F(LibAbcKitMemoryHandling, OpenAbcDynamic)
     transformMain(main2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "internal/mem_manager/abc_dynamic_1.abc");
+    g_impl->writeAbc(file, PATH1, strlen(PATH1));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    g_impl->writeAbc(ctxI2, ABCKIT_ABC_DIR "internal/mem_manager/abc_dynamic_2.abc");
+    g_impl->writeAbc(ctxI2, PATH2, strlen(PATH2));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(ctxI2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

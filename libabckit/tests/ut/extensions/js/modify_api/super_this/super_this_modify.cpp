@@ -53,7 +53,7 @@ static void StByNameTest(AbckitFile *file, AbckitGraph *graph, bool isSuper)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(newAge, nullptr);
 
-    AbckitString *fieldName = g_implM->createString(file, "age");
+    AbckitString *fieldName = g_implM->createString(file, "age", strlen("age"));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(fieldName, nullptr);
 
@@ -203,7 +203,7 @@ static void StByValueTest(AbckitFile *file, AbckitGraph *graph, bool isSuper)
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_NE(param, nullptr);
     }
-    AbckitString *fieldName = g_implM->createString(file, "age");
+    AbckitString *fieldName = g_implM->createString(file, "age", strlen("age"));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(fieldName, nullptr);
 
@@ -356,7 +356,7 @@ static void LdByNameTest(AbckitFile *file, AbckitGraph *graph, bool isSuper)
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_NE(param, nullptr);
     }
-    AbckitString *funcName = g_implM->createString(file, "getName");
+    AbckitString *funcName = g_implM->createString(file, "getName", strlen("getName"));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(funcName, nullptr);
 
@@ -465,7 +465,7 @@ static void LdByValueTest(AbckitFile *file, AbckitGraph *graph, bool isSuper)
         ASSERT_NE(param, nullptr);
     }
 
-    AbckitString *funcName = g_implM->createString(file, "getName");
+    AbckitString *funcName = g_implM->createString(file, "getName", strlen("getName"));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(funcName, nullptr);
 

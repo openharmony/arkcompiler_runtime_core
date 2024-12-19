@@ -1163,11 +1163,12 @@ struct AbckitModifyApi {
      * @return Pointer to the `AbckitValue`.
      * @param [ in ] file - Binary file to be modified.
      * @param [ in ] value - C-style null-terminated string from which value item is created.
+     * @param [ in ] len - length of `value`.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
      * @note Allocates
      */
-    AbckitValue *(*createValueString)(AbckitFile *file, const char *value);
+    AbckitValue *(*createValueString)(AbckitFile *file, const char *value, size_t len);
 
     /**
      * @brief Creates literal array value item with size `size` from the given value items array `value`.
@@ -1190,11 +1191,12 @@ struct AbckitModifyApi {
      * @return Pointer to the `AbckitString`.
      * @param [ in ] file - Binary file to be modified.
      * @param [ in ] value - C-style null-terminated string to be set.
+     * @param [ in ] len - length of `value`.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
      * @note Allocates
      */
-    AbckitString *(*createString)(AbckitFile *file, const char *value);
+    AbckitString *(*createString)(AbckitFile *file, const char *value, size_t len);
 
     /* ========================================
      * LiteralArray
@@ -1312,11 +1314,12 @@ struct AbckitModifyApi {
      * @return Pointer to the `AbckitLiteral`.
      * @param [ in ] file - Binary file to be modified.
      * @param [ in ] value - C-style null-terminated string that will be stored in the literal to be created.
+     * @param [ in ] len - length of `value`.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
      * @note Allocates
      */
-    AbckitLiteral *(*createLiteralString)(AbckitFile *file, const char *value);
+    AbckitLiteral *(*createLiteralString)(AbckitFile *file, const char *value, size_t len);
 
     /**
      * @brief Creates literal containing the given function `function`.

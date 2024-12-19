@@ -30,17 +30,19 @@ AbckitStatus GetLastError()
     return ABCKIT_STATUS_NO_ERROR;
 }
 
-AbckitFile *OpenAbc(const char *path)
+AbckitFile *OpenAbc(const char *path, size_t len)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(strncmp(path, DEFAULT_PATH, DEFAULT_PATH_SIZE) == 0);
+    EXPECT_TRUE(len + 1 == DEFAULT_PATH_SIZE);
     return DEFAULT_FILE;
 }
 
-void WriteAbc(AbckitFile *file, const char *path)
+void WriteAbc(AbckitFile *file, const char *path, size_t len)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(strncmp(path, DEFAULT_PATH, DEFAULT_PATH_SIZE) == 0);
+    EXPECT_TRUE(len + 1 == DEFAULT_PATH_SIZE);
     EXPECT_TRUE(file == DEFAULT_FILE);
 }
 

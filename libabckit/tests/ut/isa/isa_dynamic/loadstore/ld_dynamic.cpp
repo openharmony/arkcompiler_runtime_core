@@ -169,12 +169,12 @@ TEST_F(LibAbcKitDynLdInstTest, CreateDynTryldglobalbynameValid)
     EXPECT_TRUE(helpers::Match(output, ""));
 
     auto cb = [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-        auto *stringPrint = g_implM->createString(file, "print");
+        auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
         auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         auto *newobjrange = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_NEWOBJRANGE);
         // CC-OFFNXT(G.FMT.02)
-        auto *stringf = g_implM->createString(file, "f");
+        auto *stringf = g_implM->createString(file, "f", strlen("f"));
         auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, newobjrange, stringf);
         auto *callarg1 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbyname);
         auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
@@ -203,11 +203,11 @@ TEST_F(LibAbcKitDynLdInstTest, CreateDynTrystglobalbynameValid)
             auto arr = std::vector<AbckitLiteral *>();
             arr.emplace_back(g_implM->createLiteralU32(file, 0));
             arr.emplace_back(g_implM->createLiteralU32(file, 111));
-            arr.emplace_back(g_implM->createLiteralString(file, "hello"));
+            arr.emplace_back(g_implM->createLiteralString(file, "hello", strlen("hello")));
             auto *litArr = g_implM->createLiteralArray(file, arr.data(), arr.size());
 
             auto *createarraywithbuffer = g_dynG->iCreateCreatearraywithbuffer(graph, litArr);
-            auto *stringO = g_implM->createString(file, "o");
+            auto *stringO = g_implM->createString(file, "o", strlen("o"));
             auto *trystglobalbyname = g_dynG->iCreateTrystglobalbyname(graph, createarraywithbuffer, stringO);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             auto *callarg0 = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG0);

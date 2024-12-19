@@ -118,7 +118,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicIcreateDelobjprop)
         // CC-OFFNXT(G.FMT.02)
         AbckitInst *firstDelobj = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_DELOBJPROP);
         // CC-OFFNXT(G.FMT.02)
-        AbckitString *str = g_implM->createString(file, "y");
+        AbckitString *str = g_implM->createString(file, "y", strlen("y"));
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_NE(str, nullptr);
 

@@ -30,6 +30,9 @@ static auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implM = AbckitGetModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
+constexpr auto MODIFIED_DYNAMIC = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_dynamic_modified.abc";
+constexpr auto MODIFIED_STATIC = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_static_modified.abc";
+
 class LibAbcKitInspectApiValuesTest : public ::testing::Test {};
 
 // Test: test-kind=api, api=InspectApiImpl::valueGetU1, abc-kind=ArkTS1, category=positive
@@ -42,7 +45,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, ValueGetU1_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_TRUE(val);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -58,7 +61,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, ValueGetFile_1)
 
     ASSERT_EQ(g_implI->valueGetFile(res), file);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -75,7 +78,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, ValueGetDouble_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val, implVal);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -86,12 +89,12 @@ TEST_F(LibAbcKitInspectApiValuesTest, ValueGetString_1)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_dynamic.abc", &file);
-    auto *res = g_implM->createValueString(file, "test");
+    auto *res = g_implM->createValueString(file, "test", strlen("test"));
     auto val = g_implI->valueGetString(res);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val->impl, "test");
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -103,7 +106,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, CreateLiteralArrayValue_1)
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/values/values_dynamic.abc", &file);
     std::vector<AbckitValue *> abcArr;
-    abcArr.emplace_back(g_implM->createValueString(file, "test"));
+    abcArr.emplace_back(g_implM->createValueString(file, "test", strlen("test")));
     abcArr.emplace_back(g_implM->createValueU1(file, true));
     auto *arr = g_implM->createLiteralArrayValue(file, abcArr.data(), 2U);
     auto *litArr = g_implI->arrayValueGetLiteralArray(arr);
@@ -124,7 +127,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, CreateLiteralArrayValue_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -136,7 +139,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, ArrayValueGetLiteralArray_1)
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/values/values_dynamic.abc", &file);
     std::vector<AbckitValue *> abcArr;
-    abcArr.emplace_back(g_implM->createValueString(file, "test"));
+    abcArr.emplace_back(g_implM->createValueString(file, "test", strlen("test")));
     abcArr.emplace_back(g_implM->createValueU1(file, true));
     auto *arr = g_implM->createLiteralArrayValue(file, abcArr.data(), 2);
     auto *larr = g_implI->arrayValueGetLiteralArray(arr);
@@ -148,7 +151,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, ArrayValueGetLiteralArray_1)
     ASSERT_EQ(counter, 2U);
 
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -159,7 +162,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, ValueGetType_1)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_dynamic.abc", &file);
-    auto *res = g_implM->createValueString(file, "test");
+    auto *res = g_implM->createValueString(file, "test", strlen("test"));
     auto val = g_implI->valueGetType(res);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val->id, ABCKIT_TYPE_ID_STRING);
@@ -173,7 +176,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, ValueGetType_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val->id, ABCKIT_TYPE_ID_F64);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -189,7 +192,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, ValueGetU1_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_TRUE(val);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -206,7 +209,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, ValueGetDouble_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val, implVal);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -217,12 +220,12 @@ TEST_F(LibAbcKitInspectApiValuesTest, ValueGetString_2)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_static.abc", &file);
-    auto *res = g_implM->createValueString(file, "test");
+    auto *res = g_implM->createValueString(file, "test", strlen("test"));
     auto val = g_implI->valueGetString(res);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val->impl, "test");
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -234,7 +237,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, CreateLiteralArrayValue_2)
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/values/values_static.abc", &file);
     std::vector<AbckitValue *> abcArr;
-    abcArr.emplace_back(g_implM->createValueString(file, "test"));
+    abcArr.emplace_back(g_implM->createValueString(file, "test", strlen("test")));
     abcArr.emplace_back(g_implM->createValueU1(file, true));
     auto *arr = g_implM->createLiteralArrayValue(file, abcArr.data(), 2);
 
@@ -242,7 +245,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, CreateLiteralArrayValue_2)
     ASSERT_EQ(arr, nullptr);
 
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -258,7 +261,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, ValueGetFile_2)
 
     ASSERT_EQ(g_implI->valueGetFile(res), file);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -270,7 +273,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, ArrayValueGetLiteralArray_2)
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/values/values_static.abc", &file);
     std::vector<AbckitValue *> abcArr;
-    abcArr.emplace_back(g_implM->createValueString(file, "test"));
+    abcArr.emplace_back(g_implM->createValueString(file, "test", strlen("test")));
     abcArr.emplace_back(g_implM->createValueU1(file, true));
     auto *arr = g_implM->createLiteralArrayValue(file, abcArr.data(), 2);
     auto *larr = g_implI->arrayValueGetLiteralArray(arr);
@@ -279,7 +282,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, ArrayValueGetLiteralArray_2)
     ASSERT_EQ(larr, nullptr);
 
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -290,7 +293,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, ValueGetType_2)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_static.abc", &file);
-    auto *res = g_implM->createValueString(file, "test");
+    auto *res = g_implM->createValueString(file, "test", strlen("test"));
     auto val = g_implI->valueGetType(res);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val->id, ABCKIT_TYPE_ID_STRING);
@@ -304,7 +307,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, ValueGetType_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val->id, ABCKIT_TYPE_ID_F64);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -369,7 +372,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, ValueGetString_3)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_dynamic.abc", &file);
-    auto *res = g_implM->createValueString(file, "test");
+    auto *res = g_implM->createValueString(file, "test", strlen("test"));
     ValueGetTypeDynamic(res)->id = ABCKIT_TYPE_ID_INVALID;
     g_implI->valueGetString(res);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
@@ -382,7 +385,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, ValueGetString_4)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_static.abc", &file);
-    auto *res = g_implM->createValueString(file, "test");
+    auto *res = g_implM->createValueString(file, "test", strlen("test"));
     ValueGetTypeStatic(res)->id = ABCKIT_TYPE_ID_INVALID;
     g_implI->valueGetString(res);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
@@ -396,7 +399,7 @@ TEST_F(LibAbcKitInspectApiValuesTest, ArrayValueGetLiteralArray_3)
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/values/values_dynamic.abc", &file);
     std::vector<AbckitValue *> abcArr;
-    abcArr.emplace_back(g_implM->createValueString(file, "test"));
+    abcArr.emplace_back(g_implM->createValueString(file, "test", strlen("test")));
     abcArr.emplace_back(g_implM->createValueU1(file, true));
     auto *arr = g_implM->createLiteralArrayValue(file, abcArr.data(), 2);
     ValueGetTypeDynamic(arr)->id = ABCKIT_TYPE_ID_INVALID;

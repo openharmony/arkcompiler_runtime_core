@@ -101,7 +101,8 @@ class AbckitScenarioTest : public ::testing::Test {};
 // Test: test-kind=scenario, abc-kind=ArkTS2, category=positive
 TEST_F(AbckitScenarioTest, LibAbcKitTestApiScannerStatic)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "scenarios/api_scanner/static/api_scanner_static.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "scenarios/api_scanner/static/api_scanner_static.abc";
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
 
     std::unordered_map<std::string, int> methodsMap;
     helpers::EnumerateAllMethods(file,
@@ -118,7 +119,8 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestApiScannerStatic)
 
     ASSERT_TRUE(CheckRessult(methodsMap));
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "scenarios/api_scanner/static/api_scanner_static_modified.abc");
+    constexpr auto OUTPUT_PATH = ABCKIT_ABC_DIR "scenarios/api_scanner/static/api_scanner_static_modified.abc";
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
     g_impl->closeFile(file);
 }
 

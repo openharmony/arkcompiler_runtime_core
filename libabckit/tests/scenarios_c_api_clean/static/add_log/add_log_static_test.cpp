@@ -200,7 +200,9 @@ TEST_F(AbckitScenarioTestClean, LibAbcKitTestStaticAddLogClean)
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/static/add_log/add_log_static.abc",
                                             "add_log_static/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output, "buisiness logic...\n"));
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/static/add_log/add_log_static.abc");
+
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "scenarios_c_api_clean/static/add_log/add_log_static.abc";
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     UserData userData;
     EnumerateAllMethods(file, [&](AbckitCoreFunction *method) {
         auto methodName = GetMethodName(method);
@@ -225,8 +227,8 @@ TEST_F(AbckitScenarioTestClean, LibAbcKitTestStaticAddLogClean)
             return;
         }
         startMsg = "file: NOTE; function: " + methodName;
-        userData.str1 = g_implM->createString(file, startMsg.c_str());
-        userData.str2 = g_implM->createString(file, "Elapsed time:");
+        userData.str1 = g_implM->createString(file, startMsg.c_str(), startMsg.size());
+        userData.str2 = g_implM->createString(file, "Elapsed time:", strlen("Elapsed time:"));
 
         AbckitGraph *graph = g_implI->createGraphFromFunction(method);
         TransformIr(graph, &userData);
@@ -234,12 +236,11 @@ TEST_F(AbckitScenarioTestClean, LibAbcKitTestStaticAddLogClean)
         g_impl->destroyGraph(graph);
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "scenarios_c_api_clean/static/add_log/add_log_static_modified.abc");
+    constexpr auto OUTPUT_PATH = ABCKIT_ABC_DIR "scenarios_c_api_clean/static/add_log/add_log_static_modified.abc";
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
     g_impl->closeFile(file);
 
-    output =
-        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/static/add_log/add_log_static_modified.abc",
-                                  "add_log_static/ETSGLOBAL", "main");
+    output = helpers::ExecuteStaticAbc(OUTPUT_PATH, "add_log_static/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output,
                                "file: NOTE; function: handle\n"
                                "buisiness logic...\n"
