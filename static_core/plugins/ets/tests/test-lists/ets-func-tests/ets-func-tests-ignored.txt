@@ -520,3 +520,6 @@ spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/t
 ### Issue 19529 end
 # Issue 20687
 spec/05.Generics/tuple_as_generic_args_0030.sts
+
+# Issue 21176
+spec/09.classes/9.5.Field_Declaration/class_with_optional_attributes_0006.sts
