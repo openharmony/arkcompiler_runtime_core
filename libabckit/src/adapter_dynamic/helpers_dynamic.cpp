@@ -467,7 +467,8 @@ bool IsServiceRecord(const std::string &name)
 {
     constexpr const std::string_view TSTYPE_ANNO_RECORD_NAME = "_TestAnnotation";
     return name == TSTYPE_ANNO_RECORD_NAME || name == "_ESConcurrentModuleRequestsAnnotation" ||
-           name == "L_ESSlotNumberAnnotation" || name == "_ESSlotNumberAnnotation";
+           name == "L_ESSlotNumberAnnotation" || name == "_ESSlotNumberAnnotation" ||
+           name == "_ESExpectedPropertyCountAnnotation";
 }
 
 bool IsAnnotationInterfaceRecord(const pandasm::Record &rec)
