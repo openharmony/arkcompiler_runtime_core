@@ -17,26 +17,29 @@
 #define PANDA_GUARD_UTIL_ASSERT_UTIL_H
 
 #include "macros.h"
-#include "utils/logger.h"
+#include "util/error.h"
 
-#define PANDA_GUARD_ASSERT_PRINT(cond, message)  \
-    do {                                         \
-        if (UNLIKELY((cond))) {                  \
-            /* CC-OFFNXT(G.PRE.02) string arg */ \
-            LOG(ERROR, PANDAGUARD) << message;   \
-            /* CC-OFFNXT(G.PRE.02) string arg */ \
-            std::cerr << message << std::endl;   \
-            std::abort();                        \
-        }                                        \
+#define PANDA_GUARD_ERROR_PRINT(tag, errCode, desc, cause, solutions)              \
+    do {                                                                           \
+        panda::guard::Error error((errCode), (tag));                               \
+        error.GetDescStream() << desc;           /* CC-OFF(G.PRE.02) string arg */ \
+        error.GetCauseStream() << cause;         /* CC-OFF(G.PRE.02) string arg */ \
+        error.GetSolutionsStream() << solutions; /* CC-OFF(G.PRE.02) string arg */ \
+        error.Print();                                                             \
     } while (0)
 
-#define PANDA_GUARD_ABORT_PRINT(message)     \
-    do {                                     \
-        /* CC-OFFNXT(G.PRE.02) string arg */ \
-        LOG(ERROR, PANDAGUARD) << message;   \
-        /* CC-OFFNXT(G.PRE.02) string arg */ \
-        std::cerr << message << std::endl;   \
-        std::abort();                        \
+#define PANDA_GUARD_ASSERT_PRINT(cond, tag, errCode, desc)       \
+    do {                                                         \
+        if (UNLIKELY((cond))) {                                  \
+            PANDA_GUARD_ERROR_PRINT(tag, errCode, desc, "", ""); \
+            std::abort();                                        \
+        }                                                        \
+    } while (0)
+
+#define PANDA_GUARD_ABORT_PRINT(tag, errCode, desc)          \
+    do {                                                     \
+        PANDA_GUARD_ERROR_PRINT(tag, errCode, desc, "", ""); \
+        std::abort();                                        \
     } while (0)
 
 #endif  // PANDA_GUARD_UTIL_ASSERT_UTIL_H

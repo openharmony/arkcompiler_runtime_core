@@ -48,7 +48,8 @@ std::string panda::guard::JsonUtil::GetStringValue(const panda::JsonObject *obje
     if (result.has_value()) {
         return result.value();
     }
-    PANDA_GUARD_ASSERT_PRINT(!optionalField, TAG << "fail to obtain field: " << field << " from json object");
+    PANDA_GUARD_ASSERT_PRINT(!optionalField, TAG, ErrorCode::NOT_CONFIGURED_REQUIRED_FIELD,
+                             "fail to obtain required field: " << field << " from json file");
     return "";
 }
 
@@ -59,7 +60,8 @@ double panda::guard::JsonUtil::GetDoubleValue(const panda::JsonObject *object, c
     if (result.has_value()) {
         return result.value();
     }
-    PANDA_GUARD_ASSERT_PRINT(!optionalField, TAG << "fail to obtain field: " << field << " from json object");
+    PANDA_GUARD_ASSERT_PRINT(!optionalField, TAG, ErrorCode::NOT_CONFIGURED_REQUIRED_FIELD,
+                             "fail to obtain required field: " << field << " from json file");
     return 0;
 }
 
@@ -70,7 +72,8 @@ bool panda::guard::JsonUtil::GetBoolValue(const panda::JsonObject *object, const
     if (result.has_value()) {
         return result.value();
     }
-    PANDA_GUARD_ASSERT_PRINT(!optionalField, TAG << "fail to obtain field: " << field << " from json object");
+    PANDA_GUARD_ASSERT_PRINT(!optionalField, TAG, ErrorCode::NOT_CONFIGURED_REQUIRED_FIELD,
+                             "fail to obtain required field: " << field << " from json file");
     return false;
 }
 

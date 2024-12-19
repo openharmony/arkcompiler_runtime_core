@@ -76,7 +76,8 @@ void panda::guard::FileUtil::WriteFile(const std::string &filePath, const std::s
 {
     std::ofstream ofs;
     ofs.open(filePath, std::ios::trunc | std::ios::out);
-    PANDA_GUARD_ASSERT_PRINT(!ofs.is_open(), TAG << "can not open file, invalid filePath:" << filePath);
+    PANDA_GUARD_ASSERT_PRINT(!ofs.is_open(), TAG, ErrorCode::GENERIC_ERROR,
+                             "can not open file, invalid filePath:" << filePath);
     ofs << content;
     ofs.close();
 }

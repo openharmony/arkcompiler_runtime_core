@@ -20,8 +20,13 @@ config("panda_guard_public_config") {
 panda_guard_sources = [
   "configs/guard_args_parser.cpp",
   "configs/guard_context.cpp",
+  "configs/guard_graph_context.cpp",
+  "configs/guard_name_cache.cpp",
   "configs/guard_options.cpp",
+  "generator/name_mapping.cpp",
+  "generator/order_name_generator.cpp",
   "guard_driver.cpp",
+  "util/error.cpp",
   "util/file_util.cpp",
   "util/json_util.cpp",
   "util/string_util.cpp",

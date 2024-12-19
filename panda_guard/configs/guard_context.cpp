@@ -15,12 +15,20 @@
 
 #include "guard_context.h"
 
-#include <iostream>
+#include "utils/logger.h"
+
+#include "generator/order_name_generator.h"
 #include "guard_args_parser.h"
+#include "util/assert_util.h"
 
 namespace {
 constexpr std::string_view TAG = "[Guard_Context]";
-}
+// The reserved fields here are to ensure basic confusion operation in scenarios where the fronted is not configured
+const std::set<std::string> RESERVED_NAMES = {"prototype", "default", "*default*"};
+/* When the path is split, there will be/ xxx.ts, Even some paths can be written as/ sss/../../xx.ts, This is a folder
+ * name that needs to be preserved */
+const std::set<std::string> RESERVED_FILE_NAMES = {".", ".."};
+}  // namespace
 
 std::shared_ptr<panda::guard::GuardContext> panda::guard::GuardContext::GetInstance()
 {
@@ -31,12 +39,56 @@ std::shared_ptr<panda::guard::GuardContext> panda::guard::GuardContext::GetInsta
 void panda::guard::GuardContext::Init(int argc, const char **argv)
 {
     GuardArgsParser parser;
-    if (!parser.Parse(argc, argv)) {
-        std::cerr << TAG << "input params parse failed" << std::endl;
-        return;
-    }
+    PANDA_GUARD_ASSERT_PRINT(!parser.Parse(argc, argv), TAG, ErrorCode::COMMAND_PARAMS_PARSE_ERROR,
+                             "obfuscate command param parse failed");
 
     debugMode_ = parser.IsDebugMode();
+    LOG(INFO, PANDAGUARD) << TAG << "[param parse success], config file:" << parser.GetConfigFilePath();
+
+    options_ = std::make_shared<GuardOptions>();
+    options_->Load(parser.GetConfigFilePath());
+    LOG(INFO, PANDAGUARD) << TAG << "[load config file success]";
+
+    nameCache_ = std::make_shared<NameCache>(options_);
+    std::string applyNameCachePath =
+        options_->GetApplyNameCache().empty() ? options_->GetDefaultNameCachePath() : options_->GetApplyNameCache();
+    nameCache_->Load(applyNameCachePath);
+
+    nameMapping_ = std::make_shared<NameMapping>(nameCache_, options_);
+    nameMapping_->AddNameMapping(RESERVED_NAMES);
+    nameMapping_->AddFileNameMapping(RESERVED_FILE_NAMES);
+    LOG(INFO, PANDAGUARD) << TAG << "[name mapping init success]";
+}
+
+void panda::guard::GuardContext::Finalize()
+{
+    graphContext_->Finalize();
+}
+
+const std::shared_ptr<panda::guard::GuardOptions> &panda::guard::GuardContext::GetGuardOptions() const
+{
+    return options_;
+}
+
+const std::shared_ptr<panda::guard::NameCache> &panda::guard::GuardContext::GetNameCache() const
+{
+    return nameCache_;
+}
+
+const std::shared_ptr<panda::guard::NameMapping> &panda::guard::GuardContext::GetNameMapping() const
+{
+    return nameMapping_;
+}
+
+void panda::guard::GuardContext::CreateGraphContext(const panda_file::File &file)
+{
+    graphContext_ = std::make_shared<GraphContext>(file);
+    graphContext_->Init();
+}
+
+const std::shared_ptr<panda::guard::GraphContext> &panda::guard::GuardContext::GetGraphContext() const
+{
+    return graphContext_;
 }
 
 bool panda::guard::GuardContext::IsDebugMode() const
