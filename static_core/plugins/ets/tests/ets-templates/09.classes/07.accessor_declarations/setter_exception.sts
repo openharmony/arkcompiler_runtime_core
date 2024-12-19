@@ -37,9 +37,9 @@ function main(): void {
 
   try {
     instance.age = -5;
-  } catch (e: TestException){
+  } catch (e: TestException) {
     catchCode = 1;
-  } catch {
+  } catch (any) {
     assert false;
   }
 

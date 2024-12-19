@@ -13,10 +13,6 @@
 
 --- # List of valid class members
 class_members:
-  - "f: int;"
-  - "m(): void {}"
   - "class B{}"
-  - "interface I{}"
-  - "enum E{V1, V2}"
-  - "constructor() {}"
-  - "final get age(): int {return 2}; set age(i: int) {}"
+  - "protected interface I{}"
+  - "enum Color {Red, Green}"

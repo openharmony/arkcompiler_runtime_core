@@ -26,8 +26,8 @@ class A {
 
     protected parentField: int;
 
-    protected parentMethod() {
-
+    protected parentMethod(): int {
+       return 1;
     }
 
     public constructor() {
@@ -53,6 +53,10 @@ class B extends A {
     }
 
     public constructor(value: String) {
+
+    }
+    
+    public constructor(value: int) {
 
     }
 

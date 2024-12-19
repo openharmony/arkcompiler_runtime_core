@@ -27,7 +27,8 @@ interface C {
 }
 
 class B implements A, C{
-
+  x: int;
+  y: boolean;
 }
 
 function main(): void {

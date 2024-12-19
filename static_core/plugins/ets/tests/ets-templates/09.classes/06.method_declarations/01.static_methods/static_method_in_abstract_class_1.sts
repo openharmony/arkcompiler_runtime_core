@@ -19,11 +19,11 @@ desc: Call static method inherited from the abstract class.
 
 abstract class X {
   static foo() : int {return 1};
-  abstract foo() : int;
+  abstract bar() : int;
 }
 
 class Y extends X {
-  foo() : int {return 2};
+  bar() : int {return 2};
 }
 
 function main(): void {

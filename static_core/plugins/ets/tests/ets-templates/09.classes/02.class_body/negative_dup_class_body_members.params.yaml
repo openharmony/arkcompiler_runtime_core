@@ -13,5 +13,10 @@
 
 --- # List of valid class members
 class_members:
-  - {decl: "x: int = 5", call: "let y = x"}
-  - {decl: "x: int = 5", call: "foo(x)"}
+  - "f: int;"
+  - "m(): void {}"
+  - "class B{}"
+  - "interface I{}"
+  - "enum E{V1, V2}"
+  - "constructor() {}"
+  - "final get age(): int {return 2}; set age(i: int) {}"

@@ -331,36 +331,13 @@
 07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_69.sts
 07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_70.sts
 07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_71.sts
-09.classes/01.class_declaration/class_modifiers_inner_classes_and_static_classes/class_inner_class_declaration.sts
-09.classes/01.class_declaration/class_modifiers_inner_classes_and_static_classes/inner_class_inherit_static_member.sts
-09.classes/01.class_declaration/class_modifiers_inner_classes_and_static_classes/interface_inner_class_declaration.sts
 #19956
-09.classes/01.class_declaration/class_modifiers_inner_classes_and_static_classes/inner_class_inherit_static_constant_member.sts
-09.classes/01.class_declaration/04.class_implementation_clause/indirect_interfaces_Implementation_twice.sts
-09.classes/01.class_declaration/enclosing_instances/use_instance_const_variables_in_inner_class_0.sts
-09.classes/01.class_declaration/enclosing_instances/use_instance_const_variables_in_inner_class_1.sts
-09.classes/02.class_body/class_body_members_2.sts
-09.classes/02.class_body/class_body_members_3.sts
-09.classes/02.class_body/class_body_members_4.sts
-09.classes/03.class_members/inherited_from_superinterface_0.sts
 09.classes/04.access_modifiers/access_modifiers_14.sts
 09.classes/04.access_modifiers/access_modifiers_15.sts
 09.classes/04.access_modifiers/access_modifiers_16.sts
-09.classes/05.field_declarations/access_to_private_field_from_superclass_member.sts
-09.classes/05.field_declarations/fields_inheritance_from_superclass_and_superinterface.sts
-09.classes/05.field_declarations/fields_inheritance_from_superinterface.sts
-09.classes/05.field_declarations/inheritance_fields_with_same_name.sts
-09.classes/05.field_declarations/several_inherited_field_paths_from_superinterface.sts
-09.classes/05.field_declarations/superinterface_field_declaration.sts
-09.classes/06.method_declarations/02.instanse_methods/instance_method_call.sts
 #19909
-09.classes/06.method_declarations/04.final_methods/final_method_derived_class_call.sts
-09.classes/06.method_declarations/04.final_methods/final_declaration_with_modifiers_positive_1.sts
-09.classes/06.method_declarations/hiding_by_class_methods/hided_method_access_by_cast.sts
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_2.sts
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_3.sts
-09.classes/06.method_declarations/inheriting_methods_with_override-equivalent_signatures/inheritance_multiple_methods_with_same_signatures.sts
-09.classes/06.method_declarations/08.method_overload_signatures/method_overload_relatioship_1.sts
 
 10.interfaces/06.interface_method_declarations/inheriting_methods_with_override_equivalent_signatures/inheritance_multiple_default_methods.sts
 
@@ -395,8 +372,6 @@
 03.types/07.value_types/01.integer_types_and_operations/multiplication/multiplication_char_7.sts
 03.types/07.value_types/01.integer_types_and_operations/remainder/remainder_by_zero_byte.sts
 03.types/07.value_types/01.integer_types_and_operations/remainder/remainder_by_zero_short.sts
-09.classes/01.class_declaration/class_modifiers_inner_classes_and_static_classes/static_inner_class_declaration_In_interface.sts
-09.classes/01.class_declaration/class_modifiers_inner_classes_and_static_classes/static_inner_class_declaration_in_class.sts
 # end of es2panda fails
 
 #19909
@@ -463,10 +438,6 @@
 17.experimental_features/06.statements/02.multiple_catch_clauses_in_try_statements/catch3.sts
 17.experimental_features/06.statements/02.multiple_catch_clauses_in_try_statements/exec_2.sts
 17.experimental_features/06.statements/02.multiple_catch_clauses_in_try_statements/try_4.sts
-09.classes/07.accessor_declarations/getter_exception.sts
-09.classes/07.accessor_declarations/getter_override_modifier.sts
-09.classes/07.accessor_declarations/setter_exception.sts
-09.classes/07.accessor_declarations/setter_inheritance.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_1.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_2.sts
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_11.sts
@@ -961,7 +932,6 @@
 13.compilation_units_packages_and_modules/10.export_directives/04.re-export_directive/re-export_all_by_old_names.sts
 
 # 15095
-09.classes/06.method_declarations/hiding_by_class_methods/hiding_instance_static_method.sts
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/hiding_methods_with_different_access_modifiers_2.sts
 # end 15095
 
@@ -1060,9 +1030,6 @@
 04.names_declarations_and_scopes/05.accesible/type_name_variable_enum.sts
 # union
 04.names_declarations_and_scopes/05.accesible/type_name_interface_prop_23.sts
-09.classes/09.constructor_declaration/02.constructor_overload_signatures/constructor_implementation_5.sts
-09.classes/09.constructor_declaration/02.constructor_overload_signatures/constructor_implementation_6.sts
-09.classes/09.constructor_declaration/02.constructor_overload_signatures/constructor_implementation_7.sts
 # types, lambda
 17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co1_over_11.sts
 17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co2_over_10.sts
@@ -1114,9 +1081,6 @@
 # 16022 Failed compilation of Enumeration-Operations
 # Null type annotation is allowed now, these test are incorrect
 # End of tests that are wrong because of null type annotation is allowed now
-
-# es2panda: the specification changed
-09.classes/05.field_declarations/01.static_fields/static_field_declaration_n3.sts
 
 # Not implemented yet: SyntaxError: #19956 Local type declaration (class, struct, interface and enum) support is not yet implemented.
 09.classes/11.local_classes_and_interfaces/access_parent_data_0.sts
@@ -1666,9 +1630,6 @@
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_6.sts
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_6.sts
 
-# 16623: cannot call static method from abstract class
-09.classes/06.method_declarations/01.static_methods/static_method_in_abstract_class_1.sts
-# end of es2panda failure
 
 # es2panda: #16262 Declare leads to RTE
 14.ambient_declarations/ambient_declarations_38.sts
@@ -1928,11 +1889,6 @@
 05.generics/03.utility_types/01.partial_utility_type/module_interface_2.sts
 05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_4.sts
 
-# es2panda: #15667 Invalid tests, This cases should be allowed
-09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_abstract_method.sts
-09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_hided_method.sts
-09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_overrided_method.sts
-
 # es2panda: #18843 type compatability
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/eq_0.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/ne_0.sts
@@ -1975,18 +1931,6 @@
 
 # es2panda 19640: compilation segfault, custom type
 04.names_declarations_and_scopes/05.accesible/type_name_interface_prop_22.sts
-# end es2panda
-
-# es2panda 19655: missing CTE for overloaded constructors with different access modifiers
-09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_1.sts
-09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_2.sts
-09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_3.sts
-09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_4.sts
-09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_5.sts
-09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_6.sts
-09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_7.sts
-09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_8.sts
-09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_9.sts
 # end es2panda
 
 ### ES2PANDA_FAIL - fails of negative, compile-only

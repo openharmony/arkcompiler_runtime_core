@@ -15,7 +15,6 @@ limitations under the License.
 
 /*---
 desc: Checks that final method can be called from another method inside the same class.
-tags: [compile-only]
 ---*/
 
 class A {
@@ -26,14 +25,14 @@ class A {
   }
 }
 
-clss B extends A {
+class B extends A {
   method2(): void {
     this.method1();
   }
 }
 
 function main(): void {
-  let a: A = new A();
-  a.method2();
-  assert a.res == 1;
+  let b: B = new B();
+  b.method2();
+  assert b.res == 1;
 }

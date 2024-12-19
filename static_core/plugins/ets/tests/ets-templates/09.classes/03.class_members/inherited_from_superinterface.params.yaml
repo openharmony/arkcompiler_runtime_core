@@ -13,6 +13,5 @@
 
 --- # List of valid class members
 interface_members:
-  - {interface: "foo: int = 5;", class: "", check: "assert x.foo == 5;" }
   - {interface: "foo(): int { return 5; }", class: "", check: "assert x.foo() == 5;" }
   - {interface: "get bar(): int;\n  set bar(f: int): void", class: "foo: int; get bar(): int { return this.foo; }; set bar(foo: int): void { this.foo = foo; }", check: "x.foo = 3; assert x.foo == 3;"}

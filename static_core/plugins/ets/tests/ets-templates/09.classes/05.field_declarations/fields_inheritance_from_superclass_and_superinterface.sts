@@ -23,11 +23,11 @@ class A {
 }
 
 interface C {
-  public y: boolean;
+  y: boolean;
 }
 
 class B extends A implements C {
-
+  y: boolean;
 }
 
 function main(): void {

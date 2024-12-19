@@ -23,7 +23,7 @@ interface A {
 }
 
 class C implements A {
-
+    x: int;
 }
 
 class B extends C implements A {

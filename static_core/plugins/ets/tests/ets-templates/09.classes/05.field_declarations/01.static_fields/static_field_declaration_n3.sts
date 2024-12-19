@@ -17,6 +17,7 @@ limitations under the License.
 desc: >-
     Static fields are declared with the modifier static. A static field is not part of a class instance. There is one
     copy of a static field irrespective of how many instances of the class (even if zero) are eventually created.
+tags: [compile-only, negative]
 ---*/
 
 class A {
