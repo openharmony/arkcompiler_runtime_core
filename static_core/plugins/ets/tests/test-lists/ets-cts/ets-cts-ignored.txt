@@ -873,10 +873,7 @@
 # end of es2panda fails
 
 # 14654 Cannot use constant expressions in enum initialization
-11.enumerations/01.enumeration_integer_values/enum_int_3.sts
 11.enumerations/02.enumeration_string_values/enum_str_10.sts
-11.enumerations/02.enumeration_string_values/enum_str_5.sts
-11.enumerations/02.enumeration_string_values/enum_str_6.sts
 
 # 13917 Casting of enum doesn't work as expected
 11.enumerations/02.enumeration_string_values/enum_str_4.sts
