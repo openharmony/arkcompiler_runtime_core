@@ -17,6 +17,7 @@ function main() {
     console.log('Starting...');
     let penv = process.env;
     let stsVm = require(penv.MODULE_PATH + '/ets_interop_js_napi.node');
+    
     const stsRT = stsVm.createRuntime({
         'boot-panda-files': penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
         'panda-files': penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
@@ -24,24 +25,42 @@ function main() {
         'compiler-enable-jit': 'false',
         'run-gc-in-place': 'false',
     });
-
+    
     if (!stsRT) {
         console.error('Failed to create ETS runtime');
         return 1;
     }
 
-    const State = stsVm.getClass('LMapCallbackJ2a;');
+    const MS2NS = 1000000;
+    let totalTime = 0;
 
-    const start = process.hrtime.bigint();
-    let bench = new State();
-    bench.setup();
+    const Person = stsVm.getClass('LStringifyJ2a;');
+    const getArray = stsVm.getFunction('LETSGLOBAL;', 'getArray');
 
-    for (let i = 0; i < 1000; i++) {
-        bench.test();
+    const obj = new Person();
+    const array = getArray();
+
+
+    function toStringify(arg, target) {
+        let start;
+        let loopTime = 0;
+
+        for (let i = 0; i < MS2NS; i++) {
+            start = process.hrtime.bigint();
+            JSON.stringify(arg);
+            loopTime += Number(process.hrtime.bigint() - start);
+        }
+
+        console.log(`Benchmark result: stringify_j2a ${target} ` + loopTime);
+        totalTime += loopTime;
     }
-    const end = process.hrtime.bigint();
-    let timeNs = end - start;
-    console.log('Benchmark result: map_callback_j2a ' + timeNs);
+
+    toStringify(array, 'array');
+
+
+    toStringify(obj, 'object');
+
+    console.log('Benchmark result: stringify_j2a ' + totalTime);
 
     return null;
 }

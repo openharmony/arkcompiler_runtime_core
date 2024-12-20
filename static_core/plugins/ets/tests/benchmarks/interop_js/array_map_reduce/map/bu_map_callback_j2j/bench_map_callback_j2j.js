@@ -52,7 +52,7 @@ function main() {
     }
     const end = process.hrtime.bigint();
     timing = end - start;
-    console.log('Benchmark result: MapCallback ' + timing);
+    console.log('Benchmark result: map_callback_j2j ' + timing);
 
     return null;
 }

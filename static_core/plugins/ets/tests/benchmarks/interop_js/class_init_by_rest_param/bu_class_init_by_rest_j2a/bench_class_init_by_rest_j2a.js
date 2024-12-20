@@ -30,18 +30,55 @@ function main() {
         return 1;
     }
 
-    const State = stsVm.getClass('LMapCallbackJ2a;');
+    const MS2NS = 1000000;
+    let totalTime = 0;
 
-    const start = process.hrtime.bigint();
-    let bench = new State();
-    bench.setup();
+    const UnlimitedArguments = stsVm.getClass('LUnlimitedArguments;');
 
-    for (let i = 0; i < 1000; i++) {
-        bench.test();
+    function createArgArray(count) {
+        const arr = [];
+
+        for (let i = 0; i < count; i++) {
+            arr.push(i);
+        }
+
+        return arr;
     }
-    const end = process.hrtime.bigint();
-    let timeNs = end - start;
-    console.log('Benchmark result: map_callback_j2a ' + timeNs);
+
+    function init(arg) {
+        let start;
+        let loopTime = BigInt(0);
+
+        for (let i = 0; i < MS2NS; i++) {
+            start = process.hrtime.bigint();
+
+            new UnlimitedArguments(...arg);
+
+            loopTime += process.hrtime.bigint() - start;
+        }
+
+        totalTime += Number(loopTime);
+        console.log(`Benchmark result: class_init_by_rest_j2a arg ${arg.length} ` + loopTime);
+    }
+
+    // NOTE: issue(17965) enable below after fix global reference storage
+    if (false) {
+        init(createArgArray(0));
+
+        init(createArgArray(5));
+
+        init(createArgArray(10));
+
+        init(createArgArray(20));
+
+        init(createArgArray(50));
+
+        init(createArgArray(100));
+
+        init(createArgArray(200));
+    }
+
+    console.log('Benchmark result: class_init_by_rest_j2a ' + totalTime);
 
     return null;
 }
