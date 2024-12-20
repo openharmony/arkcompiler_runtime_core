@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: Check interface with internal access modifier in package.
 assert: Member or constructor with private modifier can be accessed only within their declaring class.
+tags: [negative, compile-only]
 ---*/
 
 package Test;
