@@ -105,7 +105,9 @@ function(create_declgen_ets2ts_test TARGET)
     file(WRITE ${ARKTSCONFIG} ${ARKTSCONFIG_CONTENT})
 
     # NOTE (kkonsw): temporary disabling all other checks
-    set(ETS_VERIFICATOR_ERRORS "NodeHasParentForAll:EveryChildHasValidParentForAll:VariableHasScopeForAll:NodeHasTypeForAll:IdentifierHasVariableForAll:ReferenceTypeAnnotationIsNullForAll:ArithmeticOperationValidForAll:SequenceExpressionHasLastTypeForAll:ForLoopCorrectlyInitializedForAll:VariableHasEnclosingScopeForAll:ModifierAccessValidForAll:ImportExportAccessValid")
+    set(ETS_VERIFICATOR_ERRORS "NodeHasParent:EveryChildHasValidParent:VariableHasScope:NodeHasType:IdentifierHasVariable:ReferenceTypeAnnotationIsNull:ArithmeticOperationValid:SequenceExpressionHasLastType:ForLoopCorrectlyInitialized:VariableHasEnclosingScope:ModifierAccessValid")
+    # NOTE(dkofanov): `ImportExportAccessValid` need to be fixed
+    # set(ETS_VERIFICATOR_ERRORS "${ETS_VERIFICATOR_ERRORS}:ImportExportAccessValid")
 
     # Compile source .sts files into .abc and declaration .ts files
     set(ABC_FILES "")

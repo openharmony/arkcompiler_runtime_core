@@ -26,7 +26,7 @@
 #     ETS_CONFIG
 #       path/to/arktsconfig.json
 #     ETS_VERIFICATOR_ERRORS
-#       ForLoopCorrectlyInitializedForAll,VariableHasScopeForAll,IdentifierHasVariableForAll
+#       ForLoopCorrectlyInitialized:VariableHasScope:IdentifierHasVariable
 #   )
 function(do_panda_ets_package TARGET)
     add_custom_target(${TARGET})
