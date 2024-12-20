@@ -134,7 +134,7 @@ void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
     InteropCtx *ctx = InteropCtx::Current(coro);
     napi_env env = ctx->GetJSEnv();
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-    napi_value jsPromise = storage->GetReference(jsObject)->GetJsObject(env);
+    napi_value jsPromise = storage->GetJsObject(jsObject, env);
 
     napi_value thenFn;
     napi_status status = napi_get_named_property(env, jsPromise, "then", &thenFn);

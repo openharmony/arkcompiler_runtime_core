@@ -89,7 +89,7 @@ TEST_F(ItemsPoolGTest, test_1)
     ASSERT_EQ(freeList, nullptr);
 
     auto &currentPos = GetCurrentPos(pool);
-    ASSERT_EQ(currentPos, data);
+    ASSERT_NE(currentPos, data) << "First element should be reserved by pool";
 }
 
 // CC-OFFNXT(G.FUN.01, huge_method) solid logic
@@ -99,20 +99,21 @@ TEST_F(ItemsPoolGTest, test_2)
     // clang-format off
 // S = Step
 // i = item
-// |  INDEX  | S1 | S2 | S3 | S4 | S5 | S6 | S7 | S8 | S9 | S10| S11| S12| S13| S14| S15| S16| S17| S18| S19|
-// +=========+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+
-// |   000   | i0 | i0 | i0 | i0 | i0 | i0 | i0 | i0 | i0 | i0 | i0 | i0 |    |    |    |    |    | i13| i13|
-// |   001   |    | i1 | i1 |    | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 |
-// |   010   |    |    | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 |
-// |   011   |    |    |    |    |    | i4 | i4 | i4 | i4 | i4 | i4 | i4 | i4 | i4 |    | i11| i11| i11| i11|
-// |   100   |    |    |    |    |    |    | i5 | i5 | i5 | i5 | i5 | i5 | i5 |    |    |    | i12| i12| i12|
-// |   101   |    |    |    |    |    |    |    | i6 | i6 | i6 | i6 | i6 | i6 | i6 | i6 | i6 | i6 | i6 | i6 |
-// |   110   |    |    |    |    |    |    |    |    | i7 | i7 | i7 | i7 | i7 | i7 | i7 | i7 | i7 | i7 | i7 |
-// |   111   |    |    |    |    |    |    |    |    |    | i8 | i8 | i8 | i8 | i8 | i8 | i8 | i8 | i8 | i8 |
-// +=========+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+
-// |free_list|    |    |    |    |    |    |    |    |    |    |    |    |  0 |  4 |  3 |  4 |  0 |    |    |
-// |         |    |    |    |    |    |    |    |    |    |    |    |    |    |  0 |  4 |  0 |    |    |    |
-// |         |    |    |    |    |    |    |    |    |    |    |    |    |    |    |  0 |    |    |    |    |
+//  r - reserved
+// |  INDEX  | S1 | S2 | S3 | S4 | S5 | S6 | S7 | S8 | S9 | S10| S11| S12| S13| S14| S15| S16| S17| S18|
+// +=========+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+
+// |   000   |  r |  r |  r |  r |  r |  r |  r |  r |  r |  r |  r |  r |  r |  r |  r |  r |  r |  r |
+// |   001   |    | i1 | i1 |    | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 |
+// |   010   |    |    | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 |
+// |   011   |    |    |    |    |    | i4 | i4 | i4 | i4 | i4 | i4 | i4 | i4 | i4 |    | i11| i11| i11|
+// |   100   |    |    |    |    |    |    | i5 | i5 | i5 | i5 | i5 | i5 | i5 |    |    |    | i12| i12|
+// |   101   |    |    |    |    |    |    |    | i6 | i6 | i6 | i6 | i6 | i6 | i6 | i6 | i6 | i6 | i6 |
+// |   110   |    |    |    |    |    |    |    |    | i7 | i7 | i7 | i7 | i7 | i7 | i7 | i7 | i7 | i7 |
+// |   111   |    |    |    |    |    |    |    |    |    | i8 | i8 | i8 | i8 | i8 | i8 | i8 | i8 | i8 |
+// +=========+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+
+// |free_list|    |    |    |    |    |    |    |    |    |    |    |    |    |  4 |  3 |  4 |    |    |
+// |         |    |    |    |    |    |    |    |    |    |    |    |    |    |    |  4 |    |    |    |
+// |         |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |
     // clang-format on
 
     auto pool = ItemsPoolTest::CreatePool();
@@ -121,14 +122,10 @@ TEST_F(ItemsPoolGTest, test_2)
     auto &freeList = GetFreeList(pool);
 
     ASSERT_NE(data, nullptr);
-    ASSERT_EQ(currentPos, data);
+    ASSERT_NE(currentPos, data);
     ASSERT_EQ(freeList, nullptr);
 
     // Step1, Alloc
-    auto item0 = pool->AllocItem();
-    ASSERT_NE(item0, nullptr);
-    ASSERT_EQ(item0, pool->GetItemByIndex(0));
-    ASSERT_EQ(pool->GetIndexByItem(item0), 0b000);
     ASSERT_EQ(freeList, nullptr);
     ASSERT_EQ(currentPos, data + 1);
 
@@ -213,10 +210,9 @@ TEST_F(ItemsPoolGTest, test_2)
     ASSERT_EQ(freeList, nullptr);
     ASSERT_EQ(currentPos, data + 8U);
 
-    // Step13, Free
-    ASSERT_EQ(pool->GetIndexByItem(item0), 0b000);
-    pool->FreeItem(item0);
-    ASSERT_EQ(freeList, data + 0);
+    // Step13, Alloc (no space)
+    ASSERT_EQ(pool->AllocItem(), nullptr);
+    ASSERT_EQ(freeList, nullptr);
     ASSERT_EQ(currentPos, data + 8U);
 
     // Step14, Free
@@ -244,25 +240,16 @@ TEST_F(ItemsPoolGTest, test_2)
     ASSERT_NE(item12, nullptr);
     ASSERT_EQ(item12, pool->GetItemByIndex(4U));
     ASSERT_EQ(pool->GetIndexByItem(item12), 0b100);
-    ASSERT_EQ(freeList, data + 0);
+    ASSERT_EQ(freeList, nullptr);
     ASSERT_EQ(currentPos, data + 8U);
 
     // Step18, Alloc
     auto item13 = pool->AllocItem();
-    ASSERT_NE(item13, nullptr);
-    ASSERT_EQ(item13, pool->GetItemByIndex(0));
-    ASSERT_EQ(pool->GetIndexByItem(item13), 0b000);
-    ASSERT_EQ(freeList, nullptr);
-    ASSERT_EQ(currentPos, data + 8U);
-
-    // Step19, Alloc, out of memory
-    auto item14 = pool->AllocItem();
-    ASSERT_EQ(item14, nullptr);
+    ASSERT_EQ(item13, nullptr);
     ASSERT_EQ(freeList, nullptr);
     ASSERT_EQ(currentPos, data + 8U);
 
     // Check allocated items possitions
-    ASSERT_EQ(uintptr_t(item13), uintptr_t(data + 0U));
     ASSERT_EQ(uintptr_t(item3), uintptr_t(data + 1U));
     ASSERT_EQ(uintptr_t(item2), uintptr_t(data + 2U));
     ASSERT_EQ(uintptr_t(item11), uintptr_t(data + 3U));
@@ -278,8 +265,8 @@ TEST_F(ItemsPoolGTest, test_3)
     // clang-format off
 // |  INDEX  | Step1 | Step2 | Step3 | Step4 |
 // +=========+=======+=======+=======+=======+
-// |   000   | item0 |       | item6 | item6 |
-// |   001   | item1 | item1 | item1 | item1 |
+// |   000   |  res  |  res  |  res  |  res  |
+// |   001   | item1 |       | item6 | item6 |
 // |   010   | item2 | item2 | item2 | item2 |
 // |   011   | item3 |       | item5 | item5 |
 // |   100   | item4 | item4 | item4 | item4 |
@@ -288,7 +275,7 @@ TEST_F(ItemsPoolGTest, test_3)
 // |   111   |       |       |       | item9 |
 // +=========+=======+=======+=======+=======+
 // |free_list|       |   3   |       |       |
-// |         |       |   0   |       |       |
+// |         |       |   1   |       |       |
     // clang-format on
 
     auto pool = ItemsPoolTest::CreatePool();
@@ -297,17 +284,10 @@ TEST_F(ItemsPoolGTest, test_3)
     auto &freeList = GetFreeList(pool);
 
     ASSERT_NE(data, nullptr);
-    ASSERT_EQ(currentPos, data + 0);
-    ASSERT_EQ(freeList, nullptr);
-
-    // Step1, Alloc 5 items
-    auto item0 = pool->AllocItem();
-    ASSERT_NE(item0, nullptr);
-    ASSERT_EQ(item0, pool->GetItemByIndex(0));
-    ASSERT_EQ(pool->GetIndexByItem(item0), 0b000);
-    ASSERT_EQ(freeList, nullptr);
     ASSERT_EQ(currentPos, data + 1);
+    ASSERT_EQ(freeList, nullptr);
 
+    // Step1, Alloc 4 items
     auto item1 = pool->AllocItem();
     ASSERT_NE(item1, nullptr);
     ASSERT_EQ(item1, pool->GetItemByIndex(1));
@@ -337,9 +317,9 @@ TEST_F(ItemsPoolGTest, test_3)
     ASSERT_EQ(currentPos, data + 5U);
 
     // Step2, Free item0 and item3
-    ASSERT_EQ(pool->GetIndexByItem(item0), 0b000);
-    pool->FreeItem(item0);
-    ASSERT_EQ(freeList, data + 0);
+    ASSERT_EQ(pool->GetIndexByItem(item1), 0b001);
+    pool->FreeItem(item1);
+    ASSERT_EQ(freeList, data + 1);
     ASSERT_EQ(currentPos, data + 5U);
 
     ASSERT_EQ(pool->GetIndexByItem(item3), 0b011);
@@ -352,13 +332,13 @@ TEST_F(ItemsPoolGTest, test_3)
     ASSERT_NE(item5, nullptr);
     ASSERT_EQ(item5, pool->GetItemByIndex(3U));
     ASSERT_EQ(pool->GetIndexByItem(item5), 0b011);
-    ASSERT_EQ(freeList, data + 0);
+    ASSERT_EQ(freeList, data + 1);
     ASSERT_EQ(currentPos, data + 5U);
 
     auto item6 = pool->AllocItem();
     ASSERT_NE(item6, nullptr);
-    ASSERT_EQ(item6, pool->GetItemByIndex(0));
-    ASSERT_EQ(pool->GetIndexByItem(item6), 0b000);
+    ASSERT_EQ(item6, pool->GetItemByIndex(1));
+    ASSERT_EQ(pool->GetIndexByItem(item6), 0b001);
     ASSERT_EQ(freeList, nullptr);
     ASSERT_EQ(currentPos, data + 5U);
 
@@ -390,7 +370,7 @@ TEST_F(ItemsPoolGTest, test_3)
     ASSERT_EQ(currentPos, data + 8U);
 
     // Check allocated items possitions
-    ASSERT_EQ(uintptr_t(item6), uintptr_t(data + 0U));
+    ASSERT_EQ(uintptr_t(item6), uintptr_t(data + 1U));
     ASSERT_EQ(uintptr_t(item1), uintptr_t(data + 1U));
     ASSERT_EQ(uintptr_t(item2), uintptr_t(data + 2U));
     ASSERT_EQ(uintptr_t(item5), uintptr_t(data + 3U));
@@ -409,10 +389,11 @@ TEST_F(ItemsPoolGTest, test_IsValidItem)
     auto item = pool->AllocItem();
 
     ASSERT_EQ(pool->IsValidItem(item), true);
-    ASSERT_EQ(pool->IsValidItem(reinterpret_cast<decltype(item)>(data)), true);
+    ASSERT_EQ(pool->IsValidItem(reinterpret_cast<decltype(item)>(data)), false)
+        << "First element should be reserved by pool";
     ASSERT_EQ(pool->IsValidItem(reinterpret_cast<decltype(item)>(dataEnd)), false);
     ASSERT_EQ(pool->IsValidItem(reinterpret_cast<decltype(item)>(data - 1)), false);
-    ASSERT_EQ(pool->IsValidItem(reinterpret_cast<decltype(item)>(dataEnd - 1)), true);
+    ASSERT_EQ(pool->IsValidItem(reinterpret_cast<decltype(item)>(dataEnd - 1)), false);
 }
 // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 

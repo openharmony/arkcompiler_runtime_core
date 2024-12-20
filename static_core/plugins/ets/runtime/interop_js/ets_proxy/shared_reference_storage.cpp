@@ -21,21 +21,28 @@ namespace ark::ets::interop::js::ets_proxy {
 
 class SharedReferenceSanity {
 public:
-    static inline void Kill(SharedReference *ref)
+    static ALWAYS_INLINE void Kill(SharedReference *ref)
     {
         ASSERT(ref->jsRef_ != nullptr);
         ref->jsRef_ = nullptr;
+        ref->ctx_ = nullptr;
+        ref->flags_.ClearFlags();
     }
 
-    static inline bool CheckAlive(SharedReference *ref)
+    static ALWAYS_INLINE bool CheckAlive(SharedReference *ref)
     {
-        return ref->jsRef_ != nullptr;
+        return ref->jsRef_ != nullptr && !ref->flags_.IsEmpty();
     }
 };
 
-/*static*/
-PandaUniquePtr<SharedReferenceStorage> SharedReferenceStorage::Create()
+SharedReferenceStorage *SharedReferenceStorage::sharedStorage_ = nullptr;
+
+/* static */
+PandaUniquePtr<SharedReferenceStorage> SharedReferenceStorage::Create(PandaEtsVM *vm)
 {
+    if (sharedStorage_ != nullptr) {
+        return nullptr;
+    }
     size_t realSize = SharedReferenceStorage::MAX_POOL_SIZE;
 
     void *data = os::mem::MapRWAnonymousRaw(realSize);
@@ -43,26 +50,36 @@ PandaUniquePtr<SharedReferenceStorage> SharedReferenceStorage::Create()
         INTEROP_LOG(FATAL) << "Cannot allocate MemPool";
         return nullptr;
     }
-    // CC-OFFNXT(G.RES.09) private constructor
-    return MakePandaUnique<SharedReferenceStorage>(data, realSize);
+    auto sharedStorage = MakePandaUnique<SharedReferenceStorage>(vm, data, realSize);
+    sharedStorage_ = sharedStorage.get();
+    vm->AddRootProvider(sharedStorage_);
+    return sharedStorage;
 }
 
-SharedReference *SharedReferenceStorage::GetReference(EtsObject *etsObject)
+SharedReferenceStorage::~SharedReferenceStorage()
 {
-    ASSERT(HasReference(etsObject));
+    vm_->RemoveRootProvider(this);
+    sharedStorage_ = nullptr;
+}
+
+SharedReference *SharedReferenceStorage::GetReference(EtsObject *etsObject) const
+{
+    os::memory::ReadLockHolder lock(storageLock_);
+    ASSERT(SharedReference::HasReference(etsObject));
     return GetItemByIndex(SharedReference::ExtractMaybeIndex(etsObject));
 }
 
-SharedReference *SharedReferenceStorage::GetReference(napi_env env, napi_value jsObject)
+SharedReference *SharedReferenceStorage::GetReference(napi_env env, napi_value jsObject) const
 {
     void *data = SharedReference::ExtractMaybeReference(env, jsObject);
     if (UNLIKELY(data == nullptr)) {
         return nullptr;
     }
+    os::memory::ReadLockHolder lock(storageLock_);
     return GetReference(data);
 }
 
-SharedReference *SharedReferenceStorage::GetReference(void *data)
+SharedReference *SharedReferenceStorage::GetReference(void *data) const
 {
     auto *sharedRef = reinterpret_cast<SharedReference *>(data);
     if (UNLIKELY(!IsValidItem(sharedRef))) {
@@ -73,30 +90,103 @@ SharedReference *SharedReferenceStorage::GetReference(void *data)
     return sharedRef;
 }
 
+bool SharedReferenceStorage::HasReference(EtsObject *etsObject, napi_env env)
+{
+    os::memory::ReadLockHolder lock(storageLock_);
+    if (!SharedReference::HasReference(etsObject)) {
+        return false;
+    }
+    uint32_t index = SharedReference::ExtractMaybeIndex(etsObject);
+    do {
+        const SharedReference *currentRef = GetItemByIndex(index);
+        if (currentRef->ctx_->GetJSEnv() == env) {
+            return true;
+        }
+        index = currentRef->flags_.GetNextIndex();
+    } while (index != 0U);
+    return false;
+}
+
+napi_value SharedReferenceStorage::GetJsObject(EtsObject *etsObject, napi_env env) const
+{
+    os::memory::ReadLockHolder lock(storageLock_);
+    napi_value jsValue;
+    const SharedReference *currentRef = GetItemByIndex(SharedReference::ExtractMaybeIndex(etsObject));
+    // CC-OFFNXT(G.CTL.03) false positive
+    do {
+        if (currentRef->ctx_->GetJSEnv() == env) {
+            NAPI_CHECK_FATAL(napi_get_reference_value(env, currentRef->jsRef_, &jsValue));
+            return jsValue;
+        }
+        uint32_t index = currentRef->flags_.GetNextIndex();
+        ASSERT_PRINT(index != 0U, "No JS Object for SharedReference (" << this << ") and napi_env: " << env);
+        currentRef = GetItemByIndex(index);
+    } while (true);
+}
+
+bool SharedReferenceStorage::HasReferenceWithCtx(SharedReference *ref, InteropCtx *ctx) const
+{
+    uint32_t idx;
+    do {
+        if (ref->ctx_ == ctx) {
+            return true;
+        }
+        idx = ref->flags_.GetNextIndex();
+    } while (idx != 0U);
+    return false;
+}
+
 template <SharedReference::InitFn REF_INIT>
 inline SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx, EtsObject *etsObject,
-                                                                napi_value jsObject)
+                                                                napi_value jsObject,
+                                                                const PreInitJSObjectCallback &preInitCallback)
 {
-    ASSERT(!SharedReference::HasReference(etsObject));
+    os::memory::WriteLockHolder lock(storageLock_);
     SharedReference *sharedRef = AllocItem();
     if (UNLIKELY(sharedRef == nullptr)) {
         ctx->ThrowJSError(ctx->GetJSEnv(), "no free space for SharedReference");
         return nullptr;
     }
-    if (UNLIKELY(!(sharedRef->*REF_INIT)(ctx, etsObject, jsObject, GetIndexByItem(sharedRef)))) {
+    if (preInitCallback != nullptr) {
+        jsObject = preInitCallback(sharedRef);
+    }
+    SharedReference *startRef = sharedRef;
+    SharedReference *lastRefInChain = nullptr;
+    // If EtsObject has been already marked as interop object then add new created SharedReference for a new interop
+    // context to chain of references with this EtsObject
+    if (etsObject->IsHashed()) {
+        lastRefInChain = GetItemByIndex(etsObject->GetInteropHash());
+        startRef = lastRefInChain;
+        ASSERT(!HasReferenceWithCtx(startRef, ctx));
+        uint32_t index = lastRefInChain->flags_.GetNextIndex();
+        while (index != 0U) {
+            lastRefInChain = GetItemByIndex(index);
+            index = lastRefInChain->flags_.GetNextIndex();
+        }
+    }
+    if (UNLIKELY(!(sharedRef->*REF_INIT)(ctx, etsObject, jsObject, GetIndexByItem(startRef)))) {
         auto coro = EtsCoroutine::GetCurrent();
         if (coro->HasPendingException()) {
             ctx->ForwardEtsException(coro);
         }
+        RemoveReference(sharedRef);
         ASSERT(ctx->SanityJSExceptionPending());
         return nullptr;
     }
-    return sharedRef;
+    if (lastRefInChain != nullptr) {
+        lastRefInChain->flags_.SetNextIndex(GetIndexByItem(sharedRef));
+    }
+    // Ref allocated during XGC, so need to mark it to avoid removing
+    if (isXGCinProgress_) {
+        refsAllocatedDuringXGC_.insert(sharedRef);
+    }
+    return startRef;
 }
 
-SharedReference *SharedReferenceStorage::CreateETSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject)
+SharedReference *SharedReferenceStorage::CreateETSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject,
+                                                            const PreInitJSObjectCallback &callback)
 {
-    return CreateReference<&SharedReference::InitETSObject>(ctx, etsObject, jsObject);
+    return CreateReference<&SharedReference::InitETSObject>(ctx, etsObject, jsObject, callback);
 }
 
 SharedReference *SharedReferenceStorage::CreateJSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject)
@@ -116,9 +206,83 @@ void SharedReferenceStorage::RemoveReference(SharedReference *sharedRef)
     SharedReferenceSanity::Kill(sharedRef);
 }
 
+void SharedReferenceStorage::DeleteReference(SharedReference *sharedRef)
+{
+    ASSERT(sharedRef != nullptr);
+    ASSERT(!sharedRef->IsEmpty());
+    ASSERT(!sharedRef->IsMarked());
+    // NOTE(ipetrov, #20833): Use special xref OHOS napi interface when it will be supported
+    NAPI_CHECK_FATAL(napi_delete_reference(sharedRef->ctx_->GetJSEnv(), sharedRef->jsRef_));
+    // Need to drop interop state once for all references in chain
+    if (sharedRef->flags_.GetNextIndex() == 0U) {
+        sharedRef->GetEtsObject()->DropInteropHash();
+    }
+    ASSERT(Size() > 0);
+    RemoveReference(sharedRef);
+}
+
+void SharedReferenceStorage::NotifyXGCStarted()
+{
+    os::memory::WriteLockHolder lock(storageLock_);
+    isXGCinProgress_ = true;
+}
+
+void SharedReferenceStorage::NotifyXGCFinished()
+{
+    os::memory::WriteLockHolder lock(storageLock_);
+    isXGCinProgress_ = false;
+}
+
+void SharedReferenceStorage::VisitRoots(const GCRootVisitor &visitor)
+{
+    // No need lock, because we visit roots on pause and we wait XGC ConcurrentSweep for local GCs
+    size_t capacity = Capacity();
+    for (size_t i = 1U; i < capacity; ++i) {
+        SharedReference *ref = GetItemByIndex(i);
+        if (!ref->IsEmpty() && ref->flags_.GetNextIndex() == 0U) {
+            visitor(mem::GCRoot {mem::RootType::ROOT_VM, ref->GetEtsObject()->GetCoreType()});
+        }
+    }
+}
+
+void SharedReferenceStorage::UpdateRefs()
+{
+    // No need lock, because we visit roots on pause and we wait XGC ConcurrentSweep for local GCs
+    size_t capacity = Capacity();
+    for (size_t i = 1U; i < capacity; ++i) {
+        SharedReference *ref = GetItemByIndex(i);
+        if (ref->IsEmpty()) {
+            continue;
+        }
+        ObjectHeader *obj = ref->GetEtsObject()->GetCoreType();
+        if (obj->IsForwarded()) {
+            ref->SetETSObject(EtsObject::FromCoreType(ark::mem::GetForwardAddress(obj)));
+        }
+    }
+}
+
+void SharedReferenceStorage::SweepUnmarkedRefs()
+{
+    os::memory::WriteLockHolder lock(storageLock_);
+    ASSERT_PRINT(refsAllocatedDuringXGC_.empty(),
+                 "All references allocted during XGC should be proceesed on ReMark phase, unprocessed refs: "
+                     << refsAllocatedDuringXGC_.size());
+    size_t capacity = Capacity();
+    for (size_t i = 1U; i < capacity; ++i) {
+        SharedReference *ref = GetItemByIndex(i);
+        if (!ref->IsMarked()) {
+            DeleteReference(ref);
+        } else {
+            ref->Unmark();
+        }
+    }
+    isXGCinProgress_ = false;
+}
+
 bool SharedReferenceStorage::CheckAlive(void *data)
 {
     auto *sharedRef = reinterpret_cast<SharedReference *>(data);
+    os::memory::ReadLockHolder lock(storageLock_);
     return IsValidItem(sharedRef) && SharedReferenceSanity::CheckAlive(sharedRef);
 }
 

@@ -398,8 +398,8 @@ JSCONVERT_WRAP(Promise)
     // When a ets Promise object goes to JS we should get the corresponding EtsPromiseRef object.
     // So the ets Promise object should know about EtsPromiseRef which is stored in 'interopObject' field.
     EtsObject *interopObj = etsVal->GetInteropObject(coro);
-    if (interopObj != nullptr && storage->HasReference(interopObj)) {
-        return storage->GetReference(interopObj)->GetJsObject(env);
+    if (interopObj != nullptr && storage->HasReference(interopObj, env)) {
+        return storage->GetJsObject(interopObj, env);
     }
 
     [[maybe_unused]] EtsHandleScope s(coro);
@@ -448,7 +448,7 @@ JSCONVERT_UNWRAP(Promise)
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
     ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsVal);
     if (sharedRef != nullptr) {
-        auto *ref = reinterpret_cast<EtsPromiseRef *>(sharedRef->GetEtsObject(ctx));
+        auto *ref = reinterpret_cast<EtsPromiseRef *>(sharedRef->GetEtsObject());
         ASSERT(ref->GetTarget(coro) != nullptr);
         return EtsPromise::FromEtsObject(ref->GetTarget(coro));
     }
