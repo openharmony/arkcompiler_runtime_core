@@ -6,6 +6,9 @@ build-sdk/sdk/ets/stdlib/README.md
 build-sdk/sdk/ets/stdlib/escompat
 build-sdk/sdk/ets/stdlib/native
 build-sdk/sdk/ets/stdlib/std
+build-sdk/sdk/icu
+build-sdk/sdk/icu/data
+build-sdk/sdk/icu/data/icudt72l.dat
 build-sdk/sdk/linux_arm64_host_tools
 build-sdk/sdk/linux_arm64_host_tools/bin
 build-sdk/sdk/linux_arm64_host_tools/bin/ark

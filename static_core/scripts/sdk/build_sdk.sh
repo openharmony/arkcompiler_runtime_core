@@ -59,6 +59,7 @@ linux_tools
 windows_tools
 ts_linter
 ets_std_lib
+icu_dat_file
 
 echo "> Packing NPM package..."
 cp "$SCRIPT_DIR"/package.json "$PANDA_SDK_PATH"
