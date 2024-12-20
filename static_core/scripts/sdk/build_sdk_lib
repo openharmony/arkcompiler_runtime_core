@@ -113,7 +113,7 @@ function ohos() {
     # Source headers
     copy_into_sdk "$ARK_ROOT" "$headers_dst" "$SCRIPT_DIR"/headers.txt '\(\.h$\|\.inl$\|\.inc$\)'
     # Generated headers
-    copy_into_sdk "$ohos_build_dir" "$headers_dst" "$SCRIPT_DIR"/gen_headers.txt '\(\.h$\|\.inl$\|\.inc$\)'
+    copy_into_sdk "$ohos_build_dir" "$headers_dst" "$SCRIPT_DIR"/gen_headers.txt '\(\.h$\|\.inl$\|\.inc$\|\.idl$\)'
     # Copy compiled etsstdlib into Panda SDK
     mkdir -p "$PANDA_SDK_PATH"/ets
     cp -r "$ohos_build_dir"/plugins/ets/etsstdlib.abc "$PANDA_SDK_PATH"/ets
