@@ -49,6 +49,7 @@ panda_ets_add_gtest(
         ets_string_builder_members_test.cpp
         ets_to_string_cache_test.cpp
         ets_finalizable_weak_ref_test.cpp
+        ets_runtime_linker_test.cpp
     LIBRARIES
         arkassembler
         arkruntime

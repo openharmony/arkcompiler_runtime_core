@@ -71,6 +71,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_promise.cpp
     ${ETS_EXT_SOURCES}/types/ets_promise_ref.cpp
     ${ETS_EXT_SOURCES}/types/ets_object.cpp
+    ${ETS_EXT_SOURCES}/types/ets_runtime_linker.cpp
     ${ETS_EXT_SOURCES}/types/ets_sync_primitives.cpp
     ${ETS_EXT_SOURCES}/types/ets_string_builder.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_create.cpp

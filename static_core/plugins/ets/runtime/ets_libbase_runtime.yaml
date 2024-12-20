@@ -18,6 +18,9 @@ coretypes:
 - managed_class: std.core.Class
   mirror_class: ark::ets::EtsClass
 
+- managed_class: std.core.RuntimeLinker
+  mirror_class: ark::ets::EtsRuntimeLinker
+
 - managed_class: std.core.String
   mirror_class: ark::ets::EtsString
 
@@ -3221,6 +3224,16 @@ intrinsics:
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreClassGetNameInternal
 
+  - name: StdCoreClassGetLinker
+    space: ets
+    class_name: std.core.Class
+    method_name: getLinker
+    static: false
+    signature:
+      ret: std.core.RuntimeLinker
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassGetLinker
+
   - name: StdCoreClassOf
     space: ets
     class_name: std.core.Class
@@ -3274,15 +3287,15 @@ intrinsics:
 ####################
 # std.core.RuntimeLinker #
 ####################
-  - name: StdCoreRuntimeLinkerLoadClassInternal
+  - name: StdCoreRuntimeLinkerLoadClass
     space: ets
     class_name: std.core.RuntimeLinker
-    method_name: loadClassInternal
-    static: true
+    method_name: loadClass
+    static: false
     signature:
       ret: std.core.Class
-      args: [ std.core.Class, std.core.String, u1]
-    impl: ark::ets::intrinsics::StdCoreRuntimeLinkerLoadClassInternal
+      args: [ std.core.String, u1]
+    impl: ark::ets::intrinsics::StdCoreRuntimeLinkerLoadClass
 
 ###################
 # std.core.RegExp #

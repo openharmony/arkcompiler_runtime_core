@@ -19,6 +19,7 @@
 #include "macros.h"
 #include "napi/ets_napi.h"
 #include "runtime/include/runtime.h"
+#include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_field.h"

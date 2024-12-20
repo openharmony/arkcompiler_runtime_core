@@ -20,6 +20,7 @@
 #include <libpandafile/include/source_lang_enum.h>
 
 #include "libpandabase/macros.h"
+#include "runtime/class_linker_context.h"
 #include "runtime/include/class_linker_extension.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/class_root.h"
@@ -36,6 +37,8 @@ class ObjectHeader;
 }  // namespace ark
 
 namespace ark::ets {
+
+class EtsRuntimeLinker;
 
 class EtsClassLinkerExtension : public ClassLinkerExtension {
 public:
@@ -230,6 +233,11 @@ public:
         return finalizableWeakClass_;
     }
 
+    Class *GetRuntimeLinkerClass()
+    {
+        return runtimeLinkerClass_;
+    }
+
     Method *GetSubscribeOnAnotherPromiseMethod()
     {
         return subscribeOnAnotherPromiseMethod_;
@@ -250,6 +258,8 @@ public:
     {
         return maybeJSValue == jsvalueClass_;
     }
+
+    static EtsRuntimeLinker *GetOrCreateEtsRuntimeLinker(ClassLinkerContext *ctx);
 
     NO_COPY_SEMANTIC(EtsClassLinkerExtension);
     NO_MOVE_SEMANTIC(EtsClassLinkerExtension);
@@ -305,6 +315,7 @@ private:
     Class *arrayAsListIntClass_ = nullptr;
     Class *jsvalueClass_ = nullptr;
     Class *finalizableWeakClass_ = nullptr;
+    Class *runtimeLinkerClass_ = nullptr;
     // Cached type API classes
     Class *typeapiFieldClass_ = nullptr;
     Class *typeapiMethodClass_ = nullptr;

@@ -68,6 +68,7 @@ public:
     EtsClass *GetTypeAPIParameterClass();
     EtsClass *GetFunctionClass();
     EtsClass *GetFinalizableWeakRefClass();
+    EtsClass *GetRuntimeLinkerClass();
     // NOTE(molotkovmikhail): Need to implement a method cache that should be accessible by some class and method ids.
     Method *GetSubscribeOnAnotherPromiseMethod();
 
