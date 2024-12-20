@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 
 #include "include/method.h"
+#include "include/thread_scopes.h"
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/logger.h"
 #include "mem/refstorage/global_object_storage.h"
@@ -26,9 +27,10 @@
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/napi/ets_napi_helpers.h"
-#include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
+#include "plugins/ets/runtime/types/ets_field.h"
 #include "plugins/ets/runtime/types/ets_method.h"
-#include "plugins/ets/runtime/types/ets_runtime_linker.h"
+#include "plugins/ets/runtime/types/ets_object.h"
 #include "runtime/class_linker_context.h"
 #include "runtime/include/class_linker_extension.h"
 #include "runtime/include/class_linker-inl.h"
@@ -82,16 +84,6 @@ static std::string_view GetClassLinkerErrorDescriptor(ClassLinker::Error error)
             LOG(FATAL, CLASS_LINKER) << "Unhandled class linker error (" << helpers::ToUnderlying(error) << "): ";
             UNREACHABLE();
     }
-}
-
-static EtsRuntimeLinker *GetEtsRuntimeLinker(ClassLinkerContext *ctx)
-{
-    ASSERT(ctx != nullptr);
-    auto *ref = ctx->GetRefToLinker();
-    if (ref == nullptr) {
-        return nullptr;
-    }
-    return EtsRuntimeLinker::FromCoreType(PandaEtsVM::GetCurrent()->GetGlobalObjectStorage()->Get(ref));
 }
 
 void EtsClassLinkerExtension::ErrorHandler::OnError(ClassLinker::Error error, const PandaString &message)
@@ -468,19 +460,8 @@ EtsClassLinkerExtension::~EtsClassLinkerExtension()
 
     FreeLoadedClasses();
 
-    if (Thread::GetCurrent() == nullptr) {
-        // Do not remove references during runtime destruction
-        return;
-    }
-    EnumerateContexts([objectStorage = PandaEtsVM::GetCurrent()->GetGlobalObjectStorage()](ClassLinkerContext *ctx) {
-        auto *ref = ctx->GetRefToLinker();
-        if (ref != nullptr) {
-            // Removal could be done in ets-specific ClassLinkerContext,
-            // though no such class in hierarchy exist
-            objectStorage->Remove(ref);
-        }
-        return true;
-    });
+    // References from `EtsClassLinkerContext` are removed in their destructors, need to process only boot context.
+    RemoveRefToLinker(GetBootContext());
 }
 
 const void *EtsClassLinkerExtension::GetNativeEntryPointFor(Method *method) const
@@ -584,6 +565,9 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
     InitializeBuiltinSpecialClasses();
 
     runtimeLinkerClass_ = CacheClass(RUNTIME_LINKER);
+    bootRuntimeLinkerClass_ = CacheClass(BOOT_RUNTIME_LINKER);
+    abcFileClass_ = CacheClass(ABC_FILE);
+    abcRuntimeLinkerClass_ = CacheClass(ABC_RUNTIME_LINKER);
     promiseClass_ = CacheClass(PROMISE);
     if (promiseClass_ != nullptr) {
         subscribeOnAnotherPromiseMethod_ = EtsMethod::ToRuntimeMethod(
@@ -621,6 +605,30 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
     coro->SetArrayU8ClassPtr(GetClassRoot(ClassRoot::ARRAY_U8));
 }
 
+static EtsRuntimeLinker *GetEtsRuntimeLinker(ClassLinkerContext *ctx)
+{
+    ASSERT(ctx != nullptr);
+    auto *ref = ctx->GetRefToLinker();
+    if (ref == nullptr) {
+        return nullptr;
+    }
+    return EtsRuntimeLinker::FromCoreType(PandaEtsVM::GetCurrent()->GetGlobalObjectStorage()->Get(ref));
+}
+
+static EtsRuntimeLinker *CreateBootRuntimeLinker(ClassLinkerContext *ctx)
+{
+    ASSERT(ctx->IsBootContext());
+    ASSERT(ctx->GetRefToLinker() == nullptr);
+    auto *klass = PandaEtsVM::GetCurrent()->GetClassLinker()->GetBootRuntimeLinkerClass();
+    auto *etsObject = EtsObject::Create(klass);
+    if (UNLIKELY(etsObject == nullptr)) {
+        LOG(FATAL, CLASS_LINKER) << "Could not allocate BootRuntimeLinker";
+    }
+    auto *runtimeLinker = EtsRuntimeLinker::FromEtsObject(etsObject);
+    runtimeLinker->SetClassLinkerContext(ctx);
+    return runtimeLinker;
+}
+
 /* static */
 EtsRuntimeLinker *EtsClassLinkerExtension::GetOrCreateEtsRuntimeLinker(ClassLinkerContext *ctx)
 {
@@ -632,19 +640,63 @@ EtsRuntimeLinker *EtsClassLinkerExtension::GetOrCreateEtsRuntimeLinker(ClassLink
         if (runtimeLinker != nullptr) {
             return runtimeLinker;
         }
-
-        runtimeLinker = EtsRuntimeLinker::Create(ctx);
-        if (UNLIKELY(runtimeLinker == nullptr)) {
-            LOG(FATAL, CLASS_LINKER) << "Could not allocate EtsRuntimeLinker";
-        }
+        // Only BootRuntimeLinker is created after its corresponding context
+        ASSERT(ctx->IsBootContext());
+        runtimeLinker = CreateBootRuntimeLinker(ctx);
         auto *objectStorage = PandaEtsVM::GetCurrent()->GetGlobalObjectStorage();
-        auto *refToLinker = objectStorage->Add(runtimeLinker, mem::Reference::ObjectType::GLOBAL);
+        auto *refToLinker = objectStorage->Add(runtimeLinker->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
         if (ctx->CompareAndSetRefToLinker(nullptr, refToLinker)) {
             return runtimeLinker;
         }
         objectStorage->Remove(refToLinker);
     }
     UNREACHABLE();
+}
+
+/* static */
+void EtsClassLinkerExtension::RemoveRefToLinker(ClassLinkerContext *ctx)
+{
+    ASSERT(ctx != nullptr);
+    if (Thread::GetCurrent() == nullptr) {
+        // Do not remove references during runtime destruction
+        return;
+    }
+    auto *ref = ctx->GetRefToLinker();
+    if (ref != nullptr) {
+        auto *objectStorage = PandaEtsVM::GetCurrent()->GetGlobalObjectStorage();
+        objectStorage->Remove(ref);
+    }
+}
+
+ClassLinkerContext *EtsClassLinkerExtension::CreateApplicationClassLinkerContext(const PandaVector<PandaString> &path)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+
+    [[maybe_unused]] ScopedManagedCodeThread sj(coro);
+    [[maybe_unused]] EtsHandleScope scope(coro);
+
+    auto *klass = GetAbcRuntimeLinkerClass();
+    auto *runtimeLinker = EtsAbcRuntimeLinker::FromEtsObject(EtsObject::Create(EtsClass::FromRuntimeClass(klass)));
+    EtsHandle<EtsAbcRuntimeLinker> linkerHandle(coro, runtimeLinker);
+
+    auto *paths = EtsObjectArray::Create(EtsClass::FromRuntimeClass(GetClassRoot(ClassRoot::STRING)), path.size());
+    EtsHandle<EtsObjectArray> pathsHandle(coro, paths);
+    for (size_t idx = 0; idx < path.size(); ++idx) {
+        auto *str = EtsString::CreateFromMUtf8(path[idx].data(), path[idx].length());
+        pathsHandle->Set(idx, str->AsObject());
+    }
+    std::array args {Value(linkerHandle->GetCoreType()), Value(nullptr), Value(pathsHandle->GetCoreType())};
+
+    Method *ctor = klass->GetDirectMethod(GetLanguageContext().GetCtorName());
+    ASSERT(ctor != nullptr);
+    ctor->InvokeVoid(coro, args.data());
+    ASSERT(!coro->HasPendingException());
+
+    // Save global reference to created application `AbcRuntimeLinker`.
+    auto *objectStorage = PandaEtsVM::GetCurrent()->GetGlobalObjectStorage();
+    objectStorage->Add(linkerHandle->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+    return linkerHandle->GetClassLinkerContext();
 }
 
 }  // namespace ark::ets

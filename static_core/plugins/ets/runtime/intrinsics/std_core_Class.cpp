@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,13 +17,17 @@
 #include "intrinsics.h"
 #include "libpandabase/utils/logger.h"
 #include "runtime/handle_scope-inl.h"
+#include "plugins/ets/runtime/ets_class_linker_context.h"
+#include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
-#include "plugins/ets/runtime/types/ets_method.h"
-#include "plugins/ets/runtime/types/ets_runtime_linker.h"
-#include "plugins/ets/runtime/ets_class_linker_extension.h"
-#include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
+#include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/types/ets_field.h"
+#include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_primitives.h"
+#include "plugins/ets/runtime/types/ets_runtime_linker.h"
+#include "plugins/ets/runtime/types/ets_string.h"
 #include "runtime/mem/local_object_handle.h"
 
 namespace ark::ets::intrinsics {
@@ -103,18 +107,41 @@ EtsObject *StdCoreClassCreateInstance(EtsClass *cls)
     return objHandle.GetPtr();
 }
 
-EtsClass *StdCoreRuntimeLinkerLoadClass(EtsRuntimeLinker *runtimeLinker, EtsString *clsName, uint8_t init)
+EtsClass *EtsRuntimeLinkerFindLoadedClass(EtsRuntimeLinker *runtimeLinker, EtsString *clsName)
 {
-    PandaString name = clsName->GetMutf8();
+    const auto name = clsName->GetMutf8();
     PandaString descriptor;
-    ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor);
+    const auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor);
+    auto *klass = runtimeLinker->GetClassLinkerContext()->FindClass(classDescriptor);
+    return klass != nullptr ? EtsClass::FromRuntimeClass(klass) : nullptr;
+}
 
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    EtsClassLinker *linker = coro->GetPandaVM()->GetClassLinker();
-    auto *ctx = runtimeLinker->GetClassLinkerContext();
-    EtsClass *klass = linker->GetClass(descriptor.c_str(), false, ctx);
-    if (UNLIKELY(klass == nullptr)) {
-        ASSERT(coro->HasPendingException());
+void EtsRuntimeLinkerInitializeContext(EtsRuntimeLinker *runtimeLinker)
+{
+    auto *ext = PandaEtsVM::GetCurrent()->GetEtsClassLinkerExtension();
+    ext->RegisterContext([ext, runtimeLinker]() {
+        ASSERT(runtimeLinker->GetClassLinkerContext() == nullptr);
+        auto allocator = ext->GetClassLinker()->GetAllocator();
+        auto *ctx = allocator->New<EtsClassLinkerContext>(runtimeLinker);
+        runtimeLinker->SetClassLinkerContext(ctx);
+        return ctx;
+    });
+}
+
+EtsClass *EtsBootRuntimeLinkerFindAndLoadClass(ObjectHeader *runtimeLinker, EtsString *clsName, EtsBoolean init)
+{
+    const auto name = clsName->GetMutf8();
+    PandaString descriptor;
+    auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor);
+
+    auto *coro = EtsCoroutine::GetCurrent();
+    // Use core ClassLinker in order to pass nullptr as error handler,
+    // as exception is thrown in managed RuntimeLinker.loadClass
+    auto *linker = Runtime::GetCurrent()->GetClassLinker();
+    auto *ctx = EtsRuntimeLinker::FromCoreType(runtimeLinker)->GetClassLinkerContext();
+    ASSERT(ctx->IsBootContext());
+    auto *klass = linker->GetClass(classDescriptor, true, ctx, nullptr);
+    if (klass == nullptr) {
         return nullptr;
     }
 
@@ -124,7 +151,7 @@ EtsClass *StdCoreRuntimeLinkerLoadClass(EtsRuntimeLinker *runtimeLinker, EtsStri
             return nullptr;
         }
     }
-    return klass;
+    return EtsClass::FromRuntimeClass(klass);
 }
 
 }  // namespace ark::ets::intrinsics

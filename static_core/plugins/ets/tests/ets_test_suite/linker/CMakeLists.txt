@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,19 +29,97 @@ set(linker_tests
 set(linker_tests_in_dir "${CMAKE_CURRENT_SOURCE_DIR}")
 set(linker_tests_out_dir "${CMAKE_CURRENT_BINARY_DIR}")
 
+macro(get_ets_int_targets_list result target)
+    set(ets_int_target ${target}-ets-int)
+    set(targets_list ${ets_int_target}-cpp ${ets_int_target}-irtoc)
+    if (PANDA_LLVM_INTERPRETER)
+        set(targets_list ${targets_list} ${ets_int_target}-llvmirtoc)
+    endif()
+    set(${result} ${targets_list})
+endmacro()
+
 add_custom_target(ets_test_suite_linker)
 
-foreach(test ${linker_tests})
-    set(test_out_dir "${linker_tests_out_dir}/${test}")
+function(add_target_with_dependencies test_suite target additional_dependencies)
+    add_dependencies(${test_suite} ${target})
+    if (additional_dependencies)
+        add_dependencies(${target} ${additional_dependencies})
+    endif()
+endfunction()
 
+function(add_linker_test test additional_dependencies)
+    set(noValues SKIP_ARM32_COMPILER)
+    cmake_parse_arguments(ARG "${noValues}" "" "" ${ARGN})
+
+    set(should_skip_compiler "")
+    if (ARG_SKIP_ARM32_COMPILER)
+        set(should_skip_compiler "SKIP_ARM32_COMPILER")
+    endif()
+
+    set(test_out_dir "${linker_tests_out_dir}/${test}")
     set(test_in "${linker_tests_in_dir}/${test}.sts")
     set(target ets_test_suite_linker_${test})
 
-    run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target})
-    add_dependencies(ets_test_suite_linker
-        ${target}-ets-jit
-        ${target}-ets-int)
-    if (NOT CMAKE_CROSSCOMPILING)
-        add_dependencies(ets_test_suite_linker ${target}-ets-aot)
+    run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target} ${should_skip_compiler})
+
+    # int
+    get_ets_int_targets_list(int_targets_list ${target})
+    foreach(int_target ${int_targets_list})
+        add_target_with_dependencies(ets_test_suite_linker ${int_target} "${additional_dependencies}")
+    endforeach()
+
+    if (ARG_SKIP_ARM32_COMPILER AND PANDA_TARGET_ARM32)
+        return()
     endif()
+
+    # jit
+    add_target_with_dependencies(ets_test_suite_linker ${target}-ets-jit "${additional_dependencies}")
+
+    if (NOT CMAKE_CROSSCOMPILING)
+        # aot
+        add_target_with_dependencies(ets_test_suite_linker ${target}-ets-aot "${additional_dependencies}")
+
+        if (PANDA_LLVM_AOT)
+            # llvm-aot
+            add_target_with_dependencies(ets_test_suite_linker ${target}-ets-llvmaot "${additional_dependencies}")
+        endif()
+    endif()
+
+    if (PANDA_TARGET_ARM64)
+        # jit-osr
+        add_target_with_dependencies(ets_test_suite_linker ${target}-ets-jit-osr "${additional_dependencies}")
+    endif()
+
+endfunction()
+
+foreach(test ${linker_tests})
+    add_linker_test(${test} "")
 endforeach()
+
+function(test_runtime_linker_extensions test)
+    file(GLOB abc_runtime_linker_sources "${CMAKE_CURRENT_SOURCE_DIR}/abc_runtime_linker_sources/*.sts")
+    set(additional_abc_dir "${linker_tests_out_dir}/abc_runtime_linker_sources")
+    set(additional_abc_files_list "")
+    set(compilations_targets_list "")
+
+    foreach(ets_source ${abc_runtime_linker_sources})
+        get_filename_component(src_filename ${ets_source} NAME)
+        set(output_abc ${additional_abc_dir}/${src_filename}.abc)
+        list(APPEND additional_abc_files_list ${output_abc})
+
+        set(compilation_target ${test}-${src_filename}-ets-es2panda)
+        list(APPEND compilations_targets_list ${compilation_target})
+        compile_ets_code(${ets_source} ${output_abc} ${compilation_target}
+            OPT_LEVEL ${ARG_OPT_LEVEL}
+            COMPILER_EXTRA_OPTIONS "--ets-module")
+    endforeach()
+
+    list(JOIN additional_abc_files_list ":" additional_abc_files)
+    set(PANDA_RUN_PREFIX ADDITIONAL_ABC_FILES=${additional_abc_files} ${PANDA_RUN_PREFIX})
+
+    add_custom_target(additional_dependencies DEPENDS ${compilations_targets_list})
+    add_linker_test(${test} additional_dependencies SKIP_ARM32_COMPILER)
+
+endfunction()
+
+test_runtime_linker_extensions(runtime_linker_extensions)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,6 +69,9 @@ public:
     EtsClass *GetFunctionClass();
     EtsClass *GetFinalizableWeakRefClass();
     EtsClass *GetRuntimeLinkerClass();
+    EtsClass *GetBootRuntimeLinkerClass();
+    EtsClass *GetAbcRuntimeLinkerClass();
+    EtsClass *GetAbcFileClass();
     // NOTE(molotkovmikhail): Need to implement a method cache that should be accessible by some class and method ids.
     Method *GetSubscribeOnAnotherPromiseMethod();
 

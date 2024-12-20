@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,6 +20,12 @@ coretypes:
 
 - managed_class: std.core.RuntimeLinker
   mirror_class: ark::ets::EtsRuntimeLinker
+
+- managed_class: std.core.AbcFile
+  mirror_class: ark::ets::EtsAbcFile
+
+- managed_class: std.core.AbcRuntimeLinker
+  mirror_class: ark::ets::EtsAbcRuntimeLinker
 
 - managed_class: std.core.String
   mirror_class: ark::ets::EtsString
@@ -3287,15 +3293,71 @@ intrinsics:
 ####################
 # std.core.RuntimeLinker #
 ####################
-  - name: StdCoreRuntimeLinkerLoadClass
+  - name: StdCoreRuntimeLinkerFindLoadedClass
     space: ets
     class_name: std.core.RuntimeLinker
+    method_name: findLoadedClass
+    static: false
+    signature:
+      ret: std.core.Class
+      args: [ std.core.String ]
+    impl: ark::ets::intrinsics::EtsRuntimeLinkerFindLoadedClass
+
+  - name: StdCoreRuntimeLinkerInitializeContext
+    space: ets
+    class_name: std.core.RuntimeLinker
+    method_name: initializeContext
+    static: false
+    signature:
+      ret: void
+      args: [ ]
+    impl: ark::ets::intrinsics::EtsRuntimeLinkerInitializeContext
+
+######################################
+# std.core.BootRuntimeLinker #
+######################################
+  - name: StdCoreBootRuntimeLinkerFindAndLoadClass
+    space: ets
+    class_name: std.core.BootRuntimeLinker
+    method_name: findAndLoadClass
+    static: false
+    signature:
+      ret: std.core.Class
+      args: [ std.core.String, u1 ]
+    impl: ark::ets::intrinsics::EtsBootRuntimeLinkerFindAndLoadClass
+
+######################################
+# std.core.AbcFile #
+######################################
+  - name: StdCoreAbcFileLoadAbcFile
+    space: ets
+    class_name: std.core.AbcFile
+    method_name: loadAbcFile
+    static: true
+    signature:
+      ret: std.core.AbcFile
+      args: [ std.core.RuntimeLinker, std.core.String ]
+    impl: ark::ets::intrinsics::EtsAbcFileLoadAbcFile
+
+  - name: StdCoreAbcFileLoadClass
+    space: ets
+    class_name: std.core.AbcFile
     method_name: loadClass
     static: false
     signature:
       ret: std.core.Class
-      args: [ std.core.String, u1]
-    impl: ark::ets::intrinsics::StdCoreRuntimeLinkerLoadClass
+      args: [ std.core.RuntimeLinker, std.core.String, u1 ]
+    impl: ark::ets::intrinsics::EtsAbcFileLoadClass
+
+  - name: StdCoreAbcFileGetFilename
+    space: ets
+    class_name: std.core.AbcFile
+    method_name: getFilename
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: ark::ets::intrinsics::EtsAbcFileGetFilename
 
 ###################
 # std.core.RegExp #
