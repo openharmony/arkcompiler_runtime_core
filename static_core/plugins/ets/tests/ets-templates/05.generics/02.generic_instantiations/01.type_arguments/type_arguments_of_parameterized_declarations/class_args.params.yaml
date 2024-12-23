@@ -48,7 +48,6 @@ cases:
 
   - use: |-
       let v: A<X[]> = new A<X[]>(new X[0])
-    bound: ' extends Object[]'
 
   - use: |-
       let v: A<X[]|null> = new A<X[]|null>(null)
