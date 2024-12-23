@@ -63,6 +63,8 @@ function(panda_configure_host_tools)
         -DPANDA_LLVM_BACKEND=${PANDA_LLVM_BACKEND}
         -DPANDA_LLVM_INTERPRETER=${PANDA_LLVM_INTERPRETER}
         -DPANDA_LLVM_FASTPATH=${PANDA_LLVM_FASTPATH}
+        -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES}
+        -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${PANDA_BUILD_LLVM_BINARIES_PATH_ROOT}
         # LLVM AOT is used only by target build, cross-tools do not compile anything by llvm aot
         -DPANDA_LLVM_AOT=false
         -DLLVM_TARGET_PATH=${LLVM_HOST_PATH}
