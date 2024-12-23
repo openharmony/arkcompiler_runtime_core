@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { RegularFunc, Foo, MultipleCall, Lambda, ArrayOfFoo, DoubleArrayOfFoo, ArrayOfLambda } from "."
+import { RegularFunc, Foo, MultipleCall, Lambda, ArrayOfFoo, DoubleArrayOfFoo, ArrayOfLambda } from "js_code"
 
 
 function regularFunc(): int {

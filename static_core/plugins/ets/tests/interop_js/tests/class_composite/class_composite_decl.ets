@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { A } from "./js"
+import { A } from "js"
 
 function Test1(): int {
     let a: A = { name: "Edalyn", age: 30, location: "Boiling Isles" };

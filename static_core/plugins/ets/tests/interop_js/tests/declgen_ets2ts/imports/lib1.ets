@@ -15,7 +15,7 @@
 
 import { Lib2Class, Lib2Class2 /*as Lib2Class2Alias*/, IntAlias } from './lib2';
 
-import { DynClass } from "/plugins/ets/tests/interop_js/tests/declgen_ets2ts/imports/lib3.js"
+import { DynClass } from "lib3"
 
 export class C {
     constructor() {

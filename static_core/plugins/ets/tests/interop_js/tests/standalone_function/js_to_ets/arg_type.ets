@@ -15,7 +15,7 @@
 
 import { functionArgTypeIdentical, functionArgTypeObject, functionArgTypeClass,
     functionArgTypeArray, functionArgTypeTuple, functionArgTypeCallable }
-    from "/plugins/ets/tests/interop_js/tests/standalone_function/js_to_ets/arg_type.js"
+    from "arg_type"
 
 const functionToCall = () :int => {
     return 1;

@@ -30,7 +30,7 @@ import {
     TFunctionReturnsUndefined,
     UNDEFINED,
     genericInterfaceImplementation
-} from ".";
+} from "js_code";
 
 
 /* Note: nullish \ undefish types here are workarounds for note 17745*/

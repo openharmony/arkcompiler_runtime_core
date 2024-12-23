@@ -18,7 +18,7 @@ import { functionArgTypeDoubleOpt, functionArgTypeByteOpt, functionArgTypeShortO
     functionArgTypeCharOpt, functionArgTypeBooleanOpt, functionArgTypeStringOpt,
     functionArgTypeObjectOpt, functionArgTypeClassOpt, functionArgTypeArrayOpt,
     functionArgTypeTupleOpt, functionArgTypeCallableOpt }
-    from "/plugins/ets/tests/interop_js/tests/standalone_function/js_to_ets/opt_arg_type.js"
+    from "opt_arg_type"
 
 const functionToCall = () :int => {
     return 1;

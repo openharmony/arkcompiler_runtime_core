@@ -26,7 +26,7 @@ import {
     getProp,
     nop,
     nonexisting
-} from ".";
+} from "js_code";
 
 function vstringify(val: JSValue): String {
     return stringifyValue(val) as String;

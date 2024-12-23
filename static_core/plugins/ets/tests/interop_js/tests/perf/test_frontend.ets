@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { GetObject, GetNumber, GetString, Nop } from "./code.js";
+import { GetObject, GetNumber, GetString, Nop } from "js_code";
 
 function voidCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {

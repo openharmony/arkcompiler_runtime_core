@@ -36,7 +36,7 @@ import {
 	withOptionalMethodInstanceClass,
 	optionalArg,
 	optionalArgArray,
-} from '/plugins/ets/tests/interop_js/tests/interface/ts_to_ets/interface_method.js'
+} from 'dynamic_import'
 
 const str = 'string'
 const bool = true

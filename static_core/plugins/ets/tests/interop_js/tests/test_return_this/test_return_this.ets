@@ -19,7 +19,7 @@ import {
     getThis,
     getThisAsFunction,
     getThisAsAsyncFunction
-} from '.';
+} from 'js_code';
 
 const TEST_NUM_ARRAY: number[] = [1, 2, 3, 4, 5]
 const TEST_STRING: string = 'Test'

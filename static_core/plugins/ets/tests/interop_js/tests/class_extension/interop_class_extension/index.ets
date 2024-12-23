@@ -15,7 +15,7 @@
 
 package interop_class_extension
 
-import { DEFAULT_STRING_VALUE, TestNativeClass, TestUserClass, helperIsJSInstanceOf } from ".";
+import { DEFAULT_STRING_VALUE, TestNativeClass, TestUserClass, helperIsJSInstanceOf } from "js_code";
 
 // NOTE Should be commented out until #17693 is resolved
 // function extendUserClass() {

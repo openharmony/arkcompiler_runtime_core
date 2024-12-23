@@ -19,7 +19,7 @@ import { functionReturnTypeAny, functionReturnTypeUnknown, functionReturnTypeUnd
     functionReturnTypeFloat, functionReturnTypeChar, functionReturnTypeBoolean,
     functionReturnTypeString, functionReturnTypeObject, functionReturnTypeClass,
     functionReturnTypeArray, functionReturnTypeCallable }
-    from "/plugins/ets/tests/interop_js/tests/standalone_function/js_to_ets/ret_type.js"
+    from "ret_type"
 
 function TestFunctionReturnTypeAny(): boolean {
     return functionReturnTypeAny() as int == 1;

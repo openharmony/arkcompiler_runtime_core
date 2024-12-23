@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { makeEnum, jsEnum, isEq } from "."
+import { makeEnum, jsEnum, isEq } from "js_code"
 
 function Test1(): boolean {
     let a = makeEnum(['red', 'green', 'blue'])

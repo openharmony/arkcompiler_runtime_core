@@ -7,15 +7,12 @@
             ],
 			"std": [
                 "${PANDA_ROOT}/plugins/ets/stdlib/std"
-            ],
-			"error_js": [
-                "${CMAKE_CURRENT_BINARY_DIR}/error.abc"
             ]
 		},
 		"dynamicPaths": {
-			"${CMAKE_CURRENT_BINARY_DIR}/error.abc": {
+			"error_js": {
 				"language": "js",
-				"hasDecl": false
+				"ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/error"
 			}
 		}
 	}

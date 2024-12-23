@@ -6,8 +6,8 @@
             "HarA": ["."]
         },
         "dependencies": [
-            "../B/arktsconfig.json"
+            "../../../../B/arktsconfig.json"
         ],
-        "entry": "./indexA.ets"
+        "entry": "../../../indexA.ets"
     }
 }

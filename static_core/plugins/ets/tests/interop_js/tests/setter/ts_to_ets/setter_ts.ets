@@ -29,7 +29,7 @@ import {
     SubsetValueSetObject,
     tsTestString,
     AbstractClassObject
-} from '/plugins/ets/tests/interop_js/tests/setter/ts_to_ets/setter.js';
+} from 'js/setter';
 
 type Tuple = [int, string];
 

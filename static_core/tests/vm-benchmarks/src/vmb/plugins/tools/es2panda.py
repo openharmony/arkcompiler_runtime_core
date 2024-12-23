@@ -49,7 +49,7 @@ def make_arktsconfig(configpath: Union[str, Path],
             is_compilable = Path(path).suffix == '.ets' or Path(path).is_dir()
             paths[lib_name] = [path]
             if not is_compilable:
-                dynamic_paths[path] = {'language': 'js', 'hasDecl': False}
+                dynamic_paths[path] = {'language': 'js'}
                 parsed_template['compilerOptions']['paths'] = {
                     **parsed_template['compilerOptions']['paths'],
                     **paths

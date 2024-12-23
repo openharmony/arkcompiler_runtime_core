@@ -65,7 +65,7 @@
 //! RUN          entry: "testString"
 //! EVENT        /AotManager,.*,ADDED/
 
-import { addString } from "/plugins/ets/tests/interop_js/tests/checked/example/strings.js"
+import { addString } from "checked/example/strings.js"
 
 function testString(): int {
     let res = addString("abc");

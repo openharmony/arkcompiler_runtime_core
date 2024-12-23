@@ -27,7 +27,7 @@ import {
 	genericFunction,
 	tupleDeclaredType,
 	explicitlyDeclaredType,
-} from '/plugins/ets/tests/interop_js/tests/generic/ts_to_ets/generic.js';
+} from 'dynamic_import';
 
 const strContent = 'ets_test_string';
 const numContent = 1;

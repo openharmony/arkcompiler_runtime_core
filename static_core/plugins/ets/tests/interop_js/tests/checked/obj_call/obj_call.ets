@@ -14,7 +14,7 @@
  */
 
 import { getRetObj }
-    from "/plugins/ets/tests/interop_js/tests/checked/obj_call/obj_call.js"
+    from "checked/obj_call/obj_call.js"
 
 class EtsClass {
     intValue: int;

@@ -24,7 +24,7 @@ import {
     returnNumArray,
     returnRecord,
     returnInterface
-} from '.';
+} from 'js_code';
 
 const TEST_STRING: string = 'This is a test string'
 const TEST_INT: int = 100
