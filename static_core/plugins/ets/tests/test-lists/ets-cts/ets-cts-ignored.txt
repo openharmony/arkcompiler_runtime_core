@@ -145,7 +145,6 @@
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_3.sts
 
 #  20948 No access to common union members if members are of a function type
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_10.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_10.sts
 
 #  20948 No access to common union members if members are of a tuple type
@@ -482,7 +481,6 @@
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_16.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_4.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_6.sts
-07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_7.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_9.sts
 # end of es2panda fails
 
@@ -820,7 +818,7 @@
 # es2panda fails: panda#15191 es2panda complains on tuple type value in function call argument
 03.types/08.reference_types/11.tuple_types/tt_6.sts
 03.types/08.reference_types/11.tuple_types/tt_7.sts
-03.types/08.reference_types/11.tuple_types/tt_8.sts
+
 # 19950
 03.types/08.reference_types/11.tuple_types/tt_10.sts
 
@@ -861,7 +859,6 @@
 
 # #15709
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_23.sts
-06.contexts_and_conversions/01.assignment-like_contexts/identity_call.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1n_4.sts
 17.experimental_features/07.function_and_method_overloading/01.function_overloading/fn_overloading_n_10.sts
 
@@ -1076,7 +1073,6 @@
 07.expressions/33.dynamic_import_expression/imp_10f.sts
 07.expressions/33.dynamic_import_expression/imp_11a.sts
 07.expressions/33.dynamic_import_expression/imp_11b.sts
-07.expressions/33.dynamic_import_expression/imp_neg_0.sts
 
 # 15704, 19950 Constant Narrowing Integer Conversion is not implemented
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var_0.sts
@@ -1305,14 +1301,6 @@
 # 19950 Tuples types values are not recognized while passing arguments to functions without explicit 'as'
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_func/call-func_0.sts
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_lmbd/call-lmbd_0.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_lmbd/call-lmbd_1.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_lmbd/call-lmbd_2.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_lmbd/call-lmbd_3.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_lmbd/call-lmbd_4.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_lmbd/call-lmbd_5.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_lmbd/call-lmbd_6.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_lmbd/call-lmbd_7.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_lmbd/call-lmbd_8.sts
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_lmbd/call-lmbd_9.sts
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_meth/call-meth_0.sts
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_0.sts
@@ -1804,7 +1792,6 @@
 ### ES2PANDA_FAIL - fails of negative, compile-only
 ### Issue 19680
 09.classes/11.local_classes_and_interfaces/local_class_out_of_visibility_area_7.sts
-15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/access_modifier_over_25.sts
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_21.sts
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_10.sts
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/interface_args_neg_21.sts
@@ -1891,3 +1878,11 @@
 # 21431 byte as annotation field - compilation error
 18.annotations/01.declaring_annotations/01.types_of_annotation_fields/declaration_types_0.sts
 18.annotations/01.declaring_annotations/01.types_of_annotation_fields/declaration_types_4.sts
+
+# 21520
+17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_lamb_17.sts
+17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_lamb_18.sts
+17.experimental_features/17.async_functions_and_methods/01.async_functions/afunc_34.sts
+17.experimental_features/17.async_functions_and_methods/01.async_functions/afunc_36.sts
+17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_34.sts
+17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_36.sts
