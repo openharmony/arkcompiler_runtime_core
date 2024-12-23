@@ -116,7 +116,7 @@ void ApiModifier::AddParamChecker(AbckitCoreFunction *method)
 
         AbckitString *str = implM_->createString(file, "length");
 
-        AbckitInst *constant = implG_->gCreateConstantI32(graph, -1);
+        AbckitInst *constant = implG_->gFindOrCreateConstantI32(graph, -1);
         AbckitInst *arrLength = dynG_->iCreateLdobjbyname(graph, arr, str);
 
         AbckitBasicBlock *trueBB = succBBs[0];

@@ -134,7 +134,7 @@ static void TransformIrCallarg1(AbckitGraph *graph)
     ASSERT_NE(func, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    auto param0 = g_implG->gCreateConstantI64(graph, 1);
+    auto param0 = g_implG->gFindOrCreateConstantI64(graph, 1);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     auto call1 = g_dynG->iCreateCallarg1(graph, func, param0);
@@ -151,9 +151,9 @@ static void TransformIrCallargs2(AbckitGraph *graph)
     ASSERT_NE(func, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    auto param0 = g_implG->gCreateConstantI64(graph, 1);
+    auto param0 = g_implG->gFindOrCreateConstantI64(graph, 1);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto param1 = g_implG->gCreateConstantI64(graph, 2);
+    auto param1 = g_implG->gFindOrCreateConstantI64(graph, 2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     auto call2 = g_dynG->iCreateCallargs2(graph, func, param0, param1);
@@ -170,11 +170,11 @@ static void TransformIrCallargs3(AbckitGraph *graph)
     ASSERT_NE(func, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    auto param0 = g_implG->gCreateConstantI64(graph, 1);
+    auto param0 = g_implG->gFindOrCreateConstantI64(graph, 1);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto param1 = g_implG->gCreateConstantI64(graph, 2);
+    auto param1 = g_implG->gFindOrCreateConstantI64(graph, 2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto param2 = g_implG->gCreateConstantI64(graph, 3);
+    auto param2 = g_implG->gFindOrCreateConstantI64(graph, 3);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     auto call3 = g_dynG->iCreateCallargs3(graph, func, param0, param1, param2);
@@ -191,13 +191,13 @@ static void TransformIrCallrange(AbckitGraph *graph)
     ASSERT_NE(func, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    auto param0 = g_implG->gCreateConstantI64(graph, 1);
+    auto param0 = g_implG->gFindOrCreateConstantI64(graph, 1);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto param1 = g_implG->gCreateConstantI64(graph, 2);
+    auto param1 = g_implG->gFindOrCreateConstantI64(graph, 2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto param2 = g_implG->gCreateConstantI64(graph, 3);
+    auto param2 = g_implG->gFindOrCreateConstantI64(graph, 3);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto param3 = g_implG->gCreateConstantI64(graph, 4);
+    auto param3 = g_implG->gFindOrCreateConstantI64(graph, 4);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     auto call4 = g_dynG->iCreateCallrange(graph, func, 4, param0, param1, param2, param3);
@@ -214,13 +214,13 @@ static void TransformIrWideCallrange(AbckitGraph *graph)
     ASSERT_NE(func, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    auto param0 = g_implG->gCreateConstantI64(graph, 1);
+    auto param0 = g_implG->gFindOrCreateConstantI64(graph, 1);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto param1 = g_implG->gCreateConstantI64(graph, 2);
+    auto param1 = g_implG->gFindOrCreateConstantI64(graph, 2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto param2 = g_implG->gCreateConstantI64(graph, 3);
+    auto param2 = g_implG->gFindOrCreateConstantI64(graph, 3);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto param3 = g_implG->gCreateConstantI64(graph, 4);
+    auto param3 = g_implG->gFindOrCreateConstantI64(graph, 4);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     auto call4 = g_dynG->iCreateWideCallrange(graph, func, 4, param0, param1, param2, param3);

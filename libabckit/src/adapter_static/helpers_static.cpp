@@ -73,7 +73,7 @@ std::string FuncNameCropModule(const std::string &fullSig)
     return fullSig;
 }
 
-void CheckInvalidOpcodes([[maybe_unused]] compiler::Graph *graph, [[maybe_unused]] bool isDynamic)
+void CheckInvalidOpcodes([[maybe_unused]] ark::compiler::Graph *graph, [[maybe_unused]] bool isDynamic)
 {
 #ifndef NDEBUG
     for (auto *bb : graph->GetBlocksRPO()) {
@@ -93,95 +93,95 @@ void CheckInvalidOpcodes([[maybe_unused]] compiler::Graph *graph, [[maybe_unused
 
 // CC-OFFNXT(G.FUD.05) huge function, big switch-case
 // CC-OFFNXT(G.FUN.01-CPP) huge function, big switch-case
-AbckitIsaApiStaticOpcode GetStaticOpcode(compiler::Inst *inst)
+AbckitIsaApiStaticOpcode GetStaticOpcode(ark::compiler::Inst *inst)
 {
     auto opcode = inst->GetOpcode();
     switch (opcode) {
-        case compiler::Opcode::CallStatic:
+        case ark::compiler::Opcode::CallStatic:
             return ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC;
-        case compiler::Opcode::CallVirtual:
+        case ark::compiler::Opcode::CallVirtual:
             return ABCKIT_ISA_API_STATIC_OPCODE_CALL_VIRTUAL;
-        case compiler::Opcode::LoadStatic:
+        case ark::compiler::Opcode::LoadStatic:
             return ABCKIT_ISA_API_STATIC_OPCODE_LOADSTATIC;
-        case compiler::Opcode::LoadString:
+        case ark::compiler::Opcode::LoadString:
             return ABCKIT_ISA_API_STATIC_OPCODE_LOADSTRING;
-        case compiler::Opcode::LoadObject:
+        case ark::compiler::Opcode::LoadObject:
             return ABCKIT_ISA_API_STATIC_OPCODE_LOADOBJECT;
-        case compiler::Opcode::Sub:
+        case ark::compiler::Opcode::Sub:
             return ABCKIT_ISA_API_STATIC_OPCODE_SUB;
-        case compiler::Opcode::ReturnVoid:
+        case ark::compiler::Opcode::ReturnVoid:
             return ABCKIT_ISA_API_STATIC_OPCODE_RETURN_VOID;
-        case compiler::Opcode::Parameter:
+        case ark::compiler::Opcode::Parameter:
             return ABCKIT_ISA_API_STATIC_OPCODE_PARAMETER;
-        case compiler::Opcode::Constant:
+        case ark::compiler::Opcode::Constant:
             return ABCKIT_ISA_API_STATIC_OPCODE_CONSTANT;
-        case compiler::Opcode::Cmp:
+        case ark::compiler::Opcode::Cmp:
             return ABCKIT_ISA_API_STATIC_OPCODE_CMP;
-        case compiler::Opcode::Cast:
+        case ark::compiler::Opcode::Cast:
             return ABCKIT_ISA_API_STATIC_OPCODE_CAST;
-        case compiler::Opcode::Return:
+        case ark::compiler::Opcode::Return:
             return ABCKIT_ISA_API_STATIC_OPCODE_RETURN;
-        case compiler::Opcode::Add:
+        case ark::compiler::Opcode::Add:
             return ABCKIT_ISA_API_STATIC_OPCODE_ADD;
-        case compiler::Opcode::Mul:
+        case ark::compiler::Opcode::Mul:
             return ABCKIT_ISA_API_STATIC_OPCODE_MUL;
-        case compiler::Opcode::Mod:
+        case ark::compiler::Opcode::Mod:
             return ABCKIT_ISA_API_STATIC_OPCODE_MOD;
-        case compiler::Opcode::Div:
+        case ark::compiler::Opcode::Div:
             return ABCKIT_ISA_API_STATIC_OPCODE_DIV;
-        case compiler::Opcode::Neg:
+        case ark::compiler::Opcode::Neg:
             return ABCKIT_ISA_API_STATIC_OPCODE_NEG;
-        case compiler::Opcode::AddI:
+        case ark::compiler::Opcode::AddI:
             return ABCKIT_ISA_API_STATIC_OPCODE_ADDI;
-        case compiler::Opcode::DivI:
+        case ark::compiler::Opcode::DivI:
             return ABCKIT_ISA_API_STATIC_OPCODE_DIVI;
-        case compiler::Opcode::SubI:
+        case ark::compiler::Opcode::SubI:
             return ABCKIT_ISA_API_STATIC_OPCODE_SUBI;
-        case compiler::Opcode::MulI:
+        case ark::compiler::Opcode::MulI:
             return ABCKIT_ISA_API_STATIC_OPCODE_MULI;
-        case compiler::Opcode::ModI:
+        case ark::compiler::Opcode::ModI:
             return ABCKIT_ISA_API_STATIC_OPCODE_MODI;
-        case compiler::Opcode::Shl:
+        case ark::compiler::Opcode::Shl:
             return ABCKIT_ISA_API_STATIC_OPCODE_SHL;
-        case compiler::Opcode::Shr:
+        case ark::compiler::Opcode::Shr:
             return ABCKIT_ISA_API_STATIC_OPCODE_SHR;
-        case compiler::Opcode::AShr:
+        case ark::compiler::Opcode::AShr:
             return ABCKIT_ISA_API_STATIC_OPCODE_ASHR;
-        case compiler::Opcode::ShlI:
+        case ark::compiler::Opcode::ShlI:
             return ABCKIT_ISA_API_STATIC_OPCODE_SHLI;
-        case compiler::Opcode::ShrI:
+        case ark::compiler::Opcode::ShrI:
             return ABCKIT_ISA_API_STATIC_OPCODE_SHRI;
-        case compiler::Opcode::AShrI:
+        case ark::compiler::Opcode::AShrI:
             return ABCKIT_ISA_API_STATIC_OPCODE_ASHRI;
-        case compiler::Opcode::And:
+        case ark::compiler::Opcode::And:
             return ABCKIT_ISA_API_STATIC_OPCODE_AND;
-        case compiler::Opcode::Or:
+        case ark::compiler::Opcode::Or:
             return ABCKIT_ISA_API_STATIC_OPCODE_OR;
-        case compiler::Opcode::Xor:
+        case ark::compiler::Opcode::Xor:
             return ABCKIT_ISA_API_STATIC_OPCODE_XOR;
-        case compiler::Opcode::AndI:
+        case ark::compiler::Opcode::AndI:
             return ABCKIT_ISA_API_STATIC_OPCODE_ANDI;
-        case compiler::Opcode::OrI:
+        case ark::compiler::Opcode::OrI:
             return ABCKIT_ISA_API_STATIC_OPCODE_ORI;
-        case compiler::Opcode::XorI:
+        case ark::compiler::Opcode::XorI:
             return ABCKIT_ISA_API_STATIC_OPCODE_XORI;
-        case compiler::Opcode::Not:
+        case ark::compiler::Opcode::Not:
             return ABCKIT_ISA_API_STATIC_OPCODE_NOT;
-        case compiler::Opcode::LenArray:
+        case ark::compiler::Opcode::LenArray:
             return ABCKIT_ISA_API_STATIC_OPCODE_LENARRAY;
-        case compiler::Opcode::If:
+        case ark::compiler::Opcode::If:
             return ABCKIT_ISA_API_STATIC_OPCODE_IF;
-        case compiler::Opcode::NullPtr:
+        case ark::compiler::Opcode::NullPtr:
             return ABCKIT_ISA_API_STATIC_OPCODE_NULLPTR;
-        case compiler::Opcode::Phi:
+        case ark::compiler::Opcode::Phi:
             return ABCKIT_ISA_API_STATIC_OPCODE_PHI;
-        case compiler::Opcode::LoadUndefined:
+        case ark::compiler::Opcode::LoadUndefined:
             return ABCKIT_ISA_API_STATIC_OPCODE_LOADUNDEFINED;
-        case compiler::Opcode::Try:
+        case ark::compiler::Opcode::Try:
             return ABCKIT_ISA_API_STATIC_OPCODE_TRY;
-        case compiler::Opcode::CatchPhi:
+        case ark::compiler::Opcode::CatchPhi:
             return ABCKIT_ISA_API_STATIC_OPCODE_CATCHPHI;
-        case compiler::Opcode::Intrinsic:
+        case ark::compiler::Opcode::Intrinsic:
             return GetStaticIntrinsicOpcode(inst->CastToIntrinsic());
         default:
             LIBABCKIT_LOG(DEBUG) << "compiler->abckit INVALID\n";
@@ -190,27 +190,27 @@ AbckitIsaApiStaticOpcode GetStaticOpcode(compiler::Inst *inst)
     LIBABCKIT_UNREACHABLE;
 }
 
-AbckitIsaApiDynamicOpcode GetDynamicOpcode(compiler::Inst *inst)
+AbckitIsaApiDynamicOpcode GetDynamicOpcode(ark::compiler::Inst *inst)
 {
     auto opcode = inst->GetOpcode();
     switch (opcode) {
-        case compiler::Opcode::LoadString:
+        case ark::compiler::Opcode::LoadString:
             return ABCKIT_ISA_API_DYNAMIC_OPCODE_LOADSTRING;
-        case compiler::Opcode::Parameter:
+        case ark::compiler::Opcode::Parameter:
             return ABCKIT_ISA_API_DYNAMIC_OPCODE_PARAMETER;
-        case compiler::Opcode::Constant:
+        case ark::compiler::Opcode::Constant:
             return ABCKIT_ISA_API_DYNAMIC_OPCODE_CONSTANT;
-        case compiler::Opcode::If:
+        case ark::compiler::Opcode::If:
             return ABCKIT_ISA_API_DYNAMIC_OPCODE_IF;
-        case compiler::Opcode::Phi:
+        case ark::compiler::Opcode::Phi:
             return ABCKIT_ISA_API_DYNAMIC_OPCODE_PHI;
-        case compiler::Opcode::Try:
+        case ark::compiler::Opcode::Try:
             return ABCKIT_ISA_API_DYNAMIC_OPCODE_TRY;
-        case compiler::Opcode::CatchPhi:
+        case ark::compiler::Opcode::CatchPhi:
             return ABCKIT_ISA_API_DYNAMIC_OPCODE_CATCHPHI;
-        case compiler::Opcode::Intrinsic:
+        case ark::compiler::Opcode::Intrinsic:
             switch (inst->CastToIntrinsic()->GetIntrinsicId()) {
-                case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_STRING:
+                case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_STRING:
                     return ABCKIT_ISA_API_DYNAMIC_OPCODE_LOADSTRING;
                 default:
                     break;
@@ -240,40 +240,40 @@ bool IsCallInst(AbckitInst *inst)
     return IsCallInstStatic(inst->impl);
 }
 
-AbckitTypeId TypeToTypeId(compiler::DataType::Type type)
+AbckitTypeId TypeToTypeId(ark::compiler::DataType::Type type)
 {
     LIBABCKIT_LOG(DEBUG) << "compiler->abckit\n";
     switch (type) {
-        case compiler::DataType::Type::REFERENCE:
+        case ark::compiler::DataType::Type::REFERENCE:
             return AbckitTypeId::ABCKIT_TYPE_ID_REFERENCE;
-        case compiler::DataType::Type::BOOL:
+        case ark::compiler::DataType::Type::BOOL:
             return AbckitTypeId::ABCKIT_TYPE_ID_U1;
-        case compiler::DataType::Type::UINT8:
+        case ark::compiler::DataType::Type::UINT8:
             return AbckitTypeId::ABCKIT_TYPE_ID_U8;
-        case compiler::DataType::Type::INT8:
+        case ark::compiler::DataType::Type::INT8:
             return AbckitTypeId::ABCKIT_TYPE_ID_I8;
-        case compiler::DataType::Type::UINT16:
+        case ark::compiler::DataType::Type::UINT16:
             return AbckitTypeId::ABCKIT_TYPE_ID_U16;
-        case compiler::DataType::Type::INT16:
+        case ark::compiler::DataType::Type::INT16:
             return AbckitTypeId::ABCKIT_TYPE_ID_I16;
-        case compiler::DataType::Type::UINT32:
+        case ark::compiler::DataType::Type::UINT32:
             return AbckitTypeId::ABCKIT_TYPE_ID_U32;
-        case compiler::DataType::Type::INT32:
+        case ark::compiler::DataType::Type::INT32:
             return AbckitTypeId::ABCKIT_TYPE_ID_I32;
-        case compiler::DataType::Type::UINT64:
+        case ark::compiler::DataType::Type::UINT64:
             return AbckitTypeId::ABCKIT_TYPE_ID_U64;
-        case compiler::DataType::Type::INT64:
+        case ark::compiler::DataType::Type::INT64:
             return AbckitTypeId::ABCKIT_TYPE_ID_I64;
-        case compiler::DataType::Type::FLOAT32:
+        case ark::compiler::DataType::Type::FLOAT32:
             return AbckitTypeId::ABCKIT_TYPE_ID_F32;
-        case compiler::DataType::Type::FLOAT64:
+        case ark::compiler::DataType::Type::FLOAT64:
             return AbckitTypeId::ABCKIT_TYPE_ID_F64;
-        case compiler::DataType::Type::ANY:
+        case ark::compiler::DataType::Type::ANY:
             return AbckitTypeId::ABCKIT_TYPE_ID_ANY;
-        case compiler::DataType::Type::VOID:
+        case ark::compiler::DataType::Type::VOID:
             return AbckitTypeId::ABCKIT_TYPE_ID_VOID;
-        case compiler::DataType::Type::POINTER:
-        case compiler::DataType::Type::NO_TYPE:
+        case ark::compiler::DataType::Type::POINTER:
+        case ark::compiler::DataType::Type::NO_TYPE:
         default:
             LIBABCKIT_LOG(DEBUG) << "compiler->abckit INVALID\n";
             return AbckitTypeId::ABCKIT_TYPE_ID_INVALID;
@@ -281,42 +281,42 @@ AbckitTypeId TypeToTypeId(compiler::DataType::Type type)
     LIBABCKIT_UNREACHABLE;
 }
 
-compiler::DataType::Type TypeIdToType(AbckitTypeId typeId)
+ark::compiler::DataType::Type TypeIdToType(AbckitTypeId typeId)
 {
     LIBABCKIT_LOG(DEBUG) << "abckit->compiler\n";
     switch (typeId) {
         case AbckitTypeId::ABCKIT_TYPE_ID_REFERENCE:
-            return compiler::DataType::Type::REFERENCE;
+            return ark::compiler::DataType::Type::REFERENCE;
         case AbckitTypeId::ABCKIT_TYPE_ID_U1:
-            return compiler::DataType::Type::BOOL;
+            return ark::compiler::DataType::Type::BOOL;
         case AbckitTypeId::ABCKIT_TYPE_ID_U8:
-            return compiler::DataType::Type::UINT8;
+            return ark::compiler::DataType::Type::UINT8;
         case AbckitTypeId::ABCKIT_TYPE_ID_I8:
-            return compiler::DataType::Type::INT8;
+            return ark::compiler::DataType::Type::INT8;
         case AbckitTypeId::ABCKIT_TYPE_ID_U16:
-            return compiler::DataType::Type::UINT16;
+            return ark::compiler::DataType::Type::UINT16;
         case AbckitTypeId::ABCKIT_TYPE_ID_I16:
-            return compiler::DataType::Type::INT16;
+            return ark::compiler::DataType::Type::INT16;
         case AbckitTypeId::ABCKIT_TYPE_ID_U32:
-            return compiler::DataType::Type::UINT32;
+            return ark::compiler::DataType::Type::UINT32;
         case AbckitTypeId::ABCKIT_TYPE_ID_I32:
-            return compiler::DataType::Type::INT32;
+            return ark::compiler::DataType::Type::INT32;
         case AbckitTypeId::ABCKIT_TYPE_ID_U64:
-            return compiler::DataType::Type::UINT64;
+            return ark::compiler::DataType::Type::UINT64;
         case AbckitTypeId::ABCKIT_TYPE_ID_I64:
-            return compiler::DataType::Type::INT64;
+            return ark::compiler::DataType::Type::INT64;
         case AbckitTypeId::ABCKIT_TYPE_ID_F32:
-            return compiler::DataType::Type::FLOAT32;
+            return ark::compiler::DataType::Type::FLOAT32;
         case AbckitTypeId::ABCKIT_TYPE_ID_F64:
-            return compiler::DataType::Type::FLOAT64;
+            return ark::compiler::DataType::Type::FLOAT64;
         case AbckitTypeId::ABCKIT_TYPE_ID_ANY:
-            return compiler::DataType::Type::ANY;
+            return ark::compiler::DataType::Type::ANY;
         case AbckitTypeId::ABCKIT_TYPE_ID_VOID:
-            return compiler::DataType::Type::VOID;
+            return ark::compiler::DataType::Type::VOID;
         case AbckitTypeId::ABCKIT_TYPE_ID_INVALID:
         default:
             LIBABCKIT_LOG(DEBUG) << "abckit->compiler INVALID\n";
-            return compiler::DataType::Type::NO_TYPE;
+            return ark::compiler::DataType::Type::NO_TYPE;
     }
     LIBABCKIT_UNREACHABLE;
 }
@@ -497,7 +497,7 @@ std::string GetFuncName(AbckitCoreFunction *function)
         funcName = func->name;
         delete func;
     } else {
-        auto *func = reinterpret_cast<const pandasm::Function *>(function->GetArkTSImpl()->GetStaticImpl());
+        auto *func = reinterpret_cast<const ark::pandasm::Function *>(function->GetArkTSImpl()->GetStaticImpl());
         funcName = func->name;
     }
 
@@ -513,8 +513,8 @@ std::string GetMangleFuncName(AbckitCoreFunction *function)
         funcName = func->name;
         delete func;
     } else {
-        auto *func = reinterpret_cast<const pandasm::Function *>(function->GetArkTSImpl()->GetStaticImpl());
-        funcName = MangleFunctionName(pandasm::DeMangleName(func->name), func->params, func->returnType);
+        auto *func = reinterpret_cast<const ark::pandasm::Function *>(function->GetArkTSImpl()->GetStaticImpl());
+        funcName = MangleFunctionName(ark::pandasm::DeMangleName(func->name), func->params, func->returnType);
     }
     return funcName;
 }
@@ -606,30 +606,39 @@ uint32_t GetLiteralArrayOffset(AbckitGraph *graph, AbckitLiteralArray *arr)
     return arrayOffset;
 }
 
-AbckitInst *CreateInstFromImpl(AbckitGraph *graph, compiler::Inst *impl)
+AbckitInst *FindOrCreateInstFromImpl(AbckitGraph *graph, ark::compiler::Inst *impl)
+{
+    if (graph->implToInst.find(impl) != graph->implToInst.end()) {
+        return graph->implToInst.at(impl);
+    }
+
+    return CreateInstFromImpl(graph, impl);
+}
+
+AbckitInst *CreateInstFromImpl(AbckitGraph *graph, ark::compiler::Inst *impl)
 {
     AbckitInst *newInst = graph->impl->GetLocalAllocator()->New<AbckitInst>(graph, impl);
     graph->implToInst.insert({impl, newInst});
     return newInst;
 }
 
-AbckitInst *CreateDynInst(AbckitGraph *graph, compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
+AbckitInst *CreateDynInst(AbckitGraph *graph, ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
 {
-    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::ANY, 0, intrinsicId);
+    auto intrImpl = graph->impl->CreateInstIntrinsic(ark::compiler::DataType::ANY, 0, intrinsicId);
     if (hasIC) {
         intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
     }
     return CreateInstFromImpl(graph, intrImpl);
 }
 
-AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, compiler::IntrinsicInst::IntrinsicId intrinsicId,
+AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, ark::compiler::IntrinsicInst::IntrinsicId intrinsicId,
                           bool hasIC)
 {
-    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::ANY, 0, intrinsicId);
+    auto intrImpl = graph->impl->CreateInstIntrinsic(ark::compiler::DataType::ANY, 0, intrinsicId);
     size_t argsCount {1U};
     intrImpl->ReserveInputs(argsCount);
     intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
-    intrImpl->AppendInput(input0->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input0->impl, ark::compiler::DataType::ANY);
     if (hasIC) {
         intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
     }
@@ -637,14 +646,14 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, compiler::Intr
 }
 
 AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1,
-                          compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
+                          ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
 {
-    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::ANY, 0, intrinsicId);
+    auto intrImpl = graph->impl->CreateInstIntrinsic(ark::compiler::DataType::ANY, 0, intrinsicId);
     size_t argsCount {2U};
     intrImpl->ReserveInputs(argsCount);
     intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
-    intrImpl->AppendInput(input0->impl, compiler::DataType::ANY);
-    intrImpl->AppendInput(input1->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input0->impl, ark::compiler::DataType::ANY);
+    intrImpl->AppendInput(input1->impl, ark::compiler::DataType::ANY);
     if (hasIC) {
         intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
     }
@@ -653,15 +662,15 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, AbckitInst *in
 
 // CC-OFFNXT(G.FUN.01) helper function
 AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1, AbckitInst *input2,
-                          compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
+                          ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
 {
-    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::ANY, 0, intrinsicId);
+    auto intrImpl = graph->impl->CreateInstIntrinsic(ark::compiler::DataType::ANY, 0, intrinsicId);
     size_t argsCount {3U};
     intrImpl->ReserveInputs(argsCount);
     intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
-    intrImpl->AppendInput(input0->impl, compiler::DataType::ANY);
-    intrImpl->AppendInput(input1->impl, compiler::DataType::ANY);
-    intrImpl->AppendInput(input2->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input0->impl, ark::compiler::DataType::ANY);
+    intrImpl->AppendInput(input1->impl, ark::compiler::DataType::ANY);
+    intrImpl->AppendInput(input2->impl, ark::compiler::DataType::ANY);
     if (hasIC) {
         intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
     }
@@ -670,14 +679,14 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, AbckitInst *in
 
 // CC-OFFNXT(G.FUN.01) helper function
 AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1, uint64_t imm0,
-                          compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
+                          ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
 {
-    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::ANY, 0, intrinsicId);
+    auto intrImpl = graph->impl->CreateInstIntrinsic(ark::compiler::DataType::ANY, 0, intrinsicId);
     size_t argsCount {2U};
     intrImpl->ReserveInputs(argsCount);
     intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
-    intrImpl->AppendInput(input0->impl, compiler::DataType::ANY);
-    intrImpl->AppendInput(input1->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input0->impl, ark::compiler::DataType::ANY);
+    intrImpl->AppendInput(input1->impl, ark::compiler::DataType::ANY);
     if (hasIC) {
         intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
     }
@@ -685,8 +694,8 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, AbckitInst *in
     return CreateInstFromImpl(graph, intrImpl);
 }
 
-AbckitInst *CreateDynInst(AbckitGraph *graph, uint64_t imm0, compiler::DataType::Type retType,
-                          compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
+AbckitInst *CreateDynInst(AbckitGraph *graph, uint64_t imm0, ark::compiler::DataType::Type retType,
+                          ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
 {
     auto intrImpl = graph->impl->CreateInstIntrinsic(retType, 0, intrinsicId);
     if (hasIC) {
@@ -696,10 +705,10 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, uint64_t imm0, compiler::DataType:
     return CreateInstFromImpl(graph, intrImpl);
 }
 
-AbckitInst *CreateDynInst(AbckitGraph *graph, uint64_t imm0, compiler::IntrinsicInst::IntrinsicId intrinsicId,
+AbckitInst *CreateDynInst(AbckitGraph *graph, uint64_t imm0, ark::compiler::IntrinsicInst::IntrinsicId intrinsicId,
                           bool hasIC)
 {
-    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::ANY, 0, intrinsicId);
+    auto intrImpl = graph->impl->CreateInstIntrinsic(ark::compiler::DataType::ANY, 0, intrinsicId);
     if (hasIC) {
         intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
     }
@@ -708,13 +717,13 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, uint64_t imm0, compiler::Intrinsic
 }
 
 AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, uint64_t imm0,
-                          compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
+                          ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
 {
-    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::ANY, 0, intrinsicId);
+    auto intrImpl = graph->impl->CreateInstIntrinsic(ark::compiler::DataType::ANY, 0, intrinsicId);
     size_t argsCount {1U};
     intrImpl->ReserveInputs(argsCount);
     intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
-    intrImpl->AppendInput(input0->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input0->impl, ark::compiler::DataType::ANY);
     if (hasIC) {
         intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
     }
@@ -724,13 +733,13 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, uint64_t imm0,
 
 // CC-OFFNXT(G.FUN.01) helper function
 AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, uint64_t imm0, uint64_t imm1,
-                          compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
+                          ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
 {
-    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::ANY, 0, intrinsicId);
+    auto intrImpl = graph->impl->CreateInstIntrinsic(ark::compiler::DataType::ANY, 0, intrinsicId);
     size_t argsCount {1U};
     intrImpl->ReserveInputs(argsCount);
     intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
-    intrImpl->AppendInput(input0->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input0->impl, ark::compiler::DataType::ANY);
     if (hasIC) {
         intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
     }
@@ -740,9 +749,9 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, uint64_t imm0,
 }
 
 AbckitInst *CreateDynInst(AbckitGraph *graph, uint64_t imm0, uint64_t imm1,
-                          compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
+                          ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
 {
-    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::ANY, 0, intrinsicId);
+    auto intrImpl = graph->impl->CreateInstIntrinsic(ark::compiler::DataType::ANY, 0, intrinsicId);
     if (hasIC) {
         intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
     }
@@ -753,14 +762,14 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, uint64_t imm0, uint64_t imm1,
 
 // CC-OFFNXT(G.FUN.01) helper function
 AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1, uint64_t imm0, uint64_t imm1,
-                          compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
+                          ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
 {
-    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::ANY, 0, intrinsicId);
+    auto intrImpl = graph->impl->CreateInstIntrinsic(ark::compiler::DataType::ANY, 0, intrinsicId);
     size_t argsCount {2U};
     intrImpl->ReserveInputs(argsCount);
     intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
-    intrImpl->AppendInput(input0->impl, compiler::DataType::ANY);
-    intrImpl->AppendInput(input1->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input0->impl, ark::compiler::DataType::ANY);
+    intrImpl->AppendInput(input1->impl, ark::compiler::DataType::ANY);
     if (hasIC) {
         intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
     }
@@ -771,16 +780,16 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, AbckitInst *in
 
 // CC-OFFNXT(G.FUN.01-CPP) helper function
 AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, AbckitInst *input1,
-                          AbckitInst *input2, compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
+                          AbckitInst *input2, ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
 {
-    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::ANY, 0, intrinsicId);
+    auto intrImpl = graph->impl->CreateInstIntrinsic(ark::compiler::DataType::ANY, 0, intrinsicId);
     size_t argsCount {4U};
     intrImpl->ReserveInputs(argsCount);
     intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
-    intrImpl->AppendInput(acc->impl, compiler::DataType::ANY);
-    intrImpl->AppendInput(input0->impl, compiler::DataType::ANY);
-    intrImpl->AppendInput(input1->impl, compiler::DataType::ANY);
-    intrImpl->AppendInput(input2->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(acc->impl, ark::compiler::DataType::ANY);
+    intrImpl->AppendInput(input0->impl, ark::compiler::DataType::ANY);
+    intrImpl->AppendInput(input1->impl, ark::compiler::DataType::ANY);
+    intrImpl->AppendInput(input2->impl, ark::compiler::DataType::ANY);
     if (hasIC) {
         intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
     }
@@ -791,11 +800,11 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input
 AbckitInst *CreateDynInst(AbckitGraph *graph, uint64_t imm0, uint64_t imm1, uint64_t imm2, AbckitInst *input0,
                           ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
 {
-    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::ANY, 0, intrinsicId);
+    auto intrImpl = graph->impl->CreateInstIntrinsic(ark::compiler::DataType::ANY, 0, intrinsicId);
     size_t argsCount {1U};
     intrImpl->ReserveInputs(argsCount);
     intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
-    intrImpl->AppendInput(input0->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input0->impl, ark::compiler::DataType::ANY);
     if (hasIC) {
         intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
     }
@@ -807,18 +816,18 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, uint64_t imm0, uint64_t imm1, uint
 
 // CC-OFFNXT(G.FUN.01) helper function
 AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, AbckitInst *input1,
-                          AbckitInst *input2, AbckitInst *input3, compiler::IntrinsicInst::IntrinsicId intrinsicId,
+                          AbckitInst *input2, AbckitInst *input3, ark::compiler::IntrinsicInst::IntrinsicId intrinsicId,
                           bool hasIC)
 {
-    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::ANY, 0, intrinsicId);
+    auto intrImpl = graph->impl->CreateInstIntrinsic(ark::compiler::DataType::ANY, 0, intrinsicId);
     size_t argsCount {5U};
     intrImpl->ReserveInputs(argsCount);
     intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
-    intrImpl->AppendInput(acc->impl, compiler::DataType::ANY);
-    intrImpl->AppendInput(input0->impl, compiler::DataType::ANY);
-    intrImpl->AppendInput(input1->impl, compiler::DataType::ANY);
-    intrImpl->AppendInput(input2->impl, compiler::DataType::ANY);
-    intrImpl->AppendInput(input3->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(acc->impl, ark::compiler::DataType::ANY);
+    intrImpl->AppendInput(input0->impl, ark::compiler::DataType::ANY);
+    intrImpl->AppendInput(input1->impl, ark::compiler::DataType::ANY);
+    intrImpl->AppendInput(input2->impl, ark::compiler::DataType::ANY);
+    intrImpl->AppendInput(input3->impl, ark::compiler::DataType::ANY);
     if (hasIC) {
         intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
     }
@@ -827,18 +836,18 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input
 
 // CC-OFFNXT(G.FUN.01) helper function
 AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1, uint64_t imm0, std::va_list args,
-                          compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
+                          ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
 {
-    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::ANY, 0, intrinsicId);
+    auto intrImpl = graph->impl->CreateInstIntrinsic(ark::compiler::DataType::ANY, 0, intrinsicId);
     size_t argsCount {imm0 + 2U};
     intrImpl->ReserveInputs(imm0 + 2U);
     intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
-    intrImpl->AppendInput(input0->impl, compiler::DataType::ANY);
-    intrImpl->AppendInput(input1->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input0->impl, ark::compiler::DataType::ANY);
+    intrImpl->AppendInput(input1->impl, ark::compiler::DataType::ANY);
     for (size_t index = 0; index < imm0; index++) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         AbckitInst *input = va_arg(args, AbckitInst *);
-        intrImpl->AppendInput(input->impl, compiler::DataType::ANY);
+        intrImpl->AppendInput(input->impl, ark::compiler::DataType::ANY);
     }
     if (hasIC) {
         intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
@@ -849,17 +858,17 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *input0, AbckitInst *in
 
 // CC-OFFNXT(G.FUN.01) helper function
 AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *acc, size_t argCount, std::va_list args,
-                          compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
+                          ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
 {
-    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::ANY, 0, intrinsicId);
+    auto intrImpl = graph->impl->CreateInstIntrinsic(ark::compiler::DataType::ANY, 0, intrinsicId);
     size_t argsCount {argCount + 1};
     intrImpl->ReserveInputs(argCount + 1);
     intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
-    intrImpl->AppendInput(acc->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(acc->impl, ark::compiler::DataType::ANY);
     for (size_t index = 0; index < argCount; ++index) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         AbckitInst *input = va_arg(args, AbckitInst *);
-        intrImpl->AppendInput(input->impl, compiler::DataType::ANY);
+        intrImpl->AppendInput(input->impl, ark::compiler::DataType::ANY);
     }
     if (hasIC) {
         intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
@@ -869,16 +878,16 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, AbckitInst *acc, size_t argCount, 
 }
 
 AbckitInst *CreateDynInst(AbckitGraph *graph, size_t argCount, std::va_list args,
-                          compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
+                          ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
 {
-    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::ANY, 0, intrinsicId);
+    auto intrImpl = graph->impl->CreateInstIntrinsic(ark::compiler::DataType::ANY, 0, intrinsicId);
     size_t argsCount {argCount};
     intrImpl->ReserveInputs(argCount);
     intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
     for (size_t index = 0; index < argCount; ++index) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         AbckitInst *input = va_arg(args, AbckitInst *);
-        intrImpl->AppendInput(input->impl, compiler::DataType::ANY);
+        intrImpl->AppendInput(input->impl, ark::compiler::DataType::ANY);
     }
     if (hasIC) {
         intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
@@ -887,79 +896,153 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, size_t argCount, std::va_list args
     return CreateInstFromImpl(graph, intrImpl);
 }
 
-static void LiteralDeleter(pandasm_Literal *p)
-{
-    delete reinterpret_cast<pandasm::LiteralArray::Literal *>(p);
-}
-
 template <class T>
-static AbckitLiteral *GetOrCreateLit(AbckitFile *file, std::unordered_map<T, std::unique_ptr<AbckitLiteral>> &cache,
-                                     T value, panda_file::LiteralTag tagImpl)
+static AbckitLiteral *FindOrCreateLiteral(AbckitFile *file,
+                                          std::unordered_map<T, std::unique_ptr<AbckitLiteral>> &cache, T value,
+                                          ark::panda_file::LiteralTag tagImpl)
 {
     if (cache.count(value) == 1) {
         return cache[value].get();
     }
 
-    auto *literal = new pandasm::LiteralArray::Literal();
+    auto literalDeleter = [](pandasm_Literal *p) -> void {
+        delete reinterpret_cast<ark::pandasm::LiteralArray::Literal *>(p);
+    };
+
+    auto *literal = new ark::pandasm::LiteralArray::Literal();
     literal->tag = tagImpl;
     literal->value = value;
     auto abcLit = std::make_unique<AbckitLiteral>(
-        file, AbckitLiteralImplT(reinterpret_cast<pandasm_Literal *>(literal), LiteralDeleter));
+        file, AbckitLiteralImplT(reinterpret_cast<pandasm_Literal *>(literal), literalDeleter));
     cache.insert({value, std::move(abcLit)});
     return cache[value].get();
 }
 
-AbckitLiteral *GetOrCreateLiteralBoolStatic(AbckitFile *file, bool value)
+AbckitLiteral *FindOrCreateLiteralBoolStaticImpl(AbckitFile *file, bool value)
 {
-    return GetOrCreateLit(file, file->literals.boolLits, value, panda_file::LiteralTag::ARRAY_U1);
+    return FindOrCreateLiteral(file, file->literals.boolLits, value, ark::panda_file::LiteralTag::ARRAY_U1);
 }
 
-AbckitLiteral *GetOrCreateLiteralU8Static(AbckitFile *file, uint8_t value)
+AbckitLiteral *FindOrCreateLiteralU8StaticImpl(AbckitFile *file, uint8_t value)
 {
-    return GetOrCreateLit(file, file->literals.u8Lits, value, panda_file::LiteralTag::ARRAY_U8);
+    return FindOrCreateLiteral(file, file->literals.u8Lits, value, ark::panda_file::LiteralTag::ARRAY_U8);
 }
 
-AbckitLiteral *GetOrCreateLiteralU16Static(AbckitFile *file, uint16_t value)
+AbckitLiteral *FindOrCreateLiteralU16StaticImpl(AbckitFile *file, uint16_t value)
 {
-    return GetOrCreateLit(file, file->literals.u16Lits, value, panda_file::LiteralTag::ARRAY_U16);
+    return FindOrCreateLiteral(file, file->literals.u16Lits, value, ark::panda_file::LiteralTag::ARRAY_U16);
 }
 
-AbckitLiteral *GetOrCreateLiteralMethodAffiliateStatic(AbckitFile *file, uint16_t value)
+AbckitLiteral *FindOrCreateLiteralMethodAffiliateStaticImpl(AbckitFile *file, uint16_t value)
 {
-    return GetOrCreateLit(file, file->literals.methodAffilateLits, value, panda_file::LiteralTag::METHODAFFILIATE);
+    return FindOrCreateLiteral(file, file->literals.methodAffilateLits, value,
+                               ark::panda_file::LiteralTag::METHODAFFILIATE);
 }
 
-AbckitLiteral *GetOrCreateLiteralU32Static(AbckitFile *file, uint32_t value)
+AbckitLiteral *FindOrCreateLiteralU32StaticImpl(AbckitFile *file, uint32_t value)
 {
-    return GetOrCreateLit(file, file->literals.u32Lits, value, panda_file::LiteralTag::ARRAY_U32);
+    return FindOrCreateLiteral(file, file->literals.u32Lits, value, ark::panda_file::LiteralTag::ARRAY_U32);
 }
 
-AbckitLiteral *GetOrCreateLiteralU64Static(AbckitFile *file, uint64_t value)
+AbckitLiteral *FindOrCreateLiteralU64StaticImpl(AbckitFile *file, uint64_t value)
 {
-    return GetOrCreateLit(file, file->literals.u64Lits, value, panda_file::LiteralTag::ARRAY_U64);
+    return FindOrCreateLiteral(file, file->literals.u64Lits, value, ark::panda_file::LiteralTag::ARRAY_U64);
 }
 
-AbckitLiteral *GetOrCreateLiteralFloatStatic(AbckitFile *file, float value)
+AbckitLiteral *FindOrCreateLiteralFloatStaticImpl(AbckitFile *file, float value)
 {
-    return GetOrCreateLit(file, file->literals.floatLits, value, panda_file::LiteralTag::FLOAT);
+    return FindOrCreateLiteral(file, file->literals.floatLits, value, ark::panda_file::LiteralTag::FLOAT);
 }
 
-AbckitLiteral *GetOrCreateLiteralDoubleStatic(AbckitFile *file, double value)
+AbckitLiteral *FindOrCreateLiteralDoubleStaticImpl(AbckitFile *file, double value)
 {
-    return GetOrCreateLit(file, file->literals.doubleLits, value, panda_file::LiteralTag::DOUBLE);
+    return FindOrCreateLiteral(file, file->literals.doubleLits, value, ark::panda_file::LiteralTag::DOUBLE);
 }
 
-AbckitLiteral *GetOrCreateLiteralStringStatic(AbckitFile *file, const std::string &value)
+AbckitLiteral *FindOrCreateLiteralStringStaticImpl(AbckitFile *file, const std::string &value)
 {
-    return GetOrCreateLit(file, file->literals.stringLits, value, panda_file::LiteralTag::STRING);
+    return FindOrCreateLiteral(file, file->literals.stringLits, value, ark::panda_file::LiteralTag::STRING);
 }
 
-AbckitLiteral *GetOrCreateLiteralMethodStatic(AbckitFile *file, const std::string &value)
+AbckitLiteral *FindOrCreateLiteralMethodStaticImpl(AbckitFile *file, const std::string &value)
 {
-    return GetOrCreateLit(file, file->literals.methodLits, value, panda_file::LiteralTag::METHOD);
+    return FindOrCreateLiteral(file, file->literals.methodLits, value, ark::panda_file::LiteralTag::METHOD);
 }
 
-void FixPreassignedRegisters(compiler::Inst *inst, compiler::Register reg, compiler::Register regLarge)
+template <class T, ark::pandasm::Value::Type PANDASM_VALUE_TYPE>
+static AbckitValue *FindOrCreateScalarValue(AbckitFile *file,
+                                            std::unordered_map<T, std::unique_ptr<AbckitValue>> &cache, T value)
+{
+    if (cache.count(value) == 1) {
+        return cache[value].get();
+    }
+
+    auto valueDeleter = [](pandasm_Value *val) -> void { delete reinterpret_cast<ark::pandasm::ScalarValue *>(val); };
+
+    auto *pval = new ark::pandasm::ScalarValue(ark::pandasm::ScalarValue::Create<PANDASM_VALUE_TYPE>(value));
+    auto abcVal =
+        std::make_unique<AbckitValue>(file, AbckitValueImplT(reinterpret_cast<pandasm_Value *>(pval), valueDeleter));
+    cache.insert({value, std::move(abcVal)});
+    return cache[value].get();
+}
+
+AbckitValue *FindOrCreateValueU1StaticImpl(AbckitFile *file, bool value)
+{
+    return FindOrCreateScalarValue<bool, ark::pandasm::Value::Type::U1>(file, file->values.boolVals, value);
+}
+
+AbckitValue *FindOrCreateValueDoubleStaticImpl(AbckitFile *file, double value)
+{
+    return FindOrCreateScalarValue<double, ark::pandasm::Value::Type::F64>(file, file->values.doubleVals, value);
+}
+
+AbckitValue *FindOrCreateValueStringStaticImpl(AbckitFile *file, const std::string &value)
+{
+    return FindOrCreateScalarValue<std::string, ark::pandasm::Value::Type::STRING>(file, file->values.stringVals,
+                                                                                   value);
+}
+
+AbckitValue *FindOrCreateLiteralArrayValueStaticImpl(AbckitFile *file, const std::string &value)
+{
+    return FindOrCreateScalarValue<std::string, ark::pandasm::Value::Type::LITERALARRAY>(file, file->values.litarrVals,
+                                                                                         value);
+}
+
+AbckitValue *FindOrCreateValueStatic(AbckitFile *file, const ark::pandasm::Value &value)
+{
+    switch (value.GetType()) {
+        case ark::pandasm::Value::Type::U1:
+            return FindOrCreateValueU1StaticImpl(file, value.GetAsScalar()->GetValue<bool>());
+        case ark::pandasm::Value::Type::F64:
+            return FindOrCreateValueDoubleStaticImpl(file, value.GetAsScalar()->GetValue<double>());
+        case ark::pandasm::Value::Type::STRING:
+            return FindOrCreateValueStringStaticImpl(file, value.GetAsScalar()->GetValue<std::string>());
+        case ark::pandasm::Value::Type::LITERALARRAY:
+            return FindOrCreateLiteralArrayValueStaticImpl(file, value.GetAsScalar()->GetValue<std::string>());
+        case ark::pandasm::Value::Type::I8:
+        case ark::pandasm::Value::Type::U8:
+        case ark::pandasm::Value::Type::I16:
+        case ark::pandasm::Value::Type::U16:
+        case ark::pandasm::Value::Type::I32:
+        case ark::pandasm::Value::Type::U32:
+        case ark::pandasm::Value::Type::I64:
+        case ark::pandasm::Value::Type::U64:
+        case ark::pandasm::Value::Type::F32:
+        case ark::pandasm::Value::Type::STRING_NULLPTR:
+        case ark::pandasm::Value::Type::RECORD:
+        case ark::pandasm::Value::Type::METHOD:
+        case ark::pandasm::Value::Type::ENUM:
+        case ark::pandasm::Value::Type::ANNOTATION:
+        case ark::pandasm::Value::Type::ARRAY:
+        case ark::pandasm::Value::Type::VOID:
+        case ark::pandasm::Value::Type::METHOD_HANDLE:
+        case ark::pandasm::Value::Type::UNKNOWN:
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
+}
+
+void FixPreassignedRegisters(ark::compiler::Inst *inst, ark::compiler::Register reg, ark::compiler::Register regLarge)
 {
     for (size_t idx = 0; idx < inst->GetInputsCount(); idx++) {
         if (inst->GetSrcReg(idx) == reg) {
@@ -971,28 +1054,29 @@ void FixPreassignedRegisters(compiler::Inst *inst, compiler::Register reg, compi
     }
 }
 
-void FixPreassignedRegisters(compiler::Graph *graph)
+void FixPreassignedRegisters(ark::compiler::Graph *graph)
 {
     for (auto bb : graph->GetBlocksRPO()) {
         for (auto inst : bb->AllInsts()) {
-            FixPreassignedRegisters(inst, compiler::INVALID_REG, compiler::INVALID_REG_LARGE);
-            FixPreassignedRegisters(inst, compiler::INVALID_REG - 1U, compiler::INVALID_REG_LARGE - 1U);  // ACC_REG
+            FixPreassignedRegisters(inst, ark::compiler::INVALID_REG, ark::compiler::INVALID_REG_LARGE);
+            FixPreassignedRegisters(inst, ark::compiler::INVALID_REG - 1U,
+                                    ark::compiler::INVALID_REG_LARGE - 1U);  // ACC_REG
         }
     }
 }
 
-bool AllocateRegisters(compiler::Graph *graph, uint8_t reservedReg)
+bool AllocateRegisters(ark::compiler::Graph *graph, uint8_t reservedReg)
 {
-    graph->RunPass<bytecodeopt::RegAccAlloc>();
-    compiler::RegAllocResolver(graph).ResolveCatchPhis();
-    if (!compiler::IsFrameSizeLarge()) {
-        return graph->RunPass<compiler::RegAllocGraphColoring>(compiler::GetFrameSize());
+    graph->RunPass<ark::bytecodeopt::RegAccAlloc>();
+    ark::compiler::RegAllocResolver(graph).ResolveCatchPhis();
+    if (!ark::compiler::IsFrameSizeLarge()) {
+        return graph->RunPass<ark::compiler::RegAllocGraphColoring>(ark::compiler::GetFrameSize());
     }
-    compiler::LocationMask regMask(graph->GetLocalAllocator());
-    regMask.Resize(compiler::GetFrameSize());
+    ark::compiler::LocationMask regMask(graph->GetLocalAllocator());
+    regMask.Resize(ark::compiler::GetFrameSize());
     regMask.Set(reservedReg);
     FixPreassignedRegisters(graph);
-    return graph->RunPass<compiler::RegAllocGraphColoring>(regMask);
+    return graph->RunPass<ark::compiler::RegAllocGraphColoring>(regMask);
 }
 
 }  // namespace libabckit

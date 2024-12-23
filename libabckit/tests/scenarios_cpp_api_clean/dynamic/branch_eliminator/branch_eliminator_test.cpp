@@ -127,15 +127,16 @@ ConstantMetaIterator GetConstantMetaIterator(const abckit::Instruction &inst, co
 {
     auto end = constants.end();
 
-    if (inst.GetOpcodeDyn() != ABCKIT_ISA_API_DYNAMIC_OPCODE_LDOBJBYNAME) {
+    if (inst.GetGraph()->DynIsa().GetOpcode(inst) != ABCKIT_ISA_API_DYNAMIC_OPCODE_LDOBJBYNAME) {
         return end;
     }
     auto ldExternalModuleVar = inst.GetInput(0);
-    if (ldExternalModuleVar.GetOpcodeDyn() != ABCKIT_ISA_API_DYNAMIC_OPCODE_LDEXTERNALMODULEVAR) {
+    if (ldExternalModuleVar.GetGraph()->DynIsa().GetOpcode(ldExternalModuleVar) !=
+        ABCKIT_ISA_API_DYNAMIC_OPCODE_LDEXTERNALMODULEVAR) {
         return end;
     }
 
-    auto idesc = ldExternalModuleVar.GetImportDescriptorDyn();
+    auto idesc = ldExternalModuleVar.GetGraph()->DynIsa().GetImportDescriptor(ldExternalModuleVar);
     auto range = suspects.equal_range(idesc);
     if (range.first == range.second) {
         return end;
@@ -170,7 +171,7 @@ void ReplaceLdObjByNameWithBoolean(abckit::Graph &graph, abckit::Instruction ldO
     const bool fieldVal = constMeta.fieldValue;
     abckit::BasicBlock bb = ldObjByName.GetBasicBlock();
     // abckit::Graph& graph = *const_cast<abckit::Graph*>(bb.GetGraph());
-    auto value = fieldVal ? graph.DynIsa().CreateLdTrue() : graph.DynIsa().CreateLdFalse();
+    auto value = fieldVal ? graph.DynIsa().CreateLdtrue() : graph.DynIsa().CreateLdfalse();
     value.InsertAfter(ldObjByName);
     ReplaceUsers(ldObjByName, value);
 
@@ -179,7 +180,8 @@ void ReplaceLdObjByNameWithBoolean(abckit::Graph &graph, abckit::Instruction ldO
     std::vector<abckit::Instruction> removableChecks;
     ldExternalModuleVar.VisitUsers([&](abckit::Instruction user) -> bool {
         if (user != ldObjByName) {
-            if (user.GetOpcodeDyn() != ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_UNDEFINEDIFHOLEWITHNAME) {
+            if (user.GetGraph()->DynIsa().GetOpcode(user) !=
+                ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_UNDEFINEDIFHOLEWITHNAME) {
                 isRemovable = false;
             } else {
                 removableChecks.push_back(std::move(user));
@@ -228,7 +230,7 @@ bool ReplaceModuleVarByConstant(abckit::Graph &graph, const ConstantMetaCollecti
 
 bool GetInstAsBool(const abckit::Instruction &inst)
 {
-    switch (inst.GetOpcodeDyn()) {
+    switch (inst.GetGraph()->DynIsa().GetOpcode(inst)) {
         case ABCKIT_ISA_API_DYNAMIC_OPCODE_CONSTANT:
             return inst.GetConstantValueI64() != 0;
         case ABCKIT_ISA_API_DYNAMIC_OPCODE_LDTRUE:
@@ -247,7 +249,7 @@ bool GetInstAsBool(const abckit::Instruction &inst)
 
 bool CanBeRemoved(const abckit::Instruction &inst)
 {
-    switch (inst.GetOpcodeDyn()) {
+    switch (inst.GetGraph()->DynIsa().GetOpcode(inst)) {
         case ABCKIT_ISA_API_DYNAMIC_OPCODE_CONSTANT:
         case ABCKIT_ISA_API_DYNAMIC_OPCODE_LDTRUE:
         case ABCKIT_ISA_API_DYNAMIC_OPCODE_ISTRUE:
@@ -292,7 +294,7 @@ bool LoweringConstantsSinglePass(abckit::Graph &graph)
 {
     std::vector<abckit::Instruction> boolUsers;
     auto fnInstCollectBoolUsers = [&boolUsers](const abckit::Instruction &user) -> bool {
-        auto userOp = user.GetOpcodeDyn();
+        auto userOp = user.GetGraph()->DynIsa().GetOpcode(user);
         if (userOp == ABCKIT_ISA_API_DYNAMIC_OPCODE_ISTRUE || userOp == ABCKIT_ISA_API_DYNAMIC_OPCODE_ISFALSE ||
             userOp == ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLRUNTIME_ISTRUE ||
             userOp == ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLRUNTIME_ISFALSE) {
@@ -302,7 +304,7 @@ bool LoweringConstantsSinglePass(abckit::Graph &graph)
     };
 
     std::optional<abckit::Instruction> maybeLdBool = GraphInstsFindIf(graph, [&](const abckit::Instruction &inst) {
-        auto op = inst.GetOpcodeDyn();
+        auto op = inst.GetGraph()->DynIsa().GetOpcode(inst);
         if (op != ABCKIT_ISA_API_DYNAMIC_OPCODE_LDTRUE && op != ABCKIT_ISA_API_DYNAMIC_OPCODE_LDFALSE) {
             return false;
         }
@@ -319,7 +321,7 @@ bool LoweringConstantsSinglePass(abckit::Graph &graph)
 
     for (abckit::Instruction &isBool : boolUsers) {
         auto isBoolVal = GetInstAsBool(isBool);
-        auto ldBool = ldBoolVal == isBoolVal ? graph.DynIsa().CreateLdTrue() : graph.DynIsa().CreateLdFalse();
+        auto ldBool = ldBoolVal == isBoolVal ? graph.DynIsa().CreateLdtrue() : graph.DynIsa().CreateLdfalse();
         ldBool.InsertAfter(isBool);
         ReplaceUsers(isBool, ldBool);
         isBool.Remove();
@@ -342,17 +344,17 @@ bool LoweringConstants(abckit::Graph &graph)
 
 bool IsEliminatableIfInst(const abckit::Instruction &inst)
 {
-    if (inst.GetOpcodeDyn() != ABCKIT_ISA_API_DYNAMIC_OPCODE_IF || inst.GetInputCount() != 2U) {
+    if (inst.GetGraph()->DynIsa().GetOpcode(inst) != ABCKIT_ISA_API_DYNAMIC_OPCODE_IF || inst.GetInputCount() != 2U) {
         return false;
     }
     auto ldBool = inst.GetInput(0);
-    auto op = ldBool.GetOpcodeDyn();
+    auto op = ldBool.GetGraph()->DynIsa().GetOpcode(ldBool);
     if (op != ABCKIT_ISA_API_DYNAMIC_OPCODE_LDTRUE && op != ABCKIT_ISA_API_DYNAMIC_OPCODE_LDFALSE) {
         return false;
     }
 
     auto constInst = inst.GetInput(1);
-    return constInst.GetOpcodeDyn() == ABCKIT_ISA_API_DYNAMIC_OPCODE_CONSTANT;
+    return constInst.GetGraph()->DynIsa().GetOpcode(constInst) == ABCKIT_ISA_API_DYNAMIC_OPCODE_CONSTANT;
 }
 
 void DeleteUnreachableBranch(abckit::Graph &graph, abckit::Instruction &ifInst)
@@ -362,7 +364,7 @@ void DeleteUnreachableBranch(abckit::Graph &graph, abckit::Instruction &ifInst)
     const bool valLhs = GetInstAsBool(ldBool);
     const bool valRhs = GetInstAsBool(constInst);
 
-    auto conditionCode = ifInst.GetConditionCodeDyn();
+    auto conditionCode = ifInst.GetGraph()->DynIsa().GetConditionCode(ifInst);
     EXPECT_TRUE(conditionCode == ABCKIT_ISA_API_DYNAMIC_CONDITION_CODE_CC_EQ ||
                 conditionCode == ABCKIT_ISA_API_DYNAMIC_CONDITION_CODE_CC_NE);
     bool result = (conditionCode == ABCKIT_ISA_API_DYNAMIC_CONDITION_CODE_CC_EQ && valLhs == valRhs) ||
@@ -441,7 +443,7 @@ bool MethodHasBranch(const abckit::File &file, const std::string &moduleName, co
 
     auto graph = foundMethod->CreateGraph();
     auto maybeIfInst = GraphInstsFindIf(graph, [&](const abckit::Instruction &inst) {
-        return inst.GetOpcodeDyn() == ABCKIT_ISA_API_DYNAMIC_OPCODE_IF;
+        return inst.GetGraph()->DynIsa().GetOpcode(inst) == ABCKIT_ISA_API_DYNAMIC_OPCODE_IF;
     });
     return maybeIfInst.has_value();
 }

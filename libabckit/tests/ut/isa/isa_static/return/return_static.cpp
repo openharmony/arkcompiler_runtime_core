@@ -35,7 +35,7 @@ class LibAbcKitCreateReturnInstTest : public ::testing::Test {};
 
 static void TransformIrCreateReturnInstValid(AbckitGraph *graph)
 {
-    AbckitInst *firstInst = g_implG->gCreateConstantI64(graph, 5);
+    AbckitInst *firstInst = g_implG->gFindOrCreateConstantI64(graph, 5);
     AbckitInst *mainInst = g_statG->iCreateReturn(graph, firstInst);
     ASSERT_NE(mainInst, nullptr);
 

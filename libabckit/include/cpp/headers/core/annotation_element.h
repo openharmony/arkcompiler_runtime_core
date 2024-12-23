@@ -19,7 +19,7 @@
 #include "../base_classes.h"
 #include "../value.h"
 
-#include <string_view>
+#include <string>
 
 namespace abckit::core {
 
@@ -60,12 +60,12 @@ public:
      * @brief Constructor
      * @param other
      */
-    AnnotationElement(AnnotationElement &&other) = default;  // CC-OFF(G.CLS.07-CPP) plan to break polymorphism
+    AnnotationElement(AnnotationElement &&other) = default;  // CC-OFF(G.CLS.07): design decision
 
     /**
      * @brief Constructor
      * @param other
-     * @return this
+     * @return AnnotationElement&
      */
     AnnotationElement &operator=(AnnotationElement &&other) = default;
 
@@ -78,20 +78,50 @@ public:
     // ...
 
     /**
-     * @brief Returns name for this annotation element.
-     * @return `std::string_view` with a name.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `bool(*this)` results in `false`.
-     * @note Allocates
+     * @brief Returns binary file that the Annotation Element is a part of.
+     * @return `const File *`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
-    std::string_view GetName() const;
+    const File *GetFile() const;
 
     /**
-     * @brief Returns value for this annotation element.
-     * @return `abckit::Value` with a value.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `bool(*this)` results in `false`.
+     * @brief Returns name for annotation element.
+     * @return `std::string`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      * @note Allocates
      */
+    std::string GetName() const;
+
+    /**
+     * @brief Returns value for annotation element.
+     * @return `Value`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
     Value GetValue() const;
+
+    /**
+     * @brief Returns annotation for Annotation Element.
+     * @return core::Annotation.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    core::Annotation GetAnnotation() const;
+
+    // Core API's.
+    // ...
+
+private:
+    /**
+     * Constructor
+     * @param conf
+     * @param anne
+     * @param file
+     */
+    AnnotationElement(AbckitCoreAnnotationElement *anne, const ApiConfig *conf, const File *file)
+        : ViewInResource(anne), conf_(conf)
+    {
+        SetResource(file);
+    };
+    const ApiConfig *conf_;
 
 protected:
     /**
@@ -102,17 +132,6 @@ protected:
     {
         return conf_;
     }
-
-private:
-    /**
-     * Private constructor
-     * @param conf - pointer to ApiConfig
-     * @param anne - pointer to Core C API annotation element
-     * @param file - pointer to owning `File`
-     */
-    AnnotationElement(AbckitCoreAnnotationElement *anne, const ApiConfig *conf, const File *file);
-
-    const ApiConfig *conf_;
 };
 
 }  // namespace abckit::core

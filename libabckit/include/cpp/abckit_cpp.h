@@ -28,6 +28,7 @@
 #include "./headers/value.h"
 #include "./headers/literal.h"
 #include "./headers/literal_array.h"
+#include "./headers/type.h"
 
 #include "./headers/core/annotation_element.h"
 #include "./headers/core/annotation_interface_field.h"
@@ -53,6 +54,10 @@
 #include "./headers/arkts/module.h"
 #include "./headers/arkts/namespace.h"
 
+#include "./headers/js/export_descriptor.h"
+#include "./headers/js/import_descriptor.h"
+#include "./headers/js/module.h"
+
 // implementations
 #include "./headers/core/annotation_interface_field_impl.h"
 #include "./headers/core/annotation_interface_impl.h"
@@ -74,6 +79,11 @@
 #include "./headers/arkts/class_impl.h"
 #include "./headers/arkts/export_descriptor_impl.h"
 #include "./headers/arkts/import_descriptor_impl.h"
+#include "./headers/arkts/namespace_impl.h"
+
+#include "./headers/js/export_descriptor_impl.h"
+#include "./headers/js/import_descriptor_impl.h"
+#include "./headers/js/module_impl.h"
 
 #include "./headers/dynamic_isa_impl.h"
 #include "./headers/basic_block_impl.h"
@@ -81,6 +91,7 @@
 #include "./headers/graph_impl.h"
 #include "./headers/instruction_impl.h"
 #include "./headers/literal_impl.h"
+#include "./headers/literal_array_impl.h"
 #include "./headers/value_impl.h"
 
 #include "./headers/hash_specializations.h"

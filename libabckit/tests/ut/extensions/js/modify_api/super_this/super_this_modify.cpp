@@ -49,7 +49,7 @@ static void StByNameTest(AbckitFile *file, AbckitGraph *graph, bool isSuper)
         ASSERT_NE(param, nullptr);
     }
 
-    AbckitInst *newAge = g_implG->gCreateConstantI32(graph, 2);
+    AbckitInst *newAge = g_implG->gFindOrCreateConstantI32(graph, 2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(newAge, nullptr);
 
@@ -193,7 +193,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicIcreateStthisbynameLarge)
 
 static void StByValueTest(AbckitFile *file, AbckitGraph *graph, bool isSuper)
 {
-    AbckitInst *newAge = g_implG->gCreateConstantI32(graph, 2);
+    AbckitInst *newAge = g_implG->gFindOrCreateConstantI32(graph, 2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(newAge, nullptr);
 

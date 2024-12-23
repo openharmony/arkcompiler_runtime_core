@@ -70,8 +70,10 @@ static void TransformIrSendableClass(AbckitFile *file, AbckitGraph *graph, bool 
     auto *sendableKlass = CreateSendableClass(klass, file, graph);
     ASSERT_NE(sendableKlass, nullptr);
 
-    AbckitInst *newsendableenv = isWideMode ? g_dynG->iCreateCallruntimeWidenewsendableenv(graph, 0x1)
-                                            : g_dynG->iCreateCallruntimeNewsendableenv(graph, 0x1);
+    // Slot number passed to create newsendableenv allows [0, slot number - 1] slots to be used by other instructions in
+    // this env. Slot index imm used in stsendablevar and ldsendablevar must be less than the slot number.
+    AbckitInst *newsendableenv = isWideMode ? g_dynG->iCreateCallruntimeWidenewsendableenv(graph, imm + 1)
+                                            : g_dynG->iCreateCallruntimeNewsendableenv(graph, imm + 1);
     ASSERT_NE(newsendableenv, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 

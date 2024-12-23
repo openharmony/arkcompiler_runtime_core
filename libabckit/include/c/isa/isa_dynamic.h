@@ -583,6 +583,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `acc` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` or `imm1` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateLdprivateproperty)(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0, uint64_t imm1);
@@ -601,6 +602,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `acc` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `input0` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` or `imm1` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateStprivateproperty)(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0, uint64_t imm1,
@@ -618,6 +620,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `acc` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` or `imm1` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateTestin)(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0, uint64_t imm1);
@@ -730,6 +733,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `input0` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `input1` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateCreateobjectwithexcludedkeys)(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1,
@@ -751,6 +755,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `input0` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `input1` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateWideCreateobjectwithexcludedkeys)(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1,
@@ -808,6 +813,7 @@ struct AbckitIsaApiDynamic {
      * @param [ in ] ... - Insts containing class object and arguments.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `argCount` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateNewobjrange)(AbckitGraph *graph, size_t argCount, ... /* in AbckitInst *inputs... */);
@@ -822,6 +828,7 @@ struct AbckitIsaApiDynamic {
      * @param [ in ] ... - Insts containing class object and arguments.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `argCount` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateWideNewobjrange)(AbckitGraph *graph, size_t argCount, ... /* in AbckitInst *inputs... */);
@@ -834,6 +841,7 @@ struct AbckitIsaApiDynamic {
      * @param [ in ] imm0 - Number of slots in the lexical environment.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateNewlexenv)(AbckitGraph *graph, uint64_t imm0);
@@ -846,6 +854,7 @@ struct AbckitIsaApiDynamic {
      * @param [ in ] imm0 - Number of slots in the lexical environment.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateWideNewlexenv)(AbckitGraph *graph, uint64_t imm0);
@@ -861,6 +870,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `literalArray` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateNewlexenvwithname)(AbckitGraph *graph, uint64_t imm0, AbckitLiteralArray *literalArray);
@@ -876,6 +886,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `literalArray` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateWideNewlexenvwithname)(AbckitGraph *graph, uint64_t imm0, AbckitLiteralArray *literalArray);
@@ -1446,6 +1457,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `acc` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `input0` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateCallruntimeDefinefieldbyindex)(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0,
@@ -1478,6 +1490,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `literalArray` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateCallruntimeCreateprivateproperty)(AbckitGraph *graph, uint64_t imm0,
@@ -1498,6 +1511,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `acc` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `input0` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` or `imm1` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateCallruntimeDefineprivateproperty)(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0,
@@ -1537,6 +1551,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if corresponding `AbckitFile` containing `function` and `graph`
      * differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateCallruntimeDefinesendableclass)(AbckitGraph *graph, AbckitCoreFunction *function,
@@ -1551,6 +1566,7 @@ struct AbckitIsaApiDynamic {
      * @param [ in ] imm0 - Lexical environment.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateCallruntimeLdsendableclass)(AbckitGraph *graph, uint64_t imm0);
@@ -1562,6 +1578,7 @@ struct AbckitIsaApiDynamic {
      * @param [ in ] imm0 - Index
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateCallruntimeLdsendableexternalmodulevar)(AbckitGraph *graph, uint64_t imm0);
@@ -1573,6 +1590,7 @@ struct AbckitIsaApiDynamic {
      * @param [ in ] imm0 - Index
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateCallruntimeWideldsendableexternalmodulevar)(AbckitGraph *graph, uint64_t imm0);
@@ -1581,9 +1599,10 @@ struct AbckitIsaApiDynamic {
      * @brief Creates instruction with opcode CALLRUNTIME_NEWSENDABLEENV.
      * @return Pointer to created `AbckitInst`.
      * @param [ in ] graph - Graph where instruction will be inserted.
-     * @param [ in ] imm0 - Number of variables.
+     * @param [ in ] imm0 - Number of slots in a shared lexical environment.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateCallruntimeNewsendableenv)(AbckitGraph *graph, uint64_t imm0);
@@ -1592,9 +1611,10 @@ struct AbckitIsaApiDynamic {
      * @brief Creates instruction with opcode CALLRUNTIME_WIDENEWSENDABLEENV.
      * @return Pointer to created `AbckitInst`.
      * @param [ in ] graph - Graph where instruction will be inserted.
-     * @param [ in ] imm0 - Number of variables.
+     * @param [ in ] imm0 - Number of slots in a shared lexical environment.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateCallruntimeWidenewsendableenv)(AbckitGraph *graph, uint64_t imm0);
@@ -1610,6 +1630,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `acc` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` or `imm1` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateCallruntimeStsendablevar)(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0, uint64_t imm1);
@@ -1626,6 +1647,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` and `AbckitInst` differs.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `acc` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` or `imm1` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateCallruntimeWidestsendablevar)(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0,
@@ -1639,6 +1661,7 @@ struct AbckitIsaApiDynamic {
      * @param [ in ] imm1 - Slot number.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` or `imm1` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateCallruntimeLdsendablevar)(AbckitGraph *graph, uint64_t imm0, uint64_t imm1);
@@ -1651,6 +1674,7 @@ struct AbckitIsaApiDynamic {
      * @param [ in ] imm1 - Slot number.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` or `imm1` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateCallruntimeWideldsendablevar)(AbckitGraph *graph, uint64_t imm0, uint64_t imm1);
@@ -1803,6 +1827,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `acc` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateThrowIfsupernotcorrectcall)(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0);
@@ -1910,6 +1935,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `acc` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `argCount` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateCallrange)(AbckitGraph *graph, AbckitInst *acc, size_t argCount, ...);
@@ -1926,6 +1952,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `acc` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `argCount` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateWideCallrange)(AbckitGraph *graph, AbckitInst *acc, size_t argCount, ...);
@@ -2060,6 +2087,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `argCount` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateCallthisrange)(AbckitGraph *graph, AbckitInst *acc, size_t argCount, ...);
@@ -2077,6 +2105,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `argCount` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateWideCallthisrange)(AbckitGraph *graph, AbckitInst *acc, size_t argCount, ...);
@@ -2124,6 +2153,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `argCount` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateSupercallarrowrange)(AbckitGraph *graph, AbckitInst *acc, size_t argCount, ...);
@@ -2141,6 +2171,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `argCount` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateWideSupercallarrowrange)(AbckitGraph *graph, AbckitInst *acc, size_t argCount, ...);
@@ -2179,6 +2210,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if  AbckitCoreFunction *function  is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateDefinefunc)(AbckitGraph *graph, AbckitCoreFunction *function, uint64_t imm0);
@@ -2196,6 +2228,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitCoreFunction *function  is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateDefinemethod)(AbckitGraph *graph, AbckitInst *acc, AbckitCoreFunction *function,
@@ -2216,6 +2249,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input0` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateDefineclasswithbuffer)(AbckitGraph *graph, AbckitCoreFunction *function,
@@ -2464,6 +2498,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `acc` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateLdobjbyindex)(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0);
@@ -2478,6 +2513,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `acc` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateWideLdobjbyindex)(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0);
@@ -2494,6 +2530,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input0` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateStobjbyindex)(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, uint64_t imm0);
@@ -2510,6 +2547,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input0` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateWideStobjbyindex)(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, uint64_t imm0);
@@ -2527,6 +2565,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input0` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateStownbyindex)(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, uint64_t imm0);
@@ -2544,6 +2583,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input0` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateWideStownbyindex)(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, uint64_t imm0);
@@ -2587,6 +2627,7 @@ struct AbckitIsaApiDynamic {
      * @param [ in ] imm0 - The order in which the remaining parameters in the parameter list start.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateCopyrestargs)(AbckitGraph *graph, uint64_t imm0);
@@ -2598,6 +2639,7 @@ struct AbckitIsaApiDynamic {
      * @param [ in ] imm0 - The order in which the remaining parameters in the parameter list start.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateWideCopyrestargs)(AbckitGraph *graph, uint64_t imm0);
@@ -2611,6 +2653,7 @@ struct AbckitIsaApiDynamic {
      * @param [ in ] imm1 - Slot number.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` or `imm1` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateLdlexvar)(AbckitGraph *graph, uint64_t imm0, uint64_t imm1);
@@ -2624,6 +2667,7 @@ struct AbckitIsaApiDynamic {
      * @param [ in ] imm1 - Slot number.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` or `imm1` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateWideLdlexvar)(AbckitGraph *graph, uint64_t imm0, uint64_t imm1);
@@ -2640,6 +2684,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `acc` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` or `imm1` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateStlexvar)(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0, uint64_t imm1);
@@ -2656,6 +2701,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning `acc` and `graph` differs.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` or `imm1` type overflow.
      * @note Allocates
      */
     AbckitInst *(*iCreateWideStlexvar)(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0, uint64_t imm1);
@@ -3013,6 +3059,7 @@ struct AbckitIsaApiDynamic {
      * @param [ in ] imm0 - Long value containing patch variable index.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph` is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      */
     AbckitInst *(*iCreateWideLdpatchvar)(AbckitGraph *graph, uint64_t imm0);
 
@@ -3026,6 +3073,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if corresponding `AbckitFile`s owning `graph` and `acc` are differ.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph` is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      */
     AbckitInst *(*iCreateWideStpatchvar)(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0);
 
@@ -3068,6 +3116,7 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if corresponding `AbckitFile`s owning `graph` and `acc` are differ.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph` is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `imm0` type overflow.
      */
     AbckitInst *(*iCreateSetgeneratorstate)(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0);
 

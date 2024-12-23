@@ -17,11 +17,31 @@
 #define CPP_ABCKIT_CORE_ANNOTATION_INTERFACE_IMPL_H
 
 #include "./annotation_interface.h"
+#include "./module.h"
 
 namespace abckit::core {
 
+inline const File *AnnotationInterface::GetFile() const
+{
+    return GetResource();
+}
+
+inline bool AnnotationInterface::EnumerateFields(const std::function<bool(core::AnnotationInterfaceField)> &cb) const
+{
+    Payload<const std::function<bool(core::AnnotationInterfaceField)> &> payload {cb, GetApiConfig(), GetResource()};
+
+    bool isNormalExit = GetApiConfig()->cIapi_->annotationInterfaceEnumerateFields(
+        GetView(), &payload, [](AbckitCoreAnnotationInterfaceField *func, void *data) {
+            const auto &payload =
+                *static_cast<Payload<const std::function<bool(core::AnnotationInterfaceField)> &> *>(data);
+            return payload.data(core::AnnotationInterfaceField(func, payload.config, payload.resource));
+        });
+    CheckError(GetApiConfig());
+    return isNormalExit;
+}
+
 // CC-OFFNXT(G.FUD.06) perf critical
-inline std::vector<AnnotationInterfaceField> AnnotationInterface::GetFields()
+inline std::vector<AnnotationInterfaceField> AnnotationInterface::GetFields() const
 {
     std::vector<core::AnnotationInterfaceField> namespaces;
     Payload<std::vector<core::AnnotationInterfaceField> *> payload {&namespaces, GetApiConfig(), GetResource()};
@@ -38,14 +58,21 @@ inline std::vector<AnnotationInterfaceField> AnnotationInterface::GetFields()
     return namespaces;
 }
 
-inline std::string_view AnnotationInterface::GetName()
+inline core::Module AnnotationInterface::GetModule() const
+{
+    auto mod = GetApiConfig()->cIapi_->annotationInterfaceGetModule(GetView());
+    CheckError(GetApiConfig());
+    return Module(mod, GetApiConfig(), GetResource());
+}
+
+inline std::string AnnotationInterface::GetName() const
 {
     const ApiConfig *conf = GetApiConfig();
     AbckitString *abcStr = conf->cIapi_->annotationInterfaceGetName(GetView());
     CheckError(conf);
-    std::string_view sView = conf->cIapi_->abckitStringToString(abcStr);
+    std::string str = conf->cIapi_->abckitStringToString(abcStr);
     CheckError(conf);
-    return sView;
+    return str;
 }
 
 }  // namespace abckit::core

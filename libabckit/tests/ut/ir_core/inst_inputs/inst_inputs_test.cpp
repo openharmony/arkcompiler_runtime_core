@@ -36,9 +36,9 @@ namespace {
 
 void TransformIrStatic(AbckitGraph *graph)
 {
-    auto constant1 = g_implG->gCreateConstantI64(graph, 10);
+    auto constant1 = g_implG->gFindOrCreateConstantI64(graph, 10);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto constant2 = g_implG->gCreateConstantI64(graph, 20);
+    auto constant2 = g_implG->gFindOrCreateConstantI64(graph, 20);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     AbckitInst *callInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC);
@@ -52,9 +52,9 @@ void TransformIrStatic(AbckitGraph *graph)
 
 void TransformIrStatic2(AbckitGraph *graph)
 {
-    auto constant1 = g_implG->gCreateConstantI64(graph, 10U);
+    auto constant1 = g_implG->gFindOrCreateConstantI64(graph, 10U);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto constant2 = g_implG->gCreateConstantI64(graph, 20U);
+    auto constant2 = g_implG->gFindOrCreateConstantI64(graph, 20U);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     AbckitInst *callInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC);
@@ -140,9 +140,9 @@ TEST_F(LibAbcKitIrInstInputsTest, StaticSetInputs)
 namespace {
 void TransformIrDynamic(AbckitGraph *graph)
 {
-    auto constant1 = g_implG->gCreateConstantI64(graph, 10);
+    auto constant1 = g_implG->gFindOrCreateConstantI64(graph, 10);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto constant2 = g_implG->gCreateConstantI64(graph, 20);
+    auto constant2 = g_implG->gFindOrCreateConstantI64(graph, 20);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     AbckitInst *callInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1);
@@ -156,9 +156,9 @@ void TransformIrDynamic(AbckitGraph *graph)
 
 void TransformIrDynamic2(AbckitGraph *graph)
 {
-    auto constant1 = g_implG->gCreateConstantI64(graph, 10);
+    auto constant1 = g_implG->gFindOrCreateConstantI64(graph, 10);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto constant2 = g_implG->gCreateConstantI64(graph, 20);
+    auto constant2 = g_implG->gFindOrCreateConstantI64(graph, 20);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     AbckitInst *callInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1);

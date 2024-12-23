@@ -142,7 +142,7 @@ AbckitGraph *CreateGraphFromFunctionDynamic(AbckitCoreFunction *function)
     }
     if (functionOffset == 0) {
         LIBABCKIT_LOG(DEBUG) << "functionOffset == 0\n";
-        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
         return nullptr;
     }
 
@@ -150,9 +150,8 @@ AbckitGraph *CreateGraphFromFunctionDynamic(AbckitCoreFunction *function)
         new AbckitIrInterface(maps->methods, maps->fields, maps->classes, maps->strings, maps->literalarrays);
 
     auto *wpf = new FileWrapper(reinterpret_cast<const void *>(pf));
-    auto [graph, error] = GraphWrapper::BuildGraphDynamic(wpf, irInterface, file, functionOffset);
-    if (error != AbckitStatus::ABCKIT_STATUS_NO_ERROR) {
-        statuses::SetLastError(error);
+    auto graph = GraphWrapper::BuildGraphDynamic(wpf, irInterface, file, functionOffset);
+    if (statuses::GetLastError() != AbckitStatus::ABCKIT_STATUS_NO_ERROR) {
         return nullptr;
     }
 
@@ -491,13 +490,13 @@ bool LiteralArrayEnumerateElementsDynamic(AbckitLiteralArray *litArr, void *data
 
     size_t size = arrImpl->literals_.size();
     if (size % 2U != 0) {
-        statuses::SetLastError(ABCKIT_STATUS_TODO);
+        statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
         return false;
     }
 
     for (size_t idx = 1; idx < size; idx += 2U) {
         auto litImpl = arrImpl->literals_[idx];
-        if (!cb(litArr->file, GetOrCreateLiteralDynamic(litArr->file, litImpl), data)) {
+        if (!cb(litArr->file, FindOrCreateLiteralDynamic(litArr->file, litImpl), data)) {
             return false;
         }
     }
@@ -511,7 +510,7 @@ bool LiteralArrayEnumerateElementsDynamic(AbckitLiteralArray *litArr, void *data
 AbckitType *ValueGetTypeDynamic(AbckitValue *value)
 {
     LIBABCKIT_LOG_FUNC;
-    auto *pVal = static_cast<pandasm::ScalarValue *>(value->GetDynamicImpl());
+    auto *pVal = reinterpret_cast<pandasm::ScalarValue *>(value->val.get());
     AbckitTypeId id;
     switch (pVal->GetType()) {
         case pandasm::Value::Type::U1:
@@ -549,11 +548,11 @@ bool ValueGetU1Dynamic(AbckitValue *value)
 {
     LIBABCKIT_LOG_FUNC;
     if (ValueGetTypeDynamic(value)->id != ABCKIT_TYPE_ID_U1) {
-        statuses::SetLastError(ABCKIT_STATUS_TODO);
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return false;
     }
 
-    auto *pVal = static_cast<pandasm::ScalarValue *>(value->GetDynamicImpl());
+    auto *pVal = reinterpret_cast<pandasm::ScalarValue *>(value->val.get());
     return pVal->GetValue<bool>();
 }
 
@@ -561,11 +560,11 @@ double ValueGetDoubleDynamic(AbckitValue *value)
 {
     LIBABCKIT_LOG_FUNC;
     if (ValueGetTypeDynamic(value)->id != ABCKIT_TYPE_ID_F64) {
-        statuses::SetLastError(ABCKIT_STATUS_TODO);
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return 0.0;
     }
 
-    auto *pVal = static_cast<pandasm::ScalarValue *>(value->GetDynamicImpl());
+    auto *pVal = reinterpret_cast<pandasm::ScalarValue *>(value->val.get());
     return pVal->GetValue<double>();
 }
 
@@ -573,11 +572,11 @@ AbckitString *ValueGetStringDynamic(AbckitValue *value)
 {
     LIBABCKIT_LOG_FUNC;
     if (ValueGetTypeDynamic(value)->id != ABCKIT_TYPE_ID_STRING) {
-        statuses::SetLastError(ABCKIT_STATUS_TODO);
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return nullptr;
     }
 
-    auto *pVal = static_cast<pandasm::ScalarValue *>(value->GetDynamicImpl());
+    auto *pVal = reinterpret_cast<pandasm::ScalarValue *>(value->val.get());
     auto valImpl = pVal->GetValue<std::string>();
     return CreateStringDynamic(value->file, valImpl.data());
 }
@@ -586,11 +585,11 @@ AbckitLiteralArray *ArrayValueGetLiteralArrayDynamic(AbckitValue *value)
 {
     LIBABCKIT_LOG_FUNC;
     if (ValueGetTypeDynamic(value)->id != ABCKIT_TYPE_ID_LITERALARRAY) {
-        statuses::SetLastError(ABCKIT_STATUS_TODO);
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return nullptr;
     }
 
-    auto *pVal = static_cast<pandasm::ScalarValue *>(value->GetDynamicImpl());
+    auto *pVal = reinterpret_cast<pandasm::ScalarValue *>(value->val.get());
     auto arrName = pVal->GetValue<std::string>();
     auto &litarrs = value->file->GetDynamicProgram()->literalarray_table;
 

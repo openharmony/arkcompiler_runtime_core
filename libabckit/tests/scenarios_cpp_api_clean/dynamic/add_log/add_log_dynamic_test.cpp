@@ -47,7 +47,7 @@ struct UserData {
     std::string_view consume;
 };
 
-std::string_view GetMethodName(const abckit::core::Function &method)
+std::string GetMethodName(const abckit::core::Function &method)
 {
     const auto name = method.GetName();
     return name.substr(0, name.find(':'));
@@ -96,11 +96,11 @@ abckit::Instruction CreateProlog(abckit::Graph &graph, const UserData &userData)
     bb.AddInstFront(iStr);
 
     auto iPrint = graph.DynIsa().CreateTryldglobalbyname(userData.print).InsertAfter(iStr);
-    auto iCallArg = graph.DynIsa().CreateCallArg1(iPrint, iStr).InsertAfter(iPrint);
+    auto iCallArg = graph.DynIsa().CreateCallarg1(iPrint, iStr).InsertAfter(iPrint);
     auto iDateClass = graph.DynIsa().CreateTryldglobalbyname(userData.date).InsertAfter(iCallArg);
     auto iDateObj = graph.DynIsa().CreateNewobjrange(iDateClass).InsertAfter(iDateClass);
-    auto iGetTime = graph.DynIsa().CreateLdObjByName(iDateObj, userData.getTime).InsertAfter(iDateObj);
-    auto iTimeStart = graph.DynIsa().CreateCallThis0(iGetTime, iDateObj).InsertAfter(iGetTime);
+    auto iGetTime = graph.DynIsa().CreateLdobjbyname(iDateObj, userData.getTime).InsertAfter(iDateObj);
+    auto iTimeStart = graph.DynIsa().CreateCallthis0(iGetTime, iDateObj).InsertAfter(iGetTime);
     return iTimeStart;
 }
 
@@ -108,7 +108,7 @@ void CreateEpilog(abckit::Graph &graph, const abckit::BasicBlock &bb, const abck
                   const UserData &userData)
 {
     for (abckit::Instruction inst = bb.GetFirstInst(); !!inst; inst = inst.GetNext()) {
-        if (inst.GetOpcodeDyn() != ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED) {
+        if (inst.GetGraph()->DynIsa().GetOpcode(inst) != ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED) {
             continue;
         }
 
@@ -116,13 +116,13 @@ void CreateEpilog(abckit::Graph &graph, const abckit::BasicBlock &bb, const abck
         auto iDateClass = graph.DynIsa().CreateTryldglobalbyname(userData.date).InsertBefore(iUndef);
 
         auto iDateObj = graph.DynIsa().CreateNewobjrange(iDateClass).InsertAfter(iDateClass);
-        auto iGetTime = graph.DynIsa().CreateLdObjByName(iDateObj, userData.getTime).InsertAfter(iDateObj);
-        auto iTimeEnd = graph.DynIsa().CreateCallThis0(iGetTime, iDateObj).InsertAfter(iGetTime);
+        auto iGetTime = graph.DynIsa().CreateLdobjbyname(iDateObj, userData.getTime).InsertAfter(iDateObj);
+        auto iTimeEnd = graph.DynIsa().CreateCallthis0(iGetTime, iDateObj).InsertAfter(iGetTime);
         auto iConsume = graph.DynIsa().CreateLoadString(userData.consume).InsertAfter(iTimeEnd);
         auto iPrint = graph.DynIsa().CreateTryldglobalbyname(userData.print).InsertAfter(iConsume);
-        auto iCallPrintConsume = graph.DynIsa().CreateCallArg1(iPrint, iConsume).InsertAfter(iPrint);
+        auto iCallPrintConsume = graph.DynIsa().CreateCallarg1(iPrint, iConsume).InsertAfter(iPrint);
         auto iSub = graph.DynIsa().CreateSub2(iTimeStart, iTimeEnd).InsertAfter(iCallPrintConsume);
-        auto iCallPrintSub = graph.DynIsa().CreateCallArg1(iPrint, iSub).InsertAfter(iSub);
+        auto iCallPrintSub = graph.DynIsa().CreateCallarg1(iPrint, iSub).InsertAfter(iSub);
     }
 }
 

@@ -203,6 +203,7 @@ group("abckit_codegen_dynamic_source_set_header_deps") {
     "templates_dynamic:abckit_isa_gen_check_width_dynamic_h",
     "templates_dynamic:abckit_isa_gen_generate_ecma_inl",
     "templates_dynamic:abckit_isa_gen_ic_info_h",
+    "templates_dynamic:abckit_isa_gen_insn_info_h",
     "templates_dynamic:abckit_isa_gen_insn_selection_dynamic_h",
     "templates_dynamic:codegen_visitors_dyn_inc",
   ]

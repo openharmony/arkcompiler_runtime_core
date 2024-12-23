@@ -25,6 +25,7 @@
 
 #include "static_core/compiler/optimizer/ir/inst.h"
 #include "static_core/libpandabase/mem/arena_allocator.h"
+#include "static_core/assembler/annotation.h"
 
 #include <string>
 #include <tuple>
@@ -65,6 +66,7 @@ uint32_t GetStringOffset(AbckitGraph *graph, AbckitString *string);
 uint32_t GetLiteralArrayOffset(AbckitGraph *graph, AbckitLiteralArray *arr);
 
 AbckitInst *CreateInstFromImpl(AbckitGraph *graph, ark::compiler::Inst *impl);
+AbckitInst *FindOrCreateInstFromImpl(AbckitGraph *graph, ark::compiler::Inst *impl);
 
 AbckitInst *CreateDynInst(AbckitGraph *graph, ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC = true);
 
@@ -124,16 +126,65 @@ AbckitDynamicExportDescriptorPayload *GetDynExportDescriptorPayload(AbckitCoreEx
 void FixPreassignedRegisters(ark::compiler::Graph *graph);
 bool AllocateRegisters(ark::compiler::Graph *graph, uint8_t reservedReg);
 
-AbckitLiteral *GetOrCreateLiteralBoolStatic(AbckitFile *file, bool value);
-AbckitLiteral *GetOrCreateLiteralU8Static(AbckitFile *file, uint8_t value);
-AbckitLiteral *GetOrCreateLiteralU16Static(AbckitFile *file, uint16_t value);
-AbckitLiteral *GetOrCreateLiteralMethodAffiliateStatic(AbckitFile *file, uint16_t value);
-AbckitLiteral *GetOrCreateLiteralU32Static(AbckitFile *file, uint32_t value);
-AbckitLiteral *GetOrCreateLiteralU64Static(AbckitFile *file, uint64_t value);
-AbckitLiteral *GetOrCreateLiteralFloatStatic(AbckitFile *file, float value);
-AbckitLiteral *GetOrCreateLiteralDoubleStatic(AbckitFile *file, double value);
-AbckitLiteral *GetOrCreateLiteralStringStatic(AbckitFile *file, const std::string &value);
-AbckitLiteral *GetOrCreateLiteralMethodStatic(AbckitFile *file, const std::string &value);
+AbckitLiteral *FindOrCreateLiteralBoolStaticImpl(AbckitFile *file, bool value);
+AbckitLiteral *FindOrCreateLiteralU8StaticImpl(AbckitFile *file, uint8_t value);
+AbckitLiteral *FindOrCreateLiteralU16StaticImpl(AbckitFile *file, uint16_t value);
+AbckitLiteral *FindOrCreateLiteralMethodAffiliateStaticImpl(AbckitFile *file, uint16_t value);
+AbckitLiteral *FindOrCreateLiteralU32StaticImpl(AbckitFile *file, uint32_t value);
+AbckitLiteral *FindOrCreateLiteralU64StaticImpl(AbckitFile *file, uint64_t value);
+AbckitLiteral *FindOrCreateLiteralFloatStaticImpl(AbckitFile *file, float value);
+AbckitLiteral *FindOrCreateLiteralDoubleStaticImpl(AbckitFile *file, double value);
+AbckitLiteral *FindOrCreateLiteralStringStaticImpl(AbckitFile *file, const std::string &value);
+AbckitLiteral *FindOrCreateLiteralMethodStaticImpl(AbckitFile *file, const std::string &value);
+
+AbckitValue *FindOrCreateValueU1StaticImpl(AbckitFile *file, bool value);
+AbckitValue *FindOrCreateValueDoubleStaticImpl(AbckitFile *file, double value);
+AbckitValue *FindOrCreateValueStringStaticImpl(AbckitFile *file, const std::string &value);
+AbckitValue *FindOrCreateLiteralArrayValueStaticImpl(AbckitFile *file, const std::string &value);
+AbckitValue *FindOrCreateValueStatic(AbckitFile *file, const ark::pandasm::Value &value);
+
+constexpr AbckitBitImmSize GetBitLengthUnsigned(uint64_t imm)
+{
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    constexpr uint8_t bit4Max = 0xF;
+
+    if (imm <= bit4Max) {
+        return AbckitBitImmSize::BITSIZE_4;
+    }
+    if (imm <= std::numeric_limits<uint8_t>::max()) {
+        return AbckitBitImmSize::BITSIZE_8;
+    }
+    if (imm <= std::numeric_limits<uint16_t>::max()) {
+        return AbckitBitImmSize::BITSIZE_16;
+    }
+    if (imm <= std::numeric_limits<uint32_t>::max()) {
+        return AbckitBitImmSize::BITSIZE_32;
+    }
+    return AbckitBitImmSize::BITSIZE_64;
+}
+
+constexpr AbckitBitImmSize GetBinaryImmOperationSize(ark::compiler::Opcode opcode)
+{
+    switch (opcode) {
+        case ark::compiler::Opcode::AddI:
+        case ark::compiler::Opcode::SubI:
+        case ark::compiler::Opcode::MulI:
+        case ark::compiler::Opcode::DivI:
+        case ark::compiler::Opcode::ModI:
+        case ark::compiler::Opcode::ShlI:
+        case ark::compiler::Opcode::ShrI:
+        case ark::compiler::Opcode::AShrI:
+            return AbckitBitImmSize::BITSIZE_8;
+
+        case ark::compiler::Opcode::AndI:
+        case ark::compiler::Opcode::OrI:
+        case ark::compiler::Opcode::XorI:
+            return AbckitBitImmSize::BITSIZE_32;
+        default:
+            LIBABCKIT_LOG(DEBUG) << "Not BinaryImmOperation" << '\n';
+    }
+    return AbckitBitImmSize::BITSIZE_0;
+}
 
 }  // namespace libabckit
 

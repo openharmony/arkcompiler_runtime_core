@@ -38,7 +38,7 @@ auto g_icreateApplyLambda0 = [](AbckitFile *file, AbckitCoreFunction * /*method*
     auto *ldlexvar = g_dynG->iCreateLdlexvar(graph, 0x0, 0x0);
     auto *ldundefined = g_dynG->iCreateLdundefined(graph);
     auto *createemptyarray = g_dynG->iCreateCreateemptyarray(graph);
-    auto *const0 = g_implG->gCreateConstantU64(graph, 0x0);
+    auto *const0 = g_implG->gFindOrCreateConstantU64(graph, 0x0);
     auto *param3 = g_implG->gGetParameter(graph, 0x3);
     auto *starrayspread = g_dynG->iCreateStarrayspread(graph, param3, createemptyarray, const0);
     auto *stringLength = g_implM->createString(file, "length");
@@ -108,7 +108,7 @@ TEST_F(LibAbcKitCreateDynApply, IcreateNewobjapply_1)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/apply/newobjapply_dynamic_modified.abc", "func_main_0",
         [&](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             auto *createemptyarray = g_dynG->iCreateCreateemptyarray(graph);
-            auto *const0 = g_implG->gCreateConstantU64(graph, 0x0);
+            auto *const0 = g_implG->gFindOrCreateConstantU64(graph, 0x0);
             auto *createarraywithbuffer =
                 helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEARRAYWITHBUFFER);
             auto *starrayspread = g_dynG->iCreateStarrayspread(graph, createarraywithbuffer, createemptyarray, const0);
@@ -151,7 +151,7 @@ TEST_F(LibAbcKitCreateDynApply, IcreateNewobjapply_2)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/apply/newobjapply_dynamic_modified.abc", "func_main_0",
         [&](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             auto *createemptyarray = g_dynG->iCreateCreateemptyarray(graph);
-            auto *const0 = g_implG->gCreateConstantU64(graph, 0x0);
+            auto *const0 = g_implG->gFindOrCreateConstantU64(graph, 0x0);
             auto *createarraywithbuffer =
                 helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEARRAYWITHBUFFER);
             auto *starrayspread = g_dynG->iCreateStarrayspread(graph, createarraywithbuffer, createemptyarray, const0);

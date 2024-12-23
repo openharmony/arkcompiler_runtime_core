@@ -49,7 +49,7 @@ void TransformIrNegativeInst(AbckitGraph *graph, AbckitFile *file, AbckitCoreCla
     ASSERT_NE(isInstance, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    AbckitInst *idx = g_implG->gCreateConstantI64(graph, 1);
+    AbckitInst *idx = g_implG->gFindOrCreateConstantI64(graph, 1);
     g_implG->iSetInput(isInstance, idx, 0);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -78,7 +78,7 @@ void TransformIrNegativeBinInst(AbckitGraph *graph)
     ASSERT_NE(ret, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    AbckitInst *idx = g_implG->gCreateConstantI64(graph, 5);
+    AbckitInst *idx = g_implG->gFindOrCreateConstantI64(graph, 5);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     AbckitInst *addInst = g_statG->iCreateAdd(graph, loadString, idx);
@@ -111,7 +111,7 @@ TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierInst)
     TransformIrNegativeInst(graph, g_implI->functionGetFile(method), classCtxFinder.klass);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_implM->functionSetGraph(method, graph);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_TODO);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
     g_impl->destroyGraph(graph);
 
     g_impl->closeFile(file);
@@ -132,7 +132,7 @@ TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierBB)
     TransformIrNegativeBB(graph);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_implM->functionSetGraph(method, graph);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_TODO);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
     g_impl->destroyGraph(graph);
 
     g_impl->closeFile(file);
@@ -153,7 +153,7 @@ TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierBinInst)
     TransformIrNegativeBinInst(graph);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_implM->functionSetGraph(method, graph);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_TODO);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
     g_impl->destroyGraph(graph);
 
     g_impl->closeFile(file);

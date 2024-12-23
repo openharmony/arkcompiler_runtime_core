@@ -99,7 +99,7 @@ TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_2)
             g_implG->iInsertBefore(loadString, ldundefinedLast);
             g_implG->iInsertBefore(definesetter, ldundefinedLast);
 
-            auto *const1 = g_implG->gCreateConstantU64(graph, 5);
+            auto *const1 = g_implG->gFindOrCreateConstantU64(graph, 5);
             auto *stobj = g_dynG->iCreateStobjbyname(graph, const1, setterStr, createObj);
             g_implG->iInsertBefore(stobj, ldundefinedLast);
         });
@@ -134,7 +134,7 @@ TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_3)
             g_implG->iInsertBefore(loadString, ldundefinedLast);
             g_implG->iInsertBefore(definesetter, ldundefinedLast);
 
-            auto *const1 = g_implG->gCreateConstantU64(graph, 5);
+            auto *const1 = g_implG->gFindOrCreateConstantU64(graph, 5);
             auto *stobj = g_dynG->iCreateStobjbyname(graph, const1, getterStr, createObj);
             g_implG->iInsertBefore(stobj, ldundefinedLast);
 

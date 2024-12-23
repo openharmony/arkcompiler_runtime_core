@@ -30,14 +30,14 @@ export function bar() {
 
 
 
-@ #MyAnnoName({
+@__$$ETS_ANNOTATION$$__MyAnnoName({
     a: 20,
     b: [13, 10],
     d: true,
     str: 'ABC'
 })
 class A {
-    @ #MyAnnoName({
+    @__$$ETS_ANNOTATION$$__MyAnnoName({
         a: 10,
         b: [1, 2, 3],
         d: true,

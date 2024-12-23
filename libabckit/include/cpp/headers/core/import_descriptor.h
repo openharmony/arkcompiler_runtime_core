@@ -19,7 +19,7 @@
 #include "../base_classes.h"
 #include "./module.h"
 
-#include <string_view>
+#include <string>
 
 namespace abckit::core {
 
@@ -31,9 +31,11 @@ class ImportDescriptor : public ViewInResource<AbckitCoreImportDescriptor *, con
     /// @brief to access private constructor
     friend class abckit::File;
     /// @brief to access private constructor
-    friend class abckit::core::Module;
+    friend class core::Module;
     /// @brief to access private constructor
-    friend class abckit::arkts::Module;
+    friend class arkts::Module;
+    /// @brief to access private constructor
+    friend class js::Module;
     /// @brief to access private constructor
     friend class abckit::DynamicIsa;
     /// @brief to access private constructor
@@ -86,17 +88,41 @@ public:
     ~ImportDescriptor() override = default;
 
     /**
-     * @brief Get the Name object
-     * @return std::string_view
+     * @brief Returns binary file that the Import Descriptor is a part of.
+     * @return Pointer to the `File` that the Import is a part of.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
-    std::string_view GetName() const;
+    const File *GetFile() const;
+
+    /**
+     * @brief Get the Name object
+     * @return std::string
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::string GetName() const;
 
     // Core API's.
     /**
      * @brief Get the Imported Module object
      * @return core::Module
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
-    core::Module GetImportedModule() const;
+    Module GetImportedModule() const;
+
+    /**
+     * @brief Returns importing module.
+     * @return `core::Module` that the import `i` is a part of.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Module GetImportingModule() const;
+
+    /**
+     * @brief Returns alias for import descriptor.
+     * @return `AbckitString` - the alias of the imported entity.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Allocates
+     */
+    std::string DescriptorGetAlias() const;
 
 protected:
     /**

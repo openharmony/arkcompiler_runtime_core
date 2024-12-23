@@ -262,12 +262,12 @@ extern "C" AbckitBasicBlock *BBgetFalseBranch(AbckitBasicBlock *curBasicBlock)
     return BBgetFalseBranchStatic(curBasicBlock);
 }
 
-extern "C" AbckitBasicBlock *BBsplitBlockAfterInstruction(AbckitInst *inst, bool makeEdge)
+extern "C" AbckitBasicBlock *BBsplitBlockAfterInstruction(AbckitBasicBlock *basicBlock, AbckitInst *inst, bool makeEdge)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    return BBsplitBlockAfterInstructionStatic(inst, makeEdge);
+    return BBsplitBlockAfterInstructionStatic(basicBlock, inst, makeEdge);
 }
 
 extern "C" void BBaddInstFront(AbckitBasicBlock *basicBlock, AbckitInst *inst)
@@ -288,6 +288,9 @@ extern "C" void BBremoveAllInsts(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT_VOID(basicBlock)
+
     return BBremoveAllInstsStatic(basicBlock);
 }
 
@@ -454,44 +457,44 @@ extern "C" AbckitInst *BBcreateCatchPhi(AbckitBasicBlock *catchBegin, size_t arg
 // Api for instruction manipulation
 // ========================================
 
-extern "C" AbckitInst *GcreateConstantI64(AbckitGraph *graph, int64_t value)
+extern "C" AbckitInst *GfindOrCreateConstantI64(AbckitGraph *graph, int64_t value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
 
-    return GcreateConstantI64Static(graph, value);
+    return GfindOrCreateConstantI64Static(graph, value);
 }
 
-extern "C" AbckitInst *GcreateConstantI32(AbckitGraph *graph, int32_t value)
+extern "C" AbckitInst *GfindOrCreateConstantI32(AbckitGraph *graph, int32_t value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
 
-    return GcreateConstantI32Static(graph, value);
+    return GfindOrCreateConstantI32Static(graph, value);
 }
 
-extern "C" AbckitInst *GcreateConstantU64(AbckitGraph *graph, uint64_t value)
+extern "C" AbckitInst *GfindOrCreateConstantU64(AbckitGraph *graph, uint64_t value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
 
-    return GcreateConstantU64Static(graph, value);
+    return GfindOrCreateConstantU64Static(graph, value);
 }
 
-extern "C" AbckitInst *GcreateConstantF64(AbckitGraph *graph, double value)
+extern "C" AbckitInst *GfindOrCreateConstantF64(AbckitGraph *graph, double value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
 
-    return GcreateConstantF64Static(graph, value);
+    return GfindOrCreateConstantF64Static(graph, value);
 }
 
 extern "C" void Iremove(AbckitInst *inst)
@@ -563,6 +566,14 @@ extern "C" AbckitBasicBlock *IgetBasicBlock(AbckitInst *inst)
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_BAD_ARGUMENT(inst, nullptr);
     return IgetBasicBlockStatic(inst);
+}
+
+extern "C" AbckitGraph *IgetGraph(AbckitInst *inst)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(inst, nullptr);
+    return IgetGraphStatic(inst);
 }
 
 extern "C" bool IcheckIsCall(AbckitInst *inst)
@@ -702,8 +713,8 @@ extern "C" void IsetFunction(AbckitInst *inst, AbckitCoreFunction *function)
     LIBABCKIT_BAD_ARGUMENT_VOID(inst);
     LIBABCKIT_BAD_ARGUMENT_VOID(function);
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(function->owningModule);
-    LIBABCKIT_BAD_ARGUMENT_VOID(inst->graph);
+    LIBABCKIT_INTERNAL_ERROR_VOID(function->owningModule);
+    LIBABCKIT_INTERNAL_ERROR_VOID(inst->graph);
     LIBABCKIT_WRONG_CTX_VOID(inst->graph->file, function->owningModule->file);
     return IsetFunctionStatic(inst, function);
 }
@@ -724,6 +735,15 @@ extern "C" void IsetImmediate(AbckitInst *inst, size_t idx, uint64_t imm)
     LIBABCKIT_BAD_ARGUMENT_VOID(inst);
 
     IsetImmediateStatic(inst, idx, imm);
+}
+
+extern "C" AbckitBitImmSize IgetImmediateSize(AbckitInst *inst, size_t idx)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(inst, AbckitBitImmSize::BITSIZE_0);
+
+    return IgetImmediateSizeStatic(inst, idx);
 }
 
 extern "C" uint64_t IgetImmediateCount(AbckitInst *inst)
@@ -829,10 +849,10 @@ AbckitGraphApi g_graphApiImpl = {
     GgetNumberOfParameters,
     GinsertTryCatch,
     Gdump,
-    GcreateConstantI32,
-    GcreateConstantI64,
-    GcreateConstantU64,
-    GcreateConstantF64,
+    GfindOrCreateConstantI32,
+    GfindOrCreateConstantI64,
+    GfindOrCreateConstantU64,
+    GfindOrCreateConstantF64,
     GrunPassRemoveUnreachableBlocks,
 
     // ========================================
@@ -888,6 +908,7 @@ AbckitGraphApi g_graphApiImpl = {
     IinsertBefore,
     IgetType,
     IgetBasicBlock,
+    IgetGraph,
     IcheckDominance,
     IcheckIsCall,
     IgetUserCount,
@@ -903,6 +924,7 @@ AbckitGraphApi g_graphApiImpl = {
     IsetFunction,
     IgetImmediate,
     IsetImmediate,
+    IgetImmediateSize,
     IgetImmediateCount,
     IgetLiteralArray,
     IsetLiteralArray,

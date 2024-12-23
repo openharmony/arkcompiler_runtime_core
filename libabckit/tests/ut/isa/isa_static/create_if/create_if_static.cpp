@@ -37,8 +37,8 @@ void TransformIrIcreateIf(AbckitGraph *graph)
 {
     AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(graph);
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
-    AbckitInst *constOne = g_implG->gCreateConstantU64(graph, 1);
-    AbckitInst *constZero = g_implG->gCreateConstantU64(graph, 0);
+    AbckitInst *constOne = g_implG->gFindOrCreateConstantU64(graph, 1);
+    AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
     g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
@@ -57,8 +57,8 @@ void TransformIrIcreateIfNeg(AbckitGraph *graph)
 {
     AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(graph);
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
-    AbckitInst *constOne = g_implG->gCreateConstantU64(graph, 1);
-    AbckitInst *constZero = g_implG->gCreateConstantU64(graph, 0);
+    AbckitInst *constOne = g_implG->gFindOrCreateConstantU64(graph, 1);
+    AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
     g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
@@ -77,8 +77,8 @@ void TransformIrIsetConditionCode(AbckitGraph *graph)
 {
     AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(graph);
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
-    AbckitInst *constOne = g_implG->gCreateConstantU64(graph, 1);
-    AbckitInst *constZero = g_implG->gCreateConstantU64(graph, 0);
+    AbckitInst *constOne = g_implG->gFindOrCreateConstantU64(graph, 1);
+    AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
     g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
@@ -99,8 +99,8 @@ void TransformIrIsetConditionCodeNeg(AbckitGraph *graph)
 {
     AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(graph);
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
-    AbckitInst *constOne = g_implG->gCreateConstantU64(graph, 1);
-    AbckitInst *constZero = g_implG->gCreateConstantU64(graph, 0);
+    AbckitInst *constOne = g_implG->gFindOrCreateConstantU64(graph, 1);
+    AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
     g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
@@ -121,8 +121,8 @@ void TransformIrIgetConditionCode(AbckitGraph *graph)
 {
     AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(graph);
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
-    AbckitInst *constOne = g_implG->gCreateConstantU64(graph, 1);
-    AbckitInst *constZero = g_implG->gCreateConstantU64(graph, 0);
+    AbckitInst *constOne = g_implG->gFindOrCreateConstantU64(graph, 1);
+    AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
     g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
@@ -144,8 +144,8 @@ void TransformIrIgetConditionCodeNeg(AbckitGraph *graph)
 {
     AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(graph);
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
-    AbckitInst *constOne = g_implG->gCreateConstantU64(graph, 1);
-    AbckitInst *constZero = g_implG->gCreateConstantU64(graph, 0);
+    AbckitInst *constOne = g_implG->gFindOrCreateConstantU64(graph, 1);
+    AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
     g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);

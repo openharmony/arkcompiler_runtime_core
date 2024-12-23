@@ -37,7 +37,7 @@
 
 #include <gtest/gtest.h>
 
-namespace libabckit::mock {
+namespace libabckit::mock::metadata_modify {
 
 // NOLINTBEGIN(readability-identifier-naming)
 
@@ -61,7 +61,7 @@ namespace libabckit::mock {
 // Function
 // ========================================
 
-inline void FunctionSetGraph(AbckitCoreFunction *function, AbckitGraph *graph)
+void FunctionSetGraph(AbckitCoreFunction *function, AbckitGraph *graph)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
@@ -76,7 +76,7 @@ inline void FunctionSetGraph(AbckitCoreFunction *function, AbckitGraph *graph)
 // Type
 // ========================================
 
-inline AbckitType *CreateType(AbckitFile *file, AbckitTypeId id)
+AbckitType *CreateType(AbckitFile *file, AbckitTypeId id)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
@@ -84,7 +84,7 @@ inline AbckitType *CreateType(AbckitFile *file, AbckitTypeId id)
     return DEFAULT_TYPE;
 }
 
-inline AbckitType *CreateReferenceType(AbckitFile *file, AbckitCoreClass *klass)
+AbckitType *CreateReferenceType(AbckitFile *file, AbckitCoreClass *klass)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
@@ -96,7 +96,7 @@ inline AbckitType *CreateReferenceType(AbckitFile *file, AbckitCoreClass *klass)
 // Value
 // ========================================
 
-inline AbckitValue *CreateValueU1(AbckitFile *file, bool value)
+AbckitValue *CreateValueU1(AbckitFile *file, bool value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
@@ -104,7 +104,7 @@ inline AbckitValue *CreateValueU1(AbckitFile *file, bool value)
     return DEFAULT_VALUE;
 }
 
-inline AbckitValue *CreateValueDouble(AbckitFile *file, double value)
+AbckitValue *CreateValueDouble(AbckitFile *file, double value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
@@ -112,20 +112,19 @@ inline AbckitValue *CreateValueDouble(AbckitFile *file, double value)
     return DEFAULT_VALUE;
 }
 
-inline AbckitValue *CreateValueString(AbckitFile *file, const char *value)
+AbckitValue *CreateValueString(AbckitFile *file, const char *value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
-    EXPECT_TRUE(strncmp(value, DEFAULT_CONST_CHAR, sizeof(DEFAULT_CONST_CHAR)) == 0);
+    EXPECT_TRUE(strncmp(value, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
     return DEFAULT_VALUE;
 }
 
-inline AbckitValue *CreateLiteralArrayValue(AbckitFile *file, AbckitValue **value, size_t size)
+AbckitValue *CreateLiteralArrayValue(AbckitFile *file, [[maybe_unused]] AbckitValue **value, size_t size)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
-    EXPECT_TRUE(*value == DEFAULT_VALUE);
-    EXPECT_TRUE(size == DEFAULT_SIZE_T);
+    EXPECT_TRUE(size == 1);
     return DEFAULT_VALUE;
 }
 
@@ -133,11 +132,11 @@ inline AbckitValue *CreateLiteralArrayValue(AbckitFile *file, AbckitValue **valu
 // String
 // ========================================
 
-inline AbckitString *CreateString(AbckitFile *file, const char *value)
+AbckitString *CreateString(AbckitFile *file, const char *value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
-    EXPECT_TRUE(strncmp(value, DEFAULT_CONST_CHAR, sizeof(DEFAULT_CONST_CHAR)) == 0);
+    EXPECT_TRUE(strncmp(value, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
     return DEFAULT_STRING;
 }
 
@@ -145,16 +144,16 @@ inline AbckitString *CreateString(AbckitFile *file, const char *value)
 // LiteralArray
 // ========================================
 
-inline AbckitLiteralArray *CreateLiteralArray(AbckitFile *file, AbckitLiteral **value, size_t size)
+AbckitLiteralArray *CreateLiteralArray(AbckitFile *file, AbckitLiteral **value, size_t size)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
     EXPECT_TRUE(*value == DEFAULT_LITERAL);
-    EXPECT_TRUE(size == DEFAULT_SIZE_T);
+    EXPECT_TRUE(size == 1U);
     return DEFAULT_LITERAL_ARRAY;
 }
 
-inline AbckitLiteral *CreateLiteralBool(AbckitFile *file, bool value)
+AbckitLiteral *CreateLiteralBool(AbckitFile *file, bool value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
@@ -162,7 +161,7 @@ inline AbckitLiteral *CreateLiteralBool(AbckitFile *file, bool value)
     return DEFAULT_LITERAL;
 }
 
-inline AbckitLiteral *CreateLiteralU8(AbckitFile *file, uint8_t value)
+AbckitLiteral *CreateLiteralU8(AbckitFile *file, uint8_t value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
@@ -170,7 +169,7 @@ inline AbckitLiteral *CreateLiteralU8(AbckitFile *file, uint8_t value)
     return DEFAULT_LITERAL;
 }
 
-inline AbckitLiteral *CreateLiteralU16(AbckitFile *file, uint16_t value)
+AbckitLiteral *CreateLiteralU16(AbckitFile *file, uint16_t value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
@@ -178,14 +177,14 @@ inline AbckitLiteral *CreateLiteralU16(AbckitFile *file, uint16_t value)
     return DEFAULT_LITERAL;
 }
 
-inline AbckitLiteral *CreateLiteralMethodAffiliate(AbckitFile *file, uint16_t value)
+AbckitLiteral *CreateLiteralMethodAffiliate(AbckitFile *file, uint16_t value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
     EXPECT_TRUE(value == DEFAULT_U16);
     return DEFAULT_LITERAL;
 }
-inline AbckitLiteral *CreateLiteralU32(AbckitFile *file, uint32_t value)
+AbckitLiteral *CreateLiteralU32(AbckitFile *file, uint32_t value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
@@ -193,7 +192,7 @@ inline AbckitLiteral *CreateLiteralU32(AbckitFile *file, uint32_t value)
     return DEFAULT_LITERAL;
 }
 
-inline AbckitLiteral *CreateLiteralU64(AbckitFile *file, uint64_t value)
+AbckitLiteral *CreateLiteralU64(AbckitFile *file, uint64_t value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
@@ -201,7 +200,7 @@ inline AbckitLiteral *CreateLiteralU64(AbckitFile *file, uint64_t value)
     return DEFAULT_LITERAL;
 }
 
-inline AbckitLiteral *CreateLiteralFloat(AbckitFile *file, float value)
+AbckitLiteral *CreateLiteralFloat(AbckitFile *file, float value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
@@ -209,7 +208,7 @@ inline AbckitLiteral *CreateLiteralFloat(AbckitFile *file, float value)
     return DEFAULT_LITERAL;
 }
 
-inline AbckitLiteral *CreateLiteralDouble(AbckitFile *file, double value)
+AbckitLiteral *CreateLiteralDouble(AbckitFile *file, double value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
@@ -217,7 +216,7 @@ inline AbckitLiteral *CreateLiteralDouble(AbckitFile *file, double value)
     return DEFAULT_LITERAL;
 }
 
-inline AbckitLiteral *CreateLiteralLiteralArray(AbckitFile *file, AbckitLiteralArray *litarr)
+AbckitLiteral *CreateLiteralLiteralArray(AbckitFile *file, AbckitLiteralArray *litarr)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
@@ -225,15 +224,15 @@ inline AbckitLiteral *CreateLiteralLiteralArray(AbckitFile *file, AbckitLiteralA
     return DEFAULT_LITERAL;
 }
 
-inline AbckitLiteral *CreateLiteralString(AbckitFile *file, const char *value)
+AbckitLiteral *CreateLiteralString(AbckitFile *file, const char *value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
-    EXPECT_TRUE(strncmp(value, DEFAULT_CONST_CHAR, sizeof(DEFAULT_CONST_CHAR)) == 0);
+    EXPECT_TRUE(strncmp(value, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
     return DEFAULT_LITERAL;
 }
 
-inline AbckitLiteral *CreateLiteralMethod(AbckitFile *file, AbckitCoreFunction *function)
+AbckitLiteral *CreateLiteralMethod(AbckitFile *file, AbckitCoreFunction *function)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
@@ -316,11 +315,11 @@ static AbckitModifyApi g_modifyApiImpl = {
     CreateLiteralMethod,
 };
 
-}  // namespace libabckit::mock
+}  // namespace libabckit::mock::metadata_modify
 
 AbckitModifyApi const *AbckitGetMockModifyApiImpl([[maybe_unused]] AbckitApiVersion version)
 {
-    return &libabckit::mock::g_modifyApiImpl;
+    return &libabckit::mock::metadata_modify::g_modifyApiImpl;
 }
 
 #endif  // ABCKIT_MODIFY_IMPL_MOCK

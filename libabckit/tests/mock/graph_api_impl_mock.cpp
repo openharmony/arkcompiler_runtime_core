@@ -17,13 +17,14 @@
 #include "../../src/mock/mock_values.h"
 
 #include <cstring>
+#include <iostream>
 #include <gtest/gtest.h>
 
-namespace libabckit::mock {
+namespace libabckit::mock::graph_api {
 
 // NOLINTBEGIN(readability-identifier-naming)
 
-inline enum AbckitIsaType GgetIsa(AbckitGraph *graph)
+enum AbckitIsaType GgetIsa(AbckitGraph *graph)
 {
     g_calledFuncs.push(__func__);
 
@@ -31,7 +32,7 @@ inline enum AbckitIsaType GgetIsa(AbckitGraph *graph)
     return DEFAULT_ENUM_ISA_TYPE;
 }
 
-inline AbckitFile *GgetFile(AbckitGraph *graph)
+AbckitFile *GgetFile(AbckitGraph *graph)
 {
     g_calledFuncs.push(__func__);
 
@@ -39,7 +40,7 @@ inline AbckitFile *GgetFile(AbckitGraph *graph)
     return DEFAULT_FILE;
 }
 
-inline AbckitBasicBlock *GgetStartBasicBlock(AbckitGraph *graph)
+AbckitBasicBlock *GgetStartBasicBlock(AbckitGraph *graph)
 {
     g_calledFuncs.push(__func__);
 
@@ -47,7 +48,7 @@ inline AbckitBasicBlock *GgetStartBasicBlock(AbckitGraph *graph)
     return DEFAULT_BB;
 }
 
-inline AbckitBasicBlock *GgetEndBasicBlock(AbckitGraph *graph)
+AbckitBasicBlock *GgetEndBasicBlock(AbckitGraph *graph)
 {
     g_calledFuncs.push(__func__);
 
@@ -55,7 +56,7 @@ inline AbckitBasicBlock *GgetEndBasicBlock(AbckitGraph *graph)
     return DEFAULT_BB;
 }
 
-inline uint32_t GgetNumberOfBasicBlocks(AbckitGraph *graph)
+uint32_t GgetNumberOfBasicBlocks(AbckitGraph *graph)
 {
     g_calledFuncs.push(__func__);
 
@@ -63,7 +64,7 @@ inline uint32_t GgetNumberOfBasicBlocks(AbckitGraph *graph)
     return DEFAULT_U32;
 }
 
-inline bool GvisitBlocksRpo(AbckitGraph *graph, void *data, bool (*cb)(AbckitBasicBlock *basicBlock, void *data))
+bool GvisitBlocksRpo(AbckitGraph *graph, void *data, bool (*cb)(AbckitBasicBlock *basicBlock, void *data))
 {
     g_calledFuncs.push(__func__);
 
@@ -72,7 +73,7 @@ inline bool GvisitBlocksRpo(AbckitGraph *graph, void *data, bool (*cb)(AbckitBas
     return DEFAULT_BOOL;
 }
 
-inline AbckitBasicBlock *GgetBasicBlock(AbckitGraph *graph, uint32_t id)
+AbckitBasicBlock *GgetBasicBlock(AbckitGraph *graph, uint32_t id)
 {
     g_calledFuncs.push(__func__);
 
@@ -81,7 +82,7 @@ inline AbckitBasicBlock *GgetBasicBlock(AbckitGraph *graph, uint32_t id)
     return DEFAULT_BB;
 }
 
-inline AbckitInst *GgetParameter(AbckitGraph *graph, uint32_t index)
+AbckitInst *GgetParameter(AbckitGraph *graph, uint32_t index)
 {
     g_calledFuncs.push(__func__);
 
@@ -90,7 +91,7 @@ inline AbckitInst *GgetParameter(AbckitGraph *graph, uint32_t index)
     return DEFAULT_INST;
 }
 
-inline uint32_t GgetNumberOfParameters(AbckitGraph *graph)
+uint32_t GgetNumberOfParameters(AbckitGraph *graph)
 {
     g_calledFuncs.push(__func__);
 
@@ -98,8 +99,8 @@ inline uint32_t GgetNumberOfParameters(AbckitGraph *graph)
     return DEFAULT_U32;
 }
 
-inline void GinsertTryCatch(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLastBB, AbckitBasicBlock *catchBeginBB,
-                            AbckitBasicBlock *catchEndBB)
+void GinsertTryCatch(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLastBB, AbckitBasicBlock *catchBeginBB,
+                     AbckitBasicBlock *catchEndBB)
 {
     g_calledFuncs.push(__func__);
 
@@ -109,7 +110,7 @@ inline void GinsertTryCatch(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryL
     EXPECT_TRUE(catchEndBB == DEFAULT_BB);
 }
 
-inline void Gdump(AbckitGraph *graph, int32_t fd)
+void Gdump(AbckitGraph *graph, int32_t fd)
 {
     g_calledFuncs.push(__func__);
 
@@ -117,7 +118,7 @@ inline void Gdump(AbckitGraph *graph, int32_t fd)
     EXPECT_TRUE(fd == DEFAULT_I32);
 }
 
-inline AbckitInst *GcreateConstantI32(AbckitGraph *graph, int32_t value)
+AbckitInst *GfindOrCreateConstantI32(AbckitGraph *graph, int32_t value)
 {
     g_calledFuncs.push(__func__);
 
@@ -126,7 +127,7 @@ inline AbckitInst *GcreateConstantI32(AbckitGraph *graph, int32_t value)
     return DEFAULT_INST;
 }
 
-inline AbckitInst *GcreateConstantI64(AbckitGraph *graph, int64_t value)
+AbckitInst *GfindOrCreateConstantI64(AbckitGraph *graph, int64_t value)
 {
     g_calledFuncs.push(__func__);
 
@@ -135,7 +136,7 @@ inline AbckitInst *GcreateConstantI64(AbckitGraph *graph, int64_t value)
     return DEFAULT_INST;
 }
 
-inline AbckitInst *GcreateConstantU64(AbckitGraph *graph, uint64_t value)
+AbckitInst *GfindOrCreateConstantU64(AbckitGraph *graph, uint64_t value)
 {
     g_calledFuncs.push(__func__);
 
@@ -144,7 +145,7 @@ inline AbckitInst *GcreateConstantU64(AbckitGraph *graph, uint64_t value)
     return DEFAULT_INST;
 }
 
-inline AbckitInst *GcreateConstantF64(AbckitGraph *graph, double value)
+AbckitInst *GfindOrCreateConstantF64(AbckitGraph *graph, double value)
 {
     g_calledFuncs.push(__func__);
 
@@ -153,14 +154,14 @@ inline AbckitInst *GcreateConstantF64(AbckitGraph *graph, double value)
     return DEFAULT_INST;
 }
 
-inline void GrunPassRemoveUnreachableBlocks(AbckitGraph *graph)
+void GrunPassRemoveUnreachableBlocks(AbckitGraph *graph)
 {
     g_calledFuncs.push(__func__);
 
     EXPECT_TRUE(graph == DEFAULT_GRAPH);
 }
 
-inline AbckitBasicBlock *BBCreateEmpty(AbckitGraph *graph)
+AbckitBasicBlock *BBCreateEmpty(AbckitGraph *graph)
 {
     g_calledFuncs.push(__func__);
 
@@ -168,7 +169,7 @@ inline AbckitBasicBlock *BBCreateEmpty(AbckitGraph *graph)
     return DEFAULT_BB;
 }
 
-inline uint32_t BBGetId(AbckitBasicBlock *basicBlock)
+uint32_t BBGetId(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -176,7 +177,7 @@ inline uint32_t BBGetId(AbckitBasicBlock *basicBlock)
     return DEFAULT_U32;
 }
 
-inline AbckitGraph *BBGetGraph(AbckitBasicBlock *basicBlock)
+AbckitGraph *BBGetGraph(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -184,7 +185,7 @@ inline AbckitGraph *BBGetGraph(AbckitBasicBlock *basicBlock)
     return DEFAULT_GRAPH;
 }
 
-inline uint64_t BBGetPredBlockCount(AbckitBasicBlock *basicBlock)
+uint64_t BBGetPredBlockCount(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -192,7 +193,7 @@ inline uint64_t BBGetPredBlockCount(AbckitBasicBlock *basicBlock)
     return DEFAULT_I64;
 }
 
-inline AbckitBasicBlock *BBGetPredBlock(AbckitBasicBlock *basicBlock, uint32_t index)
+AbckitBasicBlock *BBGetPredBlock(AbckitBasicBlock *basicBlock, uint32_t index)
 {
     g_calledFuncs.push(__func__);
 
@@ -201,8 +202,8 @@ inline AbckitBasicBlock *BBGetPredBlock(AbckitBasicBlock *basicBlock, uint32_t i
     return DEFAULT_BB;
 }
 
-inline bool BBVisitPredBlocks(AbckitBasicBlock *basicBlock, void *data,
-                              bool (*cb)(AbckitBasicBlock *predBasicBlock, void *data))
+bool BBVisitPredBlocks(AbckitBasicBlock *basicBlock, void *data,
+                       bool (*cb)(AbckitBasicBlock *predBasicBlock, void *data))
 {
     g_calledFuncs.push(__func__);
 
@@ -211,7 +212,7 @@ inline bool BBVisitPredBlocks(AbckitBasicBlock *basicBlock, void *data,
     return DEFAULT_BB;
 }
 
-inline uint64_t BBGetSuccBlockCount(AbckitBasicBlock *basicBlock)
+uint64_t BBGetSuccBlockCount(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -219,7 +220,7 @@ inline uint64_t BBGetSuccBlockCount(AbckitBasicBlock *basicBlock)
     return DEFAULT_I64;
 }
 
-inline AbckitBasicBlock *BBGetSuccBlock(AbckitBasicBlock *basicBlock, uint32_t index)
+AbckitBasicBlock *BBGetSuccBlock(AbckitBasicBlock *basicBlock, uint32_t index)
 {
     g_calledFuncs.push(__func__);
 
@@ -228,7 +229,7 @@ inline AbckitBasicBlock *BBGetSuccBlock(AbckitBasicBlock *basicBlock, uint32_t i
     return DEFAULT_BB;
 }
 
-inline void BBInsertSuccBlock(AbckitBasicBlock *basicBlock, AbckitBasicBlock *succBlock, uint32_t index)
+void BBInsertSuccBlock(AbckitBasicBlock *basicBlock, AbckitBasicBlock *succBlock, uint32_t index)
 {
     g_calledFuncs.push(__func__);
 
@@ -237,7 +238,7 @@ inline void BBInsertSuccBlock(AbckitBasicBlock *basicBlock, AbckitBasicBlock *su
     EXPECT_TRUE(index == DEFAULT_U32);
 }
 
-inline void BBAppendSuccBlock(AbckitBasicBlock *basicBlock, AbckitBasicBlock *succBlock)
+void BBAppendSuccBlock(AbckitBasicBlock *basicBlock, AbckitBasicBlock *succBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -245,7 +246,7 @@ inline void BBAppendSuccBlock(AbckitBasicBlock *basicBlock, AbckitBasicBlock *su
     EXPECT_TRUE(succBlock == DEFAULT_BB);
 }
 
-inline void BBEraseSuccBlock(AbckitBasicBlock *basicBlock, uint32_t index)
+void BBEraseSuccBlock(AbckitBasicBlock *basicBlock, uint32_t index)
 {
     g_calledFuncs.push(__func__);
 
@@ -253,8 +254,8 @@ inline void BBEraseSuccBlock(AbckitBasicBlock *basicBlock, uint32_t index)
     EXPECT_TRUE(index == DEFAULT_U32);
 }
 
-inline bool BBVisitSuccBlocks(AbckitBasicBlock *basicBlock, void *data,
-                              bool (*cb)(AbckitBasicBlock *succBasicBlock, void *data))
+bool BBVisitSuccBlocks(AbckitBasicBlock *basicBlock, void *data,
+                       bool (*cb)(AbckitBasicBlock *succBasicBlock, void *data))
 {
     g_calledFuncs.push(__func__);
 
@@ -263,7 +264,7 @@ inline bool BBVisitSuccBlocks(AbckitBasicBlock *basicBlock, void *data,
     return DEFAULT_BOOL;
 }
 
-inline AbckitBasicBlock *BBGetTrueBranch(AbckitBasicBlock *basicBlock)
+AbckitBasicBlock *BBGetTrueBranch(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -271,7 +272,7 @@ inline AbckitBasicBlock *BBGetTrueBranch(AbckitBasicBlock *basicBlock)
     return DEFAULT_BB;
 }
 
-inline AbckitBasicBlock *BBGetFalseBranch(AbckitBasicBlock *basicBlock)
+AbckitBasicBlock *BBGetFalseBranch(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -279,16 +280,17 @@ inline AbckitBasicBlock *BBGetFalseBranch(AbckitBasicBlock *basicBlock)
     return DEFAULT_BB;
 }
 
-inline AbckitBasicBlock *BBSplitBlockAfterInstruction(AbckitInst *inst, bool makeEdge)
+AbckitBasicBlock *BBSplitBlockAfterInstruction(AbckitBasicBlock *basicBlock, AbckitInst *inst, bool makeEdge)
 {
     g_calledFuncs.push(__func__);
 
+    EXPECT_TRUE(basicBlock == DEFAULT_BB);
     EXPECT_TRUE(inst == DEFAULT_INST);
     EXPECT_TRUE(makeEdge == DEFAULT_BOOL);
     return DEFAULT_BB;
 }
 
-inline void BBAddInstFront(AbckitBasicBlock *basicBlock, AbckitInst *inst)
+void BBAddInstFront(AbckitBasicBlock *basicBlock, AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -296,7 +298,7 @@ inline void BBAddInstFront(AbckitBasicBlock *basicBlock, AbckitInst *inst)
     EXPECT_TRUE(inst == DEFAULT_INST);
 }
 
-inline void BBAddInstBack(AbckitBasicBlock *basicBlock, AbckitInst *inst)
+void BBAddInstBack(AbckitBasicBlock *basicBlock, AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -304,22 +306,14 @@ inline void BBAddInstBack(AbckitBasicBlock *basicBlock, AbckitInst *inst)
     EXPECT_TRUE(inst == DEFAULT_INST);
 }
 
-inline void BBRemoveAllInsts(AbckitBasicBlock *basicBlock)
+void BBRemoveAllInsts(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
     EXPECT_TRUE(basicBlock == DEFAULT_BB);
 }
 
-inline AbckitInst *BBGetFirstInst(AbckitBasicBlock *basicBlock)
-{
-    g_calledFuncs.push(__func__);
-
-    EXPECT_TRUE(basicBlock == DEFAULT_BB);
-    return DEFAULT_INST;
-}
-
-inline AbckitInst *BBGetLastInst(AbckitBasicBlock *basicBlock)
+AbckitInst *BBGetFirstInst(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -327,7 +321,15 @@ inline AbckitInst *BBGetLastInst(AbckitBasicBlock *basicBlock)
     return DEFAULT_INST;
 }
 
-inline uint32_t BBGetNumberOfInstructions(AbckitBasicBlock *basicBlock)
+AbckitInst *BBGetLastInst(AbckitBasicBlock *basicBlock)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(basicBlock == DEFAULT_BB);
+    return DEFAULT_INST;
+}
+
+uint32_t BBGetNumberOfInstructions(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -335,7 +337,7 @@ inline uint32_t BBGetNumberOfInstructions(AbckitBasicBlock *basicBlock)
     return DEFAULT_U32;
 }
 
-inline AbckitBasicBlock *BBGetImmediateDominator(AbckitBasicBlock *basicBlock)
+AbckitBasicBlock *BBGetImmediateDominator(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -343,7 +345,7 @@ inline AbckitBasicBlock *BBGetImmediateDominator(AbckitBasicBlock *basicBlock)
     return DEFAULT_BB;
 }
 
-inline bool BBCheckDominance(AbckitBasicBlock *basicBlock, AbckitBasicBlock *dominator)
+bool BBCheckDominance(AbckitBasicBlock *basicBlock, AbckitBasicBlock *dominator)
 {
     g_calledFuncs.push(__func__);
 
@@ -352,8 +354,8 @@ inline bool BBCheckDominance(AbckitBasicBlock *basicBlock, AbckitBasicBlock *dom
     return DEFAULT_BOOL;
 }
 
-inline bool BBVisitDominatedBlocks(AbckitBasicBlock *basicBlock, void *data,
-                                   bool (*cb)(AbckitBasicBlock *dominatedBasicBlock, void *data))
+bool BBVisitDominatedBlocks(AbckitBasicBlock *basicBlock, void *data,
+                            bool (*cb)(AbckitBasicBlock *dominatedBasicBlock, void *data))
 {
     g_calledFuncs.push(__func__);
 
@@ -362,7 +364,7 @@ inline bool BBVisitDominatedBlocks(AbckitBasicBlock *basicBlock, void *data,
     return DEFAULT_BOOL;
 }
 
-inline bool BBIsStart(AbckitBasicBlock *basicBlock)
+bool BBIsStart(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -370,7 +372,7 @@ inline bool BBIsStart(AbckitBasicBlock *basicBlock)
     return DEFAULT_BOOL;
 }
 
-inline bool BBIsEnd(AbckitBasicBlock *basicBlock)
+bool BBIsEnd(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -378,7 +380,7 @@ inline bool BBIsEnd(AbckitBasicBlock *basicBlock)
     return DEFAULT_BOOL;
 }
 
-inline bool BBIsLoopHead(AbckitBasicBlock *basicBlock)
+bool BBIsLoopHead(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -386,7 +388,7 @@ inline bool BBIsLoopHead(AbckitBasicBlock *basicBlock)
     return DEFAULT_BOOL;
 }
 
-inline bool BBIsLoopPrehead(AbckitBasicBlock *basicBlock)
+bool BBIsLoopPrehead(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -394,7 +396,7 @@ inline bool BBIsLoopPrehead(AbckitBasicBlock *basicBlock)
     return DEFAULT_BOOL;
 }
 
-inline bool BBIsTryBegin(AbckitBasicBlock *basicBlock)
+bool BBIsTryBegin(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -402,7 +404,7 @@ inline bool BBIsTryBegin(AbckitBasicBlock *basicBlock)
     return DEFAULT_BOOL;
 }
 
-inline bool BBIsTry(AbckitBasicBlock *basicBlock)
+bool BBIsTry(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -410,7 +412,7 @@ inline bool BBIsTry(AbckitBasicBlock *basicBlock)
     return DEFAULT_BOOL;
 }
 
-inline bool BBIsTryEnd(AbckitBasicBlock *basicBlock)
+bool BBIsTryEnd(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -418,7 +420,7 @@ inline bool BBIsTryEnd(AbckitBasicBlock *basicBlock)
     return DEFAULT_BOOL;
 }
 
-inline bool BBIsCatchBegin(AbckitBasicBlock *basicBlock)
+bool BBIsCatchBegin(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -426,7 +428,7 @@ inline bool BBIsCatchBegin(AbckitBasicBlock *basicBlock)
     return DEFAULT_BOOL;
 }
 
-inline bool BBIsCatch(AbckitBasicBlock *basicBlock)
+bool BBIsCatch(AbckitBasicBlock *basicBlock)
 {
     g_calledFuncs.push(__func__);
 
@@ -434,7 +436,7 @@ inline bool BBIsCatch(AbckitBasicBlock *basicBlock)
     return DEFAULT_BOOL;
 }
 
-inline void BBDump(AbckitBasicBlock *basicBlock, int32_t fd)
+void BBDump(AbckitBasicBlock *basicBlock, int32_t fd)
 {
     g_calledFuncs.push(__func__);
 
@@ -442,32 +444,32 @@ inline void BBDump(AbckitBasicBlock *basicBlock, int32_t fd)
     EXPECT_TRUE(fd == DEFAULT_I32);
 }
 
-inline AbckitInst *BBCreatePhi(AbckitBasicBlock *basicBlock, size_t argCount, ...)
+AbckitInst *BBCreatePhi(AbckitBasicBlock *basicBlock, size_t argCount, ...)
 {
     g_calledFuncs.push(__func__);
 
     EXPECT_TRUE(basicBlock == DEFAULT_BB);
-    EXPECT_TRUE(argCount == DEFAULT_SIZE_T);
+    EXPECT_TRUE(argCount == 2U);
     return DEFAULT_INST;
 }
 
-inline AbckitInst *BBCreateCatchPhi(AbckitBasicBlock *catchBegin, size_t argCount, ...)
+AbckitInst *BBCreateCatchPhi(AbckitBasicBlock *catchBegin, size_t argCount, ...)
 {
     g_calledFuncs.push(__func__);
 
     EXPECT_TRUE(catchBegin == DEFAULT_BB);
-    EXPECT_TRUE(argCount == DEFAULT_SIZE_T);
+    EXPECT_TRUE(argCount == 2U);
     return DEFAULT_INST;
 }
 
-inline void Iremove(AbckitInst *inst)
+void Iremove(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
     EXPECT_TRUE(inst == DEFAULT_INST);
 }
 
-inline uint32_t IgetId(AbckitInst *inst)
+uint32_t IgetId(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -475,7 +477,7 @@ inline uint32_t IgetId(AbckitInst *inst)
     return DEFAULT_U32;
 }
 
-inline AbckitInst *IgetNext(AbckitInst *inst)
+AbckitInst *IgetNext(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -483,7 +485,7 @@ inline AbckitInst *IgetNext(AbckitInst *inst)
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IgetPrev(AbckitInst *inst)
+AbckitInst *IgetPrev(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -491,7 +493,7 @@ inline AbckitInst *IgetPrev(AbckitInst *inst)
     return DEFAULT_INST;
 }
 
-inline void IinsertAfter(AbckitInst *newInst, AbckitInst *ref)
+void IinsertAfter(AbckitInst *newInst, AbckitInst *ref)
 {
     g_calledFuncs.push(__func__);
 
@@ -499,7 +501,7 @@ inline void IinsertAfter(AbckitInst *newInst, AbckitInst *ref)
     EXPECT_TRUE(ref == DEFAULT_INST);
 }
 
-inline void IinsertBefore(AbckitInst *newInst, AbckitInst *ref)
+void IinsertBefore(AbckitInst *newInst, AbckitInst *ref)
 {
     g_calledFuncs.push(__func__);
 
@@ -507,7 +509,7 @@ inline void IinsertBefore(AbckitInst *newInst, AbckitInst *ref)
     EXPECT_TRUE(ref == DEFAULT_INST);
 }
 
-inline AbckitType *IgetType(AbckitInst *inst)
+AbckitType *IgetType(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -515,7 +517,7 @@ inline AbckitType *IgetType(AbckitInst *inst)
     return DEFAULT_TYPE;
 }
 
-inline AbckitBasicBlock *IgetBasicBlock(AbckitInst *inst)
+AbckitBasicBlock *IgetBasicBlock(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -523,7 +525,15 @@ inline AbckitBasicBlock *IgetBasicBlock(AbckitInst *inst)
     return DEFAULT_BB;
 }
 
-inline bool IcheckDominance(AbckitInst *inst, AbckitInst *dominator)
+AbckitGraph *IgetGraph(AbckitInst *inst)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(inst == DEFAULT_INST);
+    return DEFAULT_GRAPH;
+}
+
+bool IcheckDominance(AbckitInst *inst, AbckitInst *dominator)
 {
     g_calledFuncs.push(__func__);
 
@@ -532,7 +542,7 @@ inline bool IcheckDominance(AbckitInst *inst, AbckitInst *dominator)
     return DEFAULT_BOOL;
 }
 
-inline bool IcheckIsCall(AbckitInst *inst)
+bool IcheckIsCall(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -540,7 +550,7 @@ inline bool IcheckIsCall(AbckitInst *inst)
     return DEFAULT_BOOL;
 }
 
-inline uint32_t IgetUserCount(AbckitInst *inst)
+uint32_t IgetUserCount(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -548,7 +558,7 @@ inline uint32_t IgetUserCount(AbckitInst *inst)
     return DEFAULT_U32;
 }
 
-inline bool IvisitUsers(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *user, void *data))
+bool IvisitUsers(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *user, void *data))
 {
     g_calledFuncs.push(__func__);
 
@@ -557,7 +567,7 @@ inline bool IvisitUsers(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *use
     return DEFAULT_BOOL;
 }
 
-inline uint32_t IgetInputCount(AbckitInst *inst)
+uint32_t IgetInputCount(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -565,7 +575,7 @@ inline uint32_t IgetInputCount(AbckitInst *inst)
     return DEFAULT_U32;
 }
 
-inline AbckitInst *IgetInput(AbckitInst *inst, uint32_t index)
+AbckitInst *IgetInput(AbckitInst *inst, uint32_t index)
 {
     g_calledFuncs.push(__func__);
 
@@ -574,7 +584,7 @@ inline AbckitInst *IgetInput(AbckitInst *inst, uint32_t index)
     return DEFAULT_INST;
 }
 
-inline bool IvisitInputs(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *input, size_t inputIdx, void *data))
+bool IvisitInputs(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *input, size_t inputIdx, void *data))
 {
     g_calledFuncs.push(__func__);
 
@@ -583,7 +593,7 @@ inline bool IvisitInputs(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *in
     return DEFAULT_BOOL;
 }
 
-inline void IsetInput(AbckitInst *inst, AbckitInst *input, uint32_t index)
+void IsetInput(AbckitInst *inst, AbckitInst *input, uint32_t index)
 {
     g_calledFuncs.push(__func__);
 
@@ -592,15 +602,15 @@ inline void IsetInput(AbckitInst *inst, AbckitInst *input, uint32_t index)
     EXPECT_TRUE(index == DEFAULT_U32);
 }
 
-inline void IsetInputs(AbckitInst *inst, size_t argCount, ...)
+void IsetInputs(AbckitInst *inst, size_t argCount, ...)
 {
     g_calledFuncs.push(__func__);
 
     EXPECT_TRUE(inst == DEFAULT_INST);
-    EXPECT_TRUE(argCount == DEFAULT_SIZE_T);
+    EXPECT_TRUE(argCount == 2U);
 }
 
-inline void IappendInput(AbckitInst *inst, AbckitInst *input)
+void IappendInput(AbckitInst *inst, AbckitInst *input)
 {
     g_calledFuncs.push(__func__);
 
@@ -608,7 +618,7 @@ inline void IappendInput(AbckitInst *inst, AbckitInst *input)
     EXPECT_TRUE(input == DEFAULT_INST);
 }
 
-inline void Idump(AbckitInst *inst, int32_t fd)
+void Idump(AbckitInst *inst, int32_t fd)
 {
     g_calledFuncs.push(__func__);
 
@@ -616,7 +626,7 @@ inline void Idump(AbckitInst *inst, int32_t fd)
     EXPECT_TRUE(fd == DEFAULT_I32);
 }
 
-inline AbckitCoreFunction *IgetFunction(AbckitInst *inst)
+AbckitCoreFunction *IgetFunction(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -624,7 +634,7 @@ inline AbckitCoreFunction *IgetFunction(AbckitInst *inst)
     return DEFAULT_CORE_FUNCTION;
 }
 
-inline void IsetFunction(AbckitInst *inst, AbckitCoreFunction *function)
+void IsetFunction(AbckitInst *inst, AbckitCoreFunction *function)
 {
     g_calledFuncs.push(__func__);
 
@@ -632,7 +642,7 @@ inline void IsetFunction(AbckitInst *inst, AbckitCoreFunction *function)
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
 }
 
-inline uint64_t IgetImmediate(AbckitInst *inst, size_t index)
+uint64_t IgetImmediate(AbckitInst *inst, size_t index)
 {
     g_calledFuncs.push(__func__);
 
@@ -641,7 +651,7 @@ inline uint64_t IgetImmediate(AbckitInst *inst, size_t index)
     return DEFAULT_I64;
 }
 
-inline void IsetImmediate(AbckitInst *inst, size_t index, uint64_t imm)
+void IsetImmediate(AbckitInst *inst, size_t index, uint64_t imm)
 {
     g_calledFuncs.push(__func__);
 
@@ -650,7 +660,16 @@ inline void IsetImmediate(AbckitInst *inst, size_t index, uint64_t imm)
     EXPECT_TRUE(imm == DEFAULT_U64);
 }
 
-inline uint64_t IgetImmediateCount(AbckitInst *inst)
+AbckitBitImmSize IgetImmediateSize(AbckitInst *inst, size_t index)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(inst == DEFAULT_INST);
+    EXPECT_TRUE(index == DEFAULT_SIZE_T);
+    return DEFAULT_ENUM_BITSIZE;
+}
+
+uint64_t IgetImmediateCount(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -658,7 +677,7 @@ inline uint64_t IgetImmediateCount(AbckitInst *inst)
     return DEFAULT_I64;
 }
 
-inline AbckitLiteralArray *IgetLiteralArray(AbckitInst *inst)
+AbckitLiteralArray *IgetLiteralArray(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -666,7 +685,7 @@ inline AbckitLiteralArray *IgetLiteralArray(AbckitInst *inst)
     return DEFAULT_LITERAL_ARRAY;
 }
 
-inline void IsetLiteralArray(AbckitInst *inst, AbckitLiteralArray *la)
+void IsetLiteralArray(AbckitInst *inst, AbckitLiteralArray *la)
 {
     g_calledFuncs.push(__func__);
 
@@ -674,7 +693,7 @@ inline void IsetLiteralArray(AbckitInst *inst, AbckitLiteralArray *la)
     EXPECT_TRUE(la == DEFAULT_LITERAL_ARRAY);
 }
 
-inline AbckitString *IgetString(AbckitInst *inst)
+AbckitString *IgetString(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -682,7 +701,7 @@ inline AbckitString *IgetString(AbckitInst *inst)
     return DEFAULT_STRING;
 }
 
-inline void IsetString(AbckitInst *inst, AbckitString *s)
+void IsetString(AbckitInst *inst, AbckitString *s)
 {
     g_calledFuncs.push(__func__);
 
@@ -690,7 +709,7 @@ inline void IsetString(AbckitInst *inst, AbckitString *s)
     EXPECT_TRUE(s == DEFAULT_STRING);
 }
 
-inline int32_t IgetConstantValueI32(AbckitInst *inst)
+int32_t IgetConstantValueI32(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -698,7 +717,7 @@ inline int32_t IgetConstantValueI32(AbckitInst *inst)
     return DEFAULT_I32;
 }
 
-inline int64_t IgetConstantValueI64(AbckitInst *inst)
+int64_t IgetConstantValueI64(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -706,7 +725,7 @@ inline int64_t IgetConstantValueI64(AbckitInst *inst)
     return DEFAULT_I64;
 }
 
-inline uint64_t IgetConstantValueU64(AbckitInst *inst)
+uint64_t IgetConstantValueU64(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -714,7 +733,7 @@ inline uint64_t IgetConstantValueU64(AbckitInst *inst)
     return DEFAULT_I64;
 }
 
-inline double IgetConstantValueF64(AbckitInst *inst)
+double IgetConstantValueF64(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -739,10 +758,10 @@ AbckitGraphApi g_graphApiImpl = {
     GgetNumberOfParameters,
     GinsertTryCatch,
     Gdump,
-    GcreateConstantI32,
-    GcreateConstantI64,
-    GcreateConstantU64,
-    GcreateConstantF64,
+    GfindOrCreateConstantI32,
+    GfindOrCreateConstantI64,
+    GfindOrCreateConstantU64,
+    GfindOrCreateConstantF64,
     GrunPassRemoveUnreachableBlocks,
 
     // ========================================
@@ -798,6 +817,7 @@ AbckitGraphApi g_graphApiImpl = {
     IinsertBefore,
     IgetType,
     IgetBasicBlock,
+    IgetGraph,
     IcheckDominance,
     IcheckIsCall,
     IgetUserCount,
@@ -813,6 +833,7 @@ AbckitGraphApi g_graphApiImpl = {
     IsetFunction,
     IgetImmediate,
     IsetImmediate,
+    IgetImmediateSize,
     IgetImmediateCount,
     IgetLiteralArray,
     IsetLiteralArray,
@@ -826,9 +847,9 @@ AbckitGraphApi g_graphApiImpl = {
 
 // NOLINTEND(readability-identifier-naming)
 
-}  // namespace libabckit::mock
+}  // namespace libabckit::mock::graph_api
 
 AbckitGraphApi const *AbckitGetMockGraphApiImpl([[maybe_unused]] AbckitApiVersion version)
 {
-    return &libabckit::mock::g_graphApiImpl;
+    return &libabckit::mock::graph_api::g_graphApiImpl;
 }

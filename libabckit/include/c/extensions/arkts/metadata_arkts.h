@@ -575,7 +575,7 @@ struct AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if annotation interface `ai` doesn't have `ABCKIT_TARGET_ARK_TS_V1`
      * target.
-     * @note Set `ABCKIT_STATUS_TODO` error if annotation interface `ai` does not have the field `field`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if annotation interface `ai` does not have the field `field`.
      */
     void (*annotationInterfaceRemoveField)(AbckitArktsAnnotationInterface *ai,
                                            AbckitArktsAnnotationInterfaceField *field);

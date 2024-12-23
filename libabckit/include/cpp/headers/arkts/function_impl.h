@@ -17,8 +17,11 @@
 #define CPP_ABCKIT_ARKTS_FUNCTION_IMPL_H
 
 #include "./function.h"
+#include "./annotation.h"
+#include "../core/annotation.h"
 #include "./annotation_interface.h"
 
+// NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit::arkts {
 
 inline AbckitArktsFunction *Function::TargetCast() const
@@ -28,18 +31,37 @@ inline AbckitArktsFunction *Function::TargetCast() const
     return ret;
 }
 
-inline arkts::Function &Function::AddAnnotation(const arkts::AnnotationInterface &iface)
+inline Function::Function(const core::Function &coreOther) : core::Function(coreOther), targetChecker_(this) {};
+
+inline bool Function::IsNative() const
 {
-    const AbckitArktsAnnotationCreateParams paramsImpl {
-        GetApiConfig()->cArktsIapi_->coreAnnotationInterfaceToArktsAnnotationInterface(iface.GetView())};
+    auto arktsFunc = GetApiConfig()->cArktsIapi_->coreFunctionToArktsFunction(GetView());
     CheckError(GetApiConfig());
-    GetApiConfig()->cArktsMapi_->functionAddAnnotation(TargetCast(), &paramsImpl);
+    auto arktsIsNative = GetApiConfig()->cArktsIapi_->functionIsNative(arktsFunc);
+    CheckError(GetApiConfig());
+    return arktsIsNative;
+}
+
+inline Annotation Function::AddAnnotation(AnnotationInterface ai) const
+{
+    const struct AbckitArktsAnnotationCreateParams params {
+        ai.TargetCast()
+    };
+    auto arktsAnno = GetApiConfig()->cArktsMapi_->functionAddAnnotation(TargetCast(), &params);
+    CheckError(GetApiConfig());
+    auto coreAnno = GetApiConfig()->cArktsIapi_->arktsAnnotationToCoreAnnotation(arktsAnno);
+    CheckError(GetApiConfig());
+    return Annotation(core::Annotation(coreAnno, GetApiConfig(), GetResource()));
+}
+
+inline Function Function::RemoveAnnotation(Annotation anno) const
+{
+    GetApiConfig()->cArktsMapi_->functionRemoveAnnotation(TargetCast(), anno.TargetCast());
     CheckError(GetApiConfig());
     return *this;
 }
 
-inline Function::Function(const core::Function &coreOther) : core::Function(coreOther), targetChecker_(this) {};
-
 }  // namespace abckit::arkts
+// NOLINTEND(performance-unnecessary-value-param)
 
 #endif  // CPP_ABCKIT_ARKTS_FUNCTION_IMPL_H

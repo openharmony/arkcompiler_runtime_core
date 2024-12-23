@@ -313,12 +313,12 @@ extern "C" AbckitArktsAnnotationElement *AnnotationAddAnnotationElement(
     LIBABCKIT_BAD_ARGUMENT(anno, nullptr);
     LIBABCKIT_BAD_ARGUMENT(params, nullptr);
 
-    LIBABCKIT_BAD_ARGUMENT(anno->core->ai, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(anno->core->ai, nullptr);
 
     AbckitCoreModule *module = anno->core->ai->owningModule;
 
-    LIBABCKIT_BAD_ARGUMENT(module, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(module->file, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(module, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(module->file, nullptr);
 
     switch (module->target) {
         case ABCKIT_TARGET_ARK_TS_V1:
@@ -339,12 +339,12 @@ extern "C" void AnnotationRemoveAnnotationElement(AbckitArktsAnnotation *anno, A
     LIBABCKIT_BAD_ARGUMENT_VOID(anno);
     LIBABCKIT_BAD_ARGUMENT_VOID(elem);
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(anno->core->ai);
+    LIBABCKIT_INTERNAL_ERROR_VOID(anno->core->ai);
 
     AbckitCoreModule *module = anno->core->ai->owningModule;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(module);
-    LIBABCKIT_BAD_ARGUMENT_VOID(module->file);
+    LIBABCKIT_INTERNAL_ERROR_VOID(module);
+    LIBABCKIT_INTERNAL_ERROR_VOID(module->file);
 
     switch (module->target) {
         case ABCKIT_TARGET_ARK_TS_V1:

@@ -71,7 +71,8 @@ extern "C" AbckitFile *OpenAbc(const char *path)
 
     LIBABCKIT_LOG(DEBUG) << (std::string() + "Load file with path '" + path + "' failed for both modes\n");
 
-    statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
+    // Input abc file is neither for dynamic vm nor static vm
+    statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
 
     return nullptr;
 }

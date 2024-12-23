@@ -46,21 +46,21 @@ struct ReplaceCommand {
     Subject subject;
 
     struct Target {
-        std::string_view className;
-        std::string_view methodName;
+        std::string className;
+        std::string methodName;
     };
     Target target;
 };
 
 bool HasTargetMethod(const abckit::Instruction &inst, const ReplaceCommand::Target &target)
 {
-    if (inst.GetOpcodeDyn() != ABCKIT_ISA_API_DYNAMIC_OPCODE_LDEXTERNALMODULEVAR) {
+    if (inst.GetGraph()->DynIsa().GetOpcode(inst) != ABCKIT_ISA_API_DYNAMIC_OPCODE_LDEXTERNALMODULEVAR) {
         return false;
     }
 
     bool hasNewObjUser = false;
     inst.VisitUsers([&](const abckit::Instruction &user) -> bool {
-        hasNewObjUser |= user.GetOpcodeDyn() == ABCKIT_ISA_API_DYNAMIC_OPCODE_NEWOBJRANGE;
+        hasNewObjUser |= user.GetGraph()->DynIsa().GetOpcode(user) == ABCKIT_ISA_API_DYNAMIC_OPCODE_NEWOBJRANGE;
         return !hasNewObjUser;
     });
     if (!hasNewObjUser) {
@@ -69,7 +69,7 @@ bool HasTargetMethod(const abckit::Instruction &inst, const ReplaceCommand::Targ
 
     bool found = false;
     inst.VisitUsers([&](const abckit::Instruction &user) -> bool {
-        if (user.GetOpcodeDyn() == ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_UNDEFINEDIFHOLEWITHNAME) {
+        if (user.GetGraph()->DynIsa().GetOpcode(user) == ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_UNDEFINEDIFHOLEWITHNAME) {
             found |= target.className == user.GetString();
         }
         return !found;
@@ -98,7 +98,7 @@ std::optional<abckit::Instruction> FindFirstInst(const abckit::Graph &graph, Abc
     std::optional<abckit::Instruction> found;
     graph.EnumerateBasicBlocksRpo([&](const abckit::BasicBlock &bb) -> bool {
         for (auto inst = bb.GetFirstInst(); !!inst && !found; inst = inst.GetNext()) {
-            if (inst.GetOpcodeDyn() == opcode) {
+            if (inst.GetGraph()->DynIsa().GetOpcode(inst) == opcode) {
                 found = inst;
             }
         }
@@ -131,19 +131,19 @@ void ReplaceCallSite(const abckit::core::Function &method, const ReplaceCommand 
 
     graph.EnumerateBasicBlocksRpo([&](const abckit::BasicBlock &bb) -> bool {
         for (abckit::Instruction inst = bb.GetFirstInst(); !!inst; inst = inst.GetNext()) {
-            if (inst.GetOpcodeDyn() != ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1) {
+            if (inst.GetGraph()->DynIsa().GetOpcode(inst) != ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1) {
                 continue;
             }
-            maybeConstInst = maybeConstInst ? maybeConstInst : graph.CreateConstantI32(TARGET_ORIENTATION);
+            maybeConstInst = maybeConstInst ? maybeConstInst : graph.FindOrCreateConstantI32(TARGET_ORIENTATION);
 
-            auto ldExternal = graph.DynIsa().CreateLdExternalModuleVar(idesc).InsertAfter(inst);
+            auto ldExternal = graph.DynIsa().CreateLdexternalmodulevar(idesc).InsertAfter(inst);
             auto classThrow = graph.DynIsa()
-                                  .CreateThrowUndefinedIfHoleWithName(ldExternal, command.subject.klass.GetName())
+                                  .CreateThrowUndefinedifholewithname(ldExternal, command.subject.klass.GetName())
                                   .InsertAfter(ldExternal);
             auto ldObj =
-                graph.DynIsa().CreateLdObjByName(ldExternal, command.subject.method.GetName()).InsertAfter(classThrow);
+                graph.DynIsa().CreateLdobjbyname(ldExternal, command.subject.method.GetName()).InsertAfter(classThrow);
             auto staticCall =
-                graph.DynIsa().CreateCallThis2(ldObj, ldExternal, *maybeNewobjInst, *maybeConstInst).InsertAfter(ldObj);
+                graph.DynIsa().CreateCallthis2(ldObj, ldExternal, *maybeNewobjInst, *maybeConstInst).InsertAfter(ldObj);
         }
         return true;
     });

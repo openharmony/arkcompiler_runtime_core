@@ -21,100 +21,101 @@
 #include <cstring>
 #include <gtest/gtest.h>
 
-namespace libabckit::mock {
+namespace libabckit::mock::arkts_modify_api {
 
 // NOLINTBEGIN(readability-identifier-naming)
 
-inline AbckitArktsModule *FileAddExternalModuleArktsV1(AbckitFile *file,
-                                                       const struct AbckitArktsV1ExternalModuleCreateParams *params)
+AbckitArktsModule *FileAddExternalModuleArktsV1(AbckitFile *file,
+                                                const struct AbckitArktsV1ExternalModuleCreateParams *params)
 {
     g_calledFuncs.push(__func__);
-
     EXPECT_TRUE(file == DEFAULT_FILE);
-    EXPECT_TRUE(params == DEFAULT_STRUCT_ARKTS_V1_EXTERNAL_MODULE_CREATE_PARAMS);
-    return DEFAULT_MODULE;
+    EXPECT_TRUE(params != nullptr);
+    EXPECT_TRUE(strncmp(params->name, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
+    return DEFAULT_ARKTS_MODULE;
 }
 
-inline AbckitArktsImportDescriptor *ModuleAddImportFromArktsV1ToArktsV1(
+AbckitArktsImportDescriptor *ModuleAddImportFromArktsV1ToArktsV1(
     AbckitArktsModule *importing, AbckitArktsModule *imported,
     const struct AbckitArktsImportFromDynamicModuleCreateParams *params)
 {
     g_calledFuncs.push(__func__);
 
-    EXPECT_TRUE(importing == DEFAULT_MODULE);
-    EXPECT_TRUE(imported == DEFAULT_MODULE);
-    EXPECT_TRUE(params == DEFAULT_STRUCT_ARKTS_IMPORT_FROM_DYNAMIC_CREATE_PARAMS);
-    return DEFAULT_IMPORT_DESCRIPTOR;
+    EXPECT_TRUE(importing == DEFAULT_ARKTS_MODULE);
+    EXPECT_TRUE(imported == DEFAULT_ARKTS_MODULE);
+    EXPECT_TRUE(strncmp(params->name, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
+    EXPECT_TRUE(strncmp(params->alias, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
+    return DEFAULT_ARKTS_IMPORT_DESCRIPTOR;
 }
 
-inline void ModuleRemoveImport(AbckitArktsModule *m, AbckitArktsImportDescriptor *id)
+void ModuleRemoveImport(AbckitArktsModule *m, AbckitArktsImportDescriptor *id)
 {
     g_calledFuncs.push(__func__);
 
-    EXPECT_TRUE(m == DEFAULT_MODULE);
-    EXPECT_TRUE(id == DEFAULT_IMPORT_DESCRIPTOR);
+    EXPECT_TRUE(m == DEFAULT_ARKTS_MODULE);
+    EXPECT_TRUE(id == DEFAULT_ARKTS_IMPORT_DESCRIPTOR);
 }
 
-inline AbckitArktsExportDescriptor *ModuleAddExportFromArktsV1ToArktsV1(
+AbckitArktsExportDescriptor *ModuleAddExportFromArktsV1ToArktsV1(
     AbckitArktsModule *exporting, AbckitArktsModule *exported,
     const struct AbckitArktsDynamicModuleExportCreateParams *params)
 {
     g_calledFuncs.push(__func__);
 
-    EXPECT_TRUE(exporting == DEFAULT_MODULE);
-    EXPECT_TRUE(exported == DEFAULT_MODULE);
-    EXPECT_TRUE(params == DEFAULT_STRUCT_ARKTS_DYNAMIC_MODULE_EXPORT_CREATE_PARAMS);
-    return DEFAULT_EXPORT_DESCRIPTOR;
+    EXPECT_TRUE(exporting == DEFAULT_ARKTS_MODULE);
+    EXPECT_TRUE(exported == DEFAULT_ARKTS_MODULE);
+    EXPECT_TRUE(strncmp(params->name, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
+    EXPECT_TRUE(strncmp(params->alias, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
+    return DEFAULT_ARKTS_EXPORT_DESCRIPTOR;
 }
 
-inline void ModuleRemoveExport(AbckitArktsModule *m, AbckitArktsExportDescriptor *ed)
+void ModuleRemoveExport(AbckitArktsModule *m, AbckitArktsExportDescriptor *ed)
 {
     g_calledFuncs.push(__func__);
 
-    EXPECT_TRUE(m == DEFAULT_MODULE);
-    EXPECT_TRUE(ed == DEFAULT_EXPORT_DESCRIPTOR);
+    EXPECT_TRUE(m == DEFAULT_ARKTS_MODULE);
+    EXPECT_TRUE(ed == DEFAULT_ARKTS_EXPORT_DESCRIPTOR);
 }
 
-inline AbckitArktsAnnotationInterface *ModuleAddAnnotationInterface(
+AbckitArktsAnnotationInterface *ModuleAddAnnotationInterface(
     AbckitArktsModule *m, const struct AbckitArktsAnnotationInterfaceCreateParams *params)
 {
     g_calledFuncs.push(__func__);
 
-    EXPECT_TRUE(m == DEFAULT_MODULE);
-    EXPECT_TRUE(params == DEFAULT_STRUCT_ARKTS_ANNOTATION_INTERFACE_CREATE_PARAMS);
+    EXPECT_TRUE(m == DEFAULT_ARKTS_MODULE);
+    EXPECT_TRUE(strncmp(params->name, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
     return DEFAULT_ANNOTATION_INTERFACE;
 }
 
-inline AbckitArktsAnnotation *ClassAddAnnotation(AbckitArktsClass *klass,
-                                                 const struct AbckitArktsAnnotationCreateParams *params)
+AbckitArktsAnnotation *ClassAddAnnotation(AbckitArktsClass *klass,
+                                          [[maybe_unused]] const struct AbckitArktsAnnotationCreateParams *params)
 {
     g_calledFuncs.push(__func__);
 
-    EXPECT_TRUE(klass == DEFAULT_CLASS);
-    EXPECT_TRUE(params == DEFAULT_STRUCT_ARKTS_ANNOTATION_CREATE_PARAMS);
+    EXPECT_TRUE(klass == DEFAULT_ARKTS_CLASS);
     return DEFAULT_ANNOTATION;
 }
 
-inline void ClassRemoveAnnotation(AbckitArktsClass *klass, AbckitArktsAnnotation *anno)
+void ClassRemoveAnnotation(AbckitArktsClass *klass, AbckitArktsAnnotation *anno)
 {
     g_calledFuncs.push(__func__);
 
-    EXPECT_TRUE(klass == DEFAULT_CLASS);
+    EXPECT_TRUE(klass == DEFAULT_ARKTS_CLASS);
     EXPECT_TRUE(anno == DEFAULT_ANNOTATION);
 }
 
-inline AbckitArktsAnnotationInterfaceField *AnnotationInterfaceAddField(
+AbckitArktsAnnotationInterfaceField *AnnotationInterfaceAddField(
     AbckitArktsAnnotationInterface *ai, const struct AbckitArktsAnnotationInterfaceFieldCreateParams *params)
 {
     g_calledFuncs.push(__func__);
 
     EXPECT_TRUE(ai == DEFAULT_ANNOTATION_INTERFACE);
-    EXPECT_TRUE(params == DEFAULT_STRUCT_ARKTS_ANNOTATION_INTERFACE_FIELD_CREATE_PARAMS);
+    EXPECT_TRUE(strncmp(params->name, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
+    EXPECT_TRUE(params->type == DEFAULT_TYPE);
     return DEFAULT_ANNOTATION_INTERFACE_FIELD;
 }
 
-inline void AnnotationInterfaceRemoveField(AbckitArktsAnnotationInterface *ai,
-                                           AbckitArktsAnnotationInterfaceField *field)
+void AnnotationInterfaceRemoveField(AbckitArktsAnnotationInterface *ai, AbckitArktsAnnotationInterfaceField *field)
 {
     g_calledFuncs.push(__func__);
 
@@ -122,35 +123,34 @@ inline void AnnotationInterfaceRemoveField(AbckitArktsAnnotationInterface *ai,
     EXPECT_TRUE(field == DEFAULT_ANNOTATION_INTERFACE_FIELD);
 }
 
-inline AbckitArktsAnnotation *FunctionAddAnnotation(AbckitArktsFunction *function,
-                                                    const struct AbckitArktsAnnotationCreateParams *params)
+AbckitArktsAnnotation *FunctionAddAnnotation(AbckitArktsFunction *function,
+                                             [[maybe_unused]] const struct AbckitArktsAnnotationCreateParams *params)
 {
     g_calledFuncs.push(__func__);
 
-    EXPECT_TRUE(function == DEFAULT_FUNCTION);
-    EXPECT_TRUE(params == DEFAULT_STRUCT_ARKTS_ANNOTATION_CREATE_PARAMS);
+    EXPECT_TRUE(function == DEFAULT_ARKTS_FUNCTION);
     return DEFAULT_ANNOTATION;
 }
 
-inline void FunctionRemoveAnnotation(AbckitArktsFunction *function, AbckitArktsAnnotation *anno)
+void FunctionRemoveAnnotation(AbckitArktsFunction *function, AbckitArktsAnnotation *anno)
 {
     g_calledFuncs.push(__func__);
 
-    EXPECT_TRUE(function == DEFAULT_FUNCTION);
+    EXPECT_TRUE(function == DEFAULT_ARKTS_FUNCTION);
     EXPECT_TRUE(anno == DEFAULT_ANNOTATION);
 }
 
-inline AbckitArktsAnnotationElement *AnnotationAddAnnotationElement(
-    AbckitArktsAnnotation *anno, struct AbckitArktsAnnotationElementCreateParams *params)
+AbckitArktsAnnotationElement *AnnotationAddAnnotationElement(AbckitArktsAnnotation *anno,
+                                                             struct AbckitArktsAnnotationElementCreateParams *params)
 {
     g_calledFuncs.push(__func__);
 
     EXPECT_TRUE(anno == DEFAULT_ANNOTATION);
-    EXPECT_TRUE(params == DEFAULT_STRUCT_ARKTS_ANNOTATION_ELEMENT_CREATE_PARAMS);
+    EXPECT_TRUE(strncmp(params->name, DEFAULT_CONST_CHAR, DEFAULT_CONST_CHAR_SIZE) == 0);
     return DEFAULT_ANNOTATION_ELEMENT;
 }
 
-inline void AnnotationRemoveAnnotationElement(AbckitArktsAnnotation *anno, AbckitArktsAnnotationElement *elem)
+void AnnotationRemoveAnnotationElement(AbckitArktsAnnotation *anno, AbckitArktsAnnotationElement *elem)
 {
     g_calledFuncs.push(__func__);
 
@@ -220,9 +220,9 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
 
 // NOLINTEND(readability-identifier-naming)
 
-}  // namespace libabckit::mock
+}  // namespace libabckit::mock::arkts_modify_api
 
 AbckitArktsModifyApi const *AbckitGetMockArktsModifyApiImpl([[maybe_unused]] AbckitApiVersion version)
 {
-    return &libabckit::mock::g_arktsModifyApiImpl;
+    return &libabckit::mock::arkts_modify_api::g_arktsModifyApiImpl;
 }

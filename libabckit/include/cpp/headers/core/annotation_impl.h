@@ -22,17 +22,17 @@
 
 namespace abckit::core {
 
-inline void Annotation::EnumerateElements(const std::function<bool(abckit::core::AnnotationElement)> &cb) const
+inline bool Annotation::EnumerateElements(const std::function<bool(abckit::core::AnnotationElement)> &cb) const
 {
-    using PayloadT = Payload<const std::function<bool(core::AnnotationElement)> &>;
-    PayloadT payload {cb, GetApiConfig(), GetResource()};
+    Payload<const std::function<bool(core::AnnotationElement)> &> payload {cb, GetApiConfig(), GetResource()};
 
-    GetApiConfig()->cIapi_->annotationEnumerateElements(
-        GetView(), &payload, [](AbckitCoreAnnotationElement *el, void *data) -> bool {
-            const auto &payload = *static_cast<PayloadT *>(data);
-            return payload.data(core::AnnotationElement(el, payload.config, payload.resource));
+    bool isNormalExit = GetApiConfig()->cIapi_->annotationEnumerateElements(
+        GetView(), &payload, [](AbckitCoreAnnotationElement *func, void *data) {
+            const auto &payload = *static_cast<Payload<const std::function<bool(core::AnnotationElement)> &> *>(data);
+            return payload.data(core::AnnotationElement(func, payload.config, payload.resource));
         });
     CheckError(GetApiConfig());
+    return isNormalExit;
 }
 
 inline core::AnnotationInterface Annotation::GetInterface() const

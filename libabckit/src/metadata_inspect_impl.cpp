@@ -891,7 +891,7 @@ extern "C" AbckitValue *AnnotationElementGetValue(AbckitCoreAnnotationElement *a
 
     LIBABCKIT_BAD_ARGUMENT(ae, nullptr);
 
-    return ae->value.get();
+    return ae->value;
 }
 
 // ========================================

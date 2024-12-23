@@ -41,9 +41,9 @@ static void TransformIrMain(AbckitFile *file, AbckitGraph *graph, bool isWideMod
     auto *mainBB = g_implG->gGetBasicBlock(graph, 0);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    auto *firstConst = g_implG->gCreateConstantI32(graph, 0x1);
+    auto *firstConst = g_implG->gFindOrCreateConstantI32(graph, 0x1);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto *secondConst = g_implG->gCreateConstantI32(graph, 0x3);
+    auto *secondConst = g_implG->gFindOrCreateConstantI32(graph, 0x3);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     AbckitInst *newlexenv = nullptr;
@@ -98,7 +98,7 @@ static void TransformIrMain(AbckitFile *file, AbckitGraph *graph, bool isWideMod
 
 static void TransformIrFuncs(AbckitFile *file, AbckitGraph *graph, uint32_t slot, bool isWideMode)
 {
-    auto *firstConst = g_implG->gCreateConstantI32(graph, 0x1);
+    auto *firstConst = g_implG->gFindOrCreateConstantI32(graph, 0x1);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     AbckitInst *ldlexvar = nullptr;

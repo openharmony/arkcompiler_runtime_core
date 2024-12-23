@@ -311,7 +311,7 @@ AbckitCoreExportDescriptor *FindStarExport(ModuleIterateData *data, const std::s
     }
     LIBABCKIT_LOG(DEBUG) << "Appropriate StarExport was not found for service namespace import '" << serviceName << "'"
                          << std::endl;
-    libabckit::statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
+    libabckit::statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
     return nullptr;
 }
 
@@ -748,13 +748,7 @@ void CreateAnnotationInterface(AbckitFile *file, const std::string &recName, pan
         aiField->type = GetOrCreateType(file, PandaTypeToAbcKitTypeId(field.type), field.type.GetRank(), nullptr);
 
         if (field.metadata->GetValue().has_value()) {
-            auto abcval = std::make_unique<AbckitValue>();
-            abcval->file = file;
-            auto value = field.metadata->GetValue().value();
-            auto newValue = new pandasm::ScalarValue(value);
-            abcval->impl = newValue;
-            aiField->value = abcval.get();
-            file->values.emplace_back(std::move(abcval));
+            aiField->value = FindOrCreateValueDynamic(file, field.metadata->GetValue().value());
         }
 
         ai->fields.emplace_back(std::move(aiField));
@@ -803,10 +797,8 @@ void CreateFunctionAnnotations(AbckitFile *file, panda::pandasm::Function &funct
             annoElem->name = CreateStringDynamic(file, annoElemImpl.GetName().data());
             annoElem->impl = std::make_unique<AbckitArktsAnnotationElement>();
             annoElem->GetArkTSImpl()->core = annoElem.get();
-            auto value = std::make_unique<AbckitValue>();
-            value->file = file;
-            value->impl = annoElemImpl.GetValue();
-            annoElem->value = std::move(value);
+            auto value = FindOrCreateValueDynamic(file, *annoElemImpl.GetValue());
+            annoElem->value = value;
 
             anno->elements.emplace_back(std::move(annoElem));
         }
@@ -1196,7 +1188,7 @@ void WriteAbcDynamic(AbckitFile *file, const char *path)
         return;
     }
 
-    LIBABCKIT_LOG(DEBUG) << "LIBABCKIT WriteAbcDynamic SUCCESS\n";
+    LIBABCKIT_LOG(DEBUG) << "SUCCESS\n";
 }
 
 void DestroyGraphDynamic(AbckitGraph *graph)
@@ -1208,10 +1200,6 @@ void DestroyGraphDynamic(AbckitGraph *graph)
 void CloseFileDynamic(AbckitFile *file)
 {
     LIBABCKIT_LOG_FUNC;
-
-    for (auto &val : file->values) {
-        delete static_cast<pandasm::ScalarValue *>(val->GetDynamicImpl());
-    }
 
     auto *ctxIInternal = reinterpret_cast<struct CtxIInternal *>(file->internal);
     delete ctxIInternal->driver;

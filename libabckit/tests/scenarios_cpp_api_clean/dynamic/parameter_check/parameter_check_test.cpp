@@ -46,15 +46,16 @@ void AddParamChecker(const abckit::core::Function &method)
 
         std::vector<abckit::BasicBlock> succBBs = startBB.GetSuccs();
 
-        std::string_view str = file->CreateString(std::string("length"));
+        std::string str = file->CreateString(std::string("length"));
 
-        abckit::Instruction constant = graph.CreateConstantI32(-1);
-        abckit::Instruction arrLength = graph.DynIsa().CreateLdObjByName(arr, str);
+        abckit::Instruction constant = graph.FindOrCreateConstantI32(-1);
+        abckit::Instruction arrLength = graph.DynIsa().CreateLdobjbyname(arr, str);
 
         abckit::BasicBlock trueBB = succBBs[0];
         startBB.EraseSuccBlock(ABCKIT_TRUE_SUCC_IDX);
         abckit::BasicBlock falseBB = graph.CreateEmptyBb();
-        falseBB.AppendSuccBlock(graph.GetEndBb());
+        abckit::BasicBlock endBb = graph.GetEndBb();
+        falseBB.AppendSuccBlock(endBb);
         falseBB.AddInstBack(graph.DynIsa().CreateReturn(constant));
         abckit::BasicBlock ifBB = graph.CreateEmptyBb();
         abckit::Instruction intrinsicGreatereq = graph.DynIsa().CreateGreatereq(arrLength, idx);
@@ -136,16 +137,16 @@ abckit::core::Function GetSubclassMethod(const abckit::core::ImportDescriptor &i
                                          MethodInfo &methodInfo)
 {
     abckit::core::Function foundMethod;
-    if (inst.GetOpcodeDyn() != ABCKIT_ISA_API_DYNAMIC_OPCODE_LDEXTERNALMODULEVAR) {
+    if (inst.GetGraph()->DynIsa().GetOpcode(inst) != ABCKIT_ISA_API_DYNAMIC_OPCODE_LDEXTERNALMODULEVAR) {
         return foundMethod;
     }
 
-    if (inst.GetImportDescriptorDyn() != id) {
+    if (inst.GetGraph()->DynIsa().GetImportDescriptor(inst) != id) {
         return foundMethod;
     }
 
     inst.VisitUsers([&](const abckit::Instruction &user) {
-        if (user.GetOpcodeDyn() == ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINECLASSWITHBUFFER) {
+        if (user.GetGraph()->DynIsa().GetOpcode(user) == ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINECLASSWITHBUFFER) {
             auto method = user.GetFunction();
             auto klass = method.GetParentClass();
             foundMethod = GetMethodToModify(klass, methodInfo);

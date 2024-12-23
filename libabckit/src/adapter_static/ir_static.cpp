@@ -36,6 +36,8 @@
 #include "static_core/compiler/optimizer/ir/inst.h"
 #include "static_core/compiler/optimizer/analysis/loop_analyzer.h"
 
+#include "generated/insn_info.h"
+
 #include "abckit_intrinsics_opcodes.inc"
 
 #include <cstdarg>
@@ -141,7 +143,7 @@ static int GetLiteralArrayIdOperandIndexStatic(AbckitIsaApiStaticOpcode opcode)
 // Api for Graph manipulation
 // ========================================
 
-AbckitInst *GcreateConstantI64Static(AbckitGraph *graph, int64_t value)
+AbckitInst *GfindOrCreateConstantI64Static(AbckitGraph *graph, int64_t value)
 {
     LIBABCKIT_LOG_FUNC;
     if (graph == nullptr) {
@@ -153,7 +155,7 @@ AbckitInst *GcreateConstantI64Static(AbckitGraph *graph, int64_t value)
     return CreateInstFromImpl(graph, constantI64Impl);
 }
 
-AbckitInst *GcreateConstantI32Static(AbckitGraph *graph, int32_t value)
+AbckitInst *GfindOrCreateConstantI32Static(AbckitGraph *graph, int32_t value)
 {
     LIBABCKIT_LOG_FUNC;
     if (graph == nullptr) {
@@ -165,7 +167,7 @@ AbckitInst *GcreateConstantI32Static(AbckitGraph *graph, int32_t value)
     return CreateInstFromImpl(graph, constantI32Impl);
 }
 
-AbckitInst *GcreateConstantU64Static(AbckitGraph *graph, uint64_t value)
+AbckitInst *GfindOrCreateConstantU64Static(AbckitGraph *graph, uint64_t value)
 {
     LIBABCKIT_LOG_FUNC;
     if (graph == nullptr) {
@@ -177,7 +179,7 @@ AbckitInst *GcreateConstantU64Static(AbckitGraph *graph, uint64_t value)
     return CreateInstFromImpl(graph, constantU64Impl);
 }
 
-AbckitInst *GcreateConstantF64Static(AbckitGraph *graph, double value)
+AbckitInst *GfindOrCreateConstantF64Static(AbckitGraph *graph, double value)
 {
     LIBABCKIT_LOG_FUNC;
     // check inputs are valid
@@ -272,6 +274,7 @@ struct VisitorData {
     AbckitBasicBlock *cur;
     AbckitBasicBlock *tryBegin;
     AbckitBasicBlock *tryEnd;
+    AbckitBasicBlock *catchEnd;
     std::unordered_set<AbckitBasicBlock *> *visited;
     std::queue<AbckitBasicBlock *> *toVisit;
 };
@@ -370,7 +373,6 @@ void GinsertTryCatchStatic(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLa
     }
 
     if ((graph != tryLastBB->graph) || (graph != catchBeginBB->graph) || (graph != catchEndBB->graph)) {
-        LIBABCKIT_LOG(DEBUG) << "All BB's must be in the same graph";
         SetLastError(ABCKIT_STATUS_WRONG_CTX);
         return;
     }
@@ -387,7 +389,7 @@ void GinsertTryCatchStatic(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLa
     std::unordered_set<AbckitBasicBlock *> visited;
     std::queue<AbckitBasicBlock *> toVisit;
 
-    auto visitorData = VisitorData {nullptr, tryBeginBB, tryEndBB, &visited, &toVisit};
+    auto visitorData = VisitorData {nullptr, tryBeginBB, tryEndBB, catchEndBB, &visited, &toVisit};
 
     VisitBbs(tryFirstBB, tryLastBB, catchBeginBB, tryBeginBB, &visited, &toVisit, visitorData);
 
@@ -401,8 +403,10 @@ void GinsertTryCatchStatic(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLa
         curBB->impl->SetCatch(true);
         curBB->impl->SetTryId(tryBeginBB->impl->GetTryId());
         BBvisitSuccBlocksStatic(curBB, &visitorData, [](AbckitBasicBlock *succBasicBlock, void *data) {
+            auto catchEndBB = static_cast<struct VisitorData *>(data)->catchEnd;
+
             // NOTE(ivagin) if (succBasicBlock->impl->IsCatchEnd()
-            if (succBasicBlock->impl->IsCatch() || succBasicBlock->impl->IsTry()) {
+            if (succBasicBlock == catchEndBB || succBasicBlock->impl->IsTry()) {
                 return false;
             }
 
@@ -425,7 +429,7 @@ AbckitBasicBlock *GgetStartBasicBlockStatic(AbckitGraph *graph)
 {
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
-    compiler::BasicBlock *bbImpl = graph->impl->GetStartBlock();
+    ark::compiler::BasicBlock *bbImpl = graph->impl->GetStartBlock();
     auto *bb = graph->implToBB.at(bbImpl);
 
     return bb;
@@ -435,7 +439,7 @@ AbckitBasicBlock *GgetEndBasicBlockStatic(AbckitGraph *graph)
 {
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
-    compiler::BasicBlock *bbImpl = graph->impl->GetEndBlock();
+    ark::compiler::BasicBlock *bbImpl = graph->impl->GetEndBlock();
     auto *bb = graph->implToBB.at(bbImpl);
 
     return bb;
@@ -461,7 +465,7 @@ void GrunPassRemoveUnreachableBlocksStatic(AbckitGraph *graph)
 {
     LIBABCKIT_LOG_FUNC;
     graph->impl->RemoveUnreachableBlocks();
-    graph->impl->InvalidateAnalysis<compiler::LoopAnalyzer>();
+    graph->impl->InvalidateAnalysis<ark::compiler::LoopAnalyzer>();
 }
 
 bool GvisitBlocksRPOStatic(AbckitGraph *graph, void *data, bool (*cb)(AbckitBasicBlock *bb, void *data))
@@ -552,12 +556,20 @@ void BBaddInstFrontStatic(AbckitBasicBlock *basicBlock, AbckitInst *inst)
     basicBlock->impl->PrependInst(inst->impl);
 }
 
-AbckitBasicBlock *BBsplitBlockAfterInstructionStatic(AbckitInst *inst, bool makeEdge)
+AbckitBasicBlock *BBsplitBlockAfterInstructionStatic(AbckitBasicBlock *basicBlock, AbckitInst *inst, bool makeEdge)
 {
+    LIBABCKIT_BAD_ARGUMENT(basicBlock, nullptr);
     LIBABCKIT_BAD_ARGUMENT(inst, nullptr);
 
     auto *bbImpl = inst->impl->GetBasicBlock();
     auto *newBbImpl = bbImpl->SplitBlockAfterInstruction(inst->impl, makeEdge);
+
+    auto *iBb = IgetBasicBlockStatic(inst);
+    if (iBb != basicBlock) {
+        LIBABCKIT_LOG(DEBUG) << "Instruction should be in basic block";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
 
     auto *bb = inst->graph->impl->GetLocalAllocator()->New<AbckitBasicBlock>();
     bb->graph = inst->graph;
@@ -611,7 +623,7 @@ AbckitInst *BBgetFirstInstStatic(AbckitBasicBlock *basicBlock)
 
     auto *bbImpl = basicBlock->impl;
 
-    compiler::Inst *instImpl = bbImpl->GetFirstPhi();
+    ark::compiler::Inst *instImpl = bbImpl->GetFirstPhi();
     if (instImpl == nullptr) {
         instImpl = bbImpl->GetFirstInst();
     }
@@ -641,7 +653,6 @@ void BBeraseSuccBlockStatic(AbckitBasicBlock *bb, size_t index)
 void BBremoveAllInstsStatic(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_LOG_FUNC;
-    LIBABCKIT_BAD_ARGUMENT_VOID(basicBlock)
     basicBlock->impl->Clear();
 }
 
@@ -912,15 +923,15 @@ AbckitInst *BBcreatePhiStatic(AbckitBasicBlock *bb, size_t argCount, std::va_lis
         inputs.emplace_back(input);
     }
 
-    compiler::DataType::Type type = inputs[0]->impl->GetType();
+    ark::compiler::DataType::Type type = inputs[0]->impl->GetType();
     if (IsDynamic(bb->graph->function->owningModule->target)) {
-        type = compiler::DataType::ANY;
+        type = ark::compiler::DataType::ANY;
     }
 
     for (auto *inst : inputs) {
         if (IsDynamic(bb->graph->function->owningModule->target)) {
-            if (inst->impl->GetType() != compiler::DataType::INT64 &&
-                inst->impl->GetType() != compiler::DataType::ANY) {
+            if (inst->impl->GetType() != ark::compiler::DataType::INT64 &&
+                inst->impl->GetType() != ark::compiler::DataType::ANY) {
                 LIBABCKIT_LOG(DEBUG) << "inconsistent input types\n";
                 SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
                 return nullptr;
@@ -951,14 +962,14 @@ AbckitInst *BBcreateCatchPhiStatic(AbckitBasicBlock *catchBegin, size_t argCount
     BBaddInstFrontStatic(catchBegin, catchPhi);
 
     if (argCount == 0) {
-        auto type = IsDynamic(catchBegin->graph->function->owningModule->target) ? compiler::DataType::ANY
-                                                                                 : compiler::DataType::REFERENCE;
+        auto type = IsDynamic(catchBegin->graph->function->owningModule->target) ? ark::compiler::DataType::ANY
+                                                                                 : ark::compiler::DataType::REFERENCE;
         instImpl->SetIsAcc();
         instImpl->SetType(type);
         return catchPhi;
     }
 
-    std::vector<compiler::DataType::Type> types;
+    std::vector<ark::compiler::DataType::Type> types;
 
     for (size_t index = 0; index < argCount; ++index) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -974,7 +985,7 @@ AbckitInst *BBcreateCatchPhiStatic(AbckitBasicBlock *catchBegin, size_t argCount
     ASSERT(!types.empty());
 
     if (IsDynamic(catchBegin->graph->function->owningModule->target)) {
-        catchPhi->impl->SetType(compiler::DataType::ANY);
+        catchPhi->impl->SetType(ark::compiler::DataType::ANY);
     } else {
         for (int i = 1, j = types.size(); i < j; ++i) {
             if (types[0] != types[i]) {
@@ -1137,7 +1148,7 @@ AbckitIsaApiStaticOpcode IgetOpcodeStaticStatic(AbckitInst *inst)
 {
     LIBABCKIT_LOG_FUNC;
     auto opc = inst->impl->GetOpcode();
-    if (opc == compiler::Opcode::Intrinsic) {
+    if (opc == ark::compiler::Opcode::Intrinsic) {
         return GetStaticIntrinsicOpcode(inst->impl->CastToIntrinsic());
     }
     return GetStaticOpcode(inst->impl);
@@ -1147,9 +1158,9 @@ AbckitIsaApiDynamicOpcode IgetOpcodeDynamicStatic(AbckitInst *inst)
 {
     LIBABCKIT_LOG_FUNC;
     auto opc = inst->impl->GetOpcode();
-    if (opc == compiler::Opcode::Intrinsic) {
+    if (opc == ark::compiler::Opcode::Intrinsic) {
         switch (inst->impl->CastToIntrinsic()->GetIntrinsicId()) {
-            case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_STRING:
+            case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_STRING:
                 return ABCKIT_ISA_API_DYNAMIC_OPCODE_LOADSTRING;
             default:
                 break;
@@ -1321,15 +1332,15 @@ void IappendInputStatic(AbckitInst *inst, AbckitInst *input)
 
     if (instImpl->IsOperandsDynamic()) {
         switch (instImpl->GetOpcode()) {
-            case compiler::Opcode::CallStatic: {
+            case ark::compiler::Opcode::CallStatic: {
                 instImpl->CastToCallStatic()->AppendInput(input->impl, input->impl->GetType());
                 return;
             }
-            case compiler::Opcode::CallVirtual: {
+            case ark::compiler::Opcode::CallVirtual: {
                 instImpl->CastToCallVirtual()->AppendInput(input->impl, input->impl->GetType());
                 return;
             }
-            case compiler::Opcode::Intrinsic: {
+            case ark::compiler::Opcode::Intrinsic: {
                 if (GetIntrinicMaxInputsCount(inst) == rangeInputsCount) {
                     instImpl->CastToIntrinsic()->AppendInput(input->impl, input->impl->GetType());
                     return;
@@ -1342,7 +1353,7 @@ void IappendInputStatic(AbckitInst *inst, AbckitInst *input)
                 instImpl->CastToIntrinsic()->AppendInput(input->impl, input->impl->GetType());
                 return;
             }
-            case compiler::Opcode::Phi: {
+            case ark::compiler::Opcode::Phi: {
                 instImpl->AppendInput(input->impl);
                 return;
             }
@@ -1377,19 +1388,19 @@ AbckitType *IgetTypeStatic(AbckitInst *inst)
 AbckitTypeId IgetTargetTypeStatic(AbckitInst *inst)
 {
     LIBABCKIT_LOG_FUNC;
-    if (inst->impl->GetOpcode() != compiler::Opcode::Cast) {
+    if (inst->impl->GetOpcode() != ark::compiler::Opcode::Cast) {
         LIBABCKIT_LOG(DEBUG) << "Instruction is not a cast\n";
         SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return AbckitTypeId::ABCKIT_TYPE_ID_INVALID;
     }
 
-    return TypeToTypeId(static_cast<compiler::CastInst *>(inst->impl)->GetType());
+    return TypeToTypeId(static_cast<ark::compiler::CastInst *>(inst->impl)->GetType());
 }
 
 void IsetTargetTypeStatic(AbckitInst *inst, AbckitTypeId type)
 {
     LIBABCKIT_LOG_FUNC;
-    if (inst->impl->GetOpcode() != compiler::Opcode::Cast) {
+    if (inst->impl->GetOpcode() != ark::compiler::Opcode::Cast) {
         LIBABCKIT_LOG(DEBUG) << "Instruction is not a cast\n";
         SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return;
@@ -1416,14 +1427,20 @@ AbckitBasicBlock *IgetBasicBlockStatic(AbckitInst *inst)
     return nullptr;
 }
 
+AbckitGraph *IgetGraphStatic(AbckitInst *inst)
+{
+    LIBABCKIT_LOG_FUNC;
+    return inst->graph;
+}
+
 AbckitCoreFunction *IgetFunctionStatic(AbckitInst *inst)
 {
     LIBABCKIT_LOG_FUNC;
     auto *graph = inst->graph;
 
-    compiler::RuntimeInterface::MethodPtr methodPtr = nullptr;
+    ark::compiler::RuntimeInterface::MethodPtr methodPtr = nullptr;
     if (inst->impl->IsCall()) {
-        auto *callInst = static_cast<compiler::CallInst *>(inst->impl);
+        auto *callInst = static_cast<ark::compiler::CallInst *>(inst->impl);
         methodPtr = callInst->GetCallMethod();
     } else if (inst->impl->IsIntrinsic()) {
         size_t idx = 0;
@@ -1444,7 +1461,7 @@ AbckitCoreFunction *IgetFunctionStatic(AbckitInst *inst)
         }
 
         auto *intrinsic = inst->impl->CastToIntrinsic();
-        methodPtr = reinterpret_cast<compiler::RuntimeInterface::MethodPtr>(intrinsic->GetImm(idx));
+        methodPtr = reinterpret_cast<ark::compiler::RuntimeInterface::MethodPtr>(intrinsic->GetImm(idx));
     } else {
         LIBABCKIT_LOG(DEBUG) << "Instruction is not a call or intrinsic\n";
         SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
@@ -1473,7 +1490,7 @@ void IsetFunctionStatic(AbckitInst *inst, AbckitCoreFunction *function)
     auto methodOffset = GetMethodOffset(graph, function);
 
     if (inst->impl->IsCall()) {
-        auto *callInst = static_cast<compiler::CallInst *>(inst->impl);
+        auto *callInst = static_cast<ark::compiler::CallInst *>(inst->impl);
         callInst->SetCallMethodId(methodOffset);
     } else if (inst->impl->IsIntrinsic()) {
         size_t idx = 0;
@@ -1528,7 +1545,7 @@ AbckitCoreClass *IgetClassStatic(AbckitInst *inst)
         return nullptr;
     }
     size_t idx = GetTypeIdOperandIndexStatic(instOpcode);
-    auto classPtr = reinterpret_cast<compiler::RuntimeInterface::ClassPtr>(intrinsic->GetImm(idx));
+    auto classPtr = reinterpret_cast<ark::compiler::RuntimeInterface::ClassPtr>(intrinsic->GetImm(idx));
 
     auto it = graph->ptrToClass.find(reinterpret_cast<uintptr_t>(classPtr));
     if (it == graph->ptrToClass.end()) {
@@ -1541,7 +1558,7 @@ AbckitCoreClass *IgetClassStatic(AbckitInst *inst)
 
 AbckitInst *GcreateNullPtrStatic(AbckitGraph *graph)
 {
-    auto instImpl = graph->impl->CreateInstNullPtr(compiler::DataType::REFERENCE);
+    auto instImpl = graph->impl->CreateInstNullPtr(ark::compiler::DataType::REFERENCE);
     auto *inst = CreateInstFromImpl(graph, instImpl);
     graph->impl->GetStartBlock()->AppendInst(instImpl);
     return inst;
@@ -1553,10 +1570,11 @@ int32_t IgetConstantValueI32Static(AbckitInst *inst)
         LIBABCKIT_LOG(DEBUG) << "Input instruction of " << LIBABCKIT_FUNC_NAME << " must be constant instruction"
                              << '\n';
     }
-    if (inst->impl->GetType() != compiler::DataType::INT32 && inst->impl->GetType() != compiler::DataType::UINT32) {
+    if (inst->impl->GetType() != ark::compiler::DataType::INT32 &&
+        inst->impl->GetType() != ark::compiler::DataType::UINT32) {
         LIBABCKIT_LOG(DEBUG) << "Type of input constant instruction in " << LIBABCKIT_FUNC_NAME << " is wrong" << '\n';
     }
-    return static_cast<compiler::ConstantInst *>(inst->impl)->GetInt32Value();
+    return static_cast<ark::compiler::ConstantInst *>(inst->impl)->GetInt32Value();
 }
 
 int64_t IgetConstantValueI64Static(AbckitInst *inst)
@@ -1565,10 +1583,11 @@ int64_t IgetConstantValueI64Static(AbckitInst *inst)
         LIBABCKIT_LOG(DEBUG) << "Input instruction of " << LIBABCKIT_FUNC_NAME << " must be constant instruction"
                              << '\n';
     }
-    if (inst->impl->GetType() != compiler::DataType::INT64 && inst->impl->GetType() != compiler::DataType::UINT64) {
+    if (inst->impl->GetType() != ark::compiler::DataType::INT64 &&
+        inst->impl->GetType() != ark::compiler::DataType::UINT64) {
         LIBABCKIT_LOG(DEBUG) << "Type of input constant instruction in " << LIBABCKIT_FUNC_NAME << " is wrong" << '\n';
     }
-    return static_cast<compiler::ConstantInst *>(inst->impl)->GetInt64Value();
+    return static_cast<ark::compiler::ConstantInst *>(inst->impl)->GetInt64Value();
 }
 
 uint64_t IgetConstantValueU64Static(AbckitInst *inst)
@@ -1578,11 +1597,12 @@ uint64_t IgetConstantValueU64Static(AbckitInst *inst)
                              << '\n';
         SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
     }
-    if (inst->impl->GetType() != compiler::DataType::INT64 && inst->impl->GetType() != compiler::DataType::UINT64) {
+    if (inst->impl->GetType() != ark::compiler::DataType::INT64 &&
+        inst->impl->GetType() != ark::compiler::DataType::UINT64) {
         LIBABCKIT_LOG(DEBUG) << "Type of input constant instruction in " << LIBABCKIT_FUNC_NAME << " is wrong" << '\n';
         SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
     }
-    return static_cast<compiler::ConstantInst *>(inst->impl)->GetInt64Value();
+    return static_cast<ark::compiler::ConstantInst *>(inst->impl)->GetInt64Value();
 }
 
 double IgetConstantValueF64Static(AbckitInst *inst)
@@ -1592,11 +1612,11 @@ double IgetConstantValueF64Static(AbckitInst *inst)
                              << '\n';
         SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
     }
-    if (inst->impl->GetType() != compiler::DataType::FLOAT64) {
+    if (inst->impl->GetType() != ark::compiler::DataType::FLOAT64) {
         LIBABCKIT_LOG(DEBUG) << "Type of input constant instruction in " << LIBABCKIT_FUNC_NAME << " is wrong" << '\n';
         SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
     }
-    return static_cast<compiler::ConstantInst *>(inst->impl)->GetDoubleValue();
+    return static_cast<ark::compiler::ConstantInst *>(inst->impl)->GetDoubleValue();
 }
 
 uint64_t IgetImmediateStatic(AbckitInst *inst, size_t idx)
@@ -1611,8 +1631,8 @@ uint64_t IgetImmediateStatic(AbckitInst *inst, size_t idx)
     uint64_t ret = 0;
 
     if (inst->impl->IsBinaryImmInst()) {
-        ret = (static_cast<compiler::BinaryImmOperation *>(inst->impl))->GetImm();
-    } else if (inst->impl->GetOpcode() == compiler::Opcode::Intrinsic) {
+        ret = (static_cast<ark::compiler::BinaryImmOperation *>(inst->impl))->GetImm();
+    } else if (inst->impl->GetOpcode() == ark::compiler::Opcode::Intrinsic) {
         ret = inst->impl->CastToIntrinsic()->GetImm(idx);
     } else {
         SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
@@ -1631,12 +1651,44 @@ void IsetImmediateStatic(AbckitInst *inst, size_t idx, uint64_t imm)
     }
 
     if (inst->impl->IsBinaryImmInst()) {
-        (static_cast<compiler::BinaryImmOperation *>(inst->impl))->SetImm(imm);
-    } else if (inst->impl->GetOpcode() == compiler::Opcode::Intrinsic) {
-        inst->impl->CastToIntrinsic()->SetImm(idx, imm);
+        if (GetBitLengthUnsigned(imm) <= GetBinaryImmOperationSize(inst->impl->GetOpcode())) {
+            (static_cast<ark::compiler::BinaryImmOperation *>(inst->impl))->SetImm(imm);
+        } else {
+            LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+            SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        }
+    } else if (inst->impl->GetOpcode() == ark::compiler::Opcode::Intrinsic) {
+        auto instr = inst->impl->CastToIntrinsic();
+        if (GetBitLengthUnsigned(imm) <= GetIntrinsicBitImmSize(instr->GetIntrinsicId(), idx)) {
+            instr->SetImm(idx, imm);
+        } else {
+            LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+            SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        }
     } else {
         SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
     }
+}
+
+AbckitBitImmSize IgetImmediateSizeStatic(AbckitInst *inst, size_t idx)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (IgetImmediateCountStatic(inst) <= idx) {
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return AbckitBitImmSize::BITSIZE_0;
+    }
+
+    auto immBitSize = AbckitBitImmSize::BITSIZE_0;
+    if (inst->impl->IsBinaryImmInst()) {
+        immBitSize = GetBinaryImmOperationSize(inst->impl->GetOpcode());
+    } else if (inst->impl->GetOpcode() == ark::compiler::Opcode::Intrinsic) {
+        auto instr = inst->impl->CastToIntrinsic();
+        immBitSize = GetIntrinsicBitImmSize(instr->GetIntrinsicId(), idx);
+    } else {
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+    }
+    return immBitSize;
 }
 
 uint64_t IgetImmediateCountStatic(AbckitInst *inst)
@@ -1647,7 +1699,7 @@ uint64_t IgetImmediateCountStatic(AbckitInst *inst)
 
     if (inst->impl->IsBinaryImmInst()) {
         ret = 1;
-    } else if (inst->impl->GetOpcode() == compiler::Opcode::Intrinsic) {
+    } else if (inst->impl->GetOpcode() == ark::compiler::Opcode::Intrinsic) {
         auto instr = inst->impl->CastToIntrinsic();
         return instr->HasImms() ? instr->GetImms().size() : 0;
     }

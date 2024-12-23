@@ -94,7 +94,7 @@ void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
 
     if (!ark::compiler::GraphChecker(graphImpl).Check()) {
         LIBABCKIT_LOG(DEBUG) << func->name << ": Graph Verifier failed!\n";
-        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
         return;
     }
 
@@ -106,19 +106,19 @@ void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
 
     if (!AllocateRegisters(graphImpl, CodeGenStatic::RESERVED_REG)) {
         LIBABCKIT_LOG(DEBUG) << func->name << ": RegAllocGraphColoring failed!\n";
-        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
         return;
     }
 
     if (!graphImpl->RunPass<bytecodeopt::RegEncoder>()) {
         LIBABCKIT_LOG(DEBUG) << func->name << ": RegEncoder failed!\n";
-        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
         return;
     }
 
     if (!graphImpl->RunPass<CodeGenStatic>(func, graph->irInterface)) {
         LIBABCKIT_LOG(DEBUG) << func->name << ": Code generation failed!\n";
-        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
         return;
     }
 
@@ -130,64 +130,64 @@ void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
     LIBABCKIT_LOG(DEBUG) << "============================================\n";
 }
 
-AbckitLiteral *CreateLiteralBoolStatic(AbckitFile *file, bool value)
+AbckitLiteral *FindOrCreateLiteralBoolStatic(AbckitFile *file, bool value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralBoolStatic(file, value);
+    return FindOrCreateLiteralBoolStaticImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralU8Static(AbckitFile *file, uint8_t value)
+AbckitLiteral *FindOrCreateLiteralU8Static(AbckitFile *file, uint8_t value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralU8Static(file, value);
+    return FindOrCreateLiteralU8StaticImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralU16Static(AbckitFile *file, uint16_t value)
+AbckitLiteral *FindOrCreateLiteralU16Static(AbckitFile *file, uint16_t value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralU16Static(file, value);
+    return FindOrCreateLiteralU16StaticImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralMethodAffiliateStatic(AbckitFile *file, uint16_t value)
+AbckitLiteral *FindOrCreateLiteralMethodAffiliateStatic(AbckitFile *file, uint16_t value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralMethodAffiliateStatic(file, value);
+    return FindOrCreateLiteralMethodAffiliateStaticImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralU32Static(AbckitFile *file, uint32_t value)
+AbckitLiteral *FindOrCreateLiteralU32Static(AbckitFile *file, uint32_t value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralU32Static(file, value);
+    return FindOrCreateLiteralU32StaticImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralU64Static(AbckitFile *file, uint64_t value)
+AbckitLiteral *FindOrCreateLiteralU64Static(AbckitFile *file, uint64_t value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralU64Static(file, value);
+    return FindOrCreateLiteralU64StaticImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralFloatStatic(AbckitFile *file, float value)
+AbckitLiteral *FindOrCreateLiteralFloatStatic(AbckitFile *file, float value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralFloatStatic(file, value);
+    return FindOrCreateLiteralFloatStaticImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralDoubleStatic(AbckitFile *file, double value)
+AbckitLiteral *FindOrCreateLiteralDoubleStatic(AbckitFile *file, double value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralDoubleStatic(file, value);
+    return FindOrCreateLiteralDoubleStaticImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralStringStatic(AbckitFile *file, const char *value)
+AbckitLiteral *FindOrCreateLiteralStringStatic(AbckitFile *file, const char *value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralStringStatic(file, value);
+    return FindOrCreateLiteralStringStaticImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralMethodStatic(AbckitFile *file, AbckitCoreFunction *function)
+AbckitLiteral *FindOrCreateLiteralMethodStatic(AbckitFile *file, AbckitCoreFunction *function)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralMethodStatic(file, GetMangleFuncName(function));
+    return FindOrCreateLiteralMethodStaticImpl(file, GetMangleFuncName(function));
 }
 
 static void EmplaceType(ark::pandasm::Program *prog, AbckitLiteral *value)
@@ -262,40 +262,22 @@ AbckitLiteralArray *CreateLiteralArrayStatic(AbckitFile *file, AbckitLiteral **v
     return file->litarrs.emplace_back(std::move(litarr)).get();
 }
 
-AbckitValue *CreateValueU1Static(AbckitFile *file, bool value)
+AbckitValue *FindOrCreateValueU1Static(AbckitFile *file, bool value)
 {
     LIBABCKIT_LOG_FUNC;
-    auto *pval =
-        new pandasm::ScalarValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U1>(static_cast<uint8_t>(value)));
-    auto abcval = std::make_unique<AbckitValue>(file, pval);
-    file->values.emplace_back(std::move(abcval));
-    return file->values.back().get();
+    return FindOrCreateValueU1StaticImpl(file, value);
 }
 
-AbckitValue *CreateValueDoubleStatic(AbckitFile *file, double value)
+AbckitValue *FindOrCreateValueDoubleStatic(AbckitFile *file, double value)
 {
     LIBABCKIT_LOG_FUNC;
-    auto *pval = new pandasm::ScalarValue(pandasm::ScalarValue::Create<pandasm::Value::Type::F64>(value));
-    auto abcval = std::make_unique<AbckitValue>(file, pval);
-    file->values.emplace_back(std::move(abcval));
-    return file->values.back().get();
+    return FindOrCreateValueDoubleStaticImpl(file, value);
 }
 
-AbckitValue *CreateValueStringStatic(AbckitFile *file, const char *value)
+AbckitValue *FindOrCreateValueStringStatic(AbckitFile *file, const char *value)
 {
     LIBABCKIT_LOG_FUNC;
-    auto *pval =
-        new pandasm::ScalarValue(pandasm::ScalarValue::Create<pandasm::Value::Type::STRING>(std::string(value)));
-    auto abcval = std::make_unique<AbckitValue>(file, pval);
-    file->values.emplace_back(std::move(abcval));
-    return file->values.back().get();
-}
-
-AbckitValue *CreateLiteralArrayValueStatic(AbckitFile * /*file*/, AbckitValue ** /*value*/, size_t /*size*/)
-{
-    LIBABCKIT_LOG_FUNC;
-    statuses::SetLastError(ABCKIT_STATUS_TODO);
-    return nullptr;
+    return FindOrCreateValueStringStaticImpl(file, value);
 }
 
 }  // namespace libabckit

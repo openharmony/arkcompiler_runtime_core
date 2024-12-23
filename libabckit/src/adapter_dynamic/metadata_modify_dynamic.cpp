@@ -73,12 +73,11 @@ void FunctionSetGraphDynamic(AbckitCoreFunction *function, AbckitGraph *graph)
     LIBABCKIT_LOG_DUMP(func->DebugDump(), DEBUG);
 
     auto res = GraphWrapper::BuildCodeDynamic(graph, func->name);
-    auto status = std::get<1>(res);
+    auto status = statuses::GetLastError();
     if (status != AbckitStatus::ABCKIT_STATUS_NO_ERROR) {
-        statuses::SetLastError(status);
         return;
     }
-    void *fw = std::get<0>(res);
+    void *fw = res;
 
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_LOG(DEBUG) << "============================================ AFTER CODEGEN: " << func->name << '\n';
@@ -627,67 +626,67 @@ void ModuleRemoveExportDynamic(AbckitCoreModule *m, AbckitJsExportDescriptor *i)
     m->ed.erase(found);
 }
 
-AbckitLiteral *CreateLiteralBoolDynamic(AbckitFile *file, bool value)
+AbckitLiteral *FindOrCreateLiteralBoolDynamic(AbckitFile *file, bool value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralBoolDynamic(file, value);
+    return FindOrCreateLiteralBoolDynamicImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralU8Dynamic(AbckitFile *file, uint8_t value)
+AbckitLiteral *FindOrCreateLiteralU8Dynamic(AbckitFile *file, uint8_t value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralU8Dynamic(file, value);
+    return FindOrCreateLiteralU8DynamicImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralU16Dynamic(AbckitFile *file, uint16_t value)
+AbckitLiteral *FindOrCreateLiteralU16Dynamic(AbckitFile *file, uint16_t value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralU16Dynamic(file, value);
+    return FindOrCreateLiteralU16DynamicImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralMethodAffiliateDynamic(AbckitFile *file, uint16_t value)
+AbckitLiteral *FindOrCreateLiteralMethodAffiliateDynamic(AbckitFile *file, uint16_t value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralMethodAffiliateDynamic(file, value);
+    return FindOrCreateLiteralMethodAffiliateDynamicImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralU32Dynamic(AbckitFile *file, uint32_t value)
+AbckitLiteral *FindOrCreateLiteralU32Dynamic(AbckitFile *file, uint32_t value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralU32Dynamic(file, value);
+    return FindOrCreateLiteralU32DynamicImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralU64Dynamic(AbckitFile *file, uint64_t value)
+AbckitLiteral *FindOrCreateLiteralU64Dynamic(AbckitFile *file, uint64_t value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralU64Dynamic(file, value);
+    return FindOrCreateLiteralU64DynamicImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralFloatDynamic(AbckitFile *file, float value)
+AbckitLiteral *FindOrCreateLiteralFloatDynamic(AbckitFile *file, float value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralFloatDynamic(file, value);
+    return FindOrCreateLiteralFloatDynamicImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralDoubleDynamic(AbckitFile *file, double value)
+AbckitLiteral *FindOrCreateLiteralDoubleDynamic(AbckitFile *file, double value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralDoubleDynamic(file, value);
+    return FindOrCreateLiteralDoubleDynamicImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralStringDynamic(AbckitFile *file, const char *value)
+AbckitLiteral *FindOrCreateLiteralStringDynamic(AbckitFile *file, const char *value)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralStringDynamic(file, value);
+    return FindOrCreateLiteralStringDynamicImpl(file, value);
 }
 
-AbckitLiteral *CreateLiteralMethodDynamic(AbckitFile *file, AbckitCoreFunction *function)
+AbckitLiteral *FindOrCreateLiteralMethodDynamic(AbckitFile *file, AbckitCoreFunction *function)
 {
     LIBABCKIT_LOG_FUNC;
-    return GetOrCreateLiteralMethodDynamic(file, GetDynFunction(function)->name);
+    return FindOrCreateLiteralMethodDynamicImpl(file, GetDynFunction(function)->name);
 }
 
-AbckitLiteral *CreateLiteralLiteralArrayDynamic(AbckitFile *file, AbckitLiteralArray *litarr)
+AbckitLiteral *FindOrCreateLiteralLiteralArrayDynamic(AbckitFile *file, AbckitLiteralArray *litarr)
 {
     LIBABCKIT_LOG_FUNC;
     std::string arrName;
@@ -697,7 +696,7 @@ AbckitLiteral *CreateLiteralLiteralArrayDynamic(AbckitFile *file, AbckitLiteralA
             break;
         }
     }
-    return GetOrCreateLiteralLiteralArrayDynamic(file, arrName);
+    return FindOrCreateLiteralLiteralArrayDynamicImpl(file, arrName);
 }
 
 AbckitLiteralArray *CreateLiteralArrayDynamic(AbckitFile *file, AbckitLiteral **value, size_t size)
@@ -731,36 +730,25 @@ AbckitLiteralArray *CreateLiteralArrayDynamic(AbckitFile *file, AbckitLiteral **
     return file->litarrs.emplace_back(std::move(litarr)).get();
 }
 
-AbckitValue *CreateValueU1Dynamic(AbckitFile *file, bool value)
+AbckitValue *FindOrCreateValueU1Dynamic(AbckitFile *file, bool value)
 {
     LIBABCKIT_LOG_FUNC;
-    auto *pval = new pandasm::ScalarValue(
-        pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U1>(static_cast<uint8_t>(value)));
-    auto abcval = std::make_unique<AbckitValue>(file, pval);
-    file->values.emplace_back(std::move(abcval));
-    return file->values.back().get();
+    return FindOrCreateValueU1DynamicImpl(file, value);
 }
 
-AbckitValue *CreateValueDoubleDynamic(AbckitFile *file, double value)
+AbckitValue *FindOrCreateValueDoubleDynamic(AbckitFile *file, double value)
 {
     LIBABCKIT_LOG_FUNC;
-    auto *pval = new pandasm::ScalarValue(pandasm::ScalarValue::Create<panda::pandasm::Value::Type::F64>(value));
-    auto abcval = std::make_unique<AbckitValue>(file, pval);
-    file->values.emplace_back(std::move(abcval));
-    return file->values.back().get();
+    return FindOrCreateValueDoubleDynamicImpl(file, value);
 }
 
-AbckitValue *CreateValueStringDynamic(AbckitFile *file, const char *value)
+AbckitValue *FindOrCreateValueStringDynamic(AbckitFile *file, const char *value)
 {
     LIBABCKIT_LOG_FUNC;
-    auto *pval =
-        new pandasm::ScalarValue(pandasm::ScalarValue::Create<panda::pandasm::Value::Type::STRING>(std::string(value)));
-    auto abcval = std::make_unique<AbckitValue>(file, pval);
-    file->values.emplace_back(std::move(abcval));
-    return file->values.back().get();
+    return FindOrCreateValueStringDynamicImpl(file, value);
 }
 
-AbckitValue *CreateLiteralArrayValueDynamic(AbckitFile *file, AbckitValue **value, size_t size)
+AbckitValue *FindOrCreateLiteralArrayValueDynamic(AbckitFile *file, AbckitValue **value, size_t size)
 {
     LIBABCKIT_LOG_FUNC;
     std::vector<AbckitLiteral *> litArr;
@@ -769,15 +757,16 @@ AbckitValue *CreateLiteralArrayValueDynamic(AbckitFile *file, AbckitValue **valu
         switch (ValueGetTypeDynamic(value[i])->id) {
             case ABCKIT_TYPE_ID_U1:
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                litArr.emplace_back(CreateLiteralBoolDynamic(file, ValueGetU1Dynamic(value[i])));
+                litArr.emplace_back(FindOrCreateLiteralBoolDynamic(file, ValueGetU1Dynamic(value[i])));
                 break;
             case ABCKIT_TYPE_ID_F64:
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                litArr.emplace_back(CreateLiteralDoubleDynamic(file, ValueGetDoubleDynamic(value[i])));
+                litArr.emplace_back(FindOrCreateLiteralDoubleDynamic(file, ValueGetDoubleDynamic(value[i])));
                 break;
             case ABCKIT_TYPE_ID_STRING:
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                litArr.emplace_back(CreateLiteralStringDynamic(file, ValueGetStringDynamic(value[i])->impl.data()));
+                litArr.emplace_back(
+                    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                    FindOrCreateLiteralStringDynamic(file, ValueGetStringDynamic(value[i])->impl.data()));
                 break;
             default:
                 break;
@@ -792,11 +781,7 @@ AbckitValue *CreateLiteralArrayValueDynamic(AbckitFile *file, AbckitValue **valu
             break;
         }
     }
-    auto *pval =
-        new pandasm::ScalarValue(pandasm::ScalarValue::Create<panda::pandasm::Value::Type::LITERALARRAY>(arrName));
-    auto abcval = std::make_unique<AbckitValue>(file, pval);
-    file->values.emplace_back(std::move(abcval));
-    return file->values.back().get();
+    return FindOrCreateLiteralArrayValueDynamicImpl(file, arrName);
 }
 
 AbckitArktsAnnotationInterface *ModuleAddAnnotationInterfaceDynamic(
@@ -898,17 +883,13 @@ AbckitArktsAnnotationElement *AnnotationAddAnnotationElementDynamic(AbckitCoreAn
     auto valuePtr = params->value;
     auto name = params->name;
 
-    auto value = *valuePtr;
-    auto pandasmValue = *value.GetDynamicImpl();
-    auto abcValue = std::make_unique<AbckitValue>(value);
-
-    pandasm::AnnotationElement progAnnoElem(params->name, std::make_unique<pandasm::Value>(std::move(pandasmValue)));
-    abcValue->impl = progAnnoElem.GetValue();
+    auto progAnnoElemValue = std::make_unique<pandasm::Value>(*reinterpret_cast<pandasm::Value *>(valuePtr->val.get()));
+    pandasm::AnnotationElement progAnnoElem(params->name, std::move(progAnnoElemValue));
 
     auto annoElem = std::make_unique<AbckitCoreAnnotationElement>();
     annoElem->ann = anno;
     annoElem->name = CreateStringDynamic(anno->ai->owningModule->file, progAnnoElem.GetName().data());
-    annoElem->value = std::move(abcValue);
+    annoElem->value = valuePtr;
 
     if (std::holds_alternative<AbckitCoreFunction *>(anno->owner)) {
         auto *func = std::get<AbckitCoreFunction *>(anno->owner);
@@ -930,6 +911,11 @@ AbckitArktsAnnotationElement *AnnotationAddAnnotationElementDynamic(AbckitCoreAn
 
 void AnnotationRemoveAnnotationElementDynamic(AbckitCoreAnnotation *anno, AbckitCoreAnnotationElement *elem)
 {
+    if (elem->ann != anno) {
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return;
+    }
+
     auto name = elem->name;
 
     if (std::holds_alternative<AbckitCoreFunction *>(anno->owner)) {
@@ -944,7 +930,7 @@ void AnnotationRemoveAnnotationElementDynamic(AbckitCoreAnnotation *anno, Abckit
     auto iter = std::find_if(annotationElementes.begin(), annotationElementes.end(),
                              [&name](auto &annoElemIt) { return name->impl == annoElemIt.get()->name->impl; });
     if (iter == annotationElementes.end()) {
-        statuses::SetLastError(ABCKIT_STATUS_TODO);
+        statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
         return;
     }
     annotationElementes.erase(iter);
@@ -1018,7 +1004,7 @@ AbckitArktsAnnotationInterfaceField *AnnotationInterfaceAddFieldDynamic(
     progField.name = name;
     std::string typeName;
     progField.type = pandasm::Type(TypeToName(type), type->rank);
-    progField.metadata->SetValue(*static_cast<pandasm::ScalarValue *>(value->GetDynamicImpl()));
+    progField.metadata->SetValue(*reinterpret_cast<pandasm::ScalarValue *>(value->val.get()));
     record->field_list.emplace_back(std::move(progField));
 
     return ai->fields.back()->GetArkTSImpl();
@@ -1026,9 +1012,14 @@ AbckitArktsAnnotationInterfaceField *AnnotationInterfaceAddFieldDynamic(
 
 void AnnotationInterfaceRemoveFieldDynamic(AbckitCoreAnnotationInterface *ai, AbckitCoreAnnotationInterfaceField *field)
 {
+    if (field->ai != ai) {
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return;
+    }
+
     auto str = field->name;
     if (str == nullptr) {
-        statuses::SetLastError(ABCKIT_STATUS_TODO);
+        statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
         return;
     }
     auto name = str->impl;
@@ -1039,7 +1030,7 @@ void AnnotationInterfaceRemoveFieldDynamic(AbckitCoreAnnotationInterface *ai, Ab
 
     auto fieldsIter = std::find_if(fields.begin(), fields.end(), [&name](auto &field) { return name == field.name; });
     if (fieldsIter == fields.end()) {
-        statuses::SetLastError(ABCKIT_STATUS_TODO);
+        statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
         return;
     }
     fields.erase(fieldsIter);
@@ -1048,7 +1039,7 @@ void AnnotationInterfaceRemoveFieldDynamic(AbckitCoreAnnotationInterface *ai, Ab
     auto iter = std::find_if(aiFields.begin(), aiFields.end(),
                              [&name](auto &field) { return name == field.get()->name->impl; });
     if (iter == aiFields.end()) {
-        statuses::SetLastError(ABCKIT_STATUS_TODO);
+        statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
         return;
     }
     aiFields.erase(iter);

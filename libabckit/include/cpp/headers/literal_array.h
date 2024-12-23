@@ -17,6 +17,10 @@
 #define CPP_ABCKIT_LITERAL_ARRAY_H
 
 #include "./base_classes.h"
+#include "config.h"
+#include "./value.h"
+#include "./literal.h"
+#include <functional>
 
 namespace abckit {
 
@@ -28,10 +32,14 @@ class LiteralArray : public ViewInResource<AbckitLiteralArray *, const File *> {
     friend class abckit::File;
     /// @brief abckit::Literal
     friend class abckit::Literal;
+    /// @brief abckit::Instruction
+    friend class abckit::Instruction;
     /// @brief abckit::DefaultHash<LiteralArray>
     friend class abckit::DefaultHash<LiteralArray>;
     /// @brief abckit::DynamicIsa
     friend class abckit::DynamicIsa;
+    /// @brief abckit::Value
+    friend class abckit::Value;
 
 public:
     /**
@@ -65,6 +73,17 @@ public:
      *
      */
     ~LiteralArray() override = default;
+
+    /**
+     * @brief Enumerates elements of the literal array, invoking callback `cb` for each of it's
+     * elements.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if 'cb' is false.
+     */
+    bool EnumerateElements(const std::function<bool(Literal)> &cb) const;
 
 protected:
     /**

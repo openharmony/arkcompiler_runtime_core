@@ -37,8 +37,10 @@ class Graph;
 class BasicBlock;
 class Instruction;
 class Value;
+class Type;
 class Literal;
 class LiteralArray;
+class Type;
 
 namespace core {
 class Module;
@@ -68,6 +70,12 @@ class ImportDescriptor;
 class ExportDescriptor;
 }  // namespace arkts
 
+namespace js {
+class Module;
+class ImportDescriptor;
+class ExportDescriptor;
+}  // namespace js
+
 // Class containing pointers to underlying C API's,
 // hides C implementation from C++ API user
 /**
@@ -83,8 +91,10 @@ class ApiConfig final {
     friend BasicBlock;
     friend Instruction;
     friend Value;
+    friend Type;
     friend Literal;
     friend LiteralArray;
+    friend Type;
 
     /// \relates abckit::core::Module
     friend core::Module;
@@ -131,6 +141,13 @@ class ApiConfig final {
     friend arkts::ImportDescriptor;
     /// \relates abckit::arkts::ExportDescriptor
     friend arkts::ExportDescriptor;
+
+    /// \relates abckit::js::Module
+    friend js::Module;
+    /// \relates abckit::js::ImportDescriptor
+    friend js::ImportDescriptor;
+    /// \relates abckit::js::ExportDescriptor
+    friend js::ExportDescriptor;
 
     /**
      * Check error
@@ -181,6 +198,8 @@ protected:
           cMapi_(AbckitGetModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
           cArktsIapi_(AbckitGetArktsInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
           cArktsMapi_(AbckitGetArktsModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
+          cJsIapi_(AbckitGetJsInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
+          cJsMapi_(AbckitGetJsModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
           cGapi_(AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
           cDynapi_(AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
           cStatapi_(AbckitGetIsaApiStaticImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
@@ -193,6 +212,8 @@ private:
     const AbckitModifyApi *cMapi_;
     const AbckitArktsInspectApi *cArktsIapi_;
     const AbckitArktsModifyApi *cArktsMapi_;
+    const AbckitJsInspectApi *cJsIapi_;
+    const AbckitJsModifyApi *cJsMapi_;
     const AbckitGraphApi *cGapi_;
     const AbckitIsaApiDynamic *cDynapi_;
     const AbckitIsaApiStatic *cStatapi_;

@@ -24,19 +24,19 @@
     d: boolean = true
 }
 
-@ #Anno1({
+@__$$ETS_ANNOTATION$$__Anno1({
     a: 20,
     b: [13, 10],
     d: true
 })
 class A {
-    @ #Anno1({
+    @__$$ETS_ANNOTATION$$__Anno1({
         a: 10,
         b: [1, 2, 3],
         d: true
     })
     foo() {}
-    @ #Anno1({
+    @__$$ETS_ANNOTATION$$__Anno1({
         a: 5,
         b: [1, 4]
     })

@@ -29,14 +29,12 @@ struct Program;
 struct Function;
 struct Record;
 struct LiteralArray;
-class Value;
 }  // namespace panda::pandasm
 namespace ark::pandasm {
 struct Function;
 struct Program;
 struct Record;
 struct LiteralArray;
-class Value;
 }  // namespace ark::pandasm
 
 namespace libabckit {
@@ -47,6 +45,7 @@ enum class Mode {
 };
 
 struct pandasm_Literal;
+struct pandasm_Value;
 
 }  // namespace libabckit
 
@@ -69,35 +68,14 @@ enum AbckitDynamicExportKind {
 };
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
+using AbckitValueImplT = std::unique_ptr<libabckit::pandasm_Value, void (*)(libabckit::pandasm_Value *)>;
 struct AbckitValue {
     AbckitFile *file = nullptr;
     /*
      * Underlying implementation
      */
-    std::variant<ark::pandasm::Value *, panda::pandasm::Value *> impl;
-
-    AbckitValue() = default;
-
-    AbckitValue(AbckitFile *f, ark::pandasm::Value *val)
-    {
-        impl = val;
-        file = f;
-    }
-
-    AbckitValue(AbckitFile *f, panda::pandasm::Value *val)
-    {
-        impl = val;
-        file = f;
-    }
-
-    ark::pandasm::Value *GetStaticImpl() const
-    {
-        return std::get<ark::pandasm::Value *>(impl);
-    }
-    panda::pandasm::Value *GetDynamicImpl() const
-    {
-        return std::get<panda::pandasm::Value *>(impl);
-    }
+    AbckitValueImplT val;
+    AbckitValue(AbckitFile *file, AbckitValueImplT val) : file(file), val(std::move(val)) {}
 };
 
 struct AbckitArktsAnnotationInterface {
@@ -187,7 +165,7 @@ struct AbckitCoreAnnotationElement {
     /*
      * Value stored in annotation
      */
-    std::unique_ptr<AbckitValue> value;
+    AbckitValue *value = nullptr;
 
     std::variant<std::unique_ptr<AbckitArktsAnnotationElement>> impl;
     AbckitArktsAnnotationElement *GetArkTSImpl()
@@ -603,6 +581,12 @@ struct AbckitFile {
         std::unordered_map<std::string, std::unique_ptr<AbckitLiteral>> stringLits;
         std::unordered_map<std::string, std::unique_ptr<AbckitLiteral>> methodLits;
     };
+    struct AbcKitValues {
+        std::unordered_map<bool, std::unique_ptr<AbckitValue>> boolVals;
+        std::unordered_map<double, std::unique_ptr<AbckitValue>> doubleVals;
+        std::unordered_map<std::string, std::unique_ptr<AbckitValue>> stringVals;
+        std::unordered_map<std::string, std::unique_ptr<AbckitValue>> litarrVals;
+    };
 
     libabckit::Mode frontend = libabckit::Mode::DYNAMIC;
 
@@ -632,7 +616,7 @@ struct AbckitFile {
 
     AbcKitLiterals literals;
     std::unordered_map<size_t, std::unique_ptr<AbckitType>> types;
-    std::vector<std::unique_ptr<AbckitValue>> values;
+    AbcKitValues values;
     std::vector<std::unique_ptr<AbckitLiteralArray>> litarrs;
 
     /*

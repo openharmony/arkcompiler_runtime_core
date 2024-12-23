@@ -21,36 +21,36 @@
 
 #include <gtest/gtest.h>
 
-namespace libabckit::mock {
+namespace libabckit::mock::abckit_api {
 
 // NOLINTBEGIN(readability-identifier-naming)
 
-inline AbckitStatus GetLastError()
+AbckitStatus GetLastError()
 {
     return ABCKIT_STATUS_NO_ERROR;
 }
 
-inline AbckitFile *OpenAbc(const char *path)
+AbckitFile *OpenAbc(const char *path)
 {
     g_calledFuncs.push(__func__);
-    EXPECT_TRUE(strncmp(path, DEFAULT_PATH, sizeof(DEFAULT_PATH)) == 0);
+    EXPECT_TRUE(strncmp(path, DEFAULT_PATH, DEFAULT_PATH_SIZE) == 0);
     return DEFAULT_FILE;
 }
 
-inline void WriteAbc(AbckitFile *file, const char *path)
+void WriteAbc(AbckitFile *file, const char *path)
 {
     g_calledFuncs.push(__func__);
-    EXPECT_TRUE(strncmp(path, DEFAULT_PATH, sizeof(DEFAULT_PATH)) == 0);
+    EXPECT_TRUE(strncmp(path, DEFAULT_PATH, DEFAULT_PATH_SIZE) == 0);
     EXPECT_TRUE(file == DEFAULT_FILE);
 }
 
-inline void CloseFile(AbckitFile *file)
+void CloseFile(AbckitFile *file)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
 }
 
-inline void DestroyGraph(AbckitGraph *graph)
+void DestroyGraph(AbckitGraph *graph)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(graph == DEFAULT_GRAPH);
@@ -83,9 +83,9 @@ static AbckitApi g_impl = {
 
 // NOLINTEND(readability-identifier-naming)
 
-}  // namespace libabckit::mock
+}  // namespace libabckit::mock::abckit_api
 
 AbckitApi const *AbckitGetMockApiImpl([[maybe_unused]] AbckitApiVersion version)
 {
-    return &libabckit::mock::g_impl;
+    return &libabckit::mock::abckit_api::g_impl;
 }

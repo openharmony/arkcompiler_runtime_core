@@ -15,14 +15,14 @@
 
 import { Anno1, Anno2 } from "./a"
 
-@#Anno1
+@__$$ETS_ANNOTATION$$__Anno1
 class A {}
 
-@#Anno1()
+@__$$ETS_ANNOTATION$$__Anno1()
 class B {}
 
-@#Anno1({})
+@__$$ETS_ANNOTATION$$__Anno1({})
 class C {}
 
-@#Anno2({a: 1, b: "string"})
+@__$$ETS_ANNOTATION$$__Anno2({a: 1, b: "string"})
 class D {}

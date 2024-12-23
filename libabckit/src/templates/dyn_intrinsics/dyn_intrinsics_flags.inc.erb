@@ -16,19 +16,19 @@
 % Panda::instructions.select{|b| b.namespace == "ecmascript"}.each do |inst|
     case RuntimeInterface::IntrinsicId::DYN_<%= inst.opcode.upcase %>:
     {
-        constexpr auto CLEAR_FLAGS = compiler::inst_flags::BARRIER|compiler::inst_flags::REQUIRE_STATE|compiler::inst_flags::CALL|compiler::inst_flags::HEAP_INV|compiler::inst_flags::CAN_THROW|compiler::inst_flags::ACC_READ|compiler::inst_flags::ACC_WRITE;
+        constexpr auto CLEAR_FLAGS = ark::compiler::inst_flags::BARRIER|ark::compiler::inst_flags::REQUIRE_STATE|ark::compiler::inst_flags::CALL|ark::compiler::inst_flags::HEAP_INV|ark::compiler::inst_flags::CAN_THROW|ark::compiler::inst_flags::ACC_READ|ark::compiler::inst_flags::ACC_WRITE;
         constexpr auto SET_FLAGS = 0U;
         static_assert((SET_FLAGS & CLEAR_FLAGS) == 0, "DYN_<%= inst.opcode.upcase %> CLEAR_FLAGS cannot intersect SET_FLAGS");
         inst->ClearFlag(static_cast<inst_flags::Flags>(CLEAR_FLAGS));
 %   if inst.throwing?
-        inst->SetFlag(compiler::inst_flags::CAN_THROW);
+        inst->SetFlag(ark::compiler::inst_flags::CAN_THROW);
 %   end
 %   if inst.exceptions.include?('x_throw') || inst.properties.include?('return')
-        inst->SetFlag(compiler::inst_flags::CF);
-        inst->SetFlag(compiler::inst_flags::TERMINATOR);
+        inst->SetFlag(ark::compiler::inst_flags::CF);
+        inst->SetFlag(ark::compiler::inst_flags::TERMINATOR);
 %   end
 %   if inst.acc.include?("in")
-        inst->SetFlag(compiler::inst_flags::ACC_READ);
+        inst->SetFlag(ark::compiler::inst_flags::ACC_READ);
 %   end
 %   addition_acc_write_opcodes = ["DEFINEPROPERTYBYNAME_IMM8_ID16_V8",
 %                                 "CALLRUNTIME_DEFINEFIELDBYVALUE_PREF_IMM8_V8_V8",
@@ -36,7 +36,7 @@
 %                                 "STPRIVATEPROPERTY_IMM8_IMM16_IMM16_V8",
 %                                 "THROW_UNDEFINEDIFHOLEWITHNAME_PREF_ID16"]
 %   if inst.acc.include?("out") || (addition_acc_write_opcodes.include? inst.opcode.upcase)
-        inst->SetFlag(compiler::inst_flags::ACC_WRITE);
+        inst->SetFlag(ark::compiler::inst_flags::ACC_WRITE);
 %   end
         break;
     }

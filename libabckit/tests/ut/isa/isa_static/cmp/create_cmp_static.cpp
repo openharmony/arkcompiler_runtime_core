@@ -86,9 +86,9 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpI1)
         ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static_modified_set.abc", "foo",
         [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitInst *firstConst = g_implG->gCreateConstantI64(graph, 10);
+            AbckitInst *firstConst = g_implG->gFindOrCreateConstantI64(graph, 10);
             EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
-            AbckitInst *secondConst = g_implG->gCreateConstantI64(graph, 7);
+            AbckitInst *secondConst = g_implG->gFindOrCreateConstantI64(graph, 7);
             EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
             TransformIrIcreateCmp(graph, firstConst, secondConst);
         },
@@ -106,9 +106,9 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpI2)
         ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static_modified_set.abc", "foo",
         [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitInst *firstConst = g_implG->gCreateConstantI64(graph, 0);
+            AbckitInst *firstConst = g_implG->gFindOrCreateConstantI64(graph, 0);
             EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
-            AbckitInst *secondConst = g_implG->gCreateConstantI64(graph, 24);
+            AbckitInst *secondConst = g_implG->gFindOrCreateConstantI64(graph, 24);
             EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
             TransformIrIcreateCmp(graph, firstConst, secondConst);
         },
@@ -126,7 +126,7 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpI3)
         ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static_modified_set.abc", "foo",
         [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitInst *firstConst = g_implG->gCreateConstantI64(graph, 7);
+            AbckitInst *firstConst = g_implG->gFindOrCreateConstantI64(graph, 7);
             EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
             TransformIrIcreateCmp(graph, firstConst, firstConst);
         },
@@ -144,9 +144,9 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpD1)
         ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static_modified_set.abc", "foo",
         [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitInst *firstConst = g_implG->gCreateConstantF64(graph, 12.4);
+            AbckitInst *firstConst = g_implG->gFindOrCreateConstantF64(graph, 12.4);
             EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
-            AbckitInst *secondConst = g_implG->gCreateConstantF64(graph, 4.5);
+            AbckitInst *secondConst = g_implG->gFindOrCreateConstantF64(graph, 4.5);
             EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
             TransformIrIcreateCmp(graph, firstConst, secondConst);
         },
@@ -164,9 +164,9 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpD2)
         ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static_modified_set.abc", "foo",
         [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitInst *firstConst = g_implG->gCreateConstantF64(graph, 4.3);
+            AbckitInst *firstConst = g_implG->gFindOrCreateConstantF64(graph, 4.3);
             EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
-            AbckitInst *secondConst = g_implG->gCreateConstantF64(graph, 13.6);
+            AbckitInst *secondConst = g_implG->gFindOrCreateConstantF64(graph, 13.6);
             EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
             TransformIrIcreateCmp(graph, firstConst, secondConst);
         },
@@ -184,7 +184,7 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpD3)
         ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static_modified_set.abc", "foo",
         [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitInst *firstConst = g_implG->gCreateConstantF64(graph, 7.6);
+            AbckitInst *firstConst = g_implG->gFindOrCreateConstantF64(graph, 7.6);
             EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
             TransformIrIcreateCmp(graph, firstConst, firstConst);
         },
@@ -202,9 +202,9 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpNegative)
         ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static_modified_set.abc", "foo",
         [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitInst *firstConst = g_implG->gCreateConstantI64(graph, 10);
+            AbckitInst *firstConst = g_implG->gFindOrCreateConstantI64(graph, 10);
             EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
-            AbckitInst *secondConst = g_implG->gCreateConstantF64(graph, 7.2);
+            AbckitInst *secondConst = g_implG->gFindOrCreateConstantF64(graph, 7.2);
             EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
             AbckitInst *cmp = g_statG->iCreateCmp(graph, firstConst, secondConst);
             EXPECT_TRUE(cmp == nullptr);

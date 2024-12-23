@@ -54,7 +54,7 @@ auto g_icreateGetresumemode1Lambda = [](AbckitFile * /*file*/, AbckitCoreFunctio
     g_implG->bbAppendSuccBlock(bbRet, g_implG->gGetEndBasicBlock(graph));
     g_implG->bbAppendSuccBlock(bbThrow, g_implG->gGetEndBasicBlock(graph));
 
-    auto *add2 = g_dynG->iCreateAdd2(graph, g_implG->gCreateConstantU64(graph, 7), param2);
+    auto *add2 = g_dynG->iCreateAdd2(graph, g_implG->gFindOrCreateConstantU64(graph, 7), param2);
     auto *ldfalse = g_dynG->iCreateLdfalse(graph);
     auto *createiterresultobj = g_dynG->iCreateCreateiterresultobj(graph, add2, ldfalse);
     auto *creategeneratorobj = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEGENERATOROBJ);
@@ -62,7 +62,7 @@ auto g_icreateGetresumemode1Lambda = [](AbckitFile * /*file*/, AbckitCoreFunctio
     auto *resumegenerator = g_dynG->iCreateResumegenerator(graph, creategeneratorobj);
     auto *getresumemode = g_dynG->iCreateGetresumemode(graph, creategeneratorobj);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto *const0 = g_implG->gCreateConstantU64(graph, 0);
+    auto *const0 = g_implG->gFindOrCreateConstantU64(graph, 0);
     auto *eq = g_dynG->iCreateEq(graph, getresumemode, const0);
     auto *ifInst = g_dynG->iCreateIf(graph, eq, ABCKIT_ISA_API_DYNAMIC_CONDITION_CODE_CC_EQ);
 
@@ -78,7 +78,7 @@ auto g_icreateGetresumemode1Lambda = [](AbckitFile * /*file*/, AbckitCoreFunctio
     auto *returnInst = g_dynG->iCreateReturn(graph, resumegenerator);
     g_implG->bbAddInstBack(bbRet, returnInst);
 
-    auto *eq2 = g_dynG->iCreateEq(graph, getresumemode, g_implG->gCreateConstantU64(graph, 1));
+    auto *eq2 = g_dynG->iCreateEq(graph, getresumemode, g_implG->gFindOrCreateConstantU64(graph, 1));
     auto *ifInst2 = g_dynG->iCreateIf(graph, eq2, ABCKIT_ISA_API_DYNAMIC_CONDITION_CODE_CC_EQ);
     g_implG->bbAddInstBack(bbEq, eq2);
     g_implG->bbAddInstBack(bbEq, ifInst2);

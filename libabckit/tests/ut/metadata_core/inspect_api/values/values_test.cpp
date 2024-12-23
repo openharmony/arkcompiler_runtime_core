@@ -21,6 +21,8 @@
 #include "helpers/helpers.h"
 #include "libabckit/include/c/metadata_core.h"
 #include "libabckit/src/metadata_inspect_impl.h"  // NOTE(mredkin)
+#include "libabckit/src/adapter_dynamic/metadata_inspect_dynamic.h"
+#include "libabckit/src/adapter_static/metadata_inspect_static.h"
 
 namespace libabckit::test {
 
@@ -308,4 +310,99 @@ TEST_F(LibAbcKitInspectApiValuesTest, ValueGetType_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
+// Test: test-kind=api, api=InspectApiImpl::valueGetU1, abc-kind=ArkTS1, category=positive
+TEST_F(LibAbcKitInspectApiValuesTest, ValueGetU1_3)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_dynamic.abc", &file);
+    auto *res = g_implM->createValueU1(file, true);
+    ValueGetTypeDynamic(res)->id = ABCKIT_TYPE_ID_INVALID;
+    g_implI->valueGetU1(res);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::valueGetU1, abc-kind=ArkTS2, category=positive
+TEST_F(LibAbcKitInspectApiValuesTest, ValueGetU1_4)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_static.abc", &file);
+    auto *res = g_implM->createValueU1(file, true);
+    ValueGetTypeStatic(res)->id = ABCKIT_TYPE_ID_INVALID;
+    g_implI->valueGetU1(res);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::valueGetDouble, abc-kind=ArkTS1, category=positive
+TEST_F(LibAbcKitInspectApiValuesTest, ValueGetDouble_3)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_dynamic.abc", &file);
+    const double initVal = .1f;
+    auto *res = g_implM->createValueDouble(file, initVal);
+    ValueGetTypeDynamic(res)->id = ABCKIT_TYPE_ID_INVALID;
+    g_implI->valueGetU1(res);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::valueGetDouble, abc-kind=ArkTS2, category=positive
+TEST_F(LibAbcKitInspectApiValuesTest, ValueGetDouble_4)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_static.abc", &file);
+    const double initVal = .1f;
+    auto *res = g_implM->createValueDouble(file, initVal);
+    ValueGetTypeStatic(res)->id = ABCKIT_TYPE_ID_INVALID;
+    g_implI->valueGetDouble(res);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::valueGetString, abc-kind=ArkTS1, category=positive
+TEST_F(LibAbcKitInspectApiValuesTest, ValueGetString_3)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_dynamic.abc", &file);
+    auto *res = g_implM->createValueString(file, "test");
+    ValueGetTypeDynamic(res)->id = ABCKIT_TYPE_ID_INVALID;
+    g_implI->valueGetString(res);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::valueGetString, abc-kind=ArkTS2, category=positive
+TEST_F(LibAbcKitInspectApiValuesTest, ValueGetString_4)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/values/values_static.abc", &file);
+    auto *res = g_implM->createValueString(file, "test");
+    ValueGetTypeStatic(res)->id = ABCKIT_TYPE_ID_INVALID;
+    g_implI->valueGetString(res);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::valueGetLiteralArray, abc-kind=ArkTS1, category=positive
+TEST_F(LibAbcKitInspectApiValuesTest, ArrayValueGetLiteralArray_3)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/values/values_dynamic.abc", &file);
+    std::vector<AbckitValue *> abcArr;
+    abcArr.emplace_back(g_implM->createValueString(file, "test"));
+    abcArr.emplace_back(g_implM->createValueU1(file, true));
+    auto *arr = g_implM->createLiteralArrayValue(file, abcArr.data(), 2);
+    ValueGetTypeDynamic(arr)->id = ABCKIT_TYPE_ID_INVALID;
+    g_implI->arrayValueGetLiteralArray(arr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
 }  // namespace libabckit::test

@@ -49,6 +49,21 @@ enum AbckitIsaType {
 
 enum { ABCKIT_TRUE_SUCC_IDX = 0, ABCKIT_FALSE_SUCC_IDX = 1 };
 
+enum AbckitBitImmSize {
+    /*
+     * For invalid input.
+     */
+    BITSIZE_0 = 0,
+    BITSIZE_4 = 4,
+    BITSIZE_8 = 8,
+    BITSIZE_16 = 16,
+    BITSIZE_32 = 32,
+    /*
+     * For immediate overflow check.
+     */
+    BITSIZE_64 = 64
+};
+
 /**
  * @brief Struct that holds the pointers to the graph manipulation API.
  */
@@ -174,7 +189,7 @@ struct AbckitGraphApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Allocates
      */
-    AbckitInst *(*gCreateConstantI32)(AbckitGraph *graph, int32_t value);
+    AbckitInst *(*gFindOrCreateConstantI32)(AbckitGraph *graph, int32_t value);
 
     /**
      * @brief Creates I64 constant instruction and inserts it in start basic block of given `graph`.
@@ -184,7 +199,7 @@ struct AbckitGraphApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Allocates
      */
-    AbckitInst *(*gCreateConstantI64)(AbckitGraph *graph, int64_t value);
+    AbckitInst *(*gFindOrCreateConstantI64)(AbckitGraph *graph, int64_t value);
 
     /**
      * @brief Creates U64 constant instruction and inserts it in start basic block of given `graph`.
@@ -194,7 +209,7 @@ struct AbckitGraphApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Allocates
      */
-    AbckitInst *(*gCreateConstantU64)(AbckitGraph *graph, uint64_t value);
+    AbckitInst *(*gFindOrCreateConstantU64)(AbckitGraph *graph, uint64_t value);
 
     /**
      * @brief Creates F64 constant instruction and inserts it in start basic block of given `graph`.
@@ -204,7 +219,7 @@ struct AbckitGraphApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Allocates
      */
-    AbckitInst *(*gCreateConstantF64)(AbckitGraph *graph, double value);
+    AbckitInst *(*gFindOrCreateConstantF64)(AbckitGraph *graph, double value);
 
     /**
      * @brief Removes all basic blocks unreachable from start basic block.
@@ -367,12 +382,13 @@ struct AbckitGraphApi {
     /**
      * @brief Creates new basic block and moves all instructions after `inst` into new basic block.
      * @return Pointer to newly create `AbckitBasicBlock`.
+     * @param [ in ] basicBlock - Block for which instruction is splitted.
      * @param [ in ] inst - Instruction after which all instructions will be moved into new basic block.
      * @param [ in ] makeEdge - If `true` connects old and new basic blocks.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `inst` is NULL.
      * @note Allocates
      */
-    AbckitBasicBlock *(*bbSplitBlockAfterInstruction)(AbckitInst *inst, bool makeEdge);
+    AbckitBasicBlock *(*bbSplitBlockAfterInstruction)(AbckitBasicBlock *basicBlock, AbckitInst *inst, bool makeEdge);
 
     /**
      * @brief Insert `inst` at the beginning of `basicBlock`.
@@ -655,6 +671,14 @@ struct AbckitGraphApi {
     AbckitBasicBlock *(*iGetBasicBlock)(AbckitInst *inst);
 
     /**
+     * @brief Returns graph that owns `inst`.
+     * @return Pointer to the `AbckitGraph`.
+     * @param [ in ] inst - Instruction to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `inst` is NULL.
+     */
+    AbckitGraph *(*iGetGraph)(AbckitInst *inst);
+
+    /**
      * @brief Checks that `inst` is dominated by `dominator`.
      * @return `true` if `inst` is dominated by `dominator`, `false` otherwise.
      * @param [ in ] inst - Instruction to be inspected.
@@ -815,6 +839,17 @@ struct AbckitGraphApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `index` larger than `inst` immediates number.
      */
     void (*iSetImmediate)(AbckitInst *inst, size_t index, uint64_t imm);
+
+    /**
+     * @brief Returns size in bits of `inst` immediate under given `index`.
+     * @return Size of `inst` immediate under given `index` in bits.
+     * @param [ in ] inst - Instruction to be inspected.
+     * @param [ in ] index - Index of immediate to get size.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `inst` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `inst` has no immediates.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `index` larger than `inst` immediates number.
+     */
+    enum AbckitBitImmSize (*iGetImmediateSize)(AbckitInst *inst, size_t index);
 
     /**
      * @brief Returns number of `inst` immediates.

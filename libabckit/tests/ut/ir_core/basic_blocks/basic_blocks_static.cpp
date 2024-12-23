@@ -252,7 +252,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBaddInstFront_4)
             auto *start = g_implG->gGetStartBasicBlock(graph);
             auto *bb = helpers::BBgetSuccBlocks(start)[0];
             auto *inst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_CONSTANT);
-            auto *newInst = g_implG->gCreateConstantI64(graph, 1U);
+            auto *newInst = g_implG->gFindOrCreateConstantI64(graph, 1U);
             auto *negInst = g_statG->iCreateNeg(graph, newInst);
             g_implG->bbAddInstFront(bb, negInst);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -284,7 +284,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBaddInstBack_2)
             auto *start = g_implG->gGetStartBasicBlock(graph);
             auto *bb = helpers::BBgetSuccBlocks(start)[0];
             auto *inst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_CONSTANT);
-            auto *newInst = g_implG->gCreateConstantI64(graph, 1U);
+            auto *newInst = g_implG->gFindOrCreateConstantI64(graph, 1U);
             auto *negInst = g_statG->iCreateNeg(graph, newInst);
 
             g_implG->bbEraseSuccBlock(start, 0);
@@ -327,7 +327,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBaddInstBack_4)
         ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/basic_blocks_static_modified.abc", "test",
         [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
             auto *start = g_implG->gGetStartBasicBlock(graph);
-            auto *newIns = g_implG->gCreateConstantI64(graph, 1);
+            auto *newIns = g_implG->gFindOrCreateConstantI64(graph, 1);
 
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             std::vector<helpers::BBSchema<AbckitIsaApiStaticOpcode>> bbSchemas(
@@ -672,7 +672,7 @@ TEST_F(LibAbcKitBasicBlocksTest, bbRemoveAllInsts_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test2", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *empty = g_implG->bbCreateEmpty(graph);
-        auto *constInst = g_implG->gCreateConstantI64(graph, 1U);
+        auto *constInst = g_implG->gFindOrCreateConstantI64(graph, 1U);
         auto *newInst = g_statG->iCreateNeg(graph, constInst);
         g_implG->bbAddInstFront(empty, newInst);
         ASSERT_EQ(g_implG->bbGetNumberOfInstructions(empty), 1);
@@ -723,7 +723,7 @@ TEST_F(LibAbcKitBasicBlocksTest, DISABLED_BBsplitBlockAfterInstruction_1)
         auto *bb2 = g_implG->bbGetSuccBlock(bb, 0);
         auto *inst = g_implG->bbGetFirstInst(bb2);
         ASSERT_EQ(g_implG->gGetNumberOfBasicBlocks(graph), 5U);
-        auto *newBb = g_implG->bbSplitBlockAfterInstruction(inst, false);
+        auto *newBb = g_implG->bbSplitBlockAfterInstruction(bb2, inst, false);
         ASSERT_EQ(g_implG->gGetNumberOfBasicBlocks(graph), 6U);
         g_implG->bbAppendSuccBlock(bb2, newBb);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -773,7 +773,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBvisitSuccBlocksStatic_2)
             if (curInst == nullptr) {
                 return false;
             }
-            gImplG->iSetInput(curInst, gImplG->gCreateConstantU64(graph, newPrintInt), 1);
+            gImplG->iSetInput(curInst, gImplG->gFindOrCreateConstantU64(graph, newPrintInt), 1);
             return true;
         });
     };

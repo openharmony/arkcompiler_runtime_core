@@ -21,7 +21,7 @@ export class B {}
 }
 
 class A {
-    @ #Anno({
+    @__$$ETS_ANNOTATION$$__Anno({
         a: 10
     })
     foo() {

@@ -286,32 +286,32 @@ TEST_F(LibAbcKitNullptrTestsGraphApiImpl0, bbVisitSuccBlocks)
     helpers_nullptr::TestNullptr(g_graphApiImp->bbVisitSuccBlocks);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gCreateConstantF64,
+// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantF64,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsGraphApiImpl0, gCreateConstantF64)
+TEST_F(LibAbcKitNullptrTestsGraphApiImpl0, gFindOrCreateConstantF64)
 {
-    helpers_nullptr::TestNullptr(g_graphApiImp->gCreateConstantF64);
+    helpers_nullptr::TestNullptr(g_graphApiImp->gFindOrCreateConstantF64);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gCreateConstantI32,
+// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantI32,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsGraphApiImpl0, gCreateConstantI32)
+TEST_F(LibAbcKitNullptrTestsGraphApiImpl0, gFindOrCreateConstantI32)
 {
-    helpers_nullptr::TestNullptr(g_graphApiImp->gCreateConstantI32);
+    helpers_nullptr::TestNullptr(g_graphApiImp->gFindOrCreateConstantI32);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gCreateConstantI64,
+// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantI64,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsGraphApiImpl0, gCreateConstantI64)
+TEST_F(LibAbcKitNullptrTestsGraphApiImpl0, gFindOrCreateConstantI64)
 {
-    helpers_nullptr::TestNullptr(g_graphApiImp->gCreateConstantI64);
+    helpers_nullptr::TestNullptr(g_graphApiImp->gFindOrCreateConstantI64);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gCreateConstantU64,
+// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantU64,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsGraphApiImpl0, gCreateConstantU64)
+TEST_F(LibAbcKitNullptrTestsGraphApiImpl0, gFindOrCreateConstantU64)
 {
-    helpers_nullptr::TestNullptr(g_graphApiImp->gCreateConstantU64);
+    helpers_nullptr::TestNullptr(g_graphApiImp->gFindOrCreateConstantU64);
 }
 
 // Test: test-kind=api, api=GraphApiImpl::gDump,
@@ -487,6 +487,13 @@ TEST_F(LibAbcKitNullptrTestsGraphApiImpl0, iGetImmediate)
 TEST_F(LibAbcKitNullptrTestsGraphApiImpl0, iGetImmediateCount)
 {
     helpers_nullptr::TestNullptr(g_graphApiImp->iGetImmediateCount);
+}
+
+// Test: test-kind=api, api=GraphApiImpl::iGetImmediateSize,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsGraphApiImpl0, iGetImmediateSize)
+{
+    helpers_nullptr::TestNullptr(g_graphApiImp->iGetImmediateSize);
 }
 
 // Test: test-kind=api, api=GraphApiImpl::iGetInput,

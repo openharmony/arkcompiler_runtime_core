@@ -30,22 +30,21 @@ AbckitString *CreateStringStatic(AbckitFile *file, const char *value);
 
 void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph);
 
-AbckitLiteral *CreateLiteralBoolStatic(AbckitFile *file, bool value);
-AbckitLiteral *CreateLiteralU8Static(AbckitFile *file, uint8_t value);
-AbckitLiteral *CreateLiteralU16Static(AbckitFile *file, uint16_t value);
-AbckitLiteral *CreateLiteralMethodAffiliateStatic(AbckitFile *file, uint16_t value);
-AbckitLiteral *CreateLiteralU32Static(AbckitFile *file, uint32_t value);
-AbckitLiteral *CreateLiteralU64Static(AbckitFile *file, uint64_t value);
-AbckitLiteral *CreateLiteralFloatStatic(AbckitFile *file, float value);
-AbckitLiteral *CreateLiteralDoubleStatic(AbckitFile *file, double value);
-AbckitLiteral *CreateLiteralStringStatic(AbckitFile *file, const char *value);
-AbckitLiteral *CreateLiteralMethodStatic(AbckitFile *file, AbckitCoreFunction *function);
+AbckitLiteral *FindOrCreateLiteralBoolStatic(AbckitFile *file, bool value);
+AbckitLiteral *FindOrCreateLiteralU8Static(AbckitFile *file, uint8_t value);
+AbckitLiteral *FindOrCreateLiteralU16Static(AbckitFile *file, uint16_t value);
+AbckitLiteral *FindOrCreateLiteralMethodAffiliateStatic(AbckitFile *file, uint16_t value);
+AbckitLiteral *FindOrCreateLiteralU32Static(AbckitFile *file, uint32_t value);
+AbckitLiteral *FindOrCreateLiteralU64Static(AbckitFile *file, uint64_t value);
+AbckitLiteral *FindOrCreateLiteralFloatStatic(AbckitFile *file, float value);
+AbckitLiteral *FindOrCreateLiteralDoubleStatic(AbckitFile *file, double value);
+AbckitLiteral *FindOrCreateLiteralStringStatic(AbckitFile *file, const char *value);
+AbckitLiteral *FindOrCreateLiteralMethodStatic(AbckitFile *file, AbckitCoreFunction *function);
 AbckitLiteralArray *CreateLiteralArrayStatic(AbckitFile *file, AbckitLiteral **value, size_t size);
 
-AbckitValue *CreateValueU1Static(AbckitFile *file, bool value);
-AbckitValue *CreateValueDoubleStatic(AbckitFile *file, double value);
-AbckitValue *CreateValueStringStatic(AbckitFile *file, const char *value);
-AbckitValue *CreateLiteralArrayValueStatic(AbckitFile *file, AbckitValue **value, size_t size);
+AbckitValue *FindOrCreateValueU1Static(AbckitFile *file, bool value);
+AbckitValue *FindOrCreateValueDoubleStatic(AbckitFile *file, double value);
+AbckitValue *FindOrCreateValueStringStatic(AbckitFile *file, const char *value);
 }  // namespace libabckit
 
 #endif

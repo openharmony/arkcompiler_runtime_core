@@ -40,23 +40,23 @@ AbckitJsExportDescriptor *DynamicModuleAddExportDynamic(AbckitCoreModule *export
                                                         const AbckitJsDynamicModuleExportCreateParams *params);
 void ModuleRemoveExportDynamic(AbckitCoreModule *m, AbckitArktsExportDescriptor *i);
 void ModuleRemoveExportDynamic(AbckitCoreModule *m, AbckitJsExportDescriptor *i);
-AbckitLiteral *CreateLiteralBoolDynamic(AbckitFile *file, bool value);
-AbckitLiteral *CreateLiteralU8Dynamic(AbckitFile *file, uint8_t value);
-AbckitLiteral *CreateLiteralU16Dynamic(AbckitFile *file, uint16_t value);
-AbckitLiteral *CreateLiteralMethodAffiliateDynamic(AbckitFile *file, uint16_t value);
-AbckitLiteral *CreateLiteralU32Dynamic(AbckitFile *file, uint32_t value);
-AbckitLiteral *CreateLiteralU64Dynamic(AbckitFile *file, uint64_t value);
-AbckitLiteral *CreateLiteralFloatDynamic(AbckitFile *file, float value);
-AbckitLiteral *CreateLiteralDoubleDynamic(AbckitFile *file, double value);
-AbckitLiteral *CreateLiteralStringDynamic(AbckitFile *file, const char *value);
-AbckitLiteral *CreateLiteralMethodDynamic(AbckitFile *file, AbckitCoreFunction *function);
-AbckitLiteral *CreateLiteralLiteralArrayDynamic(AbckitFile *file, AbckitLiteralArray *litarr);
+AbckitLiteral *FindOrCreateLiteralBoolDynamic(AbckitFile *file, bool value);
+AbckitLiteral *FindOrCreateLiteralU8Dynamic(AbckitFile *file, uint8_t value);
+AbckitLiteral *FindOrCreateLiteralU16Dynamic(AbckitFile *file, uint16_t value);
+AbckitLiteral *FindOrCreateLiteralMethodAffiliateDynamic(AbckitFile *file, uint16_t value);
+AbckitLiteral *FindOrCreateLiteralU32Dynamic(AbckitFile *file, uint32_t value);
+AbckitLiteral *FindOrCreateLiteralU64Dynamic(AbckitFile *file, uint64_t value);
+AbckitLiteral *FindOrCreateLiteralFloatDynamic(AbckitFile *file, float value);
+AbckitLiteral *FindOrCreateLiteralDoubleDynamic(AbckitFile *file, double value);
+AbckitLiteral *FindOrCreateLiteralStringDynamic(AbckitFile *file, const char *value);
+AbckitLiteral *FindOrCreateLiteralMethodDynamic(AbckitFile *file, AbckitCoreFunction *function);
+AbckitLiteral *FindOrCreateLiteralLiteralArrayDynamic(AbckitFile *file, AbckitLiteralArray *litarr);
 AbckitLiteralArray *CreateLiteralArrayDynamic(AbckitFile *file, AbckitLiteral **value, size_t size);
 
-AbckitValue *CreateValueU1Dynamic(AbckitFile *file, bool value);
-AbckitValue *CreateValueDoubleDynamic(AbckitFile *file, double value);
-AbckitValue *CreateValueStringDynamic(AbckitFile *file, const char *value);
-AbckitValue *CreateLiteralArrayValueDynamic(AbckitFile *file, AbckitValue **value, size_t size);
+AbckitValue *FindOrCreateValueU1Dynamic(AbckitFile *file, bool value);
+AbckitValue *FindOrCreateValueDoubleDynamic(AbckitFile *file, double value);
+AbckitValue *FindOrCreateValueStringDynamic(AbckitFile *file, const char *value);
+AbckitValue *FindOrCreateLiteralArrayValueDynamic(AbckitFile *file, AbckitValue **value, size_t size);
 
 AbckitArktsAnnotationInterface *ModuleAddAnnotationInterfaceDynamic(
     AbckitCoreModule *m, const AbckitArktsAnnotationInterfaceCreateParams *params);

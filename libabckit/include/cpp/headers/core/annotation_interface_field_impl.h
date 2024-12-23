@@ -17,17 +17,45 @@
 #define CPP_ABCKIT_CORE_ANNOTATION_INTERFACE_FIELD_IMPL_H
 
 #include "./annotation_interface_field.h"
+#include "./annotation_interface.h"
+#include "../value.h"
 
 namespace abckit::core {
 
-inline std::string_view AnnotationInterfaceField::GetName()
+inline const File *AnnotationInterfaceField::GetFile() const
+{
+    return GetResource();
+}
+
+inline std::string AnnotationInterfaceField::GetName() const
 {
     const ApiConfig *conf = GetApiConfig();
     AbckitString *abcStr = conf->cIapi_->annotationInterfaceFieldGetName(GetView());
     CheckError(conf);
-    std::string_view sView = conf->cIapi_->abckitStringToString(abcStr);
+    std::string str = conf->cIapi_->abckitStringToString(abcStr);
     CheckError(conf);
-    return sView;
+    return str;
+}
+
+inline core::AnnotationInterface AnnotationInterfaceField::GetInterface() const
+{
+    auto *ai = GetApiConfig()->cIapi_->annotationInterfaceFieldGetInterface(GetView());
+    CheckError(GetApiConfig());
+    return AnnotationInterface(ai, GetApiConfig(), GetResource());
+}
+
+inline Type AnnotationInterfaceField::GetType() const
+{
+    auto t = GetApiConfig()->cIapi_->annotationInterfaceFieldGetType(GetView());
+    CheckError(GetApiConfig());
+    return Type(t, GetApiConfig(), GetResource());
+}
+
+inline Value AnnotationInterfaceField::GetDefaultValue() const
+{
+    auto dv = GetApiConfig()->cIapi_->annotationInterfaceFieldGetDefaultValue(GetView());
+    CheckError(GetApiConfig());
+    return Value(dv, GetApiConfig(), GetResource());
 }
 
 }  // namespace abckit::core

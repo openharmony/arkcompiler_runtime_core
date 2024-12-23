@@ -155,8 +155,8 @@ TEST_F(LibAbcKitIrInstTest, IgetImmediateCount_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "test",
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                               auto const1 = g_implG->gCreateConstantU64(graph, 1);
-                               auto const2 = g_implG->gCreateConstantU64(graph, 2);
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
+                               auto const2 = g_implG->gFindOrCreateConstantU64(graph, 2);
                                auto *addi = g_statG->iCreateAddI(graph, const1, 2);
                                auto *add = g_statG->iCreateAdd(graph, const1, const2);
 
@@ -172,7 +172,7 @@ TEST_F(LibAbcKitIrInstTest, IgetImmediateCount_2)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "test",
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                               auto const1 = g_implG->gCreateConstantU64(graph, 1);
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
                                auto *newlexenv = g_dynG->iCreateNewlexenv(graph, 2);
                                auto *getnextpropname = g_dynG->iCreateGetnextpropname(graph, const1);
 
@@ -188,7 +188,7 @@ TEST_F(LibAbcKitIrInstTest, IgetImmediate_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "test",
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                               auto const1 = g_implG->gCreateConstantU64(graph, 1);
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
                                auto *addi = g_statG->iCreateAddI(graph, const1, 2);
 
                                ASSERT_EQ(g_implG->iGetImmediate(addi, 0), 2);
@@ -201,8 +201,8 @@ TEST_F(LibAbcKitIrInstTest, IgetImmediate_2)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "test",
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                               auto const1 = g_implG->gCreateConstantU64(graph, 1);
-                               auto const2 = g_implG->gCreateConstantU64(graph, 2);
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
+                               auto const2 = g_implG->gFindOrCreateConstantU64(graph, 2);
                                auto *addi = g_statG->iCreateAddI(graph, const1, 2);
                                auto *add = g_statG->iCreateAdd(graph, const1, const2);
 
@@ -232,7 +232,7 @@ TEST_F(LibAbcKitIrInstTest, IgetImmediate_4)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "test",
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                               auto const1 = g_implG->gCreateConstantU64(graph, 1);
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
                                auto *newlexenv = g_dynG->iCreateNewlexenv(graph, 2);
                                auto *getnextpropname = g_dynG->iCreateGetnextpropname(graph, const1);
 
@@ -250,7 +250,7 @@ TEST_F(LibAbcKitIrInstTest, IsetImmediate_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "test",
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                               auto const1 = g_implG->gCreateConstantU64(graph, 1);
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
                                auto *addi = g_statG->iCreateAddI(graph, const1, 2);
 
                                ASSERT_EQ(g_implG->iGetImmediate(addi, 0), 2);
@@ -267,8 +267,8 @@ TEST_F(LibAbcKitIrInstTest, IsetImmediate_2)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "test",
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                               auto const1 = g_implG->gCreateConstantU64(graph, 1);
-                               auto const2 = g_implG->gCreateConstantU64(graph, 2);
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
+                               auto const2 = g_implG->gFindOrCreateConstantU64(graph, 2);
                                auto *addi = g_statG->iCreateAddI(graph, const1, 2);
                                auto *add = g_statG->iCreateAdd(graph, const1, const2);
 
@@ -302,7 +302,7 @@ TEST_F(LibAbcKitIrInstTest, IsetImmediate_4)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "test",
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                               auto const1 = g_implG->gCreateConstantU64(graph, 1);
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
                                auto *newlexenv = g_dynG->iCreateNewlexenv(graph, 2);
                                auto *getnextpropname = g_dynG->iCreateGetnextpropname(graph, const1);
 
@@ -312,6 +312,72 @@ TEST_F(LibAbcKitIrInstTest, IsetImmediate_4)
                                ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
                                g_implG->iSetImmediate(getnextpropname, 0, 1);
                                ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+                           });
+}
+
+// Test: test-kind=api, api=GraphApiImpl::iSetImmediate, abc-kind=ArkTS1, category=negative
+TEST_F(LibAbcKitIrInstTest, IsetImmediate_5)
+{
+    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "test",
+                           [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+                               auto *newlexenv = g_dynG->iCreateNewlexenv(graph, 2);
+
+                               ASSERT_EQ(g_implG->iGetImmediate(newlexenv, 0), 2);
+                               ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                               g_implG->iSetImmediate(newlexenv, 0, 0x100);
+                               ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+                               ASSERT_EQ(g_implG->iGetImmediate(newlexenv, 0), 2);
+                               ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                           });
+}
+
+// Test: test-kind=api, api=GraphApiImpl::iGetImmediateSize, abc-kind=ArkTS1, category=positive
+TEST_F(LibAbcKitIrInstTest, IgetImmediateSize_1)
+{
+    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "test",
+                           [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+                               auto *newlexenv = g_dynG->iCreateNewlexenv(graph, 2);
+
+                               ASSERT_EQ(g_implG->iGetImmediateSize(newlexenv, 0), AbckitBitImmSize::BITSIZE_8);
+                               ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                           });
+}
+
+// Test: test-kind=api, api=GraphApiImpl::iGetImmediateSize, abc-kind=ArkTS1, category=positive
+TEST_F(LibAbcKitIrInstTest, IgetImmediateSize_2)
+{
+    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "test",
+                           [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+                               auto *wideldlexvar = g_dynG->iCreateWideLdlexvar(graph, 1000, 1);
+
+                               ASSERT_EQ(g_implG->iGetImmediateSize(wideldlexvar, 1), AbckitBitImmSize::BITSIZE_16);
+                               ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                           });
+}
+
+// Test: test-kind=api, api=GraphApiImpl::iGetImmediateSize, abc-kind=ArkTS2, category=positive
+TEST_F(LibAbcKitIrInstTest, IgetImmediateSize_3)
+{
+    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "test",
+                           [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
+                               auto *addi = g_statG->iCreateAddI(graph, const1, 2);
+
+                               ASSERT_EQ(g_implG->iGetImmediateSize(addi, 0), AbckitBitImmSize::BITSIZE_8);
+                               ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                           });
+}
+
+// Test: test-kind=api, api=GraphApiImpl::iGetImmediateSize, abc-kind=ArkTS2, category=positive
+TEST_F(LibAbcKitIrInstTest, IgetImmediateSize_4)
+{
+    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "test",
+                           [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
+                               auto *xori = g_statG->iCreateXorI(graph, const1, 2);
+
+                               ASSERT_EQ(g_implG->iGetImmediateSize(xori, 0), AbckitBitImmSize::BITSIZE_32);
+                               ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
                            });
 }
 
@@ -392,8 +458,8 @@ TEST_F(LibAbcKitIrInstTest, IinsertBefore_1)
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
                                auto *start = helpers::BBgetSuccBlocks(g_implG->gGetStartBasicBlock(graph))[0];
                                auto *inst = g_implG->bbGetLastInst(start);
-                               auto *constOne = g_implG->gCreateConstantI64(graph, 1U);
-                               auto *constZero = g_implG->gCreateConstantI64(graph, 0U);
+                               auto *constOne = g_implG->gFindOrCreateConstantI64(graph, 1U);
+                               auto *constZero = g_implG->gFindOrCreateConstantI64(graph, 0U);
                                auto *instAdd = g_statG->iCreateAdd(graph, constOne, constZero);
                                g_implG->iInsertBefore(instAdd, inst);
                                ASSERT_EQ(g_implG->iGetPrev(inst), instAdd);
@@ -412,7 +478,7 @@ TEST_F(LibAbcKitIrInstTest, IinsertBefore_2)
             auto *bb = helpers::BBgetSuccBlocks(start)[0];
             auto *inst = g_implG->iGetNext(g_implG->bbGetFirstInst(start));
             auto *inst2 = g_implG->bbGetFirstInst(bb);
-            auto *newInst = g_implG->gCreateConstantI64(graph, 1U);
+            auto *newInst = g_implG->gFindOrCreateConstantI64(graph, 1U);
             auto *negInst = g_statG->iCreateNeg(graph, newInst);
             g_implG->iInsertBefore(negInst, inst2);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -441,8 +507,8 @@ TEST_F(LibAbcKitIrInstTest, IinsertBefore_3)
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
                                auto *start = helpers::BBgetSuccBlocks(g_implG->gGetStartBasicBlock(graph))[0];
                                auto *inst = g_implG->bbGetLastInst(start);
-                               auto *constOne = g_implG->gCreateConstantI64(graph, 1U);
-                               auto *constZero = g_implG->gCreateConstantI64(graph, 0U);
+                               auto *constOne = g_implG->gFindOrCreateConstantI64(graph, 1U);
+                               auto *constZero = g_implG->gFindOrCreateConstantI64(graph, 0U);
                                auto *instAdd = g_dynG->iCreateAdd2(graph, constOne, constZero);
                                g_implG->iInsertBefore(instAdd, inst);
                                ASSERT_EQ(g_implG->iGetPrev(inst), instAdd);
@@ -461,7 +527,7 @@ TEST_F(LibAbcKitIrInstTest, IinsertBefore_4)
             auto *bb = helpers::BBgetSuccBlocks(start)[0];
             auto *inst = g_implG->iGetNext(g_implG->iGetNext(g_implG->iGetNext(g_implG->bbGetFirstInst(start))));
             auto *inst2 = g_implG->bbGetFirstInst(bb);
-            auto *newInst = g_implG->gCreateConstantI64(graph, 1U);
+            auto *newInst = g_implG->gFindOrCreateConstantI64(graph, 1U);
             auto *negInst = g_dynG->iCreateNeg(graph, newInst);
             g_implG->iInsertBefore(negInst, inst2);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -497,7 +563,7 @@ TEST_F(LibAbcKitIrInstTest, IinsertAfter_1)
             auto *start = g_implG->gGetStartBasicBlock(graph);
             auto *bb = helpers::BBgetSuccBlocks(start)[0];
             auto *inst = g_implG->iGetNext(g_implG->bbGetFirstInst(start));
-            auto *newInst = g_implG->gCreateConstantI64(graph, 1U);
+            auto *newInst = g_implG->gFindOrCreateConstantI64(graph, 1U);
             auto *negInst = g_statG->iCreateNeg(graph, newInst);
             auto *addInst = g_statG->iCreateAdd(graph, negInst, newInst);
 
@@ -545,7 +611,7 @@ TEST_F(LibAbcKitIrInstTest, IinsertAfter_2)
             auto *start = g_implG->gGetStartBasicBlock(graph);
             auto *bb = helpers::BBgetSuccBlocks(start)[0];
             auto *inst = g_implG->iGetNext(g_implG->iGetNext(g_implG->iGetNext(g_implG->bbGetFirstInst(start))));
-            auto *newInst = g_implG->gCreateConstantI64(graph, 1U);
+            auto *newInst = g_implG->gFindOrCreateConstantI64(graph, 1U);
             auto *negInst = g_dynG->iCreateNeg(graph, newInst);
             auto *addInst = g_dynG->iCreateAdd2(graph, negInst, newInst);
 
@@ -610,6 +676,19 @@ TEST_F(LibAbcKitIrInstTest, IgetBasicBlock_2)
                                auto *inst = g_implG->bbGetFirstInst(start);
 
                                ASSERT_EQ(g_implG->iGetBasicBlock(inst), start);
+                               ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                           });
+}
+
+// Test: test-kind=api, api=GraphApiImpl::iGetGraph, abc-kind=ArkTS1, category=positive
+TEST_F(LibAbcKitIrInstTest, IgetGraph_1)
+{
+    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "Test",
+                           [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+                               auto *start = g_implG->gGetStartBasicBlock(graph);
+                               auto *inst = g_implG->bbGetFirstInst(start);
+
+                               ASSERT_EQ(g_implG->iGetGraph(inst), graph);
                                ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
                            });
 }
@@ -781,7 +860,7 @@ TEST_F(LibAbcKitIrInstTest, IsetLiteralArray_1)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", &file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test", [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-        auto *constInst = g_implG->gCreateConstantI64(graph, 1U);
+        auto *constInst = g_implG->gFindOrCreateConstantI64(graph, 1U);
         auto arr = std::vector<AbckitLiteral *>();
         AbckitLiteral *res1 = g_implM->createLiteralString(file, "asdf");
         AbckitLiteral *res2 = g_implM->createLiteralDouble(file, 1.0);
@@ -832,7 +911,7 @@ TEST_F(LibAbcKitIrInstTest, IgetLiteralArray_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test",
                              [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                                 auto *constInst = g_implG->gCreateConstantI64(graph, 1U);
+                                 auto *constInst = g_implG->gFindOrCreateConstantI64(graph, 1U);
                                  g_implG->iGetLiteralArray(constInst);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
                              });
@@ -1154,7 +1233,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_1)
                                  auto *found = helpers::FindMethodByName(file, "test0:i32;void;");
                                  ASSERT_NE(found, nullptr);
                                  g_implG->iSetFunction(call, found);
-                                 auto *const1 = g_implG->gCreateConstantI32(graph, 6);
+                                 auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 6);
                                  g_implG->iAppendInput(call, const1);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
                              });
@@ -1175,7 +1254,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_2)
         // CC-OFFNXT(G.FMT.02)
         ASSERT_NE(found, nullptr);
         g_implG->iSetFunction(call, found);
-        auto *const1 = g_implG->gCreateConstantI32(graph, 6);
+        auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 6);
         g_implG->iAppendInput(call, const1);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     };
@@ -1200,7 +1279,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_3)
                              "func_main_0",
                              [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
                                  auto *call = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLRANGE);
-                                 auto *const1 = g_implG->gCreateConstantI32(graph, 8);
+                                 auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 8);
                                  g_implG->iSetImmediate(call, 1, 5);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
                                  g_implG->iAppendInput(call, const1);
@@ -1220,7 +1299,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_4)
                              "main", [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
                                  auto *start = g_implG->gGetStartBasicBlock(graph);
                                  auto *inst = g_implG->bbGetFirstInst(start);
-                                 auto *const1 = g_implG->gCreateConstantI32(graph, 8);
+                                 auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 8);
                                  g_implG->iAppendInput(inst, const1);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
                              });
@@ -1233,7 +1312,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_5)
                              ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static_modified.abc",
                              "main", [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
                                  auto *inst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_LOADSTRING);
-                                 auto *const1 = g_implG->gCreateConstantI32(graph, 8);
+                                 auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 8);
                                  g_implG->iAppendInput(inst, const1);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
                              });
@@ -1248,7 +1327,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_6)
                              [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
                                  auto *start = helpers::BBgetSuccBlocks(g_implG->gGetStartBasicBlock(graph))[0];
                                  auto *inst = g_implG->bbGetFirstInst(start);
-                                 auto *const1 = g_implG->gCreateConstantI32(graph, 8);
+                                 auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 8);
                                  g_implG->iAppendInput(inst, const1);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
                              });
@@ -1263,7 +1342,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_7)
                              [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
                                  auto *start = g_implG->gGetStartBasicBlock(graph);
                                  auto *inst = g_implG->bbGetFirstInst(start);
-                                 auto *const1 = g_implG->gCreateConstantI32(graph, 8);
+                                 auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 8);
                                  g_implG->iAppendInput(inst, const1);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
                              });
@@ -1277,7 +1356,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_8)
                              "func_main_0",
                              [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
                                  auto *call = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0);
-                                 auto *const1 = g_implG->gCreateConstantI32(graph, 8);
+                                 auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 8);
                                  g_implG->iAppendInput(call, const1);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
                              });
@@ -1297,7 +1376,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_9)
             helpers::FindMethodByName(file, "_ctor_:inst_manipulation_static.Test;i32;i32;i32;i32;i32;i32;void;");
         ASSERT_NE(found, nullptr);
         g_implG->iSetFunction(call, found);
-        auto *const1 = g_implG->gCreateConstantI32(graph, 8);
+        auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 8);
         g_implG->iAppendInput(call, const1);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     };

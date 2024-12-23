@@ -143,7 +143,7 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithbuffer, IcreateCreateobjectwithbuffer_3
             auto *ldobjbynameBar = g_dynG->iCreateLdobjbyname(graph, createobjectwithbuffer, stringBar);
             auto *callthisFoo = g_dynG->iCreateCallthis0(graph, ldobjbynameFoo, createobjectwithbuffer);
             auto *callthisBar = g_dynG->iCreateCallthis1(graph, ldobjbynameBar, createobjectwithbuffer,
-                                                         g_implG->gCreateConstantU64(graph, 777));
+                                                         g_implG->gFindOrCreateConstantU64(graph, 777));
 
             auto *ldundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
             g_implG->iInsertBefore(createobjectwithbuffer, ldundef);

@@ -17,8 +17,8 @@
     a: string;
 }
 
-@#Anno({a : "Hello"})
+@__$$ETS_ANNOTATION$$__Anno({a : "Hello"})
 class A {
-    @#Anno({a : "world"})
+    @__$$ETS_ANNOTATION$$__Anno({a : "world"})
     foo() {}
 }

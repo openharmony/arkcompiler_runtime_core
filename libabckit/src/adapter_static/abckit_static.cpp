@@ -138,8 +138,8 @@ std::unique_ptr<AbckitCoreFunction> CollectFunction(
             annoElem->name = CreateStringStatic(file, annoElemImpl.GetName().data());
             annoElem->impl = std::make_unique<AbckitArktsAnnotationElement>();
             annoElem->GetArkTSImpl()->core = annoElem.get();
-            auto value = std::make_unique<AbckitValue>(file, annoElemImpl.GetValue());
-            annoElem->value = std::move(value);
+            auto value = FindOrCreateValueStatic(file, *annoElemImpl.GetValue());
+            annoElem->value = value;
 
             anno->elements.emplace_back(std::move(annoElem));
         }
@@ -345,10 +345,6 @@ void CloseFileStatic(AbckitFile *file)
 {
     LIBABCKIT_LOG_FUNC;
 
-    for (auto &val : file->values) {
-        delete val->GetStaticImpl();
-    }
-
     auto *ctxIInternal = reinterpret_cast<struct CtxIInternal *>(file->internal);
     delete ctxIInternal->driver;
     delete ctxIInternal;
@@ -368,10 +364,12 @@ void WriteAbcStatic(AbckitFile *file, const char *path)
     ark::pandasm::AsmEmitter::PandaFileToPandaAsmMaps *mapsp = nullptr;
 
     if (!pandasm::AsmEmitter::Emit(path, *program, statp, mapsp, emitDebugInfo)) {
-        LIBABCKIT_LOG(DEBUG) << "FAILURE\n";
-        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
+        LIBABCKIT_LOG(DEBUG) << "FAILURE: " << pandasm::AsmEmitter::GetLastError() << '\n';
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
         return;
     }
+
+    LIBABCKIT_LOG(DEBUG) << "SUCCESS\n";
 }
 
 void DestroyGraphStatic(AbckitGraph *graph)

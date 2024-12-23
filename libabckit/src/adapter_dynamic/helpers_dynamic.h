@@ -80,18 +80,24 @@ AbckitDynamicExportDescriptorPayload *GetDynExportDescriptorPayload(AbckitCoreEx
 
 std::string GetClassNameFromCtor(const std::string &ctorName, const AbckitLiteralArray *scopeNames);
 
-AbckitLiteral *GetOrCreateLiteralBoolDynamic(AbckitFile *file, bool value);
-AbckitLiteral *GetOrCreateLiteralU8Dynamic(AbckitFile *file, uint8_t value);
-AbckitLiteral *GetOrCreateLiteralU16Dynamic(AbckitFile *file, uint16_t value);
-AbckitLiteral *GetOrCreateLiteralMethodAffiliateDynamic(AbckitFile *file, uint16_t value);
-AbckitLiteral *GetOrCreateLiteralU32Dynamic(AbckitFile *file, uint32_t value);
-AbckitLiteral *GetOrCreateLiteralU64Dynamic(AbckitFile *file, uint64_t value);
-AbckitLiteral *GetOrCreateLiteralFloatDynamic(AbckitFile *file, float value);
-AbckitLiteral *GetOrCreateLiteralDoubleDynamic(AbckitFile *file, double value);
-AbckitLiteral *GetOrCreateLiteralLiteralArrayDynamic(AbckitFile *file, const std::string &value);
-AbckitLiteral *GetOrCreateLiteralStringDynamic(AbckitFile *file, const std::string &value);
-AbckitLiteral *GetOrCreateLiteralMethodDynamic(AbckitFile *file, const std::string &value);
-AbckitLiteral *GetOrCreateLiteralDynamic(AbckitFile *file, const panda::pandasm::LiteralArray::Literal &value);
+AbckitLiteral *FindOrCreateLiteralBoolDynamicImpl(AbckitFile *file, bool value);
+AbckitLiteral *FindOrCreateLiteralU8DynamicImpl(AbckitFile *file, uint8_t value);
+AbckitLiteral *FindOrCreateLiteralU16DynamicImpl(AbckitFile *file, uint16_t value);
+AbckitLiteral *FindOrCreateLiteralMethodAffiliateDynamicImpl(AbckitFile *file, uint16_t value);
+AbckitLiteral *FindOrCreateLiteralU32DynamicImpl(AbckitFile *file, uint32_t value);
+AbckitLiteral *FindOrCreateLiteralU64DynamicImpl(AbckitFile *file, uint64_t value);
+AbckitLiteral *FindOrCreateLiteralFloatDynamicImpl(AbckitFile *file, float value);
+AbckitLiteral *FindOrCreateLiteralDoubleDynamicImpl(AbckitFile *file, double value);
+AbckitLiteral *FindOrCreateLiteralLiteralArrayDynamicImpl(AbckitFile *file, const std::string &value);
+AbckitLiteral *FindOrCreateLiteralStringDynamicImpl(AbckitFile *file, const std::string &value);
+AbckitLiteral *FindOrCreateLiteralMethodDynamicImpl(AbckitFile *file, const std::string &value);
+AbckitLiteral *FindOrCreateLiteralDynamic(AbckitFile *file, const panda::pandasm::LiteralArray::Literal &value);
+
+AbckitValue *FindOrCreateValueU1DynamicImpl(AbckitFile *file, bool value);
+AbckitValue *FindOrCreateValueDoubleDynamicImpl(AbckitFile *file, double value);
+AbckitValue *FindOrCreateValueStringDynamicImpl(AbckitFile *file, const std::string &value);
+AbckitValue *FindOrCreateLiteralArrayValueDynamicImpl(AbckitFile *file, const std::string &value);
+AbckitValue *FindOrCreateValueDynamic(AbckitFile *file, const panda::pandasm::Value &value);
 
 }  // namespace libabckit
 

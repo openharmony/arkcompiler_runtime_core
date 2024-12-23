@@ -17,8 +17,9 @@
 #define CPP_ABCKIT_CORE_ANNOTATION_INTERFACE_FIELD_H
 
 #include "../base_classes.h"
+#include "../type.h"
 
-#include <string_view>
+#include <string>
 
 namespace abckit::core {
 
@@ -59,7 +60,7 @@ public:
      * @brief Construct a new Annotation Interface Field object
      * @param other
      */
-    AnnotationInterfaceField(AnnotationInterfaceField &&other) = default;
+    AnnotationInterfaceField(AnnotationInterfaceField &&other) = default;  // CC-OFF(G.CLS.07): design decision
 
     /**
      * @brief Constructor
@@ -73,14 +74,44 @@ public:
      */
     ~AnnotationInterfaceField() override = default;
 
-    // Core API's.
+    // Core API's.`
     // ...
 
     /**
-     * @brief Get the Name object
-     * @return std::string_view
+     * @brief Returns binary file that the given interface field is a part of.
+     * @return `const File *`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
-    std::string_view GetName();
+    const File *GetFile() const;
+
+    /**
+     * @brief Returns name for interface field.
+     * @return `std::string`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Allocates
+     */
+    std::string GetName() const;
+
+    /**
+     * @brief Returns interface for interface field.
+     * @return `core::AnnotationInterface`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    core::AnnotationInterface GetInterface() const;
+
+    /**
+     * @brief Returns type for interface field.
+     * @return `Type`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Type GetType() const;
+
+    /**
+     * @brief Returns default value for interface field.
+     * @return `Value`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Value GetDefaultValue() const;
 
 private:
     AnnotationInterfaceField(AbckitCoreAnnotationInterfaceField *anni, const ApiConfig *conf, const File *file)

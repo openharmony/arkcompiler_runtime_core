@@ -53,7 +53,7 @@ void TransformIrDynReturnInstValid(AbckitGraph *graph,
     AbckitInst *retOp = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURN);
     ASSERT_NE(retOp, nullptr);
 
-    auto *constZero = g_implG->gCreateConstantU64(graph, 0);
+    auto *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
     auto *mainInst = returnInstToCheck(graph, constZero);
     ASSERT_NE(mainInst, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

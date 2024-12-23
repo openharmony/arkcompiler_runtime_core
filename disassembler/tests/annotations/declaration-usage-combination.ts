@@ -37,8 +37,8 @@ const enum E1 {
     k: E1[][][] = [[new Array<E1>(2)]] // no initializer
 }
 
-@#Anno({a: 20, b: [-13, 10], c: "ab", d: true, e: [-1, 2, 3], f: new Array<number>(), g: [[[0]]], h: 10, i: [[new Array<E>(1)]], j: "B", k: [[new Array<E1>(3)]]})
+@__$$ETS_ANNOTATION$$__Anno({a: 20, b: [-13, 10], c: "ab", d: true, e: [-1, 2, 3], f: new Array<number>(), g: [[[0]]], h: 10, i: [[new Array<E>(1)]], j: "B", k: [[new Array<E1>(3)]]})
 class A {
-    @#Anno({a: -10, b: [1, 2, -3], c: "cde", d: true, e: [1, -2, 3], f: [1], g: [[[0], [1]]], h: -10, i: [[[10], [20]]], j: "B", k: [[["A"], ["B"]]]})
+    @__$$ETS_ANNOTATION$$__Anno({a: -10, b: [1, 2, -3], c: "cde", d: true, e: [1, -2, 3], f: [1], g: [[[0], [1]]], h: -10, i: [[[10], [20]]], j: "B", k: [[["A"], ["B"]]]})
     foo() {}
 }

@@ -19,14 +19,14 @@
     str: string = 'Hello'
 }
 
-@ #Anno({
+@__$$ETS_ANNOTATION$$__Anno({
     a: 20,
     b: [13, 10],
     d: true,
     str: 'ABC'
 })
 class A {
-    @ #Anno({
+    @__$$ETS_ANNOTATION$$__Anno({
         a: 10,
         b: [1, 2, 3],
         d: true,

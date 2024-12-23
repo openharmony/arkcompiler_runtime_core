@@ -55,7 +55,7 @@ void AddParamChecker(AbckitCoreFunction *method)
 
         AbckitString *str = g_implM->createString(file, "length");
 
-        AbckitInst *constant = g_implG->gCreateConstantI32(graph, -1);
+        AbckitInst *constant = g_implG->gFindOrCreateConstantI32(graph, -1);
         AbckitInst *arrLength = g_dynG->iCreateLdobjbyname(graph, arr, str);
 
         AbckitBasicBlock *trueBB = succBBs[0];

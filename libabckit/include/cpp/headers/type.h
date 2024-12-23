@@ -17,15 +17,24 @@
 #define CPP_ABCKIT_TYPE_H
 
 #include "./base_classes.h"
+#include "./core/class.h"
 
 namespace abckit {
 
 /**
  * @brief Type
  */
-class Type : public View<AbckitType *> {
+class Type : public ViewInResource<AbckitType *, const File *> {
     /// @brief abckit::File
     friend class abckit::File;
+    /// @brief abckit::File
+    friend class abckit::core::AnnotationInterfaceField;
+    /// @brief abckit::Value
+    friend class abckit::Value;
+    /// @brief arkts::AnnotationInterface
+    friend class arkts::AnnotationInterface;
+    /// @brief abckit::Instruction
+    friend class abckit::Instruction;
 
 public:
     /**
@@ -59,6 +68,28 @@ public:
      */
     ~Type() override = default;
 
+    /**
+     * @brief Returns the Type Id of type
+     * @return Returns the AbckitTypeId
+     */
+    inline enum AbckitTypeId GetTypeId() const
+    {
+        auto ret = GetApiConfig()->cIapi_->typeGetTypeId(GetView());
+        CheckError(GetApiConfig());
+        return ret;
+    }
+
+    /**
+     * @brief Returns instance of the `AbckitCoreClass` that the type `t` is reference to.
+     * @return Pointer to the `AbckitCoreClass` that `t` references.
+     */
+    inline core::Class GetReferenceClass() const
+    {
+        auto *ret = GetApiConfig()->cIapi_->typeGetReferenceClass(GetView());
+        CheckError(GetApiConfig());
+        return core::Class(ret, GetApiConfig(), GetResource());
+    }
+
 protected:
     /**
      * @brief Get the Api Config object
@@ -70,7 +101,10 @@ protected:
     }
 
 private:
-    explicit Type(AbckitType *val, const ApiConfig *conf) : View(val), conf_(conf) {};
+    explicit Type(AbckitType *type, const ApiConfig *conf, const File *file) : ViewInResource(type), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 };
 

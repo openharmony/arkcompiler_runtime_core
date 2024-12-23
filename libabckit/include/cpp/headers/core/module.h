@@ -19,8 +19,8 @@
 #include "../base_classes.h"
 #include "./class.h"
 #include "./export_descriptor.h"
-#include "./import_descriptor.h"
 #include "./namespace.h"
+#include "./annotation_interface.h"
 
 namespace abckit::core {
 
@@ -32,13 +32,23 @@ class Module : public ViewInResource<AbckitCoreModule *, const File *> {
     /// @brief to access private constructor
     friend class abckit::File;
     /// @brief to access private constructor
-    friend class abckit::core::Class;
+    friend class core::Class;
     /// @brief to access private constructor
-    friend class abckit::core::Function;
+    friend class core::ImportDescriptor;
     /// @brief to access private constructor
-    friend class abckit::core::ImportDescriptor;
+    friend class core::ExportDescriptor;
+    /// @brief to access private constructor
+    friend class core::AnnotationInterface;
+    /// @brief to access private constructor
+    friend class core::Class;
+    /// @brief to access private constructor
+    friend class core::Function;
     /// @brief abckit::DefaultHash<Module>
     friend class abckit::DefaultHash<Module>;
+    /// @brief abckit::DynamicIsa
+    friend class abckit::DynamicIsa;
+    /// @brief arkts::Module
+    friend class arkts::Module;
 
 protected:
     /// @brief Core API View type
@@ -49,7 +59,7 @@ public:
      * @brief Construct a new Module object
      * @param other
      */
-    Module(const Module &other) = default;
+    Module(const Module &other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -62,7 +72,7 @@ public:
      * @brief Construct a new Module object
      * @param other
      */
-    Module(Module &&other) = default;
+    Module(Module &&other) = default;  // CC-OFF(G.CLS.07-CPP)
 
     /**
      * @brief Constructor
@@ -77,91 +87,165 @@ public:
     ~Module() override = default;
 
     /**
-     * @brief Get the Classes name
-     * @return std::string_view
+     * @brief Returns binary file that the Module is a part of.
+     * @return `File` that contains Module.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
-    std::string_view GetName() const;
+    const File *GetFile() const;
+
+    /**
+     * @brief Returns the target that the Module was compiled for.
+     * @return Target of the current module.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    enum AbckitTarget GetTarget() const;
+
+    /**
+     * @brief Get the Classes name
+     * @return std::string
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::string GetName() const;
+
+    /**
+     * @brief Tells if Module is defined in the same binary or externally in another binary.
+     * @return Returns `true` if Module is defined in another binary and `false` if defined locally.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsExternal() const;
 
     /**
      * @brief Get the Classes object
      * @return std::vector<core::Class>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::vector<core::Class> GetClasses() const;
 
     /**
      * @brief Get the Top Level Functions object
      * @return std::vector<core::Function>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::vector<core::Function> GetTopLevelFunctions() const;
 
     /**
      * @brief Get the Annotation Interfaces object
      * @return std::vector<core::AnnotationInterface>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::vector<core::AnnotationInterface> GetAnnotationInterfaces() const;
 
     /**
      * @brief Get the Namespaces object
-     *
      * @return std::vector<core::Namespace>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::vector<core::Namespace> GetNamespaces() const;
 
     /**
      * @brief Get the Imports object
      * @return std::vector<core::ImportDescriptor>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::vector<core::ImportDescriptor> GetImports() const;
 
     /**
      * @brief Get the Exports object
-     *
      * @return std::vector<core::ExportDescriptor>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::vector<core::ExportDescriptor> GetExports() const;
 
     /**
-     * @brief EnumerateNamespaces
-     * @param cb
+     * @brief Enumerates namespaces of the Module, invoking callback `cb` for each namespace.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if 'cb' is false.
      */
-    void EnumerateNamespaces(const std::function<bool(core::Namespace)> &cb) const;
+    bool EnumerateNamespaces(const std::function<bool(core::Namespace)> &cb) const;
 
     /**
-     * @brief EnumerateTopLevelFunctions
-     * @param cb
+     * @brief Enumerates top level functions of the Module, invoking callback `cb` for each top level function.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if 'cb' is false.
      */
-    void EnumerateTopLevelFunctions(const std::function<bool(core::Function)> &cb) const;
+    bool EnumerateTopLevelFunctions(const std::function<bool(core::Function)> &cb) const;
 
     /**
-     * @brief EnumerateClasses
-     * @param cb
+     * @brief Enumerates classes of the Module, invoking callback `cb` for each class.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if 'cb' is false.
      */
-    void EnumerateClasses(const std::function<bool(core::Class)> &cb) const;
+    bool EnumerateClasses(const std::function<bool(core::Class)> &cb) const;
 
     /**
-     * @brief EnumerateImports
-     * @param cb
+     * @brief Enumerates imports of the Module, invoking callback `cb` for each import.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if 'cb' is false.
      */
-    void EnumerateImports(const std::function<bool(core::ImportDescriptor)> &cb) const;
+    bool EnumerateImports(const std::function<bool(core::ImportDescriptor)> &cb) const;
+
+    /**
+     * @brief Enumerates anonymous functions of the Module, invoking callback `cb` for each anonymous function.
+     * @return`false` if was early exited. Otherwise - `true`.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if 'cb' is false.
+     */
+    bool EnumerateAnonymousFunctions(const std::function<bool(core::Function)> &cb) const;
+
+    /**
+     * @brief Enumerates exports of the Module, invoking callback `cb` for each export.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if 'cb' is false.
+     */
+    bool EnumerateExports(const std::function<bool(core::ExportDescriptor)> &cb) const;
+
+    /**
+     * @brief Enumerates annotation interfaces of the Module, invoking callback `cb` for each annotation interface.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if 'cb' is false.
+     */
+    bool EnumerateAnnotationInterfaces(const std::function<bool(core::AnnotationInterface)> &cb) const;
 
     // Core API's.
     // ...
 
 private:
-    inline void GetClassesInner(std::vector<core::Class> &classes) const;
+    bool GetClassesInner(std::vector<core::Class> &classes) const;
 
-    inline void GetTopLevelFunctionsInner(std::vector<core::Function> &functions) const;
+    bool GetTopLevelFunctionsInner(std::vector<core::Function> &functions) const;
 
-    inline void GetAnnotationInterfacesInner(std::vector<core::AnnotationInterface> &ifaces) const;
+    bool GetAnnotationInterfacesInner(std::vector<core::AnnotationInterface> &ifaces) const;
 
-    inline void GetNamespacesInner(std::vector<core::Namespace> &namespaces) const;
+    bool GetNamespacesInner(std::vector<core::Namespace> &namespaces) const;
 
-    inline void GetImportsInner(std::vector<core::ImportDescriptor> &imports) const;
+    bool GetImportsInner(std::vector<core::ImportDescriptor> &imports) const;
 
-    inline void GetExportsInner(std::vector<core::ExportDescriptor> &exports) const;
+    bool GetExportsInner(std::vector<core::ExportDescriptor> &exports) const;
 
-    Module(AbckitCoreModule *module, const ApiConfig *conf, const File *file);
-
+    Module(AbckitCoreModule *module, const ApiConfig *conf, const File *file) : ViewInResource(module), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 
 protected:

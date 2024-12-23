@@ -28,6 +28,8 @@ class Function final : public core::Function {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class Class;
+    /// @brief to access private constructor
+    friend class Namespace;
     /// @brief abckit::DefaultHash<Function>
     friend class abckit::DefaultHash<Function>;
     /// @brief to access private TargetCast
@@ -48,10 +50,10 @@ public:
 
     /**
      * @brief Constructor
-     * @param other
+     * @param coreOther
      * @return Function&
      */
-    Function &operator=(const Function &other) = default;
+    Function &operator=(const Function &coreOther) = default;
 
     /**
      * @brief Construct a new Function object
@@ -72,11 +74,31 @@ public:
     ~Function() override = default;
 
     /**
-     * @brief Add annotation
-     * @param iface
-     * @return arkts::Function&
+     * @brief Check whether the Function is native.
+     * @return `true` if Function is native, `false` otherwise.
      */
-    arkts::Function &AddAnnotation(const arkts::AnnotationInterface &iface);
+    bool IsNative() const;
+
+    /**
+     * @brief Function to add annotation to.
+     * @return Newly created annotation.
+     * @param [ in ] ai -  Annotation Interface that is used to create the annotation.
+     * @note Allocates
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ai` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if function Function doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     */
+    Annotation AddAnnotation(AnnotationInterface ai) const;
+
+    /**
+     * @brief Remove annotation from the function.
+     * @param [ in ] anno - Annotation to remove from the function `function`.
+     * @return New state of Function.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if Function doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     */
+    Function RemoveAnnotation(Annotation anno) const;
 
     // Other API.
     // ...
