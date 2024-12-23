@@ -376,12 +376,14 @@ group("runtime_core_host_unittest") {
     "$ark_root/libark_defect_scan_aux/tests/unittest:host_unittest",
     "$ark_root/libpandafile/tests:host_unittest",
     "$ark_root/libziparchive/tests:host_unittest",
-    "$ark_root/panda_guard/tests:host_unittest",
     "$ark_root/platforms/tests:host_unittest",
     "$ark_root/verifier/tests:host_unittest",
   ]
   if (!ark_standalone_build) {
-    deps += [ "$ark_root/libpandabase/tests:host_unittest" ]
+    deps += [
+      "$ark_root/libpandabase/tests:host_unittest",
+      "$ark_root/panda_guard/tests:host_unittest",
+    ]
   }
 }
 
