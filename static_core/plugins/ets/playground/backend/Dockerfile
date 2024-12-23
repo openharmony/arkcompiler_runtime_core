@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,6 +20,7 @@ COPY ./plugins/ets/stdlib ./stdlib
 COPY ./plugins/ets/playground/backend/dist ./dist
 COPY ./plugins/ets/playground/backend/docker/config.yaml ./config.yaml
 COPY ./plugins/ets/playground/backend/docker/arktsconfig.json ./build/bin/arktsconfig.json
+COPY ./third_party/icu/ohos_icu4j/data/icudt72l.dat ./icudt72l.dat
 
 RUN apt-get update -qq && apt-get install -yqq libdwarf-dev libatomic1
 RUN python3 -m pip install --no-cache-dir /playground/dist/*.whl

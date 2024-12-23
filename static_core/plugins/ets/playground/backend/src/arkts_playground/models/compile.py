@@ -23,7 +23,8 @@ from .common import ResponseLog, DisasmResponse
 class CompileRequestModel(BaseModel):
     code: str
     options: Dict[str, Any] = Field(default_factory=dict)
-    disassemble: bool
+    disassemble: bool = False
+    verifier: bool = False
     runtime_verify: bool = False
 
 
@@ -31,8 +32,10 @@ class RunResponse(BaseModel):
     run: Optional[ResponseLog] = None
     compile: ResponseLog
     disassembly: Optional[DisasmResponse] = None
+    verifier: Optional[ResponseLog] = None
 
 
 class CompileResponse(BaseModel):
     compile: ResponseLog
     disassembly: Optional[DisasmResponse] = None
+    verifier: Optional[ResponseLog] = None
