@@ -53,7 +53,7 @@ class ObjProxyHandler extends DefaultProxyHandler<ObjWithProps> {
     getTrapped: boolean = false
     setTrapped: boolean = false
     getIdTrapped: boolean = false
-    
+
     get(target: ObjWithProps, name: string): NullishType {
         this.getTrapped = true
 
@@ -87,7 +87,7 @@ function verifyObjectProxyOps(obj: ObjWithProps, objProxyHandler: ObjProxyHandle
     assertFalse(objProxyHandler.setTrapped)
 
     const objProxy = Proxy.create(obj, objProxyHandler)
-    
+
     objProxy.name = "foo"
     assertTrue(objProxyHandler.setTrapped)
 
@@ -107,6 +107,9 @@ function verifyObjectProxyOps(obj: ObjWithProps, objProxyHandler: ObjProxyHandle
 
     const id = objProxy.getId()
     assertTrue(objProxyHandler.getIdTrapped)
+
+    assertEQ(Proxy.tryGetTarget(objProxy), obj)
+    assertEQ(Proxy.tryGetHandler(objProxy), objProxyHandler)
 }
 
 function testObjectProxyOps(): void {
