@@ -114,6 +114,13 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
     UNREACHABLE();
 }
 
+[[maybe_unused]] static bool IsBoxedNumericClass(Class *rcls, EtsClassLinkerExtension *ext)
+{
+    return rcls == ext->GetBoxByteClass() || rcls == ext->GetBoxCharClass() || rcls == ext->GetBoxShortClass() ||
+           rcls == ext->GetBoxIntClass() || rcls == ext->GetBoxLongClass() || rcls == ext->GetBoxFloatClass() ||
+           rcls == ext->GetBoxDoubleClass();
+}
+
 EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
 {
     // NOTE(vpukhov): #19799 use string constants
@@ -147,29 +154,9 @@ EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
     if (rcls == ext->GetBoxBooleanClass()) {
         return EtsString::CreateFromMUtf8("boolean");
     }
-    // NOTE(vpukhov): #19653 numerics must map to "number"
-    if (rcls == ext->GetBoxByteClass()) {
-        return EtsString::CreateFromMUtf8("byte");
-    }
-    if (rcls == ext->GetBoxCharClass()) {
-        return EtsString::CreateFromMUtf8("char");
-    }
-    if (rcls == ext->GetBoxShortClass()) {
-        return EtsString::CreateFromMUtf8("short");
-    }
-    if (rcls == ext->GetBoxIntClass()) {
-        return EtsString::CreateFromMUtf8("int");
-    }
-    if (rcls == ext->GetBoxLongClass()) {
-        return EtsString::CreateFromMUtf8("long");
-    }
-    if (rcls == ext->GetBoxFloatClass()) {
-        return EtsString::CreateFromMUtf8("float");
-    }
-    if (rcls == ext->GetBoxDoubleClass()) {
-        return EtsString::CreateFromMUtf8("number");
-    }
-    UNREACHABLE();
+
+    ASSERT(IsBoxedNumericClass(rcls, ext));
+    return EtsString::CreateFromMUtf8("number");
 }
 
 }  // namespace ark::ets
