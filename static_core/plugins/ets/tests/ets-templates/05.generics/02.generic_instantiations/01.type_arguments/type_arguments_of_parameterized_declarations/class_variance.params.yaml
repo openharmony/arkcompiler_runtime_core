@@ -13,34 +13,42 @@
 
 ---
 cases:
-  - use: |-
-        let a: A<in X> = new A<X>(new X())
+  - variance: "in "
+    use: |-
+        let a: A<X> = new A<X>(new X())
         a.methIn(new X())
 
-  - use: |-
-        let a: A<out X> = new A<X>(new X())
+  - variance: "out "
+    use: |-
+        let a: A<X> = new A<X>(new X())
         let z: X = a.methOut()
 
-  - use: |-
-        let a: A<out> = new A<Object|null>(new X())
+  - variance: "out "
+    use: |-
+        let a: A<Object|null> = new A<Object|null>(new X())
         let z: Object|null = a.methOut()
 
-  - use: |-
-        let a: A<in X> = new A<X>(new Y())
+  - variance: "in "
+    use: |-
+        let a: A<X> = new A<X>(new Y())
         a.methIn(new Z())
 
-  - use: |-
-        let a: A<in X> = new A<X>(new Y())
+  - variance: "in "
+    use: |-
+        let a: A<X> = new A<X>(new Y())
         let z: X = a.methOut()
 
-  - use: |-
-        let a: A<in X> = new A<X>(new Y())
+  - variance: "in "
+    use: |-
+        let a: A<X> = new A<X>(new Y())
         let z: X = a.methOut()
 
-  - use: |-
-        let a: A<in X> = new A<X>(new Y())
+  - variance: "in "
+    use: |-
+        let a: A<X> = new A<X>(new Y())
         let z: X = a.methOut()
 
-  - use: |-
-        let a: A<in X> = new A<X>(new Z())
-        let z: Y = a.methOut()
+  - variance: "in "
+    use: |-
+        let a: A<X> = new A<X>(new Z())
+        let z: X = a.methOut()
