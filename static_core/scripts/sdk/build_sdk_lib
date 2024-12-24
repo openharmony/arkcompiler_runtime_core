@@ -70,7 +70,7 @@ function linux_arm64_tools() {
         -DPANDA_LLVM_BACKEND=${PANDA_LLVM_BACKEND} \
         -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
         -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${SDK_BUILD_ROOT}/llvm_binaries"
-    local linux_arm64_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin etsnative"
+    local linux_arm64_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin etsnative verifier"
     build_panda "$linux_arm64_build_dir" "$linux_arm64_cmake_args" "$linux_arm64_build_targets"
     copy_into_sdk "$linux_arm64_build_dir" "$PANDA_SDK_PATH/linux_arm64_host_tools" "$SCRIPT_DIR"/linux_arm64_host_tools.txt
 }
@@ -86,7 +86,7 @@ function linux_tools() {
         -DPANDA_LLVM_BACKEND=${PANDA_LLVM_BACKEND} \
         -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
         -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${SDK_BUILD_ROOT}/llvm_binaries"
-    local linux_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin etsnative"
+    local linux_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin etsnative verifier"
     build_panda "$linux_build_dir" "$linux_cmake_args" "$linux_build_targets"
     copy_into_sdk "$linux_build_dir" "$PANDA_SDK_PATH/linux_host_tools" "$SCRIPT_DIR"/linux_host_tools.txt
 }
