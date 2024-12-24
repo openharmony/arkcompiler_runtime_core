@@ -413,6 +413,43 @@ private:
     NO_MOVE_SEMANTIC(WriteScopedLock);
 };
 
+class Event {
+public:
+    Event() = default;
+    ~Event() = default;
+    NO_COPY_SEMANTIC(Event);
+    NO_MOVE_SEMANTIC(Event);
+
+    /**
+     * Blocks current thread until another thread will fire the same event.
+     * It can be used concurrently with other wait/fire.
+     * It has no effect in case fire has already been caused, but guarantees happens-before.
+     */
+    void Wait()
+    {
+        os::memory::LockHolder lh(lock_);
+        while (!happened_) {
+            cv_.Wait(&lock_);
+        }
+    }
+
+    /**
+     * Unblocks all threads that are waiting the same event.
+     * Can be used concurrently with other wait/fire but multiply calls have no effect.
+     */
+    void Fire()
+    {
+        os::memory::LockHolder lh(lock_);
+        happened_ = true;
+        cv_.SignalAll();
+    }
+
+private:
+    bool happened_ = false;
+    Mutex lock_;
+    ConditionVariable cv_;
+};
+
 }  // namespace ark::os::memory
 
 #endif  // PAND_LIBPANDABASE_PBASE_OS_MACROS_H_

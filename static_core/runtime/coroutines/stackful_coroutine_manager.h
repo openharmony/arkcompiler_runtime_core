@@ -173,6 +173,9 @@ private:
     void IncrementActiveCoroutines();
     void DecrementActiveCoroutines();
 
+    /// schedule worker (main or exclusive) in event loop
+    void TriggerSchedulerExternally(StackfulCoroutineWorker *triggerOwner);
+
     // for thread safety with GC
     mutable os::memory::Mutex coroListLock_;
     // all registered coros

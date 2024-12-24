@@ -4999,3 +4999,51 @@ intrinsics:
       ret: void
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsMutexUnlock
+
+###############################
+# std.core.ExclusiveLauncher #
+###############################
+
+  - name: StdExclusiveLauncherLaunch
+    space: ets
+    class_name: std.core.ExclusiveLauncher
+    method_name: elaunch
+    static: true
+    signature:
+      ret: void
+      args: [std.core.Object, u1]
+    impl: ark::ets::intrinsics::ExclusiveLaunch
+
+###############################
+# std.core.TaskPoster #
+###############################
+
+  - name: StdTaskPosterCreate
+    space: ets
+    class_name: std.core.TaskPoster
+    method_name: create
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: ark::ets::intrinsics::TaskPosterCreate
+
+  - name: StdTaskPosterDestroy
+    space: ets
+    class_name: std.core.TaskPoster
+    method_name: destroy
+    static: true
+    signature:
+      ret: void
+      args: [i64]
+    impl: ark::ets::intrinsics::TaskPosterDestroy
+
+  - name: StdTaskPosterPost
+    space: ets
+    class_name: std.core.TaskPoster
+    method_name: post
+    static: true
+    signature:
+      ret: void
+      args: [i64, std.core.Object]
+    impl: ark::ets::intrinsics::TaskPosterPost

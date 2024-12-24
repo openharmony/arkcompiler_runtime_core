@@ -140,7 +140,7 @@ public:
         SharedEtsVmState::TryReleaseInstance();
     }
 
-    static InteropCtx *Current(EtsCoroutine *coro)
+    static InteropCtx *Current(Coroutine *coro)
     {
         // NOTE(konstanting): we may want to optimize this and take the cached pointer from the coroutine
         // itself. Just need to make sure that the worker's interop context ptr state is coherent
@@ -151,7 +151,7 @@ public:
 
     static InteropCtx *Current()
     {
-        return Current(EtsCoroutine::GetCurrent());
+        return Current(Coroutine::GetCurrent());
     }
 
     PandaEtsVM *GetPandaEtsVM()

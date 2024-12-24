@@ -499,7 +499,8 @@ ETS_EXPORT ets_int ETS_CreateVM(EtsVM **pVm, EtsEnv **pEnv, EtsVMInitArgs *vmArg
 struct ETS_InvokeInterface {
     ets_int (*DestroyEtsVM)(EtsVM *vm);
     ets_int (*GetEnv)(EtsVM *vm, EtsEnv **pEnv, ets_int version);
-    ets_int (*AttachThread)(EtsVM *vm, EtsEnv **resultEnv);
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    ets_int (*AttachThread)(EtsVM *vm, EtsEnv **resultEnv, void **resultJsEnv);
     ets_int (*DetachThread)(EtsVM *vm);
 };
 
@@ -518,9 +519,9 @@ struct __EtsVM {
         return invoke_interface->GetEnv(this, pEnv, version);
     }
 
-    ets_int AttachThread(EtsEnv **resultEnv)
+    ets_int AttachThread(EtsEnv **resultEnv, void **resultJsEnv)
     {
-        return invoke_interface->AttachThread(this, resultEnv);
+        return invoke_interface->AttachThread(this, resultEnv, resultJsEnv);
     }
 
     ets_int DetachThread()

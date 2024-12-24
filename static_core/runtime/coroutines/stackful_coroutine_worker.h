@@ -21,6 +21,7 @@
 #include "runtime/coroutines/coroutine_events.h"
 #include "runtime/coroutines/stackful_common.h"
 #include "runtime/coroutines/coroutine_stats.h"
+#include "runtime/include/external_callback_poster.h"
 
 namespace ark {
 

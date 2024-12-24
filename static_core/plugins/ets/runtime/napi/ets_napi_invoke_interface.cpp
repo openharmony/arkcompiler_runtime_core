@@ -77,7 +77,7 @@ static ets_int GetEnv([[maybe_unused]] EtsVM *vm, EtsEnv **pEnv, [[maybe_unused]
     return ETS_OK;
 }
 
-static ets_int AttachThread(EtsVM *vm, EtsEnv **resultEnv)
+static ets_int AttachThread(EtsVM *vm, EtsEnv **resultEnv, void **resultJsEnv)
 {
     if (vm == nullptr) {
         LOG(ERROR, RUNTIME) << "Cannot AttachThread, vm is null";
@@ -97,7 +97,15 @@ static ets_int AttachThread(EtsVM *vm, EtsEnv **resultEnv)
         return ETS_ERR;
     }
     ASSERT(exclusiveCoro == Coroutine::GetCurrent());
+    auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
+    auto *jsEnv = ifaceTable->CreateJSRuntime();
+    if (jsEnv != nullptr) {
+        ifaceTable->CreateInteropCtx(exclusiveCoro, jsEnv);
+        auto poster = etsVM->CreateCallbackPoster(exclusiveCoro);
+        exclusiveCoro->GetWorker()->SetCallbackPoster(std::move(poster));
+    }
     *resultEnv = PandaEtsNapiEnv::GetCurrent();
+    *resultJsEnv = jsEnv;
     return ETS_OK;
 }
 

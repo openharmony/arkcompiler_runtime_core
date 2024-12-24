@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "runtime/coroutines/coroutine.h"
 #include "ets_interop_js_gtest.h"
 #include "plugins/ets/runtime/interop_js/event_loop_module.h"
 
@@ -44,13 +45,14 @@ TEST_F(EventLoopCallbackPosterTest, ManyPostsTest)
     uv_loop_t *loop = uv_default_loop();
     EventLoopCallbackPosterFactoryImpl factory;
     {
-        auto poster = factory.CreatePoster();
+        auto poster = factory.CreatePoster(Coroutine::GetCurrent());
         poster->Post([&messageCollector] { messageCollector += GetFirstWord(); });
         poster->Post([&messageCollector] { messageCollector += GetSecondWord(); });
         // after 2 posts poster will be deleted with final post of deleter
     }
     ASSERT_EQ(messageCollector, "");
-    uv_run(loop, uv_run_mode::UV_RUN_DEFAULT);
+    // run loop only once to avoid deadlock due to mainPoster in runtime
+    uv_run(loop, uv_run_mode::UV_RUN_ONCE);
     ASSERT_EQ(messageCollector, GetAllWordInCorrectOrder());
 }
 
@@ -58,10 +60,11 @@ TEST_F(EventLoopCallbackPosterTest, DeletingInPostTest)
 {
     uv_loop_t *loop = uv_default_loop();
     EventLoopCallbackPosterFactoryImpl factory;
-    auto poster = factory.CreatePoster();
+    auto poster = factory.CreatePoster(Coroutine::GetCurrent());
+    // run loop only once to avoid deadlock due to mainPoster in runtime
     poster->Post([&poster] { poster = nullptr; });
     ASSERT_NE(poster.get(), nullptr);
-    uv_run(loop, uv_run_mode::UV_RUN_DEFAULT);
+    uv_run(loop, uv_run_mode::UV_RUN_ONCE);
     ASSERT_EQ(poster.get(), nullptr);
 }
 
