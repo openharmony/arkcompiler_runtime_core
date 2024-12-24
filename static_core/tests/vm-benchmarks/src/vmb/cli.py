@@ -61,7 +61,11 @@ def add_measurement_opts(parser: argparse.ArgumentParser) -> None:
                         help='If <val> >= 0 invoke GC twice '
                         'and wait <val> ms before iteration')
     parser.add_argument("-aot-co", "--aot-compiler-options", default=[],
-                        type=str, action="append", help="aot-compiler options")
+                        type=str, action="append",
+                        help="Sets ahead-of-time compiler options")
+    parser.add_argument("-aot-lib-co", "--aot-lib-compiler-options", default=[],
+                        type=str, action="append",
+                        help="Sets ahead-of-time compiler options for libraries")
     parser.add_argument("-c", "--concurrency-level",
                         default=None, type=str,
                         help="Concurrency level (DEPRECATED)")
@@ -111,6 +115,9 @@ def add_run_opts(parser: argparse.ArgumentParser) -> None:
                         help='Timeout (seconds)')
     parser.add_argument('--device', type=str,
                         default='', help='Device ID (serial)')
+    parser.add_argument('--device-host', type=str, default='',
+                        help='device server in form server:port '
+                             'in case you use remote device')
     parser.add_argument('--device-dir', type=str,
                         default='/data/local/tmp/vmb',
                         help='Base dir on device (%(default)s)')
@@ -272,8 +279,16 @@ class Args(argparse.Namespace):
         mode = ToolMode(self.get('mode'))
         if ToolMode.AOT == mode:
             flags |= OptFlags.AOT
+        elif ToolMode.LLVMAOT == mode:
+            flags |= OptFlags.AOT | OptFlags.LLVMAOT
         elif ToolMode.INT == mode:
             flags |= OptFlags.INT
+        elif ToolMode.INT_CPP == mode:
+            flags |= OptFlags.INT | OptFlags.INT_CPP
+        elif ToolMode.INT_IRTOC == mode:
+            flags |= OptFlags.INT | OptFlags.INT_IRTOC
+        elif ToolMode.INT_LLVM == mode:
+            flags |= OptFlags.INT | OptFlags.INT_LLVM
         elif ToolMode.JIT == mode:
             flags |= OptFlags.JIT
         if self.get('dry_run', False):

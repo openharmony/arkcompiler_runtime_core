@@ -51,6 +51,7 @@ class PlatformBase(CrossShell, ABC):
                                    tmp_dir=args.device_dir)
         if self.target == Target.OHOS:
             self.__hdc = ShellHdc(dev_serial=args.device,
+                                  dev_host=args.device_host,
                                   timeout=args.timeout,
                                   tmp_dir=args.device_dir)
         ToolBase.sh_ = self.sh

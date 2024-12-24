@@ -47,6 +47,10 @@ class ToolMode(StringEnum):
     AOT = 'aot'
     INT = 'int'
     JIT = 'jit'
+    INT_CPP = 'int-cpp'
+    INT_IRTOC = 'int-irtoc'
+    INT_LLVM = 'int-llvm'
+    LLVMAOT = 'llvmaot'
     DEFAULT = 'default'
 
 
@@ -58,10 +62,13 @@ class OptFlags(Flag):
     AOT_SKIP_LIBS = auto()
     DRY_RUN = auto()
     DISABLE_INLINING = auto()
-    # these 3 flags are mutually exclusive (this is guarantied by ToolMode)
     AOT = auto()
     INT = auto()
     JIT = auto()
+    INT_CPP = auto()
+    INT_IRTOC = auto()
+    INT_LLVM = auto()
+    LLVMAOT = auto()
 
 
 class ToolBase(CrossShell, ABC):

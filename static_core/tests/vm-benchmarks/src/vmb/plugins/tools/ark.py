@@ -50,6 +50,12 @@ class Tool(ToolBase):
             an_files.append(stdlib)
         if OptFlags.INT in self.flags:
             opts += '--compiler-enable-jit=false '
+        if OptFlags.INT_CPP in self.flags:
+            opts += '--interpreter-type=cpp '
+        if OptFlags.INT_IRTOC in self.flags:
+            opts += '--interpreter-type=irtoc '
+        if OptFlags.INT_LLVM in self.flags:
+            opts += '--interpreter-type=llvm '
         if OptFlags.GC_STATS in self.flags:
             opts += '--print-gc-statistics --log-components=gc ' \
                     '--log-level=info --log-stream=file ' \
