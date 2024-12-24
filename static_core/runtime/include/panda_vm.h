@@ -237,6 +237,8 @@ public:
         return false;
     }
 
+    virtual void FreeInternalResources();
+
     NO_MOVE_SEMANTIC(PandaVM);
     NO_COPY_SEMANTIC(PandaVM);
 

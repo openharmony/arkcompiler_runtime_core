@@ -84,6 +84,8 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_finalizable_weak_ref.cpp
     ${ETS_EXT_SOURCES}/ets_vm_api.cpp
     ${ETS_EXT_SOURCES}/ets_utils.cpp
+    ${ETS_EXT_SOURCES}/ets_object_state_info.cpp
+    ${ETS_EXT_SOURCES}/ets_object_state_table.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/init_native_methods.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/Process.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/etsstdlib.cpp

@@ -154,8 +154,8 @@ inline SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx,
     SharedReference *lastRefInChain = nullptr;
     // If EtsObject has been already marked as interop object then add new created SharedReference for a new interop
     // context to chain of references with this EtsObject
-    if (etsObject->IsHashed()) {
-        lastRefInChain = GetItemByIndex(etsObject->GetInteropHash());
+    if (etsObject->HasInteropIndex()) {
+        lastRefInChain = GetItemByIndex(etsObject->GetInteropIndex());
         startRef = lastRefInChain;
         ASSERT(!HasReferenceWithCtx(startRef, ctx));
         uint32_t index = lastRefInChain->flags_.GetNextIndex();
@@ -215,7 +215,7 @@ void SharedReferenceStorage::DeleteReference(SharedReference *sharedRef)
     NAPI_CHECK_FATAL(napi_delete_reference(sharedRef->ctx_->GetJSEnv(), sharedRef->jsRef_));
     // Need to drop interop state once for all references in chain
     if (sharedRef->flags_.GetNextIndex() == 0U) {
-        sharedRef->GetEtsObject()->DropInteropHash();
+        sharedRef->GetEtsObject()->DropInteropIndex();
     }
     ASSERT(Size() > 0);
     RemoveReference(sharedRef);

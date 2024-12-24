@@ -24,6 +24,7 @@
 
 #include <libpandafile/include/source_lang_enum.h>
 
+#include "include/mem/panda_smart_pointers.h"
 #include "libpandabase/macros.h"
 #include "libpandabase/mem/mem.h"
 #include "libpandabase/utils/expected.h"
@@ -61,9 +62,9 @@
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/mem/root_provider.h"
+#include "plugins/ets/runtime/ets_object_state_table.h"
 
 namespace ark::ets {
-
 class DoubleToStringCache;
 class FloatToStringCache;
 class LongToStringCache;
@@ -333,6 +334,16 @@ public:
         return callbackPosterFactory_->CreatePoster();
     }
 
+    EtsObjectStateTable *GetEtsObjectStateTable() const
+    {
+        return objStateTable_.get();
+    }
+
+    void FreeInternalResources() override
+    {
+        objStateTable_->DeflateInfo();
+    }
+
     void AddRootProvider(mem::RootProvider *provider);
     void RemoveRootProvider(mem::RootProvider *provider);
 
@@ -390,6 +401,8 @@ private:
     DoubleToStringCache *doubleToStringCache_ {nullptr};
     FloatToStringCache *floatToStringCache_ {nullptr};
     LongToStringCache *longToStringCache_ {nullptr};
+
+    PandaUniquePtr<EtsObjectStateTable> objStateTable_ {nullptr};
 
     NO_MOVE_SEMANTIC(PandaEtsVM);
     NO_COPY_SEMANTIC(PandaEtsVM);

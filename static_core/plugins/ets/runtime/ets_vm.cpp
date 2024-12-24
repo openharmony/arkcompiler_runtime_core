@@ -17,6 +17,7 @@
 #include <atomic>
 
 #include "compiler/optimizer/ir/runtime_interface.h"
+#include "include/mem/panda_smart_pointers.h"
 #include "include/mem/panda_string.h"
 #include "libpandabase/macros.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
@@ -43,6 +44,8 @@
 #include "plugins/ets/runtime/types/ets_finalizable_weak_ref_list.h"
 
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
+
+#include "plugins/ets/runtime/ets_object_state_table.h"
 
 namespace ark::ets {
 // Create MemoryManager by RuntimeOptions
@@ -175,7 +178,7 @@ PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::Mem
         coroutineManager_ = allocator->New<ThreadedCoroutineManager>(EtsCoroutine::Create<Coroutine>);
     }
     rendezvous_ = allocator->New<Rendezvous>(this);
-
+    objStateTable_ = MakePandaUnique<EtsObjectStateTable>(allocator);
     InitializeRandomEngine();
 }
 
@@ -191,6 +194,8 @@ PandaEtsVM::~PandaEtsVM()
     allocator->Delete(monitorPool_);
     allocator->Delete(stringTable_);
     allocator->Delete(compiler_);
+
+    objStateTable_.reset();
 
     ASSERT(mm_ != nullptr);
     mm_->Finalize();

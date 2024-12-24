@@ -38,7 +38,7 @@ bool SharedReference::InitRef(InteropCtx *ctx, EtsObject *etsObject, napi_value 
     // For future we can to provide a solution with correct finalization from finalizeCb in NapiWrap method
     NAPI_CHECK_FATAL(napi_reference_ref(env, jsRef_, nullptr));
 
-    etsObject->SetInteropHash(refIdx);
+    etsObject->SetInteropIndex(refIdx);
     SetETSObject(etsObject);
     ctx_ = ctx;
     return true;
