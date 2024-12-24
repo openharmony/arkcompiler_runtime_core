@@ -36,10 +36,10 @@ function main(): void {
   let catchCode = 0;
 
   try {
-    instance.age();
-  } catch (e: TestException){
+    let a = instance.age;
+  } catch (e: TestException) {
     catchCode = 1;
-  } catch {
+  } catch (any) {
     assert false;
   }
 

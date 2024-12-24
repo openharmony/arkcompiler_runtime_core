@@ -26,5 +26,5 @@ class A {
 
 function main(): void {
   let instance: A = new A();
-  assert instance.bar() == 10;
+  assert instance.foo() == 5;
 }

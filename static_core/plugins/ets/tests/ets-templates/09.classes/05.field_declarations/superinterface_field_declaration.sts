@@ -19,16 +19,14 @@ assert: If a class declares a field with a certain name, then the declaration of
 ---*/
 
 interface A {
-  x(): boolean {
-    return true;
-  }
+  get x(): boolean;
 }
 
 class B implements A {
   public x: boolean;
 
   public getX(): boolean {
-    return x();
+    return this.x;
   }
 }
 

@@ -36,5 +36,5 @@ function main(): void {
   assert instance.age == 10;
 
   let instance2: A = new B();
-  assert instance2.getAge() == 10;
+  assert instance2.age == 10;
 }

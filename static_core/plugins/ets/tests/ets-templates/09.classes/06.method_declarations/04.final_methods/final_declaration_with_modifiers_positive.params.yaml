@@ -14,4 +14,3 @@
 --- # List of valid method modifiers
 modifiers:
   - "native"
-  - "override"

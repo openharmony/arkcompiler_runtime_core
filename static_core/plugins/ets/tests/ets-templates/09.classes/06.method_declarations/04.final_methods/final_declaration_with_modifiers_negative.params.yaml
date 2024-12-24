@@ -16,3 +16,4 @@ modifiers:
   - "static"
   - "final"
   - "abstract"
+  - "override"

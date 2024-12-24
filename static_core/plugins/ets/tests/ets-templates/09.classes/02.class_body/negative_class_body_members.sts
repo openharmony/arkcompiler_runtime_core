@@ -14,14 +14,12 @@ limitations under the License.
 ---*/
 
 {% for cm in class_members %}
-
 /*---
-desc: Class members appears twice
+desc: class members
 tags: [negative, compile-only]
 ---*/
 
-final class A {
-  {{cm}}
+class A {
   {{cm}}
 }
 

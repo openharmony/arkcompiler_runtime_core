@@ -30,7 +30,14 @@ class A {
 
 function main(): void {
   let instance: A = new A();
+  let a = 0;
 
-  assert instance.foo() == 1;
+  try {
+      a = instance.foo();
+  } catch (e) {
+      a = 2;
+  }
+
+  assert a == 1;
   assert instance.foo(2) == true;
 }

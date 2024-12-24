@@ -17,7 +17,7 @@ limitations under the License.
 desc: Field setter inheritance by child class
 ---*/
 
-final class A {
+class A {
   protected _age: int = 0;
 
   set age(value: int) {

@@ -14,30 +14,23 @@ limitations under the License.
 ---*/
 
 /*---
-desc: A private field from of a superclass access, if both classes are members of same class.
-assert: A private field of a superclass might be accessible to a subclass - for example, if both classes are members of the same class.
+desc: A class inherits fields with the same name from its direct superclass and superinterfaces.
+assert: It is possible for a class to inherit more than one field with the same name, either from its superclass and superinterfaces or from its superinterfaces alone. Such a situation does not in itself cause a compile-time error.
+tags: [compile-only, negative]
 ---*/
 
 class A {
-  inner class C {
-    private static x: int;
-  }
-
-  inner class B extends C {
-    public getX(): int {
-      return C.x;
-    }
-  }
-
-  public getValue(): int {
-    return new B.getX();
-  }
+  x: int;
 }
 
+interface C {
+  x: int;
+}
 
+interface D {
+    x: boolean;
+}
 
-function main(): void {
-    let instance: A = new A();
+class B extends A implements C, D{
 
-    assert instance.getValue() == 0;
 }
