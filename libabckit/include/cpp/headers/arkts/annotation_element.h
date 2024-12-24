@@ -81,9 +81,6 @@ public:
      */
     std::string GetName() const;
 
-    // Other API.
-    // ...
-
 private:
     /**
      * @brief Converts annotation element from Core to Arkts target

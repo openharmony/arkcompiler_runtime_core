@@ -96,9 +96,6 @@ public:
      */
     Annotation AddAnnotation(AnnotationInterface ai);
 
-    // Other API.
-    // ...
-
 private:
     /**
      * @brief Converts class from Core to Arkts target

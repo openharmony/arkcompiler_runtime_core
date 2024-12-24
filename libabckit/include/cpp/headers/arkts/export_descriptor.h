@@ -72,8 +72,6 @@ public:
      * @brief Destroy the Export Descriptor object
      */
     ~ExportDescriptor() override = default;
-    // Other API.
-    // ...
 
 private:
     /**

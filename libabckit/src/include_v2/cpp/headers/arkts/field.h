@@ -61,8 +61,6 @@ public:
      * @brief Destroy the Field object
      */
     ~Field() override = default;
-    // Other API.
-    // ...
 };
 
 }  // namespace abckit::arkts

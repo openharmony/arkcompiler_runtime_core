@@ -76,8 +76,6 @@ public:
      */
     Function GetConstructor() const;
 
-    // Other API's.
-    // ...
 private:
     /**
      * @brief Converts underlying namespace from Core to Arkts target

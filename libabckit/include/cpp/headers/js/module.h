@@ -75,8 +75,6 @@ public:
      * @brief Destroy the Module object
      */
     ~Module() override = default;
-    // Other API.
-    // ...
 
     /**
      * @brief Adds import from one Js module to another Js module.

@@ -47,7 +47,6 @@ class Module;
 class Namespace;
 class Class;
 class Function;
-class Field;
 class Annotation;
 class AnnotationInterface;
 class AnnotationElement;
@@ -61,7 +60,6 @@ class Module;
 class Namespace;
 class Class;
 class Function;
-class Field;
 class Annotation;
 class AnnotationInterface;
 class AnnotationElement;
@@ -104,8 +102,6 @@ class ApiConfig final {
     friend core::Class;
     /// \relates abckit::core::Function
     friend core::Function;
-    /// \relates abckit::core::Field
-    friend core::Field;
     /// \relates abckit::core::Annotation
     friend core::Annotation;
     /// \relates abckit::core::AnnotationInterface
@@ -127,8 +123,6 @@ class ApiConfig final {
     friend arkts::Class;
     /// \relates abckit::arkts::Function
     friend arkts::Function;
-    /// \relates abckit::arkts::Field
-    friend arkts::Field;
     /// \relates abckit::arkts::Annotation
     friend arkts::Annotation;
     /// \relates abckit::arkts::AnnotationInterface

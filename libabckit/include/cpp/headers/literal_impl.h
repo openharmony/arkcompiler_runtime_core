@@ -17,7 +17,6 @@
 #define CPP_ABCKIT_LITERAL_IMPL_H
 
 #include <cstdint>
-#include <string_view>
 #include "literal_array.h"
 #include "./literal.h"
 

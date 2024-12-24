@@ -16,7 +16,6 @@
 #ifndef CPP_ABCKIT_VALUE_H
 #define CPP_ABCKIT_VALUE_H
 
-#include <string_view>
 #include "./base_classes.h"
 
 namespace abckit {
