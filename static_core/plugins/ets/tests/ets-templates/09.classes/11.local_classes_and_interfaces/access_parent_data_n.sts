@@ -20,6 +20,7 @@ desc: >-
     When declared in a scope, names of local classes and interfaces have access to entities visible within this scope,
     and capture the entities they use from this scope.
     Function/method parameters and local variables can be used and thus captured.
+tags: [compile-only, negative]
 ---*/
 
 {{c.decl}}
