@@ -24,10 +24,11 @@ AbcMethodProcessor::AbcMethodProcessor(panda_file::File::EntityId entity_id,
                                        Abc2ProgramEntityContainer &entity_container)
     : AbcFileEntityProcessor(entity_id, entity_container),
       type_converter_(entity_container),
-      function_(pandasm::Function(entity_container_.GetFullMethodNameById(entity_id_), LANG_ECMA)),
+      function_(pandasm::Function(entity_container_.GetFullMethodNameById(entity_id_), DEFUALT_SOURCE_LANG)),
       debug_info_extractor_(entity_container.GetDebugInfoExtractor())
 {
     method_data_accessor_ = std::make_unique<panda_file::MethodDataAccessor>(*file_, entity_id_);
+    function_.language = method_data_accessor_->GetSourceLang().value_or(DEFUALT_SOURCE_LANG);
 }
 
 void AbcMethodProcessor::FillProgramData()
@@ -54,7 +55,9 @@ void AbcMethodProcessor::FillProto()
     pandasm::Type any_type = pandasm::Type(ANY_TYPE_NAME, 0);
     function_.return_type = any_type;
     for (uint8_t i = 0; i < params_num; i++) {
-        function_.params.emplace_back(pandasm::Function::Parameter(any_type, LANG_ECMA));
+        function_.params.emplace_back(
+            pandasm::Function::Parameter(any_type, function_.language)
+        );
     }
 }
 

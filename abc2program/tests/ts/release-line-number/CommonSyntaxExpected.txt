@@ -1,45 +1,52 @@
-# source binary: arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/CommonSyntax.abc
-
-.language ECMAScript
+# source binary: /mnt/data/shixiaowei/oh2/out/rk3568/clang_x64/obj/arkcompiler/runtime_core/abc2program/tests/CommonSyntax.abc
 
 # ====================
 # LITERALS
 
-_ESModuleRecord_1552 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
+_ESModuleRecord_1576 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
 
-_ESScopeNamesRecord_1538 { 4 [ tag_value:5, string:"Person", tag_value:5, string:"fetchData", ]}
+_ESScopeNamesRecord_1562 { 4 [ tag_value:5, string:"Person", tag_value:5, string:"fetchData", ]}
 
-_GLOBAL_1580 { 4 [ tag_value:5, string:"mySymbol", tag_value:5, string:"prop", ]}
+_GLOBAL_1604 { 4 [ tag_value:5, string:"mySymbol", tag_value:5, string:"prop", ]}
 
-_GLOBAL_1594 { 6 [ tag_value:2, i32:1, tag_value:2, i32:2, tag_value:2, i32:3, ]}
+_GLOBAL_1618 { 6 [ tag_value:2, i32:1, tag_value:2, i32:2, tag_value:2, i32:3, ]}
 
-_GLOBAL_1613 { 14 [ tag_value:5, string:"name", tag_value:5, string:"Alice", tag_value:5, string:"age", tag_value:2, i32:25, tag_value:5, string:"greet", tag_value:6, method:.#*#greet^1, tag_value:9, method_affiliate:0, ]}
+_GLOBAL_1637 { 14 [ tag_value:5, string:"name", tag_value:5, string:"Alice", tag_value:5, string:"age", tag_value:2, i32:25, tag_value:5, string:"greet", tag_value:6, method:.#*#greet^1, tag_value:9, method_affiliate:0, ]}
 
-_GLOBAL_1650 { 8 [ tag_value:5, string:"gender", tag_value:5, string:"男", tag_value:5, string:"grade", tag_value:5, string:"2", ]}
+_GLOBAL_1674 { 8 [ tag_value:5, string:"gender", tag_value:5, string:"男", tag_value:5, string:"grade", tag_value:5, string:"2", ]}
 
-_GLOBAL_1674 { 6 [ tag_value:2, i32:1, tag_value:2, i32:2, tag_value:2, i32:3, ]}
+_GLOBAL_1698 { 6 [ tag_value:2, i32:1, tag_value:2, i32:2, tag_value:2, i32:3, ]}
 
-_GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
+_GLOBAL_1717 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
 
 
 
 # ====================
 # RECORDS
 
+.language ECMAScript
+.record _ESExpectedPropertyCountAnnotation {
+}
+.record.source_file 
+
+.language ECMAScript
 .record _ESModuleRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/CommonSyntax.ts _ESModuleRecord_1552
+	u32 /mnt/data/shixiaowei/oh2/arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/CommonSyntax.ts _ESModuleRecord_1576
 }
 .record.source_file 
 
+.language ECMAScript
 .record _ESScopeNamesRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/CommonSyntax.ts _ESScopeNamesRecord_1538
+	u32 /mnt/data/shixiaowei/oh2/arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/CommonSyntax.ts _ESScopeNamesRecord_1562
 }
 .record.source_file 
 
+.language ECMAScript
 .record _ESSlotNumberAnnotation {
 }
 .record.source_file 
 
+.language ECMAScript
 .record _GLOBAL {
 }
 .record.source_file 
@@ -51,6 +58,7 @@ _GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 .function_kind FunctionKind::NC_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 5
+.language ECMAScript
 .function any .#*#(any a0, any a1, any a2, any a3) {
 	tryldglobalbyname 0x0, console           # line: 133           # column: 0
 	sta v0                                   # line: 133           # column: 0
@@ -63,6 +71,7 @@ _GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 .function_kind FunctionKind::NC_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 5
+.language ECMAScript
 .function any .#*#^1(any a0, any a1, any a2, any a3) {
 	tryldglobalbyname 0x0, console           # line: 135           # column: 0
 	sta v0                                   # line: 135           # column: 0
@@ -79,6 +88,7 @@ _GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 .function_kind FunctionKind::FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 7
+.language ECMAScript
 .function any .#*#defaultGreet(any a0, any a1, any a2, any a3) {
 	ldundefined                              # line: 100           # column: 0
 	stricteq 0x0, a3                         # line: 100           # column: 0
@@ -103,6 +113,7 @@ _GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 .function_kind FunctionKind::ASYNC_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 13
+.language ECMAScript
 .function any .#*#fetchAndDisplayData(any a0, any a1, any a2) {
 	nop                                      # line: 18446744073709551615           # column: 0
 	asyncfunctionenter                       # line: 18446744073709551615           # column: 0
@@ -161,6 +172,7 @@ _GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 .function_kind FunctionKind::FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 4
+.language ECMAScript
 .function any .#*#fetchData(any a0, any a1, any a2) {
 	newlexenv 0x2                            # line: 18446744073709551615           # column: 0
 	lda a1                                   # line: 18446744073709551615           # column: 0
@@ -180,6 +192,7 @@ _GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 .function_kind FunctionKind::NC_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 6
+.language ECMAScript
 .function any .#*#greet(any a0, any a1, any a2, any a3) {
 	tryldglobalbyname 0x0, console           # line: 77           # column: 0
 	sta v0                                   # line: 77           # column: 0
@@ -199,6 +212,7 @@ _GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 .function_kind FunctionKind::NONE
  _ESSlotNumberAnnotation
  SlotNumber 8
+.language ECMAScript
 .function any .#*#greet^1(any a0, any a1, any a2) {
 	tryldglobalbyname 0x0, console           # line: 86           # column: 0
 	sta v0                                   # line: 86           # column: 0
@@ -219,6 +233,7 @@ _GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 .function_kind FunctionKind::FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 1
+.language ECMAScript
 .function any .#*#sum(any a0, any a1, any a2, any a3, any a4) {
 	lda a4                                   # line: 30           # column: 0
 	add2 0x0, a3                             # line: 30           # column: 0
@@ -228,6 +243,7 @@ _GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 .function_kind FunctionKind::NC_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 4
+.language ECMAScript
 .function any .#*@1*#(any a0, any a1, any a2, any a3, any a4) {
 	newlexenv 0x1                            # line: 18446744073709551615           # column: 0
 	lda a3                                   # line: 18446744073709551615           # column: 0
@@ -247,6 +263,7 @@ _GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 .function_kind FunctionKind::NC_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 2
+.language ECMAScript
 .function any .#*@1**#(any a0, any a1, any a2) {
 	ldlexvar 0x0, 0x0                        # line: 127           # column: 0
 	sta v0                                   # line: 127           # column: 0
@@ -259,8 +276,11 @@ _GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 }
 
 .function_kind FunctionKind::NONE
+ _ESExpectedPropertyCountAnnotation
+ ExpectedPropertyCount 2
  _ESSlotNumberAnnotation
  SlotNumber 4
+.language ECMAScript
 .function any .#~@0=#Person(any a0, any a1, any a2, any a3, any a4) {
 	lda a3                                   # line: 112           # column: 0
 	stobjbyname 0x0, name, a2                # line: 112           # column: 0
@@ -273,6 +293,7 @@ _GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 .function_kind FunctionKind::NONE
  _ESSlotNumberAnnotation
  SlotNumber 8
+.language ECMAScript
 .function any .#~@0>#greet(any a0, any a1, any a2) {
 	tryldglobalbyname 0x0, console           # line: 117           # column: 0
 	sta v0                                   # line: 117           # column: 0
@@ -293,6 +314,7 @@ _GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 .function_kind FunctionKind::FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 123
+.language ECMAScript
 .function any .func_main_0(any a0, any a1, any a2) {
 	ldai 0x19                                # line: 18446744073709551615           # column: 0
 	sta v0                                   # line: 18446744073709551615           # column: 0
@@ -323,9 +345,9 @@ _GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	sta v7                                   # line: 22           # column: 0
 	ldbigint 10                              # line: 23           # column: 0
 	sta v8                                   # line: 23           # column: 0
-	createobjectwithbuffer 0x6, _GLOBAL_1580 # line: 24           # column: 0
+	createobjectwithbuffer 0x6, _GLOBAL_1604 # line: 24           # column: 0
 	sta v9                                   # line: 24           # column: 0
-	createarraywithbuffer 0x7, _GLOBAL_1594  # line: 27           # column: 0
+	createarraywithbuffer 0x7, _GLOBAL_1618  # line: 27           # column: 0
 	sta v10                                  # line: 27           # column: 0
 	definefunc 0x8, .#*#sum, 0x2             # line: 29           # column: 0
 	sta v11                                  # line: 29           # column: 0
@@ -460,7 +482,7 @@ _GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	sta v6                                   # line: 79           # column: 0
 	lda v5                                   # line: 79           # column: 0
 	callarg1 0x4a, v6                        # line: 79           # column: 0
-	createobjectwithbuffer 0x4c, _GLOBAL_1613 # line: 82           # column: 0
+	createobjectwithbuffer 0x4c, _GLOBAL_1637 # line: 82           # column: 0
 	sta v5                                   # line: 82           # column: 0
 	ldobjbyname 0x4d, greet                  # line: 89           # column: 0
 	callthis0 0x4f, v5                       # line: 89           # column: 0
@@ -473,14 +495,14 @@ _GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	sta v6                                   # line: 93           # column: 0
 	lda.str !                                # line: 93           # column: 0
 	add2 0x52, v6                            # line: 93           # column: 0
-	createobjectwithbuffer 0x53, _GLOBAL_1650 # line: 96           # column: 0
+	createobjectwithbuffer 0x53, _GLOBAL_1674 # line: 96           # column: 0
 	lda v5                                   # line: 97           # column: 0
 	ldobjbyname 0x54, gender                 # line: 97           # column: 0
 	lda v5                                   # line: 97           # column: 0
 	ldobjbyname 0x56, grade                  # line: 97           # column: 0
 	lda v1                                   # line: 103           # column: 0
 	callarg0 0x58                            # line: 103           # column: 0
-	createarraywithbuffer 0x5a, _GLOBAL_1674 # line: 106           # column: 0
+	createarraywithbuffer 0x5a, _GLOBAL_1698 # line: 106           # column: 0
 	sta v1                                   # line: 106           # column: 0
 	createemptyarray 0x5b                    # line: 107           # column: 0
 	sta v5                                   # line: 107           # column: 0
@@ -500,7 +522,7 @@ _GLOBAL_1693 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	inc 0x63                                 # line: 107           # column: 0
 	ldhole                                   # line: 110           # column: 0
 	sta v1                                   # line: 110           # column: 0
-	defineclasswithbuffer 0x64, .#~@0=#Person, _GLOBAL_1693, 0x2, v1 # line: 110           # column: 0
+	defineclasswithbuffer 0x64, .#~@0=#Person, _GLOBAL_1717, 0x2, v1 # line: 110           # column: 0
 	sta v1                                   # line: 110           # column: 0
 	ldobjbyname 0x65, prototype              # line: 110           # column: 0
 	lda.str Alice                            # line: 120           # column: 0

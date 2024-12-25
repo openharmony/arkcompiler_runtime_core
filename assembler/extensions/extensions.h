@@ -27,6 +27,8 @@ namespace panda::pandasm::extensions {
 // Workaround for ets_frontend. Should be removed by our colleagues.
 using Language = panda::panda_file::SourceLang;
 
+constexpr Language DEFAULT_LANGUAGE = panda::panda_file::DEFUALT_SOURCE_LANG;
+
 class MetadataExtension {
 public:
     static std::unique_ptr<RecordMetadata> CreateRecordMetadata(panda::panda_file::SourceLang lang);

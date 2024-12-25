@@ -64,7 +64,10 @@ const panda_file::DebugInfoExtractor &Abc2ProgramCompiler::GetDebugInfoExtractor
 pandasm::Program *Abc2ProgramCompiler::CompileAbcFile()
 {
     prog_ = new pandasm::Program();
-    prog_->lang = LANG_ECMA;
+    // An abc may be generated from serveral kinds of source files.
+    // prog_->lang should not be used for setting any other structure's language such as record.
+    // Since prog_->lang will not be emitted into abc, this will not effect the integraty of generated abc file.
+    prog_->lang = DEFUALT_SOURCE_LANG;
     auto classes = file_->GetClasses();
     std::string record_name = "";
     for (size_t i = 0; i < classes.size(); i++) {

@@ -25,7 +25,7 @@
 
 namespace panda::abc2program {
 
-const panda::panda_file::SourceLang LANG_ECMA = panda::panda_file::SourceLang::ECMASCRIPT;
+const panda::panda_file::SourceLang DEFUALT_SOURCE_LANG = panda::panda_file::DEFUALT_SOURCE_LANG;
 
 class Abc2ProgramEntityContainer {
 public:

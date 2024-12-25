@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//arkcompiler/runtime_core/ark_config.gni")
 import("$ark_root/tests/test_helper.gni")
+import("$build_root/config/components/ets_frontend/es2abc_config.gni")
 
 disasm_test_configs = [
   "$ark_root:ark_config",
@@ -180,6 +180,33 @@ foreach(file, disasm_test_js_files) {
   }
 }
 
+sourceLang_file = "sourceLang"
+action("gen_filesinfo_action") {
+  script = "handle_fileinfo.py"
+
+  inputs = [ "${sourceLang_file}/filesInfo.txt" ]
+  outputs = [ "${target_out_dir}/${sourceLang_file}/filesInfo.txt" ]
+  args = [
+    rebase_path("${sourceLang_file}/filesInfo.txt"),
+    rebase_path("${target_out_dir}/${sourceLang_file}/filesInfo.txt"),
+    rebase_path("./"),
+  ]
+}
+
+es2abc_gen_abc("gen_${sourceLang_file}_abc") {
+  test_abc = "$target_out_dir/${sourceLang_file}.abc"
+  fileinfo_path =
+      rebase_path("${target_out_dir}/${sourceLang_file}/filesInfo.txt")
+  src_js = "@${fileinfo_path}"
+  dst_file = rebase_path(test_abc)
+  extra_args = [
+    "--module",
+    "--merge-abc",
+    "--enable-annotations",
+  ]
+  out_puts = [ test_abc ]
+}
+
 disasm_include_dirs = [
   "$ark_root/disassembler",
   "$ark_root/assembler",
@@ -192,6 +219,7 @@ script_sources = [
   "disassembler_column_number_test.cpp",
   "disassembler_get_file_name_test.cpp",
   "disassembler_line_number_test.cpp",
+  "disassembler_source_lang_test.cpp",
   "disassembler_string_test.cpp",
   "disassembler_system_annotations_test.cpp",
 ]
@@ -282,6 +310,7 @@ host_unittest_action("DisasmUserAnnotationsTest") {
   sources = annotations_sources
   include_dirs = disasm_include_dirs
   configs = disasm_test_configs
+  external_deps = [ sdk_libc_secshared_dep ]
   deps = disasm_test_deps
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
@@ -315,6 +344,21 @@ host_unittest_action("DisasmImmTest") {
   deps = disasm_test_deps
 }
 
+host_unittest_action("DisasmSourceLangTest") {
+  module_out_path = module_output_path
+  sources = [ "disassembler_source_lang_test.cpp" ]
+  include_dirs = disasm_include_dirs
+  configs = disasm_test_configs
+  external_deps = [ sdk_libc_secshared_dep ]
+  deps = disasm_test_deps
+  test_abc_dir = rebase_path(target_out_dir)
+  defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
+  deps += [
+    ":gen_${sourceLang_file}_abc",
+    ":gen_filesinfo_action",
+  ]
+}
+
 group("host_unittest") {
   testonly = true
   deps = [
@@ -323,6 +367,7 @@ group("host_unittest") {
     ":DisasmModuleTestAction",
     ":DisasmReleaseTestAction",
     ":DisasmScriptTestAction",
+    ":DisasmSourceLangTestAction",
     ":DisasmUserAnnotationsTest",
   ]
 }
