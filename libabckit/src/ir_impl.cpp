@@ -230,12 +230,12 @@ extern "C" void BBappendSuccBlock(AbckitBasicBlock *basicBlock, AbckitBasicBlock
     BBappendSuccBlockStatic(basicBlock, succBlock);
 }
 
-extern "C" void BBeraseSuccBlock(AbckitBasicBlock *bb, uint32_t index)
+extern "C" void BBdisconnectSuccBlock(AbckitBasicBlock *bb, uint32_t index)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    BBeraseSuccBlockStatic(bb, index);
+    BBdisconnectSuccBlockStatic(bb, index);
 }
 
 extern "C" bool BBvisitSuccBlocks(AbckitBasicBlock *basicBlock, void *data,
@@ -869,7 +869,7 @@ AbckitGraphApi g_graphApiImpl = {
     BBgetSuccBlock,
     BBinsertSuccBlock,
     BBappendSuccBlock,
-    BBeraseSuccBlock,
+    BBdisconnectSuccBlock,
     BBvisitSuccBlocks,
     BBgetTrueBranch,
     BBgetFalseBranch,

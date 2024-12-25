@@ -90,11 +90,11 @@ TEST_F(LibAbcKitNullptrTestsGraphApiImpl0, bbDump)
     helpers_nullptr::TestNullptr(g_graphApiImp->bbDump);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbEraseSuccBlock,
+// Test: test-kind=api, api=GraphApiImpl::bbDisconnectSuccBlock,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsGraphApiImpl0, bbEraseSuccBlock)
+TEST_F(LibAbcKitNullptrTestsGraphApiImpl0, bbDisconnectSuccBlock)
 {
-    helpers_nullptr::TestNullptr(g_graphApiImp->bbEraseSuccBlock);
+    helpers_nullptr::TestNullptr(g_graphApiImp->bbDisconnectSuccBlock);
 }
 
 // Test: test-kind=api, api=GraphApiImpl::bbGetFalseBranch,

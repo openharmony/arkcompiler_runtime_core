@@ -59,7 +59,7 @@ void AddParamChecker(AbckitCoreFunction *method)
         AbckitInst *arrLength = g_dynG->iCreateLdobjbyname(graph, arr, str);
 
         AbckitBasicBlock *trueBB = succBBs[0];
-        g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
+        g_implG->bbDisconnectSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
         AbckitBasicBlock *falseBB = g_implG->bbCreateEmpty(graph);
         g_implG->bbAppendSuccBlock(falseBB, g_implG->gGetEndBasicBlock(graph));
         g_implG->bbAddInstBack(falseBB, g_dynG->iCreateReturn(graph, constant));

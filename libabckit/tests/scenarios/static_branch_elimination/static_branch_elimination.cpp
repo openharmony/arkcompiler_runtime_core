@@ -86,7 +86,7 @@ auto g_libAbcKitTestStaticBranchEliminationLambda0 = [](AbckitFile *file, Abckit
     EXPECT_NE(ifBB, nullptr);
     auto *falseBB = g_implG->bbGetFalseBranch(ifBB);
     EXPECT_NE(falseBB, nullptr);
-    g_implG->bbEraseSuccBlock(ifBB, ABCKIT_FALSE_SUCC_IDX);
+    g_implG->bbDisconnectSuccBlock(ifBB, ABCKIT_FALSE_SUCC_IDX);
     g_implG->iRemove(ifInstr);
 };
 

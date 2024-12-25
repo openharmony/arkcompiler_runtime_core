@@ -58,13 +58,12 @@ void TransformIR(AbckitGraph *graph, bool isDynamic = false)
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
     AbckitBasicBlock *endBB = g_implG->gGetEndBasicBlock(graph);
 
-    g_implG->bbEraseSuccBlock(startBB, 0);
-
     auto [param0, param1] = IRFindParameters(graph, isDynamic);
 
     ASSERT_NE(param0, nullptr);
     ASSERT_NE(param1, nullptr);
 
+    g_implG->bbDisconnectSuccBlock(startBB, 0);
     AbckitBasicBlock *ifBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(startBB, ifBB);
     AbckitInst *ifInst = nullptr;

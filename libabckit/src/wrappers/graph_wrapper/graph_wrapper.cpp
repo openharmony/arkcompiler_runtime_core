@@ -83,10 +83,13 @@ AbckitGraph *GraphWrapper::BuildGraphDynamic(FileWrapper *pf, AbckitIrInterface 
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
         return nullptr;
     }
+    if (GraphHasUnreachableBlocks(graphImpl)) {
+        LIBABCKIT_LOG(DEBUG) << "Cannot build graph, there are unreachable blocks in graph\n";
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     graphImpl->RunPass<ark::bytecodeopt::CheckResolver>();
     graphImpl->RunPass<ark::compiler::Cleanup>();
-
-    LIBABCKIT_LOG_DUMP(graphImpl->Dump(&std::cerr), DEBUG);
     CheckInvalidOpcodes(graphImpl, true);
 
     auto graph = new AbckitGraph;
@@ -107,9 +110,9 @@ static bool RunPreliminaryPasses(ark::compiler::Graph *graphImpl, uint16_t *icSl
 {
     graphImpl->RemoveUnreachableBlocks();
 
-    CheckInvalidOpcodes(graphImpl, true);
-
     graphImpl->InvalidateAnalysis<compiler::LoopAnalyzer>();
+
+    CheckInvalidOpcodes(graphImpl, true);
 
     if (!ark::compiler::GraphChecker(graphImpl).Check()) {
         LIBABCKIT_LOG(DEBUG) << ": Graph Verifier failed!\n";
@@ -150,10 +153,13 @@ static bool RunPreliminaryPasses(ark::compiler::Graph *graphImpl, uint16_t *icSl
 
 void *GraphWrapper::BuildCodeDynamic(AbckitGraph *graph, const std::string &funcName)
 {
-    LIBABCKIT_LOG(DEBUG) << "Building code for function " << funcName;
+    LIBABCKIT_LOG(DEBUG) << "Building code for function " << funcName << "\n";
 
     auto graphImpl =
         compiler::GraphCloner(graph->impl, graph->impl->GetAllocator(), graph->impl->GetLocalAllocator()).CloneGraph();
+
+    graphImpl->RemoveUnreachableBlocks();
+    GraphInvalidateAnalyses(graphImpl);
 
     LIBABCKIT_LOG(DEBUG) << "BEFORE======================================\n";
     LIBABCKIT_LOG_DUMP(graphImpl->Dump(&std::cerr), DEBUG);

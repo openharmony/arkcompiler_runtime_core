@@ -23,6 +23,7 @@
 #include "libabckit/src/ir_impl.h"
 #include "libabckit/src/adapter_static/runtime_adapter_static.h"
 #include "libabckit/src/adapter_static/metadata_modify_static.h"
+#include "libabckit/src/adapter_static/ir_static.h"
 
 #include "libabckit/src/wrappers/graph_wrapper/graph_wrapper.h"
 
@@ -160,6 +161,7 @@ static AbckitGraph *CreateGraph(AbckitCoreFunction *function, AbckitIrInterface 
     auto *ctxGInternal =
         new CtxGInternal {graphImpl->GetAllocator(), graphImpl->GetLocalAllocator(), irInterface, adapter};
     graph->internal = ctxGInternal;
+    LIBABCKIT_LOG_DUMP(GdumpStatic(graph, STDERR_FILENO), DEBUG);
     return graph;
 }
 
@@ -174,8 +176,7 @@ AbckitGraph *CreateGraphFromFunctionStatic(AbckitCoreFunction *function)
     LIBABCKIT_LOG_DUMP(func->DebugDump(), DEBUG);
     LIBABCKIT_LOG(DEBUG) << func->name << '\n';
 
-    auto *file = function->owningModule->file;
-    auto program = file->GetStaticProgram();
+    auto program = function->owningModule->file->GetStaticProgram();
 
     auto maps = std::make_unique<pandasm::AsmEmitter::PandaFileToPandaAsmMaps>();
     auto pf = pandasm::AsmEmitter::Emit(*program, maps.get()).release();
@@ -220,8 +221,9 @@ AbckitGraph *CreateGraphFromFunctionStatic(AbckitCoreFunction *function)
     }
 
     RemoveInsts(graphImpl);
+    graphImpl->RemoveUnreachableBlocks();
+    GraphInvalidateAnalyses(graphImpl);
     CheckInvalidOpcodes(graphImpl, false);
-    LIBABCKIT_LOG_DUMP(graphImpl->Dump(&std::cerr), DEBUG);
 
     return CreateGraph(function, irInterface, graphImpl, adapter);
 }

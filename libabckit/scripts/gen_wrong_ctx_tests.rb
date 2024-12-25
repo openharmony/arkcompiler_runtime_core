@@ -294,7 +294,7 @@ funcs_without_helper = [
   "bbGetSuccBlock",
   "gInsertTryCatch",
   "iGetConstantValueI32",
-  "bbEraseSuccBlock",
+  "bbDisconnectSuccBlock",
   "bbIsTry",
   "gGetIsa",
   "bbIsCatch",

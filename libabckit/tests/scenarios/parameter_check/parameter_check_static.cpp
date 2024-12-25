@@ -36,8 +36,6 @@ void TransformIR(AbckitGraph *graph)
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
     AbckitBasicBlock *endBB = g_implG->gGetEndBasicBlock(graph);
 
-    g_implG->bbEraseSuccBlock(startBB, 0);
-
     AbckitInst *param1 = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_PARAMETER);
     ASSERT_NE(param1, nullptr);
     AbckitInst *param0 = g_implG->iGetPrev(param1);
@@ -52,6 +50,7 @@ void TransformIR(AbckitGraph *graph)
     g_implG->bbAddInstBack(ifBB, ifInst);
 
     g_implG->bbAppendSuccBlock(ifBB, succBBs[0]);
+    g_implG->bbDisconnectSuccBlock(startBB, 0);
 
     AbckitBasicBlock *falseBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(ifBB, falseBB);

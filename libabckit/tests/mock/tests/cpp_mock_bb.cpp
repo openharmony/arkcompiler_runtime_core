@@ -287,7 +287,7 @@ TEST_F(LibAbcKitCppMockTestBasicBlock, BasicBlock_EraseSuccBlock)
         abckit::File f(DEFAULT_PATH);
         ASSERT_TRUE(CheckMockedApi("OpenAbc"));
         abckit::mock::helpers::GetMockBasicBlock(f).EraseSuccBlock(DEFAULT_U32);
-        ASSERT_TRUE(CheckMockedApi("BBEraseSuccBlock"));
+        ASSERT_TRUE(CheckMockedApi("BBdisconnectSuccBlock"));
     }
     ASSERT_TRUE(CheckMockedApi("CloseFile"));
     ASSERT_TRUE(CheckMockedStackEmpty());

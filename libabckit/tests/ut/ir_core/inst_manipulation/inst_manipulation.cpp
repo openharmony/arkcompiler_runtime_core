@@ -567,7 +567,7 @@ TEST_F(LibAbcKitIrInstTest, IinsertAfter_1)
             auto *negInst = g_statG->iCreateNeg(graph, newInst);
             auto *addInst = g_statG->iCreateAdd(graph, negInst, newInst);
 
-            g_implG->bbEraseSuccBlock(start, 0);
+            g_implG->bbDisconnectSuccBlock(start, 0);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             auto *empty = g_implG->bbCreateEmpty(graph);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -615,7 +615,7 @@ TEST_F(LibAbcKitIrInstTest, IinsertAfter_2)
             auto *negInst = g_dynG->iCreateNeg(graph, newInst);
             auto *addInst = g_dynG->iCreateAdd2(graph, negInst, newInst);
 
-            g_implG->bbEraseSuccBlock(start, 0);
+            g_implG->bbDisconnectSuccBlock(start, 0);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             auto *empty = g_implG->bbCreateEmpty(graph);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

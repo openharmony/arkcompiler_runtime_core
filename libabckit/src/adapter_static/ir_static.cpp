@@ -456,6 +456,11 @@ void IdumpStatic(AbckitInst *inst, int fd)
 void GdumpStatic(AbckitGraph *graph, int fd)
 {
     LIBABCKIT_LOG_FUNC;
+    if (GraphHasUnreachableBlocks(graph->impl)) {
+        LIBABCKIT_LOG(DEBUG) << "Cannot dump, there are unreachable blocks in graph\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return;
+    }
     std::stringstream ss;
     graph->impl->Dump(&ss);
     write(fd, ss.str().data(), ss.str().size());
@@ -465,7 +470,7 @@ void GrunPassRemoveUnreachableBlocksStatic(AbckitGraph *graph)
 {
     LIBABCKIT_LOG_FUNC;
     graph->impl->RemoveUnreachableBlocks();
-    graph->impl->InvalidateAnalysis<ark::compiler::LoopAnalyzer>();
+    GraphInvalidateAnalyses(graph->impl);
 }
 
 bool GvisitBlocksRPOStatic(AbckitGraph *graph, void *data, bool (*cb)(AbckitBasicBlock *bb, void *data))
@@ -473,6 +478,12 @@ bool GvisitBlocksRPOStatic(AbckitGraph *graph, void *data, bool (*cb)(AbckitBasi
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_BAD_ARGUMENT(graph, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
+
+    if (GraphHasUnreachableBlocks(graph->impl)) {
+        LIBABCKIT_LOG(DEBUG) << "Cannot get blocks RPO, there are unreachable blocks in graph\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return false;
+    }
 
     std::stringstream ss;
     for (auto *bbImpl : graph->impl->GetBlocksRPO()) {
@@ -536,6 +547,7 @@ AbckitBasicBlock *BBcreateEmptyStatic(AbckitGraph *graph)
     bb->graph = graph;
     bb->impl = bbImpl;
     graph->implToBB.insert({bbImpl, bb});
+    GraphInvalidateAnalyses(graph->impl);
     return bb;
 }
 
@@ -575,6 +587,7 @@ AbckitBasicBlock *BBsplitBlockAfterInstructionStatic(AbckitBasicBlock *basicBloc
     bb->graph = inst->graph;
     bb->impl = newBbImpl;
     inst->graph->implToBB.insert({newBbImpl, bb});
+    GraphInvalidateAnalyses(basicBlock->graph->impl);
     return bb;
 }
 
@@ -635,7 +648,7 @@ AbckitInst *BBgetFirstInstStatic(AbckitBasicBlock *basicBlock)
     return inst;
 }
 
-void BBeraseSuccBlockStatic(AbckitBasicBlock *bb, size_t index)
+void BBdisconnectSuccBlockStatic(AbckitBasicBlock *bb, size_t index)
 {
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_BAD_ARGUMENT_VOID(bb)
@@ -648,6 +661,7 @@ void BBeraseSuccBlockStatic(AbckitBasicBlock *bb, size_t index)
     auto succ = bb->impl->GetSuccessor(index);
     succ->RemovePred(bb->impl);
     bb->impl->RemoveSucc(succ);
+    GraphInvalidateAnalyses(bb->graph->impl);
 }
 
 void BBremoveAllInstsStatic(AbckitBasicBlock *basicBlock)
@@ -806,6 +820,12 @@ bool BBcheckDominanceStatic(AbckitBasicBlock *basicBlock, AbckitBasicBlock *domi
 
     LIBABCKIT_WRONG_CTX(basicBlock->graph, dominator->graph, false);
 
+    if (!GraphDominatorsTreeAnalysisIsValid(basicBlock->graph->impl)) {
+        LIBABCKIT_LOG(DEBUG) << "DominatorsTree analysis is not valid\n";
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return false;
+    }
+
     return dominator->impl->IsDominate(basicBlock->impl);
 }
 
@@ -813,6 +833,12 @@ AbckitBasicBlock *BBgetImmediateDominatorStatic(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_BAD_ARGUMENT(basicBlock, nullptr);
+
+    if (!GraphDominatorsTreeAnalysisIsValid(basicBlock->graph->impl)) {
+        LIBABCKIT_LOG(DEBUG) << "DominatorsTree analysis is not valid\n";
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
 
     auto *bb = basicBlock->impl->GetDominator();
     return basicBlock->graph->implToBB.at(bb);
@@ -824,6 +850,12 @@ bool BBvisitDominatedBlocksStatic(AbckitBasicBlock *basicBlock, void *data,
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_BAD_ARGUMENT(basicBlock, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
+
+    if (!GraphDominatorsTreeAnalysisIsValid(basicBlock->graph->impl)) {
+        LIBABCKIT_LOG(DEBUG) << "DominatorsTree analysis is not valid\n";
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return false;
+    }
 
     for (auto *bbImpl : basicBlock->impl->GetDominatedBlocks()) {
         auto *bb = basicBlock->graph->implToBB.at(bbImpl);
@@ -859,6 +891,7 @@ void BBinsertSuccBlockStatic(AbckitBasicBlock *basicBlock, AbckitBasicBlock *suc
     }
 
     succBlock->impl->GetPredsBlocks().emplace_back(basicBlock->impl);
+    GraphInvalidateAnalyses(basicBlock->graph->impl);
 }
 
 void BBappendSuccBlockStatic(AbckitBasicBlock *basicBlock, AbckitBasicBlock *succBlock)
@@ -871,6 +904,7 @@ void BBappendSuccBlockStatic(AbckitBasicBlock *basicBlock, AbckitBasicBlock *suc
 
     basicBlock->impl->GetSuccsBlocks().emplace_back(succBlock->impl);
     succBlock->impl->GetPredsBlocks().emplace_back(basicBlock->impl);
+    GraphInvalidateAnalyses(basicBlock->graph->impl);
 }
 
 AbckitBasicBlock *BBgetTrueBranchStatic(AbckitBasicBlock *bb)

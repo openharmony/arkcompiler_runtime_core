@@ -345,7 +345,7 @@ struct AbckitGraphApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `basicBlock` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `index` is larger than `basicBlock` successors quantity.
      */
-    void (*bbEraseSuccBlock)(AbckitBasicBlock *basicBlock, uint32_t index);
+    void (*bbDisconnectSuccBlock)(AbckitBasicBlock *basicBlock, uint32_t index);
 
     /**
      * @brief Enumerates basic blocks successing to the given `basicBlock`, invoking callback `cb` for each basic block.

@@ -58,7 +58,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBcreateEmptyBlock_1)
             auto *bb = g_implG->bbCreateEmpty(graph);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-            g_implG->bbEraseSuccBlock(start, 0);
+            g_implG->bbDisconnectSuccBlock(start, 0);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             g_implG->bbInsertSuccBlock(start, bb, 0);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -86,23 +86,25 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBcreateEmptyBlock_1)
         []([[maybe_unused]] AbckitGraph *graph) {});
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbEraseSuccBlock, abc-kind=ArkTS1, category=positive
-TEST_F(LibAbcKitBasicBlocksDynamicTest, BBeraseSuccBlock)
+// Test: test-kind=api, api=GraphApiImpl::bbDisconnectSuccBlock, abc-kind=ArkTS1, category=positive
+TEST_F(LibAbcKitBasicBlocksDynamicTest, BBdisconnectSuccBlock)
 {
     auto cb = [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
         auto *next = helpers::BBgetSuccBlocks(start)[0];
-        g_implG->bbEraseSuccBlock(start, 0);
+        g_implG->bbDisconnectSuccBlock(start, 0);
         ASSERT_TRUE(helpers::BBgetSuccBlocks(start).empty());
         ASSERT_TRUE(helpers::BBgetPredBlocks(next).empty());
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        g_implG->bbAppendSuccBlock(start, next);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> bbSchemas(
             {{{},
-              {},
+              {1},
               {{4, ABCKIT_ISA_API_DYNAMIC_OPCODE_PARAMETER, {}},
                {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_PARAMETER, {}},
                {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_PARAMETER, {}}}},
-             {{},
+             {{0},
               {2},
               {
                   {2, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
@@ -111,9 +113,6 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBeraseSuccBlock)
              {{1}, {}, {}}});
         // CC-OFFNXT(G.FMT.02)
         helpers::VerifyGraph(graph, bbSchemas);
-
-        g_implG->bbAppendSuccBlock(start, next);
-        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     };
     helpers::InspectMethod(CREATE_EMPTY_INPUT_PATH, "test", cb);
 }
@@ -320,7 +319,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBaddInstBack_2)
             auto *newInst = g_implG->gFindOrCreateConstantI64(graph, 1U);
             auto *negInst = g_dynG->iCreateNeg(graph, newInst);
 
-            g_implG->bbEraseSuccBlock(start, 0);
+            g_implG->bbDisconnectSuccBlock(start, 0);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             auto *empty = g_implG->bbCreateEmpty(graph);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -680,7 +679,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBinsertSuccBlock_1)
         g_implG->bbInsertSuccBlock(bb, empty, 2U);
         ASSERT_EQ(g_implG->bbGetSuccBlock(bb, 2U), helpers::BBgetSuccBlocks(bb)[2U]);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-        g_implG->bbEraseSuccBlock(bb, 2U);
+        g_implG->bbDisconnectSuccBlock(bb, 2U);
     });
     g_impl->closeFile(file);
 }
@@ -697,7 +696,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBappendSuccBlock_1)
         g_implG->bbAppendSuccBlock(bb, empty);
         ASSERT_EQ(g_implG->bbGetSuccBlock(bb, 2U), helpers::BBgetSuccBlocks(bb)[2U]);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-        g_implG->bbEraseSuccBlock(bb, g_implG->bbGetSuccBlockCount(bb) - 1);
+        g_implG->bbDisconnectSuccBlock(bb, g_implG->bbGetSuccBlockCount(bb) - 1);
     });
     g_impl->closeFile(file);
 }

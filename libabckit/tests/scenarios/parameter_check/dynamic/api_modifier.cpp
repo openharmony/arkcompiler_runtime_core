@@ -121,7 +121,7 @@ void ApiModifier::AddParamChecker(AbckitCoreFunction *method)
         AbckitInst *arrLength = dynG_->iCreateLdobjbyname(graph, arr, str);
 
         AbckitBasicBlock *trueBB = succBBs[0];
-        implG_->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
+        implG_->bbDisconnectSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
         AbckitBasicBlock *falseBB = implG_->bbCreateEmpty(graph);
         implG_->bbAppendSuccBlock(falseBB, implG_->gGetEndBasicBlock(graph));
         implG_->bbAddInstBack(falseBB, dynG_->iCreateReturn(graph, constant));

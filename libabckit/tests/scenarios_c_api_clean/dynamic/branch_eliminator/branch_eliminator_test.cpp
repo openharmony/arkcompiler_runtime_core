@@ -425,7 +425,7 @@ void DeleteUnreachableBranch(AbckitInst *ifInst)
     // if true ==> delete false branch
     g_implG->iRemove(ifInst);
 
-    g_implG->bbEraseSuccBlock(bb, result ? 1 : 0);
+    g_implG->bbDisconnectSuccBlock(bb, result ? 1 : 0);
     g_implG->gRunPassRemoveUnreachableBlocks(g_implG->bbGetGraph(bb));
 }
 
