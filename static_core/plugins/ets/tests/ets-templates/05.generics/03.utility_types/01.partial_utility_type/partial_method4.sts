@@ -18,6 +18,7 @@ desc: >-
     Using interface with method as T for Partial<T>.
     Optional feature is not about methods.
     There is interface method implemented.
+tags: [compile-only, negative]
 ---*/
 
 interface I {
@@ -34,5 +35,5 @@ function foo(i: Partial<I>) {
 }
 
 function main() {
-  assert(foo( {i: 1.9, foo(){}} ) == 1.9 )
+  assert(foo( {i: 1.9, foo(){}} ) == 1 )
 }

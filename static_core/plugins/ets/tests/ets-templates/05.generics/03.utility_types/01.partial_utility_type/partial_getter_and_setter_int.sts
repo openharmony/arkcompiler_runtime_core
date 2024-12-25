@@ -28,10 +28,12 @@ interface I {
 }
 
 class C implements I {
-  set i(i: number) { z += 1; this.i = i; }
-  get i() { z += 10; return this.i; }
-  set j(j: string) { z += 5; this.j = j; }
-  get j() { z += 50; return this.j; }
+  private _i:number = 0;
+  private _j:string = "";
+  set i(i: number) { z += 1; this._i = i; }
+  get i() { z += 10; return this._i; }
+  set j(j: string) { z += 5; this._j = j; }
+  get j() { z += 50; return this._j; }
 }
 
 function fooI(i: Partial<I>) {
