@@ -124,13 +124,13 @@ function cloneArray<%= ctx.this_generic %>(self: <%= ctx.this_type %>): <%= ctx.
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-export function filter<%= ctx.this_generic %>(<%= ctx.this_arg %>fn: (v: <%= ctx.el_type %>, k: number) => boolean): <%= ctx.this_type %> {
+export function filter<%= ctx.this_generic %>(<%= ctx.this_arg %>fn: (v: <%= ctx.el_type %>, k: number, array: <%= ctx.this_type %>) => boolean): <%= ctx.this_type %> {
     const mask = new boolean[<%= ctx.this_len_int %>]
     let cnt = 0
 
     for (let i: int = 0; i < <%= ctx.this_len_int %>; i++) {
         const val = self[i];
-        if (fn(val, i)) {
+        if (fn(val, i, self)) {
             mask[i] = true
             cnt++;
         }

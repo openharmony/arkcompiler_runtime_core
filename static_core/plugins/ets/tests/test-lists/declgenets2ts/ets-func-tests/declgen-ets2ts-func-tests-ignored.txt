@@ -1069,3 +1069,10 @@ spec/13.Compilation_Units_Packages_and_Modules/import_export/issue14991_02.sts
 std/core/IntlLocaleTest.sts
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_is_proxed_through_chain_of_files.sts
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_isnt_exported_but_var_of_t_exported.sts
+
+
+# 23077
+spec/10.Interfaces/Interface_Methods_Declarations/method_overload6.sts
+spec/10.Interfaces/Interface_Methods_Declarations/method_overload7.sts
+spec/10.Interfaces/method_overload6.sts
+spec/10.Interfaces/method_overload7.sts

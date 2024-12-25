@@ -804,15 +804,15 @@ bool AsmEmitter::AddAnnotations(T *item, ItemContainer *container, const Annotat
 template <class T>
 static void AddBytecodeIndexDependencies(MethodItem *method, const Ins &insn,
                                          const std::unordered_map<std::string, T *> &items,
-                                         const AsmEmitter::AsmEntityCollections &entities)
+                                         const AsmEmitter::AsmEntityCollections &entities, bool lookupInStatic = true)
 {
     ASSERT(!insn.ids.empty());
 
     for (const auto &id : insn.ids) {
         auto it = items.find(id);
         if (it == items.cend()) {
-            if (insn.HasFlag(InstFlags::STATIC_METHOD_ID)) {
-                AddBytecodeIndexDependencies(method, insn, entities.methodItems, entities);
+            if (lookupInStatic && insn.HasFlag(InstFlags::STATIC_METHOD_ID)) {
+                AddBytecodeIndexDependencies(method, insn, entities.methodItems, entities, false);
                 return;
             }
 #ifdef PANDA_WITH_ECMASCRIPT

@@ -36,27 +36,6 @@ export interface ReadonlySet<T> extends Iterable<T> {
     /**
      * Executes a provided function once per each value in the Set object, in insertion order
      *
-     * @param callbackfn to apply
-     */
-    forEach(callbackfn: () => void): void;
-
-    /**
-     * Executes a provided function once per each value in the Set object, in insertion order
-     *
-     * @param callbackfn to apply
-     */
-    forEach(callbackfn: (value: T) => void): void;
-
-    /**
-     * Executes a provided function once per each value in the Set object, in insertion order
-     *
-     * @param callbackfn to apply; value2 is always same as value1
-     */
-    forEach(callbackfn: (value: T, value2: T) => void): void;
-
-    /**
-     * Executes a provided function once per each value in the Set object, in insertion order
-     *
      * @param callbackfn to apply; value2 is always same as value1
      */
     forEach(callbackfn: (value: T, value2: T, set: ReadonlySet<T>) => void): void;
@@ -218,33 +197,6 @@ export final class Set<K> implements ReadonlySet<K> {
      */
     override entries(): IterableIterator<[K, K]> {
         return this.elements.entries()
-    }
-
-    /**
-     * Executes a provided function once per each value in the Set object, in insertion order
-     *
-     * @param callbackfn to apply
-     */
-    override forEach(callbackfn: () => void): void {
-        iteratorForEach<K>(this.keys(), (elem: K) => callbackfn())
-    }
-
-    /**
-     * Executes a provided function once per each value in the Set object, in insertion order
-     *
-     * @param callbackfn to apply
-     */
-    override forEach(callbackfn: (k: K) => void): void {
-        iteratorForEach<K>(this.keys(), callbackfn)
-    }
-
-    /**
-     * Executes a provided function once per each value in the Set object, in insertion order
-     *
-     * @param callbackfn to apply
-     */
-    override forEach(callbackfn: (k: K, v: K) => void): void {
-        iteratorForEach<K>(this.keys(), (x: K): void => callbackfn(x, x))
     }
 
     /**

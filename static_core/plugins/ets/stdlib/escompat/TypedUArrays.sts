@@ -1375,35 +1375,6 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Sorts in-place
-     *
-     * @param compareFn comparator —  used to determine the order of the elements.
-     * compareFn returns a negative value if first argument is less than second argument,
-     * zero if they're equal and a positive value otherwise.
-     *
-     * @returns sorted Uint8ClampedArray
-     */
-    public sort(compareFn: (a: number) => number): this {
-        let cmp = (a: number, b: number) => { return compareFn(a)}
-        this.sort(cmp)
-        return this
-    }
-
-    /**
-     * Sorts in-place
-     *
-     * @param fn compareFn —  used to determine the order of the elements.
-     * compareFn returns a negative value if first argument is less than second argument,
-     * zero if they're equal and a positive value otherwise.
-     *
-     * @returns sorted Uint8ClampedArray
-     */
-    public sort(compareFn: () => number): this {
-        let cmp = (a: number, b: number) => { return compareFn()}
-        this.sort(cmp)
-        return this
-    }
-    /**
      * Creates a Uint8ClampedArray with the same underlying Buffer
      *
      * @param begin start index, inclusive
@@ -1605,128 +1576,6 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
     /// === with element lambda functions ===
 
     /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts one argument.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: (element: number) => boolean): boolean {
-        return this.every((element: number, index: number, array: Uint8ClampedArray): boolean => predicate(element))
-    }
-
-    /**
-     * creates a new Uint8ClampedArray from current Uint8ClampedArray based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Uint8ClampedArray with elements from current Uint8ClampedArray that satisfy condition fn
-     */
-    public filter(fn: (val: number) => boolean): Uint8ClampedArray {
-        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
-            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val) }
-        return this.filter(newF)
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns number | undefined
-     */
-    public find(predicate: () => boolean): number | undefined {
-        return this.find((value: number, index: number, obj: Uint8ClampedArray): boolean => predicate())
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns number | undefined
-     */
-    public find(predicate: (value: number) => boolean): number | undefined {
-        return this.find((value: number, index: number, obj: Uint8ClampedArray): boolean => predicate(value))
-    }
-
-    /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns number
-     */
-    public findIndex(predicate: (value: number) => boolean): number {
-        return this.findIndex((value: number, index: number, obj: Uint8ClampedArray): boolean => predicate(value)) as number
-    }
-
-    /**
-     * Finds the last element in the Uint8ClampedArray that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
-            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val) }
-        return this.findLast(newF)
-    }
-
-    /**
-     * Finds an index of the last element in the Uint8ClampedArray that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
-            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val) }
-        return this.findLastIndex(newF) as number
-    }
-
-    /**
-     * Performs the specified action for each element in Uint8ClampedArray
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: (val: number) => void): void {
-        this.forEach((value: number, index: number, array: Uint8ClampedArray): void => callbackfn(value))
-    }
-
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts one argument.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: (element: number) => boolean): boolean {
-        return this.some((element: number, index: number, array: Uint8ClampedArray): boolean => predicate(element))
-    }
-
-    /**
      * Determines whether the specified callback function returns true for any element of an array.
      *
      * @param predicate A function that accepts three arguments.
@@ -1743,34 +1592,6 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         return false
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts two arguments.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: (element: number, index: number) => boolean): boolean {
-        return this.some((element: number, index: number, array: Uint8ClampedArray): boolean => predicate(element, index))
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts no arguments.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: () => boolean): boolean {
-        return this.some((element: number, index: number, array: Uint8ClampedArray): boolean => predicate())
     }
 
     /**
@@ -1801,94 +1622,6 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
      * The return value of the callback function is the accumulated result,
      * and is provided as an argument in the next call to the callback function.
      *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
-                        callbackfn(prevVal, currVal, currIndex),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
-                        callbackfn(prevVal, currVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = number>(
-                callbackfn: (previousValue: U) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
-                        callbackfn(prevVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = number>(
-                callbackfn: () => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
-                        callbackfn(),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
      * @param callbackfn A function that accepts four arguments.
      * The reduce method calls the callbackfn function one time for each element in the array.
      * The first call to the callbackfn function provides array first element value as an argument
@@ -1906,78 +1639,6 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
             accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
         }
         return accumulatedValue
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
-        return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
-                        callbackfn(prevVal, currVal, currIndex))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: number, currentValue: number) => number): number {
-        return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
-                        callbackfn(prevVal, currVal))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: number) => number): number {
-        return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
-                        callbackfn(prevVal))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: () => number): number {
-        return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
-                        callbackfn())
     }
 
     /**
@@ -2008,94 +1669,6 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
      * The return value of the callback function is the accumulated result,
      * and is provided as an argument in the next call to the callback function.
      *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = number>(
-                callbackfn: (previuosValue: U, currentValue: number, currentIndex: number) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
-                        callbackfn(prevVal, currVal, currIndex),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = number>(
-                callbackfn: (previuosValue: U, currentValue: number) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
-                        callbackfn(prevVal, currVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = number>(
-                callbackfn: (previuosValue: U) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
-                        callbackfn(prevVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = number>(
-                callbackfn: () => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
-                        callbackfn(),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
      * @param callbackfn A function that accepts four arguments.
      * The reduceRight method calls the callbackfn function one time for each element in the array.
      * The first call to the callbackfn function provides array last element value as an argument
@@ -2116,78 +1689,6 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
-        return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint8ClampedArray) =>
-                        callbackfn(prevValue, currValue, currIndex))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: number, currentValue: number) => number): number {
-        return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint8ClampedArray) =>
-                        callbackfn(prevValue, currValue))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: number) => number): number {
-        return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint8ClampedArray) =>
-                        callbackfn(prevValue))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: () => number): number {
-        return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint8ClampedArray) =>
-                        callbackfn())
-    }
-
-    /**
      * Creates a new Uint8ClampedArray using fn(arr[i]) over all elements of current Uint8ClampedArray.
      *
      * @param fn a function to apply for each element of current Uint8ClampedArray
@@ -2202,45 +1703,6 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
             res.setUnsafeClamp(i, fnRes as int)
         }
         return res
-    }
-
-    /**
-     * Creates a new Uint8ClampedArray using fn(arr[i], i) over all elements of current Uint8ClampedArray
-     *
-     * @param fn a function to apply for each element of current Uint8ClampedArray
-     *
-     * @returns a new Uint8ClampedArray where for each element from current Uint8ClampedArray fn was applied
-     */
-    public map(fn: (val: number, index: number) => number): Uint8ClampedArray {
-        let newF: (val: number, index: number, array: Uint8ClampedArray) => number =
-            (val: number, index: number, array: Uint8ClampedArray): number => { return fn(val, index) }
-        return this.map(newF)
-    }
-
-    /**
-     * Creates a new Uint8ClampedArray using fn(arr[i]) over all elements of current Uint8ClampedArray
-     *
-     * @param fn a function to apply for each element of current Uint8ClampedArray
-     *
-     * @returns a new Uint8ClampedArray where for each element from current Uint8ClampedArray fn was applied
-     */
-    public map(fn: (val: number) => number): Uint8ClampedArray {
-        let newF: (val: number, index: number, array: Uint8ClampedArray) => number =
-            (val: number, index: number, array: Uint8ClampedArray): number => { return fn(val) }
-        return this.map(newF)
-    }
-
-    /**
-     * Creates a new Uint8ClampedArray using fn() over all elements of current Uint8ClampedArray
-     *
-     * @param fn a function to apply for each element of current Uint8ClampedArray
-     *
-     * @returns a new Uint8ClampedArray where for each element from current Uint8ClampedArray fn was applied
-     */
-    public map(fn: () => number): Uint8ClampedArray {
-        let newF: (val: number, index: number, array: Uint8ClampedArray) => number =
-            (val: number, index: number, array: Uint8ClampedArray): number => { return fn() }
-        return this.map(newF)
     }
 
     /**
@@ -2260,34 +1722,6 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         return true
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts two arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: (element: number, index: number) => boolean): boolean {
-        return this.every((element: number, index: number, array: Uint8ClampedArray): boolean => predicate(element, index))
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts no arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: () => boolean): boolean {
-        return this.every((element: number, index: number, array: Uint8ClampedArray): boolean => predicate())
     }
 
     /**
@@ -2317,19 +1751,6 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * creates a new Uint8ClampedArray from current Uint8ClampedArray based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Uint8ClampedArray with elements from current Uint8ClampedArray that satisfy condition fn
-     */
-    public filter(fn: (val: number, index: number) => boolean): Uint8ClampedArray {
-        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
-            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val, index) }
-        return this.filter(newF)
-    }
-
-    /**
      * Returns the value of the first element in the array where predicate is true, and undefined
      * otherwise
      *
@@ -2347,20 +1768,6 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         return undefined
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns number | undefined
-     */
-    public find(predicate: (value: number, index: number) => boolean): number | undefined {
-        return this.find((value: number, index: number, obj: Uint8ClampedArray): boolean => predicate(value, index))
     }
 
     /**
@@ -2383,34 +1790,6 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns number
-     */
-    public findIndex(predicate: (value: number, index: number) => boolean): number {
-        return this.findIndex((value: number, index: number, obj: Uint8ClampedArray): boolean => predicate(value, index))
-    }
-
-    /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns number
-     */
-    public findIndex(predicate: () => boolean): number {
-        return this.findIndex((value: number, index: number, obj: Uint8ClampedArray): boolean => predicate())
-    }
-
-    /**
      * Finds the last element in the Uint8ClampedArray that satisfies the condition
      *
      * @param fn condition
@@ -2425,19 +1804,6 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         throw new Error("Uint8ClampedArray.findLast: not implemented if an element was not found")
-    }
-
-    /**
-     * Finds the last element in the Uint8ClampedArray that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
-            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val, index) }
-        return this.findLast(newF)
     }
 
     /**
@@ -2457,19 +1823,6 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Finds an index of the last element in the Uint8ClampedArray that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
-            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val, index) }
-        return this.findLastIndex(newF) as number
-    }
-
-    /**
      * Performs the specified action for each element in Uint8ClampedArray
      *
      * @param callbackfn  A function that accepts up to three arguments. forEach calls the
@@ -2481,30 +1834,6 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
         for (let i = 0; i < this.lengthInt; i++) {
             callbackfn(this.getUnsafe(i) as number, i as number, this)
         }
-    }
-
-    /**
-     * Performs the specified action for each element in Uint8ClampedArray
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: (value: number, index: number) => void): void {
-        this.forEach((value: number, index: number, array: Uint8ClampedArray): void => callbackfn(value, index))
-    }
-
-    /**
-     * Performs the specified action for each element in Uint8ClampedArray
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: () => void): void {
-        this.forEach((value: number, index: number, array: Uint8ClampedArray): void => callbackfn())
     }
 
     /**
@@ -4000,35 +3329,6 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Sorts in-place
-     *
-     * @param compareFn comparator —  used to determine the order of the elements.
-     * compareFn returns a negative value if first argument is less than second argument,
-     * zero if they're equal and a positive value otherwise.
-     *
-     * @returns sorted Uint8Array
-     */
-    public sort(compareFn: (a: number) => number): this {
-        let cmp = (a: number, b: number) => { return compareFn(a)}
-        this.sort(cmp)
-        return this
-    }
-
-    /**
-     * Sorts in-place
-     *
-     * @param fn compareFn —  used to determine the order of the elements.
-     * compareFn returns a negative value if first argument is less than second argument,
-     * zero if they're equal and a positive value otherwise.
-     *
-     * @returns sorted Uint8Array
-     */
-    public sort(compareFn: () => number): this {
-        let cmp = (a: number, b: number) => { return compareFn()}
-        this.sort(cmp)
-        return this
-    }
-    /**
      * Creates a Uint8Array with the same underlying Buffer
      *
      * @param begin start index, inclusive
@@ -4230,128 +3530,6 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     /// === with element lambda functions ===
 
     /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts one argument.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: (element: number) => boolean): boolean {
-        return this.every((element: number, index: number, array: Uint8Array): boolean => predicate(element))
-    }
-
-    /**
-     * creates a new Uint8Array from current Uint8Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Uint8Array with elements from current Uint8Array that satisfy condition fn
-     */
-    public filter(fn: (val: number) => boolean): Uint8Array {
-        let newF: (val: number, index: number, array: Uint8Array) => boolean =
-            (val: number, index: number, array: Uint8Array): boolean => { return fn(val) }
-        return this.filter(newF)
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns number | undefined
-     */
-    public find(predicate: () => boolean): number | undefined {
-        return this.find((value: number, index: number, obj: Uint8Array): boolean => predicate())
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns number | undefined
-     */
-    public find(predicate: (value: number) => boolean): number | undefined {
-        return this.find((value: number, index: number, obj: Uint8Array): boolean => predicate(value))
-    }
-
-    /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns number
-     */
-    public findIndex(predicate: (value: number) => boolean): number {
-        return this.findIndex((value: number, index: number, obj: Uint8Array): boolean => predicate(value)) as number
-    }
-
-    /**
-     * Finds the last element in the Uint8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint8Array) => boolean =
-            (val: number, index: number, array: Uint8Array): boolean => { return fn(val) }
-        return this.findLast(newF)
-    }
-
-    /**
-     * Finds an index of the last element in the Uint8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint8Array) => boolean =
-            (val: number, index: number, array: Uint8Array): boolean => { return fn(val) }
-        return this.findLastIndex(newF) as number
-    }
-
-    /**
-     * Performs the specified action for each element in Uint8Array
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: (val: number) => void): void {
-        this.forEach((value: number, index: number, array: Uint8Array): void => callbackfn(value))
-    }
-
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts one argument.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: (element: number) => boolean): boolean {
-        return this.some((element: number, index: number, array: Uint8Array): boolean => predicate(element))
-    }
-
-    /**
      * Determines whether the specified callback function returns true for any element of an array.
      *
      * @param predicate A function that accepts three arguments.
@@ -4368,34 +3546,6 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         return false
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts two arguments.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: (element: number, index: number) => boolean): boolean {
-        return this.some((element: number, index: number, array: Uint8Array): boolean => predicate(element, index))
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts no arguments.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: () => boolean): boolean {
-        return this.some((element: number, index: number, array: Uint8Array): boolean => predicate())
     }
 
     /**
@@ -4426,94 +3576,6 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * The return value of the callback function is the accumulated result,
      * and is provided as an argument in the next call to the callback function.
      *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) =>
-                        callbackfn(prevVal, currVal, currIndex),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) =>
-                        callbackfn(prevVal, currVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = number>(
-                callbackfn: (previousValue: U) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) =>
-                        callbackfn(prevVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = number>(
-                callbackfn: () => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) =>
-                        callbackfn(),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
      * @param callbackfn A function that accepts four arguments.
      * The reduce method calls the callbackfn function one time for each element in the array.
      * The first call to the callbackfn function provides array first element value as an argument
@@ -4531,78 +3593,6 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
         }
         return accumulatedValue
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
-        return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint8Array) =>
-                        callbackfn(prevVal, currVal, currIndex))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: number, currentValue: number) => number): number {
-        return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint8Array) =>
-                        callbackfn(prevVal, currVal))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: number) => number): number {
-        return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint8Array) =>
-                        callbackfn(prevVal))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: () => number): number {
-        return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint8Array) =>
-                        callbackfn())
     }
 
     /**
@@ -4633,94 +3623,6 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * The return value of the callback function is the accumulated result,
      * and is provided as an argument in the next call to the callback function.
      *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = number>(
-                callbackfn: (previuosValue: U, currentValue: number, currentIndex: number) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) =>
-                        callbackfn(prevVal, currVal, currIndex),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = number>(
-                callbackfn: (previuosValue: U, currentValue: number) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) =>
-                        callbackfn(prevVal, currVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = number>(
-                callbackfn: (previuosValue: U) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) =>
-                        callbackfn(prevVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = number>(
-                callbackfn: () => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) =>
-                        callbackfn(),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
      * @param callbackfn A function that accepts four arguments.
      * The reduceRight method calls the callbackfn function one time for each element in the array.
      * The first call to the callbackfn function provides array last element value as an argument
@@ -4741,78 +3643,6 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
-        return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint8Array) =>
-                        callbackfn(prevValue, currValue, currIndex))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: number, currentValue: number) => number): number {
-        return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint8Array) =>
-                        callbackfn(prevValue, currValue))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: number) => number): number {
-        return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint8Array) =>
-                        callbackfn(prevValue))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: () => number): number {
-        return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint8Array) =>
-                        callbackfn())
-    }
-
-    /**
      * Creates a new Uint8Array using fn(arr[i]) over all elements of current Uint8Array.
      *
      * @param fn a function to apply for each element of current Uint8Array
@@ -4827,45 +3657,6 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             res.setUnsafeClamp(i, fnRes as int)
         }
         return res
-    }
-
-    /**
-     * Creates a new Uint8Array using fn(arr[i], i) over all elements of current Uint8Array
-     *
-     * @param fn a function to apply for each element of current Uint8Array
-     *
-     * @returns a new Uint8Array where for each element from current Uint8Array fn was applied
-     */
-    public map(fn: (val: number, index: number) => number): Uint8Array {
-        let newF: (val: number, index: number, array: Uint8Array) => number =
-            (val: number, index: number, array: Uint8Array): number => { return fn(val, index) }
-        return this.map(newF)
-    }
-
-    /**
-     * Creates a new Uint8Array using fn(arr[i]) over all elements of current Uint8Array
-     *
-     * @param fn a function to apply for each element of current Uint8Array
-     *
-     * @returns a new Uint8Array where for each element from current Uint8Array fn was applied
-     */
-    public map(fn: (val: number) => number): Uint8Array {
-        let newF: (val: number, index: number, array: Uint8Array) => number =
-            (val: number, index: number, array: Uint8Array): number => { return fn(val) }
-        return this.map(newF)
-    }
-
-    /**
-     * Creates a new Uint8Array using fn() over all elements of current Uint8Array
-     *
-     * @param fn a function to apply for each element of current Uint8Array
-     *
-     * @returns a new Uint8Array where for each element from current Uint8Array fn was applied
-     */
-    public map(fn: () => number): Uint8Array {
-        let newF: (val: number, index: number, array: Uint8Array) => number =
-            (val: number, index: number, array: Uint8Array): number => { return fn() }
-        return this.map(newF)
     }
 
     /**
@@ -4885,34 +3676,6 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         return true
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts two arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: (element: number, index: number) => boolean): boolean {
-        return this.every((element: number, index: number, array: Uint8Array): boolean => predicate(element, index))
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts no arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: () => boolean): boolean {
-        return this.every((element: number, index: number, array: Uint8Array): boolean => predicate())
     }
 
     /**
@@ -4942,19 +3705,6 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * creates a new Uint8Array from current Uint8Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Uint8Array with elements from current Uint8Array that satisfy condition fn
-     */
-    public filter(fn: (val: number, index: number) => boolean): Uint8Array {
-        let newF: (val: number, index: number, array: Uint8Array) => boolean =
-            (val: number, index: number, array: Uint8Array): boolean => { return fn(val, index) }
-        return this.filter(newF)
-    }
-
-    /**
      * Returns the value of the first element in the array where predicate is true, and undefined
      * otherwise
      *
@@ -4972,20 +3722,6 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         return undefined
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns number | undefined
-     */
-    public find(predicate: (value: number, index: number) => boolean): number | undefined {
-        return this.find((value: number, index: number, obj: Uint8Array): boolean => predicate(value, index))
     }
 
     /**
@@ -5008,34 +3744,6 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns number
-     */
-    public findIndex(predicate: (value: number, index: number) => boolean): number {
-        return this.findIndex((value: number, index: number, obj: Uint8Array): boolean => predicate(value, index))
-    }
-
-    /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns number
-     */
-    public findIndex(predicate: () => boolean): number {
-        return this.findIndex((value: number, index: number, obj: Uint8Array): boolean => predicate())
-    }
-
-    /**
      * Finds the last element in the Uint8Array that satisfies the condition
      *
      * @param fn condition
@@ -5050,19 +3758,6 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         throw new Error("Uint8Array.findLast: not implemented if an element was not found")
-    }
-
-    /**
-     * Finds the last element in the Uint8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint8Array) => boolean =
-            (val: number, index: number, array: Uint8Array): boolean => { return fn(val, index) }
-        return this.findLast(newF)
     }
 
     /**
@@ -5082,19 +3777,6 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Finds an index of the last element in the Uint8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint8Array) => boolean =
-            (val: number, index: number, array: Uint8Array): boolean => { return fn(val, index) }
-        return this.findLastIndex(newF) as number
-    }
-
-    /**
      * Performs the specified action for each element in Uint8Array
      *
      * @param callbackfn  A function that accepts up to three arguments. forEach calls the
@@ -5106,30 +3788,6 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         for (let i = 0; i < this.lengthInt; i++) {
             callbackfn(this.getUnsafe(i) as number, i as number, this)
         }
-    }
-
-    /**
-     * Performs the specified action for each element in Uint8Array
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: (value: number, index: number) => void): void {
-        this.forEach((value: number, index: number, array: Uint8Array): void => callbackfn(value, index))
-    }
-
-    /**
-     * Performs the specified action for each element in Uint8Array
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: () => void): void {
-        this.forEach((value: number, index: number, array: Uint8Array): void => callbackfn())
     }
 
     /**
@@ -6611,35 +5269,6 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Sorts in-place
-     *
-     * @param compareFn comparator —  used to determine the order of the elements.
-     * compareFn returns a negative value if first argument is less than second argument,
-     * zero if they're equal and a positive value otherwise.
-     *
-     * @returns sorted Uint16Array
-     */
-    public sort(compareFn: (a: number) => number): this {
-        let cmp = (a: number, b: number) => { return compareFn(a)}
-        this.sort(cmp)
-        return this
-    }
-
-    /**
-     * Sorts in-place
-     *
-     * @param fn compareFn —  used to determine the order of the elements.
-     * compareFn returns a negative value if first argument is less than second argument,
-     * zero if they're equal and a positive value otherwise.
-     *
-     * @returns sorted Uint16Array
-     */
-    public sort(compareFn: () => number): this {
-        let cmp = (a: number, b: number) => { return compareFn()}
-        this.sort(cmp)
-        return this
-    }
-    /**
      * Creates a Uint16Array with the same underlying Buffer
      *
      * @param begin start index, inclusive
@@ -6841,128 +5470,6 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     /// === with element lambda functions ===
 
     /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts one argument.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: (element: number) => boolean): boolean {
-        return this.every((element: number, index: number, array: Uint16Array): boolean => predicate(element))
-    }
-
-    /**
-     * creates a new Uint16Array from current Uint16Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Uint16Array with elements from current Uint16Array that satisfy condition fn
-     */
-    public filter(fn: (val: number) => boolean): Uint16Array {
-        let newF: (val: number, index: number, array: Uint16Array) => boolean =
-            (val: number, index: number, array: Uint16Array): boolean => { return fn(val) }
-        return this.filter(newF)
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns number | undefined
-     */
-    public find(predicate: () => boolean): number | undefined {
-        return this.find((value: number, index: number, obj: Uint16Array): boolean => predicate())
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns number | undefined
-     */
-    public find(predicate: (value: number) => boolean): number | undefined {
-        return this.find((value: number, index: number, obj: Uint16Array): boolean => predicate(value))
-    }
-
-    /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns number
-     */
-    public findIndex(predicate: (value: number) => boolean): number {
-        return this.findIndex((value: number, index: number, obj: Uint16Array): boolean => predicate(value)) as number
-    }
-
-    /**
-     * Finds the last element in the Uint16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint16Array) => boolean =
-            (val: number, index: number, array: Uint16Array): boolean => { return fn(val) }
-        return this.findLast(newF)
-    }
-
-    /**
-     * Finds an index of the last element in the Uint16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint16Array) => boolean =
-            (val: number, index: number, array: Uint16Array): boolean => { return fn(val) }
-        return this.findLastIndex(newF) as number
-    }
-
-    /**
-     * Performs the specified action for each element in Uint16Array
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: (val: number) => void): void {
-        this.forEach((value: number, index: number, array: Uint16Array): void => callbackfn(value))
-    }
-
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts one argument.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: (element: number) => boolean): boolean {
-        return this.some((element: number, index: number, array: Uint16Array): boolean => predicate(element))
-    }
-
-    /**
      * Determines whether the specified callback function returns true for any element of an array.
      *
      * @param predicate A function that accepts three arguments.
@@ -6979,34 +5486,6 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         return false
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts two arguments.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: (element: number, index: number) => boolean): boolean {
-        return this.some((element: number, index: number, array: Uint16Array): boolean => predicate(element, index))
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts no arguments.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: () => boolean): boolean {
-        return this.some((element: number, index: number, array: Uint16Array): boolean => predicate())
     }
 
     /**
@@ -7037,94 +5516,6 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * The return value of the callback function is the accumulated result,
      * and is provided as an argument in the next call to the callback function.
      *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) =>
-                        callbackfn(prevVal, currVal, currIndex),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) =>
-                        callbackfn(prevVal, currVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = number>(
-                callbackfn: (previousValue: U) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) =>
-                        callbackfn(prevVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = number>(
-                callbackfn: () => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) =>
-                        callbackfn(),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
      * @param callbackfn A function that accepts four arguments.
      * The reduce method calls the callbackfn function one time for each element in the array.
      * The first call to the callbackfn function provides array first element value as an argument
@@ -7142,78 +5533,6 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
         }
         return accumulatedValue
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
-        return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint16Array) =>
-                        callbackfn(prevVal, currVal, currIndex))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: number, currentValue: number) => number): number {
-        return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint16Array) =>
-                        callbackfn(prevVal, currVal))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: number) => number): number {
-        return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint16Array) =>
-                        callbackfn(prevVal))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: () => number): number {
-        return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint16Array) =>
-                        callbackfn())
     }
 
     /**
@@ -7244,94 +5563,6 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * The return value of the callback function is the accumulated result,
      * and is provided as an argument in the next call to the callback function.
      *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = number>(
-                callbackfn: (previuosValue: U, currentValue: number, currentIndex: number) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) =>
-                        callbackfn(prevVal, currVal, currIndex),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = number>(
-                callbackfn: (previuosValue: U, currentValue: number) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) =>
-                        callbackfn(prevVal, currVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = number>(
-                callbackfn: (previuosValue: U) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) =>
-                        callbackfn(prevVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = number>(
-                callbackfn: () => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) =>
-                        callbackfn(),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
      * @param callbackfn A function that accepts four arguments.
      * The reduceRight method calls the callbackfn function one time for each element in the array.
      * The first call to the callbackfn function provides array last element value as an argument
@@ -7352,78 +5583,6 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
-        return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint16Array) =>
-                        callbackfn(prevValue, currValue, currIndex))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: number, currentValue: number) => number): number {
-        return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint16Array) =>
-                        callbackfn(prevValue, currValue))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: number) => number): number {
-        return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint16Array) =>
-                        callbackfn(prevValue))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: () => number): number {
-        return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint16Array) =>
-                        callbackfn())
-    }
-
-    /**
      * Creates a new Uint16Array using fn(arr[i]) over all elements of current Uint16Array.
      *
      * @param fn a function to apply for each element of current Uint16Array
@@ -7438,45 +5597,6 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             res.setUnsafeClamp(i, fnRes as int)
         }
         return res
-    }
-
-    /**
-     * Creates a new Uint16Array using fn(arr[i], i) over all elements of current Uint16Array
-     *
-     * @param fn a function to apply for each element of current Uint16Array
-     *
-     * @returns a new Uint16Array where for each element from current Uint16Array fn was applied
-     */
-    public map(fn: (val: number, index: number) => number): Uint16Array {
-        let newF: (val: number, index: number, array: Uint16Array) => number =
-            (val: number, index: number, array: Uint16Array): number => { return fn(val, index) }
-        return this.map(newF)
-    }
-
-    /**
-     * Creates a new Uint16Array using fn(arr[i]) over all elements of current Uint16Array
-     *
-     * @param fn a function to apply for each element of current Uint16Array
-     *
-     * @returns a new Uint16Array where for each element from current Uint16Array fn was applied
-     */
-    public map(fn: (val: number) => number): Uint16Array {
-        let newF: (val: number, index: number, array: Uint16Array) => number =
-            (val: number, index: number, array: Uint16Array): number => { return fn(val) }
-        return this.map(newF)
-    }
-
-    /**
-     * Creates a new Uint16Array using fn() over all elements of current Uint16Array
-     *
-     * @param fn a function to apply for each element of current Uint16Array
-     *
-     * @returns a new Uint16Array where for each element from current Uint16Array fn was applied
-     */
-    public map(fn: () => number): Uint16Array {
-        let newF: (val: number, index: number, array: Uint16Array) => number =
-            (val: number, index: number, array: Uint16Array): number => { return fn() }
-        return this.map(newF)
     }
 
     /**
@@ -7496,34 +5616,6 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         return true
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts two arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: (element: number, index: number) => boolean): boolean {
-        return this.every((element: number, index: number, array: Uint16Array): boolean => predicate(element, index))
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts no arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: () => boolean): boolean {
-        return this.every((element: number, index: number, array: Uint16Array): boolean => predicate())
     }
 
     /**
@@ -7553,19 +5645,6 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * creates a new Uint16Array from current Uint16Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Uint16Array with elements from current Uint16Array that satisfy condition fn
-     */
-    public filter(fn: (val: number, index: number) => boolean): Uint16Array {
-        let newF: (val: number, index: number, array: Uint16Array) => boolean =
-            (val: number, index: number, array: Uint16Array): boolean => { return fn(val, index) }
-        return this.filter(newF)
-    }
-
-    /**
      * Returns the value of the first element in the array where predicate is true, and undefined
      * otherwise
      *
@@ -7583,20 +5662,6 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         return undefined
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns number | undefined
-     */
-    public find(predicate: (value: number, index: number) => boolean): number | undefined {
-        return this.find((value: number, index: number, obj: Uint16Array): boolean => predicate(value, index))
     }
 
     /**
@@ -7619,34 +5684,6 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns number
-     */
-    public findIndex(predicate: (value: number, index: number) => boolean): number {
-        return this.findIndex((value: number, index: number, obj: Uint16Array): boolean => predicate(value, index))
-    }
-
-    /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns number
-     */
-    public findIndex(predicate: () => boolean): number {
-        return this.findIndex((value: number, index: number, obj: Uint16Array): boolean => predicate())
-    }
-
-    /**
      * Finds the last element in the Uint16Array that satisfies the condition
      *
      * @param fn condition
@@ -7661,19 +5698,6 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         throw new Error("Uint16Array.findLast: not implemented if an element was not found")
-    }
-
-    /**
-     * Finds the last element in the Uint16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint16Array) => boolean =
-            (val: number, index: number, array: Uint16Array): boolean => { return fn(val, index) }
-        return this.findLast(newF)
     }
 
     /**
@@ -7693,19 +5717,6 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Finds an index of the last element in the Uint16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint16Array) => boolean =
-            (val: number, index: number, array: Uint16Array): boolean => { return fn(val, index) }
-        return this.findLastIndex(newF) as number
-    }
-
-    /**
      * Performs the specified action for each element in Uint16Array
      *
      * @param callbackfn  A function that accepts up to three arguments. forEach calls the
@@ -7717,30 +5728,6 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         for (let i = 0; i < this.lengthInt; i++) {
             callbackfn(this.getUnsafe(i) as number, i as number, this)
         }
-    }
-
-    /**
-     * Performs the specified action for each element in Uint16Array
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: (value: number, index: number) => void): void {
-        this.forEach((value: number, index: number, array: Uint16Array): void => callbackfn(value, index))
-    }
-
-    /**
-     * Performs the specified action for each element in Uint16Array
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: () => void): void {
-        this.forEach((value: number, index: number, array: Uint16Array): void => callbackfn())
     }
 
     /**
@@ -9264,35 +7251,6 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Sorts in-place
-     *
-     * @param compareFn comparator —  used to determine the order of the elements.
-     * compareFn returns a negative value if first argument is less than second argument,
-     * zero if they're equal and a positive value otherwise.
-     *
-     * @returns sorted Uint32Array
-     */
-    public sort(compareFn: (a: number) => number): this {
-        let cmp = (a: number, b: number) => { return compareFn(a)}
-        this.sort(cmp)
-        return this
-    }
-
-    /**
-     * Sorts in-place
-     *
-     * @param fn compareFn —  used to determine the order of the elements.
-     * compareFn returns a negative value if first argument is less than second argument,
-     * zero if they're equal and a positive value otherwise.
-     *
-     * @returns sorted Uint32Array
-     */
-    public sort(compareFn: () => number): this {
-        let cmp = (a: number, b: number) => { return compareFn()}
-        this.sort(cmp)
-        return this
-    }
-    /**
      * Creates a Uint32Array with the same underlying Buffer
      *
      * @param begin start index, inclusive
@@ -9494,128 +7452,6 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     /// === with element lambda functions ===
 
     /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts one argument.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: (element: number) => boolean): boolean {
-        return this.every((element: number, index: number, array: Uint32Array): boolean => predicate(element))
-    }
-
-    /**
-     * creates a new Uint32Array from current Uint32Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Uint32Array with elements from current Uint32Array that satisfy condition fn
-     */
-    public filter(fn: (val: number) => boolean): Uint32Array {
-        let newF: (val: number, index: number, array: Uint32Array) => boolean =
-            (val: number, index: number, array: Uint32Array): boolean => { return fn(val) }
-        return this.filter(newF)
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns number | undefined
-     */
-    public find(predicate: () => boolean): number | undefined {
-        return this.find((value: number, index: number, obj: Uint32Array): boolean => predicate())
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns number | undefined
-     */
-    public find(predicate: (value: number) => boolean): number | undefined {
-        return this.find((value: number, index: number, obj: Uint32Array): boolean => predicate(value))
-    }
-
-    /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns number
-     */
-    public findIndex(predicate: (value: number) => boolean): number {
-        return this.findIndex((value: number, index: number, obj: Uint32Array): boolean => predicate(value)) as number
-    }
-
-    /**
-     * Finds the last element in the Uint32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint32Array) => boolean =
-            (val: number, index: number, array: Uint32Array): boolean => { return fn(val) }
-        return this.findLast(newF)
-    }
-
-    /**
-     * Finds an index of the last element in the Uint32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint32Array) => boolean =
-            (val: number, index: number, array: Uint32Array): boolean => { return fn(val) }
-        return this.findLastIndex(newF) as number
-    }
-
-    /**
-     * Performs the specified action for each element in Uint32Array
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: (val: number) => void): void {
-        this.forEach((value: number, index: number, array: Uint32Array): void => callbackfn(value))
-    }
-
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts one argument.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: (element: number) => boolean): boolean {
-        return this.some((element: number, index: number, array: Uint32Array): boolean => predicate(element))
-    }
-
-    /**
      * Determines whether the specified callback function returns true for any element of an array.
      *
      * @param predicate A function that accepts three arguments.
@@ -9632,34 +7468,6 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         return false
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts two arguments.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: (element: number, index: number) => boolean): boolean {
-        return this.some((element: number, index: number, array: Uint32Array): boolean => predicate(element, index))
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts no arguments.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: () => boolean): boolean {
-        return this.some((element: number, index: number, array: Uint32Array): boolean => predicate())
     }
 
     /**
@@ -9690,94 +7498,6 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * The return value of the callback function is the accumulated result,
      * and is provided as an argument in the next call to the callback function.
      *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) =>
-                        callbackfn(prevVal, currVal, currIndex),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) =>
-                        callbackfn(prevVal, currVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = number>(
-                callbackfn: (previousValue: U) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) =>
-                        callbackfn(prevVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = number>(
-                callbackfn: () => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) =>
-                        callbackfn(),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
      * @param callbackfn A function that accepts four arguments.
      * The reduce method calls the callbackfn function one time for each element in the array.
      * The first call to the callbackfn function provides array first element value as an argument
@@ -9795,78 +7515,6 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
         }
         return accumulatedValue
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
-        return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint32Array) =>
-                        callbackfn(prevVal, currVal, currIndex))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: number, currentValue: number) => number): number {
-        return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint32Array) =>
-                        callbackfn(prevVal, currVal))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: number) => number): number {
-        return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint32Array) =>
-                        callbackfn(prevVal))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: () => number): number {
-        return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint32Array) =>
-                        callbackfn())
     }
 
     /**
@@ -9897,94 +7545,6 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * The return value of the callback function is the accumulated result,
      * and is provided as an argument in the next call to the callback function.
      *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = number>(
-                callbackfn: (previuosValue: U, currentValue: number, currentIndex: number) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) =>
-                        callbackfn(prevVal, currVal, currIndex),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = number>(
-                callbackfn: (previuosValue: U, currentValue: number) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) =>
-                        callbackfn(prevVal, currVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = number>(
-                callbackfn: (previuosValue: U) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) =>
-                        callbackfn(prevVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = number>(
-                callbackfn: () => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) =>
-                        callbackfn(),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
      * @param callbackfn A function that accepts four arguments.
      * The reduceRight method calls the callbackfn function one time for each element in the array.
      * The first call to the callbackfn function provides array last element value as an argument
@@ -10005,78 +7565,6 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
-        return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint32Array) =>
-                        callbackfn(prevValue, currValue, currIndex))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: number, currentValue: number) => number): number {
-        return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint32Array) =>
-                        callbackfn(prevValue, currValue))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: number) => number): number {
-        return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint32Array) =>
-                        callbackfn(prevValue))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: () => number): number {
-        return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint32Array) =>
-                        callbackfn())
-    }
-
-    /**
      * Creates a new Uint32Array using fn(arr[i]) over all elements of current Uint32Array.
      *
      * @param fn a function to apply for each element of current Uint32Array
@@ -10091,45 +7579,6 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             res.setUnsafeClamp(i, fnRes as long)
         }
         return res
-    }
-
-    /**
-     * Creates a new Uint32Array using fn(arr[i], i) over all elements of current Uint32Array
-     *
-     * @param fn a function to apply for each element of current Uint32Array
-     *
-     * @returns a new Uint32Array where for each element from current Uint32Array fn was applied
-     */
-    public map(fn: (val: number, index: number) => number): Uint32Array {
-        let newF: (val: number, index: number, array: Uint32Array) => number =
-            (val: number, index: number, array: Uint32Array): number => { return fn(val, index) }
-        return this.map(newF)
-    }
-
-    /**
-     * Creates a new Uint32Array using fn(arr[i]) over all elements of current Uint32Array
-     *
-     * @param fn a function to apply for each element of current Uint32Array
-     *
-     * @returns a new Uint32Array where for each element from current Uint32Array fn was applied
-     */
-    public map(fn: (val: number) => number): Uint32Array {
-        let newF: (val: number, index: number, array: Uint32Array) => number =
-            (val: number, index: number, array: Uint32Array): number => { return fn(val) }
-        return this.map(newF)
-    }
-
-    /**
-     * Creates a new Uint32Array using fn() over all elements of current Uint32Array
-     *
-     * @param fn a function to apply for each element of current Uint32Array
-     *
-     * @returns a new Uint32Array where for each element from current Uint32Array fn was applied
-     */
-    public map(fn: () => number): Uint32Array {
-        let newF: (val: number, index: number, array: Uint32Array) => number =
-            (val: number, index: number, array: Uint32Array): number => { return fn() }
-        return this.map(newF)
     }
 
     /**
@@ -10149,34 +7598,6 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         return true
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts two arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: (element: number, index: number) => boolean): boolean {
-        return this.every((element: number, index: number, array: Uint32Array): boolean => predicate(element, index))
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts no arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: () => boolean): boolean {
-        return this.every((element: number, index: number, array: Uint32Array): boolean => predicate())
     }
 
     /**
@@ -10206,19 +7627,6 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * creates a new Uint32Array from current Uint32Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Uint32Array with elements from current Uint32Array that satisfy condition fn
-     */
-    public filter(fn: (val: number, index: number) => boolean): Uint32Array {
-        let newF: (val: number, index: number, array: Uint32Array) => boolean =
-            (val: number, index: number, array: Uint32Array): boolean => { return fn(val, index) }
-        return this.filter(newF)
-    }
-
-    /**
      * Returns the value of the first element in the array where predicate is true, and undefined
      * otherwise
      *
@@ -10236,20 +7644,6 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         return undefined
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns number | undefined
-     */
-    public find(predicate: (value: number, index: number) => boolean): number | undefined {
-        return this.find((value: number, index: number, obj: Uint32Array): boolean => predicate(value, index))
     }
 
     /**
@@ -10272,34 +7666,6 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns number
-     */
-    public findIndex(predicate: (value: number, index: number) => boolean): number {
-        return this.findIndex((value: number, index: number, obj: Uint32Array): boolean => predicate(value, index))
-    }
-
-    /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns number
-     */
-    public findIndex(predicate: () => boolean): number {
-        return this.findIndex((value: number, index: number, obj: Uint32Array): boolean => predicate())
-    }
-
-    /**
      * Finds the last element in the Uint32Array that satisfies the condition
      *
      * @param fn condition
@@ -10314,19 +7680,6 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         throw new Error("Uint32Array.findLast: not implemented if an element was not found")
-    }
-
-    /**
-     * Finds the last element in the Uint32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint32Array) => boolean =
-            (val: number, index: number, array: Uint32Array): boolean => { return fn(val, index) }
-        return this.findLast(newF)
     }
 
     /**
@@ -10346,19 +7699,6 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Finds an index of the last element in the Uint32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint32Array) => boolean =
-            (val: number, index: number, array: Uint32Array): boolean => { return fn(val, index) }
-        return this.findLastIndex(newF) as number
-    }
-
-    /**
      * Performs the specified action for each element in Uint32Array
      *
      * @param callbackfn  A function that accepts up to three arguments. forEach calls the
@@ -10370,30 +7710,6 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         for (let i = 0; i < this.lengthInt; i++) {
             callbackfn(this.getUnsafe(i) as number, i as number, this)
         }
-    }
-
-    /**
-     * Performs the specified action for each element in Uint32Array
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: (value: number, index: number) => void): void {
-        this.forEach((value: number, index: number, array: Uint32Array): void => callbackfn(value, index))
-    }
-
-    /**
-     * Performs the specified action for each element in Uint32Array
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: () => void): void {
-        this.forEach((value: number, index: number, array: Uint32Array): void => callbackfn())
     }
 
     /**
@@ -11937,35 +9253,6 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
     }
 
     /**
-     * Sorts in-place
-     *
-     * @param compareFn comparator —  used to determine the order of the elements.
-     * compareFn returns a negative value if first argument is less than second argument,
-     * zero if they're equal and a positive value otherwise.
-     *
-     * @returns sorted BigUint64Array
-     */
-    public sort(compareFn: (a: BigInt) => number): this {
-        let cmp = (a: BigInt, b: BigInt) => { return compareFn(a)}
-        this.sort(cmp)
-        return this
-    }
-
-    /**
-     * Sorts in-place
-     *
-     * @param fn compareFn —  used to determine the order of the elements.
-     * compareFn returns a negative value if first argument is less than second argument,
-     * zero if they're equal and a positive value otherwise.
-     *
-     * @returns sorted BigUint64Array
-     */
-    public sort(compareFn: () => number): this {
-        let cmp = (a: BigInt, b: BigInt) => { return compareFn()}
-        this.sort(cmp)
-        return this
-    }
-    /**
      * Creates a BigUint64Array with the same underlying Buffer
      *
      * @param begin start index, inclusive
@@ -12167,128 +9454,6 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
     /// === with element lambda functions ===
 
     /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts one argument.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: (element: BigInt) => boolean): boolean {
-        return this.every((element: BigInt, index: number, array: BigUint64Array): boolean => predicate(element))
-    }
-
-    /**
-     * creates a new BigUint64Array from current BigUint64Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new BigUint64Array with elements from current BigUint64Array that satisfy condition fn
-     */
-    public filter(fn: (val: BigInt) => boolean): BigUint64Array {
-        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
-            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(val) }
-        return this.filter(newF)
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns BigInt | undefined
-     */
-    public find(predicate: () => boolean): BigInt | undefined {
-        return this.find((value: BigInt, index: number, obj: BigUint64Array): boolean => predicate())
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns BigInt | undefined
-     */
-    public find(predicate: (value: BigInt) => boolean): BigInt | undefined {
-        return this.find((value: BigInt, index: number, obj: BigUint64Array): boolean => predicate(value))
-    }
-
-    /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns number
-     */
-    public findIndex(predicate: (value: BigInt) => boolean): number {
-        return this.findIndex((value: BigInt, index: number, obj: BigUint64Array): boolean => predicate(value)) as number
-    }
-
-    /**
-     * Finds the last element in the BigUint64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: BigInt) => boolean): BigInt {
-        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
-            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(val) }
-        return this.findLast(newF)
-    }
-
-    /**
-     * Finds an index of the last element in the BigUint64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: BigInt) => boolean): number {
-        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
-            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(val) }
-        return this.findLastIndex(newF) as number
-    }
-
-    /**
-     * Performs the specified action for each element in BigUint64Array
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: (val: BigInt) => void): void {
-        this.forEach((value: BigInt, index: number, array: BigUint64Array): void => callbackfn(value))
-    }
-
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts one argument.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: (element: BigInt) => boolean): boolean {
-        return this.some((element: BigInt, index: number, array: BigUint64Array): boolean => predicate(element))
-    }
-
-    /**
      * Determines whether the specified callback function returns true for any element of an array.
      *
      * @param predicate A function that accepts three arguments.
@@ -12305,34 +9470,6 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
             }
         }
         return false
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts two arguments.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: (element: BigInt, index: number) => boolean): boolean {
-        return this.some((element: BigInt, index: number, array: BigUint64Array): boolean => predicate(element, index))
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts no arguments.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: () => boolean): boolean {
-        return this.some((element: BigInt, index: number, array: BigUint64Array): boolean => predicate())
     }
 
     /**
@@ -12363,94 +9500,6 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
      * The return value of the callback function is the accumulated result,
      * and is provided as an argument in the next call to the callback function.
      *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = BigInt>(
-                callbackfn: (previousValue: U, currentValue: BigInt, currentIndex: number) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
-                        callbackfn(prevVal, currVal, currIndex),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = BigInt>(
-                callbackfn: (previousValue: U, currentValue: BigInt) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
-                        callbackfn(prevVal, currVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = BigInt>(
-                callbackfn: (previousValue: U) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
-                        callbackfn(prevVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = BigInt>(
-                callbackfn: () => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
-                        callbackfn(),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
      * @param callbackfn A function that accepts four arguments.
      * The reduce method calls the callbackfn function one time for each element in the array.
      * The first call to the callbackfn function provides array first element value as an argument
@@ -12468,78 +9517,6 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
             accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i as number, this)
         }
         return accumulatedValue
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: BigInt, currentValue: BigInt, currentIndex: number) => BigInt): BigInt {
-        return this.reduce(
-                (prevVal: BigInt, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
-                        callbackfn(prevVal, currVal, currIndex))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: BigInt, currentValue: BigInt) => BigInt): BigInt {
-        return this.reduce(
-                (prevVal: BigInt, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
-                        callbackfn(prevVal, currVal))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: BigInt) => BigInt): BigInt {
-        return this.reduce(
-                (prevVal: BigInt, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
-                        callbackfn(prevVal))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: () => BigInt): BigInt {
-        return this.reduce(
-                (prevVal: BigInt, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
-                        callbackfn())
     }
 
     /**
@@ -12570,94 +9547,6 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
      * The return value of the callback function is the accumulated result,
      * and is provided as an argument in the next call to the callback function.
      *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = BigInt>(
-                callbackfn: (previuosValue: U, currentValue: BigInt, currentIndex: number) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
-                        callbackfn(prevVal, currVal, currIndex),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = BigInt>(
-                callbackfn: (previuosValue: U, currentValue: BigInt) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
-                        callbackfn(prevVal, currVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = BigInt>(
-                callbackfn: (previuosValue: U) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
-                        callbackfn(prevVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = BigInt>(
-                callbackfn: () => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
-                        callbackfn(),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
      * @param callbackfn A function that accepts four arguments.
      * The reduceRight method calls the callbackfn function one time for each element in the array.
      * The first call to the callbackfn function provides array last element value as an argument
@@ -12678,78 +9567,6 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
     }
 
     /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: BigInt, currentValue: BigInt, currentIndex: number) => BigInt): BigInt {
-        return this.reduceRight(
-                (prevValue: BigInt, currValue: BigInt, currIndex: number, array: BigUint64Array) =>
-                        callbackfn(prevValue, currValue, currIndex))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: BigInt, currentValue: BigInt) => BigInt): BigInt {
-        return this.reduceRight(
-                (prevValue: BigInt, currValue: BigInt, currIndex: number, array: BigUint64Array) =>
-                        callbackfn(prevValue, currValue))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: BigInt) => BigInt): BigInt {
-        return this.reduceRight(
-                (prevValue: BigInt, currValue: BigInt, currIndex: number, array: BigUint64Array) =>
-                        callbackfn(prevValue))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: () => BigInt): BigInt {
-        return this.reduceRight(
-                (prevValue: BigInt, currValue: BigInt, currIndex: number, array: BigUint64Array) =>
-                        callbackfn())
-    }
-
-    /**
      * Creates a new BigUint64Array using fn(arr[i]) over all elements of current BigUint64Array.
      *
      * @param fn a function to apply for each element of current BigUint64Array
@@ -12764,45 +9581,6 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
             res.setUnsafeClamp(i, fnRes.getULong())
         }
         return res
-    }
-
-    /**
-     * Creates a new BigUint64Array using fn(arr[i], i) over all elements of current BigUint64Array
-     *
-     * @param fn a function to apply for each element of current BigUint64Array
-     *
-     * @returns a new BigUint64Array where for each element from current BigUint64Array fn was applied
-     */
-    public map(fn: (val: BigInt, index: number) => BigInt): BigUint64Array {
-        let newF: (val: BigInt, index: number, array: BigUint64Array) => BigInt =
-            (val: BigInt, index: number, array: BigUint64Array): BigInt => { return fn(val, index) }
-        return this.map(newF)
-    }
-
-    /**
-     * Creates a new BigUint64Array using fn(arr[i]) over all elements of current BigUint64Array
-     *
-     * @param fn a function to apply for each element of current BigUint64Array
-     *
-     * @returns a new BigUint64Array where for each element from current BigUint64Array fn was applied
-     */
-    public map(fn: (val: BigInt) => BigInt): BigUint64Array {
-        let newF: (val: BigInt, index: number, array: BigUint64Array) => BigInt =
-            (val: BigInt, index: number, array: BigUint64Array): BigInt => { return fn(val) }
-        return this.map(newF)
-    }
-
-    /**
-     * Creates a new BigUint64Array using fn() over all elements of current BigUint64Array
-     *
-     * @param fn a function to apply for each element of current BigUint64Array
-     *
-     * @returns a new BigUint64Array where for each element from current BigUint64Array fn was applied
-     */
-    public map(fn: () => BigInt): BigUint64Array {
-        let newF: (val: BigInt, index: number, array: BigUint64Array) => BigInt =
-            (val: BigInt, index: number, array: BigUint64Array): BigInt => { return fn() }
-        return this.map(newF)
     }
 
     /**
@@ -12822,34 +9600,6 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
             }
         }
         return true
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts two arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: (element: BigInt, index: number) => boolean): boolean {
-        return this.every((element: BigInt, index: number, array: BigUint64Array): boolean => predicate(element, index))
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts no arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: () => boolean): boolean {
-        return this.every((element: BigInt, index: number, array: BigUint64Array): boolean => predicate())
     }
 
     /**
@@ -12879,19 +9629,6 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
     }
 
     /**
-     * creates a new BigUint64Array from current BigUint64Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new BigUint64Array with elements from current BigUint64Array that satisfy condition fn
-     */
-    public filter(fn: (val: BigInt, index: number) => boolean): BigUint64Array {
-        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
-            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(val, index) }
-        return this.filter(newF)
-    }
-
-    /**
      * Returns the value of the first element in the array where predicate is true, and undefined
      * otherwise
      *
@@ -12909,20 +9646,6 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
             }
         }
         return undefined
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns BigInt | undefined
-     */
-    public find(predicate: (value: BigInt, index: number) => boolean): BigInt | undefined {
-        return this.find((value: BigInt, index: number, obj: BigUint64Array): boolean => predicate(value, index))
     }
 
     /**
@@ -12945,34 +9668,6 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
     }
 
     /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns number
-     */
-    public findIndex(predicate: (value: BigInt, index: number) => boolean): number {
-        return this.findIndex((value: BigInt, index: number, obj: BigUint64Array): boolean => predicate(value, index))
-    }
-
-    /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns number
-     */
-    public findIndex(predicate: () => boolean): number {
-        return this.findIndex((value: BigInt, index: number, obj: BigUint64Array): boolean => predicate())
-    }
-
-    /**
      * Finds the last element in the BigUint64Array that satisfies the condition
      *
      * @param fn condition
@@ -12987,19 +9682,6 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
             }
         }
         throw new Error("BigUint64Array.findLast: not implemented if an element was not found")
-    }
-
-    /**
-     * Finds the last element in the BigUint64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: BigInt, index: number) => boolean): BigInt {
-        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
-            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(val, index) }
-        return this.findLast(newF)
     }
 
     /**
@@ -13019,19 +9701,6 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
     }
 
     /**
-     * Finds an index of the last element in the BigUint64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: BigInt, index: number) => boolean): number {
-        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
-            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(val, index) }
-        return this.findLastIndex(newF) as number
-    }
-
-    /**
      * Performs the specified action for each element in BigUint64Array
      *
      * @param callbackfn  A function that accepts up to three arguments. forEach calls the
@@ -13043,30 +9712,6 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
         for (let i = 0; i < this.lengthInt; i++) {
             callbackfn(new BigInt(this.getUnsafe(i)), i as number, this)
         }
-    }
-
-    /**
-     * Performs the specified action for each element in BigUint64Array
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: (value: BigInt, index: number) => void): void {
-        this.forEach((value: BigInt, index: number, array: BigUint64Array): void => callbackfn(value, index))
-    }
-
-    /**
-     * Performs the specified action for each element in BigUint64Array
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: () => void): void {
-        this.forEach((value: BigInt, index: number, array: BigUint64Array): void => callbackfn())
     }
 
     /**

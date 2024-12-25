@@ -187,19 +187,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return ret
     }
 
-    public static from<T, U>(values: T[], mapfn: (v: T) => U): Array<U> {
-        const newFn: (v: T, k: number) => U =
-            (v: T, k: number): U => { return mapfn(v) }
-        return Array.from(values, newFn)
-    }
-
-    public static from<T, U>(values: T[], mapfn: () => U): Array<U> {
-        const newFn: (v: T, k: number) => U =
-            (v: T, k: number): U => { return mapfn() }
-        return Array.from(values, newFn)
-    }
-
-
     /**
     * Creates a new `Array` instance from `Object[]` primitive array.
     *
@@ -913,11 +900,11 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
      */
-    public override filter(predicate: (value: T, index: number) => boolean): Array<T> {
+    public override filter(predicate: (value: T, index: number, array: Array<T>) => boolean): Array<T> {
         const res = new Array<T>()
         for (let i: int = 0; i < this.actualLength; i++) {
             const val = this.$_get_unsafe(i)
-            if (predicate(val, i as number)) {
+            if (predicate(val, i as number, this)) {
                 res.push(val)
             }
         }
@@ -972,32 +959,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     // NOTE(ivan-tyulyandin): TBD, flatMap may be not subset, see ReadonlyArray
     public flatMap<U>(fn: (v: T, k: number, arr: Array<T>) => U): Array<U> {
-        let mapped: Array<U> = this.map<U>(fn)
-        return mapped.flat<U>()
-    }
-
-    /**
-     * Applies flat and than map
-     *
-     * fn a function to apply
-     *
-     * @return new Array after map and than flat
-     */
-     // NOTE(ivan-tyulyandin): TBD, flatMap may be not subset, see ReadonlyArray
-    public flatMap<U>(fn: (v: T, k: number) => U): Array<U> {
-        let mapped: Array<U> = this.map<U>(fn)
-        return mapped.flat<U>()
-    }
-
-    /**
-     * Applies flat and than map
-     *
-     * fn a function to apply
-     *
-     * @return new Array after map and than flat
-     */
-    // NOTE(ivan-tyulyandin): TBD, flatMap may be not subset, see ReadonlyArray
-    public flatMap<U>(fn: (v: T) => U): Array<U> {
         let mapped: Array<U> = this.map<U>(fn)
         return mapped.flat<U>()
     }

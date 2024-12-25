@@ -1552,35 +1552,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
 
     /**
-     * Sorts in-place
-     *
-     * @param compareFn comparator —  used to determine the order of the elements.
-     * compareFn returns a negative value if first argument is less than second argument,
-     * zero if they're equal and a positive value otherwise.
-     *
-     * @returns sorted {{element['name']}}Array
-     */
-    public sort(compareFn: (a: {{element['subsetType']}}) => number): this {
-        let cmp = (a: {{element['subsetType']}}, b: {{element['subsetType']}}) => { return compareFn(a)}
-        this.sort(cmp)
-        return this
-    }
-
-    /**
-     * Sorts in-place
-     *
-     * @param fn compareFn —  used to determine the order of the elements.
-     * compareFn returns a negative value if first argument is less than second argument,
-     * zero if they're equal and a positive value otherwise.
-     *
-     * @returns sorted {{element['name']}}Array
-     */
-    public sort(compareFn: () => number): this {
-        let cmp = (a: {{element['subsetType']}}, b: {{element['subsetType']}}) => { return compareFn()}
-        this.sort(cmp)
-        return this
-    }
-    /**
      * Creates a {{element['name']}}Array with the same underlying Buffer
      *
      * @param begin start index, inclusive
@@ -1799,128 +1770,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         {%- endif %}
 
     /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts one argument.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: (element: {{elType}}) => boolean): boolean {
-        return this.every((element: {{elType}}, index: number, array: {{element['name']}}Array): boolean => predicate(element))
-    }
-
-    /**
-     * creates a new {{element['name']}}Array from current {{element['name']}}Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new {{element['name']}}Array with elements from current {{element['name']}}Array that satisfy condition fn
-     */
-    public filter(fn: (val: {{elType}}) => boolean): {{element['name']}}Array {
-        let newF: (val: {{elType}}, index: number, array: {{element['name']}}Array) => boolean =
-            (val: {{elType}}, index: number, array: {{element['name']}}Array): boolean => { return fn(val) }
-        return this.filter(newF)
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns {{elType}} | undefined
-     */
-    public find(predicate: () => boolean): {{elType}} | undefined {
-        return this.find((value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => predicate())
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns {{elType}} | undefined
-     */
-    public find(predicate: (value: {{elType}}) => boolean): {{elType}} | undefined {
-        return this.find((value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => predicate(value))
-    }
-
-    /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns {{idxType}}
-     */
-    public findIndex(predicate: (value: {{elType}}) => boolean): {{idxType}} {
-        return this.findIndex((value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => predicate(value)){{castToIdx}}
-    }
-
-    /**
-     * Finds the last element in the {{element['name']}}Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: {{elType}}) => boolean): {{elType}} {
-        let newF: (val: {{elType}}, index: number, array: {{element['name']}}Array) => boolean =
-            (val: {{elType}}, index: number, array: {{element['name']}}Array): boolean => { return fn(val) }
-        return this.findLast(newF)
-    }
-
-    /**
-     * Finds an index of the last element in the {{element['name']}}Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: {{elType}}) => boolean): {{idxType}} {
-        let newF: (val: {{elType}}, index: number, array: {{element['name']}}Array) => boolean =
-            (val: {{elType}}, index: number, array: {{element['name']}}Array): boolean => { return fn(val) }
-        return this.findLastIndex(newF){{castToIdx}}
-    }
-
-    /**
-     * Performs the specified action for each element in {{element['name']}}Array
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: (val: {{elType}}) => void): void {
-        this.forEach((value: {{elType}}, index: number, array: {{element['name']}}Array): void => callbackfn(value))
-    }
-
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts one argument.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: (element: {{elType}}) => boolean): boolean {
-        return this.some((element: {{elType}}, index: number, array: {{element['name']}}Array): boolean => predicate(element))
-    }
-
-    /**
      * Determines whether the specified callback function returns true for any element of an array.
      *
      * @param predicate A function that accepts three arguments.
@@ -1937,34 +1786,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
             }
         }
         return false
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts two arguments.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: (element: {{elType}}, index: {{idxType}}) => boolean): boolean {
-        return this.some((element: {{elType}}, index: number, array: {{element['name']}}Array): boolean => predicate(element, index))
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for any element of an array.
-     *
-     * @param predicate A function that accepts no arguments.
-     * The some method calls the predicate function for each element in the array
-     * until the predicate returns a true or until the end of the array.
-     *
-     * @returns false unless predicate function returns true for an array element,
-     * in which case true is immediately returned.
-     */
-    public some(predicate: () => boolean): boolean {
-        return this.some((element: {{elType}}, index: number, array: {{element['name']}}Array): boolean => predicate())
     }
 
     /**
@@ -1995,94 +1816,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * The return value of the callback function is the accumulated result,
      * and is provided as an argument in the next call to the callback function.
      *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = {{elType}}>(
-                callbackfn: (previousValue: U, currentValue: {{elType}}, currentIndex: {{idxType}}) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
-                        callbackfn(prevVal, currVal, currIndex),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = {{elType}}>(
-                callbackfn: (previousValue: U, currentValue: {{elType}}) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
-                        callbackfn(prevVal, currVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = {{elType}}>(
-                callbackfn: (previousValue: U) => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
-                        callbackfn(prevVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduce<U = {{elType}}>(
-                callbackfn: () => U,
-                initialValue: U): U {
-        return this.reduce(
-                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
-                        callbackfn(),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
      * @param callbackfn A function that accepts four arguments.
      * The reduce method calls the callbackfn function one time for each element in the array.
      * The first call to the callbackfn function provides array first element value as an argument
@@ -2100,78 +1833,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
             accumulatedValue = callbackfn(accumulatedValue, {{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)
         }
         return accumulatedValue
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: {{elType}}, currentValue: {{elType}}, currentIndex: {{idxType}}) => {{elType}}): {{elType}} {
-        return this.reduce(
-                (prevVal: {{elType}}, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
-                        callbackfn(prevVal, currVal, currIndex))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: {{elType}}, currentValue: {{elType}}) => {{elType}}): {{elType}} {
-        return this.reduce(
-                (prevVal: {{elType}}, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
-                        callbackfn(prevVal, currVal))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: (previousValue: {{elType}}) => {{elType}}): {{elType}} {
-        return this.reduce(
-                (prevVal: {{elType}}, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
-                        callbackfn(prevVal))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduce method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array first element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduce method on an empty array without an initial value creates a TypeError
-     */
-    public reduce(callbackfn: () => {{elType}}): {{elType}} {
-        return this.reduce(
-                (prevVal: {{elType}}, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
-                        callbackfn())
     }
 
     /**
@@ -2202,94 +1863,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * The return value of the callback function is the accumulated result,
      * and is provided as an argument in the next call to the callback function.
      *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = {{elType}}>(
-                callbackfn: (previuosValue: U, currentValue: {{elType}}, currentIndex: {{idxType}}) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
-                        callbackfn(prevVal, currVal, currIndex),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = {{elType}}>(
-                callbackfn: (previuosValue: U, currentValue: {{elType}}) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
-                        callbackfn(prevVal, currVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = {{elType}}>(
-                callbackfn: (previuosValue: U) => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
-                        callbackfn(prevVal),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
-     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
-     * The first call to the callbackfn function provides this value as an argument.
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     */
-    public reduceRight<U = {{elType}}>(
-                callbackfn: () => U,
-                initialValue: U): U {
-        return this.reduceRight(
-                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
-                        callbackfn(),
-                initialValue)
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
      * @param callbackfn A function that accepts four arguments.
      * The reduceRight method calls the callbackfn function one time for each element in the array.
      * The first call to the callbackfn function provides array last element value as an argument
@@ -2310,78 +1883,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
 
     /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts three arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: {{elType}}, currentValue: {{elType}}, currentIndex: {{idxType}}) => {{elType}}): {{elType}} {
-        return this.reduceRight(
-                (prevValue: {{elType}}, currValue: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
-                        callbackfn(prevValue, currValue, currIndex))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts two arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: {{elType}}, currentValue: {{elType}}) => {{elType}}): {{elType}} {
-        return this.reduceRight(
-                (prevValue: {{elType}}, currValue: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
-                        callbackfn(prevValue, currValue))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts one argument.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: (previousValue: {{elType}}) => {{elType}}): {{elType}} {
-        return this.reduceRight(
-                (prevValue: {{elType}}, currValue: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
-                        callbackfn(prevValue))
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result,
-     * and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts no arguments.
-     * The reduceRight method calls the callbackfn function one time for each element in the array.
-     * The first call to the callbackfn function provides array last element value as an argument
-     *
-     * @returns The value that results from running the callback function to completion over the entire typed array.
-     * calling reduceRight method on an empty array without an initial value creates a TypeError
-     */
-    public reduceRight(callbackfn: () => {{elType}}): {{elType}} {
-        return this.reduceRight(
-                (prevValue: {{elType}}, currValue: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
-                        callbackfn())
-    }
-
-    /**
      * Creates a new {{element['name']}}Array using fn(arr[i]) over all elements of current {{element['name']}}Array.
      *
      * @param fn a function to apply for each element of current {{element['name']}}Array
@@ -2396,45 +1897,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
             res.setUnsafeClamp(i, {{castFromEl % 'fnRes'}})
         }
         return res
-    }
-
-    /**
-     * Creates a new {{element['name']}}Array using fn(arr[i], i) over all elements of current {{element['name']}}Array
-     *
-     * @param fn a function to apply for each element of current {{element['name']}}Array
-     *
-     * @returns a new {{element['name']}}Array where for each element from current {{element['name']}}Array fn was applied
-     */
-    public map(fn: (val: {{elType}}, index: number) => {{elType}}): {{element['name']}}Array {
-        let newF: (val: {{elType}}, index: number, array: {{element['name']}}Array) => {{elType}} =
-            (val: {{elType}}, index: number, array: {{element['name']}}Array): {{elType}} => { return fn(val, index) }
-        return this.map(newF)
-    }
-
-    /**
-     * Creates a new {{element['name']}}Array using fn(arr[i]) over all elements of current {{element['name']}}Array
-     *
-     * @param fn a function to apply for each element of current {{element['name']}}Array
-     *
-     * @returns a new {{element['name']}}Array where for each element from current {{element['name']}}Array fn was applied
-     */
-    public map(fn: (val: {{elType}}) => {{elType}}): {{element['name']}}Array {
-        let newF: (val: {{elType}}, index: number, array: {{element['name']}}Array) => {{elType}} =
-            (val: {{elType}}, index: number, array: {{element['name']}}Array): {{elType}} => { return fn(val) }
-        return this.map(newF)
-    }
-
-    /**
-     * Creates a new {{element['name']}}Array using fn() over all elements of current {{element['name']}}Array
-     *
-     * @param fn a function to apply for each element of current {{element['name']}}Array
-     *
-     * @returns a new {{element['name']}}Array where for each element from current {{element['name']}}Array fn was applied
-     */
-    public map(fn: () => {{elType}}): {{element['name']}}Array {
-        let newF: (val: {{elType}}, index: number, array: {{element['name']}}Array) => {{elType}} =
-            (val: {{elType}}, index: number, array: {{element['name']}}Array): {{elType}} => { return fn() }
-        return this.map(newF)
     }
 
     /**
@@ -2454,34 +1916,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
             }
         }
         return true
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts two arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: (element: {{elType}}, index: {{idxType}}) => boolean): boolean {
-        return this.every((element: {{elType}}, index: number, array: {{element['name']}}Array): boolean => predicate(element, index))
-    }
-
-    /**
-     * Determines whether the specified callback function returns true for all elements of an array.
-     *
-     * @param predicate A function that accepts no arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false,
-     * or until the end of the array.
-     *
-     * @returns true unless predicate function returns a false for an array element,
-     * in which case false is immediately returned.
-     */
-    public every(predicate: () => boolean): boolean {
-        return this.every((element: {{elType}}, index: number, array: {{element['name']}}Array): boolean => predicate())
     }
 
     /**
@@ -2511,19 +1945,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
 
     /**
-     * creates a new {{element['name']}}Array from current {{element['name']}}Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new {{element['name']}}Array with elements from current {{element['name']}}Array that satisfy condition fn
-     */
-    public filter(fn: (val: {{elType}}, index: {{idxType}}) => boolean): {{element['name']}}Array {
-        let newF: (val: {{elType}}, index: number, array: {{element['name']}}Array) => boolean =
-            (val: {{elType}}, index: number, array: {{element['name']}}Array): boolean => { return fn(val, index) }
-        return this.filter(newF)
-    }
-
-    /**
      * Returns the value of the first element in the array where predicate is true, and undefined
      * otherwise
      *
@@ -2541,20 +1962,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
             }
         }
         return undefined
-    }
-
-    /**
-     * Returns the value of the first element in the array where predicate is true, and undefined
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found, find
-     * immediately returns that element value. Otherwise, find returns undefined
-     *
-     * @returns {{elType}} | undefined
-     */
-    public find(predicate: (value: {{elType}}, index: {{idxType}}) => boolean): {{elType}} | undefined {
-        return this.find((value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => predicate(value, index))
     }
 
     /**
@@ -2577,34 +1984,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
 
     /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns {{idxType}}
-     */
-    public findIndex(predicate: (value: {{elType}}, index: {{idxType}}) => boolean): {{idxType}} {
-        return this.findIndex((value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => predicate(value, index))
-    }
-
-    /**
-     * Returns the index of the first element in the array where predicate is true, and -1
-     * otherwise
-     *
-     * @param predicate find calls predicate once for each element of the array, in ascending
-     * order, until it finds one where predicate returns true. If such an element is found,
-     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
-     *
-     * @returns {{idxType}}
-     */
-    public findIndex(predicate: () => boolean): {{idxType}} {
-        return this.findIndex((value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => predicate())
-    }
-
-    /**
      * Finds the last element in the {{element['name']}}Array that satisfies the condition
      *
      * @param fn condition
@@ -2619,19 +1998,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
             }
         }
         throw new Error("{{element['name']}}Array.findLast: not implemented if an element was not found")
-    }
-
-    /**
-     * Finds the last element in the {{element['name']}}Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    public findLast(fn: (val: {{elType}}, index: {{idxType}}) => boolean): {{elType}} {
-        let newF: (val: {{elType}}, index: number, array: {{element['name']}}Array) => boolean =
-            (val: {{elType}}, index: number, array: {{element['name']}}Array): boolean => { return fn(val, index) }
-        return this.findLast(newF)
     }
 
     /**
@@ -2651,19 +2017,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
 
     /**
-     * Finds an index of the last element in the {{element['name']}}Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    public findLastIndex(fn: (val: {{elType}}, index: {{idxType}}) => boolean): {{idxType}} {
-        let newF: (val: {{elType}}, index: number, array: {{element['name']}}Array) => boolean =
-            (val: {{elType}}, index: number, array: {{element['name']}}Array): boolean => { return fn(val, index) }
-        return this.findLastIndex(newF){{castToIdx}}
-    }
-
-    /**
      * Performs the specified action for each element in {{element['name']}}Array
      *
      * @param callbackfn  A function that accepts up to three arguments. forEach calls the
@@ -2675,30 +2028,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         for (let i = 0; i < this.lengthInt; i++) {
             callbackfn({{castToEl % 'this.getUnsafe(i)'}}, i as number, this)
         }
-    }
-
-    /**
-     * Performs the specified action for each element in {{element['name']}}Array
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: (value: {{elType}}, index: number) => void): void {
-        this.forEach((value: {{elType}}, index: number, array: {{element['name']}}Array): void => callbackfn(value, index))
-    }
-
-    /**
-     * Performs the specified action for each element in {{element['name']}}Array
-     *
-     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
-     * callbackfn function one time for each element in the array.
-     *
-     * @returns None
-     */
-    public forEach(callbackfn: () => void): void {
-        this.forEach((value: {{elType}}, index: number, array: {{element['name']}}Array): void => callbackfn())
     }
 
     {% endfor -%}

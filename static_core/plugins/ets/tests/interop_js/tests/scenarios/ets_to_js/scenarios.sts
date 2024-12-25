@@ -171,13 +171,15 @@ class ClassWithDefaultParameterMethods {
         return arg;
     }
 
-    public undefinedParameterMethod(arg: JSValue | undefined = undefined): JSValue | undefined {
-        return arg;
-    }
+    // #22991
+    // public undefinedParameterMethod(arg: JSValue | undefined = undefined): JSValue | undefined {
+    //     return arg;
+    // }
 
-    public static undefinedParameterStaticMethod(arg: JSValue | undefined = undefined): JSValue | undefined {
-        return arg;
-    }
+    // #22991
+    // public static undefinedParameterStaticMethod(arg: JSValue | undefined = undefined): JSValue | undefined {
+    //     return arg;
+    // }
 
     public overloadedMethod(arg: int) {
         // do nothing
@@ -214,9 +216,10 @@ function defaultIntParameterFunction(arg: int = 1): int {
     return arg;
 }
 
-function defaultUndefinedParameterFunction(arg: JSValue | undefined = undefined): JSValue | undefined {
-    return arg;
-}
+// #22991
+// function defaultUndefinedParameterFunction(arg: JSValue | undefined = undefined): JSValue | undefined {
+//     return arg;
+// }
 
 function functionArgTypeOptionalPrimitive(arg?: Number): Number | undefined {
     return arg;

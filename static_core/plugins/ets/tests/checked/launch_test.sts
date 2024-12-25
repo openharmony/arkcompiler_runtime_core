@@ -230,7 +230,7 @@ function foo(arg1: int, arg2: int): int
     return arg1 + arg2;
 }
 
-function launchF(func: Function2<Int, Int, NullishType>, arg1: Int, arg2: Int): Promise<NullishType>
+function launchF(func: (p1: Int, p2: Int) => NullishType, arg1: Int, arg2: Int): Promise<NullishType>
 {
     return launch func(arg1, arg2);
 }

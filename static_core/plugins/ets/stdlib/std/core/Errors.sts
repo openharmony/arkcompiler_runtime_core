@@ -21,7 +21,7 @@ package std.core;
 export class AssertionError extends Error {
     constructor(message?: String, options?: ErrorOptions) {
         super("AssertionError", message, options)
-        console.log(message!);
+        console.log(message ?? "Assertion failed.");
     }
 }
 

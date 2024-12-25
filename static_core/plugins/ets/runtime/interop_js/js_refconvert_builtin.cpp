@@ -178,46 +178,9 @@ private:
     void RegisterArray()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_ARRAY_OVERLOADS = {
-            {utf::CStringAsMutf8("at"), "I:Lstd/core/Object;"},
-            {utf::CStringAsMutf8("$_get"), "D:Lstd/core/Object;"},
-            {utf::CStringAsMutf8("$_set"), "DLstd/core/Object;:V"},
-            {utf::CStringAsMutf8("with"), "DLstd/core/Object;:Lescompat/Array;"},
-            {utf::CStringAsMutf8("map"), "Lstd/core/Function1;:Lescompat/Array;"},
-            {utf::CStringAsMutf8("forEach"), "Lstd/core/Function1;:V"},
-            {utf::CStringAsMutf8("pop"), ":Lstd/core/Object;"},
-            {utf::CStringAsMutf8("fill"), "Lstd/core/Object;Lstd/core/Double;Lstd/core/Double;:Lescompat/Array;"},
-            {utf::CStringAsMutf8("flat"), ":Lescompat/Array;"},
-            {utf::CStringAsMutf8("join"), "Lstd/core/String;:Lstd/core/String;"},
-            {utf::CStringAsMutf8("push"), "[Lstd/core/Object;:D"},
-            {utf::CStringAsMutf8("some"), "Lstd/core/Function1;:Z"},
-            {utf::CStringAsMutf8("sort"), ":Lescompat/Array;"},
-            {utf::CStringAsMutf8("every"), "Lstd/core/Function1;:Z"},
-            {utf::CStringAsMutf8("shift"), ":Lstd/core/Object;"},
-            {utf::CStringAsMutf8("slice"), "Lstd/core/Double;Lstd/core/Double;:Lescompat/Array;"},
             {utf::CStringAsMutf8("<ctor>"), ":V"},
-            {utf::CStringAsMutf8("filter"), "Lstd/core/Function1;:Lescompat/Array;"},
-            {utf::CStringAsMutf8("<get>length"), ":D"},
-            {utf::CStringAsMutf8("reduce"), "Lstd/core/Function2;:Lstd/core/Object;"},
-            {utf::CStringAsMutf8("splice"), "DLstd/core/Double;[Lstd/core/Object;:Lescompat/Array;"},
-            {utf::CStringAsMutf8("findLast"), "Lstd/core/Function1;:Lstd/core/Object;"},
-            {utf::CStringAsMutf8("toSorted"), ":Lescompat/Array;"},
-            {utf::CStringAsMutf8("findIndex"), "Lstd/core/Function1;:D"},
-            {utf::CStringAsMutf8("findLastIndex"), "Lstd/core/Function1;:D"},
-            {utf::CStringAsMutf8("toSpliced"), "Lstd/core/Double;Lstd/core/Double;:Lescompat/Array;"},
-            {utf::CStringAsMutf8("copyWithin"), "II:Lescompat/Array;"},
-            {utf::CStringAsMutf8("toReversed"), ":Lescompat/Array;"},
-            {utf::CStringAsMutf8("indexOf"), "Lstd/core/Object;Lstd/core/Double;:D"},
-            {utf::CStringAsMutf8("includes"), "Lstd/core/Object;Lstd/core/Double;:Z"},
-            {utf::CStringAsMutf8("lastIndexOf"), "Lstd/core/Object;Lstd/core/Double;:D"},
-            {utf::CStringAsMutf8("reduceRight"), "Lstd/core/Function2;:Lstd/core/Object;"},
-            {utf::CStringAsMutf8("find"), "Lstd/core/Function1;:Lstd/core/Object;"},
-            {utf::CStringAsMutf8("isArray"), "Lstd/core/Object;:Z"},
-            {utf::CStringAsMutf8("flatMap"), "Lstd/core/Function2;:Lescompat/Array;"},
-            {utf::CStringAsMutf8("toLocaleString"), ":Lstd/core/String;"},
-            {utf::CStringAsMutf8("from"), "Lescompat/Iterable;:Lescompat/Array;"},
         };
         wArray_ = RegisterClass(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);
-
         NAPI_CHECK_FATAL(napi_object_seal(ctx_->GetJSEnv(), jsGlobalEts_));
     }
 

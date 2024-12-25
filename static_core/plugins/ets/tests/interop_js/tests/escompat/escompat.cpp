@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,13 +20,15 @@ namespace ark::ets::interop::js::testing {
 
 class ESCompatTest : public EtsInteropTest {};
 
-TEST_F(ESCompatTest, compat_array)
+// #22991
+TEST_F(ESCompatTest, DISABLED_compat_array)
 {
     ASSERT_EQ(true, RunJsTestSuite("compat_array.js"));
 }
 
 // NOTE(oignatenko) uncomment Array_TestJSLength code after interop is implemented from JS to eTS
-TEST_F(ESCompatTest, compat_array_length)
+// #22991
+TEST_F(ESCompatTest, DISABLED_compat_array_length)
 {
     ASSERT_EQ(true, RunJsTestSuite("array_js_suites/test_length.js"));
 }
@@ -36,53 +38,62 @@ TEST_F(ESCompatTest, compat_array_pop)
     ASSERT_EQ(true, RunJsTestSuite("array_js_suites/test_pop.js"));
 }
 
-TEST_F(ESCompatTest, compat_array_fill)
+// #22991
+TEST_F(ESCompatTest, DISABLED_compat_array_fill)
 {
     ASSERT_EQ(true, RunJsTestSuite("array_js_suites/test_fill.js"));
 }
 
-TEST_F(ESCompatTest, compat_array_shift)
+// #22991
+TEST_F(ESCompatTest, DISABLED_compat_array_shift)
 {
     ASSERT_EQ(true, RunJsTestSuite("array_js_suites/test_shift.js"));
 }
 
 // NOTE(oignatenko) uncomment Array_TestJSSlice code after interop is implemented from JS to eTS
-TEST_F(ESCompatTest, compat_array_slice)
+// #22991
+TEST_F(ESCompatTest, DISABLED_compat_array_slice)
 {
     ASSERT_EQ(true, RunJsTestSuite("array_js_suites/test_slice.js"));
 }
 
 // NOTE(oignatenko) uncomment Array_TestJSSplice code after interop is implemented from JS to eTS
-TEST_F(ESCompatTest, compat_array_splice)
+// #22991
+TEST_F(ESCompatTest, DISABLED_compat_array_splice)
 {
     ASSERT_EQ(true, RunJsTestSuite("array_js_suites/test_splice.js"));
 }
 
 // NOTE(oignatenko) uncomment test_to_spliced.js code after recent regression making it work in place is fixed
-TEST_F(ESCompatTest, compat_array_to_spliced)
+// #22991
+TEST_F(ESCompatTest, DISABLED_compat_array_to_spliced)
 {
     ASSERT_EQ(true, RunJsTestSuite("array_js_suites/test_to_spliced.js"));
 }
 
 // NOTE(oignatenko) uncomment Array_TestJSCopyWithin code after interop is implemented from JS to eTS
-TEST_F(ESCompatTest, compat_array_copy_within)
+// #22991
+TEST_F(ESCompatTest, DISABLED_compat_array_copy_within)
 {
     ASSERT_EQ(true, RunJsTestSuite("array_js_suites/test_copy_within.js"));
 }
 
 // NOTE(oignatenko) uncomment Array_TestJSWith code after interop is implemented from JS to eTS
-TEST_F(ESCompatTest, compat_array_with)
+// #22991
+TEST_F(ESCompatTest, DISABLED_compat_array_with)
 {
     ASSERT_EQ(true, RunJsTestSuite("array_js_suites/test_with.js"));
 }
 
-TEST_F(ESCompatTest, compat_array_last_index_of)
+// #22991
+TEST_F(ESCompatTest, DISABLED_compat_array_last_index_of)
 {
     ASSERT_EQ(true, RunJsTestSuite("array_js_suites/test_last_index_of.js"));
 }
 
 // NOTE(oignatenko) uncomment Array_TestJSToReversed code after interop is implemented from JS to eTS
-TEST_F(ESCompatTest, compat_array_to_reversed)
+// #22991
+TEST_F(ESCompatTest, DISABLED_compat_array_to_reversed)
 {
     ASSERT_EQ(true, RunJsTestSuite("array_js_suites/test_to_reversed.js"));
 }

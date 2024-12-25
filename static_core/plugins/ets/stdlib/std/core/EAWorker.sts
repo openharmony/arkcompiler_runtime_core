@@ -107,7 +107,7 @@ class InteropWorker implements InternalWorker {
 
     constructor() {
         this.initEvent = new Event();
-        ExclusiveLauncher.elaunch(this.body, true);
+        ExclusiveLauncher.elaunch(() => this.body(), true);
     }
     
     public run<T>(task: () => T): Promise<T> {
@@ -174,7 +174,7 @@ class StaticWorker implements InternalWorker {
 
     constructor() {
         this.tasks = new TaskQueue();
-        ExclusiveLauncher.elaunch(this.body, false);
+        ExclusiveLauncher.elaunch(() => this.body(), false);
     }
 
     public run<T>(task: () => T): Promise<T> {
