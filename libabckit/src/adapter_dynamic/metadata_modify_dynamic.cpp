@@ -45,12 +45,12 @@ namespace libabckit {
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace panda;
 
-AbckitString *CreateStringDynamic(AbckitFile *file, const char *value)
+AbckitString *CreateStringDynamic(AbckitFile *file, const char *value, size_t len)
 {
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_LOG(DEBUG) << "\"" << value << "\"" << '\n';
     auto *prog = file->GetDynamicProgram();
-    const auto &[progValueIter, _] = prog->strings.insert(value);
+    const auto &[progValueIter, _] = prog->strings.insert(std::string(value, len));
     const auto &progValue = *progValueIter;
     auto &strings = file->strings;
 
@@ -674,10 +674,10 @@ AbckitLiteral *FindOrCreateLiteralDoubleDynamic(AbckitFile *file, double value)
     return FindOrCreateLiteralDoubleDynamicImpl(file, value);
 }
 
-AbckitLiteral *FindOrCreateLiteralStringDynamic(AbckitFile *file, const char *value)
+AbckitLiteral *FindOrCreateLiteralStringDynamic(AbckitFile *file, const char *value, size_t len)
 {
     LIBABCKIT_LOG_FUNC;
-    return FindOrCreateLiteralStringDynamicImpl(file, value);
+    return FindOrCreateLiteralStringDynamicImpl(file, std::string(value, len));
 }
 
 AbckitLiteral *FindOrCreateLiteralMethodDynamic(AbckitFile *file, AbckitCoreFunction *function)
@@ -742,10 +742,10 @@ AbckitValue *FindOrCreateValueDoubleDynamic(AbckitFile *file, double value)
     return FindOrCreateValueDoubleDynamicImpl(file, value);
 }
 
-AbckitValue *FindOrCreateValueStringDynamic(AbckitFile *file, const char *value)
+AbckitValue *FindOrCreateValueStringDynamic(AbckitFile *file, const char *value, size_t len)
 {
     LIBABCKIT_LOG_FUNC;
-    return FindOrCreateValueStringDynamicImpl(file, value);
+    return FindOrCreateValueStringDynamicImpl(file, std::string(value, len));
 }
 
 AbckitValue *FindOrCreateLiteralArrayValueDynamic(AbckitFile *file, AbckitValue **value, size_t size)
@@ -753,24 +753,22 @@ AbckitValue *FindOrCreateLiteralArrayValueDynamic(AbckitFile *file, AbckitValue 
     LIBABCKIT_LOG_FUNC;
     std::vector<AbckitLiteral *> litArr;
     for (size_t i = 0; i < size; i++) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         switch (ValueGetTypeDynamic(value[i])->id) {
             case ABCKIT_TYPE_ID_U1:
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 litArr.emplace_back(FindOrCreateLiteralBoolDynamic(file, ValueGetU1Dynamic(value[i])));
                 break;
             case ABCKIT_TYPE_ID_F64:
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 litArr.emplace_back(FindOrCreateLiteralDoubleDynamic(file, ValueGetDoubleDynamic(value[i])));
                 break;
             case ABCKIT_TYPE_ID_STRING:
-                litArr.emplace_back(
-                    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                    FindOrCreateLiteralStringDynamic(file, ValueGetStringDynamic(value[i])->impl.data()));
+                litArr.emplace_back(FindOrCreateLiteralStringDynamic(file, ValueGetStringDynamic(value[i])->impl.data(),
+                                                                     ValueGetStringDynamic(value[i])->impl.size()));
                 break;
             default:
                 break;
         }
+        // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
     auto *abcArr = CreateLiteralArrayDynamic(file, litArr.data(), litArr.size());
     auto *prog = file->GetDynamicProgram();
@@ -888,7 +886,8 @@ AbckitArktsAnnotationElement *AnnotationAddAnnotationElementDynamic(AbckitCoreAn
 
     auto annoElem = std::make_unique<AbckitCoreAnnotationElement>();
     annoElem->ann = anno;
-    annoElem->name = CreateStringDynamic(anno->ai->owningModule->file, progAnnoElem.GetName().data());
+    auto annoElemName = progAnnoElem.GetName();
+    annoElem->name = CreateStringDynamic(anno->ai->owningModule->file, annoElemName.data(), annoElemName.size());
     annoElem->value = valuePtr;
 
     if (std::holds_alternative<AbckitCoreFunction *>(anno->owner)) {
@@ -988,7 +987,7 @@ AbckitArktsAnnotationInterfaceField *AnnotationInterfaceAddFieldDynamic(
 
     auto field = std::make_unique<AbckitCoreAnnotationInterfaceField>();
     field->ai = ai;
-    field->name = CreateStringDynamic(ai->owningModule->file, name);
+    field->name = CreateStringDynamic(ai->owningModule->file, name, strlen(name));
     field->type = type;
     field->value = value;
 

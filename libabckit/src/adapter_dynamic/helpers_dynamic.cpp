@@ -249,9 +249,10 @@ bool UpdateModuleLiteralArray(AbckitFile *file, const std::string &recName)
 
 namespace libabckit {
 
+// CC-OFFNXT(G.FUN.01-CPP) helper function
 const panda_file::File *EmitDynamicProgram(AbckitFile *file, pandasm::Program *program,
                                            pandasm::AsmEmitter::PandaFileToPandaAsmMaps *mapsp, bool getFile,
-                                           const char *path)
+                                           std::string_view path)
 {
     for (auto &[recName, rec] : program->record_table) {
         if (IsServiceRecord(recName) || IsAnnotationInterfaceRecord(rec) || IsExternalRecord(rec)) {
@@ -266,7 +267,7 @@ const panda_file::File *EmitDynamicProgram(AbckitFile *file, pandasm::Program *p
         const panda_file::File *res {nullptr};
         if (!getFile) {
             std::map<std::string, size_t> *statp = nullptr;
-            if (!pandasm::AsmEmitter::Emit(path, *program, statp, mapsp)) {
+            if (!pandasm::AsmEmitter::Emit(std::string(path), *program, statp, mapsp)) {
                 LIBABCKIT_LOG_NO_FUNC(DEBUG)
                     << "[EmitDynamicProgram] FAILURE: " << pandasm::AsmEmitter::GetLastError() << '\n';
                 statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);

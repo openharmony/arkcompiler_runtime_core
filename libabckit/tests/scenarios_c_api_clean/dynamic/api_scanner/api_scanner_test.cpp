@@ -360,7 +360,8 @@ TEST_F(AbckitScenarioTestClean, LibAbcKitTestApiScannerDynamicClean)
 {
     // CC-OFFNXT(G.NAM.03) project code style
 
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/api_scanner/api_scanner.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/api_scanner/api_scanner.abc";
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_NE(file, nullptr);
 
     std::vector<ApiInfo> apiList = {{"modules/apiNamespace", "ApiNamespace", "foo"},

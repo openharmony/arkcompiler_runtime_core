@@ -98,9 +98,10 @@ int main(int argc, const char **argv)
         return 1;
     }
 
-    AbckitFile *file = g_impl->openAbc(libabckit::g_abckitOptions.GetInputFile().c_str());
+    auto inputPath = libabckit::g_abckitOptions.GetInputFile();
+    AbckitFile *file = g_impl->openAbc(inputPath.c_str(), inputPath.size());
     if (g_impl->getLastError() != ABCKIT_STATUS_NO_ERROR || file == nullptr) {
-        std::cerr << "ERROR: failed to open: " << libabckit::g_abckitOptions.GetInputFile() << '\n';
+        std::cerr << "ERROR: failed to open: " << inputPath << '\n';
         return 1;
     }
 
@@ -110,10 +111,11 @@ int main(int argc, const char **argv)
         return ret;
     }
 
-    if (!libabckit::g_abckitOptions.GetOutputFile().empty()) {
-        g_impl->writeAbc(file, libabckit::g_abckitOptions.GetOutputFile().c_str());
+    auto outputPath = libabckit::g_abckitOptions.GetOutputFile();
+    if (!outputPath.empty()) {
+        g_impl->writeAbc(file, outputPath.c_str(), outputPath.size());
         if (g_impl->getLastError() != ABCKIT_STATUS_NO_ERROR || file == nullptr) {
-            std::cerr << "ERROR: failed to write: " << libabckit::g_abckitOptions.GetOutputFile() << '\n';
+            std::cerr << "ERROR: failed to write: " << outputPath << '\n';
             return 1;
         }
         g_impl->closeFile(file);

@@ -115,7 +115,7 @@ static void TestHelper(void (*transformIrCall)(AbckitGraph *graph, AbckitInst *o
             ASSERT_NE(obj, nullptr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-            auto func = g_dynG->iCreateLdobjbyname(graph, obj, g_implM->createString(file, "func"));
+            auto func = g_dynG->iCreateLdobjbyname(graph, obj, g_implM->createString(file, "func", strlen("func")));
             ASSERT_NE(func, nullptr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 

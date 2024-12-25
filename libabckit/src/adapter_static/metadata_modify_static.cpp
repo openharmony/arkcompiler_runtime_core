@@ -49,12 +49,12 @@ namespace libabckit {
 // ========================================
 // Create / Update
 // ========================================
-AbckitString *CreateStringStatic(AbckitFile *file, const char *value)
+AbckitString *CreateStringStatic(AbckitFile *file, const char *value, size_t len)
 {
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_LOG(DEBUG) << "\"" << value << "\"" << '\n';
     auto *prog = file->GetStaticProgram();
-    const auto &[progValueIter, _] = prog->strings.insert(value);
+    const auto &[progValueIter, _] = prog->strings.insert(std::string(value, len));
     const auto &progValue = *progValueIter;
     auto &strings = file->strings;
 
@@ -178,10 +178,10 @@ AbckitLiteral *FindOrCreateLiteralDoubleStatic(AbckitFile *file, double value)
     return FindOrCreateLiteralDoubleStaticImpl(file, value);
 }
 
-AbckitLiteral *FindOrCreateLiteralStringStatic(AbckitFile *file, const char *value)
+AbckitLiteral *FindOrCreateLiteralStringStatic(AbckitFile *file, const char *value, size_t len)
 {
     LIBABCKIT_LOG_FUNC;
-    return FindOrCreateLiteralStringStaticImpl(file, value);
+    return FindOrCreateLiteralStringStaticImpl(file, std::string(value, len));
 }
 
 AbckitLiteral *FindOrCreateLiteralMethodStatic(AbckitFile *file, AbckitCoreFunction *function)
@@ -274,10 +274,10 @@ AbckitValue *FindOrCreateValueDoubleStatic(AbckitFile *file, double value)
     return FindOrCreateValueDoubleStaticImpl(file, value);
 }
 
-AbckitValue *FindOrCreateValueStringStatic(AbckitFile *file, const char *value)
+AbckitValue *FindOrCreateValueStringStatic(AbckitFile *file, const char *value, size_t len)
 {
     LIBABCKIT_LOG_FUNC;
-    return FindOrCreateValueStringStaticImpl(file, value);
+    return FindOrCreateValueStringStaticImpl(file, std::string(value, len));
 }
 
 }  // namespace libabckit

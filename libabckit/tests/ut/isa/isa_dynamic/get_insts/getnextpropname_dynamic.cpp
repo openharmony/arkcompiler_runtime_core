@@ -80,7 +80,7 @@ TEST_F(LibAbcKitCreateDynGetNextProp, IcreateGetnextpropname_1)
             g_implG->bbAddInstBack(newEndBB, ldundef2);
             g_implG->bbAddInstBack(newEndBB, returnundef2);
 
-            auto *stringPrint = g_implM->createString(file, "print");
+            auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
             auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
             auto *ldobjbyvalue = g_dynG->iCreateLdobjbyvalue(graph, getnextpropname, createArr);
             auto *callarg1 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbyvalue);

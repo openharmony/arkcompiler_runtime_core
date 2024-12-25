@@ -46,13 +46,13 @@ auto g_icreateCallruntimeCallinit1Lambda = [](AbckitFile *file, AbckitCoreFuncti
 
     auto *ldhole = g_dynG->iCreateLdhole(graph);
     auto *defineClass = g_dynG->iCreateDefineclasswithbuffer(graph, classConstr, litArr, 0x0, ldhole);
-    auto *stringProt = g_implM->createString(file, "prototype");
+    auto *stringProt = g_implM->createString(file, "prototype", strlen("prototype"));
     auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, defineClass, stringProt);
 
     auto *innerInit = helpers::FindMethodByName(file, "innerInit");
     auto *definemethod = g_dynG->iCreateDefinemethod(graph, ldobjbyname, innerInit, 0x0);
     auto *stlexvar = g_dynG->iCreateStlexvar(graph, definemethod, 0x0, 0x0);
-    auto *stringD = g_implM->createString(file, "D");
+    auto *stringD = g_implM->createString(file, "D", strlen("D"));
     auto *definepropertybyname = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINEPROPERTYBYNAME);
     g_implG->iSetString(definepropertybyname, stringD);
     g_implG->iSetInput(definepropertybyname, defineClass, 0);
@@ -85,7 +85,7 @@ TEST_F(LibAbcKitCreateDynCallsRuntime, IcreateCallruntimeTopropertykey_1)
             auto *callCreate = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1);
 
             auto *ldhole = g_dynG->iCreateLdhole(graph);
-            auto *stringX = g_implM->createString(file, "x");
+            auto *stringX = g_implM->createString(file, "x", strlen("x"));
             auto *loadString = g_dynG->iCreateLoadString(graph, stringX);
             auto *isin = g_dynG->iCreateIsin(graph, callCreate, loadString);
             auto *topropertykey = g_dynG->iCreateCallruntimeTopropertykey(graph, isin);
@@ -98,13 +98,13 @@ TEST_F(LibAbcKitCreateDynCallsRuntime, IcreateCallruntimeTopropertykey_1)
             ASSERT_NE(classConstr, nullptr);
 
             auto *defineclasswithbuffer = g_dynG->iCreateDefineclasswithbuffer(graph, classConstr, litArr, 0, ldhole);
-            auto *stringProt = g_implM->createString(file, "prototype");
+            auto *stringProt = g_implM->createString(file, "prototype", strlen("prototype"));
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, defineclasswithbuffer, stringProt);
             auto *funcGetter = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINEFUNC);
             auto *ldtrue = g_dynG->iCreateLdtrue(graph);
             auto *definegetter = g_dynG->iCreateDefinegettersetterbyvalue(graph, ldtrue, ldobjbyname, topropertykey,
                                                                           funcGetter, ldundefFirts);
-            auto *stringFalse = g_implM->createString(file, "false");
+            auto *stringFalse = g_implM->createString(file, "false", strlen("false"));
             auto *ldobjbynameFalse = g_dynG->iCreateLdobjbyname(graph, ldobjbyname, stringFalse);
             auto *callarg1 = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1);
             g_implG->iSetInput(callarg1, ldobjbynameFalse, 1);
@@ -161,7 +161,7 @@ TEST_F(LibAbcKitCreateDynCallsRuntime, IcreateCallruntimeCallinit_1)
         auto *defineclasswithbuffer =
             helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINECLASSWITHBUFFER);
         // CC-OFFNXT(G.FMT.02)
-        auto *stringD = g_implM->createString(file, "D");
+        auto *stringD = g_implM->createString(file, "D", strlen("D"));
         auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, defineclasswithbuffer, stringD);
         auto *newobjrange = g_dynG->iCreateNewobjrange(graph, 0x1, ldobjbyname);
 

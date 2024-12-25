@@ -21,8 +21,8 @@
 
 namespace libabckit {
 
-AbckitFile *OpenAbcStatic(const char *path);
-void WriteAbcStatic(AbckitFile *file, const char *path);
+AbckitFile *OpenAbcStatic(const char *path, size_t len);
+void WriteAbcStatic(AbckitFile *file, const char *path, size_t len);
 void DestroyGraphStatic(AbckitGraph *graph);
 void CloseFileStatic(AbckitFile *file);
 

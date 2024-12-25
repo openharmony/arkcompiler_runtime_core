@@ -53,7 +53,7 @@ struct ModuleIterateData {
 
 const panda::panda_file::File *EmitDynamicProgram(AbckitFile *file, panda::pandasm::Program *program,
                                                   panda::pandasm::AsmEmitter::PandaFileToPandaAsmMaps *mapsp,
-                                                  bool getFile, const char *path = nullptr);
+                                                  bool getFile, std::string_view path = {});
 bool IterateModuleSections(
     ModuleIterateData &data, const std::function<size_t(ModuleIterateData *)> &requestIdxSectionModifier,
     const std::function<std::pair<size_t, size_t>(ModuleIterateData *, size_t, size_t)> &sectionModifier,

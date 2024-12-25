@@ -253,13 +253,15 @@ TEST_F(AbckitScenarioTestClean, LibAbcKitTestDynamicAddLogClean)
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_log/add_log_dynamic.abc",
                                              "add_log_dynamic");
     EXPECT_TRUE(helpers::Match(output, "abckit\n"));
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_log/add_log_dynamic.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_log/add_log_dynamic.abc";
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     UserData data = {};
-    data.print = g_implM->createString(file, "print");
-    data.date = g_implM->createString(file, "Date");
-    data.getTime = g_implM->createString(file, "getTime");
-    data.str = g_implM->createString(file, "file: src/MyClass, function: MyClass.handle");
-    data.consume = g_implM->createString(file, "Ellapsed time:");
+    data.print = g_implM->createString(file, "print", strlen("print"));
+    data.date = g_implM->createString(file, "Date", strlen("Date"));
+    data.getTime = g_implM->createString(file, "getTime", strlen("getTime"));
+    data.str = g_implM->createString(file, "file: src/MyClass, function: MyClass.handle",
+                                     strlen("file: src/MyClass, function: MyClass.handle"));
+    data.consume = g_implM->createString(file, "Ellapsed time:", strlen("Ellapsed time:"));
 
     AbckitCoreFunction *handleMethod;
     EnumerateAllMethods(file, [&](AbckitCoreFunction *method) {
@@ -272,12 +274,12 @@ TEST_F(AbckitScenarioTestClean, LibAbcKitTestDynamicAddLogClean)
     AbckitGraph *graph = g_implI->createGraphFromFunction(handleMethod);
     TransformIr(graph, &data);
     g_implM->functionSetGraph(handleMethod, graph);
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_log/add_log_dynamic_modified.abc");
+    constexpr auto OUTPUT_PATH = ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_log/add_log_dynamic_modified.abc";
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
     g_impl->destroyGraph(graph);
     g_impl->closeFile(file);
 
-    output = helpers::ExecuteDynamicAbc(
-        ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_log/add_log_dynamic_modified.abc", "add_log_dynamic");
+    output = helpers::ExecuteDynamicAbc(OUTPUT_PATH, "add_log_dynamic");
     EXPECT_TRUE(helpers::Match(output,
                                "file: src/MyClass, function: MyClass.handle\n"
                                "abckit\n"

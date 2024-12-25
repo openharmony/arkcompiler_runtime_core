@@ -344,4 +344,17 @@ TEST_F(LibAbcKitCppTest, CppTest12)
     ASSERT_FALSE(inst);
 }
 
+// Test: test-kind=api, api=File::CreateString, abc-kind=ArkTS1, category=positive, extension=cpp
+TEST_F(LibAbcKitCppTest, CppTest13)
+{
+    std::string_view abcPath {ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic_js.abcXXX"};
+    size_t suffixLen = 3;
+    size_t viewLen = 4;
+    abcPath.remove_suffix(suffixLen);
+    abckit::File file(abcPath);
+    std::string_view view {"test example", viewLen};
+    std::string res = file.CreateString(view);
+    ASSERT_TRUE(res == "test");
+}
+
 }  // namespace libabckit::test

@@ -68,12 +68,6 @@ public:
      * @brief Constructor
      * @param path
      */
-    explicit File(const char *path) : File(std::string_view(path)) {};
-
-    /**
-     * @brief Constructor
-     * @param path
-     */
     explicit File(std::string_view path) : File(path, std::make_unique<DefaultErrorHandler>()) {}
 
     /**
@@ -108,7 +102,8 @@ public:
      * @param eh
      */
     File(std::string_view path, std::unique_ptr<IErrorHandler> eh)
-        : Resource(AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)->openAbc(path.data())), conf_(std::move(eh))
+        : Resource(AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)->openAbc(path.data(), path.size())),
+          conf_(std::move(eh))
     {
         CheckError(&conf_);
         SetDeleter(std::make_unique<FileDeleter>(&conf_, *this));
@@ -247,7 +242,7 @@ public:
      */
     void WriteAbc(std::string_view path) const
     {
-        GetApiConfig()->cApi_->writeAbc(GetResource(), path.data());
+        GetApiConfig()->cApi_->writeAbc(GetResource(), path.data(), path.size());
         CheckError(GetApiConfig());
     }
 
@@ -299,13 +294,13 @@ public:
     Type CreateReferenceType(core::Class &klass) const;
 
     /**
-     * @brief Creates value item `Value` containing the given const char * `value`.
+     * @brief Creates value item `Value` containing the given string `value`.
      * @return `Value`.
-     * @param [ in ] value - const char * value from which value item is created.
+     * @param [ in ] value - string value from which value item is created.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current File is false.
      * @note Allocates
      */
-    Value CreateValueString(const char *value) const;
+    Value CreateValueString(std::string_view value) const;
 
     /**
      * @brief Creates literal array value item with size `size` from the given value items array `value`.

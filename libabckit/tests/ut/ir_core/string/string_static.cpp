@@ -37,7 +37,7 @@ void TransformSetStringIrStatic(AbckitGraph *graph, AbckitFile *file)
     ASSERT_NE(loadStr, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    auto *newStr = g_implM->createString(file, "STRING");
+    auto *newStr = g_implM->createString(file, "STRING", strlen("STRING"));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_implG->iSetString(loadStr, newStr);

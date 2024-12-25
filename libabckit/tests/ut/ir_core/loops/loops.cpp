@@ -67,7 +67,7 @@ void CreateLoopDynamic(AbckitGraph *graph, AbckitFile *file)
     g_implG->bbAddInstBack(trueBB, add);
     g_implG->iAppendInput(phi, add);
 
-    auto *print = g_dynG->iCreateTryldglobalbyname(graph, g_implM->createString(file, "print"));
+    auto *print = g_dynG->iCreateTryldglobalbyname(graph, g_implM->createString(file, "print", strlen("print")));
     g_implG->bbAddInstBack(trueBB, print);
     auto *call = g_dynG->iCreateCallarg1(graph, print, phi);
     g_implG->bbAddInstBack(trueBB, call);

@@ -46,7 +46,7 @@ void TransformLoadStringIr(AbckitFile *file, AbckitGraph *graph)
     ASSERT_NE(ret, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    auto *str = g_implM->createString(file, "foo");
+    auto *str = g_implM->createString(file, "foo", strlen("foo"));
     ASSERT_NE(str, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 

@@ -111,8 +111,8 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestStaticAddLog)
             auto mname = g_implI->functionGetName(method);
             auto methodName = helpers::GetCropFuncName(helpers::AbckitStringToString(mname).data());
             std::string startMsg = "file: NOTE; function: " + methodName;
-            userData.str1 = g_implM->createString(file, startMsg.c_str());
-            userData.str2 = g_implM->createString(file, "Elapsed time:");
+            userData.str1 = g_implM->createString(file, startMsg.c_str(), startMsg.size());
+            userData.str2 = g_implM->createString(file, "Elapsed time:", strlen("Elapsed time:"));
 
             TransformIr(graph, &userData);
         },

@@ -54,7 +54,7 @@ TEST_F(LibAbcKitIcreateArrayTest, IcreateDynCreatearraywithbuffer_1)
                 // g_implM->createLiteralU64(file, (uint64_t)((uint64_t)2 << 62) + 1),
                 // g_implM->createLiteralFloat(file, 3.21),
                 g_implM->createLiteralDouble(file, 3.22),
-                g_implM->createLiteralString(file, "asdf"),
+                g_implM->createLiteralString(file, "asdf", strlen("asdf")),
             });
             auto litArr = g_implM->createLiteralArray(file, arr.data(), arr.size());
 

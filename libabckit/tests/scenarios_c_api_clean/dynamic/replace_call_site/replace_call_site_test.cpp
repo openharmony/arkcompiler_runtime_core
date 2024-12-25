@@ -339,7 +339,7 @@ TEST_F(LibAbcKitTest, LibAbcKitTestDynamicReplaceCallSiteClean)
     auto output = helpers::ExecuteDynamicAbc(inputPath, "replace_call_site");
     EXPECT_TRUE(helpers::Match(output, "3\n"));
 
-    AbckitFile *file = g_impl->openAbc(inputPath.c_str());
+    AbckitFile *file = g_impl->openAbc(inputPath.c_str(), inputPath.size());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     UserData ud {};
@@ -371,7 +371,7 @@ TEST_F(LibAbcKitTest, LibAbcKitTestDynamicReplaceCallSiteClean)
         },
         file);
 
-    g_impl->writeAbc(file, outputPath.c_str());
+    g_impl->writeAbc(file, outputPath.c_str(), outputPath.size());
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 

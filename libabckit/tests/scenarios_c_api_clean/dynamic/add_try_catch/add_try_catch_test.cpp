@@ -172,11 +172,11 @@ class AbckitScenarioTestClean : public ::testing::Test {};
 // Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
 TEST_F(AbckitScenarioTestClean, LibAbcKitTestDynamicAddTryCatchClean)
 {
-    auto output = helpers::ExecuteDynamicAbc(
-        ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_try_catch/add_try_catch.abc", "add_try_catch");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_try_catch/add_try_catch.abc";
+    auto output = helpers::ExecuteDynamicAbc(INPUT_PATH, "add_try_catch");
     EXPECT_TRUE(helpers::Match(output, "THROW\n"));
 
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_try_catch/add_try_catch.abc");
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     AbckitCoreFunction *runMethod;
@@ -191,17 +191,18 @@ TEST_F(AbckitScenarioTestClean, LibAbcKitTestDynamicAddTryCatchClean)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     UserData uData {};
-    uData.print = g_implM->createString(file, "print");
+    uData.print = g_implM->createString(file, "print", strlen("print"));
     TransformIr(graph, &uData);
 
     g_implM->functionSetGraph(runMethod, graph);
     g_impl->destroyGraph(graph);
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_try_catch/add_try_catch_modified.abc");
+    constexpr auto OUTPUT_PATH =
+        ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_try_catch/add_try_catch_modified.abc";
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    output = helpers::ExecuteDynamicAbc(
-        ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_try_catch/add_try_catch_modified.abc", "add_try_catch");
+    output = helpers::ExecuteDynamicAbc(OUTPUT_PATH, "add_try_catch");
     EXPECT_TRUE(helpers::Match(output,
                                "THROW\n"
                                "Error: DUMMY_ERROR\n"

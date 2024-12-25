@@ -55,12 +55,14 @@ static panda::pandasm::Function *g_dummyPandasmFunction = (panda::pandasm::Funct
 AbckitGraph *OpenWrongModeFile(bool isDynamic)
 {
     if (isDynamic) {
-        auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "wrong_mode_tests/mode_test_static.abc");
+        constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "wrong_mode_tests/mode_test_static.abc";
+        auto *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
         auto *foo = helpers::FindMethodByName(file, "foo");
         auto *graph = CreateGraphFromFunctionStatic(foo);
         return graph;
     }
-    auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "wrong_mode_tests/mode_test_dynamic.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "wrong_mode_tests/mode_test_dynamic.abc";
+    auto *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     auto *foo = helpers::FindMethodByName(file, "foo");
     auto *graph = g_implI->createGraphFromFunction(foo);
     return graph;

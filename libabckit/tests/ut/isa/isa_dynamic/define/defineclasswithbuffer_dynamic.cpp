@@ -58,7 +58,7 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_1)
 
             auto *instDefine = g_dynG->iCreateDefineclasswithbuffer(graph, classMethod, litArr, 0x0, input);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *stringProt = g_implM->createString(file, "prototype");
+            auto *stringProt = g_implM->createString(file, "prototype", strlen("prototype"));
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, instDefine, stringProt);
             auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
             auto *newobj = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_NEWOBJRANGE);
@@ -98,7 +98,7 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_2)
 
             auto *instDefine = g_dynG->iCreateDefineclasswithbuffer(graph, classConstr, litArr, 0x0, input);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *stringProt = g_implM->createString(file, "prototype");
+            auto *stringProt = g_implM->createString(file, "prototype", strlen("prototype"));
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, instDefine, stringProt);
             auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
             auto *newobj = g_dynG->iCreateNewobjrange(graph, 1, instDefine);
@@ -130,7 +130,7 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_3)
             auto *classConstr = helpers::FindMethodByName(file, "newClassConstr");
             ASSERT_NE(classConstr, nullptr);
             auto arr = std::vector<AbckitLiteral *>();
-            arr.emplace_back(g_implM->createLiteralString(file, "newClassMethod"));
+            arr.emplace_back(g_implM->createLiteralString(file, "newClassMethod", strlen("newClassMethod")));
             arr.emplace_back(g_implM->createLiteralMethod(file, helpers::FindMethodByName(file, "newClassMethod")));
             arr.emplace_back(g_implM->createLiteralMethodAffiliate(file, 0));
             arr.emplace_back(g_implM->createLiteralU32(file, 1));
@@ -138,11 +138,11 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_3)
 
             auto *instDefine = g_dynG->iCreateDefineclasswithbuffer(graph, classConstr, litArr, 0x0, input);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *stringProt = g_implM->createString(file, "prototype");
+            auto *stringProt = g_implM->createString(file, "prototype", strlen("prototype"));
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, instDefine, stringProt);
             auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
             auto *newobj = g_dynG->iCreateNewobjrange(graph, 1, instDefine);
-            auto *stringMethod = g_implM->createString(file, "newClassMethod");
+            auto *stringMethod = g_implM->createString(file, "newClassMethod", strlen("newClassMethod"));
             auto *ldobjbyname2 = g_dynG->iCreateLdobjbyname(graph, newobj, stringMethod);
             auto *callthis = g_dynG->iCreateCallthis0(graph, ldobjbyname2, newobj);
             g_implG->iInsertBefore(instDefine, ldundefined);
@@ -175,10 +175,10 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_4)
             auto *classConstr = helpers::FindMethodByName(file, "newClassConstr");
             ASSERT_NE(classConstr, nullptr);
             auto arr = std::vector<AbckitLiteral *>();
-            arr.emplace_back(g_implM->createLiteralString(file, "newClassMethod"));
+            arr.emplace_back(g_implM->createLiteralString(file, "newClassMethod", strlen("newClassMethod")));
             arr.emplace_back(g_implM->createLiteralMethod(file, helpers::FindMethodByName(file, "newClassMethod")));
             arr.emplace_back(g_implM->createLiteralMethodAffiliate(file, 0));
-            arr.emplace_back(g_implM->createLiteralString(file, "newClassMethod2"));
+            arr.emplace_back(g_implM->createLiteralString(file, "newClassMethod2", strlen("newClassMethod2")));
             arr.emplace_back(g_implM->createLiteralMethod(file, helpers::FindMethodByName(file, "newClassMethod2")));
             arr.emplace_back(g_implM->createLiteralMethodAffiliate(file, 1));
             arr.emplace_back(g_implM->createLiteralU32(file, 2));
@@ -186,11 +186,11 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_4)
 
             auto *instDefine = g_dynG->iCreateDefineclasswithbuffer(graph, classConstr, litArr, 0x0, input);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *stringProt = g_implM->createString(file, "prototype");
+            auto *stringProt = g_implM->createString(file, "prototype", strlen("prototype"));
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, instDefine, stringProt);
             auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
             auto *newobj = g_dynG->iCreateNewobjrange(graph, 1, instDefine);
-            auto *stringMethod = g_implM->createString(file, "newClassMethod2");
+            auto *stringMethod = g_implM->createString(file, "newClassMethod2", strlen("newClassMethod2"));
             auto *ldobjbyname2 = g_dynG->iCreateLdobjbyname(graph, newobj, stringMethod);
             auto *const1 = g_implG->gFindOrCreateConstantU64(graph, 5);
             auto *callthis = g_dynG->iCreateCallthis1(graph, ldobjbyname2, newobj, const1);
@@ -224,10 +224,10 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_5)
             auto *classConstr = helpers::FindMethodByName(file, "newClassConstr2");
             ASSERT_NE(classConstr, nullptr);
             auto arr = std::vector<AbckitLiteral *>();
-            arr.emplace_back(g_implM->createLiteralString(file, "newClassMethod"));
+            arr.emplace_back(g_implM->createLiteralString(file, "newClassMethod", strlen("newClassMethod")));
             arr.emplace_back(g_implM->createLiteralMethod(file, helpers::FindMethodByName(file, "newClassMethod")));
             arr.emplace_back(g_implM->createLiteralMethodAffiliate(file, 0));
-            arr.emplace_back(g_implM->createLiteralString(file, "newClassMethod2"));
+            arr.emplace_back(g_implM->createLiteralString(file, "newClassMethod2", strlen("newClassMethod2")));
             arr.emplace_back(g_implM->createLiteralMethod(file, helpers::FindMethodByName(file, "newClassMethod2")));
             arr.emplace_back(g_implM->createLiteralMethodAffiliate(file, 1));
             arr.emplace_back(g_implM->createLiteralU32(file, 2));
@@ -235,10 +235,10 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_5)
 
             auto *instDefine = g_dynG->iCreateDefineclasswithbuffer(graph, classConstr, litArr, 0x0, input);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *stringProt = g_implM->createString(file, "prototype");
+            auto *stringProt = g_implM->createString(file, "prototype", strlen("prototype"));
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, instDefine, stringProt);
             auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            auto *string = g_implM->createString(file, "initialize");
+            auto *string = g_implM->createString(file, "initialize", strlen("initialize"));
             auto *loadString = g_dynG->iCreateLoadString(graph, string);
             auto *newobj = g_dynG->iCreateNewobjrange(graph, 2, instDefine, loadString);
             g_implG->iInsertBefore(instDefine, ldundefined);
@@ -275,7 +275,7 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_6)
 
             auto *instDefine = g_dynG->iCreateDefineclasswithbuffer(graph, classConstr, litArr, 0x1, input);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *stringProt = g_implM->createString(file, "prototype");
+            auto *stringProt = g_implM->createString(file, "prototype", strlen("prototype"));
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, instDefine, stringProt);
             auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
             g_implG->iInsertBefore(instDefine, ldundefined);

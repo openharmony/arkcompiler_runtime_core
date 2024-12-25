@@ -84,5 +84,20 @@
         /* CC-OFFNXT(G.PRE.05) code generation */                    \
         return returnValue;                                          \
     }
-
+// CC-OFFNXT(G.PRE.02) code readability
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define LIBABCKIT_ZERO_ARGUMENT(argument, returnvalue)      \
+    if ((argument) == 0) {                                  \
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT); \
+        /* CC-OFFNXT(G.PRE.05) code generation */           \
+        return returnvalue;                                 \
+    }
+// CC-OFFNXT(G.PRE.02) code readability
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define LIBABCKIT_ZERO_ARGUMENT_VOID(argument)              \
+    if ((argument) == 0) {                                  \
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT); \
+        /* CC-OFFNXT(G.PRE.05) code generation */           \
+        return;                                             \
+    }
 #endif

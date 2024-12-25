@@ -82,7 +82,7 @@ void TransformMethod(const std::string &inputPath, const std::string &outputPath
     LIBABCKIT_LOG_TEST(DEBUG) << "TransformMethod: " << inputPath << '\n';
 
     // Open file
-    AbckitFile *file = g_impl->openAbc(inputPath.c_str());
+    AbckitFile *file = g_impl->openAbc(inputPath.c_str(), inputPath.size());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     // Transform method
@@ -99,7 +99,7 @@ void TransformMethod(const std::string &inputPath, const std::string &outputPath
     g_impl->destroyGraph(graph);
 
     // Write output
-    g_impl->writeAbc(file, outputPath.c_str());
+    g_impl->writeAbc(file, outputPath.c_str(), outputPath.size());
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
@@ -110,7 +110,7 @@ void TransformMethod(const std::string &inputPath, const std::string &outputPath
     LIBABCKIT_LOG_TEST(DEBUG) << "TransformMethod: " << inputPath << '\n';
 
     // Open file
-    AbckitFile *file = g_impl->openAbc(inputPath.c_str());
+    AbckitFile *file = g_impl->openAbc(inputPath.c_str(), inputPath.size());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     // Transform method
@@ -121,7 +121,7 @@ void TransformMethod(const std::string &inputPath, const std::string &outputPath
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     // Write output
-    g_impl->writeAbc(file, outputPath.c_str());
+    g_impl->writeAbc(file, outputPath.c_str(), outputPath.size());
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
@@ -161,7 +161,7 @@ void InspectMethod(const std::string &inputPath, const std::string &methodSignat
     LIBABCKIT_LOG_TEST(DEBUG) << "InspectMethod: " << inputPath << '\n';
 
     // Open file
-    AbckitFile *file = g_impl->openAbc(inputPath.c_str());
+    AbckitFile *file = g_impl->openAbc(inputPath.c_str(), inputPath.size());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     // Inspect method
@@ -447,7 +447,7 @@ void AssertOpenAbc(const char *fname, AbckitFile **file)
 {
     ASSERT_NE(g_impl, nullptr);
     ASSERT_NE(g_implI, nullptr);
-    *file = g_impl->openAbc(fname);
+    *file = g_impl->openAbc(fname, strlen(fname));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(*file, nullptr);
 }

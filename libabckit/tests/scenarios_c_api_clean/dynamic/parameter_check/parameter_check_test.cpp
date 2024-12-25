@@ -53,7 +53,7 @@ void AddParamChecker(AbckitCoreFunction *method)
             return true;
         });
 
-        AbckitString *str = g_implM->createString(file, "length");
+        AbckitString *str = g_implM->createString(file, "length", strlen("length"));
 
         AbckitInst *constant = g_implG->gFindOrCreateConstantI32(graph, -1);
         AbckitInst *arrLength = g_dynG->iCreateLdobjbyname(graph, arr, str);
@@ -297,7 +297,7 @@ TEST_F(AbckitScenarioTestClean, LibAbcKitTestParameterCheckClean)
         ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/parameter_check/parameter_check_modified.abc";
     const std::string entryPoint = "parameter_check";
 
-    AbckitFile *file = g_impl->openAbc(INPUT_PATH);
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_NE(file, nullptr);
 
     auto output = helpers::ExecuteDynamicAbc(INPUT_PATH, entryPoint);
@@ -315,7 +315,7 @@ TEST_F(AbckitScenarioTestClean, LibAbcKitTestParameterCheckClean)
 
     Modify(method, file);
 
-    g_impl->writeAbc(file, OUTPUT_PATH);
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
     g_impl->closeFile(file);
 
     output = helpers::ExecuteDynamicAbc(OUTPUT_PATH, entryPoint);

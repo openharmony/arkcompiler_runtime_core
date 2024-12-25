@@ -37,7 +37,7 @@ TEST_F(AbckitRegressionTestCAPI, LibAbcKitTestIssueIB1YEI)
         "new_module"
     };
 
-    AbckitFile *file = g_impl->openAbc(inputPath.c_str());
+    AbckitFile *file = g_impl->openAbc(inputPath.c_str(), inputPath.size());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     auto newModule = g_implArkM->fileAddExternalModuleArktsV1(file, &params);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

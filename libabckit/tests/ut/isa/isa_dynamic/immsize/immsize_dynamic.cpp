@@ -38,7 +38,8 @@ class LibAbcKitCheckDynInstImmSize : public ::testing::Test {};
 
 AbckitGraph *OpenImmSizeFile()
 {
-    auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/immsize/immsize_dynamic.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/isa/isa_dynamic/immsize/immsize_dynamic.abc";
+    auto *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     auto *bar = helpers::FindMethodByName(file, "bar");
     auto *graph = g_implI->createGraphFromFunction(bar);
     return graph;

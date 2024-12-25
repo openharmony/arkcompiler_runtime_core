@@ -73,7 +73,7 @@ TEST_F(LibAbcKitModifyApiStringsTest, StaticCreateString)
 {
     UserData userData = {};
     auto testImpl = [&userData]() {
-        auto abckitstr = g_implM->createString(userData.file, "newString");
+        auto abckitstr = g_implM->createString(userData.file, "newString", strlen("newString"));
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_NE(abckitstr, nullptr);
 
@@ -99,13 +99,13 @@ TEST_F(LibAbcKitModifyApiStringsTest, StaticCreateString2)
         AbckitInst *callOp = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC);
         auto consoleLogStr = helpers::FindMethodByName(userData.file, "ConsoleLogStr");
 
-        auto str1 = g_implM->createString(userData.file, "string1");
+        auto str1 = g_implM->createString(userData.file, "string1", strlen("string1"));
         auto loadString1 = g_statG->iCreateLoadString(graph, str1);
         g_implG->iInsertAfter(loadString1, callOp);
         AbckitInst *log1 = g_statG->iCreateCallStatic(graph, consoleLogStr, 1, loadString1);
         g_implG->iInsertAfter(log1, loadString1);
 
-        auto str2 = g_implM->createString(userData.file, "string2");
+        auto str2 = g_implM->createString(userData.file, "string2", strlen("string2"));
         auto loadString2 = g_statG->iCreateLoadString(graph, str2);
         g_implG->iInsertAfter(loadString2, log1);
         AbckitInst *log2 = g_statG->iCreateCallStatic(graph, consoleLogStr, 1, loadString2);
@@ -144,7 +144,7 @@ TEST_F(LibAbcKitModifyApiStringsTest, DynamicCreateString)
 {
     UserData userData = {};
     auto testImpl = [&userData]() {
-        auto abckitstr = g_implM->createString(userData.file, "newString");
+        auto abckitstr = g_implM->createString(userData.file, "newString", strlen("newString"));
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_NE(abckitstr, nullptr);
 
@@ -175,8 +175,8 @@ TEST_F(LibAbcKitModifyApiStringsTest, DynamicCreateString2)
     auto testImpl = [&userData](AbckitGraph *graph) {
         AbckitInst *callOp = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1);
 
-        auto str1 = g_implM->createString(userData.file, "string1");
-        auto str2 = g_implM->createString(userData.file, "string2");
+        auto str1 = g_implM->createString(userData.file, "string1", strlen("string1"));
+        auto str2 = g_implM->createString(userData.file, "string2", strlen("string2"));
 
         auto loadString1 = g_dynG->iCreateLoadString(graph, str1);
         g_implG->iInsertAfter(loadString1, callOp);

@@ -49,8 +49,8 @@ static void TransformIrMain(AbckitFile *file, AbckitGraph *graph, bool isWideMod
     AbckitInst *newlexenv = nullptr;
     if (isWithName) {
         std::array<AbckitLiteral *, 5U> statlitarr = {
-            g_implM->createLiteralU32(file, 2), g_implM->createLiteralString(file, "x"),
-            g_implM->createLiteralU32(file, 0), g_implM->createLiteralString(file, "y"),
+            g_implM->createLiteralU32(file, 2), g_implM->createLiteralString(file, "x", strlen("x")),
+            g_implM->createLiteralU32(file, 0), g_implM->createLiteralString(file, "y", strlen("x")),
             g_implM->createLiteralU32(file, 1)};
         AbckitLiteralArray *litarr = g_implM->createLiteralArray(file, statlitarr.data(), 5U);
         newlexenv = isWideMode ? g_dynG->iCreateWideNewlexenvwithname(graph, 0x2, litarr)
@@ -110,9 +110,9 @@ static void TransformIrFuncs(AbckitFile *file, AbckitGraph *graph, uint32_t slot
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     AbckitString *name = nullptr;
     if (slot == 0x0) {
-        name = g_implM->createString(file, "x");
+        name = g_implM->createString(file, "x", strlen("x"));
     } else if (slot == 0x1) {
-        name = g_implM->createString(file, "y");
+        name = g_implM->createString(file, "y", strlen("y"));
     }
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     auto *throwundef = g_dynG->iCreateThrowUndefinedifholewithname(graph, ldlexvar, name);

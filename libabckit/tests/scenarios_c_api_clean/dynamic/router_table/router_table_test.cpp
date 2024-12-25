@@ -134,7 +134,7 @@ void TransformMethod(AbckitCoreFunction *method, VisitHelper &visitor, const Use
         std::string fullPath =
             std::string(visitor.GetString(routerInfo.scheme)) + std::string(visitor.GetString(routerInfo.path));
         auto arr = std::vector<AbckitLiteral *>();
-        AbckitLiteral *str = g_implM->createLiteralString(file, fullPath.data());
+        AbckitLiteral *str = g_implM->createLiteralString(file, fullPath.data(), fullPath.size());
         arr.emplace_back(str);
 
         auto *litArr = g_implM->createLiteralArray(file, arr.data(), arr.size());
@@ -317,7 +317,7 @@ TEST_F(AbckitScenarioTestClean, LibAbcKitTestRouterTableClean)
     auto output = helpers::ExecuteDynamicAbc(inputPath, "router_table");
     EXPECT_TRUE(helpers::Match(output, ""));
 
-    AbckitFile *file = g_impl->openAbc(inputPath.c_str());
+    AbckitFile *file = g_impl->openAbc(inputPath.c_str(), inputPath.size());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     auto visitor = VisitHelper(file, g_impl, g_implI, g_implG, g_dynG);
@@ -329,15 +329,14 @@ TEST_F(AbckitScenarioTestClean, LibAbcKitTestRouterTableClean)
     auto *method = FindMethodWithRouterTable(visitor);
     ModifyRouterTable(method, visitor, userData);
 
-    g_impl->writeAbc(file, outputPath.c_str());
+    g_impl->writeAbc(file, outputPath.c_str(), outputPath.size());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     for (const auto &ud : userData) {
         ASSERT_FALSE(ClassHasAnnotation(visitor, ud));
     }
 
-    output = helpers::ExecuteDynamicAbc(
-        ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/router_table/router_table_modified.abc", "router_table");
+    output = helpers::ExecuteDynamicAbc(outputPath, "router_table");
 
     g_impl->closeFile(file);
 

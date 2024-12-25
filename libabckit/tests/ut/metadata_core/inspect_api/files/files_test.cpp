@@ -82,7 +82,8 @@ TEST_F(LibAbcKitInspectApiFilesTest, DynamicFileEnumerateModules)
         ASSERT_NE(gotModulesMap.find(expectedName), gotModulesMap.end());
     }
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc");
+    constexpr auto OUTPUT_PATH = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc";
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -106,7 +107,8 @@ TEST_F(LibAbcKitInspectApiFilesTest, DISABLED_DynamicFileEnumerateExternalModule
         ASSERT_NE(gotModulesMap.find(expectedName), gotModulesMap.end());
     }
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc");
+    constexpr auto OUTPUT_PATH = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc";
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

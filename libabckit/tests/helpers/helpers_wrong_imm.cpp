@@ -34,7 +34,8 @@ static AbckitLiteralArray *g_dummyLitarr = (AbckitLiteralArray *)(0x1);
 
 AbckitGraph *OpenWrongImmFile()
 {
-    auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "wrong_imm_tests/wrong_imm_test_dynamic.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "wrong_imm_tests/wrong_imm_test_dynamic.abc";
+    auto *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     auto *foo = helpers::FindMethodByName(file, "foo");
     auto *graph = g_implI->createGraphFromFunction(foo);
     return graph;

@@ -50,7 +50,7 @@ TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_1)
             auto *createObj = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEOBJECTWITHBUFFER);
             auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
             auto *ldfalse = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDFALSE);
-            auto *getterStr = g_implM->createString(file, "getter");
+            auto *getterStr = g_implM->createString(file, "getter", strlen("getter"));
             auto *loadString = g_dynG->iCreateLoadString(graph, getterStr);
             auto *definegetter = g_dynG->iCreateDefinegettersetterbyvalue(graph, ldfalse, createObj, loadString,
                                                                           getterFunc, ldundefined);
@@ -59,7 +59,7 @@ TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_1)
             g_implG->iInsertBefore(loadString, ldundefinedLast);
             g_implG->iInsertBefore(definegetter, ldundefinedLast);
 
-            auto *stringPrint = g_implM->createString(file, "print");
+            auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
             auto *ldglobal = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, createObj, getterStr);
             auto *callarg = g_dynG->iCreateCallarg1(graph, ldglobal, ldobjbyname);
@@ -90,7 +90,7 @@ TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_2)
             auto *createObj = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEOBJECTWITHBUFFER);
             auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
             auto *ldfalse = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDFALSE);
-            auto *setterStr = g_implM->createString(file, "setter");
+            auto *setterStr = g_implM->createString(file, "setter", strlen("setter"));
             auto *loadString = g_dynG->iCreateLoadString(graph, setterStr);
             auto *definesetter = g_dynG->iCreateDefinegettersetterbyvalue(graph, ldfalse, createObj, loadString,
                                                                           ldundefined, setterFunc);
@@ -125,7 +125,7 @@ TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_3)
             auto *getterFunc = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINEFUNC);
             auto *createObj = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEOBJECTWITHBUFFER);
             auto *ldfalse = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDFALSE);
-            auto *getterStr = g_implM->createString(file, "getter");
+            auto *getterStr = g_implM->createString(file, "getter", strlen("getter"));
             auto *loadString = g_dynG->iCreateLoadString(graph, getterStr);
             auto *definesetter =
                 g_dynG->iCreateDefinegettersetterbyvalue(graph, ldfalse, createObj, loadString, getterFunc, getterFunc);
@@ -138,7 +138,7 @@ TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_3)
             auto *stobj = g_dynG->iCreateStobjbyname(graph, const1, getterStr, createObj);
             g_implG->iInsertBefore(stobj, ldundefinedLast);
 
-            auto *stringPrint = g_implM->createString(file, "print");
+            auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
             auto *ldglobal = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, createObj, getterStr);
             auto *callarg = g_dynG->iCreateCallarg1(graph, ldglobal, ldobjbyname);

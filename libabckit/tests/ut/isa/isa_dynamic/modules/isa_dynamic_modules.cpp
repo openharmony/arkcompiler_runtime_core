@@ -830,7 +830,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynGetmodulenamespace)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules_modified.abc", "isa_dynamic_modules.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitString *abckitstr = g_implM->createString(file, "sameFuncInDifferentModules");
+            AbckitString *abckitstr =
+                g_implM->createString(file, "sameFuncInDifferentModules", strlen("sameFuncInDifferentModules"));
 
             TransformIrGetModuleNamespace(graph, abckitstr);
         },
@@ -866,7 +867,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideGetmodulenamesp
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules_modified.abc", "isa_dynamic_modules.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitString *abckitstr = g_implM->createString(file, "sameFuncInDifferentModules");
+            AbckitString *abckitstr =
+                g_implM->createString(file, "sameFuncInDifferentModules", strlen("sameFuncInDifferentModules"));
 
             TransformIrGetModuleNamespace(graph, abckitstr, true);
         },
@@ -902,7 +904,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynLdexternalmodulevar
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules_modified.abc", "isa_dynamic_modules.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitString *abckitstr = g_implM->createString(file, "MF1M2");
+            AbckitString *abckitstr = g_implM->createString(file, "MF1M2", strlen("MF1M2"));
 
             TransformIrLdExternalModuleVar(graph, abckitstr);
         },
@@ -938,7 +940,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideLdexternalmodul
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules_modified.abc", "isa_dynamic_modules.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitString *abckitstr = g_implM->createString(file, "MF1M2");
+            AbckitString *abckitstr = g_implM->createString(file, "MF1M2", strlen("MF1M2"));
 
             TransformIrLdExternalModuleVar(graph, abckitstr, true);
         },
@@ -974,8 +976,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynLdlocalmodulevar)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules_modified.abc", "isa_dynamic_modules.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitString *abckitstr = g_implM->createString(file, "LocalExportLet");
-            AbckitString *abckitcallStr = g_implM->createString(file, "print");
+            AbckitString *abckitstr = g_implM->createString(file, "LocalExportLet", strlen("LocalExportLet"));
+            AbckitString *abckitcallStr = g_implM->createString(file, "print", strlen("print"));
 
             TransformIrLdLocalModuleVar(graph, abckitstr, abckitcallStr);
         },
@@ -1013,8 +1015,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideLdlocalmoduleva
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules_modified.abc", "isa_dynamic_modules.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitString *abckitstr = g_implM->createString(file, "LocalExportLet");
-            AbckitString *abckitcallStr = g_implM->createString(file, "print");
+            AbckitString *abckitstr = g_implM->createString(file, "LocalExportLet", strlen("LocalExportLet"));
+            AbckitString *abckitcallStr = g_implM->createString(file, "print", strlen("print"));
 
             TransformIrLdLocalModuleVar(graph, abckitstr, abckitcallStr, true);
         },
@@ -1052,8 +1054,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynStmodulevar)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules_modified.abc", "isa_dynamic_modules.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitString *abckitstr = g_implM->createString(file, "LocalExportConst");
-            AbckitString *abckitcallStr = g_implM->createString(file, "print");
+            AbckitString *abckitstr = g_implM->createString(file, "LocalExportConst", strlen("LocalExportConst"));
+            AbckitString *abckitcallStr = g_implM->createString(file, "print", strlen("print"));
 
             TransformIrStModuleVar(graph, abckitstr, abckitcallStr);
         },
@@ -1093,8 +1095,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideStmodulevar)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules_modified.abc", "isa_dynamic_modules.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitString *abckitstr = g_implM->createString(file, "LocalExportConst");
-            AbckitString *abckitcallStr = g_implM->createString(file, "print");
+            AbckitString *abckitstr = g_implM->createString(file, "LocalExportConst", strlen("LocalExportConst"));
+            AbckitString *abckitcallStr = g_implM->createString(file, "print", strlen("print"));
 
             TransformIrStModuleVar(graph, abckitstr, abckitcallStr, true);
         },

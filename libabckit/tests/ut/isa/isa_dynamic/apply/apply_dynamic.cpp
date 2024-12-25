@@ -41,7 +41,7 @@ auto g_icreateApplyLambda0 = [](AbckitFile *file, AbckitCoreFunction * /*method*
     auto *const0 = g_implG->gFindOrCreateConstantU64(graph, 0x0);
     auto *param3 = g_implG->gGetParameter(graph, 0x3);
     auto *starrayspread = g_dynG->iCreateStarrayspread(graph, param3, createemptyarray, const0);
-    auto *stringLength = g_implM->createString(file, "length");
+    auto *stringLength = g_implM->createString(file, "length", strlen("length"));
     auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, createemptyarray, stringLength);
     auto *apply = g_dynG->iCreateApply(graph, ldlexvar, ldundefined, createemptyarray);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -112,15 +112,15 @@ TEST_F(LibAbcKitCreateDynApply, IcreateNewobjapply_1)
             auto *createarraywithbuffer =
                 helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEARRAYWITHBUFFER);
             auto *starrayspread = g_dynG->iCreateStarrayspread(graph, createarraywithbuffer, createemptyarray, const0);
-            auto *stringLength = g_implM->createString(file, "length");
+            auto *stringLength = g_implM->createString(file, "length", strlen("length"));
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, createemptyarray, stringLength);
             auto *defineclasswithbuffer =
                 helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINECLASSWITHBUFFER);
             auto *newobjapply = g_dynG->iCreateNewobjapply(graph, createemptyarray, defineclasswithbuffer);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *stringPrint = g_implM->createString(file, "print");
+            auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
             auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
-            auto *stringA = g_implM->createString(file, "a");
+            auto *stringA = g_implM->createString(file, "a", strlen("a"));
             auto *ldobjbyname2 = g_dynG->iCreateLdobjbyname(graph, newobjapply, stringA);
             auto *callarg1 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbyname2);
 
@@ -155,21 +155,21 @@ TEST_F(LibAbcKitCreateDynApply, IcreateNewobjapply_2)
             auto *createarraywithbuffer =
                 helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEARRAYWITHBUFFER);
             auto *starrayspread = g_dynG->iCreateStarrayspread(graph, createarraywithbuffer, createemptyarray, const0);
-            auto *stringLength = g_implM->createString(file, "length");
+            auto *stringLength = g_implM->createString(file, "length", strlen("length"));
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, createemptyarray, stringLength);
             auto *defineclasswithbuffer =
                 helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINECLASSWITHBUFFER);
             auto *newobjapply = g_dynG->iCreateNewobjapply(graph, createemptyarray, defineclasswithbuffer);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *stringPrint = g_implM->createString(file, "print");
+            auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
             auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
-            auto *stringA = g_implM->createString(file, "a");
+            auto *stringA = g_implM->createString(file, "a", strlen("a"));
             auto *ldobjbynameA = g_dynG->iCreateLdobjbyname(graph, newobjapply, stringA);
             auto *callarg1A = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbynameA);
-            auto *stringB = g_implM->createString(file, "b");
+            auto *stringB = g_implM->createString(file, "b", strlen("b"));
             auto *ldobjbynameB = g_dynG->iCreateLdobjbyname(graph, newobjapply, stringB);
             auto *callarg1B = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbynameB);
-            auto *stringC = g_implM->createString(file, "c");
+            auto *stringC = g_implM->createString(file, "c", strlen("c"));
             auto *ldobjbynameC = g_dynG->iCreateLdobjbyname(graph, newobjapply, stringC);
             auto *callarg1C = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbynameC);
 

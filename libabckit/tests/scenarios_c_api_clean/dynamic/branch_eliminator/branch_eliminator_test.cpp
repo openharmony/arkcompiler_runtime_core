@@ -530,12 +530,11 @@ static std::string GetExpectOutput(bool value)
 
 static void GeneralBranchEliminatorTest(bool configIsDebugFinal)
 {
-    AbckitFile *file =
-        g_impl->openAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/branch_eliminator/branch_eliminator.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/branch_eliminator/branch_eliminator.abc";
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_NE(file, nullptr);
 
-    const auto actualOutput = helpers::ExecuteDynamicAbc(
-        ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/branch_eliminator/branch_eliminator.abc", "branch_eliminator");
+    const auto actualOutput = helpers::ExecuteDynamicAbc(INPUT_PATH, "branch_eliminator");
     auto expectedOutput = GetExpectOutput(CONFIG_IS_DEBUG_ORIGIN_VALUE);
     EXPECT_TRUE(helpers::Match(actualOutput, expectedOutput));
 
@@ -549,12 +548,11 @@ static void GeneralBranchEliminatorTest(bool configIsDebugFinal)
     ASSERT_FALSE(MethodHasBranch("modules/mybar", "test1", file));
     ASSERT_FALSE(MethodHasBranch("modules/mybar", "test2", file));
 
-    g_impl->writeAbc(file,
-                     ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/branch_eliminator/branch_eliminator_modified.abc");
+    constexpr auto OUTPUT_PATH =
+        ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/branch_eliminator/branch_eliminator_modified.abc";
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
     g_impl->closeFile(file);
-    auto output = helpers::ExecuteDynamicAbc(
-        ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/branch_eliminator/branch_eliminator_modified.abc",
-        "branch_eliminator");
+    auto output = helpers::ExecuteDynamicAbc(OUTPUT_PATH, "branch_eliminator");
     auto expectOutput2 = GetExpectOutput(configIsDebugFinal);
     ASSERT_EQ(output, expectOutput2);
 }

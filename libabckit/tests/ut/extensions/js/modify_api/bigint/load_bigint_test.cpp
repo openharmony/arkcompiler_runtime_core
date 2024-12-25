@@ -46,7 +46,8 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicIcreateLdbigint)
     EXPECT_TRUE(helpers::Match(output, expected));
 
     auto cb = [](AbckitFile *file, AbckitCoreFunction *, AbckitGraph *graph) {
-        AbckitString *value = g_implM->createString(file, "987654321987654321987654321");
+        AbckitString *value =
+            g_implM->createString(file, "987654321987654321987654321", strlen("987654321987654321987654321"));
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_NE(value, nullptr);
 
