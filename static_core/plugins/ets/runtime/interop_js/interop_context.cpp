@@ -237,7 +237,11 @@ void InteropCtx::InitExternalInterfaces()
     });
 }
 
-InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env) : constStringStorage_(this), stackInfoManager_(this, coro)
+// Workaround for calling interop without a scope (e.g., calling from native)
+// Use the creation-time napi_env as default jsEnv.
+// This should be removed ASAP, issue: #21429
+InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
+    : jsEnv_(env), constStringStorage_(this), stackInfoManager_(this, coro)
 {
     JSNapiEnvScope envscope(this, env);
     jsEnvForEventLoopCallbacks_ = env;
