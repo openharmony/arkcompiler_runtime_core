@@ -115,13 +115,15 @@ static_core/plugins/ets/runtime/types/*promise*                               @d
 static_core/plugins/ets/runtime/types/*typeapi*                               @smirnovandrei @anton-sysoev
 static_core/plugins/ets/stdlib/escompat/Atomics.sts                           @dmitriitr @konstanting
 static_core/plugins/ets/templates/stdlib/                                     @ivan-tyulyandin @anton-sysoev
-static_core/plugins/ets/tests/benchmarks/                                     @semenovaleksandr @ignatenkooleg
+static_core/plugins/ets/tests/benchmarks/interop_js                           @semenovaleksandr @ignatenkooleg
 static_core/plugins/ets/tests/checked/                                        @Prof1983
 static_core/plugins/ets/tests/ets_es_checked/                                 @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/tests/stdlib-templates/                               @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/tests/test-lists/                                     @shirunova_viktoria @kuchkovairina
 static_core/plugins/ets/tools/declgen_ts2sts/                                 @semenovaleksandr
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   @ivan-tyulyandin @anton-sysoev
+static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        @dmitriitr @udav @ipetrov
+static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting @dmitriitr @udav
 static_core/plugins/ets/stdlib/std/containers/BlockingQueue.sts               @konstanting
 static_core/plugins/ets/stdlib/std/core/Coroutine.sts                         @dmitriitr @konstanting
 static_core/plugins/ets/stdlib/std/core/EnumConstant.sts                      @smirnovandrei @anton-sysoev
@@ -141,13 +143,13 @@ static_core/plugins/ets/tests/ets_test_suite/containers/blocking_queue.sts    @k
 static_core/plugins/ets/tests/ets_test_suite/coroutines/                      @konstanting
 static_core/plugins/ets/tests/ets_test_suite/gc/                              @udav
 static_core/plugins/ets/tests/ets_test_suite/taskpool/                        @konstanting @ipetrov
-static_core/plugins/ets/tests/interop_js/tests/                               @igelhaus @semenovaleksandr @ignatenkooleg @igorlegalov
+static_core/plugins/ets/tests/interop_js/tests/                               @igelhaus @semenovaleksandr @ignatenkooleg @rokashevichsvetlana
 static_core/plugins/ets/tests/native/promise/                                 @konstanting
 static_core/plugins/ets/tests/runtime/tooling/                                @ragnvald
 static_core/plugins/ets/tests/runtime/types/ets_promise_test.cpp              @konstanting @udav
 static_core/plugins/ets/stdlib/std/debug/concurrency/                         @konstanting
-static_core/plugins/ets/tests/interop_js/tests/checked/                       @igelhaus @semenovaleksandr @ignatenkooleg @igorlegalov @Prof1983
-static_core/plugins/ets/tests/interop_js/tests/compiler/                      @igelhaus @semenovaleksandr @ignatenkooleg @igorlegalov @Prof1983
+static_core/plugins/ets/tests/interop_js/tests/checked/                       @igelhaus @semenovaleksandr @ignatenkooleg @rokashevichsvetlana @Prof1983
+static_core/plugins/ets/tests/interop_js/tests/compiler/                      @igelhaus @semenovaleksandr @ignatenkooleg @rokashevichsvetlana @Prof1983
 static_core/plugins/ets/tests/interop_js/tests/promise/                       @udav
 static_core/plugins/ets/tests/sts_ts_subset/std/core/Promise*                 @ivan-tyulyandin @anton-sysoev @dmitriitr @konstanting @udav
 
