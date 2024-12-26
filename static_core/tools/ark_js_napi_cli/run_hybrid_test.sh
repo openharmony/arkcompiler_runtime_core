@@ -17,6 +17,8 @@ set -e
 declare BUILD_ROOT=""
 declare JS_TEST_PATH=""
 declare STS_TEST_PATH=""
+declare TS_TEST_PATH=""
+declare TS_COMMON_PATH=""
 
 while [[ -n "$1" ]]; do
     case "$1" in
@@ -31,6 +33,14 @@ while [[ -n "$1" ]]; do
         --sts-test)
             shift
             STS_TEST_PATH="$1"
+            ;;
+        --ts-test)
+            shift
+            TS_TEST_PATH="$1"
+            ;;
+        --ts-common)
+            shift
+            TS_COMMON_PATH="$1"
             ;;
         *)
             echo "Unknow option '$1'"
@@ -47,12 +57,12 @@ if [[ ! -d "${BUILD_ROOT}" ]]; then
     echo "Build directory does not exist: ${BUILD_ROOT}"
     exit 1
 fi
-if [[ -z "${JS_TEST_PATH}" ]]; then
-    echo "JS test file was not set. Please use --js-test option"
+if [[ -z "${JS_TEST_PATH}" && -z "${TS_TEST_PATH}" ]]; then
+    echo "JS or TS test file was not set. Please use --js-test or --ts-test option"
     exit 1
 fi
-if [[ ! -f "${JS_TEST_PATH}" ]]; then
-    echo "JS test file does not exist: ${JS_TEST_PATH}"
+if [[ ! -f "${JS_TEST_PATH}" && ! -f "${TS_TEST_PATH}" ]]; then
+    echo "JS or TS test file does not exist: ${JS_TEST_PATH} or ${TS_TEST_PATH}"
     exit 1
 fi
 if [[ -n "${STS_TEST_PATH}" && ! -f "${STS_TEST_PATH}" ]]; then
@@ -62,10 +72,15 @@ fi
 
 ## Prepare test space
 declare TEST_SPACE="${BUILD_ROOT}/hybrid_test"
-declare JS_TEST_NAME="" STS_TEST_NAME=""
-JS_TEST_NAME="$(basename -s .js "${JS_TEST_PATH}")_js"
+declare JS_TEST_NAME="" STS_TEST_NAME="" TS_TEST_NAME="" TS_COMMON_NAME=""
+JS_TEST_NAME="$(basename -s .js "${JS_TEST_PATH}")_ts"
+TS_TEST_NAME="$(basename -s .ts "${TS_TEST_PATH}")_ts"
 if [[ -n "${STS_TEST_PATH}" ]]; then
     STS_TEST_NAME="$(basename -s .sts "${STS_TEST_PATH}")_sts"
+fi
+
+if [[ -n "${TS_COMMON_PATH}" ]]; then
+    TS_COMMON_NAME="$(basename -s .ts "${TS_COMMON_PATH}")_ts"
 fi
 
 if [[ -d "${TEST_SPACE}" ]]; then
@@ -102,7 +117,14 @@ cp "${BUILD_ROOT}/arkcompiler/ets_frontend/arktsconfig.json" "${TEST_SPACE}"
 cd "${TEST_SPACE}"
 
 ### Compile test
-"${TEST_SPACE}"/bin/es2abc --merge-abc --extension=js --commonjs "${JS_TEST_PATH}" --output "${TEST_SPACE}/${JS_TEST_NAME}.abc"
+if [[ -n "${TS_TEST_PATH}" ]]; then
+    "${TEST_SPACE}"/bin/es2abc --merge-abc --extension=ts --module "${TS_TEST_PATH}" --output "${TEST_SPACE}/${TS_TEST_NAME}.abc"
+else
+    "${TEST_SPACE}"/bin/es2abc --merge-abc --extension=js --commonjs "${JS_TEST_PATH}" --output "${TEST_SPACE}/${JS_TEST_NAME}.abc"
+fi
+if [[ -n "${TS_COMMON_PATH}" ]]; then
+    "${TEST_SPACE}"/bin/es2abc --merge-abc --extension=ts --module "${TS_COMMON_PATH}" --output "${TEST_SPACE}/${TS_COMMON_NAME}.abc"
+fi
 if [[ -n "${STS_TEST_PATH}" ]]; then
     "${TEST_SPACE}"/bin/es2panda --extension=sts --opt-level=2 \
                                  --arktsconfig="${TEST_SPACE}/arktsconfig.json" \
@@ -111,7 +133,15 @@ if [[ -n "${STS_TEST_PATH}" ]]; then
 fi
 
 ### Run test
-LD_LIBRARY_PATH="${TEST_SPACE}/lib" "${TEST_SPACE}"/bin/ark_js_napi_cli \
+if [[ -n "${TS_TEST_PATH}" ]]; then
+    LD_LIBRARY_PATH="${TEST_SPACE}/lib" "${TEST_SPACE}"/bin/ark_js_napi_cli \
         --stub-file "${TEST_SPACE}/lib/stub.an" \
-        --entry-point "${JS_TEST_NAME}" \
-        "${TEST_SPACE}/${JS_TEST_NAME}.abc"
+        --entry-point "${TS_TEST_NAME}" \
+        "${TEST_SPACE}/${TS_TEST_NAME}.abc"
+else
+    LD_LIBRARY_PATH="${TEST_SPACE}/lib" "${TEST_SPACE}"/bin/ark_js_napi_cli \
+            --stub-file "${TEST_SPACE}/lib/stub.an" \
+            --entry-point "${JS_TEST_NAME}" \
+            "${TEST_SPACE}/${JS_TEST_NAME}.abc"
+fi
+exit $?
