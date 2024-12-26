@@ -1,0 +1,38 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - decl:
+    - out T
+    - |
+      readonly field: T
+      constructor(p: T) { this.field = p }
+      f(): T { return this.field }
+    use: | 
+      let a: A<string> = new A<string>("abc")
+      assertEQ(a.f(), "abc")
+  - decl:
+    - in T
+    - |
+      f(p: T): number { return 0 }
+    use: |
+      let a: A<string> = new A<string>()
+      assertEQ(a.f("abc"), 0)
+  - decl:
+    - T
+    - |
+      f(p: T): T { return p }
+    use: |
+      let a: A<string> = new A<string>()
+      assertEQ(a.f("abc"), "abc")
