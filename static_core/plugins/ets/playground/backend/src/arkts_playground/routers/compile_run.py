@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -48,7 +48,8 @@ async def compile_run_arkts_code(body: CompileRequestModel,
     result = await runner.compile_run_arkts(
         body.code,
         options=runner.parse_compile_options(body.options),
-        disasm=body.disassemble
+        disasm=body.disassemble,
+        runtime_verify=body.runtime_verify
     )
     return RunResponse(**result)
 
