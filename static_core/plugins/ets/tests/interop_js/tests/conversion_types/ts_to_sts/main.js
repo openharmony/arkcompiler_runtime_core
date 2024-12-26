@@ -30,3 +30,6 @@ exports.tsIntString = '1';
 exports.tsByte = dataView;
 exports.tsFloat = 3.14;
 exports.tsExponential = exports.tsInt.toExponential();
+
+exports.returnBigInt = () => 1000000n;
+exports.returnBigIntObj = () => BigInt(1);
