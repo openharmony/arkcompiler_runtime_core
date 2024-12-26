@@ -23,11 +23,8 @@ export class NumberFormat {
      *
      * @param locale locale from which to load formats and symbols for number formatting
      */
-    public constructor(locale: string = "") {
-        if (locale == "") {
-            locale = "en-US";  // en-US as default locale
-        }
-        this.locale = locale;
+    public constructor(locale: BCP47LanguageTag | BCP47LanguageTag[] = "") {
+        this.locale = intlBestFitLocale(locale);
     }
 
     /**
