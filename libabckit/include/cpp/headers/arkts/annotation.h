@@ -89,9 +89,6 @@ public:
      */
     arkts::AnnotationElement AddAndGetElement(const abckit::Value &val, std::string_view name) const;
 
-    // Other API.
-    // ...
-
     /**
      * @brief Add annotation element to the existing annotation.
      * @return Newly created annotation element.

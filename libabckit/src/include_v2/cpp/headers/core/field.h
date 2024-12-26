@@ -16,7 +16,8 @@
 #ifndef CPP_ABCKIT_CORE_FIELD_H
 #define CPP_ABCKIT_CORE_FIELD_H
 
-#include "../base_classes.h"
+#include "../../../../../include/cpp/headers/base_classes.h"
+#include "../../../c/isa/field.h"
 
 namespace abckit::core {
 

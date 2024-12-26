@@ -100,9 +100,6 @@ public:
      */
     Function RemoveAnnotation(Annotation anno) const;
 
-    // Other API.
-    // ...
-
 private:
     /**
      * @brief Converts underlying function from Core to Arkts target

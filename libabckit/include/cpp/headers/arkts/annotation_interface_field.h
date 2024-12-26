@@ -74,8 +74,6 @@ public:
      * @brief Destroy the Annotation Interface Field object
      */
     ~AnnotationInterfaceField() override = default;
-    // Other API.
-    // ...
 
 private:
     /**

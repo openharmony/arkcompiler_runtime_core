@@ -340,8 +340,6 @@ public:
      */
     js::Module AddExternalModuleJs(std::string_view name) const;
 
-    // Other API.
-
 protected:
     /**
      * @brief Get api config

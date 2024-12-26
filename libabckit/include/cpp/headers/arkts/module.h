@@ -76,8 +76,6 @@ public:
      * @brief Destroy the Module object
      */
     ~Module() override = default;
-    // Other API.
-    // ...
 
     /**
      * @brief Adds import from one ArktsV1 module to another ArktsV1 module.
