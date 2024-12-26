@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,14 +36,21 @@ bool ArkJsRuntime::ProcessOptions(int argc, const char **argv, arg_list_t *filen
         return false;
     }
 
-    std::string files = argv[argc - 1];
-    if (!ecmascript::base::StringHelper::EndsWith(files, ".abc")) {
-        std::cerr << "The last argument must be abc file" << std::endl;
+    size_t jsvmArgsEndIdx = 0;
+    for (int idx = 1; idx < argc; ++idx) {
+        if (ecmascript::base::StringHelper::EndsWith(argv[idx], ".abc")) {
+            jsvmArgsEndIdx = idx;
+        }
+    }
+
+    std::string files = argv[jsvmArgsEndIdx];
+    if (files.empty()) {
+        std::cerr << "Abc file must pass after arguments to jsvm" << std::endl;
         std::cerr << GetHelper();
         return 1;
     }
 
-    bool retOpt = options_.ParseCommand(argc - 1, argv);
+    bool retOpt = options_.ParseCommand(jsvmArgsEndIdx, argv);
     if (!retOpt) {
         std::cerr << GetHelper();
         return false;

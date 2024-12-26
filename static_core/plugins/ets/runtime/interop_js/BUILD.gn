@@ -108,7 +108,7 @@ config("interop_js_public_config") {
     node_api_includes = "//third_party/node/src"
     include_dirs += [
       "$node_api_includes",
-      "$arkui_root/napi/interfaces/inner_api/napi",
+      "$arkui_root/napi",
     ]
     defines += [ "PANDA_JS_ETS_HYBRID_MODE" ]
   } else if (ark_standalone_build || ark_static_standalone_build) {
