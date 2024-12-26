@@ -58,7 +58,6 @@ cases:
       if (a.meth <X[]> (new X(), v) !== v) {
           return 1;
       }
-    bound: ' extends Object[]'
 
   - use: |-
       let v: Color[] = [Color.Red]
