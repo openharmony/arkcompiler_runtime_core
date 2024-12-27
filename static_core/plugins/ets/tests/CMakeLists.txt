@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -504,7 +504,7 @@ add_subdirectory(lookup_by_name)
 add_subdirectory(ets_test_suite)
 add_subdirectory(runtime)
 add_subdirectory(napi)
-add_subdirectory(nark)
+add_subdirectory(ani)
 if(NOT (PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_THREAD_SANITIZER))
     add_subdirectory(micro-benchmarks)
 endif()

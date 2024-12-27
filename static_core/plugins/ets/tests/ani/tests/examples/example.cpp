@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "nark_gtest.h"
+#include "ani_gtest.h"
 
-namespace ark::ets::nark::testing {
+namespace ark::ets::ani::testing {
 
-class ExampleTest : public NarkTest {};
+class ExampleTest : public AniTest {};
 
 // NOLINTBEGIN(readability-magic-numbers)
 TEST_F(ExampleTest, EtsFunctionCall)
@@ -48,4 +48,4 @@ TEST_F(ExampleTest, CallNativeFunction)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace ark::ets::nark::testing
+}  // namespace ark::ets::ani::testing

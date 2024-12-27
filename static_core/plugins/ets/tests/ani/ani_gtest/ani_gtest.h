@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_NARK_GTEST_H
-#define PANDA_PLUGINS_ETS_NARK_GTEST_H
+#ifndef PANDA_PLUGINS_ETS_ANI_GTEST_H
+#define PANDA_PLUGINS_ETS_ANI_GTEST_H
 
 #include <gtest/gtest.h>
 #include <cstdlib>
@@ -22,9 +22,9 @@
 #include "libpandabase/macros.h"
 #include "plugins/ets/runtime/napi/ets_napi.h"
 
-namespace ark::ets::nark::testing {
+namespace ark::ets::ani::testing {
 
-class NarkTest : public ::testing::Test {
+class AniTest : public ::testing::Test {
 public:
     void SetUp() override
     {
@@ -33,9 +33,9 @@ public:
 
         std::vector<EtsVMOption> optionsVector {{EtsOptionType::ETS_BOOT_FILE, stdlib}};
 
-        abcPath_ = std::getenv("NARK_GTEST_ABC_PATH");
+        abcPath_ = std::getenv("ANI_GTEST_ABC_PATH");
         if (abcPath_.empty()) {
-            std::cerr << "NARK_GTEST_ABC_PATH must be set" << std::endl;
+            std::cerr << "ANI_GTEST_ABC_PATH must be set" << std::endl;
             UNREACHABLE();
         }
         optionsVector.push_back({EtsOptionType::ETS_BOOT_FILE, abcPath_.c_str()});
@@ -195,6 +195,6 @@ private:
     EtsVM *vm_ {nullptr};
 };
 
-}  // namespace ark::ets::nark::testing
+}  // namespace ark::ets::ani::testing
 
-#endif  // PANDA_PLUGINS_ETS_NARK_GTEST_H
+#endif  // PANDA_PLUGINS_ETS_ANI_GTEST_H

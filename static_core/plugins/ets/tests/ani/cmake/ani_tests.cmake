@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,12 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_custom_target(nark_tests COMMENT "Common target to run NARK ETS tests")
+add_custom_target(ani_tests COMMENT "Common target to run ANI ETS tests")
 
-# Add gtest-based tests to nark_tests target.
+# Add gtest-based tests to ani_tests target.
 #
 # Example usage:
-#   nark_add_gtest(test_name
+#   ani_add_gtest(test_name
 #     CPP_SOURCES
 #       tests/unit1_test.cpp
 #       tests/unit2_test.cpp
@@ -26,7 +26,7 @@ add_custom_target(nark_tests COMMENT "Common target to run NARK ETS tests")
 #       lib_target1
 #       lib_target2
 #   )
-function(nark_add_gtest TARGET)
+function(ani_add_gtest TARGET)
     cmake_parse_arguments(
         ARG # give prefix `ARG` to each argument
         ""
@@ -44,7 +44,7 @@ function(nark_add_gtest TARGET)
         panda_ets_package_gtest(${TARGET_GTEST_PACKAGE}
             ETS_SOURCES ${ARG_ETS_SOURCES}
         )
-        set(NARK_GTEST_ABC_PATH "NARK_GTEST_ABC_PATH=${PANDA_BINARY_ROOT}/abc-gtests/${TARGET_GTEST_PACKAGE}.zip")
+        set(ANI_GTEST_ABC_PATH "ANI_GTEST_ABC_PATH=${PANDA_BINARY_ROOT}/abc-gtests/${TARGET_GTEST_PACKAGE}.zip")
     endif()
 
     # Add launcher <${TARGET}_gtests> target
@@ -54,10 +54,10 @@ function(nark_add_gtest TARGET)
         NO_CORES
         CUSTOM_PRERUN_ENVIRONMENT
             "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
-            "${NARK_GTEST_ABC_PATH}"
+            "${ANI_GTEST_ABC_PATH}"
 
         SOURCES ${ARG_CPP_SOURCES}
-        LIBRARIES ${ARG_LIBRARIES} nark_gtest arkruntime
+        LIBRARIES ${ARG_LIBRARIES} ani_gtest arkruntime
         SANITIZERS ${PANDA_SANITIZERS_LIST}
         TSAN_EXTRA_OPTIONS ${ARG_TSAN_EXTRA_OPTIONS}
         DEPS_TARGETS etsstdlib ${TARGET_GTEST_PACKAGE}
@@ -65,5 +65,5 @@ function(nark_add_gtest TARGET)
         OUTPUT_DIRECTORY ${NATIVE_TESTS_DIR}
     )
 
-    add_dependencies(nark_tests ${TARGET}_gtests)
-endfunction(nark_add_gtest)
+    add_dependencies(ani_tests ${TARGET}_gtests)
+endfunction(ani_add_gtest)
