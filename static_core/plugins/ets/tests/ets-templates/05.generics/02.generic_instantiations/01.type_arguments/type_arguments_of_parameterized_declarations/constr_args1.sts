@@ -25,10 +25,10 @@ class X implements I {}
 
 class Y extends X {}
 
-class A {
-    private t: Object | null
+class A <T{{c.bound}}> {
+    private t: T
 
-    public constructor <T{{c.bound}}> (t: T) {
+    public constructor(t: T) {
         this.t = t
     }
 }
