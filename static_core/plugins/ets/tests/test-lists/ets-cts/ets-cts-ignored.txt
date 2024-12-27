@@ -1679,10 +1679,6 @@
 10.interfaces/05.interface_properties/external_interface_with_property_0.sts
 10.interfaces/05.interface_properties/external_interface_with_property_1.sts
 
-# 20683 No CTE on duplicate fields in object literal
-07.expressions/05.object_literal/01.object_literal_of_class_type/cl_n_7.sts
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_n_3.sts
-
 # 20737 Compiler complains on return statement without expression in constructor
 09.classes/09.constructor_declaration/03.constructor_body/constructor_with_return_expression3.sts
 
