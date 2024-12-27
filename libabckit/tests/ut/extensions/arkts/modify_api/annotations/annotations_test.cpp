@@ -741,6 +741,45 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, DISABLED_ClassRemoveAnnotation_WrongT
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::functionAddAnnotation, abc-kind=ArkTS1, category=positive, extension=c
+TEST_F(LibAbcKitModifyApiAnnotationsTests, ClassRemoveAnnotation_WrongName)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc", &file);
+
+    helpers::ModuleByNameContext mdFinder = {nullptr, "annotations_dynamic"};
+    g_implI->fileEnumerateModules(file, &mdFinder, helpers::ModuleByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(mdFinder.module, nullptr);
+    auto *module = mdFinder.module;
+
+    helpers::ClassByNameContext clsFinder = {nullptr, "A"};
+    g_implI->moduleEnumerateClasses(module, &clsFinder, helpers::ClassByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(clsFinder.klass, nullptr);
+    auto *klass = clsFinder.klass;
+
+    helpers::AnnotationInterfaceByNameContext aiFinder = {nullptr, "Anno1"};
+    g_implI->moduleEnumerateAnnotationInterfaces(module, &aiFinder, helpers::AnnotationInterfaceByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(aiFinder.ai, nullptr);
+    auto *ai = aiFinder.ai;
+
+    auto *newAnno = new AbckitCoreAnnotation();
+    newAnno->ai = ai;
+    newAnno->owner = klass;
+    newAnno->name = g_implM->createString(file, "wrongName", sizeof("wrongName"));
+    auto *newArktsAnno = new AbckitArktsAnnotation {newAnno};
+
+    g_implArkM->classRemoveAnnotation(g_implArkI->coreClassToArktsClass(klass), newArktsAnno);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    delete newArktsAnno;
+    delete newAnno;
+
+    g_impl->closeFile(file);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::functionAddAnnotation, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, FunctionAddAnnotation)
 {
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc",
@@ -828,6 +867,43 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, DISABLED_FunctionRemoveAnnotation_Wro
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::annotationAddAnnotationElement, abc-kind=ArkTS1, category=positive,
 // extension=c
+TEST_F(LibAbcKitModifyApiAnnotationsTests, FunctionRemoveAnnotation_WrongName)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc", &file);
+
+    auto *method = helpers::FindMethodByName(file, "bar");
+    ASSERT_NE(method, nullptr);
+
+    helpers::ModuleByNameContext mdFinder = {nullptr, "annotations_dynamic"};
+    g_implI->fileEnumerateModules(file, &mdFinder, helpers::ModuleByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(mdFinder.module, nullptr);
+    auto *module = mdFinder.module;
+
+    helpers::AnnotationInterfaceByNameContext aiFinder = {nullptr, "Anno2"};
+    g_implI->moduleEnumerateAnnotationInterfaces(module, &aiFinder, helpers::AnnotationInterfaceByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(aiFinder.ai, nullptr);
+    auto *ai = aiFinder.ai;
+
+    auto *newAnno = new AbckitCoreAnnotation();
+    newAnno->ai = ai;
+    newAnno->owner = method;
+    newAnno->name = g_implM->createString(file, "wrongName", sizeof("wrongName"));
+    auto *newArktsAnno = new AbckitArktsAnnotation {newAnno};
+
+    g_implArkM->functionRemoveAnnotation(g_implArkI->coreFunctionToArktsFunction(method), newArktsAnno);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    delete newArktsAnno;
+    delete newAnno;
+
+    g_impl->closeFile(file);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::annotationAddAnnotationElement, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, AnnotationAddAnnotationElement)
 {
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc",
@@ -856,6 +932,36 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, AnnotationRemoveAnnotationElement_2)
                              ABCKIT_ABC_DIR
                              "ut/extensions/arkts/modify_api/annotations/annotations_dynamic_modified.abc",
                              "bar", TestAnnotationRemoveAnnotationElement);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::annotationInterfaceAddField, abc-kind=ArkTS1, category=positive,
+// extension=c
+TEST_F(LibAbcKitModifyApiAnnotationsTests, AnnotationRemoveAnnotationElement_WrongName)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc", &file);
+
+    auto *method = helpers::FindMethodByName(file, "bar");
+    ASSERT_NE(method, nullptr);
+
+    helpers::AnnotationByNameContext annoFinder = {nullptr, "Anno1"};
+    g_implI->functionEnumerateAnnotations(method, &annoFinder, helpers::AnnotationByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(annoFinder.anno, nullptr);
+    auto *anno = annoFinder.anno;
+
+    auto *newAnnoElem = new AbckitCoreAnnotationElement();
+    newAnnoElem->ann = anno;
+    newAnnoElem->name = g_implM->createString(file, "wrongName", sizeof("wrongName"));
+    auto *newArktsAnnoElem = new AbckitArktsAnnotationElement {newAnnoElem};
+
+    g_implArkM->annotationRemoveAnnotationElement(g_implArkI->coreAnnotationToArktsAnnotation(anno), newArktsAnnoElem);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    delete newArktsAnnoElem;
+    delete newAnnoElem;
+
+    g_impl->closeFile(file);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::annotationInterfaceAddField, abc-kind=ArkTS1, category=positive,
@@ -890,4 +996,37 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, AnnotationInterfaceRemoveField_2)
                              "bar", TestAnnotationInterfaceRemoveField);
 }
 
+// Test: test-kind=api, api=ArktsModifyApiImpl::annotationInterfaceRemoveField, abc-kind=ArkTS1, category=negative,
+// extension=c
+TEST_F(LibAbcKitModifyApiAnnotationsTests, AnnotationInterfaceRemoveField_WrongName)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc", &file);
+
+    helpers::ModuleByNameContext mdFinder = {nullptr, "annotations_dynamic"};
+    g_implI->fileEnumerateModules(file, &mdFinder, helpers::ModuleByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(mdFinder.module, nullptr);
+    auto *module = mdFinder.module;
+
+    helpers::AnnotationInterfaceByNameContext aiFinder = {nullptr, "Anno2"};
+    g_implI->moduleEnumerateAnnotationInterfaces(module, &aiFinder, helpers::AnnotationInterfaceByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(aiFinder.ai, nullptr);
+    auto *ai = aiFinder.ai;
+
+    auto *newAIF = new AbckitCoreAnnotationInterfaceField();
+    newAIF->ai = ai;
+    newAIF->name = g_implM->createString(file, "wrongName", sizeof("wrongName"));
+    auto *newArktsAIF = new AbckitArktsAnnotationInterfaceField {newAIF};
+
+    g_implArkM->annotationInterfaceRemoveField(g_implArkI->coreAnnotationInterfaceToArktsAnnotationInterface(ai),
+                                               newArktsAIF);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    delete newArktsAIF;
+    delete newAIF;
+
+    g_impl->closeFile(file);
+}
 }  // namespace libabckit::test
