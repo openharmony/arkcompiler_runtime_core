@@ -17,6 +17,7 @@
 
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 
 namespace ark::ets::interop::js::ets_proxy {
 
@@ -143,6 +144,11 @@ inline SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx,
                                                                 const PreInitJSObjectCallback &preInitCallback)
 {
     os::memory::WriteLockHolder lock(storageLock_);
+    // NOTE(ipetrov, XGC): XGC should be triggered only in hybrid mode. Need to remove when interop will work only in
+    // hybrid mode
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+    XGC::GetInstance()->TriggerGcIfNeeded(ctx->GetPandaEtsVM()->GetGC());
+#endif  // PANDA_JS_ETS_HYBRID_MODE
     SharedReference *sharedRef = AllocItem();
     if (UNLIKELY(sharedRef == nullptr)) {
         ctx->ThrowJSError(ctx->GetJSEnv(), "no free space for SharedReference");

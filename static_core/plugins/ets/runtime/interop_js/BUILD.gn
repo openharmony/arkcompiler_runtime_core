@@ -54,7 +54,6 @@ ohos_source_set("ets_interop_js_napi_static") {
     "event_loop_module.cpp",
     "stack_info.cpp",
     "timer_module.cpp",
-    "xgc/xgc.cpp",
   ]
 
   deps = [

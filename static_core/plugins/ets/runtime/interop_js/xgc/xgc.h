@@ -18,6 +18,7 @@
 
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage.h"
 #include "plugins/ets/runtime/interop_js/sts_vm_interface_impl.h"
+#include "runtime/mem/gc/gc_trigger.h"
 
 namespace ark::ets::interop::js {
 
@@ -25,7 +26,7 @@ namespace ark::ets::interop::js {
  * Cross-reference garbage collector.
  * Implements logic to collect cross-references between JS and STS in SharedReferenceStorage.
  */
-class XGC final : public mem::GCListener {
+class XGC final : public mem::GCTrigger {
 public:
     NO_COPY_SEMANTIC(XGC);
     NO_MOVE_SEMANTIC(XGC);
@@ -33,10 +34,41 @@ public:
 
     /**
      * Create instance of XGC if it was not created before. Runtime should be existed before the XGC creation
-     * @param ctx main interop context
+     * @param mainCoro main coroutine
      * @return true if the instance successfully created, false - otherwise
      */
-    [[nodiscard]] static bool Create();
+    [[nodiscard]] PANDA_PUBLIC_API static bool Create(EtsCoroutine *mainCoro);
+
+    /// @return current instance of XGC
+    static XGC *GetInstance();
+
+    /**
+     * Destroy the current instance of XGC if the instance is existed. Runtime should be existed before the XGC
+     * destruction
+     * @return true if the instance successfully destroyed, false - otherwise
+     */
+    PANDA_PUBLIC_API static bool Destroy();
+
+    /**
+     * Check trigger condition and post XGC task to gc queue and
+     * trigger XMark for all related JS virtual machines if needed
+     * @param gc GC using in the current VM
+     */
+    void TriggerGcIfNeeded(mem::GC *gc) override;
+
+    /**
+     * Post XGC task to gc queue and trigger XMark for all related JS virtual machines
+     * @param gc GC using in the current VM
+     */
+    void Trigger(mem::GC *gc);
+
+    /// @return XGC trigger type value
+    mem::GCTriggerType GetType() const override
+    {
+        return mem::GCTriggerType::XGC;
+    }
+
+    /// GCListener specific public methods ///
 
     void GCStarted(const GCTask &task, size_t heapSize) override;
     void GCFinished(const GCTask &task, size_t heapSizeBeforeGc, size_t heapSize) override;
@@ -44,14 +76,33 @@ public:
     void GCPhaseFinished(mem::GCPhase phase) override;
 
 private:
-    explicit XGC(ets_proxy::SharedReferenceStorage *storage);
+    // For allocation of XGC with the private constructor by internal allocator
+    friend mem::Allocator;
+    XGC(PandaEtsVM *vm, STSVMInterfaceImpl *stsVmIface, ets_proxy::SharedReferenceStorage *storage);
     static XGC *instance_;
 
-    ets_proxy::SharedReferenceStorage *storage_;
-    bool isXGcInProgress_ = false;
-    bool remarkFinished_ = false;
-    STSVMInterfaceImpl *stsVmIface_ = nullptr;
+    /// @return new target threshold storage size for XGC trigger
+    size_t ComputeNewSize();
+
+    /// External specific fields ///
+
+    PandaEtsVM *vm_ {nullptr};
+    ets_proxy::SharedReferenceStorage *storage_ {nullptr};
+    STSVMInterfaceImpl *stsVmIface_ {nullptr};
+
+    /// XGC current state specific fields ///
+
+    std::atomic_bool isXGcInProgress_ {false};
+    bool remarkFinished_ {false};  // GUARDED_BY(mutatorLock)
+
+    /// Trigger specific fields ///
+
+    size_t beforeGCStorageSize_ {0U};
+    const size_t minimalThreasholdSize_ {0U};
+    // We can load a value of the variable from several threads, so need to use atomic
+    std::atomic<size_t> targetThreasholdSize_ {0U};
 };
+
 }  // namespace ark::ets::interop::js
 
 #endif  // PANDA_PLUGINGS_ETS_RUNTIME_INTEROP_JS_HYBRID_XGC_XGC_H

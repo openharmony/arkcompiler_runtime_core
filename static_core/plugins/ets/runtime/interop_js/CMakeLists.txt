@@ -31,7 +31,6 @@ panda_ets_interop_js_plugin(ets_interop_js_napi
         event_loop_module.cpp
         timer_module.cpp
         stack_info.cpp
-        xgc/xgc.cpp
     LIBRARIES
         arkruntime
 )
@@ -68,6 +67,7 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/js_remote_promise_resolver.cpp
         ${ETS_EXT_SOURCES}/interop_js/stack_info.cpp
         ${ETS_EXT_SOURCES}/interop_js/sts_vm_interface_impl.cpp
+        ${ETS_EXT_SOURCES}/interop_js/xgc/xgc.cpp
         ${ETS_INTEROP_ARCH_SOURCES}
         ${ETS_INTEROP_HYBRID_SOURCES}
 )
