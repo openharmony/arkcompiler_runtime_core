@@ -45,8 +45,7 @@ void AbcMethodProcessor::FillFunctionData()
     FillCodeData();
     FillDebugInfo();
     FillFuncAnnotation();
-    FillSlotsNum();
-    FillConcurrentModuleRequests();
+    FillAnnotationData();
 }
 
 void AbcMethodProcessor::FillProto()
@@ -136,26 +135,24 @@ void AbcMethodProcessor::FillFuncAnnotation()
     });
 }
 
-void AbcMethodProcessor::FillSlotsNum()
+void AbcMethodProcessor::FillAnnotationData()
 {
     for (auto annotation : function_.metadata->GetAnnotations()) {
-        if (annotation.GetName() == SLOT_NUMBER_RECORD_NAME && !annotation.GetElements().empty()) {
-            uint32_t slots_num = annotation.GetElements()[0].GetValue()->GetAsScalar()->GetValue<uint32_t>();
+        const auto& name = annotation.GetName();
+        const auto& elements = annotation.GetElements();
+
+        if (name == SLOT_NUMBER_RECORD_NAME && !elements.empty()) {
+            uint32_t slots_num = elements[0].GetValue()->GetAsScalar()->GetValue<uint32_t>();
             function_.SetSlotsNum(static_cast<size_t>(slots_num));
+        } else if (name == CONCURRENT_MODULE_REQUEST_RECORD_NAME) {
+            for (auto &elem : elements) {
+                function_.concurrent_module_requests.emplace_back(
+                    elem.GetValue()->GetAsScalar()->GetValue<uint32_t>());
+            }
+        } else if (name == EXPECTED_PROPERTY_COUNT_RECORD_NAME && !elements.empty()) {
+            uint32_t expected_property = elements[0].GetValue()->GetAsScalar()->GetValue<uint32_t>();
+            function_.SetExpectedPropertyCount(static_cast<size_t>(expected_property));
         }
     }
 }
-
-void AbcMethodProcessor::FillConcurrentModuleRequests()
-{
-    for (auto annotation : function_.metadata->GetAnnotations()) {
-        if (annotation.GetName() != CONCURRENT_MODULE_REQUEST_RECORD_NAME) {
-            continue;
-        }
-        for (auto &elem : annotation.GetElements()) {
-            function_.concurrent_module_requests.emplace_back(elem.GetValue()->GetAsScalar()->GetValue<uint32_t>());
-        }
-    }
-}
-
 } // namespace panda::abc2program

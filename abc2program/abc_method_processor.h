@@ -41,8 +41,7 @@ class AbcMethodProcessor : public AbcFileEntityProcessor {
     void FillSourceFile();
     void FillSourceCode();
     void FillFuncAnnotation();
-    void FillSlotsNum();
-    void FillConcurrentModuleRequests();
+    void FillAnnotationData();
     AbcTypeConverter type_converter_;
     pandasm::Function function_;
     std::unique_ptr<panda_file::MethodDataAccessor> method_data_accessor_;

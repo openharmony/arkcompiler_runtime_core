@@ -1,23 +1,23 @@
-# source binary: /mnt/data/shixiaowei/oh2/out/rk3568/clang_x64/obj/arkcompiler/runtime_core/abc2program/tests/CommonSyntax.abc
+# source binary: out/rk3568/clang_x64/obj/arkcompiler/runtime_core/abc2program/tests/CommonSyntax.abc
 
 # ====================
 # LITERALS
 
-_ESModuleRecord_1576 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
+_ESModuleRecord_1585 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
 
-_ESScopeNamesRecord_1562 { 4 [ tag_value:5, string:"Person", tag_value:5, string:"fetchData", ]}
+_ESScopeNamesRecord_1571 { 4 [ tag_value:5, string:"Person", tag_value:5, string:"fetchData", ]}
 
-_GLOBAL_1604 { 4 [ tag_value:5, string:"mySymbol", tag_value:5, string:"prop", ]}
+_GLOBAL_1613 { 4 [ tag_value:5, string:"mySymbol", tag_value:5, string:"prop", ]}
 
-_GLOBAL_1618 { 6 [ tag_value:2, i32:1, tag_value:2, i32:2, tag_value:2, i32:3, ]}
+_GLOBAL_1627 { 6 [ tag_value:2, i32:1, tag_value:2, i32:2, tag_value:2, i32:3, ]}
 
-_GLOBAL_1637 { 14 [ tag_value:5, string:"name", tag_value:5, string:"Alice", tag_value:5, string:"age", tag_value:2, i32:25, tag_value:5, string:"greet", tag_value:6, method:.#*#greet^1, tag_value:9, method_affiliate:0, ]}
+_GLOBAL_1646 { 14 [ tag_value:5, string:"name", tag_value:5, string:"Alice", tag_value:5, string:"age", tag_value:2, i32:25, tag_value:5, string:"greet", tag_value:6, method:.#*#greet^1, tag_value:9, method_affiliate:0, ]}
 
-_GLOBAL_1674 { 8 [ tag_value:5, string:"gender", tag_value:5, string:"男", tag_value:5, string:"grade", tag_value:5, string:"2", ]}
+_GLOBAL_1683 { 8 [ tag_value:5, string:"gender", tag_value:5, string:"男", tag_value:5, string:"grade", tag_value:5, string:"2", ]}
 
-_GLOBAL_1698 { 6 [ tag_value:2, i32:1, tag_value:2, i32:2, tag_value:2, i32:3, ]}
+_GLOBAL_1707 { 6 [ tag_value:2, i32:1, tag_value:2, i32:2, tag_value:2, i32:3, ]}
 
-_GLOBAL_1717 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
+_GLOBAL_1726 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
 
 
 
@@ -31,13 +31,13 @@ _GLOBAL_1717 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 
 .language ECMAScript
 .record _ESModuleRecord {
-	u32 /mnt/data/shixiaowei/oh2/arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/CommonSyntax.ts _ESModuleRecord_1576
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/CommonSyntax.ts _ESModuleRecord_1585
 }
 .record.source_file 
 
 .language ECMAScript
 .record _ESScopeNamesRecord {
-	u32 /mnt/data/shixiaowei/oh2/arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/CommonSyntax.ts _ESScopeNamesRecord_1562
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/CommonSyntax.ts _ESScopeNamesRecord_1571
 }
 .record.source_file 
 
@@ -345,9 +345,9 @@ _GLOBAL_1717 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	sta v7                                   # line: 22           # column: 0
 	ldbigint 10                              # line: 23           # column: 0
 	sta v8                                   # line: 23           # column: 0
-	createobjectwithbuffer 0x6, _GLOBAL_1604 # line: 24           # column: 0
+	createobjectwithbuffer 0x6, _GLOBAL_1613 # line: 24           # column: 0
 	sta v9                                   # line: 24           # column: 0
-	createarraywithbuffer 0x7, _GLOBAL_1618  # line: 27           # column: 0
+	createarraywithbuffer 0x7, _GLOBAL_1627  # line: 27           # column: 0
 	sta v10                                  # line: 27           # column: 0
 	definefunc 0x8, .#*#sum, 0x2             # line: 29           # column: 0
 	sta v11                                  # line: 29           # column: 0
@@ -482,7 +482,7 @@ _GLOBAL_1717 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	sta v6                                   # line: 79           # column: 0
 	lda v5                                   # line: 79           # column: 0
 	callarg1 0x4a, v6                        # line: 79           # column: 0
-	createobjectwithbuffer 0x4c, _GLOBAL_1637 # line: 82           # column: 0
+	createobjectwithbuffer 0x4c, _GLOBAL_1646 # line: 82           # column: 0
 	sta v5                                   # line: 82           # column: 0
 	ldobjbyname 0x4d, greet                  # line: 89           # column: 0
 	callthis0 0x4f, v5                       # line: 89           # column: 0
@@ -495,14 +495,14 @@ _GLOBAL_1717 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	sta v6                                   # line: 93           # column: 0
 	lda.str !                                # line: 93           # column: 0
 	add2 0x52, v6                            # line: 93           # column: 0
-	createobjectwithbuffer 0x53, _GLOBAL_1674 # line: 96           # column: 0
+	createobjectwithbuffer 0x53, _GLOBAL_1683 # line: 96           # column: 0
 	lda v5                                   # line: 97           # column: 0
 	ldobjbyname 0x54, gender                 # line: 97           # column: 0
 	lda v5                                   # line: 97           # column: 0
 	ldobjbyname 0x56, grade                  # line: 97           # column: 0
 	lda v1                                   # line: 103           # column: 0
 	callarg0 0x58                            # line: 103           # column: 0
-	createarraywithbuffer 0x5a, _GLOBAL_1698 # line: 106           # column: 0
+	createarraywithbuffer 0x5a, _GLOBAL_1707 # line: 106           # column: 0
 	sta v1                                   # line: 106           # column: 0
 	createemptyarray 0x5b                    # line: 107           # column: 0
 	sta v5                                   # line: 107           # column: 0
@@ -522,7 +522,7 @@ _GLOBAL_1717 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	inc 0x63                                 # line: 107           # column: 0
 	ldhole                                   # line: 110           # column: 0
 	sta v1                                   # line: 110           # column: 0
-	defineclasswithbuffer 0x64, .#~@0=#Person, _GLOBAL_1717, 0x2, v1 # line: 110           # column: 0
+	defineclasswithbuffer 0x64, .#~@0=#Person, _GLOBAL_1726, 0x2, v1 # line: 110           # column: 0
 	sta v1                                   # line: 110           # column: 0
 	ldobjbyname 0x65, prototype              # line: 110           # column: 0
 	lda.str Alice                            # line: 120           # column: 0
