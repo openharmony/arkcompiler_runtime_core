@@ -110,7 +110,8 @@ void ParseKeepOption(const panda::JsonObject *obj, panda::guard::KeepOption &opt
 void ParseObfuscationConfigFile(const std::string &content, panda::guard::ObfuscationConfig &obfConfig)
 {
     panda::JsonObject configObj(content);
-    PANDA_GUARD_ASSERT_PRINT(!configObj.IsValid(), TAG << "the config file is not a valid json");
+    PANDA_GUARD_ASSERT_PRINT(!configObj.IsValid(), TAG, panda::guard::ErrorCode::CONFIG_FILE_FORMAT_ERROR,
+                             "the config file is not a valid json");
 
     obfConfig.abcFilePath = panda::guard::JsonUtil::GetStringValue(&configObj, ABC_FILE_PATH, false);
     obfConfig.obfAbcFilePath = panda::guard::JsonUtil::GetStringValue(&configObj, OBF_ABC_FILE_PATH, false);
@@ -126,7 +127,8 @@ void ParseObfuscationConfigFile(const std::string &content, panda::guard::Obfusc
     obfConfig.useNormalizedOHMUrl = panda::guard::JsonUtil::GetBoolValue(&configObj, USE_NORMALIZED_OHM_URL);
 
     auto rulesObj = panda::guard::JsonUtil::GetJsonObject(&configObj, OBFUSCATION_RULES);
-    PANDA_GUARD_ASSERT_PRINT(!rulesObj, TAG << "there is no confusion rule configured in the config file");
+    PANDA_GUARD_ASSERT_PRINT(!rulesObj, TAG, panda::guard::ErrorCode::NOT_CONFIGURED_OBFUSCATION_RULES,
+                             "there is no confusion rule configured in the config file");
 
     auto obfRule = &obfConfig.obfuscationRules;
     obfRule->disableObfuscation = panda::guard::JsonUtil::GetBoolValue(rulesObj, DISABLE_OBFUSCATION);
@@ -236,13 +238,15 @@ void ParseFilesInfoAndSourceMaps(const std::string &filesInfoPath, const std::st
 void panda::guard::GuardOptions::Load(const std::string &configFilePath)
 {
     std::string fileContent = FileUtil::GetFileContent(configFilePath);
-    PANDA_GUARD_ASSERT_PRINT(fileContent.empty(), TAG << "config file is empty");
+    PANDA_GUARD_ASSERT_PRINT(fileContent.empty(), TAG, ErrorCode::CONFIG_FILE_CONTENT_EMPTY, "config file is empty");
 
     ParseObfuscationConfigFile(fileContent, this->obfConfig_);
-    PANDA_GUARD_ASSERT_PRINT(obfConfig_.abcFilePath.empty() || obfConfig_.obfAbcFilePath.empty(),
-                             TAG << "abcFilePath and obfAbcFilePath must not empty");
-
-    PANDA_GUARD_ASSERT_PRINT((obfConfig_.targetApiVersion == 0), TAG << "targetApiVersion is invalid");
+    PANDA_GUARD_ASSERT_PRINT(obfConfig_.abcFilePath.empty(), TAG, ErrorCode::NOT_CONFIGURED_ABC_FILE_PATH,
+                             "the value of field abcFilePath in the configuration file is invalid");
+    PANDA_GUARD_ASSERT_PRINT(obfConfig_.obfAbcFilePath.empty(), TAG, ErrorCode::NOT_CONFIGURED_OBF_ABC_FILE_PATH,
+                             "the value of field obfAbcFilePath in the configuration file is invalid");
+    PANDA_GUARD_ASSERT_PRINT((obfConfig_.targetApiVersion == 0), TAG, ErrorCode::NOT_CONFIGURED_TARGET_API_VERSION,
+                             "the value of field targetApiVersion in the configuration file is invalid");
 
     LOG(INFO, PANDAGUARD) << TAG << "disableObfuscation_:" << obfConfig_.obfuscationRules.disableObfuscation;
     LOG(INFO, PANDAGUARD) << TAG << "export obfuscation:" << obfConfig_.obfuscationRules.enableExportObfuscation;
