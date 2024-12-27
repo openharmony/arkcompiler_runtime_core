@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,26 @@
 
 const stsVm = globalThis.gtest.etsVm;
 
+class TestModule {
+    constructor(name) {
+        this.descriptorPrefix = 'L' + name.replaceAll('.', '/') + '/test/';
+    }
+
+    getClass(name) {
+        return stsVm.getClass(this.descriptorPrefix + name + ';');
+    }
+    getFunction(name) {
+        return stsVm.getFunction(this.descriptorPrefix + 'ETSGLOBAL;', name);
+    }
+
+    static descriptorPrefix;
+}
+
+function getTestModule(name) {
+    return new TestModule(name);
+}
+
+
 const DeferentIntTypes = stsVm.getClass('Lconversion_types/test/DeferentIntTypes;');
 const DeferentStringTypes = stsVm.getClass('Lconversion_types/test/DeferentStringTypes;');
 const NullAndUndefinedTypes = stsVm.getClass('Lconversion_types/test/NullAndUndefinedTypes;');
@@ -23,4 +43,5 @@ module.exports = {
     DeferentIntTypes,
     DeferentStringTypes,
     NullAndUndefinedTypes,
+    getTestModule,
 };
