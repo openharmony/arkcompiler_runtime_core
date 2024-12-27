@@ -147,7 +147,12 @@ extern "C" ets_int ETS_GetCreatedVMs(EtsVM **vmBuf, ets_size bufLen, ets_size *n
         return ETS_ERR;
     }
 
-    if (auto coroutine = EtsCoroutine::GetCurrent()) {
+    if (Thread::GetCurrent() == nullptr) {
+        *nVms = 0;
+        return ETS_OK;
+    }
+
+    if (auto *coroutine = EtsCoroutine::GetCurrent()) {
         *nVms = 1;
 
         if (vmBuf == nullptr || bufLen < 1) {
