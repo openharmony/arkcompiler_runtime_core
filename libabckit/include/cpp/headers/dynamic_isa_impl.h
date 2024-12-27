@@ -112,8 +112,7 @@ inline Instruction DynamicIsa::CreateLoadString(std::string_view string) &&
 }
 
 /**
- * @brief Creates instruction with opcode NEWOBJRANGE. This instruction invokes the constructor of `inputs[0]` with
- * arguments `inputs[1]`, ..., `inputs[argCount-1]` to create a class instance, and stores the instance in `acc`.
+ * @brief Creates instruction with opcode NEWOBJRANGE.
  * @return `Instruction`
  * @param [ in ] input0 - Class object.
  * @param [ in ] args - Number of insts containing arguments.
@@ -132,8 +131,7 @@ inline Instruction DynamicIsa::CreateNewobjrange(Instruction input0, Args... arg
 }
 
 /**
- * @brief Creates instruction with opcode NEWOBJRANGE. This instruction invokes the constructor of `inputs[0]` with
- * arguments `inputs[1]`, ..., `inputs[argCount-1]` to create a class instance, and stores the instance in `acc`.
+ * @brief Creates instruction with opcode NEWOBJRANGE.
  * @return `Instruction`
  * @param [ in ] input0 - Class object.
  * @param [ in ] args - Number of insts containing arguments.
@@ -394,9 +392,7 @@ inline Instruction DynamicIsa::CreateCreateiterresultobj(Instruction input0, Ins
 }
 
 /**
- * @brief Creates instruction with opcode CREATEOBJECTWITHEXCLUDEDKEYS. This instruction creates an object based on
- * object `input0` with excluded properties of the keys `input1`, `inputs[0]`, ..., `inputs[imm0-1]`, and stores
- * it in `acc`.
+ * @brief Creates instruction with opcode CREATEOBJECTWITHEXCLUDEDKEYS.
  * @return `Instruction`
  * @param [ in ] input0 - Inst containing object.
  * @param [ in ] input1 - Inst containing first `key`.
@@ -415,9 +411,7 @@ inline Instruction DynamicIsa::CreateCreateobjectwithexcludedkeys(Instruction in
 }
 
 /**
- * @brief Creates instruction with opcode WIDE_CREATEOBJECTWITHEXCLUDEDKEYS. This instruction creates an object
- * based on object `input0` with excluded properties of the keys `input1`, `inputs[0]`, ..., `inputs[imm0-1]`, and
- * stores it in `acc`.
+ * @brief Creates instruction with opcode WIDE_CREATEOBJECTWITHEXCLUDEDKEYS.
  * @return `Instruction`
  * @param [ in ] input0 - Inst containing object.
  * @param [ in ] input1 - Inst containing first `key`.
@@ -1023,8 +1017,7 @@ inline Instruction DynamicIsa::CreateCallargs3(Instruction acc, Instruction inpu
 }
 
 /**
- * @brief Creates instruction with opcode CALLRANGE. This instruction invokes `acc` with arguments `inputs[0]`, ...,
- * `inputs[argCount-1]`.
+ * @brief Creates instruction with opcode CALLRANGE.
  * @return `Instruction`
  * @param [ in ] acc - Inst containing function object.
  * @param [ in ] instrs - Arguments.
@@ -1040,8 +1033,7 @@ inline Instruction DynamicIsa::CreateCallrange(Instruction acc, Args... instrs) 
 }
 
 /**
- * @brief Creates instruction with opcode WIDE_CALLRANGE. This instruction invokes `acc` with arguments `inputs[0]`,
- * ..., `inputs[argCount-1]`.
+ * @brief Creates instruction with opcode WIDE_CALLRANGE.
  * @return `Instruction`
  * @param [ in ] acc - Inst containing function object.
  * @param [ in ] instrs - Arguments.

@@ -130,16 +130,6 @@ inline abckit::Literal File::CreateLiteralLiteralArray(const abckit::LiteralArra
     return abckit::Literal(literal, GetApiConfig(), this);
 }
 
-inline std::string File::CreateString(std::string_view val) const
-{
-    const ApiConfig *conf = GetApiConfig();
-    AbckitString *cString = conf->cMapi_->createString(GetResource(), val.data(), val.size());
-    CheckError(conf);
-    std::string str = conf->cIapi_->abckitStringToString(cString);
-    CheckError(conf);
-    return str;
-}
-
 inline abckit::Literal File::CreateLiteralString(std::string_view val) const
 {
     AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralString(GetResource(), val.data(), val.size());

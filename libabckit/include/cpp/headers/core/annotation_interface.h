@@ -76,9 +76,6 @@ public:
      */
     ~AnnotationInterface() override = default;
 
-    // Core API's.
-    // ...
-
     /**
      * @brief Returns binary file that the given Annotation Interface is a part of.
      * @return Pointer to the `File`.

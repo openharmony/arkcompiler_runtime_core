@@ -41,9 +41,9 @@ inline ImportDescriptor Module::AddImportFromJsToJs(Module imported, std::string
     return js::ImportDescriptor(core::ImportDescriptor(coreid, GetApiConfig(), GetResource()));
 }
 
-inline Module Module::RemoveImport(ImportDescriptor id) const
+inline Module Module::RemoveImport(ImportDescriptor desc) const
 {
-    GetApiConfig()->cJsMapi_->moduleRemoveImport(TargetCast(), id.TargetCast());
+    GetApiConfig()->cJsMapi_->moduleRemoveImport(TargetCast(), desc.TargetCast());
     CheckError(GetApiConfig());
     return *this;
 }

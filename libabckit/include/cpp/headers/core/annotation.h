@@ -78,9 +78,6 @@ public:
      */
     ~Annotation() override = default;
 
-    // Core API's.
-    // ...
-
     /**
      * @brief Get the Interface of Annotation
      * @return core::AnnotationInterface

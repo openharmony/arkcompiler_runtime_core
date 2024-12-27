@@ -190,21 +190,6 @@ TEST_F(LibAbcKitCppMockTestFile, File_CreateLiteralArray)
     ASSERT_TRUE(CheckMockedStackEmpty());
 }
 
-// Test: test-kind=mock, api=File::CreateString, abc-kind=ArkTS1, category=internal, extension=cpp
-TEST_F(LibAbcKitCppMockTestFile, File_CreateString)
-{
-    ASSERT_TRUE(CheckMockedStackEmpty());
-    {
-        abckit::File f(DEFAULT_PATH);
-        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
-        f.CreateString(DEFAULT_CONST_CHAR);
-        ASSERT_TRUE(CheckMockedApi("AbckitStringToString"));
-        ASSERT_TRUE(CheckMockedApi("CreateString"));
-    }
-    ASSERT_TRUE(CheckMockedApi("CloseFile"));
-    ASSERT_TRUE(CheckMockedStackEmpty());
-}
-
 // Test: test-kind=mock, api=File::CreateLiteralString, abc-kind=ArkTS1, category=internal, extension=cpp
 TEST_F(LibAbcKitCppMockTestFile, File_CreateLiteralString)
 {

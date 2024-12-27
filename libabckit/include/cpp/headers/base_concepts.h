@@ -27,7 +27,7 @@ namespace abckit::traits {
 #endif  // _MSC_VER
 
 /**
- * @brief Lightweitght checker that ensures core<->target API conversion validity
+ * @brief Lightweight checker that ensures core<->target API conversion validity
  * It is designed to be empty class type.
  * In case of inheritance the empty base optimization will be applied
  * (see https://en.cppreference.com/w/cpp/language/ebo for the details)
@@ -45,7 +45,7 @@ private:
     /**
      * @brief Checks that T::TargetCast() method is defined using
      * pre-C++20 concept idiom with SFINAE and decltype to check type expression valideness
-     * @tparam T - type that is inspected againts the contractr
+     * @tparam T - type that is inspected againts the contract
      * @note A general case to be matched (to false) if more specialized case fail
      */
     template <typename T, typename = void>

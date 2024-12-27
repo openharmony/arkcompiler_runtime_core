@@ -60,9 +60,9 @@ inline arkts::ExportDescriptor Module::AddExportFromArktsV1ToArktsV1(arkts::Modu
     return ExportDescriptor(core::ExportDescriptor(coreEd, GetApiConfig(), GetResource()));
 }
 
-inline Module Module::RemoveImport(arkts::ImportDescriptor id) const
+inline Module Module::RemoveImport(arkts::ImportDescriptor desc) const
 {
-    auto arktsId = id.TargetCast();
+    auto arktsId = desc.TargetCast();
     auto arktsMod = TargetCast();
     GetApiConfig()->cArktsMapi_->moduleRemoveImport(arktsMod, arktsId);
     CheckError(GetApiConfig());
