@@ -327,6 +327,7 @@ if(PANDA_WITH_TESTS)
     set_target_properties(gtest PROPERTIES POSITION_INDEPENDENT_CODE ON)
     set_target_properties(gtest_main PROPERTIES POSITION_INDEPENDENT_CODE ON)
     set_target_properties(gmock PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    panda_target_compile_options(gtest PRIVATE "-Wno-implicit-float-conversion")
 
     option(RC_ENABLE_RTTI OFF)
     if(NOT PANDA_USE_PREBUILT_TARGETS)
