@@ -198,6 +198,10 @@ if (ark_ets_interop_js) {
     "runtime/interop_js/ts2ets_copy.cpp",
   ]
 
+  if (ark_ets_hybrid) {
+    srcs_runtime += [ "runtime/interop_js/hybrid/handshake.cpp" ]
+  }
+
   if (current_cpu == "amd64" || current_cpu == "x64" ||
       current_cpu == "x86_64") {
     srcs_runtime += [ "runtime/interop_js/arch/amd64/call_bridge_amd64.S" ]
@@ -209,9 +213,8 @@ if (ark_ets_interop_js) {
 
   configs_runtime += [ "runtime/interop_js:interop_js_public_config" ]
 
-  if (ark_ets_hybrid) {
-    arkruntime_deps += [ "$arkplatform_root:libarkplatform" ]
-  } else if (ark_standalone_build) {
+  arkruntime_deps += [ "$arkplatform_root:libarkplatform" ]
+  if (ark_standalone_build) {
     arkruntime_deps +=
         [ "$ark_root/plugins/ets/runtime/interop_js:install_nodejs" ]
   }

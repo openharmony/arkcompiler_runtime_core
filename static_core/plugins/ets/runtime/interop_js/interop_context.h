@@ -29,6 +29,9 @@
 
 #include "plugins/ets/runtime/interop_js/stack_info.h"
 
+#include "hybrid/sts_vm_interface.h"
+#include "hybrid/ecma_vm_interface.h"
+
 #include <node_api.h>
 #include <unordered_map>
 
@@ -470,6 +473,11 @@ public:
         stackInfoManager_.UpdateStackInfoIfNeeded();
     }
 
+    void SetEcmaVMInterface(arkplatform::EcmaVMInterface *iface)
+    {
+        ecmaVMInterface_ = iface;
+    }
+
 protected:
     static InteropCtx *Current(CoroutineWorker *worker)
     {
@@ -481,6 +489,8 @@ private:
     void InitJsValueFinalizationRegistry(EtsCoroutine *coro);
     void InitSharedEtsVmState(PandaEtsVM *vm);
     void InitExternalInterfaces();
+
+    void VmHandshake(napi_env env, EtsCoroutine *coro, arkplatform::STSVMInterface *stsVmIface);
 
     // per-EtsVM data, should be shared between contexts.
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
@@ -520,6 +530,7 @@ private:
         // NOTE(konstanting): do we REALLY want to cache the classlinker context?
         ClassLinkerContext *linkerCtx {};
         PandaUniquePtr<ets_proxy::SharedReferenceStorage> etsProxyRefStorage {};
+        PandaUniquePtr<arkplatform::STSVMInterface> stsVMInterface {};
 
     private:
         explicit SharedEtsVmState(PandaEtsVM *vm);
@@ -563,6 +574,8 @@ private:
     InteropCallStack interopStk_ {};
 
     StackInfoManager stackInfoManager_;
+
+    arkplatform::EcmaVMInterface *ecmaVMInterface_ = nullptr;
 
     // needs to access the jsEnv_ without the nullptr assert
     friend class JSNapiEnvScope;

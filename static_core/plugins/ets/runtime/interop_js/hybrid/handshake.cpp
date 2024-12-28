@@ -1,0 +1,54 @@
+/**
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "plugins/ets/runtime/interop_js/hybrid/handshake.h"
+#include "plugins/ets/runtime/interop_js/code_scopes.h"
+
+#include "native_node_api.h"
+
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_vm_handshake([[maybe_unused]] napi_env env, [[maybe_unused]] void *stsIface, [[maybe_unused]] void **ecmaIface)
+{
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+                       << " is implemented in later versions of OHOS, please update." << std::endl;
+    return napi_ok;
+}
+
+namespace ark::ets::interop::js {
+
+void Handshake::VmHandshake(napi_env env, EtsCoroutine *coro, arkplatform::STSVMInterface *stsVmIface)
+{
+    auto ctx = InteropCtx::Current();
+    JSNapiEnvScope envscope(ctx, env);
+    void *jsvmIface = nullptr;
+    ASSERT(coro != nullptr);
+    auto status = napi_vm_handshake(env, stsVmIface, &jsvmIface);
+    if (status != napi_status::napi_ok) {
+        InteropCtx::ThrowJSError(env, "Handshake error: napi_vm_handshake failed");
+        return;
+    }
+    if (jsvmIface == nullptr) {
+        InteropCtx::ThrowJSError(env, "Handshake error: got null VMInterfaceType");
+        return;
+    }
+    auto iface = reinterpret_cast<arkplatform::VMInterface *>(jsvmIface);
+    if (iface->GetVMType() != arkplatform::VMInterface::VMInterfaceType::ECMA_VM_IFACE) {
+        InteropCtx::ThrowJSError(env, "Handshake error: got wrong VMInterfaceType");
+        return;
+    }
+    ctx->SetEcmaVMInterface(reinterpret_cast<arkplatform::EcmaVMInterface *>(jsvmIface));
+}
+
+}  // namespace ark::ets::interop::js
