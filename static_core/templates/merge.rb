@@ -54,7 +54,11 @@ check_option(optparser, options, :data)
 # Merge yamls into 'options_hash'
 options_hash = Hash.new("")
 options.data.each do |options_yaml|
-  data = YAML.load_file(File.expand_path(options_yaml))
+  if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('3.1.0')
+    data = YAML.load_file(File.expand_path(options_yaml))
+  else
+    data = YAML.load_file(File.expand_path(options_yaml), aliases: true)
+  end
   data = JSON.parse(data.to_json)
   data["options"].each do |option|
     name = option["name"]
@@ -93,7 +97,11 @@ options.data.each do |options_yaml|
 end
 
 # Dump resulted 'options_hash' to yaml output
-data = YAML.load_file(File.expand_path(options.data[0]))
+if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('3.1.0')
+  data = YAML.load_file(File.expand_path(options.data[0]))
+else
+  data = YAML.load_file(File.expand_path(options.data[0]), aliases: true)
+end
 data = JSON.parse(data.to_json)
 data["options"] = options_hash.values
 output = options.output ? File.open(File.expand_path(options.output), 'w') : $stdout

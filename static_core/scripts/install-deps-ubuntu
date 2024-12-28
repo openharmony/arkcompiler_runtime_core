@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -68,10 +68,10 @@ fi
 function print_help
 {
     HELP_MESSAGE="
-    It is the bootstrap script for Panda on Ubuntu 18.04 or 20.04.
+    It is the bootstrap script for Panda on Ubuntu 18.04, 20.04, 22.04 and 24.04.
 
     This script installs all necessary packages for building and testing Panda
-    in your local environment, given that your environment is Ubuntu 18.04 or 20.04.
+    in your local environment, given that your environment is supported Ubuntu version
     (detected with the contents of /etc/os-release).
 
     The script should run with superuser privileges.
@@ -152,7 +152,11 @@ function install_pip_dep
     fi
 
     echo "Processing $fname"
-    python3 -m pip install --no-cache-dir --upgrade -r $fname
+    if [[ $VERSION_ID == "24.04" ]]; then
+        python3 -m pip install --break-system-packages --no-cache-dir --upgrade -r $fname
+    else
+        python3 -m pip install --no-cache-dir --upgrade -r $fname
+    fi
 }
 
 function enable_test_toolchain_repo
@@ -396,7 +400,7 @@ install_dep "$SCRIPT_DIR/dep-lists/ubuntu-bootstrap"
 # Check specific Ubuntu version
 #
 
-UBUNTU_NAME=ubuntu-18-04
+UBUNTU_NAME=ubuntu-20-04
 
 if [ ! -f /etc/os-release ]; then
     echo "FATAL: /etc/os-release not found. Exiting..."
@@ -415,6 +419,10 @@ else
     elif [[ $VERSION_ID == "22.04" ]]; then
         echo "Installing packages for Ubuntu 22.04 LTS"
         UBUNTU_NAME=ubuntu-22-04
+    elif [[ $VERSION_ID == "24.04" ]]; then
+        echo "Installing packages for Ubuntu 24.04 LTS"
+        UBUNTU_NAME=ubuntu-24-04
+        INSTALL_CROSS_LIBS=no
     else
         echo "Trying to install packages for Ubuntu with unpinned versions."
     fi
@@ -496,7 +504,9 @@ then
 fi
 
 if [[ "x$INSTALL_TEST" == "xyes" ]]; then
-    install_python_dependencies
+    if [[ $VERSION_ID != "24.04" ]]; then
+        install_python_dependencies
+    fi
 fi
 
 

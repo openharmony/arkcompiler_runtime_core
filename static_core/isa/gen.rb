@@ -95,7 +95,11 @@ check_option(optparser, options, :data)
 check_option(optparser, options, :api)
 raise "'api' and 'data' must be of equal length" if options.api.length != options.data.length
 options.api.zip(options.data).each do |api_file, data_file|
-  data = YAML.load_file(File.expand_path(data_file))
+  if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('3.1.0')
+    data = YAML.load_file(File.expand_path(data_file))
+  else
+    data = YAML.load_file(File.expand_path(data_file), aliases: true)
+  end
   data = JSON.parse(data.to_json, object_class: OpenStruct).freeze
   require File.expand_path(api_file)
   Gen.on_require(data)

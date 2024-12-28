@@ -36,8 +36,13 @@ optparser.parse!(into: options)
 exit unless options.data
 exit unless options.plugins
 
-data = YAML.load_file(File.expand_path(options.data))
-plugins_data = YAML.load_file(File.expand_path(options.plugins))
+if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('3.1.0')
+  data = YAML.load_file(File.expand_path(options.data))
+  plugins_data = YAML.load_file(File.expand_path(options.plugins))
+else
+  data = YAML.load_file(File.expand_path(options.data), aliases: true)
+  plugins_data = YAML.load_file(File.expand_path(options.plugins), aliases: true)
+end
 
 if plugins_data['plugins']
   plugins_data['plugins'].each do |plugins|
