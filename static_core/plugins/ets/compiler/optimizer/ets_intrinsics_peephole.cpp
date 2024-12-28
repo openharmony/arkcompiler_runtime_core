@@ -66,14 +66,7 @@ static bool ReplaceTypeofWithIsInstance(IntrinsicInst *intrinsic)
     if (stringValue == "string") {
         klass = runtime->GetStringClass(method, &ktypeId);
     } else {
-        const std::unordered_map<std::string_view, const char *const> n2n = {
-            {"number", "Lstd/core/Double;"}, {"double", "Lstd/core/Double;"}, {"int", "Lstd/core/Int;"},
-            {"short", "Lstd/core/Short;"},   {"byte", "Lstd/core/Byte;"},     {"float", "Lstd/core/Float;"}};
-        auto found = n2n.find(stringValue);
-        if (found == n2n.end()) {
-            return false;
-        }
-        klass = runtime->GetNumberClass(method, found->second, &ktypeId);
+        return false;
     }
 
     auto pc = intrinsic->GetPc();
