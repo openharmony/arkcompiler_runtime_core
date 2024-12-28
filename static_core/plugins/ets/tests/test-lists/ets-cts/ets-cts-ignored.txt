@@ -1938,3 +1938,7 @@
 # 21278 binvalid code does not generate CTE
 05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/wrong_type_parameter_variance_0.sts
 05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/wrong_type_parameter_variance_1.sts
+
+# 21431 byte as annotation field - compilation error
+18.annotations/01.declaring_annotations/01.types_of_annotation_fields/declaration_types_0.sts
+18.annotations/01.declaring_annotations/01.types_of_annotation_fields/declaration_types_4.sts
