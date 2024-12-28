@@ -52,6 +52,11 @@ public:
         return static_cast<PandaEtsNapiEnv *>(env);
     }
 
+    static PandaEtsNapiEnv *FromAniEnv(ani_env *env)
+    {
+        return static_cast<PandaEtsNapiEnv *>(env);
+    }
+
     void SetException(EtsThrowable *thr);
     EtsThrowable *GetThrowable() const;
     bool HasPendingException() const;
@@ -65,6 +70,8 @@ private:
     EtsCoroutine *coroutine_;
     PandaUniquePtr<EtsReferenceStorage> referenceStorage_;
 };
+
+using PandaEnv = PandaEtsNapiEnv;
 
 }  // namespace ark::ets
 

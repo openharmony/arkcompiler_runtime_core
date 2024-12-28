@@ -15,17 +15,58 @@
 
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ANI_CHECKERS_H
 #define PANDA_PLUGINS_ETS_RUNTIME_ANI_CHECKERS_H
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
-
+// CC-OFFNXT(G.PRE.02) should be with define
 #define ANI_DEBUG_TRACE(env)
 
-
-#define ANI_RETURN_IF_EQ(a, b, ret) \
-    do {                            \
-        if (UNLIKELY((a) == (b))) { \
-            return ret;             \
-        }                           \
+// CC-OFFNXT(G.PRE.02) should be with define
+#define ANI_CHECK_RETURN_IF_EQ(a, b, ret) \
+    do {                                  \
+        if (UNLIKELY((a) == (b))) {       \
+            return ret;                   \
+        }                                 \
     } while (false)
 
+// CC-OFFNXT(G.PRE.02) should be with define
+#define ANI_CHECK_RETURN_IF_NE(a, b, ret) \
+    do {                                  \
+        if (UNLIKELY((a) != (b))) {       \
+            return ret;                   \
+        }                                 \
+    } while (false)
 
+// CC-OFFNXT(G.PRE.02) should be with define
+#define ANI_CHECK_RETURN_IF_GT(a, b, ret) \
+    do {                                  \
+        if (UNLIKELY((a) > (b))) {        \
+            return ret;                   \
+        }                                 \
+    } while (false)
+
+// CC-OFFNXT(G.PRE.02) should be with define
+#define ANI_CHECK_RETURN_IF_GE(a, b, ret) \
+    do {                                  \
+        if (UNLIKELY((a) >= (b))) {       \
+            return ret;                   \
+        }                                 \
+    } while (false)
+
+// CC-OFFNXT(G.PRE.02) should be with define
+#define ANI_CHECK_RETURN_IF_LT(a, b, ret) \
+    do {                                  \
+        if (UNLIKELY((a) < (b))) {        \
+            return ret;                   \
+        }                                 \
+    } while (false)
+
+// CC-OFFNXT(G.PRE.02) should be with define
+#define ANI_CHECK_RETURN_IF_LE(a, b, ret) \
+    do {                                  \
+        if (UNLIKELY((a) <= (b))) {       \
+            return ret;                   \
+        }                                 \
+    } while (false)
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ANI_CHECKERS_H

@@ -34,12 +34,10 @@ public:
 
         std::vector<EtsVMOption> optionsVector {{EtsOptionType::ETS_BOOT_FILE, stdlib}};
 
-        abcPath_ = std::getenv("ANI_GTEST_ABC_PATH");
-        if (abcPath_.empty()) {
-            std::cerr << "ANI_GTEST_ABC_PATH must be set" << std::endl;
-            UNREACHABLE();
+        const char *abcPath = std::getenv("ANI_GTEST_ABC_PATH");
+        if (abcPath != nullptr) {
+            optionsVector.push_back({EtsOptionType::ETS_BOOT_FILE, abcPath});
         }
-        optionsVector.push_back({EtsOptionType::ETS_BOOT_FILE, abcPath_.c_str()});
 
         EtsVMInitArgs vmArgs;
         vmArgs.version = ETS_NAPI_VERSION_1_0;
@@ -200,7 +198,6 @@ protected:
     ani_env *env_ {nullptr};    // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
-    std::string abcPath_;
     EtsVM *etsVm_ {nullptr};
     ani_vm *vm_ {nullptr};
 };

@@ -24,8 +24,8 @@ namespace ark::ets::ani {
 extern "C" ani_status ANI_GetCreatedVMs(ani_vm **vmsBuffer, ani_size vmsBufferLength, ani_size *result)
 {
     ANI_DEBUG_TRACE(env);
-    ANI_RETURN_IF_EQ(vmsBuffer, nullptr, ANI_INVALID_ARGS);
-    ANI_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
+    ANI_CHECK_RETURN_IF_EQ(vmsBuffer, nullptr, ANI_INVALID_ARGS);
+    ANI_CHECK_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
 
     Thread *thread = Thread::GetCurrent();
     if (thread == nullptr) {
@@ -49,7 +49,7 @@ extern "C" ani_status ANI_GetCreatedVMs(ani_vm **vmsBuffer, ani_size vmsBufferLe
 NO_UB_SANITIZE static ani_status GetEnv(ani_vm *vm, uint32_t version, ani_env **result)
 {
     ANI_DEBUG_TRACE(env);
-    ANI_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
+    ANI_CHECK_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
 
     PandaEtsVM *pandaVM = PandaEtsVM::FromAniVM(vm);
     EtsCoroutine *coroutine = EtsCoroutine::CastFromThread(pandaVM->GetAssociatedThread());

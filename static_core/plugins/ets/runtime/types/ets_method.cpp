@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include "runtime/include/class_linker.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/value-inl.h"
+#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/napi/ets_scoped_objects_fix.h"
@@ -74,6 +75,23 @@ EtsValue EtsMethod::Invoke(napi::ScopedManagedCodeFix *s, Value *args)
         return EtsValue(napi::ScopedManagedCodeFix::AddLocalRef(s->EtsNapiEnv(), obj));
     }
 
+    return EtsValue(res.GetAs<EtsLong>());
+}
+
+EtsValue EtsMethod::Invoke(ani::ScopedManagedCodeFix *s, Value *args)
+{
+    Value res = GetPandaMethod()->Invoke(s->GetCoroutine(), args);
+    if (GetReturnValueType() == EtsType::VOID) {
+        // Return any value, will be ignored
+        return EtsValue(0);
+    }
+    if (GetReturnValueType() == EtsType::OBJECT) {
+        auto *obj = reinterpret_cast<EtsObject *>(res.GetAs<ObjectHeader *>());
+        if (obj == nullptr) {
+            return EtsValue(nullptr);
+        }
+        return EtsValue(ani::ScopedManagedCodeFix::AddLocalRef(s->GetPandaEnv(), obj));
+    }
     return EtsValue(res.GetAs<EtsLong>());
 }
 

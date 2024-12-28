@@ -14,19 +14,350 @@
  */
 
 #include "ani.h"
-#include "plugins/ets/runtime/ani/ani_checkers.h"
-#include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "macros.h"
 #include "libpandabase/utils/logger.h"
+#include "plugins/ets/runtime/ani/ani_checkers.h"
+#include "plugins/ets/runtime/ani/ani_interaction_api.h"
+#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
+#include "plugins/ets/runtime/ets_napi_env.h"
+
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
+// CC-OFFNXT(G.PRE.02) should be with define
+#define CHECK_PTR_ARG(arg) ANI_CHECK_RETURN_IF_EQ(arg, nullptr, ANI_INVALID_ARGS)
+
+// CC-OFFNXT(G.PRE.02) should be with define
+#define CHECK_ENV(env)                                                                           \
+    do {                                                                                         \
+        bool hasPendingException = ::ark::ets::PandaEnv::FromAniEnv(env)->HasPendingException(); \
+        ANI_CHECK_RETURN_IF_EQ(hasPendingException, true, ANI_PENDING_ERROR);                    \
+    } while (false)
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 namespace ark::ets::ani {
 
-NO_UB_SANITIZE static ani_status GetVersion([[maybe_unused]] ani_env *env, uint32_t *result)
+template <typename T>
+using ArgVector = PandaSmallVector<T>;
+
+using TypeId = panda_file::Type::TypeId;
+
+static inline EtsMethod *ToInternalMethod(ani_method method)
+{
+    auto *m = reinterpret_cast<EtsMethod *>(method);
+    ASSERT(!m->IsStatic());
+    return m;
+}
+
+[[maybe_unused]] static inline ani_method ToAniMethod(EtsMethod *method)
+{
+    ASSERT(!method->IsStatic());
+    return reinterpret_cast<ani_method>(method);
+}
+
+static inline EtsMethod *ToInternalMethod(ani_static_method method)
+{
+    auto *m = reinterpret_cast<EtsMethod *>(method);
+    ASSERT(m->IsStatic());
+    return m;
+}
+
+static inline ani_static_method ToAniStaticMethod(EtsMethod *method)
+{
+    ASSERT(method->IsStatic());
+    return reinterpret_cast<ani_static_method>(method);
+}
+
+static void CheckStaticMethodReturnType(ani_static_method method, EtsType type)
+{
+    EtsMethod *m = ToInternalMethod(method);
+    if (UNLIKELY(m->GetReturnValueType() != type)) {
+        LOG(FATAL, ANI) << "Return type mismatch";
+    }
+}
+
+static ClassLinkerContext *GetClassLinkerContext(EtsCoroutine *coroutine)
+{
+    auto stack = StackWalker::Create(coroutine);
+    if (!stack.HasFrame()) {
+        return nullptr;
+    }
+
+    auto *method = EtsMethod::FromRuntimeMethod(stack.GetMethod());
+    if (method != nullptr) {
+        return method->GetClass()->GetLoadContext();
+    }
+    return nullptr;
+}
+
+static EtsClass *GetInternalClass(ScopedManagedCodeFix *s, ani_class cls)
+{
+    EtsClass *klass = s->ToInternalType(cls);
+    if (klass->IsInitialized()) {
+        return klass;
+    }
+
+    // Initialize class
+    EtsCoroutine *corutine = s->GetCoroutine();
+    EtsClassLinker *classLinker = corutine->GetPandaVM()->GetClassLinker();
+    bool isInitialized = classLinker->InitializeClass(corutine, klass);
+    if (!isInitialized) {
+        LOG(ERROR, ANI) << "Cannot initialize class: " << klass->GetDescriptor();
+        return nullptr;
+    }
+    return klass;
+}
+
+static Value ConstructValueFromFloatingPoint(float val)
+{
+    return Value(bit_cast<int32_t>(val));
+}
+
+static Value ConstructValueFromFloatingPoint(double val)
+{
+    return Value(bit_cast<int64_t>(val));
+}
+
+static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method, va_list args, ani_object object)
+{
+    ArgVector<Value> parsedArgs;
+    parsedArgs.reserve(method->GetNumArgs());
+    if (object != nullptr) {
+        parsedArgs.emplace_back(s->ToInternalType(object)->GetCoreType());
+    }
+
+    panda_file::ShortyIterator it(method->GetPandaMethod()->GetShorty());
+    panda_file::ShortyIterator end;
+    ++it;  // skip the return value
+    while (it != end) {
+        panda_file::Type type = *it;
+        ++it;
+        // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
+        switch (type.GetId()) {
+            case TypeId::U1:
+            case TypeId::U16:
+                parsedArgs.emplace_back(va_arg(args, uint32_t));
+                break;
+            case TypeId::I8:
+            case TypeId::I16:
+            case TypeId::I32:
+                parsedArgs.emplace_back(va_arg(args, int32_t));
+                break;
+            case TypeId::I64:
+                parsedArgs.emplace_back(va_arg(args, int64_t));
+                break;
+            case TypeId::F32:
+                parsedArgs.push_back(ConstructValueFromFloatingPoint(static_cast<float>(va_arg(args, double))));
+                break;
+            case TypeId::F64:
+                parsedArgs.push_back(ConstructValueFromFloatingPoint(va_arg(args, double)));
+                break;
+            case TypeId::REFERENCE: {
+                auto param = va_arg(args, ani_object);
+                parsedArgs.emplace_back(param != nullptr ? s->ToInternalType(param)->GetCoreType() : nullptr);
+                break;
+            }
+            default:
+                LOG(FATAL, ANI) << "Unexpected argument type";
+                break;
+        }
+        // NOLINTEND(cppcoreguidelines-pro-type-vararg)
+    }
+    return parsedArgs;
+}
+
+static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method, const ani_value *args,
+                                     ani_object object)
+{
+    ArgVector<Value> parsedArgs;
+    parsedArgs.reserve(method->GetNumArgs());
+    if (object != nullptr) {
+        parsedArgs.emplace_back(s->ToInternalType(object)->GetCoreType());
+    }
+
+    panda_file::ShortyIterator it(method->GetPandaMethod()->GetShorty());
+    panda_file::ShortyIterator end;
+    ++it;  // skip the return value
+    auto *arg = args;
+    while (it != end) {
+        panda_file::Type type = *it;
+        ++it;
+        switch (type.GetId()) {
+            case TypeId::U1:
+                parsedArgs.emplace_back(arg->z);
+                break;
+            case TypeId::U32:  // NOTE: Check it
+                parsedArgs.emplace_back(arg->c);
+                break;
+            case TypeId::I8:
+                parsedArgs.emplace_back(arg->b);
+                break;
+            case TypeId::I16:
+                parsedArgs.emplace_back(arg->s);
+                break;
+            case TypeId::I32:
+                parsedArgs.emplace_back(arg->i);
+                break;
+            case TypeId::I64:
+                parsedArgs.emplace_back(arg->l);
+                break;
+            case TypeId::F32:
+                parsedArgs.push_back(ConstructValueFromFloatingPoint(arg->f));
+                break;
+            case TypeId::F64:
+                parsedArgs.push_back(ConstructValueFromFloatingPoint(arg->d));
+                break;
+            case TypeId::REFERENCE: {
+                parsedArgs.emplace_back(s->ToInternalType(arg->r)->GetCoreType());
+                break;
+            }
+            default:
+                LOG(FATAL, ANI) << "Unexpected argument type";
+                break;
+        }
+        ++arg;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    }
+    return parsedArgs;
+}
+
+[[maybe_unused]] static inline EtsMethod *ResolveVirtualMethod(ScopedManagedCodeFix *s, ani_object object,
+                                                               ani_method method)
+{
+    EtsMethod *m = ToInternalMethod(method);
+    if (UNLIKELY(m->IsStatic())) {
+        LOG(FATAL, ANI) << "Called ResolveVirtualMethod of static method, invalid ANI usage";
+        return m;
+    }
+    EtsObject *obj = s->ToInternalType(object);
+    return obj->GetClass()->ResolveVirtualMethod(m);
+}
+
+template <typename EtsValueType, typename AniType, typename MethodType, typename Args>
+static ani_status GeneralMethodCall(ani_env *env, ani_object obj, MethodType method, AniType *result, Args args)
+{
+    EtsMethod *m = nullptr;
+    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    if constexpr (std::is_same_v<MethodType, ani_method>) {
+        m = ResolveVirtualMethod(&s, obj, method);
+    } else if constexpr (std::is_same_v<MethodType, ani_static_method>) {
+        m = ToInternalMethod(method);
+    } else {
+        static_assert(!(std::is_same_v<MethodType, ani_method> || std::is_same_v<MethodType, ani_static_method>),
+                      "Unreachable type");
+    }
+    ASSERT(m != nullptr);
+
+    ArgVector<Value> values = GetArgValues(&s, m, args, obj);
+    EtsValue res = m->Invoke(&s, const_cast<Value *>(values.data()));
+
+    // Now AniType and EtsValueType are the same, but later it could be changed
+    static_assert(std::is_same_v<AniType, EtsValueType>);
+    *result = res.GetAs<EtsValueType>();
+    return ANI_OK;
+}
+
+NO_UB_SANITIZE static ani_status GetVersion(ani_env *env, uint32_t *result)
 {
     ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(result);
 
     *result = ANI_VERSION_1;
     return ANI_OK;
+}
+
+NO_UB_SANITIZE static ani_status FindClass(ani_env *env, const char *classDescriptor, ani_class *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(classDescriptor);
+    CHECK_PTR_ARG(result);
+
+    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
+    ScopedManagedCodeFix s(pandaEnv);
+    EtsClassLinker *classLinker = pandaEnv->GetEtsVM()->GetClassLinker();
+    EtsClass *klass = classLinker->GetClass(classDescriptor, true, GetClassLinkerContext(s.GetCoroutine()));
+    if (UNLIKELY(pandaEnv->HasPendingException())) {
+        EtsThrowable *currentException = pandaEnv->GetThrowable();
+        std::string_view exceptionString = currentException->GetClass()->GetDescriptor();
+        if (exceptionString == panda_file_items::class_descriptors::CLASS_NOT_FOUND_EXCEPTION) {
+            pandaEnv->ClearException();
+            return ANI_NOT_FOUND;
+        }
+
+        // NOTE: Handle exception
+        return ANI_PENDING_ERROR;
+    }
+    ANI_CHECK_RETURN_IF_EQ(klass, nullptr, ANI_NOT_FOUND);
+
+    ASSERT_MANAGED_CODE();
+    *result = static_cast<ani_class>(s.AddLocalRef(reinterpret_cast<EtsObject *>(klass)));
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetStaticMethod(ani_env *env, ani_class cls, const char *name,
+                                                       const char *signature, ani_static_method *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    EtsClass *klass = GetInternalClass(&s, cls);
+    if (UNLIKELY(klass == nullptr)) {
+        return ANI_ERROR;
+    }
+    EtsMethod *method = (signature == nullptr ? klass->GetMethod(name) : klass->GetMethod(name, signature));
+    if (method == nullptr || !method->IsStatic()) {
+        return ANI_NOT_FOUND;
+    }
+    *result = ToAniStaticMethod(method);
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Int_V(ani_env *env, ani_class cls, ani_static_method method,
+                                                              ani_int *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+
+    CheckStaticMethodReturnType(method, EtsType::INT);
+    return GeneralMethodCall<EtsInt>(env, nullptr, method, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Int(ani_env *env, ani_class cls, ani_static_method method,
+                                                            ani_int *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Class_CallStaticMethod_Int_V(env, cls, method, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Int_A(ani_env *env, ani_class cls, ani_static_method method,
+                                                              ani_int *result, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(args);
+
+    CheckStaticMethodReturnType(method, EtsType::INT);
+    return GeneralMethodCall<EtsInt>(env, nullptr, method, result, args);
 }
 
 [[noreturn]] static void NotImplementedAPI(int nr)
@@ -46,7 +377,6 @@ static R NotImplementedAdapterVargs([[maybe_unused]] Args... args, ...)
 {
     NotImplementedAPI(NR);
 }
-
 
 // clang-format off
 const __ani_interaction_api INTERACTION_API = {
@@ -72,7 +402,7 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<19>,
     NotImplementedAdapter<20>,
     NotImplementedAdapter<21>,
-    NotImplementedAdapter<22>,
+    NotImplementedAdapterVargs<22>,
     NotImplementedAdapter<23>,
     NotImplementedAdapter<24>,
     NotImplementedAdapter<25>,
@@ -82,7 +412,7 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<29>,
     NotImplementedAdapter<30>,
     NotImplementedAdapter<31>,
-    NotImplementedAdapter<32>,
+    FindClass,
     NotImplementedAdapter<33>,
     NotImplementedAdapter<34>,
     NotImplementedAdapter<35>,
@@ -176,22 +506,22 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<123>,
     NotImplementedAdapter<124>,
     NotImplementedAdapter<125>,
-    NotImplementedAdapterVargs<126>,
+    NotImplementedAdapter<126>,
     NotImplementedAdapter<127>,
     NotImplementedAdapter<128>,
-    NotImplementedAdapterVargs<129>,
+    NotImplementedAdapter<129>,
     NotImplementedAdapter<130>,
     NotImplementedAdapter<131>,
-    NotImplementedAdapterVargs<132>,
+    NotImplementedAdapter<132>,
     NotImplementedAdapter<133>,
     NotImplementedAdapter<134>,
-    NotImplementedAdapterVargs<135>,
+    NotImplementedAdapter<135>,
     NotImplementedAdapter<136>,
     NotImplementedAdapter<137>,
-    NotImplementedAdapterVargs<138>,
+    NotImplementedAdapter<138>,
     NotImplementedAdapter<139>,
     NotImplementedAdapter<140>,
-    NotImplementedAdapterVargs<141>,
+    NotImplementedAdapter<141>,
     NotImplementedAdapter<142>,
     NotImplementedAdapter<143>,
     NotImplementedAdapterVargs<144>,
@@ -206,22 +536,22 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapterVargs<153>,
     NotImplementedAdapter<154>,
     NotImplementedAdapter<155>,
-    NotImplementedAdapter<156>,
+    NotImplementedAdapterVargs<156>,
     NotImplementedAdapter<157>,
     NotImplementedAdapter<158>,
-    NotImplementedAdapter<159>,
+    NotImplementedAdapterVargs<159>,
     NotImplementedAdapter<160>,
     NotImplementedAdapter<161>,
-    NotImplementedAdapter<162>,
+    NotImplementedAdapterVargs<162>,
     NotImplementedAdapter<163>,
     NotImplementedAdapter<164>,
-    NotImplementedAdapter<165>,
+    NotImplementedAdapterVargs<165>,
     NotImplementedAdapter<166>,
     NotImplementedAdapter<167>,
-    NotImplementedAdapter<168>,
+    NotImplementedAdapterVargs<168>,
     NotImplementedAdapter<169>,
     NotImplementedAdapter<170>,
-    NotImplementedAdapter<171>,
+    NotImplementedAdapterVargs<171>,
     NotImplementedAdapter<172>,
     NotImplementedAdapter<173>,
     NotImplementedAdapter<174>,
@@ -229,7 +559,7 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<176>,
     NotImplementedAdapter<177>,
     NotImplementedAdapter<178>,
-    NotImplementedAdapter<179>,
+    Class_GetStaticMethod,
     NotImplementedAdapter<180>,
     NotImplementedAdapter<181>,
     NotImplementedAdapter<182>,
@@ -254,22 +584,22 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<201>,
     NotImplementedAdapter<202>,
     NotImplementedAdapter<203>,
-    NotImplementedAdapterVargs<204>,
+    NotImplementedAdapter<204>,
     NotImplementedAdapter<205>,
     NotImplementedAdapter<206>,
-    NotImplementedAdapterVargs<207>,
+    NotImplementedAdapter<207>,
     NotImplementedAdapter<208>,
     NotImplementedAdapter<209>,
-    NotImplementedAdapterVargs<210>,
+    NotImplementedAdapter<210>,
     NotImplementedAdapter<211>,
     NotImplementedAdapter<212>,
-    NotImplementedAdapterVargs<213>,
+    NotImplementedAdapter<213>,
     NotImplementedAdapter<214>,
     NotImplementedAdapter<215>,
-    NotImplementedAdapterVargs<216>,
+    NotImplementedAdapter<216>,
     NotImplementedAdapter<217>,
     NotImplementedAdapter<218>,
-    NotImplementedAdapterVargs<219>,
+    NotImplementedAdapter<219>,
     NotImplementedAdapter<220>,
     NotImplementedAdapter<221>,
     NotImplementedAdapterVargs<222>,
@@ -284,9 +614,9 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapterVargs<231>,
     NotImplementedAdapter<232>,
     NotImplementedAdapter<233>,
-    NotImplementedAdapterVargs<234>,
-    NotImplementedAdapter<235>,
-    NotImplementedAdapter<236>,
+    Class_CallStaticMethod_Int,
+    Class_CallStaticMethod_Int_A,
+    Class_CallStaticMethod_Int_V,
     NotImplementedAdapterVargs<237>,
     NotImplementedAdapter<238>,
     NotImplementedAdapter<239>,
@@ -317,19 +647,19 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapterVargs<264>,
     NotImplementedAdapter<265>,
     NotImplementedAdapter<266>,
-    NotImplementedAdapter<267>,
+    NotImplementedAdapterVargs<267>,
     NotImplementedAdapter<268>,
     NotImplementedAdapter<269>,
-    NotImplementedAdapter<270>,
+    NotImplementedAdapterVargs<270>,
     NotImplementedAdapter<271>,
     NotImplementedAdapter<272>,
-    NotImplementedAdapter<273>,
+    NotImplementedAdapterVargs<273>,
     NotImplementedAdapter<274>,
     NotImplementedAdapter<275>,
-    NotImplementedAdapter<276>,
+    NotImplementedAdapterVargs<276>,
     NotImplementedAdapter<277>,
     NotImplementedAdapter<278>,
-    NotImplementedAdapter<279>,
+    NotImplementedAdapterVargs<279>,
     NotImplementedAdapter<280>,
     NotImplementedAdapter<281>,
     NotImplementedAdapter<282>,
@@ -392,16 +722,16 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<339>,
     NotImplementedAdapter<340>,
     NotImplementedAdapter<341>,
-    NotImplementedAdapterVargs<342>,
+    NotImplementedAdapter<342>,
     NotImplementedAdapter<343>,
     NotImplementedAdapter<344>,
-    NotImplementedAdapterVargs<345>,
+    NotImplementedAdapter<345>,
     NotImplementedAdapter<346>,
     NotImplementedAdapter<347>,
-    NotImplementedAdapterVargs<348>,
+    NotImplementedAdapter<348>,
     NotImplementedAdapter<349>,
     NotImplementedAdapter<350>,
-    NotImplementedAdapterVargs<351>,
+    NotImplementedAdapter<351>,
     NotImplementedAdapter<352>,
     NotImplementedAdapter<353>,
     NotImplementedAdapterVargs<354>,
@@ -455,16 +785,16 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapterVargs<402>,
     NotImplementedAdapter<403>,
     NotImplementedAdapter<404>,
-    NotImplementedAdapter<405>,
+    NotImplementedAdapterVargs<405>,
     NotImplementedAdapter<406>,
     NotImplementedAdapter<407>,
-    NotImplementedAdapter<408>,
+    NotImplementedAdapterVargs<408>,
     NotImplementedAdapter<409>,
     NotImplementedAdapter<410>,
-    NotImplementedAdapter<411>,
+    NotImplementedAdapterVargs<411>,
     NotImplementedAdapter<412>,
     NotImplementedAdapter<413>,
-    NotImplementedAdapter<414>,
+    NotImplementedAdapterVargs<414>,
     NotImplementedAdapter<415>,
     NotImplementedAdapter<416>,
     NotImplementedAdapter<417>,
