@@ -74,9 +74,6 @@ public:
      */
     ~AnnotationElement() override = default;
 
-    // Core API's.
-    // ...
-
     /**
      * @brief Returns binary file that the Annotation Element is a part of.
      * @return `const File *`.
@@ -105,9 +102,6 @@ public:
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     core::Annotation GetAnnotation() const;
-
-    // Core API's.
-    // ...
 
 private:
     /**

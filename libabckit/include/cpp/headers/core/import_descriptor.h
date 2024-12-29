@@ -101,7 +101,6 @@ public:
      */
     std::string GetName() const;
 
-    // Core API's.
     /**
      * @brief Get the Imported Module object
      * @return core::Module

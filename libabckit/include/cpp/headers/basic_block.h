@@ -402,17 +402,6 @@ protected:
     }
 
 private:
-    void GetSuccsInner(std::vector<BasicBlock> &bBs) const
-    {
-        Payload<std::vector<BasicBlock> *> payload {&bBs, GetApiConfig(), GetResource()};
-
-        GetApiConfig()->cGapi_->bbVisitSuccBlocks(GetView(), &payload, [](AbckitBasicBlock *succ, void *data) {
-            const auto &payload = *static_cast<Payload<std::vector<BasicBlock> *> *>(data);
-            payload.data->push_back(BasicBlock(succ, payload.config, payload.resource));
-            return true;
-        });
-    }
-
     BasicBlock(AbckitBasicBlock *bb, const ApiConfig *conf, const Graph *graph) : ViewInResource(bb), conf_(conf)
     {
         SetResource(graph);

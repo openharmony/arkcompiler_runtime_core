@@ -90,13 +90,13 @@ public:
 
     /**
      * @brief Removes import `id` from Module.
-     * @param [ in ] id - Import to remove from the Module.
+     * @param [ in ] desc - Import to remove from the Module.
      * @return New state of Module.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `id` is false.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if Module does not have the import descriptor `id`.
      */
-    Module RemoveImport(ImportDescriptor id) const;
+    Module RemoveImport(ImportDescriptor desc) const;
 
     /**
      * @brief Adds export to the Js module.

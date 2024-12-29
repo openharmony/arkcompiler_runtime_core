@@ -872,7 +872,13 @@ void FunctionRemoveAnnotationDynamic(AbckitCoreFunction *function, AbckitCoreAnn
     auto &annotations = function->annotations;
     auto iter = std::find_if(annotations.begin(), annotations.end(),
                              [&name](auto &annoIt) { return name == annoIt.get()->name->impl; });
+    if (iter == annotations.end()) {
+        statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
+        return;
+    }
+
     annotations.erase(iter);
+    anno = nullptr;
 }
 
 AbckitArktsAnnotationElement *AnnotationAddAnnotationElementDynamic(AbckitCoreAnnotation *anno,

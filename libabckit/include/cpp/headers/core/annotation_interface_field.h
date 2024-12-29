@@ -74,9 +74,6 @@ public:
      */
     ~AnnotationInterfaceField() override = default;
 
-    // Core API's.`
-    // ...
-
     /**
      * @brief Returns binary file that the given interface field is a part of.
      * @return `const File *`.

@@ -80,8 +80,8 @@ public:
     }
 
     /**
-     * @brief Returns instance of the `AbckitCoreClass` that the type `t` is reference to.
-     * @return Pointer to the `AbckitCoreClass` that `t` references.
+     * @brief Returns instance of a `core::Class` that the type is reference to.
+     * @return Instance of a `core::Class` that the type references.
      */
     inline core::Class GetReferenceClass() const
     {

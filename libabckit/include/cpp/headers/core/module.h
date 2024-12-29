@@ -226,9 +226,6 @@ public:
      */
     bool EnumerateAnnotationInterfaces(const std::function<bool(core::AnnotationInterface)> &cb) const;
 
-    // Core API's.
-    // ...
-
 private:
     bool GetClassesInner(std::vector<core::Class> &classes) const;
 

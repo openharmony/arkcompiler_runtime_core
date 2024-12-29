@@ -69,9 +69,6 @@ public:
      */
     ~Field() override = default;
 
-    // Core API's.
-    // ...
-
 private:
     Field(AbckitCoreField *field, const ApiConfig *conf) : View(field), conf_(conf) {};
     const ApiConfig *conf_;

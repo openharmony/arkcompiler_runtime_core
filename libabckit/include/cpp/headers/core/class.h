@@ -146,8 +146,6 @@ public:
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     Namespace GetParentNamespace() const;
-    // Core API's.
-    // ...
 
 private:
     inline bool GetAllMethodsInner(std::vector<core::Function> &methods) const;

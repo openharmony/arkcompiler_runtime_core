@@ -138,7 +138,6 @@ public:
      */
     bool IsStatic() const;
 
-    // Core API's.
     /**
      * @brief Get the Module object
      * @return `core::Module`

@@ -31,11 +31,6 @@ inline DynamicIsa Graph::DynIsa() const
     return DynamicIsa(*this);
 }
 
-inline StaticIsa Graph::StatIsa() const
-{
-    return StaticIsa(*this);
-}
-
 inline AbckitIsaType Graph::GetIsa() const
 {
     const ApiConfig *conf = GetApiConfig();
