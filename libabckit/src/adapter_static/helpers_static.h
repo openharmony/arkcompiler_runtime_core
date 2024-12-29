@@ -143,6 +143,10 @@ AbckitValue *FindOrCreateValueStringStaticImpl(AbckitFile *file, const std::stri
 AbckitValue *FindOrCreateLiteralArrayValueStaticImpl(AbckitFile *file, const std::string &value);
 AbckitValue *FindOrCreateValueStatic(AbckitFile *file, const ark::pandasm::Value &value);
 
+void GraphInvalidateAnalyses(ark::compiler::Graph *graph);
+bool GraphHasUnreachableBlocks(ark::compiler::Graph *graph);
+bool GraphDominatorsTreeAnalysisIsValid(ark::compiler::Graph *graph);
+
 constexpr AbckitBitImmSize GetBitLengthUnsigned(uint64_t imm)
 {
     // NOLINTNEXTLINE(readability-identifier-naming)

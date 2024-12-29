@@ -26,8 +26,13 @@
 #include "static_core/bytecode_optimizer/reg_acc_alloc.h"
 #include "static_core/compiler/optimizer/ir/graph.h"
 #include "static_core/compiler/optimizer/ir/basicblock.h"
+#include "static_core/compiler/optimizer/ir/marker.h"
 #include "static_core/compiler/optimizer/optimizations/regalloc/reg_alloc_graph_coloring.h"
 #include "static_core/compiler/optimizer/optimizations/regalloc/reg_alloc_resolver.h"
+#include "static_core/compiler/optimizer/analysis/loop_analyzer.h"
+#include "static_core/compiler/optimizer/analysis/dominators_tree.h"
+#include "static_core/compiler/optimizer/analysis/linear_order.h"
+#include "static_core/compiler/optimizer/analysis/rpo.h"
 
 #include "abckit_intrinsics_opcodes.inc"
 
@@ -1077,6 +1082,53 @@ bool AllocateRegisters(ark::compiler::Graph *graph, uint8_t reservedReg)
     regMask.Set(reservedReg);
     FixPreassignedRegisters(graph);
     return graph->RunPass<ark::compiler::RegAllocGraphColoring>(regMask);
+}
+
+void GraphInvalidateAnalyses(ark::compiler::Graph *graph)
+{
+    graph->InvalidateAnalysis<ark::compiler::LoopAnalyzer>();
+    graph->InvalidateAnalysis<ark::compiler::Rpo>();
+    graph->InvalidateAnalysis<ark::compiler::DominatorsTree>();
+    graph->InvalidateAnalysis<ark::compiler::LinearOrder>();
+}
+
+static void GraphMarkBlocksRec(ark::compiler::Graph *graph, ark::compiler::Marker mrk, ark::compiler::BasicBlock *block)
+{
+    if (block->SetMarker(mrk)) {
+        return;
+    }
+    for (auto succ : block->GetSuccsBlocks()) {
+        GraphMarkBlocksRec(graph, mrk, succ);
+    }
+}
+
+bool GraphHasUnreachableBlocks(ark::compiler::Graph *graph)
+{
+    bool ret = false;
+    ark::compiler::Marker mrk = graph->NewMarker();
+    GraphMarkBlocksRec(graph, mrk, graph->GetStartBlock());
+    auto bbs = graph->GetVectorBlocks();
+    // Remove unreachable blocks
+    for (auto &bb : bbs) {
+        if (bb != nullptr && !bb->IsMarked(mrk)) {
+            LIBABCKIT_LOG(DEBUG) << "BB " << bb->GetId() << " is unreachable\n";
+            ret = true;
+            break;
+        }
+    }
+    graph->EraseMarker(mrk);
+    return ret;
+}
+
+bool GraphDominatorsTreeAnalysisIsValid(ark::compiler::Graph *graph)
+{
+    if (!graph->GetAnalysis<ark::compiler::DominatorsTree>().IsValid()) {
+        if (!graph->RunPass<ark::compiler::DominatorsTree>()) {
+            LIBABCKIT_LOG(DEBUG) << ": ICDominatorsTree failed!\n";
+            return false;
+        }
+    }
+    return true;
 }
 
 }  // namespace libabckit

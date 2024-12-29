@@ -48,7 +48,7 @@ void CreateLoopDynamic(AbckitGraph *graph, AbckitFile *file)
     g_implG->bbAddInstBack(startBB, forConst);
     g_implG->bbAddInstBack(startBB, zero);
     g_implG->bbAddInstBack(startBB, forStep);
-    g_implG->bbEraseSuccBlock(startBB, 0);
+    g_implG->bbDisconnectSuccBlock(startBB, 0);
 
     AbckitBasicBlock *forBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(startBB, forBB);
@@ -97,7 +97,7 @@ void CreateLoopStatic(AbckitGraph *graph, AbckitCoreFunction *consoleLogInt)
     g_implG->bbAddInstBack(startBB, zero);
     g_implG->bbAddInstBack(startBB, forStep);
 
-    g_implG->bbEraseSuccBlock(startBB, 0);
+    g_implG->bbDisconnectSuccBlock(startBB, 0);
 
     AbckitBasicBlock *forBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(startBB, forBB);

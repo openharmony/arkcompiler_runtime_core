@@ -202,7 +202,7 @@ inline BasicBlock BasicBlock::AppendSuccBlock(BasicBlock succBlock)
 
 inline BasicBlock BasicBlock::EraseSuccBlock(uint32_t index)
 {
-    GetApiConfig()->cGapi_->bbEraseSuccBlock(GetView(), index);
+    GetApiConfig()->cGapi_->bbDisconnectSuccBlock(GetView(), index);
     CheckError(GetApiConfig());
     return BasicBlock(GetView(), GetApiConfig(), GetResource());
 }

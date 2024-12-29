@@ -45,7 +45,7 @@ auto g_icreateGetresumemode1Lambda = [](AbckitFile * /*file*/, AbckitCoreFunctio
     auto *bbRet = g_implG->bbCreateEmpty(graph);
     auto *bbThrow = g_implG->bbCreateEmpty(graph);
 
-    g_implG->bbEraseSuccBlock(bbStart, 0);
+    g_implG->bbDisconnectSuccBlock(bbStart, 0);
     g_implG->bbInsertSuccBlock(bbStart, bbResume, 0);
     g_implG->bbAppendSuccBlock(bbResume, bbEq);
     g_implG->bbAppendSuccBlock(bbResume, bbRet);

@@ -41,7 +41,7 @@ void TransformIrIcreateIf(AbckitGraph *graph)
     AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
-    g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
+    g_implG->bbDisconnectSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
     AbckitBasicBlock *falseBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(falseBB, g_implG->gGetEndBasicBlock(graph));
     g_implG->bbAddInstBack(falseBB, g_statG->iCreateReturn(graph, constZero));
@@ -61,7 +61,7 @@ void TransformIrIcreateIfNeg(AbckitGraph *graph)
     AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
-    g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
+    g_implG->bbDisconnectSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
     AbckitBasicBlock *falseBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(falseBB, g_implG->gGetEndBasicBlock(graph));
     g_implG->bbAddInstBack(falseBB, g_statG->iCreateReturn(graph, constZero));
@@ -81,7 +81,7 @@ void TransformIrIsetConditionCode(AbckitGraph *graph)
     AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
-    g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
+    g_implG->bbDisconnectSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
     AbckitBasicBlock *falseBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(falseBB, g_implG->gGetEndBasicBlock(graph));
     g_implG->bbAddInstBack(falseBB, g_statG->iCreateReturn(graph, constZero));
@@ -103,7 +103,7 @@ void TransformIrIsetConditionCodeNeg(AbckitGraph *graph)
     AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
-    g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
+    g_implG->bbDisconnectSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
     AbckitBasicBlock *falseBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(falseBB, g_implG->gGetEndBasicBlock(graph));
     g_implG->bbAddInstBack(falseBB, g_statG->iCreateReturn(graph, constZero));
@@ -125,7 +125,7 @@ void TransformIrIgetConditionCode(AbckitGraph *graph)
     AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
-    g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
+    g_implG->bbDisconnectSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
     AbckitBasicBlock *falseBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(falseBB, g_implG->gGetEndBasicBlock(graph));
     g_implG->bbAddInstBack(falseBB, g_statG->iCreateReturn(graph, constZero));
@@ -148,7 +148,7 @@ void TransformIrIgetConditionCodeNeg(AbckitGraph *graph)
     AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
-    g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
+    g_implG->bbDisconnectSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
     AbckitBasicBlock *falseBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(falseBB, g_implG->gGetEndBasicBlock(graph));
     g_implG->bbAddInstBack(falseBB, g_statG->iCreateReturn(graph, constZero));

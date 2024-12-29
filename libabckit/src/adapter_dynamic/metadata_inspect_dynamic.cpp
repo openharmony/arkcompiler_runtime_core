@@ -24,6 +24,7 @@
 #include "libabckit/src/statuses_impl.h"
 #include "libabckit/src/wrappers/graph_wrapper/graph_wrapper.h"
 #include "libabckit/src/wrappers/abcfile_wrapper.h"
+#include "libabckit/src/adapter_static/ir_static.h"
 
 #include "assembler/assembly-emitter.h"
 #include "assembler/annotation.h"
@@ -155,6 +156,7 @@ AbckitGraph *CreateGraphFromFunctionDynamic(AbckitCoreFunction *function)
     if (statuses::GetLastError() != AbckitStatus::ABCKIT_STATUS_NO_ERROR) {
         return nullptr;
     }
+    LIBABCKIT_LOG_DUMP(GdumpStatic(graph, STDERR_FILENO), DEBUG);
 
     ASSERT(graph->file == file);
     graph->function = function;

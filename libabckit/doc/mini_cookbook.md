@@ -294,7 +294,7 @@ auto *start = implG->gGetStartBasicBlock(ctxG);
 auto *bb = implG->bbCreateEmpty(ctxG);
 
 implG->bbInsertSuccBlock(start, bb, 0);
-implG->bbEraseSuccBlock(start, 0);
+implG->bbDisconnectSuccBlock(start, 0);
 ```
 
 ### _Insert instructions_

@@ -79,7 +79,7 @@ void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
         compiler::GraphCloner(graph->impl, graph->impl->GetAllocator(), graph->impl->GetLocalAllocator()).CloneGraph();
 
     graphImpl->RemoveUnreachableBlocks();
-
+    GraphInvalidateAnalyses(graphImpl);
     CheckInvalidOpcodes(graphImpl, false);
 
     LIBABCKIT_LOG(DEBUG) << "======================== BEFORE CODEGEN ========================\n";
@@ -89,8 +89,6 @@ void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
     LIBABCKIT_LOG_DUMP(graphImpl->Dump(&std::cerr), DEBUG);
 
     LIBABCKIT_LOG(DEBUG) << "============================================\n";
-
-    graphImpl->InvalidateAnalysis<compiler::LoopAnalyzer>();
 
     if (!ark::compiler::GraphChecker(graphImpl).Check()) {
         LIBABCKIT_LOG(DEBUG) << func->name << ": Graph Verifier failed!\n";

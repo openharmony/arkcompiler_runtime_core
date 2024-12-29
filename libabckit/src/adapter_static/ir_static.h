@@ -73,7 +73,7 @@ void BBaddInstBackStatic(AbckitBasicBlock *basicBlock, AbckitInst *inst);
 void BBdumpStatic(AbckitBasicBlock *basicBlock, int fd);
 void BBinsertSuccBlockStatic(AbckitBasicBlock *basicBlock, AbckitBasicBlock *succBlock, uint32_t index);
 void BBappendSuccBlockStatic(AbckitBasicBlock *basicBlock, AbckitBasicBlock *succBlock);
-void BBeraseSuccBlockStatic(AbckitBasicBlock *bb, size_t index);
+void BBdisconnectSuccBlockStatic(AbckitBasicBlock *bb, size_t index);
 bool BBisStartStatic(AbckitBasicBlock *basicBlock);
 bool BBisEndStatic(AbckitBasicBlock *basicBlock);
 bool BBisLoopHeadStatic(AbckitBasicBlock *basicBlock);

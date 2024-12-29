@@ -136,7 +136,7 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithexcludedkeys, IcreateCreateobjectwithex
             auto *bbThrow = g_implG->bbCreateEmpty(graph);
             auto *bbMain = g_implG->bbCreateEmpty(graph);
 
-            g_implG->bbEraseSuccBlock(bb, 0);
+            g_implG->bbDisconnectSuccBlock(bb, 0);
             g_implG->bbAppendSuccBlock(bb, bbThrow);
             g_implG->bbAppendSuccBlock(bb, bbUndef);
             g_implG->bbAppendSuccBlock(bbUndef, bbMain);
@@ -188,7 +188,7 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithexcludedkeys, IcreateCreateobjectwithex
             auto *bbThrow = g_implG->bbCreateEmpty(graph);
             auto *bbMain = g_implG->bbCreateEmpty(graph);
 
-            g_implG->bbEraseSuccBlock(bb, 0);
+            g_implG->bbDisconnectSuccBlock(bb, 0);
             g_implG->bbAppendSuccBlock(bb, bbThrow);
             g_implG->bbAppendSuccBlock(bb, bbUndef);
             g_implG->bbAppendSuccBlock(bbUndef, bbMain);
@@ -241,7 +241,7 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithexcludedkeys, IcreateWideCreateobjectwi
             auto *bbThrow = g_implG->bbCreateEmpty(graph);
             auto *bbMain = g_implG->bbCreateEmpty(graph);
 
-            g_implG->bbEraseSuccBlock(bb, 0);
+            g_implG->bbDisconnectSuccBlock(bb, 0);
             g_implG->bbAppendSuccBlock(bb, bbThrow);
             g_implG->bbAppendSuccBlock(bb, bbUndef);
             g_implG->bbAppendSuccBlock(bbUndef, bbMain);
@@ -294,7 +294,7 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithexcludedkeys, IcreateWideCreateobjectwi
             auto *bbThrow = g_implG->bbCreateEmpty(graph);
             auto *bbMain = g_implG->bbCreateEmpty(graph);
 
-            g_implG->bbEraseSuccBlock(bb, 0);
+            g_implG->bbDisconnectSuccBlock(bb, 0);
             g_implG->bbAppendSuccBlock(bb, bbThrow);
             g_implG->bbAppendSuccBlock(bb, bbUndef);
             g_implG->bbAppendSuccBlock(bbUndef, bbMain);

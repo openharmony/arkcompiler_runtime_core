@@ -85,7 +85,7 @@ TEST_F(LibAbcKitBasicBlocksDynTest, GrunPassRemoveUnreachableBlocks_1)
         [&](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             auto *bb2 = g_implG->gGetBasicBlock(graph, 2);
             g_implG->iRemove(g_implG->bbGetLastInst(bb2));
-            g_implG->bbEraseSuccBlock(bb2, 0x0);
+            g_implG->bbDisconnectSuccBlock(bb2, 0x0);
             g_implG->gRunPassRemoveUnreachableBlocks(graph);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         },
@@ -144,7 +144,7 @@ TEST_F(LibAbcKitBasicBlocksDynTest, GrunPassRemoveUnreachableBlocks_2)
         [&](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             auto *bb2 = g_implG->gGetBasicBlock(graph, 2);
             g_implG->iRemove(g_implG->bbGetLastInst(bb2));
-            g_implG->bbEraseSuccBlock(bb2, 0x1);
+            g_implG->bbDisconnectSuccBlock(bb2, 0x1);
             g_implG->gRunPassRemoveUnreachableBlocks(graph);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         },
@@ -205,7 +205,7 @@ TEST_F(LibAbcKitBasicBlocksDynTest, GrunPassRemoveUnreachableBlocks_3)
         [&](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             auto *bb0 = g_implG->gGetBasicBlock(graph, 0);
             g_implG->iRemove(g_implG->bbGetLastInst(bb0));
-            g_implG->bbEraseSuccBlock(bb0, 0x0);
+            g_implG->bbDisconnectSuccBlock(bb0, 0x0);
             g_implG->gRunPassRemoveUnreachableBlocks(graph);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         },

@@ -246,7 +246,7 @@ void BBAppendSuccBlock(AbckitBasicBlock *basicBlock, AbckitBasicBlock *succBlock
     EXPECT_TRUE(succBlock == DEFAULT_BB);
 }
 
-void BBEraseSuccBlock(AbckitBasicBlock *basicBlock, uint32_t index)
+void BBdisconnectSuccBlock(AbckitBasicBlock *basicBlock, uint32_t index)
 {
     g_calledFuncs.push(__func__);
 
@@ -778,7 +778,7 @@ AbckitGraphApi g_graphApiImpl = {
     BBGetSuccBlock,
     BBInsertSuccBlock,
     BBAppendSuccBlock,
-    BBEraseSuccBlock,
+    BBdisconnectSuccBlock,
     BBVisitSuccBlocks,
     BBGetTrueBranch,
     BBGetFalseBranch,
