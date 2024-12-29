@@ -83,6 +83,7 @@ static_core/libpandabase/tests/ringbuf/                  @udav
 static_core/libpandabase/tests/taskmanager/              @udav @molotkovmikhail
 static_core/plugins/ets/bytecode_optimizer/              @mbolshov
 static_core/plugins/ets/compiler/                        @Prof1983
+static_core/plugins/ets/doc/spec                         @dmitriitr @Prof1983 @igelhaus @ragnvald @sergeyandreev @mbolshov @akmaevaleksey @anedoria
 static_core/plugins/ets/irtoc_scripts/                   @Prof1983 @mbolshov
 static_core/plugins/ets/isa/                             @mbolshov
 static_core/plugins/ets/libllvmbackend/                  @Prof1983 @romanzhuykov
@@ -117,6 +118,7 @@ static_core/plugins/ets/stdlib/escompat/Atomics.sts                           @d
 static_core/plugins/ets/templates/stdlib/                                     @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/tests/benchmarks/interop_js                           @semenovaleksandr @ignatenkooleg
 static_core/plugins/ets/tests/checked/                                        @Prof1983
+static_core/plugins/ets/tests/ets-templates/                                  @dmitriitr @Prof1983 @igelhaus @ragnvald @troeglazovamaria @maksim-khramov
 static_core/plugins/ets/tests/ets_es_checked/                                 @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/tests/stdlib-templates/                               @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/tests/test-lists/                                     @shirunova_viktoria @kuchkovairina
