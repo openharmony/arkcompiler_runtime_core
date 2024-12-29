@@ -63,6 +63,7 @@ void DumpModuleArray(const panda::pandasm::LiteralArray *moduleLitArr, std::stri
 fs::path Relative(const fs::path &src, const fs::path &base);
 
 bool IsServiceRecord(const std::string &name);
+bool IsModuleDescriptorRecord(const panda::pandasm::Record &rec);
 bool IsAnnotationInterfaceRecord(const panda::pandasm::Record &rec);
 bool IsExternalRecord(const panda::pandasm::Record &rec);
 

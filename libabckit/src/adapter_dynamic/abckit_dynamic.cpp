@@ -15,6 +15,7 @@
 
 #include "libabckit/include/c/metadata_core.h"
 #include "libabckit/src/adapter_dynamic/abckit_dynamic.h"
+#include "libabckit/src/adapter_dynamic/convert.h"
 #include "libabckit/src/adapter_dynamic/helpers_dynamic.h"
 #include "libabckit/src/helpers_common.h"
 #include "libabckit/src/logger.h"
@@ -36,6 +37,7 @@
 #include <cstdint>
 #include <cstring>
 #include <string>
+#include <type_traits>
 
 #if __has_include(<filesystem>)
 #include <filesystem>
@@ -442,8 +444,9 @@ std::unique_ptr<AbckitCoreModule> CreateModule(pandasm::Program *prog, const pan
     auto m = std::make_unique<AbckitCoreModule>();
     m->file = file;
     m->moduleName = CreateStringDynamic(file, record->name.data(), record->name.size());
-    m->target = m->moduleName->impl.find("JS", 0) == std::string_view::npos ? ABCKIT_TARGET_ARK_TS_V1
-                                                                            : ABCKIT_TARGET_JS;  // NOTE(ivagin)
+    m->target = convert::ToTargetDynamic(record->language);
+    LIBABCKIT_LOG(DEBUG) << "name=" << m->moduleName << " target=" << convert::ToString(m->target)
+                         << " lang=" << record->language << "\n";
 
     CreateModuleImpl(m.get());
 
@@ -975,8 +978,7 @@ AbckitCoreModule *ResolveUnfoundModule(AbckitCoreModule *m, AbckitFile *file, si
     auto foundModule = TryFindModule(moduleName, file);
     if (foundModule == nullptr) {
         auto md = std::make_unique<AbckitCoreModule>();
-        md->target = moduleName.find("JS", 0) == std::string_view::npos ? ABCKIT_TARGET_ARK_TS_V1
-                                                                        : ABCKIT_TARGET_JS;  // NOTE(ivagin)
+        md->target = ABCKIT_TARGET_UNKNOWN;
         md->isExternal = true;
         md->file = file;
         md->moduleName = CreateNameString(moduleName, file);
@@ -1053,8 +1055,7 @@ void CollectModules(pandasm::Program *prog, AbckitFile *file)
 {
     for (const auto &[recName, rec] : prog->record_table) {
         LIBABCKIT_LOG(DEBUG) << "RECORD: " << recName << ' ' << rec.name << '\n';
-        if (libabckit::IsServiceRecord(recName) || libabckit::IsAnnotationInterfaceRecord(rec) ||
-            libabckit::IsExternalRecord(rec)) {
+        if (!libabckit::IsModuleDescriptorRecord(rec) || libabckit::IsExternalRecord(rec)) {
             continue;
         }
         auto m = CreateModule(prog, &rec, file);

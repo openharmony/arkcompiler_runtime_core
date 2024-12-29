@@ -25,6 +25,7 @@
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/metadata_arkts_inspect_impl.h"
 #include "libabckit/src/metadata_js_inspect_impl.h"
+#include "libabckit/src/metadata_unknown_inspect_impl.h"
 #include "libabckit/src/adapter_dynamic/metadata_inspect_dynamic.h"
 #include "libabckit/src/adapter_static/metadata_inspect_static.h"
 
@@ -124,6 +125,8 @@ extern "C" bool ModuleEnumerateImports(AbckitCoreModule *m, void *data,
             return ArkTSModuleEnumerateImports(m, data, cb);
         case ABCKIT_TARGET_JS:
             return JsModuleEnumerateImports(m, data, cb);
+        case ABCKIT_TARGET_UNKNOWN:
+            return UnknownModuleEnumerateStub(m);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -144,6 +147,8 @@ extern "C" bool ModuleEnumerateExports(AbckitCoreModule *m, void *data,
             return ArkTSModuleEnumerateExports(m, data, cb);
         case ABCKIT_TARGET_JS:
             return JsModuleEnumerateExports(m, data, cb);
+        case ABCKIT_TARGET_UNKNOWN:
+            return UnknownModuleEnumerateStub(m);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -164,6 +169,8 @@ extern "C" bool ModuleEnumerateNamespaces(AbckitCoreModule *m, void *data,
             return ArkTSModuleEnumerateNamespaces(m, data, cb);
         case ABCKIT_TARGET_JS:
             return false;
+        case ABCKIT_TARGET_UNKNOWN:
+            return UnknownModuleEnumerateStub(m);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -181,6 +188,8 @@ extern "C" bool ModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool (*c
             return ArkTSModuleEnumerateClasses(m, data, cb);
         case ABCKIT_TARGET_JS:
             return JsModuleEnumerateClasses(m, data, cb);
+        case ABCKIT_TARGET_UNKNOWN:
+            return UnknownModuleEnumerateStub(m);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -199,6 +208,8 @@ extern "C" bool ModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data
             return ArkTSModuleEnumerateTopLevelFunctions(m, data, cb);
         case ABCKIT_TARGET_JS:
             return JsModuleEnumerateTopLevelFunctions(m, data, cb);
+        case ABCKIT_TARGET_UNKNOWN:
+            return UnknownModuleEnumerateStub(m);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -217,6 +228,8 @@ extern "C" bool ModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *dat
             return ArkTSModuleEnumerateAnonymousFunctions(m, data, cb);
         case ABCKIT_TARGET_JS:
             return JsModuleEnumerateAnonymousFunctions(m, data, cb);
+        case ABCKIT_TARGET_UNKNOWN:
+            return UnknownModuleEnumerateStub(m);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -235,6 +248,8 @@ extern "C" bool ModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *d
             return ArkTSModuleEnumerateAnnotationInterfaces(m, data, cb);
         case ABCKIT_TARGET_JS:
             return false;
+        case ABCKIT_TARGET_UNKNOWN:
+            return UnknownModuleEnumerateStub(m);
         default:
             LIBABCKIT_UNREACHABLE;
     }

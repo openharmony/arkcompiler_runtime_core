@@ -78,9 +78,9 @@ void FunctionWrapper::Update()
     }
 }
 
-FunctionWrapper *PandasmWrapper::CreateWrappedFunction()
+FunctionWrapper *PandasmWrapper::CreateWrappedFunction(panda::panda_file::SourceLang lang)
 {
-    auto *newFunc = new panda::pandasm::Function("newCode", panda::panda_file::SourceLang::ECMASCRIPT);
+    auto *newFunc = new panda::pandasm::Function("newCode", lang);
     return GetWrappedFunction(newFunc);
 }
 

@@ -19,6 +19,7 @@ import("//arkcompiler/runtime_core/libabckit/abckit_config.gni")
 template("create_merge_file") {
   assert(defined(invoker.input_file), "input_file is required!")
   assert(defined(invoker.output_file), "output_file is required!")
+  assert(defined(invoker.source_lang), "source_lang is required!")
 
   extra_dependencies = []
   if (defined(invoker.extra_dependencies)) {
@@ -32,6 +33,7 @@ template("create_merge_file") {
       rebase_path(target_gen_dir),
       rebase_path(invoker.input_file),
       rebase_path(invoker.output_file),
+      invoker.source_lang,
     ]
 
     deps = extra_dependencies
@@ -43,6 +45,15 @@ template("create_merge_file") {
 test_js_path = "//arkcompiler/runtime_core/libabckit/tests/"
 
 test_js_files = [
+  "ut/metadata_core/inspect_api/modules/targets/JS_target",
+  "ut/extensions/js/inspect_api/api_casts/JSapi_casts",
+  "ut/extensions/js/inspect_api/modules/JSmodules_dynamic",
+  "ut/extensions/js/inspect_api/modules/JSmodules_dynamic_external",
+  "ut/extensions/js/inspect_api/enumerators/JSenumerators0_dynamic",
+  "ut/extensions/js/modify_api/modules/JSmodules_dynamic_modify",
+]
+
+test_js_from_ets_files = [
   "cpp/tests/cpp_test_dynamic_js",
 
   "ut/metadata_core/inspect_api/classes/classes_dynamic",
@@ -50,7 +61,6 @@ test_js_files = [
   "ut/metadata_core/inspect_api/literals/literals_dynamic",
   "ut/metadata_core/inspect_api/values/values_dynamic",
   "ut/metadata_core/inspect_api/modules/modules_dynamic",
-  "ut/metadata_core/inspect_api/modules/targets/JS_target",
   "ut/metadata_core/inspect_api/modules/modules_dynamic_external",
   "ut/metadata_core/inspect_api/types/types_dynamic",
   "ut/metadata_core/modify_api/strings/strings_dynamic",
@@ -60,11 +70,6 @@ test_js_files = [
   "ut/metadata_core/inspect_api/files/file_dynamic",
   "ut/extensions/arkts/modify_api/modules/modules_dynamic_modify",
   "ut/extensions/arkts/inspect_api/modules/modules_dynamic",
-  "ut/extensions/js/inspect_api/api_casts/JSapi_casts",
-  "ut/extensions/js/inspect_api/modules/JSmodules_dynamic",
-  "ut/extensions/js/inspect_api/modules/JSmodules_dynamic_external",
-  "ut/extensions/js/inspect_api/enumerators/JSenumerators0_dynamic",
-  "ut/extensions/js/modify_api/modules/JSmodules_dynamic_modify",
   "ut/extensions/js/modify_api/super_this/store_super",
   "ut/extensions/js/modify_api/super_this/load_super",
   "ut/extensions/js/modify_api/super_this/store_this",
@@ -253,7 +258,6 @@ test_ets_files = [
   "ut/isa/isa_static/cast/target_type_static",
   "ut/isa/isa_static/call/call_static_static",
   "ut/isa/isa_static/call/call_virtual_static",
-  "ut/ir_core/catchphi/catchphi_static",
   "ut/isa/isa_static/cmp/create_cmp_static",
   "ut/isa/isa_static/load_string/load_string_static",
   "ut/isa/isa_static/load_undefined/load_undefined_static",
@@ -268,6 +272,7 @@ test_ets_files = [
   "ut/isa/isa_static/return/return_static",
   "ut/isa/isa_static/create_nullptr/create_nullptr_static",
 
+  "ut/ir_core/catchphi/catchphi_static",
   "ut/ir_core/graph/graph_static",
   "ut/ir_core/inst_manipulation/inst_manipulation_static",
   "ut/ir_core/basic_blocks/basic_blocks_static",
@@ -308,6 +313,33 @@ foreach(file, test_js_files) {
   create_merge_file("${file}_merge") {
     input_file = "$test_js"
     output_file = "$test_merge_file"
+    source_lang = "js"
+  }
+  es2abc_gen_abc("gen_${file}_abc") {
+    # Only targets in this file can depend on this.
+    extra_visibility = [ ":*" ]
+    extra_dependencies = [ ":${file}_merge" ]
+    src_js = "@" + rebase_path(test_merge_file)
+    dst_file = rebase_path(test_abc)
+    extra_args = [
+      "--module",
+      "--merge-abc",
+    ]
+
+    in_puts = [ test_js ]
+    out_puts = [ test_abc ]
+  }
+}
+
+foreach(file, test_js_from_ets_files) {
+  test_js = "${test_js_path}${file}.js"
+  test_merge_file = "$target_out_dir/${file}_merge.txt"
+  test_abc = "$target_out_dir/${file}.abc"
+
+  create_merge_file("${file}_merge") {
+    input_file = "$test_js"
+    output_file = "$test_merge_file"
+    source_lang = "ets"
   }
   es2abc_gen_abc("gen_${file}_abc") {
     # Only targets in this file can depend on this.
@@ -333,6 +365,7 @@ foreach(file, test_ts_files) {
   create_merge_file("${file}_merge") {
     input_file = "$test_ts"
     output_file = "$test_merge_file"
+    source_lang = "ets"
   }
   es2abc_gen_abc("gen_${file}_abc") {
     # Only targets in this file can depend on this.
@@ -694,6 +727,10 @@ libabckit_host_unittest_action("abckit_gtests") {
     deps += [ ":gen_${file}_abc" ]
   }
 
+  foreach(file, test_js_from_ets_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
   foreach(file, test_ts_files) {
     deps += [ ":gen_${file}_abc" ]
   }
@@ -728,6 +765,16 @@ action("abckit_stress_tests") {
   deps = [ ":libabckit_stress_tests_package" ]
   outputs = [ "$target_gen_dir/abckit_stress_tests.txt" ]
   script = "stress/stress.py"
+}
+
+group("abckit_stress_tests_apps") {
+  testonly = true
+  if (abckit_enable) {
+    deps = [
+      "apps:abckit_test_apps_build",
+      "apps:abckit_test_apps_run_stress",
+    ]
+  }
 }
 
 ohos_source_set("abckit_js_vm_helpers") {

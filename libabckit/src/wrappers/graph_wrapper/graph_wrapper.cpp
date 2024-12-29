@@ -19,6 +19,7 @@
 #include "libabckit/src/macros.h"
 #include "libabckit/src/irbuilder_dynamic/ir_builder_dyn.h"
 #include "libabckit/src/adapter_dynamic/runtime_adapter_dynamic.h"
+#include "libabckit/src/adapter_dynamic/convert.h"
 #include "libabckit/src/adapter_static/helpers_static.h"
 #include "libabckit/src/codegen/codegen_dynamic.h"
 #include "libabckit/src/codegen/ic_slot_allocator.h"
@@ -174,7 +175,8 @@ void *GraphWrapper::BuildCodeDynamic(AbckitGraph *graph, const std::string &func
     LIBABCKIT_LOG_DUMP(graphImpl->Dump(&std::cerr), DEBUG);
     LIBABCKIT_LOG(DEBUG) << "============================================\n";
 
-    FunctionWrapper *wrFunc = PandasmWrapper::CreateWrappedFunction();
+    const auto lang = convert::ToSourceLang(graph->function->owningModule->target);
+    FunctionWrapper *wrFunc = PandasmWrapper::CreateWrappedFunction(lang);
     if (!graphImpl->RunPass<CodeGenDynamic>(wrFunc, graph->irInterface)) {
         LIBABCKIT_LOG(DEBUG) << funcName << ": Code generation failed!\n";
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);

@@ -108,7 +108,11 @@ extern "C" int Entry(AbckitFile *file)
         return !hasError;
     };
 
+    std::cout << "Stress plugin start" << std::endl;
+
     EnumerateAllMethodsInModule(file, cbNamespace, cbClass, cbFunc, hasError);
+
+    std::cout << "Stress plugin end" << std::endl;
 
     return hasError ? 1 : 0;
 }
