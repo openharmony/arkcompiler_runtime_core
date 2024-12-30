@@ -61,10 +61,9 @@ struct Function {
 
     struct Parameter {
         Type type;
-        std::unique_ptr<ParamMetadata> metadata;
 
         Parameter(Type t, panda::panda_file::SourceLang lang)
-            : type(std::move(t)), metadata(extensions::MetadataExtension::CreateParamMetadata(lang))
+            : type(std::move(t))
         {
         }
     };

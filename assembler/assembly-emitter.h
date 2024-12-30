@@ -62,6 +62,7 @@ public:
                      panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr,
                      uint8_t api = 0, std::string subApi = panda_file::DEFAULT_SUB_API_VERSION);
 
+    // The function releases the data in progs in advance for the sake of the peak memory at compiler time.
     static bool EmitPrograms(const std::string &filename, const std::vector<Program *> &progs, bool emit_debug_info,
                              uint8_t api = 0, std::string subApi = panda_file::DEFAULT_SUB_API_VERSION);
 
