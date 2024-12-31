@@ -19,6 +19,10 @@
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference.h"
 
 namespace ark::ets::interop::js {
+
+thread_local STSVMInterfaceImpl::XGCSyncState STSVMInterfaceImpl::xgcSyncState_ =
+    STSVMInterfaceImpl::XGCSyncState::NONE;
+
 void STSVMInterfaceImpl::MarkFromObject(void *ref)
 {
     ASSERT(ref != nullptr);
@@ -30,4 +34,157 @@ void STSVMInterfaceImpl::MarkFromObject(void *ref)
         gc->MarkObjectRecursively(etsObj->GetCoreType());
     }
 }
+
+STSVMInterfaceImpl::STSVMInterfaceImpl() : xgcBarrier_(STSVMInterface::DEFAULT_XGC_EXECUTORS_COUNT) {}
+
+void STSVMInterfaceImpl::OnVMAttach()
+{
+    xgcBarrier_.Increment();
+}
+
+void STSVMInterfaceImpl::OnVMDetach()
+{
+    xgcBarrier_.Decrement();
+}
+
+void STSVMInterfaceImpl::StartXGCBarrier()
+{
+    ASSERT(xgcSyncState_ == XGCSyncState::NONE);
+    xgcBarrier_.InitialWait();
+    xgcSyncState_ = XGCSyncState::CONCURRENT_PHASE;
+}
+
+bool STSVMInterfaceImpl::WaitForConcurrentMark(const NoWorkPred &func)
+{
+    ASSERT(xgcSyncState_ == XGCSyncState::CONCURRENT_PHASE);
+    auto res = xgcBarrier_.Wait(func);
+    if (res) {
+        xgcSyncState_ = XGCSyncState::CONCURRENT_FINISHED;
+    }
+    return res;
+}
+
+void STSVMInterfaceImpl::RemarkStartBarrier()
+{
+    ASSERT(xgcSyncState_ == XGCSyncState::CONCURRENT_FINISHED);
+    xgcBarrier_.Wait();
+    xgcSyncState_ = XGCSyncState::REMARK_PHASE;
+}
+
+bool STSVMInterfaceImpl::WaitForRemark(const NoWorkPred &func)
+{
+    ASSERT(xgcSyncState_ == XGCSyncState::REMARK_PHASE);
+    auto res = xgcBarrier_.Wait(func);
+    if (res) {
+        xgcSyncState_ = XGCSyncState::NONE;
+    }
+    return res;
+}
+
+void STSVMInterfaceImpl::FinishXGCBarrier()
+{
+    xgcBarrier_.Wait();
+    xgcSyncState_ = XGCSyncState::NONE;
+}
+
+void STSVMInterfaceImpl::NotifyWaiters()
+{
+    xgcBarrier_.Signal();
+}
+
+STSVMInterfaceImpl::VMBarrier::VMBarrier(size_t vmsCount)
+{
+    os::memory::LockHolder lh(barrierMutex_);
+    vmsCount_ = vmsCount;
+    currentVMsCount_ = 0U;
+    epochCount_ = 0U;
+    currentWaitersCount_ = 0U;
+}
+
+void STSVMInterfaceImpl::VMBarrier::Increment()
+{
+    os::memory::LockHolder lh(barrierMutex_);
+    vmsCount_++;
+}
+
+void STSVMInterfaceImpl::VMBarrier::Decrement()
+{
+    os::memory::LockHolder lh(barrierMutex_);
+    ASSERT(vmsCount_ > 1);  // after this Decrement, barrier is broken and will not wait correctly
+    vmsCount_--;
+    Wake();
+}
+
+void STSVMInterfaceImpl::VMBarrier::InitialWait()
+{
+    Wait(nullptr, true);
+}
+
+bool STSVMInterfaceImpl::VMBarrier::Wait(const NoWorkPred &noWorkPred)
+{
+    return Wait(noWorkPred, false);
+}
+
+bool STSVMInterfaceImpl::VMBarrier::Wait(const NoWorkPred &noWorkPred, bool isInitial)
+{
+    os::memory::LockHolder lh(barrierMutex_);
+    // Need check if noWorkPred exist and if yes, check if it's true. This prevent situation with lost Signal.
+    if (CheckNoWorkPred(noWorkPred)) {
+        return false;
+    }
+    size_t epochCount = 0;
+    do {
+        // Save current epoch to look at it in future.
+        epochCount = epochCount_;
+        // No we can try to pass the barrier. First we increment count of waiters.
+        auto currentWaitersCount = IncrementCurrentWaitersCount();
+        // For Inintial barrier we use variable vmsCount_, otherwise we use currentVMsCount_ that can not be checked
+        // between 2 Initial barriers.
+        size_t waitersCount = 0;
+        if (isInitial) {
+            waitersCount = vmsCount_;
+        } else {
+            waitersCount = currentVMsCount_;
+        }
+        // Next we check if this waiter is the last, if it true, we increase epoch and go out
+        if (currentWaitersCount == waitersCount) {
+            // for initial barrier we also should set new currentVMsCount_;
+            if (isInitial) {
+                currentVMsCount_ = vmsCount_;
+            }
+            epochCount_++;
+            Wake();
+            return true;
+        }
+        // We go to wait, it will return true if noWorkPred() returns true
+        if (WaitNextEpochOrSignal(noWorkPred)) {
+            return false;
+        }
+    } while (epochCount == epochCount_);
+    return true;
+}
+
+void STSVMInterfaceImpl::VMBarrier::Signal()
+{
+    os::memory::LockHolder lh(barrierMutex_);
+    Wake();
+}
+
+size_t STSVMInterfaceImpl::VMBarrier::IncrementCurrentWaitersCount()
+{
+    return ++currentWaitersCount_;
+}
+
+bool STSVMInterfaceImpl::VMBarrier::WaitNextEpochOrSignal(const NoWorkPred &noWorkPred)
+{
+    condVar_.Wait(&barrierMutex_);
+    return CheckNoWorkPred(noWorkPred);
+}
+
+void STSVMInterfaceImpl::VMBarrier::Wake()
+{
+    currentWaitersCount_ = 0;
+    condVar_.SignalAll();
+}
+
 }  // namespace ark::ets::interop::js

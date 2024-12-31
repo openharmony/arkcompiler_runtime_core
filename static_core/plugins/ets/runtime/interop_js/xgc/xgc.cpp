@@ -37,7 +37,8 @@ bool XGC::Create()
         // NOTE(audovichenko): remove this later
         return true;
     }
-    auto xobjHandler = [storage](ObjectHeader *obj) {
+    instance_->stsVmIface_ = reinterpret_cast<STSVMInterfaceImpl *>(stsVmIface);
+    auto xobjHandler = [storage, stsVmIface](ObjectHeader *obj) {
         auto *etsObj = EtsObject::FromCoreType(obj);
         if (!etsObj->HasInteropIndex()) {
             return;
@@ -52,6 +53,7 @@ bool XGC::Create()
             }
             ++it;
         } while (it != end);
+        reinterpret_cast<STSVMInterfaceImpl *>(stsVmIface)->NotifyWaiters();
     };
     auto *coro = EtsCoroutine::GetCurrent();
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
@@ -69,7 +71,7 @@ void XGC::GCStarted(const GCTask &task, [[maybe_unused]] size_t heapSize)
     }
     auto *coro = EtsCoroutine::GetCurrent();
     coro->GetPandaVM()->RemoveRootProvider(InteropCtx::Current()->GetSharedRefStorage());
-    // NOTE(audovichenko): Add a barrier here
+    stsVmIface_->StartXGCBarrier();
     isXGcInProgress_ = true;
     remarkFinished_ = false;
 }
@@ -90,6 +92,7 @@ void XGC::GCFinished(const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeG
         // To do it on the main thread we should start a coro on the main worker
         // or post async job using libuv.
     }
+    stsVmIface_->FinishXGCBarrier();
 }
 
 void XGC::GCPhaseStarted(mem::GCPhase phase)
@@ -97,8 +100,18 @@ void XGC::GCPhaseStarted(mem::GCPhase phase)
     if (!isXGcInProgress_) {
         return;
     }
-    if (phase == mem::GCPhase::GC_PHASE_INITIAL_MARK) {
-        storage_->UnmarkAll();
+    switch (phase) {
+        case mem::GCPhase::GC_PHASE_INITIAL_MARK: {
+            storage_->UnmarkAll();
+            break;
+        }
+        case mem::GCPhase::GC_PHASE_REMARK: {
+            stsVmIface_->RemarkStartBarrier();
+            break;
+        }
+        default: {
+            break;
+        }
     }
 }
 
@@ -107,8 +120,19 @@ void XGC::GCPhaseFinished(mem::GCPhase phase)
     if (!isXGcInProgress_) {
         return;
     }
-    if (phase == mem::GCPhase::GC_PHASE_REMARK) {
-        remarkFinished_ = true;
+    switch (phase) {
+        case mem::GCPhase::GC_PHASE_MARK: {
+            stsVmIface_->WaitForConcurrentMark(nullptr);
+            break;
+        }
+        case mem::GCPhase::GC_PHASE_REMARK: {
+            stsVmIface_->WaitForRemark(nullptr);
+            remarkFinished_ = true;
+            break;
+        }
+        default: {
+            break;
+        }
     }
 }
 

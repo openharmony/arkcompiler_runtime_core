@@ -50,6 +50,7 @@ private:
     ets_proxy::SharedReferenceStorage *storage_;
     bool isXGcInProgress_ = false;
     bool remarkFinished_ = false;
+    STSVMInterfaceImpl *stsVmIface_ = nullptr;
 };
 }  // namespace ark::ets::interop::js
 
