@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -58,7 +58,7 @@ class Config:
         yaml_path="test-suites",
         cli_name=["test_suites", "test262", "parser", "declgenparser", "hermes", "system", "astchecker", "srcdumper",
                   "ets_func_tests", "ets_runtime", "ets_cts", "ets_gc_stress", "ets_es_checked", "ets_custom",
-                  "sts_ts_subset"],
+                  "sts_ts_subset", "declgenets2ts_ets_cts"],
         cast_to_type=_to_test_suites,
         required=True
     )

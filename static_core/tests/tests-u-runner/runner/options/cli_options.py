@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -509,6 +509,13 @@ def add_coverage_args(parser: argparse.ArgumentParser) -> None:
         help='Stacks files in the specified directory')
 
 
+def add_declgen_ets2ts_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        '--declgen-ets2ts-ets-cts', action='store_true', dest='declgenets2ts_ets_cts',
+        default=None,
+        help="run declgen_ets2ts ets_cts tests")
+
+
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Regression test runner")
 
@@ -527,5 +534,6 @@ def get_args() -> argparse.Namespace:
     add_time_report_args(parser)
     add_test_lists_args(parser)
     add_coverage_args(parser)
+    add_declgen_ets2ts_args(parser)
 
     return parser.parse_args()
