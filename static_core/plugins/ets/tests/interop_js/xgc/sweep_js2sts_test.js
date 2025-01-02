@@ -14,8 +14,8 @@
  */
 const testRunner = require('./test_utils.js');
 
-let objects = new Array();
 function js2sts(etsVm) {
+    let objects = new Array();
     objects.push(etsVm.call('.js2sts'));
 }
 

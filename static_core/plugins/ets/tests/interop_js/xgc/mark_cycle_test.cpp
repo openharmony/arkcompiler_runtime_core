@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "native_reference.h"
 
 namespace ark::ets::interop::js {
 
@@ -30,7 +31,7 @@ public:
         return true;
     }
 
-    void MarkFromObject(void *obj) override
+    void MarkFromObject(void *obj)
     {
         markFromObjectCalled_ = true;
         if (obj != expectedJsObject_) {
@@ -39,7 +40,8 @@ public:
             errors_.push_back(err.str());
             return;
         }
-        InteropCtx::Current()->GetSTSVMInterface()->MarkFromObject(refToMark_);
+        PandaUniquePtr<TestNativeReference> ref = MakePandaUnique<TestNativeReference>(refToMark_);
+        InteropCtx::Current()->GetSTSVMInterface()->MarkFromObject(ref.get());
     }
 
     void SetExpectedJsObject(void *obj)

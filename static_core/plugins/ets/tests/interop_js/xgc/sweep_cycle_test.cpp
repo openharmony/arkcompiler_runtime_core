@@ -30,7 +30,7 @@ public:
         return true;
     }
 
-    void MarkFromObject(void *obj) override
+    void MarkFromObject(void *obj)
     {
         std::stringstream err;
         err << "Unexpected call of MarkFromObject";

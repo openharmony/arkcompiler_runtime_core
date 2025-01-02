@@ -25,7 +25,7 @@ namespace ark::ets::interop::js {
 
 class TestEcmaVMInterface : public arkplatform::EcmaVMInterface {
 public:
-    void MarkFromObject(void *obj) override
+    void MarkFromObject(void *obj)
     {
         std::stringstream err;
         err << "Unexpected call of MarkFromObject";

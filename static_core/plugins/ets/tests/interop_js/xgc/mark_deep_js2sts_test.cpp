@@ -29,7 +29,7 @@ public:
         return true;
     }
 
-    void MarkFromObject([[maybe_unused]] void *obj) override {}
+    void MarkFromObject([[maybe_unused]] void *obj) {}
 
     std::vector<std::string> GetErrors()
     {
