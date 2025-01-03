@@ -10,24 +10,12 @@
 ### **[测试项](https://gitee.com/openharmony/arkcompiler_runtime_core/wikis)**
 
 #### 当前GGW中未添加的测试套(请在本地进行验证)
-
-1.版本控制测试用例
-```
-cd arkcompiler/ets_frontend/es2panda
-python3 test/runner.py --version-control --no-progress ../../../out/rk3568/clang_x64/arkcompiler/ets_frontend
-```
-
-2.test262混合编译
-```
-python3 test262/run_test262.py --es2022 all --ark-frontend-binary=../../out/rk3568/clang_x64/arkcompiler/ets_frontend/es2abc --ark-frontend=es2panda --product-name=rk3568 --timeout=3000000 --abc2program
-```
-
-3.Fuzz编译测试
+1.Fuzz编译测试
 ```
 ./build.sh --product-name rk3568 --build-target arkcompiler/runtime_core/tests/fuzztest:fuzztest
 ```
 
-4."runtime_core/libpandabase/tests:host_unittest"
+2."runtime_core/libpandabase/tests:host_unittest"
 release模式：
 ```
 ./build.sh --product-name rk3568 --build-target runtime_core_host_unittest
