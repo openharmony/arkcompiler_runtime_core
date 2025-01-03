@@ -25,7 +25,7 @@ tags: []
 class CallMeTrinity {
     name: String = "Nemo";
 
-    static instantiate(factory: () => CallMeTrinity, newName: String = "Trinity"): CallMeTrinity {
+    static $_instantiate(factory: () => CallMeTrinity, newName: String = "Trinity"): CallMeTrinity {
         return factory();
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "plugins/ets/runtime/interop_js/timer_module.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/runtime/types/ets_type.h"
 
 pid_t TimerModule::mainTid_ = 0;
 EtsEnv *TimerModule::mainEtsEnv_ = nullptr;
@@ -90,7 +91,7 @@ void TimerModule::TimerCallback(uv_timer_t *timer)
         DisarmTimer(timer);
     }
     ets_class cls = mainEtsEnv_->GetObjectClass(info->GetFuncObject());
-    ets_method invokeMethod = mainEtsEnv_->Getp_method(cls, "invoke", nullptr);
+    ets_method invokeMethod = mainEtsEnv_->Getp_method(cls, ark::ets::LAMBDA_METHOD_NAME, nullptr);
     ark::ets::interop::js::JSNapiEnvScope scope(ark::ets::interop::js::InteropCtx::Current(), jsEnv_);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     mainEtsEnv_->CallVoidMethod(info->GetFuncObject(), invokeMethod);

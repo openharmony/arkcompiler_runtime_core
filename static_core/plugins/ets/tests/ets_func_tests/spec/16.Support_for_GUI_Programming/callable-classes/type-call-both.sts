@@ -24,8 +24,8 @@ tags:
 let counter: int = 0;
 
 class CallMeTrinity {
-    static invoke() { counter++; }
-    static instantiate(factory: () => CallMeTrinity) {
+    static $_invoke() { counter++; }
+    static $_instantiate(factory: () => CallMeTrinity) {
         return factory();
     }
 }

@@ -24,9 +24,9 @@ let counter: int = 0;
 let pi: number = 0;
 
 class CallMeTrinity {
-    static invoke(val: int) { counter = val; }
-    static invoke(val: String) { name = val; }
-    static invoke(val: number) { pi = val; }
+    static $_invoke(val: int) { counter = val; }
+    static $_invoke(val: String) { name = val; }
+    static $_invoke(val: number) { pi = val; }
 }
 
 function main(): int {

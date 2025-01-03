@@ -27,7 +27,7 @@ let counter: int = 0;
 class CallMeTrinity {
     name: String;
 
-    static instantiate(newName: String, factory: () => CallMeTrinity): CallMeTrinity {
+    static $_instantiate(newName: String, factory: () => CallMeTrinity): CallMeTrinity {
         this.name = newName;
         return factory();
     }

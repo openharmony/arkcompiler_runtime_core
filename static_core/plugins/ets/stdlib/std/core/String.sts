@@ -57,7 +57,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      *
      * @returns A new String instance
      */
-    static invoke(): string {
+    static $_invoke(): string {
         return new String();
     }
 
@@ -68,7 +68,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      *
      * @returns A new String instance
      */
-    static invoke(value: Object | null | undefined): string {
+    static $_invoke(value: Object | null | undefined): string {
         return new String(value);
     }
 

@@ -43,7 +43,7 @@ class StructCommon {
 
 class Column extends StructCommon {
     // TODO: this should be taken from the base class
-    static instantiate(factory: () => Column, content: () => void): Column {
+    static $_instantiate(factory: () => Column, content: () => void): Column {
         console.println("Executing invoke")
         const instance = factory()
         instance.__initializeStruct()
@@ -61,7 +61,7 @@ class Column extends StructCommon {
 
 class Button extends StructCommon {
     // TODO: this should be taken from the base class
-    static instantiate(factory: () => Button, content: () => void): Button {
+    static $_instantiate(factory: () => Button, content: () => void): Button {
         console.println("Executing invoke")
         const instance = factory()
         instance.__initializeStruct()

@@ -28,6 +28,6 @@ class CallMeTrinity {
 }
 
 function main(): int {
-    let tt: CallMeTrinity = CallMeTrinity.instantiate();
+    let tt: CallMeTrinity = CallMeTrinity.$_instantiate();
     return 1;
 }

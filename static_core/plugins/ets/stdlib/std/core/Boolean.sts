@@ -150,7 +150,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      *
      * @returns A new Boolean instance representing the specified value.
      */
-    static invoke(): boolean {
+    static $_invoke(): boolean {
         return Boolean.FALSE;
     }
 
@@ -161,7 +161,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      *
      * @returns A new Boolean instance representing the specified value.
      */
-    static invoke<T>(value: T): boolean {
+    static $_invoke<T>(value: T): boolean {
         return new Boolean(value).valueOf();
     }
 

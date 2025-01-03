@@ -24,7 +24,7 @@ let globalVar: int = 0;
 @Component
 struct Test {
     build() {}
-    static invoke(): void {
+    static $_invoke(): void {
         globalVar = 100;
     }
 }

@@ -633,7 +633,7 @@ export final class Date {
      *
      * @returns A new Date instance as a string
      */
-    static invoke(): string {
+    static $_invoke(): string {
         return new Date().toString();
     }
 

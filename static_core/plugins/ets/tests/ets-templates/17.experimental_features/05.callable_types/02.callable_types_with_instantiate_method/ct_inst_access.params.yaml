@@ -16,8 +16,8 @@ cases:
           // private instantiate from same-class another instantiate
           class C {
               fld: string = ''
-              public static instantiate(f: ()=>C, p: number): C { return C('' + p) }
-              private static instantiate(f: ()=>C, p: string): C {
+              public static $_instantiate(f: ()=>C, p: number): C { return C('' + p) }
+              private static $_instantiate(f: ()=>C, p: string): C {
                   let x = f()
                   x.fld = p
                   return x
@@ -30,7 +30,7 @@ cases:
           // private instantiate from same-class method
           class C {
               fld: string = ''
-              private static instantiate(f: ()=>C, p: string): C {
+              private static $_instantiate(f: ()=>C, p: string): C {
                   let x = f()
                   x.fld = p
                   return x
@@ -46,8 +46,8 @@ cases:
           // protected instantiate from same-class another instantiate
           class C {
               fld: string = ''
-              public static instantiate(f: ()=>C, p: number): C { return C('' + p) }
-              protected static instantiate(f: ()=>C, p: string): C {
+              public static $_instantiate(f: ()=>C, p: number): C { return C('' + p) }
+              protected static $_instantiate(f: ()=>C, p: string): C {
                   let x = f()
                   x.fld = p
                   return x
@@ -60,7 +60,7 @@ cases:
           // protected instantiate from same-class method
           class C {
               fld: string = ''
-              protected static instantiate(f: ()=>C, p: string): C {
+              protected static $_instantiate(f: ()=>C, p: string): C {
                   let x = f()
                   x.fld = p
                   return x
@@ -76,14 +76,14 @@ cases:
           // protected instantiate from subclass instantiate
           class B {
               fld: string = ''
-              protected static instantiate(f: ()=>B, p: string): B {
+              protected static $_instantiate(f: ()=>B, p: string): B {
                   let x = f()
                   x.fld = p
                   return x
               }
           }
           class C extends B {
-              public static instantiate(f: ()=>C, p: number): B { return C('' + p) }
+              public static $_instantiate(f: ()=>C, p: number): B { return C('' + p) }
           }
       use: |-
           if (C(42.0).fld != '42') return 1
@@ -92,7 +92,7 @@ cases:
           // protected instantiate from subclass method
           class B {
               fld: string = ''
-              protected static instantiate(f: ()=>B, p: string): B {
+              protected static $_instantiate(f: ()=>B, p: string): B {
                   let x = f()
                   x.fld = p
                   return x
@@ -111,14 +111,14 @@ cases:
           // protected instantiate from another class instantiate
           class B {
               fld: string = ''
-              protected static instantiate(f: ()=>B, p: string): B {
+              protected static $_instantiate(f: ()=>B, p: string): B {
                   let x = f()
                   x.fld = p
                   return x
               }
           }
           class C {
-              public static instantiate(f: ()=>C, p: number): B { return B('' + p) }
+              public static $_instantiate(f: ()=>C, p: number): B { return B('' + p) }
           }
       use: |-
           if (C(42.0).fld != '42') return 1
@@ -128,7 +128,7 @@ cases:
           // protected instantiate from another class method
           class B {
               fld: string = ''
-              protected static instantiate(f: ()=>B, p: string): B {
+              protected static $_instantiate(f: ()=>B, p: string): B {
                   let x = f()
                   x.fld = p
                   return x
@@ -147,14 +147,14 @@ cases:
           // private instantiate from subclass instantiate
           class B {
               fld: string = ''
-              private static instantiate(f: ()=>B, p: string): B {
+              private static $_instantiate(f: ()=>B, p: string): B {
                   let x = f()
                   x.fld = p
                   return x
               }
           }
           class C extends B {
-              public static instantiate(f: ()=>C, p: number): B { return B('' + p) }
+              public static $_instantiate(f: ()=>C, p: number): B { return B('' + p) }
           }
       use: |-
           if (C(42.0).fld != '42') return 1
@@ -164,7 +164,7 @@ cases:
           // private instantiate from subclass method
           class B {
               fld: string = ''
-              private static instantiate(f: ()=>B, p: string): B {
+              private static $_instantiate(f: ()=>B, p: string): B {
                   let x = f()
                   x.fld = p
                   return x

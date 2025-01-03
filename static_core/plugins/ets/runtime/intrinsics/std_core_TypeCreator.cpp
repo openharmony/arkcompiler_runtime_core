@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -357,7 +357,7 @@ EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromLambda(EtsLong methodPtr, EtsIn
     auto klassName = GetPandasmTypeFromDescriptor(m->Ctx(), klassTd);
     auto klass = coro->GetPandaVM()->GetClassLinker()->GetClass(klassTd.c_str());
     ASSERT(klass->IsInitialized());
-    auto meth = klass->GetMethod("invoke");
+    auto meth = klass->GetMethod(ark::ets::LAMBDA_METHOD_NAME);
     if (meth == nullptr) {
         return EtsString::CreateFromMUtf8("method is absent");
     }

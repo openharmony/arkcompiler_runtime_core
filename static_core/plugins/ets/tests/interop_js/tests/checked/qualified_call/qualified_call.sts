@@ -24,7 +24,7 @@ import { Outer, outerObj }
 //! METHOD       "callInner"
 //! PASS_AFTER   "Codegen"
 //! INST         /\ InitClass.*jscall/
-//! INST         /CallStatic.*jscall::invoke/
+//! INST         /CallStatic.*jscall::$_invoke/
 
 //! CHECKER      Call method of class member JIT (fast)
 //! RUN          force_jit: true, entry: "callInner", options: "--compiler-regex=ETSGLOBAL::callInner --compiler-interop-try-single-scope=false"
@@ -69,7 +69,7 @@ import { Outer, outerObj }
 //! METHOD       "callInner"
 //! PASS_AFTER   "Codegen"
 //! INST         /\ InitClass.*jscall/
-//! INST         /CallStatic.*jscall::invoke/
+//! INST         /CallStatic.*jscall::$_invoke/
 //! RUN          entry: "callInner"
 
 //! CHECKER      Call method of class member LLVMAOT (slow)

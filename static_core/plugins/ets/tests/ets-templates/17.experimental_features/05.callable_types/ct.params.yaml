@@ -16,8 +16,8 @@ cases:
       decl: |-
           // CTE if both invoke and instantiate are present in the same class
           class C {
-              static invoke() {}
-              static instantiate(f: () => C): C { return f() }
+              static $_invoke() {}
+              static $_instantiate(f: () => C): C { return f() }
           }
       use: |-
           let x = C()
@@ -26,11 +26,11 @@ cases:
       decl: |-
           // CTE if both invoke and instantiate are available
           abstract class A {
-              static invoke() {}
+              static $_invoke() {}
           }
           abstract class B extends A {}
           class C extends B {
-              static instantiate(f: () => C): C { return f() }
+              static $_instantiate(f: () => C): C { return f() }
           }
       use: |-
           let x = C()
@@ -39,11 +39,11 @@ cases:
       decl: |-
           // CTE if both invoke and instantiate are available
           class A {
-              static instantiate(f: () => A): A { return f() }
+              static $_instantiate(f: () => A): A { return f() }
           }
           class B extends A {}
           class C extends B {
-              static invoke() {}
+              static $_invoke() {}
           }
       use: |-
           let x = C()
@@ -52,10 +52,10 @@ cases:
       decl: |-
           // CTE if both invoke and instantiate are available
           class A {
-              static instantiate(f: () => A): A { return f() }
+              static $_instantiate(f: () => A): A { return f() }
           }
           abstract class B extends A {
-              static invoke() {}
+              static $_invoke() {}
           }
           class C extends B {}
       use: |-
@@ -65,7 +65,7 @@ cases:
       decl: |-
           // CTE if invoke is not static, implicit call
           class C {
-              invoke(p: number, q: string): string {
+              $_invoke(p: number, q: string): string {
                   return q + p
               }
           }
@@ -76,7 +76,7 @@ cases:
       decl: |-
           // CTE if invoke is not static, explicit call
           class C {
-              invoke(p: number, q: string): string {
+              $_invoke(p: number, q: string): string {
                   return q + p
               }
           }
@@ -87,7 +87,7 @@ cases:
       decl: |-
           // CTE if instantiate is not static, implicit call
           class C {
-              instantiate(f: ()=>C): C {
+              $_instantiate(f: ()=>C): C {
                   return f()
               }
           }
@@ -98,9 +98,9 @@ cases:
       decl: |-
           // CTE if instantiate is not static, explicit call
           class C {
-              instantiate(f: ()=>C): C {
+              $_instantiate(f: ()=>C): C {
                   return f()
               }
           }
       use: |-
-          let x = C.instantiate(() => { return new C() })
+          let x = C.$_instantiate(() => { return new C() })

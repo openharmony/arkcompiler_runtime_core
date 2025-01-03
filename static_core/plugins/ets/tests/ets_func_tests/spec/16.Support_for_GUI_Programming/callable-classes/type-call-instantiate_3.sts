@@ -25,7 +25,7 @@ tags:
 let counter: int = 0;
 
 class CallMeTrinity {
-    static instantiate(): CallMeTrinity {
+    static $_instantiate(): CallMeTrinity {
         return new CallMeTrinity();
     }
     add(): void {

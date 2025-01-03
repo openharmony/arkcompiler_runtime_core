@@ -22,7 +22,7 @@ tags: []
 let counter: int = 0;
 
 class CallMeTrinity {
-    static invoke() { counter++; }
+    static $_invoke() { counter++; }
 }
 
 function main(): int {

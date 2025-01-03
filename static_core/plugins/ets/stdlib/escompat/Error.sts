@@ -62,11 +62,11 @@ export class Error {
         this.stackLines = StackTrace.provisionStackTrace()
     }
 
-    static invoke(message?: String, options?: ErrorOptions): Error {
+    static $_invoke(message?: String, options?: ErrorOptions): Error {
         return new Error(message, options)
     }
 
-    static invoke(message: String): Error {
+    static $_invoke(message: String): Error {
         return new Error(message)
     }
 

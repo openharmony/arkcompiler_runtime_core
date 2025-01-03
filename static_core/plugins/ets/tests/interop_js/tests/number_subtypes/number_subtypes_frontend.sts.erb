@@ -24,14 +24,14 @@ import {
 //! RUN          force_jit: true, entry: "jscall<%= primitive.getName.capitalize %>", options: "--compiler-regex=ETSGLOBAL::jscall<%= primitive.getName.capitalize %>"
 //! METHOD       "jscall<%= primitive.getName.capitalize %>"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jscall::invoke/
+//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST         "Intrinsic.JSRuntimeGetValueDouble"
 
 //! CHECKER      jsnewGetProperty<%= primitive.getName.capitalize %> JIT
 //! RUN          force_jit: true, entry: "jsnewGetProperty<%= primitive.getName.capitalize %>", options: "--compiler-regex=ETSGLOBAL::jsnewGetProperty<%= primitive.getName.capitalize %>"
 //! METHOD       "jsnewGetProperty<%= primitive.getName.capitalize %>"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::invoke/
+//! INST_NOT     /CallStatic.*jsnew::$_invoke/
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 2
 //! INST_NOT     "Intrinsic.JSRuntimeGetPropertyJSValue"
 //! INST_NOT     "Intrinsic.JSRuntimeGetValueDouble"
@@ -40,7 +40,7 @@ import {
 //! RUN          force_jit: true, entry: "jsnewSetProperty<%= primitive.getName.capitalize %>", options: "--compiler-regex=ETSGLOBAL::jsnewSetProperty<%= primitive.getName.capitalize %>"
 //! METHOD       "jsnewSetProperty<%= primitive.getName.capitalize %>"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::invoke/
+//! INST_NOT     /CallStatic.*jsnew::$_invoke/
 //! INST_COUNT   "Intrinsic.JSRuntimeSetPropertyDouble", 2
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 2
 //! INST_NOT     "Intrinsic.JSRuntimeGetPropertyJSValue"
@@ -49,8 +49,8 @@ import {
 //! RUN          force_jit: true, entry: "jscallStaticMethod<%= primitive.getName.capitalize() %>", options: "--compiler-regex=ETSGLOBAL::jscallStaticMethod<%= primitive.getName.capitalize %>"
 //! METHOD       "jscallStaticMethod<%= primitive.getName.capitalize() %>"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::invoke/
-//! INST_NOT     /CallStatic.*jscall::invoke/
+//! INST_NOT     /CallStatic.*jsnew::$_invoke/
+//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST         "Intrinsic.JSRuntimeGetValueDouble"
 
 % end
