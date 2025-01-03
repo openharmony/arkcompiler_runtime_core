@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,9 +24,11 @@
 #include "runtime/coroutines/stackful_coroutine.h"
 
 // NOLINTBEGIN(readability-identifier-naming)
+extern "C" {
 // CC-OFFNXT(G.FMT.10-CPP) project code style
 napi_status __attribute__((weak))
 napi_load_module_with_info(napi_env env, const char *path, const char *module_info, napi_value *result);
+}
 // NOLINTEND(readability-identifier-naming)
 
 static bool StringStartWith(std::string_view str, std::string_view startStr)
