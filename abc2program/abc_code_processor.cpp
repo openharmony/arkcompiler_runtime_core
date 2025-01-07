@@ -14,9 +14,6 @@
  */
 
 #include "abc_code_processor.h"
-#include <iostream>
-#include "mangling.h"
-#include "method_data_accessor-inl.h"
 
 namespace panda::abc2program {
 

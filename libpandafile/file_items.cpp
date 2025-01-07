@@ -15,12 +15,6 @@
 
 #include "file_items.h"
 #include "file_item_container.h"
-#include "macros.h"
-#include "utils/bit_utils.h"
-#include "utils/leb128.h"
-#include "utils/utf.h"
-
-#include <iomanip>
 
 namespace panda::panda_file {
 

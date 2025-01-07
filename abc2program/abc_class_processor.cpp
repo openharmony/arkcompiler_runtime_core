@@ -13,12 +13,10 @@
  * limitations under the License.
  */
 
-#include <iostream>
 #include "abc_class_processor.h"
 #include "abc_field_processor.h"
 #include "abc_literal_array_processor.h"
 #include "abc_method_processor.h"
-#include "mangling.h"
 
 namespace panda::abc2program {
 

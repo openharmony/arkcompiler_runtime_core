@@ -15,7 +15,6 @@
 
 #include "abc2program_compiler.h"
 #include "abc_class_processor.h"
-#include "file_format_version.h"
 #include "utils/timers.h"
 
 namespace panda::abc2program {

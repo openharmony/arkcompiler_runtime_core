@@ -17,8 +17,6 @@
 
 #include "utils/string_helpers.h"
 
-#include <algorithm>
-
 using panda::helpers::string::Format;
 
 namespace panda {

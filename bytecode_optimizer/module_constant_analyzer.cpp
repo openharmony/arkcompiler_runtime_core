@@ -15,8 +15,6 @@
 
 #include "module_constant_analyzer.h"
 #include "bytecode_optimizer/constant_propagation/constant_value.h"
-#include "compiler/optimizer/ir/graph.h"
-#include "compiler/optimizer/ir/runtime_interface.h"
 
 namespace panda::bytecodeopt {
 

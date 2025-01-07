@@ -17,8 +17,6 @@
 #include "abc_file_utils.h"
 #include "file-inl.h"
 #include "method_data_accessor-inl.h"
-#include "mangling.h"
-#include "os/file.h"
 
 namespace panda::abc2program {
 

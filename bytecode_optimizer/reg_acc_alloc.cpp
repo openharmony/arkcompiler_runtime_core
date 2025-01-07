@@ -16,7 +16,6 @@
 #include "reg_acc_alloc.h"
 #include "common.h"
 #include "compiler/optimizer/ir/basicblock.h"
-#include "compiler/optimizer/ir/inst.h"
 
 namespace panda::bytecodeopt {
 

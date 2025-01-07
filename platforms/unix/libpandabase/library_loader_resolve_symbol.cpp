@@ -15,14 +15,6 @@
 
 #include "os/library_loader.h"
 
-#include <dlfcn.h>
-#include <iosfwd>
-#include <string>
-#include <string_view>
-
-#include "os/error.h"
-#include "utils/expected.h"
-
 namespace panda::os::library_loader {
 
 Expected<void *, Error> ResolveSymbol(const LibraryHandle &handle, std::string_view name)

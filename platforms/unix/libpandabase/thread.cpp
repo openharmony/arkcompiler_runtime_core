@@ -13,26 +13,12 @@
  * limitations under the License.
  */
 
-#include "os/thread.h"
-
-#include "utils/span.h"
 #include "utils/logger.h"
 
-#include <cstdio>
-
-#include <array>
-#include <cstdint>
-#include "os/failure_retry.h"
 #ifdef PANDA_TARGET_UNIX
-#include <fcntl.h>
-#include <pthread.h>
-#include <unistd.h>
 #include <sys/resource.h>
-#include <sys/syscall.h>
 #include <csignal>
 #endif
-#include <securec.h>
-#include <unistd.h>
 
 namespace panda::os::thread {
 

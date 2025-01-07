@@ -15,9 +15,6 @@
 
 #include "file_format_version.h"
 
-#include <cstring>
-#include <cstdio>
-
 namespace panda::panda_file {
 
 std::string GetVersion(const std::array<uint8_t, File::VERSION_SIZE> &v)

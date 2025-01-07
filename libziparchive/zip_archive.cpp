@@ -14,10 +14,7 @@
  */
 
 #include "zip_archive.h"
-#include "os/file.h"
 #include "utils/logger.h"
-
-#include <securec.h>
 
 namespace panda {
 

@@ -15,9 +15,7 @@
 
 #include "base_mem_stats.h"
 
-#include "os/mutex.h"
 #include "utils/logger.h"
-#include "utils/type_helpers.h"
 
 #include <numeric>
 namespace panda {
