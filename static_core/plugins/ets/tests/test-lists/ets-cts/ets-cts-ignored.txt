@@ -290,10 +290,6 @@
 
 10.interfaces/06.interface_method_declarations/inheriting_methods_with_override_equivalent_signatures/inheritance_multiple_default_methods.sts
 
-13.compilation_units_packages_and_modules/04.import_directives/import_0.sts
-13.compilation_units_packages_and_modules/04.import_directives/import_1.sts
-13.compilation_units_packages_and_modules/04.import_directives/import_2.sts
-
 13.compilation_units_packages_and_modules/08.top-level_declarations/top_level_declarations_11.sts
 17.experimental_features/15.exceptions/01.throwing_functions/lambda_call_with_catch.sts
 17.experimental_features/15.exceptions/01.throwing_functions/lambda_call_with_default_catch.sts
@@ -481,16 +477,7 @@
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_19.sts
 
 # es2panda fails: panda#11752
-13.compilation_units_packages_and_modules/11.top-level_statements/block_declaration_10.sts
-13.compilation_units_packages_and_modules/11.top-level_statements/block_declaration_11.sts
-13.compilation_units_packages_and_modules/11.top-level_statements/block_declaration_14.sts
-13.compilation_units_packages_and_modules/11.top-level_statements/block_declaration_2.sts
 13.compilation_units_packages_and_modules/11.top-level_statements/block_declaration_4.sts
-13.compilation_units_packages_and_modules/11.top-level_statements/block_declaration_7.sts
-13.compilation_units_packages_and_modules/11.top-level_statements/block_declaration_8.sts
-13.compilation_units_packages_and_modules/11.top-level_statements/block_declaration_9.sts
-13.compilation_units_packages_and_modules/11.top-level_statements/block_execution.sts
-13.compilation_units_packages_and_modules/11.top-level_statements/multiple_block_execution.sts
 # end of es2panda fails
 
 # es2panda fails: panda#11660 panda#11541
@@ -499,7 +486,6 @@
 # end of es2panda fails
 
 # runtime fails
-13.compilation_units_packages_and_modules/04.import_directives/03.several_bindings_for_one_import_path/explicitly_and_implicitly_import_3.sts
 13.compilation_units_packages_and_modules/04.import_directives/03.several_bindings_for_one_import_path/explicitly_and_implicitly_import_5.sts
 # end of runtime fails
 
@@ -869,13 +855,6 @@
 # es2panda fails: panda:14653 es2panda segfault when optional lambda is omitted
 17.experimental_features/12.trailing_lambda/trlambda_func_15.sts
 # end of es2panda fails
-
-13.compilation_units_packages_and_modules/04.import_directives/07.import_path/dir/import_path_dir_0.sts
-13.compilation_units_packages_and_modules/04.import_directives/07.import_path/dir/import_path_dir_1.sts
-13.compilation_units_packages_and_modules/04.import_directives/07.import_path/dir/import_path_dir_2.sts
-13.compilation_units_packages_and_modules/04.import_directives/07.import_path/dir/import_path_dir_3.sts
-
-13.compilation_units_packages_and_modules/10.export_directives/04.re-export_directive/re-export_all_by_old_names.sts
 
 # 15095
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/hiding_methods_with_different_access_modifiers_2.sts
@@ -1778,7 +1757,6 @@
 07.expressions/17.typeof_expression/tof_const_11.sts
 
 # 17488: Separate module initializer not implemented yet
-13.compilation_units_packages_and_modules/02.separate_module_initializer/import_statements.sts
 
 # es2panda: #18344 Invalid test, ArkTS doesn't have intersection type
 06.contexts_and_conversions/01.assignment-like_contexts/identity2_11.sts
