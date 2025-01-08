@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -34,3 +34,10 @@ run_int_ets_code(default_import_4 ${CMAKE_CURRENT_BINARY_DIR}/default_import_4 S
 run_int_ets_code(default_import_5 ${CMAKE_CURRENT_BINARY_DIR}/default_import_5 SOURCES
                  ${CMAKE_CURRENT_SOURCE_DIR}/default5.sts;
                  ${CMAKE_CURRENT_SOURCE_DIR}/export.sts)
+
+run_int_ets_code(multiple_default_import ${CMAKE_CURRENT_BINARY_DIR}/multiple_default_import SOURCES
+                 ${CMAKE_CURRENT_SOURCE_DIR}/multiple_default_import.sts; 
+                 ${CMAKE_CURRENT_SOURCE_DIR}/default_export/default_export_class.sts;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/default_export/default_export_interface.sts;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/default_export/default_export_function.sts;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/default_export/default_export_variable.sts)
