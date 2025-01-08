@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,35 +13,10 @@
  * limitations under the License.
  */
 
-import {Anno3, Anno4} from "./annotations_imports"
-
-@interface Anno1 {
-    a: number = 3
-    b: number[] = [13, 9]
-    d: boolean = false
+export @interface Anno3 {
+    a: string
 }
 
-@interface Anno2 {
-    a: number = 5
-    b: number[] = [12, 4]
-    d: boolean = true
-}
-
-@__$$ETS_ANNOTATION$$__Anno1({
-    a: 20,
-    b: [13, 10],
-    d: true
-})
-class A {
-    @__$$ETS_ANNOTATION$$__Anno1({
-        a: 10,
-        b: [1, 2, 3],
-        d: true
-    })
-    foo() {}
-    @__$$ETS_ANNOTATION$$__Anno1({
-        a: 5,
-        b: [1, 4]
-    })
-    bar() {}
+export @interface Anno4 {
+    a: string
 }

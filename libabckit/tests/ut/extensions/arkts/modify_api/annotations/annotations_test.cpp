@@ -653,6 +653,45 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, ClassAddAnnotation)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
+// Test: test-kind=api, api=ArktsModifyApiImpl::classAddAnnotation, abc-kind=ArkTS1, category=negative, extension=c
+TEST_F(LibAbcKitModifyApiAnnotationsTests, DISABLED_ClassAddAnnotation_WrongTargets)
+{
+    // Test is disabled
+    // Annotation imports are not supported yet
+
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc", &file);
+
+    helpers::ModuleByNameContext mdlFinder = {nullptr, "annotations_dynamic"};
+    g_implI->fileEnumerateModules(file, &mdlFinder, helpers::ModuleByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(mdlFinder.module, nullptr);
+    auto *module = mdlFinder.module;
+
+    helpers::ClassByNameContext clsFinder = {nullptr, "A"};
+    g_implI->moduleEnumerateClasses(module, &clsFinder, helpers::ClassByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(clsFinder.klass, nullptr);
+    auto klass = clsFinder.klass;
+
+    helpers::AnnotationInterfaceByNameContext aiFinder = {nullptr, "Anno3"};
+    g_implI->moduleEnumerateAnnotationInterfaces(module, &aiFinder, helpers::AnnotationInterfaceByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(aiFinder.ai, nullptr);
+    auto ai = aiFinder.ai;
+
+    EXPECT_TRUE(ai->owningModule != klass->owningModule);
+
+    ai->owningModule->target = ABCKIT_TARGET_ARK_TS_V2;
+
+    struct AbckitArktsAnnotationCreateParams annoCreateParams {};
+    annoCreateParams.ai = g_implArkI->coreAnnotationInterfaceToArktsAnnotationInterface(ai);
+    g_implArkM->classAddAnnotation(g_implArkI->coreClassToArktsClass(klass), &annoCreateParams);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_TARGET);
+
+    g_impl->closeFile(file);
+}
+
 // Test: test-kind=api, api=ArktsModifyApiImpl::classRemoveAnnotation, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, ClassRemoveAnnotation)
 {
@@ -661,6 +700,44 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, ClassRemoveAnnotation)
                              "ut/extensions/arkts/modify_api/annotations/annotations_dynamic_modified.abc",
                              "foo", ModifyClassRemoveAnnotation);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::classRemoveAnnotation, abc-kind=ArkTS1, category=negative, extension=c
+TEST_F(LibAbcKitModifyApiAnnotationsTests, DISABLED_ClassRemoveAnnotation_WrongTargets)
+{
+    // Test is disabled
+    // Annotation imports are not supported yet
+
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc", &file);
+
+    helpers::ModuleByNameContext mdlFinder = {nullptr, "annotations_dynamic"};
+    g_implI->fileEnumerateModules(file, &mdlFinder, helpers::ModuleByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(mdlFinder.module, nullptr);
+    auto *module = mdlFinder.module;
+
+    helpers::ClassByNameContext clsFinder = {nullptr, "A"};
+    g_implI->moduleEnumerateClasses(module, &clsFinder, helpers::ClassByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(clsFinder.klass, nullptr);
+    auto klass = clsFinder.klass;
+
+    helpers::AnnotationByNameContext annoFinder = {nullptr, "Anno4"};
+    g_implI->classEnumerateAnnotations(klass, &annoFinder, helpers::AnnotationByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(annoFinder.anno, nullptr);
+    auto anno = annoFinder.anno;
+
+    EXPECT_TRUE(anno->ai->owningModule != klass->owningModule);
+
+    anno->ai->owningModule->target = ABCKIT_TARGET_ARK_TS_V2;
+
+    g_implArkM->classRemoveAnnotation(g_implArkI->coreClassToArktsClass(klass),
+                                      g_implArkI->coreAnnotationToArktsAnnotation(anno));
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_TARGET);
+
+    g_impl->closeFile(file);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::functionAddAnnotation, abc-kind=ArkTS1, category=positive, extension=c
@@ -673,6 +750,41 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, FunctionAddAnnotation)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
+// Test: test-kind=api, api=ArktsModifyApiImpl::functionAddAnnotation, abc-kind=ArkTS1, category=negative
+TEST_F(LibAbcKitModifyApiAnnotationsTests, DISABLED_FunctionAddAnnotation_WrongTargets)
+{
+    // Test is disabled
+    // Annotation imports are not supported yet
+
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc", &file);
+
+    helpers::ModuleByNameContext mdlFinder = {nullptr, "annotations_dynamic"};
+    g_implI->fileEnumerateModules(file, &mdlFinder, helpers::ModuleByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(mdlFinder.module, nullptr);
+    auto *module = mdlFinder.module;
+
+    helpers::AnnotationInterfaceByNameContext aiFinder = {nullptr, "Anno3"};
+    g_implI->moduleEnumerateAnnotationInterfaces(module, &aiFinder, helpers::AnnotationInterfaceByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(aiFinder.ai, nullptr);
+    auto ai = aiFinder.ai;
+
+    auto method = helpers::FindMethodByName(file, "foo");
+    ASSERT_NE(method, nullptr);
+
+    EXPECT_TRUE(ai->owningModule != method->owningModule);
+    ai->owningModule->target = ABCKIT_TARGET_ARK_TS_V2;
+
+    struct AbckitArktsAnnotationCreateParams annoCreateParams {};
+    annoCreateParams.ai = g_implArkI->coreAnnotationInterfaceToArktsAnnotationInterface(ai);
+    g_implArkM->functionAddAnnotation(g_implArkI->coreFunctionToArktsFunction(method), &annoCreateParams);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_TARGET);
+
+    g_impl->closeFile(file);
+}
+
 // Test: test-kind=api, api=ArktsModifyApiImpl::functionRemoveAnnotation, abc-kind=ArkTS1, category=positive,
 // extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, FunctionRemoveAnnotation)
@@ -682,6 +794,36 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, FunctionRemoveAnnotation)
                              "ut/extensions/arkts/modify_api/annotations/annotations_dynamic_modified.abc",
                              "foo", ModifyFunctionRemoveAnnotation);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::functionRemoveAnnotation, abc-kind=ArkTS1, category=positive,
+// extension=c
+TEST_F(LibAbcKitModifyApiAnnotationsTests, DISABLED_FunctionRemoveAnnotation_WrongTargets)
+{
+    // Test is disabled
+    // Annotation imports are not supported yet
+
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc", &file);
+
+    auto method = helpers::FindMethodByName(file, "bar");
+    ASSERT_NE(method, nullptr);
+
+    helpers::AnnotationByNameContext annoFinder = {nullptr, "Anno4"};
+    g_implI->functionEnumerateAnnotations(method, &annoFinder, helpers::AnnotationByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(annoFinder.anno, nullptr);
+    auto anno = annoFinder.anno;
+
+    EXPECT_TRUE(anno->ai->owningModule != method->owningModule);
+
+    anno->ai->owningModule->target = ABCKIT_TARGET_ARK_TS_V2;
+
+    g_implArkM->functionRemoveAnnotation(g_implArkI->coreFunctionToArktsFunction(method),
+                                         g_implArkI->coreAnnotationToArktsAnnotation(anno));
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_TARGET);
+
+    g_impl->closeFile(file);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::annotationAddAnnotationElement, abc-kind=ArkTS1, category=positive,

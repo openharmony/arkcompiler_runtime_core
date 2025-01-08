@@ -261,8 +261,7 @@ static void DynamicModuleAddExportImpl(AbckitCoreModule *module, void *data)
     }
 
     auto newExport = g_implArkM->moduleAddExportFromArktsV1ToArktsV1(
-        g_implArkI->coreModuleToArktsModule(module),
-        exported != nullptr ? g_implArkI->coreModuleToArktsModule(exported) : nullptr, &params);
+        g_implArkI->coreModuleToArktsModule(module), g_implArkI->coreModuleToArktsModule(exported), &params);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     std::set<AbckitCoreExportDescriptor *> gotExports;
@@ -582,8 +581,11 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveWrongImport)
         INPUT_PATH, OUTPUT_PATH, "modules_dynamic_modify.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *) {
             auto *newID = new AbckitCoreImportDescriptor();
-            newID->impl = std::make_unique<AbckitArktsImportDescriptor>();
+            auto newAID = std::make_unique<AbckitArktsImportDescriptor>();
+            newAID->core = newID;
+            newID->impl = std::move(newAID);
             newID->importingModule = method->owningModule;
+            newID->importedModule = method->owningModule;  // just to make object newID valid
             helpers::ModuleByNameContext ctxFinder = {nullptr, MAIN_MODULE_NAME};
             g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
             EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -599,6 +601,51 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveWrongImport)
     output = helpers::ExecuteDynamicAbc(OUTPUT_PATH, MAIN_MODULE_NAME);
     expected = UNMODIFIED_EXPECTED_OUTPUT;
     EXPECT_TRUE(helpers::Match(output, expected));
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::moduleRemoveImport, abc-kind=ArkTS1, category=negative, extension=c
+TEST_F(LibAbcKitArkTSModifyApiModulesTest, DISABLED_DynamicModuleRemoveImport_WrongTargets)
+{
+    // Test is disabled
+    // importDescriptorGetAlias has no ArkTS_V2 support, aliases for imports are not implemented
+
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(INPUT_PATH, &file);
+
+    helpers::ModuleByNameContext ctxFinder = {nullptr, MAIN_MODULE_NAME};
+    g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(ctxFinder.module, nullptr);
+    auto *module = ctxFinder.module;
+
+    // Find import from module/module4 in module/module3
+    ctxFinder = {nullptr, "modules/module3"};
+    g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(ctxFinder.module, nullptr);
+    auto *module2 = ctxFinder.module;
+    // Set another module target
+    module2->target = ABCKIT_TARGET_ARK_TS_V2;
+
+    std::set<AbckitCoreImportDescriptor *> gotImports;
+    g_implI->moduleEnumerateImports(module2, &gotImports, helpers::ModuleImportsCollector);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_EQ(gotImports.empty(), false);
+
+    // Try to remove found import from main module
+    auto importName = "regularImportFunc1FromModule1";
+    for (auto &gotImport : gotImports) {
+        auto impName = g_implI->importDescriptorGetAlias(gotImport);
+        auto strName = helpers::AbckitStringToString(impName);
+        if (strName == importName) {
+            g_implArkM->moduleRemoveImport(g_implArkI->coreModuleToArktsModule(module),
+                                           g_implArkI->coreImportDescriptorToArktsImportDescriptor(gotImport));
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_TARGET);
+            break;
+        }
+    }
+
+    g_impl->closeFile(file);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::moduleRemoveExport, abc-kind=ArkTS1, category=positive, extension=c
@@ -650,8 +697,11 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveWrongExport)
         INPUT_PATH, OUTPUT_PATH, "modules_dynamic_modify.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *) {
             auto *newED = new AbckitCoreExportDescriptor();
-            newED->impl = std::make_unique<AbckitArktsExportDescriptor>();
+            auto newAED = std::make_unique<AbckitArktsExportDescriptor>();
+            newAED->core = newED;
+            newED->impl = std::move(newAED);
             newED->exportingModule = method->owningModule;
+            newED->exportedModule = method->owningModule;  // just to make object newED valid
             helpers::ModuleByNameContext ctxFinder = {nullptr, MAIN_MODULE_NAME};
             g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
             EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -667,6 +717,50 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveWrongExport)
     output = helpers::ExecuteDynamicAbc(OUTPUT_PATH, MAIN_MODULE_NAME);
     expected = UNMODIFIED_EXPECTED_OUTPUT;
     EXPECT_TRUE(helpers::Match(output, expected));
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::moduleRemoveExport, abc-kind=ArkTS1, category=negative
+TEST_F(LibAbcKitArkTSModifyApiModulesTest, DISABLED_DynamicModuleRemoveExport_WrongTargets)
+{
+    // Test is disabled
+    // exportDescriptorGetAlias has no ArkTS_V2 support, aliases for exports are not implemented
+
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(INPUT_PATH, &file);
+
+    helpers::ModuleByNameContext ctxFinder = {nullptr, MAIN_MODULE_NAME};
+    g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(ctxFinder.module, nullptr);
+    auto *module = ctxFinder.module;
+
+    // Find export in module/module3
+    ctxFinder = {nullptr, "modules/module3"};
+    g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(ctxFinder.module, nullptr);
+    auto *module2 = ctxFinder.module;
+    // Set another module target
+    module2->target = ABCKIT_TARGET_ARK_TS_V2;
+
+    std::set<AbckitCoreExportDescriptor *> gotExports;
+    g_implI->moduleEnumerateExports(module2, &gotExports, helpers::ModuleExportsCollector);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_EQ(gotExports.empty(), false);
+
+    auto exportName = "regularDefaultImportFunc1FromModule3";
+    for (auto &gotExport : gotExports) {
+        auto expName = g_implI->exportDescriptorGetAlias(gotExport);
+        auto strName = helpers::AbckitStringToString(expName);
+        if (strName == exportName) {
+            g_implArkM->moduleRemoveExport(g_implArkI->coreModuleToArktsModule(module),
+                                           g_implArkI->coreExportDescriptorToArktsExportDescriptor(gotExport));
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_TARGET);
+            break;
+        }
+    }
+
+    g_impl->closeFile(file);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::moduleAddImportFromArktsV1ToArktsV1, abc-kind=ArkTS1,
@@ -954,6 +1048,38 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleAddImportFromDynamicModule_Name
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
+// Test: test-kind=api, api=ArktsModifyApiImpl::moduleAddImportFromArktsV1ToArktsV1, abc-kind=ArkTS1,
+// category=negative
+TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleAddImportFromDynamicModule_WrongTargets)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(INPUT_PATH, &file);
+
+    helpers::ModuleByNameContext ctxFinder = {nullptr, MAIN_MODULE_NAME};
+    g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(ctxFinder.module, nullptr);
+    auto *module = ctxFinder.module;
+
+    helpers::ModuleByNameContext ctxFinder2 = {nullptr, "modules/module4"};
+    g_implI->fileEnumerateModules(file, &ctxFinder2, helpers::ModuleByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(ctxFinder2.module, nullptr);
+    auto *importedModule = ctxFinder2.module;
+
+    AbckitArktsImportFromDynamicModuleCreateParams params {};
+    params.name = "*";
+    params.alias = "NewImport";
+
+    importedModule->target = ABCKIT_TARGET_ARK_TS_V2;
+
+    g_implArkM->moduleAddImportFromArktsV1ToArktsV1(g_implArkI->coreModuleToArktsModule(module),
+                                                    g_implArkI->coreModuleToArktsModule(importedModule), &params);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_TARGET);
+
+    g_impl->closeFile(file);
+}
+
 // Test: test-kind=api, api=ArktsModifyApiImpl::moduleAddExportFromArktsV1ToArktsV1, abc-kind=ArkTS1,
 // category=positive
 TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_LocalExport)
@@ -970,6 +1096,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_LocalExport)
     utd.name = "NewExportedVar";
     utd.alias = "NewExportedVar";
     utd.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_LOCAL_EXPORT;
+    utd.moduleName = MAIN_MODULE_NAME;
     DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -1013,6 +1140,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_LocalExport2)
     utd.name = "NewExportedVar";
     utd.alias = "NewExportedVarAlias";
     utd.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_LOCAL_EXPORT;
+    utd.moduleName = MAIN_MODULE_NAME;
     DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -1056,6 +1184,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_LocalExport3)
     utd.name = "default";
     utd.alias = "NewExportedVarDefault";
     utd.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_LOCAL_EXPORT;
+    utd.moduleName = MAIN_MODULE_NAME;
     DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -1341,6 +1470,38 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_StarExport3)
         "func3 from module1\n1\n2\nnamespace import func3 from module2\nthe same func from module3\nnew exported func "
         "from module3\n";
     EXPECT_TRUE(helpers::Match(output, expected));
+}
+
+// Test: test-kind=api, api=ArktsModifyApiImpl::moduleAddExportFromArktsV1ToArktsV1, abc-kind=ArkTS1,
+// category=negative, extension=c
+TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_WrongTargets)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(INPUT_PATH, &file);
+
+    helpers::ModuleByNameContext ctxFinder = {nullptr, "modules/module2"};
+    g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(ctxFinder.module, nullptr);
+    auto *module = ctxFinder.module;
+
+    helpers::ModuleByNameContext ctxFinder2 = {nullptr, "modules/module1"};
+    g_implI->fileEnumerateModules(file, &ctxFinder2, helpers::ModuleByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(ctxFinder2.module, nullptr);
+    auto *exportedModule = ctxFinder2.module;
+
+    AbckitArktsDynamicModuleExportCreateParams params {};
+    params.name = "NewLocalExportLet";
+    params.alias = "NewLocalExportLet";
+
+    exportedModule->target = ABCKIT_TARGET_ARK_TS_V2;
+
+    g_implArkM->moduleAddExportFromArktsV1ToArktsV1(g_implArkI->coreModuleToArktsModule(module),
+                                                    g_implArkI->coreModuleToArktsModule(exportedModule), &params);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_TARGET);
+
+    g_impl->closeFile(file);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::fileAddExternalModuleArktsV1, abc-kind=ArkTS1, category=positive,

@@ -443,6 +443,20 @@ void AssertMethodVisitor([[maybe_unused]] AbckitCoreFunction *method, [[maybe_un
     EXPECT_TRUE(data != nullptr);
 }
 
+void AssertAnnotationInterfaceVisitor(AbckitCoreAnnotationInterface *ai, void *data)
+{
+    ASSERT_TRUE(ai != nullptr);
+    ASSERT_TRUE(data != nullptr);
+}
+
+void AssertAnnotationVisitor(AbckitCoreAnnotation *anno, void *data)
+{
+    ASSERT_NE(anno, nullptr);
+    auto ai = g_implI->annotationGetInterface(anno);
+    ASSERT_NE(ai, nullptr);
+    ASSERT_NE(data, nullptr);
+}
+
 void AssertOpenAbc(const char *fname, AbckitFile **file)
 {
     ASSERT_NE(g_impl, nullptr);
@@ -515,6 +529,37 @@ bool ExportByAliasFinder(AbckitCoreExportDescriptor *ed, void *data)
     auto name = helpers::AbckitStringToString(g_implI->exportDescriptorGetAlias(ed));
     if (name == ctxFinder->name) {
         ctxFinder->ed = ed;
+        return false;
+    }
+
+    return true;
+}
+
+bool AnnotationInterfaceByNameFinder(AbckitCoreAnnotationInterface *ai, void *data)
+{
+    AssertAnnotationInterfaceVisitor(ai, data);
+
+    auto ctxFinder = reinterpret_cast<AnnotationInterfaceByNameContext *>(data);
+    auto str = g_implI->annotationInterfaceGetName(ai);
+    auto name = helpers::AbckitStringToString(str);
+    if (name == ctxFinder->name) {
+        ctxFinder->ai = ai;
+        return false;
+    }
+
+    return true;
+}
+
+bool AnnotationByNameFinder(AbckitCoreAnnotation *anno, void *data)
+{
+    AssertAnnotationVisitor(anno, data);
+
+    auto ctxFinder = reinterpret_cast<AnnotationByNameContext *>(data);
+    auto ai = g_implI->annotationGetInterface(anno);
+    auto str = g_implI->annotationInterfaceGetName(ai);
+    auto name = helpers::AbckitStringToString(str);
+    if (name == ctxFinder->name) {
+        ctxFinder->anno = anno;
         return false;
     }
 
