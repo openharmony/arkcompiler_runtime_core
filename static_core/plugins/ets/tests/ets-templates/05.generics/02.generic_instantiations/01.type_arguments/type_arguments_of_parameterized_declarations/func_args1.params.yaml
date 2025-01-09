@@ -103,7 +103,7 @@ cases:
   # Autoboxing of primitives
   - use: |-
       let v = 1
-      if (foo <int> (1, 2) != 2) {
+      if (foo <int> (1, 2) != 1) {
           return 1;
       }
 

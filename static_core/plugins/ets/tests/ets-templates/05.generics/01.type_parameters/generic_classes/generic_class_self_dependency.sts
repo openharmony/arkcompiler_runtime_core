@@ -20,10 +20,12 @@ desc: self-dependency is prohibited
 params: >
     {{sd}}
     {{cm}}
-
+tags:
+   - compile-only
+   - negative
 ---*/
 
-{{cm}} class T<{{sd}}> {}
+{{cm}} class A<T extends {{sd}}> {}
 
 function main(): void {}
 
