@@ -281,13 +281,7 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: int) {
-        if (length < 0) {
-            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
-        }
-        this.lengthInt = length
-        this.byteLengthInt = length * Uint8ClampedArray.BYTES_PER_ELEMENT as int
-        this.byteOffsetInt = 0
-        this.buffer = new ArrayBuffer(this.byteLengthInt)
+        this(length as number)
     }
 
     /**
@@ -296,7 +290,13 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: number) {
-        this(length as int)
+        if (length < 0 || length > (Int.MAX_VALUE / Uint8ClampedArray.BYTES_PER_ELEMENT)) {
+            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+        }
+        this.lengthInt = length as int
+        this.byteLengthInt = this.lengthInt * Uint8ClampedArray.BYTES_PER_ELEMENT as int
+        this.byteOffsetInt = 0
+        this.buffer = new ArrayBuffer(this.byteLengthInt)
     }
 
     /**
@@ -2883,13 +2883,7 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: int) {
-        if (length < 0) {
-            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
-        }
-        this.lengthInt = length
-        this.byteLengthInt = length * Uint8Array.BYTES_PER_ELEMENT as int
-        this.byteOffsetInt = 0
-        this.buffer = new ArrayBuffer(this.byteLengthInt)
+        this(length as number)
     }
 
     /**
@@ -2898,7 +2892,13 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: number) {
-        this(length as int)
+        if (length < 0 || length > (Int.MAX_VALUE / Uint8Array.BYTES_PER_ELEMENT)) {
+            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+        }
+        this.lengthInt = length as int
+        this.byteLengthInt = this.lengthInt * Uint8Array.BYTES_PER_ELEMENT as int
+        this.byteOffsetInt = 0
+        this.buffer = new ArrayBuffer(this.byteLengthInt)
     }
 
     /**
@@ -5509,13 +5509,7 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: int) {
-        if (length < 0) {
-            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
-        }
-        this.lengthInt = length
-        this.byteLengthInt = length * Uint16Array.BYTES_PER_ELEMENT as int
-        this.byteOffsetInt = 0
-        this.buffer = new ArrayBuffer(this.byteLengthInt)
+        this(length as number)
     }
 
     /**
@@ -5524,7 +5518,13 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: number) {
-        this(length as int)
+        if (length < 0 || length > (Int.MAX_VALUE / Uint16Array.BYTES_PER_ELEMENT)) {
+            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+        }
+        this.lengthInt = length as int
+        this.byteLengthInt = this.lengthInt * Uint16Array.BYTES_PER_ELEMENT as int
+        this.byteOffsetInt = 0
+        this.buffer = new ArrayBuffer(this.byteLengthInt)
     }
 
     /**
@@ -8120,13 +8120,7 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: int) {
-        if (length < 0) {
-            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
-        }
-        this.lengthInt = length
-        this.byteLengthInt = length * Uint32Array.BYTES_PER_ELEMENT as int
-        this.byteOffsetInt = 0
-        this.buffer = new ArrayBuffer(this.byteLengthInt)
+        this(length as number)
     }
 
     /**
@@ -8135,7 +8129,13 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: number) {
-        this(length as int)
+        if (length < 0 || length > (Int.MAX_VALUE / Uint32Array.BYTES_PER_ELEMENT)) {
+            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+        }
+        this.lengthInt = length as int
+        this.byteLengthInt = this.lengthInt * Uint32Array.BYTES_PER_ELEMENT as int
+        this.byteOffsetInt = 0
+        this.buffer = new ArrayBuffer(this.byteLengthInt)
     }
 
     /**
@@ -10773,13 +10773,7 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
      * @param length data initializer
      */
     public constructor(length: int) {
-        if (length < 0) {
-            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
-        }
-        this.lengthInt = length
-        this.byteLengthInt = length * BigUint64Array.BYTES_PER_ELEMENT as int
-        this.byteOffsetInt = 0
-        this.buffer = new ArrayBuffer(this.byteLengthInt)
+        this(length as number)
     }
 
     /**
@@ -10788,7 +10782,13 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
      * @param length data initializer
      */
     public constructor(length: number) {
-        this(length as int)
+        if (length < 0 || length > (Int.MAX_VALUE / BigUint64Array.BYTES_PER_ELEMENT)) {
+            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+        }
+        this.lengthInt = length as int
+        this.byteLengthInt = this.lengthInt * BigUint64Array.BYTES_PER_ELEMENT as int
+        this.byteOffsetInt = 0
+        this.buffer = new ArrayBuffer(this.byteLengthInt)
     }
 
     /**

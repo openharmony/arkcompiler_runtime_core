@@ -314,13 +314,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @param length data initializer
      */
     public constructor(length: int) {
-        if (length < 0) {
-            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
-        }
-        this.lengthInt = length
-        this.byteLengthInt = length * {{element['name']}}Array.BYTES_PER_ELEMENT as int
-        this.byteOffsetInt = 0
-        this.buffer = new ArrayBuffer(this.byteLengthInt)
+        this(length as number)
     }
 
     /**
@@ -329,7 +323,13 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @param length data initializer
      */
     public constructor(length: number) {
-        this(length as int)
+        if (length < 0 || length > (Int.MAX_VALUE / {{element['name']}}Array.BYTES_PER_ELEMENT)) {
+            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+        }
+        this.lengthInt = length as int
+        this.byteLengthInt = this.lengthInt * {{element['name']}}Array.BYTES_PER_ELEMENT as int
+        this.byteOffsetInt = 0
+        this.buffer = new ArrayBuffer(this.byteLengthInt)
     }
 
     /**
