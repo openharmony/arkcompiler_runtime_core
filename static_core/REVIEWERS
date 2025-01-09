@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -115,6 +115,7 @@ static_core/plugins/ets/runtime/types/*promise*                               @d
 static_core/plugins/ets/runtime/types/*typeapi*                               @smirnovandrei @anton-sysoev
 static_core/plugins/ets/stdlib/escompat/Atomics.sts                           @dmitriitr @konstanting
 static_core/plugins/ets/templates/stdlib/                                     @ivan-tyulyandin @anton-sysoev
+static_core/plugins/ets/tests/benchmarks/ani                                  @ignatenkooleg @v-cherkashin
 static_core/plugins/ets/tests/benchmarks/interop_js                           @semenovaleksandr @ignatenkooleg
 static_core/plugins/ets/tests/checked/                                        @Prof1983
 static_core/plugins/ets/tests/ets_es_checked/                                 @ivan-tyulyandin @anton-sysoev
