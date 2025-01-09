@@ -24,7 +24,7 @@ Statements are designed to control the execution:
 
     statement:
         expressionStatement
-        | block 
+        | block
         | localDeclaration
         | ifStatement
         | loopStatement
@@ -65,7 +65,6 @@ causes an exception or an error to be thrown.
    exception
    error
 
-
 |
 
 .. _Expression Statements:
@@ -101,7 +100,6 @@ Block
 
 .. meta:
     frontend_status: Done
-
 
 A sequence of statements (see :ref:`Statements`) enclosed in balanced braces
 forms a *block*:
@@ -208,20 +206,18 @@ certain conditions:
         statement
         ;
 
-
 Type of expression must be ``boolean``, or ``Boolean`` or type mentioned in
 :ref:`Extended Conditional Expressions`. Otherwise, a
-:index:`compile-time error` occurs. 
+:index:`compile-time error` occurs.
 
 If an expression is successfully evaluated as ``true``, then *thenStatement* is
-executed. Otherwise, *elseStatement* is executed (if provided). 
-
+executed. Otherwise, *elseStatement* is executed (if provided).
 
 Any ``else`` corresponds to the first ``if`` of an ``if`` statement:
 
 .. code-block:: typescript
    :linenos:
- 
+
     if (Cond1)
     if (Cond2) statement1
     else statement2 // Executes only if: Cond1 && !Cond2
@@ -277,6 +273,12 @@ below:
         | forOfStatement
         ;
 
+An ``identifier`` at the beginning of a loop statement denotes a *label*
+that can be used in :ref:`Break Statements` and :ref:`Continue Statements`.
+
+A :index:`compile-time error` occurs if the label *identifier* is not used
+within ``loopStatment``.
+
 |
 
 .. _While Statements and Do Statements:
@@ -305,8 +307,7 @@ the statement:
 
 Type of expression must be ``boolean``, or ``Boolean`` or type mentioned in
 :ref:`Extended Conditional Expressions`.
-Otherwise, a :index:`compile-time error` occurs. 
-
+Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
    while statement
@@ -345,11 +346,9 @@ Otherwise, a :index:`compile-time error` occurs.
         expressionSequence
         ;
 
-
 Type of forContinue expression must be ``boolean``, or ``Boolean`` or type
 mentioned in :ref:`Extended Conditional Expressions`. Otherwise, a
-:index:`compile-time error` occurs. 
-
+:index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -440,7 +439,6 @@ feature (see :ref:`For-of Type Annotation`).
    for-of type annotation
    annotation
 
-
 .. code-block-meta:
     not-subset
 
@@ -464,7 +462,6 @@ feature (see :ref:`For-of Type Annotation`).
       console.log(element)
       element = 66 // Compile-time error as 'element' is 'const'
     }
-
 
 |
 
@@ -494,8 +491,9 @@ or *switchStatement*:
 
 A ``break`` statement with the label *identifier* transfers control out of the
 enclosing statement with the same label *identifier*. If there is no enclosing
-statement with the same label identifier, then a :index:`compile-time error`
-occurs.
+loop statement with the same label identifier
+(within the body of the surrounding function or method),
+then a :index:`compile-time error` occurs.
 
 A statement without a label transfers control out of the innermost enclosing
 ``switch``, ``while``, ``do``, ``for``, or ``for-of`` statement. If
@@ -540,13 +538,12 @@ exit conditions depend on the kind of the loop.
         'continue' identifier?
         ;
 
-A ``continue`` statement with the label *identifier* transfers control out
-of the enclosing loop statement with the same label *identifier*.
-A :index:`compile-time error` occurs if a ``continue`` statement is not found
-within the body of the surrounding function or method.
-
-A :index:`compile-time error` occurs if *continueStatement* is not found
-within ``loopStatment``.
+A ``continue`` statement with the label *identifier* transfers control
+to the next iteration of the enclosing loop statement
+with the same label *identifier*.
+If there is no enclosing loop statement with the same label *identifier*
+(within the body of the surrounding function or method),
+then a :index:`compile-time error` occurs.
 
 .. index::
    continue statement
@@ -1075,5 +1072,3 @@ can be performed while leaving the ``try-catch``:
 .. raw:: pdf
 
    PageBreak
-
-

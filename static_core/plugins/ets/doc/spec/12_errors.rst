@@ -32,7 +32,6 @@ execution:
    not exist on a specified path, read permissions are not available,
    or else).
 
-
 .. index::
    execution
    null pointer dereferencing
@@ -50,7 +49,6 @@ This specification uses the terms as follows:
 -  *Error* to denote runtime errors, and
 
 -  *Exception* to denote failures.
-
 
 The difference between these two terms is that *exceptions* are the
 *normal* and expected way for an operation to complete. A program
@@ -132,7 +130,6 @@ provided below:
         }
     }
 
-
 A :index:`compile-time error` occurs if a generic class is directly or
 indirectly a subclass of ``Error``.
 
@@ -179,9 +176,6 @@ errors in a manner similar to the handling of exceptions.
       }
     }
 
-
 .. raw:: pdf
 
    PageBreak
-
-

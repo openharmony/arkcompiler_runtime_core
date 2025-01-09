@@ -86,7 +86,6 @@ can optionally consist of the following four parts:
 
 #. Re-export directives.
 
-
 .. code-block:: abnf
 
     separateModuleDeclaration:
@@ -267,7 +266,6 @@ distinguishable in the declaration scope (see
    not distinguishable;
 -  ``importPath`` refers to the file the current module is stored in.
 
-
 **Note**: Import directives are handled by the compiler during compilation, and
 have no effect during program execution. Though they ensure that imported
 entities are initialised before use in the current compilation unit.
@@ -339,7 +337,6 @@ The import binding ``qualifiedName`` has two cases as follows:
 -  A simple name (like ``foo``); or
 
 -  A name containing several identifiers (like ``A.foo``).
-
 
 The import binding ``ident`` binds an exported entity with the name ``ident``
 to the declaration scope of the current module. The name ``ident`` can only
@@ -435,7 +432,6 @@ The same bound entities can use the following:
 
 - Several import bindings,
 - One import directive, or several import directives with the same import path:
-
 
 +---------------------------------+-----------------------------------+
 |                                 |                                   |
@@ -552,8 +548,6 @@ import an entity initially exported as default.
       // instance of class 'SomeClass' to be created here
     }
 
-
-
     // SomeFile
     export default class SomeClass {}
 
@@ -608,7 +602,6 @@ and the latter imports only exported types.
    export type
    import type
    top-level declaration
-
 
 |
 
@@ -854,7 +847,6 @@ and cannot be used by modules that import this declaration module:
 
    let a = new m.A // compile-time error as A is not exported
 
-
 The exact manner declaration modules are stored in the file system, and how
 they differ from separate modules, is determined by a particular implementation.
 
@@ -896,7 +888,6 @@ If there is a cyclic dependency between top-level variable declarations, then a
     import {x} from "Source file 2"
     let y = x // y uses x for its initialization
 
-
     // Source file 2
     import {y} from "Source file 1"
     let x = y // x uses y for its initialization
@@ -917,7 +908,6 @@ If there is a cyclic dependency between top-level variable declarations, then a
    declaration scope
    top-level declaration
    variable
-
 
 |
 
@@ -1000,7 +990,6 @@ occurs if more than one top-level declaration is marked as ``default``.
 
 .. code-block-meta:
 
-
 .. code-block:: typescript
    :linenos:
 
@@ -1035,9 +1024,14 @@ syntax is presented below:
 .. code-block:: abnf
 
     namespaceDeclaration:
-        'namespace' qualifiedName '{' topDeclaration* '}'
+        'namespace' qualifiedName
+        '{' topDeclaration* initializerBlock? topDeclaration* '}'
         ;
 
+Namespace may have initializer block which ensures that all namespace variables
+will get initial values. Initialization details are based on
+:ref:`Compilation Unit Initialization` except the parts related to import which
+is not applicable for namespaces and :ref:`Initializer Block`.
 
 An example of usage is presented below:
 
@@ -1048,6 +1042,10 @@ An example of usage is presented below:
         export function foo() { ... }
         export let variable = 1234
         export const constant = 1234
+        export let someVar: SomeType
+        static {
+            someVar = new SomeType
+        }
     }
 
     if (NS1.variable == NS1.constant) {
@@ -1078,7 +1076,6 @@ An example of usage is presented below:
         export let variable = "1234"
     }
 
-
     // File2
     import {Space2 as Space1} from "File1"
     if (Space1.variable == Space1.constant) { // compile-time error - there is no variable or constant called 'constant'
@@ -1105,48 +1102,72 @@ An example of usage is presented below:
     }
 
 **Note**: Namespaces with identical namespace names in a single compilation
-unit (including embedded namespaces cases) form a single namespace:
+  unit merge their exported declarations into a single namespace. Duplications
+  leads to a :index:`compile-time error`. Also it is treated as a
+  :index:`compile-time error` when exported and non-exported declarations have
+  the same name. 
+  Only one of merging namespaces may have initializer. Otherwise a
+  :index:`compile-time error` occurs.
 
-.. code-block:: typescript
+  .. code-block:: typescript
    :linenos:
 
     // One source file
     namespace A {
-        function foo() { ... }
-        function bar() { ... }
-        namespace C {
-            function too() { ... }
+        export function foo() { console.log ("1st A.foo() exported") }
+        function bar() {  }
+        export namespace C {
+            export function too() { console.log ("1st A.C.too() exported") }
         }
     }
 
-    namespace B { ... }
+    namespace B {  }
 
     namespace A {
-        function goo() { bar() }  // bar()  belongs to the same namespace
-        function foo() { ... }  // Compile-time error as foo() was already defined
+        export function goo() {
+            A.foo() // calls exported foo()
+            foo()   // calls non-exported foo()
+            A.C.moo()
+        }
+        //export function foo() {  }
+        // Compile-time error as foo() was already defined
+
+        // function foo() { console.log ("2nd A.foo() non-exported") }  
+        // Compile-time error as foo() was already defined as exported
     }
 
     namespace A.C {
-        function moo() { too() }  // too()  belongs to the same namespace
+        export function moo() {
+            too() // too()  accessible when namespace C and too() are both exported
+            A.C.too()
+
+        }  
     }
 
+    A.goo()
 
     // File1
     package P
     namespace A {
-        function foo() { ... }
-        function bar() { ... }
+        export function foo() { ... }
+        export function bar() { ... }
     }
 
     // File2
     package P
     namespace A {
-        function goo() { bar() }  // bar()  belongs to the same namespace
-        function foo() { ... }  // Compile-time error as foo() was already defined
+        function goo() { bar() }  // exported bar() is accessible in the same namespace
+        export function foo() { ... }  // Compile-time error as foo() was already defined
+    }
+
+    namespace X {
+        static {}
+    }
+    namespace X {
+        static {} // Compile-time error as only one initializer allowed
     }
 
 **Note**: A namespace name can be a qualified name:
-
 
 .. code-block:: typescript
    :linenos:
@@ -1174,7 +1195,6 @@ The *export directive* allows the following:
 -  Specifying a name of one declaration; or
 -  Exporting a type; or
 -  Re-exporting declarations from other compilation units.
-
 
 .. code-block:: abnf
 
@@ -1257,7 +1277,6 @@ in the example below exports variable 'v' by its name:
     singleExportDirective:
         'export' identifier
         ;
-
 
 .. code-block:: typescript
    :linenos:
@@ -1352,7 +1371,6 @@ is presented below:
 An ``importPath`` cannot refer to the file the current module is stored in.
 Otherwise, a :index:`compile-time error` occurs.
 
-
 The re-exporting practice is represented in the following examples:
 
 .. code-block:: typescript
@@ -1367,8 +1385,6 @@ The re-exporting practice is represented in the following examples:
    re-export directive
    re-export declaration
    module
-
-
 
 .. _Top-Level Statements:
 
@@ -1590,4 +1606,3 @@ This is the end of the program exit process.
 .. raw:: pdf
 
    PageBreak
-

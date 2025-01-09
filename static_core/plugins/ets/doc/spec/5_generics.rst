@@ -36,7 +36,6 @@ implicitly.
 |LANG| has special types that look similar to generics syntax-wise, and allow
 creating new types during compilation (see :ref:`Utility Types`).
 
-
 .. index::
    class
    array
@@ -68,10 +67,10 @@ Type Parameters
 .. meta:
     frontend_status: Done
 
-The type parameter is declared in the type parameter section. It can be used as
+*Type parameter* is declared in the type parameter section. It can be used as
 an ordinary type inside a *generic*. 
 
-Syntactically, a type parameter is an unqualified identifier with a proper
+Syntax-wise, a *type parameter* is an unqualified identifier with a proper
 scope (see :ref:`Scopes` for the scope of type parameters). Each type parameter
 can have a *constraint* (see :ref:`Type Parameter Constraint`). A type
 parameter can have a default type (see :ref:`Type Parameter Default`), and can
@@ -118,9 +117,9 @@ specify its *in-* or *out-* variance (see :ref:`Type Parameter Variance`).
 
 A generic class, interface, type alias, method, function, or lambda defines a
 set of parameterized classes, interfaces, unions, arrays, methods, functions, or
-lambdas respectively (see :ref:`Generic Instantiations`).
-One type argument can define only one set for each possible parameterization of
-the type parameter section.
+lambdas respectively (see :ref:`Generic Instantiations`). A single type argument
+can define only one set for each possible parameterization of the type parameter
+section.
 
 .. index::
    generic declaration
@@ -146,7 +145,6 @@ the type parameter section.
    method
    type parameter
 
-
 No type parameter has a default value, and initialization is mandatory for
 variables and fields of a type parameter (see :ref:`Field Initialization`):
 
@@ -159,7 +157,6 @@ variables and fields of a type parameter (see :ref:`Field Initialization`):
             let t: T // compile-time error, variable is not initialized
         }
     }
-
 
 .. index::
    default value
@@ -178,7 +175,7 @@ Type Parameter Constraint
     frontend_status: Done
 
 If possible instantiations need to be constrained, then an individual
-*constraint* can be set for every type parameter.
+*constraint* can be set for each type parameter.
 
 A constraint of any type parameter can follow the keyword ``extends``. The
 constraint is denoted as a type reference, or a union type. If no constraint is
@@ -187,7 +184,7 @@ methods or fields available for use. Lack of constraint effectively means
 ``extends Object|null|undefined``. If type parameter *T* has type constraint
 *S*, then the actual type of the generic instantiation must be compatible with
 *S* (see :ref:`Type Compatibility`). If the constraint *S* is a non-nullish
-type (see :ref:`Nullish Types`), then *T* is non-nullish too.
+type (see :ref:`Nullish Types`), then *T* is also non-nullish.
 
 .. index::
    constraint
@@ -318,7 +315,6 @@ in the examples below:
    function
    compile-time error
 
-
 .. code-block-meta:
     expect-cte:
 
@@ -381,8 +377,8 @@ argument types.
    derived class
    base class
 
-Special markers are used to specify the *declaration-site variance*. The
-markers are to be added to generic parameter declarations. These markers are
+Special markers are used to specify *declaration-site variance*. The
+markers are to be added to generic parameter declarations. The markers are
 expressed as keywords ``in`` or ``out`` (a *variance modifier* that specifies
 the variance of the type parameter).
 
@@ -462,9 +458,9 @@ type parameter *F* defines the subtyping between ``T<A>`` and ``T<B>`` (in the
 case of declaration-site variance with two different types ``A`` <: ``B``) as
 follows:
 
--  Covariant :ref:`Covariance` (*out F*): ``T<A>`` <: ``T<B>``;
--  Contravariant :ref:`Contravariance` (*in F*): ``T<A>`` :> ``T<B>``;
--  Invariant (default) (*F*).
+-  Covariant -- :ref:`Covariance` (*out F*): ``T<A>`` <: ``T<B>``;
+-  Contravariant -- :ref:`Contravariance` (*in F*): ``T<A>`` :> ``T<B>``;
+-  Invariant -- default (*F*).
 
 .. index::
    type parameter
@@ -501,9 +497,8 @@ or lambda declaration defines a set of corresponding non-generic entities. The
 process of instantiation is designed to do the following:
 
 - Allow producing new generic or non-generic entities;
-- Proivide every type parameter with a type argument that can be any kind
+- Provide every type parameter with a type argument that can be any kind
   of type, including the type argument itself.
-
 
 As a result of the instantiation process, a new class, interface, union, array,
 method, function, or lambda is created.
@@ -532,7 +527,7 @@ generic instantiation, then the compiler actually replaces it as follows:
         method (p: A<Object>) {}  // Here A<Object> is a new non-generic type
     }
 
-**Note**. Built-in arrays are not generics, thus ``number[]`` contains elements
+**Note**. Built-in arrays are not generic, thus ``number[]`` contains elements
 of type ``number`` but not ``Number``.
 
 .. index::
@@ -562,7 +557,7 @@ Type Arguments
 .. meta:
     frontend_status: Done
 
-Type arguments is a non-empty list of types being used for instantiation.
+Type arguments are a non-empty list of types that are used for instantiation.
 
 .. code-block:: abnf
 
@@ -570,8 +565,8 @@ Type arguments is a non-empty list of types being used for instantiation.
         '<' type (',' type)* '>'
         ;
 
-
-Below is the example of instantiations with different forms of type arguments:
+The example below represents instantiations with different forms of type
+arguments:
 
 .. code-block:: typescript
    :linenos:
@@ -595,7 +590,6 @@ Explicit Generic Instantiations
 
 .. meta:
     frontend_status: Done
-
 
 An explicit generic instantiation is a language construct, which provides a
 list of *type arguments* (see :ref:`Type Arguments`) that specify real types or
@@ -656,12 +650,11 @@ declaration are constrained by the corresponding ``C``:sub:`1`, ``...``,
 in the corresponding constraint have each type argument *T*:sub:`i` of the
 parameterized declaration ranging over them.
 
-
 A generic instantiation *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`> is
 *well-formed* if **all** of the following is true:
 
--  The generic declaration name is *G*.
--  The number of type arguments equals the number of type parameters of *G*.
+-  The generic declaration name is *G*;
+-  The number of type arguments equals the number of type parameters of *G*; and
 -  All type arguments are compatible with the corresponding type parameter
    constraint (see :ref:`Type Compatibility`).
 
@@ -705,7 +698,7 @@ Implicit Generic Instantiations
 
 In an *implicit* instantiation, type arguments are not specified explicitly.
 Such type arguments are inferred (see :ref:`Type Inference`) from the context
-the generic is referred in as in the example below:
+in which a generic is referred. It is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -716,7 +709,6 @@ the generic is referred in as in the example below:
 
     let lambda = <T>(p: T): void => {console.log (p)}  // Generic lambda declaration
     lambda(6) // Implicit generic lambda instantiation
-
 
 Implicit instantiation is only possible for generic functions, methods, and
 lambdas.
@@ -744,7 +736,7 @@ Utility Types
     frontend_status: Done
 
 |LANG| supports several embedded types, called *utility* types. Utility types
-allow constructing new types by adjusting properties of the initial types.
+allow constructing new types by adjusting properties of initial types.
 
 .. index::
    embedded type
@@ -762,8 +754,9 @@ Partial Utility Type
     frontend_status: Done
 
 Type ``Partial<T>`` constructs a type with all properties of ``T`` set to
-optional. ``T`` must be a class or an interface type. No method (including any
+optional. ``T`` must be a class or an interface type. No method (not even any
 getter or setter) of ``T`` is part of the ``Partial<T>`` type.
+It is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -782,7 +775,7 @@ getter or setter) of ``T`` is part of the ``Partial<T>`` type.
     process({title: "aa"}) // description is undefined
 
 In the example above, type ``Partial<Issue>`` is transformed to a distinct but
-analogous type:
+analogous type as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -807,7 +800,8 @@ literals.
 
 **Note**. If class ``T`` has a user-defined getter, setter, or both, then none
 of those is called when object literal is used with ``Partial<T>`` variables.
-Object literal has its own built-in getters and setters to modify its variables:
+Object literal has its own built-in getters and setters to modify its variables.
+It is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -849,8 +843,9 @@ Required Utility Type
 
 Type ``Required<T>`` is opposite to ``Partial<T>``, and constructs a type with
 all properties of ``T`` set to required (i.e., not optional). ``T`` must be a
-class or an interface type. No method (including any getter or setter) of ``T``
+class or an interface type. No method (not even any getter or setter) of ``T``
 is part of the ``Required<T>`` type.
+It is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -865,7 +860,7 @@ is part of the ``Required<T>`` type.
     }
 
 In the example above, type ``Required<Issue>`` is transformed to a distinct
-but analogous type:
+but analogous type as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -901,10 +896,10 @@ Readonly Utility Type
     frontend_status: Done
 
 Type ``Readonly<T>`` constructs a type with all properties of ``T`` set to
-readonly. It means that the properties of the constructed value cannot be
-reassigned. ``T`` must be a class or an interface type. No method (including
-any getter or setter) of ``T`` is part of the ``Readonly<T>`` type.
-
+``readonly``. It means that the properties of the constructed value cannot be
+reassigned. ``T`` must be a class or an interface type. No method (not even
+any getter or setter) of ``T`` is part of the ``Readonly<T>`` type. It is
+represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -930,7 +925,6 @@ any getter or setter) of ``T`` is part of the ``Readonly<T>`` type.
 Type ``T`` is compatible (see :ref:`Type Compatibility`) with ``Readonly<T>``,
 and allows assignments as a consequence:
 
-
 .. code-block:: typescript
    :linenos:
 
@@ -941,7 +935,6 @@ and allows assignments as a consequence:
     }
     let x = new A
     let y: Readonly<A> = x // OK
-
 
 |
 
@@ -954,10 +947,11 @@ Record Utility Type
     frontend_status: Done
 
 Type ``Record<K, V>`` constructs a container that maps keys (of type ``K``)
-to values (of type ``V``).
+to values of type ``V``.
 
-Type ``K`` is restricted to numeric types (see :ref:`Numeric Types`), type
-``string``, string literal types, and union types constructed from these types.
+Type ``K`` is restricted to numeric types (see :ref:`Numeric Types`). Type
+``string``, string literal types, and union types are constructed from these
+types.
 
 A :index:`compile-time error` occurs if any other type, or literal of any other
 type is used in place of this type:
@@ -984,16 +978,20 @@ type is used in place of this type:
     type R3 = Record<"salary" | "bonus", number> // ok
     type R4 = Record<"salary" | boolean, number> // compile-time error
 
-There are no restrictions on type ``V``.
+Type ``V`` has no restrictions.
 
 A special form of object literals is supported for instances of type ``Record``
 (see :ref:`Object Literal of Record Type`).
 
 Access to ``Record<K, V>`` values is performed by an *indexing expression*
 like *r[index]*, where *r* is an instance of type ``Record``, and *index*
-is the expression of type ``K``. The result of an indexing expression is of type
-``V`` if ``K`` is a union that contains literal types only. Otherwise, it is of
-type ``V | undefined``. See :ref:`Record Indexing Expression` for details.
+is the expression of type ``K``. See :ref:`Record Indexing Expression` for
+details.
+
+Variables of type ``Record<K, V>`` can be initialized with help of valid object
+literals of record type (see :ref:`Object Literal of Record Type`). Where
+literal is valid if type of key expression is compatible with key type ``K``
+and type of value expression is compatible with value type ``V``.
 
 .. code-block:: typescript
    :linenos:
@@ -1009,8 +1007,8 @@ type ``V | undefined``. See :ref:`Record Indexing Expression` for details.
     x['key2'] = 8
     console.log(x['key2']) // prints 8
 
-In the example above, ``K`` is a union of literal types. The result of an
-indexing expression is of type ``V``. In this case it is ``number``.
+In the example above, ``K`` is a union of literal types and thus the result of
+an indexing expression is of type ``V``. In this case it is ``number``.
 
 .. index::
    object literal
@@ -1033,9 +1031,9 @@ Utility Type Private Fields
 .. meta:
     frontend_status: Done
 
-As utility types are built on top of other types private fields of the initial
+Utility types are built on top of other types. Private fields of the initial
 type stay in the utility type but they are not accessible and cannot be
-accessed in any form.
+accessed in any way. It is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -1067,5 +1065,3 @@ accessed in any form.
 .. raw:: pdf
 
    PageBreak
-
-

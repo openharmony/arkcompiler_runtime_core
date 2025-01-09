@@ -15,7 +15,6 @@
 Grammar Summary
 ###############
 
-
 .. code-block:: abnf
 
     literal: Literal;
@@ -72,7 +71,7 @@ Grammar Summary
         ;
 
     tupleType:
-        '[' (type (',' type)*)? ']'
+        '[' (type (',' type)* ','?)? ']'
         ;
 
     unionType:
@@ -177,7 +176,6 @@ Grammar Summary
         optionalParameter (',' optionalParameter)
         ;
 
-
     optionalParameter:
         annotationUsage?
         ( identifier ':' type '=' expression
@@ -212,7 +210,6 @@ Grammar Summary
     typeArguments:
         '<' type (',' type)* '>'
         ;
-
 
     expression:
         primaryExpression
@@ -635,7 +632,6 @@ Grammar Summary
           'finally' block
           ;
 
-
     classDeclaration:
         classModifier? 'class' identifier typeParameters?
           classExtendsClause? implementsClause? classBody
@@ -659,7 +655,7 @@ Grammar Summary
 
     classBody:
         '{'
-           classBodyDeclaration* classInitializer? classBodyDeclaration*
+           classBodyDeclaration* gloablInitializer? classBodyDeclaration*
         '}'
         ;
 
@@ -720,10 +716,6 @@ Grammar Summary
         | 'override'
         ;
 
-    classInitializer
-        : 'static' block
-        ;
-
     constructorDeclaration:
         constructorOverloadSignature*
         'constructor' parameters throwMark? constructorBody
@@ -750,7 +742,6 @@ Grammar Summary
     interfaceExtendsClause:
         'extends' interfaceTypeList
         ;
-
 
     interfaceMember: 
         annotationUsage?
@@ -851,6 +842,10 @@ Grammar Summary
         )
         ;
 
+    namespaceDeclaration:
+        'namespace' qualifiedName '{' topDeclaration* '}'
+        ;
+
     exportDirective:
         selectiveExportDirective
         | singleExportDirective
@@ -898,7 +893,7 @@ Grammar Summary
         ;
 
     ambientConst:
-        identifier (':' type)? initializer
+        identifier ((':' type) | ('=' (IntegerLiteral|FloatLiteral|StringLiteral )))
         ;
 
     ambientFunctionDeclaration:
@@ -930,7 +925,6 @@ Grammar Summary
         )
         ;
 
-
     ambientAccessModifier:
         'public' | 'protected'
         ;
@@ -955,7 +949,6 @@ Grammar Summary
     ambientMethodOverloadSignature:
         ambientMethodModifier* identifier signature ';'
         ;
-
 
     ambientMethodModifier:
         'static'
@@ -995,7 +988,7 @@ Grammar Summary
         ;
 
     ambientNamespaceDeclaration:
-        'namespace' identifier '{' ambientNamespaceElement* '}'
+        'namespace' qualifiedName '{' ambientNamespaceElement* '}'
         ;
 
     ambientNamespaceElement:
@@ -1075,7 +1068,6 @@ Grammar Summary
         'await' expression
         ;
 
-
       packageModule:
           packageHeader packageModuleDeclaration
           ;
@@ -1089,10 +1081,10 @@ Grammar Summary
           ;
 
       packageTopDeclaration:
-          topDeclaration | packageInitializer
+          topDeclaration | initializerBlock
           ;
 
-      packageInitializer:
+      initializerBlock:
           'static' block
           ;
 
@@ -1312,12 +1304,6 @@ Grammar Summary
         'c\'' SingleQuoteCharacter '\''
         ;
 
-
 .. raw:: pdf
 
    PageBreak
-
-
-
-
-

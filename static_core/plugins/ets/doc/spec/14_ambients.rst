@@ -98,11 +98,11 @@ Ambient Constant Declarations
         ;
 
     ambientConst:
-        identifier (':' type)? initializer
+        identifier ((':' type) | ('=' (IntegerLiteral|FloatLiteral|StringLiteral )))
         ;
 
-The initializer expression for an ambient constant
-must be a numeric or string literal.
+The initializer expression for an ambient constant must be a numeric or string
+literal.
 
 .. index::
    ambient constant
@@ -165,7 +165,6 @@ Ambient function declarations cannot specify function bodies.
 
     declare function foo(x?: string): void // ok
     declare function bar(y: number = 1): void // compile-time error
-    
 
 **Note**. The modifier ``async`` cannot be used in an ambient context.
 
@@ -210,7 +209,6 @@ Ambient Class Declarations
     ambientAccessModifier:
         'public' | 'protected'
         ;
-
 
 Ambient field declarations have no initializers:
 
@@ -297,7 +295,6 @@ in an ambient context. This feature is provided for |TS| compatibility:
         [index: number]: number
     }
 
-
 **Note**. *Ambient indexer declaration* is supported in ambient contexts only.
 If ambient class implementation is written in |LANG|, then it must conform to
 :ref:`Indexable Types`.
@@ -375,7 +372,6 @@ implements ``Iterator`` interface defined in the standard library (see
     declare class C {
         [Symbol.iterator]: CIterator
     }
-
 
 **Note**. *Ambient iterable declaration* is supported in ambient contexts only.
 If ambient class implementation is written in |LANG|, then it must conform to
@@ -510,5 +506,3 @@ declaration module is built (see :ref:`Declaration Modules`).
 .. raw:: pdf
 
    PageBreak
-
-

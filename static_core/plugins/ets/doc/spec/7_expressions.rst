@@ -138,7 +138,6 @@ The *arguments* grammar rule refers to the list of arguments of a call. Only
 the last argument can have the form of a spread expression (see
 :ref:`Spread Expression`).
 
-
 .. index::
    argument
    spread operator
@@ -326,7 +325,6 @@ the following rules:
 
    If using a compound-assignment operator (see :ref:`Simple Assignment Operator`),
    the evaluation of the left-hand operand includes the following:
-
 
    - Remembering the variable denoted by the left-hand operand;
    - Fetching the value of that variable for the subsequent evaluation
@@ -666,7 +664,6 @@ expression in an array literal is ignored:
    initializer expression
    trailing comma
 
-
 .. code-block:: typescript
    :linenos:
 
@@ -788,7 +785,6 @@ of an assignment, call parameter type, or type of a cast expression:
       /* Type of literal is inferred from the context
          taken from b1 and b2 declarations */
 
-
 All valid conversions are applied to the initializer expression, i.e., each
 initializer expression type must be compatible (see :ref:`Type Compatibility`)
 with the array element type. Otherwise, a :index:`compile-time error` occurs.
@@ -831,8 +827,6 @@ compile-time to ensure new array or tuple fits the context type.
     function bar (tuple: [Number, Boolean]) {}
     [1, true] as [Number, Boolean]              // casting conversion
    
-
-
 .. index::
    literal
    boxing
@@ -860,10 +854,8 @@ it is necessary to try inferring the type of the array literal from its elements
 the type so inferred must be compatible with one of the types that form the
 union type. Otherwise, it is a :index:`compile-time error`:
 
-
 .. code-block:: typescript
    :linenos:
-
 
     let union_of_arrays: number[] | string[] = [1, 2] // OK, type of literal is number[]
     let incorrect_union_of_arrays: number[] | string[] = [1, 2, "string"]
@@ -1058,7 +1050,6 @@ literal is ``C``:
          used */
     foo({name: "Alice", age: 18}) // ok, parameter type is used
 
-
 An identifier in each *name-value pair* must name a field of the class ``C``,
 or a field of any superclass of class ``C``.
 
@@ -1107,7 +1098,6 @@ such fields can be skiped in the object literal.
     let f: Friend = {} /* OK, as name, nick, age, and sex have either default
                           value or explicit initializer */
 
-
 If class ``C`` is to be used in an object literal, then it must have a
 *parameterless* constructor (explicit or default) that is *accessible*
 (see :ref:`Accessible`) in the class composite context.
@@ -1154,9 +1144,8 @@ These situations are presented in the examples below:
     let c: C = {} /* compile-time error - constructor is not
         accessible */
 
-
 If a class has accessors (see :ref:`Accessor Declarations`) for some property
-then this properety can be used as a part of object literal if its setter is
+then this property can be used as a part of object literal if its setter is
 provided. Otherwise it is a :index:`compile-time error`.
 
 .. code-block:: typescript
@@ -1171,8 +1160,6 @@ provided. Otherwise it is a :index:`compile-time error`.
         get attr (): number { return 666 }
     }
     const b: CTE = {attr: 666} // compile-time error - no setter for 'attr'
-
-
 
 |
 
@@ -1215,8 +1202,6 @@ skiped in the object literal as they have default value *undefined* (see
     let b: Person = {name: "Bob", age: 25}
          // 'sex' field will have 'undefined' value
 
-
-
 The interface type ``I`` must contain properties only. A :index:`compile-time error`
 occurs if the interface type ``I`` contains a method:
 
@@ -1242,7 +1227,7 @@ occurs if the interface type ``I`` contains a method:
     let i : I = {name: "Bob"} // compile-time error, interface has methods
 
 If an interface has accessors (see :ref:`Accessor Declarations`) for some
-property then if properety is used in an object literal then a
+property then if property is used in an object literal then a
 :index:`compile-time error` occurs.
 
 .. code-block:: typescript
@@ -1259,7 +1244,6 @@ property then if properety is used in an object literal then a
     }
     const b: I2 = {attr: 666} /* compile-time error - 'attr' cannot be used
                                  in object literal */
-
 
 |
 
@@ -1301,7 +1285,8 @@ type:
        ;
 
 The first expression in ``keyValue`` denotes a key, and must be of type ``Key``;
-the second expression denotes a value, and must be of type ``Value``:
+the second expression denotes a value, and must be compatible to the  type
+``Value``:
 
 .. index::
    expression
@@ -1316,7 +1301,6 @@ the second expression denotes a value, and must be of type ``Value``:
     }
 
     console.log(map["John"]) // prints 25
-
 
 .. code-block:: typescript
 
@@ -1492,7 +1476,6 @@ The type of the *spread expression* is a sequence of types of these values.
         // such array literal will be built at runtime
     }
 
-
 **Note**. If an array is spread while calling a function, then an appropriate
 parameter must be of the spread array kind. If an array is spread into a
 sequence of ordinary parameters, then a :index:`compile-time error` occurs:
@@ -1604,7 +1587,6 @@ reference to the following:
 -  Object for which the instance method is called; or
 -  Object being constructed.
 
-
 The value denoted by ``this`` in a lambda body and in the surrounding context
 is the same.
 
@@ -1641,7 +1623,6 @@ A *field access expression* can access a field of an object that is referred to
 by the object reference. The object reference can have different forms
 described in detail in :ref:`Accessing Current Object Fields` and
 :ref:`Accessing Superclass Fields`.
-
 
 .. index::
    field access expression
@@ -1709,7 +1690,6 @@ expression* of a static field in a class is as follows:
 
 -  ``value`` if the field is ``readonly``, except where the *field access*
    occurs in a class initializer (see :ref:`Class Initializer`).
-
 
 .. index::
    access
@@ -1821,7 +1801,6 @@ class is not ``T``).
    direct superclass
    qualified name
 
-
 |
 
 .. _Method Call Expression:
@@ -1890,7 +1869,6 @@ Step 1: Selection of Type to Use
 The *object reference* is used to determine the type in which to search the method.
 Three forms of *object reference* are available:
 
-
 .. table::
    :widths: 40, 60
 
@@ -1901,7 +1879,6 @@ Three forms of *object reference* are available:
    ``expression`` of type *T*      ``T`` if ``T`` is a class, interface, or union; ``T``’s constraint (:ref:`Type Parameter Constraint`) if ``T`` is a type parameter. A :index:`compile-time error` occurs otherwise.
    ``super``                       The superclass of the class that contains the method call.
    ============================== =================================================================
-
 
 .. index::
    type
@@ -1975,7 +1952,6 @@ semantic checks must be performed:
    abstract method call
    type argument
 
-
 .. _Type of Method Call Expression:
 
 Type of Method Call Expression
@@ -1986,7 +1962,6 @@ Type of Method Call Expression
 
 The type of the *method call expression* is defined below
 - TBD
-
 
 |
 
@@ -2079,7 +2054,6 @@ and require different semantic checks:
    qualified name
    function
 
-
 The example below represents different forms of function calls:
 
 .. code-block:: typescript
@@ -2104,10 +2078,8 @@ The example below represents different forms of function calls:
 
     ((): void => { console.log ("Lambda is called") }) () // function call uses lambda expression to call it
 
-
 The type of a *function call expression* is defined below
 - TBD
-
 
 |
 
@@ -2196,7 +2168,6 @@ and the fractional part differs from 0, then errors occur as follows:
    and
 -  A :index:`compile-time error`, if the situation is detected during
    compilation.
-
 
 A numeric types conversion (see :ref:`Primitive Types Conversions`) is
 performed on *index expression* to ensure that the resultant type is ``int``.
@@ -2310,7 +2281,6 @@ the *index expression* can only be one of the literals listed in the type.
 The result of an indexing expression is of type ``Value``.
 
 .. code-block-meta:
-
 
 .. code-block:: typescript
    :linenos:
@@ -2526,7 +2496,6 @@ It optionally lists all actual arguments for the constructor.
 
 A *class instance creation expression* can throw an error or
 an exception (see :ref:`Error Handling`, :ref:`Constructor Declaration`).
-
 
 The execution of a class instance creation expression is performed as follows:
 
@@ -2937,7 +2906,6 @@ following example:
 
     // Type of x is NonNullishType(expression1)|Type(expression2)
 
-
 A :index:`compile-time error` occurs if the nullish-coalescing operator is
 mixed with conditional-and or conditional-or operators without parentheses.
 
@@ -3027,7 +2995,6 @@ If the evaluation of the operand expression completes normally at runtime, then:
    operand
    normal completion
    runtime
-
 
 Otherwise, the postfix increment expression completes abruptly, and no
 incrementation occurs.
@@ -3453,7 +3420,6 @@ Multiplicative Expressions
 .. meta:
     frontend_status: Done
 
-
 Multiplicative expressions use *multiplicative operators* '``*``', '``/``',
 and '``%``':
 
@@ -3525,7 +3491,6 @@ If overflow occurs during integer multiplication, then:
 -  The sign of the result can be other than the sign of the mathematical
    product of the two operand values.
 
-
 A floating-point multiplication result is determined in compliance with the
 IEEE 754 arithmetic:
 
@@ -3549,12 +3514,10 @@ IEEE 754 arithmetic:
    -  Either operand is ``NaN``;
    -  Infinity is multiplied by zero.
 
-
 -  If the result is not ``NaN``, then the sign of the result is as follows:
 
    -  Positive, where both operands have the same sign; and
    -  Negative, where the operands have different signs.
-
 
 -  If infinity is multiplied by a finite value, then the multiplication results
    in a signed infinity (the sign is determined by the rule above).
@@ -3568,7 +3531,6 @@ IEEE 754 arithmetic:
 
    If the magnitude of the product is too large to represent, then the
    operation overflows, and the result is an appropriately signed infinity.
-
 
 The evaluation of a multiplication operator '``*``' never throws an error
 despite possible overflow, underflow, or loss of information.
@@ -3621,7 +3583,6 @@ Note that *q* is:
    but
 -  Negative, where \|n| :math:`\geq{}` \|d|, and *n* and *d* have opposite signs.
 
-
 .. index::
    division operator
    binary operator
@@ -3650,7 +3611,6 @@ arithmetic:
    -  Both operands are infinity; or
    -  Both operands are zero.
 
-
 .. index::
    integer overflow
    dividend
@@ -3672,13 +3632,11 @@ arithmetic:
    -  Positive, where both operands have the same sign; or
    -  Negative, where the operands have different signs.
 
-
 -  Division produces a signed infinity (the sign is determined by
    the rule above) if:
 
    -  Infinity is divided by a finite value; and
    -  A nonzero finite value is divided by zero.
-
 
 -  Division produces a signed zero (the sign is determined by the
    rule above) if:
@@ -3698,7 +3656,6 @@ arithmetic:
 
    If the magnitude of the product is too large to represent, then the
    operation overflows, and the result is an appropriately signed infinity.
-
 
 The quotient is rounded to the nearest value in the chosen value set by
 using the IEEE 754 *round-to-nearest* mode. The |LANG| programming
@@ -3749,7 +3706,6 @@ The remainder operation on integer operands (for the numeric type conversion
 on both see :ref:`Primitive Types Conversions`) produces a result
 value, i.e., :math:`(a/b)*b+(a\%b)` equals *a*.
 
-
 .. index::
    remainder operator
    dividend
@@ -3772,7 +3728,6 @@ operation can only be:
 
 -  Negative if the dividend is negative; or
 -  Positive if the dividend is positive.
-
 
 The magnitude of the result is always less than that of the divisor.
 
@@ -3817,7 +3772,6 @@ with the IEEE 754 arithmetic:
    -  The divisor is zero; or
    -  The dividend is infinity, and the divisor is zero.
 
-
 -  If the result is not ``NaN``, then the sign of the result is the same as the
    sign of the dividend.
 -  The result equals the dividend if:
@@ -3842,10 +3796,8 @@ with the IEEE 754 arithmetic:
    -  Negative if :math:`n/d` is negative, or
    -  Positive if :math:`n/d` is positive.
 
-
 -  The magnitude of *q* is the largest possible without exceeding the
    magnitude of the true mathematical quotient of *n* and *d*.
-
 
 The evaluation of the floating-point remainder operator '``%``' never throws
 an error, even if the right-hand operand is zero. Overflow, underflow, or
@@ -4006,7 +3958,6 @@ If overflow occurs on an integer addition, then:
 -  The sign of the result is different than that of the mathematical sum of
    the operands’ values.
 
-
 The result of a floating-point addition is determined in compliance with the
 IEEE 754 arithmetic as follows:
 
@@ -4030,7 +3981,6 @@ IEEE 754 arithmetic as follows:
    -  Either operand is ``NaN``; or
    -  The operands are two infinities of the opposite signs.
 
-
 -  The sum of two infinities of the same sign is the infinity of that sign.
 -  The sum of infinity and a finite value equals the infinite operand.
 -  The sum of two zeros of opposite sign is positive zero.
@@ -4041,7 +3991,6 @@ IEEE 754 arithmetic as follows:
 -  If infinity, zero, or ``NaN`` are not involved, and the operands have the
    same sign or different magnitudes, then the exact sum is computed
    mathematically.
-
 
 If the magnitude of the sum is too large to represent, then the operation
 overflows, and the result is an appropriately signed infinity.
@@ -5054,7 +5003,6 @@ The following comparisons evaluate to ``false`` at compile time:
 
 .. code-block-meta:
 
-
 .. code-block:: typescript
    :linenos:
 
@@ -5109,7 +5057,6 @@ The *bitwise operators* and *logical operators* are as follows:
 -  Exclusive OR operator '``^``'; and
 -  Inclusive OR operator '``|``'.
 
-
 .. code-block:: abnf
 
     bitwiseAndLogicalExpression:
@@ -5147,7 +5094,6 @@ type, or two operands of the ``boolean`` type. Otherwise, a
    operator
    boolean type
 
-
 |
 
 .. _Integer Bitwise Operators:
@@ -5175,7 +5121,6 @@ The resultant value of '``&``' is the bitwise AND of the operand values.
 The resultant value of '``^``' is the bitwise exclusive OR of the operand values.
 
 The resultant value of '``|``' is the bitwise inclusive OR of the operand values.
-
 
 .. index::
    integer operator
@@ -5443,7 +5388,6 @@ A :index:`compile-time error` occurs if:
    :ref:`Chaining Operator`);
 -  the result of *lhsExpression* is not a variable.
 
-
 The type of the variable is the type of the assignment expression.
 
 The result of the assignment expression at runtime is not a variable itself
@@ -5524,13 +5468,11 @@ one of the following ways:
       element of the array referred to by the value of the array reference
       subexpression.
 
-
       That element is a variable of type ``SC``. If ``TC`` is the type of the
       left-hand operand of the assignment operator determined at compile
       time, then there are two options:
 
       - If ``TC`` is a primitive type, then ``SC`` can only be the same as ``TC``.
-
 
         The value of the right-hand operand is converted to the type of the
         selected array element. The value set conversion (see
@@ -6106,11 +6048,9 @@ The examples of usage are presented below:
     // Type can be omitted for the rest parameter
     bar ((...e) => e)
 
-
     function goo<T> (a: (p?: T) => T) {}
     // Type can be omitted for the optional parameter
     goo ((e?) => e)
-
 
 A *lambda expression* evaluation creates an instance of a function type (see
 :ref:`Function Types`) as described in detail in
@@ -6146,10 +6086,8 @@ A :index:`compile-time error` occurs if:
 - A formal parameter contains no type provided, and the type cannot be derived
   by type inference.
 
-
 See :ref:`Throwing Functions` for the details of ``throws``, and
 :ref:`Rethrowing Functions` for the details of ``rethrows`` marks.
-
 
 .. index::
    lambda signature
@@ -6251,7 +6189,6 @@ that has the following:
 
 -  Lambda return type as the return type of the function type.
 
-
 **Note**. Lambda return type can be inferred from the *lambda body*.
 
 .. index::
@@ -6352,7 +6289,6 @@ can act as follows:
 -  Replace the captured variable’s type for a proxy class that contains an
    original reference (x: T for x: Proxy<T>; x.ref = original-ref) if that
    captured variable is of a non-primitive type.
-
 
 If the captured variable is defined as ``const``, then neither boxing nor
 proxying is required.
@@ -6510,9 +6446,6 @@ of the following:
    qualified name
    initializer
 
-
-
 .. raw:: pdf
 
    PageBreak
-

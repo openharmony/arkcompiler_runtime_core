@@ -231,5 +231,3 @@ found in :ref:`Enumeration Methods` in the chapter Experimental Features.
 .. raw:: pdf
 
    PageBreak
-
-

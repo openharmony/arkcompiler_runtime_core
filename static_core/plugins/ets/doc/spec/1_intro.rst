@@ -51,7 +51,6 @@ The following major aspects characterize the |LANG| language as a whole:
    -  Methods (class instance or interface methods) with a dynamically dispatched
       overriding mechanism.
 
-
    Common in many (if not all) modern programming languages, object orientation
    enables powerful, flexible, safe, clear, and adequate software design.
 
@@ -292,7 +291,6 @@ All grammar rules are presented in the Grammar section (see
    terminal
    expression
    grammar rule
-
 
 Terms and Definitions
 *********************
@@ -598,9 +596,6 @@ as used in other languages, application areas, or industries.
      -- a component produced by, inherited from, and dependent from another
      component.
 
-
 .. raw:: pdf
 
    PageBreak
-
-

@@ -299,7 +299,6 @@ When using an annotation, the order of values has no significance:
     // the same as:
     @ClassPreamble({revision: 2, authorName: "John"})
 
-
 When using an annotation, all fields without default values must be listed.
 Otherwise, a :index:`compile-time error` occurs:
 
@@ -406,7 +405,6 @@ To export an annotation, its declaration must be marked with the keyword
     // a.sts
     export @interface MyAnno {}
 
-
 If an annotation is imported as part of an imported module, then the annotation
 is accessed by its qualified name:
 
@@ -447,7 +445,6 @@ An annotation is not a type. Exporting or importing annotations by using
    :linenos:
 
     import type { MyAnno } from "./a" // compile-time error
-
 
 Annotations are forbidden in the following cases:
 
@@ -525,7 +522,6 @@ not identical to the annotation declaration:
 
     // a.sts
     export @interface VersionAnno{version: number = 1}
-
 
 An ambient declaration can be imported and used in exactly the same manner
 as a regular annotation:

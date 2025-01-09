@@ -240,7 +240,6 @@ follows:
         ':' (type | 'this')
         ;
 
-
 The only result that is allowed to be returned from such a method is ``this``:
 
 .. code-block:: typescript
