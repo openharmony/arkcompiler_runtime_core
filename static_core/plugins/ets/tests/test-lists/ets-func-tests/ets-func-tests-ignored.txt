@@ -44,7 +44,6 @@ spec/03.types/References_Types/unions/union_generics_03.sts
 ### generics + unions not everything supported yet
 spec/03.types/References_Types/unions/union_generics_02.sts
 ### Negative tests
-spec/03.types/References_Types/unions/union_compare_n_10.sts
 spec/03.types/References_Types/unions/union_param_n_01.sts
 spec/03.types/References_Types/unions/union_param_n_02.sts
 ### End of Unions

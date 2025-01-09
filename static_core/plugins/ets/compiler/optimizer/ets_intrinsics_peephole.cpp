@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -282,26 +282,13 @@ static void ReplaceWithCompareNullish(IntrinsicInst *intrinsic, Inst *input)
     intrinsic->ReplaceUsers(orInst);
 }
 
-bool Peepholes::PeepholeEquals([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+static bool IsNullish(const Inst *input)
 {
-    auto input0 = intrinsic->GetInput(0).GetInst();
-    auto input1 = intrinsic->GetInput(1).GetInst();
+    return input->IsNullPtr() || input->IsLoadUndefined();
+}
 
-    const auto isNullish = [](Inst *inst) { return inst->IsNullPtr() || inst->IsLoadUndefined(); };
-    if (input0 == input1 || (isNullish(input0) && isNullish(input1))) {
-        intrinsic->ReplaceUsers(ConstFoldingCreateIntConst(intrinsic, 1));
-        return true;
-    }
-    auto graph = intrinsic->GetBasicBlock()->GetGraph();
-    if (graph->IsBytecodeOptimizer()) {
-        return false;
-    }
-    if (isNullish(input0) || isNullish(input1)) {
-        auto nonNullishInput = isNullish(input0) ? input1 : input0;
-        ReplaceWithCompareNullish(intrinsic, nonNullishInput);
-        return true;
-    }
-
+static bool ReplaceIfNonValueTyped(IntrinsicInst *intrinsic, compiler::Graph *graph)
+{
     auto klass1 = GetClassPtrForObject(intrinsic, 0);
     auto klass2 = GetClassPtrForObject(intrinsic, 1);
     if ((klass1 != nullptr && !graph->GetRuntime()->IsClassValueTyped(klass1)) ||
@@ -311,6 +298,49 @@ bool Peepholes::PeepholeEquals([[maybe_unused]] GraphVisitor *v, IntrinsicInst *
     }
     // NOTE(vpukhov): #16340 try ObjectTypePropagation
     return false;
+}
+
+bool Peepholes::PeepholeEquals([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    auto input0 = intrinsic->GetInput(0).GetInst();
+    auto input1 = intrinsic->GetInput(1).GetInst();
+    if (input0 == input1 || (IsNullish(input0) && IsNullish(input1))) {
+        intrinsic->ReplaceUsers(ConstFoldingCreateIntConst(intrinsic, 1));
+        return true;
+    }
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
+    if (graph->IsBytecodeOptimizer()) {
+        return false;
+    }
+    if (IsNullish(input0) || IsNullish(input1)) {
+        auto nonNullishInput = IsNullish(input0) ? input1 : input0;
+        ReplaceWithCompareNullish(intrinsic, nonNullishInput);
+        return true;
+    }
+
+    return ReplaceIfNonValueTyped(intrinsic, graph);
+}
+
+bool Peepholes::PeepholeStrictEquals([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    auto input0 = intrinsic->GetInput(0).GetInst();
+    auto input1 = intrinsic->GetInput(1).GetInst();
+    if (input0 == input1) {
+        intrinsic->ReplaceUsers(ConstFoldingCreateIntConst(intrinsic, 1));
+        return true;
+    }
+
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
+    if (graph->IsBytecodeOptimizer()) {
+        return false;
+    }
+
+    if (IsNullish(input0) || IsNullish(input1)) {
+        ReplaceWithCompareEQ(intrinsic);
+        return true;
+    }
+
+    return ReplaceIfNonValueTyped(intrinsic, graph);
 }
 
 bool Peepholes::PeepholeDoubleToString([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1736,6 +1736,21 @@ AbckitInst *IcreateModStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst 
 }
 
 AbckitInst *IcreateEqualsStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::BOOL, compiler::INVALID_PC,
+                                                     compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_EQUALS);
+    size_t argsCount {2U};
+    intrImpl->ReserveInputs(argsCount);
+    intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
+    intrImpl->AppendInput(input0->impl, input0->impl->GetType());
+    intrImpl->AppendInput(input1->impl, input1->impl->GetType());
+
+    return CreateInstFromImpl(graph, intrImpl);
+}
+
+AbckitInst *IcreateStrictEqualsStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
 {
     LIBABCKIT_LOG_FUNC;
 

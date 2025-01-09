@@ -1,5 +1,5 @@
 # plugin interpreter_main_loop
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -47,3 +47,5 @@
 
   when "ETS_EQUALS_PREF_V4_V4"
     handle_ets_equals(vreg_value(op[0]).ref, vreg_value(op[1]).ref)
+  when "ETS_STRICTEQUALS_PREF_V4_V4"
+    handle_ets_equals_strict(vreg_value(op[0]).ref, vreg_value(op[1]).ref)

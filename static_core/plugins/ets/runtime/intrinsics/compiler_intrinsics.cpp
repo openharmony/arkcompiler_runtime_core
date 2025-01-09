@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -379,6 +379,13 @@ extern "C" uint8_t CompilerEtsEquals(ObjectHeader *obj1, ObjectHeader *obj2)
 {
     auto coro = EtsCoroutine::GetCurrent();
     return static_cast<uint8_t>(EtsReferenceEquals(coro, EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2)));
+}
+
+extern "C" uint8_t CompilerEtsStrictEquals(ObjectHeader *obj1, ObjectHeader *obj2)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    return static_cast<uint8_t>(
+        EtsReferenceEquals<true>(coro, EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2)));
 }
 
 extern "C" EtsString *CompilerDoubleToStringDecimal(ObjectHeader *cache, uint64_t number,

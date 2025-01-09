@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,16 +14,22 @@
  */
 
 /*---
-desc: Checking that two variables with the same expressions of the compound class are different objects
+desc: >-
+    03.08.11 Union types
+name: 03.types/08.reference_types/03.08.11.union_types/union_compare_07
+tags: []
 ---*/
 
-class Person {
-  height: Int = 0;
-  age: Int = 0;
-}
+class A {}
+class B {}
 
-function main(): void {
-  let person: Person = {height:new Int(20), age: new Int(20)}
-  assert person.height !== person.age
+type Union1 = B | string
+
+function main(): int {
+    let a: Union1 = new B()
+    let b: A = new A()
+    if (a === b) {
+        return -1
+    }
+    return 0
 }
-  
