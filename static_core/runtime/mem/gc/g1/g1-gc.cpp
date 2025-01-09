@@ -1089,11 +1089,12 @@ void G1GC<LanguageConfig>::MarkObjectRecursively(ObjectHeader *object)
 {
     ASSERT(object != nullptr);
     ASSERT(this->GetLastGCCause() == GCTaskCause::CROSSREF_CAUSE);
-    ASSERT(this->GetGCPhase() == GCPhase::GC_PHASE_INITIAL_MARK || this->GetGCPhase() == GCPhase::GC_PHASE_MARK ||
-           this->GetGCPhase() == GCPhase::GC_PHASE_REMARK);
+    ASSERT(this->GetGCPhase() == GCPhase::GC_PHASE_RUNNING || this->GetGCPhase() == GCPhase::GC_PHASE_INITIAL_MARK ||
+           this->GetGCPhase() == GCPhase::GC_PHASE_MARK || this->GetGCPhase() == GCPhase::GC_PHASE_REMARK);
     if (concXMarker_.MarkIfNotMarked(object)) {
-        auto *objectClass = object->template ClassAddr<BaseClass>();
-        concMarker_.MarkInstance(&concurrentMarkingStack_, object, objectClass);
+        GCMarkingStackType stack(this);
+        stack.PushToStack(RootType::ROOT_VM, object);
+        this->MarkStack(&concMarker_, &stack, GC::EmptyMarkPreprocess);
     } else {
         LOG_DEBUG_GC << "Skip object: " << object << " since it is already marked";
     }

@@ -119,7 +119,6 @@ void XGC::GCStarted(const GCTask &task, [[maybe_unused]] size_t heapSize)
         return;
     }
     vm_->RemoveRootProvider(storage_);
-    stsVmIface_->StartXGCBarrier();
     isXGcInProgress_ = true;
     remarkFinished_ = false;
     beforeGCStorageSize_ = storage_->Size();
@@ -130,6 +129,7 @@ void XGC::GCFinished(const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeG
     if (task.reason != GCTaskCause::CROSSREF_CAUSE) {
         return;
     }
+    stsVmIface_->FinishXGCBarrier();
     vm_->AddRootProvider(storage_);
     isXGcInProgress_ = false;
     if (remarkFinished_) {
@@ -141,7 +141,6 @@ void XGC::GCFinished(const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeG
         // or post async job using libuv.
         storage_->SweepUnmarkedRefs();
     }
-    stsVmIface_->FinishXGCBarrier();
     // NOTE(ipetrov, XGC): if table will be cleared in concurrent, then compute the new size should not be based on the
     // current storage size, need storage size without dead references
     auto newTargetThreshold = this->ComputeNewSize();
@@ -159,6 +158,7 @@ void XGC::GCPhaseStarted(mem::GCPhase phase)
     switch (phase) {
         case mem::GCPhase::GC_PHASE_INITIAL_MARK: {
             storage_->UnmarkAll();
+            stsVmIface_->StartXGCBarrier();
             break;
         }
         case mem::GCPhase::GC_PHASE_REMARK: {
