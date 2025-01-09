@@ -20,9 +20,10 @@ export final class Proxy {
 
     private static readonly INSTANCE = new Proxy()
 
-    private static readonly PROXY_CLASS_NAME_SUFFIX = "$Proxy"
-    private static readonly PROXY_INSTANCE_TARGET_FIELD = "target"
-    private static readonly PROXY_INSTANCE_HANDLER_FIELD = "handler"
+    // Note(ivan-tyulyandin): invalid STS names to prevent collision with user code
+    private static readonly PROXY_CLASS_NAME_SUFFIX = "@Proxy"
+    private static readonly PROXY_INSTANCE_TARGET_FIELD = "@target"
+    private static readonly PROXY_INSTANCE_HANDLER_FIELD = "@handler"
 
     private static readonly CTOR_METHOD_NAME = "constructor"
 
@@ -31,6 +32,14 @@ export final class Proxy {
 
     private static readonly SETTER_METHOD_PREFIX = "<set>"
     private static readonly SETTER_METHOD_PREFIX_LENGTH = Proxy.SETTER_METHOD_PREFIX.getLength()
+
+    static tryGetTarget(obj: Object): NullishType {
+        return Reflect.get(obj, Proxy.PROXY_INSTANCE_TARGET_FIELD)
+    }
+
+    static tryGetHandler(obj: Object): NullishType {
+        return Reflect.get(obj, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
+    }
 
     static create<T extends Object>(target: T, handler: ProxyHandler<T>): T {
         const targetType = Type.of(target) as ClassType
@@ -226,7 +235,7 @@ export final class Proxy {
     }
 
     private generateGetterProxy(
-            proxyTypeCreator: ClassTypeCreator, 
+            proxyTypeCreator: ClassTypeCreator,
             getter: Method): void {
 
         const propertyName = getter.getName().substring(Proxy.GETTER_METHOD_PREFIX_LENGTH)
@@ -254,7 +263,7 @@ export final class Proxy {
     }
 
     private generateSetterProxy(
-            proxyTypeCreator: ClassTypeCreator, 
+            proxyTypeCreator: ClassTypeCreator,
             setter: Method): void {
 
         const propertyName = setter.getName().substring(Proxy.SETTER_METHOD_PREFIX_LENGTH)
@@ -338,11 +347,11 @@ export final class Proxy {
 
     private wrapFn0<R>(fn: Function0<R>): Function0<R> {
         return (): R => fn.invoke0()
-    } 
+    }
 
     private wrapThrowFn0<R>(fn: ThrowingFunction0<R>): ThrowingFunction0<R> {
         return (): R throws => fn.invoke0()
-    } 
+    }
 
     private wrapFn1<P1, R>(fn: Function1<P1, R>): Function1<P1, R> {
         return (p1: P1): R => fn.invoke0(p1)
@@ -407,7 +416,7 @@ export final class Proxy {
                     if (arrayProxy instanceof ArrayProxy) {
                         return this.arrayHandlerInvoke(arrayProxy, method, args)
                     }
-                    
+
                     throw new AssertionError("unexpected array proxy type: " + Type.of(arrayProxy).getName())
                 }))
 
@@ -446,7 +455,7 @@ export interface ArrayProxyHandler<T> extends ProxyHandler<Array<T>> {
 export abstract class DefaultArrayProxyHandler<T> extends DefaultProxyHandler<Array<T>> implements ArrayProxyHandler<T> {
     override get(target: Array<T>, name: string): NullishType {
         if (name == ArrayProxy.LENGTH_PROP_NAME) {
-            return target.length 
+            return target.length
         }
 
         throw new AssertionError("unexpected property: " + name)
@@ -456,7 +465,7 @@ export abstract class DefaultArrayProxyHandler<T> extends DefaultProxyHandler<Ar
         if (name == ArrayProxy.LENGTH_PROP_NAME) {
             if (value instanceof Number) {
                 target.length = value
-                return true 
+                return true
             }
         }
 
@@ -475,7 +484,7 @@ export abstract class DefaultArrayProxyHandler<T> extends DefaultProxyHandler<Ar
         target[index] = value
         return true
     }
-} 
+}
 
 abstract class ArrayProxy<T> extends Array<T> {
     public readonly target: Array<T>
@@ -554,10 +563,10 @@ abstract class ArrayProxy<T> extends Array<T> {
     private static readonly SPLICE_METHOD_NUM: Method = ArrayProxy.getArrayMethod("splice", Type.of(1.0))
     private static readonly SPLICE_METHOD_INT: Method = ArrayProxy.getArrayMethod("splice", Type.of(1))
 
-    private static readonly SPLICE_METHOD_INT_INT_ARR: Method = 
+    private static readonly SPLICE_METHOD_INT_INT_ARR: Method =
             ArrayProxy.getArrayMethod("splice", Type.of(1), Type.of(1), Type.of(new Object[0]))
 
-    private static readonly SPLICE_METHOD_NUM_OBJ_ARR: Method = 
+    private static readonly SPLICE_METHOD_NUM_OBJ_ARR: Method =
             ArrayProxy.getArrayMethod("splice", Type.of(1.0), ObjectType, Type.of(new Object[0]))
 
     constructor(target: Array<T>, handler: ArrayProxyHandler<T>) {
