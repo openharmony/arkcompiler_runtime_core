@@ -16,7 +16,7 @@
 17.experimental_features/02.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_5.sts
 
 # fails in JIT mode with --opt-level=0
-02.lexical_elements/09.literals/08.undefined_literal/undef_literal1.sts
+02.lexical_elements/09.literals/09.undefined_literal/undef_literal1.sts
 04.names_declarations_and_scopes/05.scopes/interface_level1.sts
 04.names_declarations_and_scopes/05.scopes/interface_level2.sts
 07.expressions/09.field_access_expressions/safe_field_access_0.sts
