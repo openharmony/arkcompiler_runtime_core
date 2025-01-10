@@ -27,6 +27,7 @@ import {foo} from "./pkg";
 function main() {
   i++;
 
-  assertEQ(i, foo(), "i != foo()");
+  assertEQ(i, 1, "i != 1");
+  assertEQ(i + 1, foo(), "i != foo()");
   assertEQ(i, 2, "i != 2");
 }
