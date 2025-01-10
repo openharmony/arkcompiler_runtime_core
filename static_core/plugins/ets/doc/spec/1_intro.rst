@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -199,9 +199,9 @@ numbers/numeric literals, operator signs, delimiters), special characters
 
 The tokens defined by the lexical grammar are terminal symbols of syntactic
 notation. Syntactic notation defines a set of productions starting from the
-goal symbol *compilationUnit* (see :ref:`Modules and Compilation Units`). It is
-a sentence that consists of a single distinguished nonterminal, and describes
-how sequences of tokens can form syntactically correct programs.
+goal symbol *compilationUnit* (see :ref:`Compilation Units`). It is a sentence
+that consists of a single distinguished nonterminal, and describes how
+sequences of tokens can form syntactically correct programs.
 
 .. index::
    production
@@ -505,8 +505,8 @@ as used in other languages, application areas, or industries.
      specified type.
 
    method
-     -- ordered 4-tuple consisting of type parameters, argument types,
-     return type, and a ``throws``/``rethrows`` clause.
+     -- ordered 3-tuple consisting of type parameters, argument types,
+     return type.
 
    abstract declaration
      -- ordinary interface method declaration that specifies the method’s name
@@ -517,10 +517,6 @@ as used in other languages, application areas, or industries.
      of non-Boolean types, and allows handling the value of a valid
      expression of a non-void type as ``Truthy`` or ``Falsy``, depending on
      the kind of the value type.
-
-   default ``catch`` clause
-     -- ``catch`` clause that has its exception parameter type omitted, and can
-     handle any exception or error that is not handled by a preceding clause.
 
    overloading
      -- situation where different functions 

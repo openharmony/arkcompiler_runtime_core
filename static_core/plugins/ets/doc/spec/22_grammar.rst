@@ -50,7 +50,7 @@ Grammar Summary
        ;
 
     functionType:
-        '(' ftParameterList? ')' ftReturnType 'throws'?
+        '(' ftParameterList? ')' ftReturnType 
         ;
 
     ftParameterList:
@@ -137,7 +137,7 @@ Grammar Summary
         ;
 
     signature:
-        parameters returnType? throwMark?
+        parameters returnType?
         ;
 
     parameters:
@@ -146,10 +146,6 @@ Grammar Summary
 
     returnType:
         ':' type
-        ;
-
-    throwMark:
-        'throws' | 'rethrows'
         ;
 
     parameterList:
@@ -623,7 +619,7 @@ Grammar Summary
           ;
 
     classDeclaration:
-        classModifier? 'class' identifier typeParameters?
+        classModifier? ('class' | 'struct') identifier typeParameters?
           classExtendsClause? implementsClause? classBody
         ;
 
@@ -1015,7 +1011,7 @@ Grammar Summary
         ;
         
     functionTypeWithReceiver:
-        '(' receiverParameter (',' ftParameterList)? ')' ftReturnType 'throws'?
+        '(' receiverParameter (',' ftParameterList)? ')' ftReturnType
         ;
 
     lambdaExpressionWithReceiver:

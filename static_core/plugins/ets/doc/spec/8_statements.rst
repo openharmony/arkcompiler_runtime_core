@@ -52,9 +52,8 @@ evaluation for each kind of statement are described in the following
 sections.
 
 A statement execution is considered to *complete normally* if the desired
-action is performed without an exception or an error being thrown. On the
-contrary, a statement execution is considered to *complete abruptly* if it
-causes an exception or an error to be thrown.
+action is performed without an error being thrown. On the contrary, a statement
+execution is considered to *complete abruptly* if it causes an error thrown.
 
 .. index::
    statement
@@ -62,8 +61,6 @@ causes an exception or an error to be thrown.
    statement execution
    normal completion
    abrupt completion
-   exception
-   error
 
 |
 
@@ -112,8 +109,8 @@ forms a *block*:
 
 The execution of a block means that all block statements, except type
 declarations, are executed one after another in the textual order of their
-appearance within the block until exception (see :ref:`Exceptions`), error
-(see :ref:`Errors`), or return (see :ref:`Return Statements`) occurs.
+appearance within the block until an erroneous sitation is thrown (see
+:ref:`Errors`), or return (see :ref:`Return Statements`) occurs.
 
 If a block is the body of a ``functionDeclaration`` (see
 :ref:`Function Declarations`) or a ``classMethodDeclaration`` (see
@@ -129,8 +126,6 @@ return statement at all. Such a block is equivalent to one that ends in a
    execution
    block statement
    type declaration
-   exception
-   error
    return
    return type
 
@@ -779,11 +774,11 @@ determines the equality.
 .. meta:
     frontend_status: Done
 
-A ``throw`` statement causes *exception* or *error* to be thrown (see
-:ref:`Error Handling`). It immediately transfers control, and can exit multiple
-statements, constructors, functions, and method calls until a ``try`` statement
-(see :ref:`Try Statements`) is found that catches the value thrown. If no
-``try`` statement is found, then ``UncaughtExceptionError`` is thrown.
+A ``throw`` statement causes an *error* object to be created and raised
+(see :ref:`Error Handling`). It immediately transfers control, and can exit
+multiple statements, constructors, functions, and method calls until a ``try``
+statement (see :ref:`Try Statements`) is found that catches the value thrown.
+If no ``try`` statement is found, then ``UncaughtExceptionError`` is thrown.
 
 .. code-block:: abnf
 
@@ -792,21 +787,16 @@ statements, constructors, functions, and method calls until a ``try`` statement
         ;
 
 The expression type must be assignable (see :ref:`Assignment`) to type
-``Exception`` or ``Error``. Otherwise, a :index:`compile-time error` occurs.
+``Error``. Otherwise, a :index:`compile-time error` occurs.
 
 This implies that the object thrown is never ``null``.
 
-It is necessary to check at compile time that a ``throw`` statement, which
-throws an exception, is placed in the ``try`` block of a ``try`` statement,
-or in a *throwing function* (see :ref:`Throwing Functions`). Errors can
-be thrown at any place in the code.
+Errors can be thrown at any place in the code.
 
 .. index::
    throw statement
    thrown value
    thrown object
-   exception
-   error
    control transfer
    statement
    method
@@ -814,7 +804,6 @@ be thrown at any place in the code.
    constructor
    try block
    try statement
-   throwing function
    assignment
    compile-time error
 
@@ -829,41 +818,28 @@ be thrown at any place in the code.
     frontend_status: Done
 
 A ``try`` statement runs blocks of code, and provides sets of catch clauses
-to handle different exceptions and errors (see :ref:`Error Handling`).
+to handle different errors (see :ref:`Error Handling`).
 
 .. index::
    try statement
    block
    catch clause
-   exception
-   error
 
 .. code-block:: abnf
 
     tryStatement:
-          'try' block catchClauses finallyClause?
-          ;
-
-    catchClauses:
-          typedCatchClause* catchClause?
+          'try' block catchClause? finallyClause?
           ;
 
     catchClause:
           'catch' '(' identifier ')' block
           ;
 
-    typedCatchClause:
-          'catch' '(' identifier ':' typeReference ')' block
-          ;
-
     finallyClause:
           'finally' block
           ;
 
-The |LANG| programming language supports *multiple typed catch clauses* as
-an experimental feature (see :ref:`Multiple Catch Clauses in Try Statements`).
-
-A ``try`` statement must contain either a ``finally`` clause, or at least one
+A ``try`` statement must contain either a ``finally`` clause, or a
 ``catch`` clause. Otherwise, a :index:`compile-time error` occurs.
 
 If the ``try`` block completes normally, then no action is taken, and no
@@ -874,7 +850,6 @@ control is transferred to the ``catch`` clause.
 
 .. index::
    catch clause
-   multiple typed catch clause
    typed catch clause
    try statement
    try block
@@ -882,8 +857,6 @@ control is transferred to the ``catch`` clause.
    compile-time error
    control transfer
    finally clause
-   exception
-   error
    block
 
 |
@@ -899,25 +872,21 @@ control is transferred to the ``catch`` clause.
 A ``catch`` clause consists of two parts:
 
 -  A *catch identifier* that provides access to an object associated with
-   the *error* or *exception* thrown; and
+   the *error* thrown; and
 
--  A block of code that handles the situation.
+-  A block of code that handles the error.
 
-The type of *catch identifier* inside the block is ``Error | Exception``
-(see :ref:`Error Handling`).
+The type of *catch identifier* inside the block is ``Error`` (see
+:ref:`Error Handling`).
 
 .. index::
    catch clause
    catch identifier
-   exception
    access
-   error
    block
    catch identifier
    Object
 
-The details of *typed catch clause* are discussed in
-:ref:`Multiple Catch Clauses in Try Statements`.
 
 .. index::
    typed catch clause
@@ -950,7 +919,6 @@ the ``ZeroDivisor``, and '*0*'  for all other errors.
 .. index::
    catch clause
    runtime
-   error
 
 |
 
@@ -972,9 +940,9 @@ abruptly.
         'finally' block
         ;
 
-A ``finally`` block is executed without regard to how (by reaching
-``exception``, ``error``, ``return``, or ``try-catch`` end) the program control
-is transferred out. The ``finally`` block is particularly useful to ensure
+A ``finally`` block is executed without regard to how (by reaching ``return``
+or ``try-catch`` end or raising new *error*) the program control is
+transferred out. The ``finally`` block is particularly useful to ensure
 proper resource management.
 
 Any required actions (e.g., flush buffers and close file descriptors)
@@ -989,8 +957,6 @@ can be performed while leaving the ``try-catch``:
    abrupt completion
    finally block
    execution
-   exception
-   error
    return
    try-catch
 
@@ -1025,26 +991,22 @@ can be performed while leaving the ``try-catch``:
     frontend_status: Done
 
 #. A ``try`` block and the entire ``try`` statement complete normally if no
-   ``catch`` block is executed.
-   The execution of a ``try`` block completes abruptly if an exception or
-   an error is thrown inside the ``try`` block.
-   ``Catch`` clauses are checked in the textual order of their position in the
-   source code.
+   ``catch`` block is executed. The execution of a ``try`` block completes
+   abruptly if an error is thrown inside the ``try`` block. 
 
-#. The execution of a ``try`` block completes abruptly if exception or error
-   *x* is thrown inside the ``try`` block.
-   If the runtime type of *x* is compatible (see :ref:`Type Compatibility`) with
-   the exception class of the exception parameter (i.e., the ``catch`` clause
-   matches *x*), and the execution of the body of the ``catch`` clause
-   completes normally, then the entire ``try`` statement completes normally.
-   Otherwise, the ``try`` statement completes abruptly.
+#. The execution of a ``try`` block completes abruptly if error *x* is thrown
+   inside the ``try`` block. If the ``catch`` clause is present and the
+   execution of the body of the ``catch`` clause completes normally, then the
+   entire ``try`` statement completes normally. Otherwise, the ``try``
+   statement completes abruptly.
 
-#. If no ``catch`` clause can handle an exception or an error, then those
-   propagate to the surrounding scope. If the surrounding scope is a function,
-   method, or constructor, then the execution depends on whether the surrounding
-   scope is a *throwing function* (see :ref:`Throwing Functions`). If so, then
-   the exception propagates to the caller context. Otherwise,
-   ``UncaughtExceptionError`` is thrown.
+#. If no ``catch`` clause in place then the error is propagated to the
+   surrounding scope until it reaches the scope with the ``catch`` clause which
+   handles the error. If no such scope exits then ``UncaughtExceptionError`` is
+   thrown and program execution terminates (see :ref:`Program Exit`).
+
+#. If ``finally`` clause in place and its execution completes abruptly then the
+   ``try`` statement completes abruptly as well.
 
 .. index::
    try statement
@@ -1054,18 +1016,14 @@ can be performed while leaving the ``try-catch``:
    abrupt completion
    error
    catch clause
-   exception
    runtime
    catch clause
-   exception parameter
-   error
    compatibility
    propagation
    surrounding scope
    function
    method
    constructor
-   throwing function
    caller context
 
 .. raw:: pdf

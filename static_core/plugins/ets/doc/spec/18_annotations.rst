@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -263,7 +263,7 @@ Annotations can be applied to the following:
 - A lambda expression (see :ref:`Lambda Expressions`,
   :ref:`Lambda Expressions with Receiver`);
 
-- Local declarataions (see :ref:`Local Declarations`).
+- Local declarations (see :ref:`Local Declarations`).
 
 .. index::
    annotation
@@ -476,7 +476,7 @@ Ambient Annotations
 *******************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 Ambient annotations can be specified in :ref:`Declaration Modules` only.
 
@@ -580,6 +580,60 @@ modifies semantics of the declaration it is applied to.
    declaration
 
 |
+
+.. _Retention Annotation:
+
+Retention Annotation
+====================
+
+.. meta:
+    frontend_status: None
+
+*@Retention* is a standard annotation that is used to annotate
+declaration of other annotations.
+A :index:`compile-time error` occurs if it is used in other places.
+
+The annotation has a single field ``policy`` of type ``string``. 
+The typical use is:
+
+.. code-block:: typescript
+   :linenos:
+
+    @Retention({policy: "RUNTIME"})
+    @interface MyAnno {} // this annotation uses "RUNTIME" policy
+
+    @MyAnno // 
+    class C {}
+
+The value of this field determine at which point an annotation is used
+and is discarded after use.
+There are three types of retention policies: "SOURCE", "BYTECODE, "RUNTIME":
+
+- annotations that use "SOURCE" policy
+  are processed in compile-time and discarded after compilation;
+
+- metadata specified in annotations that use
+  "BYTECODE" policy is saved into bytecode file,
+  but are discarded during runtime.
+
+- metadata specified in annotations that use
+  "RUNTIME" policy is saved into bytecode file,
+  retained during runtime and can be accessed during runtime.
+
+"BYTECODE" is the default retention policy.
+
+A :index:`compile-time error` occurs if any other string literal is used as
+the value of ``policy`` field.
+
+As ``@Retention`` has a single field, it can be used with a short notation
+(see :ref:`Using Single Field Annotations`):
+
+.. code-block:: typescript
+   :linenos:
+
+    @Retention("SOURCE")
+    @interface Author {name: string} // this annotation uses "SOURCE" policy
+
 
 .. raw:: pdf
 

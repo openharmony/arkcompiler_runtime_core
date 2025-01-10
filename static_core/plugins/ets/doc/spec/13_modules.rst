@@ -10,10 +10,10 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-.. _Modules and Compilation Units:
+.. _Compilation Units:
 
-Compilation Units, Packages, and Modules
-########################################
+Compilation Units
+#################
 
 .. meta:
     frontend_status: Done
@@ -710,15 +710,8 @@ accordance to :ref:`Distinguishable Declarations`.
 .. code-block:: typescript
    :linenos:
 
-    function main() {
-
-      let myException = new Exception { ... }
-        // class 'Exception' is defined in the standard library
-
-      console.log("Hello")
-        // variable 'console' is defined in the standard library too
-
-    }
+    console.log("Hello, world!")
+        // variable 'console' is defined in the standard library
     
 .. index::
    compilation unit
@@ -1086,7 +1079,8 @@ An example of usage is presented below:
     namespace A {
         export function goo() {
             A.foo() // calls exported foo()
-            foo()   // calls non-exported foo()
+            foo()   /* calls exported foo() as well as all A namespace
+                       declarations are merged into one */
             A.C.moo()
         }
         //export function foo() {  }
@@ -1544,15 +1538,15 @@ A program exit takes place when:
 
 - All top-level statements (for separate modules) and statements of the entry
   point function body, if any, complete normally.
-- An unhandled error or exception (see :ref:`Error Handling`, :ref:`Exceptions`)
-  occurs during the program execution.
+- An unhandled error (see :ref:`Error Handling`) occurs during the program
+  execution.
 
 In both cases, the control is transferred to the |LANG| runtime system, which
 ensures that all coroutines (see :ref:`Coroutines`) created during the program
 execution are terminated.
 
-If an unhandled error or exception occur, then proper diagnostics is displayed.
-This is the end of the program exit process.
+If an error occurs, then proper diagnostics is displayed. This is the end of
+the program exit process.
 
 .. index::
    exit
@@ -1562,8 +1556,6 @@ This is the end of the program exit process.
    normal completion
    control
    module
-   error
-   exception
    runtime system
    coroutine
 

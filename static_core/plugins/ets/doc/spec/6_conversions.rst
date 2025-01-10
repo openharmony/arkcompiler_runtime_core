@@ -1344,23 +1344,9 @@ Contravariance and covariance are discussed in detail in
     let foo5: (p: Base) => void = (p?: Base): void => {}
      /* Compile-time error: as Base|undefined is not compatible with Base */
 
-A *throwing function* type variable can have a *non-throwing function* value.
 
-.. code-block:: typescript
-   :linenos:
-
-    let foo: () => void throws = (): void => {} // OK
-
-A :index:`compile-time error` occurs if a *throwing function* value is assigned
-to a *non-throwing function* type variable.
-
-.. code-block:: typescript
-   :linenos:
-
-    let foo: () => void = (): void throws => {} // Compile-time error
-
-In addition a function type with less parameters is compatible with another
-function type with more parameters.
+A function type with less parameters is compatible with another function type
+with more parameters.
 
 .. code-block:: typescript
    :linenos:
@@ -1383,9 +1369,7 @@ compile-time error:
     }
 
 .. index::
-   throwing function
    variable
-   non-throwing function
    compile-time error
    assignment
 
@@ -1471,10 +1455,11 @@ Constant to Enumeration Conversions
 .. meta:
     frontend_status: None
 
-A constant value of some integer type is converted to *enumeration* type if:
+A constant expression of some integer type is converted to *enumeration* type if:
 
 -  Enumeration constants are of type ``int``;
--  Value is equal to the value of one of the enumeration type constants.
+-  Value of the constant expression is equal to the value of one of the
+   enumeration type constants.
 
 This conversion never causes runtime errors.
 
@@ -1488,6 +1473,16 @@ This conversion never causes runtime errors.
     const one = 2
     e = one // ok, e is set to IntegerEnum.c
 
+Similar conversion of a string type expression is not supported as it is not
+part of |TS|.
+
+.. code-block:: typescript
+   :linenos:
+
+    enum StringEnum {"a", "b", "c"}
+    let incorrect: StringEnum = "b" // compile-time error
+    let correct: StringEnum = StringEnum.b // OK
+   
 
 |
 

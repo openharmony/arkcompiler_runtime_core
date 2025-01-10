@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -949,8 +949,8 @@ Record Utility Type
 Type ``Record<K, V>`` constructs a container that maps keys (of type ``K``)
 to values of type ``V``.
 
-Type ``K`` is restricted to numeric types (see :ref:`Numeric Types`). Type
-``string``, string literal types, and union types are constructed from these
+Type ``K`` is restricted to numeric types (see :ref:`Numeric Types`), type
+``string``, string literal types, and union types constructed from these
 types.
 
 A :index:`compile-time error` occurs if any other type, or literal of any other
@@ -973,10 +973,12 @@ type is used in place of this type:
 .. code-block:: typescript
    :linenos:
 
-    type R1 = Record<number, string>   // ok
-    type R2 = Record<boolean, string>  // compile-time error
-    type R3 = Record<"salary" | "bonus", number> // ok
-    type R4 = Record<"salary" | boolean, number> // compile-time error
+    type R1 = Record<number, Object>             // ok
+    type R2 = Record<boolean, Object>            // compile-time error
+    type R3 = Record<"salary" | "bonus", Object> // ok
+    type R4 = Record<"salary" | boolean, Object> // compile-time error
+    type R5 = Record<"salary" | number, Object>  // ok
+    type R6 = Record<string | number, Object>    // ok
 
 Type ``V`` has no restrictions.
 

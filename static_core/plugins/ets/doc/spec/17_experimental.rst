@@ -79,18 +79,6 @@ with ``enums``.
    inheritance
    derived class
 
-Section :ref:`Exceptions` discusses the powerful, commonly used mechanism for
-the processing of various kinds of unexpected events and situations that break
-the *ordinary* program logic. There are constructs to raise (*throw*)
-exceptions, *catch* them along the dynamic sequence of function calls, and
-handle them. Some support for exceptions is also provided by the classes from
-the standard library (see :ref:`Standard Library`).
-
-**Note**. The exceptions mechanism is sometimes deprecated for being too
-time-consuming and unsafe. Some modern languages do not support the
-exceptions mechanism as discussed in this section. That is why the expediency
-of adding this feature to the language is still under discussion.
-
 The |LANG| language supports writing concurrent applications in the form of
 *coroutines* (see :ref:`Coroutines`) that allow executing functions
 concurrently, while the *channels* through which the coroutines can produce
@@ -102,7 +90,6 @@ to its declaration. In addition, any function---or lambda expression---can be
 launched as a separate thread explicitly by using the launch expression.
 
 .. index::
-   exception
    construct
    coroutine
    channel
@@ -254,6 +241,63 @@ parts of the |LANG| standard library (see :ref:`Standard Library`).
    constructor
    method
    constant
+
+|
+
+.. _Fixed Array Types:
+
+Fixed Array Types
+*****************
+
+.. meta:
+    frontend_status: Partly
+
+*Fixed array type* is the built-in type characterized by the following:
+
+-  Any object of array type contains elements, the number of elements 
+   is known as *array length*;
+-  Array length is non-negative integer number;   
+-  Array length is set once at runtime and can not be changed after that;   
+-  Array element are accessed by index, which is integer number
+   starting from *0* to *array length minus 1*;
+-  Accessing an element by its index is a constant-time operation;
+-  If passed to non-|LANG| environment, an array is represented as a contiguous
+   memory location;
+-  Type of each array elements is compatible with the element type specified
+   in the array declaration (see :ref:`Type Compatibility`).
+
+Differences between *fixed arrays* and *arrays* 
+
+- the length of *fixed array* is set once, it can lead to better performance;
+- there is no methods defined for *fixed arrays*;
+- *arrays* and *fixed arrays* are not compatible.
+
+*Fixed array* can be created using :ref:`Array Literal`
+or :ref:`Array Creation Expressions`.
+
+
+The examples are presented below:
+
+.. code-block:: typescript
+   :linenos:
+
+    let a : FixedArray<number> = [1, 2, 3] 
+      /* allocate array with 3 elements of type number */
+    a[1] = 7 /* put 7 as the 2nd element of the array, index of this element is 1 */
+    let y = a[2] /* get the last element of array 'a' */
+    let count = a.length // get the number of array elements
+    y = a[3] // Will lead to runtime error - attempt to access non-existing array element
+
+.. index::
+   fixed array type
+   fixed array
+   integer
+   array element
+   element type
+   access
+
+
+TBD: example for incompatibility between array and fixed array.
 
 |
 
@@ -828,8 +872,7 @@ Callable Types with ``$_instantiate`` Method
 ============================================
 
 .. meta:
-    frontend_status: Partly
-    todo: es2panda segfaults on the first example
+    frontend_status: Done
 
 The method ``$_instantiate`` can have an arbitrary signature by itself.
 If it is to be used in a *type call expression*, then its first parameter
@@ -942,161 +985,6 @@ An explicit type annotation is allowed for a *for-variable*:
 
 |
 
-.. _Multiple Catch Clauses in Try Statements:
-
-Multiple Catch Clauses in Try Statements
-========================================
-
-.. meta:
-    frontend_status: Done
-
-When an exception or an error is thrown in the ``try`` block
-(see :ref:`try Statements`), or in a
-*throwing* or *rethrowing* function (see :ref:`Throwing Functions` and
-:ref:`Rethrowing Functions`) called from the ``try`` block, the control is
-transferred to the first ``catch`` clause if the statement has at least one
-``catch`` clause that can catch that exception or error. If no ``catch``
-clause is found, then exception or error is propagated to the surrounding
-scope.
-
-**Note**. An exception handled within a *non-throwing* function (see
-:ref:`Non-Throwing Functions`) is never propagated outside that function.
-
-A ``catch`` clause has two parts:
-
--  Exception parameter that provides access to the object associated
-   with the exception or the error occurred; and
-
--  Block of code that is to handle the situation.
-
-.. index::
-   exception
-   error
-   throwing function
-   rethrowing function
-   non-throwing function
-   try block
-   try statement
-   propagation
-   scope
-   catch clause
-   propagation
-   exception parameter
-   access
-
-*Default catch clause* is a ``catch`` clause with the exception parameter type
-omitted. Such a ``catch`` clause handles any exception or error that is not
-handled by any previous clause. The type of that parameter is union
-``Exception`` | ``Error``.
-
-A :index:`compile-time error` occurs if:
-
--  Default ``catch`` clause is not the last ``catch`` clause in a
-   ``try`` statement.
-
--  Type reference of an exception parameter (if any) is neither the
-   class ``Exception`` or ``Error``, nor a class derived from ``Exception`` or
-   ``Error``.
-
-.. index::
-   catch clause
-   default catch clause
-   exception
-   parameter type
-   union
-   try statement
-   type reference
-   error
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-      class ZeroDivisorException extends Exception {}
-
-      function divide(a: int, b: int): int throws {
-        if (b == 0) throw new ZeroDivisorException()
-        return a / b
-      }
-
-      function process(a: int; b: int) {
-        try {
-          let res = divide(a, b)
-
-          // Division successful, further processing ...
-        }
-        catch (d: ZeroDivisorException) {
-          // Handle zero division situation
-        }
-        catch (e) { // type of 'e' is Error|Exception
-          // Handle all other errors or exceptions
-        }
-      }
-
-All exceptions that the ``try`` block can throw are caught by the function
-*process*. Special handling is provided for the ``ZeroDivisor`` exception,
-and the handling of other exceptions and errors is different.
-
-``Catch`` clauses do not handle every possible exception or error that can
-be thrown by the code in the ``try`` block. If no ``catch`` clause can handle
-the situation, then exception or error is propagated to the surrounding scope.
-
-**Note**. If a ``try`` statement (*default catch clause*) is placed inside a
-*non-throwing* function (see :ref:`Non-Throwing Functions`), then exception
-is never propagated.
-
-.. index::
-   exception
-   try block
-   exception
-   propagation
-   try statement
-   default catch clause
-   non-throwing function
-
-If a ``catch`` clause contains a block that corresponds to a parameter of the
-error, then it can only handle that error.
-
-The type of the ``catch`` clause parameter in a *default catch clause* is
-omitted. The ``catch`` clause can handle any exceptions or errors unhandled
-by the previous clauses.
-
-The type of a ``catch`` clause parameter (if any) must be of the class
-``Error`` or ``Exception``, or of another class derived from ``Exception``
-or ``Error``.
-
-.. index::
-   exception
-   error
-   catch clause
-   default catch clause
-   derived class
-   Error
-   Exception
-
-.. code-block:: typescript
-   :linenos:
-
-        function process(a: int; b: int): int {
-        try {
-          return a / b
-        }
-        catch (x: DivideByZeroError) { return MaxInt }
-      }
-
-A ``catch`` clause handles the ``DivideByZeroError`` at runtime. Other errors
-are propagated to the surrounding scope if no ``catch`` clause is found.
-
-.. index::
-   catch clause
-   runtime
-   error
-   propagation
-   scope
-
-|
-
 .. _Function, Method and Constructor Overloading:
 
 Function, Method and Constructor Overloading
@@ -1141,10 +1029,9 @@ same name but different signatures that are not *overload-equivalent* (see
 Function overloading declarations cause no :index:`compile-time error` on their
 own.
 
-No specific relationship is required between the return types, or between the
-``throws`` clauses of the two functions with the same name but different
-signatures that are not *overload-equivalent* (see
-:ref:`Overload-Equivalent Signatures`).
+No specific relationship is required between the return types of the two
+functions with the same name but different signatures that are not
+*overload-equivalent* (see :ref:`Overload-Equivalent Signatures`).
 
 When calling an overloaded function, the number of actual arguments (and any
 explicit type arguments) and compile-time argument types are used at compile
@@ -1160,7 +1047,6 @@ time to determine exactly which one is to be called (see
    overload-equivalent signature
    overloaded function name
    return type
-   throws clause
    argument
    type argument
    function call
@@ -1215,8 +1101,7 @@ interface:
 
 If the signatures of two or more methods with the same name are not
 *overload-equivalent* (see :ref:`Overload-Equivalent Signatures`), then the
-return types of those methods, or the ``throws`` or ``rethrows`` clauses of
-those methods can have any kind of relationship.
+return types of those methods can have any kind of relationship.
 
 When calling an overloaded method, the number of actual arguments (and any
 explicit type arguments) and compile-time argument types are used at compile
@@ -1227,8 +1112,6 @@ time to determine exactly which one is to be called (see
    signature
    overload-equivalent signature
    overload equivalence
-   throws clause
-   rethrows clause
    type argument
    argument type
    method call
@@ -1533,7 +1416,7 @@ Adding Functionality to Existing Types
 **************************************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 |LANG| supports adding functions and accessors to already defined types. The
 usage of functions so added looks the same as if they are methods and accessors
@@ -1800,7 +1683,7 @@ Function Types with Receiver
 ============================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 A *function type with receiver* specifies the signature of a function or lambda
 with receiver. It is almost the same as a *function type* (see :ref:`Function Types`),
@@ -1810,7 +1693,7 @@ as its name:
 .. code-block:: abnf
 
     functionTypeWithReceiver:
-        '(' receiverParameter (',' ftParameterList)? ')' ftReturnType 'throws'?
+        '(' receiverParameter (',' ftParameterList)? ')' ftReturnType 
         ;
 
 The type of a *receiver parameter* is called the *receiver type* (see
@@ -1845,8 +1728,8 @@ is applied to *function type with receiver*, and parameter names are ignored.
       type F1 = (this: A) => boolean
       type F2 = (a: A) => boolean
 
-      function foo(this: A) => boolean {}
-      function goo(a: A) => boolean {}
+      function foo(this: A): boolean {}
+      function goo(a: A): boolean {}
 
       let f1: F1 = foo // ok
       f1 = goo // ok
@@ -1877,7 +1760,7 @@ Lambda Expressions with Receiver
 ================================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 *Lambda expression with receiver* defines an instance of a *function type with
 receiver* (see :ref:`Function Types with Receiver`). It looks almost the same
@@ -1902,11 +1785,11 @@ It corresponds to the first parameter:
 
       class A { name = "Bob" }
 
-      let show = (this: a): void {
+      let show = (this: A): void {
           console.log(this.name)
       }
 
-The use of lambada is illustrated by the example below:
+The use of lambda is illustrated by the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -1927,6 +1810,24 @@ The use of lambada is illustrated by the example below:
       let aa: A[] = [new A("aa"), new A("bb")]
       foo(aa, (this: A) => { console.log(this.name)} ) // output: "aa" "bb"
 
+
+**Note**. If *lambda expression with reciever* is declared in a class or
+inteface, then the use of ``this`` in a lambda body always refers to the first
+lambda parameter, but not to ``this`` of the surrounding class or interface.
+
+.. code-block:: typescript
+   :linenos:
+
+      class B {
+        foo() { console.log ("foo() from B is called") }
+      }
+      class A {
+        lambda = (this: B): void => { this.foo() }
+        foo() { console.log ("foo() from A is called") }
+      }
+      new A().new B().lambda() // Output is 'foo() from B is called'
+
+
 |
 
 .. _Implicit this in Lambda with Receiver Body:
@@ -1935,23 +1836,25 @@ Implicit ``this`` in Lambda with Receiver Body
 ==============================================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
-Implicit ``this`` can be used in *lambada expression with receiver* body when
+Implicit ``this`` can be used in the body of *lambda expression with receiver*
+when accessing the following:
 
-- calling methods of lambda receiver type
-- calling functions with receiver of the same
-  receiver type (see :ref:`Receiver Type`).
+- Instance methods, fields, and accessories of lambda receiver type (see
+  :ref:`Receiver Type`); or
+- Functions with receiver (see :ref:`Functions with Receiver`) of the same
+  receiver type.
 
-In other words ``this.`` prefix can be omitted in such cases.
-TBD: fields and properties?
-
-It is illustrated by the examples below:
+In other words, prefix ``this.`` in such cases can be omitted. This feature
+is added to |LANG| to improve DSL support. It is illustrated by the following
+examples:
 
 .. code-block:: typescript
    :linenos:
 
      class C {
+       name: string = ""
        foo(): void {}
      }
 
@@ -1959,14 +1862,15 @@ It is illustrated by the examples below:
 
      process(
         (this: C): void => {
-            this.foo() // ok - normal call
-            foo()      // ok - implicit 'this'
+            this.foo()   // ok - normal call
+            foo()        // ok - implicit 'this'
+            name = "Bob" // ok - implicit 'this'
         }
      )
 
 The same applies if *lambda expression with receiver* is defined as
-*trailing lambda* (see :ref:`Trailing Lambdas`).
-The lambda signature is inferred in this case from the context:
+*trailing lambda* (see :ref:`Trailing Lambdas`). In this case, lambda signature
+is inferred from the context:
 
 .. code-block:: typescript
    :linenos:
@@ -1976,7 +1880,7 @@ The lambda signature is inferred in this case from the context:
         foo()      // ok - implicit 'this'
      }
 
-This example illustrates using implicit ``this`` when calling a function
+The example above represents the use of implicit ``this`` when calling a function
 with receiver:
 
 .. code-block:: typescript
@@ -1989,6 +1893,11 @@ with receiver:
         bar()      // ok -  implicit 'this'
         otherBar() // compile-time error, wrong type of implicit 'this'
      }
+
+If a simple name used in a lambda body can be resolved as instance method,
+field or accessor of the reciever type and as another entity in the current
+scope at the same time, then a :index:`compile-time error` occurs to prevent
+ambiguity and improve readability.
 
 |
 
@@ -2083,12 +1992,12 @@ argument (see :ref:`Optional Parameters`).
       // method 'foo' is called with 'p' parameter set to 'undefined'
       // ';' allows to specify explicitly that '{' starts the block
 
-      function bar(f: ()=>void) { ... }
+      function bar(f?: ()=>void) { ... }
 
       bar() { console.log ("function lambda argument is activated") }
       // function 'bar' receives last argument as an inline lambda,
       bar(); { console.log ("that is the block code") }
-      // function 'bar' is called with 'p' parameter set to 'undefined'
+      // function 'bar' is called with 'f' parameter set to 'undefined'
 
 .. code-block:: typescript
    :linenos:
@@ -2203,334 +2112,53 @@ There are additional methods for instances of any enumeration type:
    type int
    type string
 
+
 |
 
-.. _Exceptions:
+.. _Errors and Initialization Expression:
 
-Exceptions
-**********
+Errors and Initialization Expression
+====================================
 
 .. meta:
     frontend_status: Done
 
-``Exception`` is the base class of all exceptions. ``Exception`` is used to
-define a new exception, or any class derived from the ``Exception`` as the
-base of a class:
+If code of an *initialization expression* of *variable declaration* (see
+:ref:`Variable Declarations`) or a *constant declaration* (see
+:ref:`Constant Declarations`) or *class field initializer* (see
+:ref:`Field Initialization`) contains unhandled ``throw`` statement (see
+:ref:`Throw Statements`) then the program terminates (see :ref:`Program Exit`).
+
+Examples of such situations are below:
 
 .. code-block:: typescript
    :linenos:
 
-      class MyException extends Exception { ... }
+    const const_decl = foo(true)
+    class A {
+        field_decl = foo(false)
+    }
 
-.. index::
-   exception
-   base class
-   Exception
 
-A :index:`compile-time error` occurs if a generic class is a direct or
-indirect subclass of ``Exception``.
+    function foo(toggle: boolean) {
+        if (toggle)
+            throw new Error // No surrounding 'try'
+        return true
+    }
 
-An exception is thrown explicitly with the ``throw`` statement.
 
-When an exception is thrown, the surrounding piece of code is to handle it by
-correcting the problem, trying an alternative approach, or informing the user.
-
-An exception can  be  processed in two ways:
-
--  Propagating the exception from a function to the code that calls that
-   function (see :ref:`Throwing Functions`);
-
--  Using a ``try`` statement to handle the exception (see :ref:`Try Statements`).
-
-.. index::
-   exception
-   base class
-   Exception
-   try statement
-   throw statement
-   propagation
-   function
-   throwing function
-   function call
-
-|
-
-.. _Throwing Functions:
-
-Throwing Functions
-==================
-
-.. meta:
-    frontend_status: Done
-
-The keyword ``throws`` is used at the end of a signature to indicate that a
-function (this notion here includes methods, constructors, or lambdas) can
-throw an exception. A function ending with ``throws`` is called a
-*throwing function*. The function type can also be marked as ``throws``:
-
-.. index::
-   keyword throws
-   throwing function
-   signature
-   method
-   constructor
-   lambda
-   function
-   exception
-   function type
-   throws mark
-
-.. code-block:: typescript
-   :linenos:
-
-      function canThrow(x: int): int throws { ... }
-
-A *throwing function* can propagate exceptions to the scope from which
-it is called. The propagation of an *exception* occurs if:
-
--  The call of a *throwing function* is not enclosed in a ``try`` statement; or
--  The enclosed ``try`` statement does not contain a clause that can catch the
-   exception.
-
-In the example below, the function call is not enclosed in a ``try``
-statement; any exception raised by ``canThrow`` function is propagated:
-
-.. index::
-   throwing function
-   propagation
-   exception
-   scope
-   function call
-   try statement
-
-.. code-block:: typescript
-   :linenos:
-
-      function propagate1(x: int): int throws {
-        return y = canThrow(x) // exception is propagated
-      }
-
-In the example below, the ``try`` statement can catch only ``this`` exceptions.
-Any exception raised by ``canThrow`` function---except for ``MyException``
-itself, and any exception derived from ``MyException``---is propagated:
-
-.. index::
-   try statement
-   this
-   exception
-   propagation
-
-.. code-block:: typescript
-   :linenos:
-
-      function propagate2(x: int): int throws {
-        try {
-          return y = canThrow(x) //
-        }
-        catch (e: MyException) /*process*/ }
-          return 0
-      }
-
-|
-
-.. _Non-Throwing Functions:
-
-Non-Throwing Functions
-======================
-
-.. meta:
-    frontend_status: Done
-
-A *non-throwing function* is a function (this notion here includes methods,
-constructors, or lambdas) not marked as ``throws``. Any exceptions inside a
-*non-throwing function* must be handled inside the function.
-
-A :index:`compile-time error` occurs if not **all** of the following
-requirements are met:
-
--  The call of a *throwing function* is enclosed in a ``try`` statement;
--  The enclosing ``try`` statement has a default ``catch`` clause.
-
-.. index::
-   non-throwing function
-   throwing function
-   function
-   method
-   constructor
-   lambda
-   throws mark
-   try statement
-   catch clause
-
-.. code-block-meta:
-   expect-cte:
-
-.. code-block:: typescript
-   :linenos:
-
-      // non-throwing function
-      function cannotThrow(x: int): int {
-        return y = canThrow(x) // compile-time error
-      }
-
-      function cannotThrow(x: int): int {
-        try {
-          return y = canThrow(x) //
-        }
-        catch (e: MyException) { /* process */ }
-        // compile-time error – default catch clause is required
-      }
-
-|
-
-.. _Rethrowing Functions:
-
-Rethrowing Functions
-====================
-
-.. meta:
-    frontend_status: Done
-
-A *rethrowing function* is a function that accepts a *throwing function* as a
-parameter, and is marked with the keyword ``rethrows``.
-
-The body of such function must not contain any ``throw`` statement that is
-not handled by a ``try`` statement within that body. A function with unhandled
-``throw`` statements must be marked with the keyword ``throws`` but not
-``rethrows``.
-
-.. index::
-   rethrowing function
-   throwing function
-   non-throwing function
-   function parameter
-   keyword throws
-   keyword rethrows
-   try statement
-   throw statement
-
-Both a *throwing* and a *non-throwing* function can be an argument of a
-*rethrowing function* ``foo`` that is being called.
-
-If a *throwing function* is an argument, then the calling of ``foo`` can
-throw an exception.
-
-This rule is exception-free, i.e., a *non-throwing* function used as a call
-argument cannot throw an exception:
-
-.. code-block:: typescript
-   :linenos:
-
-        function foo (action: () throws) rethrows {
-        action()
-      }
-
-      function canThrow() {
-        /* body */
-      }
-
-      function cannotThrow() {
-        /* body */
-      }
-
-      // calling rethrowing function:
-        foo(canThrow) // exception can be thrown
-        foo(cannotThrow) // exception-free
-
-A call is exception-free if:
-
--  Function ``foo`` has several parameters of a function type marked
-   with ``throws``; and
--  All actual arguments of the call to ``foo`` are non-throwing.
-
-However, the call can raise an exception, and is handled as any other
-*throwing function* call if at least one of the actual function arguments
-is *throwing*. It implies that a call to ``foo`` within the body of a
-*non-throwing* function must be guaranteed with a ``try-catch`` statement:
-
-.. index::
-   function
-   exception-free call
-   function type parameter
-   throws mark
-   throwing function
-   non-throwing function
-   try-catch statement
-
-.. code-block:: typescript
-   :linenos:
-
-      function mayThrowContext() throws {
-        // calling rethrowing function:
-        foo(canThrow) // exception can be thrown
-        foo(cannotThrow) // exception-free
-      }
-
-      function neverThrowsContext() {
-        try {
-          // calling rethrowing function:
-          foo(canThrow) // exception can be thrown
-          foo(cannotThrow) // exception-free
-        }
-        catch (e) {
-          // To handle the situation
-        }
-      }
-
-|
-
-.. _Exceptions and Initialization Expression:
-
-Exceptions and Initialization Expression
-========================================
-
-.. meta:
-    frontend_status: Done
-
-A *variable declaration* (see :ref:`Variable Declarations`) or a *constant
-declaration* (see :ref:`Constant Declarations`) expression used to initialize
-a variable or constant must not have calls to functions that can *throw* or
-*rethrow* exceptions if the declaration is not within a statement that handles
-all exceptions.
-
-See :ref:`Throwing Functions` and :ref:`Rethrowing Functions` for details.
 
 .. index::
    variable declaration
-   exception
    initialization expression
    constant declaration
+   field initializer
    expression
    initialization
    variable
    constant
    function call
-   throw exception
-   rethrow exception
    statement
-   throwing function
-   rethrowing function
-
-|
-
-.. _Exceptions and Errors Inside Field Initializers:
-
-Exceptions and Errors Inside Field Initializers
-===============================================
-
-.. meta:
-    frontend_status: Done
-
-Class field initializers cannot call *throwing* or *rethrowing* functions.
-
-See :ref:`Throwing Functions` and :ref:`Rethrowing Functions` for details.
-
-.. index::
-   exception
-   error
-   field initializer
-   throwing function
-   rethrowing function
 
 |
 
@@ -2772,36 +2400,6 @@ The methods are used as follows:
 
 |
 
-.. _Structured Coroutines:
-
-Structured Coroutines
-=====================
-
-.. meta:
-    frontend_status: None
-
-|
-
-.. _Channels Classes:
-
-Channels Classes
-================
-
-.. meta:
-    frontend_status: None
-
-*Channels* are used to send data between coroutines.
-
-*Channels classes* are a part of the coroutine-related package of the
-standard library (see :ref:`Standard Library`).
-
-.. index::
-   channel class
-   coroutine
-   package
-
-|
-
 Async Functions and Methods
 ***************************
 
@@ -2915,7 +2513,6 @@ object of type ``DynamicObject`` are handled by the compiler in a special manner
 .. index::
    interface
    interoperability
-   dynamic import
    interface
    wrapper
    access
@@ -2966,7 +2563,6 @@ The wrapper can raise an error if:
 
 .. index::
    wrapper
-   dynamic import
    underlying object
    field access
    field access expression
@@ -3013,7 +2609,6 @@ The wrapper must raise an error if:
    DynamicObject
    wrapper
    method
-   dynamic import
    field access
    property
    instance
@@ -3297,7 +2892,7 @@ Package Initializer
 ===================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Partly
 
 Among all *package modules* there can be one to contain a code that performs
 initialization actions (e.g., setting initial values for variables across all

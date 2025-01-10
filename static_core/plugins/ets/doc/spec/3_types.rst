@@ -920,8 +920,6 @@ used to create ``bigint`` values from numeric types.
    integer type
    floating-point type
    numeric type
-   exception
-   floating-point type
    assignment
    variable
    double
@@ -1336,7 +1334,7 @@ Type ``never`` is compatible (see :ref:`Type Compatibility`) with any other type
 Type ``never`` has no instance. Type ``never`` is used as one of the following:
 
 - Return type for functions or methods that never return a value, but
-  throw an error or an exception when completing an operation.
+  throw an error when completing an operation.
 - Type of variables that can never be assigned.
 - Type of parameters of a function or a method to prevent the body of that
   function or method from being executed.
@@ -1363,7 +1361,6 @@ Type ``never`` has no instance. Type ``never`` is used as one of the following:
    method
    error
    throw
-   exception
    variable
    assignment
    parameter
@@ -1413,6 +1410,9 @@ A :index:`compile-time error` occurs if:
     function foo (): void {}
     let y = foo()  // compile-time error - void used as a value
 
+    type ErroneousType = void | number 
+         // compile-time error - void used as type annotation
+
 .. index::
    type void
    instance
@@ -1456,40 +1456,50 @@ Array Types
 ===========
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
 *Array type* is the built-in type characterized by the following:
 
--  Any object of array type contains elements indexed by integer position
-   starting from *0*;
--  Access to any array element is performed at the same time;
+-  Any object of array type contains elements, the number of elements 
+   is known as *array length*;
+-  Array length is non-negative integer number;   
+-  Array length can be set and changed at runtime;   
+-  Array element are accessed by index, which is integer number
+   starting from *0* to *array length minus 1*;
+-  Accessing an element by its index is a constant-time operation;
 -  If passed to non-|LANG| environment, an array is represented as a contiguous
    memory location;
--  Types of all array elements are upper-bounded by the element type specified
-   in the array declaration.
+-  Type of each array elements is compatible with the element type specified
+   in the array declaration (see :ref:`Type Compatibility`).
 
 .. index::
    array type
    integer
    array element
-   upper-bounded type
    element type
    array declaration
    access
    array
 
-Two basic operations with array elements take elements out of, and put
-elements into an array by using the operator '``[]``' and index expression.
 
-The number of elements in an array can be obtained by accessing the field
-``length``. Setting a new value of this field allows shrinking the array by
-reducing the number of its elements. Attempting to increase the length of the
-array causes a :index:`compile-time error` (if the compiler has the information
-sufficient to determine this) or a runtime error.
+There are two syntax forms of array type with elements of type ``T``:
 
-An example of syntax for built-in array type is presented below:
+- ``T[]``
+- ``Array<T>``
+
+The rule for the first form is
+
+.. code-block:: abnf
+
+    arrayType:
+       type '[' ']'
+       ;
+
+**Note**.  ``T[]`` and ``Array<T>`` specify identical (indistinguishable) type
+(see :ref:`Type Identity`).
 
 .. index::
+   type identity
    array element
    array
    index expression
@@ -1499,31 +1509,33 @@ An example of syntax for built-in array type is presented below:
    compiler
    runtime error
 
-.. code-block:: abnf
+Two basic operations with array elements take elements out of, and put
+elements into an array by using the operator '``[]``' and index expression.
 
-    arrayType:
-       type '[' ']'
-       ;
+The same syntax can be used to work with :ref:`Indexable Types`, 
+some of such types are parts of :ref:`Standard Library`.
 
-The family of array types that are parts of the standard library (see
-:ref:`Standard Library`), including all available operations, is described
-in the library documentation. It is common to these types that the operator
-'``[]``' can be applied to variables of all array types, and to their derived
-types.
+The number of elements in an array can be obtained by accessing the property
+``length``. 
 
-**Note**. Type ``T[]`` and type ``Array<T>`` are different types.
-Some methods defined for ``Array<T>`` (e.g., ``at``) can be used for ``T[]``,
-but only if those do not change the array length.
+The length of an array can be set and changed in runtime using methods defined
+in the standard library (see :ref:`Standard Library`).
+
+|LANG| also support special *fixed array types* (see :ref:`Fixed Array Types`).
+The length of *fixed array types* can be set once in runtime
+and cannot be changed after that.
+
+To provide better |TS| compatibility, |LANG| allows 
+to shrink the array by setting a new value to ``length`` 
+(new value must be less or equal to the previous length).
+Attempting to increase the length of the
+array by assignment to ``length`` causes a :index:`compile-time error`
+(if the compiler has the information
+sufficient to determine this) or a runtime error.
 
 .. index::
-   array type
-   variable
-   operator
-   reference type
    method
    array length
-   value type
-   derived type
    standard library
 
 The examples are presented below:
@@ -1536,9 +1548,11 @@ The examples are presented below:
     a[1] = 7 /* put 7 as the 2nd element of the array, index of this element is 1 */
     let y = a[4] /* get the last element of array 'a' */
     let count = a.length // get the number of array elements
-    a.length = 3
+    a.length = 3 // shrink array
     y = a[2] // OK, 2 is the index of the last element now
     y = a[3] // Will lead to runtime error - attempt to access non-existing array element
+    
+    let b: Array<number> = a // 'b' points to the same array as 'a'
 
 A type alias can set a name for an array type (see :ref:`Type Alias Declaration`):
 
@@ -1579,26 +1593,23 @@ Function Types
 A function type consists of the following:
 
 -  List of parameters (which can be empty);
--  Optional return type; and
--  Optional keyword ``throws``.
+-  Optional return type.
 
 .. index::
    array element
    type alias
    array type
    type Object
-   keyword throws
    function
    function type
    signature
    return type
    parameter
-   throws keyword
 
 .. code-block:: abnf
 
     functionType:
-        '(' ftParameterList? ')' ftReturnType 'throws'?
+        '(' ftParameterList? ')' ftReturnType
         ;
 
     ftParameterList:
@@ -1640,9 +1651,6 @@ A type alias can set a name for a *function type* (see
     type BinaryOp = (x: number, y: number) => number
     let op: BinaryOp
 
-A function type that contains the ``throws`` mark (see :ref:`Throwing Functions`)
-is the *throwing function type*.
-
 If a function type has the '``?``' mark for a parameter name, then this
 parameter and all parameters that follow (if any) are optional. Otherwise, a
 :index:`compile-time error` occurs. The actual type of the parameter is then a
@@ -1679,24 +1687,19 @@ default value.
        // Types of p1 and p2 are identical
     }
 
-All function types are subtypes of special type ``Function`` (see
-:ref:`Type Function`), which in turn is a subtype of ``Object`` (see
+All function types are subtypes of ``Object`` (see
 :ref:`Object Class Type`). More details on function types assignability are
 provided in :ref:`Assignment-like Contexts`, and conversions in
 :ref:`Function Types Conversions`.
 
 .. index::
    function type
-   throwing function type
    parameter name
    parameter type
    type undefined
    assignability
    context
    conversion
-   throwing function
-   throwing function type
-   throws mark
 
 |
 
@@ -2339,7 +2342,7 @@ Default Values for Types
 ************************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
 **Note**. This feature in |LANG| is experimental.
 
@@ -2350,8 +2353,7 @@ explicit initialization (see :ref:`Variable Declarations`):
 
 - Primitive types (see the table below);
 - Literal types;
-- All union types that have at least one nullish (see :ref:`Nullish Types`)
-  value, and use an appropriate nullish value as default (see the table below).
+- All union types that have at least one ``undefined``.
 
 .. -  Nullable reference types with the default value *null* (see :ref:`Literals`).
 
@@ -2412,17 +2414,7 @@ Default values of literal types are literals of such types:
         // Output: string literal null undefined 
     }
 
-Default values of nullish union types are as follows:
-
-+----------------------+--------------------+
-|    Data Type         |   Default Value    |
-+======================+====================+
-| ``type | null``      | ``null``           |
-+----------------------+--------------------+
-| ``type | undefined`` | ``undefined``      |
-+----------------------+--------------------+
-| ``null | undefined`` | ``undefined``      |
-+----------------------+--------------------+
+The default value of a union type that contains type ``undefined`` is ``undefined``.
 
 .. code-block-meta:
 
@@ -2430,13 +2422,12 @@ Default values of nullish union types are as follows:
    :linenos:
 
    class A {
-     f1: number|null
-     f2: string|undefined
-     f3?: boolean
+     f1: string|undefined
+     f2?: boolean
    }
    let a = new A()
-   console.log (a.f1, a.f2, a.f3)
-   // Output: null, undefined, undefined
+   console.log (a.f1, a.f2)
+   // Output: undefined, undefined
 
 .. index::
    number

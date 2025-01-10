@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -23,6 +23,13 @@ document. The description of the rules is more or less informal. Some details
 are omitted to simplify the understanding.
 
 |
+
+.. _Type Identity:
+
+Type Identity
+*************
+
+WIP
 
 .. _Subtyping:
 
@@ -242,7 +249,7 @@ If class ``Base`` is defined as follows:
       // covariance for the return type: Derived is a subtype of Base
       override method_two(p: Derived): Derived {}
 
-      // contravariance for parameter types: Base is a super type for Derived
+      // contravariance for parameter types: Base is a supertype for Derived
       override method_three(p: Base): Derived {}
    }
 
@@ -577,7 +584,7 @@ parameters are *overload-equivalent* if:
 
 -  Parameter type at some position in *S*:sub:`1` is a *type parameter*
    (see :ref:`Type Parameters`), and a parameter type at the same position
-   in *S*:sub:`2` is any reference type or type parameter;
+   in *S*:sub:`2` is any reference non-generic type or type parameter;
 
 -  Parameter type at some position in *S*:sub:`1` is *generic type*
    ``G`` <``T``:sub:`1`, ``...``, ``T``:sub:`n`>, and a parameter type at the
@@ -665,6 +672,13 @@ Signatures in the following series are not *overload-equivalent*:
    class B extends A { /*body*/}
    (x: A): void
    (y: B): void
+
+   class A<T> {
+       foo(p: T) {}
+       foo(p: T[]) {}
+       foo(p: A<T>) {}
+   }
+
 
 |
 
@@ -1412,7 +1426,7 @@ occurs. Examples of error cases are presented below:
 .. _Initializer Block:
 
 Initializer Block
-***********************
+*****************
 
 .. meta:
     frontend_status: None
@@ -1431,13 +1445,38 @@ The appropriate syntax is presented below:
           'static' block
           ;
 
-A :index:`compile-time error` occurs if an *initializer block* contains the
-following:
+A :index:`compile-time error` occurs if an *initializer block* contains a
+``return <expression>`` statement (see :ref:`Return Statements`).
 
--  A ``return <expression>`` statement (see :ref:`Return Statements`).
--  A ``throw`` statement (see :ref:`Throw Statements`) without a surrounding
-   ``try`` statement (see :ref:`Try Statements`) to handle the error or
-   exception.
+
+If code of an *initializer block* contains unhandled ``throw`` statement
+(see :ref:`Throw Statements`) then the program terminates (see
+:ref:`Program Exit`).
+
+Examples of such situations are below:
+
+.. code-block:: typescript
+   :linenos:
+
+    static {
+
+        throw new Error // No surrounding 'try'
+
+        try { throw new Error }  // 'try' has no catch
+        finally {}
+
+        try { throw new Error }
+        catch (e) { throw new Error } // No surrounding 'try' in 'catch'
+
+        foo () // Function call throws an error
+
+    }
+
+    function foo() {
+        throw new Error // No surrounding 'try'
+    }
+
+
 
 |
 

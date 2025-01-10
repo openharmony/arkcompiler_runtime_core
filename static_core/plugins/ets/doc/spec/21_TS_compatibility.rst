@@ -308,44 +308,45 @@ Class Fields While Inheriting
 *****************************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: None
 
-|TS| allows overriding class fields with the field in the subclass with
-the invariant or covariant type, and potentially with a new initial value.
+|TS| allows overriding a class field with a field in a subclass of invariant
+or covariant type.
+|LANG| supports overriding a class field with a field in a subclass of invariant
+type only.
+In both languages, an overriding field can have a new initial value.
 
-|LANG| supports shadowing if a new field in a subclass is just a physically
-different field with the same name.
-
-As a result, the number of fields in a derived object, and the semantics of
-``super`` can be different. Trying to access ``super.field_name`` in |TS|
-returns *undefined*. However, the same code in |LANG| returns the shadowed
-field declared in or inherited from the direct superclass.
-
-These situations are illustrated by the examples below:
+The situations are illustrated by the following examples:
 
 .. code-block-meta:
 
 .. code-block:: typescript
    :linenos:
 
+   // Both TypeScript and ArkTS do the same
    class Base {
      field: number = 666
    }
    class Derived extends Base {
      field: number = 555
      foo () {
-        console.log (this.field, super.field)
+        console.log (this.field)
      }
    }
-   let d = new Derived
-   console.log (d)
-   d.foo()
-   // TypeScript output
-   // Derived { field: 555 }
-   // 555 undefined
-   // ArkTS output
-   // { field: 666, field: 555 }
-   // 555 666
+   let b: Base = new Derived()
+   b.foo()  // 555 is printed
+
+
+   // That will be a compile-time error in ArkTS as type of 'field' in Child
+   // differs from 'field' type in Parent
+   class Parent {
+       field: Object
+   }
+   class Child extends Parent {
+       field: Number 
+   }
+
+
 
 .. index::
    class field
@@ -383,6 +384,25 @@ illustrated by the example below:
    overriding
    primitive type
    class type
+
+|
+
+.. _Type void Compatibility:
+
+Type void Compatibility
+***********************
+
+.. meta:
+    frontend_status: Done
+
+|TS| allows to use type ``void`` in union types while |LANG| does not.
+
+.. code-block:: typescript
+   :linenos:
+
+   type UnionWithVoid = void | number
+     // Such type is OK for Typescript, but leads to a compile-time error for ArkTS
+
 
 |
 
@@ -427,6 +447,28 @@ type cannot be assigned into an array of a reference type:
 
 |
 
+.. _Tuples and Arrays:
+
+Tuples and Arrays
+*****************
+
+.. meta:
+    frontend_status: None
+
+|TS| allows assignments of tuples into arrays while |LANG| does not allows
+this:
+
+.. code-block:: typescript
+   :linenos:
+
+   const tuple: [number, number, boolean] = [1, 3.14, true]
+
+   // Typescript accepts such assignment while ArkTS reports an error
+   const array: (number|boolean) [] = tuple
+
+
+|
+
 .. _Extending Class Object:
 
 Extending Class Object
@@ -458,6 +500,37 @@ explicitly listed in the ``extends`` clause of a class. |LANG| allows this as
 .. index::
    class object
    extends clause
+
+|
+
+.. _Differences in Namespaces:
+
+Differences in Namespaces
+*************************
+
+.. meta:
+    frontend_status: Done
+
+|TS| allows having non-exported entities with the same name in two or more
+different declarations of a namespace for these entities are local to a
+particular declaration of the namespace. Such situations are forbidden in |LANG|
+as this language merges all declarations into one:
+
+
+.. code-block:: typescript
+   :linenos:
+
+    // Typescript accepts such code, while ArkTS will report a compile-time error
+    namespace A {
+       function foo() { console.log ("foo() from the 1st namespace A declaration") }
+       export bar () { foo() }
+    }
+    namespace A {
+       function foo() { console.log ("foo() from the 2nd namespace A declaration") }
+       export bar_bar() { foo() }
+    }
+    A.bar()
+    A.bar_bar()
 
 |
 
