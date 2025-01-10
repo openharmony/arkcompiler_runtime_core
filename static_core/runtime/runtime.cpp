@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -807,6 +807,13 @@ bool Runtime::HandleAotOptions()
     return true;
 }
 
+template <typename Handler>
+static void RegisterSignalHandler(SignalManager *manager, bool inCompiledCode)
+{
+    auto *handler = manager->GetAllocator()->New<Handler>();
+    manager->AddHandler(handler, inCompiledCode);
+}
+
 void Runtime::HandleJitOptions()
 {
 #ifndef PANDA_TARGET_WINDOWS
@@ -828,14 +835,12 @@ void Runtime::HandleJitOptions()
     }
 
 #ifndef PANDA_TARGET_WINDOWS
+    RegisterSignalHandler<SamplingProfilerHandler>(signalManager_, true);
     if (signalManager_->IsInitialized() && enableNpHandler) {
-        auto *handler = signalManager_->GetAllocator()->New<NullPointerHandler>();
-        signalManager_->AddHandler(handler, true);
+        RegisterSignalHandler<NullPointerHandler>(signalManager_, true);
     }
-    {
-        auto *handler = signalManager_->GetAllocator()->New<StackOverflowHandler>();
-        signalManager_->AddHandler(handler, true);
-    }
+    RegisterSignalHandler<StackOverflowHandler>(signalManager_, true);
+    RegisterSignalHandler<CrashFallbackDumpHandler>(signalManager_, false);
 #endif
 }
 
