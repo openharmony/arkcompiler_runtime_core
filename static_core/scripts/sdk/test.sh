@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -60,6 +60,7 @@ find build-sdk -maxdepth 1 | sort --version-sort >"$ACTUAL"
 echo "build-sdk
 build-sdk/linux_arm64_host_tools
 build-sdk/linux_host_tools
+build-sdk/ohos_arm32
 build-sdk/ohos_arm64
 build-sdk/panda-sdk-$SDK_VERSION.tgz
 build-sdk/sdk
