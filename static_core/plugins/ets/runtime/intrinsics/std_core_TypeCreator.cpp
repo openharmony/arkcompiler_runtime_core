@@ -423,6 +423,33 @@ static void AddLambdaParamInst(pandasm::Function &fn, TypeCreatorCtx *ctx)
     }
 }
 
+static void AddBoxedTypeCheck(pandasm::Function &fn, const std::string &primTypeName)
+{
+    std::string objectTypeName {typeapi_create_consts::TYPE_BOXED_PREFIX};
+    if (primTypeName == "u1") {
+        objectTypeName += "Boolean";
+    } else if (primTypeName == "i8") {
+        objectTypeName += "Byte";
+    } else if (primTypeName == "i16") {
+        objectTypeName += "Short";
+    } else if (primTypeName == "i32") {
+        objectTypeName += "Int";
+    } else if (primTypeName == "i64") {
+        objectTypeName += "Long";
+    } else if (primTypeName == "u16") {
+        objectTypeName += "Char";
+    } else if (primTypeName == "void") {
+        objectTypeName += "Void";
+    } else if (primTypeName == "f32") {
+        objectTypeName += "Float";
+    } else if (primTypeName == "f64") {
+        objectTypeName += "Double";
+    } else {
+        UNREACHABLE();
+    }
+    fn.AddInstruction(pandasm::Create_CHECKCAST(objectTypeName));
+}
+
 EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda(EtsLong methodPtr, EtsInt lambdaId)
 {
     auto m = PtrFromLong<PandasmMethodCreator>(methodPtr);
@@ -457,13 +484,13 @@ EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda(EtsLong methodPtr,
 
     fn.AddInstruction(pandasm::Create_CALL_VIRT(LMB_REG, RECV_REG, ARR_REG, 0, lambda.GetFunctionName()));
 
-    fn.AddInstruction(pandasm::Create_STA_OBJ(0));
     if (!fn.returnType.IsObject() && !fn.returnType.IsVoid()) {
+        AddBoxedTypeCheck(fn, fn.returnType.GetComponentName());
+        fn.AddInstruction(pandasm::Create_STA_OBJ(0));
+
         auto destr = m->Ctx()->DeclarePrimitive(fn.returnType.GetComponentName()).second;
         fn.AddInstruction(pandasm::Create_CALL_SHORT(0, 0, destr));
-    }
-
-    if (fn.returnType.IsObject()) {
+    } else if (fn.returnType.IsObject()) {
         fn.AddInstruction(pandasm::Create_CHECKCAST(ret.GetName()));
     }
     auto returnId = fn.returnType.GetId();
