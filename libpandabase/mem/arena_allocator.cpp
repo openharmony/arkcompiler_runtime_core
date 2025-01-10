@@ -15,13 +15,8 @@
 
 #include "arena_allocator.h"
 
-#include <cstdlib>
-#include <cstring>
-#include "arena-inl.h"
-#include "utils/logger.h"
 #include "pool_manager.h"
 #include "trace/trace.h"
-#include "mem/base_mem_stats.h"
 
 namespace panda {
 

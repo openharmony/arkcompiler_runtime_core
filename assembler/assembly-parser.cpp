@@ -13,14 +13,7 @@
  * limitations under the License.
  */
 
-#include <cctype>
-#include <cerrno>
-
-#include <iterator>
-
-#include "assembly-type.h"
 #include "ins_emit.h"
-#include "modifiers.h"
 #include "opcode_parsing.h"
 #include "operand_types_print.h"
 #include "utils/number-utils.h"

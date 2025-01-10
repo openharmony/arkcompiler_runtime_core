@@ -16,8 +16,6 @@
 #include "program_dump.h"
 #include "abc2program_log.h"
 #include "common/abc_file_utils.h"
-#include "dump_utils.h"
-#include "os/file.h"
 
 namespace panda::abc2program {
 

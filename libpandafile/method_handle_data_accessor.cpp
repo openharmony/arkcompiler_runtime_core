@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "helpers.h"
 #include "method_handle_data_accessor.h"
 
 namespace panda::panda_file {

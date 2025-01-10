@@ -28,10 +28,6 @@
 
 #include "constant_propagation.h"
 #include "bytecode_optimizer/bytecode_analysis_results.h"
-#include "compiler_logger.h"
-#include "compiler/optimizer/optimizations/lowering.h"
-#include "optimizer/ir/graph.h"
-#include "optimizer/ir/inst.h"
 
 namespace panda::bytecodeopt {
 

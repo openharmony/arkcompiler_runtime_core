@@ -15,8 +15,6 @@
 
 #include "abc_method_processor.h"
 #include "abc_code_processor.h"
-#include "method_data_accessor-inl.h"
-#include "file_items.h"
 
 namespace panda::abc2program {
 

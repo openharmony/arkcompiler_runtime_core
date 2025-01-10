@@ -13,10 +13,7 @@
  * limitations under the License.
  */
 
-#include <cstdlib>
 #include <cinttypes>
-#include <sys/types.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include "utils/logger.h"
 

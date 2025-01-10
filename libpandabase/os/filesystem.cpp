@@ -15,8 +15,6 @@
 
 #include "os/filesystem.h"
 
-#include <ostream>
-#include <string>
 #if defined PANDA_TARGET_MOBILE || defined PANDA_TARGET_UNIX || defined PANDA_TARGET_ARM32 || \
     defined PANDA_TARGET_ARM64
 #include <sys/stat.h>
