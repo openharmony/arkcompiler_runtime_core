@@ -34,7 +34,7 @@ function(add_ets_gc_test)
     set(target ets_test_suite_gc_${TEST_NAME}-ets-${run_mode})
 
     if ("${ARG_MODE}" STREQUAL "INT")
-        run_int_ets_code(${test_in} ${test_out_dir} ${target} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
+        run_int_ets_code(${target} ${test_out_dir} SOURCES "${test_in}" RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
     elseif ("${ARG_MODE}" STREQUAL "AOT")
         run_aot_ets_code(aot ${test_in} ${test_out_dir} ${target} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
     elseif ("${ARG_MODE}" STREQUAL "JIT")

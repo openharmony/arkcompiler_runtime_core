@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -206,7 +206,6 @@ private:
     void ParseAsRecord(const std::vector<Token> &tokens);
     void ParseAsArray(const std::vector<Token> &tokens);
     void ParseAsFunction(const std::vector<Token> &tokens);
-    void ParseAsUnionField(const std::vector<Token> &tokens);
     void ParseAsBraceRight(const std::vector<Token> &tokens);
     bool ParseAfterLine(bool &isFirstStatement);
     void ParseContextByType(const std::vector<Token> &tokens, bool &isLangParsed, bool &isFirstStatement);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,7 +122,7 @@ static napi_value CallEtsFunctionImpl(EtsCoroutine *coro, InteropCtx *ctx, Span<
 
     auto methodRes = ResolveEntryPoint(ctx, callTarget);
     if (UNLIKELY(!methodRes)) {
-        InteropCtx::ThrowJSError(env, "CallEtsFunction: " + callTarget + " " + methodRes.Error());
+        InteropCtx::ThrowJSError(env, "CallEtsFunction: " + callTarget + " " + std::string(methodRes.Error()));
         return nullptr;
     }
     return CallETSStatic(coro, ctx, methodRes.Value(), jsargv.SubSpan(1));

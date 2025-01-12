@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ function init() {
 }
 
 function callEts(etsVm) {
-	let res = etsVm.call('testReturnPendingPromise');
+	let res = etsVm.call('.testReturnPendingPromise');
 	if (typeof res !== 'object') {
 		console.log('Result is not an object');
 		process.exit(1);
@@ -57,7 +57,7 @@ function queueTasks(etsVm) {
 			console.log('Promise must not be resolved');
 			process.exit(1);
 		}
-		if (!etsVm.call('resolvePendingPromise')) {
+		if (!etsVm.call('.resolvePendingPromise')) {
 			console.log("Call of 'resolvePendingPromise' return false");
 			return null;
 		}

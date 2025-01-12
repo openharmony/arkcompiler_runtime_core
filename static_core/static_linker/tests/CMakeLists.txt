@@ -83,8 +83,8 @@ add_dependencies(static_linker_tests static_linker_tests_gen_abc arkruntime)
 if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSCOMPILING)
     # internal issue #15674
     add_custom_target(static_linker_tests_field_value
-        COMMAND $<TARGET_FILE:es2panda> --output "${CMAKE_CURRENT_BINARY_DIR}/a.abc" --ets-module --extension=sts "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/field_value/a.sts"
-        COMMAND $<TARGET_FILE:es2panda> --output "${CMAKE_CURRENT_BINARY_DIR}/b.abc" --ets-module --extension=sts "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/field_value/b.sts"
+        COMMAND $<TARGET_FILE:es2panda> --output "${CMAKE_CURRENT_BINARY_DIR}/a.abc" --extension=sts "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/field_value/a.sts"
+        COMMAND $<TARGET_FILE:es2panda> --output "${CMAKE_CURRENT_BINARY_DIR}/b.abc" --extension=sts "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/field_value/b.sts"
         COMMAND $<TARGET_FILE:ark_link> --output "${CMAKE_CURRENT_BINARY_DIR}/l.abc" -- "${CMAKE_CURRENT_BINARY_DIR}/a.abc" "${CMAKE_CURRENT_BINARY_DIR}/b.abc"
         COMMAND $<TARGET_FILE:ark> --load-runtimes ets --boot-panda-files $<TARGET_PROPERTY:etsstdlib,FILE> "${CMAKE_CURRENT_BINARY_DIR}/l.abc" b/ETSGLOBAL::main
         DEPENDS  es2panda ark ark_link etsstdlib "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/field_value/a.sts" "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/field_value/b.sts"

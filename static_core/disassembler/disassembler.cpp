@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1542,17 +1542,6 @@ void Disassembler::Serialize(const pandasm::Record &record, std::ostream &os, bo
     os << "}\n\n";
 }
 
-void Disassembler::SerializeUnionFields(const pandasm::Record &record, std::ostream &os, bool printInformation) const
-{
-    if (printInformation && progInfo_.recordsInfo.find(record.name) != progInfo_.recordsInfo.end()) {
-        os << " # " << progInfo_.recordsInfo.at(record.name).recordInfo << "\n";
-        SerializeFields(record, os, true, true);
-    } else {
-        SerializeFields(record, os, false, true);
-    }
-    os << "\n";
-}
-
 void Disassembler::DumpLiteralArray(const pandasm::LiteralArray &literalArray, std::stringstream &ss) const
 {
     ss << "[";
@@ -1623,8 +1612,7 @@ void Disassembler::SerializeFieldValue(const pandasm::Field &f, std::stringstrea
     }
 }
 
-void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &os, bool printInformation,
-                                   bool isUnion) const
+void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &os, bool printInformation) const
 {
     constexpr size_t INFO_OFFSET = 80;
 
@@ -1637,23 +1625,18 @@ void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &
 
     std::stringstream ss;
     for (const auto &f : record.fieldList) {
-        if (isUnion) {
-            ss << ".union_field ";
-        } else {
-            ss << "\t";
-        }
-        ss << f.type.GetPandasmName() << " " << f.name;
+        ss << "\t" << f.type.GetPandasmName() << " " << f.name;
         if (f.metadata->GetValue().has_value()) {
             SerializeFieldValue(f, ss);
         }
-        if (!isUnion && recordInTable) {
+        if (recordInTable) {
             const auto fieldIter = recordIter->second.fieldAnnotations.find(f.name);
             if (fieldIter != recordIter->second.fieldAnnotations.end()) {
                 Serialize(*f.metadata, fieldIter->second, ss);
             } else {
                 Serialize(*f.metadata, {}, ss);
             }
-        } else if (!isUnion && !recordInTable) {
+        } else {
             Serialize(*f.metadata, {}, ss);
         }
 
@@ -1839,11 +1822,7 @@ void Disassembler::SerializeRecords(std::ostream &os, bool addSeparators, bool p
     }
 
     for (const auto &r : prog_.recordTable) {
-        if (!panda_file::IsDummyClassName(r.first)) {
-            Serialize(r.second, os, printInformation);
-        } else {
-            SerializeUnionFields(r.second, os, printInformation);
-        }
+        Serialize(r.second, os, printInformation);
     }
 }
 
@@ -1902,10 +1881,7 @@ std::string Disassembler::IDToString(BytecodeInstruction bcIns, panda_file::File
         panda_file::FieldDataAccessor fieldAccessor(*file_, id);
 
         auto recordName = GetFullRecordName(fieldAccessor.GetClassId());
-        if (!panda_file::IsDummyClassName(recordName)) {
-            name << recordName;
-            name << '.';
-        }
+        name << recordName << '.';
         name << StringDataToString(file_->GetStringData(fieldAccessor.GetNameId()));
     } else if (bcIns.HasFlag(BytecodeInstruction::Flags::LITERALARRAY_ID)) {
         auto index = bcIns.GetId().AsIndex();

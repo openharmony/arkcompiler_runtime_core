@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -636,28 +636,6 @@ void Parser::ParseAsFunction(const std::vector<Token> &tokens)
     }
 }
 
-void Parser::ParseAsUnionField(const std::vector<Token> &tokens)
-{
-    LOG(DEBUG, ASSEMBLER) << "started parsing of union field (line " << lineStric_ << "): " << tokens[0].wholeLine;
-
-    if (!open_) {
-        ++context_;
-    } else {
-        context_.err =
-            GetError("No union field can be defined inside record or function.", Error::ErrorType::ERR_BAD_DEFINITION);
-        return;
-    }
-
-    auto dummyRecord = program_.recordTable.find(panda_file::GetDummyClassName());
-    if (dummyRecord == program_.recordTable.end()) {
-        SetRecordInformation(panda_file::GetDummyClassName());
-    }
-    currRecord_->fieldList.emplace_back(program_.lang);
-    currFld_ = &(currRecord_->fieldList[currRecord_->fieldList.size() - 1]);
-    currFld_->lineOfDef = lineStric_;
-    ParseRecordField();
-}
-
 void Parser::ParseAsBraceRight(const std::vector<Token> &tokens)
 {
     if (!open_) {
@@ -1065,10 +1043,6 @@ void Parser::ParseContextByType(const std::vector<Token> &tokens, bool &isLangPa
         }
         case Token::Type::ID_FUN: {
             ParseAsFunction(tokens);
-            break;
-        }
-        case Token::Type::ID_UNION: {
-            ParseAsUnionField(tokens);
             break;
         }
         case Token::Type::ID_ARR: {
@@ -1885,15 +1859,8 @@ bool Parser::ParseOperandField()
     // Some names of records in pandastdlib starts with 'panda.', therefore,
     // the record name is before the second dot, and the field name is after the second dot
     auto posPoint = recordFullName.find_last_of('.');
-    std::string recordName;
-    std::string fieldName;
-    if (posPoint == std::string::npos) {
-        recordName = panda_file::GetDummyClassName();
-        fieldName = recordFullName;
-    } else {
-        recordName = recordFullName.substr(0, posPoint);
-        fieldName = recordFullName.substr(posPoint + 1);
-    }
+    std::string recordName = recordFullName.substr(0, posPoint);
+    std::string fieldName = recordFullName.substr(posPoint + 1);
 
     auto itRecord = program_.recordTable.find(recordName);
     if (itRecord == program_.recordTable.end()) {

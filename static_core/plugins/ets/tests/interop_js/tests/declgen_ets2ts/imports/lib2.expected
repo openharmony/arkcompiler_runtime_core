@@ -14,7 +14,11 @@
  */
 
 declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
+let ETSGLOBAL: any = (globalThis as any).Panda.getClass('Llib2/ETSGLOBAL;');
+
+function main(): void { return {} as any; };
+(main as any) = ETSGLOBAL.main;
+
 
 function _$init$_(): void { return {} as any; };
 (_$init$_ as any) = ETSGLOBAL._$init$_;

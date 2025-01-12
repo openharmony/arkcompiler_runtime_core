@@ -15,8 +15,22 @@ if (PANDA_TARGET_ARM32)
     return()
 endif()
 
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/default1.sts ${CMAKE_CURRENT_BINARY_DIR}/default_import_1 default_import_1 EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/export.sts)
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/default2.sts ${CMAKE_CURRENT_BINARY_DIR}/default_import_2 default_import_2 EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/export.sts)
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/default3.sts ${CMAKE_CURRENT_BINARY_DIR}/default_import_3 default_import_3 EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/export.sts)
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/default4.sts ${CMAKE_CURRENT_BINARY_DIR}/default_import_4 default_import_4 EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/export.sts)
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/default5.sts ${CMAKE_CURRENT_BINARY_DIR}/default_import_5 default_import_5 EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/export.sts)
+run_int_ets_code(default_import_1 ${CMAKE_CURRENT_BINARY_DIR}/default_import_1 SOURCES
+                 ${CMAKE_CURRENT_SOURCE_DIR}/default1.sts;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/export.sts)
+
+run_int_ets_code(default_import_2 ${CMAKE_CURRENT_BINARY_DIR}/default_import_2 SOURCES
+                 ${CMAKE_CURRENT_SOURCE_DIR}/default2.sts;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/export.sts)
+
+run_int_ets_code(default_import_3 ${CMAKE_CURRENT_BINARY_DIR}/default_import_3 SOURCES
+                 ${CMAKE_CURRENT_SOURCE_DIR}/default3.sts;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/export.sts)
+
+run_int_ets_code(default_import_4 ${CMAKE_CURRENT_BINARY_DIR}/default_import_4 SOURCES
+                 ${CMAKE_CURRENT_SOURCE_DIR}/default4.sts;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/export.sts)
+
+run_int_ets_code(default_import_5 ${CMAKE_CURRENT_BINARY_DIR}/default_import_5 SOURCES
+                 ${CMAKE_CURRENT_SOURCE_DIR}/default5.sts;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/export.sts)

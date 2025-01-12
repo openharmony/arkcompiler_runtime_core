@@ -21,7 +21,7 @@ include(cmake/import.cmake)
 add_custom_target(ets_tests COMMENT "Running ets test suites")
 
 function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
-    set(oneValueArgs OPT_LEVEL)
+    set(oneValueArgs ARKTS_CONFIG ETSPATH OPT_LEVEL UNNAMED)
     set(multiValueArgs COMPILER_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -36,6 +36,17 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
         --output=${OUTPUT_ABC}
         ${ARG_COMPILER_EXTRA_OPTIONS}
     )
+    if (DEFINED ARG_ARKTS_CONFIG)
+        list(APPEND ES2PANDA_ARGUMENTS "--arktsconfig=${ARG_ARKTS_CONFIG}")
+        list(APPEND ES2PANDA_ARGUMENTS "--stdlib=${PANDA_ROOT}/plugins/ets/stdlib")
+    endif()
+    if (DEFINED ARG_ETSPATH)
+        list(APPEND ES2PANDA_ARGUMENTS "--ets-path=${ARG_ETSPATH}")
+    endif()
+    if (ARG_UNNAMED)
+        list(APPEND ES2PANDA_ARGUMENTS "--ets-unnamed")
+    endif()
+
     set(COMPILE_DEPENDENCIES
         ${es2panda_target}
     )
@@ -80,6 +91,27 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
 
 endfunction()
 
+function(compile_ets_sources WORK_DIR ABC_TARGET ABC_FILES ETS_SOURCES)
+    set(oneValueArgs ARKTS_CONFIG ETSPATH OPT_LEVEL)
+    set(multiValueArgs )
+    cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    add_custom_target(${ABC_TARGET})
+
+    foreach(SOURCE_ETS IN LISTS ETS_SOURCES)
+        get_filename_component(SOURCE_FNAME ${SOURCE_ETS} NAME_WE)
+        set(SOURCE_ABC ${WORK_DIR}/${ABC_TARGET}-${SOURCE_FNAME}.abc)
+        set(SOURCE_ABC_TARGET ${ABC_TARGET}-${SOURCE_FNAME}-ets-es2panda)
+        compile_ets_code(${SOURCE_ETS} ${SOURCE_ABC} ${SOURCE_ABC_TARGET}
+                         ARKTS_CONFIG ${ARG_ARKTS_CONFIG}
+                         ETSPATH ${ARG_ETSPATH}
+                         OPT_LEVEL ${ARG_OPT_LEVEL})
+        add_dependencies(${ABC_TARGET} ${SOURCE_ABC_TARGET})
+        set(RESULT ${RESULT} ${SOURCE_ABC})
+    endforeach()
+
+    set(${ABC_FILES} ${RESULT} PARENT_SCOPE)
+endfunction()
 
 # NB! ADDING THIS PROPERTY IS ALLOWED ONLY IN SPECIAL CASES. DO NOT COPY-PASTE IT.
 set_target_properties(ets_tests PROPERTIES first-level-tests-dependency TRUE)

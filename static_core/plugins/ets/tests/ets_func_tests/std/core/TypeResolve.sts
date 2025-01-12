@@ -27,7 +27,7 @@ class AHAH {
 }
 
 function main() {
-    const iType = Type.resolve('LAHAH;') as ClassType
+    const iType = Type.resolve("LTypeResolve/AHAH;") as ClassType
     const ctorsN = iType.getConstructorsNum()
 
     assert iType.getConstructorsNum() == 2

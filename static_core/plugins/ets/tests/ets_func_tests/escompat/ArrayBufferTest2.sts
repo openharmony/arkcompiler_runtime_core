@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-import { Error as EsError, AssertionError as EsAssertionError } from "escompat"
-
 function main(): int {
   let failures: int = 0;
 
@@ -38,19 +36,19 @@ function createEmptyArrayBuffer(): int {
 
 class Assertions {
   static assertEquals(expected: int, actual: int): void {
-    if (expected != actual) throw new EsAssertionError(`${expected} != ${actual}`)
+    if (expected != actual) throw new AssertionError(`${expected} != ${actual}`)
   }
 
   static assertEquals(expected: number, actual: number): void {
-    if (expected != actual) throw new EsAssertionError(`${expected} != ${actual}`)
+    if (expected != actual) throw new AssertionError(`${expected} != ${actual}`)
   }
 
   static assertTrue(condition: boolean): void {
-    if (!condition) throw new EsAssertionError("expected true but was false") 
+    if (!condition) throw new AssertionError("expected true but was false") 
   }
 
   static assertFalse(condition: boolean): void {
-    if (condition) throw new EsAssertionError("expected false but was true")
+    if (condition) throw new AssertionError("expected false but was true")
   }
 }
 
@@ -220,8 +218,8 @@ function test(action: () => int, message: String) {
 
     return result
   } catch (e) {
-    if (e instanceof EsAssertionError) {
-      let error = e as EsAssertionError
+    if (e instanceof AssertionError) {
+      let error = e as AssertionError
       console.println(`FAILED: '${message}' with exception: ${error.name}(${error.message})`)
     } else {
       console.println(`FAILED '${message}' with exception ` + e)

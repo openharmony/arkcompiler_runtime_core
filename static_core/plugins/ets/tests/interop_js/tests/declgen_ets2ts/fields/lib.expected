@@ -14,7 +14,7 @@
  */
 
 declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
+let ETSGLOBAL: any = (globalThis as any).Panda.getClass('Llib/ETSGLOBAL;');
 
 function main(): void { return {} as any; };
 (main as any) = ETSGLOBAL.main;
@@ -41,7 +41,7 @@ class Fields {
     public uint32Array_: Uint32Array = {} as any;
     constructor() {};
 };
-(Fields as any) = (globalThis as any).Panda.getClass('LFields;');
+(Fields as any) = (globalThis as any).Panda.getClass('Llib/Fields;');
 export {Fields};
 exports.Fields = Fields;
 

@@ -41,14 +41,16 @@
     return
 }
 
-.union_field i32 bar
-.union_field i32 baz
+.record $NamedAccessMeta-i32 {
+    i32 bar
+    i32 baz
+}
 
 .function i32 test(std.core.Object a0, std.core.Object a1) {
-    ets.ldobj.name a0, baz
+    ets.ldobj.name a0, $NamedAccessMeta-i32.baz
     movi v0, 5
     add2 v0
-    ets.stobj.name a1, bar
+    ets.stobj.name a1, $NamedAccessMeta-i32.bar
     return
 }
 

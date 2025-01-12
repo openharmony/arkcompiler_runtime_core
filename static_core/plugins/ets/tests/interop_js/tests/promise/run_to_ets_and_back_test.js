@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ function runTest() {
 		process.exit(1);
 	}
 	let jsPromise = Promise.resolve();
-	let etsPromise = etsVm.call('getTheSamePromise', jsPromise);
+	let etsPromise = etsVm.call('.getTheSamePromise', jsPromise);
 	if (jsPromise !== etsPromise) {
 		console.log('Test ' + test + ' failed: expected jsPromise and etsPromise are the same but actually they differs');
 		process.exit(1);

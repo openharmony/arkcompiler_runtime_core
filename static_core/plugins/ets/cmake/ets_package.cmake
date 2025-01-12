@@ -87,13 +87,12 @@ function(do_panda_ets_package TARGET)
                 OUTPUT ${OUTPUT_ABC}
                 COMMENT "${TARGET}: Convert sts files to ${OUTPUT_ABC}"
                 COMMAND mkdir -p ${BUILD_DIR}/src
-                COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS} --output=${OUTPUT_ABC} ${ARG_ETS_SOURCES}
+                COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS} --ets-unnamed --output=${OUTPUT_ABC} ${ARG_ETS_SOURCES}
                 DEPENDS ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc ${es2panda_target} ${ARG_ETS_SOURCES}
             )
         else()
             # Compile several .sts files and link them to OUTPUT_ABC
             set(ABC_FILES)
-            set(ETS_MODULE_KEY "")
             foreach(ETS_SOURCE ${ARG_ETS_SOURCES})
                 get_filename_component(CLEAR_NAME ${ETS_SOURCE} NAME_WE)
                 set(CUR_OUTPUT_ABC ${BUILD_DIR}/src/${CLEAR_NAME}.abc)
@@ -103,12 +102,9 @@ function(do_panda_ets_package TARGET)
                     OUTPUT ${CUR_OUTPUT_ABC}
                     COMMENT "${TARGET}: Convert ets files to ${CUR_OUTPUT_ABC}"
                     COMMAND mkdir -p ${BUILD_DIR}/src
-                    COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS} ${ETS_MODULE_KEY} --output=${CUR_OUTPUT_ABC} ${ETS_SOURCE}
+                    COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS} --output=${CUR_OUTPUT_ABC} ${ETS_SOURCE}
                     DEPENDS ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc ${es2panda_target} ${ETS_SOURCE}
                 )
-                if (ETS_MODULE_KEY STREQUAL "")
-                    set(ETS_MODULE_KEY "--ets-module")
-                endif()
             endforeach()
 
             # Link .abc files into single .abc file

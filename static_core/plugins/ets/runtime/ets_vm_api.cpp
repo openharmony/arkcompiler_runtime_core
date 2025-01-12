@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,13 +129,14 @@ bool DestroyRuntime()
     return res;
 }
 
-std::pair<bool, int> ExecuteMain()
+std::pair<bool, int> ExecuteModule(std::string_view name)
 {
     auto runtime = ark::Runtime::GetCurrent();
     auto pfPath = runtime->GetPandaFiles()[0];
-    LOG(INFO, RUNTIME) << "ExecuteEtsMain: '" << pfPath << "'";
-    auto res = ark::Runtime::GetCurrent()->ExecutePandaFile(pfPath, "ETSGLOBAL::main", {});
-    LOG(INFO, RUNTIME) << "ExecuteEtsMain: result = " << (res ? std::to_string(res.Value()) : "failed");
+    LOG(INFO, RUNTIME) << "ExecuteEtsModule: '" << pfPath << "'";
+    std::string moduleEp = (name.empty() ? "ETSGLOBAL::main" : std::string(name) + ".ETSGLOBAL::main");
+    auto res = ark::Runtime::GetCurrent()->ExecutePandaFile(pfPath, moduleEp, {});
+    LOG(INFO, RUNTIME) << "ExecuteEtsModule: result = " << (res ? std::to_string(res.Value()) : "failed");
     return res ? std::make_pair(true, res.Value()) : std::make_pair(false, 1);
 }
 

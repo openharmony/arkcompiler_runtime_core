@@ -55,7 +55,7 @@ function(run_atomics_tests ETS_SRC WORK_DIR TARGET)
 
     # TODO(egor-porsev): Add jit and aot. Currently, they do not work because of the data race issue #13551
     # int
-    run_int_ets_code(${ETS_SRC} ${WORK_DIR} ${TARGET}-ets-int OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
+    run_int_ets_code(${TARGET}-ets-int ${WORK_DIR} SOURCES "${ETS_SRC}" OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
     if(TARGET ${TARGET}-ets-int)
         add_dependencies(${TARGET} ${TARGET}-ets-int)
     endif()

@@ -156,11 +156,11 @@ function testPoint(): int {
     const addMethod = pointMethods[0]
     const serializeMethod = pointMethods[1]
 
-    return test(pt.getName() == "Point",                                    "ClassName: Point") +
+    return test(pt.getName() == "TypeClassTypeTest.Point",                  "ClassName: Point") +
             test(pt.hasEmptyConstructor(),                                  "   doesn't have empty constuctor") +
             test(pt.getBaseType().equals(ObjectType),                       "   base type is ObjectType") +
             test(pt.getInterfacesNum() == 1,                                "   1 Interface:") +
-            test(pt.getInterface(0).getName() == "Serializable",            "        Serializable interface") +
+            test(pt.getInterface(0).getName() == "TypeClassTypeTest.Serializable",       "        Serializable interface") +
             test(pt.getFieldsNum() == 2,                                    "   2 Fields:") +
             test(pt.hasField("x"),                                          "       x field") +
             test(pt.hasField("y"),                                          "       y field") +
@@ -183,9 +183,9 @@ function testPoint3D(): int {
     const addMethod = pointMethods[0]
     const serializeMethod = pointMethods[1]
 
-    return test(pt.getName() == "Point3D",                                  "ClassName: Point3D") +
+    return test(pt.getName() == "TypeClassTypeTest.Point3D",                "ClassName: Point3D") +
             test(!pt.hasEmptyConstructor(),                                 "   doesn't have empty constructor") +
-            test(pt.getBaseType().getName() == "Point",                     "   base type is Point") +
+            test(pt.getBaseType().getName() == "TypeClassTypeTest.Point",                "   base type is Point") +
             test(pt.getInterfacesNum() == 0,                                "   0 Interfaces") +
             test(pt.getFieldsNum() == 5,                                    "   5 Fields:") +
             test(pt.hasField("x"),                                          "       x field") +
@@ -212,9 +212,9 @@ function testHTMLWriter(): int {
     const writeMethod = writerMethods[0]
     const getStateMethod = writerMethods[1]
 
-    return test(wt.getName() == "HTMLWriter",                               "ClassName: HTMLWriter") +
+    return test(wt.getName() == "TypeClassTypeTest.HTMLWriter",                          "ClassName: HTMLWriter") +
             test(!wt.hasEmptyConstructor(),                                 "   doesn't have empty constructor") +
-            test(wt.getBaseType().getName() == "Writer",                    "   base type is Writer") +
+            test(wt.getBaseType().getName() == "TypeClassTypeTest.Writer",               "   base type is Writer") +
             test(wt.getInterfacesNum() == 0,                                "   0 Interfaces") +
             test(wt.getFieldsNum() == 1,                                    "   1 Field:") +
             test(wt.hasField("state"),                                      "       state field") +

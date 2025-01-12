@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-import { Error as EsError, AssertionError as EsAssertionError } from "escompat"
-
 const RESULT_SUCCESS = 0
 const RESULT_FAILURE = 1
 
@@ -200,8 +198,8 @@ function test(testAction: () => int, testName: string): int {
         return testResult
     } catch (e) {
         consolePrint(Color.Red, "FAILED: ")
-        if (e instanceof EsAssertionError) {
-            const assertionError = e as EsAssertionError
+        if (e instanceof AssertionError) {
+            const assertionError = e as AssertionError
 
             const errorMessage = assertionError.message
             console.println(`"${testName}" failed with error: ${errorMessage}`)

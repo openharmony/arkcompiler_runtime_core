@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,11 +22,11 @@ function runTest(test) {
 	}
 	let res = etsVm.call(test);
 	let checkFn = () => {
-		if (!etsVm.call('ready')) {
+		if (!etsVm.call('.ready')) {
 			queueMicrotask(checkFn);
 			return;
 		}
-		etsVm.call('check');
+		etsVm.call('.check');
 	};
 	queueMicrotask(checkFn);
 }

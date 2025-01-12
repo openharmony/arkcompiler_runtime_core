@@ -14,7 +14,11 @@
  */
 
 declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
+let ETSGLOBAL: any = (globalThis as any).Panda.getClass('Llib/ETSGLOBAL;');
+
+function main(): void { return {} as any; };
+(main as any) = ETSGLOBAL.main;
+
 
 function _$init$_(): void { return {} as any; };
 (_$init$_ as any) = ETSGLOBAL._$init$_;
@@ -36,7 +40,7 @@ class GenericClass<T extends Object> {
     public identity(x: T): T { return {} as any; };
     constructor() {};
 };
-(GenericClass as any) = (globalThis as any).Panda.getClass('LGenericClass;');
+(GenericClass as any) = (globalThis as any).Panda.getClass('Llib/GenericClass;');
 export {GenericClass};
 exports.GenericClass = GenericClass;
 
@@ -57,7 +61,7 @@ class BaseGeneric<T, U> {
     public d: U = {} as any;
     public constructor(c: T, d: U) {};
 };
-(BaseGeneric as any) = (globalThis as any).Panda.getClass('LBaseGeneric;');
+(BaseGeneric as any) = (globalThis as any).Panda.getClass('Llib/BaseGeneric;');
 export {BaseGeneric};
 exports.BaseGeneric = BaseGeneric;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1061,10 +1061,7 @@ bool AsmEmitter::HandleFields(ItemContainer *items, const Program &program, AsmE
 {
     for (const auto &f : rec.fieldList) {
         auto *fieldName = items->GetOrCreateStringItem(pandasm::DeMangleName(f.name));
-        std::string fullFieldName = f.name;
-        if (!panda_file::IsDummyClassName(name)) {
-            fullFieldName.insert(0, name + ".");
-        }
+        std::string fullFieldName = name + '.' + f.name;
         auto *typeItem = GetTypeItem(items, primitiveTypes, f.type, program);
         if (typeItem == nullptr) {
             SetLastError("Field " + fullFieldName + " has undefined type");
@@ -1342,10 +1339,7 @@ bool AsmEmitter::MakeRecordAnnotations(ItemContainer *items, const Program &prog
         }
 
         for (const auto &field : record.fieldList) {
-            auto fieldName = field.name;
-            if (!panda_file::IsDummyClassName(name)) {
-                fieldName.insert(0, record.name + ".");
-            }
+            std::string fieldName = record.name + '.' + field.name;
             auto *fieldItem = static_cast<FieldItem *>(Find(entities.fieldItems, fieldName));
             if (!AddAnnotations(fieldItem, items, *field.metadata, program, entities)) {
                 SetLastError("Cannot emit annotations for field " + fieldName + ": " + GetLastError());

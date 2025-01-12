@@ -19,7 +19,7 @@ interface A {}
 class B implements A {}
 class D implements A {}
 
-const AType = Type.resolve('LA;') as InterfaceType
+const AType = Type.resolve("LTypeMethodResolveConstructor/A;") as InterfaceType
 const BType = Type.of(new B()) as ClassType
 const CType = Type.of(new C()) as ClassType
 
