@@ -85,6 +85,9 @@ python3 $PROJECT/tests/tests-u-runner/main.py <test-suite-name> --build-dir $BUI
       - `chapters06-09`
       - `chapters10-12`
       - `chapters13-17`
+-   `--ets-sdk` - tests for ArkTS SDK
+    Tests folder: `plugins/ets/tests/ets_sdk/`
+
 
 ### Supported JS test suites
 

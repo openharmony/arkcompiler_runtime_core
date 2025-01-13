@@ -117,6 +117,10 @@ def add_sts_test_suite_args(parser: argparse.ArgumentParser) -> None:
     ets_mutex_group.add_argument(
         '--sts-ts-subset', action='store_true', dest='sts_ts_subset',
         default=None, help='run comparing static VM vs dynamic one on TS subset suite test')
+    ets_mutex_group.add_argument(
+        '--ets-sdk', action='store_true', dest='ets_sdk',
+        default=None, help='run sdk tests')
+
 
 
 def add_other_test_suite_args(parser: argparse.ArgumentParser) -> None:
