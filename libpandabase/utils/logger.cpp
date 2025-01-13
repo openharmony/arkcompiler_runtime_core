@@ -15,8 +15,17 @@
 
 #include "logger.h"
 #include "os/filesystem.h"
+#include "os/thread.h"
 #include "string_helpers.h"
 #include "generated/base_options.h"
+
+#include <cstdarg>
+#include <cstdlib>
+#include <cstring>
+
+#include <fstream>
+#include <iostream>
+#include <string_view>
 
 namespace panda {
 

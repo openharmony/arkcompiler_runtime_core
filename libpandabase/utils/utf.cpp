@@ -15,7 +15,12 @@
 
 #include "utf.h"
 
+#include <cstddef>
 #include <cstring>
+
+#include <limits>
+#include <tuple>
+#include <utility>
 
 namespace panda::utf {
 

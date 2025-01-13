@@ -14,6 +14,7 @@
  */
 
 #include "reg_alloc_graph_coloring.h"
+#include "reg_type.h"
 
 namespace panda::compiler {
 RegAllocGraphColoring::RegAllocGraphColoring(Graph *graph) : RegAllocBase(graph) {}

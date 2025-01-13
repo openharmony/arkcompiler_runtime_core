@@ -17,6 +17,9 @@
 
 #include <array>
 #include <cstring>
+#include <iosfwd>
+#include <string>
+#include <variant>
 
 namespace panda::os {
 

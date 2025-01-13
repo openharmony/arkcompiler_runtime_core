@@ -15,6 +15,7 @@
 
 #include "module_data_accessor.h"
 #include "file_items.h"
+#include "helpers.h"
 
 namespace panda::panda_file {
 ModuleDataAccessor::ModuleDataAccessor(const panda_file::File &panda_file, panda_file::File::EntityId module_data_id)

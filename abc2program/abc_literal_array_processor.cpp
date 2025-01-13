@@ -14,6 +14,8 @@
  */
 
 #include "abc_literal_array_processor.h"
+#include "abc2program_log.h"
+#include "method_data_accessor-inl.h"
 
 namespace panda::abc2program {
 

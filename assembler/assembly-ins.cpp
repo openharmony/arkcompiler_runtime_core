@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <iostream>
 #include "assembly-ins.h"
 
 namespace panda::pandasm {

@@ -14,6 +14,9 @@
  */
 
 #include "abc_code_converter.h"
+#include <iostream>
+#include "abc_type_converter.h"
+#include "abc_file_utils.h"
 
 namespace panda::abc2program {
 

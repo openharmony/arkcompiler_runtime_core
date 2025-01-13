@@ -14,6 +14,7 @@
  */
 
 #include "abc2program_options.h"
+#include <sstream>
 
 namespace panda::abc2program {
 

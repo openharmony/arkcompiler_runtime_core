@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "codegen.h"
+#include "common.h"
 #include "generate_ecma.inl"
 #include "tagged_value.h"
 

@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+#include "platforms/unix/libpandabase/native_stack.h"
+
+#include <regex>
+#include <dirent.h>
 #include <mem/mem.h>
 #include "os/file.h"
 

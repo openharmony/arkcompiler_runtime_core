@@ -14,7 +14,12 @@
  */
 
 #include "code_allocator.h"
+#include "mem/base_mem_stats.h"
+#include "os/mem.h"
 #include "trace/trace.h"
+
+#include <securec.h>
+#include <cstring>
 
 namespace panda {
 

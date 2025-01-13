@@ -14,7 +14,15 @@
  */
 
 #include "os/mem.h"
+#include "utils/type_helpers.h"
 #include "utils/asan_interface.h"
+#include "utils/tsan_interface.h"
+
+#include <limits>
+#include <sys/mman.h>
+#include <unistd.h>
+
+#include <type_traits>
 
 #if defined(__GLIBC__) || defined(PANDA_TARGET_MOBILE)
 #include <malloc.h>

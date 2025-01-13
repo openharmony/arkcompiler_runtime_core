@@ -14,6 +14,7 @@
  */
 
 #include "extensions.h"
+#include "macros.h"
 #include "register_extensions.h"
 
 namespace panda::pandasm::extensions {

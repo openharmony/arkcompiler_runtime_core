@@ -15,6 +15,7 @@
 
 #include "reg_encoder.h"
 #include "common.h"
+#include "compiler/optimizer/ir/basicblock.h"
 
 namespace panda::bytecodeopt {
 

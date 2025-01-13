@@ -14,6 +14,8 @@
  */
 
 #include "abc_file_utils.h"
+#include <iostream>
+#include "os/file.h"
 
 namespace panda::abc2program {
 

@@ -15,6 +15,9 @@
 
 #include "collect_util.h"
 
+#include <codecvt>
+#include <locale>
+
 namespace panda::libpandafile {
 
 /**

@@ -14,6 +14,7 @@
  */
 
 #include "abc_field_processor.h"
+#include "abc2program_log.h"
 #include "abc_literal_array_processor.h"
 #include "file-inl.h"
 #include "literal_data_accessor.h"

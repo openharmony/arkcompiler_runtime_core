@@ -15,6 +15,9 @@
 
 #include "bytecode_emitter.h"
 #include <bytecode_instruction-inl.h>
+#include <macros.h>
+#include <utils/bit_utils.h>
+#include <utils/span.h>
 
 namespace panda {
 

@@ -15,6 +15,7 @@
 
 #include "abc2program_driver.h"
 #include "abc2program_options.h"
+#include "abc_class_processor.h"
 #include "program_dump.h"
 
 namespace panda::abc2program {

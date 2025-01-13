@@ -15,8 +15,16 @@
 
 #include "assembly-emitter.h"
 
+#include <algorithm>
+#include <cctype>
+#include <iostream>
+#include <sstream>
+
 #include "bytecode_instruction-inl.h"
+#include "file_items.h"
+#include "file_writer.h"
 #include "mangling.h"
+#include "os/file.h"
 
 namespace {
 

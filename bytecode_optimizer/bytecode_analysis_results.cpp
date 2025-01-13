@@ -15,6 +15,8 @@
 
 #include "bytecode_analysis_results.h"
 
+#include <mutex>
+
 namespace panda::bytecodeopt {
 
 std::mutex BytecodeAnalysisResults::mutex_;

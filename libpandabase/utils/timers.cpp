@@ -17,7 +17,12 @@
 #include "os/file.h"
 
 #include <algorithm>
+#include <cerrno>
 #include <cstring>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 
 namespace panda {
 TimeStartFunc Timer::timerStart = Timer::TimerStartDoNothing;

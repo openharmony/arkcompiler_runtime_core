@@ -15,6 +15,13 @@
 
 #include "meta.h"
 
+#include <cstdlib>
+
+#include <algorithm>
+#include <limits>
+
+#include "utils/expected.h"
+
 namespace panda::pandasm {
 
 std::optional<Metadata::Error> Metadata::ValidateSize(const std::string_view &value) const

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "stacktrace.h"
+
 #include <cstdint>
 #include <iosfwd>
 #include <vector>

@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include <sstream>
+
+#include "ide_helpers.h"
 #include "assembly-program.h"
 
 namespace panda::pandasm {
