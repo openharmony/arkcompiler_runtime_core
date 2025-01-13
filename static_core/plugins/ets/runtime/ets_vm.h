@@ -367,8 +367,8 @@ public:
         objStateTable_->DeflateInfo();
     }
 
-    void AddRootProvider(mem::RootProvider *provider);
-    void RemoveRootProvider(mem::RootProvider *provider);
+    PANDA_PUBLIC_API void AddRootProvider(mem::RootProvider *provider);
+    PANDA_PUBLIC_API void RemoveRootProvider(mem::RootProvider *provider);
 
 protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;

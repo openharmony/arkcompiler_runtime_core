@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,19 +65,7 @@ bool SharedReference::InitHybridObject(InteropCtx *ctx, EtsObject *etsObject, na
 
 bool SharedReference::MarkIfNotMarked()
 {
-    bool wasNotMarked = true;
-    SharedReference *currentRef = this;
-    uint32_t index;
-    do {
-        wasNotMarked = currentRef->flags_.SetBit<SharedReferenceFlags::Bit::MARK>();
-        index = currentRef->flags_.GetNextIndex();
-        if (index == 0U) {
-            break;
-        }
-        currentRef = SharedReferenceStorage::GetCurrent()->GetItemByIndex(index);
-        ASSERT(!currentRef->flags_.IsEmpty());
-    } while (wasNotMarked);
-    return wasNotMarked;
+    return flags_.SetBit<SharedReferenceFlags::Bit::MARK>();
 }
 
 SharedReference::Iterator &SharedReference::Iterator::operator++()

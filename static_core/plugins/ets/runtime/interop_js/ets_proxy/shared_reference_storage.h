@@ -82,6 +82,9 @@ public:
     /// Remove all unmarked refs after XGC (can be run concurrently)
     void SweepUnmarkedRefs();
 
+    /// Clear mark bit for all shared references
+    PANDA_PUBLIC_API void UnmarkAll();
+
     /**
      * Extract one SharedRefrence from set of references allocated during XGC concurrent marking pahse
      * @return valid SharedReference or nullptr if no more references in the set

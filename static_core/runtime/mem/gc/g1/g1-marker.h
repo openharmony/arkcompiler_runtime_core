@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,6 +94,43 @@ public:
     }
 };
 
+template <class LanguageConfig, bool ATOMIC>
+class XGCMarker : public GCMarker<XGCMarker<LanguageConfig, ATOMIC>, LanguageConfig::LANG_TYPE> {
+public:
+    explicit XGCMarker(GC *gc, std::function<void(ObjectHeader *)> callback)
+        : GCMarker<XGCMarker<LanguageConfig, ATOMIC>, LanguageConfig::LANG_TYPE>(gc), callback_(std::move(callback))
+    {
+    }
+
+    ALWAYS_INLINE bool MarkIfNotMarked(ObjectHeader *object) const
+    {
+        MarkBitmap *bitmap = ObjectToRegion(object)->GetMarkBitmap();
+        ASSERT(bitmap != nullptr);
+        bool alreadyMarked = false;
+        if constexpr (ATOMIC) {
+            alreadyMarked = bitmap->AtomicTestAndSet(object);
+        } else {
+            alreadyMarked = bitmap->Test(object);
+            bitmap->Set(object);
+        }
+        callback_(object);
+        return !alreadyMarked;
+    }
+
+    ALWAYS_INLINE static bool IsMarked(const ObjectHeader *object)
+    {
+        MarkBitmap *bitmap = ObjectToRegion(object)->GetMarkBitmap();
+        ASSERT(bitmap != nullptr);
+        if constexpr (ATOMIC) {
+            return bitmap->AtomicTest(object);
+        } else {
+            return bitmap->Test(object);
+        }
+    }
+
+private:
+    std::function<void(ObjectHeader *)> callback_;
+};
 }  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_G1_G1_MARKER_H

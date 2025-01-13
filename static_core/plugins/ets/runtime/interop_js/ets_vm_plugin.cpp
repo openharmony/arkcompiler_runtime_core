@@ -28,6 +28,7 @@
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
 #include "interop_js/napi_impl/napi_impl.h"
+#include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 
 namespace ark::ets::interop::js {
 
@@ -200,7 +201,7 @@ static void RegisterEventLoopModule()
     coro->GetPandaVM()->SetRunEventLoopFunction([](Coroutine *target) { EventLoop::RunEventLoop(target); });
 }
 
-static void InitInteropContext(napi_env env)
+static bool InitInteropContext(napi_env env)
 {
     auto coro = EtsCoroutine::GetCurrent();
     ScopedManagedCodeThread scoped(coro);
@@ -210,6 +211,7 @@ static void InitInteropContext(napi_env env)
     auto mainPoster = coro->GetPandaVM()->CreateCallbackPoster(coro);
     ASSERT(mainPoster != nullptr);
     coro->GetWorker()->SetCallbackPoster(std::move(mainPoster));
+    return XGC::Create();
 }
 
 static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
@@ -258,7 +260,7 @@ static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
     res &= RegisterTimerModule(env);
     RegisterEventLoopModule();
     if (res) {
-        InitInteropContext(env);
+        res = InitInteropContext(env);
     }
     napi_value napiRes;
     NAPI_ASSERT_OK(napi_get_boolean(env, res, &napiRes));
@@ -371,7 +373,7 @@ static napi_value CreateRuntime(napi_env env, napi_callback_info info)
     res &= RegisterTimerModule(env);
     RegisterEventLoopModule();
     if (res) {
-        InitInteropContext(env);
+        res = InitInteropContext(env);
     }
     napi_value napiRes;
     NAPI_ASSERT_OK(napi_get_boolean(env, res, &napiRes));

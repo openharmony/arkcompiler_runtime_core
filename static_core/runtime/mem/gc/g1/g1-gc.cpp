@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,8 +39,14 @@
 #include "runtime/include/stack_walker-inl.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "runtime/mem/gc/g1/g1-evacuate-regions-worker-state-inl.h"
+#include "runtime/mem/gc/g1/xgc-extension-data.h"
 
 namespace ark::mem {
+
+void Unreachable([[maybe_unused]] ObjectHeader *obj)
+{
+    UNREACHABLE();
+}
 
 /* static */
 template <class LanguageConfig>
@@ -66,6 +72,8 @@ G1GC<LanguageConfig>::G1GC(ObjectAllocatorBase *objectAllocator, const GCSetting
       marker_(this),
       concMarker_(this),
       mixedMarker_(this),
+      onPauseXMarker_(this, Unreachable),
+      concXMarker_(this, Unreachable),
       concurrentMarkingStack_(this),
       numberOfMixedTenuredRegions_(settings.GetG1NumberOfTenuredRegionsAtMixedCollection()),
       regionGarbageRateThreshold_(settings.G1RegionGarbageRateThreshold()),
@@ -553,6 +561,10 @@ void G1GC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_unu
             ExecuteHugeArrayMarkTask(hugeArrayTask->GetMarkingStack(), marker_);
             break;
         }
+        case GCWorkersTaskTypes::TASK_XREMARK: {
+            ExecuteRemarkTask(task->Cast<GCMarkWorkersTask>()->GetMarkingStack(), onPauseXMarker_);
+            break;
+        }
         case GCWorkersTaskTypes::TASK_FULL_MARK: {
             ExecuteFullMarkingTask(task->Cast<GCMarkWorkersTask>()->GetMarkingStack());
             break;
@@ -721,6 +733,15 @@ bool G1GC<LanguageConfig>::NeedFullGC(const ark::GCTask &task)
 }
 
 template <class LanguageConfig>
+void G1GC<LanguageConfig>::SetExtensionData(GCExtensionData *data)
+{
+    GenerationalGC<LanguageConfig>::SetExtensionData(data);
+    auto *xdata = reinterpret_cast<XGCExtensionData *>(data);
+    onPauseXMarker_ = XGCMarker<LanguageConfig, true>(this, xdata->GetXObjectHandler());
+    concXMarker_ = XGCMarker<LanguageConfig, true>(this, xdata->GetXObjectHandler());
+}
+
+template <class LanguageConfig>
 void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
 {
     SuspendUpdateRemsetWorkerScope stopUpdateRemsetWorkerScope(updateRemsetWorker_);
@@ -769,7 +790,9 @@ void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
         collectionSet_.clear();
         singlePassCompactionEnabled_ = false;
 
-        if (ScheduleMixedGCAndConcurrentMark(task)) {
+        if (task.reason == GCTaskCause::CROSSREF_CAUSE) {
+            RunConcurrentMark(task, onPauseXMarker_, concXMarker_);
+        } else if (ScheduleMixedGCAndConcurrentMark(task)) {
             RunConcurrentMark(task, marker_, concMarker_);
         }
     }
@@ -1059,6 +1082,21 @@ bool G1GC<LanguageConfig>::MarkObjectIfNotMarked(ObjectHeader *object)
         return mixedMarker_.MarkIfNotMarked(object);
     }
     return marker_.MarkIfNotMarked(object);
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::MarkObjectRecursively(ObjectHeader *object)
+{
+    ASSERT(object != nullptr);
+    ASSERT(this->GetLastGCCause() == GCTaskCause::CROSSREF_CAUSE);
+    ASSERT(this->GetGCPhase() == GCPhase::GC_PHASE_INITIAL_MARK || this->GetGCPhase() == GCPhase::GC_PHASE_MARK ||
+           this->GetGCPhase() == GCPhase::GC_PHASE_REMARK);
+    if (concXMarker_.MarkIfNotMarked(object)) {
+        auto *objectClass = object->template ClassAddr<BaseClass>();
+        concMarker_.MarkInstance(&concurrentMarkingStack_, object, objectClass);
+    } else {
+        LOG_DEBUG_GC << "Skip object: " << object << " since it is already marked";
+    }
 }
 
 template <class LanguageConfig>
@@ -1892,7 +1930,8 @@ void G1GC<LanguageConfig>::Remark(const GCTask &task, Marker &marker)
         bool useGcWorkers = this->GetSettings()->ParallelMarkingEnabled();
         GCMarkingStackType stack(this, useGcWorkers ? this->GetSettings()->GCRootMarkingStackMaxSize() : 0,
                                  useGcWorkers ? this->GetSettings()->GCWorkersMarkingStackMaxSize() : 0,
-                                 GCWorkersTaskTypes::TASK_REMARK,
+                                 task.reason == GCTaskCause::CROSSREF_CAUSE ? GCWorkersTaskTypes::TASK_XREMARK
+                                                                            : GCWorkersTaskTypes::TASK_REMARK,
                                  this->GetSettings()->GCMarkingStackNewTasksFrequency());
 
         // The mutator may create new regions.

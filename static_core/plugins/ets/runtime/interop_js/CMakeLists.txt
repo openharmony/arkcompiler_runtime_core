@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -31,6 +31,7 @@ panda_ets_interop_js_plugin(ets_interop_js_napi
         event_loop_module.cpp
         timer_module.cpp
         stack_info.cpp
+        xgc/xgc.cpp
     LIBRARIES
         arkruntime
 )
@@ -38,7 +39,7 @@ panda_ets_interop_js_plugin(ets_interop_js_napi
 set(ETS_INTEROP_HYBRID_SOURCES)
 if (PANDA_JS_ETS_HYBRID_MODE)
     list(APPEND ETS_INTEROP_HYBRID_SOURCES
-        ${ETS_EXT_SOURCES}/interop_js/hybrid/handshake.cpp
+        ${ETS_EXT_SOURCES}/interop_js/handshake.cpp
     )
 endif(PANDA_JS_ETS_HYBRID_MODE)
 
@@ -66,6 +67,7 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/js_job_queue.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_remote_promise_resolver.cpp
         ${ETS_EXT_SOURCES}/interop_js/stack_info.cpp
+        ${ETS_EXT_SOURCES}/interop_js/sts_vm_interface_impl.cpp
         ${ETS_INTEROP_ARCH_SOURCES}
         ${ETS_INTEROP_HYBRID_SOURCES}
 )
