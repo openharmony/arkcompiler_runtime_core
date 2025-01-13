@@ -399,7 +399,7 @@ def print_cppapi_stat(tests_pathes, api, expected=0):
 
     def get_element(array, i):
         if len(array) <= i:
-            return 0
+            return '-'
         return array[i]
 
     mock_tests_apis = list(dict.fromkeys(t.api

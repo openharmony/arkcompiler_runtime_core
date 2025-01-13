@@ -92,7 +92,7 @@ public:
     std::string GetName() const;
 
     /**
-     * @brief Get the Fields object
+     * @brief Get vector with Fields
      * @return std::vector<AnnotationInterfaceField>
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */

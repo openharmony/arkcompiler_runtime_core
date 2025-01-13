@@ -92,6 +92,13 @@ group("abckit_tests") {
   }
 }
 
+group("abckit_clean_scenario_tests") {
+  testonly = true
+  if (abckit_enable) {
+    deps = [ "tests:abckit_clean_scenarios_action" ]
+  }
+}
+
 group("abckit_tests_full") {
   testonly = true
   if (abckit_enable) {

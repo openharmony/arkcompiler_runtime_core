@@ -42,6 +42,32 @@ template("create_merge_file") {
   }
 }
 
+clean_scenario_js_from_ets_files = [
+  "clean_scenarios/c_api/dynamic/add_log/add_log_dynamic",
+  "clean_scenarios/c_api/dynamic/scan_subclasses/scan_subclasses",
+  "clean_scenarios/c_api/dynamic/parameter_check/parameter_check",
+  "clean_scenarios/c_api/dynamic/api_scanner/api_scanner",
+  "clean_scenarios/c_api/dynamic/branch_eliminator/branch_eliminator",
+  "clean_scenarios/c_api/dynamic/add_try_catch/add_try_catch",
+  "clean_scenarios/cpp_api/dynamic/add_log/add_log_dynamic",
+  "clean_scenarios/cpp_api/dynamic/branch_eliminator/branch_eliminator",
+  "clean_scenarios/cpp_api/dynamic/api_scanner/api_scanner",
+  "clean_scenarios/cpp_api/dynamic/add_try_catch/add_try_catch",
+  "clean_scenarios/cpp_api/dynamic/parameter_check/parameter_check",
+  "clean_scenarios/cpp_api/dynamic/scan_subclasses/scan_subclasses",
+]
+
+clean_scenario_ts_files = [
+  "clean_scenarios/c_api/dynamic/replace_call_site/replace_call_site",
+  "clean_scenarios/c_api/dynamic/router_table/router_table",
+
+  "clean_scenarios/cpp_api/dynamic/replace_call_site/replace_call_site",
+  "clean_scenarios/cpp_api/dynamic/router_table/router_table",
+]
+
+clean_scenario_ets_files =
+    [ "clean_scenarios/c_api/static/add_log/add_log_static" ]
+
 test_js_path = "//arkcompiler/runtime_core/libabckit/tests/"
 
 test_js_files = [
@@ -172,18 +198,6 @@ test_js_from_ets_files = [
   "scenarios/branch_eliminator/dynamic/branch_eliminator",
   "scenarios/scan_subclasses/dynamic/scan_subclasses",
   "scenarios/parameter_check/dynamic/parameter_check",
-  "scenarios_c_api_clean/dynamic/add_log/add_log_dynamic",
-  "scenarios_c_api_clean/dynamic/scan_subclasses/scan_subclasses",
-  "scenarios_c_api_clean/dynamic/parameter_check/parameter_check",
-  "scenarios_c_api_clean/dynamic/api_scanner/api_scanner",
-  "scenarios_c_api_clean/dynamic/branch_eliminator/branch_eliminator",
-  "scenarios_c_api_clean/dynamic/add_try_catch/add_try_catch",
-  "scenarios_cpp_api_clean/dynamic/add_log/add_log_dynamic",
-  "scenarios_cpp_api_clean/dynamic/branch_eliminator/branch_eliminator",
-  "scenarios_cpp_api_clean/dynamic/api_scanner/api_scanner",
-  "scenarios_cpp_api_clean/dynamic/add_try_catch/add_try_catch",
-  "scenarios_cpp_api_clean/dynamic/parameter_check/parameter_check",
-  "scenarios_cpp_api_clean/dynamic/scan_subclasses/scan_subclasses",
 
   "internal/ICSlotAllocator/ICSlotAllocator",
   "internal/implementation_api/abc_dynamic",
@@ -193,6 +207,7 @@ test_js_from_ets_files = [
   "wrong_mode_tests/mode_test_dynamic",
   "wrong_imm_tests/wrong_imm_test_dynamic",
 ]
+test_js_from_ets_files += clean_scenario_js_from_ets_files
 
 test_ts_files = [
   "cpp/tests/cpp_test_dynamic",
@@ -214,15 +229,10 @@ test_ts_files = [
   "ut/extensions/arkts/inspect_api/namespace/namespace_arkts_dynamic",
   "ut/extensions/arkts/modify_api/annotations/annotations_dynamic",
 
-  "scenarios_c_api_clean/dynamic/replace_call_site/replace_call_site",
-  "scenarios_c_api_clean/dynamic/router_table/router_table",
-
-  "scenarios_cpp_api_clean/dynamic/replace_call_site/replace_call_site",
-  "scenarios_cpp_api_clean/dynamic/router_table/router_table",
-
   "regression/issue_IB1YEI/issue_IB1YEI",
   "regression/issue_IB2T4M/issue_IB2T4M",
 ]
+test_ts_files += clean_scenario_ts_files
 
 test_ets_files = [
   "ut/metadata_core/inspect_api/modules/targets/ArkTS2_target",
@@ -300,8 +310,8 @@ test_ets_files = [
   "scenarios/replace_callsite/replace_callsite_static",
   "scenarios/api_scanner/static/api_scanner_static",
   "scenarios/static_branch_elimination/static_branch_elimination",
-  "scenarios_c_api_clean/static/add_log/add_log_static",
 ]
+test_ets_files += clean_scenario_ets_files
 
 module_output_path = "arkcompiler/runtime_core/libabckit"
 
@@ -513,6 +523,23 @@ libabckit_host_unittest_action("abckit_gtests") {
   module_out_path = module_output_path
 
   sources = [
+    "clean_scenarios/c_api/dynamic/add_log/add_log_dynamic_test.cpp",
+    "clean_scenarios/c_api/dynamic/add_try_catch/add_try_catch_test.cpp",
+    "clean_scenarios/c_api/dynamic/api_scanner/api_scanner_test.cpp",
+    "clean_scenarios/c_api/dynamic/branch_eliminator/branch_eliminator_test.cpp",
+    "clean_scenarios/c_api/dynamic/parameter_check/parameter_check_test.cpp",
+    "clean_scenarios/c_api/dynamic/replace_call_site/replace_call_site_test.cpp",
+    "clean_scenarios/c_api/dynamic/router_table/router_table_test.cpp",
+    "clean_scenarios/c_api/dynamic/scan_subclasses/scan_subclasses_test.cpp",
+    "clean_scenarios/c_api/static/add_log/add_log_static_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/add_log/add_log_dynamic_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/add_try_catch/add_try_catch.cpp",
+    "clean_scenarios/cpp_api/dynamic/api_scanner/api_scanner_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/branch_eliminator/branch_eliminator_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/parameter_check/parameter_check_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/replace_call_site/replace_call_site_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/router_table/router_table_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/scan_subclasses/scan_subclasses_test.cpp",
     "cpp/tests/cpp_test.cpp",
     "helpers/helpers.cpp",
     "helpers/helpers_mode.cpp",
@@ -555,23 +582,6 @@ libabckit_host_unittest_action("abckit_gtests") {
     "scenarios/scan_subclasses/dynamic/scan_subclasses_test.cpp",
     "scenarios/scan_subclasses/dynamic/subclasses_scanner.cpp",
     "scenarios/static_branch_elimination/static_branch_elimination.cpp",
-    "scenarios_c_api_clean/dynamic/add_log/add_log_dynamic_test.cpp",
-    "scenarios_c_api_clean/dynamic/add_try_catch/add_try_catch_test.cpp",
-    "scenarios_c_api_clean/dynamic/api_scanner/api_scanner_test.cpp",
-    "scenarios_c_api_clean/dynamic/branch_eliminator/branch_eliminator_test.cpp",
-    "scenarios_c_api_clean/dynamic/parameter_check/parameter_check_test.cpp",
-    "scenarios_c_api_clean/dynamic/replace_call_site/replace_call_site_test.cpp",
-    "scenarios_c_api_clean/dynamic/router_table/router_table_test.cpp",
-    "scenarios_c_api_clean/dynamic/scan_subclasses/scan_subclasses_test.cpp",
-    "scenarios_c_api_clean/static/add_log/add_log_static_test.cpp",
-    "scenarios_cpp_api_clean/dynamic/add_log/add_log_dynamic_test.cpp",
-    "scenarios_cpp_api_clean/dynamic/add_try_catch/add_try_catch.cpp",
-    "scenarios_cpp_api_clean/dynamic/api_scanner/api_scanner_test.cpp",
-    "scenarios_cpp_api_clean/dynamic/branch_eliminator/branch_eliminator_test.cpp",
-    "scenarios_cpp_api_clean/dynamic/parameter_check/parameter_check_test.cpp",
-    "scenarios_cpp_api_clean/dynamic/replace_call_site/replace_call_site_test.cpp",
-    "scenarios_cpp_api_clean/dynamic/router_table/router_table_test.cpp",
-    "scenarios_cpp_api_clean/dynamic/scan_subclasses/scan_subclasses_test.cpp",
     "ut/extensions/arkts/inspect_api/api_casts/api_casts.cpp",
     "ut/extensions/arkts/inspect_api/modules/modules_dynamic_test.cpp",
     "ut/extensions/arkts/inspect_api/namespace/namespace_arkts.cpp",
@@ -736,6 +746,74 @@ libabckit_host_unittest_action("abckit_gtests") {
   }
 
   foreach(file, test_ets_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  if (is_ohos && is_standard_system) {
+    test_abc_dir = "/data/test"
+  } else {
+    test_abc_dir = rebase_path(target_out_dir)
+  }
+
+  test_js_dir = rebase_path(test_js_path)
+
+  defines = [
+    "ABCKIT_ABC_DIR=\"${test_abc_dir}/\"",
+    "ABCKIT_TEST_DIR=\"${test_js_dir}\"",
+  ]
+}
+
+libabckit_host_unittest_action("abckit_clean_scenarios") {
+  module_out_path = module_output_path
+
+  sources = [
+    "clean_scenarios/c_api/dynamic/add_log/add_log_dynamic_test.cpp",
+    "clean_scenarios/c_api/dynamic/add_try_catch/add_try_catch_test.cpp",
+    "clean_scenarios/c_api/dynamic/api_scanner/api_scanner_test.cpp",
+    "clean_scenarios/c_api/dynamic/branch_eliminator/branch_eliminator_test.cpp",
+    "clean_scenarios/c_api/dynamic/parameter_check/parameter_check_test.cpp",
+    "clean_scenarios/c_api/dynamic/replace_call_site/replace_call_site_test.cpp",
+    "clean_scenarios/c_api/dynamic/router_table/router_table_test.cpp",
+    "clean_scenarios/c_api/dynamic/scan_subclasses/scan_subclasses_test.cpp",
+    "clean_scenarios/c_api/static/add_log/add_log_static_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/add_log/add_log_dynamic_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/add_try_catch/add_try_catch.cpp",
+    "clean_scenarios/cpp_api/dynamic/api_scanner/api_scanner_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/branch_eliminator/branch_eliminator_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/parameter_check/parameter_check_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/replace_call_site/replace_call_site_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/router_table/router_table_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/scan_subclasses/scan_subclasses_test.cpp",
+    "helpers/helpers.cpp",
+    "helpers/helpers_mode.cpp",
+    "helpers/visit_helper/visit_helper.cpp",
+  ]
+
+  include_dirs = [
+    "$ark_root_dynamic",
+    "$abckit_root",
+    "$abckit_root/include",
+    "$abckit_root/src",
+    "$abckit_root/tests",
+  ]
+
+  configs = [ "$abckit_root:abckit_config" ]
+
+  deps = [
+    ":abckit_ets_vm_helpers",
+    ":abckit_js_vm_helpers",
+    "$abckit_root/src:libabckit",
+  ]
+
+  foreach(file, clean_scenario_js_from_ets_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  foreach(file, clean_scenario_ts_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  foreach(file, clean_scenario_ets_files) {
     deps += [ ":gen_${file}_abc" ]
   }
 
