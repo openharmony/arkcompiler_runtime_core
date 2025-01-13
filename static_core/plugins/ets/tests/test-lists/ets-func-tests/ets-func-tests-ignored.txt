@@ -522,3 +522,8 @@ spec/05.Generics/tuple_as_generic_args_0030.sts
 
 # Issue 21176
 spec/09.classes/9.5.Field_Declaration/class_with_optional_attributes_0006.sts
+
+# Issue 21490
+regression/21490_0.sts
+regression/21490_1.sts
+regression/21490_2.sts
