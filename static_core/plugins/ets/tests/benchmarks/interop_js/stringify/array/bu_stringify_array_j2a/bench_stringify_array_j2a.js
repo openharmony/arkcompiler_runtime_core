@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,36 +31,25 @@ function main() {
         return 1;
     }
 
-    const MS2NS = 1000000;
+    const iterations = 1000000;
     let totalTime = 0;
 
-    const Person = stsVm.getClass('LStringifyJ2a;');
     const getArray = stsVm.getFunction('LETSGLOBAL;', 'getArray');
 
-    const obj = new Person();
     const array = getArray();
 
+    let start;
+    let loopTime = 0;
 
-    function toStringify(arg, target) {
-        let start;
-        let loopTime = 0;
-
-        for (let i = 0; i < MS2NS; i++) {
-            start = process.hrtime.bigint();
-            JSON.stringify(arg);
-            loopTime += Number(process.hrtime.bigint() - start);
-        }
-
-        console.log(`Benchmark result: stringify_j2a ${target} ` + loopTime);
-        totalTime += loopTime;
+    for (let i = 0; i < iterations; i++) {
+        start = process.hrtime.bigint();
+        JSON.stringify(array);
+        loopTime += Number(process.hrtime.bigint() - start);
     }
 
-    toStringify(array, 'array');
+    totalTime += loopTime;
 
-
-    toStringify(obj, 'object');
-
-    console.log('Benchmark result: stringify_j2a ' + totalTime);
+    console.log('Benchmark result: stringify_array_j2a ' + totalTime);
 
     return null;
 }

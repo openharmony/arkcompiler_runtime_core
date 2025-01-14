@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,11 @@
  * limitations under the License.
  */
 
-const array: int[] = [1, 2, 3, 4, 5];
-class Person {
-    name = 'string';
-    constructor() {}
-}
+import {
+    array,
+} from 'import';
 
-export class StringifyA2a {
+export class StringifyArrayA2j {
 
     state: number = 0
     totalTime: number = 0;
@@ -29,34 +27,24 @@ export class StringifyA2a {
         console.log('starting')
     }
 
-    bench(): int {
-        return 1;
-    }
-
     test(): number {
-        const obj = new Person();
-        this.bench();
+        this.setup();
 
-        this.toStringify(this.runsLeft, array, 'array');
-
-        this.toStringify(this.runsLeft, obj, 'object');
-
-        return this.totalTime;
-    }
-
-    toStringify<T>(iterations: number, valueA: T, target: string): void {
+        let iterations: number = this.runsLeft;
         let start: number;
         let loopTime: number = 0;
 
         while (iterations > 0) {
             start = Chrono.nanoNow();
-            JSON.stringify(valueA);
+            JSON.stringify(array);
 
             loopTime += Chrono.nanoNow() - start;
             iterations = iterations - 1;
         }
 
-        console.log(`Benchmark result: stringify_a2a ${target} ` + loopTime);
+        console.log(`Benchmark result: stringify_array_a2j ` + loopTime);
         this.totalTime += loopTime;
+
+        return this.totalTime;
     }
 }
