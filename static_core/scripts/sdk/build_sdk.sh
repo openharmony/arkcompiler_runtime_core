@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -55,7 +55,8 @@ export PANDA_SDK_PATH="$SDK_BUILD_ROOT/sdk"
 rm -r -f "$PANDA_SDK_PATH"
 
 source "$SCRIPT_DIR"/build_sdk_lib
-ohos
+ohos_arm64
+ohos_arm32
 linux_arm64_tools
 linux_tools
 windows_tools

@@ -238,7 +238,7 @@ if(PANDA_TARGET_OHOS)
     set(PANDA_WITH_BENCHMARKS false)
     add_definitions(-D__MUSL__)
 
-    if(PANDA_TARGET_ARM64)
+    if(PANDA_TARGET_ARM64 OR PANDA_TARGET_ARM32)
         # WORKAROUND:
         #   Disable '-Wunused-command-line-argument' error to avoid compilation error:
         #   clang++: error: argument unused during compilation: '--gcc-toolchain=<path/to/toolchain>/llvm' [-Werror,-Wunused-command-line-argument]
