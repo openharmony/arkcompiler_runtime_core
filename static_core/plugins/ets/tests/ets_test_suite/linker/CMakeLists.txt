@@ -29,15 +29,6 @@ set(linker_tests
 set(linker_tests_in_dir "${CMAKE_CURRENT_SOURCE_DIR}")
 set(linker_tests_out_dir "${CMAKE_CURRENT_BINARY_DIR}")
 
-macro(get_ets_int_targets_list result target)
-    set(ets_int_target ${target}-ets-int)
-    set(targets_list ${ets_int_target}-cpp ${ets_int_target}-irtoc)
-    if (PANDA_LLVM_INTERPRETER)
-        set(targets_list ${targets_list} ${ets_int_target}-llvmirtoc)
-    endif()
-    set(${result} ${targets_list})
-endmacro()
-
 add_custom_target(ets_test_suite_linker)
 
 function(add_target_with_dependencies test_suite target additional_dependencies)
@@ -63,7 +54,7 @@ function(add_linker_test test additional_dependencies)
     run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target} ${should_skip_compiler})
 
     # int
-    get_ets_int_targets_list(int_targets_list ${target})
+    get_ets_int_targets_list(int_targets_list ${target}-ets-int)
     foreach(int_target ${int_targets_list})
         add_target_with_dependencies(ets_test_suite_linker ${int_target} "${additional_dependencies}")
     endforeach()

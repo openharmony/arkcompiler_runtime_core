@@ -46,7 +46,7 @@ class Test {
         const placeholderClass = Class.of(new A());
         const testLoadObject = (runtimeLinker: RuntimeLinker) => {
             const cls = runtimeLinker.loadClass(Test.stdCoreObjectName);
-            assert(cls == placeholderClass);
+            assertEQ(cls, placeholderClass, "dummy linker must always return class A");
         };
 
         const dummyLinker = new DummyRuntimeLinker(placeholderClass);
@@ -59,16 +59,16 @@ class Test {
     static testEmptyAbcRuntimeLinker() {
         const linker = new AbcRuntimeLinker(null, []);
         const cls1 = linker.loadClass(Test.stdCoreObjectName);
-        assert(cls1 == Class.of(new Object()));
+        assertEQ(cls1, Class.of(new Object()));
         // Object must be returned from BootRuntimeLinker
-        assert(cls1.getLinker() == getBootRuntimeLinker());
+        assertEQ(cls1.getLinker(), getBootRuntimeLinker(), "std.core.Object must be loaded by BootRuntimeLinker");
         const cls2 = getBootRuntimeLinker().loadClass(Test.stdCoreObjectName);
-        assert(cls1 == cls2);
+        assertEQ(cls1, cls2, "loadClass must be idempotent");
     }
 
     static getAdditionalFilesList() {
         const abcFiles = ProcessManager.getEnvironmentVar("ADDITIONAL_ABC_FILES");
-        assert(abcFiles.length > 0);
+        assertLT(0, abcFiles.length, "this test must have additional abc files")
         return abcFiles.split(":");
     }
 
@@ -76,32 +76,31 @@ class Test {
         const abcLinker = new AbcRuntimeLinker(null, Test.getAdditionalFilesList());
 
         const objectClass = abcLinker.loadClass(Test.stdCoreObjectName);
-        // Object must be returned from BootRuntimeLinker
-        assert(objectClass == Class.of(new Object()));
-        assert(objectClass.getLinker() == getBootRuntimeLinker());
+        assertEQ(objectClass, Class.of(new Object()));
+        assertEQ(objectClass.getLinker(), getBootRuntimeLinker(), "std.core.Object must be loaded by BootRuntimeLinker");
 
         // Load class from "additional1.sts"
         const cls1 = abcLinker.loadClass(Test.additionalClass1Name, true);
-        assert(cls1 != null);
-        assert(cls1.getLinker() == abcLinker);
+        assertNE(cls1, null, "AdditionalClass1 must be found");
+        assertEQ(cls1.getLinker(), abcLinker, "AdditionalClass1 must be loaded by custom linker");
 
         // Load class from "additional2.sts"
         // As side effect, this must load "additional3.sts" and execute code from it
         const cls2 = abcLinker.loadClass(Test.additionalClass2Name, true);
-        assert(cls2 != null);
-        assert(cls2.getLinker() == abcLinker);
+        assertNE(cls2, null, "AdditionalClass2 must be found");
+        assertEQ(cls2.getLinker(), abcLinker, "AdditionalClass2 must be loaded by custom linker");
 
         // Check that RuntimeLinker loads into an isolated context
         const abcLinker2 = new AbcRuntimeLinker(null, Test.getAdditionalFilesList());
         // Load firstly "AdditionalClass2", which must trigger load of "AdditionalClass1"
         const otherLinkerClass2 = abcLinker2.loadClass(Test.additionalClass2Name, true);
-        assert(otherLinkerClass2 != null);
-        assert(otherLinkerClass2.getLinker() == abcLinker2);
-        assert(cls2 != otherLinkerClass2);
+        assertNE(otherLinkerClass2, null);
+        assertEQ(otherLinkerClass2.getLinker(), abcLinker2, "linker contexts must be isolated");
+        assertNE(cls2, otherLinkerClass2, "classes from different contexts must not conflict");
         const otherLinkerClass1 = abcLinker2.loadClass(Test.additionalClass1Name, true);
-        assert(otherLinkerClass1 != null);
-        assert(otherLinkerClass1.getLinker() == abcLinker2);
-        assert(cls1 != otherLinkerClass1);
+        assertNE(otherLinkerClass1, null);
+        assertEQ(otherLinkerClass1.getLinker(), abcLinker2, "linker contexts must be isolated");
+        assertNE(cls1, otherLinkerClass1, "classes from different contexts must not conflict");
     }
 
     static testCustomAbcRuntimeLinker() {
@@ -117,11 +116,11 @@ class Test {
         // Load firstly "AdditionalClass2", which must trigger load of "AdditionalClass1"
         // - "A" must be loaded instead of "AdditionalClass1"
         const cls2 = linker.loadClass(Test.additionalClass2Name, true);
-        assert(cls2 != null);
-        assert(cls2.getLinker() == baseLinker);
+        assertNE(cls2, null);
+        assertEQ(cls2.getLinker(), baseLinker);
         const cls1 = linker.loadClass(Test.additionalClass1Name, true);
-        assert(cls1 == placeholderClass);
-        assert(cls1.getLinker() == getBootRuntimeLinker());
+        assertEQ(cls1, placeholderClass);
+        assertEQ(cls1.getLinker(), getBootRuntimeLinker());
     }
 
     static testClassInitializationFail() {
@@ -134,8 +133,8 @@ class Test {
 
         // Load "AdditionalClass2" without initialization
         const cls2 = linker.loadClass(Test.additionalClass2Name, false);
-        assert(cls2 != null);
-        assert(cls2.getLinker() == linker);
+        assertNE(cls2, null);
+        assertEQ(cls2.getLinker(), linker);
         // Trigger initialization, which will not find "AdditionalClass1"
         expectThrow(() => { linker.loadClass(Test.additionalClass2Name, true); },
             (e) => e instanceof NoClassDefFoundError

@@ -207,7 +207,11 @@ bool EtsClassLinkerContext::TryLoadingClassFromNative(const uint8_t *descriptor,
 
     DecoratorErrorHandler handler(errorHandler);
     auto succeeded = TryLoadingClassInChain(descriptor, handler, this, klass);
-    if (succeeded && *klass == nullptr && !handler.HasError()) {
+    if (handler.HasError()) {
+        // Report errors occurred during class loading
+        ASSERT(*klass == nullptr);
+        handler.PropagateError();
+    } else if (succeeded && *klass == nullptr) {
         ReportClassNotFound(descriptor, errorHandler);
     }
     return succeeded;

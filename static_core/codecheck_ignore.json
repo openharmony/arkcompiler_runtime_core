@@ -69,7 +69,6 @@
   "plugins/ets/tests/ets_test_suite/intrinsics": "*",
   "plugins/ets/tests/ets_test_suite/lambda": "*",
   "plugins/ets/tests/ets_test_suite/linker": "*",
-  "plugins/ets/tests/ets_test_suite/modules-config/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/ets_test_suite/modules/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/ets_test_suite/overload": "*",
   "plugins/ets/tests/ets_test_suite/strings": "*",
