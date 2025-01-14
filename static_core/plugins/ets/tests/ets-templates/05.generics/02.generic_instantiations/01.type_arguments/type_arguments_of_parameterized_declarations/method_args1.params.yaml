@@ -103,7 +103,7 @@ cases:
   # Autoboxing of primitives
   - use: |-
       let v = 1
-      if (a.meth<int>(1, 2) != 2) {
+      if (a.meth<int>(1, 2) != 1) {
           return 1;
       }
 
