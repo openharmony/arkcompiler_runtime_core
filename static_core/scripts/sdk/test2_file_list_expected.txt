@@ -16,6 +16,7 @@ build-sdk/sdk/linux_arm64_host_tools/bin/ark_aot
 build-sdk/sdk/linux_arm64_host_tools/bin/ark_disasm
 build-sdk/sdk/linux_arm64_host_tools/bin/ark_link
 build-sdk/sdk/linux_arm64_host_tools/bin/es2panda
+build-sdk/sdk/linux_arm64_host_tools/bin/verifier
 build-sdk/sdk/linux_arm64_host_tools/lib
 build-sdk/sdk/linux_arm64_host_tools/lib/libarkaotmanager.so
 build-sdk/sdk/linux_arm64_host_tools/lib/libarkassembler.so
@@ -43,6 +44,7 @@ build-sdk/sdk/linux_host_tools/bin/ark_aot
 build-sdk/sdk/linux_host_tools/bin/ark_disasm
 build-sdk/sdk/linux_host_tools/bin/ark_link
 build-sdk/sdk/linux_host_tools/bin/es2panda
+build-sdk/sdk/linux_host_tools/bin/verifier
 build-sdk/sdk/linux_host_tools/lib
 build-sdk/sdk/linux_host_tools/lib/libarkaotmanager.so
 build-sdk/sdk/linux_host_tools/lib/libarkassembler.so

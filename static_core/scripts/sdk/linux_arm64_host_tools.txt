@@ -3,6 +3,7 @@ bin/ark_aot
 bin/ark_disasm
 bin/ark_link
 bin/es2panda
+bin/verifier
 lib/libarkaotmanager.so
 lib/libarkassembler.so
 lib/libarkbase.so
