@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -978,23 +978,24 @@ bool GC::IsGenerational() const
 void GC::GCListenerManager::AddListener(GCListener *listener)
 {
     os::memory::LockHolder lh(listenerLock_);
-    newListeners_.insert(listener);
+    newListeners_.push_back(listener);
 }
 
 void GC::GCListenerManager::RemoveListener(GCListener *listener)
 {
     os::memory::LockHolder lh(listenerLock_);
-    listenersForRemove_.insert(listener);
+    listenersForRemove_.push_back(listener);
 }
 
 void GC::GCListenerManager::NormalizeListenersOnStartGC()
 {
     os::memory::LockHolder lh(listenerLock_);
     for (auto *listenerForRemove : listenersForRemove_) {
-        if (newListeners_.find(listenerForRemove) != newListeners_.end()) {
-            newListeners_.erase(listenerForRemove);
+        auto it = std::find(newListeners_.begin(), newListeners_.end(), listenerForRemove);
+        if (it != newListeners_.end()) {
+            newListeners_.erase(it);
         }
-        auto it = currentListeners_.find(listenerForRemove);
+        it = std::find(currentListeners_.begin(), currentListeners_.end(), listenerForRemove);
         if (it != currentListeners_.end()) {
             LOG(DEBUG, GC) << "Remove listener for GC: " << listenerForRemove;
             currentListeners_.erase(it);
@@ -1003,7 +1004,7 @@ void GC::GCListenerManager::NormalizeListenersOnStartGC()
     listenersForRemove_.clear();
     for (auto *newListener : newListeners_) {
         LOG(DEBUG, GC) << "Add new listener for GC: " << newListener;
-        currentListeners_.insert(newListener);
+        currentListeners_.push_back(newListener);
     }
     newListeners_.clear();
 }

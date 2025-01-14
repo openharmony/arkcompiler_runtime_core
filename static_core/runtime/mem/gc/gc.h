@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -735,9 +735,9 @@ private:
 
     private:
         os::memory::Mutex listenerLock_;
-        PandaUnorderedSet<GCListener *> currentListeners_ GUARDED_BY(listenerLock_);
-        PandaUnorderedSet<GCListener *> newListeners_ GUARDED_BY(listenerLock_);
-        PandaUnorderedSet<GCListener *> listenersForRemove_ GUARDED_BY(listenerLock_);
+        PandaList<GCListener *> currentListeners_ GUARDED_BY(listenerLock_);
+        PandaList<GCListener *> newListeners_ GUARDED_BY(listenerLock_);
+        PandaList<GCListener *> listenersForRemove_ GUARDED_BY(listenerLock_);
     };
 
     volatile std::atomic<GCPhase> phase_ {GCPhase::GC_PHASE_IDLE};
