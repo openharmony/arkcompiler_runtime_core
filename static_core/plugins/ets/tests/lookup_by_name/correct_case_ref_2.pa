@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -31,7 +31,7 @@
     std.core.NoSuchFieldError foo
 }
 
-.function std.core.NoSuchFieldError A.baz(A a0) <access.function=public> {
+.function std.core.NoSuchFieldError A.<get>baz(A a0) <access.function=public> {
     newobj v0, std.core.NoSuchFieldError
     lda.str "42"
     stobj.obj v0, std.core.NoSuchFieldError.message
@@ -39,7 +39,7 @@
     return.obj
 }
 
-.function void C.bar(C a0, std.core.Exception a1) <access.function=public> {
+.function void C.<set>bar(C a0, std.core.Exception a1) <access.function=public> {
     ldobj.v.obj v0, a0, C.foo
     ldobj.obj a1, std.core.Exception.message
     stobj.obj v0, std.core.NoSuchFieldError.message

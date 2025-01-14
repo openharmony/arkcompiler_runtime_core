@@ -20,6 +20,8 @@
 
 namespace ark::ets {
 
+constexpr static uint64_t METHOD_FLAG_MASK = 0x00000001;
+
 class EtsCoroutine;
 class EtsObject;
 class EtsClass;
@@ -39,6 +41,25 @@ inline EtsClass *GetMethodOwnerClassInFrames(EtsCoroutine *coro, uint32_t depth)
 
 // Compute typeof
 EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj);
+
+template <bool IS_GETTER>
+inline void LookUpException(ark::Class *klass, Field *rawField);
+
+template <bool IS_GETTER = true>
+inline Field *GetFieldByName(InterpreterCache::Entry *entry, ark::Method *method, Field *rawField,
+                             const uint8_t *address, ark::Class *klass);
+
+template <panda_file::Type::TypeId FIELD_TYPE, bool IS_GETTER>
+inline ark::Method *GetAccessorByName(InterpreterCache::Entry *entry, ark::Method *method, Field *rawField,
+                                      const uint8_t *address, ark::Class *klass);
+
+inline Field *LookupFieldByName(panda_file::File::StringData name, const ark::Class *klass);
+
+template <panda_file::Type::TypeId FIELD_TYPE>
+inline ark::Method *LookupGetterByName(panda_file::File::StringData name, const ark::Class *klass);
+
+template <panda_file::Type::TypeId FIELD_TYPE>
+inline ark::Method *LookupSetterByName(panda_file::File::StringData name, const ark::Class *klass);
 
 }  // namespace ark::ets
 

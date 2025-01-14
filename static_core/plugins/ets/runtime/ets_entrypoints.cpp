@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -158,46 +158,42 @@ extern "C" ObjectHeader *LaunchFromInterpreterRange(Method *method, Frame *frame
 extern "C" Field *LookupFieldByNameEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id,
                                               Method *caller, const uint8_t *pc)
 {
-    auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+    auto current = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
-    auto *field = klass->LookupFieldByName(rawField->GetName());
-    if (field != nullptr) {
-        *entry = {pc, caller, static_cast<void *>(field)};
+    Field *metaField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
+    if (UNLIKELY(metaField == nullptr)) {
+        HandlePendingException();
+        return nullptr;
     }
-    return field;
+    return GetFieldByName(entry, caller, metaField, pc, current);
 }
-
-constexpr static uint64_t METHOD_FLAG_MASK = 0x00000001;
 
 template <panda_file::Type::TypeId FORMAT>
 Method *LookupGetterByNameEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id, Method *caller,
                                      const uint8_t *pc)
 {
-    auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+    auto current = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
-    auto *method = klass->LookupGetterByName<FORMAT>(rawField->GetName());
-    auto mUint = reinterpret_cast<uint64_t>(method);
-    if (method != nullptr) {
-        *entry = {pc, caller, reinterpret_cast<Method *>(mUint | METHOD_FLAG_MASK)};
+    Field *metaField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
+    if (UNLIKELY(metaField == nullptr)) {
+        HandlePendingException();
+        return nullptr;
     }
-    return method;
+    return GetAccessorByName<FORMAT, true>(entry, caller, metaField, pc, current);
 }
 
 template <panda_file::Type::TypeId FORMAT>
 Method *LookupSetterByNameEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id, Method *caller,
                                      const uint8_t *pc)
 {
-    auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+    auto current = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
-    auto *method = klass->LookupSetterByName<FORMAT>(rawField->GetName());
-    auto mUint = reinterpret_cast<uint64_t>(method);
-    if (method != nullptr) {
-        *entry = {pc, caller, reinterpret_cast<Method *>(mUint | METHOD_FLAG_MASK)};
+    Field *metaField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
+    if (UNLIKELY(metaField == nullptr)) {
+        HandlePendingException();
+        return nullptr;
     }
-    return method;
+    return GetAccessorByName<FORMAT, false>(entry, caller, metaField, pc, current);
 }
 
 extern "C" Method *LookupGetterByNameShortEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id,
@@ -241,13 +237,7 @@ extern "C" void ThrowEtsExceptionNoSuchGetterEntrypoint(ObjectHeader *obj, uint3
     auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
     auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
-    auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) + " does not have field and getter with name " +
-                    utf::Mutf8AsCString(rawField->GetName().data);
-    ThrowEtsException(
-        EtsCoroutine::GetCurrent(),
-        utf::Mutf8AsCString(
-            Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS).GetNoSuchFieldErrorDescriptor()),
-        errorMsg);
+    LookUpException<true>(klass, rawField);
 }
 
 extern "C" void ThrowEtsExceptionNoSuchSetterEntrypoint(ObjectHeader *obj, uint32_t id, Method *caller)
@@ -255,13 +245,7 @@ extern "C" void ThrowEtsExceptionNoSuchSetterEntrypoint(ObjectHeader *obj, uint3
     auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
     auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
-    auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) + " does not have field and setter with name " +
-                    utf::Mutf8AsCString(rawField->GetName().data);
-    ThrowEtsException(
-        EtsCoroutine::GetCurrent(),
-        utf::Mutf8AsCString(
-            Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS).GetNoSuchFieldErrorDescriptor()),
-        errorMsg);
+    LookUpException<false>(klass, rawField);
 }
 
 extern "C" ObjectHeader *StringBuilderAppendLongEntrypoint(ObjectHeader *sb, int64_t v)

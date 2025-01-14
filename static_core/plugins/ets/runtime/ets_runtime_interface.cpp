@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include <string>
 
 #include "ets_runtime_interface.h"
+#include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "types/ets_method.h"
 
@@ -32,17 +33,37 @@ compiler::RuntimeInterface::FieldPtr EtsRuntimeInterface::ResolveLookUpField(Fie
 {
     ASSERT(rawField != nullptr);
     ASSERT(klass != nullptr);
-    return ClassCast(klass)->LookupFieldByName(FieldCast(rawField)->GetName());
+    Class *current = ClassCast(klass);
+    Field *raw = FieldCast(rawField);
+    while (current != nullptr) {
+        Field *field = LookupFieldByName(raw->GetName(), current);
+        if (LIKELY(field != nullptr)) {
+            return field;
+        }
+        current = current->GetBase();
+    }
+    return nullptr;
 }
 
 template <panda_file::Type::TypeId FIELD_TYPE>
 compiler::RuntimeInterface::MethodPtr EtsRuntimeInterface::GetLookUpCall(FieldPtr rawField, ClassPtr klass,
                                                                          bool isSetter)
 {
-    if (isSetter) {
-        return ClassCast(klass)->LookupSetterByName<FIELD_TYPE>(FieldCast(rawField)->GetName());
+    Field *raw = FieldCast(rawField);
+    Method *method = nullptr;
+    Class *current = ClassCast(klass);
+    while (current != nullptr) {
+        if (isSetter) {
+            method = LookupSetterByName<FIELD_TYPE>(raw->GetName(), current);
+        } else {
+            method = LookupGetterByName<FIELD_TYPE>(raw->GetName(), current);
+        }
+        if (LIKELY(method != nullptr)) {
+            return method;
+        }
+        current = current->GetBase();
     }
-    return ClassCast(klass)->LookupGetterByName<FIELD_TYPE>(FieldCast(rawField)->GetName());
+    return method;
 }
 
 compiler::RuntimeInterface::MethodPtr EtsRuntimeInterface::ResolveLookUpCall(FieldPtr rawField, ClassPtr klass,

@@ -83,6 +83,20 @@ public:
     {
         return war_;
     }
+    inline bool IsUnderscoreOrDollarOrHyphen(char c)
+    {
+        return c == '_' || c == '$' || c == '-';
+    }
+
+    inline bool IsAlphaNumeric(char c)
+    {
+        return std::isalnum(c) != 0 || IsUnderscoreOrDollarOrHyphen(c);
+    }
+
+    inline bool IsNonDigit(char c)
+    {
+        return std::isalpha(c) != 0 || IsUnderscoreOrDollarOrHyphen(c);
+    }
 
 private:
     ark::pandasm::Program program_;
@@ -104,6 +118,22 @@ private:
     bool arrayDef_ = false;
     bool funcDef_ = false;
     static constexpr uint32_t INTRO_CONST_ARRAY_LITERALS_NUMBER = 2;
+
+    enum class BracketOptions : uint8_t {
+        NOT_ALLOW_BRACKETS = 0,
+        ALLOW_BRACKETS = 1,
+        ALLOW_ANGLE_BRACKETS = 2,
+        ALL_BRACKETS = ALLOW_BRACKETS | ALLOW_ANGLE_BRACKETS
+    };
+
+    bool IsAllowAngleBrackets(BracketOptions options)
+    {
+        return (static_cast<uint8_t>(options) & static_cast<uint8_t>(BracketOptions::ALLOW_ANGLE_BRACKETS)) != 0;
+    }
+    bool IsAllowBrackets(BracketOptions options)
+    {
+        return (static_cast<uint8_t>(options) & static_cast<uint8_t>(BracketOptions::ALLOW_BRACKETS)) != 0;
+    }
 
     inline Error GetError(const std::string &mess = "", Error::ErrorType err = Error::ErrorType::ERR_NONE,
                           int8_t shift = 0, int tokenShift = 0, const std::string &addMess = "") const
@@ -149,7 +179,7 @@ private:
     bool ParseFunctionArgComma(bool &comma);
     bool ParseFunctionArgs();
     bool ParseType(Type *type);
-    bool PrefixedValidName(bool allowBrackets = false);
+    bool PrefixedValidName(BracketOptions options = BracketOptions::NOT_ALLOW_BRACKETS);
     bool ParseMetaListComma(bool &comma, bool eq);
     bool MeetExpMetaList(bool eq);
     bool BuildMetaListAttr(bool &eq, std::string &attributeName, std::string &attributeValue);
