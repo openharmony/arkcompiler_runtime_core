@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,58 +16,80 @@
 package std.core;
 
 /**
- * Unstable API, represents internal runtime type descriptor
+ * @class RuntimeLinker base class.
+ * All classes deriving from RuntimeLinker must implement findClass.
  */
-export final class Class {
-    private name: string | null
-    private superClass: Class | null
-    private flags: int
-
-    private constructor() { throw new Error("Class constructor called") }
-    private native getNameInternal(): string;
-
-    public getName(): string {
-        return this.name ?? this.getNameInternal()
-    }
-
-    public getSuper(): Class | null {
-        return this.superClass
-    }
-
-    public native getLinker(): RuntimeLinker
-
-    /**
-     * Invoke class initializer once if class is not initialized
-     */
-    public native initialize(): void
-
-    public static native of(obj: Object): Class
-
-    /**
-     * Get class of caller method
-     */
-    public static native ofCaller(): Class
-
-    public native createInstance(): Object
-
-    /**
-     * Get internal string descriptor
-     */
-    public native getDescriptor(): string
-}
-
-/**
- * Unstable API, represents internal runtime type linking and loading APIs
- */
-export final class RuntimeLinker {
+export abstract class RuntimeLinker {
     private classLinkerCtxPtr: long;
 
-    private constructor() { throw new Error("RuntimeLinker constructor called") }
+    protected constructor() {
+        this.initializeContext();
+    }
 
     /**
-     * Load Class by name in the context of this RuntimeLinker
+     * Searches the already loaded class in this linker's context.
+     *
+     * @param clsName name of the class.
+     *
+     * @returns Class if it was found, null otherwise.
      */
-    public native loadClass(clsName: string, init: boolean = false): Class
+    public final native findLoadedClass(clsName: string): Class | null;
+
+    /**
+     * Loads class into this linker's context.
+     *
+     * @param clsName name of the class.
+     *
+     * @param init indicator whether class must be initialized.
+     *
+     * @returns The found class.
+     *
+     * @throws NoClassDefFoundError if the class was not found or errors happened during class initialization.
+     */
+    public final loadClass(clsName: string, init: boolean = false): Class {
+        const optClass = this.loadClassSafe(clsName, init);
+        if (optClass) {
+            return optClass;
+        }
+        throw new NoClassDefFoundError(clsName);
+    }
+
+    /**
+     * Find not yet loaded class and load it into this linker.
+     *
+     * @param clsName name of the class.
+     *
+     * @param init indicator whether class must be initialized.
+     *
+     * @returns Class if it was found, null otherwise.
+     *
+     * @throws errors happened during class initialization.
+     */
+    protected abstract findAndLoadClass(clsName: string, init: boolean): Class | null;
+
+    /**
+     * Version of loadClass which does not throw NoClassDefFoundError.
+     */
+    protected final loadClassSafe(clsName: string, init: boolean): Class | null {
+        let optClass = this.findLoadedClass(clsName);
+        if (optClass) {
+            if (init) {
+                // No-op if class is already initialized
+                optClass.initialize();
+            }
+            return optClass;
+        }
+        optClass = this.findAndLoadClass(clsName, init);
+        if (optClass) {
+            return optClass;
+        }
+        return null;
+    }
+
+    /**
+     * Initialization of runtime internal structs.
+     */
+    private native initializeContext(): void;
 }
 
 /**

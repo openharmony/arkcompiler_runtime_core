@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,9 @@ static constexpr std::string_view ASYNC                                = "Lets/c
 static constexpr std::string_view EXCEPTION                            = "Lstd/core/Exception;";
 static constexpr std::string_view CLASS                                = "Lstd/core/Class;";
 static constexpr std::string_view RUNTIME_LINKER                       = "Lstd/core/RuntimeLinker;";
+static constexpr std::string_view BOOT_RUNTIME_LINKER                  = "Lstd/core/BootRuntimeLinker;";
+static constexpr std::string_view ABC_RUNTIME_LINKER                   = "Lstd/core/AbcRuntimeLinker;";
+static constexpr std::string_view ABC_FILE                             = "Lstd/core/AbcFile;";
 static constexpr std::string_view OBJECT                               = "Lstd/core/Object;";
 static constexpr std::string_view PROMISE                              = "Lstd/core/Promise;";
 static constexpr std::string_view PROMISE_REF                          = "Lstd/core/PromiseRef;";

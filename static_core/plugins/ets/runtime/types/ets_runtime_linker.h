@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,15 +30,13 @@ namespace test {
 class EtsRuntimeLinkerTest;
 }  // namespace test
 
-class EtsRuntimeLinker : public ObjectHeader {
+class EtsRuntimeLinker : public EtsObject {
 public:
     EtsRuntimeLinker() = delete;
     ~EtsRuntimeLinker() = delete;
 
     NO_COPY_SEMANTIC(EtsRuntimeLinker);
     NO_MOVE_SEMANTIC(EtsRuntimeLinker);
-
-    static EtsRuntimeLinker *Create(ClassLinkerContext *ctx);
 
     static EtsRuntimeLinker *FromEtsObject(EtsObject *obj)
     {
@@ -52,7 +50,7 @@ public:
 
     EtsObject *AsObject()
     {
-        return EtsObject::FromCoreType(this);
+        return this;
     }
 
     ClassLinkerContext *GetClassLinkerContext()
@@ -60,7 +58,6 @@ public:
         return reinterpret_cast<ClassLinkerContext *>(classLinkerCtxPtr_);
     }
 
-private:
     void SetClassLinkerContext(ClassLinkerContext *ctx)
     {
         ASSERT(ctx != nullptr);
@@ -69,7 +66,7 @@ private:
 
 private:
     // ets.RuntimeLinker fields BEGIN
-    FIELD_UNUSED EtsLong classLinkerCtxPtr_;
+    EtsLong classLinkerCtxPtr_;
     // ets.RuntimeLinker fields END
 
     friend class test::EtsRuntimeLinkerTest;

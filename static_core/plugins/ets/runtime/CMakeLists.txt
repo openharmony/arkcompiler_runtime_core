@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,6 +16,7 @@ set(ETS_EXT_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/runtime)
 set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_annotation.cpp
     ${ETS_EXT_SOURCES}/ets_class_linker.cpp
+    ${ETS_EXT_SOURCES}/ets_class_linker_context.cpp
     ${ETS_EXT_SOURCES}/ets_class_linker_extension.cpp
     ${ETS_EXT_SOURCES}/ets_exceptions.cpp
     ${ETS_EXT_SOURCES}/ets_language_context.cpp
@@ -36,6 +37,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/debugger_api.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Runtime.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Class.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_AbcFile.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Char.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Console.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Double.cpp
@@ -72,7 +74,6 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_promise.cpp
     ${ETS_EXT_SOURCES}/types/ets_promise_ref.cpp
     ${ETS_EXT_SOURCES}/types/ets_object.cpp
-    ${ETS_EXT_SOURCES}/types/ets_runtime_linker.cpp
     ${ETS_EXT_SOURCES}/types/ets_sync_primitives.cpp
     ${ETS_EXT_SOURCES}/types/ets_string_builder.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_create.cpp

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,6 +84,8 @@ public:
 
     Class *FromClassObject(ark::ObjectHeader *obj) override;
     size_t GetClassObjectSizeFromClassSize(uint32_t size) override;
+
+    ClassLinkerContext *CreateApplicationClassLinkerContext(const PandaVector<PandaString> &path) override;
 
     void InitializeBuiltinClasses();
     void InitializeBuiltinSpecialClasses();
@@ -238,6 +240,21 @@ public:
         return runtimeLinkerClass_;
     }
 
+    Class *GetBootRuntimeLinkerClass()
+    {
+        return bootRuntimeLinkerClass_;
+    }
+
+    Class *GetAbcRuntimeLinkerClass()
+    {
+        return abcRuntimeLinkerClass_;
+    }
+
+    Class *GetAbcFileClass()
+    {
+        return abcFileClass_;
+    }
+
     Method *GetSubscribeOnAnotherPromiseMethod()
     {
         return subscribeOnAnotherPromiseMethod_;
@@ -260,6 +277,9 @@ public:
     }
 
     static EtsRuntimeLinker *GetOrCreateEtsRuntimeLinker(ClassLinkerContext *ctx);
+
+    /// @brief Removes reference to `RuntimeLinker` from `BootContext` and `EtsClassLinkerContext`.
+    static void RemoveRefToLinker(ClassLinkerContext *ctx);
 
     NO_COPY_SEMANTIC(EtsClassLinkerExtension);
     NO_MOVE_SEMANTIC(EtsClassLinkerExtension);
@@ -316,6 +336,9 @@ private:
     Class *jsvalueClass_ = nullptr;
     Class *finalizableWeakClass_ = nullptr;
     Class *runtimeLinkerClass_ = nullptr;
+    Class *bootRuntimeLinkerClass_ = nullptr;
+    Class *abcRuntimeLinkerClass_ = nullptr;
+    Class *abcFileClass_ = nullptr;
     // Cached type API classes
     Class *typeapiFieldClass_ = nullptr;
     Class *typeapiMethodClass_ = nullptr;

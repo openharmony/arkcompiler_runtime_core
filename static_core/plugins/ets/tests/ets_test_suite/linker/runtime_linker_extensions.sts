@@ -1,0 +1,155 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+function cname(name: string) { return name; }
+
+class A { }
+
+class DummyRuntimeLinker extends RuntimeLinker {
+    private parent: RuntimeLinker | null = null;
+    private placeholderClass: Class;
+
+    public constructor(placeholderClass: Class, parent: RuntimeLinker | null = null) {
+        this.parent = parent;
+        this.placeholderClass = placeholderClass;
+    }
+
+    public override findAndLoadClass(clsName: string, init: boolean): Class {
+        if (this.parent) {
+            const optClass = this.parent!.findAndLoadClass(clsName, init);
+            if (optClass) {
+                return optClass;
+            }
+        }
+        return this.placeholderClass;
+    }
+}
+
+class Test {
+    static stdCoreObjectName = cname("std.core.Object");
+    static additionalClass1Name = cname("additional1.AdditionalClass1");
+    static additionalClass2Name = cname("additional2.AdditionalClass2");
+
+    static testDummyLinker() {
+        const placeholderClass = Class.of(new A());
+        const testLoadObject = (runtimeLinker: RuntimeLinker) => {
+            const cls = runtimeLinker.loadClass(Test.stdCoreObjectName);
+            assert(cls == placeholderClass);
+        };
+
+        const dummyLinker = new DummyRuntimeLinker(placeholderClass);
+        testLoadObject(dummyLinker);
+
+        const abcLinker = new AbcRuntimeLinker(dummyLinker, []);
+        testLoadObject(abcLinker);
+    }
+
+    static testEmptyAbcRuntimeLinker() {
+        const linker = new AbcRuntimeLinker(null, []);
+        const cls1 = linker.loadClass(Test.stdCoreObjectName);
+        assert(cls1 == Class.of(new Object()));
+        // Object must be returned from BootRuntimeLinker
+        assert(cls1.getLinker() == getBootRuntimeLinker());
+        const cls2 = getBootRuntimeLinker().loadClass(Test.stdCoreObjectName);
+        assert(cls1 == cls2);
+    }
+
+    static getAdditionalFilesList() {
+        const abcFiles = ProcessManager.getEnvironmentVar("ADDITIONAL_ABC_FILES");
+        assert(abcFiles.length > 0);
+        return abcFiles.split(":");
+    }
+
+    static testAbcRuntimeLinker() {
+        const abcLinker = new AbcRuntimeLinker(null, Test.getAdditionalFilesList());
+
+        const objectClass = abcLinker.loadClass(Test.stdCoreObjectName);
+        // Object must be returned from BootRuntimeLinker
+        assert(objectClass == Class.of(new Object()));
+        assert(objectClass.getLinker() == getBootRuntimeLinker());
+
+        // Load class from "additional1.sts"
+        const cls1 = abcLinker.loadClass(Test.additionalClass1Name, true);
+        assert(cls1 != null);
+        assert(cls1.getLinker() == abcLinker);
+
+        // Load class from "additional2.sts"
+        // As side effect, this must load "additional3.sts" and execute code from it
+        const cls2 = abcLinker.loadClass(Test.additionalClass2Name, true);
+        assert(cls2 != null);
+        assert(cls2.getLinker() == abcLinker);
+
+        // Check that RuntimeLinker loads into an isolated context
+        const abcLinker2 = new AbcRuntimeLinker(null, Test.getAdditionalFilesList());
+        // Load firstly "AdditionalClass2", which must trigger load of "AdditionalClass1"
+        const otherLinkerClass2 = abcLinker2.loadClass(Test.additionalClass2Name, true);
+        assert(otherLinkerClass2 != null);
+        assert(otherLinkerClass2.getLinker() == abcLinker2);
+        assert(cls2 != otherLinkerClass2);
+        const otherLinkerClass1 = abcLinker2.loadClass(Test.additionalClass1Name, true);
+        assert(otherLinkerClass1 != null);
+        assert(otherLinkerClass1.getLinker() == abcLinker2);
+        assert(cls1 != otherLinkerClass1);
+    }
+
+    static testCustomAbcRuntimeLinker() {
+        // Cut out "additional1.sts" from the ABC files list
+        const reducedAbcFiles = Array.from(Test.getAdditionalFilesList()).slice(1);
+        const abcFiles = new string[reducedAbcFiles.length];
+        reducedAbcFiles.forEach((path: string, idx: number) => { abcFiles[idx as int] = path; });
+        // Create linkers
+        const placeholderClass = Class.of(new A());
+        const baseLinker = new AbcRuntimeLinker(null, abcFiles);
+        const linker = new DummyRuntimeLinker(placeholderClass, baseLinker);
+
+        // Load firstly "AdditionalClass2", which must trigger load of "AdditionalClass1"
+        // - "A" must be loaded instead of "AdditionalClass1"
+        const cls2 = linker.loadClass(Test.additionalClass2Name, true);
+        assert(cls2 != null);
+        assert(cls2.getLinker() == baseLinker);
+        const cls1 = linker.loadClass(Test.additionalClass1Name, true);
+        assert(cls1 == placeholderClass);
+        assert(cls1.getLinker() == getBootRuntimeLinker());
+    }
+
+    static testClassInitializationFail() {
+        // Cut out "additional1.sts" from the ABC files list
+        const reducedAbcFiles = Array.from(Test.getAdditionalFilesList()).slice(1);
+        const abcFiles = new string[reducedAbcFiles.length];
+        reducedAbcFiles.forEach((path: string, idx: number) => { abcFiles[idx as int] = path; });
+        // Create linker
+        const linker = new AbcRuntimeLinker(null, abcFiles);
+
+        // Load "AdditionalClass2" without initialization
+        const cls2 = linker.loadClass(Test.additionalClass2Name, false);
+        assert(cls2 != null);
+        assert(cls2.getLinker() == linker);
+        // Trigger initialization, which will not find "AdditionalClass1"
+        expectThrow(() => { linker.loadClass(Test.additionalClass2Name, true); },
+            (e) => e instanceof NoClassDefFoundError
+        );
+    }
+
+    static test() {
+        Test.testDummyLinker();
+        Test.testEmptyAbcRuntimeLinker();
+        Test.testAbcRuntimeLinker();
+        Test.testClassInitializationFail();
+    }
+}
+
+function main() {
+    Test.test();
+}

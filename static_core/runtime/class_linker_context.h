@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,7 @@ class ClassLinkerErrorHandler;
 class ClassLinkerContext {
 public:
     explicit ClassLinkerContext(panda_file::SourceLang lang) : lang_(lang) {}
+
     Class *FindClass(const uint8_t *descriptor)
     {
         os::memory::LockHolder lock(classesLock_);
@@ -139,7 +140,7 @@ public:
         }
     }
 
-    mem::Reference *GetRefToLinker()
+    mem::Reference *GetRefToLinker() const
     {
         // Atomic with relaxed order reason: read of field
         return refToLinker_.load(std::memory_order_relaxed);
