@@ -72,6 +72,7 @@ static_core/runtime/mem/                                 @dmitriitr @udav
 static_core/runtime/tooling/                             @ragnvald
 static_core/scripts/clang-tidy/                          @igelhaus @semenovaleksandr
 static_core/scripts/code_style/                          @igelhaus @semenovaleksandr
+static_core/scripts/sdk/                                 @igelhaus @Prof1983 @trubachevilya @dsilakov
 static_core/tests/benchmarks/                            @igelhaus
 static_core/tests/checked/                               @Prof1983
 static_core/tests/panda/                                 @igelhaus
@@ -122,7 +123,7 @@ static_core/plugins/ets/tests/ets-templates/                                  @d
 static_core/plugins/ets/tests/ets_es_checked/                                 @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/tests/stdlib-templates/                               @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/tests/test-lists/                                     @shirunova_viktoria @kuchkovairina
-static_core/plugins/ets/tools/declgen_ts2sts/                                 @semenovaleksandr
+static_core/plugins/ets/tools/declgen_ts2sts/                                 @semenovaleksandr @trubachevilya  @hufeng20 @nazarovkonstantin
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        @dmitriitr @udav @ipetrov
 static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting @dmitriitr @udav
@@ -152,6 +153,7 @@ static_core/plugins/ets/tests/runtime/types/ets_promise_test.cpp              @k
 static_core/plugins/ets/stdlib/std/debug/concurrency/                         @konstanting
 static_core/plugins/ets/tests/interop_js/tests/checked/                       @igelhaus @semenovaleksandr @ignatenkooleg @rokashevichsvetlana @Prof1983
 static_core/plugins/ets/tests/interop_js/tests/compiler/                      @igelhaus @semenovaleksandr @ignatenkooleg @rokashevichsvetlana @Prof1983
+static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                @igelhaus @semenovaleksandr @trubachevilya @ivagin @hufeng20 @Prof1983
 static_core/plugins/ets/tests/interop_js/tests/promise/                       @udav
 static_core/plugins/ets/tests/sts_ts_subset/std/core/Promise*                 @ivan-tyulyandin @anton-sysoev @dmitriitr @konstanting @udav
 
