@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage.h"
+#include <cstring>
 
+#include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 
 namespace ark::ets::interop::js::ets_proxy {
@@ -202,23 +203,72 @@ SharedReference *SharedReferenceStorage::CreateHybridObjectRef(InteropCtx *ctx, 
 
 void SharedReferenceStorage::RemoveReference(SharedReference *sharedRef)
 {
+    ASSERT(Size() > 0U);
     FreeItem(sharedRef);
     SharedReferenceSanity::Kill(sharedRef);
 }
 
-void SharedReferenceStorage::DeleteReference(SharedReference *sharedRef)
+void SharedReferenceStorage::DeleteJSRefAndRemoveReference(SharedReference *sharedRef)
+{
+    NAPI_CHECK_FATAL(napi_delete_reference(sharedRef->ctx_->GetJSEnv(), sharedRef->jsRef_));
+    RemoveReference(sharedRef);
+}
+
+void SharedReferenceStorage::DeleteUnmarkedReferences(SharedReference *sharedRef)
 {
     ASSERT(sharedRef != nullptr);
     ASSERT(!sharedRef->IsEmpty());
-    ASSERT(!sharedRef->IsMarked());
-    // NOTE(ipetrov, #20833): Use special xref OHOS napi interface when it will be supported
-    NAPI_CHECK_FATAL(napi_delete_reference(sharedRef->ctx_->GetJSEnv(), sharedRef->jsRef_));
-    // Need to drop interop state once for all references in chain
-    if (sharedRef->flags_.GetNextIndex() == 0U) {
-        sharedRef->GetEtsObject()->DropInteropIndex();
+    EtsObject *etsObject = sharedRef->GetEtsObject();
+    // Get head of refs chain
+    auto currentIndex = etsObject->GetInteropIndex();
+    SharedReference *currentRef = GetItemByIndex(currentIndex);
+    auto nextIndex = currentRef->flags_.GetNextIndex();
+    // if nextIndex is 0, then refs chain contains only 1 element, so need to also drop interop index from EtsObject
+    if (LIKELY(nextIndex == 0U)) {
+        ASSERT(sharedRef == currentRef);
+        DeleteJSRefAndRemoveReference(currentRef);
+        etsObject->DropInteropIndex();
+        return;
     }
-    ASSERT(Size() > 0);
-    RemoveReference(sharedRef);
+    SharedReference *headRef = currentRef;
+    // -- Remove all unmarked refs except head: START --
+    SharedReference *prevRef = currentRef;
+    currentRef = GetItemByIndex(nextIndex);
+    nextIndex = currentRef->flags_.GetNextIndex();
+    while (nextIndex != 0U) {
+        if (!currentRef->IsMarked()) {
+            DeleteJSRefAndRemoveReference(currentRef);
+            prevRef->flags_.SetNextIndex(nextIndex);
+        } else {
+            prevRef = currentRef;
+        }
+        currentRef = GetItemByIndex(nextIndex);
+        nextIndex = currentRef->flags_.GetNextIndex();
+    }
+    if (!currentRef->IsMarked()) {
+        DeleteJSRefAndRemoveReference(currentRef);
+        prevRef->flags_.SetNextIndex(0U);
+    }
+    // -- Remove all unmarked refs except head: FINISH --
+    // Check mark state for headRef, we need to keep interop index in EtsObject header
+    if (!headRef->IsMarked()) {
+        NAPI_CHECK_FATAL(napi_delete_reference(headRef->ctx_->GetJSEnv(), headRef->jsRef_));
+        nextIndex = headRef->flags_.GetNextIndex();
+        if (nextIndex == 0U) {
+            // Head reference is alone reference in the chain, so need to drop interop index from EtsObject header
+            RemoveReference(headRef);
+            etsObject->DropInteropIndex();
+            return;
+        }
+        // All unmarked references were removed from the chain, so reference after head should marked
+        SharedReference *firstMarkedRef = GetItemByIndex(nextIndex);
+        ASSERT(firstMarkedRef->IsMarked());
+        // Copy content from first marked refs to head, so we keep index in EtsObject header
+        [[maybe_unused]] auto res = memcpy_s(headRef, sizeof(SharedReference), firstMarkedRef, sizeof(SharedReference));
+        ASSERT(res == EOK);
+        // Content of marked reference copied to headRef, so now we can remove old firstMarkedRef
+        RemoveReference(firstMarkedRef);
+    }
 }
 
 void SharedReferenceStorage::NotifyXGCStarted()
@@ -270,10 +320,12 @@ void SharedReferenceStorage::SweepUnmarkedRefs()
     size_t capacity = Capacity();
     for (size_t i = 1U; i < capacity; ++i) {
         SharedReference *ref = GetItemByIndex(i);
+        if (ref->IsEmpty()) {
+            continue;
+        }
+        // If the reference is unmarked, then we immediately remove all unmarked references from related chain
         if (!ref->IsMarked()) {
-            DeleteReference(ref);
-        } else {
-            ref->Unmark();
+            DeleteUnmarkedReferences(ref);
         }
     }
     isXGCinProgress_ = false;
