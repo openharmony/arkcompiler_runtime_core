@@ -14,7 +14,7 @@
 ---
 cases:
   - { argument: "{j: \"some str\", i: 1.9}", result: 3 }
-  - { argument: "{i: \"some str\", k: false, i: 1.9}", result: 3 }
+  - { argument: "{i: \"some str\", k: false, i: 1.9}", result: -1 } # neg
   - { argument: "{i: 1.9}", result: -1 } # neg
   - { argument: "{j: \"some str\"}", result: -1 } # neg
   - { argument: "{j: , i: }", result: -1 } #neg

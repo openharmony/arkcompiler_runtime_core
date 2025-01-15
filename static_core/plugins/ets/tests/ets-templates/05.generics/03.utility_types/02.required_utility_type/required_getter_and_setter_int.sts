@@ -17,6 +17,7 @@ limitations under the License.
 
 /*---
 desc:  No method (including any getter or setter) of T is part of the Required<T> type.
+tags: [{% if c.result == -1 %}compile-only, negative{% endif %}]
 ---*/
 
 let z: int = 0;
@@ -27,10 +28,12 @@ interface I {
 }
 
 class C implements I {
-  set i(i: number) { z += 1; this.i = i; }
-  get i(): number|undefined { z += 10; return this.i; }
-  set j(j: string) { z += 5; this.j = j; }
-  get j(): string|undefined { z += 50; return this.j; }
+  private _i?:number = 0;
+  private _j?:string = "";
+  set i(i: number|undefined) { z += 1; this._i = i; }
+  get i(): number|undefined { z += 10; return this._i; }
+  set j(j: string|undefined) { z += 5; this._j = j; }
+  get j(): string|undefined { z += 50; return this._j; }
 }
 
 function fooI(i: Required<I>) {

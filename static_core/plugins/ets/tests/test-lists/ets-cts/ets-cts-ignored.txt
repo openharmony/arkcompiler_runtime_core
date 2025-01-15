@@ -1817,14 +1817,7 @@
 07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum2_neg_3.sts
 
 # 20290
-05.generics/03.utility_types/02.required_utility_type/required_module_interface_1.sts
 05.generics/03.utility_types/01.partial_utility_type/module_extends_1.sts
-05.generics/03.utility_types/02.required_utility_type/type_10.sts
-05.generics/03.utility_types/02.required_utility_type/type_11.sts
-05.generics/03.utility_types/02.required_utility_type/type_13.sts
-05.generics/03.utility_types/02.required_utility_type/type_14.sts
-05.generics/03.utility_types/02.required_utility_type/type_15.sts
-05.generics/03.utility_types/02.required_utility_type/type_9.sts
 05.generics/03.utility_types/01.partial_utility_type/module_class_2.sts
 05.generics/03.utility_types/01.partial_utility_type/module_class_3.sts
 05.generics/03.utility_types/01.partial_utility_type/module_extends_2.sts
@@ -1832,7 +1825,6 @@
 05.generics/03.utility_types/01.partial_utility_type/module_interface_1.sts
 05.generics/03.utility_types/01.partial_utility_type/module_interface_3.sts
 05.generics/03.utility_types/01.partial_utility_type/partial_inherit3.sts
-05.generics/03.utility_types/02.required_utility_type/required_module_interface_2.sts
 
 # 20291: reserve names for Required/Partial/Readonly
 05.generics/03.utility_types/incorrect_utility_type_usage_0.sts
@@ -1864,14 +1856,8 @@
 
 # 20383 missing CTE for incorrect variable initialization
 05.generics/03.utility_types/02.required_utility_type/required_method_1.sts
-05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_4.sts
-05.generics/03.utility_types/02.required_utility_type/required_module_interface_3.sts
 
 # 20387 custom getter/setter for interfaces is not working
-05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_0.sts
-05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_1.sts
-05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_2.sts
-05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_3.sts
 05.generics/03.utility_types/02.required_utility_type/required_module_implements_0.sts
 05.generics/03.utility_types/01.partial_utility_type/module_implements_0.sts
 05.generics/03.utility_types/01.partial_utility_type/module_implements_1.sts
