@@ -189,15 +189,6 @@
 # end of es2panda fails
 
 # 16343 Improve typeof result inference, move it to ETSAnalyzer
-07.expressions/17.typeof_expression/tof_const_6.sts
-07.expressions/17.typeof_expression/tof_vars_6.sts
-07.expressions/17.typeof_expression/tof_func_6.sts
-07.expressions/17.typeof_expression/tof_meth_6.sts
-07.expressions/17.typeof_expression/tof_obj_6.sts
-07.expressions/17.typeof_expression/tof_const_21.sts
-07.expressions/17.typeof_expression/tof_vars_21.sts
-07.expressions/17.typeof_expression/tof_func_21.sts
-07.expressions/17.typeof_expression/tof_meth_21.sts
 07.expressions/17.typeof_expression/tof_obj_21.sts
 07.expressions/01.evaluation_of_expressions/03.operator_precedence/typeof.sts
 
@@ -401,7 +392,6 @@
 17.experimental_features/05.callable_types/01.callable_types_with_invoke_method/ct_invoke_17.sts
 
 # es2panda fails: panda#19947
-06.contexts_and_conversions/04.casting_contexts_and_conversions/identity.sts
 06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_39.sts
 06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_41.sts
 # end of es2panda fails
@@ -715,15 +705,6 @@
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index_n_9.sts
 # end of es2panda fails
 
-# es2panda fails: equality not yet implemented
-07.expressions/25.equality_expressions/eq_12.sts
-07.expressions/25.equality_expressions/eq_16.sts
-07.expressions/25.equality_expressions/eq_17.sts
-07.expressions/25.equality_expressions/eq_4.sts
-07.expressions/25.equality_expressions/eq_6.sts
-07.expressions/25.equality_expressions/eq_8.sts
-# end of es2panda fails
-
 # 14654 Cannot use constant expressions in enum initialization
 11.enumerations/02.enumeration_string_values/enum_str_10.sts
 
@@ -816,9 +797,7 @@
 03.types/08.reference_types/11.tuple_types/tt_17.sts
 
 # es2panda fails: panda#15191 es2panda complains on tuple type value in function call argument
-03.types/08.reference_types/11.tuple_types/tt_6.sts
 03.types/08.reference_types/11.tuple_types/tt_7.sts
-
 # 19950
 03.types/08.reference_types/11.tuple_types/tt_10.sts
 
@@ -1177,7 +1156,6 @@
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_var/decl-var_8.sts
 
 # 13947 Object Literal of Interface Type is not implemented
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_17.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_20.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_21.sts
 
@@ -1189,11 +1167,9 @@
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/assn_var/assn-var_21.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/call_func/call-func_20.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/call_func/call-func_21.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/decl_const/decl-const_20.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/decl_const/decl-const_21.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/decl_field/decl-field_20.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/decl_field/decl-field_21.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/decl_var/decl-var_20.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/decl_var/decl-var_21.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-clss_20.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-clss_21.sts
@@ -1205,16 +1181,6 @@
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/call_lmbd/call-lmbd_21.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/call_cons/call-cons_20.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/call_cons/call-cons_21.sts
-
-# 15965 reference/value equality runtime semantics, strings handling
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/assn_var/assn-var_17.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/call_func/call-func_17.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/decl_field/decl-field_17.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-clss_17.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_arr/comp-arr_17.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/call_meth/call-meth_17.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/call_lmbd/call-lmbd_17.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/call_cons/call-cons_17.sts
 
 # Type 'char' cannot be assigned to type 'String' - not yet implemented
 06.contexts_and_conversions/05.implicit_conversions/08.char_to_string_conversion/call-cons.sts
@@ -1509,9 +1475,6 @@
 # es2panda: #16415 Cannot declare static field in generic ambient class
 14.ambient_declarations/ambient_declarations_24.sts
 
-# 16863: reference equality
-15.semantic_rules/03.variance/01.invariance/invariance_function_ref_equality.sts
-
 # 17358: Avoid variable and type alias name collisions
 02.lexical_elements/07.keywords/types_8.sts
 02.lexical_elements/07.keywords/types_10.sts
@@ -1749,8 +1712,6 @@
 # test runner: #18046 Update compilation process with modules for AOT mode
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_levels_default_export.sts
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_levels_default_export_3.sts
-05.generics/03.utility_types/01.partial_utility_type/module_interface_0.sts
-05.generics/03.utility_types/01.partial_utility_type/module_interface_2.sts
 
 # es2panda: #18843 type compatability
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/eq_0.sts
@@ -1812,12 +1773,7 @@
 
 # 20290
 05.generics/03.utility_types/01.partial_utility_type/module_extends_1.sts
-05.generics/03.utility_types/01.partial_utility_type/module_class_2.sts
-05.generics/03.utility_types/01.partial_utility_type/module_class_3.sts
-05.generics/03.utility_types/01.partial_utility_type/module_extends_2.sts
 05.generics/03.utility_types/01.partial_utility_type/module_extends_3.sts
-05.generics/03.utility_types/01.partial_utility_type/module_interface_1.sts
-05.generics/03.utility_types/01.partial_utility_type/module_interface_3.sts
 05.generics/03.utility_types/01.partial_utility_type/partial_inherit3.sts
 
 # 20291: reserve names for Required/Partial/Readonly
@@ -1853,13 +1809,6 @@
 
 # 20387 custom getter/setter for interfaces is not working
 05.generics/03.utility_types/02.required_utility_type/required_module_implements_0.sts
-05.generics/03.utility_types/01.partial_utility_type/module_implements_0.sts
-05.generics/03.utility_types/01.partial_utility_type/module_implements_1.sts
-05.generics/03.utility_types/01.partial_utility_type/module_implements_2.sts
-05.generics/03.utility_types/01.partial_utility_type/module_implements_3.sts
-
-# 20486 interface variable is not available
-05.generics/03.utility_types/incorrect_utility_type_1.sts
 
 # 20774 rest parameter doesn`t work with tuples
 03.types/08.reference_types/04.literal_types/function_literal_type_18.sts
