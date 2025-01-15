@@ -156,43 +156,60 @@ core runtime side.
     :linenos:
 
     // standard library
-        abstract class RuntimeLinker {
-        LoadClass(name: string): Class
+    abstract class RuntimeLinker {
+        final native findLoadedClass(clsName: string): Class | null
+        loadClass(name: string, init: boolean = false): Class
+        abstract findAndLoadClass(name: string, init: boolean): Class | null
+    }
 
-        parent: RuntimeLinker
+    function getBootRuntimeLinker(): BootRuntimeLinker
+
+    final class BootRuntimeLinker extends RuntimeLinker {
+        private constructor()
+        native override findAndLoadClass(clsName: string, init: boolean): Class | null
+
+        static instance: BootRuntimeLinker
     }
 
     // runtime-specific API:
-    abstract class ABCFile {
-        constructor(path: string)
+    final class ABCFile {
+        private constructor()
+        static native loadAbcFile(runtimeLinker: RuntimeLinker, path: string): AbcFile
+        native loadClass(runtimeLinker: RuntimeLinker, clsName: string, init: boolean): Class | null
+        native getFilename(): string
     }
 
     // platform API
-    class ABCRuntimeLinker extends RuntimeLinker {
-        constructor(abcList: string, libraryLinkers: RuntimeLinker[])
-        addAbc(abcPath: string): void
+    class AbcRuntimeLinker extends RuntimeLinker {
+        constructor(parentLinker: RuntimeLinker | null, paths: string[])
+        addAbcFiles(paths: string[]): void
+        override findAndLoadClass(clsName: string, init: boolean): Class | null
 
-        files: ABCFile[] // formed from the `abcList` and define the load order
+        parentLinker: RuntimeLinker
+        abcFiles: ABCFile[] // formed from the `paths` list and define the load order
     }
 
 
 .. code-block:: typescript
     :linenos:
 
-    // appspawn code, pre-fork
-    let boot = new ABCRuntimeLinker("stdlib.abc:ohosapi.abc:arkui.abc")
+    /*
+     * appspawn code, pre-fork, created in runtime from bootload files
+     * specified by appspawn: ["stdlib.abc", "ohosapi.abc", "arkui.abc"]
+     */
+    let boot = getBootRuntimeLinker()
 
     /*
      * appspawn code, post-fork, create a new 'app' context RuntimeLinker
      * specifing all the files that are in intial ability har
      */
-    let app = new ABCRuntimeLinker("app.abc")
+    let app = new AbcRuntimeLinker(boot, ["app.abc"])
 
     /* load a feature dynamically */
-    app.addAbc("feature.abc")
+    app.addAbcFiles(["feature.abc"])
 
     /* load an isolated resource */
-    let isolated = new ABCRuntimeLinker("dynamics.abc")
+    let isolated = new AbcRuntimeLinker(boot, ["dynamics.abc"])
 
 Resolution request from runtime has two inputs:
 
