@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,21 @@
  * limitations under the License.
  */
 
-import { exitCode } from 'process';
 import { IObj } from '../store/slices/options';
 
 export interface ICodeFetch {
     code: string
     disassemble: boolean
+    verifier: boolean
+    runtime_verify?: boolean
     options: IObj | null
+}
+export interface ICodeShare {
+    code: string
+    options: IObj | null
+}
+export interface IShareReq {
+    uuid: string
 }
 export interface ICodeReq {
     compile: {
@@ -30,6 +38,11 @@ export interface ICodeReq {
     disassembly: {
         output: string,
         code: string,
+        error: string,
+        exit_code?: number
+    },
+    verifier: {
+        output: string,
         error: string,
         exit_code?: number
     }
@@ -51,6 +64,11 @@ export interface IRunReq {
         error: string,
         exit_code?: number
     },
+    verifier: {
+        output: string,
+        error: string,
+        exit_code?: number
+    }
 }
 
 export const codeModel = {
@@ -67,10 +85,12 @@ export const codeModel = {
     fromApiCompile: (data: ICodeReq): ICodeReq => ({
         compile: codeModel.fillDefaults(data.compile || {}, { output: '', error: '' }),
         disassembly: codeModel.fillDefaults(data.disassembly || {}, { output: '', code: '', error: '' }),
+        verifier: codeModel.fillDefaults(data.verifier || {}, { output: '', error: '' }),
     }),
     fromApiRun: (data: IRunReq): IRunReq => ({
         compile: codeModel.fillDefaults(data.compile || {}, { output: '', error: '' }),
         disassembly: codeModel.fillDefaults(data.disassembly || {}, { output: '', code: '', error: '' }),
         run: codeModel.fillDefaults(data.run || {}, { output: '', error: '' }),
+        verifier: codeModel.fillDefaults(data.verifier || {}, { output: '', error: '' }),
     }),
 };

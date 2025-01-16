@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,17 @@
  */
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import {setClearLogsEachRun, setDisasm, setPrimaryColor, setTheme, setVersions, setVersionsLoading, Theme} from '../slices/appState';
+import {
+    setClearLogsEachRun,
+    setDisasm,
+    setPrimaryColor,
+    setRuntimeVerify,
+    setTheme,
+    setVerifier,
+    setVersions,
+    setVersionsLoading,
+    Theme
+} from '../slices/appState';
 import { RootState } from '..';
 import { versionService } from '../../services/versions';
 
@@ -40,6 +50,18 @@ export const setDisasmAction = createAsyncThunk(
     '@disasm/change',
     (data: boolean, thunkAPI) => {
         thunkAPI.dispatch(setDisasm(data));
+    },
+);
+export const setVerifAction = createAsyncThunk(
+    '@verifier/change',
+    (data: boolean, thunkAPI) => {
+        thunkAPI.dispatch(setVerifier(data));
+    },
+);
+export const setRuntimeVerifAction = createAsyncThunk(
+    '@runtimeVerify/change',
+    (data: boolean, thunkAPI) => {
+        thunkAPI.dispatch(setRuntimeVerify(data));
     },
 );
 

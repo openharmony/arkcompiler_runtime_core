@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ export interface IVersionsFetch {
 
 export const versionsModel = {
     fromApi: (data: Partial<IVersionsResponse>): IVersionsResponse => ({
-        frontend: data.frontend || '0.0.1',
+        frontend: data.frontend || '0.0.3',
         backendVersion: data.backendVersion || '0.0.1',
         arktsVersion: data.arktsVersion || '0.0.1',
         es2panda: data.es2panda || '0.0.1',

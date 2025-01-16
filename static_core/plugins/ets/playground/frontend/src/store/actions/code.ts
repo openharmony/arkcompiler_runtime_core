@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@ import {codeService} from '../../services/code';
 import {handleResponseLogs} from '../../models/logs';
 import { RootState } from '..';
 import { clearErrLogs, clearOutLogs } from './logs';
+import { setOptionsPicked } from '../slices/options';
 
 export const fetchCompileCode = createAsyncThunk(
     '@code/compileCode',
@@ -38,7 +39,9 @@ export const fetchCompileCode = createAsyncThunk(
         const response = await codeService.fetchCompile({
             code: codeState?.code,
             options: optionsState?.pickedOptions,
-            disassemble: appState.disasm});
+            disassemble: appState.disasm,
+            verifier: appState.verifier
+        });
         if (response.error) {
             console.error(response.error);
             thunkAPI.dispatch(setCompileLoading(false));
@@ -67,7 +70,9 @@ export const fetchRunCode = createAsyncThunk(
         const response = await codeService.fetchRun({
             code: codeState?.code,
             options: optionsState?.pickedOptions,
-            disassemble: appState.disasm
+            disassemble: appState.disasm,
+            verifier: appState.verifier,
+            runtime_verify: appState.runtimeVerify,
         });
         if (response.error) {
             console.error(response.error);
@@ -84,5 +89,45 @@ export const setCodeAction = createAsyncThunk(
     '@code/setCode',
     (data: string, thunkAPI) => {
         thunkAPI.dispatch(setCode(data));
+    },
+);
+
+export const fetchShareCode = createAsyncThunk(
+    '@code/shareCode',
+    async (_, thunkAPI): Promise<string> => {
+        const state: RootState = thunkAPI.getState() as RootState;
+        const codeState = state.code || '';
+        const optionsState = state.options || {};
+
+        const response = await codeService.shareCode({
+            code: codeState.code,
+            options: optionsState.pickedOptions,
+        });
+
+        if (response.error) {
+            console.error(response.error);
+            return '';
+        }
+
+        const shareUrl = `${window.location.origin}/${response.data.uuid}`;
+        return shareUrl;
+    },
+);
+
+export const fetchCodeByUuid = createAsyncThunk(
+    '@code/fetchCodeByUuid',
+    async (uuid: string, thunkAPI) => {
+        const response = await codeService.fetchShareCode(uuid);
+
+        if (response.error) {
+            console.error(response.error);
+            return;
+        }
+
+        thunkAPI.dispatch(setCode(response.data.code));
+
+        if (response.data.options) {
+            thunkAPI.dispatch(setOptionsPicked(response.data.options));
+        }
     },
 );

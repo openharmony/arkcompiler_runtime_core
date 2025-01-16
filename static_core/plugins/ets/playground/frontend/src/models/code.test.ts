@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@ describe('codeModel', () => {
             const mockData: ICodeReq = {
                 compile: { output: 'compile output', error: 'compile error', exit_code: 1 },
                 disassembly: { output: 'disasm output', code: 'disasm code', error: 'disasm error', exit_code: 2 },
+                verifier: { output: 'verifier output', error: 'verifier error', exit_code: 2 },
             };
 
             const result = codeModel.fromApiCompile(mockData);
@@ -29,6 +30,7 @@ describe('codeModel', () => {
             expect(result).toEqual({
                 compile: { output: 'compile output', error: 'compile error', exit_code: 1 },
                 disassembly: { output: 'disasm output', code: 'disasm code', error: 'disasm error', exit_code: 2 },
+                verifier: { output: 'verifier output', error: 'verifier error', exit_code: 2 },
             });
         });
 
@@ -39,6 +41,7 @@ describe('codeModel', () => {
             expect(result).toEqual({
                 compile: { output: '', error: '', exit_code: undefined },
                 disassembly: { output: '', code: '', error: '', exit_code: undefined },
+                verifier: { output: '', error: '', exit_code: undefined },
             });
         });
     });
@@ -49,6 +52,7 @@ describe('codeModel', () => {
                 compile: { output: 'compile output', error: 'compile error', exit_code: 1 },
                 disassembly: { output: 'disasm output', code: 'disasm code', error: 'disasm error', exit_code: 2 },
                 run: { output: 'run output', error: 'run error', exit_code: 3 },
+                verifier: { output: '', error: '', exit_code: 0 }
             };
 
             const result = codeModel.fromApiRun(mockData);
@@ -57,6 +61,7 @@ describe('codeModel', () => {
                 compile: { output: 'compile output', error: 'compile error', exit_code: 1 },
                 disassembly: { output: 'disasm output', code: 'disasm code', error: 'disasm error', exit_code: 2 },
                 run: { output: 'run output', error: 'run error', exit_code: 3 },
+                verifier: { output: '', error: '', exit_code: 0 }
             });
         });
 
@@ -68,6 +73,7 @@ describe('codeModel', () => {
                 compile: { output: '', error: '', exit_code: undefined },
                 disassembly: { output: '', code: '', error: '', exit_code: undefined },
                 run: { output: '', error: '', exit_code: undefined },
+                verifier: { output: '', error: '', exit_code: undefined }
             });
         });
     });

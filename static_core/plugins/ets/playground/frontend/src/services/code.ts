@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,15 @@
  */
 
 import { IServiceResponse } from './types';
-import {fetchPostEntity} from './common';
-import {codeModel, ICodeFetch, ICodeReq, IRunReq} from '../models/code';
+import {fetchGetEntity, fetchPostEntity} from './common';
+import {codeModel, ICodeFetch, ICodeReq, ICodeShare, IRunReq, IShareReq} from '../models/code';
+import { fetchShareCode } from '../store/actions/code';
 
 export enum EActionsEndpoints {
     COMPILE = '/compile',
     RUN = '/run',
+    SHARE = '/share',
+    SHARE_UUID = '/share/:uuid'
 }
 
 export const codeService = {
@@ -39,6 +42,22 @@ export const codeService = {
             EActionsEndpoints.RUN,
             null,
             codeModel.fromApiRun,
+        );
+    },
+    shareCode: async (payload: ICodeShare): Promise<IServiceResponse<IShareReq>> => {
+        // @ts-ignore
+        return fetchPostEntity<ICodeShare, IShareReq>(
+            payload,
+            EActionsEndpoints.SHARE,
+            null
+        );
+    },
+    fetchShareCode: async (payload: string): Promise<IServiceResponse<ICodeShare>> => {
+        // @ts-ignore
+        return fetchGetEntity(
+            EActionsEndpoints.SHARE_UUID.replace(':uuid', payload),
+            null,
+            (data) => data
         );
     }
 };
