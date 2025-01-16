@@ -29,13 +29,10 @@
 #include "constant_propagation/constant_propagation.h"
 #include "libpandabase/mem/pool_manager.h"
 #include "libpandafile/class_data_accessor-inl.h"
-#include "libpandafile/method_data_accessor.h"
 #include "libpandafile/module_data_accessor-inl.h"
 #include "reg_acc_alloc.h"
 #include "reg_encoder.h"
 #include "runtime_adapter.h"
-
-#include <regex>
 
 namespace panda::bytecodeopt {
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
