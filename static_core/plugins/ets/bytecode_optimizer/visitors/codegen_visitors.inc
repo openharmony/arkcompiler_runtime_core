@@ -180,3 +180,11 @@ static void VisitEtsEquals(GraphVisitor *visitor, Inst *inst)
     }
     DoSta(inst->GetDstReg(), enc->result_);
 }
+
+static void VisitEtsTypeof(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<BytecodeGen *>(visitor);
+    auto v0 = inst->GetSrcReg(0);
+    enc->result_.emplace_back(pandasm::Create_ETS_TYPEOF(v0));
+    DoStaObj(inst->GetDstReg(), enc->result_);
+}

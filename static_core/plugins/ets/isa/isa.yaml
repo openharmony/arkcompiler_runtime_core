@@ -281,3 +281,19 @@ groups:
         acc: out:i32
         format: [pref_op_v1_4_v2_4]
         intrinsic_name: INTRINSIC_COMPILER_ETS_STRICT_EQUALS
+
+  - title: Evaluate typeof string
+    description: >
+      Evaluate typeof string
+    verification:
+      - v1_obj_or_null
+      - acc_type
+    exceptions:
+      - x_oom
+    namespace: ets
+    instructions:
+      - sig: ets.typeof v1:in:ref
+        prefix: ets
+        acc: out:ref
+        format: [pref_op_v1_8]
+        intrinsic_name: INTRINSIC_COMPILER_ETS_TYPEOF

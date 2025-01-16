@@ -3199,18 +3199,6 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreRuntimeFailedTypeCastException
     clear_flags: [ ]
 
-  - name: StdCoreRuntimeTypeof
-    space: ets
-    class_name: std.core.Runtime
-    method_name: typeOf
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::StdCoreRuntimeTypeof
-    clear_flags: [ no_dce ]
-    set_flags: [ no_nullptr ]
-
 ####################
 # std.core.Class #
 ####################

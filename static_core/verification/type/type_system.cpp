@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,6 +56,7 @@ TypeSystem::TypeSystem(VerifierService *service, panda_file::SourceLang lang)
 
     class_ = compute(langCtx_.GetClassClassDescriptor());
     object_ = compute(langCtx_.GetObjectClassDescriptor());
+    string_ = compute(langCtx_.GetStringClassDescriptor());
     // Throwable is not given to us as descriptor for some reason. NOTE(gogabr): correct this.
     auto throwableClassName = langCtx_.GetVerificationTypeThrowable();
     if (throwableClassName != nullptr) {

@@ -39,3 +39,9 @@ static void VisitEquals([[maybe_unused]] ark::compiler::GraphVisitor *v, [[maybe
     auto *re = static_cast<RegEncoder *>(v);
     re->Check4Width(inst);
 }
+
+static void VisitTypeof([[maybe_unused]] ark::compiler::GraphVisitor *v, [[maybe_unused]] ark::compiler::Inst *inst)
+{
+    auto *re = static_cast<RegEncoder *>(v);
+    re->Check4Width(inst);
+}

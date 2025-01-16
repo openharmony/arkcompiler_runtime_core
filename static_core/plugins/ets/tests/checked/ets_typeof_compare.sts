@@ -18,10 +18,10 @@
 //! EVENT        /Compilation,ETSGLOBAL::__noinline__process_typeof,.*,COMPILED/
 //! METHOD       "ETSGLOBAL::__noinline__process_typeof"
 //! PASS_AFTER   "IrBuilder"
-//! INST_COUNT   "Intrinsic.StdCoreRuntimeTypeof",1
+//! INST_COUNT   "Intrinsic.CompilerEtsTypeof",1
 //! INST_NOT     "IsInstance"
 //! PASS_BEFORE  "LocationsBuilder"
-//! INST_NOT     "Intrinsic.StdCoreRuntimeTypeof"
+//! INST_NOT     "Intrinsic.CompilerEtsTypeof"
 //! INST_COUNT   "IsInstance",1
 
 function __noinline__process_typeof(u: string|number): int {

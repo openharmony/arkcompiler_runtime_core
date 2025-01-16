@@ -265,4 +265,24 @@ void InstBuilder::BuildEquals(const BytecodeInstruction *bcInst)
 
 template void InstBuilder::BuildEquals<true>(const BytecodeInstruction *bcInst);
 template void InstBuilder::BuildEquals<false>(const BytecodeInstruction *bcInst);
+
+void InstBuilder::BuildTypeof(const BytecodeInstruction *bcInst)
+{
+    auto pc = GetPc(bcInst->GetAddress());
+    Inst *obj = GetDefinition(bcInst->GetVReg(0));
+
+    RuntimeInterface::IntrinsicId intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_TYPEOF;
+    auto intrinsic = GetGraph()->CreateInstIntrinsic(DataType::REFERENCE, pc, intrinsicId);
+    auto saveState = CreateSaveState(Opcode::SaveState, pc);
+
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 2_I);
+    intrinsic->AppendInput(obj);
+    intrinsic->AddInputType(DataType::REFERENCE);
+    intrinsic->AppendInput(saveState);
+    intrinsic->AddInputType(DataType::NO_TYPE);
+
+    AddInstruction(saveState);
+    AddInstruction(intrinsic);
+    UpdateDefinitionAcc(intrinsic);
+}
 }  // namespace ark::compiler

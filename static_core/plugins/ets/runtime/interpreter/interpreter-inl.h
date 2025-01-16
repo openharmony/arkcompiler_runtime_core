@@ -27,6 +27,7 @@
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 
@@ -502,6 +503,20 @@ public:
 
         bool res = EtsReferenceEquals<true>(GetCoro(), EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2));
         this->GetAccAsVReg().SetPrimitive(res);
+        this->template MoveToNextInst<FORMAT, true>();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleEtsTypeof()
+    {
+        uint16_t v1 = this->GetInst().template GetVReg<FORMAT, 0>();
+
+        LOG_INST() << "ets.typeof v" << v1;
+
+        ObjectHeader *obj = this->GetFrame()->GetVReg(v1).GetReference();
+
+        EtsString *res = EtsReferenceTypeof(GetCoro(), EtsObject::FromCoreType(obj));
+        this->GetAccAsVReg().SetReference(res->AsObjectHeader());
         this->template MoveToNextInst<FORMAT, true>();
     }
 

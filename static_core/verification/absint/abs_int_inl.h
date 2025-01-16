@@ -3023,6 +3023,25 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsTypeof()
+    {
+        LOG_INST();
+        DBGBRK();
+        uint16_t v1 = inst_.GetVReg<FORMAT, 0x00>();
+        Sync();
+
+        if (!CheckRegType(v1, refType_)) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        SetAcc(GetTypeSystem()->StringClass());
+
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleReturnWide()
     {
         LOG_INST();

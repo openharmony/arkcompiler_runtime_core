@@ -178,6 +178,18 @@ intrinsics:
     clear_flags: [ acc_read, require_state, can_throw, heap_inv, no_dce, no_cse, no_hoist ]
     peephole_func: PeepholeStrictEquals
 
+  - name: CompilerEtsTypeof
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ ref ]
+    impl: ark::ets::intrinsics::CompilerEtsTypeof
+    set_flags: [ no_nullptr ]
+    clear_flags: [ acc_read, no_dce, no_cse, no_hoist ]
+    peephole_func: PeepholeTypeof
+
   - name: CompilerEtsDoubleToStringDecimal
     space: ets
     compiler_only: true
