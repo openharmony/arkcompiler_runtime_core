@@ -74,7 +74,7 @@ static void TransformIr(AbckitGraph *graph, UserData *userData)
     g_implG->gInsertTryCatch(tryBegin, tryEnd, catchBlock, catchBlock);
 }
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(AbckitScenarioTest, LibAbcKitTestDynamicAddTryCatch)
 {
     auto output =

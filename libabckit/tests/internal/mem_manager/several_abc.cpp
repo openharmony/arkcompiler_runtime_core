@@ -27,7 +27,7 @@ static auto g_implG = AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitMemoryHandling : public ::testing::Test {};
 
-// Test: test-kind=api, api=ApiImpl::openAbc, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ApiImpl::openAbc, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitMemoryHandling, OpenAbcStatic)
 {
     constexpr auto PATH1 = ABCKIT_ABC_DIR "internal/mem_manager/abc_static_1.abc";
@@ -67,7 +67,7 @@ TEST_F(LibAbcKitMemoryHandling, OpenAbcStatic)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ApiImpl::openAbc, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ApiImpl::openAbc, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitMemoryHandling, OpenAbcDynamic)
 {
     constexpr auto PATH1 = ABCKIT_ABC_DIR "internal/mem_manager/abc_dynamic_1.abc";

@@ -490,7 +490,7 @@ constexpr auto OUTPUT_PATH =
 
 constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_dynamic_modify.abc";
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::moduleRemoveImport, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ArktsModifyApiImpl::moduleRemoveImport, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveImport)
 {
     auto output = helpers::ExecuteDynamicAbc(INPUT_PATH, MAIN_MODULE_NAME);
@@ -511,7 +511,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveImport)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::moduleRemoveImport, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ArktsModifyApiImpl::moduleRemoveImport, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveNSImport)
 {
     auto output = helpers::ExecuteDynamicAbc(INPUT_PATH, MAIN_MODULE_NAME);
@@ -533,7 +533,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveNSImport)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::moduleRemoveImport, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ArktsModifyApiImpl::moduleRemoveImport, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveImportAndModule)
 {
     auto output = helpers::ExecuteDynamicAbc(INPUT_PATH, MAIN_MODULE_NAME);
@@ -601,7 +601,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveWrongImport)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::moduleRemoveExport, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ArktsModifyApiImpl::moduleRemoveExport, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveExport)
 {
     auto output = helpers::ExecuteDynamicAbc(INPUT_PATH, MAIN_MODULE_NAME);
@@ -1343,7 +1343,8 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_StarExport3)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::fileAddExternalModuleArktsV1, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ArktsModifyApiImpl::fileAddExternalModuleArktsV1, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitArkTSModifyApiModulesTest, fileAddExternalModuleArktsV1)
 {
     AbckitFile *file = nullptr;

@@ -188,7 +188,7 @@ static void ClassReplaceCallSite(VisitHelper &visitor, UserData &ud, AbckitCoreC
     });
 }
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(AbckitScenarioTest, LibAbcKitTestDynamicReplaceCallSite)
 {
     std::string inputPath = ABCKIT_ABC_DIR "scenarios/replace_call_site/dynamic/replace_call_site.abc";

@@ -34,7 +34,7 @@ static constexpr auto MODIFIED_STATIC = ABCKIT_ABC_DIR "ut/metadata_core/modify_
 
 class LibAbcKitModifyApiValuesTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=ModifyApiImpl::createValueU1, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createValueU1, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiValuesTest, CreateValueU1_1)
 {
     AbckitFile *file = nullptr;
@@ -49,7 +49,7 @@ TEST_F(LibAbcKitModifyApiValuesTest, CreateValueU1_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ModifyApiImpl::createValueDouble, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createValueDouble, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiValuesTest, CreateValueDouble_1)
 {
     AbckitFile *file = nullptr;
@@ -64,7 +64,7 @@ TEST_F(LibAbcKitModifyApiValuesTest, CreateValueDouble_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ModifyApiImpl::createValueString, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createValueString, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiValuesTest, CreateValueString_1)
 {
     AbckitFile *file = nullptr;
@@ -79,7 +79,7 @@ TEST_F(LibAbcKitModifyApiValuesTest, CreateValueString_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ModifyApiImpl::createLiteralArrayValue, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createLiteralArrayValue, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiValuesTest, CreateLiteralArrayValue_1)
 {
     AbckitFile *file = nullptr;
@@ -98,7 +98,7 @@ TEST_F(LibAbcKitModifyApiValuesTest, CreateLiteralArrayValue_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ModifyApiImpl::createValueU1, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createValueU1, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiValuesTest, CreateValueU1_2)
 {
     AbckitFile *file = nullptr;
@@ -113,7 +113,7 @@ TEST_F(LibAbcKitModifyApiValuesTest, CreateValueU1_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ModifyApiImpl::createValueDouble, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createValueDouble, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiValuesTest, CreateValueDouble_2)
 {
     AbckitFile *file = nullptr;
@@ -128,7 +128,7 @@ TEST_F(LibAbcKitModifyApiValuesTest, CreateValueDouble_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ModifyApiImpl::createValueString, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createValueString, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiValuesTest, CreateValueString_2)
 {
     AbckitFile *file = nullptr;
@@ -143,7 +143,7 @@ TEST_F(LibAbcKitModifyApiValuesTest, CreateValueString_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ModifyApiImpl::createLiteralArrayValue, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createLiteralArrayValue, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiValuesTest, CreateLiteralArrayValue_2)
 {
     AbckitFile *file = nullptr;

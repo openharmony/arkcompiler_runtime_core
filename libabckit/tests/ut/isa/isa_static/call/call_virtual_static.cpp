@@ -57,7 +57,7 @@ void TransformCallVirtualIr(AbckitGraph *graph, AbckitCoreClass *classA)
 
 class LibAbcKitCallVirtualStaticTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCallVirtual, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCallVirtual, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCallVirtualStaticTest, LibAbcKitTestCallVirtual)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/call/call_virtual_static.abc",

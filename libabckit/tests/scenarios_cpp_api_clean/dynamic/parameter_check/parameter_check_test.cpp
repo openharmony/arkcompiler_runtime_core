@@ -173,7 +173,7 @@ namespace libabckit::test {
 
 class AbckitScenarioTestCppClean : public ::testing::Test {};
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=cpp
 TEST_F(AbckitScenarioTestCppClean, LibAbcKitTestParameterCheckClean)
 {
     const std::string testSandboxPath = ABCKIT_ABC_DIR "scenarios_cpp_api_clean/dynamic/parameter_check/";

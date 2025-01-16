@@ -34,7 +34,7 @@ static auto g_statG = AbckitGetIsaApiStaticImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitBinInstShiftsImmTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAShrI, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAShrI, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBinInstShiftsImmTest, CreateAShrIValid)
 {
     helpers::TransformMethod(
@@ -50,7 +50,7 @@ TEST_F(LibAbcKitBinInstShiftsImmTest, CreateAShrIValid)
         []([[maybe_unused]] AbckitGraph *graph) {});
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateShrI, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateShrI, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBinInstShiftsImmTest, CreateShrIValid)
 {
     helpers::TransformMethod(
@@ -66,7 +66,7 @@ TEST_F(LibAbcKitBinInstShiftsImmTest, CreateShrIValid)
         []([[maybe_unused]] AbckitGraph *graph) {});
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateShlI, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateShlI, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBinInstShiftsImmTest, CreateShlIValid)
 {
     helpers::TransformMethod(

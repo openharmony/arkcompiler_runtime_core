@@ -148,7 +148,7 @@ static void VerifyGraphVisitBlocks(AbckitFile *file)
     g_impl->destroyGraph(graph);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gGetStartBasicBlock, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gGetStartBasicBlock, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, GgetStartBasicBlockValid)
 {
     constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/ir_core/graph_basic_block/graph_basic_block.abc";
@@ -163,7 +163,7 @@ TEST_F(LibAbcKitBasicBlocksTest, GgetStartBasicBlockValid)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gGetEndBasicBlock, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gGetEndBasicBlock, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, GgetEndBasicBlockValid)
 {
     constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/ir_core/graph_basic_block/graph_basic_block.abc";
@@ -177,7 +177,7 @@ TEST_F(LibAbcKitBasicBlocksTest, GgetEndBasicBlockValid)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gVisitBlocksRpo, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gVisitBlocksRpo, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, GvisitBlocksRPO)
 {
     constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/ir_core/graph_basic_block/graph_basic_block.abc";

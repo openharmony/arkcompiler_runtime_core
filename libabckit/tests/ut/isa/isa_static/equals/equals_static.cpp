@@ -60,7 +60,7 @@ void TransformEqualsIr(AbckitGraph *graph)
 
 class LibAbcKitEqualsStaticTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateEquals, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateEquals, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitEqualsStaticTest, LibAbcKitTestEquals)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/equals/equals_static.abc",

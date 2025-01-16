@@ -194,7 +194,7 @@ namespace libabckit::test {
 
 class AbckitScenarioTestClean : public ::testing::Test {};
 
-// Test: test-kind=scenario, abc-kind=ArkTS2, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(AbckitScenarioTestClean, LibAbcKitTestStaticAddLogClean)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/static/add_log/add_log_static.abc",

@@ -34,7 +34,7 @@ static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitObjectsTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateemptyobject, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateemptyobject, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitObjectsTest, IcreateDynCreateemptyobject)
 {
     auto output =

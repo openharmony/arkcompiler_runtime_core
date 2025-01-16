@@ -112,7 +112,7 @@ build_and_run_tests() {
         ./tests/unittest/arkcompiler/runtime_core/libabckit/abckit_gtests
 
     if [ "$SANITIZERS" = "false" ]; then
-        ninja libabckit_stress_tests_package
+        ninja abckit_stress_tests_package
 
         if [ "$TARGET" = "x64.debug" ]; then
             ../../arkcompiler/runtime_core/libabckit/tests/stress/stress.py --build-dir $(realpath .)

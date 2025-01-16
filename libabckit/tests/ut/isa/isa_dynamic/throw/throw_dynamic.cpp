@@ -185,27 +185,29 @@ void TransformIrThrowUndefinedifholeValid(AbckitGraph *graph)
     TransformIr3ArgValid(graph, g_dynG->iCreateThrowUndefinedifhole);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrow, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrow, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynThrow, CreateDynThrowValid)
 {
     TransformThrowValid(TransformIrThrowValid, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW, "Ok\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowNotexists, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowNotexists, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynThrow, CreateDynThrowNotexistsValid)
 {
     TransformThrowValid(TransformIrThrowNotexistsValid, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_NOTEXISTS,
                         "TypeError: Throw method is not defined\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowPatternnoncoercible, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowPatternnoncoercible, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynThrow, CreateDynThrowPatternnoncoercibleValid)
 {
     TransformThrowValid(TransformIrThrowPatternnoncoercibleValid,
                         ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_PATTERNNONCOERCIBLE, "TypeError: objectnotcoercible\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowDeletesuperproperty, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowDeletesuperproperty, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynThrow, CreateDynThrowDeletesuperpropertyValid)
 {
     TransformThrowValid(TransformIrThrowDeletesuperpropertyValid,
@@ -213,21 +215,23 @@ TEST_F(LibAbcKitCreateDynThrow, CreateDynThrowDeletesuperpropertyValid)
                         "ReferenceError: Can not delete super property\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowConstassignment, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowConstassignment, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynThrow, CreateDynThrowConstassignmentValid)
 {
     TransformThrowValid(TransformIrThrowConstassignmentValid, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_CONSTASSIGNMENT,
                         "TypeError: Assignment to const variable Ok\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowIfnotobject, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowIfnotobject, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynThrow, CreateDynThrowIfnotobjectValid)
 {
     TransformThrowValid(TransformIrThrowIfnotobjectValid, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_IFNOTOBJECT,
                         "TypeError: Inner return result is not object\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowUndefinedifhole, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowUndefinedifhole, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynThrow, CreateDynThrowUndefinedifholeValid)
 {
     TransformThrowValid(TransformIrThrowUndefinedifholeValid, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_UNDEFINEDIFHOLE, "");
@@ -287,21 +291,24 @@ static void TransformIrThrowUndefinedifholewithnameValid(AbckitGraph *graph, Abc
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowIfsupernotcorrectcall, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowIfsupernotcorrectcall, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynThrow, CreateDynThrowIfsupernotcorrectcallValid_imm8)
 {
     TransformThrowValid(TransformIrThrowIfsupernotcorrectcallValid,
                         ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_IFSUPERNOTCORRECTCALL, "");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowIfsupernotcorrectcall, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowIfsupernotcorrectcall, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynThrow, CreateDynThrowIfsupernotcorrectcallValid_imm16)
 {
     TransformThrowValid(TransformIrThrowIfsupernotcorrectcallValidLarge,
                         ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_IFSUPERNOTCORRECTCALL, "");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowUndefinedifholewithname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowUndefinedifholewithname, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynThrow, CreateDynThrowUndefinedifholewithnameValid)
 {
     auto output =

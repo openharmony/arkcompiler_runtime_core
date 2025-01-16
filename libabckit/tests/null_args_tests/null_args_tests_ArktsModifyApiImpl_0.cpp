@@ -35,98 +35,98 @@ static auto g_arktsModifyApiImp = AbckitGetArktsModifyApiImpl(ABCKIT_VERSION_REL
 class LibAbcKitNullptrTestsArktsModifyApiImpl0 : public ::testing::Test {};
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::annotationAddAnnotationElement,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, annotationAddAnnotationElement)
 {
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->annotationAddAnnotationElement);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::annotationInterfaceAddField,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, annotationInterfaceAddField)
 {
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->annotationInterfaceAddField);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::annotationInterfaceRemoveField,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, annotationInterfaceRemoveField)
 {
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->annotationInterfaceRemoveField);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::annotationRemoveAnnotationElement,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, annotationRemoveAnnotationElement)
 {
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->annotationRemoveAnnotationElement);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::classAddAnnotation,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classAddAnnotation)
 {
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classAddAnnotation);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::classRemoveAnnotation,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classRemoveAnnotation)
 {
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classRemoveAnnotation);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::fileAddExternalModuleArktsV1,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, fileAddExternalModuleArktsV1)
 {
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->fileAddExternalModuleArktsV1);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::functionAddAnnotation,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, functionAddAnnotation)
 {
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->functionAddAnnotation);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::functionRemoveAnnotation,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, functionRemoveAnnotation)
 {
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->functionRemoveAnnotation);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::moduleAddAnnotationInterface,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, moduleAddAnnotationInterface)
 {
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->moduleAddAnnotationInterface);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::moduleAddExportFromArktsV1ToArktsV1,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, moduleAddExportFromArktsV1ToArktsV1)
 {
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->moduleAddExportFromArktsV1ToArktsV1);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::moduleAddImportFromArktsV1ToArktsV1,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, moduleAddImportFromArktsV1ToArktsV1)
 {
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->moduleAddImportFromArktsV1ToArktsV1);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::moduleRemoveExport,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, moduleRemoveExport)
 {
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->moduleRemoveExport);
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::moduleRemoveImport,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, moduleRemoveImport)
 {
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->moduleRemoveImport);

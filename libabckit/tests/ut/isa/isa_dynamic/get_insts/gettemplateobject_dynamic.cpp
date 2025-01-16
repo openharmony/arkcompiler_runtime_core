@@ -89,7 +89,7 @@ auto g_icreateGettemplateobject1Lambda = [](AbckitFile *file, AbckitCoreFunction
 
 class LibAbcKitCreateDynGettemplateobject : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGettemplateobject, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGettemplateobject, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynGettemplateobject, IcreateGettemplateobject_1)
 {
     auto output = helpers::ExecuteDynamicAbc(

@@ -632,7 +632,8 @@ static void TestAnnotationInterfaceRemoveField(AbckitFile * /*unused*/, AbckitCo
     EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_BAD_ARGUMENT);
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::moduleAddAnnotationInterface, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ArktsModifyApiImpl::moduleAddAnnotationInterface, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, ModuleAddAnnotationInterface)
 {
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc",
@@ -642,7 +643,7 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, ModuleAddAnnotationInterface)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::classAddAnnotation, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ArktsModifyApiImpl::classAddAnnotation, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, ClassAddAnnotation)
 {
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc",
@@ -652,7 +653,7 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, ClassAddAnnotation)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::classRemoveAnnotation, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ArktsModifyApiImpl::classRemoveAnnotation, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, ClassRemoveAnnotation)
 {
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc",
@@ -662,7 +663,7 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, ClassRemoveAnnotation)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::functionAddAnnotation, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ArktsModifyApiImpl::functionAddAnnotation, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, FunctionAddAnnotation)
 {
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc",
@@ -672,7 +673,8 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, FunctionAddAnnotation)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::functionRemoveAnnotation, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ArktsModifyApiImpl::functionRemoveAnnotation, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, FunctionRemoveAnnotation)
 {
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc",
@@ -682,7 +684,8 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, FunctionRemoveAnnotation)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::annotationAddAnnotationElement, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ArktsModifyApiImpl::annotationAddAnnotationElement, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, AnnotationAddAnnotationElement)
 {
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc",
@@ -692,7 +695,8 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, AnnotationAddAnnotationElement)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::annotationRemoveAnnotationElement, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ArktsModifyApiImpl::annotationRemoveAnnotationElement, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, AnnotationRemoveAnnotationElement)
 {
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc",
@@ -702,7 +706,8 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, AnnotationRemoveAnnotationElement)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::annotationRemoveAnnotationElement, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ArktsModifyApiImpl::annotationRemoveAnnotationElement, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, AnnotationRemoveAnnotationElement_2)
 {
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc",
@@ -711,7 +716,8 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, AnnotationRemoveAnnotationElement_2)
                              "bar", TestAnnotationRemoveAnnotationElement);
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::annotationInterfaceAddField, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ArktsModifyApiImpl::annotationInterfaceAddField, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, AnnotationInterfaceAddField)
 {
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc",
@@ -721,7 +727,8 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, AnnotationInterfaceAddField)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::annotationInterfaceRemoveField, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ArktsModifyApiImpl::annotationInterfaceRemoveField, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, AnnotationInterfaceRemoveField)
 {
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc",
@@ -731,7 +738,8 @@ TEST_F(LibAbcKitModifyApiAnnotationsTests, AnnotationInterfaceRemoveField)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::annotationInterfaceRemoveField, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ArktsModifyApiImpl::annotationInterfaceRemoveField, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitModifyApiAnnotationsTests, AnnotationInterfaceRemoveField_2)
 {
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc",

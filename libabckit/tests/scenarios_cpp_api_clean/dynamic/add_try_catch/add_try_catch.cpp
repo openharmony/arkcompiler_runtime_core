@@ -62,7 +62,7 @@ static abckit::core::Function FindRunFunc(const abckit::File *file)
     return runFunc;
 }
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=cpp
 TEST_F(AbckitScenarioCppTestClean, LibAbcKitTestInsertTryCatch)
 {
     const std::string inputPath = ABCKIT_ABC_DIR "scenarios_cpp_api_clean/dynamic/add_try_catch/add_try_catch.abc";

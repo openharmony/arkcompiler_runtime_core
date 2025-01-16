@@ -35,28 +35,28 @@ static auto g_apiImp = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 class LibAbcKitNullptrTestsApiImpl0 : public ::testing::Test {};
 
 // Test: test-kind=api, api=ApiImpl::closeFile,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsApiImpl0, closeFile)
 {
     helpers_nullptr::TestNullptr(g_apiImp->closeFile);
 }
 
 // Test: test-kind=api, api=ApiImpl::destroyGraph,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsApiImpl0, destroyGraph)
 {
     helpers_nullptr::TestNullptr(g_apiImp->destroyGraph);
 }
 
 // Test: test-kind=api, api=ApiImpl::openAbc,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsApiImpl0, openAbc)
 {
     helpers_nullptr::TestNullptr(g_apiImp->openAbc);
 }
 
 // Test: test-kind=api, api=ApiImpl::writeAbc,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsApiImpl0, writeAbc)
 {
     helpers_nullptr::TestNullptr(g_apiImp->writeAbc);

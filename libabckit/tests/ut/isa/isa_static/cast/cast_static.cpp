@@ -64,7 +64,7 @@ void TransformCheckCastIr(AbckitGraph *graph, AbckitFile *file, AbckitCoreClass 
 
 class LibAbcKitCastStaticTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCast, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCast, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCastStaticTest, LibAbcKitTestCreateCast)
 {
     helpers::TransformMethod(
@@ -96,7 +96,7 @@ TEST_F(LibAbcKitCastStaticTest, LibAbcKitTestCreateCast)
         });
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCheckCast, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCheckCast, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCastStaticTest, LibAbcKitTestCheckCast)
 {
     helpers::TransformMethod(
@@ -128,7 +128,7 @@ TEST_F(LibAbcKitCastStaticTest, LibAbcKitTestCheckCast)
     EXPECT_TRUE(helpers::Match(output, ""));
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iGetTargetType, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iGetTargetType, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCastStaticTest, LibAbcKitTestGetTargetType1)
 {
     helpers::TransformMethod(
@@ -201,7 +201,7 @@ TEST_F(LibAbcKitCastStaticTest, LibAbcKitTestGetTargetType2)
         });
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iSetTargetType, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iSetTargetType, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCastStaticTest, LibAbcKitTestSetTargetType1)
 {
     helpers::TransformMethod(

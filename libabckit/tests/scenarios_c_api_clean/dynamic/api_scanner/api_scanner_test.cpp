@@ -355,7 +355,7 @@ namespace libabckit::test {
 
 class AbckitScenarioTestClean : public ::testing::Test {};
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(AbckitScenarioTestClean, LibAbcKitTestApiScannerDynamicClean)
 {
     // CC-OFFNXT(G.NAM.03) project code style

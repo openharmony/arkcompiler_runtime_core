@@ -316,7 +316,7 @@ TEST_F(LibAbcKitCppTest, CppTest10)
     ASSERT_EQ(exportNames[0], "bar");
 }
 
-// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+// Test: test-kind=internal, abc-kind=ArkTS1, category=internal, extension=cpp
 TEST_F(LibAbcKitCppTest, CppTest11)
 {
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
@@ -329,7 +329,7 @@ TEST_F(LibAbcKitCppTest, CppTest11)
     }
 }
 
-// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+// Test: test-kind=internal, abc-kind=ArkTS1, category=internal, extension=cpp
 TEST_F(LibAbcKitCppTest, CppTest12)
 {
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");

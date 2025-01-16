@@ -60,19 +60,19 @@ static void ValidTest(AbckitInst *(*binaryInstToCheck)(AbckitGraph *graph, Abcki
 
 class LibAbcKitCreateBinInstLogicalImmTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateOrI, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateOrI, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateBinInstLogicalImmTest, CreateOrIValid)
 {
     ValidTest(g_statG->iCreateOrI, ABCKIT_ISA_API_STATIC_OPCODE_ORI, "5\n");
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateXorI, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateXorI, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateBinInstLogicalImmTest, CreateXorIValid)
 {
     ValidTest(g_statG->iCreateXorI, ABCKIT_ISA_API_STATIC_OPCODE_XORI, "1\n");
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAndI, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAndI, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateBinInstLogicalImmTest, CreateAndIValid)
 {
     ValidTest(g_statG->iCreateAndI, ABCKIT_ISA_API_STATIC_OPCODE_ANDI, "4\n");

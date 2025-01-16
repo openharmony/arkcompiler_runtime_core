@@ -123,7 +123,7 @@ static std::function<void(AbckitCoreModule *)> g_cbModule = [](AbckitCoreModule 
     return true;
 };
 
-// Test: test-kind=regression, abc-kind=ArkTS1, category=positive
+// Test: test-kind=regression, abc-kind=ArkTS1, category=positive, extension=cpp
 TEST_F(AbckitRegressionTestCAPI, LibAbcKitTestIssueIB2T4M)
 {
     std::string inputPath = ABCKIT_ABC_DIR "regression/issue_IB2T4M/issue_IB2T4M.abc";

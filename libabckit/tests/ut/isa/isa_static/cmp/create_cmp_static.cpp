@@ -79,7 +79,7 @@ static std::vector<helpers::BBSchema<AbckitIsaApiStaticOpcode>> GetSchema()
             {{1}, {}, {}}};
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCmp, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCmp, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpI1)
 {
     helpers::TransformMethod(
@@ -99,7 +99,7 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpI1)
     EXPECT_TRUE(helpers::Match(output, "1\n"));
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCmp, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCmp, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpI2)
 {
     helpers::TransformMethod(
@@ -119,7 +119,7 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpI2)
     EXPECT_TRUE(helpers::Match(output, "-1\n"));
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCmp, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCmp, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpI3)
 {
     helpers::TransformMethod(
@@ -137,7 +137,7 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpI3)
     EXPECT_TRUE(helpers::Match(output, "0\n"));
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCmp, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCmp, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpD1)
 {
     helpers::TransformMethod(
@@ -157,7 +157,7 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpD1)
     EXPECT_TRUE(helpers::Match(output, "1\n"));
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCmp, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCmp, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpD2)
 {
     helpers::TransformMethod(
@@ -177,7 +177,7 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpD2)
     EXPECT_TRUE(helpers::Match(output, "-1\n"));
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCmp, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCmp, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpD3)
 {
     helpers::TransformMethod(

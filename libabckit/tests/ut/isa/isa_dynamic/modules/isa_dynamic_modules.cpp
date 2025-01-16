@@ -360,7 +360,7 @@ static std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> CreateBBSchemaF
 // Modules Tests
 // ========================================
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iSetModule, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iSetModule, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIsetModule)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -454,7 +454,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIsetModuleWrongModule)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iSetImportDescriptor, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iSetImportDescriptor, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIsetImportDescriptor)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -546,7 +546,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIsetImportDescriptorWrongImport)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iSetExportDescriptor, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iSetExportDescriptor, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIsetExportDescriptor)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -638,7 +638,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIsetExportDescriptorWrongExport)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iGetModule, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iGetModule, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIgetModule)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -692,7 +692,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIgetModuleWrongInst)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iGetImportDescriptor, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iGetImportDescriptor, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIgetImportDescriptor)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -753,7 +753,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIgetImportDescriptorWrongInst)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iGetExportDescriptor, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iGetExportDescriptor, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIgetExportDescriptor)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -815,7 +815,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIgetExportDescriptorWrongInst)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetmodulenamespace, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetmodulenamespace, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynGetmodulenamespace)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -852,7 +853,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynGetmodulenamespace)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideGetmodulenamespace, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideGetmodulenamespace, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideGetmodulenamespace)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -889,7 +891,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideGetmodulenamesp
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdexternalmodulevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdexternalmodulevar, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynLdexternalmodulevar)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -925,7 +928,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynLdexternalmodulevar
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdexternalmodulevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdexternalmodulevar, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideLdexternalmodulevar)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -961,7 +965,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideLdexternalmodul
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdlocalmodulevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdlocalmodulevar, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynLdlocalmodulevar)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -1000,7 +1004,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynLdlocalmodulevar)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdlocalmodulevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdlocalmodulevar, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideLdlocalmodulevar)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -1039,7 +1044,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideLdlocalmoduleva
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStmodulevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStmodulevar, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynStmodulevar)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -1080,7 +1085,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynStmodulevar)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStmodulevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStmodulevar, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideStmodulevar)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",

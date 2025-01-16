@@ -34,7 +34,8 @@ static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitIcreateArrayTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreatearraywithbuffer, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreatearraywithbuffer, abc-kind=ArkTS2, category=positive,
+// extension=c
 TEST_F(LibAbcKitIcreateArrayTest, IcreateDynCreatearraywithbuffer_1)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/arrays/create_array_dynamic.abc",
@@ -75,7 +76,7 @@ TEST_F(LibAbcKitIcreateArrayTest, IcreateDynCreatearraywithbuffer_1)
     EXPECT_TRUE(helpers::Match(output, "true,2147483649,3.22,asdf\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateemptyarray, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateemptyarray, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIcreateArrayTest, IcreateDynCreateemptyarray)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/arrays/create_array_dynamic.abc",

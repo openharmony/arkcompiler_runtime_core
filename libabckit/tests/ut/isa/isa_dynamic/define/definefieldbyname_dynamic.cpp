@@ -35,7 +35,7 @@ static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitCreateDynDefineField : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinefieldbyname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinefieldbyname, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinefieldbyname_1)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic.abc",
@@ -76,7 +76,7 @@ TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinefieldbyname_1)
     EXPECT_TRUE(helpers::Match(output, "2\n4\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinefieldbyname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinefieldbyname, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinefieldbyname_2)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic.abc",
@@ -123,7 +123,8 @@ TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinefieldbyname_2)
     EXPECT_TRUE(helpers::Match(output, "2\nHello\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinepropertybyname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinepropertybyname, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinepropertybyname_1)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic.abc",
@@ -163,7 +164,8 @@ TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinepropertybyname_1)
     EXPECT_TRUE(helpers::Match(output, "2\n4\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinepropertybyname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinepropertybyname, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinepropertybyname_2)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic.abc",

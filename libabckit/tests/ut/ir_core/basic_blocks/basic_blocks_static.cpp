@@ -39,7 +39,7 @@ static constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/basic
 
 class LibAbcKitBasicBlocksTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=GraphApiImpl::bbCreateEmpty, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbCreateEmpty, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBcreateEmptyBlock_1)
 {
     helpers::TransformMethod(
@@ -75,7 +75,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBcreateEmptyBlock_1)
         []([[maybe_unused]] AbckitGraph *graph) {});
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbDisconnectSuccBlock, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbDisconnectSuccBlock, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBdisconnectSuccBlock)
 {
     auto cb = [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
@@ -101,7 +101,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBdisconnectSuccBlock)
     helpers::InspectMethod(INPUT_PATH, "test", cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbGetGraph, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbGetGraph, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBgetGraph_1)
 {
     auto cb = [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
@@ -127,7 +127,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBgetGraph_1)
     helpers::InspectMethod(INPUT_PATH, "test", cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbGetFirstInst, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbGetFirstInst, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBgetFirstInst_2)
 {
     auto cb = [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
@@ -140,7 +140,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBgetFirstInst_2)
     helpers::InspectMethod(INPUT_PATH, "test", cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbGetLastInst, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbGetLastInst, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBgetLastInst_1)
 {
     auto cb = [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
@@ -153,7 +153,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBgetLastInst_1)
     helpers::InspectMethod(INPUT_PATH, "test", cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbGetTrueBranch, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbGetTrueBranch, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBgetTrueBranch_1)
 {
     auto cb = [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
@@ -197,7 +197,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBgetTrueBranch_1)
     helpers::InspectMethod(INPUT_PATH, "test2", cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbGetFalseBranch, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbGetFalseBranch, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBgetFalseBranch_1)
 {
     auto cb = [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
@@ -241,7 +241,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBgetFalseBranch_1)
     helpers::InspectMethod(INPUT_PATH, "test2", cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbAddInstFront, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbAddInstFront, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBaddInstFront_4)
 {
     helpers::TransformMethod(
@@ -272,7 +272,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBaddInstFront_4)
         []([[maybe_unused]] AbckitGraph *graph) {});
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbAddInstBack, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbAddInstBack, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBaddInstBack_2)
 {
     helpers::TransformMethod(
@@ -316,7 +316,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBaddInstBack_2)
         []([[maybe_unused]] AbckitGraph *graph) {});
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbAddInstBack, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbAddInstBack, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBaddInstBack_4)
 {
     helpers::TransformMethod(
@@ -343,7 +343,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBaddInstBack_4)
         []([[maybe_unused]] AbckitGraph *graph) {});
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbVisitSuccBlocks, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbVisitSuccBlocks, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBvisitSuccBlocks_1)
 {
     auto cb = [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
@@ -363,7 +363,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBvisitSuccBlocks_1)
     helpers::InspectMethod(INPUT_PATH, "test", cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbVisitPredBlocks, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbVisitPredBlocks, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBvisitPredBlocks_1)
 {
     auto cb = [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
@@ -384,7 +384,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBvisitPredBlocks_1)
     helpers::InspectMethod(INPUT_PATH, "test", cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbVisitDominatedBlocks, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbVisitDominatedBlocks, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBvisitDominatedBlocks_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -406,7 +406,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBvisitDominatedBlocks_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbGetSuccBlock, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbGetSuccBlock, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBgetSuccBlock_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -421,7 +421,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBgetSuccBlock_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbIsStart, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbIsStart, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBisStart_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -435,7 +435,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBisStart_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbIsEnd, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbIsEnd, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBisEnd_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -449,7 +449,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBisEnd_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbGetImmediateDominator, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbGetImmediateDominator, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBgetImmediateDominator_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -463,7 +463,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBgetImmediateDominator_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbGetSuccBlockCount, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbGetSuccBlockCount, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBgetSuccBlockCount_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -477,7 +477,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBgetSuccBlockCount_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbGetPredBlockCount, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbGetPredBlockCount, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBgetPredBlockCount_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -492,7 +492,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBgetPredBlockCount_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbDump, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbDump, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBdump_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -505,7 +505,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBdump_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbGetNumberOfInstructions, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbGetNumberOfInstructions, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBgetNumberOfInstructions_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -519,7 +519,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBgetNumberOfInstructions_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gGetBasicBlock, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gGetBasicBlock, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, GgetBasicBlock_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -546,7 +546,7 @@ TEST_F(LibAbcKitBasicBlocksTest, GgetBasicBlockBigId)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gGetParameter, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gGetParameter, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, GgetParameter_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -574,7 +574,7 @@ TEST_F(LibAbcKitBasicBlocksTest, GgetParameterBigId)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gGetNumberOfParameters, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gGetNumberOfParameters, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, GgetNumberOfParameters)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -587,7 +587,7 @@ TEST_F(LibAbcKitBasicBlocksTest, GgetNumberOfParameters)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gGetNumberOfBasicBlocks, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gGetNumberOfBasicBlocks, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, GgetNumberOfBasicBlocks_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -600,7 +600,7 @@ TEST_F(LibAbcKitBasicBlocksTest, GgetNumberOfBasicBlocks_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbGetId, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbGetId, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBgetId_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -613,7 +613,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBgetId_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbGetPredBlock, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbGetPredBlock, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBgetPredBlock_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -627,7 +627,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBgetPredBlock_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbInsertSuccBlock, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbInsertSuccBlock, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBinsertSuccBlock_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -644,7 +644,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBinsertSuccBlock_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbAppendSuccBlock, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbAppendSuccBlock, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBappendSuccBlock_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -661,7 +661,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBappendSuccBlock_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbRemoveAllInsts, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbRemoveAllInsts, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, bbRemoveAllInsts_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -679,7 +679,7 @@ TEST_F(LibAbcKitBasicBlocksTest, bbRemoveAllInsts_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbIsLoopPrehead, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbIsLoopPrehead, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBisLoopPrehead_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -693,7 +693,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBisLoopPrehead_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbIsLoopHead, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbIsLoopHead, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBisLoopHead_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -708,7 +708,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBisLoopHead_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbSplitBlockAfterInstruction, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbSplitBlockAfterInstruction, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, DISABLED_BBsplitBlockAfterInstruction_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -727,7 +727,7 @@ TEST_F(LibAbcKitBasicBlocksTest, DISABLED_BBsplitBlockAfterInstruction_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbCheckDominance, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbCheckDominance, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBcheckDominance_1)
 {
     AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
@@ -741,7 +741,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBcheckDominance_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbVisitSuccBlocks, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbVisitSuccBlocks, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBvisitSuccBlocksStatic_2)
 {
     auto output = helpers::ExecuteStaticAbc(INPUT_PATH, "basic_blocks_static/ETSGLOBAL", "visit_call");
@@ -780,7 +780,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBvisitSuccBlocksStatic_2)
     EXPECT_TRUE(helpers::Match(output, "43\n42\n"));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbIsTryBegin, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbIsTryBegin, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBisTryBegin)
 {
     helpers::InspectMethod(INPUT_PATH, "test3", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
@@ -790,7 +790,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBisTryBegin)
     });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbIsTryEnd, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbIsTryEnd, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBisTryEnd)
 {
     helpers::InspectMethod(INPUT_PATH, "test3", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
@@ -800,7 +800,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBisTryEnd)
     });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbIsCatchBegin, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbIsCatchBegin, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBisCatchBegin)
 {
     helpers::InspectMethod(INPUT_PATH, "test3", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
@@ -811,7 +811,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBisCatchBegin)
     });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbIsCatch, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbIsCatch, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBisCatch)
 {
     helpers::InspectMethod(INPUT_PATH, "test3", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
@@ -821,7 +821,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBisCatch)
     });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbIsTry, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbIsTry, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksTest, BBisTry)
 {
     auto cb = [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {

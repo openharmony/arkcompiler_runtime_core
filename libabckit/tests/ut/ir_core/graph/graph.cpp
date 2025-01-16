@@ -89,7 +89,7 @@ static constexpr auto EXPECTED =
 
 class LibAbcKitIrGraphTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=GraphApiImpl::gDump, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gDump, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrGraphTest, Gdump_1)
 {
     auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
@@ -116,7 +116,7 @@ TEST_F(LibAbcKitIrGraphTest, Gdump_1)
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/graph/graph_dynamic.abc", "func_main_0", cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gDump, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gDump, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrGraphTest, Gdump_2)
 {
     helpers::InspectMethod(
@@ -164,7 +164,7 @@ TEST_F(LibAbcKitIrGraphTest, Gdump_2)
         });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gGetFile, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gGetFile, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrGraphTest, GgetFile_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/graph/graph_dynamic.abc", "func_main_0",
@@ -175,7 +175,7 @@ TEST_F(LibAbcKitIrGraphTest, GgetFile_1)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gGetFile, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gGetFile, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrGraphTest, GgetFile_2)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/graph/graph_static.abc", "main",
@@ -186,7 +186,7 @@ TEST_F(LibAbcKitIrGraphTest, GgetFile_2)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gGetIsa, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gGetIsa, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrGraphTest, GgetIsa_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/graph/graph_dynamic.abc", "func_main_0",
@@ -197,7 +197,7 @@ TEST_F(LibAbcKitIrGraphTest, GgetIsa_1)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gGetIsa, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gGetIsa, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrGraphTest, GgetIsa_2)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/graph/graph_static.abc", "main",

@@ -24,7 +24,7 @@ namespace libabckit::test {
 
 class AbckitScenarioTest : public ::testing::Test {};
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(AbckitScenarioTest, LibAbcKitTestParameterCheck)
 {
     static constexpr auto VERSION = ABCKIT_VERSION_RELEASE_1_0_0;

@@ -60,19 +60,19 @@ static void ValidTest(AbckitInst *(*binaryInstToCheck)(AbckitGraph *graph, Abcki
 
 class LibAbcKitCreateDynBinInstLogicalTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAnd2, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAnd2, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstLogicalTest, CreateDynAnd2Valid)
 {
     ValidTest(g_dynG->iCreateAnd2, ABCKIT_ISA_API_DYNAMIC_OPCODE_AND2, "2\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateOr2, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateOr2, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstLogicalTest, CreateDynOr2Valid)
 {
     ValidTest(g_dynG->iCreateOr2, ABCKIT_ISA_API_DYNAMIC_OPCODE_OR2, "10\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateXor2, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateXor2, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstLogicalTest, CreateDynXor2Valid)
 {
     ValidTest(g_dynG->iCreateXor2, ABCKIT_ISA_API_DYNAMIC_OPCODE_XOR2, "8\n");

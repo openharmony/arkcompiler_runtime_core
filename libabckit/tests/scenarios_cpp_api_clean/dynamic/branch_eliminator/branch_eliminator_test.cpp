@@ -501,13 +501,13 @@ static void GeneralBranchEliminatorTest(bool configIsDebugFinal)
 
 class AbckitScenarioCppTestClean : public ::testing::Test {};
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=cpp
 TEST_F(AbckitScenarioCppTestClean, LibAbcKitTestBranchEliminatorDynamicClean1)
 {
     GeneralBranchEliminatorTest(false);
 }
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=cpp
 TEST_F(AbckitScenarioCppTestClean, LibAbcKitTestBranchEliminatorDynamicClean2)
 {
     GeneralBranchEliminatorTest(true);

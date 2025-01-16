@@ -112,7 +112,7 @@ void TransformIR(AbckitGraph *graph, bool isDynamic = false)
 
 }  // namespace
 
-// Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitGetPhiTest, StaticBBcreatePhi)
 {
     auto output =
@@ -160,7 +160,7 @@ TEST_F(LibAbcKitGetPhiTest, StaticBBcreatePhi)
     EXPECT_TRUE(helpers::Match(output, "-1\n4\n"));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitGetPhiTest, DynamicBBcreatePhi)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/ir_core/phi/phi_dynamic.abc", "phi_dynamic");

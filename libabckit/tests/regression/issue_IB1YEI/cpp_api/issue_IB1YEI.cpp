@@ -30,7 +30,7 @@ namespace libabckit::test {
 
 class AbckitRegressionTestCppAPI : public ::testing::Test {};
 
-// Test: test-kind=regression, abc-kind=ArkTS1, category=positive
+// Test: test-kind=regression, abc-kind=ArkTS1, category=positive, extension=cpp
 TEST_F(AbckitRegressionTestCppAPI, LibAbcKitTestIssueIB1YEI)
 {
     const std::string inputPath = ABCKIT_ABC_DIR "regression/issue_IB1YEI/issue_IB1YEI.abc";

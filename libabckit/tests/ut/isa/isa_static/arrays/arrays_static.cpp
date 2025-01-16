@@ -74,7 +74,7 @@ void TransformStoreArrayByIdx(TransformStoreArrayByIdxArgs &args,
 
 class LibAbcKitArrayStaticTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateStoreArrayWide, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateStoreArrayWide, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestStoreArrayWide)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/store_array_wide.abc",
@@ -129,7 +129,7 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestStoreArrayWideNeg)
         []([[maybe_unused]] AbckitGraph *graph) {});
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateStoreArray, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateStoreArray, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestStoreArray)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/store_array.abc",
@@ -184,7 +184,7 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestStoreArrayNeg)
         []([[maybe_unused]] AbckitGraph *graph) {});
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadArray, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadArray, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLoadArray)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/load_array.abc",
@@ -246,7 +246,7 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLoadArrayNeg)
         []([[maybe_unused]] AbckitGraph *graph) {});
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLenArray, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLenArray, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLenArray)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/len_array.abc",
@@ -296,7 +296,7 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLenArrayNeg)
         []([[maybe_unused]] AbckitGraph *graph) {});
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadConstArray, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadConstArray, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLoadConstArray)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/load_const_array.abc",

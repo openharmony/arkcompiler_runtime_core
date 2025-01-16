@@ -37,7 +37,7 @@ struct ModuleData {
     std::vector<const char *> moduleMethods = {};
 };
 
-// Test: test-kind=api, api=ApiImpl::openAbc, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ApiImpl::openAbc, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitAbcStuff, OpenAbcStatic)
 {
     constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_static.abc";
@@ -71,7 +71,7 @@ TEST_F(LibAbcKitAbcStuff, OpenAbcStatic)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ApiImpl::writeAbc, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ApiImpl::writeAbc, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitAbcStuff, WriteAbcStatic)
 {
     constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_static.abc";
@@ -110,7 +110,7 @@ TEST_F(LibAbcKitAbcStuff, WriteAbcStatic)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=ApiImpl::closeFile, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ApiImpl::closeFile, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitAbcStuff, CloseFileStatic)
 {
     constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_static.abc";
@@ -120,7 +120,7 @@ TEST_F(LibAbcKitAbcStuff, CloseFileStatic)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ApiImpl::openAbc, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ApiImpl::openAbc, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitAbcStuff, OpenAbcDynamic)
 {
     constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_dynamic.abc";
@@ -144,7 +144,7 @@ TEST_F(LibAbcKitAbcStuff, OpenAbcDynamic)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ApiImpl::writeAbc, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ApiImpl::writeAbc, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitAbcStuff, WriteAbcDynamic)
 {
     constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_dynamic.abc";
@@ -174,7 +174,7 @@ TEST_F(LibAbcKitAbcStuff, WriteAbcDynamic)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ApiImpl::closeFile, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ApiImpl::closeFile, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitAbcStuff, CloseFileDynamic)
 {
     constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_dynamic.abc";

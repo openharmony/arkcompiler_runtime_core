@@ -231,37 +231,37 @@ static void TransformIrWideCallrange(AbckitGraph *graph)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallarg0, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallarg0, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynCall, CreateDynCallarg0)
 {
     TestHelper(TransformIrCallarg0, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG0, "func\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallarg1, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallarg1, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynCall, CreateDynCallarg1)
 {
     TestHelper(TransformIrCallarg1, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, "func\n1\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallargs2, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallargs2, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynCall, CreateDynCallargs2)
 {
     TestHelper(TransformIrCallargs2, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARGS2, "func\n1\n2\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallargs3, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallargs3, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynCall, CreateDynCallargs3)
 {
     TestHelper(TransformIrCallargs3, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARGS3, "func\n1\n2\n3\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallrange, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallrange, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynCall, CreateDynCallrange)
 {
     TestHelper(TransformIrCallrange, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLRANGE, "func\n1\n2\n3\n4\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideCallrange, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideCallrange, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynCall, CreateDynWideCallrange)
 {
     // Temporary doesn't execute due to Dynamic VM runtime bug #IA954E

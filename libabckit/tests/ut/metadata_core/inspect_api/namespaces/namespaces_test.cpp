@@ -116,61 +116,61 @@ static void GeneralTestNamespaces(const std::string &entityName, const std::stri
     }
 }
 
-// Test: test-kind=api, api=InspectApiImpl::namespaceGetParentNamespace, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::namespaceGetParentNamespace, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiNamespacesTests, NamespaceGetParentNamespace_1)
 {
     GeneralTestNamespaces<NAMESPACE>("N1");
 }
 
-// Test: test-kind=api, api=InspectApiImpl::namespaceGetParentNamespace, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::namespaceGetParentNamespace, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiNamespacesTests, NamespaceGetParentNamespace_2)
 {
     GeneralTestNamespaces<NAMESPACE>("N2", "N1");
 }
 
-// Test: test-kind=api, api=InspectApiImpl::functionGetParentNamespace, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::functionGetParentNamespace, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiNamespacesTests, FunctionGetParentNamespace_1)
 {
     GeneralTestNamespaces<FUNCTION>("f0");
 }
 
-// Test: test-kind=api, api=InspectApiImpl::functionGetParentNamespace, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::functionGetParentNamespace, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiNamespacesTests, FunctionGetParentNamespace_2)
 {
     GeneralTestNamespaces<FUNCTION>("f1", "N1");
 }
 
-// Test: test-kind=api, api=InspectApiImpl::functionGetParentNamespace, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::functionGetParentNamespace, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiNamespacesTests, FunctionGetParentNamespace_3)
 {
     GeneralTestNamespaces<FUNCTION>("f2", "N2");
 }
 
-// Test: test-kind=api, api=InspectApiImpl::functionGetParentNamespace, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::functionGetParentNamespace, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiNamespacesTests, FunctionGetParentNamespace_4)
 {
     GeneralTestNamespaces<FUNCTION>("M1");
 }
 
-// Test: test-kind=api, api=InspectApiImpl::functionGetParentNamespace, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::functionGetParentNamespace, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiNamespacesTests, FunctionGetParentNamespace_5)
 {
     GeneralTestNamespaces<FUNCTION>("M2");
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetParentNamespace, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetParentNamespace, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiNamespacesTests, ClassGetParentNamespace_1)
 {
     GeneralTestNamespaces<CLASS>("C2", "N2");
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetParentNamespace, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetParentNamespace, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiNamespacesTests, ClassGetParentNamespace_2)
 {
     GeneralTestNamespaces<CLASS>("C1", "N1");
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetParentNamespace, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetParentNamespace, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiNamespacesTests, ClassGetParentNamespace_3)
 {
     GeneralTestNamespaces<CLASS>("C0");

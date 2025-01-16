@@ -92,7 +92,7 @@ static void TransformMethodDynamicValid(AbckitGraph *graph, const std::string &f
     }
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetConstantValueU64, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetConstantValueU64, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitGetConstantValueTest, GetConstantValueU64Valid)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/get_constant_value/get_constant_value_static.abc", "foo1",
@@ -101,7 +101,7 @@ TEST_F(LibAbcKitGetConstantValueTest, GetConstantValueU64Valid)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetConstantValueF64, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetConstantValueF64, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitGetConstantValueTest, GetConstantValueF64Valid)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/get_constant_value/get_constant_value_static.abc", "foo2",
@@ -110,7 +110,7 @@ TEST_F(LibAbcKitGetConstantValueTest, GetConstantValueF64Valid)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetConstantValueI64, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetConstantValueI64, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitGetConstantValueTest, GetConstantValueI64Valid)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/get_constant_value/get_constant_value_static.abc", "foo3",
@@ -119,7 +119,7 @@ TEST_F(LibAbcKitGetConstantValueTest, GetConstantValueI64Valid)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetConstantValueI64, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetConstantValueI64, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitGetConstantValueTest, GetConstantValueI64ValidDyn)
 {
     auto output = helpers::ExecuteDynamicAbc(
@@ -141,7 +141,7 @@ TEST_F(LibAbcKitGetConstantValueTest, GetConstantValueI64ValidDyn)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetConstantValueU64, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetConstantValueU64, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitGetConstantValueTest, GetConstantValueU64ValidDyn)
 {
     auto output = helpers::ExecuteDynamicAbc(
@@ -159,7 +159,7 @@ TEST_F(LibAbcKitGetConstantValueTest, GetConstantValueU64ValidDyn)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetConstantValueF64, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetConstantValueF64, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitGetConstantValueTest, GetConstantValueF64ValidDyn)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/get_constant_value/get_constant_value_dynamic.abc", "foo3",
@@ -168,7 +168,7 @@ TEST_F(LibAbcKitGetConstantValueTest, GetConstantValueF64ValidDyn)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetConstantValueF64, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetConstantValueF64, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitGetConstantValueTest, GetConstantValueF64ValidDyn_2)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/get_constant_value/get_constant_value_dynamic.abc", "foo4",
@@ -177,7 +177,7 @@ TEST_F(LibAbcKitGetConstantValueTest, GetConstantValueF64ValidDyn_2)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetConstantValueI32, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetConstantValueI32, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitGetConstantValueTest, GetConstantValueI32ValidDyn)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/get_constant_value/get_constant_value_dynamic.abc", "foo5",

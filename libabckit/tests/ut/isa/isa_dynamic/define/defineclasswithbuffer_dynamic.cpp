@@ -34,7 +34,8 @@ static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitCreateDynDefineClass : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefineclasswithbuffer, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefineclasswithbuffer, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_1)
 {
     auto output = helpers::ExecuteDynamicAbc(
@@ -76,7 +77,8 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_1)
     EXPECT_TRUE(helpers::Match(output, "\\[object Object\\]\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefineclasswithbuffer, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefineclasswithbuffer, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_2)
 {
     auto output = helpers::ExecuteDynamicAbc(
@@ -113,7 +115,8 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_2)
     EXPECT_TRUE(helpers::Match(output, "constr\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefineclasswithbuffer, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefineclasswithbuffer, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_3)
 {
     auto output = helpers::ExecuteDynamicAbc(
@@ -158,7 +161,8 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_3)
     EXPECT_TRUE(helpers::Match(output, "constr\nmethod\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefineclasswithbuffer, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefineclasswithbuffer, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_4)
 {
     auto output = helpers::ExecuteDynamicAbc(
@@ -207,7 +211,8 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_4)
     EXPECT_TRUE(helpers::Match(output, "constr\nmethod 5\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefineclasswithbuffer, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefineclasswithbuffer, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_5)
 {
     auto output = helpers::ExecuteDynamicAbc(
@@ -253,7 +258,8 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_5)
     EXPECT_TRUE(helpers::Match(output, "constr initialize\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefineclasswithbuffer, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefineclasswithbuffer, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_6)
 {
     auto output = helpers::ExecuteDynamicAbc(

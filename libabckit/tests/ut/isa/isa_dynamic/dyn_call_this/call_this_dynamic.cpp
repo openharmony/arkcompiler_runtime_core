@@ -228,37 +228,37 @@ static void TransformIrWideCallThisrange(AbckitGraph *graph, AbckitInst *obj, Ab
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis0, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis0, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynCallThis, CreateDynCallthis0)
 {
     TestHelper(TransformIrCallThisarg0, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0, "func\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis1, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis1, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynCallThis, CreateDynCallthis1)
 {
     TestHelper(TransformIrCallThisarg1, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1, "func\n1\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis2, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis2, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynCallThis, CreateDynCallthis2)
 {
     TestHelper(TransformIrCallThisargs2, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS2, "func\n1\n2\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis3, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis3, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynCallThis, CreateDynCallthis3)
 {
     TestHelper(TransformIrCallThisargs3, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS3, "func\n1\n2\n3\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthisrange, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthisrange, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynCallThis, CreateDynCallthisrange)
 {
     TestHelper(TransformIrCallThisrange, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHISRANGE, "func\n1\n2\n3\n4\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideCallthisrange, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideCallthisrange, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynCallThis, CreateDynWideCallthisrange)
 {
     TestHelper(TransformIrWideCallThisrange, ABCKIT_ISA_API_DYNAMIC_OPCODE_WIDE_CALLTHISRANGE, "func\n1\n2\n3\n4\n");

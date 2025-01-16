@@ -203,7 +203,7 @@ static std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> CreateBBSchema(
 
 class LibAbcKitCreateDynOwnInstTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyname, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStownbynameValid)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/emptyobj.abc", "emptyobj");
@@ -234,7 +234,7 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStownbynameValid)
     EXPECT_TRUE(helpers::Match(output, "abckit_test_value\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyvalue, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyvalue, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStownbyvalueValid)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/emptyobj.abc", "emptyobj");
@@ -267,7 +267,7 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStownbyvalueValid)
     EXPECT_TRUE(helpers::Match(output, "abckit_test_value\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyindex, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyindex, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStownbyindexValid)
 {
     auto output =
@@ -295,7 +295,7 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStownbyindexValid)
     EXPECT_TRUE(helpers::Match(output, "6,3,4\n4\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStownbyindex, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStownbyindex, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynWideStownbyindexValid)
 {
     auto output =
@@ -323,7 +323,8 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynWideStownbyindexValid)
     EXPECT_TRUE(helpers::Match(output, "6,3,4\n4\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyvaluewithnameset, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyvaluewithnameset, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynWideStownbyvaluewithnamesetValid)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/emptyobj.abc", "emptyobj");
@@ -360,7 +361,8 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynWideStownbyvaluewithnamesetValid)
     EXPECT_TRUE(helpers::Match(output, "abckit_test_value\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbynamewithnameset, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbynamewithnameset, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStownbynamewithnamesetValid)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/emptyobj.abc", "emptyobj");
@@ -395,7 +397,8 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStownbynamewithnamesetValid)
     EXPECT_TRUE(helpers::Match(output, "abckit_test_value\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbynamewithnameset, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbynamewithnameset, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStownbynamewithnamesetLargeValid)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/emptyobj.abc", "emptyobj");
@@ -446,7 +449,7 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStownbynamewithnamesetLargeValid)
     EXPECT_TRUE(helpers::Match(output, "abckit_test_value\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStobjbyname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStobjbyname, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStobjbynameValid)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/emptyobj.abc", "emptyobj");
@@ -481,7 +484,7 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStobjbynameValid)
     EXPECT_TRUE(helpers::Match(output, "abckit_test_value\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStobjbyvalue, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStobjbyvalue, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStobjbyvalueValid)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/emptyobj.abc", "emptyobj");
@@ -519,7 +522,7 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStobjbyvalueValid)
     EXPECT_TRUE(helpers::Match(output, "abckit_test_value\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStobjbyindex, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStobjbyindex, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStobjbyindexValid)
 {
     auto output =
@@ -551,7 +554,7 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStobjbyindexValid)
     EXPECT_TRUE(helpers::Match(output, "a\nabckit_test_value\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStobjbyindex, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStobjbyindex, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStobjbyindexLargeValid)
 {
     auto output =
@@ -598,7 +601,7 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynStobjbyindexLargeValid)
     EXPECT_TRUE(helpers::Match(output, "a\nabckit_test_value\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStobjbyindex, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStobjbyindex, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynWideStobjbyindexValid)
 {
     auto output =
@@ -630,7 +633,7 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, CreateDynWideStobjbyindexValid)
     EXPECT_TRUE(helpers::Match(output, "a\nabckit_test_value\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdobjbyvalue, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdobjbyvalue, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, IcreateDynLdobjbyvalueValid)
 {
     auto output =
@@ -661,7 +664,7 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, IcreateDynLdobjbyvalueValid)
     EXPECT_TRUE(helpers::Match(output, "field_data\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdobjbyname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdobjbyname, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, IcreateDynLdobjbynameValid)
 {
     auto output =
@@ -690,7 +693,7 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, IcreateDynLdobjbynameValid)
     EXPECT_TRUE(helpers::Match(output, "field_data\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdobjbyindex, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdobjbyindex, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, IcreateDynWideLdobjbyindexValid)
 {
     auto output =
@@ -718,7 +721,7 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, IcreateDynWideLdobjbyindexValid)
     EXPECT_TRUE(helpers::Match(output, "field_data\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdobjbyindex, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdobjbyindex, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, IcreateDynLdobjbyindexValid)
 {
     auto output =
@@ -746,7 +749,7 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, IcreateDynLdobjbyindexValid)
     EXPECT_TRUE(helpers::Match(output, "field_data\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdobjbyindex, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdobjbyindex, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, IcreateDynLdobjbyindexLargeValid)
 {
     auto output =
@@ -789,7 +792,7 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, IcreateDynLdobjbyindexLargeValid)
     EXPECT_TRUE(helpers::Match(output, "field_data\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdglobalvar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdglobalvar, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, IcreateDynLdglobalvarValid)
 {
     auto output =
@@ -817,7 +820,7 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, IcreateDynLdglobalvarValid)
     EXPECT_TRUE(helpers::Match(output, "globalvar_data\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStglobalvar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStglobalvar, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynOwnInstTest, IcreateDynStglobalvarValid)
 {
     auto output =

@@ -35,35 +35,35 @@ static auto g_jsModifyApiImp = AbckitGetJsModifyApiImpl(ABCKIT_VERSION_RELEASE_1
 class LibAbcKitNullptrTestsJsModifyApiImpl0 : public ::testing::Test {};
 
 // Test: test-kind=api, api=JsModifyApiImpl::fileAddExternalModule,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsJsModifyApiImpl0, fileAddExternalModule)
 {
     helpers_nullptr::TestNullptr(g_jsModifyApiImp->fileAddExternalModule);
 }
 
 // Test: test-kind=api, api=JsModifyApiImpl::moduleAddExportFromJsToJs,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsJsModifyApiImpl0, moduleAddExportFromJsToJs)
 {
     helpers_nullptr::TestNullptr(g_jsModifyApiImp->moduleAddExportFromJsToJs);
 }
 
 // Test: test-kind=api, api=JsModifyApiImpl::moduleAddImportFromJsToJs,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsJsModifyApiImpl0, moduleAddImportFromJsToJs)
 {
     helpers_nullptr::TestNullptr(g_jsModifyApiImp->moduleAddImportFromJsToJs);
 }
 
 // Test: test-kind=api, api=JsModifyApiImpl::moduleRemoveExport,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsJsModifyApiImpl0, moduleRemoveExport)
 {
     helpers_nullptr::TestNullptr(g_jsModifyApiImp->moduleRemoveExport);
 }
 
 // Test: test-kind=api, api=JsModifyApiImpl::moduleRemoveImport,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsJsModifyApiImpl0, moduleRemoveImport)
 {
     helpers_nullptr::TestNullptr(g_jsModifyApiImp->moduleRemoveImport);

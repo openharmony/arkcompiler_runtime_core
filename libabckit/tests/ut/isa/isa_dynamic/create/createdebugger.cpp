@@ -37,7 +37,7 @@ static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitIcreateTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDebugger, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDebugger, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIcreateTest, IcreateDebugger)
 {
     helpers::TransformMethod(

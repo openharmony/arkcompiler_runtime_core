@@ -198,7 +198,7 @@ static std::vector<helpers::BBSchema<AbckitIsaApiStaticOpcode>> GetSchema1()
             {{2, 3}, {}, {}}};
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateIf, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateIf, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateIfStaticTest, LibAbcKitTestCreateIf)
 {
     helpers::TransformMethod(
@@ -258,7 +258,7 @@ static std::vector<helpers::BBSchema<AbckitIsaApiStaticOpcode>> GetSchema2()
             {{2, 3}, {}, {}}};
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iSetConditionCode, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iSetConditionCode, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateIfStaticTest, LibAbcKitTestSetCondidionCodePos)
 {
     helpers::TransformMethod(
@@ -286,7 +286,7 @@ TEST_F(LibAbcKitCreateIfStaticTest, LibAbcKitTestSetCondidionCodeNeg)
         [](AbckitGraph *graph) { helpers::VerifyGraph(graph, GetSchema2()); });
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iGetConditionCode, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iGetConditionCode, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateIfStaticTest, LibAbcKitTestGetCondidionCodePos)
 {
     helpers::TransformMethod(

@@ -109,7 +109,7 @@ template("stress_test_action") {
 
     deps = [
       "$abckit_root/abckit:abckit(${host_toolchain})",
-      "$abckit_root/abckit/stress_plugin:abckit_stress_plugin(${host_toolchain})",
+      "$abckit_root/tests/stress/abckit_plugin:abckit_stress_plugin(${host_toolchain})",
     ]
 
     if (defined(invoker.extra_dependencies)) {

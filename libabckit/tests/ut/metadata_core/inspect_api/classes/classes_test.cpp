@@ -43,7 +43,7 @@ static bool ClassCountrer(AbckitCoreClass *klass, void *data)
     return true;
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, StaticModuleEnumerateClasses)
 {
     AbckitFile *file = nullptr;
@@ -64,7 +64,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, StaticModuleEnumerateClasses)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicModuleEnumerateClasses)
 {
     AbckitFile *file = nullptr;
@@ -85,7 +85,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicModuleEnumerateClasses)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, StaticModuleEnumerateClassesEmpty)
 {
     AbckitFile *file = nullptr;
@@ -106,7 +106,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, StaticModuleEnumerateClassesEmpty)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicModuleEnumerateClassesEmpty)
 {
     AbckitFile *file = nullptr;
@@ -127,7 +127,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicModuleEnumerateClassesEmpty)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetName, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetName, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, ClassGetNameSmoke)
 {
     AbckitFile *file = nullptr;
@@ -163,7 +163,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetNameSmoke)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetName, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetName, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetNameSmoke)
 {
     AbckitFile *file = nullptr;
@@ -218,7 +218,7 @@ static bool ClassNameCollector(AbckitCoreClass *klass, void *data)
     return true;
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetName, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetName, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, ClassGetName)
 {
     AbckitFile *file = nullptr;
@@ -243,7 +243,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetName)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetName, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetName, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetName)
 {
     AbckitFile *file = nullptr;
@@ -277,7 +277,7 @@ static bool DummyMethodVisitor(AbckitCoreFunction *method, void * /*data*/)
     return true;
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, ClassEnumerateMethodsSmoke)
 {
     AbckitFile *file = nullptr;
@@ -314,7 +314,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassEnumerateMethodsSmoke)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsSmoke)
 {
     AbckitFile *file = nullptr;
@@ -361,7 +361,7 @@ static bool MethodCountrer(AbckitCoreFunction *method, void *data)
     return true;
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, ClassEnumerateMethodsEmpty)
 {
     AbckitFile *file = nullptr;
@@ -393,7 +393,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassEnumerateMethodsEmpty)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsEmpty)
 {
     AbckitFile *file = nullptr;
@@ -427,7 +427,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsEmpty)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, ClassEnumerateMethodsSeveralMethods)
 {
     AbckitFile *file = nullptr;
@@ -460,7 +460,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassEnumerateMethodsSeveralMethods)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsSeveralMethods)
 {
     AbckitFile *file = nullptr;
@@ -495,7 +495,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsSeveralMethod
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetFile, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetFile, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, ClassGetFile)
 {
     AbckitFile *file = nullptr;
@@ -524,7 +524,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetFile)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetFile, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetFile, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetFile)
 {
     AbckitFile *file = nullptr;
@@ -555,7 +555,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetFile)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetModule, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetModule, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetModule)
 {
     AbckitFile *file = nullptr;
@@ -584,7 +584,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetModule)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetModule, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetModule, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, StaticClassGetModule)
 {
     AbckitFile *file = nullptr;
@@ -613,7 +613,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, StaticClassGetModule)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetParentFunction, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetParentFunction, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetParentFunction)
 {
     AbckitFile *file = nullptr;

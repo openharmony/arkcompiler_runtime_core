@@ -58,19 +58,19 @@ static void ValidTest(AbckitInst *(*binaryInstToCheck)(AbckitGraph *graph, Abcki
 
 class LibAbcKitCreateBinInstShiftsTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateShl, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateShl, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateBinInstShiftsTest, CreateShlValid)
 {
     ValidTest(g_statG->iCreateShl, ABCKIT_ISA_API_STATIC_OPCODE_SHL, "40\n");
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAShr, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAShr, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateBinInstShiftsTest, CreateAShrValid)
 {
     ValidTest(g_statG->iCreateAShr, ABCKIT_ISA_API_STATIC_OPCODE_ASHR, "2\n");
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateShr, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateShr, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateBinInstShiftsTest, CreateShrValid)
 {
     ValidTest(g_statG->iCreateShr, ABCKIT_ISA_API_STATIC_OPCODE_SHR, "2\n");

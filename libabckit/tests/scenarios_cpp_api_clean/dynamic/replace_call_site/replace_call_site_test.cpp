@@ -223,7 +223,7 @@ namespace libabckit::test {
 
 class LibAbcKitCppTest : public ::testing::Test {};
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=cpp
 TEST_F(LibAbcKitCppTest, LibAbcKitTestCppDynamicReplaceCallSiteClean)
 {
     const std::string sandboxPath = ABCKIT_ABC_DIR "scenarios_cpp_api_clean/dynamic/replace_call_site/";

@@ -61,7 +61,7 @@ enum class TryCatchScenario {
 }
 }  // namespace
 
-// Test: test-kind=api, api=GraphApiImpl::bbCreateCatchPhi, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbCreateCatchPhi, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynamicCatchPhiTest, CatchPhiDynamicValid)
 {
     auto output =
@@ -83,7 +83,7 @@ TEST_F(LibAbcKitDynamicCatchPhiTest, CatchPhiDynamicValid)
     EXPECT_TRUE(helpers::Match(output, "Error: abckit_error\n"));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbCreateCatchPhi, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbCreateCatchPhi, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynamicCatchPhiTest, CatchPhiNoAccDynamicValid)
 {
     auto output =

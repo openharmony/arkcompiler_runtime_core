@@ -65,7 +65,7 @@ void TransformLoadStringIr(AbckitFile *file, AbckitGraph *graph)
 
 class LibAbcKitLoadStringStaticTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadString, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadString, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitLoadStringStaticTest, LibAbcKitTestLoadString)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_string/load_string_static.abc",
