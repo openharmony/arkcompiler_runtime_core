@@ -14,8 +14,7 @@
  */
 
 /*---
-desc: lambda cast to erong function type
-tags: [compile-only, negative]
+desc: assignmnet of lambda with less required parameters
 ---*/
 
 type func = (y: int, x: int) => int;

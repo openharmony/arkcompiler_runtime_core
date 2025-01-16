@@ -403,9 +403,9 @@ cases:
           let v: UT = 42.0
           assertEQ(v, 42.0)
           v = (): number => { return 16.0 }
-          assertEQ(v(), 16.0)
+          assertEQ((v as F1)(), 16.0)
           v = (p: string): string => p + " " + p
-          assertEQ(v('hello'), 'hello hello')
+          assertEQ((v as F2)('hello'), 'hello hello')
 
     - decl: |-
           type F1 = (p: string) => string
