@@ -16,6 +16,7 @@
 #include "utils/logger.h"
 
 #ifdef PANDA_TARGET_UNIX
+#include <unistd.h>
 #include <sys/resource.h>
 #include <csignal>
 #endif

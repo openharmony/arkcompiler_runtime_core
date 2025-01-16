@@ -14,6 +14,7 @@
  */
 
 #include <cinttypes>
+#include <unistd.h>
 #include <fcntl.h>
 #include "utils/logger.h"
 
