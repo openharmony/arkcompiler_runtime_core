@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2024 Huawei Device Co., Ltd.
+    Copyright (c) 2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -10,13 +10,19 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
+++++++++++
+JavaScript
+++++++++++
+
 .. _Features JS:
 
 Features JS
 ###########
 
-Function call
-*************
+.. _Features JS. Functions:
+
+Functions
+*********
 
 Description
 ^^^^^^^^^^^
@@ -32,17 +38,16 @@ To define a function in JS you should use key world ``function``.
     }
 
 To call a previously declared function, you need to write function name followed by parentheses ``()``.
-    
+
 .. code-block:: javascript
     :linenos:
 
     // call the function
     greet();
 
-When the greet() function is called, the program's control transfers to the function definition. 
+When the greet() function is called, the program's control transfers to the function definition.
 All the code inside the function is executed (Hello World! is printed).
 Then the program control jumps to the next statement after the function call.
-
 
 Interop rules
 ^^^^^^^^^^^^^
@@ -56,7 +61,7 @@ Interop rules
 .. code-block:: javascript
     :linenos:
 
-    // 1.js
+    // file1.js
     function foo(a) {
         return a;
     }
@@ -64,14 +69,13 @@ Interop rules
 .. code-block:: typescript
     :linenos:
 
-    // 1.sts
-    import { foo } from './1.js'
+    // file2.ets
+    import { foo } from './file1'
 
     // foo will be passed to ArkTS world by reference
     // 1 will be passed to JS world by copy
     foo(1)
-    // the return value of foo(1) will be passed to ArkTS world by copy
-    let s = foo(1)
+    let s = foo(1) // `s` is ESObject
 
     function test1(f: ESObject) {
       return f(1) as number
@@ -81,75 +85,28 @@ Interop rules
     // to the moment it is called inside test1
     test1(foo);
 
-
-Function hoisting
-*****************
-
-Description
-^^^^^^^^^^^
-
-Hoisting is a behavior in which a function or a variable can be used before declaration. 
+- ``Function Expressions`` and ``Arrow function`` will work exactly in the same way. When a variable that contaions ``Function Expressions`` or ``Arrow function`` is passed through interop to ArkTS it works the same way as any function call.
 
 .. code-block:: javascript
     :linenos:
 
-    sqr0(5); /* hoisting */
-    // function declaration
-    function sqr0 (val) { return val * val; }
-
-Interop rules
-^^^^^^^^^^^^^
-
-
-Function Expressions
-********************
-
-Description
-^^^^^^^^^^^
-
-A function expression is a way to store functions in variables.
-    
-.. code-block:: javascript
-    :linenos:
-
-    // store a function in the square variable
+    // file1.js
     let square = function(num) {
         return num * num;
     };
 
-    console.log(square(5));  
-
-    // Output: 25   
-
-Interop rules
-^^^^^^^^^^^^^
-
-Arrow function
-**************
-
-Description
-^^^^^^^^^^^
-
-.. code-block:: javascript
-    :linenos:
-
-    // arrow function syntax
-    let func = (arg1, arg2, ..., argN) => expression;
-
-
-This creates a function func that accepts arguments arg1..argN, then evaluates the expression on the right side with their use and returns its result.          
-       
-In other words, it's the shorter version of:
-
-.. code-block:: javascript
-    :linenos:
-
-    let func = function(arg1, arg2, ..., argN) {
-        return expression;
+    let mul2 = (num) => {
+      return num*2;
     };
 
-Interop rules
-^^^^^^^^^^^^^
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets
+    import { square, mul2 } from './file1'
+
+    let c = square(5) as Number; // `c` is 25
+    let d = mul2(5) as Number; // `d` is 10
 
 Default parameters
 ******************
@@ -175,13 +132,34 @@ Default function parameters allow named parameters to be initialized with defaul
 Interop rules
 ^^^^^^^^^^^^^
 
+- Default parameters should be stored on in js-function, so in case of interop no need special actions.
+
+.. code-block:: javascript
+    :linenos:
+
+    // file1.js
+    function multiply(a, b = 1) {
+        return a * b;
+    }
+
+
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets
+    import { multiply } from './file1'
+
+    let c = multiply(5) as Number; // `c` is 5
+    let d = multiply(5, 2) as Number; // `d` is 10
+
+
 Arguments
 *********
 
 Description
 ^^^^^^^^^^^
 
-Since ES6, the ``arguments`` object is no longer the only way how to handle variable parameters count. 
+Since ES6, the ``arguments`` object is no longer the only way how to handle variable parameters count.
 ES6 introduced a concept called ``rest parameters``.
 
 Here's how the arguments worked:
@@ -190,21 +168,43 @@ Here's how the arguments worked:
 .. code-block:: javascript
     :linenos:
 
-    function doSomething() { 
+    function doSomething() {
         arguments[0]; // "A"
         arguments[1]; // "B"
         arguments[2]; // "C"
         arguments.length; // 3
-    }   
+    }
 
     doSomething("A","B","C");
 
 
-Arguments limitations: ``Arguments`` object is array-like, not a full-fledged array. That means that useful methods, which arrays have are not available. You cannot use methods such as ``arguments.sort()``, ``arguments.map()`` or ``arguments.filter()``. 
+Arguments limitations: ``Arguments`` object is array-like, not a full-fledged array. That means that useful methods, which arrays have are not available. You cannot use methods such as ``arguments.sort()``, ``arguments.map()`` or ``arguments.filter()``.
 The only property you have is ``length``.
 
 Interop rules
 ^^^^^^^^^^^^^
+
+- Arguments will be passed by the default way through napi, so in case of interop no need special actions.
+
+.. code-block:: javascript
+    :linenos:
+
+    // file1.js
+    function doSomething() {
+        arguments[0]; // "A"
+        arguments[1]; // "B"
+        arguments[2]; // "C"
+        arguments.length; // 3
+    }
+
+
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets
+    import { doSomething } from './file1'
+
+    doSomething("A","B","C"); // ok
 
 Rest parameters
 ***************
@@ -225,12 +225,12 @@ Rest parameters means that you can put ``...`` before the last parameter in the 
         // Etc.
     }
 
-You can access the first two named parameters as usual. 
+You can access the first two named parameters as usual.
 However, all the other arguments passed to the function starting with third are automatically collected to an array called as the last parameter (``rest`` here).
 
 If you pass less than three parameters, ``rest`` will be just empty array.
 
-Unlike ``arguments`` object, ``rest parameters`` give you a real array so that you can use all the array-specific methods. 
+Unlike ``arguments`` object, ``rest parameters`` give you a real array so that you can use all the array-specific methods.
 Moreover, unlike ``arguments``, they do work in ``arrow functions``.
 
 .. code-block:: javascript
@@ -244,7 +244,7 @@ Moreover, unlike ``arguments``, they do work in ``arrow functions``.
         arguments[0]; // Arrow functions don't have arguments
     };
 
-In addition to the advantages above, ``rest parameters`` are part of the function signature. That means that just from the function "header" you can immediately recognize that it uses ``rest parameters`` and therefore accepts variable number of arguments. With ``arguments`` object, there is no such hint.  
+In addition to the advantages above, ``rest parameters`` are part of the function signature. That means that just from the function "header" you can immediately recognize that it uses ``rest parameters`` and therefore accepts variable number of arguments. With ``arguments`` object, there is no such hint.
 
 
 Rest parameters limitations
@@ -268,14 +268,35 @@ Rest parameters limitations
 Interop rules
 ^^^^^^^^^^^^^
 
-Spread operator
-***************
+- Arguments will be passed by the default way through napi, so in case of interop no need special actions.
+
+.. code-block:: javascript
+    :linenos:
+
+    // file1.js
+    function doSomething(first, second, ...rest) {
+        first; // "A"
+        second; // "B"
+        rest[0]; // "C"
+        rest[1]; // "D"
+    }
+
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets
+    import { doSomething } from './file1'
+
+    doSomething("A","B","C","D"); // ok
+
+Spread operator(empty)
+**********************
 
 Description
 ^^^^^^^^^^^
 
 Syntactically ``spread operator`` it is the same ``...``, but it works opposite to the ``rest parameters``.
-Instead of collecting multiple values in one array, it lets you expand one existing array (or other iterable) into multiple values. 
+Instead of collecting multiple values in one array, it lets you expand one existing array (or other iterable) into multiple values.
 
 .. code-block:: javascript
     :linenos:
@@ -354,12 +375,12 @@ What happens though when you introduce a property with the ``spread operator`` w
 
     // Updating immutable objects
     let original = {
-        someProperty: "oldValue", 
+        someProperty: "oldValue",
         someOtherProperty: 42
     };
 
     let updated = {...original, someProperty: "newValue"};
-    // updated is now { someProperty: "newValue", someOtherProperty: 42 }   
+    // updated is now { someProperty: "newValue", someOtherProperty: 42 }
 
 
 
@@ -384,7 +405,7 @@ What happens though when you introduce a property with the ``spread operator`` w
     function doSomething(first, second, third) {}
 
     doSomething(...myArray);
-    // Is equivalent to 
+    // Is equivalent to
     doSomething(myArray[0], myArray[1], myArray[2]);
 
 It works with any iterable, not just arrays. For example, using the spread operator with string will disassemble it to the individual characters.
@@ -400,30 +421,25 @@ You can combine this with passing individual parameters. Unlike rest parameters,
     doSomething(...myArray, ...otherArray);
     doSomething(2, ...myArray, ...otherArray, 3, 7);
 
-Interop rules
-^^^^^^^^^^^^^
+Destructing assignment  (empty)
+*******************************
 
-Interop will parse and pass any count of parameters and types to any proxy. So no any issues and limitations here.
-
-.. code-block:: typescript
-    :linenos:
-
-    //1.sts
-    export function foo(x: int, y: int, z :int) {
-        console.log(x + y + z);
-    }
+Destructuring Assignment is a syntax that allows you to extract data from arrays and objects.
 
 .. code-block:: javascript
     :linenos:
 
-    //2.js
-    import {foo} from `converted_sts_source`;
-    let arr = [1, 2, 3];
-    foo(...arr);
+    const user = {firstName: 'Adrian', lastName: 'Mejia'};
 
+    function getFullName({ firstName, lastName }) {
+    return `${firstName} ${lastName}`;
+    }
 
-Array destructuring
-*******************
+    console.log(getFullName(user));
+    // Adrian Mejia
+
+Array destructuring  (empty)
+****************************
 
 Description
 ^^^^^^^^^^^
@@ -440,13 +456,8 @@ Description
     console.log(c); // 3
     console.log(d); // [4, 5]
 
-Interop rules
-^^^^^^^^^^^^^
-
-
-
-Exceptions
-**********
+Exceptions(empty)
+*****************
 
 Description
 ^^^^^^^^^^^
@@ -471,20 +482,23 @@ Error Handling:
     - AggregateError
 
     - EvalError
-    
-    - InternalError 
+
+    - InternalError
+
+Including:
+
+- the cause property on Error objects, which can be used to record a causation chain in errors
 
 Interop rules
 ^^^^^^^^^^^^^
 
-- JS and 2.0 exception objects are converted with common interop rules when cross the language boundary
 - JS Error and escompat Error classes are mapped as reference proxy-classes
 - If JS throws a value which is not an Error instance, the Error is boxed into JSError/RewrappedESObjectError 2.0 internal class
 
 .. code-block:: javascript
     :linenos:
 
-    // 1.js
+    // file1.js
     function foo(a) {
       throw new Error();
       return a;
@@ -493,8 +507,8 @@ Interop rules
 .. code-block:: typescript
     :linenos:
 
-    // 1.sts
-    import { foo } from './1.js'
+    // file2.ets  ArkTS
+    import { foo } from './file1'
 
     try {
         foo();
@@ -502,15 +516,15 @@ Interop rules
         e.message; // ok
     }
 
-Limitations&Solutions
-""""""""""""""""""""""
+Limitations & Solutions
+"""""""""""""""""""""""
 
 - If JS throws a value which is not an Error instance, the Error is boxed into JSError/RewrappedESObjectError 2.0 internal class
 
 .. code-block:: javascript
     :linenos:
 
-    // 1.js
+    // file1.js
     function foo(a) {
       throw 123;
       return a;
@@ -519,8 +533,8 @@ Limitations&Solutions
 .. code-block:: typescript
     :linenos:
 
-    // 1.sts
-    import { foo } from './1.js'
+    // file2.ets  ArkTS
+    import { foo } from './file1'
 
     try {
         foo();
@@ -546,12 +560,12 @@ This example uses a lang property to get the value of the language property:
 
     // Create an object:
     const person = {
-    firstName: "John",
-    lastName: "Doe",
-    language: "en",
-    get lang() {
+      firstName: "John",
+      lastName: "Doe",
+      language: "en",
+      get lang() {
         return this.language;
-    }
+      }
     };
 
     // Display data from the object using a getter:
@@ -563,12 +577,12 @@ This example uses a lang property to set the value of the language property:
     :linenos:
 
     const person = {
-    firstName: "John",
-    lastName: "Doe",
-    language: "",
-    set lang(lang) {
+      firstName: "John",
+      lastName: "Doe",
+      language: "",
+      set lang(lang) {
         this.language = lang;
-    }
+      }
     };
 
     // Set an object property using a setter:
@@ -581,12 +595,12 @@ This example uses a lang property to set the value of the language property:
 Interop rules
 ^^^^^^^^^^^^^
 
-- Accesing to getter/setter will do on JS side, so here should not be any additinal side effects or limitations, just the same as fo functions.
+- Accesing to getter/setter will do on JS side, so here should not be any additional side effects or limitations, just the same as for functions.
 
 .. code-block:: javascript
     :linenos:
 
-    // 1.js
+    // file1.js
     class A {
       get val() { return 42};
       set val(val) { console.log(val)};
@@ -597,13 +611,13 @@ Interop rules
 .. code-block:: typescript
     :linenos:
 
-    // 1.sts
-    import { a } from './1.js'
+    // file2.ets
+    import { a } from './file1'
 
     a.val = 35; // ok
 
-Objects
-*******
+Objects (empty)
+***************
 
 Description
 ^^^^^^^^^^^
@@ -683,46 +697,33 @@ Delete Object Properties:
 
         // Output: { name: 'Tony', position: 'Officer' }
 
-Interop rules
-^^^^^^^^^^^^^
-
-
-JS Method 
-*********
+JS Method  (empty)
+******************
 
 Description
 ^^^^^^^^^^^
 
 A JavaScript method is a function defined within an object.
 
-Interop rules
-^^^^^^^^^^^^^
-
-
-``this`` key word
-*****************
+``this`` key word (empty)
+*************************
 
 Description
 ^^^^^^^^^^^
 
 The ``this`` keyword refers to the context where a piece of code, such as a function's body, is supposed to run. Most typically, it is used in object methods, where this refers to the object that the method is attached to, thus allowing the same method to be reused on different objects.
 
-The value of ``this`` in JavaScript depends on how a function is invoked (runtime binding), not how it is defined. When a regular function is invoked as a method of an object (``obj.method()``), ``this`` points to that object. When invoked as a standalone function (not attached to an object: ``func()``), ``this`` typically refers to the ``global object`` (in ``non-strict mode``) or ``undefined`` (in ``strict mode``). 
+The value of ``this`` in JavaScript depends on how a function is invoked (runtime binding), not how it is defined. When a regular function is invoked as a method of an object (``obj.method()``), ``this`` points to that object. When invoked as a standalone function (not attached to an object: ``func()``), ``this`` typically refers to the ``global object`` (in ``non-strict mode``) or ``undefined`` (in ``strict mode``).
 
-
-Interop rules
-^^^^^^^^^^^^^
-
-
-Constructor 
-***********
+Constructor (empty)
+*******************
 
 Description
 ^^^^^^^^^^^
 
 Objects are not fundamentally class-based.
-Objects may be created in various ways including via a literal notation or via constructors which create objects and then execute code that initializes all or part of them by assigning initial values to their properties. Each constructor is a function that has a property named "prototype" that is used to implement prototype-based inheritance and shared properties. 
-Objects are created by using constructors in new expressions. 
+Objects may be created in various ways including via a literal notation or via constructors which create objects and then execute code that initializes all or part of them by assigning initial values to their properties. Each constructor is a function that has a property named "prototype" that is used to implement prototype-based inheritance and shared properties.
+Objects are created by using constructors in new expressions.
 
 .. code-block:: javascript
     :linenos:
@@ -737,14 +738,10 @@ Objects are created by using constructors in new expressions.
     const person = new Person();
 
 
-Every object created by a constructor has an implicit reference (called the object's prototype) to the value of its constructor's "prototype" property. 
+Every object created by a constructor has an implicit reference (called the object's prototype) to the value of its constructor's "prototype" property.
 
-Interop rules
-^^^^^^^^^^^^^
-
-
-Prototype
-*********
+Prototype (empty)
+*****************
 
 Description
 ^^^^^^^^^^^
@@ -761,30 +758,30 @@ The state and methods are carried by objects, while structure, behaviour, and st
     };
 
     let dog = {
-        __proto__: animal, 
+        __proto__: animal,
         say: () => console.log("woof")
     };
 
     let puppy = {
-        __proto__: dog, 
+        __proto__: dog,
         say: () => console.log("wf")
     };
 
-    dog.who(); /* animal */ 
+    dog.who(); /* animal */
     dog.say(); /* woof */
 
     puppy.who(); /* animal */
     puppy.say(); /* wf */
 
-Every object has prototype, if the object does not have the required property, then the search is performed in the object's prototype. If it is not there either, then in the prototype of the prototype, etc. 
+Every object has prototype, if the object does not have the required property, then the search is performed in the object's prototype. If it is not there either, then in the prototype of the prototype, etc.
 The function call can be delegated to prototypes located "above".
 
-Interop rules
-^^^^^^^^^^^^^
+Including:
 
+- Object.hasOwn, a convenient alternative to Object.prototype.hasOwnProperty.
 
-Import module
-*************
+Import module (empty)
+*********************
 
 Description
 ^^^^^^^^^^^
@@ -798,18 +795,14 @@ Description
     import { namedExport } from 'module-name';
     import "module-name";
 
-Interop rules
-^^^^^^^^^^^^^
-
-
-Dynamic import
-**************
+Dynamic import (empty)
+**********************
 
 Description
 ^^^^^^^^^^^
 
-The import declaration syntax (import something from "somewhere") is static and will always result in the imported module being evaluated at load time. 
-Dynamic imports allow one to circumvent the syntactic rigidity of import declarations and load a module conditionally or on demand. 
+The import declaration syntax (import something from "somewhere") is static and will always result in the imported module being evaluated at load time.
+Dynamic imports allow one to circumvent the syntactic rigidity of import declarations and load a module conditionally or on demand.
 
 .. code-block:: javascript
     :linenos:
@@ -817,13 +810,8 @@ Dynamic imports allow one to circumvent the syntactic rigidity of import declara
     import(moduleName)
     import(moduleName, options)
 
-
-Interop rules
-^^^^^^^^^^^^^
-
-
-Export
-******
+Export (empty)
+**************
 
 Description
 ^^^^^^^^^^^
@@ -836,26 +824,24 @@ Description
     export * from ...;
     export default function (...) { ... };
 
-Interop rules
-^^^^^^^^^^^^^
+.. _Features JS. Classes:
 
-
-Classes
-*******
+Classes (empty)
+***************
 
 Description
 ^^^^^^^^^^^
 
-Constructor - special method ``constructor``, which is called when the class is initialized with new. 
+Constructor - special method ``constructor``, which is called when the class is initialized with new.
 
 The body of a class is executed in strict mode even without the ``"use strict"`` directive.
 
 A class element can be characterized by three aspects:
 
     * Kind: Getter, setter, method, or field
-    
+
     * Location: Static or instance
-    
+
     * Visibility: Public or private
 
 Parental constructor inherited automatically if the descendant does not have its own method constructor. If the descendant has his own constructor, then to inherit the parent's constructor you need to use ``super()`` with arguments for parent.
@@ -864,20 +850,45 @@ If there is a constructor present in the subclass, it needs to first call super(
 
 .. code-block:: javascript
     :linenos:
-    
+
     class ChildClass extends ParentClass { /* … */ }
+
+Including fetures:
+- public and private instance fields
+- public and private static fields
+- private instance methods and accessors
+- private static methods and accessors
+- static blocks inside classes, to perform per-class evaluation initialization
+- the #x in obj syntax, to test for presence of private fields on objects
 
 Interop rules
 ^^^^^^^^^^^^^
 
+- Proxing JS class with ESObject.
 
-Iterations
-**********
+.. code-block:: javascript
+    :linenos:
+
+    // file1.js
+    export class A {
+      v = 123;
+    }
+
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets ArkTS
+    import { A } from './file1'
+
+    let val = new A(); // ok, val is ESObject
+
+Iterations (empty)
+******************
 
 Description
 ^^^^^^^^^^^
 
-An ``Iterator`` object is an object that conforms to the iterator protocol by providing a ``next()`` method that returns an iterator result object. All built-in iterators inherit from the Iterator class. The Iterator class provides a [Symbol.iterator]() method that returns the iterator object itself, making the iterator also iterable. 
+An ``Iterator`` object is an object that conforms to the iterator protocol by providing a ``next()`` method that returns an iterator result object. All built-in iterators inherit from the Iterator class. The Iterator class provides a [Symbol.iterator]() method that returns the iterator object itself, making the iterator also iterable.
 It also provides some helper methods for working with iterators.
 
 * do ... while
@@ -908,19 +919,16 @@ Like other looping statements, you can use control flow statements inside statem
 
 * while
 
-Interop rules
-^^^^^^^^^^^^^
-
-
-Relational operators
-********************
-
-Description
-^^^^^^^^^^^
+Relational operators: ``<``, ``>``, ``<=``, ``>=``  (empty)
+***********************************************************
 
 * ``<``, ``>``, ``<=``, ``>=`` operators
 
-* ``in``
+Relational operators: ``in``  (empty)
+*************************************
+
+Relational operators: ``instanceof``  (empty)
+*********************************************
 
 * ``instanceof`` operator
 
@@ -943,11 +951,8 @@ Operator ``instanceof`` checks whether an object belongs to a certain class. In 
     console.log(auto instanceof Object);
     // Expected output: true
 
-Interop rules
-^^^^^^^^^^^^^
-
-Closure
-********
+Closure (empty)
+***************
 
 Description
 ^^^^^^^^^^^
@@ -974,11 +979,8 @@ Description
 
 Closure provides access to the outer scope of a function from inside the inner function, even after the outer function has closed.
 
-Interop rules
-^^^^^^^^^^^^^
-
-Object of primitive types
-*************************
+Object of primitive types (empty)
+*********************************
 
 Description
 ^^^^^^^^^^^
@@ -1000,98 +1002,77 @@ Description
     Symbol is a unique and immutable data type that can be used as an identifier for object properties.
 
 
-Interop rules
-^^^^^^^^^^^^^
-
-
-The ``typeof`` Operator
-***********************
+The ``typeof`` Operator (empty)
+*******************************
 
 Description
 ^^^^^^^^^^^
 
 The ``typeof`` operator returns a string indicating the type of the operand's value.
 
-   +------------------------------------------------------------------------+-----------------+
-   | Type                                                                   |  	Result        |
-   +========================================================================+=================+
-   | Undefined                                                              |"undefined"      |
-   +------------------------------------------------------------------------+-----------------+
-   | Null                                                                   | "object"        | 
-   +------------------------------------------------------------------------+-----------------+
-   |Boolean                                                                 | "boolean"       | 
-   +------------------------------------------------------------------------+-----------------+
-   |Boolean                                                                 | "boolean"       | 
-   +------------------------------------------------------------------------+-----------------+
-   |Number                                                                  | "number"        | 
-   +------------------------------------------------------------------------+-----------------+
-   |BigInt                                                                  | "bigint"        | 
-   +------------------------------------------------------------------------+-----------------+
-   |String                                                                  | "string"        | 
-   +------------------------------------------------------------------------+-----------------+
-   |Symbol                                                                  | "symbol"        | 
-   +-------------------------------------------------------------------------------+----------+
-   |Function (implements [[Call]] in ECMA-262 terms; classes are functions as well)|"function"| 
-   +-------------------------------------------------------------------------------+----------+
-   |Any other object                                                               | "object" | 
-   +-------------------------------------------------------------------------------+----------+
+   +-------------------------------------------------------------------------------+-----------+
+   | Type                                                                          |  Result   |
+   +===============================================================================+===========+
+   | Undefined                                                                     |"undefined"|
+   +-------------------------------------------------------------------------------+-----------+
+   | Null                                                                          | "object"  |
+   +-------------------------------------------------------------------------------+-----------+
+   |Boolean                                                                        | "boolean" |
+   +-------------------------------------------------------------------------------+-----------+
+   |Boolean                                                                        | "boolean" |
+   +-------------------------------------------------------------------------------+-----------+
+   |Number                                                                         | "number"  |
+   +-------------------------------------------------------------------------------+-----------+
+   |BigInt                                                                         | "bigint"  |
+   +-------------------------------------------------------------------------------+-----------+
+   |String                                                                         | "string"  |
+   +-------------------------------------------------------------------------------+-----------+
+   |Symbol                                                                         | "symbol"  |
+   +-------------------------------------------------------------------------------+-----------+
+   |Function (implements [[Call]] in ECMA-262 terms; classes are functions as well)|"function" |
+   +-------------------------------------------------------------------------------+-----------+
+   |Any other object                                                               | "object"  |
+   +-------------------------------------------------------------------------------+-----------+
 
 
-Interop rules
-^^^^^^^^^^^^^
-
-
-Generators
-**********
-
-Description
-^^^^^^^^^^^
-
-Generators can return (``yield``) multiple values, one after another, on-demand. 
-
-    - key word ``yeild``, ``function*``, ``yeild* generator``
-
-    - methods: 
-
-        - ``generator.next()`` : returns a value of yield
-        - ``generator.return()``: returns a value and terminates the generator
-        - ``generator.throw()``: throws an error and terminates the generator
-
-
-Interop rules
-^^^^^^^^^^^^^
-
-
-``With`` statement
+Generators (empty)
 ******************
 
 Description
 ^^^^^^^^^^^
 
+Generators can return (``yield``) multiple values, one after another, on-demand.
 
-Use of the ``with`` statement is not recommended, as it may be the source of confusing bugs and compatibility issues, makes optimization impossible, and is forbidden in ``strict mode``. 
+    - key word ``yeild``, ``function*``, ``yeild* generator``
+
+    - methods:
+
+        - ``generator.next()`` : returns a value of yield
+        - ``generator.return()``: returns a value and terminates the generator
+        - ``generator.throw()``: throws an error and terminates the generator
+
+``With`` statement (empty)
+**************************
+
+Description
+^^^^^^^^^^^
+
+Use of the ``with`` statement is not recommended, as it may be the source of confusing bugs and compatibility issues, makes optimization impossible, and is forbidden in ``strict mode``.
 The recommended alternative is to assign the object whose properties you want to access to a temporary variable.
 
-Interop rules
-^^^^^^^^^^^^^
 
-
-The ``debugger`` statement
-**************************
+The ``debugger`` statement (empty)
+**********************************
 
 
 Description
 ^^^^^^^^^^^
 
-The ``debugger`` statement invokes any available debugging functionality, such as setting a breakpoint. 
-If no debugging functionality is available, this statement has no effect. 
+The ``debugger`` statement invokes any available debugging functionality, such as setting a breakpoint.
+If no debugging functionality is available, this statement has no effect.
 
-Interop rules
-^^^^^^^^^^^^^
-
-
-Proxies
-*******
+Proxies (empty)
+***************
 
 Description
 ^^^^^^^^^^^
@@ -1122,12 +1103,8 @@ You create a ``Proxy`` with two parameters:
     console.log(proxy2.message1); // world
     console.log(proxy2.message2); // world
 
-Interop rules
-^^^^^^^^^^^^^
-
-
-The Global Object
-*****************
+The Global Object (empty)
+*************************
 
 Description
 ^^^^^^^^^^^
@@ -1142,7 +1119,7 @@ Value properties of the ``Global Object``:
 
     - Infinity
 
-    - NaN 
+    - NaN
 
     - underfined
 
@@ -1156,17 +1133,14 @@ Other properties of the ``Global Object``:
 
     - Reflect
 
-Interop rules
-^^^^^^^^^^^^^
-
-Reflect
-*******
+Reflect (empty)
+***************
 
 Description
 ^^^^^^^^^^^
 
 The ``Reflect`` object provides a collection of static functions which have the same names as the ``proxy`` handler methods.
-The ``Reflect`` object has a number of methods that allow developers to access and modify the internal state of an object. 
+The ``Reflect`` object has a number of methods that allow developers to access and modify the internal state of an object.
 
 .. code-block:: javascript
     :linenos:
@@ -1182,5 +1156,337 @@ The ``Reflect`` object has a number of methods that allow developers to access a
 
 ``Reflect.get()``, ``Reflect.set()``, ``Reflect.apply()``, ``Reflect.construct()`` methods
 
+.. _JS Std library:
+
+Symbol (empty)
+**************
+
+JS Std library
+##############
+
+Arrays
+******
+
+Description
+^^^^^^^^^^^
+
 Interop rules
 ^^^^^^^^^^^^^
+
+- In JS [] and Array are indistinguishable, so interop rules are the same for both of them
+- When JS array is passed through interop to ArkTS, the proxy object is constructed in ArkTS and user can work with the array as if it was passed by reference. So any modification to the array will be reflected in JS
+
+.. code-block:: javascript
+  :linenos:
+
+  //file1.js
+  let a new ;
+  export let a = new Array<number>(1, 2, 3, 4, 5);
+  export let b = [1, 2, 3, 4 ,5]
+
+.. code-block:: typescript
+  :linenos:
+
+  //file2.ets  ArkTS
+
+  import {a, b} from 'file1'
+  let val1 = a[0]; // ok
+  let val2 = b[0]; // ok
+  let val3 = a.lenght; // ok
+  let val4 = b.lenght; // ok
+  a.push(6); // ok, will affect original Array
+  b.push(6); // ok, will affect original Array
+
+Set (empty)
+***********
+
+Map (empty)
+***********
+
+ArrayBuffer (empty)
+*******************
+
+BigInt64Array (empty)
+^^^^^^^^^^^^^^^^^^^^^
+
+BigUint64Array (empty)
+^^^^^^^^^^^^^^^^^^^^^^
+
+Float32Array (empty)
+^^^^^^^^^^^^^^^^^^^^
+
+Float64Array (empty)
+^^^^^^^^^^^^^^^^^^^^
+
+Int8Array (empty)
+^^^^^^^^^^^^^^^^^
+
+Int16Array (empty)
+^^^^^^^^^^^^^^^^^^
+
+Int32Array (empty)
+^^^^^^^^^^^^^^^^^^
+
+Uint8Array (empty)
+^^^^^^^^^^^^^^^^^^
+
+Uint8ClampedArray (empty)
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Uint16Array (empty)
+^^^^^^^^^^^^^^^^^^^
+
+Uint32Array (empty)
+^^^^^^^^^^^^^^^^^^^
+
+DataView (empty)
+****************
+
+Date (empty)
+************
+
+WeakMap (empty)
+***************
+
+WeakSet (empty)
+***************
+
+BigInt (empty)
+**************
+
+Boolean (empty)
+***************
+
+DataView (empty)
+****************
+
+Date (empty)
+************
+
+Error (empty)
+*************
+
+EvalError (empty)
+^^^^^^^^^^^^^^^^^
+
+AggregateError (empty)
+^^^^^^^^^^^^^^^^^^^^^^
+
+URIError (empty)
+^^^^^^^^^^^^^^^^
+
+RangeError (empty)
+^^^^^^^^^^^^^^^^^^
+
+ReferenceError (empty)
+^^^^^^^^^^^^^^^^^^^^^^
+
+SyntaxError (empty)
+^^^^^^^^^^^^^^^^^^^
+
+TypeError (empty)
+^^^^^^^^^^^^^^^^^
+
+InternalError (empty)
+^^^^^^^^^^^^^^^^^^^^^
+
+FinalizationRegistry (empty)
+****************************
+
+Function (empty)
+****************
+
+Math (empty)
+************
+
+See :ref:`Async and concurrency features JS`
+
+
+JSON Data (empty)
+*****************
+
+Description
+^^^^^^^^^^^
+
+``JSON data`` consists of key/value pairs similar to ``JavaScript object`` properties.
+
+.. code-block:: javascript
+    :linenos:
+
+    // JSON data
+    "name": "John"
+
+JSON Object (empty)
+*******************
+
+Description
+^^^^^^^^^^^
+
+Contain multiple key/value pairs:
+
+.. code-block:: javascript
+    :linenos:
+
+    // JSON object
+    { "name": "John", "age": 22 }
+
+- ``JavaScript Objects``VS ``JSON``
+
+- Converting ``JSON`` to ``JavaScript Object`` : using the built-in ``JSON.parse()`` function
+
+- Converting ``JavaScript Object`` to ``JSON`` : ``JSON.stringify()`` function
+
+JSON Array  (empty)
+*******************
+
+Description
+^^^^^^^^^^^
+
+Is written inside square brackets ``[ ]``:
+
+.. code-block:: javascript
+    :linenos:
+
+    // JSON array
+    [ "apple", "mango", "banana"]
+
+    // JSON array containing objects
+    [
+        { "name": "John", "age": 22 },
+        { "name": "Peter", "age": 20 }.
+        { "name": "Mark", "age": 23 }
+    ]
+
+Regular Expression Liteals (empty)
+**********************************
+
+Description
+^^^^^^^^^^^
+
+Regular expressions are patterns used to match character combinations in strings. Regular expressions are also objects. These patterns are used with the ``exec()`` and ``test()`` methods of RegExp, and with the ``match()``, ``matchAll()``, ``replace()``, ``replaceAll()``, ``search()``, and ``split()`` methods of String.
+
+Including:
+
+- Regular expression match indices via the /d flag, which provides start and end indices for matched substrings.
+
+Standart functions (empty)
+**************************
+
+- decodeURI
+- decodeURIComponent
+- encodeURI
+- encodeURIComponent
+- eval
+- isFinite
+- isNaN
+- parseFloat
+- parseInt
+
+TODO: More std library entities
+*******************************
+
+.. _Async and concurrency features JS:
+
+Async and concurrency features JS (empty)
+#########################################
+
+async/await (empty)
+*******************
+
+Description
+^^^^^^^^^^^
+
+``async`` keyword ensures that the function returns a ``promise``, and wraps non-promises in it.
+
+``await`` keyword works only inside ``async`` functions. It wait until the promise settles and returns its result.
+
+.. code-block:: javascript
+    :linenos:
+
+    async function f() {
+
+        let promise = new Promise((resolve, reject) => {
+            setTimeout(() => resolve("done!"), 1000)
+        });
+
+        let result = await promise; // wait until the promise resolves (*)
+
+        alert(result); // "done!"
+    }
+
+    f();
+
+
+Promise Objects (empty)
+***********************
+
+Description
+^^^^^^^^^^^
+
+A ``Promise`` is a proxy for a value not necessarily known when the ``promise`` is created. It allows you to associate handlers with an asynchronous action's eventual success value or failure reason. This lets asynchronous methods return values like synchronous methods: instead of immediately returning the final value, the asynchronous method returns a ``promise`` to supply the value at some point in the future.
+
+A ``Promise`` is in one of these states:
+
+- pending: initial state, neither fulfilled nor rejected
+
+- fulfilled: meaning that the operation was completed successfully
+
+- rejected: meaning that the operation failed
+
+setTimeout()  (empty)
+*********************
+
+setInterval()  (empty)
+**********************
+
+Promise.prototype.finally()  (empty)
+************************************
+
+Asynchronous iteration for-await-of  (empty)
+********************************************
+
+Description
+^^^^^^^^^^^
+
+Allows you to call asynchronous functions that return a promise (or an array with a bunch of promises) in a loop:
+
+.. code-block:: javascript
+    :linenos:
+
+    const promises = [
+    new Promise(resolve => resolve(1)),
+    new Promise(resolve => resolve(2)),
+    new Promise(resolve => resolve(3))];
+
+    async function testFunc() {
+        for await (const obj of promises) {
+            console.log(obj);
+        }
+    }
+
+    testFunc(); // 1, 2, 3
+
+Atomics (empty)
+***************
+
+Description
+^^^^^^^^^^^
+
+Unlike most global objects, ``Atomics`` is not a constructor. You cannot use it with the ``new`` operator or invoke the ``Atomics`` object as a function.
+All properties and methods of ``Atomics`` are static (just like the ``Math`` object).
+
+The ``Atomics`` namespace object are used with ``SharedArrayBuffer`` and ``ArrayBuffer`` objects.
+When memory is shared, multiple threads can read and write the same data in memory. Atomic operations make sure that predictable values are written and read, that operations are finished before the next operation starts and that operations are not interrupted.
+
+    - ``wait()`` and ``notify()`` methods
+
+    The ``wait()`` and ``notify()`` methods are modeled on Linux futexes ("fast user-space mutex") and provide ways for waiting until a certain condition becomes true and are typically used as blocking constructs.
+
+Await (empty)
+*************
+
+Description
+^^^^^^^^^^^
+
+- Including top-level await, allowing the keyword to be used at the top level of modules
+
