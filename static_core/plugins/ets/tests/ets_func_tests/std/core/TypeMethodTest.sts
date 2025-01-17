@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,6 +81,17 @@ function findMethodByName(ct: ClassType, name: string): Method | null {
     return null
 }
 
+function testGetReceiverTypeError(staticMethod: MethodType): boolean {
+    try {
+        staticMethod.getReceiverType()
+    } catch (ignored: TypeError) {
+        // Expected error is catched
+        return true
+    } catch (other) {
+    }
+    return false
+}
+
 function testMethodType(): int {
     let pt = Type.of(new Point()) as ClassType
     let hwt = Type.of(new HTMLWriter(10)) as ClassType
@@ -155,6 +166,7 @@ function testMethod() {
             test(!createFileExtMethod.isAbstract(),                                    "   not abstract") +
             test(!createFileExtMethod.isGetter(),                                      "   not getter") +
             test(!createFileExtMethod.isSetter(),                                      "   not setter") +
+            test(testGetReceiverTypeError(createFileExtMethod!.getType()),             "   has no receiver") +
             test(abstractWriteMethod.getName() == "write",                             "MethodName: write") +
             test(abstractWriteMethod.getAttributes() == Attributes.ABSTRACT,           "   abstract attrib") +
             test(abstractWriteMethod.getAccessModifier() == AccessModifier.PUBLIC,     "   public access modifier") +

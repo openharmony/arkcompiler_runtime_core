@@ -443,12 +443,11 @@ export class JSON {
 
     // TODO(kirill-mitkin): Map<Long, Long> blocked by internal issue
     private static checkType(typ: Type, used: Array<TypeColor>): boolean {
-        let id = typ.getId()
-        let ind = used.findIndex((tc: TypeColor) => tc.typeID == id)
+        let ind = used.findIndex((tc: TypeColor) => tc.typ.equals(typ))
         if (ind != -1) {
             return (used.at(ind) as TypeColor).color == TypeColor.VISITED
         }
-        used.push(new TypeColor(id, TypeColor.AT_STACK))
+        used.push(new TypeColor(typ, TypeColor.AT_STACK))
         let ok = true
         if (typ instanceof ClassType) {
             let ct = typ as ClassType
@@ -842,10 +841,10 @@ class JSONWriter {
 class TypeColor {
     readonly static VISITED : int = 1
     readonly static AT_STACK : int = 2
-    typeID : long
+    typ : Type
     color : int
-    constructor(typeID: long, color: int) {
-        this.typeID = typeID
+    constructor(typ: Type, color: int) {
+        this.typ = typ
         this.color = color
     }
 }

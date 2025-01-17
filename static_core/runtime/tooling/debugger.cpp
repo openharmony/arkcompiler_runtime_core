@@ -452,6 +452,7 @@ std::optional<Error> Debugger::EvaluateExpression(PtThread thread, uint32_t fram
         return ret.Error();
     }
 
+    // NOTE(dslynko, #22497): must select first non-boot context as target
     auto *ctx = ret.Value()->GetMethod()->GetClass()->GetLoadContext();
     auto optMethod = LoadExpressionBytecode(ctx, expr);
     if (!optMethod) {

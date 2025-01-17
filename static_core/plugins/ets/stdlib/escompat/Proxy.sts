@@ -50,7 +50,8 @@ export final class Proxy {
         }
 
         const handlerType = Type.of(handler) as ClassType
-        const proxyType = Proxy.INSTANCE.createProxyType(targetType, handlerType)
+        const targetLinker = Class.of(target).getLinker()
+        const proxyType = Proxy.INSTANCE.createProxyType(targetType, handlerType, targetLinker)
 
         const proxyInstance = proxyType.make() as T
         Reflect.set(proxyInstance, Proxy.PROXY_INSTANCE_TARGET_FIELD, target)
@@ -67,69 +68,69 @@ export final class Proxy {
         return new ReadonlyArrayProxy<T>(target, handler)
     }
 
-    private getProxyTypeDescriptor(typeDesc: string): string {
-        return typeDesc.substring(0, typeDesc.length - 1) + Proxy.PROXY_CLASS_NAME_SUFFIX + ";"
+    private getProxyClassName(targetType: ClassType): string {
+        return targetType.getName() + Proxy.PROXY_CLASS_NAME_SUFFIX
     }
 
-    private createProxyType(targetType: ClassType, handlerType: ClassType): ClassType {
-        const targetTypeDesc = this.getTypeDescriptor(targetType)
-        try {
-            return Type.resolve(this.getProxyTypeDescriptor(targetTypeDesc)) as ClassType
-        } catch (classNotFoundEx: ClassNotFoundException) {
-            const targetDefaultCtor = this.findDefaultConstructor(targetType)
-            if (targetDefaultCtor === undefined) {
-                throw new TypeError("unable to create proxy for the class without default constructor")
-            }
+    private createProxyType(targetType: ClassType, handlerType: ClassType, targetLinker: RuntimeLinker): ClassType {
+        const proxyClassName = this.getProxyClassName(targetType)
+        const proxyType = targetLinker.getType(proxyClassName)
+        if (proxyType) {
+            return proxyType as ClassType
+        }
 
-            const proxyClassName = targetType.getName() + Proxy.PROXY_CLASS_NAME_SUFFIX
-            const proxyTypeCreator = new ClassTypeCreator(proxyClassName)
-                    .addBaseType(targetType)
+        const targetDefaultCtor = this.findDefaultConstructor(targetType)
+        if (targetDefaultCtor === undefined) {
+            throw new TypeError("unable to create proxy for the class without default constructor")
+        }
 
-            const targetFieldCreator = new FieldCreator(Proxy.PROXY_INSTANCE_TARGET_FIELD, targetType)
-                    .addAccessModifier(AccessModifier.PRIVATE)
-            proxyTypeCreator.addField(targetFieldCreator)
+        const proxyTypeCreator = new ClassTypeCreator(proxyClassName)
+                .addBaseType(targetType)
 
-            const handlerFieldCreator = new FieldCreator(Proxy.PROXY_INSTANCE_HANDLER_FIELD, handlerType)
-                    .addAccessModifier(AccessModifier.PRIVATE)
-            proxyTypeCreator.addField(handlerFieldCreator)
+        const targetFieldCreator = new FieldCreator(Proxy.PROXY_INSTANCE_TARGET_FIELD, targetType)
+                .addAccessModifier(AccessModifier.PRIVATE)
+        proxyTypeCreator.addField(targetFieldCreator)
 
+        const handlerFieldCreator = new FieldCreator(Proxy.PROXY_INSTANCE_HANDLER_FIELD, handlerType)
+                .addAccessModifier(AccessModifier.PRIVATE)
+        proxyTypeCreator.addField(handlerFieldCreator)
+
+        const ctorCreator = new MethodCreator(Proxy.CTOR_METHOD_NAME)
+                .addConstructor()
+                .addBody(new CallableBodyMethod(targetDefaultCtor))
+
+        proxyTypeCreator.addMethod(ctorCreator)
+
+        this.generateProxyMethods(targetType, proxyTypeCreator)
+
+        return proxyTypeCreator.create() as ClassType
+    }
+
+    private createArrayProxyType(arrayProxyBaseType: ClassType, handlerType: InterfaceType, targetLinker: RuntimeLinker): ClassType {
+        const proxyClassName = this.getProxyClassName(arrayProxyBaseType)
+        const proxyType = targetLinker.getType(proxyClassName)
+        if (proxyType) {
+            return proxyType as ClassType
+        }
+
+        const proxyTypeCreator = new ClassTypeCreator(proxyClassName)
+                .addBaseType(arrayProxyBaseType)
+
+        const arrayProxyCtor = this.findArrayProxyConstructor(arrayProxyBaseType)
+        if (arrayProxyCtor !== undefined) {
             const ctorCreator = new MethodCreator(Proxy.CTOR_METHOD_NAME)
                     .addConstructor()
-                    .addBody(new CallableBodyMethod(targetDefaultCtor))
+                    .addParameter(new ParameterCreator(ArrayProxy.ARRAY_TYPE))
+                    .addParameter(new ParameterCreator(handlerType))
+                    .addBody(new CallableBodyMethod(arrayProxyCtor))
 
             proxyTypeCreator.addMethod(ctorCreator)
 
-            this.generateProxyMethods(targetType, proxyTypeCreator)
+            this.generateArrayProxyMethods(proxyTypeCreator)
 
             return proxyTypeCreator.create() as ClassType
-        }
-    }
-
-    private createArrayProxyType(arrayProxyBaseType: ClassType, handlerType: InterfaceType): ClassType {
-        try {
-            const arrayProxyBaseTypeDesc = this.getTypeDescriptor(arrayProxyBaseType)
-            return Type.resolve(this.getProxyTypeDescriptor(arrayProxyBaseTypeDesc)) as ClassType
-        } catch (classNotFoundEx: ClassNotFoundException) {
-            const proxyClassName = arrayProxyBaseType + Proxy.PROXY_CLASS_NAME_SUFFIX
-            const proxyTypeCreator = new ClassTypeCreator(proxyClassName)
-                    .addBaseType(arrayProxyBaseType)
-
-            const arrayProxyCtor = this.findArrayProxyConstructor(arrayProxyBaseType)
-            if (arrayProxyCtor !== undefined) {
-                const ctorCreator = new MethodCreator(Proxy.CTOR_METHOD_NAME)
-                        .addConstructor()
-                        .addParameter(new ParameterCreator(ArrayProxy.ARRAY_TYPE))
-                        .addParameter(new ParameterCreator(handlerType))
-                        .addBody(new CallableBodyMethod(arrayProxyCtor))
-
-                proxyTypeCreator.addMethod(ctorCreator)
-
-                this.generateArrayProxyMethods(proxyTypeCreator)
-
-                return proxyTypeCreator.create() as ClassType
-            } else {
-                throw new AssertionError("failed to find array proxy base type constructor")
-            }
+        } else {
+            throw new AssertionError("failed to find array proxy base type constructor")
         }
     }
 
@@ -140,13 +141,9 @@ export final class Proxy {
         const handlers: ArrayProxyHandler<T>[] = []
         const handlerType = (Type.of(handlers) as ArrayType).getElementType() as InterfaceType
 
-        const arrayProxyType = this.createArrayProxyType(arrayProxyBaseType, handlerType)
+        const targetLinker = getNearestNonBootRuntimeLinker()!
+        const arrayProxyType = this.createArrayProxyType(arrayProxyBaseType, handlerType, targetLinker)
         return arrayProxyType.make([target, handler]) as Array<T>
-    }
-
-    private getTypeDescriptor(type: ClassType): string {
-        const typeVal = Value.of(type) as ClassValue
-        return typeVal.getFieldByName("td").getData() as string
     }
 
     private findDefaultConstructor(type: ClassType): Method | undefined {

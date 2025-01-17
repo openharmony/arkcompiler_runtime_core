@@ -54,6 +54,15 @@ export abstract class RuntimeLinker {
         throw new NoClassDefFoundError(clsName);
     }
 
+    public final getType(td: TypeDescriptor): Type | undefined {
+        // Load class with lazy initialization
+        const optClass = this.loadClassSafe(td, false);
+        if (optClass === undefined) {
+            return undefined;
+        }
+        return Type.resolve(optClass.getDescriptor(), this);
+    }
+
     /**
      * Find not yet loaded class and load it into this linker.
      *

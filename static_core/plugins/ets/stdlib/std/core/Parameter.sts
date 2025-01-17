@@ -19,14 +19,14 @@ package std.core;
  * Represents parameter of function type
  */
 export final class Parameter extends Object {
-    private td: TypeDesc = new TypeDesc()
+    private paramType: Type | undefined // not undefined if already created
     private name: string = ""
     private attributes: int
 
     private constructor () {}
 
     public getType(): Type {
-        return Type.resolve(this.td)!
+        return this.paramType!
     }
 
     public getName(): string {
@@ -51,7 +51,7 @@ export final class Parameter extends Object {
 
     public equals(oth: NullishType): boolean {
         return oth instanceof Parameter &&
-                this.td == (oth as Parameter).td &&
+                this.paramType!.equals((oth as Parameter).paramType!) &&
                 this.name == (oth as Parameter).name &&
                 this.attributes == (oth as Parameter).attributes
     }

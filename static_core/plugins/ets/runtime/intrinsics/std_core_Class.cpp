@@ -16,11 +16,9 @@
 #include "include/object_header.h"
 #include "intrinsics.h"
 #include "libpandabase/utils/logger.h"
-#include "runtime/handle_scope-inl.h"
 #include "plugins/ets/runtime/ets_class_linker_context.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_field.h"
@@ -28,7 +26,7 @@
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_string.h"
-#include "runtime/mem/local_object_handle.h"
+#include "runtime/handle_scope-inl.h"
 
 namespace ark::ets::intrinsics {
 
@@ -48,9 +46,14 @@ EtsClass *StdCoreClassOf(EtsObject *obj)
     return obj->GetClass();
 }
 
-EtsClass *StdCoreClassOfCaller()
+EtsClass *StdCoreClassCurrent()
 {
     return GetMethodOwnerClassInFrames(EtsCoroutine::GetCurrent(), 0);
+}
+
+EtsClass *StdCoreClassOfCaller()
+{
+    return GetMethodOwnerClassInFrames(EtsCoroutine::GetCurrent(), 1);
 }
 
 void StdCoreClassInitialize(EtsClass *cls)
@@ -72,39 +75,8 @@ EtsString *StdCoreClassGetDescriptor(EtsClass *cls)
 
 EtsObject *StdCoreClassCreateInstance(EtsClass *cls)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    const auto throwCreateInstanceErr = [coro, cls](std::string_view msg) {
-        ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR,
-                               PandaString(msg) + " " + cls->GetDescriptor());
-    };
-
-    if (UNLIKELY(!cls->GetRuntimeClass()->IsInstantiable() || cls->IsArrayClass())) {
-        throwCreateInstanceErr("Cannot instantiate");
-        return nullptr;
-    }
-
-    EtsMethod *ctor = cls->GetDirectMethod(panda_file_items::CTOR.data(), ":V");
-    if (UNLIKELY(ctor == nullptr)) {
-        throwCreateInstanceErr("No default constructor in");
-        return nullptr;
-    }
-
-    EtsClassLinker *linker = coro->GetPandaVM()->GetClassLinker();
-    if (UNLIKELY(!cls->IsInitialized() && !linker->InitializeClass(coro, cls))) {
-        return nullptr;
-    }
-    EtsObject *obj = EtsObject::Create(cls);
-    if (UNLIKELY(obj == nullptr)) {
-        return nullptr;
-    }
-
-    LocalObjectHandle objHandle(coro, obj);
-    std::array<Value, 1> args {Value(obj->GetCoreType())};
-    ctor->GetPandaMethod()->Invoke(coro, args.data());
-    if (UNLIKELY(coro->HasPendingException())) {
-        return nullptr;
-    }
-    return objHandle.GetPtr();
+    ASSERT(cls != nullptr);
+    return cls->CreateInstance();
 }
 
 EtsClass *EtsRuntimeLinkerFindLoadedClass(EtsRuntimeLinker *runtimeLinker, EtsString *clsName)
@@ -112,8 +84,7 @@ EtsClass *EtsRuntimeLinkerFindLoadedClass(EtsRuntimeLinker *runtimeLinker, EtsSt
     const auto name = clsName->GetMutf8();
     PandaString descriptor;
     const auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor);
-    auto *klass = runtimeLinker->GetClassLinkerContext()->FindClass(classDescriptor);
-    return klass != nullptr ? EtsClass::FromRuntimeClass(klass) : nullptr;
+    return runtimeLinker->FindLoadedClass(classDescriptor);
 }
 
 void EtsRuntimeLinkerInitializeContext(EtsRuntimeLinker *runtimeLinker)
@@ -152,6 +123,24 @@ EtsClass *EtsBootRuntimeLinkerFindAndLoadClass(ObjectHeader *runtimeLinker, EtsS
         }
     }
     return EtsClass::FromRuntimeClass(klass);
+}
+
+EtsRuntimeLinker *EtsGetNearestNonBootRuntimeLinker()
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    for (auto stack = StackWalker::Create(coro); stack.HasFrame(); stack.NextFrame()) {
+        auto *method = stack.GetMethod();
+        if (LIKELY(method != nullptr)) {
+            auto *cls = method->GetClass();
+            ASSERT(cls != nullptr);
+            auto *ctx = cls->GetLoadContext();
+            ASSERT(ctx != nullptr);
+            if (!ctx->IsBootContext()) {
+                return reinterpret_cast<EtsClassLinkerContext *>(ctx)->GetRuntimeLinker();
+            }
+        }
+    }
+    return nullptr;
 }
 
 }  // namespace ark::ets::intrinsics

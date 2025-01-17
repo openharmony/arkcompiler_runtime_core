@@ -16,11 +16,9 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ABC_RUNTIME_LINKER_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ABC_RUNTIME_LINKER_H
 
-#include "include/object_header.h"
 #include "mem/object_pointer.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_object.h"
-#include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_runtime_linker.h"
 
 namespace ark::ets {

@@ -52,14 +52,17 @@ export abstract class TypeCreator {
     public create(): Type {
         if (this.typ == undefined) {
             const ctx = new TypeCreatorCtx()
+            const targetLinker = this.getTargetLinker()
             try {
-                ctx.create(this)
+                ctx.create(this, targetLinker)
             } finally {
                 ctx.deinit()
             }
         }
         return this.typ!
     }
+
+    internal abstract getTargetLinker(): RuntimeLinker
 
     /**
      * Traverses all types on which this `TypeCreator` depends
@@ -93,9 +96,9 @@ export abstract class TypeCreator {
      * @returns type descriptor that created type will habe
      * @note will be called only after {@link define}
      */
-    internal getTypeDescriptor(): string {
+    internal getTypeDescriptor(): RuntimeTypeDescriptor {
         if (this.typ != undefined) {
-            return this.typ!.td
+            return this.typ!.getTypeDesc()
         }
         assertNE(this.ctxItemPtr, 0, "this.ctxItemPtr is 0")
         return TypeCreatorCtx.getTypeDescFromPointer(this.ctxItemPtr)
@@ -109,7 +112,7 @@ abstract class TypeOrCreator {
     /**
      * @returns type descriptor or future type descriptor
      */
-    abstract getTypeDescriptor(): string
+    abstract getTypeDescriptor(): RuntimeTypeDescriptor
 
     /**
      * @returns created {@link TypeOrCreator_Type}
@@ -132,8 +135,8 @@ abstract class TypeOrCreator {
 final class TypeOrCreator_Type extends TypeOrCreator {
     private typ: Type
 
-    override getTypeDescriptor(): string {
-        return this.typ.td
+    override getTypeDescriptor(): RuntimeTypeDescriptor {
+        return this.typ.getTypeDesc()
     }
 
     constructor(typ: Type) {
@@ -144,7 +147,7 @@ final class TypeOrCreator_Type extends TypeOrCreator {
 final class TypeOrCreator_Creator extends TypeOrCreator {
     typ: TypeCreator
 
-    override getTypeDescriptor(): string {
+    override getTypeDescriptor(): RuntimeTypeDescriptor {
         return this.typ.getTypeDescriptor()
     }
 
@@ -160,31 +163,46 @@ final class TypeCreatorCtx {
 
     private static native createCtx(): long
     private static native destroyCtx(ctxPtr: long): void
-    private static native commit(ctxPtr: long, objects: Object[]): string | undefined
+
+    /**
+     * Commits all created types into runtime.
+     *
+     * @param ctxPtr pointer to native context.
+     *
+     * @param objects array of saved objects passed to static constructor.
+     *
+     * @param targetLinker in which context code will be loaded.
+     *
+     * @returns string in case of occurred errors.
+     *
+     * @throws errors happened on class initialization.
+     */
+    private static native commit(ctxPtr: long, objects: Object[], targetLinker: RuntimeLinker): string | undefined
+
     private static native getError(ctxPtr: long): string | undefined
     internal static native getObjectsArrayForCCtor(ctxPtr: long): Object[]
 
-    internal static native getTypeDescFromPointer(ctxItemPtr: long): string
+    internal static native getTypeDescFromPointer(ctxItemPtr: long): RuntimeTypeDescriptor
 
     internal static native classCreate(ctxPtr: long, name: string, attrs: int): long
-    internal static native classSetBase(classPtr: long, base: TypeDesc): string | undefined
-    internal static native classAddIface(classPtr: long, iface: TypeDesc): string | undefined
-    internal static native classAddField(classPtr: long, name: string, field: TypeDesc, attrs: int, access: int): string | undefined
+    internal static native classSetBase(classPtr: long, base: RuntimeTypeDescriptor): string | undefined
+    internal static native classAddIface(classPtr: long, iface: RuntimeTypeDescriptor): string | undefined
+    internal static native classAddField(classPtr: long, name: string, field: RuntimeTypeDescriptor, attrs: int, access: int): string | undefined
 
     internal static native interfaceCreate(ctxPtr: long, name: string): long
-    internal static native interfaceAddBase(ifacePtr: long, base: TypeDesc): string | undefined
+    internal static native interfaceAddBase(ifacePtr: long, base: RuntimeTypeDescriptor): string | undefined
 
     internal static native lambdaTypeCreate(ctxPtr: long, attrs: int): long
-    internal static native lambdaTypeAddParam(ftPtr: long, param: TypeDesc, attrs: int): string | undefined
-    internal static native lambdaTypeAddResult(ftPtr: long, result: TypeDesc): string | undefined
+    internal static native lambdaTypeAddParam(ftPtr: long, param: RuntimeTypeDescriptor, attrs: int): string | undefined
+    internal static native lambdaTypeAddResult(ftPtr: long, result: RuntimeTypeDescriptor): string | undefined
     internal static native lambdaTypeAdd(ftPtr: long): string | undefined
 
     internal static native methodCreate(ctxItemPtr: long, name: string, attrs: int): long
     internal static native methodAddAccessMod(methPtr: long, access: int): string | undefined
-    internal static native methodAddParam(methPtr: long, td: TypeDesc, name: string, attrs: int): string | undefined
-    internal static native methodAddResult(methPtr: long, result: TypeDesc): string | undefined
-    internal static native methodAddBodyFromMethod(methPtr: long, meth: string): string | undefined
-    internal static native methodAddBodyFromLambda(methPtr: long, id: int, lambdaType: TypeDesc): string | undefined
+    internal static native methodAddParam(methPtr: long, td: RuntimeTypeDescriptor, name: string, attrs: int): string | undefined
+    internal static native methodAddResult(methPtr: long, result: RuntimeTypeDescriptor): string | undefined
+    internal static native methodAddBodyFromMethod(methPtr: long, methodType: MethodType): string | undefined
+    internal static native methodAddBodyFromLambda(methPtr: long, id: int, lambdaType: LambdaType): string | undefined
     internal static native methodAddBodyFromErasedLambda(methPtr: long, id: int): string | undefined
     internal static native methodAddBodyDefault(methPtr: long): string | undefined
     internal static native methodAdd(methPtr: long): string | undefined
@@ -227,8 +245,9 @@ final class TypeCreatorCtx {
     /**
      * Runs entire type creation routine, including all types collection
      * @param first creator with must be created
+     * @param targetLinker in which type creation must be committed
      */
-    public create(first: TypeCreator): void {
+    public create(first: TypeCreator, targetLinker: RuntimeLinker): void {
         const all = new Set<TypeCreator>()
         const visited = new Set<TypeCreator>()
 
@@ -295,12 +314,12 @@ final class TypeCreatorCtx {
         for (let i = 0; i < this.objects.length; i++) {
             objsArray[i] = this.objects.$_get(i) as Object
         }
-        this.checkError(TypeCreatorCtx.commit(this.ctxPtr, objsArray))
+        this.checkError(TypeCreatorCtx.commit(this.ctxPtr, objsArray, targetLinker))
 
         // assignes actual runtime types to all creators
         for (let i = 0; i < order.length; i++) {
             const tc = order.$_get(i)
-            tc.typ = Type.resolve(TypeCreatorCtx.getTypeDescFromPointer(tc.ctxItemPtr))
+            tc.typ = Type.resolve(TypeCreatorCtx.getTypeDescFromPointer(tc.ctxItemPtr), targetLinker)
         }
     }
 
@@ -336,6 +355,7 @@ export final class ClassTypeCreator extends TypeCreator {
     private fields: Array<FieldCreator> = new Array<FieldCreator>()
     private methods: Array<MethodCreator> = new Array<MethodCreator>()
     private attrs: HasAttributes = new HasAttributes(new FreezableCreator(this), AllowedAttributes.CLASS)
+    private targetLinker: RuntimeLinker
 
     /**
      * @param name fully qualified name of class type, can include only [A-Za-z0-9_.]
@@ -343,6 +363,7 @@ export final class ClassTypeCreator extends TypeCreator {
     public constructor(name: string) {
         super()
         this.name = name
+        this.targetLinker = getNearestNonBootRuntimeLinker()!
     }
 
     /**
@@ -444,6 +465,10 @@ export final class ClassTypeCreator extends TypeCreator {
         }
     }
 
+    internal override getTargetLinker(): RuntimeLinker {
+        return this.targetLinker
+    }
+
     /**
      * Adds method
      * @param mb method to add
@@ -483,6 +508,7 @@ export final class InterfaceTypeCreator extends TypeCreator {
     private name: string
     private bases: Array<TypeOrCreator> = new Array<TypeOrCreator>()
     private methods: Array<MethodCreator> = new Array<MethodCreator>()
+    private targetLinker: RuntimeLinker
 
     /**
      * @param name name of interface
@@ -491,6 +517,7 @@ export final class InterfaceTypeCreator extends TypeCreator {
     public constructor(name: string) {
         super()
         this.name = name
+        this.targetLinker = getNearestNonBootRuntimeLinker()!
     }
 
     /**
@@ -582,6 +609,10 @@ export final class InterfaceTypeCreator extends TypeCreator {
         assertEQ(this.ctxItemPtr, 0, "this.ctxItemPtr is not 0")
         this.ctxItemPtr = ctx.checkCtxItemPtr(TypeCreatorCtx.interfaceCreate(ctx.ctxPtr, this.name))
     }
+
+    internal override getTargetLinker(): RuntimeLinker {
+        return this.targetLinker
+    }
 }
 
 /**
@@ -591,9 +622,12 @@ export final class LambdaTypeCreator extends TypeCreator {
     internal params: Array<ParameterCreator> = new Array<ParameterCreator>();
     internal result: TypeOrCreator = TypeOrCreator.from(VoidType.REF);
     private attrs: HasAttributes = new HasAttributes(new FreezableCreator(this), AllowedAttributes.LAMBDA)
+    private targetLinker: RuntimeLinker
 
     /** default constructor */
-    public constructor() {}
+    public constructor() {
+        this.targetLinker = getNearestNonBootRuntimeLinker()!
+    }
 
     /**
      * Forces creation of `this` creator and creators it depends on
@@ -695,6 +729,10 @@ export final class LambdaTypeCreator extends TypeCreator {
     }
 
     internal override define(ctx: TypeCreatorCtx): void {
+    }
+
+    internal override getTargetLinker(): RuntimeLinker {
+        return this.targetLinker
     }
 }
 
@@ -1113,11 +1151,13 @@ export final class MethodCreator {
         if (!isAbstract) {
             const body = this.body!
             if (body instanceof CallableBodyMethod) {
-                ctx.checkError(TypeCreatorCtx.methodAddBodyFromMethod(fptr, (body as CallableBodyMethod).body.getTD()))
+                const callableBody = (body as CallableBodyMethod).body
+                ctx.checkError(TypeCreatorCtx.methodAddBodyFromMethod(fptr, callableBody.getType()))
             } else if (body instanceof CallableBodyFunction) {
                 const bbody = (body as CallableBodyFunction).body
                 const id = ctx.registerObject(bbody as Object);
-                ctx.checkError(TypeCreatorCtx.methodAddBodyFromLambda(fptr, id, Type.of(bbody).td))
+                const bbodyType = Type.of(bbody) as LambdaType
+                ctx.checkError(TypeCreatorCtx.methodAddBodyFromLambda(fptr, id, bbodyType))
             } else if (body instanceof CallableBodyErasedFunction) {
                 const bbody = (body as CallableBodyErasedFunction).body
                 const id = ctx.registerObject(bbody as Object);

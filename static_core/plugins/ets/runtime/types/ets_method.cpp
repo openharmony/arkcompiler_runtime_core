@@ -13,17 +13,14 @@
  * limitations under the License.
  */
 
-#include "macros.h"
-#include "runtime/include/class_linker.h"
-#include "runtime/include/runtime.h"
-#include "runtime/include/value-inl.h"
+#include "plugins/ets/runtime/types/ets_method.h"
+
+#include "libpandabase/macros.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
-#include "plugins/ets/runtime/types/ets_array.h"
-#include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/napi/ets_scoped_objects_fix.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
-#include "types/ets_type.h"
+#include "plugins/ets/runtime/types/ets_type.h"
 
 namespace ark::ets {
 
@@ -34,8 +31,11 @@ bool EtsMethod::IsMethod(const PandaString &td)
     return td[0] == METHOD_PREFIX;
 }
 
-EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td)
+EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td, EtsRuntimeLinker *contextLinker)
 {
+    ASSERT(contextLinker != nullptr);
+    auto *ctx = contextLinker->GetClassLinkerContext();
+
     EtsClassLinker *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
     if (td[0] == METHOD_PREFIX) {
         // here we resolve method in existing class, which is stored as pointer to panda file + entity id
@@ -48,10 +48,11 @@ EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td)
         [[maybe_unused]] static constexpr int SCANF_PARAM_CNT = 2;
         ASSERT(res == SCANF_PARAM_CNT);
         auto pandaFile = reinterpret_cast<const panda_file::File *>(filePtr);
-        return EtsMethod::FromRuntimeMethod(classLinker->GetMethod(*pandaFile, panda_file::File::EntityId(id)));
+        auto *method = classLinker->GetMethod(*pandaFile, panda_file::File::EntityId(id), ctx);
+        return EtsMethod::FromRuntimeMethod(method);
     }
     ASSERT(td[0] == CLASS_TYPE_PREFIX);
-    auto type = classLinker->GetClass(td.c_str());
+    auto type = classLinker->GetClass(td.c_str(), true, ctx);
 
     auto method = type->GetMethod(ark::ets::LAMBDA_METHOD_NAME);
     if (method != nullptr) {

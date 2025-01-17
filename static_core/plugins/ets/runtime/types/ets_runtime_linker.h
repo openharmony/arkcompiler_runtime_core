@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_RUNTIME_LINKER_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_RUNTIME_LINKER_H
 
+#include <cstdint>
 #include "include/object_header.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
@@ -56,6 +57,14 @@ public:
     ClassLinkerContext *GetClassLinkerContext()
     {
         return reinterpret_cast<ClassLinkerContext *>(classLinkerCtxPtr_);
+    }
+
+    EtsClass *FindLoadedClass(const uint8_t *descriptor)
+    {
+        auto *ctx = GetClassLinkerContext();
+        ASSERT(ctx != nullptr);
+        auto *klass = ctx->FindClass(descriptor);
+        return klass != nullptr ? EtsClass::FromRuntimeClass(klass) : nullptr;
     }
 
     void SetClassLinkerContext(ClassLinkerContext *ctx)

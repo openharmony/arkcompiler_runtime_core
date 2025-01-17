@@ -51,6 +51,7 @@ panda_ets_add_gtest(
         ets_finalizable_weak_ref_test.cpp
         ets_runtime_linker_test.cpp
         ets_abc_runtime_linker_test.cpp
+        ets_typeapi_test.cpp
     LIBRARIES
         arkassembler
         arkruntime

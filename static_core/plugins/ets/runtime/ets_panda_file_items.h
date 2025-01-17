@@ -29,11 +29,6 @@ static constexpr std::string_view ARRAY_BUFFER                         = "Lescom
 static constexpr std::string_view BIG_INT                              = "Lescompat/BigInt;";
 static constexpr std::string_view ASYNC                                = "Lets/coroutine/Async;";
 static constexpr std::string_view EXCEPTION                            = "Lstd/core/Exception;";
-static constexpr std::string_view CLASS                                = "Lstd/core/Class;";
-static constexpr std::string_view RUNTIME_LINKER                       = "Lstd/core/RuntimeLinker;";
-static constexpr std::string_view BOOT_RUNTIME_LINKER                  = "Lstd/core/BootRuntimeLinker;";
-static constexpr std::string_view ABC_RUNTIME_LINKER                   = "Lstd/core/AbcRuntimeLinker;";
-static constexpr std::string_view ABC_FILE                             = "Lstd/core/AbcFile;";
 static constexpr std::string_view OBJECT                               = "Lstd/core/Object;";
 static constexpr std::string_view PROMISE                              = "Lstd/core/Promise;";
 static constexpr std::string_view PROMISE_REF                          = "Lstd/core/PromiseRef;";
@@ -54,6 +49,11 @@ static constexpr std::string_view STRING_BUILDER                       = "Lstd/c
 
 // Runtime classes
 static constexpr std::string_view STACK_TRACE_ELEMENT                  = "Lstd/core/StackTraceElement;";
+static constexpr std::string_view ABC_FILE                             = "Lstd/core/AbcFile;";
+static constexpr std::string_view ABC_RUNTIME_LINKER                   = "Lstd/core/AbcRuntimeLinker;";
+static constexpr std::string_view BOOT_RUNTIME_LINKER                  = "Lstd/core/BootRuntimeLinker;";
+static constexpr std::string_view CLASS                                = "Lstd/core/Class;";
+static constexpr std::string_view RUNTIME_LINKER                       = "Lstd/core/RuntimeLinker;";
 
 // Box classes
 static constexpr std::string_view BOX_BOOLEAN                          = "Lstd/core/Boolean;";

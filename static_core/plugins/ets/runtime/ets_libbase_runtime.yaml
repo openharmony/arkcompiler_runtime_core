@@ -36,6 +36,9 @@ coretypes:
 - managed_class: Array
   mirror_class: ark::ets::EtsCharArray
 
+- managed_class: std.core.Type
+  mirror_class: ark::ets::EtsTypeAPIType
+
 - managed_class: std.core.Field
   mirror_class: ark::ets::EtsTypeAPIField
 
@@ -3302,9 +3305,9 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreRuntimeFailedTypeCastException
     clear_flags: [ ]
 
-####################
+##################
 # std.core.Class #
-####################
+##################
   - name: StdCoreClassGetNameInternal
     space: ets
     class_name: std.core.Class
@@ -3334,6 +3337,16 @@ intrinsics:
       ret: std.core.Class
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdCoreClassOf
+
+  - name: StdCoreClassCurrent
+    space: ets
+    class_name: std.core.Class
+    method_name: current
+    static: true
+    signature:
+      ret: std.core.Class
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassCurrent
 
   - name: StdCoreClassOfCaller
     space: ets
@@ -3375,9 +3388,9 @@ intrinsics:
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreClassGetDescriptor
 
-####################
+##########################
 # std.core.RuntimeLinker #
-####################
+##########################
   - name: StdCoreRuntimeLinkerFindLoadedClass
     space: ets
     class_name: std.core.RuntimeLinker
@@ -3398,9 +3411,9 @@ intrinsics:
       args: [ ]
     impl: ark::ets::intrinsics::EtsRuntimeLinkerInitializeContext
 
-######################################
+##############################
 # std.core.BootRuntimeLinker #
-######################################
+##############################
   - name: StdCoreBootRuntimeLinkerFindAndLoadClass
     space: ets
     class_name: std.core.BootRuntimeLinker
@@ -3411,9 +3424,19 @@ intrinsics:
       args: [ std.core.String, u1 ]
     impl: ark::ets::intrinsics::EtsBootRuntimeLinkerFindAndLoadClass
 
-######################################
+  - name: StdCoreGetNearestNonBootRuntimeLinker
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: getNearestNonBootRuntimeLinker
+    static: true
+    signature:
+      ret: std.core.RuntimeLinker
+      args: [ ]
+    impl: ark::ets::intrinsics::EtsGetNearestNonBootRuntimeLinker
+
+####################
 # std.core.AbcFile #
-######################################
+####################
   - name: StdCoreAbcFileLoadAbcFile
     space: ets
     class_name: std.core.AbcFile
@@ -3467,108 +3490,259 @@ intrinsics:
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::EscompatRegExpExec
 
-###################
-# std.core.Type   #
-###################
-  - name: TypeAPIGetTypeDescriptor
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetTypeDescriptor
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::TypeAPIGetTypeDescriptor
-
+####################
+# std.core.TypeAPI #
+####################
   - name: TypeAPIGetTypeKind
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetTypeKind
+    class_name: std.core.TypeAPI
+    method_name: getTypeKind
     static: true
     signature:
       ret: i8
-      args: [ std.core.String ]
+      args: [ std.core.String, std.core.RuntimeLinker ]
     impl: ark::ets::intrinsics::TypeAPIGetTypeKind
 
   - name: TypeAPIIsValueType
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIIsValueType
+    class_name: std.core.TypeAPI
+    method_name: isValueType
     static: true
     signature:
       ret: u1
-      args: [ std.core.String ]
+      args: [ std.core.String, std.core.RuntimeLinker ]
     impl: ark::ets::intrinsics::TypeAPIIsValueType
 
-  - name: TypeAPIGetTypeName
+  - name: TypeAPIGetNullTypeDescriptor
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetTypeName
+    class_name: std.core.TypeAPI
+    method_name: getNullTypeDescriptor
     static: true
     signature:
       ret: std.core.String
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetTypeName
+      args: [ ]
+    impl: ark::ets::intrinsics::TypeAPIGetNullTypeDescriptor
+
+  - name: TypeAPIGetUndefinedTypeDescriptor
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getUndefinedTypeDescriptor
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: ark::ets::intrinsics::TypeAPIGetUndefinedTypeDescriptor
+
+  - name: TypeAPIGetClass
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getClass
+    static: true
+    signature:
+      ret: std.core.Class
+      args: [ std.core.String, std.core.RuntimeLinker ]
+    impl: ark::ets::intrinsics::TypeAPIGetClass
 
   - name: TypeAPIGetClassAttributes
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetClassAttributes
+    class_name: std.core.TypeAPI
+    method_name: getClassAttributes
     static: true
     signature:
       ret: i32
-      args: [ std.core.String ]
+      args: [ std.core.Class ]
     impl: ark::ets::intrinsics::TypeAPIGetClassAttributes
 
   - name: TypeAPIGetFieldsNum
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetFieldsNum
+    class_name: std.core.TypeAPI
+    method_name: getFieldsNum
     static: true
     signature:
       ret: i64
-      args: [ std.core.String ]
+      args: [ std.core.Class ]
     impl: ark::ets::intrinsics::TypeAPIGetFieldsNum
 
   - name: TypeAPIGetOwnFieldsNum
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetOwnFieldsNum
+    class_name: std.core.TypeAPI
+    method_name: getOwnFieldsNum
     static: true
     signature:
       ret: i64
-      args: [ std.core.String ]
+      args: [ std.core.Class ]
     impl: ark::ets::intrinsics::TypeAPIGetOwnFieldsNum
+
+  - name: TypeAPIGetFieldPtr
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getFieldPtr
+    static: true
+    signature:
+      ret: std.core.Long
+      args: [ std.core.Class, i64 ]
+    impl: ark::ets::intrinsics::TypeAPIGetFieldPtr
+
+  - name: TypeAPIGetOwnFieldPtr
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getOwnFieldPtr
+    static: true
+    signature:
+      ret: std.core.Long
+      args: [ std.core.Class, i64 ]
+    impl: ark::ets::intrinsics::TypeAPIGetOwnFieldPtr
+
+  - name: TypeAPIGetFieldPtrByName
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getFieldPtrByName
+    static: true
+    signature:
+      ret: std.core.Long
+      args: [ std.core.Class, std.core.String ]
+    impl: ark::ets::intrinsics::TypeAPIGetFieldPtrByName
+
+  - name: TypeAPIGetFieldDescriptor
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getFieldDescriptor
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::TypeAPIGetFieldDescriptor
+
+  - name: TypeAPIGetFieldOwner
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getFieldOwner
+    static: true
+    signature:
+      ret: std.core.Class
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::TypeAPIGetFieldOwner
 
   - name: TypeAPIGetField
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetField
+    class_name: std.core.TypeAPI
+    method_name: getField
     static: true
     signature:
       ret: std.core.Field
-      args: [ std.core.String, i64 ]
+      args: [ std.core.Class, i64, std.core.Type, std.core.Type ]
     impl: ark::ets::intrinsics::TypeAPIGetField
 
-  - name: TypeAPIGetOwnField
+  - name: TypeAPIGetMethodsNum
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetOwnField
+    class_name: std.core.TypeAPI
+    method_name: getMethodsNum
     static: true
     signature:
-      ret: std.core.Field
-      args: [ std.core.String, i64 ]
-    impl: ark::ets::intrinsics::TypeAPIGetOwnField
+      ret: i64
+      args: [ std.core.Class ]
+    impl: ark::ets::intrinsics::TypeAPIGetMethodsNum
 
-  - name: TypeAPIGetFieldByName
+  - name: TypeAPIGetMethodDescriptor
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetFieldByName
+    class_name: std.core.TypeAPI
+    method_name: getMethodDescriptor
     static: true
     signature:
-      ret: std.core.Field
-      args: [ std.core.String, std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetFieldByName
+      ret: std.core.String
+      args: [ std.core.Class, i64 ]
+    impl: ark::ets::intrinsics::TypeAPIGetMethodDescriptor
+
+  - name: TypeAPIGetMethod
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getMethod
+    static: true
+    signature:
+      ret: std.core.Method
+      args: [ std.core.Class, std.core.MethodType ]
+    impl: ark::ets::intrinsics::TypeAPIGetMethod
+
+  - name: TypeAPIGetConstructorsNum
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getConstructorsNum
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.Class ]
+    impl: ark::ets::intrinsics::TypeAPIGetConstructorsNum
+
+  - name: TypeAPIGetConstructorDescriptor
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getConstructorDescriptor
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.Class, i64 ]
+    impl: ark::ets::intrinsics::TypeAPIGetConstructorDescriptor
+
+  - name: TypeAPIGetArrayElementType
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getArrayElementType
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.Class ]
+    impl: ark::ets::intrinsics::TypeAPIGetArrayElementType
+
+  - name: TypeAPIMakeArrayInstance
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: makeArrayInstance
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [ std.core.String, std.core.RuntimeLinker, i64 ]
+    impl: ark::ets::intrinsics::TypeAPIMakeArrayInstance
+
+  - name: TypeAPIGetInterfacesNum
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getInterfacesNum
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.Class ]
+    impl: ark::ets::intrinsics::TypeAPIGetInterfacesNum
+
+  - name: TypeAPIGetInterface
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getInterface
+    static: true
+    signature:
+      ret: std.core.Class
+      args: [ std.core.Class, i64 ]
+    impl: ark::ets::intrinsics::TypeAPIGetInterface
+
+  - name: TypeAPIIsInheritedFrom
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: isInheritedFrom
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Class, std.core.Class ]
+    impl: ark::ets::intrinsics::TypeAPIIsInheritedFrom
+    clear_flags: [ ]
+
+  - name: TypeAPIGetFunctionAttributes
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getFunctionAttributes
+    static: true
+    signature:
+      ret: i32
+      args: [ std.core.String ]
+    impl: ark::ets::intrinsics::TypeAPIGetFunctionAttributes
 
   - name: TypeAPIGetStaticFieldValue
     space: ets
@@ -3577,128 +3751,8 @@ intrinsics:
     static: true
     signature:
       ret: std.core.Object
-      args: [ std.core.String, std.core.String ]
+      args: [ std.core.Type, std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetStaticFieldValue
-
-  - name: TypeAPIGetMethodsNum
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetMethodsNum
-    static: true
-    signature:
-      ret: i64
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetMethodsNum
-
-  - name: TypeAPIGetMethod
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetMethod
-    static: true
-    signature:
-      ret: std.core.Method
-      args: [ std.core.String, i64 ]
-    impl: ark::ets::intrinsics::TypeAPIGetMethod
-
-  - name: TypeAPIGetConstructorsNum
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetConstructorsNum
-    static: true
-    signature:
-      ret: i64
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetConstructorsNum
-
-  - name: TypeAPIGetConstructor
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetConstructor
-    static: true
-    signature:
-      ret: std.core.Method
-      args: [ std.core.String, i64 ]
-    impl: ark::ets::intrinsics::TypeAPIGetConstructor
-
-  - name: TypeAPIGetParametersNum
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetParametersNum
-    static: true
-    signature:
-      ret: i64
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetParametersNum
-
-  - name: TypeAPIGetParameter
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetParameter
-    static: true
-    signature:
-      ret: std.core.Parameter
-      args: [ std.core.String, i64 ]
-    impl: ark::ets::intrinsics::TypeAPIGetParameter
-
-  - name: TypeAPIGetTypeId
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetTypeId
-    static: true
-    signature:
-      ret: i64
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetTypeId
-
-  - name: TypeAPIGetArrayElementType
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetArrayElementType
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetArrayElementType
-
-  - name: TypeAPIMakeArrayInstance
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIMakeArrayInstance
-    static: true
-    signature:
-      ret: std.core.Object
-      args: [ std.core.String, i64 ]
-    impl: ark::ets::intrinsics::TypeAPIMakeArrayInstance
-
-  - name: TypeAPIGetBaseType
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetBaseType
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetBaseType
-
-  - name: TypeAPIGetInterfacesNum
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetInterfacesNum
-    static: true
-    signature:
-      ret: i64
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetInterfacesNum
-
-  - name: TypeAPIGetInterface
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetInterface
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ std.core.String, i64 ]
-    impl: ark::ets::intrinsics::TypeAPIGetInterface
 
   - name: TypeAPISetStaticFieldValue
     space: ets
@@ -3707,39 +3761,8 @@ intrinsics:
     static: true
     signature:
       ret: void
-      args: [ std.core.String, std.core.String, std.core.Object ]
+      args: [ std.core.Type, std.core.String, std.core.Object ]
     impl: ark::ets::intrinsics::TypeAPISetStaticFieldValue
-
-  - name: TypeAPIIsInheritedFrom
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIIsInheritedFrom
-    static: true
-    signature:
-      ret: u1
-      args: [ std.core.String, std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIIsInheritedFrom
-    clear_flags: [ ]
-
-  - name: TypeAPIGetFunctionAttributes
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetFunctionAttributes
-    static: true
-    signature:
-      ret: i32
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetFunctionAttributes
-
-  - name: TypeAPIGetResultType
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetResultType
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetResultType
 
   - name: StdMethodInvoke
     space: ets
@@ -3749,7 +3772,7 @@ intrinsics:
     signature:
       ret: std.core.Object
       args:
-        - std.core.String
+        - std.core.MethodType
         - std.core.Object
         - std.core.Object[]
     impl: ark::ets::intrinsics::TypeAPIMethodInvoke
@@ -3762,19 +3785,78 @@ intrinsics:
     signature:
       ret: std.core.Object
       args:
-        - std.core.String
+        - std.core.MethodType
         - std.core.Object[]
     impl: ark::ets::intrinsics::TypeAPIMethodInvokeConstructor
 
-  - name: TypeAPIGetReceiverType
+#########################
+# std.core.FunctionType #
+#########################
+  - name: TypeAPIGetParametersNum
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetReceiverType
-    static: true
+    class_name: std.core.FunctionType
+    method_name: getParametersNum
+    static: false
+    signature:
+      ret: i64
+      args: [ ]
+    impl: ark::ets::intrinsics::TypeAPIGetParametersNum
+
+  - name: TypeAPIGetResultTypeDescriptor
+    space: ets
+    class_name: std.core.FunctionType
+    method_name: getResultTypeDescriptor
+    static: false
     signature:
       ret: std.core.String
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetReceiverType
+      args: [ ]
+    impl: ark::ets::intrinsics::TypeAPIGetResultTypeDescriptor
+
+  - name: TypeAPIGetParameterDescriptor
+    space: ets
+    class_name: std.core.FunctionType
+    method_name: getParameterDescriptor
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::TypeAPIGetParameterDescriptor
+
+  - name: TypeAPIGetParameter
+    space: ets
+    class_name: std.core.FunctionType
+    method_name: getParameter
+    static: false
+    signature:
+      ret: std.core.Parameter
+      args: [ i64, std.core.Type ]
+    impl: ark::ets::intrinsics::TypeAPIGetParameter
+
+#######################
+# std.core.MethodType #
+#######################
+  - name: TypeAPIGetReceiverTypeDescriptor
+    space: ets
+    class_name: std.core.MethodType
+    method_name: getReceiverTypeDescriptor
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: ark::ets::intrinsics::TypeAPIGetReceiverTypeDescriptor
+
+#######################
+# std.core.LambdaType #
+#######################
+  - name: TypeAPIGetDeclaringClass
+    space: ets
+    class_name: std.core.LambdaType
+    method_name: getDeclaringClass
+    static: false
+    signature:
+      ret: std.core.Class
+      args: [ ]
+    impl: ark::ets::intrinsics::TypeAPIGetDeclaringClass
 
 #################
 # std.core.Char #
@@ -4425,6 +4507,7 @@ intrinsics:
       args:
         - i64
         - std.core.Object[]
+        - std.core.RuntimeLinker
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxCommit
 
   - name: TypeAPITypeCreatorCtxGetError
@@ -4584,7 +4667,7 @@ intrinsics:
       ret: std.core.String
       args:
         - i64
-        - std.core.String
+        - std.core.MethodType
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyFromMethod
 
   - name: TypeAPITypeCreatorCtxMethodAddBodyFromLambda
@@ -4597,7 +4680,7 @@ intrinsics:
       args:
         - i64
         - i32
-        - std.core.String
+        - std.core.LambdaType
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyFromLambda
 
   - name: TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda

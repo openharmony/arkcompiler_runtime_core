@@ -17,7 +17,7 @@ function cname(name: string) { return "runtime_linker." + name }
 
 class Other {
     static getCallerOfItself() {
-        return Class.ofCaller();
+        return Class.current();
     }
 }
 

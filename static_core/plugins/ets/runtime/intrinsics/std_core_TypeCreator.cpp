@@ -17,7 +17,6 @@
 #include "assembler/assembly-field.h"
 #include "assembler/assembly-function.h"
 #include "assembler/assembly-ins.h"
-#include "assembler/assembly-parser.h"
 #include "assembler/assembly-program.h"
 #include "assembler/assembly-record.h"
 #include "assembler/assembly-type.h"
@@ -33,11 +32,13 @@
 #include "types/ets_field.h"
 #include "types/ets_method.h"
 #include "types/ets_primitives.h"
+#include "types/ets_runtime_linker.h"
 #include "types/ets_string.h"
 #include "types/ets_typeapi_create_panda_constants.h"
 #include "types/ets_type.h"
 #include "types/ets_typeapi.h"
 #include "types/ets_typeapi_create.h"
+#include "types/ets_typeapi_type.h"
 
 namespace ark::ets::intrinsics {
 namespace {
@@ -163,7 +164,7 @@ void TypeAPITypeCreatorCtxDestroy(EtsLong ctx)
     Runtime::GetCurrent()->GetInternalAllocator()->Delete(PtrFromLong<TypeCreatorCtx>(ctx));
 }
 
-EtsString *TypeAPITypeCreatorCtxCommit(EtsLong ctxPtr, EtsArray *objects)
+EtsString *TypeAPITypeCreatorCtxCommit(EtsLong ctxPtr, EtsArray *objects, EtsRuntimeLinker *targetLinker)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
@@ -182,21 +183,28 @@ EtsString *TypeAPITypeCreatorCtxCommit(EtsLong ctxPtr, EtsArray *objects)
     // debug
     // panda_file::FileWriter {"/tmp/test.abc"}.WriteBytes(writer.GetData());
 
+    auto *classLinkerContext = targetLinker->GetClassLinkerContext();
+    ASSERT(!classLinkerContext->IsBootContext());
     auto linker = Runtime::GetCurrent()->GetClassLinker();
     auto &data = writer.GetData();
     auto file = panda_file::OpenPandaFileFromMemory(data.data(), data.size());
 
-    ctx->SaveObjects(coroutine, objectsHandle);
+    ctx->SaveObjects(coroutine, objectsHandle, classLinkerContext);
 
-    linker->AddPandaFile(std::move(file));
+    const auto *pf = file.get();
+    // Panda file will be stored until runtime destruction
+    linker->AddPandaFile(std::move(file), classLinkerContext);
 
-    ctx->InitializeCtxDataRecord(coroutine);
+    status = ctx->InitializeCtxDataRecord(coroutine, classLinkerContext, pf);
+    if (UNLIKELY(!status)) {
+        LOG(ERROR, RUNTIME) << "Type API context data initialization has failed with exception";
+    }
     return nullptr;
 }
 
 EtsLong TypeAPITypeCreatorCtxClassCreate(EtsLong ctxPtr, EtsString *name, EtsInt attrs)
 {
-    auto ctx = PtrFromLong<TypeCreatorCtx>(ctxPtr);
+    auto *ctx = PtrFromLong<TypeCreatorCtx>(ctxPtr);
     pandasm::Record rec {std::string {name->GetMutf8()}, SourceLanguage::ETS};
     rec.conflict = true;
 
@@ -204,30 +212,28 @@ EtsLong TypeAPITypeCreatorCtxClassCreate(EtsLong ctxPtr, EtsString *name, EtsInt
         rec.metadata->SetAttribute(typeapi_create_consts::ATTR_FINAL);
     }
 
-    auto nameStr = rec.name;
-    auto [iter, ok] = ctx->Program().recordTable.emplace(nameStr, std::move(rec));
-    if (!ok) {
-        ctx->AddError("duplicate class " + nameStr);
+    auto res = ctx->AddPandasmRecord(std::move(rec));
+    if (!res.second) {
+        ctx->AddError("duplicate class " + res.first.name);
         return 0;
     }
-    return PtrToLong(ctx->Alloc<ClassCreator>(&iter->second, ctx));
+    return PtrToLong(ctx->Alloc<ClassCreator>(&res.first, ctx));
 }
 
 EtsLong TypeAPITypeCreatorCtxInterfaceCreate(EtsLong ctxPtr, EtsString *name)
 {
-    auto ctx = PtrFromLong<TypeCreatorCtx>(ctxPtr);
+    auto *ctx = PtrFromLong<TypeCreatorCtx>(ctxPtr);
     pandasm::Record rec {std::string {name->GetMutf8()}, SourceLanguage::ETS};
     rec.conflict = true;
-    auto nameStr = rec.name;
     for (const auto &attr : typeapi_create_consts::ATTR_INTERFACE) {
         rec.metadata->SetAttribute(attr);
     }
-    auto [iter, ok] = ctx->Program().recordTable.emplace(nameStr, std::move(rec));
-    if (!ok) {
-        ctx->AddError("duplicate class " + nameStr);
+    auto res = ctx->AddPandasmRecord(std::move(rec));
+    if (!res.second) {
+        ctx->AddError("duplicate class " + res.first.name);
         return 0;
     }
-    return PtrToLong(ctx->Alloc<InterfaceCreator>(&iter->second, ctx));
+    return PtrToLong(ctx->Alloc<InterfaceCreator>(&res.first, ctx));
 }
 
 EtsString *TypeAPITypeCreatorCtxGetError(EtsLong ctxPtr)
@@ -327,10 +333,19 @@ EtsString *TypeAPITypeCreatorCtxMethodAdd(EtsLong methodPtr)
     return ErrorFromCtx(m->Ctx());
 }
 
-EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromMethod(EtsLong methodPtr, EtsString *methodDesc)
+EtsMethod *GetEtsMethod(ObjectHeader *methodTypeObj)
+{
+    ASSERT(methodTypeObj != nullptr);
+    auto *methodType = EtsTypeAPIType::FromCoreType(methodTypeObj);
+    return EtsMethod::FromTypeDescriptor(methodType->GetRuntimeTypeDescriptor()->GetMutf8(),
+                                         methodType->GetContextLinker());
+}
+
+EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromMethod(EtsLong methodPtr, ObjectHeader *methodTypeObj)
 {
     auto m = PtrFromLong<PandasmMethodCreator>(methodPtr);
-    auto meth = EtsMethod::FromTypeDescriptor(methodDesc->GetMutf8());
+    auto *meth = GetEtsMethod(methodTypeObj);
+    ASSERT(meth != nullptr);
     auto ctx = m->Ctx();
 
     auto parentMethodClassName = GetPandasmTypeFromDescriptor(m->Ctx(), meth->GetClass()->GetDescriptor());
@@ -347,21 +362,22 @@ EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromMethod(EtsLong methodPtr, EtsSt
     return ErrorFromCtx(m->Ctx());
 }
 
-EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromLambda(EtsLong methodPtr, EtsInt lambdaObjectId, EtsString *lambdaTd)
+EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromLambda(EtsLong methodPtr, EtsInt lambdaObjectId,
+                                                        ObjectHeader *methodTypeObj)
 {
     auto m = PtrFromLong<PandasmMethodCreator>(methodPtr);
     auto ctx = m->Ctx();
 
-    auto coro = EtsCoroutine::GetCurrent();
-    auto klassTd = lambdaTd->GetMutf8();
-    auto klassName = GetPandasmTypeFromDescriptor(m->Ctx(), klassTd);
-    auto klass = coro->GetPandaVM()->GetClassLinker()->GetClass(klassTd.c_str());
-    ASSERT(klass->IsInitialized());
-    auto meth = klass->GetMethod(ark::ets::LAMBDA_METHOD_NAME);
+    auto *meth = GetEtsMethod(methodTypeObj);
     if (meth == nullptr) {
         return EtsString::CreateFromMUtf8("method is absent");
     }
 
+    auto *lambdaClass = meth->GetClass();
+    ASSERT(lambdaClass != nullptr);
+    ASSERT(lambdaClass->IsInitialized());
+    const auto *klassTd = lambdaClass->GetDescriptor();
+    auto klassName = GetPandasmTypeFromDescriptor(m->Ctx(), klassTd);
     auto fld = m->Ctx()->AddInitField(lambdaObjectId, pandasm::Type {klassName, 0});
 
     auto externalFn = CreateCopiedMethod(ctx, klassName.GetName() + ".", meth);

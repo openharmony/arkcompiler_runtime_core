@@ -26,8 +26,9 @@
 #include "plugins/ets/runtime/ets_modifiers.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_class.h"
-#include "plugins/ets/runtime/types/ets_type.h"
+#include "plugins/ets/runtime/types/ets_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/types/ets_type.h"
 #include "plugins/ets/runtime/types/ets_value.h"
 
 namespace ark {
@@ -46,7 +47,7 @@ class PandaEtsEnv;
 
 class EtsMethod {
 public:
-    PANDA_PUBLIC_API static EtsMethod *FromTypeDescriptor(const PandaString &td);
+    PANDA_PUBLIC_API static EtsMethod *FromTypeDescriptor(const PandaString &td, EtsRuntimeLinker *contextLinker);
 
     PANDA_PUBLIC_API static bool IsMethod(const PandaString &td);
 

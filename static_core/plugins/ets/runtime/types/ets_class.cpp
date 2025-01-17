@@ -18,8 +18,8 @@
 #include "libpandabase/utils/utf.h"
 #include "macros.h"
 #include "napi/ets_napi.h"
-#include "runtime/include/runtime.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
+#include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_field.h"
@@ -28,6 +28,8 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_value.h"
 #include "plugins/ets/runtime/types/ets_class.h"
+#include "runtime/include/runtime.h"
+#include "runtime/mem/local_object_handle.h"
 
 namespace ark::ets {
 
@@ -609,6 +611,47 @@ void EtsClass::SetStaticFieldObject(int32_t fieldOffset, bool isVolatile, EtsObj
         GetRuntimeClass()->SetFieldObject<true>(fieldOffset, reinterpret_cast<ObjectHeader *>(value));
     }
     GetRuntimeClass()->SetFieldObject<false>(fieldOffset, reinterpret_cast<ObjectHeader *>(value));
+}
+
+EtsObject *EtsClass::CreateInstance()
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    const auto throwCreateInstanceErr = [coro, this](std::string_view msg) {
+        ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR,
+                               PandaString(msg) + " " + GetDescriptor());
+    };
+
+    if (UNLIKELY(!GetRuntimeClass()->IsInstantiable() || IsArrayClass())) {
+        throwCreateInstanceErr("Cannot instantiate");
+        return nullptr;
+    }
+
+    if (IsStringClass()) {
+        return EtsString::CreateNewEmptyString()->AsObject();
+    }
+
+    EtsMethod *ctor = GetDirectMethod(panda_file_items::CTOR.data(), ":V");
+    if (UNLIKELY(ctor == nullptr)) {
+        throwCreateInstanceErr("No default constructor in");
+        return nullptr;
+    }
+
+    EtsClassLinker *linker = coro->GetPandaVM()->GetClassLinker();
+    if (UNLIKELY(!IsInitialized() && !linker->InitializeClass(coro, this))) {
+        return nullptr;
+    }
+    EtsObject *obj = EtsObject::Create(this);
+    if (UNLIKELY(obj == nullptr)) {
+        return nullptr;
+    }
+
+    LocalObjectHandle objHandle(coro, obj);
+    std::array<Value, 1> args {Value(obj->GetCoreType())};
+    ctor->GetPandaMethod()->Invoke(coro, args.data());
+    if (UNLIKELY(coro->HasPendingException())) {
+        return nullptr;
+    }
+    return objHandle.GetPtr();
 }
 
 }  // namespace ark::ets

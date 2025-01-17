@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,6 +122,69 @@ function testFields(ct: ClassType): int {
     return failures
 }
 
+function testGetFieldError(ct: ClassType): int {
+    let failures = 0
+    try {
+        ct.getField(1000)
+        failures += 1
+    } catch (ignored: NoSuchFieldError) {
+        // Expected error is catched
+    } catch (other) {
+        failures += 1
+    }
+    try {
+        ct.getOwnField(1000)
+        failures += 1
+    } catch (ignored: NoSuchFieldError) {
+        // Expected error is catched
+    } catch (other) {
+        failures += 1
+    }
+    try {
+        ct.getFieldByName("nonExistingField")
+        failures += 1
+    } catch (ignored: NoSuchFieldError) {
+        // Expected error is catched
+    } catch (other) {
+        failures += 1
+    }
+    return failures
+}
+
+function testGetMethodError(ct: ClassType): int {
+    let failures = 0
+    try {
+        ct.getMethod(1000)
+        failures += 1
+    } catch (ignored: NoSuchMethodError) {
+        // Expected error is catched
+    } catch (other) {
+        failures += 1
+    }
+    try {
+        ct.getConstructor(1000)
+        failures += 1
+    } catch (ignored: NoSuchMethodError) {
+        // Expected error is catched
+    } catch (other) {
+        failures += 1
+    }
+    return failures
+}
+
+function testGetInterfaceError(ct: ClassType): int {
+    let failures = 0
+    try {
+        ct.getInterface(1000)
+        failures += 1
+    } catch (ignored: TypeError) {
+        // Expected error is catched
+    } catch (other) {
+        failures += 1
+    }
+    return failures
+}
+
 function testAllFieldsAreOwn(ct: ClassType): int {
     let failures = test(ct.getOwnFieldsNum() == ct.getFieldsNum(), "   OwnFieldsNum == FieldsNum")
     for (let i = 0; i < ct.getOwnFieldsNum(); ++i) {
@@ -173,7 +236,10 @@ function testPoint(): int {
             test(pt.getConstructor(0).getName() == "constructor",           "       default") +
             test(pt.getConstructor(1).getName() == "constructor",           "       default") +
             test(!pt.isFinal(),                                             "   not final") +
-            testFields(pt)
+            testFields(pt) +
+            testGetFieldError(pt) +
+            testGetMethodError(pt) +
+            testGetInterfaceError(pt)
 }
 
 function testPoint3D(): int {
@@ -202,7 +268,10 @@ function testPoint3D(): int {
             test(addMethod != null,                       "       Point.add method") +
             test(serializeMethod != null,                 "       Serializable.serialize method") +
             test(pt.getConstructorsNum() == 2,                              "   2 Constructors") +
-            testFields(pt)
+            testFields(pt) +
+            testGetFieldError(pt) +
+            testGetMethodError(pt) +
+            testGetInterfaceError(pt)
 }
 
 function testHTMLWriter(): int {
@@ -226,7 +295,10 @@ function testHTMLWriter(): int {
             test(wt.getConstructorsNum() == 1,                              "   1 Constructor:") +
             test(wt.getConstructor(0).getName() == "constructor",           "       default") +
             test(wt.isFinal(),                                              "   final") +
-            testFields(wt)
+            testFields(wt) +
+            testGetFieldError(wt) +
+            testGetMethodError(wt) +
+            testGetInterfaceError(wt)
 }
 
 function testMake(): int {
