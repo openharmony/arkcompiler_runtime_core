@@ -263,20 +263,6 @@ spec/07.expressions/7.5.Object_Literal/issue14687.sts
 ### End of object-literals
 
 ### Built-In Component Two Way Value Synchronization
-### Negative tests
-arkui/dollar_dollar_06.sts
-arkui/dollar_dollar_07.sts
-### Used only with ARKUI plugin
-arkui/dollar_dollar_01.sts
-arkui/dollar_dollar_02.sts
-arkui/dollar_dollar_03.sts
-arkui/dollar_dollar_04.sts
-arkui/dollar_dollar_05.sts
-arkui/dollar_dollar_08.sts
-arkui/dollar_dollar_09.sts
-arkui/dollar_dollar_11.sts
-arkui/dollar_dollar_12.sts
-arkui/dollar_dollar_13.sts
 ### End Of Built-In Component Two Way Value Synchronization
 ### Annotations issues
 ### Issue 14040 -> Annotations not yet implemented
