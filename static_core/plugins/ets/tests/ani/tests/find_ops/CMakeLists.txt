@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,10 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_add_library(nark_gtest INTERFACE)
-panda_target_link_libraries(nark_gtest INTERFACE gtest)
-
-panda_target_include_directories(nark_gtest
-    INTERFACE ${PANDA_ETS_PLUGIN_SOURCE}/tests/nark/nark_gtest/
-    INTERFACE ${PANDA_ROOT}
+ani_add_gtest(ani_test_find_class
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_class_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_class_test.sts
 )

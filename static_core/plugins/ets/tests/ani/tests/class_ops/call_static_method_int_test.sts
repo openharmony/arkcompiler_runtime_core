@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,8 @@
  * limitations under the License.
  */
 
-class Test {
-    constructor(a: double, b: double) {
-        this.a = a;
-        this.b = b;
+class Operations {
+    static sum(a0: int, a1: int): int {
+        return a0 + a1;
     }
-
-    public Summ(): double {
-        return this.a + this.b;
-    }
-
-    private a: double;
-    private b: double;
 };
-
-function exampleFunction(a: double, b: double): double {
-    let t = new Test(a, b);
-    let res = t.Summ();
-    return res;
-}
-
-native function nativeExampleFunction(a: long, b: long): long;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "include/mem/panda_smart_pointers.h"
 #include "include/mem/panda_string.h"
 #include "libpandabase/macros.h"
+#include "plugins/ets/runtime/ani/ani_vm_api.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
@@ -155,7 +156,7 @@ bool PandaEtsVM::Destroy(PandaEtsVM *vm)
 }
 
 PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm)
-    : EtsVM {napi::GetInvokeInterface()}, runtime_(runtime), mm_(mm)
+    : EtsVM {napi::GetInvokeInterface()}, ani_vm {ani::GetVMAPI()}, runtime_(runtime), mm_(mm)
 {
     ASSERT(runtime_ != nullptr);
     ASSERT(mm_ != nullptr);

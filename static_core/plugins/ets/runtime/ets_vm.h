@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,6 +56,7 @@
 #include "plugins/ets/runtime/ets_class_linker.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "runtime/coroutines/coroutine_manager.h"
+#include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ets_native_library_provider.h"
 #include "plugins/ets/runtime/napi/ets_napi.h"
 #include "plugins/ets/runtime/types/ets_object.h"
@@ -70,7 +71,7 @@ class FloatToStringCache;
 class LongToStringCache;
 class EtsFinalizableWeakRef;
 
-class PandaEtsVM final : public PandaVM, public EtsVM {  // NOLINT(fuchsia-multiple-inheritance)
+class PandaEtsVM final : public PandaVM, public EtsVM, public ani_vm {  // NOLINT(fuchsia-multiple-inheritance)
 public:
     static Expected<PandaEtsVM *, PandaString> Create(Runtime *runtime, const RuntimeOptions &options);
     static bool Destroy(PandaEtsVM *vm);
@@ -244,6 +245,11 @@ public:
     void ResolveNativeMethod(Method *method);
 
     static PandaEtsVM *FromEtsVM(EtsVM *vm)
+    {
+        return static_cast<PandaEtsVM *>(vm);
+    }
+
+    static PandaEtsVM *FromAniVM(ani_vm *vm)
     {
         return static_cast<PandaEtsVM *>(vm);
     }

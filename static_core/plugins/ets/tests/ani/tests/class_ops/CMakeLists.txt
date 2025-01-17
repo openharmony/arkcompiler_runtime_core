@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include(cmake/nark_tests.cmake)
+ani_add_gtest(ani_test_class_ops_get_static_method
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_static_method_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_static_method_test.sts
+)
 
-add_subdirectory(nark_gtest)
-add_subdirectory(tests)
+ani_add_gtest(ani_test_class_ops_call_static_method_int
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_int_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_int_test.sts
+)
