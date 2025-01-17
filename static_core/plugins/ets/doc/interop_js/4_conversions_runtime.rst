@@ -18,14 +18,14 @@ Runtime conversion rules
 Runtime conversion rules: Primitive values
 ******************************************
 
-Primitive type values are copied between ArkTS runtime and JS runtime by value.
+Primitive type values are copied by value during interop runtime.
 If the value is changed in one runtime it doesn't affect another one.
 
 ArkTS to JS conversion
-=======================
+======================
 
 +-------------------------+-------------------+
-| ArkTS runtime type      | JS runtime type   |
+| ArkTS type              | JS runtime type   |
 +=========================+===================+
 | ``number/Number``       | ``number``        |
 +-------------------------+-------------------+
@@ -51,141 +51,53 @@ ArkTS to JS conversion
 +-------------------------+-------------------+
 | ``enum``                | ``number/string`` |
 +-------------------------+-------------------+
-| ``literal type string`` | ``string``        |
-+-------------------------+-------------------+
 | ``undefined``           | ``undefined``     |
 +-------------------------+-------------------+
 | ``null``                | ``null``          |
 +-------------------------+-------------------+
 
--  Numeric ArkTS types map to JS ``number``.
-
-.. code-block:: typescript
-  :linenos:
-
-  // file2.ets ArkTS
-  export let etsInt: int = 1;
-  export let etsDouble: double = 2.1;
-
-.. code-block:: javascript
-  :linenos:
-
-  // file1.js
-  import { etsInt, etsDouble } from "file2";
-
-  let jsInt = etsInt; // jsInt is 'number' and equals 1
-  let jsDouble = etsDouble; // jsDouble is 'number' and equals 2.1
-
--  ArkTS ``boolean`` maps to JS ``boolean``.
-
-.. code-block:: typescript
-  :linenos:
-
-  // file2.ets ArkTS
-  export let etsBool: boolean = true;
-
-.. code-block:: javascript
-  :linenos:
-
-  // file1.js
-  import { etsBool } from "file2";
-
-  let jsBool = etsBool; // jsBool is 'boolean' and equals true
-
--  ArkTS ``string`` maps to JS ``string``.
-
-.. code-block:: typescript
-  :linenos:
-
-  // file2.ets  ArkTS
-  export let etsStr: string = "hello";
-
-.. code-block:: javascript
-  :linenos:
-
-  // file1.js
-  import { etsStr } from "file2";
-
-  let jsStr = etsStr; // jsStr is 'string' and equals "hello"
-
--  ArkTS ``bigint`` maps to JS ``bigint``.
-
-.. code-block:: typescript
-  :linenos:
-
-  // file2.ets  ArkTS
-  export let etsBigInt: bigint = 10n;
-
-.. code-block:: javascript
-  :linenos:
-
-  // file1.js
-  import { etsBigInt } from "file2";
-
-  let jsBigInt = etsBigInt; // jsBigInt is 'bigint' and equals 10
-
--  ArkTS ``undefined`` maps to JS ``undefined``.
-
-.. code-block:: typescript
-  :linenos:
-
-  // file2.ets  ArkTS
-  export let etsUndef: undefined = undefined;
-
-.. code-block:: javascript
-  :linenos:
-
-  // file1.js
-  import { etsUndef } from "file2";
-
-  let jsUndef = etsUndef; // jsUndef is 'undefined' and equals undefined
-
--  ArkTS ``null`` maps to JS ``null``.
-
-.. code-block:: typescript
-  :linenos:
-
-  // file2.ets  ArkTS
-  export let etsNull: null = null;
-
-.. code-block:: javascript
-  :linenos:
-
-  // file1.js 
-  import { etsNull } from "file2";
-
-  let jsNull = etsNull; // jsNull is 'object' and equals null
-
 -  Boxed types(e.g. Number, Char, etc) map to primitive JS types.
 
+.. code-block:: javascript
+  :linenos:
+
+  // file1.js
+  export function foo(x) {
+    console.log(typeof x)
+    console.log(x)
+  }
+
 .. code-block:: typescript
   :linenos:
 
   // file2.ets ArkTS
-  export let x: Number = 1; // x is 'object'
-
-.. code-block:: javascript
-  :linenos:
-
-  // file1.js JS
-  import { x } from "file2";
-
-  let a = x; // x is 'number' and equals 1
+  import { foo } from 'file1'
+  export let x: Number = new Number(123)
+  foo(x) // print 'number' and '123'
 
 -  ``enum`` conversion depends on the type of enumeration. Numeric ``enum`` converts to ``number``. String ``enum`` converts to ``string``.
 
+.. code-block:: javascript
+  :linenos:
+
+  // file1.js
+  export function foo(x) {
+    console.log(typeof x)
+    console.log(x)
+  }
+
+
 .. code-block:: typescript
   :linenos:
 
   // file2.ets ArkTS
-  // numeric enum
+  import { foo } from 'file1'
   enum Direction {
       Up = -1,
       Down = 1
   }
 
-  let up: Direction = Direction.Up;
-  let down: Direction = Direction.Down;
+  foo(Direction.Down)  // print 'number' and '1'
 
   // string enum
   enum Color {
@@ -193,38 +105,7 @@ ArkTS to JS conversion
       Red = 'red'
   }
 
-  let green: Color = Color.Green;
-  let red: Color = Color.Red;
-
-.. code-block:: javascript
-  :linenos:
-
-  // file1.js
-  import { up, down, green, red } from "file2";
-
-  let a = up; // a is 'number' and equals -1
-  let b = down; // b is 'number' and equals 1
-
-  let c = green; // c is 'string' and equals 'green'
-  let d = red; // d is 'string' and equals 'red'
-
--  ``literal type string`` map to JS ``string``
-
-.. code-block:: typescript
-  :linenos:
-
-  // file2.ets  ArkTS
-  export let etsLiteral: "literal" = "literal";
-  etsLiteral = "not literal"; // compilation error
-
-.. code-block:: javascript
-  :linenos:
-
-  // file1.js 
-  import { etsLiteral } from "file2";
-
-  let val = etsLiteral; // val is "literal" but it can be changed
-  val = "not literal"; // ok
+  foo(Color.Red)  // print 'string' and 'red'
 
 JS to ArkTS conversion
 =======================
@@ -358,49 +239,13 @@ Value imported from JS to ArkTS, should be converted explicitly using ``as`` key
 
   // file2.ets  ArkTS
   import { jsSymbol } from "file1";
-  let val = jsSymbol; // ok, val is ESObject
+  let val = jsSymbol; // OK, val is ESObject
 
 Limitations
 ===========
 
-Object wrapper types
---------------------
-
-- Object wrapper types for primitive values such as ``Null``, ``Undefined``, ``Boolean``, ``Number``, ``Bigint``, ``String``, and ``Symbol``
-  can't be copied by default to ArkTS values. It need special way for creating on JS side via ``new`` keyword. Without it even in
-  case of capital letter it will be primitive type according JS.
-
-.. code-block:: typescript
-  :linenos:
-
-  // file1.js
-  let a = new Number(123); // typeof a is "object"
-  let b = Number(123); // typeof a is "number"
-
-  // file2.ets ArkTS
-  import { a, b } from "file1";
-  let aa = a as number; // RTE, as a is a reference from JS runtime
-  let bb = b as number; // ok, as b is a primitive number from JS runtime
-
-Solutions
-^^^^^^^^^
-
-- Use ``valueOf`` to get primitive values from wrapper objects and copy them to ArkTS
-
-.. code-block:: typescript
-  :linenos:
-
-  // file1.js
-  let a = new Number(123); // typeof a == "object"
-  let b = Number(123); // typeof a == "number"
-
-  // file2.ets ArkTS
-  import { a, b } from "file1";
-  let aa = a.valueOf() as number; // ok
-  let bb = b as number; // ok
-
 Copy semantic
-=============
+-------------
 
 -  Primitive type value is copied from JS runtime to ArkTS runtime by value so there is no connection with JS runtime after compilation and no side effects.
    E.g. if Prototype is changed in JS runtime it won't be changed in ArkTS runtime.
@@ -435,25 +280,9 @@ Copy semantic
   let num = a as number; // num is just static number with val 3
 
 Solutions
-=========
+^^^^^^^^^
 
-- Instead of importing primitive types, global contex can be imported instead of them and manipulation can be done through global context
-
-.. code-block:: javascript
-  :linenos:
-
-  // file1.js
-  let a = new Number(3);
-  a.newfield = "hello" // will be ignored in ArkTS
-
-.. code-block:: typescript
-  :linenos:
-
-  // file2.ets ArkTS
-  import * as global from "file1";
-  global.a = 42; // Will change original value on JS side too
-
-- Also original source can be changed and value can be moved into a class
+- Original source code can be changed and value can be moved into a class
 
 .. code-block:: javascript
   :linenos:
@@ -479,11 +308,16 @@ Wide limitation
 .. code-block:: typescript
   :linenos:
 
-  // file2.ets ArkTS
-  export let a: long = Math.pow(2, 53) + 10;
-
   // file1.js
-  import { a } from "file2"; // this import will result in precision loss
+  export function foo(x) {
+    console.log(x)
+  }
+
+  // file2.ets ArkTS
+  import { foo } from "file1"
+
+  let a: long = Math.pow(2, 53) + 10;
+  foo(a);  // printed value will not equal Math.pow(2, 53) + 10 because of precision loss
 
 -  Integer ``number`` values when converted to ArkTS may have precision loss if a value out of range of ArkTS type
 
@@ -525,7 +359,7 @@ Solutions
 
   // file2.js
   import { a } from "file1";
-  let num = a; // ok, bigint no precision loss
+  let num = a; // OK, bigint no precision loss
 
 - Using ``number`` instead of ``float``
 
@@ -540,7 +374,7 @@ Solutions
 
   // file2.ets ArkTS
   import { a } from "file1";
-  let x = a as number; // ok, will be correct
+  let x = a as number; // OK, will be correct
   let y = b as float; // may lose precision, use ``number`` type instead of float
 
 .. _Conversion rules Reference values:
@@ -577,32 +411,45 @@ ArkTS to JS conversion
 
 - Proxing ArkTS object.
 
+.. code-block:: javascript
+  :linenos:
+
+  // file1.js
+  export function foo(a) {
+    a.val = "222";  // OK
+    a.newVal = "hello"; // RTE, objects are sealed
+    a.val = 123;  // RTE, field has another type
+  }
+
 .. code-block:: typescript
   :linenos:
 
   // file2.ets ArkTS
+  import { foo } from "file1"
   class A {
     val : string = "hi";
   };
 
-  export let a = new A();
+  let a = new A();
+  foo(a);
+
+- Inheritance also will be constructed for proxy classes
 
 .. code-block:: javascript
   :linenos:
 
   // file1.js
-  import { a } from 'file2'
-  a.val = "222"; // ok
-
-  Reflect.set(a, "newVal", "hello"); // runtime exception, objects are sealed
-  Reflect.set(a, "val", 123);  // runtime exception, field has another type
-
-- Inheritance also will be constructed for proxy classes
+  export function foo(a) {
+    // Classes A and B will be constructed on JS side with inheritance relationships.
+    a.vala = "222"; // OK
+    a.valb = "333"; // OK
+  }
 
 .. code-block:: typescript
   :linenos:
 
   // file2.ets ArkTS
+  import { foo } from 'file1'
   class B {
     valb = "b";
   };
@@ -612,15 +459,7 @@ ArkTS to JS conversion
   };
 
   let a = new A();
-
-.. code-block:: javascript
-  :linenos:
-
-  // file1.js
-  import { a } from 'file2'
-  // Classes A and B will be constructed on JS side with inheritance relationships.
-  a.vala = "222"; // ok
-  a.valb = "333"; // ok
+  foo(a);
 
 - About proxing ArkTS ``union`` see :ref:`Features ArkTS Union`
 - About proxing ArkTS ``tuple`` see :ref:`Features ArkTS Tuple`
@@ -634,79 +473,65 @@ Limitations
 
 - Layout of ArkTS objects can not be changed and it is root of limitations for proxy-objects
 
-.. code-block:: typescript
-  :linenos:
-
-  // file2.ets ArkTS
-  class A {
-    val : string = "hi";
-  };
-
-  export let a = new A();
-
 .. code-block:: javascript
   :linenos:
 
   // file1.js
+  export function foo(a) {
+    a.val = "222";  // OK
+    a.newVal = "hello"; // RTE, objects are sealed
+    a.val = 123;  // RTE, field has another type
+  }
 
-  import {a} from 'file2'
-  a.newVal = 1; // runtime exception, objects are sealed
-  a.val = 123; // runtime exception, field has another type
-  a.val = "123";  // ok
+.. code-block:: typescript
+  :linenos:
+
+  // file2.ets ArkTS
+  import { foo } from "file1"
+  class A {
+    val : string = "hi";
+  };
+
+  let a = new A();
+  foo(a);
+
 
 Solutions
 ^^^^^^^^^
 
 - All changes for static classes should be done by user on static side
 
-.. code-block:: typescript
-  :linenos:
-
-  // file2.ets ArkTS
-  class A {
-    val : number|string = 2;
-    newVal : number = 3;
-  };
-
-  export let a = new A();
-
 .. code-block:: javascript
   :linenos:
 
   // file1.js
+  export function foo(a) {
+    a.val = "222";  // OK
+    a.newVal = "hello"; // OK
+    a.val = 123;  // OK
+  }
 
-  import {a} from 'file2'
-  a.newVal = 1; // ok
-  a.val = 123; // ok
-  a.val = "123"; // ok
+.. code-block:: typescript
+  :linenos:
 
-2. JS to ArkTS conversion
+  // file2.ets ArkTS
+  import { foo } from "file1"
+  class A {
+    val : string | number = "hi";
+    newVal: number = 0;
+  };
+
+  let a = new A();
+  foo(a);
+
+JS to ArkTS conversion
 ============================
 
 In JS everything that is not a primitive value is an object. We will call it a reference value and it follows the reference conversion rules described in this chapter.
-We can group all reference values into the following categories.
 
-+----------------------------------+
-| JS reference types               |
-+==================================+
-| ``Object``                       |
-+----------------------------------+
-| ``Class``                        |
-+----------------------------------+
-| ``Function``                     |
-+----------------------------------+
-| ``Collection``                   |
-|                                  |
-| ``(Array, Set, Map, etc)``       |
-+----------------------------------+
-| ``Other standard builtins``      |
-|                                  |
-| ``(Date, RegExp, Promise, etc)`` |
-+----------------------------------+
+ESObject can used to wrap any reference values from JS.
 
-ESObject is used to proxy any reference values from JS.
-
-- Proxing JS object with ESObject.
+- Wrapping JS object with ESObject.
 
 .. code-block:: javascript
     :linenos:
@@ -724,11 +549,11 @@ ESObject is used to proxy any reference values from JS.
     // file2.ets ArkTS
     import { a } from 'file1'
 
-    let b = a; // ok, ``b`` is ESObject
-    let c = a.v; // ok, ``c`` is ESObject
-    let d = a.v as number; // ok, ``d`` is number
+    let b = a; // OK, ``b`` is ESObject
+    let c = a.v; // OK, ``c`` is ESObject
+    let d = a.v as number; // OK, ``d`` is number
 
-- Special operators: ``new``, ``.``, ``[]``, ``()`` will work properly with ESObject, if such operations available on JS side, otherwise it will generate runtime exception
+- Basic operators will work properly with ESObject, if such operations available on JS side, otherwise it will generate runtime exception
 
 .. code-block:: javascript
     :linenos:
@@ -746,12 +571,12 @@ ESObject is used to proxy any reference values from JS.
     // file2.ets ArkTS
     import { a } from 'file1'
 
-    let number1: number = a.v as number  // ok
-    a.v = 456; // ok, will modify original JS object
-    a.newfield = "hi"; // ok, will modify original JS object and create new field
-    let missedFiled = a.missedFiled as undefined; // ok
-    let number2 = a["v"] as number; // ok, will return 456
-    let number2 = a[1] as undefined; // ok
+    let number1: number = a.v as number  // OK
+    a.v = 456; // OK, modify original JS object
+    a.newfield = "hi"; // OK, modify original JS object and create new field
+    let missedFiled = a.missedFiled as undefined; // OK
+    let number2 = a["v"] as number; // OK, get 456
+    let number2 = a[1] as undefined; // OK
 
 - Prototype of JS object can be modified on ArkTS side and it will be applied to all instances of Class
 
@@ -760,7 +585,6 @@ ESObject is used to proxy any reference values from JS.
 
     // file1.js
     export class A {
-      v = 123;
       testFunction() {
         return true;
       }
@@ -786,10 +610,7 @@ ESObject is used to proxy any reference values from JS.
 - About proxing collections and other standard builtins see :ref:`JS Std library` and :ref:`Async and concurrency features JS`.
 
 Limitations
-===========
-
-Unsupported operations
-----------------------
+-----------
 
 - All unsupported special operations will throw runtime exception. Or incorrect conversions.
 
@@ -817,6 +638,25 @@ Unsupported operations
     a[1] as int; // RTE
     a["v"] as string; // RTE
 
+- ESObject which contains reference type values from JS runtime can't be cast to ArkTS object.
+
+.. code-block:: javascript
+    :linenos:
+
+    // file1.js
+    export class A {
+      v = 123;
+    }
+
+    export let a = new A()
+
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets ArkTS
+    import { a } from 'file1'
+
+    let b = a as Object; // RTE. a is ESObject with reference values from JS runtime.
 
 Solutions
 ^^^^^^^^^
@@ -841,34 +681,8 @@ Solutions
     // file2.ets ArkTS
     import { a } from 'file1'
 
-    let num = a.v as number; // ok
-    let str = num.toString(); // ok, now we get static string from number
-
-Cast to static object
----------------------
-
-- ESObject which contains reference type values from JS runtime can't be cast to ArkTS object.
-
-.. code-block:: javascript
-    :linenos:
-
-    // file1.js
-    export class A {
-      v = 123;
-    }
-
-    export let a = new A()
-
-.. code-block:: typescript
-    :linenos:
-
-    // file2.ets ArkTS
-    import { a } from 'file1'
-
-    let b = a as Object; // RTE. a is ESObject with reference values from JS runtime.
-
-Solutions
-^^^^^^^^^
+    let num = a.v as number; // OK
+    let str = num.toString(); // OK, now we get static string from number
 
 - Only primitive types can be cast to ArkTS objects.
 
@@ -886,7 +700,7 @@ Solutions
     :linenos:
 
     // file2.ets ArkTS
-    import { a } from './file1'
+    import { a } from 'file1'
 
-    let b: number = a.v as number; // ok
-    let c: Object = a.v as Object; // ok
+    let b: number = a.v as number; // OK
+    let c: Object = a.v as Object; // OK

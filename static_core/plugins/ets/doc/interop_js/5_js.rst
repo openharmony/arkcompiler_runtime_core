@@ -132,7 +132,7 @@ Default function parameters allow named parameters to be initialized with defaul
 Interop rules
 ^^^^^^^^^^^^^
 
-- Default parameters should be stored on in js-function, so in case of interop no need special actions.
+- Default parameters should be stored on in js-function, so in case of interop there is no special rule.
 
 .. code-block:: javascript
     :linenos:
@@ -178,13 +178,13 @@ Here's how the arguments worked:
     doSomething("A","B","C");
 
 
-Arguments limitations: ``Arguments`` object is array-like, not a full-fledged array. That means that useful methods, which arrays have are not available. You cannot use methods such as ``arguments.sort()``, ``arguments.map()`` or ``arguments.filter()``.
+Arguments limitations: ``Arguments`` object is array-like, not a full-fledged array. It means that array-specific methods are not available for ``Arguments``. For example, you cannot use methods such as ``arguments.sort()``, ``arguments.map()`` or ``arguments.filter()``.
 The only property you have is ``length``.
 
 Interop rules
 ^^^^^^^^^^^^^
 
-- Arguments will be passed by the default way through napi, so in case of interop no need special actions.
+- Arguments will be passed by the default way through napi, so in case of interop there is no special rule.
 
 .. code-block:: javascript
     :linenos:
@@ -268,7 +268,7 @@ Rest parameters limitations
 Interop rules
 ^^^^^^^^^^^^^
 
-- Arguments will be passed by the default way through napi, so in case of interop no need special actions.
+- Arguments will be passed by the default way through napi, so in case of interop there is no special rule.
 
 .. code-block:: javascript
     :linenos:
@@ -295,7 +295,7 @@ Spread operator(empty)
 Description
 ^^^^^^^^^^^
 
-Syntactically ``spread operator`` it is the same ``...``, but it works opposite to the ``rest parameters``.
+Syntactically ``spread operator`` is the same as ``rest parameters ...``, but it works opposite to the ``rest parameters``.
 Instead of collecting multiple values in one array, it lets you expand one existing array (or other iterable) into multiple values.
 
 .. code-block:: javascript
@@ -424,6 +424,9 @@ You can combine this with passing individual parameters. Unlike rest parameters,
 Destructing assignment  (empty)
 *******************************
 
+Description
+^^^^^^^^^^^
+
 Destructuring Assignment is a syntax that allows you to extract data from arrays and objects.
 
 .. code-block:: javascript
@@ -443,6 +446,8 @@ Array destructuring  (empty)
 
 Description
 ^^^^^^^^^^^
+
+Obtain values from an array and assign values to other variables
 
 .. code-block:: javascript
     :linenos:
@@ -705,6 +710,40 @@ Description
 
 A JavaScript method is a function defined within an object.
 
+Using object literal Syntax
+
+.. code-block:: typescript
+    :linenos:
+
+    const person = {
+        name: 'John',
+        age: 25,
+        add(a, b) {
+            return a + b;
+        }
+    };
+
+    person.add();
+
+Defining a method in a Class
+
+.. code-block:: typescript
+    :linenos:
+
+    class Person {
+        constructor(name, age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        add(a, b) {
+            return a + b;
+        }
+    }
+
+    const person = new Person('John', 25);
+    person.add();
+
 ``this`` key word (empty)
 *************************
 
@@ -730,8 +769,8 @@ Objects are created by using constructors in new expressions.
 
     // constructor function
     function Person () {
-        this.name = "John",
-        this.age = 23
+      this.name = 'John',
+      this.age = 23
     }
 
     // create an object
@@ -739,6 +778,31 @@ Objects are created by using constructors in new expressions.
 
 
 Every object created by a constructor has an implicit reference (called the object's prototype) to the value of its constructor's "prototype" property.
+
+Interop rules
+^^^^^^^^^^^^^
+
+- Constructor will be passed by the default way through napi, so in case of interop there is no special rule.
+
+.. code-block:: javascript
+    :linenos:
+
+    // file1.js
+    exprot class Person {
+      constructor(name, age) {
+        this.name = name;
+        this.age = age;
+      }
+    }
+   
+
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets
+    import { Person } from './file1'
+
+    let a: Person = new Person('Alice', 30) // ok
 
 Prototype (empty)
 *****************
@@ -785,6 +849,8 @@ Import module (empty)
 
 Description
 ^^^^^^^^^^^
+
+In JavaScript, you can import modules using the import statement.  This allows you to include functionality from external files or libraries into your code.
 
 .. code-block:: javascript
     :linenos:
@@ -919,18 +985,85 @@ Like other looping statements, you can use control flow statements inside statem
 
 * while
 
+
+Interop rules
+^^^^^^^^^^^^^
+
+- If try to iterate an object from ArkTS in JS world. The object should in ArkTS world must be iterable(can be used in for-of statements). Otherwise, the runtime will throw an error.
+
 Relational operators: ``<``, ``>``, ``<=``, ``>=``  (empty)
 ***********************************************************
 
-* ``<``, ``>``, ``<=``, ``>=`` operators
+Description
+^^^^^^^^^^^
+
+Operators ``<``, ``>``, ``<=``, ``>=`` are used to compare the order of two operands. If the condition is true, the result is ``true``; otherwise, it is ``false``.
+
+.. code-block:: javascript
+    :linenos:
+
+    let foo = 123;
+    let bar = 456;
+
+    // Expected output: true
+    console.log(foo <= bar);
+
+Interop rules
+^^^^^^^^^^^^^
+
+- If one of the operands is from ArkTS, then the type of this operand JS must be primitive. Otherwise, the runtime will throw an error.
+
+.. code-block:: javascript
+    :linenos:
+
+    // file1.js
+    export function is_greater(a, b) {
+        return a > b
+    }
+
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets ArkTS
+    import { is_greater } from './file1'
+
+    let res = is_greater(2, 1); // ok
+    res = is_greater('2', 1);  // ok
+
+    class Foo {
+        a: number;
+        constructor(arg: number) {
+            this.a = arg;
+        }
+    }
+    let a = new Foo(1);
+    let res = is_greater(2, a); // error
 
 Relational operators: ``in``  (empty)
 *************************************
 
+Description
+^^^^^^^^^^^
+
+``${name} in ${object}`` returns the bool value ``true`` if there is a property ``name`` in the object ``${object}`` (or in its prototype chain).
+Throw an runtime error if the ``${object}`` is not an object.
+
+.. code-block:: javascript
+    :linenos:
+
+    let foo = { bar: "bar_value"};
+
+    console.log("bar" in foo); // true
+    console.log(undefined in foo); // false
+    // console.log("bar" in "not a object"); // error: not an object
+    console.log("length" in new String("it is a object")); // true: it is an object
+    console.log(Symbol.iterator in new String("it is a object")) // check the iterator
+
 Relational operators: ``instanceof``  (empty)
 *********************************************
 
-* ``instanceof`` operator
+Description
+^^^^^^^^^^^
 
 Operator ``instanceof`` checks whether an object belongs to a certain class. In other words, object instanceof constructor checks if an object is present constructor.prototype in the prototype chain object.
 
@@ -953,6 +1086,8 @@ Operator ``instanceof`` checks whether an object belongs to a certain class. In 
 
 Closure (empty)
 ***************
+
+Closure provides access to the outer scope of a function from inside the inner function, even after the outer function has closed.
 
 Description
 ^^^^^^^^^^^
@@ -977,7 +1112,63 @@ Description
     // calling outer function
     greet('John'); // Hi John
 
-Closure provides access to the outer scope of a function from inside the inner function, even after the outer function has closed.
+Interop rules
+^^^^^^^^^^^^^
+
+- A JS closure can be called in ArkTS world through Interop.
+- A JS closure can captures a variable from ArkTS world.
+- GC will handle the variables' lifetime properly.
+
+.. code-block:: javascript
+    :linenos:
+
+    // js file
+    // handler.js
+    let handler = null
+
+    export function initHandler(foo) {
+      function my_handler() {
+        console.log("in my_handler")
+        console.log(foo.bar);  // interop: my_handler captures foo from ArkTS world
+      }
+
+      handler = my_handler
+    }
+
+    export function getHandler() {
+      if (handler === null) {
+        throw new Error('Handler is not set')
+      }
+      return handler
+    }
+
+.. code-block:: typescript
+    :linenos:
+
+    // arkts file
+    // init.ets
+    import { initHandler } from './handler'
+
+    class Foo {
+      bar: string = ''
+    }
+
+    export function init() {
+      let foo = new Foo()
+      foo.bar = 'this is bar property'
+      initHandler(foo)
+    }
+
+.. code-block:: typescript
+    :linenos:
+
+    // arkts file
+    import { init } from './init'
+    import { getHandler } from './handler'
+
+    init()
+    let handler = getHandler()                
+    handler()                                   // interop: closure is called in ArkTS world
 
 Object of primitive types (empty)
 *********************************
@@ -985,22 +1176,28 @@ Object of primitive types (empty)
 Description
 ^^^^^^^^^^^
 
-- Null
+The primitive types in JavaScript have no methods or properties. 
+When accessing a property or method, the primitive value is wrapped into an Object(aka auto-boxing).
+And actually the method or property is called on the object, not on the primitive value.
 
-- Undefined
+.. code-block:: javascript
+    :linenos:
 
-- Boolean
+    let str = "string literal";
 
-- Number
+    // Actually, variable str is auto-boxed into an String Object. 
+    // Then String.toUpperCase() is called.
+    console.log(str.toUpperCase()); 
 
-- Bigint
+The converting rules are:
 
-- String
-
-- Symbol
-
-    Symbol is a unique and immutable data type that can be used as an identifier for object properties.
-
+- null -> Null
+- undefined -> Undefined
+- boolean -> Boolean
+- number -> Number
+- bigint -> Bigint
+- string -> String
+- symbol-> Symbol
 
 The ``typeof`` Operator (empty)
 *******************************
@@ -1008,32 +1205,36 @@ The ``typeof`` Operator (empty)
 Description
 ^^^^^^^^^^^
 
-The ``typeof`` operator returns a string indicating the type of the operand's value.
+The ``typeof`` operator returns a string indicating the type of the operand's value. 
+The rules are:
 
-   +-------------------------------------------------------------------------------+-----------+
-   | Type                                                                          |  Result   |
-   +===============================================================================+===========+
-   | Undefined                                                                     |"undefined"|
-   +-------------------------------------------------------------------------------+-----------+
-   | Null                                                                          | "object"  |
-   +-------------------------------------------------------------------------------+-----------+
-   |Boolean                                                                        | "boolean" |
-   +-------------------------------------------------------------------------------+-----------+
-   |Boolean                                                                        | "boolean" |
-   +-------------------------------------------------------------------------------+-----------+
-   |Number                                                                         | "number"  |
-   +-------------------------------------------------------------------------------+-----------+
-   |BigInt                                                                         | "bigint"  |
-   +-------------------------------------------------------------------------------+-----------+
-   |String                                                                         | "string"  |
-   +-------------------------------------------------------------------------------+-----------+
-   |Symbol                                                                         | "symbol"  |
-   +-------------------------------------------------------------------------------+-----------+
-   |Function (implements [[Call]] in ECMA-262 terms; classes are functions as well)|"function" |
-   +-------------------------------------------------------------------------------+-----------+
-   |Any other object                                                               | "object"  |
-   +-------------------------------------------------------------------------------+-----------+
+   +--------------------------------------------------------------------------------+-------------+
+   | Type                                                                           |    Result   |
+   +================================================================================+=============+
+   | undefined                                                                      | "undefined" |
+   +--------------------------------------------------------------------------------+-------------+
+   | null                                                                           |   "object"  |
+   +--------------------------------------------------------------------------------+-------------+
+   | boolean                                                                        |   "boolean" |
+   +--------------------------------------------------------------------------------+-------------+
+   | number                                                                         |   "number"  |
+   +--------------------------------------------------------------------------------+-------------+
+   | bigInt                                                                         |   "bigint"  |
+   +--------------------------------------------------------------------------------+-------------+
+   | string                                                                         |   "string"  |
+   +--------------------------------------------------------------------------------+-------------+
+   | symbol                                                                         |   "symbol"  |
+   +--------------------------------------------------------------------------------+-------------+
+   | Function (implements [[Call]] in ECMA-262 terms; classes are functions as well)|  "function" |
+   +--------------------------------------------------------------------------------+-------------+
+   | any other object                                                               |   "object"  |
+   +--------------------------------------------------------------------------------+-------------+
 
+.. code-block:: javascript
+    :linenos:
+
+    let foo = "bar";
+    console.log(typeof foo); // "string"
 
 Generators (empty)
 ******************
@@ -1061,15 +1262,24 @@ Use of the ``with`` statement is not recommended, as it may be the source of con
 The recommended alternative is to assign the object whose properties you want to access to a temporary variable.
 
 
-The ``debugger`` statement (empty)
+The ``debugger`` statement
 **********************************
-
 
 Description
 ^^^^^^^^^^^
 
 The ``debugger`` statement invokes any available debugging functionality, such as setting a breakpoint.
 If no debugging functionality is available, this statement has no effect.
+
+.. code-block:: javascript
+    
+    :linenos:
+    // dummy code
+    dubugger; // interrupt when debugging
+
+Interop rules
+^^^^^^^^^^^^^
+- This statement has not interop with ArkTS.
 
 Proxies (empty)
 ***************
@@ -1161,6 +1371,19 @@ The ``Reflect`` object has a number of methods that allow developers to access a
 Symbol (empty)
 **************
 
+Description
+^^^^^^^^^^^
+
+Symbol is a primitive in JS which stands for a unique symbol(aka symbol value).
+
+.. code-block:: javascript
+    
+    let s = Symbol("foo");
+    let t = Symbol("foo");
+    console.log(typeof s);  // "symbol"
+    console.log(s == t);    // false
+    console.log(s === t);   // false
+
 JS Std library
 ##############
 
@@ -1169,6 +1392,15 @@ Arrays
 
 Description
 ^^^^^^^^^^^
+
+The Array object in JavaScript represents a collection of some elements. The elements can be of different types.
+
+.. code-block:: javascript
+  :linenos:
+
+  let arr = new Array(1, "2", 3, 4, 5)
+  console.log(arr)
+  console.log(arr[0])
 
 Interop rules
 ^^^^^^^^^^^^^
@@ -1180,8 +1412,7 @@ Interop rules
   :linenos:
 
   //file1.js
-  let a new ;
-  export let a = new Array<number>(1, 2, 3, 4, 5);
+  export let a = new Array(1, 2, 3, 4, 5)
   export let b = [1, 2, 3, 4 ,5]
 
 .. code-block:: typescript
@@ -1190,21 +1421,151 @@ Interop rules
   //file2.ets  ArkTS
 
   import {a, b} from 'file1'
-  let val1 = a[0]; // ok
-  let val2 = b[0]; // ok
-  let val3 = a.lenght; // ok
-  let val4 = b.lenght; // ok
-  a.push(6); // ok, will affect original Array
-  b.push(6); // ok, will affect original Array
+  let val1 = a[0] // ok
+  let val2 = b[0] // ok
+  let val3 = a.length // ok
+  let val4 = b.length // ok
+  a.push(6) // ok, will affect original Array
+  b.push(6) // ok, will affect original Array
 
-Set (empty)
-***********
+Set
+***
 
-Map (empty)
-***********
+Description
+^^^^^^^^^^^
+
+The ``Set`` object lets you store unique values of any type, whether primitive values or object references.
+
+Interop rules
+^^^^^^^^^^^^^
+
+- When JS set is passed through interop to ArkTS, the proxy object is constructed in ArkTS and user can work with the set as if it was passed by reference. So any modification to the set will be reflected in JS
+
+.. code-block:: javascript
+  :linenos:
+
+  //file1.js
+  export let mySet = new Set();
+  export let obj1 = {};
+
+  mySet.add(1);
+  mySet.add(2);
+  mySet.add('3');
+  mySet.add(obj1);
+
+.. code-block:: javascript
+  :linenos:
+
+  //file2.ets ArkTS
+  import {mySet, obj1} from 'file1'
+  let val1 = mySet.has(1) as boolean        // true
+  let val2 = mySet.has(2) as boolean        // true
+  let val3 = mySet.has('3') as boolean      // true
+  let val4 = mySet.has(obj1) as boolean     // true
+
+  class X {}
+  let x = new X()
+
+  let val5 = mySet.has(x) as boolean        // false
+  mySet.add(x)                              // ok, will affect original Set
+  let val6 = mySet.has(x) as boolean        // true
+
+  let val7 = mySet.delete(2) as boolean     // true, will affect original Set
+  let val8 = mySet.has(2) as boolean        // false
+
+Limitations
+"""""""""""
+
+- It is not supported to converte JS Set to ArkTS Set.
+
+.. code-block:: javascript
+  :linenos:
+
+  //file3.ets ArkTS
+  import {mySet} from 'file1'
+  mySet as Set<ESObject> // can not be converted, RTE
+
+Map
+***
+
+Description
+^^^^^^^^^^^
+
+The ``Map`` object holds key-value pairs and remembers the original insertion order of the keys. Any value (both objects and primitive values) may be used as either a key or a value.
+
+Interop rules
+^^^^^^^^^^^^^
+
+- When JS map is passed through interop to ArkTS, the proxy object is constructed in ArkTS and user can work with the map as if it was passed by reference. So any modification to the map will be reflected in JS
+
+.. code-block:: javascript
+  :linenos:
+
+  //file1.js
+  export let myMap1 = new Map();
+  export let key = {};
+
+  myMap1.set(1, 1);
+  myMap1.set('2', 'hello');
+  myMap1.set(key, {'value': '1'});
+
+.. code-block:: javascript
+  :linenos:
+
+  //file2.ets ArkTS
+  import {myMap1, key} from 'file1'
+  let val1 = myMap1.get(1) as number      // ok, val1 is 1
+  let val2 = myMap1.get('2') as string    // ok, val2 is 'hello'
+  let val3 = myMap1.get(key)              // ok, val3 is ESObject, content is {'value': '1'}
+  let val4 = myMap1.size as number        // ok, val4 is 3
+
+  class X {}
+  let x = new X();
+
+  myMap1.set(2, 2)  // ok, will affect original Map
+  myMap1.set(3, x)  // ok, will affect original Map
+  myMap1.set(x, 4)  // ok, will affect original Map
+
+  let val5 = myMap1.size as number    // ok, val5 is 6
+  let val6 = myMap1.get(3) as X       // ok, val6 is x
+  let val7 = myMap1.get(x) as number  // ok, val7 is 4
+
+  let y = new X()
+  let val8 = myMap1.get(y) as number  // key y dose not exist in myMap1, throw RTE
+
+
+Limitations & Solutions
+"""""""""""""""""""""""
+- It is not supported to converte JS Map to ArkTS Map.
+- On ArkTS side getting a value from map maybe undefined while key does not exist, at this time use ``as`` to convert value will be RTE, to avoid RTE, we can use has mathod to check if a key exist before calling get.
+
+.. code-block:: javascript
+  :linenos:
+
+  //file3.ets ArkTS
+  import {myMap1} from 'file1'
+  myMap1 as Map<ESObject, ESObject>;   // can not be converted, RTE
+
+  let val1 = 0
+  if (myMap1.has(5) as boolean) {      // key 5 is not exist
+      val1 = myMap1.get(5) as number
+  }
+  console.log(val1) // val1 is 0
 
 ArrayBuffer (empty)
 *******************
+
+ArrayBuffer stands for byte buffer in JavaScript. ArrayBuffer cannot be directly manipulated. Instead, it's needed to create `TypedArray` or `DataView` to write or read the buffer.
+
+.. code-block:: javascript
+  :linenos:
+
+  // file1.js
+  let buf = new ArrayBuffer(128);
+  let bytebuf = new Uint8Array(buf);
+
+  // manipulate bytebuf
+  // ...
 
 BigInt64Array (empty)
 ^^^^^^^^^^^^^^^^^^^^^
@@ -1212,35 +1573,520 @@ BigInt64Array (empty)
 BigUint64Array (empty)
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Float32Array (empty)
-^^^^^^^^^^^^^^^^^^^^
+Float32Array
+************
+Description
+^^^^^^^^^^^
 
-Float64Array (empty)
-^^^^^^^^^^^^^^^^^^^^
+Float32Array is a typed array in JavaScript that represents an array of 32-bit floating-point numbers.
 
-Int8Array (empty)
-^^^^^^^^^^^^^^^^^
+- create instance of Float32Array with length 5
 
-Int16Array (empty)
-^^^^^^^^^^^^^^^^^^
+.. code-block:: javascript
+    :linenos:
 
-Int32Array (empty)
-^^^^^^^^^^^^^^^^^^
+    let float32Array = new Float32Array(5);
+    console.log(float32Array); // Float32Array [ 0, 0, 0, 0, 0 ]
 
-Uint8Array (empty)
-^^^^^^^^^^^^^^^^^^
+- create instance of Float32Array from an array of numbers
 
-Uint8ClampedArray (empty)
-^^^^^^^^^^^^^^^^^^^^^^^^^
+.. code-block:: javascript
+    :linenos:
 
-Uint16Array (empty)
-^^^^^^^^^^^^^^^^^^^
+    let array = [1.1, 2.2, 3.3, 4.4, 5.5];
+    let float32ArrayFromArray = new Float32Array(array);
+    console.log(float32ArrayFromArray); // output: Float32Array [ 1.1, 2.2, 3.3, 4.4, 5.5 ]
 
-Uint32Array (empty)
-^^^^^^^^^^^^^^^^^^^
+- use index to access and modify elements in Float32Array
+
+.. code-block:: javascript
+    :linenos:
+
+    float32ArrayFromArray[0] = 10.1;
+    console.log(float32ArrayFromArray[0]); // output: 10.1
+
+Interop rules
+^^^^^^^^^^^^^
+- When JS Float32Array is passed through interop to ArkTS, the proxy object is constructed in ArkTS and user can work with the object as if it was passed by reference. So any modification to the object will be reflected in JS.
+
+.. code-block:: javascript
+    :linenos:
+
+    // file1.js
+    export let arrf32_1 = new Float32Array(2);
+    
+    let array = [1.1, 2.2, 3.3, 4.4, 5.5];
+    export let arrf32_2 = new Float32Array(array);
+
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets  ArkTS
+    import { arrf32_1, arrf32_2 } from './file1';
+
+    arrf32_1[0] = 1;    // ok, 'arrf32_1' is [1, 0]
+    arrf32_2[5] = 2;    // ok, will be passed to JS, and JS will ignore it
+
+    arrf32_1.set([10, 20]);    // ok, 'arrf32_1' is [10, 20]
+    let slicedArray = arrf32_2.slice(1, 4);  // ok, 'slicedArray' is [2.2, 3.3, 4.4] wrapped by ESObject
+
+    console.log(arrf32_2.length as number);  // ok, 5
+
+Float64Array
+************
+
+Description
+^^^^^^^^^^^
+- Float64Arrayis a typed array in JavaScript that represents an array of 64-bit floating-point numbers.
+- create instance of Float64Array with length 5
+
+.. code-block:: javascript
+    :linenos:
+
+    let float64Array = new Float64Array(5);
+    console.log(float64Array); // output: Float64Array [ 0, 0, 0, 0, 0 ]
+
+    // create instance of Float64Array from an array of numbers
+    let array = [1.1, 2.2, 3.3, 4.4, 5.5];
+    let float64ArrayFromArray = new Float64Array(array);
+    console.log(float64ArrayFromArray); // output: Float64Array [ 1.1, 2.2, 3.3, 4.4, 5.5 ]
+
+    // use index to access and modify elements in Float64Array
+    float64ArrayFromArray[0] = 10.1;
+    console.log(float64ArrayFromArray[0]); // output: 10.1
+
+Interop rules
+^^^^^^^^^^^^^
+
+- When a Float64Array object is passed from the JS side to ArkTS through interop, a proxy object is generated in ArkTS.
+- When a user interacts with a proxy object, the same operation is fed back to the JS side.
+
+.. code-block:: javascript
+    :linenos:
+
+    // file1.js
+    export let arrf64_1 = new Float64Array(2);
+    
+    let array = [1.1, 2.2, 3.3, 4.4, 5.5];
+    export let arrf64_2 = new Float64Array(array);
+
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets  ArkTS
+    import { arrf64_1, arrf64_2 } from './file1';
+
+    arrf64_1[0] = 1;       // ok, 'arrf64_1' is [1, 1]
+    arrf64_1[1] = 2.2;     // ok, 'arrf64_1' is [1, 2.2]
+
+    arrf64_1.set([10, 20]);   // ok, 'arrf64_1' is [10, 20]
+    let slicedArray = arrf64_2.slice(1, 4);  // ok, 'slicedArray' is [2.2, 3.3, 4.4] wrapped by ESObject
+
+    console.log(arrf64_2.length as number)   // ok, 5
+
+Int8Array
+*********
+
+Description
+^^^^^^^^^^^
+
+- Int8Array is a typed array in JavaScript that represents an array of 8-bit signed integers with values ranging from -128 to 127.
+
+.. code-block:: javascript
+    :linenos:
+
+    // create Int8Array
+    let array = [10, 20, 30, 40, 50];
+    let int8ArrayFromArray = new Int8Array(array);
+
+    // Array elements can be accessed and modified by index
+    int8ArrayFromArray[2] = 128; // out of range, becomes -128
+    console.log(int8ArrayFromArray[2]); // output: -128
+
+    // create Int8Array using existing array
+    let array = [10, 20, 30, 40, 50];
+    let int8ArrayFromArray = new Int8Array(array);
+    console.log(int8ArrayFromArray); // output: Int8Array [ 10, 20, 30, 40, 50 ]
+
+Interop rules
+^^^^^^^^^^^^^
+
+- When a Int8Array object is passed from the JS side to ArkTS through interop, a proxy object is generated in ArkTS.
+- When a user interacts with a proxy object, the same operation is fed back to the JS side.
+
+.. code-block:: javascript
+    :linenos:
+
+    // file1.js
+    export let int8arr1 = new Int8Array(3);
+
+    let array = [10, 20, 30, 40, 50];
+    export let int8arr2 = new Int8Array(array);
+
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets  ArkTS
+    import { int8arr1, int8arr2 } from './file1';
+
+    int8arr1[0] = 1;    // ok, 'int8arr1' is [1, 0, 0]
+    int8arr1[1] = 2.2;  // ok, 'int8arr1' is [1, 2, 0]
+    int8arr2[2] = 128;  // ok, 'int8arr1' is [1, 2, -128]
+
+    console.log(int8arr1.length as number);  // ok, 3
+    console.log(int8arr1.byteLength as number);  // ok, 3
+
+Int16Array
+**********
+
+Description
+^^^^^^^^^^^
+
+- When a Int16Array object is passed from the JS side to ArkTS through interop, a proxy object is generated in ArkTS.
+- When a user interacts with a proxy object, the same operation is fed back to the JS side.
+
+.. code-block:: javascript
+    :linenos:
+    
+    // create Int16Array
+    let int16Array = new Int16Array(5);
+    console.log(int16Array);            // output: Int16Array [ 0, 0, 0, 0, 0 ]
+
+    // create instance of Int16Array from an array
+    let array = [1000, 2000, 3000, 4000, 5000];
+    let int16ArrayFromArray = new Int16Array(array);
+    console.log(int16ArrayFromArray);   // output: Int16Array [ 1000, 2000, 3000, 4000, 5000 ]
+
+    // use index to access and modify elements in Int16Array
+    int16ArrayFromArray[0] = 32768;      // out of range, becomes -32768
+    console.log(int16ArrayFromArray[0]); // output: -32768
+
+Interop rules
+^^^^^^^^^^^^^
+
+- When a Int16Array object is passed from the JS side to ArkTS through interop, a proxy object is generated in ArkTS.
+
+.. code-block:: javascript
+    :linenos:
+
+    // file1.js
+    export let int16arr1 = new Int16Array(3);
+    export let int16arr2;
+    
+    let array = [1000, 2000, 3000, 4000, 5000];
+    export let int16arr3 = new Int16Array(array);
+
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets  ArkTS
+    import { int16arr1, int16arr2, int16arr3 } from './file1';
+
+    int16arr1[0] = 1;        // ok, 'int8arr1' is [1, 0, 0]
+    int16arr1[1] = 2.2222;   // ok, 'int8arr1' is [1, 2, 0]
+    int16arr1[2] = -32769;   // ok, 'int8arr1' is [1, 32767, 0]
+    int16arr1[2] = 'a';      // ok, will be `nan` on JS side
+    int16arr1[3] = 128;      // ok, will be passed to JS, and JS will ignore it
+
+Int32Array
+**********
+
+Description
+^^^^^^^^^^^
+
+- When a Int32Array object is passed from the JS side to ArkTS through interop, a proxy object is generated in ArkTS.
+- When a user interacts with a proxy object, the same operation is fed back to the JS side.
+
+.. code-block:: javascript
+    :linenos:
+
+    // create Int32Array
+    let int32Array = new Int32Array(5);
+    console.log(int32Array); // output: Int32Array [ 0, 0, 0, 0, 0 ]
+
+    // create instance of Int32Array from an array
+    let array = [1000, 2000, 3000, 4000, 5000];
+    let int32ArrayFromArray = new Int32Array(array);
+    console.log(int32ArrayFromArray); // output: Int32Array [ 1000, 2000, 3000, 4000, 5000 ]
+
+    // use index to access and modify elements in Int32Array
+    int32ArrayFromArray[0] = 2147483648; // out of range，becomes -2147483648
+    console.log(int32ArrayFromArray[0]); // output: -2147483648
+
+Interop rules
+^^^^^^^^^^^^^
+
+- When a Int32Array object is passed from the JS side to ArkTS through interop, a proxy object is generated in ArkTS.
+
+.. code-block:: javascript
+    :linenos:
+
+    // file1.js
+    export let int32arr1 = new Int32Array(3);
+    export let int32arr2;
+    
+    let array = [1000, 2000, 3000, 4000, 5000];
+    export let int32arr3 = new Int32Array(array);
+
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets  ArkTS
+    import { int32arr1, int32arr2, int32arr3 } from './file1';
+
+    int32arr1[0] = 1;        // ok, 'int8arr1' is [1, 0, 0]
+    int32arr1[1] = 2.2222;   // ok, 'int8arr1' is [1, 2, 0]
+    int32arr1[2] = -32769;   // ok, 'int8arr1' is [1, 32767, 0]
+    int32arr1[2] = 'a';      // ok, will be `nan` on JS side
+    int32arr1[3] = 128;      // ok, will be passed to JS, and JS will ignore it
+
+    int32arr2 = int32arr1.slice(0, 5);  // ok, out of range will be ignored on JS side
+
+    let arr = new Int32Array(3);
+    int32arr2 = Int32Array.from(arr);
+    arr = Int32Array.of(int32arr1);    // CTE, static `int32arr2` is not compatibale with dynamic int32arr1
+
+Uint8Array
+**********
+
+Description
+^^^^^^^^^^^
+
+- Uint8Array typed array represents an array of 8-bit unsigned integers. The contents are initialized to 0 upon creation. Once established, you can access elements in the array using the object's methods or standard array index syntax (i.e., using square brackets).
+
+.. code-block:: javascript
+    :linenos:
+
+    // create Uint8Array
+    let uint8Array = new Uint8Array(5);
+    console.log(uint8Array); // output: Uint8Array [ 0, 0, 0, 0, 0 ]
+
+    // create instance of Uint8Array from an array
+    let array = [10, 20, 30, 40, 50];
+    let uint8ArrayFromArray = new Uint8Array(array);
+    console.log(uint8ArrayFromArray); // output: Uint8Array [ 10, 20, 30, 40, 50 ]
+
+    // use index to access and modify elements in Uint8Array
+    uint8ArrayFromArray[0] = 256; // out of range，becomes 255
+    console.log(uint8ArrayFromArray[0]); // output: 255
+
+Interop rules
+^^^^^^^^^^^^^
+
+- When a Uint8Array object is passed from the JS side to ArkTS through interop, a proxy object is generated in ArkTS.
+- When a user interacts with a proxy object, the same operation is fed back to the JS side.
+
+.. code-block:: javascript
+    :linenos:
+
+    // file1.js
+    export let uint8arr1 = new Uint8Array(3);
+    export let uint8arr2;
+    
+    let array = [10, 20, 30, 40, 50];
+    export let uint8arr3 = new Uint8Array(array);
+
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets  ArkTS
+    import { uint8arr1, uint8arr2, uint8arr3 } from './file1';
+
+    uint8arr1[0] = 1;        // ok, 'uint8arr1' is [1, 0, 0]
+    uint8arr1[1] = 2.2222;   // ok, 'uint8arr1' is [1, 2, 0]
+    uint8arr1[2] = -32769;   // ok, 'uint8arr1' is [1, 2, 255]
+    uint8arr1[2] = 'a';      // ok, will be `nan` on JS side
+    uint8arr1[3] = 128;      // ok, will be passed to JS, and JS will ignore it
+    
+    uint8arr2 = uint8arr1.slice(0, 5);  // ok, out of range will be ignored on JS side
+
+Uint8ClampedArray
+*****************
+
+Description
+^^^^^^^^^^^
+
+- The Uint8ClampedArray typed array represents an array of 8-bit unsigned integers with values clamped between 0 and 255. If a specified value is outside this range, it will be adjusted to 0 or 255. If a specified value is not an integer, it will be set to the nearest integer. The array contents are initialized to 0 upon creation. Once established, you can access elements in the array using the object's methods or standard array index syntax (i.e., using square brackets).
+
+.. code-block:: javascript
+    :linenos:
+
+    // create Uint8ClampedArray
+    let uint8clampedarr1 = new Uint8ClampedArray(5);
+    console.log(uint8clampedarr1); // output: Uint32Array [ 0, 0, 0, 0, 0 ]
+
+    // create instance of Uint32Array from an array
+    let array = [-100, -10, 3.5, 100, 500];
+    let uint8ClampedArrayFromArray = new Uint8ClampedArray(array);
+    console.log(uint8ClampedArrayFromArray); // output: uint8ClampedArrayFromArray [ 0, 0, 3, 100, 255 ]
+
+    // use index to access and modify elements in Uint32Array
+    uint8ClampedArrayFromArray[0] = 4294967296; // out of range，becomes 255
+    console.log(uint8ClampedArrayFromArray[0]); // output: 255
+
+Interop rules
+^^^^^^^^^^^^^
+
+- When a Uint8ClampedArray object is passed from the JS side to ArkTS through interop, a proxy object is generated in ArkTS.
+- When a user interacts with a proxy object, the same operation is fed back to the JS side.
+
+.. code-block:: javascript
+    :linenos:
+
+    // file1.js
+    export let uint8clampedarr1 = new Uint8ClampedArray(4);
+    export let uint8clampedarr2;
+    
+    let array = [10, 20, 30, 40, 50];
+    export let uint8clampedarr3 = new Uint8ClampedArray(array);
+
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets  ArkTS
+    import { uint8clampedarr1, uint8clampedarr2, uint8clampedarr3 } from './file1';
+    uint8clampedarr1[0] = 1;        // ok, 'uint8clampedarr1' is [1, 0, 0, 0]
+    uint8clampedarr1[1] = 2.2222;   // ok, 'uint8clampedarr1' is [1, 2, 0, 0]
+    uint8clampedarr1[2] = -32769;   // ok, 'uint8clampedarr1' is [1, 2, 0, 0]
+    uint8clampedarr1[3] = 32769;    // ok, 'uint8clampedarr1' is [1, 2, 0, 255]
+    uint8clampedarr1[2] = 'a';      // ok, will be `nan` on JS side
+    uint8clampedarr1[3] = 128;      // ok, will be passed to JS, and JS will ignore it
+    
+    uint8clampedarr2 = uint8clampedarr.slice(0, 5);  // ok, out of range will be ignored on JS side
+
+Uint16Array
+***********
+
+Description
+^^^^^^^^^^^
+
+- Uint16Array is a typed array in JavaScript that represents an array of 16-bit unsigned  integers with values ranging from 0 to 65535.
+
+.. code-block:: javascript
+    :linenos:
+
+    // create Uint16Array
+    let uint16Array = new Uint16Array(5);
+    console.log(uint16Array); // output: Uint16Array [ 0, 0, 0, 0, 0 ]
+
+    // create instance of Uint16Array from an array
+    let array = [1000, 2000, 3000, 4000, 5000];
+    let uint16ArrayFromArray = new Uint16Array(array);
+    console.log(uint16ArrayFromArray); // ouput: Uint16Array [ 1000, 2000, 3000, 4000, 5000 ]
+
+    // use index to access and modify elements in Uint16Array
+    uint16ArrayFromArray[0] = 65536; // out of range，becomes 0
+    console.log(uint16ArrayFromArray[0]); // output: 0
+
+Interop rules
+^^^^^^^^^^^^^
+
+- When a Uint16Array object is passed from the JS side to ArkTS through interop, a proxy object is generated in ArkTS.
+- When a user interacts with a proxy object, the same operation is fed back to the JS side.
+
+.. code-block:: javascript
+    :linenos:
+
+    // file1.js
+    export let uint16arr1 = new Uint16Array(3);
+    export let uint16arr2;
+    
+    let array = [10, 20, 30, 40, 50];
+    export let uint16arr3 = new Uint16Array(array);
+
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets  ArkTS
+    import { uint16arr1, uint16arr2, uint16arr3 } from './file1';
+
+    uint16arr1[0] = 1;        // ok, 'uint16arr1' is [1, 0, 0]
+    uint16arr1[1] = 2.2222;   // ok, 'uint16arr1' is [1, 2, 0]
+    uint16arr1[2] = -32769;   // ok, 'uint16arr1' is [1, 2, 255]
+    uint16arr1[2] = 'a';      // ok, will be `nan` on JS side
+    uint16arr1[3] = 128;      // ok, will be passed to JS, and JS will ignore it
+    
+    uint16arr2 = uint16arr.slice(0, 5);  // ok, out of range will be ignored on JS side
+
+Uint32Array
+***********
+
+Description
+^^^^^^^^^^^
+
+- Uint32Array typed array represents an array of 32-bit unsigned integers.
+
+.. code-block:: javascript
+    :linenos:
+
+    let uint32Array = new Uint32Array(5);
+    console.log(uint32Array); // output: Uint32Array [ 0, 0, 0, 0, 0 ]
+
+    // create instance of Uint32Array fro an array 
+    let array = [1000, 2000, 3000, 4000, 5000];
+    let uint32ArrayFromArray = new Uint32Array(array);
+    console.log(uint32ArrayFromArray); // output: Uint32Array [ 1000, 2000, 3000, 4000, 5000 ]
+
+    // use index to access and modify elements in Uint32Array
+    uint32ArrayFromArray[0] = 4294967296;  // out of range，becomes 0
+    console.log(uint32ArrayFromArray[0]);  // output: 0
+
+Interop rules
+^^^^^^^^^^^^^
+
+- When a Uint32Array object is passed from the JS side to ArkTS through interop, a proxy object is generated in ArkTS.
+- When a user interacts with a proxy object, the same operation is fed back to the JS side.
+
+.. code-block:: javascript
+    :linenos:
+
+    // file1.js
+    export let uint32arr1 = new Uint32Array(3);
+    export let uint32arr2;
+    
+    let array = [10, 20, 30, 40, 50];
+    export let uint32arr3 = new Uint32Array(array);
+
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets  ArkTS
+    import { uint32arr1, uint32arr2, uint32arr3 } from './file1';
+
+    uint32arr1[0] = 1;        // ok, 'uint32arr1' is [1, 0, 0]
+    uint32arr1[1] = 2.2222;   // ok, 'uint32arr1' is [1, 2, 0]
+    uint32arr1[2] = -32769;   // ok, 'uint32arr1' is [1, 2, 255]
+    uint32arr1[2] = 'a';      // ok, will be `nan` on JS side
+    uint32arr1[3] = 128;      // ok, will be passed to JS, and JS will ignore it
+    
+    uint32arr2 = uint32arr.slice(0, 5);  // ok, out of range will be ignored on JS side
 
 DataView (empty)
 ****************
+
+DataView is used to read and write byte buffer.
+
+.. code-block:: javascript
+  :linenos:
+
+  // 00 00 00 00 00 00 00 00
+  let buf = new ArrayBuffer(8);
+  let view = new DataView(buf);
+  
+  // 00 01 00 00 00 00 00 00
+  view.setInt16(0, 1); 
+  
+  // read as big-endian
+  // 00 01 00 00 00 00 00 00
+  // ^~~~~~~~~~^
+  // |--Int32--|  High --- Low
+  console.log(view.getInt32(0));
+
+  // read as little-endian
+  // 00 01 00 00 00 00 00 00
+  // ^~~~~~~~~~^
+  // |--Int32--|  Low --- High
+  console.log(view.getInt32(0, true)); // 256
 
 Date (empty)
 ************
@@ -1266,14 +2112,64 @@ Date (empty)
 Error (empty)
 *************
 
-EvalError (empty)
-^^^^^^^^^^^^^^^^^
+EvalError
+*********
+
+Description
+^^^^^^^^^^^
+
+- EvalError is a built-in error type in JavaScript, typically used to indicate errors that occur when executing code through the eval() function.
+- Constructor function, creates a new EvalError object.
+
+.. code-block:: javascript
+    :linenos:
+
+    try {
+        throw new EvalError("Hello, world!");
+    } catch (e) {
+        console.log("EvalError:", e.message);
+    }
+
+Interop rules
+^^^^^^^^^^^^^
+
+- ArkTS does not support the eval() function
 
 AggregateError (empty)
 ^^^^^^^^^^^^^^^^^^^^^^
 
-URIError (empty)
-^^^^^^^^^^^^^^^^
+URIError
+********
+
+Description
+^^^^^^^^^^^
+
+- The URIError object is used to represent errors produced by using global URI handling functions incorrectly.
+- cry to decode an invalid URI component using decodeURIComponent.
+
+.. code-block:: javascript
+    :linenos:
+
+    try {
+        decodeURIComponent('%');
+    } catch (e) {
+        if (e instanceof URIError) {
+            console.log("URIError:", e.message);
+        } else {
+            console.log("Other Error", e.message);
+        }
+    }
+
+- create a new URIError.
+
+.. code-block:: javascript
+    :linenos:
+
+    try {
+        throw new URIError("Hello World");
+    } catch (e) {
+        console.log(e instanceof URIError, e.message); // true Hello World
+    }
 
 RangeError (empty)
 ^^^^^^^^^^^^^^^^^^
@@ -1290,11 +2186,61 @@ TypeError (empty)
 InternalError (empty)
 ^^^^^^^^^^^^^^^^^^^^^
 
-FinalizationRegistry (empty)
-****************************
+FinalizationRegistry
+********************
+
+Description
+^^^^^^^^^^^
+
+- The FinalizationRegistry is a mechanism in JavaScript that executes a callback function when an object is garbage collected.
+
+.. code-block:: javascript
+    :linenos:
+
+    const registry = new FinalizationRegistry((heldValue) => {
+        console.log(`The object has been garbage collected: ${heldValue}`);
+    });
+
+- create a target object, register and unbind it with the FinalizationRegistry
+
+.. code-block:: javascript
+    :linenos:
+
+    const target = {};
+    registry.register(target, "target is recycled");
+
+    registry.unregister(target);
+
+Interop rules
+^^^^^^^^^^^^^
+
+- When JS FinalizationRegistry object is passed through interop from the JS side to ArkTS, the ESObject is constructed in ArkTS.
+
+.. code-block:: javascript
+    :linenos:
+
+    // file1.js
+    export const registry = new FinalizationRegistry((heldValue) => {
+        console.log(`The object has been garbage collected: ${heldValue}`);
+    });
+
+.. code-block:: typescript
+    :linenos:
+
+    // file2.ets  ArkTS
+    import { registry } from './file1';
+
+    const target = {};
+    registry.register(target, "target is recycled");  // ok
+    registry.unregister(target);                      // ok
 
 Function (empty)
 ****************
+
+Description
+^^^^^^^^^^^
+
+- 'Function' is a built-in constructor that can be used to create functions dynamically. This feature is not supported.
 
 Math (empty)
 ************
