@@ -781,10 +781,10 @@ spec/11.Enumerations/issue14633_2.sts
 spec/11.Enumerations/issue14633_3.sts
 spec/11.Enumerations/issue14633.sts
 spec/11.Enumerations/issue14636_1.sts
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/issue15173/src/issue_15173_02.sts
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/issue15173/src/issue_15173_03.sts
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/issue15182/issue_15182_04.sts
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/issue16954/import_typeannotation0.sts
+spec/13.Compilation_Units_Packages_and_Modules/04.import_directives/issue15173/src/issue_15173_02.sts
+spec/13.Compilation_Units_Packages_and_Modules/04.import_directives/issue15173/src/issue_15173_03.sts
+spec/13.Compilation_Units_Packages_and_Modules/04.import_directives/issue15182/issue_15182_04.sts
+spec/13.Compilation_Units_Packages_and_Modules/04.import_directives/issue16954/import_typeannotation0.sts
 spec/13.Compilation_Units_Packages_and_Modules/04.default_import/default_import.sts
 spec/13.Compilation_Units_Packages_and_Modules/05.top-level_declarations/01.exported_declarations/exported_declarations_01.sts
 spec/13.Compilation_Units_Packages_and_Modules/05.top-level_declarations/01.exported_declarations/exported_declarations_02.sts

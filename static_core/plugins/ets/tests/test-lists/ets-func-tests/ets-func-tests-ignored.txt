@@ -200,44 +200,44 @@ spec/05.Generics/wrongUsingInT.sts
 ### End of Generic
 ### Import-export issues
 ### cannot create runtime (compound tests not supported)
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/05.default_import_binding/default_import_binding.sts
+spec/13.Compilation_Units_Packages_and_Modules/04.Import_Directives/05.default_import_binding/default_import_binding.sts
 ### Issue 19710
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/02.export_type_directives/export_type_directive_01.sts
 ### Issue 19935
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/07.import_path/import_path_03.sts
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/non_linux_path_separators.sts
+spec/13.Compilation_Units_Packages_and_Modules/04.Import_Directives/06.import_path/import_path_03.sts
+spec/13.Compilation_Units_Packages_and_Modules/04.Import_Directives/non_linux_path_separators.sts
 ### Issue 19934
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/t_isnt_exported_but_func_takes_t_as_param_exported.sts
+spec/13.Compilation_Units_Packages_and_Modules/04.Import_Directives/t_isnt_exported_but_func_takes_t_as_param_exported.sts
 ### Issue 19933
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re-export_directive_01.sts
 
 ### Issue 14647
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/07.import_path/import_path_01.sts
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/07.import_path/import_path_02.sts
+spec/13.Compilation_Units_Packages_and_Modules/04.Import_Directives/06.import_path/import_path_01.sts
+spec/13.Compilation_Units_Packages_and_Modules/04.Import_Directives/06.import_path/import_path_02.sts
 ### Issue 19967
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/t_isnt_exported_but_func_takes_t_as_return_value_exported.sts
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/t_isnt_exported_but_subtype_of_t_exported.sts
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/t_isnt_exported_but_var_of_t_exported.sts
+spec/13.Compilation_Units_Packages_and_Modules/04.Import_Directives/t_isnt_exported_but_func_takes_t_as_return_value_exported.sts
+spec/13.Compilation_Units_Packages_and_Modules/04.Import_Directives/t_isnt_exported_but_subtype_of_t_exported.sts
+spec/13.Compilation_Units_Packages_and_Modules/04.Import_Directives/t_isnt_exported_but_var_of_t_exported.sts
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/01.selective_export_directive/selective_export_directive_01.sts
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re-export_directive_02.sts
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_directive_04.sts
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue15371/issue15371_06.sts
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/05.default_import_binding/default_import_binding.sts
+spec/13.Compilation_Units_Packages_and_Modules/04.Import_Directives/05.default_import_binding/default_import_binding.sts
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_all_2.sts
 
 ### Issue 19712
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/t_is_proxed_through_chain_of_files_2.sts
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/t_is_proxed_through_chain_of_files.sts
+spec/13.Compilation_Units_Packages_and_Modules/04.Import_Directives/t_is_proxed_through_chain_of_files_2.sts
+spec/13.Compilation_Units_Packages_and_Modules/04.Import_Directives/t_is_proxed_through_chain_of_files.sts
 ### Issue 19715
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_directive_03.sts
 ### Negative tests
-spec/13.Compilation_Units_Packages_and_Modules/03.Import_Directives/import_unexported_class.sts
+spec/13.Compilation_Units_Packages_and_Modules/04.Import_Directives/import_unexported_class.sts
 spec/import_export/07.export_directives/02.export_type_directives/to_export_negative.sts
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/01.selective_export_directive/selective_export_directive_02.sts
 ### Not-a-test
-spec/import_export/03.import_directives/to_export.sts
-spec/import_export/03.import_directives/05.default_import_binding_additional/default_to_export.sts
-spec/import_export/03.import_directives/07.import_path/to_export.sts
+spec/import_export/04.Import_Directives/to_export.sts
+spec/import_export/04.Import_Directives/05.default_import_binding_additional/default_to_export.sts
+spec/import_export/04.Import_Directives/06.import_path/to_export.sts
 spec/import_export/06.top-level_declarations/01.exported_declarations/to_export.sts
 spec/import_export/07.export_directives/01.selective_export_directive/to_export.sts
 spec/import_export/07.export_directives/03.re-export_directives/re-export_all.sts

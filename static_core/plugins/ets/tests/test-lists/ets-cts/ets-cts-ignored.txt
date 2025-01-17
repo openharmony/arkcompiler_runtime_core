@@ -342,12 +342,12 @@
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_9.sts
 
 #FailKind.ES2PANDA_FAIL #19926 not implemented yet
-02.lexical_elements/09.literals/03.bigint_literals/bigint_func_0.sts
-02.lexical_elements/09.literals/03.bigint_literals/bigint_func_1.sts
-02.lexical_elements/09.literals/03.bigint_literals/bigint_func_2.sts
-02.lexical_elements/09.literals/03.bigint_literals/bigint_func_3.sts
-02.lexical_elements/09.literals/03.bigint_literals/bigint_func_4.sts
-02.lexical_elements/09.literals/03.bigint_literals/bigint_func_5.sts
+02.lexical_elements/09.literals/04.bigint_literals/bigint_func_0.sts
+02.lexical_elements/09.literals/04.bigint_literals/bigint_func_1.sts
+02.lexical_elements/09.literals/04.bigint_literals/bigint_func_2.sts
+02.lexical_elements/09.literals/04.bigint_literals/bigint_func_3.sts
+02.lexical_elements/09.literals/04.bigint_literals/bigint_func_4.sts
+02.lexical_elements/09.literals/04.bigint_literals/bigint_func_5.sts
 03.types/08.reference_types/08.function_types/function_type_2.sts
 03.types/08.reference_types/08.function_types/function_type_3.sts
 03.types/08.reference_types/08.function_types/function_type_4.sts
@@ -837,6 +837,13 @@
 # es2panda fails: panda:14653 es2panda segfault when optional lambda is omitted
 17.experimental_features/12.trailing_lambda/trlambda_func_15.sts
 # end of es2panda fails
+
+13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_0.sts
+13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_1.sts
+13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_2.sts
+13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_3.sts
+
+13.compilation_units_packages_and_modules/10.export_directives/04.re-export_directive/re-export_all_by_old_names.sts
 
 # 15095
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/hiding_methods_with_different_access_modifiers_2.sts
