@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,7 +114,19 @@ private:
 
     PANDA_PUBLIC_API SharedReference *GetReference(void *data) const REQUIRES_SHARED(storageLock_);
     PANDA_PUBLIC_API void RemoveReference(SharedReference *sharedRef);
-    void DeleteReference(SharedReference *sharedRef) REQUIRES(storageLock_);
+    /**
+     * Remove all unmarked references from related chain which contains passed shared references
+     * @param sharedRef non-empty shared reference from this storage table
+     * @note the method should be called under the storage write-lock
+     */
+    void DeleteUnmarkedReferences(SharedReference *sharedRef) REQUIRES(storageLock_);
+
+    /**
+     * Delete napi_ref for passed shared reference and remove the shared reference from the table
+     * @param sharedRef non-empty shared reference from this storage table
+     * @note the method should be called under the storage write-lock
+     */
+    void DeleteJSRefAndRemoveReference(SharedReference *sharedRef) REQUIRES(storageLock_);
 
     bool HasReferenceWithCtx(SharedReference *ref, InteropCtx *ctx) const;
 
