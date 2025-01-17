@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -98,6 +98,8 @@ function(compile_ets_sources WORK_DIR ABC_TARGET ABC_FILES ETS_SOURCES)
 
     add_custom_target(${ABC_TARGET})
 
+    # Required for clearing `RESULT` when calling the function multiple times from a single scope
+    set(RESULT "")
     foreach(SOURCE_ETS IN LISTS ETS_SOURCES)
         get_filename_component(SOURCE_FNAME ${SOURCE_ETS} NAME_WE)
         set(SOURCE_ABC ${WORK_DIR}/${ABC_TARGET}-${SOURCE_FNAME}.abc)

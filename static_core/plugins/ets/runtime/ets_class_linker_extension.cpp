@@ -663,7 +663,10 @@ void EtsClassLinkerExtension::RemoveRefToLinker(ClassLinkerContext *ctx)
     }
     auto *ref = ctx->GetRefToLinker();
     if (ref != nullptr) {
-        auto *objectStorage = PandaEtsVM::GetCurrent()->GetGlobalObjectStorage();
+        auto *etsVm = PandaEtsVM::GetCurrent();
+        ASSERT(etsVm != nullptr);
+        auto *objectStorage = etsVm->GetGlobalObjectStorage();
+        ASSERT(objectStorage != nullptr);
         objectStorage->Remove(ref);
     }
 }

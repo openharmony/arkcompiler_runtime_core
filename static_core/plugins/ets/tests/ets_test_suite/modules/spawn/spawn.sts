@@ -1,0 +1,63 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { Ability } from "./ability";
+
+native function getAppAbcFiles(): string[];
+
+function getNativeLibName(): string {
+    return ProcessManager.getEnvironmentVar("NATIVE_LIB_NAME");
+}
+
+function getAppMainAbilityClassName(): string {
+    return ProcessManager.getEnvironmentVar("APP_MAIN_ABILITY_CLASS");
+}
+
+function loadAndInvokeAbility(mainAbilityClassName: string): void {
+    const appRuntimeLinker = new AbcRuntimeLinker(null, getAppAbcFiles());
+    const mainAbilityClass = appRuntimeLinker.loadClass(mainAbilityClassName);
+    const mainAbility = mainAbilityClass.createInstance() as Ability;
+    mainAbility.invoke();
+}
+
+function main() {
+    loadLibrary(getNativeLibName());
+
+    loadAndInvokeAbility(getAppMainAbilityClassName());
+
+    return 0;
+}
+
+function mainCatchNoClassDefFoundError() {
+    loadLibrary(getNativeLibName());
+    try {
+        loadAndInvokeAbility(getAppMainAbilityClassName());
+    } catch (e: NoClassDefFoundError) {
+        console.log(e.message);
+        return 0;
+    }
+    return 1;
+}
+
+function mainCatchIncompatibleClassChangeError() {
+    loadLibrary(getNativeLibName());
+    try {
+        loadAndInvokeAbility(getAppMainAbilityClassName());
+    } catch (e: IncompatibleClassChangeError) {
+        console.log(e.message);
+        return 0;
+    }
+    return 1;
+}

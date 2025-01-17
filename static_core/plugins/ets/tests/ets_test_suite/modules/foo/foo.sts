@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
-package pkg.foo
+import { Base } from "./base";
 
-export class Dummy { }
+export class Dummy implements Base {
+    public override foo(): void { }
+}
+
 export function dummy(): Dummy { return new Dummy() }

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -72,6 +72,14 @@ function(add_ets_test test_suite)
     endforeach()
 endfunction()
 
+macro(get_ets_int_targets_list RESULT ETS_INT_TARGET)
+    set(TARGETS_LIST ${ETS_INT_TARGET}-cpp ${ETS_INT_TARGET}-irtoc)
+    if (PANDA_LLVM_INTERPRETER)
+        set(TARGETS_LIST ${TARGETS_LIST} ${ETS_INT_TARGET}-llvmirtoc)
+    endif()
+    set(${RESULT} ${TARGETS_LIST})
+endmacro()
+
 add_subdirectory(arrays)
 add_subdirectory(atomics)
 add_subdirectory(containers)
@@ -82,7 +90,6 @@ add_subdirectory(intrinsics)
 add_subdirectory(lambda)
 add_subdirectory(linker)
 add_subdirectory(modules)
-add_subdirectory(modules-config)
 add_subdirectory(overload)
 add_subdirectory(strings)
 add_subdirectory(stubs)

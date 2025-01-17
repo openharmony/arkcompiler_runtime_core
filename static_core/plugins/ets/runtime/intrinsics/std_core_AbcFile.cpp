@@ -14,6 +14,7 @@
  */
 
 #include "include/object_header.h"
+#include "include/thread_scopes.h"
 #include "intrinsics.h"
 #include "libpandabase/utils/logger.h"
 #include "runtime/handle_scope-inl.h"
@@ -37,7 +38,13 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
     auto *coro = EtsCoroutine::GetCurrent();
 
     const auto path = filePath->GetMutf8();
-    auto pf = panda_file::OpenPandaFileOrZip(path);
+    std::unique_ptr<const panda_file::File> pf {nullptr};
+    {
+        // Loading panda-file might be time-consuming, which would affect GC
+        // unless being executed in native scope
+        ScopedNativeCodeThread etsNativeScope(coro);
+        pf = panda_file::OpenPandaFileOrZip(path);
+    }
     if (pf == nullptr) {
         ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR,
                                PandaString("Panda file not found: ") + path);
