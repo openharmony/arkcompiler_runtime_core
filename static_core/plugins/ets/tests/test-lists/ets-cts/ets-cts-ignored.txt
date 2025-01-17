@@ -1889,3 +1889,6 @@
 17.experimental_features/17.async_functions_and_methods/01.async_functions/afunc_36.sts
 17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_34.sts
 17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_36.sts
+
+# 21846 Annotation name coinciding with type name gets compiled but shouldn't
+18.annotations/01.declaring_annotations/declaration_coincide_name_n_1.sts
