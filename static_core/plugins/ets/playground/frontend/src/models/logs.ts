@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,9 +78,10 @@ export const handleResponseLogs = createAsyncThunk(
             successMessage: string,
             setOutAction: (logs: ILog[]) => { payload: ILog[]; type: string },
             setErrAction: (logs: ILog[]) => { payload: ILog[]; type: string }
-        ) => {
-            if (!data) return;
-
+        ): void => {
+            if (!data) {
+                return;
+            }
             if (data.exit_code === 0 && data.output) {
                 thunkAPI.dispatch(setOutAction(
                     logsState.out.concat({
