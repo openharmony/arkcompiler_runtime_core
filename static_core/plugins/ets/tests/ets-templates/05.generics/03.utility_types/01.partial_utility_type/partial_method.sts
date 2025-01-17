@@ -17,8 +17,8 @@ limitations under the License.
 desc: >-
     Using abstract class with abstract method as T for Partial<T>.
     Optional feature is not about methods.
-    There is no abstract method implemented at all.
-tags: [compile-only, negative]
+    No method of T is part of the Partial<T> type
+tags: [compile-only]
 ---*/
 
 abstract class AC {
