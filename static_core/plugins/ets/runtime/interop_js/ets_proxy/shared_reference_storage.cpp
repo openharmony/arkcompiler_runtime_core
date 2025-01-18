@@ -331,6 +331,18 @@ void SharedReferenceStorage::SweepUnmarkedRefs()
     isXGCinProgress_ = false;
 }
 
+void SharedReferenceStorage::UnmarkAll()
+{
+    os::memory::WriteLockHolder lock(storageLock_);
+    size_t capacity = Capacity();
+    for (size_t i = 1U; i < capacity; ++i) {
+        auto *ref = GetItemByIndex(i);
+        if (!ref->IsEmpty()) {
+            ref->Unmark();
+        }
+    }
+}
+
 bool SharedReferenceStorage::CheckAlive(void *data)
 {
     auto *sharedRef = reinterpret_cast<SharedReference *>(data);

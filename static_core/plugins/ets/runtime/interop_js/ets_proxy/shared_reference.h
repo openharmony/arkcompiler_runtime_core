@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,7 +104,7 @@ public:
      * Mark the reference as live. It's special method for XGC marking
      * @return true if the method marked the reference, false if the reference has already been marked
      */
-    bool MarkIfNotMarked();
+    PANDA_PUBLIC_API bool MarkIfNotMarked();
 
     /// @return true if the refernce is marked, false - otherwise
     bool IsMarked() const
@@ -125,8 +125,8 @@ public:
 
         friend class SharedReference;
 
-        Iterator &operator++();
-        Iterator operator++(int);  // NOLINT(cert-dcl21-cpp)
+        PANDA_PUBLIC_API Iterator &operator++();
+        PANDA_PUBLIC_API Iterator operator++(int);  // NOLINT(cert-dcl21-cpp)
 
         bool operator==(const Iterator &other) const
         {

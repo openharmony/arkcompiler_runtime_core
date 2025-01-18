@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/mem/local_object_handle.h"
 
-#include "plugins/ets/runtime/interop_js/hybrid/handshake.h"
+#include "plugins/ets/runtime/interop_js/handshake.h"
 
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
 napi_status __attribute__((weak)) napi_create_runtime(napi_env env, napi_env *resultEnv);

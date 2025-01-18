@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,6 +110,8 @@ public:
 
     bool MarkObjectIfNotMarked(ObjectHeader *object) override;
 
+    void MarkObjectRecursively(ObjectHeader *object);
+
     bool InGCSweepRange(const ObjectHeader *object) const override;
 
     void OnThreadTerminate(ManagedThread *thread, mem::BuffersKeepingFlag keepBuffers) override;
@@ -148,6 +150,7 @@ public:
     void ComputeNewSize() override;
     bool Trigger(PandaUniquePtr<GCTask> task) override;
     void EvacuateStartingWith(void *ref) override;
+    void SetExtensionData(GCExtensionData *data) override;
 
 protected:
     ALWAYS_INLINE ObjectAllocatorG1<LanguageConfig::MT_MODE> *GetG1ObjectAllocator() const
@@ -495,6 +498,9 @@ private:
     G1GCMarker<LanguageConfig, true> marker_;
     G1GCMarker<LanguageConfig, false> concMarker_;
     G1GCMixedMarker<LanguageConfig> mixedMarker_;
+    XGCMarker<LanguageConfig, true> onPauseXMarker_;
+    // NOTE(audovichenko): Do not use atomics in concXMarker_
+    XGCMarker<LanguageConfig, true> concXMarker_;
     /// Flag indicates if we currently in concurrent marking phase
     std::atomic<bool> concurrentMarkingFlag_ {false};
     /// Flag indicates if we need to interrupt concurrent marking

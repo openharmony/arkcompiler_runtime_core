@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -152,9 +152,6 @@ static GCTaskCause GCCauseFromInt(EtsInt cause)
     }
     if (cause == 3_I) {
         return GCTaskCause::OOM_CAUSE;
-    }
-    if (cause == 4_I) {
-        return GCTaskCause::CROSSREF_CAUSE;
     }
     return GCTaskCause::INVALID_CAUSE;
 }

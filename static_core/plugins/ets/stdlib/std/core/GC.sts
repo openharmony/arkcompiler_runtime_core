@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,6 @@ export final class GC {
     public static readonly THRESHOLD_CAUSE = 1;
     public static readonly MIXED_CAUSE = 2;
     public static readonly FULL_CAUSE = 3;
-    public static readonly CROSSREF_CAUSE = 4;
 
     public static readonly NOT_IN_PLACE_MODE: boolean = false;
     public static readonly IN_PLACE_MODE: boolean = true;

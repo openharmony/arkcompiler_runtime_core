@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -372,7 +372,7 @@ public:
         return extensionData_;
     }
 
-    void SetExtensionData(GCExtensionData *data)
+    virtual void SetExtensionData(GCExtensionData *data)
     {
         extensionData_ = data;
     }
@@ -717,8 +717,8 @@ private:
         NO_MOVE_SEMANTIC(GCListenerManager);
         ~GCListenerManager() = default;
 
-        void AddListener(GCListener *newListener);
-        void RemoveListener(GCListener *newListener);
+        PANDA_PUBLIC_API void AddListener(GCListener *newListener);
+        PANDA_PUBLIC_API void RemoveListener(GCListener *newListener);
 
         void NormalizeListenersOnStartGC();
 

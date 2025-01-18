@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include "hybrid/ecma_vm_interface.h"
+#include "plugins/ets/runtime/interop_js/sts_vm_interface_impl.h"
+#include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
@@ -732,4 +735,26 @@ void PromiseInteropReject(EtsObject *value, EtsLong deferred)
     SettleJsPromise(value, reinterpret_cast<napi_deferred>(deferred), EtsPromise::STATE_REJECTED);
 }
 
+void XgcStart()
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+#ifndef PANDA_JS_ETS_HYBRID_MODE
+    ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR, "Not implemented");
+#else
+    // NOTE(audovichenko): Need a way to wait for the gc. May be Promise? :)
+    // NOTE(audovichenko): Handle the situation when the function create several equal tasks
+    // NOTE(audovichenko): Handle the situation when GC is triggered in one VM but cannot be triggered in another VM.
+    auto *vm = coro->GetPandaVM();
+    auto task = MakePandaUnique<GCTask>(GCTaskCause::CROSSREF_CAUSE);
+    if (!vm->GetGC()->Trigger(std::move(task))) {
+        ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR, "Cannot start STS XGC");
+        return;
+    }
+    // NOTE(audovichenko): Iterate over all coroutines to find all EcmaVMInterface-s.
+    arkplatform::EcmaVMInterface *ecmaIface = InteropCtx::Current(coro)->GetEcmaVMInterface();
+    if (!ecmaIface->StartXRefMarking()) {
+        ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR, "Cannot start ArkJS XGC");
+    }
+#endif
+}
 }  // namespace ark::ets::interop::js

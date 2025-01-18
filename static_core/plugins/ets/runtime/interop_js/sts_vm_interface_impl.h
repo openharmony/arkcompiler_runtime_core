@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PLUGINS_ETS_RUNTIME_STS_VM_INTERFACE_IMPL_H
-#define PLUGINS_ETS_RUNTIME_STS_VM_INTERFACE_IMPL_H
+#ifndef PLUGINS_ETS_RUNTIME_INTEROP_JS_STS_VM_INTERFACE_IMPL_H
+#define PLUGINS_ETS_RUNTIME_INTEROP_JS_STS_VM_INTERFACE_IMPL_H
 
 #include "hybrid/sts_vm_interface.h"
 #include "libpandabase/macros.h"
@@ -27,9 +27,9 @@ public:
     STSVMInterfaceImpl() = default;
     ~STSVMInterfaceImpl() override = default;
 
-    void MarkFromObject([[maybe_unused]] void *obj) override {}
+    void MarkFromObject(void *ref) override;
 };
 
 }  // namespace ark::ets::interop::js
 
-#endif  // PLUGINS_STS_RUNTIME_ETS_VM_INTERFACE_IMPL_H
+#endif  // PLUGINS_ETS_RUNTIME_INTEROP_JS_STS_VM_INTERFACE_IMPL_H
