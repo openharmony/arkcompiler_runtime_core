@@ -28,6 +28,7 @@
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
+#include "plugins/ets/runtime/ets_stubs.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 
 namespace ark::ets {
@@ -97,97 +98,6 @@ public:
         HandleLaunchVirt<FORMAT, true>(id);
     }
 
-    constexpr static uint64_t METHOD_FLAG_MASK = 0x00000001;
-
-    template <panda_file::Type::TypeId FIELD_TYPE, bool IS_LOAD>
-    ALWAYS_INLINE Field *LookupFieldByName(Class *klass, Field *rawField)
-    {
-        auto cache = this->GetThread()->GetInterpreterCache();
-        auto *res = cache->template Get<Field>(this->GetInst().GetAddress(), this->GetFrame()->GetMethod());
-        auto resUint = reinterpret_cast<uint64_t>(res);
-        if (res != nullptr && ((resUint & METHOD_FLAG_MASK) != 1) && (res->GetClass() == klass)) {
-            return res;
-        }
-
-        auto field = klass->LookupFieldByName(rawField->GetName());
-
-        if (field != nullptr) {
-            if constexpr (FIELD_TYPE == panda_file::Type::TypeId::REFERENCE) {
-                if constexpr (IS_LOAD) {
-                    ASSERT(rawField->ResolveTypeClass()->IsAssignableFrom(field->ResolveTypeClass()));
-                } else {
-                    ASSERT(field->ResolveTypeClass()->IsAssignableFrom(rawField->ResolveTypeClass()));
-                }
-            }
-            ASSERT((reinterpret_cast<uint64_t>(field) & METHOD_FLAG_MASK) == 0);
-            cache->template Set(this->GetInst().GetAddress(), field, this->GetFrame()->GetMethod());
-        }
-        return field;
-    }
-
-    template <panda_file::Type::TypeId FIELD_TYPE>
-    ALWAYS_INLINE Method *LookupGetterByName(Class *klass, Field *rawField)
-    {
-        auto cache = this->GetThread()->GetInterpreterCache();
-        auto *res = cache->template Get<Method>(this->GetInst().GetAddress(), this->GetFrame()->GetMethod());
-        auto resUint = reinterpret_cast<uint64_t>(res);
-        auto methodPtr = reinterpret_cast<Method *>(resUint & ~METHOD_FLAG_MASK);
-        if (res != nullptr && ((resUint & METHOD_FLAG_MASK) == 1) && (methodPtr->GetClass() == klass)) {
-            return methodPtr;
-        }
-
-        auto method = klass->LookupGetterByName<FIELD_TYPE>(rawField->GetName());
-
-        if (method != nullptr) {
-#ifndef NDEBUG
-            if constexpr (FIELD_TYPE == panda_file::Type::TypeId::REFERENCE) {
-                auto pf = method->GetPandaFile();
-                panda_file::ProtoDataAccessor pda(*pf,
-                                                  panda_file::MethodDataAccessor::GetProtoId(*pf, method->GetFileId()));
-                auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-                auto argClass = classLinker->GetClass(*pf, pda.GetReferenceType(0), klass->GetLoadContext());
-                ASSERT(rawField->ResolveTypeClass()->IsAssignableFrom(argClass));
-            }
-#endif  // !NDEBUG
-            auto mUint = reinterpret_cast<uint64_t>(method);
-            ASSERT((mUint & METHOD_FLAG_MASK) == 0);
-            cache->template Set(this->GetInst().GetAddress(), reinterpret_cast<Method *>(mUint | METHOD_FLAG_MASK),
-                                this->GetFrame()->GetMethod());
-        }
-        return method;
-    }
-
-    template <panda_file::Type::TypeId FIELD_TYPE>
-    ALWAYS_INLINE Method *LookupSetterByName(Class *klass, Field *rawField)
-    {
-        auto cache = this->GetThread()->GetInterpreterCache();
-        auto *res = cache->template Get<Method>(this->GetInst().GetAddress(), this->GetFrame()->GetMethod());
-        auto resUint = reinterpret_cast<uint64_t>(res);
-        auto methodPtr = reinterpret_cast<Method *>(resUint & ~METHOD_FLAG_MASK);
-        if (res != nullptr && ((resUint & METHOD_FLAG_MASK) == 1) && (methodPtr->GetClass() == klass)) {
-            return methodPtr;
-        }
-
-        auto method = klass->LookupSetterByName<FIELD_TYPE>(rawField->GetName());
-        if (method != nullptr) {
-#ifndef NDEBUG
-            if constexpr (FIELD_TYPE == panda_file::Type::TypeId::REFERENCE) {
-                auto pf = method->GetPandaFile();
-                panda_file::ProtoDataAccessor pda(*pf,
-                                                  panda_file::MethodDataAccessor::GetProtoId(*pf, method->GetFileId()));
-                auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-                auto argClass = classLinker->GetClass(*pf, pda.GetReferenceType(0), klass->GetLoadContext());
-                ASSERT(argClass->IsAssignableFrom(rawField->ResolveTypeClass()));
-            }
-#endif  // !NDEBUG
-            auto mUint = reinterpret_cast<uint64_t>(method);
-            ASSERT((mUint & METHOD_FLAG_MASK) == 0);
-            cache->template Set(this->GetInst().GetAddress(), reinterpret_cast<Method *>(mUint | METHOD_FLAG_MASK),
-                                this->GetFrame()->GetMethod());
-        }
-        return method;
-    }
-
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleEtsLdobjName()
     {
@@ -205,27 +115,22 @@ public:
             auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
-            auto field = LookupFieldByName<panda_file::Type::TypeId::I32, true>(klass, rawField);
+            InterpreterCache *cache = this->GetThread()->GetInterpreterCache();
+            Field *field = GetFieldByName<true>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
+                                                this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
                 this->LoadPrimitiveField(obj, field);
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
             }
-
-            auto method = LookupGetterByName<panda_file::Type::TypeId::I32>(klass, rawField);
+            ark::Method *method = GetAccessorByName<panda_file::Type::TypeId::I32, true>(
+                cache->GetEntry(this->GetInst().GetAddress()), caller, rawField, this->GetInst().GetAddress(), klass);
             if (method != nullptr) {
                 this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT, false, false, false, false,
                                           false>(method);
                 return;
             }
-            auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +
-                            " does not have field and getter with name " +
-                            utf::Mutf8AsCString(rawField->GetName().data);
-            ThrowEtsException(EtsCoroutine::GetCurrent(),
-                              utf::Mutf8AsCString(Runtime::GetCurrent()
-                                                      ->GetLanguageContext(panda_file::SourceLang::ETS)
-                                                      .GetNoSuchFieldErrorDescriptor()),
-                              errorMsg);
+            LookUpException<true>(klass, rawField);
             this->MoveToExceptionHandler();
         }
     }
@@ -247,27 +152,22 @@ public:
             auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
-            auto field = LookupFieldByName<panda_file::Type::TypeId::I64, true>(klass, rawField);
+            InterpreterCache *cache = this->GetThread()->GetInterpreterCache();
+            Field *field = GetFieldByName<true>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
+                                                this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
                 this->LoadPrimitiveField(obj, field);
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
             }
-
-            auto method = LookupGetterByName<panda_file::Type::TypeId::I64>(klass, rawField);
+            ark::Method *method = GetAccessorByName<panda_file::Type::TypeId::I64, true>(
+                cache->GetEntry(this->GetInst().GetAddress()), caller, rawField, this->GetInst().GetAddress(), klass);
             if (method != nullptr) {
                 this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT, false, false, false, false,
                                           false>(method);
                 return;
             }
-            auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +
-                            " does not have field and getter with name " +
-                            utf::Mutf8AsCString(rawField->GetName().data);
-            ThrowEtsException(EtsCoroutine::GetCurrent(),
-                              utf::Mutf8AsCString(Runtime::GetCurrent()
-                                                      ->GetLanguageContext(panda_file::SourceLang::ETS)
-                                                      .GetNoSuchFieldErrorDescriptor()),
-                              errorMsg);
+            LookUpException<true>(klass, rawField);
             this->MoveToExceptionHandler();
         }
     }
@@ -289,7 +189,9 @@ public:
             auto classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
-            auto field = LookupFieldByName<panda_file::Type::TypeId::REFERENCE, true>(klass, rawField);
+            InterpreterCache *cache = this->GetThread()->GetInterpreterCache();
+            Field *field = GetFieldByName<true>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
+                                                this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
                 ASSERT(field->GetType().IsReference());
                 this->GetAccAsVReg().SetReference(
@@ -297,21 +199,14 @@ public:
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
             }
-
-            auto method = LookupGetterByName<panda_file::Type::TypeId::REFERENCE>(klass, rawField);
+            ark::Method *method = GetAccessorByName<panda_file::Type::TypeId::REFERENCE, true>(
+                cache->GetEntry(this->GetInst().GetAddress()), caller, rawField, this->GetInst().GetAddress(), klass);
             if (method != nullptr) {
                 this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT, false, false, false, false,
                                           false>(method);
                 return;
             }
-            auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +
-                            " does not have field and getter with name " +
-                            utf::Mutf8AsCString(rawField->GetName().data);
-            ThrowEtsException(EtsCoroutine::GetCurrent(),
-                              utf::Mutf8AsCString(Runtime::GetCurrent()
-                                                      ->GetLanguageContext(panda_file::SourceLang::ETS)
-                                                      .GetNoSuchFieldErrorDescriptor()),
-                              errorMsg);
+            LookUpException<true>(klass, rawField);
             this->MoveToExceptionHandler();
         }
     }
@@ -333,27 +228,22 @@ public:
             auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
-            auto field = LookupFieldByName<panda_file::Type::TypeId::I32, false>(klass, rawField);
+            InterpreterCache *cache = this->GetThread()->GetInterpreterCache();
+            Field *field = GetFieldByName<false>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
+                                                 this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
                 this->StorePrimitiveField(obj, field);
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
             }
-
-            auto method = LookupSetterByName<panda_file::Type::TypeId::I32>(klass, rawField);
+            ark::Method *method = GetAccessorByName<panda_file::Type::TypeId::I32, false>(
+                cache->GetEntry(this->GetInst().GetAddress()), caller, rawField, this->GetInst().GetAddress(), klass);
             if (method != nullptr) {
                 this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT, false, false, false, false,
                                           false>(method);
                 return;
             }
-            auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +
-                            " does not have field and setter with name " +
-                            utf::Mutf8AsCString(rawField->GetName().data);
-            ThrowEtsException(EtsCoroutine::GetCurrent(),
-                              utf::Mutf8AsCString(Runtime::GetCurrent()
-                                                      ->GetLanguageContext(panda_file::SourceLang::ETS)
-                                                      .GetNoSuchFieldErrorDescriptor()),
-                              errorMsg);
+            LookUpException<false>(klass, rawField);
             this->MoveToExceptionHandler();
         }
     }
@@ -375,27 +265,22 @@ public:
             auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
-            auto field = LookupFieldByName<panda_file::Type::TypeId::I64, false>(klass, rawField);
+            InterpreterCache *cache = this->GetThread()->GetInterpreterCache();
+            Field *field = GetFieldByName<false>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
+                                                 this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
                 this->StorePrimitiveField(obj, field);
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
             }
-
-            auto method = LookupSetterByName<panda_file::Type::TypeId::I64>(klass, rawField);
+            ark::Method *method = GetAccessorByName<panda_file::Type::TypeId::I64, false>(
+                cache->GetEntry(this->GetInst().GetAddress()), caller, rawField, this->GetInst().GetAddress(), klass);
             if (method != nullptr) {
                 this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT, false, false, false, false,
                                           false>(method);
                 return;
             }
-            auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +
-                            " does not have field and setter with name " +
-                            utf::Mutf8AsCString(rawField->GetName().data);
-            ThrowEtsException(EtsCoroutine::GetCurrent(),
-                              utf::Mutf8AsCString(Runtime::GetCurrent()
-                                                      ->GetLanguageContext(panda_file::SourceLang::ETS)
-                                                      .GetNoSuchFieldErrorDescriptor()),
-                              errorMsg);
+            LookUpException<false>(klass, rawField);
             this->MoveToExceptionHandler();
         }
     }
@@ -417,7 +302,9 @@ public:
             auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
-            auto field = LookupFieldByName<panda_file::Type::TypeId::REFERENCE, false>(klass, rawField);
+            InterpreterCache *cache = this->GetThread()->GetInterpreterCache();
+            Field *field = GetFieldByName<false>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
+                                                 this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
                 ASSERT(field->GetType().IsReference());
                 obj->SetFieldObject<RuntimeIfaceT::NEED_WRITE_BARRIER>(this->GetThread(), *field,
@@ -425,21 +312,14 @@ public:
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
             }
-
-            auto method = LookupSetterByName<panda_file::Type::TypeId::REFERENCE>(klass, rawField);
+            ark::Method *method = GetAccessorByName<panda_file::Type::TypeId::REFERENCE, false>(
+                cache->GetEntry(this->GetInst().GetAddress()), caller, rawField, this->GetInst().GetAddress(), klass);
             if (method != nullptr) {
                 this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT, false, false, false, false,
                                           false>(method);
                 return;
             }
-            auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +
-                            " does not have field and setter with name " +
-                            utf::Mutf8AsCString(rawField->GetName().data);
-            ThrowEtsException(EtsCoroutine::GetCurrent(),
-                              utf::Mutf8AsCString(Runtime::GetCurrent()
-                                                      ->GetLanguageContext(panda_file::SourceLang::ETS)
-                                                      .GetNoSuchFieldErrorDescriptor()),
-                              errorMsg);
+            LookUpException<false>(klass, rawField);
             this->MoveToExceptionHandler();
         }
     }
@@ -656,7 +536,7 @@ private:
     {
         this->UpdateBytecodeOffset();
 
-        auto cache = this->GetThread()->GetInterpreterCache();
+        InterpreterCache *cache = this->GetThread()->GetInterpreterCache();
         auto *res = cache->template Get<Method>(this->GetInst().GetAddress(), this->GetFrame()->GetMethod());
         if (res != nullptr) {
             return res;

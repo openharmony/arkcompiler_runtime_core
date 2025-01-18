@@ -1130,54 +1130,48 @@ bool Parser::ParamValidName()
     return context_.ValidateParameterName(currFunc_->GetParamsNum());
 }
 
-bool IsAlphaNumeric(char c)
-{
-    return std::isalnum(c) != 0 || c == '_' || c == '$';
-}
-
-bool IsNonDigit(char c)
-{
-    return std::isalpha(c) != 0 || c == '_' || c == '$';
-}
-
-bool Parser::PrefixedValidName(bool allowBrackets)
+bool Parser::PrefixedValidName(BracketOptions options)
 {
     auto s = context_.GiveToken();
     if (!IsNonDigit(s[0])) {
         return false;
     }
-
-    size_t i = 1;
-
-    while (i < s.size()) {
-        if (s[i] == '.') {
-            ++i;
-            if (i >= s.size() || !IsNonDigit(s[i])) {
+    for (size_t i = 1; i < s.size(); ++i) {
+        char const c = s[i];
+        if (c == '.') {
+            if (i + 1 >= s.size()) {
                 return false;
             }
-        } else {
-            if (!allowBrackets && !IsAlphaNumeric(s[i]) && s[i] != '-') {
+            if (IsNonDigit(s[i + 1])) {
+                continue;
+            }
+            if (!IsAllowAngleBrackets(options) || s[i + 1] != '<') {
                 return false;
             }
-            if (allowBrackets && !(IsAlphaNumeric(s[i]) || s[i] == ']' || s[i] == '[') && s[i] != '-') {
-                return false;
-            }
+            continue;
         }
-
-        ++i;
+        if (IsAlphaNumeric(c)) {
+            continue;
+        }
+        if (IsAllowBrackets(options) && (c == '[' || c == ']')) {
+            continue;
+        }
+        if (IsAllowAngleBrackets(options) && (c == '<' || c == '>')) {
+            continue;
+        }
+        return false;
     }
-
     return true;
 }
 
 bool Parser::RecordValidName()
 {
-    return PrefixedValidName(true);
+    return PrefixedValidName(BracketOptions::ALLOW_BRACKETS);
 }
 
 bool Parser::FunctionValidName()
 {
-    return PrefixedValidName(true);
+    return PrefixedValidName(BracketOptions::ALL_BRACKETS);
 }
 
 bool Parser::ArrayValidName()
@@ -2182,7 +2176,7 @@ bool Parser::TypeValidName()
         return true;
     }
 
-    return PrefixedValidName(true);
+    return PrefixedValidName(BracketOptions::ALLOW_BRACKETS);
 }
 
 bool Parser::ParseFunctionArg()

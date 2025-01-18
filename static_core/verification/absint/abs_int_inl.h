@@ -2712,14 +2712,10 @@ public:
 #endif  // PANDA_WITH_ETS
 
     template <bool IS_LOAD>
-    bool CheckFieldAccessByName(int regIdx, Type expectedFieldType)
+    bool CheckFieldAccessByName(int regIdx, [[maybe_unused]] Type expectedFieldType)
     {
         Field const *rawField = GetCachedField();
         Type objType;
-        Type fieldType;
-        if (!CheckFieldAccessByNameStartCheck(regIdx, rawField, objType)) {
-            return false;
-        }
 
         // currently all union type named access sites are encoded as “$NamedAccessMeta” class fields
         // at bytecode level, thus we do not have accurate union type info to verify each variables
@@ -2730,52 +2726,7 @@ public:
         // based on the above,here we skip:
         // 1. checking whether a field existed in the union or not
         // 2. skip checking member access violiations
-        if (strstr(utf::Mutf8AsCString(rawField->GetClass()->GetDescriptor()), "$NamedAccessMeta") != nullptr) {
-            return true;
-        }
-
-        auto objClass = objType.GetClass();
-        auto field = objClass->LookupFieldByName(rawField->GetName());
-        if (field != nullptr) {
-            fieldType = Type::FromTypeId(field->GetTypeId());
-        } else {
-            Method *method = CheckFieldAccessByNameGetFieldType<IS_LOAD>(expectedFieldType, objClass, rawField);
-            if (method == nullptr) {
-                SHOW_MSG(BadFieldNameOrBitWidth)
-                LOG_VERIFIER_BAD_FIELD_NAME_OR_BIT_WIDTH(GetFieldName(field), ToString(obj_type),
-                                                         ToString(expectedFieldType));
-                END_SHOW_MSG();
-                return false;
-            }
-            if constexpr (IS_LOAD) {
-                fieldType = Type::FromTypeId(method->GetReturnType().GetId());
-            } else {
-                fieldType = Type::FromTypeId(method->GetArgType(1).GetId());
-            }
-        }
-
-        if (!IsSubtype(fieldType, expectedFieldType, GetTypeSystem())) {
-            SHOW_MSG(UnexpectedFieldType)
-            LOG_VERIFIER_UNEXPECTED_FIELD_TYPE(GetFieldName(field), ToString(fieldType), ToString(expectedFieldType));
-            END_SHOW_MSG();
-            SET_STATUS_FOR_MSG(UnexpectedFieldType, WARNING);
-            return false;
-        }
-
-        auto *plugin = job_->JobPlugin();
-        auto const *jobMethod = job_->JobMethod();
-        auto result = plugin->CheckFieldAccessViolation(field, jobMethod, GetTypeSystem());
-        if (!result.IsOk()) {
-            const auto &verifOpts = config->opts;
-            if (verifOpts.debug.allow.fieldAccessViolation && result.IsError()) {
-                result.status = VerificationStatus::WARNING;
-            }
-            LogInnerMessage(result);
-            LOG_VERIFIER_DEBUG_FIELD2(GetFieldName(field));
-            return (status_ = result.status) != VerificationStatus::ERROR;
-        }
-
-        return !result.IsError();
+        return CheckFieldAccessByNameStartCheck(regIdx, rawField, objType);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -4273,42 +4224,6 @@ private:
         }
 
         return true;
-    }
-
-    template <bool IS_LOAD>
-    Method *CheckFieldAccessByNameGetFieldType(Type &expectedFieldType, Class const *&objClass, Field const *&rawField)
-    {
-        Method *method = nullptr;
-        if constexpr (IS_LOAD) {
-            switch (expectedFieldType.GetTypeWidth()) {
-                case coretypes::INT32_BITS:
-                    method = objClass->LookupGetterByName<panda_file::Type::TypeId::I32>(rawField->GetName());
-                    break;
-                case coretypes::INT64_BITS:
-                    method = objClass->LookupGetterByName<panda_file::Type::TypeId::I64>(rawField->GetName());
-                    break;
-                case 0:
-                    method = objClass->LookupGetterByName<panda_file::Type::TypeId::REFERENCE>(rawField->GetName());
-                    break;
-                default:
-                    UNREACHABLE();
-            }
-        } else {
-            switch (expectedFieldType.GetTypeWidth()) {
-                case coretypes::INT32_BITS:
-                    method = objClass->LookupSetterByName<panda_file::Type::TypeId::I32>(rawField->GetName());
-                    break;
-                case coretypes::INT64_BITS:
-                    method = objClass->LookupSetterByName<panda_file::Type::TypeId::I64>(rawField->GetName());
-                    break;
-                case 0:
-                    method = objClass->LookupSetterByName<panda_file::Type::TypeId::REFERENCE>(rawField->GetName());
-                    break;
-                default:
-                    UNREACHABLE();
-            }
-        }
-        return method;
     }
 
     bool CheckCastArrayObjectRegDef(Type &cachedType)
