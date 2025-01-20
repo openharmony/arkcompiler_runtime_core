@@ -735,9 +735,9 @@ private:
 
     private:
         os::memory::Mutex listenerLock_;
-        PandaUnorderedSet<GCListener *> currentListeners_ GUARDED_BY(listenerLock_);
-        PandaUnorderedSet<GCListener *> newListeners_ GUARDED_BY(listenerLock_);
-        PandaUnorderedSet<GCListener *> listenersForRemove_ GUARDED_BY(listenerLock_);
+        PandaList<GCListener *> currentListeners_ GUARDED_BY(listenerLock_);
+        PandaList<GCListener *> newListeners_ GUARDED_BY(listenerLock_);
+        PandaList<GCListener *> listenersForRemove_ GUARDED_BY(listenerLock_);
     };
 
     volatile std::atomic<GCPhase> phase_ {GCPhase::GC_PHASE_IDLE};
