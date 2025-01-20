@@ -109,6 +109,7 @@ static constexpr std::string_view ARRAY_STORE_ERROR                    = "Lstd/c
 static constexpr std::string_view CLASS_CAST_ERROR                     = "Lstd/core/ClassCastError;";
 static constexpr std::string_view ARRAY_INDEX_OUT_OF_BOUNDS_ERROR      = "Lstd/core/ArrayIndexOutOfBoundsError;";
 static constexpr std::string_view CLASS_CIRCULARITY_ERROR              = "Lstd/core/ClassCircularityError;";
+static constexpr std::string_view COROUTINES_LIMIT_EXCEED_ERROR        = "Lstd/core/CoroutinesLimitExceedError;";
 static constexpr std::string_view EXCEPTION_IN_INITIALIZER_ERROR       = "Lstd/core/ExceptionInInitializerError;";
 static constexpr std::string_view INCOMPATIBLE_CLASS_CHANGE_ERROR      = "Lstd/core/IncompatibleClassChangeError;";
 static constexpr std::string_view INDEX_OUT_OF_BOUNDS_ERROR            = "Lstd/core/IndexOutOfBoundsError;";

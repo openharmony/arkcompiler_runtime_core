@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -814,9 +814,7 @@ Coroutine *StackfulCoroutineManager::CreateExclusiveWorkerForThread(Runtime *run
     // actually we need this lock due to workerId problem
     os::memory::LockHolder eWorkerLock(eWorkerCreationLock_);
 
-    auto activeWorkersCnt = GetActiveWorkersCount();
-    if (activeWorkersCnt - commonWorkersCount_ > exclusiveWorkersLimit_) {
-        LOG(DEBUG, COROUTINES) << "The programm reached the limit of exclusive workers";
+    if (IsExclusiveWorkersLimitReached()) {
         return nullptr;
     }
 
@@ -878,6 +876,13 @@ bool StackfulCoroutineManager::DestroyExclusiveWorker()
 
     OnWorkerShutdown();
     return true;
+}
+
+bool StackfulCoroutineManager::IsExclusiveWorkersLimitReached() const
+{
+    bool limitIsReached = GetActiveWorkersCount() - commonWorkersCount_ > exclusiveWorkersLimit_;
+    LOG_IF(limitIsReached, DEBUG, COROUTINES) << "The programm reached the limit of exclusive workers";
+    return limitIsReached;
 }
 
 }  // namespace ark
