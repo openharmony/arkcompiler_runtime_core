@@ -22,12 +22,12 @@ cases:
               constructor(p: number) {
                   this.fld += 'N'
               }
-              static invoke(): C {
+              static $_invoke(): C {
                   let x = new C()
                   x.fld += 'I'
                   return x
               }
-              static invoke(p: number): C {
+              static $_invoke(p: number): C {
                   let x = new C(p)
                   x.fld += 'J'
                   return x
@@ -38,8 +38,8 @@ cases:
           if (new C(42.0).fld != 'N') return 1
           if (C().fld != 'CI') return 1
           if (C(42.0).fld != 'NJ') return 1
-          if (C.invoke().fld != 'CI') return 1
-          if (C.invoke(42.0).fld != 'NJ') return 1
+          if (C.$_invoke().fld != 'CI') return 1
+          if (C.$_invoke(42.0).fld != 'NJ') return 1
 
     - decl: |-
           // Only constructor is called in new
@@ -51,12 +51,12 @@ cases:
               constructor(p: number) {
                   this.fld += 'N'
               }
-              static instantiate(f: ()=>C): C {
+              static $_instantiate(f: ()=>C): C {
                   let x = f()
                   x.fld += 'I'
                   return x
               }
-              static instantiate(f: ()=>C, p: number): C {
+              static $_instantiate(f: ()=>C, p: number): C {
                   let x = f()
                   x.fld += 'J'
                   return x
@@ -67,5 +67,5 @@ cases:
           if (new C(42.0).fld != 'N') return 1
           if (C().fld != 'CI') return 1
           if (C(42.0).fld != 'CJ') return 1
-          if (C.instantiate(() => new C()).fld != 'CI') return 1
-          if (C.instantiate(() => new C(), 42.0).fld != 'CJ') return 1
+          if (C.$_instantiate(() => new C()).fld != 'CI') return 1
+          if (C.$_instantiate(() => new C(), 42.0).fld != 'CJ') return 1

@@ -42,7 +42,7 @@ class A {
 }
 
 class B extends A{
-  static instantiate(factory: () => B, content: () => void): B {
+  static $_instantiate(factory: () => B, content: () => void): B {
     global++
     const instance = factory()
     instance.__initializeStruct()
@@ -52,7 +52,7 @@ class B extends A{
 }
 
 class C extends A{
-  static instantiate(factory: () => C, content: () => void): C {
+  static $_instantiate(factory: () => C, content: () => void): C {
     global++
     const instance = factory()
     instance.__initializeStruct()
@@ -67,8 +67,8 @@ class C extends A{
 function main(): void {
     global = 0
 
-    B.instantiate(() => { return new B() }){
-      C.instantiate(() => { return new C() }) {
+    B.$_instantiate(() => { return new B() }){
+      C.$_instantiate(() => { return new C() }) {
       }
       .color("navy")
     }

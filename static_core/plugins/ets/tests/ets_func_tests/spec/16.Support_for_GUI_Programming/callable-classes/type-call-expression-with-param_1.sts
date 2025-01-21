@@ -23,12 +23,12 @@ tags:
 let counter: int = 0;
 
 class CallMeTrinity {
-    static invoke() { counter++; }
-    static invoke(...assign: int[]) { counter += assign.length; }
+    static $_invoke() { counter++; }
+    static $_invoke(...assign: int[]) { counter += assign.length; }
 }
 
 function main(): int {
     counter = 0;
-    CallMeTrinity.invoke(3);
+    CallMeTrinity.$_invoke(3);
     return counter == 3 ? 0 : 1;
 }

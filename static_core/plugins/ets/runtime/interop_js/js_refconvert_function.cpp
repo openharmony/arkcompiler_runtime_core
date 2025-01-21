@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 #include "plugins/ets/runtime/interop_js/js_refconvert_function.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
-
+#include "plugins/ets/runtime/types/ets_type.h"
 namespace ark::ets::interop::js {
 
 napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
@@ -36,7 +36,7 @@ napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
 
     auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr);
-    auto method = etsThis->GetClass()->GetMethod("invoke");
+    auto method = etsThis->GetClass()->GetMethod(ark::ets::LAMBDA_METHOD_NAME);
     ASSERT(method != nullptr);
 
     return CallETSInstance(coro, ctx, method->GetPandaMethod(), *jsArgs, etsThis);
@@ -49,7 +49,7 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
     auto env = ctx->GetJSEnv();
 
     ASSERT(obj->GetClass() == klass_);
-    ASSERT(klass_->GetMethod("invoke") != nullptr);
+    ASSERT(klass_->GetMethod(ark::ets::LAMBDA_METHOD_NAME) != nullptr);
 
     JSValue *jsValue;
     {
@@ -62,8 +62,8 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
             napi_value jsFn;
             auto preInitCallback = [&env, &jsFn](ets_proxy::SharedReference *uninitializedRef) {
                 ASSERT(uninitializedRef->IsEmpty());
-                NAPI_CHECK_FATAL(napi_create_function(env, "invoke", NAPI_AUTO_LENGTH, EtsLambdaProxyInvoke,
-                                                      uninitializedRef, &jsFn));
+                NAPI_CHECK_FATAL(napi_create_function(env, ark::ets::LAMBDA_METHOD_NAME, NAPI_AUTO_LENGTH,
+                                                      EtsLambdaProxyInvoke, uninitializedRef, &jsFn));
                 return jsFn;
             };
             ets_proxy::SharedReference *sharedRef = storage->CreateETSObjectRef(ctx, obj, jsFn, preInitCallback);

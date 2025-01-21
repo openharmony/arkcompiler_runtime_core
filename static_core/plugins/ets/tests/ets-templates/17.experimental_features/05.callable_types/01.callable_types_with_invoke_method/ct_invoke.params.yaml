@@ -15,7 +15,7 @@ cases:
     - decl: |-
           // no parameters
           abstract class C {
-              static invoke(): number { return 42.0 }
+              static $_invoke(): number { return 42.0 }
           }
       use: |-
           let x = C()
@@ -24,16 +24,16 @@ cases:
     - decl: |-
           // no parameters
           class C {
-              static invoke(): number { return 42.0 }
+              static $_invoke(): number { return 42.0 }
           }
       use: |-
-          if (C.invoke() != 42.0) return 1
+          if (C.$_invoke() != 42.0) return 1
 
     - decl: |-
           // no parameters, use type alias
           type A = C
           class C {
-              static invoke(): number { return 42.0 }
+              static $_invoke(): number { return 42.0 }
           }
       use: |-
           let x = A()
@@ -43,17 +43,17 @@ cases:
           // no parameters, use type alias
           type A = C
           abstract class C {
-              static invoke(): number { return 42.0 }
+              static $_invoke(): number { return 42.0 }
           }
       use: |-
-          let x = A.invoke()
+          let x = A.$_invoke()
           if (x != 42.0) return 1
 
     - decl: |-
           // void return, implicit type
           class C {
               static res = 0
-              static invoke() { C.res = 1 }
+              static $_invoke() { C.res = 1 }
           }
       use: |-
           C.res = 0
@@ -64,7 +64,7 @@ cases:
           // void return, explicit type
           class C {
               static res = 0
-              static invoke(): void { C.res = 1 }
+              static $_invoke(): void { C.res = 1 }
           }
       use: |-
           C.res = 0
@@ -75,7 +75,7 @@ cases:
           // singleton
           class C {
               static instance: C|null|undefined = undefined
-              static invoke(): C {
+              static $_invoke(): C {
                   if (C.instance == undefined) {
                       C.instance = new C()
                   }
@@ -83,32 +83,32 @@ cases:
               }
           }
       use: |-
-          if (C() != C() || C.invoke() != C.invoke() || C.invoke() != C()) return 1
+          if (C() != C() || C.$_invoke() != C.$_invoke() || C.$_invoke() != C()) return 1
 
     - decl: |-
           // with parameters
           class Add {
-              static invoke(a: number, b: number): number { return a + b }
+              static $_invoke(a: number, b: number): number { return a + b }
           }
           class Sub {
-              static invoke(a: number, b: number): number { return a - b }
+              static $_invoke(a: number, b: number): number { return a - b }
           }
           class Mul {
-              static invoke(a: number, b: number): number { return a * b }
+              static $_invoke(a: number, b: number): number { return a * b }
           }
           class Div {
-              static invoke(a: number, b: number): number { return a / b }
+              static $_invoke(a: number, b: number): number { return a / b }
           }
       use: |-
           let x = Div(Mul(Add(1.0, 2.0), 3.0), 2.0)
           if (x != (1.0 + 2.0) * 3.0 / 2.0) return 1
-          let y = Div.invoke(Mul.invoke(Add.invoke(1.0, 2.0), 3.0), 2.0)
+          let y = Div.$_invoke(Mul.$_invoke(Add.$_invoke(1.0, 2.0), 3.0), 2.0)
           if (y != x) return 1
 
     - decl: |-
           // arbitrary number of parameters
           class Sum {
-              static invoke(...numbers: number[]): number {
+              static $_invoke(...numbers: number[]): number {
                   let sum = 0.0
                   for (let n of numbers) sum += n
                   return sum
@@ -119,20 +119,20 @@ cases:
           if (Sum(11.0) != 11.0) return 1
           if (Sum(12, 13, 14, 15, 16, 17, 18, 19, -1, -2, -3) != 118.0) return 1
 
-          if (Sum.invoke() != 0.0) return 1
-          if (Sum.invoke(11.0) != 11.0) return 1
-          if (Sum.invoke(12, 13, 14, 15, 16, 17, 18, 19, -1, -2, -3) != 118.0) return 1
+          if (Sum.$_invoke() != 0.0) return 1
+          if (Sum.$_invoke(11.0) != 11.0) return 1
+          if (Sum.$_invoke(12, 13, 14, 15, 16, 17, 18, 19, -1, -2, -3) != 118.0) return 1
 
     - decl: |-
           // shadowed invoke
           class A<T> {
-              static invoke(): string { return 'A' }
+              static $_invoke(): string { return 'A' }
           }
           class B<T> extends A<T> {
-              static invoke(): string { return 'B' }
+              static $_invoke(): string { return 'B' }
           }
           class C<T> extends B<T> {
-              static invoke(): string { return 'C' }
+              static $_invoke(): string { return 'C' }
           }
       use: |-
           if (C() != 'C') return 1
@@ -142,12 +142,12 @@ cases:
     - decl: |-
           // overloaded invoke
           class B {
-              static invoke(n: number): number { return n + n }
-              static invoke(p: string): string { return p }
+              static $_invoke(n: number): number { return n + n }
+              static $_invoke(p: string): string { return p }
           }
           class C extends B {
-              static invoke(p: string): string { return p + p }
-              static invoke(p: string, q: boolean): string { return p + q }
+              static $_invoke(p: string): string { return p + p }
+              static $_invoke(p: string, q: boolean): string { return p + q }
           }
       use: |-
           if (C(33.0) != 66.0) return 1
@@ -160,12 +160,12 @@ cases:
     - decl: |-
           // overloaded invoke
           class B {
-              static invoke(n: number): number { return n + n }
-              static invoke(p: string): string { return p }
+              static $_invoke(n: number): number { return n + n }
+              static $_invoke(p: string): string { return p }
           }
           class C extends B {
-              static invoke(p: string): string { return p + p }
-              static invoke(p: string, q: boolean): string { return p + q }
+              static $_invoke(p: string): string { return p + p }
+              static $_invoke(p: string, q: boolean): string { return p + q }
           }
       use: |-
           if (C(33.0) != 66.0) return 1
@@ -178,40 +178,40 @@ cases:
     - decl: |-
           // mix of static and instance invoke
           class A {
-              static invoke(): string { return 'A' }
+              static $_invoke(): string { return 'A' }
           }
           class B extends A {
-              invoke(): string { return 'B' }
+              $_invoke(): string { return 'B' }
           }
           class C extends B {
-              invoke(): string { return 'C' }
+              $_invoke(): string { return 'C' }
           }
       use: |-
           if (C() != 'A') return 1
           if (B() != 'A') return 1
           if (A() != 'A') return 1
 
-          if (new C().invoke() != 'C') return 1
-          if (new B().invoke() != 'B') return 1
+          if (new C().$_invoke() != 'C') return 1
+          if (new B().$_invoke() != 'B') return 1
 
     - decl: |-
           // mix of static and instance invoke
           class B {
-              static invoke(): string { return 'B' }
-              invoke(): string { return 'b' }
+              static $_invoke(): string { return 'B' }
+              $_invoke(): string { return 'b' }
           }
           class C extends B {
-              static invoke(): C { return new C() }
+              static $_invoke(): C { return new C() }
           }
       use: |-
-          if (C().invoke() != 'b') return 1
-          if (B.invoke() != 'B') return 1
-          if (new B().invoke() != 'b') return 1
+          if (C().$_invoke() != 'b') return 1
+          if (B.$_invoke() != 'B') return 1
+          if (new B().$_invoke() != 'b') return 1
 
     - decl: |-
           // error propagation from invoke
           class B {
-              static invoke(p: boolean): string {
+              static $_invoke(p: boolean): string {
                   if (p) {
                       throw new Error('invoke error')
                   }
@@ -219,7 +219,7 @@ cases:
               }
           }
           class C extends B {
-              invoke(): C { return new C() }
+              $_invoke(): C { return new C() }
           }
           function foo(p: boolean): string {
               return C(p)
@@ -237,7 +237,7 @@ cases:
           // exception propagation from invoke
           class MyException extends Exception {}
           class B {
-              static invoke(p: boolean): string throws {
+              static $_invoke(p: boolean): string throws {
                   if (p) {
                       throw new MyException()
                   }
@@ -245,7 +245,7 @@ cases:
               }
           }
           class C extends B {
-              invoke(): C { return new C() }
+              $_invoke(): C { return new C() }
           }
           function foo(p: boolean): string throws {
               return C(p)
@@ -262,13 +262,13 @@ cases:
     - decl: |-
           // call chain of invoke
           class A<T> {
-              static invoke(): number { return 42.0 }
+              static $_invoke(): number { return 42.0 }
           }
           class B<T> {
-              static invoke() { return A() }
+              static $_invoke() { return A() }
           }
           class C<T> {
-              static invoke() { return B() }
+              static $_invoke() { return B() }
           }
       use: |-
           if (C() != 42.0) return 1
@@ -276,8 +276,8 @@ cases:
     - decl: |-
           // invoke calls another invoke
           class C {
-              static invoke() { return C('abc') }
-              static invoke(p: string) { return p }
+              static $_invoke() { return C('abc') }
+              static $_invoke(p: string) { return p }
           }
       use: |-
           if (C() != 'abc') return 1
@@ -285,7 +285,7 @@ cases:
     - decl: |-
           // invoke returns array
           class C {
-              static invoke(...numbers: number[]): number[] {
+              static $_invoke(...numbers: number[]): number[] {
                     return numbers
               }
           }
@@ -295,5 +295,5 @@ cases:
           if (C(1.0)[0] != 1.0) return 1
           if (C(1.0, 2.0, 3.0)[2] != 3.0) return 1
 
-          if (C.invoke(1.0)[0] != 1.0) return 1
-          if (C.invoke(1.0, 2.0, 3.0)[1] != 2.0) return 1
+          if (C.$_invoke(1.0)[0] != 1.0) return 1
+          if (C.$_invoke(1.0, 2.0, 3.0)[1] != 2.0) return 1

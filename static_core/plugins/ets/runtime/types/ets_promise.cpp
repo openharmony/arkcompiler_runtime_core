@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,7 +79,7 @@ void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, Corouti
     // Launch callback in its own coroutine
     auto *coroManager = coro->GetCoroutineManager();
     auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
-    auto *method = EtsMethod::ToRuntimeMethod(callback->GetClass()->GetMethod("invoke"));
+    auto *method = EtsMethod::ToRuntimeMethod(callback->GetClass()->GetMethod(LAMBDA_METHOD_NAME));
     ASSERT(method != nullptr);
     auto args = PandaVector<Value> {Value(callback->GetCoreType())};
     [[maybe_unused]] auto *launchedCoro = coroManager->Launch(event, method, std::move(args), launchMode);

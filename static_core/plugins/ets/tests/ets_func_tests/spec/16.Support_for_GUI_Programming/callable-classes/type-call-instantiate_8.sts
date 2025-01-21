@@ -25,7 +25,7 @@ tags: []
 class CallMeTrinity {
     value: int = 0;
 
-    static instantiate(factory: () => CallMeTrinity, ...values: int[]): CallMeTrinity {
+    static $_instantiate(factory: () => CallMeTrinity, ...values: int[]): CallMeTrinity {
         let x = factory();
         x.value = values.length;
         return x;

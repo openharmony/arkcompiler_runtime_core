@@ -23,7 +23,7 @@ tags: []
 let counter: int = 0;
 
 class CallMeTrinity {
-    static instantiate(factory: () => CallMeTrinity): CallMeTrinity {
+    static $_instantiate(factory: () => CallMeTrinity): CallMeTrinity {
         return factory();
     }
     add(): void {

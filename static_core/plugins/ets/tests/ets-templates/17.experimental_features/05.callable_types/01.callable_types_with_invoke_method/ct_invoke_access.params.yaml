@@ -15,8 +15,8 @@ cases:
     - decl: |-
           // private invoke from same-class another invoke
           class C {
-              private static invoke(p: string) { return p }
-              public static invoke() { return C('abc') }
+              private static $_invoke(p: string) { return p }
+              public static $_invoke() { return C('abc') }
           }
       use: |-
           if (C() != 'abc') return 1
@@ -24,7 +24,7 @@ cases:
     - decl: |-
           // private invoke from same-class method
           class C {
-              private static invoke(p: string) { return p + p }
+              private static $_invoke(p: string) { return p + p }
               meth(): string {
                   return C('abc')
               }
@@ -35,8 +35,8 @@ cases:
     - decl: |-
           // protected invoke from same-class another invoke
           class C {
-              protected static invoke(p: string) { return p }
-              public static invoke() { return C('abc') }
+              protected static $_invoke(p: string) { return p }
+              public static $_invoke() { return C('abc') }
           }
       use: |-
           if (C() != 'abc') return 1
@@ -44,7 +44,7 @@ cases:
     - decl: |-
           // protected invoke from same-class method
           class C {
-              protected static invoke(p: string) { return p + p }
+              protected static $_invoke(p: string) { return p + p }
               meth(): string {
                   return C('abc')
               }
@@ -55,10 +55,10 @@ cases:
     - decl: |-
           // protected invoke from subclass invoke
           class B {
-              protected static invoke(p: string) { return p }
+              protected static $_invoke(p: string) { return p }
           }
           class C extends B {
-              public static invoke() { return B('abc') }
+              public static $_invoke() { return B('abc') }
           }
       use: |-
           if (C() != 'abc') return 1
@@ -66,7 +66,7 @@ cases:
     - decl: |-
           // protected invoke from subclass method
           class B {
-              protected static invoke(p: string) { return p + p }
+              protected static $_invoke(p: string) { return p + p }
           }
           class C extends B {
               meth(): string {
@@ -80,10 +80,10 @@ cases:
       decl: |-
           // protected invoke from another class invoke
           class B {
-              protected static invoke(p: string) { return p }
+              protected static $_invoke(p: string) { return p }
           }
           class C {
-              public static invoke() { return B('abc') }
+              public static $_invoke() { return B('abc') }
           }
       use: |-
           if (C() != 'abc') return 1
@@ -92,7 +92,7 @@ cases:
       decl: |-
           // protected invoke from another class method
           class B {
-              protected static invoke(p: string) { return p + p }
+              protected static $_invoke(p: string) { return p + p }
           }
           class C {
               meth(): string {
@@ -106,10 +106,10 @@ cases:
       decl: |-
           // private invoke from subclass invoke
           class B {
-              private static invoke(p: string) { return p }
+              private static $_invoke(p: string) { return p }
           }
           class C extends B {
-              public static invoke() { return B('abc') }
+              public static $_invoke() { return B('abc') }
           }
       use: |-
           if (C() != 'abc') return 1
@@ -118,7 +118,7 @@ cases:
       decl: |-
           // private invoke from subclass method
           class B {
-              private static invoke(p: string) { return p + p }
+              private static $_invoke(p: string) { return p + p }
           }
           class C extends B {
               meth(): string {

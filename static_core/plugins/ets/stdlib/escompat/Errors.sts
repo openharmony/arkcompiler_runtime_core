@@ -23,11 +23,11 @@ export class EvalError extends Error {
         super("EvalError", message, options)
     }
 
-    static invoke(message?: String, options?: ErrorOptions): EvalError {
+    static $_invoke(message?: String, options?: ErrorOptions): EvalError {
         return new EvalError(message, options)
     }
 
-    static invoke(message: String): EvalError {
+    static $_invoke(message: String): EvalError {
         return new EvalError(message)
     }
 }
@@ -40,11 +40,11 @@ export class TypeError extends Error {
         super("TypeError", message, options)
     }
 
-    static invoke(message?: String, options?: ErrorOptions): TypeError {
+    static $_invoke(message?: String, options?: ErrorOptions): TypeError {
         return new TypeError(message, options)
     }
 
-    static invoke(message: String): TypeError {
+    static $_invoke(message: String): TypeError {
         return new TypeError(message)
     }
 }
@@ -57,11 +57,11 @@ export class ReferenceError extends Error {
         super("ReferenceError", message, options)
     }
 
-    static invoke(message?: String, options?: ErrorOptions): ReferenceError {
+    static $_invoke(message?: String, options?: ErrorOptions): ReferenceError {
         return new ReferenceError(message, options)
     }
 
-    static invoke(message: String): ReferenceError {
+    static $_invoke(message: String): ReferenceError {
         return new ReferenceError(message)
     }
 }
@@ -74,11 +74,11 @@ export class URIError extends Error {
         super("URIError", message, options)
     }
 
-    static invoke(message?: String, options?: ErrorOptions): URIError {
+    static $_invoke(message?: String, options?: ErrorOptions): URIError {
         return new URIError(message, options)
     }
 
-    static invoke(message: String): URIError {
+    static $_invoke(message: String): URIError {
         return new URIError(message)
     }
 }
@@ -115,11 +115,11 @@ export class AggregateError extends Error {
         this.errors = Array.from<Error>(errors)
     }
 
-    static invoke(errors: Iterable<Error>, message?: String, options?: ErrorOptions): AggregateError {
+    static $_invoke(errors: Iterable<Error>, message?: String, options?: ErrorOptions): AggregateError {
         return new AggregateError(errors, message, options)
     }
 
-    static invoke(errors: Error[], message?: String, options?: ErrorOptions): AggregateError {
+    static $_invoke(errors: Error[], message?: String, options?: ErrorOptions): AggregateError {
         return new AggregateError(errors, message, options)
     }
 

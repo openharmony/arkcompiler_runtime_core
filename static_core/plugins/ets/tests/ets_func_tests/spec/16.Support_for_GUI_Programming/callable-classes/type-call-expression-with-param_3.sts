@@ -24,11 +24,11 @@ let counter: int = 0;
 
 class CallMeTrinity {
 
-    static invoke(f: () => int ) { counter += f(); }
+    static $_invoke(f: () => int ) { counter += f(); }
 }
 
 function main(): int {
     counter = 0;
-    CallMeTrinity.invoke(() => { return 3});
+    CallMeTrinity.$_invoke(() => { return 3});
     return counter == 3 ? 0 : 1;
 }

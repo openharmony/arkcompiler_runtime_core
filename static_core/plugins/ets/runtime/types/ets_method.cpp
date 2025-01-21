@@ -52,7 +52,7 @@ EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td)
     ASSERT(td[0] == CLASS_TYPE_PREFIX);
     auto type = classLinker->GetClass(td.c_str());
 
-    auto method = type->GetMethod(LAMBDA_METHOD_NAME);
+    auto method = type->GetMethod(ark::ets::LAMBDA_METHOD_NAME);
     if (method != nullptr) {
         return method;
     }

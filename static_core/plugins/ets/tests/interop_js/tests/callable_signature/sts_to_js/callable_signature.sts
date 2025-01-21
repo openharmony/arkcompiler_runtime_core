@@ -17,12 +17,12 @@
 package callable_signature.test;
 
 class InvokeClass {
-    static invoke(a: number, b: number): number { return a + b }
+    static $_invoke(a: number, b: number): number { return a + b }
 }
 
 class InstantiateClass {
     name = ""
-    static instantiate(factory: () => InstantiateClass, name: string): InstantiateClass {
+    static $_instantiate(factory: () => InstantiateClass, name: string): InstantiateClass {
         let x = factory()
         x.name = name
         return x

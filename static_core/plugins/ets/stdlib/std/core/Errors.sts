@@ -65,11 +65,11 @@ export class SyntaxError extends Error {
         super("SyntaxError", message, options)
     }
 
-    static invoke(message?: String, options?: ErrorOptions): SyntaxError {
+    static $_invoke(message?: String, options?: ErrorOptions): SyntaxError {
         return new SyntaxError(message, options)
     }
 
-    static invoke(message: String): SyntaxError {
+    static $_invoke(message: String): SyntaxError {
         return new SyntaxError(message)
     }
 }
@@ -91,11 +91,11 @@ export class RangeError extends Error {
         super("RangeError", message, options)
     }
 
-    static invoke(message?: String, options?: ErrorOptions): RangeError {
+    static $_invoke(message?: String, options?: ErrorOptions): RangeError {
         return new RangeError(message, options)
     }
 
-    static invoke(message: String): RangeError {
+    static $_invoke(message: String): RangeError {
         return new RangeError(message)
     }
 }

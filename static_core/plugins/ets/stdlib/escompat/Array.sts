@@ -154,7 +154,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns A new Array instance with the specified length
      */
-    static invoke<T>(arrayLength?: number): Array<T> {
+    static $_invoke<T>(arrayLength?: number): Array<T> {
         if (arrayLength != undefined) {
             return new Array<T>(arrayLength);
         } else {

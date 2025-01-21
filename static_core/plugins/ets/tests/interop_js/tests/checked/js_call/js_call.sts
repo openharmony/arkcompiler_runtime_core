@@ -20,19 +20,19 @@ import { cons, car, cdr, sum, TreeNode, makeDynObject, doNothing, makeSwappable,
 //! RUN          force_jit: true, entry: "callSequence", options: "--compiler-regex=ETSGLOBAL::callSequence --compiler-enable-fast-interop=false"
 //! METHOD       "callSequence"
 //! PASS_AFTER   "IrBuilder"
-//! INST         /CallStatic.*jscall::invoke/
+//! INST         /CallStatic.*jscall::$_invoke/
 //! INST_NEXT    "Intrinsic.JSRuntimeGetValueDouble"
 //! INST_NEXT    /i32.*Cast f64/
-//! INST_NEXT    /CallStatic.*jscall::invoke/
+//! INST_NEXT    /CallStatic.*jscall::$_invoke/
 //! INST_NEXT    "Intrinsic.JSRuntimeGetValueDouble"
-//! INST_NEXT    /CallStatic.*jscall::invoke/
+//! INST_NEXT    /CallStatic.*jscall::$_invoke/
 //! INST_NEXT    "Intrinsic.JSRuntimeGetValueString"
 
 //! CHECKER      Several js function calls JIT (fast)
 //! RUN          force_jit: true, entry: "callSequence", options: "--compiler-regex=ETSGLOBAL::callSequence --compiler-interop-try-single-scope=false"
 //! METHOD       "callSequence"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jscall::invoke/
+//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 3
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 3
 //! INST_COUNT   "Intrinsic.CompilerResolveQualifiedJSCall", 3
@@ -66,12 +66,12 @@ import { cons, car, cdr, sum, TreeNode, makeDynObject, doNothing, makeSwappable,
 //! RUN_AOT      options: "--compiler-regex=ETSGLOBAL::callSequence --compiler-enable-fast-interop=false"
 //! METHOD       "callSequence"
 //! PASS_AFTER   "IrBuilder"
-//! INST         /CallStatic.*jscall::invoke/
+//! INST         /CallStatic.*jscall::$_invoke/
 //! INST_NEXT    "Intrinsic.JSRuntimeGetValueDouble"
 //! INST_NEXT    /i32.*Cast f64/
-//! INST_NEXT    /CallStatic.*jscall::invoke/
+//! INST_NEXT    /CallStatic.*jscall::$_invoke/
 //! INST_NEXT    "Intrinsic.JSRuntimeGetValueDouble"
-//! INST_NEXT    /CallStatic.*jscall::invoke/
+//! INST_NEXT    /CallStatic.*jscall::$_invoke/
 //! INST_NEXT    "Intrinsic.JSRuntimeGetValueString"
 //! RUN          entry: "callSequence"
 
@@ -79,7 +79,7 @@ import { cons, car, cdr, sum, TreeNode, makeDynObject, doNothing, makeSwappable,
 //! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::callSequence --compiler-interop-try-single-scope=false"
 //! METHOD       "callSequence"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jscall::invoke/
+//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 3
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 3
 //! INST_COUNT   "Intrinsic.CompilerResolveQualifiedJSCall", 3
@@ -123,7 +123,7 @@ function callSequence(): int {
 //! RUN          force_jit: true, entry: "callChain", options: "--compiler-regex=ETSGLOBAL::callChain --compiler-enable-fast-interop=false"
 //! METHOD       "callChain"
 //! PASS_AFTER   "IrBuilder"
-//! INST_COUNT   /CallStatic.*jscall::invoke/, 6
+//! INST_COUNT   /CallStatic.*jscall::$_invoke/, 6
 //! INST         "Intrinsic.JSRuntimeGetValueDouble"
 //! INST_NEXT    /i32.*Cast f64/
 
@@ -131,7 +131,7 @@ function callSequence(): int {
 //! RUN          force_jit: true, entry: "callChain", options: "--compiler-regex=ETSGLOBAL::callChain --compiler-interop-try-single-scope=false"
 //! METHOD       "callChain"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jscall::invoke/
+//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 6
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 6
 //! INST_COUNT   "Intrinsic.CompilerResolveQualifiedJSCall", 6
@@ -166,7 +166,7 @@ function callSequence(): int {
 //! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::callChain --compiler-enable-fast-interop=false"
 //! METHOD       "callChain"
 //! PASS_AFTER   "Codegen"
-//! INST_COUNT   /CallStatic.*jscall::invoke/, 6
+//! INST_COUNT   /CallStatic.*jscall::$_invoke/, 6
 //! INST         "Intrinsic.JSRuntimeGetValueDouble"
 //! INST_NEXT    /i32.*Cast f64/
 //! RUN          entry: "callChain"
@@ -179,7 +179,7 @@ function callSequence(): int {
 //! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::callChain --compiler-interop-try-single-scope=false"
 //! METHOD       "callChain"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jscall::invoke/
+//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 6
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 6
 //! INST_COUNT   "Intrinsic.CompilerResolveQualifiedJSCall", 6
@@ -213,8 +213,8 @@ function callChain(): int {
 //! RUN          force_jit: true, entry: "newChain", options: "--compiler-regex=ETSGLOBAL::newChain --compiler-enable-fast-interop=false"
 //! METHOD       "newChain"
 //! PASS_AFTER   "IrBuilder"
-//! INST_COUNT   /CallStatic.*jsnew::invoke/, 3
-//! INST_COUNT   /CallStatic.*jscall::invoke/, 1
+//! INST_COUNT   /CallStatic.*jsnew::$_invoke/, 3
+//! INST_COUNT   /CallStatic.*jscall::$_invoke/, 1
 //! INST_COUNT   "Intrinsic.JSRuntimeGetValueDouble", 1
 //! INST         /i32.*Cast f64/
 
@@ -222,8 +222,8 @@ function callChain(): int {
 //! RUN          force_jit: true, entry: "newChain", options: "--compiler-regex=ETSGLOBAL::newChain --compiler-interop-try-single-scope=false"
 //! METHOD       "newChain"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::invoke/
-//! INST_NOT     /CallStatic.*jscall::invoke/
+//! INST_NOT     /CallStatic.*jsnew::$_invoke/
+//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 4
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 4
 //! INST_COUNT   "Intrinsic.CompilerResolveQualifiedJSCall", 4
@@ -258,8 +258,8 @@ function callChain(): int {
 //! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::newChain --compiler-enable-fast-interop=false"
 //! METHOD       "newChain"
 //! PASS_AFTER   "Codegen"
-//! INST_COUNT   /CallStatic.*jsnew::invoke/, 3
-//! INST_COUNT   /CallStatic.*jscall::invoke/, 1
+//! INST_COUNT   /CallStatic.*jsnew::$_invoke/, 3
+//! INST_COUNT   /CallStatic.*jscall::$_invoke/, 1
 //! INST_COUNT   "Intrinsic.JSRuntimeGetValueDouble", 1
 //! RUN          entry: "newChain"
 
@@ -271,8 +271,8 @@ function callChain(): int {
 //! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::newChain --compiler-interop-try-single-scope=false"
 //! METHOD       "newChain"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::invoke/
-//! INST_NOT     /CallStatic.*jscall::invoke/
+//! INST_NOT     /CallStatic.*jsnew::$_invoke/
+//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 4
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 4
 //! INST_COUNT   "Intrinsic.CompilerResolveQualifiedJSCall", 4
@@ -309,7 +309,7 @@ function newChain(): int {
 //! RUN          force_jit: true, entry: "loadStoreChain", options: "--compiler-regex=ETSGLOBAL::loadStoreChain --compiler-enable-fast-interop=false"
 //! METHOD       "loadStoreChain"
 //! PASS_AFTER   "IrBuilder"
-//! INST         /CallStatic.*jsnew::invoke/
+//! INST         /CallStatic.*jsnew::$_invoke/
 //! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
 //! INST_NEXT    "Intrinsic.JSRuntimeSetPropertyJSValue"
 //! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
@@ -322,7 +322,7 @@ function newChain(): int {
 //! RUN          force_jit: true, entry: "loadStoreChain", options: "--compiler-regex=ETSGLOBAL::loadStoreChain"
 //! METHOD       "loadStoreChain"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::invoke/
+//! INST_NOT     /CallStatic.*jsnew::$_invoke/
 //! INST         "Intrinsic.CompilerCreateLocalScope"
 //! INST_NEXT    "Intrinsic.CompilerConvertJSValueToLocal"
 //! INST_NEXT    "Intrinsic.CompilerResolveQualifiedJSCall"
@@ -345,7 +345,7 @@ function newChain(): int {
 //! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::loadStoreChain --compiler-enable-fast-interop=false"
 //! METHOD       "loadStoreChain"
 //! PASS_AFTER   "Codegen"
-//! INST         /CallStatic.*jsnew::invoke/
+//! INST         /CallStatic.*jsnew::$_invoke/
 //! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
 //! INST_NEXT    "Intrinsic.JSRuntimeSetPropertyJSValue"
 //! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
@@ -363,7 +363,7 @@ function newChain(): int {
 //! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::loadStoreChain"
 //! METHOD       "loadStoreChain"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::invoke/
+//! INST_NOT     /CallStatic.*jsnew::$_invoke/
 //! INST         "Intrinsic.CompilerCreateLocalScope"
 //! INST_NEXT    "Intrinsic.CompilerConvertJSValueToLocal"
 //! INST_NEXT    "Intrinsic.CompilerResolveQualifiedJSCall"
@@ -399,15 +399,15 @@ function loadStoreChain(): int {
 //! RUN          force_jit: true, entry: "methodCall", options: "--compiler-regex=ETSGLOBAL::methodCall --compiler-enable-fast-interop=false"
 //! METHOD       "methodCall"
 //! PASS_AFTER   "IrBuilder"
-//! INST_COUNT   /CallStatic.*jsnew::invoke/, 1
-//! INST_COUNT   /CallStatic.*jscall::invoke/, 5 # one function call and four method calls
+//! INST_COUNT   /CallStatic.*jsnew::$_invoke/, 1
+//! INST_COUNT   /CallStatic.*jscall::$_invoke/, 5 # one function call and four method calls
 
 //! CHECKER      Define object method in js and call it from ets, JIT (fast)
 //! RUN          force_jit: true, entry: "methodCall", options: "--compiler-regex=ETSGLOBAL::methodCall --compiler-interop-try-single-scope=false"
 //! METHOD       "methodCall"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::invoke/
-//! INST_NOT     /CallStatic.*jscall::invoke/
+//! INST_NOT     /CallStatic.*jsnew::$_invoke/
+//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 6
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 6
 //! INST_COUNT   "Intrinsic.CompilerResolveQualifiedJSCall", 6
@@ -431,8 +431,8 @@ function loadStoreChain(): int {
 //! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::methodCall --compiler-enable-fast-interop=false"
 //! METHOD       "methodCall"
 //! PASS_AFTER   "IrBuilder"
-//! INST_COUNT   /CallStatic.*jsnew::invoke/, 1
-//! INST_COUNT   /CallStatic.*jscall::invoke/, 5
+//! INST_COUNT   /CallStatic.*jsnew::$_invoke/, 1
+//! INST_COUNT   /CallStatic.*jscall::$_invoke/, 5
 //! RUN          entry: "methodCall"
 
 //! CHECKER      Define object method in js and call it from ets, LLVMAOT (slow)
@@ -443,8 +443,8 @@ function loadStoreChain(): int {
 //! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::methodCall"
 //! METHOD       "methodCall"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::invoke/
-//! INST_NOT     /CallStatic.*jscall::invoke/
+//! INST_NOT     /CallStatic.*jsnew::$_invoke/
+//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 6
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 6
 //! INST_COUNT   "Intrinsic.CompilerResolveQualifiedJSCall", 6
@@ -490,7 +490,7 @@ function methodCall(): int {
 //! INST_NEXT_NOT "Intrinsic.JSRuntimeGetPropertyJSValue"
 //! INST_NEXT     "Intrinsic.JSRuntimeGetPropertyDouble" # get StaticClass.staticProperty
 //! INST_NEXT     "Intrinsic.JSRuntimeSetPropertyDouble" # set StaticClass.staticProperty
-//! INST_NEXT     /CallStatic.*jscall::invoke/
+//! INST_NEXT     /CallStatic.*jscall::$_invoke/
 //! INST_NEXT     "Intrinsic.JSRuntimeGetValueDouble"
 //! INST_COUNT      "Intrinsic.JSRuntimeGetValueDouble", 1
 
@@ -503,7 +503,7 @@ function methodCall(): int {
 //! INST_NEXT_NOT   "Intrinsic.JSRuntimeGetPropertyJSValue"
 //! INST_NEXT       "Intrinsic.JSRuntimeGetPropertyDouble" # get StaticClass.staticProperty
 //! INST_NEXT       "Intrinsic.JSRuntimeSetPropertyDouble" # set StaticClass.staticProperty
-//! INST_NEXT_NOT   /CallStatic.*jscall::invoke/
+//! INST_NEXT_NOT   /CallStatic.*jscall::$_invoke/
 //! INST_NEXT       "Intrinsic.CompilerCreateLocalScope"
 //! INST_NEXT       "Intrinsic.CompilerConvertJSValueToLocal"
 //! INST_NEXT       "Intrinsic.CompilerResolveQualifiedJSCall"
@@ -524,7 +524,7 @@ function methodCall(): int {
 //! INST_NEXT_NOT   "Intrinsic.JSRuntimeGetPropertyJSValue"
 //! INST_NEXT       "Intrinsic.JSRuntimeGetPropertyDouble" # get StaticClass.staticProperty
 //! INST_NEXT       "Intrinsic.JSRuntimeSetPropertyDouble" # set StaticClass.staticProperty
-//! INST_NEXT       /CallStatic.*jscall::invoke/
+//! INST_NEXT       /CallStatic.*jscall::$_invoke/
 //! INST_NEXT       "Intrinsic.JSRuntimeGetValueDouble"
 //! INST_COUNT      "Intrinsic.JSRuntimeGetValueDouble", 1
 //! RUN             entry: "staticMethodCall"
@@ -542,7 +542,7 @@ function methodCall(): int {
 //! INST_NEXT_NOT   "Intrinsic.JSRuntimeGetPropertyJSValue"
 //! INST_NEXT       "Intrinsic.JSRuntimeGetPropertyDouble" # get StaticClass.staticProperty
 //! INST_NEXT       "Intrinsic.JSRuntimeSetPropertyDouble" # set StaticClass.staticProperty
-//! INST_NEXT_NOT   /CallStatic.*jscall::invoke/
+//! INST_NEXT_NOT   /CallStatic.*jscall::$_invoke/
 //! INST_NEXT       "Intrinsic.CompilerCreateLocalScope"
 //! INST_NEXT       "Intrinsic.CompilerConvertJSValueToLocal"
 //! INST_NEXT       "Intrinsic.CompilerResolveQualifiedJSCall"
@@ -576,14 +576,14 @@ class EtsClass {
 //! RUN          force_jit: true, entry: "jscallEtsObject", options: "--compiler-regex=ETSGLOBAL::jscallEtsObject --compiler-enable-fast-interop=false"
 //! METHOD       "jscallEtsObject"
 //! PASS_AFTER   "IrBuilder"
-//! INST         /CallStatic.*jscall::invoke/
+//! INST         /CallStatic.*jscall::$_invoke/
 //! INST         "Intrinsic.JSRuntimeGetValueDouble"
 
 //! CHECKER     Use ets object from js, JIT (fast)
 //! RUN         force_jit: true, entry: "jscallEtsObject", options: "--compiler-regex=ETSGLOBAL::jscallEtsObject"
 //! METHOD     "jscallEtsObject"
 //! PASS_AFTER "IrBuilder"
-//! INST_NOT   /CallStatic.*jscall::invoke/
+//! INST_NOT   /CallStatic.*jscall::$_invoke/
 //! INST       "Intrinsic.CompilerCreateLocalScope"
 //! INST_NEXT  "Intrinsic.CompilerConvertJSValueToLocal"
 //! INST_NEXT  "Intrinsic.CompilerResolveQualifiedJSCall"
@@ -600,7 +600,7 @@ class EtsClass {
 //! RUN_AOT      options: "--compiler-regex=ETSGLOBAL::jscallEtsObject --compiler-enable-fast-interop=false"
 //! METHOD       "jscallEtsObject"
 //! PASS_AFTER   "IrBuilder"
-//! INST         /CallStatic.*jscall::invoke/
+//! INST         /CallStatic.*jscall::$_invoke/
 //! INST         "Intrinsic.JSRuntimeGetValueDouble"
 //! RUN          entry: "jscallEtsObject"
 
@@ -608,7 +608,7 @@ class EtsClass {
 //! RUN_PAOC    options: "--compiler-regex=ETSGLOBAL::jscallEtsObject"
 //! METHOD     "jscallEtsObject"
 //! PASS_AFTER "IrBuilder"
-//! INST_NOT   /CallStatic.*jscall::invoke/
+//! INST_NOT   /CallStatic.*jscall::$_invoke/
 //! INST       "Intrinsic.CompilerCreateLocalScope"
 //! INST_NEXT  "Intrinsic.CompilerConvertJSValueToLocal"
 //! INST_NEXT  "Intrinsic.CompilerResolveQualifiedJSCall"
@@ -637,14 +637,14 @@ function jscallEtsObject(): int {
 //! RUN          force_jit: true, entry: "jsLoadFromPrototype", options: "--compiler-regex=ETSGLOBAL::jsLoadFromPrototype"
 //! METHOD       "jsLoadFromPrototype"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::invoke/
+//! INST_NOT     /CallStatic.*jsnew::$_invoke/
 //! INST         "Intrinsic.JSRuntimeGetPropertyDouble"
 
 //! CHECKER      Load value from js prototype, AOT
 //! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::jsLoadFromPrototype"
 //! METHOD       "jsLoadFromPrototype"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::invoke/
+//! INST_NOT     /CallStatic.*jsnew::$_invoke/
 //! INST         "Intrinsic.JSRuntimeGetPropertyDouble"
 //! RUN          entry: "jsLoadFromPrototype"
 
@@ -662,14 +662,14 @@ function jsLoadFromPrototype(): int {
 //! RUN          force_jit: true, entry: "jsLoadOverridden", options: "--compiler-regex=ETSGLOBAL::jsLoadOverridden"
 //! METHOD       "jsLoadOverridden"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::invoke/
+//! INST_NOT     /CallStatic.*jsnew::$_invoke/
 //! INST        "Intrinsic.JSRuntimeGetPropertyDouble"
 
 //! CHECKER      Load value overridden in js object, AOT
 //! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::jsLoadOverridden"
 //! METHOD       "jsLoadOverridden"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::invoke/
+//! INST_NOT     /CallStatic.*jsnew::$_invoke/
 //! INST         "Intrinsic.JSRuntimeGetPropertyDouble"
 //! RUN          entry: "jsLoadOverridden"
 
@@ -687,16 +687,16 @@ function jsLoadOverridden(): int {
 //! RUN          force_jit: true, entry: "jsCallFromPrototype", options: "--compiler-regex=ETSGLOBAL::jsCallFromPrototype"
 //! METHOD       "jsCallFromPrototype"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::invoke/
-//! INST_NOT     /CallStatic.*jscall::invoke/
+//! INST_NOT     /CallStatic.*jsnew::$_invoke/
+//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST         "Intrinsic.JSRuntimeGetValueString"
 
 //! CHECKER      Call function from js prototype, AOT
 //! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::jsCallFromPrototype"
 //! METHOD       "jsCallFromPrototype"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::invoke/
-//! INST_NOT     /CallStatic.*jscall::invoke/
+//! INST_NOT     /CallStatic.*jsnew::$_invoke/
+//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST         "Intrinsic.JSRuntimeGetValueString"
 //! RUN          entry: "jsCallFromPrototype"
 
