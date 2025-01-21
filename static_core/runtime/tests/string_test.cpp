@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -383,6 +383,26 @@ TEST_F(StringTest, RegionCopyTestMutf8)
     ASSERT_EQ(out16, res16);
 }
 
+TEST_F(StringTest, RegionCopyTestUtf8)
+{
+    std::vector<uint8_t> data {'a', 'b', 'h', 'e', 'l', 'l', 'o', 'c', 'd', 'z', 0};
+    std::vector<uint8_t> res {'h', 'e', 'l', 'l', 'o', 0};
+    std::vector<uint8_t> copiedDataUtf8(res.size());
+    size_t start = 2;
+    size_t len = 5;
+    String *str =
+        String::CreateFromUtf8(data.data(), data.size(), GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+
+    ASSERT_EQ(str->CopyDataRegionUtf8(copiedDataUtf8.data(), start, len, copiedDataUtf8.size() - 1), res.size() - 1);
+    ASSERT_EQ(copiedDataUtf8, res);
+
+    std::vector<uint16_t> res16 {'h', 'e', 'l', 'l', 'o'};
+    std::vector<uint16_t> copiedDataUtf16(res16.size());
+
+    ASSERT_EQ(str->CopyDataRegionUtf16(copiedDataUtf16.data(), start, len, copiedDataUtf16.size()), res16.size());
+    ASSERT_EQ(copiedDataUtf16, res16);
+}
+
 TEST_F(StringTest, RegionCopyTestUtf16)
 {
     std::vector<uint8_t> data {'a', 'b', 'c', 'd', 'z', 0xc2, 0xa7, 0x00};
@@ -400,6 +420,28 @@ TEST_F(StringTest, RegionCopyTestUtf16)
     std::vector<uint16_t> res16 = {'c', 'd', 'z'};
     ASSERT_EQ(string->CopyDataRegionUtf16(out16.data(), start, 3U, out16.size()), out16.size());
     ASSERT_EQ(out16, res16);
+}
+
+TEST_F(StringTest, GetUtf8Length)
+{
+    std::vector<uint8_t> data = {'H', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!', 0};
+    String *str =
+        String::CreateFromUtf8(data.data(), data.size(), GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    ASSERT_EQ(str->GetUtf8Length(), data.size() - 1);
+}
+
+TEST_F(StringTest, GetDataUtf8)
+{
+    std::vector<uint8_t> example = {'e', 'x', 'a', 'm', 'p', 'l', 'e'};
+    String *string1 = String::CreateFromUtf8(example.data(), example.size(), GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    ASSERT_FALSE(string1->IsUtf16());
+    std::vector<uint8_t> data2(string1->GetDataUtf8(), string1->GetDataUtf8() + example.size());  // NOLINT
+
+    String *string2 =
+        String::CreateFromUtf8(data2.data(), data2.size(), GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    ASSERT_FALSE(string2->IsUtf16());
+    ASSERT_TRUE(String::StringsAreEqual(string1, string2));
 }
 
 TEST_F(StringTest, SameLengthStringCompareTest)

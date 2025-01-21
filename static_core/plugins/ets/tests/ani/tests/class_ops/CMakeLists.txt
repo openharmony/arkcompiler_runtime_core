@@ -16,7 +16,17 @@ ani_add_gtest(ani_test_class_ops_get_static_method
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_static_method_test.sts
 )
 
+ani_add_gtest(ani_test_class_ops_get_method
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_method_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_method_test.sts
+)
+
 ani_add_gtest(ani_test_class_ops_call_static_method_int
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_int_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_int_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_static_method_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_ref_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_ref_test.sts
 )
