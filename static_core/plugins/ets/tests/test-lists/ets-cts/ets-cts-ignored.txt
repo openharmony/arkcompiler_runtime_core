@@ -699,8 +699,8 @@
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_33.sts
 
 # es2panda fails: panda#14338 es2panda fails to compile overloaded functions
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/pos_1.sts
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/pos_6.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_1.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_6.sts
 # end of es2panda fails
 
 # es2panda fails: panda:14380 Floating-point type array indexes are not allowed

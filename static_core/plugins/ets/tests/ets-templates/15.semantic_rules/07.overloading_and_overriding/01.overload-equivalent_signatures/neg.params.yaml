@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,14 +29,14 @@ cases:
       class Y {}
       class Z {}
       // naming formal parameters or type variables differently
-      function foo<T extends X, U extends Y, V extends Z>(t: T, u: U, v: V): V { return new Z(); }
-      function foo<U extends X, V extends Y, T extends Z>(u: U, v: V, t: T): V { return new Y(); }
+      function foo<T extends X, U extends Y, V extends Z>(t: T, u: U, v: V): V { return v; }
+      function foo<U extends X, V extends Y, T extends Z>(u: U, v: V, t: T): V { return v; }
 
   - decl: |-
       class Y {}
       // naming formal parameters or return types differently
-      function foo<X extends Y>(a: int, b: long, c: double, d: Object): X { return new Y(); }
-      function foo<Z extends Y>(q: int, r: long, v: double, w: Object): Z { return new Y(); }
+      function foo<X extends Y>(a: int, b: long, c: double, d: X): X { return d; }
+      function foo<Z extends Y>(q: int, r: long, v: double, w: Z): Z { return w; }
 
   - decl: |-
       // throws mark
@@ -79,8 +79,8 @@ cases:
       class Y {}
       // different return type variable
       class A<T extends X, U extends Y> {
-          public met(a: T): T { return new X(); }
-          public met(a: T): U { return new Y(); }
+          public met(a: T): T { return a; }
+          public met(a: T): Y { return new Y(); }
       }
 
   - decl: |-
