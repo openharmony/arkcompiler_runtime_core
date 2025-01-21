@@ -115,7 +115,7 @@ void InstBuilder::UpdateDefs()
     }
 }
 
-void InstBuilder::AddCatchPhiInputs(const ArenaUnorderedSet<BasicBlock *> &catch_handlers, const InstVector &defs,
+void InstBuilder::AddCatchPhiInputs(const ArenaSet<BasicBlock *> &catch_handlers, const InstVector &defs,
                                     Inst *throwable_inst)
 {
     ASSERT(!catch_handlers.empty());
