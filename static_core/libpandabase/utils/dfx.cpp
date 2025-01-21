@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "dfx.h"
 #include "logger.h"
+#include "string_helpers.h"
 
 namespace ark {
 DfxController *DfxController::dfxController_ = nullptr;
@@ -68,6 +69,7 @@ void DfxController::SetDefaultOption()
 /* static */
 void DfxController::ResetOptionValueFromString(const std::string &s)
 {
+    constexpr int BASE10 = 10;
     size_t lastPos = s.find_first_not_of(';', 0);
     size_t pos = s.find(';', lastPos);
     while (lastPos != std::string::npos) {
@@ -75,7 +77,9 @@ void DfxController::ResetOptionValueFromString(const std::string &s)
         lastPos = s.find_first_not_of(';', pos);
         pos = s.find(';', lastPos);
         std::string optionStr = arg.substr(0, arg.find(':'));
-        uint8_t value = static_cast<uint8_t>(std::stoi(arg.substr(arg.find(':') + 1)));
+        std::string valueStr((arg.substr(arg.find(':') + 1)));
+        auto value = static_cast<uint8_t>(strtoul(valueStr.data(), nullptr, BASE10));
+
         auto dfxOption = DfxOptionHandler::DfxOptionFromString(optionStr);
         if (dfxOption != DfxOptionHandler::END_FLAG) {
             DfxController::SetOptionValue(dfxOption, value);
