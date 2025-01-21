@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,15 +13,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for rt in types %}
+
 /*---
-desc: Method declaration with different modifiers 
-assert: It is a compile-tme error if the same method modifier appears more than once in a method declaration.
-params: {{mod}}
+desc: Declaring sub-interface.
+assert: At least one typeReference is an alias of one of primitive, enumeration, union, or function types.
 tags: [compile-only, negative]
 ---*/
 
-class A {
-  abstract abstract run(): void { 
+enum ColorEnum { Red, Green, Blue }
+type FuncOp = () => void
 
-  }
+type TBadRef = {{rt.type}};
+
+interface A extends TBadRef {
+
 }
+
+{% endfor %}
