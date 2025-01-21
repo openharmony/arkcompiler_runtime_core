@@ -80,7 +80,18 @@ regression/16169_false_unreachable_statement_after_class.sts
 #18046 Update compilation process with modules for AOT mode
 05.generics/03.utility_types/01.partial_utility_type/module_class_0.sts
 05.generics/03.utility_types/01.partial_utility_type/module_class_1.sts
+05.generics/03.utility_types/01.partial_utility_type/module_class_2.sts
+05.generics/03.utility_types/01.partial_utility_type/module_class_3.sts
 05.generics/03.utility_types/01.partial_utility_type/module_extends_0.sts
+05.generics/03.utility_types/01.partial_utility_type/module_extends_2.sts
+05.generics/03.utility_types/01.partial_utility_type/module_implements_0.sts
+05.generics/03.utility_types/01.partial_utility_type/module_implements_1.sts
+05.generics/03.utility_types/01.partial_utility_type/module_implements_2.sts
+05.generics/03.utility_types/01.partial_utility_type/module_implements_3.sts
+05.generics/03.utility_types/01.partial_utility_type/module_interface_0.sts
+05.generics/03.utility_types/01.partial_utility_type/module_interface_1.sts
+05.generics/03.utility_types/01.partial_utility_type/module_interface_2.sts
+05.generics/03.utility_types/01.partial_utility_type/module_interface_3.sts
 05.generics/03.utility_types/02.required_utility_type/required_module_class_0.sts
 05.generics/03.utility_types/02.required_utility_type/required_module_extends.sts
 05.generics/03.utility_types/02.required_utility_type/required_module_interface_0.sts

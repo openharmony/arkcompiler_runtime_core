@@ -169,10 +169,8 @@ spec/16.Support_for_GUI_Programming/callable-classes/type-call-instantiate_7.sts
 ### Issue 19666, #19947
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-default-param_2.sts
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-default-param_5.sts
-spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-param_2.sts
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-default-param_2.sts
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-default-param_5.sts
-spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-param_2.sts
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-result_2.sts
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-result_2.sts
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-default-param_7.sts
@@ -193,8 +191,6 @@ spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-para
 ### End Of Feature: Null safety tests
 
 ### Generic issues
-### Issue 19693
-spec/05.Generics/generic_02.sts
 ### Negative tests
 spec/05.Generics/wrongUsingInT.sts
 ### End of Generic
@@ -308,32 +304,6 @@ spec/17.Experimental_Features/Iterable_Types/for_of_10.sts
 spec/17.Experimental_Features/Iterable_Types/for_of_11.sts
 spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-08.sts
 ### end for of
-
-### Issue 14536: usage of === with primitive types
-spec/expressions/equality/equality_primitive_01_byte_equal_byte.sts
-spec/expressions/equality/equality_primitive_01_byte_equal_byte_016.sts
-spec/expressions/equality/equality_primitive_01_double_equal_double.sts
-spec/expressions/equality/equality_primitive_01_double_equal_double_004.sts
-spec/expressions/equality/equality_primitive_01_double_equal_double_005.sts
-spec/expressions/equality/equality_primitive_01_double_equal_double_006.sts
-spec/expressions/equality/equality_primitive_01_float_equal_float.sts
-spec/expressions/equality/equality_primitive_01_float_equal_float_001.sts
-spec/expressions/equality/equality_primitive_01_float_equal_float_002.sts
-spec/expressions/equality/equality_primitive_01_float_equal_float_003.sts
-spec/expressions/equality/equality_primitive_01_int_equal_int.sts
-spec/expressions/equality/equality_primitive_01_int_equal_int_014.sts
-spec/expressions/equality/equality_primitive_01_long_equal_long.sts
-spec/expressions/equality/equality_primitive_01_long_equal_long_013.sts
-spec/expressions/equality/equality_primitive_01_number_equal_number.sts
-spec/expressions/equality/equality_primitive_01_number_equal_number_007.sts
-spec/expressions/equality/equality_primitive_01_number_equal_number_008.sts
-spec/expressions/equality/equality_primitive_01_number_equal_number_009.sts
-spec/expressions/equality/equality_primitive_01_number_equal_number_010.sts
-spec/expressions/equality/equality_primitive_01_number_equal_number_011.sts
-spec/expressions/equality/equality_primitive_01_number_equal_number_012.sts
-spec/expressions/equality/equality_primitive_01_short_equal_short.sts
-spec/expressions/equality/equality_primitive_01_short_equal_short_015.sts
-###
 
 ### accessors
 ### Issue 19721
