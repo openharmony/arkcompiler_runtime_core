@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ LOCAL_FUNCTION_START(FiberExitBridge)
     // bl exit
 
     // let's make the exit more violent than exit(-1) for now
-    // TODO(konstanting, #I67QXC): revert to exit() when everything is tested and works
+    // TODO(konstanting, #IAD5MH): revert to exit() when everything is tested and works
     bl abort
 FUNCTION_END(FiberExitBridge)
 

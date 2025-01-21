@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,7 +90,7 @@ void JsJobQueue::Post(EtsObject *callback)
     auto *mainT = EtsCoroutine::GetCurrent()->GetPandaVM()->GetCoroutineManager()->GetMainThread();
     Coroutine *mainCoro = Coroutine::CastFromThread(mainT);
     if (Coroutine::GetCurrent() != mainCoro) {
-        // NOTE(konstanting, #I67QXC): figure out if we need to ExecuteOnThisContext() for OHOS
+        // NOTE(konstanting, #IAD5MH): figure out if we need to ExecuteOnThisContext() for OHOS
         mainCoro->GetContext<StackfulCoroutineContext>()->ExecuteOnThisContext(
             &postProc, EtsCoroutine::GetCurrent()->GetContext<StackfulCoroutineContext>());
     } else {
@@ -98,7 +98,7 @@ void JsJobQueue::Post(EtsObject *callback)
     }
 }
 
-static napi_value OnJsPromiseResolved(napi_env env, [[maybe_unused]] napi_callback_info info)
+static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callback_info info, bool isResolved)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     PandaEtsVM *vm = coro->GetPandaVM();
@@ -112,19 +112,35 @@ static napi_value OnJsPromiseResolved(napi_env env, [[maybe_unused]] napi_callba
     if (status != napi_ok) {
         InteropCtx::Fatal("Cannot call napi_get_cb_info!");
     }
+    ASSERT(promiseRef != nullptr);
 
     EtsHandleScope hScope(coro);
     EtsHandle<EtsPromise> promiseHandle(coro, EtsPromise::FromCoreType(vm->GetGlobalObjectStorage()->Get(promiseRef)));
     vm->GetGlobalObjectStorage()->Remove(promiseRef);
 
     auto jsval = JSValue::Create(coro, ctx, value);
-    ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), jsval->AsObject());
+
+    if (isResolved) {
+        ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), jsval->AsObject());
+    } else {
+        ark::ets::intrinsics::EtsPromiseReject(promiseHandle.GetPtr(), jsval->AsObject());
+    }
 
     vm->GetCoroutineManager()->Schedule();
 
     napi_value undefined;
     napi_get_undefined(env, &undefined);
     return undefined;
+}
+
+static napi_value OnJsPromiseResolved(napi_env env, [[maybe_unused]] napi_callback_info info)
+{
+    return OnJsPromiseCompleted(env, info, true);
+}
+
+static napi_value OnJsPromiseRejected(napi_env env, [[maybe_unused]] napi_callback_info info)
+{
+    return OnJsPromiseCompleted(env, info, false);
 }
 
 void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
@@ -144,15 +160,20 @@ void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
 
     mem::Reference *promiseRef = vm->GetGlobalObjectStorage()->Add(etsPromise, mem::Reference::ObjectType::GLOBAL);
 
-    // NOTE(konstanting, #I67QXC): OnJsPromiseRejected
-    napi_value thenCallback;
-    status = napi_create_function(env, nullptr, 0, OnJsPromiseResolved, promiseRef, &thenCallback);
+    std::array<napi_value, 2U> thenCallback {};
+
+    status = napi_create_function(env, nullptr, 0, OnJsPromiseResolved, promiseRef, &thenCallback[0]);
+    if (status != napi_ok) {
+        InteropCtx::Fatal("Cannot create a function");
+    }
+
+    status = napi_create_function(env, nullptr, 0, OnJsPromiseRejected, promiseRef, &thenCallback[1]);
     if (status != napi_ok) {
         InteropCtx::Fatal("Cannot create a function");
     }
 
     napi_value thenResult;
-    status = napi_call_function(env, jsPromise, thenFn, 1, &thenCallback, &thenResult);
+    status = napi_call_function(env, jsPromise, thenFn, 2U, thenCallback.data(), &thenResult);
     if (status != napi_ok) {
         InteropCtx::Fatal("Cannot call then() from a JS Promise");
     }
@@ -165,7 +186,7 @@ void JsJobQueue::CreateLink(EtsObject *source, EtsObject *target)
     auto *mainT = EtsCoroutine::GetCurrent()->GetPandaVM()->GetCoroutineManager()->GetMainThread();
     Coroutine *mainCoro = Coroutine::CastFromThread(mainT);
     if (Coroutine::GetCurrent() != mainCoro) {
-        // NOTE(konstanting, #I67QXC): figure out if we need to ExecuteOnThisContext() for OHOS
+        // NOTE(konstanting, #IAD5MH): figure out if we need to ExecuteOnThisContext() for OHOS
         mainCoro->GetContext<StackfulCoroutineContext>()->ExecuteOnThisContext(
             &addLinkProc, EtsCoroutine::GetCurrent()->GetContext<StackfulCoroutineContext>());
     } else {

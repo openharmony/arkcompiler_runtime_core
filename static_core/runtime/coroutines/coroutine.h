@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -145,7 +145,7 @@ public:
     static bool ThreadIsCoroutine(Thread *thread)
     {
         ASSERT(thread != nullptr);
-        // NOTE(konstanting, #I67QXC): THREAD_TYPE_TASK -> THREAD_TYPE_COROUTINE and
+        // NOTE(konstanting, #IAD5MH): THREAD_TYPE_TASK -> THREAD_TYPE_COROUTINE and
         // remove the runtime/scheduler directory contents
         return thread->GetThreadType() == Thread::ThreadType::THREAD_TYPE_TASK;
     }
@@ -339,7 +339,7 @@ private:
     CoroutineContext *context_ = nullptr;
     CoroutineWorker *worker_ = nullptr;
     CoroutineManager *manager_ = nullptr;
-    // NOTE(konstanting, #I67QXC): check if we still need this functionality
+    // NOTE(konstanting, #IAD5MH): check if we still need this functionality
     bool startSuspended_ = false;
     Type type_ = Type::MUTATOR;
 

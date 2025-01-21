@@ -299,3 +299,31 @@ panda_ets_interop_js_test_nodevm(ets_interop_js_test_promise_proxy_with_await
     ETS_CONFIG ${ETS_CONFIG}
     LAUNCHER_ARGS ".testAwaitPromiseProxy"
 )
+
+panda_ets_interop_js_test_nodevm(ets_interop_js_test_promise_proxy_reject
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.sts
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.js
+    ETS_CONFIG ${ETS_CONFIG}
+    LAUNCHER_ARGS ".testProxyPromiseReject"
+)
+
+panda_ets_interop_js_test_nodevm(ets_interop_js_test_promise_proxy_with_await_reject
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.sts
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.js
+    ETS_CONFIG ${ETS_CONFIG}
+    LAUNCHER_ARGS ".testAwaitPromiseProxyReject"
+)
+
+panda_ets_interop_js_test_nodevm(ets_interop_js_test_promise_proxy_with_await_reject_fail
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.sts
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.js
+    ETS_CONFIG ${ETS_CONFIG}
+    LAUNCHER_ARGS ".testAwaitPromiseProxyRejectShouldFail"
+)
+
+panda_ets_interop_js_test_nodevm(ets_interop_js_test_promise_proxy_with_then_await_reject_fail
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.sts
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.js
+    ETS_CONFIG ${ETS_CONFIG}
+    LAUNCHER_ARGS ".testAwaitPromiseProxyThenRejectShouldFail"
+)

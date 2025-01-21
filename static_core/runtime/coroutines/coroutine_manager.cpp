@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,7 +116,7 @@ CoroutineManager::CoroutineFactory CoroutineManager::GetCoroutineFactory()
 uint32_t CoroutineManager::AllocateCoroutineId()
 {
     // Taken by copy-paste from MTThreadManager. Need to generalize if possible.
-    // NOTE(konstanting, #I67QXC): try to generalize internal ID allocation
+    // NOTE(konstanting, #IAD5MH): try to generalize internal ID allocation
     os::memory::LockHolder lock(idsLock_);
     for (size_t i = 0; i < coroutineIds_.size(); i++) {
         lastCoroutineId_ = (lastCoroutineId_ + 1) % coroutineIds_.size();
@@ -132,7 +132,7 @@ uint32_t CoroutineManager::AllocateCoroutineId()
 void CoroutineManager::FreeCoroutineId(uint32_t id)
 {
     // Taken by copy-paste from MTThreadManager. Need to generalize if possible.
-    // NOTE(konstanting, #I67QXC): try to generalize internal ID allocation
+    // NOTE(konstanting, #IAD5MH): try to generalize internal ID allocation
     id--;  // 0 is reserved as uninitialized value.
     os::memory::LockHolder lock(idsLock_);
     ASSERT(coroutineIds_[id]);
