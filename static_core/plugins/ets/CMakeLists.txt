@@ -119,14 +119,12 @@ endfunction()
 set_target_properties(ets_tests PROPERTIES first-level-tests-dependency TRUE)
 add_dependencies(tests ets_tests)
 
-# List for accumulation of all ets gtests binary paths.
-# It's used by CI to archive these binaries into a single artifact
-# and send it to second stage where unit tests will use them.
-set_property(GLOBAL PROPERTY ets_stash_list "")
-
-if(TARGET es2panda_tests)
-    if(NOT PANDA_ENABLE_THREAD_SANITIZER OR PANDA_CI_TESTING_MODE STREQUAL "Nightly")
+if(NOT PANDA_ENABLE_THREAD_SANITIZER OR PANDA_CI_TESTING_MODE STREQUAL "Nightly")
+    if(TARGET es2panda_tests)
         add_dependencies(ets_tests es2panda_tests)
+    endif()
+    if(TARGET es2panda_gtests)
+        add_dependencies(ets_tests es2panda_gtests)
     endif()
 endif()
 
