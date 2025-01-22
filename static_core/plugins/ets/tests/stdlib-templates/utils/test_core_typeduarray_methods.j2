@@ -69,39 +69,82 @@ const testTypedArrayEvery = parametrize<ObjectTypeAndExpectations<boolean[]>>(
     [
         [
             {{.item.objectType}}.of({{.item.create}}(1), {{.item.create}}(2)),
-            [true, false, true, false, true, false, false]
+            [true, false, true, false, true, false, false, true, false, true]
         ] as ObjectTypeAndExpectations<boolean[]>,
     ],
     (args: ObjectTypeAndExpectations<boolean[]>): number => {
-        const array = args[0]
+        const array = new {{.item.objectType}}(args[0])
         const expected = args[1]
-
-        const isTrueEverywhere = array.every(() => true)
-        const isFalseEverywhere = array.every(() => false)
-
-        const isPositive = array.every((x: {{.item.type}}) => x > {{.item.create}}(0))
-        const isNegative = array.every((x: {{.item.type}}) => x < {{.item.create}}(0))
-
-        const isValueEqualToIndexPlus1 = array.every((x: {{.item.type}}, index: number) => x == {{.item.create}}(index + 1))
-        const isValueEqualToIndex = array.every((x: {{.item.type}}, index: number) => x == {{.item.create}}(index))
-
-        const rhs = array.reduce((acc: {{.item.type}}, x: {{.item.type}}) => acc + x)
-
-        const isArraySumEqualToIndexPlusValue =
-            array.every(
-                (x: {{.item.type}}, index: number, array: {{.item.objectType}}) => {
-                    return x + {{.item.create}}(index) == rhs
-                })
 
         let failures = 0
 
-        failures += check(boolToResult(isTrueEverywhere == expected[0]), ".every(() => true)")
-        failures += check(boolToResult(isFalseEverywhere == expected[1]), ".every(() => false)")
-        failures += check(boolToResult(isPositive == expected[2]), ".every(x > 0)")
-        failures += check(boolToResult(isNegative == expected[3]), ".every(x < 0)")
-        failures += check(boolToResult(isValueEqualToIndexPlus1 == expected[4]), ".every((x, index) => x == index + 1)")
-        failures += check(boolToResult(isValueEqualToIndex == expected[5]), ".every((x, index) => x == index)")
-        failures += check(boolToResult(isArraySumEqualToIndexPlusValue == expected[6]), ".every((x, index, arr) => x + index == sum(arr))")
+        const isTrueEverywhere = array.every(() => true)
+        failures += check(boolToResult(isTrueEverywhere == expected[0]), `[${array}].every(() => true)`)
+
+        const isFalseEverywhere = array.every(() => false)
+        failures += check(boolToResult(isFalseEverywhere == expected[1]), `[${array}].every(() => false)`)
+
+        const isPositive = array.every((x: {{.item.type}}) => x > {{.item.create}}(0))
+        failures += check(boolToResult(isPositive == expected[2]), `[${array}].every(x > 0)`)
+
+        const isNegative = array.every((x: {{.item.type}}) => x < {{.item.create}}(0))
+        failures += check(boolToResult(isNegative == expected[3]), `[${array}].every(x < 0)`)
+
+        const isValueEqualToIndexPlus1 = array.every(
+            (x: {{.item.type}}, index: number) => x == {{.item.create}}(index + 1)
+        )
+        failures += check(
+            boolToResult(isValueEqualToIndexPlus1 == expected[4]),
+            `[${array}].every((x, index) => x == index + 1)`
+        )
+
+        const isValueEqualToIndex = array.every(
+            (x: {{.item.type}}, index: number) => x == {{.item.create}}(index)
+        )
+        failures += check(
+            boolToResult(isValueEqualToIndex == expected[5]),
+            `[${array}].every((x, index) => x == index)`
+        )
+
+        const rhs = array.reduce((acc: {{.item.type}}, x: {{.item.type}}) => acc + x)
+        const isArraySumEqualToIndexPlusValue = array.every(
+            (x: {{.item.type}}, index: number, array: {{.item.objectType}}) => {
+                return x + {{.item.create}}(index) == rhs
+            }
+        )
+        failures += check(
+            boolToResult(isArraySumEqualToIndexPlusValue == expected[6]),
+            `[${array}].every((x, index, arr) => x + index == sum(arr))`
+        )
+
+        const eqByInd = (x: {{.item.type}}, index: number, arr: {{.item.objectType}}) => x == arr[index]
+        const isValueEqualToArrayByIndex = array.every(eqByInd)
+        failures += check(
+            boolToResult(isValueEqualToArrayByIndex == expected[7]),
+            `[${array}].every((x, index, arr) => x == arr[index])`
+        )
+        
+        const isNoEvenNumbers = array.every(
+            (x: {{.item.type}}, index: number, arr: {{.item.objectType}}) => {
+                if (x{{.item.cast2primitive}} % 2 == 0) {
+                    arr[index] = {{.item.create}}(0)
+                    return false
+                }
+                return true
+            }
+        )
+        failures += check(
+            boolToResult(isNoEvenNumbers == expected[8]),
+            `[${array}].every((x, index, arr) => *check and remove even numbers*)`
+        )
+
+        const isNoMoreEvenNumbers = array.every(
+            (x: {{.item.type}}) => x{{.item.cast2primitive}} == 0 || x{{.item.cast2primitive}} % 2 != 0
+        )
+        failures += check(
+            boolToResult(isNoMoreEvenNumbers == expected[9]),
+            `[${array}].every((x) => x != 0 && x % 2 != 0)`
+        )
 
         return failures == 0 ? success: fail
     }
@@ -113,11 +156,11 @@ const testTypedArraySome = parametrize<ObjectTypeAndExpectations<boolean[]>>(
     [
         [
             {{.item.objectType}}.of({{.item.create}}(1), {{.item.create}}(2)),
-            [true, true, false]
+            [true, true, false, false]
         ] as ObjectTypeAndExpectations<boolean[]>,
         [
             {{.item.objectType}}.of({{.item.create}}(0), {{.item.create}}(1)),
-            [true, true, true]
+            [true, true, true, false]
         ] as ObjectTypeAndExpectations<boolean[]>,
     ],
     (args: ObjectTypeAndExpectations<boolean[]>): number => {
@@ -128,11 +171,15 @@ const testTypedArraySome = parametrize<ObjectTypeAndExpectations<boolean[]>>(
         const hasPositivesSome = array.some((x: {{.item.type}}) => x > {{.item.create}}(0))
         const hasElementsWithValueEqIndex = array.some((x: {{.item.type}}, index: number) => x == {{.item.create}}(index))
 
+        const neByInd = (x: {{.item.type}}, index: number, arr: {{.item.objectType}}) => x != arr[index]
+        const isValueNotEqualToArrayByIndex = array.some(neByInd)
+
         let failures = 0
 
         failures += check(boolToResult(constTrue == expected[0]), "const true")
         failures += check(boolToResult(hasPositivesSome == expected[1]), "has positives")
         failures += check(boolToResult(hasElementsWithValueEqIndex == expected[2]), "has elements where value == index")
+        failures += check(boolToResult(isValueNotEqualToArrayByIndex == expected[3]), ".some(x, index, arr) => x != arr[index]")
 
         return failures == 0 ? success: fail
     }
