@@ -30,6 +30,10 @@
 
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
 napi_status __attribute__((weak)) napi_create_runtime(napi_env env, napi_env *resultEnv);
+// NOLINTBEGIN(readability-identifier-naming)
+// CC-OFFNXT(G.FMT.10-CPP) project code style
+napi_status __attribute__((weak)) napi_throw_jsvalue(napi_env env, napi_value error);
+// NOLINTEND(readability-identifier-naming)
 #endif
 
 namespace ark::ets::interop::js {
@@ -374,7 +378,13 @@ void InteropCtx::ThrowJSValue(napi_env env, napi_value val)
 {
     INTEROP_LOG(INFO) << "ThrowJSValue";
     ASSERT(!NapiIsExceptionPending(env));
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
+    NAPI_CHECK_FATAL(napi_throw_jsvalue(env, val));
+#else
+    // At present, UT relies on NodeJS, and the napi_throw interface is still used in UT runtime mode
+    // When UT migrates to ArkJS VM, this branch needs to be removed
     NAPI_CHECK_FATAL(napi_throw(env, val));
+#endif
 }
 
 void InteropCtx::ForwardEtsException(EtsCoroutine *coro)
