@@ -72,6 +72,9 @@ class RunnerETS(RunnerFileBased):
 
         test_suite_class = EtsTestSuite.get_class(self.__ets_suite_name)
 
+        if self.__ets_suite_name == EtsSuites.RUNTIME.value:
+            self.default_list_root = self._get_frontend_test_lists()
+
         test_suite = test_suite_class(self.config, self.work_dir, self.default_list_root)
         test_suite.process(self.config.general.generate_only or self.config.ets.force_generate)
         self.test_root, self.list_root = test_suite.test_root, test_suite.list_root

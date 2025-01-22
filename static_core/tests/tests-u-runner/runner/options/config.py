@@ -58,7 +58,8 @@ class Config:
         yaml_path="test-suites",
         cli_name=["test_suites", "test262", "parser", "declgenparser", "hermes", "system", "astchecker", "srcdumper",
                   "ets_func_tests", "ets_runtime", "ets_cts", "ets_gc_stress", "ets_es_checked", "ets_custom",
-                  "sts_ts_subset", "declgenets2ts_ets_cts", "ets_sdk"],
+                  "sts_ts_subset", "declgenets2ts_ets_cts", "declgenets2ts_ets_func_tests",
+                  "declgenets2ts_ets_runtime", "ets_sdk"],
         cast_to_type=_to_test_suites,
         required=True
     )

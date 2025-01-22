@@ -64,8 +64,17 @@ _LOGGER = logging.getLogger("runner.runner_file_based")
 
 
 class PandaBinaries:
-    DISABLE_CHECK_RUNTIME = ['parser', 'declgenets2ts-ets-cts']
-    DISABLE_CHECK_ES2PANDA = ['declgenets2ts-ets-cts']
+    DISABLE_CHECK_RUNTIME = [
+        'parser',
+        'declgenets2ts-ets-cts',
+        'declgenets2ts-ets-func-tests',
+        'declgenets2ts-ets-runtime'
+    ]
+    DISABLE_CHECK_ES2PANDA = [
+        'declgenets2ts-ets-cts',
+        'declgenets2ts-ets-func-tests',
+        'declgenets2ts-ets-runtime'
+    ]
 
     def __init__(self, runner_name: str, build_dir: str, config: Config, conf_kind: ConfigurationKind) -> None:
         self.build_dir = build_dir
@@ -336,6 +345,17 @@ class RunnerFileBased(Runner):
                 fail_lists[test_result.fail_kind].append(test_result)
             else:
                 TestCase().assertTrue(test_result.fail_kind)
+
+    def _get_frontend_test_lists(self) -> Path:
+        symlink_frontend_test = Path(self.config.general.static_core_root) / "tools" / "es2panda" / "test"
+        if symlink_frontend_test.exists():
+            frontend_test = symlink_frontend_test
+        else:
+            frontend_test = Path(
+                self.config.general.static_core_root).parent.parent / "ets_frontend" / "ets2panda" / "test"
+        if not frontend_test.exists():
+            raise Exception(f"There is no path {frontend_test}")
+        return frontend_test / "test-lists"
 
     def __generate_detailed_report(self, results: List[Test]) -> None:
         if self.config.report.detailed_report:

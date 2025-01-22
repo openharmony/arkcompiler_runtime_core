@@ -123,10 +123,6 @@ class RuntimeEtsTestSuite(EtsTestSuite):
         self.__default_test_dir = RuntimeDefaultEtsTestDir(config.general.static_core_root, config.general.test_root)
         self.set_preparation_steps()
 
-    @property
-    def default_list_root_suite_name(self) -> Path:
-        return Path(self.__default_test_dir.list_root, self.name)
-
     def set_preparation_steps(self) -> None:
         self._preparation_steps.append(CopyStep(
             test_source_path=self.__default_test_dir.root,
