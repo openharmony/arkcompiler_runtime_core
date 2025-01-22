@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -261,6 +261,19 @@ Dwarf_Line_Context DebugInfo::CompUnit::GetLineContext()
     return lineCtx_;
 }
 
+DebugInfo::DebugInfo(DebugInfo &&info)
+{
+    fd_ = info.fd_;
+    info.fd_ = INVALID_FD;
+    dbg_ = info.dbg_;
+    info.dbg_ = nullptr;
+    aranges_ = info.aranges_;
+    info.aranges_ = nullptr;
+    arangeCount_ = info.arangeCount_;
+    cuList_ = std::move(info.cuList_);
+    ranges_ = std::move(info.ranges_);
+}
+
 void DebugInfo::Destroy()
 {
     if (dbg_ == nullptr) {
@@ -277,6 +290,20 @@ void DebugInfo::Destroy()
     close(fd_);
     fd_ = INVALID_FD;
     dbg_ = nullptr;
+}
+
+DebugInfo &DebugInfo::operator=(DebugInfo &&info)
+{
+    fd_ = info.fd_;
+    info.fd_ = INVALID_FD;
+    dbg_ = info.dbg_;
+    info.dbg_ = nullptr;
+    aranges_ = info.aranges_;
+    info.aranges_ = nullptr;
+    arangeCount_ = info.arangeCount_;
+    cuList_ = std::move(info.cuList_);
+    ranges_ = std::move(info.ranges_);
+    return *this;
 }
 
 DebugInfo::ErrorCode DebugInfo::ReadFromFile(const char *filename)
@@ -569,25 +596,6 @@ bool DebugInfo::PcMatches(uintptr_t pc, Dwarf_Die die)
     Dwarf_Addr lowPc = DW_DLV_BADADDR;
     Dwarf_Addr highPc = 0;
     return GetDieRangeForPc(pc, die, &lowPc, &highPc);
-}
-
-bool DebugInfo::GetDieRange(Dwarf_Die die, Dwarf_Addr *outLowPc, Dwarf_Addr *outHighPc)
-{
-    Dwarf_Addr lowPc = DW_DLV_BADADDR;
-    Dwarf_Addr highPc = 0;
-    Dwarf_Half form = 0;
-    Dwarf_Form_Class formclass;
-
-    if (dwarf_lowpc(die, &lowPc, nullptr) != DW_DLV_OK ||
-        dwarf_highpc_b(die, &highPc, &form, &formclass, nullptr) != DW_DLV_OK) {
-        return false;
-    }
-    if (formclass == DW_FORM_CLASS_CONSTANT) {
-        highPc += lowPc;
-    }
-    *outLowPc = lowPc;
-    *outHighPc = highPc;
-    return true;
 }
 
 bool DebugInfo::GetDieRangeForPc(uintptr_t pc, Dwarf_Die die, Dwarf_Addr *outLowPc, Dwarf_Addr *outHighPc)
