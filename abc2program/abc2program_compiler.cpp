@@ -91,7 +91,8 @@ void Abc2ProgramCompiler::CompileAbcClass(const panda_file::File::EntityId &reco
                                           pandasm::Program &program)
 {
     ASSERT(!file_->IsExternal(record_id));
-    Abc2ProgramEntityContainer entity_container(*file_, program, *debug_info_extractor_, record_id.GetOffset());
+    Abc2ProgramEntityContainer entity_container(*file_, program, *debug_info_extractor_, record_id.GetOffset(),
+                                                bundle_name_);
     AbcClassProcessor class_processor(record_id, entity_container);
     class_processor.FillProgramData();
 }

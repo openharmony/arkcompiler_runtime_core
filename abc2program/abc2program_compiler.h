@@ -35,6 +35,11 @@ public:
     void CompileAbcClass(const panda_file::File::EntityId &record_id, pandasm::Program &program);
     bool CheckClassId(uint32_t class_id, size_t offset) const;
 
+    void SetBundleName(std::string bundle_name)
+    {
+        bundle_name_ = bundle_name;
+    }
+
 private:
     bool IsVersionLessEqual(const std::array<uint8_t, panda_file::File::VERSION_SIZE> &version_1,
         const std::array<uint8_t, panda_file::File::VERSION_SIZE> &version_2) const;
@@ -42,6 +47,8 @@ private:
     std::unique_ptr<panda_file::DebugInfoExtractor> debug_info_extractor_;
     // the single whole program compiled from the abc file, only used in non-parallel mode
     pandasm::Program *prog_ = nullptr;
+    // It should modify record name when the bundle_name_ is not empty
+    std::string bundle_name_ {};
 }; // class Abc2ProgramCompiler
 
 } // namespace panda::abc2program

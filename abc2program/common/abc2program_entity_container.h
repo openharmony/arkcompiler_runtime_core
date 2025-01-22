@@ -32,9 +32,9 @@ public:
     Abc2ProgramEntityContainer(const panda_file::File &file,
                                pandasm::Program &program,
                                const panda_file::DebugInfoExtractor &debug_info_extractor,
-                               uint32_t class_id)
+                               uint32_t class_id, std::string bundle_name)
         : file_(file), program_(program), debug_info_extractor_(debug_info_extractor),
-          current_class_id_(class_id) {}
+          current_class_id_(class_id), bundle_name_(bundle_name) {}
     const panda_file::File &GetAbcFile() const;
     pandasm::Program &GetProgram() const;
 
@@ -54,6 +54,8 @@ public:
     void TryAddUnprocessedNestedLiteralArrayId(uint32_t nested_literal_array_id);
     std::string GetLiteralArrayIdName(uint32_t literal_array_id);
     const panda_file::DebugInfoExtractor &GetDebugInfoExtractor() const;
+    void ModifyRecordName(std::string &record_name);
+    bool IsSourceFileRecord(const std::string& record_name);
 
 private:
     std::string ConcatFullMethodNameById(const panda_file::File::EntityId &method_id);
@@ -68,6 +70,8 @@ private:
     std::unordered_set<uint32_t> processed_nested_literal_array_id_set_;
     std::unordered_set<uint32_t> unprocessed_nested_literal_array_id_set_;
     uint32_t current_class_id_{0};
+    // It should modify record name when the bundle_name_ is not empty
+    std::string bundle_name_ {};
 };  // class Abc2ProgramEntityContainer
 
 }  // namespace panda::abc2program
