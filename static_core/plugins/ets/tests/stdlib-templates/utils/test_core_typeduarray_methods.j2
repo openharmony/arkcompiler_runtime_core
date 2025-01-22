@@ -30,6 +30,10 @@ function main(): int {
     failures += check(testTypedArrayReduce(), "Test reduce method")
     failures += check(testTypedArrayReduceRight(), "Test reduceRight method")
 
+    failures += check(testTypedArrayFill1Arg(), "Test fill(value) method")
+    failures += check(testTypedArrayFill2Args(), "Test fill(value, start) method")
+    failures += check(testTypedArrayFill3Args(), "Test fill(value, start, end) method")
+
     if (failures > 0){
         console.log("failed");
         return fail;
@@ -55,7 +59,8 @@ function check(result: number, message: String): number {
     return fail;
 }
 
-const source: {{.item.sourceElementsType}}[] = {{.item.data}};
+const source: {{.item.primitiveType}}[] = {{.item.data}};
+const abnormalSource: {{.item.primitiveType}}[] = {{.item.abnormalData}};
 
 type ObjectTypeAndExpectations<T> = [{{.item.objectType}}, T]
 
@@ -490,5 +495,180 @@ const testTypedArrayReduceRight = parametrize<ObjectTypeAndExpectations<[{{.item
         failures += check(boolToResult(isCorrectPrevCurIndexArray), `Expected ${expectedResultFull}, got ${testPrevCurIndexArray} on prevCurIndexArray`)
 
         return failures == 0 ? success : fail
+    }
+)
+
+const testTypedArrayFill1Arg = parametrize<ObjectTypeAndExpectations<boolean[]>>(
+    "testTypedArrayFill1Arg<{{.item.objectType}}>",
+    [
+        [
+            {{.item.objectType}}.of({{.item.create}}(10), {{.item.create}}(20)),
+            {%- if (item.objectType == 'Uint8ClampedArray') %}
+            [true, true, false, true]
+            {%- else %}
+            [true, true, true, true]
+            {%- endif %}
+        ] as ObjectTypeAndExpectations<boolean[]>,
+    ],
+    (args: ObjectTypeAndExpectations<boolean[]>): number => {
+        const array = args[0]
+        const expected = args[1]
+        const sources = [source, abnormalSource]
+        const copy = () => new {{.item.objectType}}(array)
+
+        let failures = 0
+
+        for (let src of sources) {
+            for (let val of src) {
+                const value = {{.item.create}}(val)
+                const fillVal = copy().fill(value);
+                const isAllChanged = fillVal.every((x) => x{{.item.cast2primitive}} == val)
+                failures += check(boolToResult(isAllChanged == expected[0]), `.fill(${value}) = ${fillVal}`)
+            }
+        }
+
+        {%- if item.objectType != 'BigUint64Array' %}
+
+        const fillNaN = copy().fill(NaN)
+        const isNanAllZeroes = fillNaN.every((x) => x == 0)
+        failures += check(boolToResult(isNanAllZeroes == expected[1]), `.fill(NaN) = ${fillNaN}`)
+
+        const fillPosInf = copy().fill(+Infinity)
+        const isPosInfAllZeroes = fillPosInf.every((x) => x == 0)
+        failures += check(boolToResult(isPosInfAllZeroes == expected[2]), `.fill(+Infinity) = ${fillPosInf}`)
+
+        const fillNegInf = copy().fill(-Infinity)
+        const isNegInfAllZeroes = fillNegInf.every((x) => x == 0)
+        failures += check(boolToResult(isNegInfAllZeroes == expected[3]), `.fill(-Infinity) = ${fillNegInf}`)
+
+        {%- endif %}
+
+        return failures == 0 ? success: fail
+    }
+)
+
+const testTypedArrayFill2Args = parametrize<ObjectTypeAndExpectations<boolean[]>>(
+    "testTypedArrayFill2Args<{{.item.objectType}}>",
+    [
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(10),
+                {{.item.create}}(20),
+                {{.item.create}}(30),
+                {{.item.create}}(40)
+            ),
+            [true, true, true, true, true]
+        ] as ObjectTypeAndExpectations<boolean[]>,
+    ],
+    (args: ObjectTypeAndExpectations<boolean[]>): number => {
+        const array = args[0]
+        const expected = args[1]
+        const sources = [source, abnormalSource]
+        const last = array.length - 1
+        const copy = () => new {{.item.objectType}}(array)
+
+        let failures = 0
+
+        for (let src of sources) {
+            for (let val of src) {
+                const value = {{.item.create}}(val)
+
+                const fill0 = copy().fill(value, 0);
+                const isAllChanged = fill0.every((x) => x{{.item.cast2primitive}} == val)
+                failures += check(boolToResult(isAllChanged == expected[0]), `.fill(value, 0) = ${fill0}`)
+                
+                const fill1 = copy().fill(value, 1)
+                const isAllChangedExceptFirst = fill1[0] == array[0] &&
+                    fill1.slice(1).every((x) => x{{.item.cast2primitive}} == val)
+                failures += check(boolToResult(isAllChangedExceptFirst == expected[1]), `.fill(value, 1) = ${fill1}`)
+                
+                const fillLen = copy().fill(value, array.length)
+                const isNothingChanged = fillLen.every((x, i) => x == array[i])
+                failures += check(boolToResult(isNothingChanged == expected[2]), `.fill(value, array.length) = ${fillLen}`)
+                
+                const fillM1 = copy().fill(value, -1)
+                const isOnlyLastChanged = fillM1[last]{{.item.cast2primitive}} == val &&
+                    fillM1.slice(0, last - 1).every((x, i) => x == array[i])
+                failures += check(boolToResult(isOnlyLastChanged == expected[3]), `.fill(value, -1) = ${fillM1}`)
+                
+                const fillMLen = copy().fill(value, -array.length);
+                const isAllChangedNeg = fillMLen.every((x) => x{{.item.cast2primitive}} == val)
+                failures += check(boolToResult(isAllChangedNeg == expected[4]), `.fill(value, -array.length) = ${fillMLen}`)
+            }
+        }
+
+        return failures == 0 ? success: fail
+    }
+)
+
+const testTypedArrayFill3Args = parametrize<ObjectTypeAndExpectations<boolean[]>>(
+    "testTypedArrayFill3Args<{{.item.objectType}}>",
+    [
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(10),
+                {{.item.create}}(20),
+                {{.item.create}}(30),
+                {{.item.create}}(40)
+            ),
+            [true, true, true, true, true, true, true, true, true]
+        ] as ObjectTypeAndExpectations<boolean[]>,
+    ],
+    (args: ObjectTypeAndExpectations<boolean[]>): number => {
+        const array = args[0]
+        const expected = args[1]
+        const sources = [source, abnormalSource]
+        const last = array.length - 1
+        const copy = () => new {{.item.objectType}}(array)
+
+        let failures = 0
+
+        for (let src of sources) {
+            for (let val of src) {
+                const value = {{.item.create}}(val)
+
+                const fill00 = copy().fill(value, 0, 0)
+                const isNothingChanged = fill00.every((x, i) => x == array[i])
+                failures += check(boolToResult(isNothingChanged == expected[0]), `.fill(value, 0, 0) = ${fill00}`)
+                
+                const fill01 = copy().fill(value, 0, 1)
+                const isOnlyFirstChanged = fill01[0]{{.item.cast2primitive}} == val &&
+                    fill01.slice(1).every((x, i) => x == array[i + 1])
+                failures += check(boolToResult(isOnlyFirstChanged == expected[1]), `.fill(value, 0, 1) = ${fill01}`)
+                
+                const fill0Len = copy().fill(value, 0, array.length)
+                const isAllChanged = fill0Len.every((x) => x{{.item.cast2primitive}} == val)
+                failures += check(boolToResult(isAllChanged == expected[2]), `.fill(value, 0, array.length) = ${fill0Len}`)
+                
+                const fill0M1 = copy().fill(value, 0, -1)
+                const isAllChangedExceptLast = fill0M1[last] == array[last] &&
+                    fill0M1.slice(0, last - 1).every((x) => x{{.item.cast2primitive}} == val)
+                failures += check(boolToResult(isAllChangedExceptLast == expected[3]), `.fill(value, 0, -1) = ${fill0M1}`)
+                
+                const fill0MLen = copy().fill(value, 0, -array.length)
+                const isNothingChangedNeg = fill0MLen.every((x, i) => x == array[i])
+                failures += check(boolToResult(isNothingChangedNeg == expected[4]), `.fill(value, 0, -array.length) = ${fill0MLen}`)
+
+                const fill1Last = copy().fill(value, 1, last)
+                const isOnlyCenterChanged = fill1Last[0] == array[0] && fill1Last[last] == array[last] &&
+                    fill1Last.slice(1, last - 1).every((x) => x{{.item.cast2primitive}} == val)
+                failures += check(boolToResult(isOnlyCenterChanged == expected[5]), `.fill(value, 0, last) = ${fill1Last}`)
+
+                const fill1M1 = copy().fill(value, 1, -1)
+                const isOnlyCenterChangedNeg = fill1M1[0] == array[0] && fill1M1[last] == array[last] &&
+                    fill1M1.slice(1, last - 1).every((x) => x{{.item.cast2primitive}} == val)
+                failures += check(boolToResult(isOnlyCenterChangedNeg == expected[6]), `.fill(value, 0, -1) = ${fill1M1}`)
+            
+                const fillLast1 = copy().fill(value, last, 1)
+                const isNothingChangedReverse = fillLast1.every((x, i) => x == array[i])
+                failures += check(boolToResult(isNothingChangedReverse == expected[7]), `.fill(value, last, 1) = ${fillLast1}`)
+
+                const fillM11 = copy().fill(value, -1, 1)
+                const isNothingChangedReverseNeg = fillM11.every((x, i) => x == array[i])
+                failures += check(boolToResult(isNothingChangedReverseNeg == expected[8]), `.fill(value, -1, 1) = ${fillM11}`)
+            }
+        }
+
+        return failures == 0 ? success: fail
     }
 )

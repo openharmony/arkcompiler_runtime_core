@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-{% for item in std_core_typedarrays_function1 %}
+{% for item in std_core_typedarrays_methods %}
 /*---
 desc:  {function: {{.item.object_type}}_{{.item.objectType}}}
 ---*/
