@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,10 +14,9 @@
  */
 
 function main() {
-    const MS2NS = 1000000;
+    const iterations = 1000000;
     let totalTime = 0;
 
-    const array = [1, 2, 3, 4, 5];
     class Person {
         name = 'string';
         constructor() {
@@ -25,25 +24,18 @@ function main() {
     }
     const obj = new Person();
 
-    function toStringify(arg, target) {
-        let start;
-        let loopTime = 0;
+    let start;
+    let loopTime = 0;
 
-        for (let i = 0; i < MS2NS; i++) {
-            start = process.hrtime.bigint();
-            JSON.stringify(arg);
-            loopTime += Number(process.hrtime.bigint() - start);
-        }
-
-        console.log(`Benchmark result: stringify_j2j ${target} ` + loopTime);
-        totalTime += loopTime;
+    for (let i = 0; i < iterations; i++) {
+        start = process.hrtime.bigint();
+        JSON.stringify(obj);
+        loopTime += Number(process.hrtime.bigint() - start);
     }
 
-    toStringify(array, 'array');
+    totalTime += loopTime;
 
-    toStringify(obj, 'object');
-
-    console.log('Benchmark result: stringify_j2j ' + totalTime);
+    console.log('Benchmark result: stringify_object_j2j ' + totalTime);
 }
 
 main();

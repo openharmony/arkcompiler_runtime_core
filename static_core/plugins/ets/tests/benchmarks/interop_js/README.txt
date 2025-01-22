@@ -3,6 +3,7 @@ How to run
 cd $PANDA_ROOT/tests/vm-benchmarks
 # assume PANDA and VMB are built and installed per $PANDA_ROOT/tests/vm-benchmarks/interop.readme.md
 export PANDA_BUILD=$PANDA_ROOT/build
+export PANDA_STDLIB_SRC=$PANDA_ROOT/plugins/ets/stdlib
 vmb run -p arkts_node_interop_host -v debug --exclude-list ../../plugins/ets/tests/benchmarks/interop_js/exclude-interop-benchmarks.txt ../../plugins/ets/tests/benchmarks/interop_js
 
 Note that some benchmarks may need to have corrected compilation executed prior to run due to limitations of VMB (#697), like:
