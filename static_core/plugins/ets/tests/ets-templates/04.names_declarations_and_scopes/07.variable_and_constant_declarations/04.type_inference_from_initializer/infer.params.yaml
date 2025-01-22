@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,8 +26,8 @@ cases:
     use: ' arr[0] = new Object();'
     assert: arr[0] instanceof Object
 
-  - decl: 'let arr = new (Error|null)[1];  // inferred array of Error|null'
-    assert: arr[0] == null
+  - decl: 'let arr = new (Error|undefined)[1];  // inferred array of Error|undefined'
+    assert: arr[0] == undefined
 
   - decl: 'const obj = new Object[1];  // inferred array of Objects'
     use: 'obj[0] = new Long(Long.MAX_VALUE);'

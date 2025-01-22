@@ -53,10 +53,10 @@ function_decls:
           foo(new Long[0])
 
     - decl: |-
-          function foo(a: (Object|null)[]) {}
+          function foo(a: (Object|undefined)[]) {}
       call: |-
-          let arr: (Object|null)[] = new (Object|null)[1]
-          arr[0] = null
+          let arr: (Object|undefined)[] = new (Object|undefined)[1]
+          arr[0] = undefined
           foo(arr)
 
     # enum param, void return

@@ -72,7 +72,7 @@ cases:
               name: string|null
           }
           class B implements A {
-              name: string|null
+              name: string|null = null
           }
       use: |-
           let arr: A[] = new B[2]
@@ -92,7 +92,7 @@ cases:
 
     - decl: |-
           interface A {
-              name: string|null
+              name: string|undefined
           }
           interface B extends A {
               age: number
@@ -103,7 +103,7 @@ cases:
           let a: A = b
           assertTrue( a instanceof A && a.name == "John" )
           let c: B = {}
-          assertTrue( c instanceof B && c.age == 0 && c.name == null )
+          assertTrue( c instanceof B && c.age == 0 && c.name == undefined )
 
     - decl: |-
           interface A {

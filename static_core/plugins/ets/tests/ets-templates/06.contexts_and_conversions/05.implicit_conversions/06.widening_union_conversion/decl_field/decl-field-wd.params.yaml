@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -157,6 +157,7 @@ cases:
           let b1: BN = new B()
           let b2: BN = null
       to_type: null|A|B|C|Error
+      init_value: 'null'
       values:
           - { from_type: 'C|AN|Error', ref_type: 'AN', expr: 'a1', eq: '===' }
           - { from_type: 'C|AN', ref_type: 'AN', expr: 'a2', eq: '===' }

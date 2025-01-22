@@ -130,12 +130,12 @@ class ForbiddenPrimitives {
 
 class CycleA {
     // x : CycleB = new CycleB()
-    x : CycleB|null
+    x : CycleB | null = null
 }
 
 class CycleB {
     // x : CycleA = new CycleA()
-    x : CycleA|null
+    x : CycleA | null = null
 }
 
 function testCheckParse(): int {

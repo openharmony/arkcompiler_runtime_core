@@ -20,7 +20,8 @@ assert: If the class being declared is the primordial class Object, then the def
 
 class A {
   public x: int;
-  public b: B | null;
+  public b1: B | undefined;
+  public b2: B | null = null;
 }
 
 class B extends A{
@@ -30,6 +31,7 @@ class B extends A{
 function main(): void {
   let instance: B = new B();
 
-  assertEQ( instance.x, 0 );
-  assertEQ( instance.b, null );
+  assertEQ(instance.x, 0);
+  assertEQ(instance.b1, undefined);
+  assertEQ(instance.b2, null);
 }

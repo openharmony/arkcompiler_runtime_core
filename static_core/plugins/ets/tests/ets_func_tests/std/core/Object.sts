@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@ function main(): int {
 }
 
 type Tuple = [string, NullishType]
+type NullishTuple = Tuple | null | undefined
 
 class Point2D {
     static axisnum: number = 2
@@ -86,16 +87,16 @@ function objArraysAreEqual(a: NullishType[], b: NullishType[]): boolean {
     return true
 }
 
-function tupleAreEqual(a: Tuple[], b: Tuple[]): boolean {
+function tupleAreEqual(a: NullishTuple[], b: NullishTuple[]): boolean {
     let alen = a.length
     if (alen != b.length) {
         return false
     }
     for (let i = 0; i < alen; i++) {
-        if (a[i].length != b[i].length) {
+        if (a[i]!.length != b[i]!.length) {
             return false
         }
-        if (a[i][0] != b[i][0] || !__runtimeEquals(a[i][1], b[i][1])) {
+        if (a[i]![0] != b[i]![0] || !__runtimeEquals(a[i]![1], b[i]![1])) {
             return false
         }
     }
@@ -227,7 +228,7 @@ function objectEntries(): int {
         return a + 1
     }
 
-    let emptyTuple: Tuple[] = new Tuple[0]
+    let emptyTuple: NullishTuple[] = new NullishTuple[0]
 
     result += tupleAreEqual(Object.entries(c), emptyTuple) ? 0 : 1
     result += tupleAreEqual(Object.entries(bo), emptyTuple) ? 0 : 1
@@ -238,22 +239,22 @@ function objectEntries(): int {
     result += tupleAreEqual(Object.entries(fl), emptyTuple) ? 0 : 1
     result += tupleAreEqual(Object.entries(dou), emptyTuple) ? 0 : 1
 
-    let arrVal: Tuple[] = new Tuple[3]
-    arrVal[0] = ["0", new Number(10)]
-    arrVal[1] = ["1", new Number(20)]
-    arrVal[2] = ["2", new Number(30)]
+    let arrVal: NullishTuple[] = new NullishTuple[3]
+    arrVal[0] = ["0", new Number(10)] as Tuple
+    arrVal[1] = ["1", new Number(20)] as Tuple
+    arrVal[2] = ["2", new Number(30)] as Tuple
     result += tupleAreEqual(Object.entries(arr), arrVal) ? 0 : 1
 
-    let strVal: Tuple[] = new Tuple[3]
-    strVal[0] = ["0", "a"]
-    strVal[1] = ["1", "b"]
-    strVal[2] = ["2", "c"]
+    let strVal: NullishTuple[] = new NullishTuple[3]
+    strVal[0] = ["0", "a"] as Tuple
+    strVal[1] = ["1", "b"] as Tuple
+    strVal[2] = ["2", "c"] as Tuple
     result += tupleAreEqual(Object.entries(str), strVal) ? 0 : 1
 
-    let clVal: Tuple[] = new Tuple[3]
-    clVal[0] = ["x", new Number(10)]
-    clVal[1] = ["y", null]
-    clVal[2] = ["z", new Number(30)]
+    let clVal: NullishTuple[] = new NullishTuple[3]
+    clVal[0] = ["x", new Number(10)] as Tuple
+    clVal[1] = ["y", null] as Tuple
+    clVal[2] = ["z", new Number(30)] as Tuple
     result += tupleAreEqual(Object.entries(cl), clVal) ? 0 : 1
 
     result += tupleAreEqual(Object.entries(lambda), emptyTuple) ? 0 : 1

@@ -69,13 +69,13 @@ function_decls:
         assertTrue( f instanceof Long[] && f.length == 0 )
 
     - decl: |-
-        function foo(): (Object|null)[] {
-            let arr: (Object|null)[] = new (Object|null)[0]
+        function foo(): (Object|undefined)[] {
+            let arr: (Object|undefined)[] = new (Object|undefined)[0]
             return arr;
         }
       call: |-
-        let f: (Object|null)[] = foo();
-        assertTrue( f instanceof (Object|null)[] && f.length == 0)
+        let f: (Object|undefined)[] = foo();
+        assertTrue( f instanceof (Object|undefined)[] && f.length == 0)
 
     # no params, return enum
     - decl: |-

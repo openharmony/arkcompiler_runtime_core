@@ -231,8 +231,8 @@ function builtin_insertion_sort<T>(arr: T[], startIndex: int, endIndex: int, com
 function perform_merge<T>(arr: T[], startIndex: int, midIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
-    let left = new T[len1];
-    let right = new T[len2];
+    let left = new (T | undefined)[len1];
+    let right = new (T | undefined)[len2];
     for (let i = 0; i < len1; i++) {
         left[i] = arr[startIndex + i];
     }
@@ -243,22 +243,22 @@ function perform_merge<T>(arr: T[], startIndex: int, midIndex: int, endIndex: in
     let j = 0;
     let k = startIndex;
     while (i < len1 && j < len2) {
-        if (comp(left[i], right[j]) as int <= 0) {
-            arr[k] = left[i];
+        if (comp(left[i]!, right[j]!) as int <= 0) {
+            arr[k] = left[i]!;
             i++;
         } else {
-            arr[k] = right[j];
+            arr[k] = right[j]!;
             j++;
         }
         k++;
     }
     while (i < len1) {
-        arr[k] = left[i];
+        arr[k] = left[i]!;
         k++;
         i++;
     }
     while (j < len2) {
-        arr[k] = right[j];
+        arr[k] = right[j]!;
         k++;
         j++;
     }
@@ -295,7 +295,7 @@ function defaultComparatorStr(a: String, b: String): number {
     return a.compareTo(b)
 }
 
-type buffStr = String | null
+type buffStr = String | undefined
 function stringified_insertion_sort<T>(arr: T[], arrStr: buffStr[], startIndex: int, endIndex: int): void {
     for (let i = startIndex + 1; i < endIndex; i++) {
         const tmp = arr[i]
@@ -323,7 +323,7 @@ function stringified_insertion_sort<T>(arr: T[], arrStr: buffStr[], startIndex: 
 function stringified_perform_merge<T>(arr: T[], arrStr: buffStr[], startIndex: int, midIndex: int, endIndex: int): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
-    type buffType = T | null
+    type buffType = T | undefined
     let left = new buffType[len1]
     let right = new buffType[len2]
     let leftStr = new buffStr[len1]

@@ -18,7 +18,7 @@ package escompat;
 export class ErrorOptions {
     cause: Object | undefined
 
-    constructor(cause: Object | undefined = undefined) {
+    constructor(cause?: Object) {
         this.cause = cause
     }
 }
@@ -32,7 +32,7 @@ export class Error {
     message: String
     name: String
     private stackLines: StackTraceElement[] = []
-    private stack_: String | undefined = undefined
+    private stack_?: String
 
     /**
     * Constructs a new error instance with provided message and cause

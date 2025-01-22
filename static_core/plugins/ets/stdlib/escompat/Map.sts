@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,10 +144,10 @@ final class EmptyMapIterator<R> implements IterableIterator<R> {
     }
 }
 
-type MapBucket<K, V> = Array<MapEntry<K, V>> | null
+type MapBucket<K, V> = Array<MapEntry<K, V>> | undefined
 
 export class Map<K, V> implements ReadonlyMap<K, V> {
-    private headEntry: MapEntry<K, V> | undefined = undefined
+    private headEntry?: MapEntry<K, V>
 
     private buckets: MapBucket<K, V>[] = []
     private sizeVal: int = 0
@@ -181,7 +181,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      * Constructs a Map from collection
      * @param entries initial collection
      */
-    constructor(entries?: Iterable<[K, V]> | readonly (readonly [K, V])[] | null) {
+    constructor(entries?: Iterable<[K, V]> | readonly ((readonly [K, V]) | null | undefined)[] | null) {
         if (entries == null) {
             this.buckets = new MapBucket<K, V>[Map.MIN_BUCKETS_COUNT]
         } else if (entries instanceof Iterable) {
@@ -206,7 +206,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
                 if (entries[i] == null) {
                     continue
                 }
-                this.set(entries[i][Map.ENTRY_KEY], entries[i][Map.ENTRY_VAL])
+                this.set(entries[i]![Map.ENTRY_KEY], entries[i]![Map.ENTRY_VAL])
             }
         }
     }
@@ -278,7 +278,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     private getOrCreateBucket(k: K): Array<MapEntry<K, V>> {
         const idx = this.getBucketIndex(k)
         const bucket = this.buckets[idx]
-        if (bucket === null) {
+        if (bucket === undefined) {
             const newBucket = new Array<MapEntry<K, V>>()
             this.buckets[idx] = newBucket
             return newBucket
@@ -351,7 +351,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      */
     override has(key: K): boolean {
         const buck = this.getBucket(key)
-        if (buck !== null) {
+        if (buck !== undefined) {
             const buckSize = buck.actualLength
             for (let i = 0; i < buckSize; i++) {
                 const entry = buck.$_get_unsafe(i)
@@ -392,7 +392,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
 
     private deleteImpl(key: K): boolean {
         const buck = this.getBucket(key)
-        if (buck === null) {
+        if (buck === undefined) {
             return false
         }
 
@@ -437,7 +437,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      */
     override get(key: K): V | undefined {
         const buck = this.getBucket(key)
-        if (buck !== null) {
+        if (buck !== undefined) {
             const buckSize = buck.actualLength
             for (let i = 0; i < buckSize; i++) {
                 const entry = buck.$_get_unsafe(i)

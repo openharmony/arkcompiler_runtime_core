@@ -151,21 +151,21 @@ cases:
 
     - res: 'object'
       vals:
-          - { type: 'null', expr: 'null' }
+          - { type: 'null', init_value: 'null', expr: 'null' }
 
     - res: 'object'
       decl: |-
           interface I {}
           class A implements I {}
       vals:
-          - { type: 'A|null', expr: 'new A()' }
-          - { type: 'A|null', expr: 'null' }
-          - { type: 'I|null', expr: 'new A()' }
-          - { type: 'I|null', expr: 'null' }
-          - { type: 'A[]|null', expr: '[new A()]' }
-          - { type: 'A[]|null', expr: 'null' }
-          - { type: 'I[]|null', expr: '[new A()]' }
-          - { type: 'I[]|null', expr: 'null' }
+          - { type: 'A|null', init_value: 'null', expr: 'new A()' }
+          - { type: 'A|null', init_value: 'null', expr: 'null' }
+          - { type: 'I|null', init_value: 'null', expr: 'new A()' }
+          - { type: 'I|null', init_value: 'null', expr: 'null' }
+          - { type: 'A[]|null', init_value: 'null', expr: '[new A()]' }
+          - { type: 'A[]|null', init_value: 'null', expr: 'null' }
+          - { type: 'I[]|null', init_value: 'null', expr: '[new A()]' }
+          - { type: 'I[]|null', init_value: 'null', expr: 'null' }
 
     - res: 'number'
       decl: |-

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,12 +21,12 @@ desc:  {function: {{.item.box_type_desc}}}
 const ARRAY_SIZE = {{.item.box_type_array_size}};
 
 interface Iface<T> {
-    getBoxObjectArray() : T[];
+    getBoxObjectArray() : (T | undefined)[];
 }
 
 class BoxTypeArrayProvider<T> implements Iface<T> {
-    override getBoxObjectArray(): T[] {
-        return new T[ARRAY_SIZE];
+    override getBoxObjectArray(): (T | undefined)[] {
+        return new (T | undefined)[ARRAY_SIZE];
     }
 }
 

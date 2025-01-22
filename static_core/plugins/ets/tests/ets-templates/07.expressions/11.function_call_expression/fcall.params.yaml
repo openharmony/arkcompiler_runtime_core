@@ -119,7 +119,7 @@ cases:
               globl += p
               return globl
           }
-          let nbar: ss|null
+          let nbar: ss|undefined
       use: |-
           globl = "G"
           assertTrue( nbar?.("abc") === undefined )

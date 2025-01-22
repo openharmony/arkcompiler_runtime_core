@@ -20,8 +20,8 @@ desc: >-
 ---*/
 
 class A {
-    name: string|null
-    age: number|null
+    name: string|null = null
+    age: number|null = null
     constructor() {
         let x = 0
         let y = 1

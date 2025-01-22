@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@ export const OBJECT_TO_LOCALE_STRING_MEMBER_NAME: string   = "toLocaleString"
 export const OBJECT_HAS_OWN_PROPERTY_MEMBER_NAME: string   = "hasOwnProperty"
 
 type EntryType = [PropertyKey, NullishType]
+type NullishEntryType = EntryType | null | undefined
 
 /**
  * `object` is an alias for type `Object`
@@ -267,8 +268,8 @@ export class Object {
     *
     * @returns array representation of key/value
     */
-    public static entries(rec: Record<PropertyKey, NullishType>): EntryType[] {
-        const entries = new EntryType[rec.size as int]
+    public static entries(rec: Record<PropertyKey, NullishType>): NullishEntryType[] {
+        const entries = new NullishEntryType[rec.size as int]
 
         let i = 0
         for (const entry of rec.entries()) {
@@ -286,7 +287,7 @@ export class Object {
     *
     * @returns array representation of key/value
     */
-    public static entries(o: Object): EntryType[] {
+    public static entries(o: Object): NullishEntryType[] {
         if (o instanceof Char ||
             o instanceof Boolean ||
             o instanceof Byte ||
@@ -295,15 +296,15 @@ export class Object {
             o instanceof Long ||
             o instanceof Float ||
             o instanceof Double) {
-            return new EntryType[0]
+            return new NullishEntryType[0]
         }
         if (o instanceof String) {
             const sv = o as string
             const len = sv.getLength()
             if (len == 0) {
-                return new EntryType[0]
+                return new NullishEntryType[0]
             }
-            let res = new EntryType[len]
+            let res = new NullishEntryType[len]
             for (let i = 0; i < len; i++) {
                 // NOTE(shumilov-petr): must be replaced by `sv.charAt(i) as string` when #15731 will be fixed
                 res[i] = [new Int(i).toString(), new Char(sv.charAt(i)).toString()]
@@ -314,28 +315,28 @@ export class Object {
         if (t instanceof ClassType) {
             const cv = Value.of(o) as ClassValue
             if (cv.getFieldsNum() == 0) {
-                return new EntryType[0]
+                return new NullishEntryType[0]
             }
             const keys = Object.keys(o)
             const len = keys.length
-            let res = new EntryType[len]
+            let res = new NullishEntryType[len]
             for (let i = 0; i < len; i++) {
-                res[i] = [keys[i], cv.getFieldByName(keys[i]).getData()]
+                res[i] = [keys[i], cv.getFieldByName(keys[i]).getData()] as EntryType
             }
             return res
         } else if (t instanceof ArrayType) {
             const av = Value.of(o) as ArrayValue
             const len = av.getLength()
             if (len == 0) {
-                return new EntryType[0]
+                return new NullishEntryType[0]
             }
-            let res = new EntryType[len as int]
+            let res = new NullishEntryType[len as int]
             for (let i = 0; i < len; i++) {
-                res[i] = [new Int(i).toString(), av.getElement(i).getData()]
+                res[i] = [new Int(i).toString(), av.getElement(i).getData()] as EntryType
             }
             return res
         } else if (t instanceof LambdaType) {
-            return new EntryType[0]
+            return new NullishEntryType[0]
         } else if (t instanceof EnumType) {
             // NOTE(shumilov-petr): Not implemented
             throw new Error("Not implemented")
@@ -521,7 +522,7 @@ export class Object {
         for (const s of source) {
             const entries = Object.entries(s)
             for (const e of entries) {
-                target.set(e[0], e[1])
+                target.set(e![0], e![1])
             }
         }
         return target

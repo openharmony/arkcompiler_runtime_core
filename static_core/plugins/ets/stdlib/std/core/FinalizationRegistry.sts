@@ -36,7 +36,7 @@ export final class FinalizationRegistry<T> {
         this.enlarge_freeidx(1);
 
         this.obj_token_refs = new Object[2 * size];
-        this.callback_arguments = new T[size];
+        this.callback_arguments = new (T | undefined)[size];
     }
 
     private enlarge_arrays(newsize: int): void {
@@ -53,7 +53,7 @@ export final class FinalizationRegistry<T> {
             this.obj_token_refs[i] = old_obj_token_refs[i];
         }
         let old_callback_arguments = this.callback_arguments;
-        this.callback_arguments = new T[newsize];
+        this.callback_arguments = new (T | undefined)[newsize];
         for (let i = 0; i < old_callback_arguments.length; ++i) {
             this.callback_arguments[i] = old_callback_arguments[i];
         }
@@ -129,7 +129,7 @@ export final class FinalizationRegistry<T> {
      */
     public register(object: Object, callbackArg: T, token?: Object): void {
         let refObject = new WeakRef<Object>(object);
-        let refToken: WeakRef<Object> | undefined = undefined;
+        let refToken?: WeakRef<Object>;
         if (token != undefined) {
             refToken = new WeakRef<Object>(token);
         }
