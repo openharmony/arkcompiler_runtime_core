@@ -1,1 +1,6 @@
-System ArkTS: warning treated as error.: Suggest 'final' modifier for class [werror_1.sts:21:7]
+Warning: Suggest 'final' modifier for class [werror_1.sts:21:7]
+Warning: Suggest 'final' modifier for method [werror_1.sts:22:14]
+Warning: Suggest 'final' modifier for method [werror_1.sts:23:16]
+Warning: Suggest 'final' modifier for class [werror_1.sts:28:7]
+Warning: Suggest 'final' modifier for method [werror_1.sts:29:8]
+Warning: Suggest 'final' modifier for class [werror_1.sts:34:7]

@@ -13232,3 +13232,10 @@ intl402/DateTimeFormat/prototype/format/dayPeriod-short-en.js
 intl402/DateTimeFormat/prototype/formatToParts/dayPeriod-long-en.js
 intl402/DateTimeFormat/prototype/formatToParts/dayPeriod-narrow-en.js
 intl402/DateTimeFormat/prototype/formatToParts/dayPeriod-short-en.js
+
+# ES2PANDA_FAIL not bug. es2panda log semantic error, instead of syntax error
+language/module-code/early-dup-export-as-star-as.js
+language/module-code/early-dup-export-dflt-id.js
+language/module-code/early-dup-export-id-as.js
+language/module-code/early-dup-export-id.js
+language/module-code/early-dup-export-star-as-dflt.js
