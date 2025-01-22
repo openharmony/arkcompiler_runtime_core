@@ -31,6 +31,15 @@
 #include "pgo.h"
 
 namespace panda::pandasm {
+
+constexpr size_t DEFAULT_ITEM_THREAD_COUNT = 8;;
+struct EmitterConfig {
+    uint8_t api = 0;
+    std::string subApi = panda_file::DEFAULT_SUB_API_VERSION;
+    bool isDebug = false;
+    size_t fileThreadCount = DEFAULT_ITEM_THREAD_COUNT;
+};
+
 class AsmEmitter {
 public:
     struct PandaFileToPandaAsmMaps {
@@ -64,7 +73,7 @@ public:
 
     // The function releases the data in progs in advance for the sake of the peak memory at compiler time.
     static bool EmitPrograms(const std::string &filename, const std::vector<Program *> &progs, bool emit_debug_info,
-                             uint8_t api = 0, std::string subApi = panda_file::DEFAULT_SUB_API_VERSION);
+                             const EmitterConfig &emitterConfig = EmitterConfig {});
 
     static std::unique_ptr<const panda_file::File> Emit(const Program &program,
                                                         PandaFileToPandaAsmMaps *maps = nullptr,
@@ -74,6 +83,11 @@ public:
     static std::string GetLastError()
     {
         return last_error;
+    }
+
+    static void SetLastError(const std::string &message)
+    {
+        last_error = message;
     }
 
 private:
@@ -150,11 +164,6 @@ private:
         panda_file::ItemContainer *items,
         const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitive_types,
         const Type &type, const Program &program);
-
-    static void SetLastError(const std::string &message)
-    {
-        last_error = message;
-    }
 
     static bool MakeItemsForSingleProgram(panda_file::ItemContainer *items, const Program &program,
         bool emit_debug_info, AsmEntityCollections &entities,
