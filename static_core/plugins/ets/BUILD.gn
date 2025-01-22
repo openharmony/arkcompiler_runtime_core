@@ -187,6 +187,7 @@ if (with_stdlib) {
       deps = [
         "$ark_root/plugins/ets/tests/interop_js/test_helper:interop_test_helper",
         "$ark_root/tools/ark_js_napi_cli:HybridXGCTests",
+        "tests/interop_js/eacoro:eacoro_tests",
         "tests/interop_js/xgc:xgc_tests",
       ]
     }

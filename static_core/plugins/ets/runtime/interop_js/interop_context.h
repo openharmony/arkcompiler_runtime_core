@@ -175,7 +175,6 @@ public:
 
     napi_env GetJsEnvForEventLoopCallbacks() const
     {
-        ASSERT(EtsCoroutine::GetCurrent() == EtsCoroutine::GetCurrent()->GetCoroutineManager()->GetMainThread());
         return jsEnvForEventLoopCallbacks_;
     }
 
