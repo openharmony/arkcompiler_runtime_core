@@ -21,13 +21,13 @@ function main(): int {
     let longTaskTestsuite = new ArkTestsuite("taskpool.LongTask");
     longTaskTestsuite.addTest("ExecuteTest", () =>
     {
-        let task = new taskpoolLongTask(sumFunc);
+        let task = new taskpool.LongTask(sumFunc);
         let result = await taskpool.execute(task);
         assertEQ(result, 30);
     });
     longTaskTestsuite.addTest("DoubleExecutionTest", (): void throws =>
     {
-        let task = new taskpoolLongTask(sumFunc);
+        let task = new taskpool.LongTask(sumFunc);
         taskpool.execute(task);
         expectError(() => { taskpool.execute(task) },
                     new Error("taskpool:: The long task can only be executed once"));

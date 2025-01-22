@@ -35,7 +35,7 @@ function main(): int {
             while (flagForTask.get() != true) {}
             return "result"
         };
-        let task = new taskpoolTask("task_name", funcForTask);
+        let task = new taskpool.Task("task_name", funcForTask);
         let p = taskpool.execute(task);
         // wait for task started
         while (isRunTask.get() != true) {}
@@ -51,7 +51,7 @@ function main(): int {
         }
         assertEQ(isNonEmptyWorker, true);
         // NOTE(ipetrov, #20349): uncomment when frontend fix enum comparison
-        assertEQ(info.taskInfos[0].state as int, taskpoolState.RUNNING as int);
+        assertEQ(info.taskInfos[0].state as int, taskpool.State.RUNNING as int);
         assertEQ(info.taskInfos[0].name, "task_name");
         assertEQ(await p, "result");
         CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_DEFAULT);
@@ -63,12 +63,12 @@ function main(): int {
             return 10 + 20;
         }
         // Task with lambda
-        let lambdaTask = new taskpoolTask(Sum);
+        let lambdaTask = new taskpool.Task(Sum);
         let result = await taskpool.execute(lambdaTask);
         assertEQ(result, 30);
         assertEQ(lambdaTask.isDone(), true);
         // Task with function
-        let funcTask = new taskpoolTask(returnAbc);
+        let funcTask = new taskpool.Task(returnAbc);
         let res = await taskpool.execute(funcTask);
         assertEQ(res, "abc");
         assertEQ(funcTask.isDone(), true);
@@ -98,7 +98,7 @@ function main(): int {
         let onExecutionFailedExpectedStr = "Concurrent function failed, fail callback is done";
         let onExecutionFailedCallback = (e: Error) => { onExecutionFailedStr = e.message + ", fail callback is done"; };
         // Successed task
-        let task = new taskpoolTask(returnAbc);
+        let task = new taskpool.Task(returnAbc);
         task.onEnqueued(onEnqueuedCallback);
         task.onStartExecution(onStartExecutionCallback);
         task.onExecutionSucceeded(onExecutionSucceededCallback);
@@ -113,7 +113,7 @@ function main(): int {
         onEnqueuedStr = "";
         onStartExecutionStr = "";
         onExecutionSucceededStr = "";
-        let failedTask = new taskpoolTask(returnFailAbc);
+        let failedTask = new taskpool.Task(returnFailAbc);
         failedTask.onEnqueued(onEnqueuedCallback);
         failedTask.onStartExecution(onStartExecutionCallback);
         failedTask.onExecutionSucceeded(onExecutionSucceededCallback);
@@ -125,7 +125,7 @@ function main(): int {
         assertEQ(onExecutionSucceededStr, "");
         assertEQ(onExecutionFailedStr, onExecutionFailedExpectedStr);
         // Add callbacks for executed task
-        let executedTask = new taskpoolTask(returnAbc);
+        let executedTask = new taskpool.Task(returnAbc);
         let expectedCallbackError = new Error("taskpool:: The executed task does not support the registration of listeners.");
         taskpool.execute(executedTask);
         expectError(() => { executedTask.onEnqueued(() => {}); }, expectedCallbackError);
@@ -135,10 +135,10 @@ function main(): int {
     });
     commonTaskSuite.addTest("IsCancelTest", (): void throws =>
     {
-        assertEQ(taskpoolTask.isCanceled(), false);
-        let t = new taskpoolTask(returnAbc);
+        assertEQ(taskpool.Task.isCanceled(), false);
+        let t = new taskpool.Task(returnAbc);
         taskpool.execute(t);
-        assertEQ(taskpoolTask.isCanceled(), false);
+        assertEQ(taskpool.Task.isCanceled(), false);
         // Check canceling of exeuting task
         CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN); 
         let isCanceled: AtomicFlag = new AtomicFlag(false);
@@ -148,11 +148,11 @@ function main(): int {
             isRunning.set(true);
             while(waitForCancel.get()) {}
             // Set isCanceled value from taskpool
-            isCanceled.set(taskpoolTask.isCanceled());
+            isCanceled.set(taskpool.Task.isCanceled());
             isRunning.set(false);
             return true;
         };
-        let task = new taskpoolTask(funcForTask);
+        let task = new taskpool.Task(funcForTask);
         let p = taskpool.execute(task);
         while (!isRunning.get()) {}
         assertEQ(task.isDone(), false);
@@ -168,19 +168,19 @@ function main(): int {
     {
         let expectedError = new Error("taskpool:: task is not executed or has been executed");
         expectError(() => {
-            let t = new taskpoolTask(returnAbc);
+            let t = new taskpool.Task(returnAbc);
             taskpool.cancel(t);
             taskpool.execute(t);
         }, expectedError);
         expectError(() => {
-            let t = new taskpoolTask(returnAbc);
+            let t = new taskpool.Task(returnAbc);
             await taskpool.execute(t);
             taskpool.cancel(t);
         }, expectedError);
     });
     commonTaskSuite.addTest("CancelExecutingTaskTest", (): void throws =>
     {
-        let t = new taskpoolTask(returnAbc);
+        let t = new taskpool.Task(returnAbc);
         let p = taskpool.execute(t);
         try {
             taskpool.cancel(t);
@@ -207,9 +207,9 @@ function main(): int {
             resultStr += "3";
             return resultStr;
         }
-        let task1 = new taskpoolTask(func1);
-        let task2 = new taskpoolTask(func2);
-        let task3 = new taskpoolTask(func3);
+        let task1 = new taskpool.Task(func1);
+        let task2 = new taskpool.Task(func2);
+        let task3 = new taskpool.Task(func3);
         task1.addDependency(task2);
         task2.addDependency(task3);
         let p1 = taskpool.execute(task1);
@@ -224,22 +224,22 @@ function main(): int {
         assertEQ(resultStr, "321");
         // Empty dependencies
         expectError(() => {
-            let task = new taskpoolTask(returnAbc);
+            let task = new taskpool.Task(returnAbc);
             task.addDependency();
         }, new Error("addDependency has no params."));
         expectError(() => {
-            let task = new taskpoolTask(returnAbc);
+            let task = new taskpool.Task(returnAbc);
             task.removeDependency();
         }, new Error("removeDependency has no params."));
     });
     commonTaskSuite.addTest("CircularDependencyTest", (): void throws =>
     {
-        let task1 = new taskpoolTask(returnAbc);
-        let task2 = new taskpoolTask(returnAbc);
-        let task3 = new taskpoolTask(returnAbc);
-        let task4 = new taskpoolTask(returnAbc);
-        let task5 = new taskpoolTask(returnAbc);
-        let task6 = new taskpoolTask(returnAbc);
+        let task1 = new taskpool.Task(returnAbc);
+        let task2 = new taskpool.Task(returnAbc);
+        let task3 = new taskpool.Task(returnAbc);
+        let task4 = new taskpool.Task(returnAbc);
+        let task5 = new taskpool.Task(returnAbc);
+        let task6 = new taskpool.Task(returnAbc);
         let expectedError = new Error("There is a circular dependency");
         expectNoThrow(() => {
             task1.addDependency(task2);
@@ -257,14 +257,14 @@ function main(): int {
     });
     commonTaskSuite.addTest("DependencyExecutedTaskTest", (): void throws =>
     {
-        let task1 = new taskpoolTask(returnAbc);
-        let task2 = new taskpoolTask(returnAbc);
+        let task1 = new taskpool.Task(returnAbc);
+        let task2 = new taskpool.Task(returnAbc);
         expectError(() => { task1.removeDependency(task2) }, new Error("taskpool:: task has no dependency"));
         taskpool.execute(task2);
         expectError(() => { task1.addDependency(task2) }, new Error("taskpool:: seqRunnerTask or executedTask cannot be relied on"));
         expectError(() => { task2.addDependency(task1) }, new Error("taskpool:: seqRunnerTask or executedTask cannot addDependency"));
-        let task3 = new taskpoolTask(returnAbc);
-        let task4 = new taskpoolTask(returnAbc);
+        let task3 = new taskpool.Task(returnAbc);
+        let task4 = new taskpool.Task(returnAbc);
         let expectedAgainExecuteError = new Error("taskpool:: executedTask with dependency cannot execute again");
         task1.addDependency(task3);
         taskpool.execute(task3);
@@ -274,8 +274,8 @@ function main(): int {
         expectError(() => { taskpool.execute(task1) }, expectedAgainExecuteError);
         expectError(() => { taskpool.execute(task3) }, expectedAgainExecuteError);
         // Try to remove dependency after execute
-        let task5 = new taskpoolTask(returnAbc);
-        let task6 = new taskpoolTask(returnAbc);
+        let task5 = new taskpool.Task(returnAbc);
+        let task6 = new taskpool.Task(returnAbc);
         task5.addDependency(task6);
         taskpool.execute(task5);
         expectError(() => { task5.removeDependency(task6); }, new Error("taskpool:: executedTask cannot removeDependency"));
@@ -289,10 +289,10 @@ function main(): int {
             return "";
         };
         let sendDataFunc = (): string => {
-            taskpoolTask.sendData();
+            taskpool.Task.sendData();
             return "abc";
         };
-        let t = new taskpoolTask(sendDataFunc);
+        let t = new taskpool.Task(sendDataFunc);
         t.onReceiveData(recvCallback);
         let p1 = taskpool.execute(t);
         let p2 = taskpool.execute(t);
