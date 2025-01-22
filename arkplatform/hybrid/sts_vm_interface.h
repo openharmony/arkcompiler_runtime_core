@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,11 +18,16 @@
 
 #include "hybrid/vm_interface.h"
 #include <cstdint>
+#include <cstddef>
+#include <functional>
 
 namespace arkplatform {
 
 class STSVMInterface : public VMInterface {
 public:
+    static constexpr size_t DEFAULT_XGC_EXECUTORS_COUNT = 2U;
+    using NoWorkPred = std::function<bool()>;
+
     STSVMInterface() = default;
 
     STSVMInterface(const STSVMInterface &) = delete;
@@ -38,9 +43,46 @@ public:
         return STSVMInterface::VMInterfaceType::ETS_VM_IFACE;
     }
 
-    virtual void MarkFromObject(void* obj) = 0;
+    /**
+     * @brief executes marking operation of STS VM GC that will be started from gotten object.
+     * @param obj: pointer to object from which marking will be started.
+     */
+    virtual void MarkFromObject(void *obj) = 0;
+    /**
+     * @brief Increment count of threads that will execute XGC. If you use this method in the scope of XGC execution,
+     * new count of threads will be ignored by currect XGC, but will be used in next one.
+     */
+    virtual void OnVMAttach() = 0;
+    /**
+     * @brief Decrement count of threads that will execute XGC. If you use this method in the scope of XGC execution,
+     * new count of threads will be ignored by currect XGC, but will be used in next one.
+     */
+    virtual void OnVMDetach() = 0;
+    /**
+     * @brief Method waits for all threads to start XGC. The count of threads can be changed using methods OnVMAttach
+     * and OnVMDetach. After this method XGC is considered to be running.
+     */
+    virtual void StartXGCBarrier() = 0;
+    /**
+     * @brief Method waits for all threads would call WaitForConcurrentMark.
+     * @param func: predicate that checks if we need to leave barrier to continue marking
+     * @returns true if all threads called this methods. It can return false if VM should try continue marking from new
+     * objects.
+     */
+    virtual bool WaitForConcurrentMark(const NoWorkPred &func) = 0;
+    /// @brief Method waits for all threads would call RemarkStartBarrier
+    virtual void RemarkStartBarrier() = 0;
+    /**
+     * @brief Method waits for all threads would call WaitForRemark.
+     * @param func: predicate that checks if we need to leave barrier to continue marking
+     * @returns true if all threads called this methods. It can return false if VM should try continue marking from new
+     * objects.
+     */
+    virtual bool WaitForRemark(const NoWorkPred &func) = 0;
+    /// @brief Method waits for all threads would call FinishXGCBarrier
+    virtual void FinishXGCBarrier() = 0;
 };
 
-} // namespace arkplatform
+}  // namespace arkplatform
 
-#endif // PANDA_STS_VM_INTERFACE_H
+#endif  // PANDA_STS_VM_INTERFACE_H
