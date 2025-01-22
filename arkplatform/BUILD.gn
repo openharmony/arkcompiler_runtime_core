@@ -86,10 +86,10 @@ ohos_static_library("arkplatform_static") {
 
 ohos_shared_library("libarkplatform") {
   deps = [ ":arkplatform_static" ]
-  output_extension = "so"
-  if (is_mingw) {
-    output_extension = "dll"
+  if (!is_mingw && !is_mac) {
+    output_extension = "so"
   }
+  innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 }
