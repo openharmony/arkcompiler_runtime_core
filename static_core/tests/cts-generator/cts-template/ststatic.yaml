@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -97,59 +97,37 @@ tests:
         cases:
           - values:
             - W.fu1
-            tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-config']
-            bugid: ['1324', '1828']
+            runner-options: ['compile-failure']
           - values:
             - W.fi8
-            tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-config']
-            bugid: ['1324', '1828']
+            runner-options: ['compile-failure']
           - values:
             - W.fu16
-            tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-config']
-            bugid: ['1324', '1828']
+            runner-options: ['compile-failure']
           - values:
             - W.fi16
-            tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-config']
-            bugid: ['1324', '1828']
+            runner-options: ['compile-failure']
           - values:
             - W.fi32
-            tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-config']
-            bugid: ['1324', '1828']
+            runner-options: ['compile-failure']
           - values:
             - W.fi64
-            tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-config']
-            bugid: ['1324', '1828']
+            runner-options: ['compile-failure']
           - values:
             - W.ff32
-            tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-config']
-            bugid: ['1324', '1828']
+            runner-options: ['compile-failure']
           - values:
             - W.ff64
-            tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-config']
-            bugid: ['1324', '1828']
+            runner-options: ['compile-failure']
           - values:
             - W.fW
-            tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-config']
-            bugid: ['1324', '1828']
+            runner-options: ['compile-failure']
           - values:
             - W.fi32Array
-            tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-config']
-            bugid: ['1324', '1828']
+            runner-options: ['compile-failure']
           - values:
             - W.fWArray
-            tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-config']
-            bugid: ['1324', '1828']
+            runner-options: ['compile-failure']
           - values:
             - W
             runner-options: ['compile-failure']

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1194,8 +1194,8 @@ bool LiteralArrayItem::Write(Writer *writer)
     return true;
 }
 
-BaseFieldItem::BaseFieldItem(BaseClassItem *cls, StringItem *name, TypeItem *type)
-    : class_(cls), name_(name), type_(type)
+BaseFieldItem::BaseFieldItem(BaseClassItem *cls, StringItem *name, TypeItem *type, uint32_t accessFlags = 0U)
+    : class_(cls), name_(name), type_(type), accessFlags_(accessFlags)
 {
     AddIndexDependency(cls);
     AddIndexDependency(type);
@@ -1204,7 +1204,7 @@ BaseFieldItem::BaseFieldItem(BaseClassItem *cls, StringItem *name, TypeItem *typ
 size_t BaseFieldItem::CalculateSize() const
 {
     // class id + type id + name id
-    return IDX_SIZE + IDX_SIZE + ID_SIZE;
+    return IDX_SIZE + IDX_SIZE + ID_SIZE + leb128::UnsignedEncodingSize(GetAccessFlags());
 }
 
 bool BaseFieldItem::Write(Writer *writer)
@@ -1221,11 +1221,15 @@ bool BaseFieldItem::Write(Writer *writer)
         return false;
     }
 
-    return writer->Write(name_->GetOffset());
+    if (!writer->Write(name_->GetOffset())) {
+        return false;
+    }
+
+    return writer->WriteUleb128(accessFlags_);
 }
 
 FieldItem::FieldItem(ClassItem *cls, StringItem *name, TypeItem *type, uint32_t accessFlags)
-    : BaseFieldItem(cls, name, type), accessFlags_(accessFlags)
+    : BaseFieldItem(cls, name, type, accessFlags)
 {
 }
 
@@ -1237,7 +1241,7 @@ void FieldItem::SetValue(ValueItem *value)
 
 size_t FieldItem::CalculateSize() const
 {
-    size_t size = BaseFieldItem::CalculateSize() + leb128::UnsignedEncodingSize(accessFlags_);
+    size_t size = BaseFieldItem::CalculateSize();
 
     if (value_ != nullptr) {
         if (value_->GetType() == ValueItem::Type::INTEGER) {
@@ -1334,10 +1338,6 @@ bool FieldItem::WriteTaggedData(Writer *writer)
 bool FieldItem::Write(Writer *writer)
 {
     if (!BaseFieldItem::Write(writer)) {
-        return false;
-    }
-
-    if (!writer->WriteUleb128(accessFlags_)) {
         return false;
     }
 

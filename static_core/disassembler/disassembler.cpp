@@ -1880,7 +1880,8 @@ std::string Disassembler::IDToString(BytecodeInstruction bcIns, panda_file::File
         }
 
         name << '\"';
-    } else if (bcIns.HasFlag(BytecodeInstruction::Flags::FIELD_ID)) {
+    } else if (bcIns.HasFlag(BytecodeInstruction::Flags::FIELD_ID) ||
+               bcIns.HasFlag(BytecodeInstruction::Flags::STATIC_FIELD_ID)) {
         auto idx = bcIns.GetId().AsIndex();
         auto id = file_->ResolveFieldIndex(methodId, idx);
         panda_file::FieldDataAccessor fieldAccessor(*file_, id);
@@ -1948,8 +1949,9 @@ void Disassembler::CollectExternalFields(const panda_file::FieldDataAccessor &fi
     }
 
     auto &fieldList = externalFieldTable_[recordName];
-    auto retField = std::find_if(fieldList.begin(), fieldList.end(),
-                                 [&field](pandasm::Field &fieldFromList) { return field.name == fieldFromList.name; });
+    auto retField = std::find_if(fieldList.begin(), fieldList.end(), [&field](pandasm::Field &fieldFromList) {
+        return field.name == fieldFromList.name && field.IsStatic() == fieldFromList.IsStatic();
+    });
     if (retField == fieldList.end()) {
         fieldList.emplace_back(std::move(field));
 
@@ -1962,14 +1964,13 @@ IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File
 {
     panda_file::CodeDataAccessor codeAccessor(*file_, codeId);
 
-    const auto insSz = codeAccessor.GetCodeSize();
     const auto insArr = codeAccessor.GetInstructions();
 
     method->regsNum = codeAccessor.GetNumVregs();
 
     auto bcIns = BytecodeInstruction(insArr);
     auto from = bcIns.GetAddress();
-    const auto bcInsLast = bcIns.JumpTo(insSz);
+    const auto bcInsLast = bcIns.JumpTo(codeAccessor.GetCodeSize());
 
     LabelTable labelTable = GetExceptions(method, methodId, codeId);
 
@@ -1984,7 +1985,8 @@ IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File
             break;
         }
 
-        if (bcIns.HasFlag(BytecodeInstruction::Flags::FIELD_ID)) {
+        if (bcIns.HasFlag(BytecodeInstruction::Flags::FIELD_ID) ||
+            bcIns.HasFlag(BytecodeInstruction::Flags::STATIC_FIELD_ID)) {
             auto idx = bcIns.GetId().AsIndex();
             auto id = file_->ResolveFieldIndex(methodId, idx);
             panda_file::FieldDataAccessor fieldAccessor(*file_, id);

@@ -44,7 +44,8 @@ std::string AbcCodeConverter::IDToString(BytecodeInstruction bcIns, panda_file::
         stringTable_->AddStringId(offset);
         std::string strData = stringTable_->GetStringById(offset);
         name << stringTable_->GetStringById(bcIns.GetId().AsFileId());
-    } else if (bcIns.HasFlag(BytecodeInstruction::Flags::FIELD_ID)) {
+    } else if (bcIns.HasFlag(BytecodeInstruction::Flags::FIELD_ID) ||
+               bcIns.HasFlag(BytecodeInstruction::Flags::STATIC_FIELD_ID)) {
         auto id = file_->ResolveFieldIndex(methodId, bcIns.GetId().AsIndex());
         panda_file::FieldDataAccessor fieldAccessor(*file_, id);
 

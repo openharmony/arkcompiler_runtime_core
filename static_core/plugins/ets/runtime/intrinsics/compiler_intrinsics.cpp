@@ -107,7 +107,7 @@ T CompilerEtsLdObjByName(ark::Method *method, int32_t id, uint32_t pc, ark::Obje
         VMHandle<ObjectHeader> handleObj(thread, obj);
         auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
         klass = static_cast<ark::Class *>(handleObj.GetPtr()->ClassAddr<ark::BaseClass>());
-        rawField = classLinker->GetField(*method, panda_file::File::EntityId(id));
+        rawField = classLinker->GetField(*method, panda_file::File::EntityId(id), false);
 
         Field *field = TryGetField<FIELD_TYPE, true>(method, rawField, pc, klass);
         if (field != nullptr) {
@@ -204,7 +204,7 @@ void CompilerEtsStObjByName(ark::Method *method, int32_t id, uint32_t pc, ark::O
         VMHandle<ObjectHeader> handleObj(thread, obj);
         auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
         klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
-        rawField = classLinker->GetField(*method, panda_file::File::EntityId(id));
+        rawField = classLinker->GetField(*method, panda_file::File::EntityId(id), false);
 
         Field *field = TryGetField<FIELD_TYPE, false>(method, rawField, pc, klass);
         if (field != nullptr) {
@@ -241,7 +241,7 @@ void CompilerEtsStObjByNameRef(ark::Method *method, int32_t id, uint32_t pc, ark
         VMHandle<ObjectHeader> handleStore(thread, storeValue);
         auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
         klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
-        rawField = classLinker->GetField(*method, panda_file::File::EntityId(id));
+        rawField = classLinker->GetField(*method, panda_file::File::EntityId(id), false);
 
         Field *field = TryGetField<panda_file::Type::TypeId::REFERENCE, false>(method, rawField, pc, klass);
         if (field != nullptr) {

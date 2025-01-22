@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -401,11 +401,12 @@ std::string PandaRuntimeInterface::GetBytecodeString(MethodPtr method, uintptr_t
 }
 
 PandaRuntimeInterface::FieldPtr PandaRuntimeInterface::ResolveField(PandaRuntimeInterface::MethodPtr m, size_t id,
-                                                                    bool allowExternal, uint32_t *pclassId)
+                                                                    bool isStatic, bool allowExternal,
+                                                                    uint32_t *pclassId)
 {
     auto method = MethodCast(m);
     auto pfile = method->GetPandaFile();
-    auto *field = GetField(method, id);
+    auto *field = GetField(method, id, isStatic);
     if (field == nullptr) {
         return nullptr;
     }
@@ -581,7 +582,7 @@ Method *PandaRuntimeInterface::GetMethod(MethodPtr caller, RuntimeInterface::IdT
                                                               &errorHandler);
 }
 
-Field *PandaRuntimeInterface::GetField(MethodPtr method, RuntimeInterface::IdType id) const
+Field *PandaRuntimeInterface::GetField(MethodPtr method, RuntimeInterface::IdType id, bool isStatic) const
 {
     auto *field =
         MethodCast(method)->GetPandaFile()->GetPandaCache()->GetFieldFromCache(panda_file::File::EntityId(id));
@@ -591,7 +592,7 @@ Field *PandaRuntimeInterface::GetField(MethodPtr method, RuntimeInterface::IdTyp
     ErrorHandler errorHandler;
     ScopedMutatorLock lock;
     return Runtime::GetCurrent()->GetClassLinker()->GetField(*MethodCast(method), panda_file::File::EntityId(id),
-                                                             &errorHandler);
+                                                             isStatic, &errorHandler);
 }
 
 PandaRuntimeInterface::ClassPtr PandaRuntimeInterface::ResolveType(PandaRuntimeInterface::MethodPtr method,

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -631,7 +631,7 @@ TEST(ItemContainer, ForeignItems)
     // Create foreign field
     StringItem *fieldName = container.GetOrCreateStringItem("foreign_field");
     PrimitiveTypeItem *fieldType = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32);
-    auto *fieldItem = container.CreateItem<ForeignFieldItem>(classItem, fieldName, fieldType);
+    auto *fieldItem = container.CreateItem<ForeignFieldItem>(classItem, fieldName, fieldType, 0);
 
     // Create foreign method
     StringItem *methodName = container.GetOrCreateStringItem("ForeignMethod");
