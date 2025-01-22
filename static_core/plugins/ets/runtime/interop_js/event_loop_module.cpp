@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,12 +21,12 @@
 namespace ark::ets::interop::js {
 
 /*static*/
-uv_loop_t *EventLoop::GetEventLoop([[maybe_unused]] Coroutine *coro)
+uv_loop_t *EventLoop::GetEventLoop()
 {
     uv_loop_t *loop = nullptr;
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
     [[maybe_unused]] auto nstatus =
-        napi_get_uv_event_loop(InteropCtx::Current(coro)->GetJsEnvForEventLoopCallbacks(), &loop);
+        napi_get_uv_event_loop(InteropCtx::Current()->GetJsEnvForEventLoopCallbacks(), &loop);
     ASSERT(nstatus == napi_ok);
 #else
     loop = uv_default_loop();
@@ -34,9 +34,9 @@ uv_loop_t *EventLoop::GetEventLoop([[maybe_unused]] Coroutine *coro)
     return loop;
 }
 
-void EventLoop::RunEventLoop(Coroutine *coro, RunMode mode)
+void EventLoop::RunEventLoop(RunMode mode)
 {
-    auto *loop = GetEventLoop(coro);
+    auto *loop = GetEventLoop();
     switch (mode) {
         case EventLoop::RUN_DEFAULT:
             uv_run(loop, UV_RUN_DEFAULT);
@@ -52,11 +52,9 @@ void EventLoop::RunEventLoop(Coroutine *coro, RunMode mode)
     };
 }
 
-EventLoopCallbackPoster::EventLoopCallbackPoster(Coroutine *target)
+EventLoopCallbackPoster::EventLoopCallbackPoster()
 {
-    [[maybe_unused]] auto *worker = target->GetContext<StackfulCoroutineContext>()->GetWorker();
-    ASSERT(worker->IsMainWorker() || worker->InExclusiveMode());
-    auto loop = EventLoop::GetEventLoop(target);
+    auto loop = EventLoop::GetEventLoop();
     // These resources will be deleted in the event loop callback after Runtime destruction,
     // so we need to use a standard allocator
     async_ = new uv_async_t();
@@ -69,14 +67,19 @@ EventLoopCallbackPoster::EventLoopCallbackPoster(Coroutine *target)
 EventLoopCallbackPoster::~EventLoopCallbackPoster()
 {
     ASSERT(async_ != nullptr);
-    PostToEventLoop([async = this->async_]() {
+    auto destroyCb = [async = this->async_]() {
         auto deleter = [](uv_handle_t *handle) {
             auto *poster = reinterpret_cast<ThreadSafeCallbackQueue *>(handle->data);
             delete poster;
             delete handle;
         };
         uv_close(reinterpret_cast<uv_handle_t *>(async), deleter);
-    });
+    };
+    if (NeedDestroyInPlace()) {
+        destroyCb();
+        return;
+    }
+    PostToEventLoop(std::move(destroyCb));
 }
 
 void EventLoopCallbackPoster::PostImpl(WrappedCallback &&callback)
@@ -137,9 +140,11 @@ bool EventLoopCallbackPoster::ThreadSafeCallbackQueue::IsEmpty()
     return callbackQueue_.empty();
 }
 
-PandaUniquePtr<CallbackPoster> EventLoopCallbackPosterFactoryImpl::CreatePoster(Coroutine *target)
+PandaUniquePtr<CallbackPoster> EventLoopCallbackPosterFactoryImpl::CreatePoster()
 {
-    auto poster = MakePandaUnique<EventLoopCallbackPoster>(target);
+    [[maybe_unused]] auto *w = Coroutine::GetCurrent()->GetContext<StackfulCoroutineContext>()->GetWorker();
+    ASSERT(w->IsMainWorker() || w->InExclusiveMode());
+    auto poster = MakePandaUnique<EventLoopCallbackPoster>();
     ASSERT(poster != nullptr);
     return poster;
 }

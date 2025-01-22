@@ -49,8 +49,6 @@ public:
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
 
-    void SetCallbackPoster(PandaUniquePtr<CallbackPoster> poster) override;
-    void TryResetCallbackPoster() override;
     bool IsMainWorker(Coroutine *co) const override;
     Coroutine *CreateExclusiveWorkerForThread(Runtime *runtime, PandaVM *vm) override;
     bool DestroyExclusiveWorker() override;
@@ -166,16 +164,11 @@ private:
     uint8_t *AllocCoroutineStack();
     void FreeCoroutineStack(uint8_t *stack);
 
-    /// Post external callback (e.g. to event loop)
-    void PostExternalCallback(std::function<void()> cb);
     /// @return true if there is no active coroutines
     bool IsNoActiveMutatorsExceptCurrent();
     /// Increment/decrement active corotuines count
     void IncrementActiveCoroutines();
     void DecrementActiveCoroutines();
-
-    /// schedule worker (main or exclusive) in event loop
-    void TriggerSchedulerExternally(StackfulCoroutineWorker *triggerOwner);
 
     // for thread safety with GC
     mutable os::memory::Mutex coroListLock_;
@@ -214,10 +207,6 @@ private:
 
     // stats
     CoroutineStats stats_;
-
-    // event loop poster
-    os::memory::Mutex posterLock_;
-    PandaUniquePtr<CallbackPoster> callbackPoster_ GUARDED_BY(posterLock_);
 
     os::memory::Mutex eWorkerCreationLock_;
 };

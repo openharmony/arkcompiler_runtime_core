@@ -569,10 +569,8 @@ void StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion()
 {
     os::memory::LockHolder lkCompletion(programCompletionLock_);
     auto *main = Coroutine::GetCurrent();
-
-    // Hotfix for #22151 (deadlock)
-    auto activeWorkersCnt = GetActiveWorkersCount();
-    while (coroutineCount_ > 1 + activeWorkersCnt) {  // 1 is for MAIN
+    // It's neccessary to read activeWorkersCount before coroutineCount to avoid deadlock
+    while (GetActiveWorkersCount() + 1 < coroutineCount_) {  // 1 is for MAIN
         programCompletionEvent_->SetNotHappened();
         programCompletionEvent_->Lock();
         programCompletionLock_.Unlock();
@@ -582,15 +580,10 @@ void StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion()
             << "StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion(): possibly spurious wakeup from wait...";
         // NOTE(konstanting, #IAD5MH): test for the spurious wakeup
         programCompletionLock_.Lock();
-        activeWorkersCnt = GetActiveWorkersCount();
     }
     // coroutineCount_ < 1 + GetActiveWorkersCount() in case of concurrent EWorker destroy
     // in this case coroutineCount_ >= 1 + GetActiveWorkersCount() - ExclusiveWorkersCount()
-#ifndef NDEBUG
-    // Hotfix for #22151 (assert fail)
-    activeWorkersCnt = GetActiveWorkersCount();
-#endif
-    ASSERT(coroutineCount_ <= (1 + activeWorkersCnt));
+    ASSERT(!(GetActiveWorkersCount() + 1 < coroutineCount_));
 }
 
 void StackfulCoroutineManager::MainCoroutineCompleted()
@@ -726,80 +719,17 @@ void StackfulCoroutineManager::DestroyNativeCoroutine(Coroutine *co)
     DestroyEntrypointlessCoroutine(co);
 }
 
-void StackfulCoroutineManager::SetCallbackPoster(PandaUniquePtr<CallbackPoster> poster)
-{
-    os::memory::LockHolder l(posterLock_);
-    if (callbackPoster_ != nullptr) {
-        return;
-    }
-    callbackPoster_ = std::move(poster);
-}
-
-void StackfulCoroutineManager::TryResetCallbackPoster()
-{
-    PostExternalCallback([this] {
-        // actually we need more complex logic here or
-        // re-creation of the callbackPoster_ in js -> ets call
-        if (IsNoActiveMutatorsExceptCurrent()) {
-            os::memory::LockHolder l(posterLock_);
-            callbackPoster_.reset();
-        }
-    });
-}
-
-void StackfulCoroutineManager::TriggerSchedulerExternally(StackfulCoroutineWorker *triggerOwner)
-{
-    if (triggerOwner->IsMainWorker()) {
-        PostExternalCallback([this] { Schedule(); });
-        return;
-    }
-    if (!triggerOwner->InExclusiveMode()) {
-        return;
-    }
-    auto schedule = [this, triggerOwner] {
-        auto *poster = triggerOwner->GetCallbackPoster();
-        if (poster != nullptr) {
-            poster->Post([this] { Schedule(); });
-        }
-    };
-    PostExternalCallback([this, triggerOwner, schedule = std::move(schedule)] {
-        os::memory::LockHolder lh(workersLock_);
-        for (auto *w : workers_) {
-            // check that worker still exists
-            if (w == triggerOwner) {
-                schedule();
-                break;
-            }
-        }
-    });
-}
-
 void StackfulCoroutineManager::OnCoroBecameActive(Coroutine *co)
 {
     ASSERT(co->IsActive());
     IncrementActiveCoroutines();
-    if (co->GetType() == Coroutine::Type::MUTATOR) {
-        auto *receiver = co->GetContext<StackfulCoroutineContext>()->GetWorker();
-        TriggerSchedulerExternally(receiver);
-    }
+    co->GetWorker()->OnCoroBecameActive(co);
 }
 
-void StackfulCoroutineManager::OnCoroBecameNonActive(Coroutine *co)
+void StackfulCoroutineManager::OnCoroBecameNonActive([[maybe_unused]] Coroutine *co)
 {
     ASSERT(!co->IsActive());
     DecrementActiveCoroutines();
-    if (co->GetType() == Coroutine::Type::MUTATOR) {
-        TryResetCallbackPoster();
-    }
-}
-
-void StackfulCoroutineManager::PostExternalCallback(std::function<void()> cb)
-{
-    os::memory::LockHolder l(posterLock_);
-    if (callbackPoster_ == nullptr) {
-        return;
-    }
-    callbackPoster_->Post(std::move(cb));
 }
 
 void StackfulCoroutineManager::IncrementActiveCoroutines()

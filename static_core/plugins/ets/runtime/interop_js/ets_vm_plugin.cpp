@@ -190,7 +190,7 @@ static void RegisterEventLoopModule(EtsCoroutine *coro)
 {
     ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
     coro->GetPandaVM()->CreateCallbackPosterFactory<EventLoopCallbackPosterFactoryImpl>();
-    coro->GetPandaVM()->SetRunEventLoopFunction([](Coroutine *target) { EventLoop::RunEventLoop(target); });
+    coro->GetPandaVM()->SetRunEventLoopFunction([]() { EventLoop::RunEventLoop(); });
 }
 
 [[nodiscard]] static bool InitInteropContext(napi_env env)

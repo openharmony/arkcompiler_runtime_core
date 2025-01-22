@@ -334,21 +334,16 @@ public:
         callbackPosterFactory_ = MakePandaUnique<FactoryImpl>(args...);
     }
 
-    /**
-     * @brief Uses CallbackPosterFactory to create a CallbackPoster
-     * @param target - coroutine that contains context and env, for which a poster will be created
-     */
-    PandaUniquePtr<CallbackPoster> CreateCallbackPoster(Coroutine *target)
+    /// @brief Method creates CallBackPoster using factory.
+    PandaUniquePtr<CallbackPoster> CreateCallbackPoster()
     {
-        auto *worker = target->GetContext<StackfulCoroutineContext>()->GetWorker();
-        if (!worker->IsMainWorker() && !worker->InExclusiveMode()) {
+        if (callbackPosterFactory_ == nullptr) {
             return nullptr;
         }
-        ASSERT(callbackPosterFactory_ != nullptr);
-        return callbackPosterFactory_->CreatePoster(target);
+        return callbackPosterFactory_->CreatePoster();
     }
 
-    using RunEventLoopFunction = std::function<void(Coroutine *)>;
+    using RunEventLoopFunction = std::function<void()>;
 
     void SetRunEventLoopFunction(RunEventLoopFunction &&cb)
     {
@@ -356,10 +351,10 @@ public:
         runEventLoop_ = std::move(cb);
     }
 
-    void RunEventLoop(Coroutine *coro)
+    void RunEventLoop()
     {
         if (runEventLoop_) {
-            runEventLoop_(coro);
+            runEventLoop_();
         }
     }
 

@@ -137,43 +137,12 @@ class InteropWorker implements InternalWorker {
     }
 }
 
-/// Used as temporary solution instead of BlockingQueue due to the issue in frontend
-class TaskQueue {
-    constructor() {
-        this.mutex = new Mutex();
-        this.condVar = new CondVar();
-        this.tasks = new Array<Task>();
-    }
-
-    public push(task: Task) {
-        this.mutex.lock();
-        this.tasks.unshift(task);
-        this.condVar.notifyAll(this.mutex);
-        this.mutex.unlock();
-    }
-
-    public pop(): Task {
-        this.mutex.lock();
-        while (this.tasks.length == 0) {
-            this.condVar.wait(this.mutex);
-        }
-        let task = this.tasks.pop();
-        this.mutex.unlock();
-        return task!;
-    }
-
-    private mutex: Mutex;
-    private condVar: CondVar;
-    private tasks: Array<Task>;
-}
-
 class StaticWorker implements InternalWorker {
-    // should be replaced with BlockingQueue
-    private tasks: TaskQueue;
+    private tasks: BlockingQueue<Task>;
     private static closingTask: Task = (): void => {};
 
     constructor() {
-        this.tasks = new TaskQueue();
+        this.tasks = new BlockingQueue<Task>();
         ExclusiveLauncher.elaunch(() => this.body(), false);
     }
 

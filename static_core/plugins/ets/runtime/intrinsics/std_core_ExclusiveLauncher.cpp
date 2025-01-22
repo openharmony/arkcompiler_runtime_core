@@ -67,10 +67,10 @@ void RunTaskOnEACoroutine(PandaEtsVM *etsVM, bool needInterop, Coroutine *exclus
     auto *coroMan = etsVM->GetCoroutineManager();
 
     if (needInterop) {
-        auto poster = etsVM->CreateCallbackPoster(exclusiveCoro);
+        auto poster = etsVM->CreateCallbackPoster();
         ASSERT(poster != nullptr);
         poster->Post(RunExclusiveTask, taskRef, refStorage);
-        etsVM->RunEventLoop(exclusiveCoro);
+        etsVM->RunEventLoop();
     } else {
         ScopedManagedCodeThread ss(exclusiveCoro);
         RunExclusiveTask(taskRef, refStorage);
@@ -125,7 +125,7 @@ void ExclusiveLaunch(EtsObject *task, uint8_t needInterop)
 int64_t TaskPosterCreate()
 {
     auto *coro = EtsCoroutine::GetCurrent();
-    auto poster = coro->GetPandaVM()->CreateCallbackPoster(coro);
+    auto poster = coro->GetPandaVM()->CreateCallbackPoster();
     ASSERT(poster != nullptr);
     return reinterpret_cast<int64_t>(poster.release());
 }
