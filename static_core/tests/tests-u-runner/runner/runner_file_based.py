@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -64,7 +64,8 @@ _LOGGER = logging.getLogger("runner.runner_file_based")
 
 
 class PandaBinaries:
-    DISABLE_CHECK_RUNTIME = ['parser']
+    DISABLE_CHECK_RUNTIME = ['parser', 'declgenets2ts-ets-cts']
+    DISABLE_CHECK_ES2PANDA = ['declgenets2ts-ets-cts']
 
     def __init__(self, runner_name: str, build_dir: str, config: Config, conf_kind: ConfigurationKind) -> None:
         self.build_dir = build_dir
@@ -74,6 +75,8 @@ class PandaBinaries:
 
     @property
     def es2panda(self) -> str:
+        if self.runner_name in self.DISABLE_CHECK_ES2PANDA:
+            return ""
         if self.config.es2panda.custom_path is not None:
             es2panda = self.__get_binary_path(self.config.es2panda.custom_path)
         else:

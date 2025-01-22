@@ -1,4 +1,7 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -10,11 +13,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-HERMES_REVISION=3feac7b2f9759d83879b04232479041baa805e7b
-HERMES_URL=https://github.com/facebook/hermes/archive
-TEST262_REVISION=747bed2e8aaafe8fdf2c65e8a10dd7ae64f66c47
-TEST262_URL=https://github.com/tc39/test262/archive
-LLVM_PROFDATA_VERSION="14"
-LLVM_COV_VERSION="14"
-TSC_REPO_URL=https://gitee.com/openharmony/third_party_typescript.git
+from enum import Enum
+
+
+class DeclgenEtsSuites(Enum):
+    CTS = "declgenets2ts-ets-cts"
+
+
+class DeclgenEtsSuitesDir(Enum):
+    CTS = "ets-cts"
+    
