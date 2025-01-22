@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 /*---
  desc: 06 Other State Management Functionality
  name: 06.other_state_management_functionality/06.03.built-in_component_two-way_value_synchronization_'$$'_dollar_dollar_07
- tags:  [negative]
+ tags:
  ---*/  
   
 
@@ -25,7 +25,7 @@ function increment(n: int): void {
 }
 
 function main(): void {
-  let $$n = 5
+  let $$$$n = 5
   increment($$$$n)
-  assert($$n == 6)
+  assert($$$$n == 5)
 }
