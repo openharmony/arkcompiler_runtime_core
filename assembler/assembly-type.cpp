@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <unordered_map>
+
 #include "assembly-type.h"
 
 namespace panda::pandasm {
