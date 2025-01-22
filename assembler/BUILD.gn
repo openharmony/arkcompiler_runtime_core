@@ -33,6 +33,7 @@ libarkassembler_sources = [
   "assembly-program.cpp",
   "assembly-type.cpp",
   "context.cpp",
+  "emit-item.cpp",
   "extensions/ecmascript_meta.cpp",
   "extensions/extensions.cpp",
   "lexer.cpp",
