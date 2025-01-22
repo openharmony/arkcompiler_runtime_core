@@ -1815,7 +1815,16 @@ export final class String extends Object implements Comparable<String>, JSONable
      * this string are replaced with the Unicode replacement character U+FFFD.
      */
     public toWellFormed(): String {
-        return this.normalize()
+        let res = new StringBuilder()
+        for (let i: int = 0; i < this.getLength(); i++) {
+   	        let c = this.codePointAt(i)
+   	        if (!Char.isValidCodePoint(c! as int)) {
+   	            res.append(c'\uFFFD')
+   	        } else {
+   	            res.append(String.fromCharCode(c! as int))
+   	        }
+        }
+        return res.toString()
     }
 
     private static native codePointToChar(cp: int): int
