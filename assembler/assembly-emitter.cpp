@@ -16,8 +16,8 @@
 #include "assembly-emitter.h"
 
 #include "bytecode_instruction-inl.h"
+#include "emit-item.h"
 #include "mangling.h"
-
 namespace {
 
 using panda::os::file::Mode;
@@ -1365,12 +1365,12 @@ bool AsmEmitter::MakeItemsForSingleProgram(ItemContainer *items, const Program &
 }
 
 bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Program *> &progs, bool emit_debug_info,
-                              uint8_t api, std::string subApi)
+                              const EmitterConfig &emitterConfig)
 {
     ASSERT(!progs.empty());
 
-    ItemContainer::SetApi(api);
-    ItemContainer::SetSubApi(subApi);
+    ItemContainer::SetApi(emitterConfig.api);
+    ItemContainer::SetSubApi(emitterConfig.subApi);
     auto items = ItemContainer {};
     auto primitive_types = CreatePrimitiveTypes(&items);
     auto entities = AsmEmitter::AsmEntityCollections {};
@@ -1394,13 +1394,14 @@ bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Pro
 
     items.ReLayout();
     items.ComputeLayout();
-
-    for (auto *prog : progs) {
-        if (!EmitFunctions(&items, *prog, entities, emit_debug_info)) {
-            return false;
-        }
-        prog->function_table.clear();
-        prog->record_table.clear();
+    {
+        auto queue_emit = new EmitFunctionsQueue(emitterConfig.fileThreadCount, items, progs, entities,
+                                                 emit_debug_info);
+        queue_emit->Schedule();
+        queue_emit->Consume();
+        queue_emit->Wait();
+        delete queue_emit;
+        queue_emit = nullptr;
     }
 
     auto writer = FileWriter(filename);
@@ -1409,7 +1410,7 @@ bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Pro
         return false;
     }
 
-    return items.Write(&writer);
+    return items.Write(&writer, !emitterConfig.isDebug);
 }
 
 /* static */
@@ -1569,27 +1570,29 @@ static void TryEmitPc(panda_file::LineNumberProgramItem *program, std::vector<ui
     }
 }
 
-void Function::EmitLocalVariable(panda_file::LineNumberProgramItem *program, ItemContainer *container,
-                                 std::vector<uint8_t> *constant_pool, uint32_t &pc_inc, size_t instruction_number,
-                                 size_t variable_index) const
+void Function::EmitLocalVariable(panda_file::LineNumberProgramItem *program, const ItemContainer *container,
+                                 std::vector<uint8_t> *constant_pool, const LocalVarEmitContext &context) const
 {
-    ASSERT(variable_index < local_variable_debug.size());
-    const auto &v = local_variable_debug[variable_index];
+    ASSERT(context.variable_index < local_variable_debug.size());
+    const auto &v = local_variable_debug[context.variable_index];
     ASSERT(!IsParameter(v.reg));
-    if (instruction_number == v.start) {
-        TryEmitPc(program, constant_pool, pc_inc);
-        StringItem *variable_name = container->GetOrCreateStringItem(v.name);
-        StringItem *variable_type = container->GetOrCreateStringItem(v.signature);
+    if (context.instruction_number == v.start) {
+        TryEmitPc(program, constant_pool, context.pc_inc);
+        StringItem *variable_name = container->GetStringItem(v.name);
+        ASSERT(variable_name->GetOffset() != 0);
+        StringItem *variable_type = container->GetStringItem(v.signature);
+        ASSERT(variable_type->GetOffset() != 0);
         if (v.signature_type.empty()) {
             program->EmitStartLocal(constant_pool, v.reg, variable_name, variable_type);
         } else {
-            StringItem *type_signature = container->GetOrCreateStringItem(v.signature_type);
+            StringItem *type_signature = container->GetStringItem(v.signature_type);
+            ASSERT(type_signature->GetOffset() != 0);
             program->EmitStartLocalExtended(constant_pool, v.reg, variable_name, variable_type, type_signature);
         }
     }
 
-    if (instruction_number == (v.start + v.length)) {
-        TryEmitPc(program, constant_pool, pc_inc);
+    if (context.instruction_number == (v.start + v.length)) {
+        TryEmitPc(program, constant_pool, context.pc_inc);
         program->EmitEndLocal(v.reg);
     }
 }
@@ -1669,7 +1672,7 @@ void Function::CollectLocalVariable(std::vector<Function::LocalVariablePair> &lo
 }
 
 void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debug_item, const std::vector<uint8_t> &bytecode,
-                                      ItemContainer *container, std::vector<uint8_t> *constant_pool,
+                                      const ItemContainer *container, std::vector<uint8_t> *constant_pool,
                                       bool emit_debug_info) const
 {
     auto *program = debug_item->GetLineNumberProgram();
@@ -1715,7 +1718,8 @@ void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debug_item, con
             break;
         }
         if (emit_debug_info) {
-            EmitLocalVariable(program, container, constant_pool, pc_inc, end, iter->variable_index);
+            LocalVarEmitContext context{pc_inc, end, iter->variable_index};
+            EmitLocalVariable(program, container, constant_pool, context);
         }
         start = end;
         iter++;

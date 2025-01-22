@@ -39,6 +39,8 @@ public:
     NO_COPY_SEMANTIC(ItemContainer);
     NO_MOVE_SEMANTIC(ItemContainer);
 
+    StringItem *GetStringItem(const std::string &str) const;
+
     StringItem *GetOrCreateStringItem(const std::string &str);
 
     LiteralArrayItem *GetOrCreateLiteralArrayItem(const std::string &id);
