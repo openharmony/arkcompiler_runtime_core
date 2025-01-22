@@ -1827,7 +1827,7 @@
 13.compilation_units_packages_and_modules/07.compilation_unit_initialization/module/cyclic_dependency/test.sts
 13.compilation_units_packages_and_modules/07.compilation_unit_initialization/package/cyclic_dependency/pkgA/test.sts
 
-# 21278 binvalid code does not generate CTE
+# 21278 Type parameter does not produce CTE
 05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/wrong_type_parameter_variance_0.sts
 05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/wrong_type_parameter_variance_1.sts
 
