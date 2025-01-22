@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "inspector_server.h"
 
 #include <functional>
+#include <memory>
 #include <regex>
 #include <string>
 #include <utility>
@@ -28,8 +29,11 @@
 #include "utils/logger.h"
 
 #include "connection/server.h"
+#include "types/custom_url_breakpoint_response.h"
 #include "types/location.h"
 #include "types/numeric_id.h"
+#include "types/url_breakpoint_request.h"
+#include "types/url_breakpoint_response.h"
 
 namespace ark::tooling::inspector {
 InspectorServer::InspectorServer(Server &server) : server_(server)
@@ -305,6 +309,29 @@ void InspectorServer::OnCallDebuggerRemoveBreakpoint(std::function<void(PtThread
                    });
 }
 
+static auto GetUrlFileFilter(const std::string &url)
+{
+    static constexpr std::string_view FILE_PREFIX = "file://";
+    return [sourceFile = url.find(FILE_PREFIX) == 0 ? url.substr(FILE_PREFIX.size()) : url](auto fileName) {
+        return fileName == sourceFile;
+    };
+}
+
+void InspectorServer::OnCallDebuggerRemoveBreakpointsByUrl(std::function<void(PtThread, SourceFileFilter)> &&handler)
+{
+    // clang-format off
+    server_.OnCall("Debugger.removeBreakpointsByUrl",
+        [this, handler = std::move(handler)](auto &sessionId, auto &, auto &params) {
+            const auto *url = params.template GetValue<JsonObject::StringT>("url");
+            if (url == nullptr) {
+                LOG(INFO, DEBUGGER) << "No 'url' parameter was provided for Debugger.removeBreakpointsByUrl";
+                return;
+            }
+            handler(sessionManager_.GetThreadBySessionId(sessionId), GetUrlFileFilter(*url));
+    });
+    // clang-format on
+}
+
 void InspectorServer::OnCallDebuggerRestartFrame(std::function<void(PtThread, FrameId)> &&handler)
 {
     // clang-format off
@@ -364,48 +391,106 @@ void InspectorServer::OnCallDebuggerSetBreakpoint(std::function<SetBreakpointHan
     // clang-format on
 }
 
+std::unique_ptr<UrlBreakpointResponse> InspectorServer::SetBreakpointByUrl(
+    const std::string &sessionId, const UrlBreakpointRequest &breakpointRequest,
+    const std::function<SetBreakpointHandler> &handler)
+{
+    std::function<bool(std::string_view)> sourceFileFilter;
+    if (const auto &url = breakpointRequest.GetUrl()) {
+        sourceFileFilter = GetUrlFileFilter(*url);
+    } else if (const auto &urlRegex = breakpointRequest.GetUrlRegex()) {
+        sourceFileFilter = [regex = std::regex(*urlRegex)](auto fileName) {
+            return std::regex_match(fileName.data(), regex);
+        };
+    } else {
+        // Either 'url' or 'urlRegex' must be specified - checked in parser
+        UNREACHABLE();
+    }
+
+    const auto *condition = breakpointRequest.GetCondition().has_value() ? &*breakpointRequest.GetCondition() : nullptr;
+
+    std::set<std::string_view> sourceFiles;
+    auto thread = sessionManager_.GetThreadBySessionId(sessionId);
+
+    auto id = handler(thread, sourceFileFilter, breakpointRequest.GetLineNumber(), sourceFiles, condition);
+    if (!id) {
+        LOG(INFO, DEBUGGER) << "Failed to set breakpoint";
+        return nullptr;
+    }
+    // Must be non-empty on success
+    ASSERT(!sourceFiles.empty());
+
+    auto breakpointInfo = std::make_unique<UrlBreakpointResponse>(*id);
+    AddLocations(*breakpointInfo, sourceFiles, breakpointRequest.GetLineNumber(), thread);
+    return breakpointInfo;
+}
+
 void InspectorServer::OnCallDebuggerSetBreakpointByUrl(std::function<SetBreakpointHandler> &&handler)
 {
-    server_.OnCall("Debugger.setBreakpointByUrl", [this, handler = std::move(handler)](auto &sessionId, auto &result,
-                                                                                       const JsonObject &params) {
-        size_t lineNumber;
-        if (auto prop = params.GetValue<JsonObject::NumT>("lineNumber")) {
-            lineNumber = *prop + 1;
-        } else {
-            LOG(INFO, DEBUGGER) << "No 'lineNumber' property";
-            return;
-        }
-
-        std::function<bool(std::string_view)> sourceFileFilter;
-        if (auto url = params.GetValue<JsonObject::StringT>("url")) {
-            static constexpr std::string_view FILE_PREFIX = "file://";
-            sourceFileFilter = [sourceFile = url->find(FILE_PREFIX) == 0 ? url->substr(FILE_PREFIX.size()) : *url](
-                                   auto fileName) { return fileName == sourceFile; };
-        } else if (auto urlRegex = params.GetValue<JsonObject::StringT>("urlRegex")) {
-            sourceFileFilter = [regex = std::regex(*urlRegex)](auto fileName) {
-                return std::regex_match(fileName.data(), regex);
-            };
-        } else {
-            LOG(INFO, DEBUGGER) << "No 'url' or 'urlRegex' properties";
-            return;
-        }
-
-        auto condition = params.template GetValue<JsonObject::StringT>("condition");
-
-        std::set<std::string_view> sourceFiles;
-        auto thread = sessionManager_.GetThreadBySessionId(sessionId);
-
-        auto id = handler(thread, sourceFileFilter, lineNumber, sourceFiles, condition);
-        if (!id) {
-            LOG(INFO, DEBUGGER) << "Failed to set breakpoint";
-            return;
-        }
-
-        result.AddProperty("breakpointId", std::to_string(*id));
-        result.AddProperty("locations", [this, lineNumber, &sourceFiles, thread](JsonArrayBuilder &locations) {
-            AddBreakpointByUrlLocations(locations, sourceFiles, lineNumber, thread);
+    // clang-format off
+    server_.OnCall("Debugger.setBreakpointByUrl",
+        [this, handler = std::move(handler)](auto &sessionId, auto &result, const JsonObject &params) {
+            auto optRequest = UrlBreakpointRequest::FromJson(params);
+            if (!optRequest) {
+                LOG(INFO, DEBUGGER) << "Parse error: " << optRequest.Error();
+                return;
+            }
+            auto optResponse = SetBreakpointByUrl(sessionId, *optRequest, handler);
+            if (optResponse) {
+                optResponse->Serialize(result);
+            }
         });
-    });
+    // clang-format on
+}
+
+static std::optional<std::vector<UrlBreakpointRequest>> ParseUrlBreakpointRequests(
+    const std::vector<JsonObject::Value> &rawRequests)
+{
+    std::vector<UrlBreakpointRequest> requestedBreakpoints;
+    for (const auto &rawRequest : rawRequests) {
+        auto *jsonObject = rawRequest.Get<JsonObject::JsonObjPointer>();
+        if (jsonObject == nullptr) {
+            LOG(INFO, DEBUGGER) << "Invalid 'locations' array in getPossibleAndSetBreakpointByUrl";
+            return {};
+        }
+        auto optBreakpointRequest = UrlBreakpointRequest::FromJson(**jsonObject);
+        if (!optBreakpointRequest) {
+            LOG(INFO, DEBUGGER) << "Invalid breakpoint request: " << optBreakpointRequest.Error();
+            return {};
+        }
+        requestedBreakpoints.push_back(std::move(*optBreakpointRequest));
+    }
+    return requestedBreakpoints;
+}
+
+void InspectorServer::OnCallDebuggerGetPossibleAndSetBreakpointByUrl(std::function<SetBreakpointHandler> &&handler)
+{
+    // clang-format off
+    server_.OnCall("Debugger.getPossibleAndSetBreakpointByUrl",
+        [this, handler = std::move(handler)](auto &sessionId, auto &result, const JsonObject &params) {
+            auto rawRequests = params.GetValue<JsonObject::ArrayT>("locations");
+            if (rawRequests == nullptr) {
+                LOG(INFO, DEBUGGER) << "No 'locations' array in getPossibleAndSetBreakpointByUrl";
+                return;
+            }
+            auto optRequests = ParseUrlBreakpointRequests(*rawRequests);
+            if (!optRequests) {
+                return;
+            }
+
+            auto outputLocationsBuilder = [this, &sessionId, &requests = *optRequests,
+                                           handler = std::as_const(handler)](JsonArrayBuilder &builder) {
+                for (const auto &req : requests) {
+                    auto optResponse = SetBreakpointByUrl(sessionId, req, handler);
+                    auto breakpointResponse = (optResponse != nullptr)
+                        ? optResponse->ToCustomUrlBreakpointResponse()
+                        : CustomUrlBreakpointResponse(req.GetLineNumber());
+                    builder.Add(std::move(breakpointResponse));
+                }
+            };
+            result.AddProperty("locations", outputLocationsBuilder);
+        });
+    // clang-format on
 }
 
 void InspectorServer::OnCallDebuggerSetBreakpointsActive(std::function<void(PtThread, bool)> &&handler)
@@ -423,6 +508,25 @@ void InspectorServer::OnCallDebuggerSetBreakpointsActive(std::function<void(PtTh
 
             auto thread = sessionManager_.GetThreadBySessionId(sessionId);
             handler(thread, active);
+        });
+    // clang-format on
+}
+
+void InspectorServer::OnCallDebuggerSetSkipAllPauses(std::function<void(PtThread, bool)> &&handler)
+{
+    // clang-format off
+    server_.OnCall("Debugger.setSkipAllPauses",
+        [this, handler = std::move(handler)](auto &sessionId, auto &, const JsonObject &params) {
+            bool skip;
+            if (auto prop = params.GetValue<JsonObject::BoolT>("skip")) {
+                skip = *prop;
+            } else {
+                LOG(INFO, DEBUGGER) << "No 'active' property";
+                return;
+            }
+
+            auto thread = sessionManager_.GetThreadBySessionId(sessionId);
+            handler(thread, skip);
         });
     // clang-format on
 }
@@ -612,9 +716,8 @@ void InspectorServer::AddCallFrameInfo(JsonArrayBuilder &callFrames, const CallF
     });
 }
 
-void InspectorServer::AddBreakpointByUrlLocations(JsonArrayBuilder &locations,
-                                                  const std::set<std::string_view> &sourceFiles, size_t lineNumber,
-                                                  PtThread thread)
+void InspectorServer::AddLocations(UrlBreakpointResponse &response, const std::set<std::string_view> &sourceFiles,
+                                   size_t lineNumber, PtThread thread)
 {
     for (auto sourceFile : sourceFiles) {
         auto [scriptId, isNew] = sourceManager_.GetScriptId(thread, sourceFile);
@@ -623,7 +726,7 @@ void InspectorServer::AddBreakpointByUrlLocations(JsonArrayBuilder &locations,
             CallDebuggerScriptParsed(thread, scriptId, sourceFile);
         }
 
-        locations.Add(Location {scriptId, lineNumber});
+        response.AddLocation(Location {scriptId, lineNumber});
     }
 }
 

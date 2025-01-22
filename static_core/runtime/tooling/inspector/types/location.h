@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #include "tooling/inspector/json_serialization/serializable.h"
 
 #include <cstddef>
-#include <functional>
+#include <optional>
 #include <string>
 
 #include "utils/expected.h"
@@ -34,7 +34,10 @@ class JsonObjectBuilder;
 namespace ark::tooling::inspector {
 class Location final : public JsonSerializable {
 public:
-    Location(ScriptId scriptId, size_t lineNumber) : scriptId_(scriptId), lineNumber_(lineNumber) {}
+    Location(ScriptId scriptId, size_t lineNumber, std::optional<size_t> columnNumber = {})
+        : scriptId_(scriptId), lineNumber_(lineNumber), columnNumber_(columnNumber)
+    {
+    }
 
     static Expected<Location, std::string> FromJsonProperty(const JsonObject &object, const char *propertyName);
 
@@ -53,11 +56,22 @@ public:
         lineNumber_ = lineNumber;
     }
 
+    std::optional<size_t> GetColumnNumber() const
+    {
+        return columnNumber_;
+    }
+
+    void SetColumnNumber(size_t columnNumber)
+    {
+        columnNumber_ = columnNumber;
+    }
+
     void Serialize(JsonObjectBuilder &builder) const override;
 
 private:
     ScriptId scriptId_;
     size_t lineNumber_;
+    std::optional<size_t> columnNumber_;
 };
 }  // namespace ark::tooling::inspector
 

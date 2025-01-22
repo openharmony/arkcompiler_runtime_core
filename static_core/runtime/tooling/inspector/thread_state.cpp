@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,9 @@
 
 #include <sstream>
 
+#include "include/tooling/pt_location.h"
 #include "macros.h"
 
-#include "debuggable_thread.h"
 #include "error.h"
 #include "types/numeric_id.h"
 
@@ -100,6 +100,11 @@ void ThreadState::Pause()
 void ThreadState::SetBreakpointsActive(bool active)
 {
     breakpointsActive_ = active;
+}
+
+void ThreadState::SetSkipAllPauses(bool skip)
+{
+    skipAllPauses_ = skip;
 }
 
 BreakpointId ThreadState::SetBreakpoint(const std::vector<PtLocation> &locations, const std::string *condition)
