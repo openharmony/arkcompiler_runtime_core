@@ -82,7 +82,7 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
 
     if(TARGET etsstdlib)
         if (NOT TARGET regenerate_and_check_stdlib AND ${CMAKE_GENERATOR} MATCHES "Ninja")
-            # Note(ivan-tyulyanin): -P replaces CMAKE_CURRENT_SOURCE_DIR so using ETS_PLUGIN_SOURCE_DIR
+            # Note(ivan-tyulyandin): -P replaces CMAKE_CURRENT_SOURCE_DIR so using ETS_PLUGIN_SOURCE_DIR
             add_custom_target(regenerate_and_check_stdlib
                 COMMAND ${CMAKE_COMMAND} -DETS_PLUGIN_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/GenerateStdLib.cmake)
             add_dependencies(etsstdlib regenerate_and_check_stdlib)
@@ -152,8 +152,10 @@ if(TARGET es2panda)
 
     set_target_properties(etsstdlib PROPERTIES FILE "${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.abc")
     add_dependencies(ark etsstdlib)
+
+    add_subdirectory(sdk)
 else()
-    message(WARNING "es2panda was not found for etsstdlib build")
+    message(WARNING "es2panda was not found for etsstdlib and etssdk build")
 endif()
 
 if(PANDA_WITH_COMPILER)

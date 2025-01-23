@@ -40,6 +40,7 @@
   "plugins/ets/README.md": "*",
   "plugins/ets/RegisterPlugin.cmake": "*",
   "plugins/ets/runtime/napi": "*",
+  "plugins/ets/sdk/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/snippet_verifier": "*",
   "plugins/ets/stdlib/native": "*",
   "plugins/ets/stdlib/std/containers/README.md": "*",

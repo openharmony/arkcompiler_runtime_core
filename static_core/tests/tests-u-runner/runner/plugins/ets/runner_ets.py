@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -45,6 +45,7 @@ class RunnerETS(RunnerFileBased):
         self.__ets_suite_name = self.get_ets_suite_name(config.test_suites)
         RunnerFileBased.__init__(self, config, self.__ets_suite_name)
         self.stdlib_path = path.join(self.build_dir, "plugins/ets/etsstdlib.abc")
+        self.sdk_path = path.join(self.build_dir, "plugins/ets/sdk/etssdk.abc")
         if not path.exists(self.stdlib_path):
             self.stdlib_path = path.join(self.build_dir, "gen", "plugins/ets/etsstdlib.abc")  # for GN build
 
@@ -60,8 +61,11 @@ class RunnerETS(RunnerFileBased):
             self.test_env.es2panda_args.append("--debug-info")
         self.test_env.es2panda_args.extend(self.config.es2panda.es2panda_args)
 
-        load_runtime_ets = [f"--boot-panda-files={self.stdlib_path}", "--load-runtimes=ets"]
+        boot_files = f"--boot-panda-files={self.stdlib_path}"
+        load_runtime_ets = [boot_files, "--load-runtimes=ets"]
         self.test_env.runtime_args.extend(load_runtime_ets)
+        if self.__ets_suite_name == EtsSuites.SDK.value:
+            self.test_env.runtime_args.append(f"--panda-files={self.sdk_path}")
         self.test_env.verifier_args.extend(load_runtime_ets)
         if self.conf_kind in [ConfigurationKind.AOT, ConfigurationKind.AOT_FULL]:
             self.aot_args.extend(load_runtime_ets)
@@ -111,6 +115,8 @@ class RunnerETS(RunnerFileBased):
             name = EtsSuites.CUSTOM.value
         elif 'sts_ts_subset' in test_suites:
             name = EtsSuites.TS_SUBSET.value
+        elif 'ets_sdk' in test_suites:
+            name = EtsSuites.SDK.value
         else:
             Log.exception_and_raise(_LOGGER, f"Unsupported test suite: {self.config.test_suites}")
         return name

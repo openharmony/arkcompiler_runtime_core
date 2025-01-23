@@ -27,6 +27,9 @@ foreach(plugin, ark_enabled_plugins) {
   }
 }
 
+# Note(ivan-tyulyandin): internal issue #21800
+with_sdk = false
+
 group("ark_packages") {
   deps = [ "runtime/napi/etsnative:etsnative" ]
 
@@ -35,6 +38,9 @@ group("ark_packages") {
   }
   if (with_stdlib) {
     deps += [ ":etsstdlib" ]
+  }
+  if (with_sdk) {
+    deps += [ ":etssdk" ]
   }
   if (ark_ets_interop_js) {
     deps += [ "runtime/interop_js:ets_interop_js_napi" ]
@@ -121,6 +127,8 @@ if (with_stdlib) {
       "      \"std\": [\"$abs_ark_root" + "/plugins/ets/stdlib/std\"],",
       "      \"escompat\": [\"$abs_ark_root" +
           "/plugins/ets/stdlib/escompat\"],",
+      "      \"api\": [\"$abs_ark_root" + "/plugins/ets/sdk/api\"],",
+      "      \"arkts\": [\"$abs_ark_root" + "/plugins/ets/sdk/arkts\"],",
       "      \"import_tests\": [\"$abs_ark_root" +
           "$ark_es2panda_root/test/parser/ets/import_tests\"]",
       "    }",
@@ -172,4 +180,9 @@ if (with_stdlib) {
   group("ets_func_tests") {
     deps = [ "tests:ets_func_tests_int_jit_aot" ]
   }
+}
+
+if (with_sdk) {
+  # Note(ivan-tyulyandin): internal issue #21800
+  assert(false, "Sdk build with gn is not supported!")
 }
