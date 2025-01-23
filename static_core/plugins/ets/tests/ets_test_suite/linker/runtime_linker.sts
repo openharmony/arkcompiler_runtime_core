@@ -55,7 +55,7 @@ class Test {
         assertEQ(Class.of(clsCls), clsCls);
         assertEQ(objCls.getDescriptor(), "Lstd/core/Object;");
         assertEQ(clsCls.getDescriptor(), "Lstd/core/Class;");
-        assertEQ(objCls.getSuper(), null, "std.core.Object must have no super class");
+        assertEQ(objCls.getSuper(), undefined, "std.core.Object must have no super class");
         assertEQ(clsCls.getSuper(), objCls, "std.core.Class must extend std.core.Object");
     }
 
@@ -64,7 +64,7 @@ class Test {
         const acls = Class.of(new A());
         const bcls = Class.of(new B());
         assertEQ(objcls.getName(), "std.core.Object");
-        assertEQ(objcls.getSuper(), null);
+        assertEQ(objcls.getSuper(), undefined);
         assertEQ(acls.getName(), cname("A"));
         assertEQ(acls.getSuper(), objcls);
         assertEQ(bcls.getName(), cname("B"));
@@ -80,7 +80,7 @@ class Test {
     static testRuntimeLinkerProperties() {
         // Check all booted Class refer to the same RuntimeLinker
         let objectLinker = Class.of(new Object()).getLinker();
-        assertNE(objectLinker, null);
+        assertNE(objectLinker, undefined);
         assertEQ(objectLinker, getBootRuntimeLinker());
         let doubleLinker = Class.of(new Double(1.0)).getLinker();
         assertEQ(objectLinker, doubleLinker);

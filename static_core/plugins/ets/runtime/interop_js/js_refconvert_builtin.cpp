@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,7 +101,7 @@ private:
         napi_env env = ctxx->GetJSEnv();
         napi_value val;
         NAPI_CHECK_FATAL(napi_get_named_property(env, GetGlobal(env), name, &val));
-        INTEROP_FATAL_IF(IsUndefined(env, val));
+        INTEROP_FATAL_IF(IsNull(env, val));
         napi_ref ref;
         NAPI_CHECK_FATAL(napi_create_reference(env, val, 1, &ref));
         return ref;
@@ -127,7 +127,7 @@ private:
     void RegisterExceptions()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_ERROR_OVERLOADS {
-            {utf::CStringAsMutf8("<ctor>"), "Lstd/core/Object;Lstd/core/Object;:V"}};
+            {utf::CStringAsMutf8("<ctor>"), "Lstd/core/String;Lescompat/ErrorOptions;:V"}};
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_EXCEPTION_OVERLOADS {
             {utf::CStringAsMutf8("<ctor>"), "Lstd/core/String;:V"}};
         wError_ = RegisterClass(descriptors::ERROR, "Error", &W_ERROR_OVERLOADS);
@@ -185,30 +185,30 @@ private:
             {utf::CStringAsMutf8("map"), "Lstd/core/Function1;:Lescompat/Array;"},
             {utf::CStringAsMutf8("forEach"), "Lstd/core/Function1;:V"},
             {utf::CStringAsMutf8("pop"), ":Lstd/core/Object;"},
-            {utf::CStringAsMutf8("fill"), "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:Lescompat/Array;"},
+            {utf::CStringAsMutf8("fill"), "Lstd/core/Object;Lstd/core/Double;Lstd/core/Double;:Lescompat/Array;"},
             {utf::CStringAsMutf8("flat"), ":Lescompat/Array;"},
-            {utf::CStringAsMutf8("join"), "Lstd/core/Object;:Lstd/core/String;"},
+            {utf::CStringAsMutf8("join"), "Lstd/core/String;:Lstd/core/String;"},
             {utf::CStringAsMutf8("push"), "[Lstd/core/Object;:D"},
             {utf::CStringAsMutf8("some"), "Lstd/core/Function1;:Z"},
             {utf::CStringAsMutf8("sort"), ":Lescompat/Array;"},
             {utf::CStringAsMutf8("every"), "Lstd/core/Function1;:Z"},
             {utf::CStringAsMutf8("shift"), ":Lstd/core/Object;"},
-            {utf::CStringAsMutf8("slice"), "Lstd/core/Object;Lstd/core/Object;:Lescompat/Array;"},
+            {utf::CStringAsMutf8("slice"), "Lstd/core/Double;Lstd/core/Double;:Lescompat/Array;"},
             {utf::CStringAsMutf8("<ctor>"), ":V"},
             {utf::CStringAsMutf8("filter"), "Lstd/core/Function1;:Lescompat/Array;"},
             {utf::CStringAsMutf8("<get>length"), ":D"},
             {utf::CStringAsMutf8("reduce"), "Lstd/core/Function2;:Lstd/core/Object;"},
-            {utf::CStringAsMutf8("splice"), "DLstd/core/Object;[Lstd/core/Object;:Lescompat/Array;"},
+            {utf::CStringAsMutf8("splice"), "DLstd/core/Double;[Lstd/core/Object;:Lescompat/Array;"},
             {utf::CStringAsMutf8("findLast"), "Lstd/core/Function1;:Lstd/core/Object;"},
             {utf::CStringAsMutf8("toSorted"), ":Lescompat/Array;"},
             {utf::CStringAsMutf8("findIndex"), "Lstd/core/Function1;:D"},
             {utf::CStringAsMutf8("findLastIndex"), "Lstd/core/Function1;:D"},
-            {utf::CStringAsMutf8("toSpliced"), "Lstd/core/Object;Lstd/core/Object;:Lescompat/Array;"},
+            {utf::CStringAsMutf8("toSpliced"), "Lstd/core/Double;Lstd/core/Double;:Lescompat/Array;"},
             {utf::CStringAsMutf8("copyWithin"), "II:Lescompat/Array;"},
             {utf::CStringAsMutf8("toReversed"), ":Lescompat/Array;"},
-            {utf::CStringAsMutf8("indexOf"), "Lstd/core/Object;Lstd/core/Object;:D"},
-            {utf::CStringAsMutf8("includes"), "Lstd/core/Object;Lstd/core/Object;:Z"},
-            {utf::CStringAsMutf8("lastIndexOf"), "Lstd/core/Object;Lstd/core/Object;:D"},
+            {utf::CStringAsMutf8("indexOf"), "Lstd/core/Object;Lstd/core/Double;:D"},
+            {utf::CStringAsMutf8("includes"), "Lstd/core/Object;Lstd/core/Double;:Z"},
+            {utf::CStringAsMutf8("lastIndexOf"), "Lstd/core/Object;Lstd/core/Double;:D"},
             {utf::CStringAsMutf8("reduceRight"), "Lstd/core/Function2;:Lstd/core/Object;"},
             {utf::CStringAsMutf8("find"), "Lstd/core/Function1;:Lstd/core/Object;"},
             {utf::CStringAsMutf8("isArray"), "Lstd/core/Object;:Z"},
@@ -310,8 +310,8 @@ private:
                 return BuiltinConvert<JSConvertString>(ctxx, env, jsValue);
             case napi_object:
                 return MObjectObject(ctx_, jsValue);
-            case napi_undefined:
-                return ctx_->GetUndefinedObject();
+            case napi_null:
+                return ctx_->GetNullValue();
             case napi_symbol:
                 [[fallthrough]];
             case napi_function:
@@ -410,7 +410,7 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
     RegisterBuiltinRefConvertor<JSConvertBigInt>(cache, ctx->GetBigIntClass());
     RegisterBuiltinRefConvertor<JSConvertPromise>(cache, ctx->GetPromiseClass());
     RegisterBuiltinRefConvertor<JSConvertArrayBuffer>(cache, ctx->GetArrayBufferClass());
-    RegisterBuiltinRefConvertor<JSConvertEtsUndefined>(cache, ctx->GetUndefinedClass());
+    RegisterBuiltinRefConvertor<JSConvertEtsNull>(cache, ctx->GetNullValueClass());
 
     RegisterBuiltinRefConvertor<JSConvertStdlibBoolean>(cache, linkerExt->GetBoxBooleanClass());
     RegisterBuiltinRefConvertor<JSConvertStdlibByte>(cache, linkerExt->GetBoxByteClass());

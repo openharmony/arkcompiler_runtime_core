@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,18 +20,18 @@ class jsvars {
 };
 
 class ListNode {
-    constructor(tag: double, next: ListNode) {
+    constructor(tag: double, next?: ListNode) {
         this.next = next;
         this.tag = tag;
     }
-    public getNext(): ListNode {
+    public getNext(): ListNode | undefined {
         return this.next;
     }
     public setNext(v: ListNode): void {
         this.next = v;
     }
 
-    public next: ListNode;
+    public next?: ListNode;
     public tag: double;
 };
 
@@ -113,29 +113,29 @@ class UClass2 { };
 function foo(resolve: (value: Object) => void): void { resolve(new Object()); }
 
 class ReferencesAccess {
-    public getfUClass1(): UClass1 { return this.fUClass1; }
-    public getfUClass2(): UClass2 { return this.fUClass2; }
-    public getfString(): String { return this.fString; }
-    public getfJSValue(): JSValue { return this.fJSValue; }
-    public getfPromise(): Promise<Object> { return this.fPromise; }
-    public getfAString(): String[] { return this.fAString; }
-    public getfAUClass1(): UClass1[] { return this.fAUClass1; }
+    public getfUClass1() { return this.fUClass1; }
+    public getfUClass2() { return this.fUClass2; }
+    public getfString() { return this.fString; }
+    public getfJSValue() { return this.fJSValue; }
+    public getfPromise() { return this.fPromise; }
+    public getfAString() { return this.fAString; }
+    public getfAUClass1() { return this.fAUClass1; }
 
-    public setfUClass1(v: UClass1): void { this.fUClass1 = v; }
-    public setfUClass2(v: UClass2): void { this.fUClass2 = v; }
-    public setfString(v: String): void { this.fString = v; }
-    public setfJSValue(v: JSValue): void { this.fJSValue = v; }
-    public setfPromise(v: Promise<Object>): void { this.fPromise = v; }
-    public setfAString(v: String[]): void { this.fAString = v; }
-    public setfAUClass1(v: UClass1[]): void { this.fAUClass1 = v; }
+    public setfUClass1(v?: UClass1): void { this.fUClass1 = v; }
+    public setfUClass2(v?: UClass2): void { this.fUClass2 = v; }
+    public setfString(v?: String): void { this.fString = v; }
+    public setfJSValue(v?: JSValue): void { this.fJSValue = v; }
+    public setfPromise(v?: Promise<Object>): void { this.fPromise = v; }
+    public setfAString(v?: String[]): void { this.fAString = v; }
+    public setfAUClass1(v?: UClass1[]): void { this.fAUClass1 = v; }
 
-    public fUClass1: UClass1 = new UClass1();
-    public fUClass2: UClass2 = new UClass2();
-    public fString: String = new String();
-    public fJSValue: JSValue = '0' as JSValue;
-    public fPromise: Promise<Object> = new Promise<Object>(foo);
-    public fAString: String[] = [];
-    public fAUClass1: UClass1[] = [];
+    public fUClass1?: UClass1 = new UClass1();
+    public fUClass2?: UClass2 = new UClass2();
+    public fString?: String = new String();
+    public fJSValue?: JSValue = '0' as JSValue;
+    public fPromise?: Promise<Object> = new Promise<Object>(foo);
+    public fAString?: String[] = [];
+    public fAUClass1?: UClass1[] = [];
 };
 
 class ReferencesAccessStatic {

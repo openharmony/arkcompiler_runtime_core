@@ -46,11 +46,11 @@ final class AbcFile {
      *
      * @param path to ABC file.
      *
-     * @returns loaded Class if it was found in the file, null otherwise.
+     * @returns loaded Class if it was found in the file, undefined otherwise.
      *
      * @throws errors happened during class initialization.
      */
-    public native loadClass(runtimeLinker: RuntimeLinker, clsName: string, init: boolean): Class | null;
+    public native loadClass(runtimeLinker: RuntimeLinker, clsName: string, init: boolean): Class | undefined;
 
     public native getFilename(): string;
 }

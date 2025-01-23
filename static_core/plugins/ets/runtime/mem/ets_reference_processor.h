@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,7 +84,7 @@ private:
 
     mem::MPSCSet<PandaUnorderedSet<ObjectHeader *>> weakReferences_;
     GC *gc_ {nullptr};
-    ark::ets::EtsObject *undefinedObject_ {nullptr};
+    ark::ets::EtsObject *nullValue_ {nullptr};
     PandaDeque<RefFinalizer> finalizerQueue_;
 };
 
@@ -97,7 +97,7 @@ void EtsReferenceProcessor::ProcessReferences(const mem::GC::ReferenceClearPredi
         ASSERT(ark::ets::EtsClass::FromRuntimeClass(weakRefObj->ClassAddr<Class>())->IsWeakReference());
         auto *weakRef = static_cast<ark::ets::EtsWeakReference *>(ark::ets::EtsObject::FromCoreType(weakRefObj));
         auto *referent = weakRef->GetReferent();
-        if (referent == nullptr || referent == undefinedObject_) {
+        if (referent == nullptr || referent == nullValue_) {
             LOG(DEBUG, REF_PROC) << "Don't process reference " << GetDebugInfoAboutObject(weakRefObj)
                                  << " because referent is nullish";
             continue;

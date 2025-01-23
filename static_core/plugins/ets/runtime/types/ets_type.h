@@ -26,7 +26,7 @@ namespace ark::ets {
 static constexpr char ARRAY_TYPE_PREFIX = '[';
 static constexpr char CLASS_TYPE_PREFIX = 'L';
 static constexpr char METHOD_PREFIX = 'M';
-static constexpr const char *NULL_TYPE_DESC = "Null";
+static constexpr const char *TYPE_API_UNDEFINED_TYPE_DESC = "__TYPE_API_UNDEFINED";
 static constexpr const char *LAMBDA_PREFIX = "LambdaObject";
 static constexpr const char *STD_CORE_FUNCTION_PREFIX = "std.core.Function";
 static constexpr const char *LAMBDA_METHOD_NAME = "$_invoke";

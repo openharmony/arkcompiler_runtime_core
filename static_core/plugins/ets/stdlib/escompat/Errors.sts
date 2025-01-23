@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,10 +26,6 @@ export class EvalError extends Error {
     static $_invoke(message?: String, options?: ErrorOptions): EvalError {
         return new EvalError(message, options)
     }
-
-    static $_invoke(message: String): EvalError {
-        return new EvalError(message)
-    }
 }
 
 /**
@@ -42,10 +38,6 @@ export class TypeError extends Error {
 
     static $_invoke(message?: String, options?: ErrorOptions): TypeError {
         return new TypeError(message, options)
-    }
-
-    static $_invoke(message: String): TypeError {
-        return new TypeError(message)
     }
 }
 
@@ -60,10 +52,6 @@ export class ReferenceError extends Error {
     static $_invoke(message?: String, options?: ErrorOptions): ReferenceError {
         return new ReferenceError(message, options)
     }
-
-    static $_invoke(message: String): ReferenceError {
-        return new ReferenceError(message)
-    }
 }
 
 /**
@@ -76,10 +64,6 @@ export class URIError extends Error {
 
     static $_invoke(message?: String, options?: ErrorOptions): URIError {
         return new URIError(message, options)
-    }
-
-    static $_invoke(message: String): URIError {
-        return new URIError(message)
     }
 }
 

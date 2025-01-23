@@ -79,8 +79,8 @@ enum AbckitIsaApiStaticOpcode {
     ABCKIT_ISA_API_STATIC_OPCODE_LOADCONSTARRAY,
     ABCKIT_ISA_API_STATIC_OPCODE_CHECKCAST,
     ABCKIT_ISA_API_STATIC_OPCODE_ISINSTANCE,
-    ABCKIT_ISA_API_STATIC_OPCODE_ISUNDEFINED,
-    ABCKIT_ISA_API_STATIC_OPCODE_LOADUNDEFINED,
+    ABCKIT_ISA_API_STATIC_OPCODE_ISNULLVALUE,
+    ABCKIT_ISA_API_STATIC_OPCODE_LOADNULLVALUE,
     ABCKIT_ISA_API_STATIC_OPCODE_EQUALS,
     ABCKIT_ISA_API_STATIC_OPCODE_STRICTEQUALS,
 
@@ -545,12 +545,12 @@ struct AbckitIsaApiStatic {
                                      AbckitType *targetType /* in */);
 
     /**
-     * @brief iCreateLoadUndefined.
+     * @brief iCreateLoadNullValue.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      */
-    AbckitInst *(*iCreateLoadUndefined)(AbckitGraph *graph /* in */);
+    AbckitInst *(*iCreateLoadNullValue)(AbckitGraph *graph /* in */);
 
     /**
      * @brief iCreateReturnVoid.

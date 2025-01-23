@@ -613,10 +613,10 @@ intrinsics:
   is_fastpath: false
   need_param_locations: false
 
-- name: AbckitIsUndefined
+- name: AbckitIsNullValue
   space: abckit
-  class_name: "IsUndefined"
-  method_name: "ets.isundefined"
+  class_name: "IsNullValue"
+  method_name: "ets.isnullvalue"
   compiler_only: true
   private: false
   static: true

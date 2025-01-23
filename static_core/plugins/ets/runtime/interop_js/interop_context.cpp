@@ -187,7 +187,7 @@ void InteropCtx::SharedEtsVmState::CacheClasses(EtsClassLinker *etsClassLinker)
     objectClass = CacheClass(etsClassLinker, descriptors::OBJECT);
     stringClass = CacheClass(etsClassLinker, descriptors::STRING);
     bigintClass = CacheClass(etsClassLinker, descriptors::BIG_INT);
-    undefinedClass = CacheClass(etsClassLinker, descriptors::INTERNAL_UNDEFINED);
+    nullValueClass = CacheClass(etsClassLinker, descriptors::NULL_VALUE);
     promiseClass = CacheClass(etsClassLinker, descriptors::PROMISE);
     errorClass = CacheClass(etsClassLinker, descriptors::ERROR);
     exceptionClass = CacheClass(etsClassLinker, descriptors::EXCEPTION);

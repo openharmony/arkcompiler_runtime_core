@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1037,9 +1037,10 @@ bool ConstFoldingCompareEqualInputs(Inst *inst, Inst *input0, Inst *input1)
     return false;
 }
 
-bool IsUniqueRef(Inst *inst)
+static bool IsUniqueRef(Inst *inst)
 {
-    return inst->IsAllocation() || inst->GetOpcode() == Opcode::NullPtr || inst->GetOpcode() == Opcode::LoadUndefined;
+    return inst->IsAllocation() || inst->GetOpcode() == Opcode::NullPtr ||
+           inst->GetOpcode() == Opcode::LoadUniqueObject;
 }
 
 bool ConstFoldingCompareFloatNan(Inst *inst)

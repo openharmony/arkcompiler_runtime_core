@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -413,7 +413,7 @@ JSCONVERT_WRAP(Promise)
         EtsHandle<EtsObject> value(coro, hpromise->GetValue(coro));
         napi_value completionValue;
         if (value.GetPtr() == nullptr) {
-            completionValue = GetNull(env);
+            completionValue = GetUndefined(env);
         } else {
             auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
             completionValue = refconv->Wrap(ctx, value.GetPtr());
@@ -500,19 +500,19 @@ JSCONVERT_UNWRAP(ArrayBuffer)
     return buf.GetPtr();
 }
 
-JSCONVERT_DEFINE_TYPE(EtsUndefined, EtsObject *);
-JSCONVERT_WRAP(EtsUndefined)
+JSCONVERT_DEFINE_TYPE(EtsNull, EtsObject *);
+JSCONVERT_WRAP(EtsNull)
 {
-    return GetUndefined(env);
+    return GetNull(env);
 }
 
-JSCONVERT_UNWRAP(EtsUndefined)
+JSCONVERT_UNWRAP(EtsNull)
 {
-    if (UNLIKELY(!IsUndefined(env, jsVal))) {
+    if (UNLIKELY(!IsNull(env, jsVal))) {
         TypeCheckFailed();
         return {};
     }
-    return ctx->GetUndefinedObject();
+    return ctx->GetNullValue();
 }
 
 #undef JSCONVERT_DEFINE_TYPE

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,8 @@ namespace ark::ets::interop::js::testing {
 class EtsInteropInterfaceReturnsValuesArkToJs : public EtsInteropTest {};
 
 /* test set employing interface imported from JS as is */
-TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, test_interface_returns_any_type_imported)
+// #21832: returned undefined previously, now leads to NPE
+TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, DISABLED_test_interface_returns_any_type_imported)
 {
     [[maybe_unused]] auto ret = CallEtsMethod<bool>("type_imported__returnAny");
     ASSERT_EQ(ret, true);

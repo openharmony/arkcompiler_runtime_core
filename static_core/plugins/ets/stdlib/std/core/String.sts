@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -359,11 +359,11 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @param locale String representing the BCP47 language tag
      *
      * @throws RangeError if the locale tag is invalid or not found
-     * @throws NullPointerError if another or locale is null
+     * @throws NullPointerError if another or locale is undefined
      *
      * @returns the comparison result
      */
-    public native localeCompare(another: String, locale: String | null): number;
+    public native localeCompare(another: String, locale: String | undefined): number;
 
     /**
      * Comparison between this String and another one based on default
@@ -378,7 +378,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns the comparison result
      */
     public localeCompare(another: String): number {
-        return this.localeCompare(another, null);
+        return this.localeCompare(another, undefined);
     }
 
     /**

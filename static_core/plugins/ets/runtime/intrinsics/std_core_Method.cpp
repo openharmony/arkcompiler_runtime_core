@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,8 +79,7 @@ EtsObject *TypeAPIMethodInvokeImplementation(EtsCoroutine *coro, EtsMethod *meth
     }
 
     if (meth->GetReturnValueType() == EtsType::VOID) {
-        // NOTE(kprokopenko): remove reinterpret_cast when void is synced with runtime
-        return reinterpret_cast<EtsObject *>(EtsCoroutine::GetCurrent()->GetUndefinedObject());
+        return nullptr;
     }
 
     ASSERT(res.IsPrimitive());

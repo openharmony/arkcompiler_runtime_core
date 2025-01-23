@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,14 +38,7 @@ class C {
 function tmp() {}
 
 {
-	// Test ETS stringify
-	let err = null;
-	try {
-		StringifyJSValue(tmp); // JSON.stringify(function) returns undefined (not a string!). We throw exception
-	} catch (e) {
-		err = e;
-	}
-	ASSERT_EQ(String(err.message), 'String expected');
+	ASSERT_EQ(StringifyJSValue(tmp), 'undefined');
 
 	let jsv = StringifyJSValue(new A());
 	let obj = StringifyObject(new A());

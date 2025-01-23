@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -664,20 +664,20 @@ public:
     }
     Inst *GetOrCreateNullPtr();
 
-    Inst *GetUndefinedInst() const
+    Inst *GetUniqueObjectInst() const
     {
-        return undefinedInst_;
+        return uniqueObjectInst_;
     }
-    bool HasUndefinedInst() const
+    bool HasUniqueObjectInst() const
     {
-        return undefinedInst_ != nullptr;
+        return uniqueObjectInst_ != nullptr;
     }
-    void UnsetUndefinedInst()
+    void UnsetUniqueObjectInst()
     {
-        ASSERT(HasUndefinedInst());
-        undefinedInst_ = nullptr;
+        ASSERT(HasUniqueObjectInst());
+        uniqueObjectInst_ = nullptr;
     }
-    Inst *GetOrCreateUndefinedInst();
+    Inst *GetOrCreateUniqueObjectInst();
 
     /// Find constant in the list, return nullptr if not found
     ConstantInst *FindConstant(DataType::Type type, uint64_t value);
@@ -1390,7 +1390,7 @@ private:
     // first constant instruction in graph !NOTE rewrite it to hash-map
     ConstantInst *firstConstInst_ {nullptr};
     Inst *nullptrInst_ {nullptr};
-    Inst *undefinedInst_ {nullptr};
+    Inst *uniqueObjectInst_ {nullptr};
     RuntimeInterface *runtime_ {nullptr};
     RuntimeInterface::MethodPtr method_ {nullptr};
 

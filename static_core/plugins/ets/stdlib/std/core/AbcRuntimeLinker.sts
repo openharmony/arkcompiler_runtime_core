@@ -20,12 +20,12 @@ package std.core;
  */
 export class AbcRuntimeLinker extends RuntimeLinker {
     private parentLinker: RuntimeLinker;
-    private abcFiles: (AbcFile | null)[] = [];
+    private abcFiles: (AbcFile | undefined)[] = [];
 
-    public constructor(parentLinker: RuntimeLinker | null, paths: string[]) {
+    public constructor(parentLinker: RuntimeLinker | undefined, paths: string[]) {
         super();
         this.parentLinker = parentLinker ?? getBootRuntimeLinker();
-        this.abcFiles = new (AbcFile | null)[paths.length];
+        this.abcFiles = new (AbcFile | undefined)[paths.length];
         for (let i = 0; i < paths.length; i++) {
             this.abcFiles[i] = AbcFile.loadAbcFile(this, paths[i]);
         }
@@ -39,7 +39,7 @@ export class AbcRuntimeLinker extends RuntimeLinker {
      * @throws errors happened on loading ABC file.
      */
     public addAbcFiles(paths: string[]): void {
-        const newAbcFiles = new (AbcFile | null)[this.abcFiles.length + paths.length];
+        const newAbcFiles = new (AbcFile | undefined)[this.abcFiles.length + paths.length];
         let i = 0;
         let currentLength = this.abcFiles.length;
         for (; i < currentLength; i++) {
@@ -59,11 +59,11 @@ export class AbcRuntimeLinker extends RuntimeLinker {
      *
      * @param init indicator whether class must be initialized.
      *
-     * @returns Class if it was found, null otherwise.
+     * @returns Class if it was found, undefined otherwise.
      *
      * @throws errors happened during class initialization.
      */
-    protected override findAndLoadClass(clsName: string, init: boolean): Class | null {
+    protected override findAndLoadClass(clsName: string, init: boolean): Class | undefined {
         let optClass = this.parentLinker.loadClassSafe(clsName, init);
         if (optClass) {
             return optClass;
@@ -74,6 +74,6 @@ export class AbcRuntimeLinker extends RuntimeLinker {
                 return optClass;
             }
         }
-        return null;
+        return undefined;
     }
 }

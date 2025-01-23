@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -411,7 +411,7 @@ public:
     void SetWeakReference();
     void SetFinalizeReference();
     void SetValueTyped();
-    void SetUndefined();
+    void SetNullValue();
     void SetBoxed();
     void SetFunction();
     void SetBigInt();
@@ -437,9 +437,9 @@ public:
         return (GetFlags() & IS_VALUE_TYPED) != 0;
     }
 
-    [[nodiscard]] bool IsUndefined() const
+    [[nodiscard]] bool IsNullValue() const
     {
-        return (GetFlags() & IS_UNDEFINED) != 0;
+        return (GetFlags() & IS_NULLVALUE) != 0;
     }
 
     [[nodiscard]] bool IsBoxed() const
@@ -507,8 +507,8 @@ private:
 
     // Class is a value-semantic type
     constexpr static uint32_t IS_VALUE_TYPED = 1U << 19U;
-    // Class is an internal "undefined" class
-    constexpr static uint32_t IS_UNDEFINED = 1U << 20U;
+    // Class is an internal "nullvalue" class
+    constexpr static uint32_t IS_NULLVALUE = 1U << 20U;
     // Class is a boxed type
     constexpr static uint32_t IS_BOXED = 1U << 21U;
     // Class is Function

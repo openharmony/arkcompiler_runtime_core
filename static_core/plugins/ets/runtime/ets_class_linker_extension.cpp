@@ -534,8 +534,8 @@ void EtsClassLinkerExtension::InitializeBuiltinSpecialClasses()
     using namespace panda_file_items::class_descriptors;
 
     CacheClass(STRING, [](auto *c) { c->SetValueTyped(); });
-    undefinedClass_ = CacheClass(INTERNAL_UNDEFINED, [](auto *c) {
-        c->SetUndefined();
+    nullValueClass_ = CacheClass(NULL_VALUE, [](auto *c) {
+        c->SetNullValue();
         c->SetValueTyped();
     });
     auto const setupBoxedFlags = [](EtsClass *c) {

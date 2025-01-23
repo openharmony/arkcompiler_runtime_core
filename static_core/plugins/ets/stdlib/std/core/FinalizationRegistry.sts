@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,8 +21,8 @@ export final class FinalizationRegistry<T> {
     private callbackWithoutArg: () => void = () => { return };
     private isCallbackWithArg: boolean = true;
     // Can be changed to local trimplet class when it will be implemented
-    private obj_token_refs: (Object | null)[] = [];
-    private callback_arguments: (T | null)[] = [];
+    private obj_token_refs: (Object | undefined)[] = [];
+    private callback_arguments: (T | undefined)[] = [];
     // Contains chains of used and free trimplet indexes, [0] serves as uselist head
     private idxarr: int[] = [];
     private freeidx: int = -1;
@@ -129,8 +129,8 @@ export final class FinalizationRegistry<T> {
      */
     public register(object: Object, callbackArg: T, token?: Object): void {
         let refObject = new WeakRef<Object>(object);
-        let refToken: WeakRef<Object> | null = null;
-        if (token != null) {
+        let refToken: WeakRef<Object> | undefined = undefined;
+        if (token != undefined) {
             refToken = new WeakRef<Object>(token);
         }
         let free_index = this.allocTrimplet();
@@ -147,7 +147,7 @@ export final class FinalizationRegistry<T> {
         let prev = 0;
         for (let i = this.idxarr[prev]; i != -1; prev = i, i = this.idxarr[i]) {
             let refToken = this.getToken(i);
-            if (refToken != null && refToken.deref() == token) {
+            if (refToken != undefined && refToken.deref() == token) {
                 this.freeNextTrimplet(prev);
                 i = prev; // iterator rollback
             }
@@ -158,10 +158,10 @@ export final class FinalizationRegistry<T> {
         let prev = 0;
         for (let i = this.idxarr[prev]; i != -1; prev = i, i = this.idxarr[i]) {
             let object = this.getObject(i);
-            if (object != null && object.deref() == undefined) {
+            if (object != undefined && object.deref() == undefined) {
                 // Remove from trimplet first to prevent
                 // calling it again in separate thread
-                let arg: T | null = this.getCallbackArg(i);
+                let arg: T | undefined = this.getCallbackArg(i);
                 this.freeNextTrimplet(prev);
                 i = prev; // iterator rollback
                 if (this.isCallbackWithArg) {
@@ -197,22 +197,22 @@ export final class FinalizationRegistry<T> {
         this.freeidx = freed_idx;
 
         // clean data
-        this.setTrimplet(freed_idx, null, null, null);
+        this.setTrimplet(freed_idx, undefined, undefined, undefined);
     }
 
-    private getObject(index: int): WeakRef<Object> | null {
-        return this.obj_token_refs[2 * index] as (WeakRef<Object> | null);
+    private getObject(index: int): WeakRef<Object> | undefined {
+        return this.obj_token_refs[2 * index] as (WeakRef<Object> | undefined);
     }
 
-    private getCallbackArg(index: int): T | null {
+    private getCallbackArg(index: int): T | undefined {
         return this.callback_arguments[index];
     }
 
-    private getToken(index: int): WeakRef<Object> | null {
-        return this.obj_token_refs[2 * index + 1] as (WeakRef<Object> | null);
+    private getToken(index: int): WeakRef<Object> | undefined {
+        return this.obj_token_refs[2 * index + 1] as (WeakRef<Object> | undefined);
     }
 
-    private setTrimplet(index: int, obj: WeakRef<Object> | null, cbArg: T | null, token: WeakRef<Object> | null): void {
+    private setTrimplet(index: int, obj: WeakRef<Object> | undefined, cbArg: T | undefined, token: WeakRef<Object> | undefined): void {
         this.obj_token_refs[2 * index] = obj;
         this.obj_token_refs[2 * index + 1] = token;
         this.callback_arguments[index] = cbArg;

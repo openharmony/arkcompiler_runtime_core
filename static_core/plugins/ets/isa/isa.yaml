@@ -171,55 +171,55 @@ groups:
         prefix: ets
         intrinsic_name: INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_OBJ
 
-  - title: Load 'undefined' reference into accumulator
+  - title: Load 'nullvalue' reference into accumulator
     description: >
-      Load 'undefined' reference into accumulator.
+      Load 'nullvalue' reference into accumulator.
     verification:
       - acc_type
     exceptions:
       - x_none
     pseudo: |
-      acc = undefined_object
+      acc = nullvalue
     namespace: ets
     instructions:
-      - sig: ets.ldundefined
+      - sig: ets.ldnullvalue
         prefix: ets
         acc: out:ref
         format: [pref_op_none]
 
-  - title: Move 'undefined' reference into a register
+  - title: Move 'nullvalue' reference into a register
     description: >
-      Move 'undefined' reference into a register.
+      Move 'nullvalue' reference into a register.
     verification:
       - none
     exceptions:
       - x_none
     pseudo: |
-      vd = undefined_object
+      vd = nullvalue_object
     namespace: ets
     instructions:
-      - sig: ets.movundefined v:out:ref
+      - sig: ets.movnullvalue v:out:ref
         prefix: ets
         acc: none
         format: [pref_op_v_8]
 
-  - title: Check if accumulator value is 'undefined'
+  - title: Check if accumulator value is 'nullvalue'
     description: >
-      Check if accumulator value is 'undefined'.
+      Check if accumulator value is 'nullvalue'.
     verification:
       - v1_object
       - acc_type
     exceptions:
       - x_none
     pseudo: |
-      if acc == undefined_object then
+      if acc == nullvalue_object then
         acc = 1
       else
         acc = 0
       end
     namespace: ets
     instructions:
-      - sig: ets.isundefined
+      - sig: ets.isnullvalue
         prefix: ets
         acc: inout:ref->i32
         format: [pref_op_none]

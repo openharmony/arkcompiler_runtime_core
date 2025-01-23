@@ -19,8 +19,8 @@ package std.core;
  * Unstable API, represents internal runtime type descriptor
  */
 export final class Class {
-    private name: string | null
-    private superClass: Class | null
+    private name: string | undefined
+    private superClass: Class | undefined
     private flags: int
 
     private constructor() { throw new Error("Class constructor called") }
@@ -30,7 +30,7 @@ export final class Class {
         return this.name ?? this.getNameInternal()
     }
 
-    public getSuper(): Class | null {
+    public getSuper(): Class | undefined {
         return this.superClass
     }
 

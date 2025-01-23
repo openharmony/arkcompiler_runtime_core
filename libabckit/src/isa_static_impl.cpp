@@ -478,7 +478,7 @@ extern "C" AbckitInst *IcreateIsInstance(AbckitGraph *graph, AbckitInst *inputOb
     return IcreateIsInstanceStatic(graph, inputObj, targetType);
 }
 
-extern "C" AbckitInst *IcreateLoadUndefined(AbckitGraph *graph)
+extern "C" AbckitInst *IcreateLoadNullValue(AbckitGraph *graph)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
@@ -486,7 +486,7 @@ extern "C" AbckitInst *IcreateLoadUndefined(AbckitGraph *graph)
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
 
-    return IcreateLoadUndefinedStatic(graph);
+    return IcreateLoadNullValueStatic(graph);
 }
 
 extern "C" AbckitInst *IcreateReturnVoid(AbckitGraph *graph)
@@ -882,7 +882,7 @@ AbckitIsaApiStatic g_isaApiStaticImpl = {
     IcreateLoadConstArray,
     IcreateCheckCast,
     IcreateIsInstance,
-    IcreateLoadUndefined,
+    IcreateLoadNullValue,
     IcreateReturnVoid,
     IcreateEquals,
     IcreateStrictEquals,

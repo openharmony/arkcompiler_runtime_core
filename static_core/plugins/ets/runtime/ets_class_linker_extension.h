@@ -95,11 +95,6 @@ public:
         return GetClassRoot(ClassRoot::OBJECT);
     }
 
-    Class *GetUndefinedClass() const
-    {
-        return undefinedClass_;
-    }
-
     Class *GetPromiseClass()
     {
         return promiseClass_;
@@ -306,7 +301,7 @@ private:
     mem::HeapManager *heapManager_ {nullptr};
 
     // Cached classes
-    Class *undefinedClass_ = nullptr;
+    Class *nullValueClass_ = nullptr;
     // std.core box classes
     Class *boxBooleanClass_ = nullptr;
     Class *boxByteClass_ = nullptr;

@@ -104,9 +104,9 @@ compiler::RuntimeInterface::MethodPtr EtsRuntimeInterface::ResolveLookUpCall(Fie
     return nullptr;
 }
 
-uint64_t EtsRuntimeInterface::GetUndefinedObject() const
+uint64_t EtsRuntimeInterface::GetUniqueObject() const
 {
-    return ToUintPtr(PandaEtsVM::GetCurrent()->GetUndefinedObject());
+    return ToUintPtr(PandaEtsVM::GetCurrent()->GetNullValue());
 }
 
 compiler::RuntimeInterface::InteropCallKind EtsRuntimeInterface::GetInteropCallKind(MethodPtr methodPtr) const

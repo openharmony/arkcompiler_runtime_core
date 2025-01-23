@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,16 +96,16 @@ function TestReturnBooleanAsAny(): boolean {
 }
 
 // Note: Using NullishType is a workaround until #17745 is not resolved
-function TestReturnUndefinedAsAny(): boolean {
-    const TestFunc: TReturnsAny = returnUndefinedAsAny
-    const testVal = TestFunc() as NullishType
-    return testVal == undefined
-}
-
 function TestReturnNullAsAny(): boolean {
     const TestFunc: TReturnsAny = returnNullAsAny
-    const testVal = TestFunc()
+    const testVal = TestFunc() as NullishType
     return testVal == null
+}
+
+function TestReturnUndefinedAsAny(): boolean {
+    const TestFunc: TReturnsAny = returnUndefinedAsAny
+    const testVal = TestFunc()
+    return testVal == undefined
 }
 
 function TestReturnMapAsAny(): boolean {
@@ -232,19 +232,19 @@ function TestReturnBoolSubsetByValue(): boolean {
 }
 
 // Note: Using NullishType is a workaround until #17745 is not resolved
-function TestReturnUndefinedSubsetByValue(): boolean {
-    const TestFunc = returnUndefinedSubsetByValue
+function TestReturnNullSubsetByValue(): boolean {
+    const TestFunc = returnNullSubsetByValue
     const testVal = TestFunc() as NullishType
     return (
-        testVal == undefined
-        && typeof testVal == 'undefined'
+        testVal == null
+        && typeof testVal == 'object'
     )
 }
 
-function TestReturnNullSubsetByValue(): boolean {
-    const TestFunc = returnNullSubsetByValue
+function TestReturnUndefinedSubsetByValue(): boolean {
+    const TestFunc = returnUndefinedSubsetByValue
     const testVal = TestFunc()
-    return testVal == null
+    return testVal == undefined
 }
 
 function TestReturnUnion(): boolean {

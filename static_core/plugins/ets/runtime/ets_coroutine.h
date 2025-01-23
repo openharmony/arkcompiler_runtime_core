@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,20 +80,21 @@ public:
         return MEMBER_OFFSET(EtsCoroutine, promiseClassPtr_);
     }
 
-    ALWAYS_INLINE ObjectHeader *GetUndefinedObject() const
+    // Returns a unique object representing "null" reference
+    ALWAYS_INLINE ObjectHeader *GetNullValue() const
     {
-        return undefinedObj_;
+        return nullValue_;
     }
 
     // For mainthread initializer
-    void SetUndefinedObject(ObjectHeader *obj)
+    void SetupNullValue(ObjectHeader *obj)
     {
-        undefinedObj_ = obj;
+        nullValue_ = obj;
     }
 
-    static constexpr uint32_t GetTlsUndefinedObjectOffset()
+    static constexpr uint32_t GetTlsNullValueOffset()
     {
-        return MEMBER_OFFSET(EtsCoroutine, undefinedObj_);
+        return MEMBER_OFFSET(EtsCoroutine, nullValue_);
     }
 
     PANDA_PUBLIC_API PandaEtsVM *GetPandaVM() const;
@@ -130,7 +131,7 @@ private:
     std::unique_ptr<PandaEtsNapiEnv> etsNapiEnv_;
     void *promiseClassPtr_ {nullptr};
 
-    ObjectHeader *undefinedObj_ {};
+    ObjectHeader *nullValue_ {};
 
     static ExternalIfaceTable emptyExternalIfaceTable_;
 

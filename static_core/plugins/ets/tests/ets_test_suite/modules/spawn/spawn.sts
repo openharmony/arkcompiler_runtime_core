@@ -26,7 +26,7 @@ function getAppMainAbilityClassName(): string {
 }
 
 function loadAndInvokeAbility(mainAbilityClassName: string): void {
-    const appRuntimeLinker = new AbcRuntimeLinker(null, getAppAbcFiles());
+    const appRuntimeLinker = new AbcRuntimeLinker(undefined, getAppAbcFiles());
     const mainAbilityClass = appRuntimeLinker.loadClass(mainAbilityClassName);
     const mainAbility = mainAbilityClass.createInstance() as Ability;
     mainAbility.invoke();

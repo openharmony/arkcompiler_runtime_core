@@ -641,11 +641,11 @@ public:
     {
         return 0;
     }
-    virtual uint64_t GetUndefinedObject() const
+    virtual uint64_t GetUniqueObject() const
     {
         return 0;
     }
-    virtual size_t GetTlsUndefinedObjectOffset([[maybe_unused]] Arch arch) const
+    virtual size_t GetTlsUniqueObjectOffset([[maybe_unused]] Arch arch) const
     {
         return 0;
     }

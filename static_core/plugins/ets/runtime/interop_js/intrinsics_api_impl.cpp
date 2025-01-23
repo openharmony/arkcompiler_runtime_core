@@ -172,7 +172,7 @@ EtsString *JSRuntimeGetValueString(JSValue *etsJsValue)
 
     NapiScope jsHandleScope(env);
 
-    napi_value jsVal = etsJsValue->GetNapiValue(env);
+    napi_value jsVal = JSConvertJSValue::Wrap(env, etsJsValue);
     auto res = JSConvertString::Unwrap(ctx, env, jsVal);
     if (UNLIKELY(!res)) {
         if (NapiIsExceptionPending(env)) {
@@ -196,14 +196,14 @@ EtsObject *JSRuntimeGetValueObject(JSValue *etsJsValue, EtsClass *clsObj)
     }
 
     // NOTE(kprokopenko): awful solution, see #14765
-    if (etsJsValue->AsObject() == ctx->GetUndefinedObject()) {
+    if (etsJsValue->AsObject() == ctx->GetNullValue()) {
         return etsJsValue->AsObject();
     }
 
     INTEROP_CODE_SCOPE_ETS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
-    napi_value jsVal = etsJsValue->GetNapiValue(env);
+    napi_value jsVal = JSConvertJSValue::Wrap(env, etsJsValue);
 
     auto refconv = JSRefConvertResolve<true>(ctx, cls);
     if (UNLIKELY(refconv == nullptr)) {
@@ -263,8 +263,8 @@ uint8_t JSRuntimeInstanceOfDynamic(JSValue *object, JSValue *ctor)
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
-    auto jsObj = object->GetNapiValue(env);
-    auto jsCtor = ctor->GetNapiValue(env);
+    auto jsObj = JSConvertJSValue::WrapWithNullCheck(env, object);
+    auto jsCtor = JSConvertJSValue::WrapWithNullCheck(env, ctor);
     bool res;
     napi_status rc = napi_instanceof(env, jsObj, jsCtor, &res);
     if (UNLIKELY(NapiThrownGeneric(rc))) {
@@ -295,7 +295,7 @@ uint8_t JSRuntimeInstanceOfStatic(JSValue *etsJsValue, EtsClass *etsCls)
     // Check if object has SharedReference
     ets_proxy::SharedReference *sharedRef = [=] {
         NapiScope jsHandleScope(env);
-        napi_value jsValue = etsJsValue->GetNapiValue(env);
+        napi_value jsValue = JSConvertJSValue::Wrap(env, etsJsValue);
         return ctx->GetSharedRefStorage()->GetReference(env, jsValue);
     }();
 
@@ -377,7 +377,7 @@ JSValue *JSRuntimeLoadModule(EtsString *module)
             }
             INTEROP_FATAL_IF(status != napi_ok);
         }
-        INTEROP_FATAL_IF(IsUndefined(env, modObj));
+        INTEROP_FATAL_IF(IsNull(env, modObj));
     }
 
     return JSValue::CreateRefValue(coro, ctx, modObj, napi_object);
@@ -392,7 +392,8 @@ uint8_t JSRuntimeStrictEqual([[maybe_unused]] JSValue *lhs, [[maybe_unused]] JSV
     NapiScope jsHandleScope(env);
 
     bool result = true;
-    NAPI_CHECK_FATAL(napi_strict_equals(env, lhs->GetNapiValue(env), rhs->GetNapiValue(env), &result));
+    NAPI_CHECK_FATAL(napi_strict_equals(env, JSConvertJSValue::WrapWithNullCheck(env, lhs),
+                                        JSConvertJSValue::WrapWithNullCheck(env, rhs), &result));
     return static_cast<uint8_t>(result);
 }
 
@@ -407,7 +408,7 @@ EtsString *JSValueToString(JSValue *object)
     napi_value strObj;
     napi_status status;
     {
-        auto napiValue = object->GetNapiValue(env);
+        auto napiValue = JSConvertJSValue::Wrap(env, object);
 
         ScopedNativeCodeThread nativeScope(coro);  // NOTE: Scope(Native/Managed)CodeThread should be optional here
         status = napi_coerce_to_string(env, napiValue, &strObj);
@@ -640,11 +641,10 @@ EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value)
     INTEROP_CODE_SCOPE_ETS(coro);
     napi_env env = ctx->GetJSEnv();
     if (UNLIKELY(IsNull(env, jsVal))) {
-        return nullptr;
+        return ctx->GetNullValue();
     }
-
     if (UNLIKELY(IsUndefined(env, jsVal))) {
-        return ctx->GetUndefinedObject();
+        return nullptr;
     }
 
     // start slowpath
@@ -684,7 +684,7 @@ EtsString *JSONStringify(JSValue *jsvalue)
     napi_value stringify;
     NAPI_CHECK_FATAL(napi_get_named_property(env, jsonInstance, "stringify", &stringify));
 
-    auto object = jsvalue->GetNapiValue(env);
+    auto object = JSConvertJSValue::Wrap(env, jsvalue);
     std::array<napi_value, 1> args = {object};
 
     napi_value result;
@@ -698,6 +698,9 @@ EtsString *JSONStringify(JSValue *jsvalue)
         INTEROP_FATAL_IF(jsStatus != napi_pending_exception);
         ctx->ForwardJSException(coro);
         return nullptr;
+    }
+    if (IsUndefined(env, result)) {
+        return EtsString::CreateFromMUtf8("undefined");
     }
     auto res = JSConvertString::Unwrap(ctx, env, result);
     return res.value_or(nullptr);

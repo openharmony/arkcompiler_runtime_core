@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ namespace ark::ets::intrinsics {
 EtsString *TypeAPIGetTypeDescriptor(EtsObject *object)
 {
     if (object == nullptr) {
-        return EtsString::CreateFromMUtf8(NULL_TYPE_DESC);
+        return EtsString::CreateFromMUtf8(TYPE_API_UNDEFINED_TYPE_DESC);
     }
     return EtsString::CreateFromMUtf8(object->GetClass()->GetDescriptor());
 }
@@ -81,8 +81,8 @@ static EtsByte GetRefTypeKind(const PandaString &td, const EtsClass *refType)
         result = static_cast<EtsByte>(EtsTypeAPIKind::ARRAY);
     } else if (refType->IsStringClass()) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::STRING);
-    } else if (refType->IsUndefined()) {
-        result = static_cast<EtsByte>(EtsTypeAPIKind::UNDEFINED);
+    } else if (refType->IsNullValue()) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::NUL);
     } else {
         // NOTE(vpukhov): EtsTypeAPIKind:: UNION, TUPLE are not implemented
         ASSERT(refType->IsClass());
@@ -128,9 +128,9 @@ static EtsByte GetValTypeKind(EtsValueTypeDesc td)
 EtsByte TypeAPIGetTypeKind(EtsString *td)
 {
     auto typeDesc = td->GetMutf8();
-    // Is Null?
-    if (typeDesc == NULL_TYPE_DESC) {
-        return static_cast<EtsByte>(EtsTypeAPIKind::NUL);
+    // Is Undefined?
+    if (typeDesc == TYPE_API_UNDEFINED_TYPE_DESC) {
+        return static_cast<EtsByte>(EtsTypeAPIKind::UNDEFINED);
     }
     // Is Function for methods, because currently there is no representation of them in runtime
     if (typeDesc[0] == METHOD_PREFIX) {
@@ -503,7 +503,7 @@ EtsLong TypeAPIGetTypeId(EtsString *td)
 {
     auto typeDesc = td->GetMutf8();
     // Create Null class in runtime
-    if (typeDesc == NULL_TYPE_DESC) {
+    if (typeDesc == TYPE_API_UNDEFINED_TYPE_DESC) {
         return 0;
     }
     auto classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
