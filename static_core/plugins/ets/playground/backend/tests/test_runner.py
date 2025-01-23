@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -235,6 +235,41 @@ async def test_compile_failed_with_disasm(monkeypatch, ark_build):
             "error": "",
             "exit_code": 1,
             "output": "compile error"
+        },
+        "disassembly": None
+    }
+    assert res == expected
+
+
+async def test_run_with_verify_on_the_fly(monkeypatch, ark_build, ):
+    mocker = MockAsyncSubprocess(
+        [
+            FakeCommand(opts=["--extension=sts"],
+                        expected=str(ark_build[1]),
+                        stdout=b"executed",
+                        return_code=0),
+            FakeCommand(expected=str(ark_build[3]),
+                        opts=[f"--boot-panda-files={ark_build[4]}", "--load-runtimes=ets",
+                              "ETSGLOBAL::main", "--verification-enabled=true", "--verification-mode=on-the-fly"],
+                        stderr=b"runtime verify error",
+                        return_code=1),
+
+        ]
+    )
+    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+
+    r = Runner(ark_build[0])
+    res = await r.compile_run_arkts("code", [], False, runtime_verify=True)
+    expected = {
+        "compile": {
+            "error": "",
+            "exit_code": 0,
+            "output": "executed"
+        },
+        "run": {
+            "error": "runtime verify error",
+            "exit_code": 1,
+            "output": ""
         },
         "disassembly": None
     }

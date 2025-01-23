@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -88,7 +88,8 @@ class Runner:
                 res["disassembly"] = disassembly
             return res
 
-    async def compile_run_arkts(self, code: str, options: list, disasm: bool = False) -> Dict[str, Any]:
+    async def compile_run_arkts(self, code: str, options: list, disasm: bool = False,
+                                runtime_verify: bool = False) -> Dict[str, Any]:
         """Compile, run code and make disassemble if disasm argument is True
         :rtype: Dict[str, Any]
         """
@@ -100,7 +101,7 @@ class Runner:
             if compile_result["exit_code"] != 0:
                 return res
 
-            run_result = await self._run(abcfile_name)
+            run_result = await self._run(abcfile_name, runtime_verify=runtime_verify)
             res["run"] = run_result
             if disasm:
                 disasm_res = await self.disassembly(f"{stsfile_name}.abc", f"{stsfile_name}.pa")
@@ -173,11 +174,13 @@ class Runner:
         except PackageNotFoundError:
             self._version["playground"] = "not installed"
 
-    async def _run(self, abcfile_name: str) -> Dict[str, Any]:
+    async def _run(self, abcfile_name: str, runtime_verify: bool = False) -> Dict[str, Any]:
         """Runs abc file
         :rtype: Dict[str, Any]
         """
         run_cmd = [f"--boot-panda-files={self.stdlib_abc}", "--load-runtimes=ets", abcfile_name, "ETSGLOBAL::main"]
+        if runtime_verify:
+            run_cmd += ["--verification-enabled=true", "--verification-mode=on-the-fly"]
         stdout, stderr, retcode = await self._execute_cmd(self.ark_bin, *run_cmd)
         if retcode == -11:
             stderr += "run: Segmentation fault"
