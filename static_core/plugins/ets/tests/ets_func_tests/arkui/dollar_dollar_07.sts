@@ -27,5 +27,5 @@ function increment(n: int): void {
 function main(): void {
   let $$$$n = 5
   increment($$$$n)
-  assert($$$$n == 5)
+  assertEQ($$$$n ,  5)
 }

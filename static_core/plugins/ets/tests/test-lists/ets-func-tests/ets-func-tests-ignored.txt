@@ -480,3 +480,6 @@ spec/09.classes/9.5.Field_Declaration/class_with_optional_attributes_0006.sts
 regression/21490_0.sts
 regression/21490_1.sts
 regression/21490_2.sts
+
+# Issue 22500
+std/containers/ArrayTestChecked.sts

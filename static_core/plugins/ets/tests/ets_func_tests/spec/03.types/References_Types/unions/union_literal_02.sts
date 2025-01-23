@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,9 +44,9 @@ function main(): void {
     let t1: T = "hello"
     let t2: T = "goodbye"
     t1 = t2
-    assert t1 == "goodbye"
-    assert say(t1, "blue sky") == "goodbye blue sky"
-    assert tToString01(t1) == "goodbye"
-    assert tToString02(t1) == "goodbye"
-    assert tToString03(t1) == "goodbye+"
+    assertEQ( t1 ,  "goodbye")
+    assertEQ( say(t1, "blue sky") ,  "goodbye blue sky")
+    assertEQ( tToString01(t1) ,  "goodbye")
+    assertEQ( tToString02(t1) ,  "goodbye")
+    assertEQ( tToString03(t1) ,  "goodbye+")
 }

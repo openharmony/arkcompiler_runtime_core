@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 function check(current_answer: number, correct_answer: number, test: string) {
     if (current_answer != correct_answer) {
         if (!Number.isNaN(current_answer) || !Number.isNaN(correct_answer)) {
-            assert false : "incorrect " + test + " answer " + current_answer + " instead of " + correct_answer;
+            assertTrue( false ,  "incorrect " + test + " answer " + current_answer + " instead of " + correct_answer)
             return 1;
         }
     }

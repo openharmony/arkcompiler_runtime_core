@@ -26,9 +26,9 @@ function reverse(b: boolean): void {
 function main(): void {
   let b = false
   reverse($$b)
-  assert(b == true)
+  assertEQ(b ,  true)
 
   let bb = false
   reverse(bb)
-  assert(bb == false)
+  assertEQ(bb ,  false)
 }

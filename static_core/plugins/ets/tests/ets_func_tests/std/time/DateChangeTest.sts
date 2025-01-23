@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ function main(): int {
     failures += test(testDateChangeSeconds(), "Try to set new seconds");
 
 
-    // next test raises assert "Invalid year/month pair"
+    // next test raises assertTrue( "Invalid year/month pair")
     //failures += test(testDateChangeMonthBad(), "Try to change month to bad value");
     return test(failures, "All tests run");
 }
@@ -60,7 +60,7 @@ function testDateChangeMonthImpl(date: Date, change: int) {
     let dmc = daysInMonth(date.getFullYear(), newMonth);
     if(dmc < dmo) newMonth++;
     date.setMonth(newMonth);
-    assert date.getMonth() == newMonth
+    assertEQ( date.getMonth() ,  newMonth)
 }
 
 function testDateChangeMonth(): int {

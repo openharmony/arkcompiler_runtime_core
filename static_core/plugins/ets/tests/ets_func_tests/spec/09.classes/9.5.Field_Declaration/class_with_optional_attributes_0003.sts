@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,23 +64,23 @@ function main() : void {
   let s2 : Student = new Student("Klara", 18, "an excellent student");
   let s3 : Student = new Student("Klara", 18,  new Teacher("Anna"));
 
-  assert s0.name == "Klara"
-  assert s0.age == 18
-  assert s0.desc == "an excellent student"
-  assert s0.teacher?.name == "Anna"
+  assertEQ( s0.name ,  "Klara")
+  assertEQ( s0.age ,  18)
+  assertEQ( s0.desc ,  "an excellent student")
+  assertEQ( s0.teacher?.name ,  "Anna")
 
-  assert s1.name == "Klara"
-  assert s1.age == 18
-  assert s1.desc == undefined
-  assert s1.teacher?.name ==undefined
+  assertEQ( s1.name ,  "Klara")
+  assertEQ( s1.age ,  18)
+  assertEQ( s1.desc ,  undefined)
+  assertTrue( s1.teacher?.name ==undefined)
 
-  assert s2.name == "Klara"
-  assert s2.age == 18
-  assert s2.desc == "an excellent student"
-  assert s2.teacher?.name == undefined
+  assertEQ( s2.name ,  "Klara")
+  assertEQ( s2.age ,  18)
+  assertEQ( s2.desc ,  "an excellent student")
+  assertEQ( s2.teacher?.name ,  undefined)
 
-  assert s3.name == "Klara"
-  assert s3.age == 18
-  assert s3.desc == undefined
-  assert s3.teacher?.name == "Anna"
+  assertEQ( s3.name ,  "Klara")
+  assertEQ( s3.age ,  18)
+  assertEQ( s3.desc ,  undefined)
+  assertEQ( s3.teacher?.name ,  "Anna")
 }

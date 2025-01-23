@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,14 +71,14 @@ function test1() : int {
     let x = new Bar(10);
 
     try {
-        assert(x[0] == 10)
+        assertEQ(x[0] ,  10)
     } catch(e) {
         result++
         console.log("Unexpexted exception 1");
     }
 
     try {
-        assert(x["hello"] == 10)
+        assertEQ(x["hello"] ,  10)
     } catch(e) {
         result++
         console.log("Unexpexted exception 1");
@@ -92,7 +92,7 @@ function test1() : int {
     }
 
     try {
-        assert(x[0] == 100)
+        assertEQ(x[0] ,  100)
     } catch(e) {
         result++
         console.log("Unexpexted exception 4");
@@ -106,7 +106,7 @@ function test1() : int {
     }
 
     try {
-        assert(x["hello"] == 100)
+        assertEQ(x["hello"] ,  100)
     } catch(e) {
         result++
         console.log("Unexpexted exception 6");
@@ -119,13 +119,13 @@ function test2() : int {
     let result = 0;
     let x = new Bar(10);
     try {
-        assert(x[10] == 1)
+        assertEQ(x[10] ,  1)
     } catch(e) {
         result++
     }
 
     try {
-        assert(x["bye"] == 1)
+        assertEQ(x["bye"] ,  1)
     } catch(e) {
         result++
     }
@@ -135,7 +135,7 @@ function test2() : int {
 }
 
 function main() {
-    assert(test1() == 0);
-    assert(test2() == 2);
+    assertEQ(test1() ,  0)
+    assertEQ(test2() ,  2)
 }
 

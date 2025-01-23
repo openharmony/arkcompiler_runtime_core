@@ -24,6 +24,6 @@ type MyNumber = byte | undefined;
 
 function main(): void {
     let t: MyNumber;
-    assert t === undefined;
+    assertTrue( t === undefined)
 
 }

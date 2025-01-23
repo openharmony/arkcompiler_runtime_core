@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,8 +38,8 @@ class X extends Y {
 
 function main() : int {
     let x : X = new X(1000);
-    assert x.dataY1 == 1000;
-    assert x.dataX1 == 1000;
-    assert x.dataX2 == 2000;
+    assertEQ( x.dataY1 ,  1000)
+    assertEQ( x.dataX1 ,  1000)
+    assertEQ( x.dataX2 ,  2000)
     return 0;
 }

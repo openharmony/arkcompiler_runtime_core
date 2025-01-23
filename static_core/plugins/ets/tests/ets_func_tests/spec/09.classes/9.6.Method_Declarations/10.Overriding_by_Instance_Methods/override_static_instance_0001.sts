@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ function main() {
     let x : X = new X();
     let y : Y = new Y();
 
-    assert y.foo() == 1
-    assert Y.foo() == 0
-    assert X.foo() == 0
+    assertEQ( y.foo() ,  1)
+    assertEQ( Y.foo() ,  0)
+    assertEQ( X.foo() ,  0)
 }

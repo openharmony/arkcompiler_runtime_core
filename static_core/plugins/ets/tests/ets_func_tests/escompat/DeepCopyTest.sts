@@ -65,8 +65,8 @@ function testObjectClone(): void {
 	assertTrue(obj !== objCopy, "cloned object is the same as source object")
 	assertTrue(objCopy != null, "cloned object is null")
 
-	assertTrue(obj.id == objCopy!.id, "cloned object 'id' field unexpected value")
-	assertTrue(obj.name == objCopy!.name, "cloned object 'name' field unexpected value")
+	assertEQ(obj.id ,  objCopy!.id, "cloned object 'id' field unexpected value")
+	assertEQ(obj.name ,  objCopy!.name, "cloned object 'name' field unexpected value")
 
 	assertTrue(objCopy!.next === undefined, "cloned object 'next' field unexpected value")
 	assertTrue(obj.tag !== objCopy!.tag, "object tag is not cloned")
@@ -129,7 +129,7 @@ function testBuiltinArrayClone(): void {
 	const objsCopy = deepcopy(objs)
 	assertTrue(objsCopy != null, "cloned array is null")
 
-	assertTrue(objs.length == objsCopy!.length, "cloned array invalid length")
+	assertEQ(objs.length ,  objsCopy!.length, "cloned array invalid length")
 	assertTrue(objs !== objsCopy!, "source array returned")
 	assertTrue(objs[0] !== objsCopy![0], "array elements are not cloned")
 	assertTrue(objsCopy![0] === objsCopy![1], "cloned array elements are different")
@@ -144,7 +144,7 @@ function testArrayClone(): void {
 	const objsCopy = deepcopy(objs)
 	assertTrue(objsCopy != null, "cloned array is null")
 
-	assertTrue(objs.length == objsCopy!.length, "cloned array length is not the as source length")
+	assertEQ(objs.length ,  objsCopy!.length, "cloned array length is not the as source length")
 	assertTrue(objs !== objsCopy, "cloned array is the same as source array")
 	assertTrue(objs[0] !== objsCopy![0], "array elements are not cloned")
 	assertTrue(objs[1] === null, "null element copied incorrectly")
@@ -160,7 +160,7 @@ function testObjectWithLambdaClone(): void {
 
 	assertTrue(fnBox !== fnBoxCopy, "cloned object is the same as source object")
 	assertTrue(fnBox.fn === fnBoxCopy!.fn, "lambda field is cloned")
-	assertTrue(fnBox.fn!() == fnBoxCopy!.fn!(), "not the same results")
+	assertEQ(fnBox.fn!() ,  fnBoxCopy!.fn!(), "not the same results")
 }
 
 function testSetClone(): void {
@@ -173,7 +173,7 @@ function testSetClone(): void {
 	assertTrue(setCopy != null, "cloned set is null")
 
 	assertTrue(set !== setCopy, "cloned set is the same as source set")
-	assertTrue(set.size == setCopy!.size, "cloned set size is not the same as source set size")
+	assertEQ(set.size ,  setCopy!.size, "cloned set size is not the same as source set size")
 	assertFalse(setCopy!.has(obj), "cloned set contains original element")
 }
 
@@ -189,7 +189,7 @@ function testMapClone(): void {
 	assertTrue(mapCopy != null, "cloned map is null")
 
 	assertTrue(map != mapCopy, "cloned map is the same as source map")
-	assertTrue(map.size == mapCopy!.size, "cloned map size != source map size")
+	assertEQ(map.size ,  mapCopy!.size, "cloned map size != source map size")
 	assertTrue(mapCopy!.has(key), "existing key not found in cloned map")
 
 	assertTrue(mapCopy!.get("null") === null, "'null' key has wrong value")
@@ -203,7 +203,7 @@ function testDateClone(): void {
 	assertTrue(dateCopy != null, "cloned date is null")
 
 	assertTrue(date != dateCopy, "cloned date is the same as source date")
-	assertTrue(date.valueOf() == dateCopy!.valueOf(), "cloned date value is not equal to source date value")
+	assertEQ(date.valueOf() ,  dateCopy!.valueOf(), "cloned date value is not equal to source date value")
 }
 
 function testWeakRefClone(): void {

@@ -45,11 +45,11 @@ class TestHumongousStress {
                 GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
             }
             catch (e) {
-                assert false : "Unexpected exception during GC";
+                assertTrue( false, "Unexpected exception during GC");
             }
         }
         catch(e) {
-            assert false : "Some other error: " + e.toString();
+            assertTrue( false, "Some other error: " + e.toString());
         }
         return maxNumberOfObjects;
     }
@@ -67,7 +67,7 @@ class TestHumongousStress {
             return null;
         }
         catch(e) {
-            assert false : "Some other error: " + e.toString();
+            assertTrue( false, "Some other error: " + e.toString());
         }
         return new Object();
     };
@@ -76,7 +76,7 @@ class TestHumongousStress {
         let maxObjects = this.getHeapSizeInObjects() - NUMBER_OF_FREE_REGIONS;
         let objPerCoroutine = (maxObjects / this.threadsCount) as int;
         let lastCoroutuneNumObjects = maxObjects - objPerCoroutine * (this.threadsCount - 1);
-        assert this.threadsCount > 0 && objPerCoroutine > 0;
+        assertTrue( this.threadsCount > 0 && objPerCoroutine > 0);
 
         let corArrayTmp = new Array<Promise<Object|null>>();
         for(let i = 0; i < this.threadsCount - 1; i++) {
@@ -106,7 +106,7 @@ class TestHumongousStress {
             GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
         }
         catch (e) {
-            assert false : "Unexpected exception during GC";
+            assertTrue( false, "Unexpected exception during GC");
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,7 @@ function getIfaces(): InterfaceType[] {
 
 function main(): void throws {
 	const ifaces = getIfaces()
-	assert ifaces.length == 2
+	assertEQ( ifaces.length ,  2)
 	const intType = Type.of(0)
 	const I3 = new InterfaceTypeCreator("I3")
 		.addInterface(ifaces[0])
@@ -66,6 +66,6 @@ function main(): void throws {
 		)
 	const ty = CI3.create()
 	const inst = ty.make()
-	assert (inst as I1).i() == 30
-	assert (inst as I2).i(3) == 12
+	assertEQ( (inst as I1).i() ,  30)
+	assertEQ( (inst as I2).i(3) ,  12)
 }

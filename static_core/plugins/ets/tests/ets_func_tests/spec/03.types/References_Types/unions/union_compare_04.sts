@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,10 +26,10 @@ class A {}
 function main(): void {
     let a: Margin = 5.5
     let b: Margin = 6.5
-    assert (a as number) < b as number
-    assert b as number > a as number
+    assertTrue( (a as number) < b as number)
+    assertTrue( b as number > a as number)
 
     let c: Margin = 5.5
-    assert a as number <= c as number
-    assert c as number >= a as number
+    assertTrue( a as number <= c as number)
+    assertTrue( c as number >= a as number)
 }

@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,17 +39,17 @@ class Bar {
 
 function main() {
     let x : Bar = new Bar([new Foo(1), new Foo(2), new Foo(3)]);
-    assert (x[0].i == 1);
-    assert (x[1].i == 2);
-    assert (x[2].i == 3);
+    assertEQ(x[0].i ,  1)
+    assertEQ(x[1].i ,  2)
+    assertEQ(x[2].i ,  3)
 
     x[0] = new Foo(5);
     x[1] = new Foo(6);
     x[2] = new Foo(7);
 
-    assert (x[0].i == 5);
-    assert (x[1].i == 6);
-    assert (x[2].i == 7);
+    assertEQ(x[0].i ,  5)
+    assertEQ(x[1].i ,  6)
+    assertEQ(x[2].i ,  7)
 
     return 0;
 }

@@ -26,9 +26,9 @@ function concat(s: string): void {
 function main(): void {
   let s = "Hello"
   concat($$s)
-  assert(s == "Hello World!")
+  assertEQ(s ,  "Hello World!")
 
   let ss = "Hello"
   concat(ss)
-  assert(ss == "Hello")
+  assertEQ(ss ,  "Hello")
 }

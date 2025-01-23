@@ -23,6 +23,6 @@ type MyNumber = byte;
 
 function main(): void {
     let t: MyNumber | undefined;
-    assert t === undefined;
+    assertTrue(t === undefined)
 
 }

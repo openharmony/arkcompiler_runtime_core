@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,9 +27,9 @@ class A<T0, T1=string, T2=Long> {
 
 function main() : void {
     let a: A<Short> = new A();
-    assert a.data0 instanceof Short;
-    assert a.data1 instanceof string;
-    assert a.data2 instanceof Long;
+    assertTrue( a.data0 instanceof Short)
+    assertTrue( a.data1 instanceof string)
+    assertTrue( a.data2 instanceof Long)
 }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,12 +36,12 @@ function main() : int {
         doit(bar);
     }
 
-    assert(barArray[0].index == 4);
-    assert(barArray[1].index == 6);
-    assert(barArray[2].index == 8);
-    assert(barArray[3].index == 10);
-    assert(barArray[4].index == 12);
-    assert(barArray[5].index == 14);
+    assertEQ(barArray[0].index ,  4)
+    assertEQ(barArray[1].index ,  6)
+    assertEQ(barArray[2].index ,  8)
+    assertEQ(barArray[3].index ,  10)
+    assertEQ(barArray[4].index ,  12)
+    assertEQ(barArray[5].index ,  14)
 
     return 0;
 }

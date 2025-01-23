@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,13 +25,13 @@ type Padding = number | string
 function main(): void {
     let a1: Margin = "5 px"
     let b1: Padding = a1 as string // should work
-    assert b1 as string == "5 px"
+    assertEQ( b1 as string ,  "5 px")
 
     let a2: Margin = 5.5
     let b2: Padding = a2 as number // should work
-    assert b2 as number == 5.5
+    assertEQ( b2 as number ,  5.5)
 
     let a3: Margin = 5
     let b3: Padding = a3 as number // should work
-    assert b3 as number == 5
+    assertEQ( b3 as number ,  5)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,9 +50,9 @@
  }
 
  function main(): void {
-    assert (U.returnPI_A0() == "->3.141592653589793")
-    assert (U.returnPI_A0_as_Const() == "->3.141592653589793")
-    assert (U.returnPI_A1() == "Hello->3.141592653589793")
-    assert (U.returnPI_A1_as_Const() == "Hello->3.141592653589793")
-    assert (U.returnPO_AO_Inline() == "Hello->3.141592653589793")
+    assertEQ(U.returnPI_A0() ,  "->3.141592653589793")
+    assertEQ(U.returnPI_A0_as_Const() ,  "->3.141592653589793")
+    assertEQ(U.returnPI_A1() ,  "Hello->3.141592653589793")
+    assertEQ(U.returnPI_A1_as_Const() ,  "Hello->3.141592653589793")
+    assertEQ(U.returnPO_AO_Inline() ,  "Hello->3.141592653589793")
  }

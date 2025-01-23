@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,16 +54,16 @@ function main(): void {
     let a_array = [new A(), new A()];
     let iteratorA = new TestIterator<A>(a_array);
     let firstElementA: A = iteratorA.getFirstElement();
-    assert(firstElementA instanceof A);
-    assert(firstElementA.returnHello1() == "hello 1");
+    assertTrue((firstElementA instanceof A))
+    assertEQ(firstElementA.returnHello1() ,  "hello 1")
 
     let b_array = [new B(), new B()];
     let iteratorB = new TestIterator<B>(b_array);
     let firstElementB: B = iteratorB.getFirstElement();
-    assert(firstElementB instanceof B);
-    assert(firstElementB.returnHello1() == "hello 1");
-    assert(firstElementB.returnHello2() == "hello 2");
+    assertTrue((firstElementB instanceof B))
+    assertEQ(firstElementB.returnHello1() ,  "hello 1")
+    assertEQ(firstElementB.returnHello2() ,  "hello 2")
 
-    assert(a_array == iteratorA.getAll());
-    assert(b_array == iteratorB.getAll());
+    assertEQ(a_array ,  iteratorA.getAll())
+    assertEQ(b_array ,  iteratorB.getAll())
 }

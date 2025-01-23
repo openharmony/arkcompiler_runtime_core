@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@ const success: int = 0;
 const fail: int = 1;
 
 function main(): int {
-    assert languageCodes.length == countryCodes.length: "Error! Size of languageCodes should be the same as countryCodes";
+    assertEQ( languageCodes.length ,  countryCodes.length,  "Error! Size of languageCodes should be the same as countryCodes")
 
     let failures: int = 0;
     failures += check(FormatBigIntUnion(), "Intl NumberFormat.format +-BigInt. Called union-type arg");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 function foo(): Void { return Void.void_instance }
 
 function test(a: Object): void {
-	assert(a instanceof Void);
+	assertTrue((a instanceof Void))
 }
 
 class C {
@@ -67,5 +67,5 @@ function main(): void throws {
 
 	// TODO(kprokopenko): as this function is called multiple times,
 	// same class creation will lead to mismatched lambda context...
-	//assert called[0];
+	//assertTrue( called[0])
 }
