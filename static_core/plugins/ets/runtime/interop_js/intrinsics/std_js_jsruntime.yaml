@@ -363,7 +363,7 @@ intrinsics:
     method_name: xgc
     static: true
     signature:
-      ret: void
+      ret: i64
       args: [ ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeXgcStartIntrinsic
     clear_flags: []

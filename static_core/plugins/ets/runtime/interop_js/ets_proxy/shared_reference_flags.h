@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,6 +79,14 @@ public:
     IndexType GetNextIndex() const
     {
         return static_cast<IndexType>(GetRawFlags() >> NEXT_INDEX_SHIFT);
+    }
+
+    friend std::ostream &operator<<(std::ostream &out, const SharedReferenceFlags &flags)
+    {
+        out << "idx:" << flags.GetNextIndex() << " mark:" << flags.HasBit<SharedReferenceFlags::Bit::MARK>()
+            << " JS:" << flags.HasBit<SharedReferenceFlags::Bit::JS>()
+            << " ETS:" << flags.HasBit<SharedReferenceFlags::Bit::ETS>();
+        return out;
     }
 
 private:

@@ -13,26 +13,17 @@
  * limitations under the License.
  */
 
-#include "runtime/mem/gc/g1/g1-gc.h"
-#include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/sts_vm_interface_impl.h"
-#include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference.h"
+#include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 
 namespace ark::ets::interop::js {
 
 thread_local STSVMInterfaceImpl::XGCSyncState STSVMInterfaceImpl::xgcSyncState_ =
     STSVMInterfaceImpl::XGCSyncState::NONE;
 
-void STSVMInterfaceImpl::MarkFromObject(void *ref)
+void STSVMInterfaceImpl::MarkFromObject(void *obj)
 {
-    ASSERT(ref != nullptr);
-    // NOTE(audovichenko): Find the corresponding ref
-    auto *sharedRef = reinterpret_cast<ets_proxy::SharedReference *>(ref);
-    if (sharedRef->MarkIfNotMarked()) {
-        EtsObject *etsObj = sharedRef->GetEtsObject();
-        auto *gc = reinterpret_cast<mem::G1GC<EtsLanguageConfig> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC());
-        gc->MarkObjectRecursively(etsObj->GetCoreType());
-    }
+    XGC::GetInstance()->MarkFromObject(obj);
 }
 
 STSVMInterfaceImpl::STSVMInterfaceImpl() : xgcBarrier_(STSVMInterface::DEFAULT_XGC_EXECUTORS_COUNT) {}

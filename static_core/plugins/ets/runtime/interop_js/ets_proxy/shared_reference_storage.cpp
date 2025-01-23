@@ -187,6 +187,7 @@ inline SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx,
     if (isXGCinProgress_) {
         refsAllocatedDuringXGC_.insert(sharedRef);
     }
+    LOG(DEBUG, ETS_INTEROP_JS) << "Alloc shared ref: " << sharedRef;
     return startRef;
 }
 
@@ -210,6 +211,7 @@ SharedReference *SharedReferenceStorage::CreateHybridObjectRef(InteropCtx *ctx, 
 void SharedReferenceStorage::RemoveReference(SharedReference *sharedRef)
 {
     ASSERT(Size() > 0U);
+    LOG(DEBUG, ETS_INTEROP_JS) << "Remove shared ref: " << sharedRef;
     FreeItem(sharedRef);
     SharedReferenceSanity::Kill(sharedRef);
 }

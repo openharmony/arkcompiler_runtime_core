@@ -37,7 +37,7 @@ public:
     PANDA_PUBLIC_API STSVMInterfaceImpl();
     PANDA_PUBLIC_API ~STSVMInterfaceImpl() override = default;
 
-    PANDA_PUBLIC_API void MarkFromObject(void *ref) override;
+    PANDA_PUBLIC_API void MarkFromObject(void *obj) override;
 
     PANDA_PUBLIC_API void OnVMAttach() override;
     PANDA_PUBLIC_API void OnVMDetach() override;

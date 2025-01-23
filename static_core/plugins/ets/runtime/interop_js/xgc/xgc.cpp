@@ -14,12 +14,39 @@
  */
 
 #include "runtime/include/runtime.h"
+#include "runtime/mem/gc/gc_scope.h"
+#include "runtime/mem/gc/g1/g1-gc.h"
 #include "runtime/mem/gc/g1/xgc-extension-data.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 
 namespace ark::ets::interop::js {
+
+// CC-OFFNXT(G.PRE.02) necessary macro
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define LOG_XGC(level) LOG(level, ETS_INTEROP_JS) << "[XGC] "
+
+class XGCScope : public mem::GCScope<mem::TRACE_TIMING> {
+public:
+    XGCScope(std::string_view name, PandaEtsVM *vm)
+        : mem::GCScope<mem::TRACE_TIMING>(name, vm->GetGC()), scopeName_(name)
+    {
+        ASSERT(vm->GetGC()->GetLastGCCause() == GCTaskCause::CROSSREF_CAUSE);
+        LOG_XGC(DEBUG) << scopeName_ << ": start";
+    }
+
+    NO_COPY_SEMANTIC(XGCScope);
+    NO_MOVE_SEMANTIC(XGCScope);
+
+    ~XGCScope()
+    {
+        LOG_XGC(DEBUG) << scopeName_ << ": end";
+    }
+
+private:
+    std::string_view scopeName_ {};
+};
 
 XGC *XGC::instance_ = nullptr;
 
@@ -47,12 +74,14 @@ static auto CreateXObjectHandler(ets_proxy::SharedReferenceStorage *storage, STS
         ets_proxy::SharedReference::Iterator end;
         do {
             if (it->HasJSFlag() && it->MarkIfNotMarked()) {
+                LOG_XGC(DEBUG) << "napi_mark_from_object for ref " << *it;
                 arkplatform::EcmaVMInterface *ecmaIface = it->GetCtx()->GetEcmaVMInterface();
                 ecmaIface->MarkFromObject(it->GetJsRef());
+                LOG_XGC(DEBUG) << "Notify to JS waiters";
+                stsVmIface->NotifyWaiters();
             }
             ++it;
         } while (it != end);
-        stsVmIface->NotifyWaiters();
     };
 }
 
@@ -118,6 +147,7 @@ void XGC::GCStarted(const GCTask &task, [[maybe_unused]] size_t heapSize)
     if (task.reason != GCTaskCause::CROSSREF_CAUSE) {
         return;
     }
+    XGCScope xgcStartScope("XGC Start", vm_);
     vm_->RemoveRootProvider(storage_);
     isXGcInProgress_ = true;
     remarkFinished_ = false;
@@ -129,6 +159,7 @@ void XGC::GCFinished(const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeG
     if (task.reason != GCTaskCause::CROSSREF_CAUSE) {
         return;
     }
+    XGCScope xgcFinishScope("XGC Finish", vm_);
     stsVmIface_->FinishXGCBarrier();
     vm_->AddRootProvider(storage_);
     isXGcInProgress_ = false;
@@ -139,6 +170,7 @@ void XGC::GCFinished(const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeG
         // * in the main thread.
         // To do it on the main thread we should start a coro on the main worker
         // or post async job using libuv.
+        XGCScope xgcSweepScope("XGC Sweep", vm_);
         storage_->SweepUnmarkedRefs();
     }
     // NOTE(ipetrov, XGC): if table will be cleared in concurrent, then compute the new size should not be based on the
@@ -157,11 +189,13 @@ void XGC::GCPhaseStarted(mem::GCPhase phase)
     }
     switch (phase) {
         case mem::GCPhase::GC_PHASE_INITIAL_MARK: {
+            XGCScope xgcInitialMarkkScope("UnmarkAll", vm_);
             storage_->UnmarkAll();
             stsVmIface_->StartXGCBarrier();
             break;
         }
         case mem::GCPhase::GC_PHASE_REMARK: {
+            XGCScope xgcRemarkStartScope("RemarkStartBarrier", vm_);
             stsVmIface_->RemarkStartBarrier();
             break;
         }
@@ -178,10 +212,12 @@ void XGC::GCPhaseFinished(mem::GCPhase phase)
     }
     switch (phase) {
         case mem::GCPhase::GC_PHASE_MARK: {
+            XGCScope xgcWaitForConcurrentMarkScope("WaitForConcurrentMark", vm_);
             stsVmIface_->WaitForConcurrentMark(nullptr);
             break;
         }
         case mem::GCPhase::GC_PHASE_REMARK: {
+            XGCScope xgcRemarkFinishScope("WaitForRemark", vm_);
             stsVmIface_->WaitForRemark(nullptr);
             remarkFinished_ = true;
             break;
@@ -189,6 +225,20 @@ void XGC::GCPhaseFinished(mem::GCPhase phase)
         default: {
             break;
         }
+    }
+}
+
+void XGC::MarkFromObject(void *obj)
+{
+    ASSERT(obj != nullptr);
+    // NOTE(audovichenko): Find the corresponding ref
+    auto *sharedRef = reinterpret_cast<ets_proxy::SharedReference *>(obj);
+    LOG_XGC(DEBUG) << "MarkFromObject for " << sharedRef;
+    if (sharedRef->MarkIfNotMarked()) {
+        EtsObject *etsObj = sharedRef->GetEtsObject();
+        auto *gc = reinterpret_cast<mem::G1GC<EtsLanguageConfig> *>(vm_->GetGC());
+        LOG_XGC(DEBUG) << "Start marking from " << etsObj << " (" << etsObj->GetClass()->GetDescriptor() << ")";
+        gc->MarkObjectRecursively(etsObj->GetCoreType());
     }
 }
 
@@ -206,7 +256,7 @@ size_t XGC::ComputeNewSize()
     return std::min(std::max(currentStorageSize + delta, minimalThreasholdSize_), storage_->MaxSize());
 }
 
-void XGC::Trigger(mem::GC *gc)
+bool XGC::Trigger(mem::GC *gc, PandaUniquePtr<GCTask> task)
 {
     ASSERT_MANAGED_CODE();
     LOG(DEBUG, GC_TRIGGER) << "Trigger XGC. Current storage size = " << storage_->Size();
@@ -219,10 +269,9 @@ void XGC::Trigger(mem::GC *gc)
     // NOTE(audovichenko): Handle the situation when GC is triggered in one VM but cannot be triggered in another VM.
     if (!ctx->GetEcmaVMInterface()->StartXRefMarking()) {
         ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR, "Cannot start ArkJS XGC");
-        return;
+        return false;
     }
-    auto task = MakePandaUnique<GCTask>(GCTaskCause::CROSSREF_CAUSE, time::GetCurrentTimeInNanos());
-    gc->Trigger(std::move(task));
+    return gc->Trigger(std::move(task));
 }
 
 void XGC::TriggerGcIfNeeded(mem::GC *gc)
@@ -237,7 +286,7 @@ void XGC::TriggerGcIfNeeded(mem::GC *gc)
     if (storage_->Size() < targetThreasholdSize_.load(std::memory_order_relaxed)) {
         return;
     }
-    this->Trigger(gc);
+    this->Trigger(gc, MakePandaUnique<GCTask>(GCTaskCause::CROSSREF_CAUSE, time::GetCurrentTimeInNanos()));
 }
 
 }  // namespace ark::ets::interop::js
