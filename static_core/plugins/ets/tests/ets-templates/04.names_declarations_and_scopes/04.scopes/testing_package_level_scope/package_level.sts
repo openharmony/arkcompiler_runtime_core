@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -39,8 +39,8 @@ interface I {
 class D implements I {}
 
 function main(): void {
-    assert x == 1
-    assert new C().y == 2
-    assert new D().z() == 3
-    assert foo() == 0
+    assertEQ( x, 1 )
+    assertEQ( new C().y, 2 )
+    assertEQ( new D().z(), 3 )
+    assertEQ( foo(), 0 )
 }

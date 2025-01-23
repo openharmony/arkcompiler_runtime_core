@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -40,16 +40,16 @@ class D {
 function main(): void {
     // access from D
     let d:D = new D(new C())
-    assert d.get() == 1
+    assertEQ( d.get(), 1 )
     d.put(42)
-    assert d.get() == 42
+    assertEQ( d.get(), 42 )
 
     // access from module
     let c:C = new C();
-    assert c.x == 1
+    assertEQ( c.x, 1 )
     c.x = 100
-    assert c.x == 100
+    assertEQ( c.x, 100 )
 
     // module level scope is not affected
-    assert x == -10
+    assertEQ( x, -10)
 }

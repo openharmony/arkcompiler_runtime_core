@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,69 +16,69 @@ cases:
   - import: |-
       import {decode} from "./modules/stdlib_implicit_import.sts"
     call: |-
-      assert( decode("some%20str") == "some str" )
+      assertTrue( decode("some%20str") == "some str" )
 
   - import: |-
       import {encode} from "./modules/stdlib_implicit_import.sts"
     call: |-
-      assert( encode("some str") == "some%20str" )
+      assertTrue( encode("some str") == "some%20str" )
 
   - import: |-
       import {encodeComp} from "./modules/stdlib_implicit_import.sts"
     call: |-
-      assert( encodeComp("some str") == "some%20str" )
+      assertTrue( encodeComp("some str") == "some%20str" )
 
   # classes
   - import: |-
       import {iteratorRes} from "./modules/stdlib_implicit_import.sts"
     call: |-
-      assert( iteratorRes() instanceof IteratorResult )
+      assertTrue( iteratorRes() instanceof IteratorResult )
 
   - import: |-
       import {json} from "./modules/stdlib_implicit_import.sts"
     call: |-
-      assert( json() instanceof JSON )
+      assertTrue( json() instanceof JSON )
 
   - import: |-
       import {promise} from "./modules/stdlib_implicit_import.sts"
     call: |-
-      assert( promise() instanceof Promise )
+      assertTrue( promise() instanceof Promise )
 
   - import: |-
       import {rangeError} from "./modules/stdlib_implicit_import.sts"
     call: |-
-      assert( rangeError() instanceof RangeError )
-      assert( rangeError() instanceof Error )
+      assertTrue( rangeError() instanceof RangeError )
+      assertTrue( rangeError() instanceof Error )
 
   - import: |-
       import {referenceError} from "./modules/stdlib_implicit_import.sts"
     call: |-
-      assert( referenceError() instanceof ReferenceError )
-      assert( referenceError() instanceof Error )
+      assertTrue( referenceError() instanceof ReferenceError )
+      assertTrue( referenceError() instanceof Error )
 
   - import: |-
       import {syntaxError} from "./modules/stdlib_implicit_import.sts"
     call: |-
-      assert( syntaxError() instanceof SyntaxError )
-      assert( syntaxError() instanceof Error )
+      assertTrue( syntaxError() instanceof SyntaxError )
+      assertTrue( syntaxError() instanceof Error )
 
   - import: |-
       import {uriError} from "./modules/stdlib_implicit_import.sts"
     call: |-
-      assert( uriError() instanceof URIError )
-      assert( uriError() instanceof Error )
+      assertTrue( uriError() instanceof URIError )
+      assertTrue( uriError() instanceof Error )
 
   - import: |-
       import {regexp} from "./modules/stdlib_implicit_import.sts"
     call: |-
-      assert( regexp() instanceof RegExp )
+      assertTrue( regexp() instanceof RegExp )
 
   - import: |-
       import {weakMap} from "./modules/stdlib_implicit_import.sts"
     call: |-
-      assert( weakMap() instanceof WeakMap )
+      assertTrue( weakMap() instanceof WeakMap )
 
   - import: |-
       import {weakSet} from "./modules/stdlib_implicit_import.sts"
     call: |-
-      assert( weakSet() instanceof WeakSet )
+      assertTrue( weakSet() instanceof WeakSet )

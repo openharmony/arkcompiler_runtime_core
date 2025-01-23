@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,40 +20,40 @@ cases:
           let e2: [] = []
           let e1a = e1
           let e2a = e2
-          assert e1a instanceof Object
-          assert e2a instanceof Object
-          assert e1 == e1a && e2 == e2a && e1a != e2a
+          assertTrue( e1a instanceof Object )
+          assertTrue( e2a instanceof Object )
+          assertTrue( e1 == e1a && e2 == e2a && e1a != e2a )
 
     - use: |-
           let e: [boolean, string] = [true, "A"]
-          assert e instanceof [boolean, string]
-          assert e instanceof Object
+          assertTrue( e instanceof [boolean, string] )
+          assertTrue( e instanceof Object )
 
     - decl: |-
           type TUPLE = [boolean, string]
       use: |-
           let e: TUPLE = [true, "A"]
-          assert e instanceof TUPLE
-          assert e instanceof Object
+          assertTrue( e instanceof TUPLE )
+          assertTrue( e instanceof Object )
 
     - use: |-
           let e: [][] = []  // array of empty tuples
           let f: [][] = [[]]
           let g: [][] = [[],[]]
-          assert e.length == 0
-          assert f.length == 1
-          assert g.length == 2
+          assertTrue( e.length == 0 )
+          assertTrue( f.length == 1 )
+          assertTrue( g.length == 2 )
 
     - use: |-
           let e: [string, string][] = []    // one-dimensional array of tuples
           let f: [string, string][][] = []  // two-dimensional array of tuples
-          assert e.length == 0
-          assert f.length == 0
+          assertTrue( e.length == 0 )
+          assertTrue( f.length == 0 )
 
           e = [["a", "b"]]
           f = [e, e]
-          assert e[0][0] == "a"
-          assert f[0][0][0] == "a"
+          assertTrue( e[0][0] == "a" )
+          assertTrue( f[0][0][0] == "a" )
 
     - decl: |-
           type TUPLE = [number, string, boolean, Object]
@@ -63,9 +63,9 @@ cases:
           e[1] = "B"
           e[2] = false
           e[3] = e
-          assert (e[3] as TUPLE)[0] == 33.0
-          assert (e[3] as TUPLE)[1] == "B"
-          assert (e[3] as TUPLE)[2] == false
+          assertTrue( (e[3] as TUPLE)[0] == 33.0 )
+          assertTrue( (e[3] as TUPLE)[1] == "B" )
+          assertTrue( (e[3] as TUPLE)[2] == false )
 
     - decl: |-
           function foo(v: [number, string]): [string, string] {
@@ -73,8 +73,8 @@ cases:
           }
       use: |-
           let res = foo([42.0, "test"])
-          assert res[0] === "test42"
-          assert res[1] === "test"
+          assertTrue( res[0] === "test42" )
+          assertTrue( res[1] === "test" )
 
     - decl: |-
           type TT = [int|string, string|int]
@@ -95,8 +95,8 @@ cases:
           let a: A = new A(["0", "0"])
           a.meth([1, "X"])
           let res = a.getFld()
-          assert res[0] === "01"
-          assert res[1] === "0X"
+          assertTrue( res[0] === "01" )
+          assertTrue( res[1] === "0X" )
 
     - decl: |-
           class A<T> {
@@ -111,8 +111,8 @@ cases:
       use: |-
           let a: A<[string, string]> = new A<[string, string]>(["A", "B"])
           let res = a.getFld()
-          assert res[0] === "A"
-          assert res[1] === "B"
+          assertTrue( res[0] === "A" )
+          assertTrue( res[1] === "B" )
 
     - decl: |-
           class A<T extends [number, boolean]> {
@@ -127,8 +127,8 @@ cases:
       use: |-
           let a: A<[number, boolean]> = new A<[number, boolean]>([1.0, true])
           let res = a.getFld()
-          assert res[0] == 1.0
-          assert res[1] == true
+          assertTrue( res[0] == 1.0 )
+          assertTrue( res[1] == true )
 
     - decl: |-
           class A<T> {
@@ -147,14 +147,14 @@ cases:
           let a: A<[string|null, string|null] | null> = new A<[string|null, string|null] | null>(null)
           a.setFld(["A", null])
           let res = a.getFld()
-          assert res[0] === "A"
-          assert res[1] === null
+          assertTrue( res[0] === "A" )
+          assertTrue( res[1] === null )
 
     - decl: |-
           const index: int = 1
       use: |-
           let e: [string, boolean] = ["A", true]
-          assert e[index] == true // const indices allowed
+          assertTrue( e[index] == true ) // const indices allowed
 
     - decl: |-
           function foo(p: string[]) {
@@ -162,7 +162,7 @@ cases:
           }
       use: |-
           let v = foo(["A", "B"])  // array type must be inferred from context
-          assert v == "A"
+          assertTrue( v == "A" )
 
     - decl: |-
           function foo(p: [string, string]) {
@@ -170,7 +170,7 @@ cases:
           }
       use: |-
           let v = foo(["A", "B"])  // tuple type must be inferred from context
-          assert v == "A"
+          assertTrue( v == "A" )
 
     - use: |-
           let v: [number, number] = [1.0, 2.0]
@@ -180,13 +180,13 @@ cases:
     - use: |-
           let v: [string] = ["A"]
           let p = v as [string]  // cast to the same type
-          assert p[0] == "A"
+          assertTrue( p[0] == "A" )
 
     - use: |-
           let v: [string]|null = ():[string]|null => { let x = ["A"]; return x; }();
-          assert v?.[0] == "A"
+          assertTrue( v?.[0] == "A" )
           v = ():[string]|null => { return null; }();
-          assert v?.[0] === undefined
+          assertTrue( v?.[0] === undefined )
 
     - use: |-
           let res: boolean = false
@@ -197,14 +197,14 @@ cases:
           } catch (e: NullPointerError) {
               res = true // OK
           }
-          assert res
+          assertTrue( res )
 
     - decl: |-
           type TUPLE = [number, string]
       use: |-
           let v: [TUPLE, [number, TUPLE]] = [[1.0, "A"], [2.0, [3.0, "B"]]]
-          assert v[0][0] == 1.0
-          assert v[0][1] == "A"
-          assert v[1][0] == 2.0
-          assert v[1][1][0] == 3.0
-          assert v[1][1][1] == "B"
+          assertTrue( v[0][0] == 1.0 )
+          assertTrue( v[0][1] == "A" )
+          assertTrue( v[1][0] == 2.0 )
+          assertTrue( v[1][1][0] == 3.0 )
+          assertTrue( v[1][1][1] == "B" )

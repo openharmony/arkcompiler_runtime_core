@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,7 +25,7 @@ cases:
               fld: number[] = [8.0 + foo(4.0)] // CTE expected
           }
       use: |-
-          assert new A().fld[0] == 16.0
+          assertEQ( new A().fld[0], 16.0 )
       tags: 'compile-only, negative'
 
     # positive, throws error
@@ -40,7 +40,7 @@ cases:
               fld: number[] = [8.0 + foo(4.0)]
           }
       use: |-
-          assert new A().fld[0] == 16.0
+          assertEQ( new A().fld[0], 16.0 )
 
     # negative, exception throwing lambda
     - decl: |-
@@ -53,7 +53,7 @@ cases:
               })(4.0)]  // CTE expected
           }
       use: |-
-          assert new A().fld[0] == 16.0
+          assertEQ( new A().fld[0], 16.0 )
       tags: 'compile-only, negative'
 
     # positive, error throwing lambda
@@ -67,7 +67,7 @@ cases:
               })(4.0)]
           }
       use: |-
-          assert new A().fld[0] == 16.0
+          assertEQ( new A().fld[0], 16.0 )
 
     # negative, rethrows with non-throwing argument
     - decl: |-
@@ -81,7 +81,7 @@ cases:
               fld: number[] = [8.0 + bar(foo, 2.0)]  // CTE expected
           }
       use: |-
-          assert new A().fld[0] == 18.0
+          assertEQ( new A().fld[0], 18.0 )
       tags: 'compile-only, negative'
 
     # negative, rethrows with throwing argument
@@ -99,7 +99,7 @@ cases:
               fld: number[] = [8.0 + bar(foo, 2.0)]  // CTE expected
           }
       use: |-
-          assert new A().fld[0] == 18.0
+          assertEQ( new A().fld[0], 18.0 )
       tags: 'compile-only, negative'
 
     # negative, rethrows with non-throwing lambda argument
@@ -111,7 +111,7 @@ cases:
               fld: number[] = [8.0 + bar((p: number): number => p * 2, 2.0)]  // CTE expected
           }
       use: |-
-          assert new A().fld[0] == 18.0
+          assertEQ( new A().fld[0], 18.0 )
       tags: 'compile-only, negative'
 
     # negative, rethrows with throwing lambda argument
@@ -128,5 +128,5 @@ cases:
               }, 2.0)]  // CTE expected
           }
       use: |-
-          assert new A().fld[0] == 18.0
+          assertEQ( new A().fld[0], 18.0 )
       tags: 'compile-only, negative'

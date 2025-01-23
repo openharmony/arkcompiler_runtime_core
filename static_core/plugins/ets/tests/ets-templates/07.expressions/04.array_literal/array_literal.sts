@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,6 @@ desc: The number of initializer expressions enclosed in braces of the array init
 let x: {{item.type}}[] = {{item.array}}
 
 function main() {
-    assert x.length == {{item.len}}
+    assertEQ( x.length, {{item.len}} )
 }
 {% endfor %}

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,23 +18,23 @@ cases:
       use: |-
           // assignment-like context, variable declaration
           let v1: string = Color.Red
-          assert v1 == "r"
+          assertEQ( v1, "r" )
 
           let v2: string = Color.Green + Color.Blue
-          assert v2 == "gb"
+          assertEQ( v2, "gb" )
 
           let v3: string = s + Color.Blue + "X"
-          assert v3 == "ZbX"
+          assertEQ( v3, "ZbX" )
 
           // assignment-like context, constant declaration
           const c1: string = Color.Red
-          assert c1 == "r"
+          assertEQ( c1, "r" )
 
           const c2: string = Color.Green + Color.Blue
-          assert c2 == "gb"
+          assertEQ( c2, "gb" )
 
           const c3: string = s + Color.Blue + "X"
-          assert c3 == "ZbX"
+          assertEQ( c3, "ZbX" )
 
     - decl: |-
           let s: string = "Z"
@@ -42,13 +42,13 @@ cases:
       use: |-
           // assignment-like context, variable assignment
           v = Color.Red
-          assert v == "r"
+          assertEQ( v, "r" )
 
           v = Color.Green + Color.Blue
-          assert v == "gb"
+          assertEQ( v, "gb" )
 
           v = s + Color.Blue + "X"
-          assert v == "ZbX"
+          assertEQ( v, "ZbX" )
 
     - decl: |-
           let s: string = "Z"
@@ -60,9 +60,9 @@ cases:
       use: |-
           // assignment-like context, field declaration
           let a: A = new A()
-          assert a.fld1 == "r"
-          assert a.fld2 == "bg"
-          assert a.fld3 == "ZgX"
+          assertEQ( a.fld1, "r" )
+          assertEQ( a.fld2, "bg" )
+          assertEQ( a.fld3, "ZgX" )
 
     - decl: |-
           let s: string = "Z"
@@ -77,9 +77,9 @@ cases:
           a.fld1 = Color.Red
           a.fld2 = Color.Blue + Color.Green
           a.fld3 = s + Color.Green + "X"
-          assert a.fld1 == "r"
-          assert a.fld2 == "bg"
-          assert a.fld3 == "ZgX"
+          assertEQ( a.fld1, "r" )
+          assertEQ( a.fld2, "bg" )
+          assertEQ( a.fld3, "ZgX" )
 
     - decl: |-
           let s: string = "Z"
@@ -88,9 +88,9 @@ cases:
           }
       use: |-
           // call context, function
-          assert foo(Color.Red) == "r!"
-          assert foo(Color.Green + Color.Blue) == "gb!"
-          assert foo(s + Color.Blue + "X") == "ZbX!"
+          assertEQ( foo(Color.Red), "r!" )
+          assertEQ( foo(Color.Green + Color.Blue), "gb!" )
+          assertEQ( foo(s + Color.Blue + "X"), "ZbX!" )
 
     - decl: |-
           let s: string = "Z"
@@ -102,9 +102,9 @@ cases:
       use: |-
           // call context, method
           let a: A = new A()
-          assert a.meth(Color.Red) == "r!"
-          assert a.meth(Color.Green + Color.Blue) == "gb!"
-          assert a.meth(s + Color.Blue + "X") == "ZbX!"
+          assertEQ( a.meth(Color.Red), "r!" )
+          assertEQ( a.meth(Color.Green + Color.Blue), "gb!" )
+          assertEQ( a.meth(s + Color.Blue + "X"), "ZbX!" )
 
     - decl: |-
           let s: string = "Z"
@@ -116,17 +116,17 @@ cases:
           }
       use: |-
           // call context, constructor
-          assert new A(Color.Red).fld == "r"
-          assert new A(Color.Green + Color.Blue).fld == "gb"
-          assert new A(s + Color.Blue + "X").fld == "ZbX"
+          assertEQ( new A(Color.Red).fld, "r" )
+          assertEQ( new A(Color.Green + Color.Blue).fld, "gb" )
+          assertEQ( new A(s + Color.Blue + "X").fld, "ZbX" )
 
     - decl: |-
           let s: string = "Z"
       use: |-
           // call context, lambda
-          assert ((p: string): string => { return p + "!" })(Color.Red) == "r!"
-          assert ((p: string): string => { return p + "!" })(Color.Green + Color.Blue) == "gb!"
-          assert ((p: string): string => { return p + "!" })(s + Color.Blue + "X") == "ZbX!"
+          assertEQ( ((p: string): string => { return p + "!" })(Color.Red), "r!" )
+          assertEQ( ((p: string): string => { return p + "!" })(Color.Green + Color.Blue), "gb!" )
+          assertEQ( ((p: string): string => { return p + "!" })(s + Color.Blue + "X"), "ZbX!" )
 
     - decl: |-
           let s: string = "Z"
@@ -136,18 +136,18 @@ cases:
       use: |-
           // composite object
           let a: A = { fld: Color.Red }
-          assert a.fld == "r"
+          assertEQ( a.fld, "r" )
           a = { fld: Color.Blue + Color.Green }
-          assert a.fld == "bg"
+          assertEQ( a.fld, "bg" )
           a = { fld: s + Color.Blue + "!" }
-          assert a.fld == "Zb!"
+          assertEQ( a.fld, "Zb!" )
 
     - decl: |-
           let s: string = "Z"
       use: |-
           // composite array
           let v: string[] = [ Color.Red ]
-          assert v[0] == "r"
+          assertEQ( v[0], "r" )
           v = [ Color.Green + Color.Blue, Color.Blue + s + "!" ]
-          assert v[0] == "gb"
-          assert v[1] == "bZ!"
+          assertEQ( v[0], "gb" )
+          assertEQ( v[1], "bZ!" )

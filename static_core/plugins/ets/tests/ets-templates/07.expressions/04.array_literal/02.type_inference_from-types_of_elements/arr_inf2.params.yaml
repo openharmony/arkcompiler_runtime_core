@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,29 +15,29 @@
 cases:
     - use: |-
           let a = []  // spec example
-          assert a instanceof Object[]
+          assertTrue( a instanceof Object[] )
 
     - use: |-
           let b = ["a"]  // spec example
-          assert b instanceof string[]
+          assertTrue( b instanceof string[] )
 
     - use: |-
           let c = [1, 2, 3]  // spec example
-          assert c instanceof number[]
+          assertTrue( c instanceof number[] )
 
     - use: |-
           let d = ["a", 1, 3.14]  // spec example
-          assert d instanceof (string|number)[]
+          assertTrue( d instanceof (string|number)[] )
 
     - decl: |-
           class A {}
       use: |-
           let e = [(): void => {}, new A()]  // spec example
-          assert e instanceof (() => void | A)[]
+          assertTrue( e instanceof (() => void | A)[] )
 
     - use: |-
           let x = [new Long(), new Number(), new Short()]
-          assert x instanceof (Long|Short|Number)[]
+          assertTrue( x instanceof (Long|Short|Number)[] )
 
     - decl: |-
           let cnt: number = 0
@@ -53,7 +53,7 @@ cases:
           }
       use: |-
           let a = [foo, bar, baz, foo]
-          assert a instanceof F[]
+          assertTrue( a instanceof F[] )
 
     - decl: |-
           let cnt: number = 0
@@ -68,34 +68,34 @@ cases:
               return cnt--
           }
       use: |-
-          assert [bar, baz, foo] instanceof F[]
+          assertTrue( [bar, baz, foo] instanceof F[] )
 
     - use: |-
-          assert [1, 14, 33.98] instanceof number[]
+          assertTrue( [1, 14, 33.98] instanceof number[] )
 
     - use: |-
-          assert [0 as long, 0 as short, 0x1 as int] instanceof number[]
+          assertTrue( [0 as long, 0 as short, 0x1 as int] instanceof number[] )
 
     - use: |-
-          assert [new Object(), null] instanceof (Object|null)[]
+          assertTrue( [new Object(), null] instanceof (Object|null)[] )
 
     - use: |-
-          assert [new Boolean(true), "aaa", new Long()] instanceof Object[]
+          assertTrue( [new Boolean(true), "aaa", new Long()] instanceof Object[] )
 
     - use: |-
-          assert ["aa", "bb", null, "cc", null] instanceof (string|null)[]
+          assertTrue( ["aa", "bb", null, "cc", null] instanceof (string|null)[] )
 
     - use: |-
-          assert [0, 1, 2, "aaa", 3, "bbb"] instanceof (string|number)[]
+          assertTrue( [0, 1, 2, "aaa", 3, "bbb"] instanceof (string|number)[] )
 
     - use: |-
-          assert [null, null] instanceof null[]
+          assertTrue( [null, null] instanceof null[] )
 
     - use: |-
-          assert [undefined, undefined] instanceof undefined[]
+          assertTrue( [undefined, undefined] instanceof undefined[] )
 
     - use: |-
-          assert [null, undefined] instanceof (null|undefined)[]
+          assertTrue( [null, undefined] instanceof (null|undefined)[] )
 
     - use: |-
-          assert [(p: string): number => { return p.length }] instanceof ((p: string) => number)[]
+          assertTrue( [(p: string): number => { return p.length }] instanceof ((p: string) => number)[] )

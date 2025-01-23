@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,61 +16,61 @@ cases:
     - use: |-
           // Promise of void
           let r: Promise<void> = launch (() => {})()
-          assert((await r) == undefined)
+          assertTrue((await r) == undefined)
 
     - use: |-
           // Promise of primitive
           let bar = (p: int): int => p + p
           let r = launch bar(42)
-          assert((await r) == 84)
+          assertTrue((await r) == 84)
 
     - use: |-
           // Promise of boxed
           let r: Promise<Double> = launch ((p: Double): Double => p + p)(new Double(42.0))
-          assert((await r) == 84.0)
+          assertTrue((await r) == 84.0)
 
     - use: |-
           // Promise of string
           let r: Promise<string> = launch ((p: int): string => `${p}`)(42)
-          assert((await r) == '42')
+          assertTrue((await r) == '42')
 
     - use: |-
           // Promise of String
           let r = launch ((p: int): String => new String(`${p}`))(42)
-          assert((await r) instanceof String)
+          assertTrue((await r) instanceof String)
 
     - decl: |-
           class A {}
       use: |-
           // Promise of Object
           let r: Promise<Object> = launch ((p: Object): Object => p)(new A())
-          assert((await r) instanceof A)
+          assertTrue((await r) instanceof A)
 
     - use: |-
           // Promise of nullish
           let r: Promise<Number|undefined> = launch ((p: Number|undefined): Number|undefined => p instanceof Number ? p + 1 : p)(42)
-          assert((await r) == 43)
+          assertTrue((await r) == 43)
 
     - use: |-
           // Promise of nullish
           let r: Promise<Number|null> = launch ((p: Number|null): Number|null => p instanceof Number ? p + 1 : p)(42)
-          assert((await r) == 43)
+          assertTrue((await r) == 43)
 
     - use: |-
           // Promise of nullish
           let r = launch ((p: Int|null|undefined): Int|null|undefined => p == null || p == undefined ? p : p + 1)(42)
-          assert((await r) == 43)
+          assertTrue((await r) == 43)
 
     - use: |-
           // Promise of promise
           let r: Promise<Promise<String>> = launch ((p: string): Promise<string> => launch ((q: string): string => q + q)(p))('A')
-          assert((await r) == 'AA')
+          assertTrue((await r) == 'AA')
 
     - use: |-
           // Promise of array
           let r: Promise<int[]> = launch ((): int[] => [1, 2, 3])()
           let q: int[] = await r
-          assert(q[0] == 1 && q[1] == 2 && q[2] == 3)
+          assertTrue(q[0] == 1 && q[1] == 2 && q[2] == 3)
 
     - decl: |-
           type FUNC = (p: string) => string
@@ -79,7 +79,7 @@ cases:
           let r: Promise<FUNC> = launch ((): FUNC => {
                   return (p: string): string => p + p
               })()
-          assert((await r)('A') == 'AA')
+          assertTrue((await r)('A') == 'AA')
 
     - decl: |-
           type UT = number | string | boolean
@@ -87,25 +87,25 @@ cases:
           // Promise of union
           let r: Promise<number|boolean|string> = launch ((p: int): UT => p == 0 ? true : p > 0 ? new Number(p) : `${p}`)(-1)
           let q: boolean|number|string = await r
-          assert(q as string == '-1')
+          assertTrue(q as string == '-1')
 
     - use: |-
           // Promise of tuple
           let r: Promise<[boolean, Error]> = launch ((p: int): [boolean, Error] => [p > 0, new Error()])(42)
           let q: [boolean, Error] = await r
-          assert(q[0] && (q[1] instanceof Error))
+          assertTrue(q[0] && (q[1] instanceof Error))
 
     - use: |-
           // Promise of BigInt
           let r = launch ((p: string): BigInt => new BigInt(p))('123456789012345678901234567890')
           let q: BigInt = await r
-          assert(q == 123456789012345678901234567890n)
+          assertTrue(q == 123456789012345678901234567890n)
 
     - use: |-
           // Promise of bigint
           let r: Promise<bigint> = launch ((p: bigint): bigint => { return p })(123456789012345678901234567890n)
           let q: bigint = await r
-          assert(q == 123456789012345678901234567890n)
+          assertTrue(q == 123456789012345678901234567890n)
 
     - use: |-
           // array of promises
@@ -128,21 +128,21 @@ cases:
           for (let i = 0; i < arr.length; i++) {
               cnt += await arr[i] as Promise<int>
           }
-          assert(cnt == 90)
+          assertTrue(cnt == 90)
 
     - decl: |-
           enum Color { Red, Green, Blue }
       use: |-
           // Promise of enum
           let r = launch ((p: int): Color => p > 0 ? Color.Green : Color.Blue)(42)
-          assert((await r) == Color.Green)
+          assertTrue((await r) == Color.Green)
 
     - decl: |-
           enum Color { R="red", G="green", B="blue" }
       use: |-
           // Promise of string-based enum
           let r: Promise<Color> = launch ((p: int): Color => p > 0 ? Color.G : Color.B)(-42)
-          assert((await r) == Color.B)
+          assertTrue((await r) == Color.B)
 
     - decl: |-
           class A<T> {
@@ -159,7 +159,7 @@ cases:
       use: |-
           // Promise of T
           let a: A<string> = new A<string>((p: string): string => p + p, "X")
-          assert(a.meth() == "XX")
+          assertTrue(a.meth() == "XX")
 
     - decl: |-
           class A {
@@ -168,4 +168,4 @@ cases:
       use: |-
           // Launch in object literal
           let a: A = { fld: launch ((p: number): string => '' + p)(42.0) }
-          assert((await a.fld!) == '42')
+          assertTrue((await a.fld!) == '42')

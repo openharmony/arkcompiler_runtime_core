@@ -17,7 +17,7 @@ statements:
   - block: 'let i: int = 1;'
   - block: |-
           if (check())
-            assert(true);
+            assertTrue(true);
   - block: 'class Point {}'
   - block: 'interface A {}'
   - block: 'enum Enum { v1, v2 }'
@@ -41,12 +41,12 @@ statements:
             x = v;
   - block: |-
           switch (x) {
-            case 0: { assert x == 0; break; }
-            case 1: { assert x == 1; break; }
-            case 2: { assert x == 2; break; }
-          default: { assert false; break; }
+            case 0: { assertEQ( x, 0 ); break; }
+            case 1: { assertEQ( x, 1 ); break; }
+            case 2: { assertEQ( x, 2 ); break; }
+          default: { assertTrue( false ); break; }
           }
-  - block: 'assert true;'
+  - block: 'assertTrue( true )'
   - block: |-
           class Ex extends Exception {}
           try {

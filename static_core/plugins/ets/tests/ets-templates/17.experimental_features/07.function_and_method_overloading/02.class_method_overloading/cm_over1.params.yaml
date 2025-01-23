@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -64,22 +64,22 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assert a.meth(new Byte(-1 as byte)) == "Byte"
-          assert a.meth(new Short(-1 as short)) == "Short"
-          assert a.meth(new Int(-1 as int)) == "Int"
-          assert a.meth(new Long(-1 as long)) == "Long"
-          assert a.meth(new Char(c'A')) == "Char"
-          assert a.meth(new Boolean(false)) == "Boolean"
-          assert a.meth(new Float(3.14 as float)) == "Float"
-          assert a.meth(new Double(3.14)) == "Double"
-          assert a.meth(-1 as long) == "long"
-          assert a.meth(-1 as int) == "int"
-          assert a.meth(-1 as short) == "short"
-          assert a.meth(-1 as byte) == "byte"
-          assert a.meth(c'A') == "char"
-          assert a.meth(false) == "boolean"
-          assert a.meth(3.14) == "double"
-          assert a.meth(3.14 as float) == "float"
+          assertEQ( a.meth(new Byte(-1 as byte)), "Byte" )
+          assertEQ( a.meth(new Short(-1 as short)), "Short" )
+          assertEQ( a.meth(new Int(-1 as int)), "Int" )
+          assertEQ( a.meth(new Long(-1 as long)), "Long" )
+          assertEQ( a.meth(new Char(c'A')), "Char" )
+          assertEQ( a.meth(new Boolean(false)), "Boolean" )
+          assertEQ( a.meth(new Float(3.14 as float)), "Float" )
+          assertEQ( a.meth(new Double(3.14)), "Double" )
+          assertEQ( a.meth(-1 as long), "long" )
+          assertEQ( a.meth(-1 as int), "int" )
+          assertEQ( a.meth(-1 as short), "short" )
+          assertEQ( a.meth(-1 as byte), "byte" )
+          assertEQ( a.meth(c'A'), "char" )
+          assertEQ( a.meth(false), "boolean" )
+          assertEQ( a.meth(3.14), "double" )
+          assertEQ( a.meth(3.14 as float), "float" )
 
     - decl: |-
           // primitives and boxed, with sub/superclass
@@ -118,22 +118,22 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assert a.meth(new Byte(-1 as byte)) == "Byte"
-          assert a.meth(new Short(-1 as short)) == "Short"
-          assert a.meth(new Int(-1 as int)) == "Int"
-          assert a.meth(new Long(-1 as long)) == "Long"
-          assert a.meth(new Char(c'A')) == "Char"
-          assert a.meth(new Boolean(false)) == "Boolean"
-          assert a.meth(new Float(3.14 as float)) == "Float"
-          assert a.meth(new Double(3.14)) == "Double"
-          assert a.meth(-1 as long) == "long"
-          assert a.meth(-1 as int) == "int"
-          assert a.meth(-1 as short) == "short"
-          assert a.meth(-1 as byte) == "byte"
-          assert a.meth(c'A') == "char"
-          assert a.meth(false) == "boolean"
-          assert a.meth(3.14) == "double"
-          assert a.meth(3.14 as float) == "float"
+          assertEQ( a.meth(new Byte(-1 as byte)), "Byte" )
+          assertEQ( a.meth(new Short(-1 as short)), "Short" )
+          assertEQ( a.meth(new Int(-1 as int)), "Int" )
+          assertEQ( a.meth(new Long(-1 as long)), "Long" )
+          assertEQ( a.meth(new Char(c'A')), "Char" )
+          assertEQ( a.meth(new Boolean(false)), "Boolean" )
+          assertEQ( a.meth(new Float(3.14 as float)), "Float" )
+          assertEQ( a.meth(new Double(3.14)), "Double" )
+          assertEQ( a.meth(-1 as long), "long" )
+          assertEQ( a.meth(-1 as int), "int" )
+          assertEQ( a.meth(-1 as short), "short" )
+          assertEQ( a.meth(-1 as byte), "byte" )
+          assertEQ( a.meth(c'A'), "char" )
+          assertEQ( a.meth(false), "boolean" )
+          assertEQ( a.meth(3.14), "double" )
+          assertEQ( a.meth(3.14 as float), "float" )
 
     - decl: |-
           // enums
@@ -148,12 +148,12 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assert a.meth(-1) == "int"
-          assert a.meth(Color.Red) == "Color"
-          assert a.meth(-2 as short) == "short"
-          assert a.meth("abc") == "string"
-          assert a.meth(Size.L) == "Size"
-          assert a.meth(42 as byte) == "int"
+          assertEQ( a.meth(-1), "int" )
+          assertEQ( a.meth(Color.Red), "Color" )
+          assertEQ( a.meth(-2 as short), "short" )
+          assertEQ( a.meth("abc"), "string" )
+          assertEQ( a.meth(Size.L), "Size" )
+          assertEQ( a.meth(42 as byte), "int" )
 
     - decl: |-
           // enums, with sub/superclass
@@ -173,12 +173,12 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assert a.meth(-1) == "int"
-          assert a.meth(Color.Red) == "Color"
-          assert a.meth(-2 as short) == "short"
-          assert a.meth("abc") == "string"
-          assert a.meth(Size.L) == "Size"
-          assert a.meth(42 as byte) == "int"
+          assertEQ( a.meth(-1), "int" )
+          assertEQ( a.meth(Color.Red), "Color" )
+          assertEQ( a.meth(-2 as short), "short" )
+          assertEQ( a.meth("abc"), "string" )
+          assertEQ( a.meth(Size.L), "Size" )
+          assertEQ( a.meth(42 as byte), "int" )
 
     - decl: |-
           // arrays
@@ -209,26 +209,26 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assert a.meth([-1 as byte]) == "byte"
-          assert a.meth([-1 as short]) == "short"
-          assert a.meth([-1 as int]) == "int"
-          assert a.meth([-1 as long]) == "long"
-          assert a.meth([c'A']) == "char"
-          assert a.meth([false]) == "boolean"
-          assert a.meth([3.14 as float]) == "float"
-          assert a.meth([3.14]) == "double"
-          assert a.meth([new Byte(-1 as byte)]) == "Byte"
-          assert a.meth([new Short(-1 as short)]) == "Short"
-          assert a.meth([new Int(-1)]) == "Int"
-          assert a.meth([new Long(-1 as long)]) == "Long"
-          assert a.meth([new Char(c'A')]) == "Char"
-          assert a.meth([new Boolean(false)]) == "Boolean"
-          assert a.meth([new Float(3.14 as float)]) == "Float"
-          assert a.meth([new Double(3.14)]) == "Double"
-          assert a.meth([new Object()]) == "Object"
-          assert a.meth([Color.Red]) == "Color"
-          assert a.meth([Size.M]) == "Size"
-          assert a.meth(new A[1]) == "A"
+          assertEQ( a.meth([-1 as byte]), "byte" )
+          assertEQ( a.meth([-1 as short]), "short" )
+          assertEQ( a.meth([-1 as int]), "int" )
+          assertEQ( a.meth([-1 as long]), "long" )
+          assertEQ( a.meth([c'A']), "char" )
+          assertEQ( a.meth([false]), "boolean" )
+          assertEQ( a.meth([3.14 as float]), "float" )
+          assertEQ( a.meth([3.14]), "double" )
+          assertEQ( a.meth([new Byte(-1 as byte)]), "Byte" )
+          assertEQ( a.meth([new Short(-1 as short)]), "Short" )
+          assertEQ( a.meth([new Int(-1)]), "Int" )
+          assertEQ( a.meth([new Long(-1 as long)]), "Long" )
+          assertEQ( a.meth([new Char(c'A')]), "Char" )
+          assertEQ( a.meth([new Boolean(false)]), "Boolean" )
+          assertEQ( a.meth([new Float(3.14 as float)]), "Float" )
+          assertEQ( a.meth([new Double(3.14)]), "Double" )
+          assertEQ( a.meth([new Object()]), "Object" )
+          assertEQ( a.meth([Color.Red]), "Color" )
+          assertEQ( a.meth([Size.M]), "Size" )
+          assertEQ( a.meth(new A[1]), "A" )
 
     - decl: |-
           // arrays, from sub/superclass
@@ -276,26 +276,26 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assert a.meth([-1 as byte]) == "byte"
-          assert a.meth([-1 as short]) == "short"
-          assert a.meth([-1 as int]) == "int"
-          assert a.meth([-1 as long]) == "long"
-          assert a.meth([c'A']) == "char"
-          assert a.meth([false]) == "boolean"
-          assert a.meth([3.14 as float]) == "float"
-          assert a.meth([3.14]) == "double"
-          assert a.meth([new Byte(-1 as byte)]) == "Byte"
-          assert a.meth([new Short(-1 as short)]) == "Short"
-          assert a.meth([new Int(-1)]) == "Int"
-          assert a.meth([new Long(-1 as long)]) == "Long"
-          assert a.meth([new Char(c'A')]) == "Char"
-          assert a.meth([new Boolean(false)]) == "Boolean"
-          assert a.meth([new Float(3.14 as float)]) == "Float"
-          assert a.meth([new Double(3.14)]) == "Double"
-          assert a.meth([new Object()]) == "Object"
-          assert a.meth([Color.Red]) == "Color"
-          assert a.meth([Size.M]) == "Size"
-          assert a.meth(new A[1]) == "A"
+          assertEQ( a.meth([-1 as byte]), "byte" )
+          assertEQ( a.meth([-1 as short]), "short" )
+          assertEQ( a.meth([-1 as int]), "int" )
+          assertEQ( a.meth([-1 as long]), "long" )
+          assertEQ( a.meth([c'A']), "char" )
+          assertEQ( a.meth([false]), "boolean" )
+          assertEQ( a.meth([3.14 as float]), "float" )
+          assertEQ( a.meth([3.14]), "double" )
+          assertEQ( a.meth([new Byte(-1 as byte)]), "Byte" )
+          assertEQ( a.meth([new Short(-1 as short)]), "Short" )
+          assertEQ( a.meth([new Int(-1)]), "Int" )
+          assertEQ( a.meth([new Long(-1 as long)]), "Long" )
+          assertEQ( a.meth([new Char(c'A')]), "Char" )
+          assertEQ( a.meth([new Boolean(false)]), "Boolean" )
+          assertEQ( a.meth([new Float(3.14 as float)]), "Float" )
+          assertEQ( a.meth([new Double(3.14)]), "Double" )
+          assertEQ( a.meth([new Object()]), "Object" )
+          assertEQ( a.meth([Color.Red]), "Color" )
+          assertEQ( a.meth([Size.M]), "Size" )
+          assertEQ( a.meth(new A[1]), "A" )
 
     - decl: |-
           // tuples
@@ -312,12 +312,12 @@ cases:
       use: |-
           let a: A = new A()
           let t: T = [3.14, "abc"]
-          assert a.meth(t) == "T"
+          assertEQ( a.meth(t), "T" )
           let r: R = [3.14, false]
-          assert a.meth(r) == "R"
-          assert a.meth([3.14]) == "number"
-          assert a.meth(["abc"]) == "string"
-          assert a.meth(true) == "boolean"
+          assertEQ( a.meth(r), "R" )
+          assertEQ( a.meth([3.14]), "number" )
+          assertEQ( a.meth(["abc"]), "string" )
+          assertEQ( a.meth(true), "boolean" )
 
     - decl: |-
           // tuples with sub/superclass
@@ -339,12 +339,12 @@ cases:
       use: |-
           let a: A = new A()
           let t: T = [3.14, "abc"]
-          assert a.meth(t) == "T"
+          assertEQ( a.meth(t), "T" )
           let r: R = [3.14, false]
-          assert a.meth(r) == "R"
-          assert a.meth([3.14, 3.14]) == "number"
-          assert a.meth(["abc", "xyz"]) == "string"
-          assert a.meth(true) == "boolean"
+          assertEQ( a.meth(r), "R" )
+          assertEQ( a.meth([3.14, 3.14]), "number" )
+          assertEQ( a.meth(["abc", "xyz"]), "string" )
+          assertEQ( a.meth(true), "boolean" )
 
     - decl: |-
           // unions
@@ -361,16 +361,16 @@ cases:
       use: |-
           let a: A = new A()
           let u: U = 3.14
-          assert a.meth(u) == "U"
+          assertEQ( a.meth(u), "U" )
           u = "abc"
-          assert a.meth(u) == "U"
+          assertEQ( a.meth(u), "U" )
           let v: V = new Boolean(true)
-          assert a.meth(v) == "V"
+          assertEQ( a.meth(v), "V" )
           v = new Double(1.5)
-          assert a.meth(v) == "V"
-          assert a.meth(3.14) == "number"
-          assert a.meth(new Boolean(false)) == "Boolean"
-          assert a.meth("abc") == "string"
+          assertEQ( a.meth(v), "V" )
+          assertEQ( a.meth(3.14), "number" )
+          assertEQ( a.meth(new Boolean(false)), "Boolean" )
+          assertEQ( a.meth("abc"), "string" )
 
     - decl: |-
           // unions with sub/superclass
@@ -392,16 +392,16 @@ cases:
       use: |-
           let a: A = new A()
           let u: U = 3.14
-          assert a.meth(u) == "U"
+          assertEQ( a.meth(u), "U" )
           u = "abc"
-          assert a.meth(u) == "U"
+          assertEQ( a.meth(u), "U" )
           let v: V = new Boolean(true)
-          assert a.meth(v) == "V"
+          assertEQ( a.meth(v), "V" )
           v = new Double(1.5)
-          assert a.meth(v) == "V"
-          assert a.meth(3.14) == "number"
-          assert a.meth(new Boolean(false)) == "Boolean"
-          assert a.meth("abc") == "string"
+          assertEQ( a.meth(v), "V" )
+          assertEQ( a.meth(3.14), "number" )
+          assertEQ( a.meth(new Boolean(false)), "Boolean" )
+          assertEQ( a.meth("abc"), "string" )
 
     - decl: |-
           // function types
@@ -421,14 +421,14 @@ cases:
               return v == "" ? 0.0 : 1.0
           }
           function foo() {
-              assert false
+              assertTrue( false )
           }
       use: |-
           let a: A = new A()
-          assert a.meth(foo) == "void-void"
-          assert a.meth((v: number): void => { assert v == 0.0 }) == "number-void"
-          assert a.meth(fff) == "FF"
-          assert a.meth(eee) == "EE"
+          assertEQ( a.meth(foo), "void-void" )
+          assertEQ( a.meth((v: number): void => { assertTrue( v, 0.0 ) }), "number-void" )
+          assertEQ( a.meth(fff), "FF" )
+          assertEQ( a.meth(eee), "EE" )
 
     - decl: |-
           // function types with sub/superclass
@@ -453,15 +453,15 @@ cases:
               return v == "" ? 0.0 : 1.0
           }
           function foo() {
-              assert false
+              assertTrue( false )
           }
       use: |-
           let a: A = new A()
-          assert a.meth(foo) == "void-void"
-          assert a.meth((v: number): void => { assert v == 0.0 }) == "number-void"
-          assert a.meth(fff) == "FF"
+          assertEQ( a.meth(foo), "void-void" )
+          assertEQ( a.meth((v: number): void => { assertTrue( v, 0.0 )}), "number-void" )
+          assertEQ( a.meth(fff), "FF" )
           let v: EE = eee
-          assert a.meth(v) == "EE"
+          assertEQ( a.meth(v), "EE" )
 
     - decl: |-
           // nullish types
@@ -479,19 +479,19 @@ cases:
       use: |-
           let a: A = new A()
           let s: S = "ABC"
-          assert a.meth(s) == "S"
+          assertEQ( a.meth(s), "S" )
           let sn: SN = "ABC"
-          assert a.meth(sn) == "SN"
+          assertEQ( a.meth(sn), "SN" )
           let su: SU = "ABC"
-          assert a.meth(su) == "SU"
+          assertEQ( a.meth(su), "SU" )
           let snu: SNU = "ABC"
-          assert a.meth(snu) == "SNU"
+          assertEQ( a.meth(snu), "SNU" )
           sn = null
-          assert a.meth(sn) == "SN"
+          assertEQ( a.meth(sn), "SN" )
           su = undefined
-          assert a.meth(su) == "SU"
+          assertEQ( a.meth(su), "SU" )
           snu = undefined
-          assert a.meth(snu) == "SNU"
+          assertEQ( a.meth(snu), "SNU" )
 
     - decl: |-
           // nullish types with sub/superclass
@@ -514,16 +514,16 @@ cases:
       use: |-
           let a: A = new A()
           let s: S = "ABC"
-          assert a.meth(s) == "S"
+          assertEQ( a.meth(s), "S" )
           let sn: SN = "ABC"
-          assert a.meth(sn) == "SN"
+          assertEQ( a.meth(sn), "SN" )
           let su: SU = "ABC"
-          assert a.meth(su) == "SU"
+          assertEQ( a.meth(su), "SU" )
           let snu: SNU = "ABC"
-          assert a.meth(snu) == "SNU"
+          assertEQ( a.meth(snu), "SNU" )
           sn = null
-          assert a.meth(sn) == "SN"
+          assertEQ( a.meth(sn), "SN" )
           su = undefined
-          assert a.meth(su) == "SU"
+          assertEQ( a.meth(su), "SU" )
           snu = undefined
-          assert a.meth(snu) == "SNU"
+          assertEQ( a.meth(snu), "SNU" )

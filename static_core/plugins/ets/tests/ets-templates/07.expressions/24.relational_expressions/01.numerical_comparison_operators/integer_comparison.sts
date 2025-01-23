@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,9 +24,9 @@ function main(): void {
   let bx: {{ic.xboxed}} = new {{ic.xboxed}}({{ic.xvalue}} as {{ic.xtype}});
   let y: {{ic.ytype}} = {{ic.yvalue}};
   let by: {{ic.yboxed}} = new {{ic.yboxed}}({{ic.yvalue}} as {{ic.ytype}});
-  assert (x {{ic.op}} y) == {{ic.result}};
-  assert (bx {{ic.op}} by) == {{ic.result}};
-  assert (x {{ic.op}} by) == {{ic.result}};
+  assertEQ( (x {{ic.op}} y), {{ic.result}} )
+  assertEQ( (bx {{ic.op}} by), {{ic.result}} )
+  assertEQ( (x {{ic.op}} by), {{ic.result}} )
 }
 
 {% endfor %}

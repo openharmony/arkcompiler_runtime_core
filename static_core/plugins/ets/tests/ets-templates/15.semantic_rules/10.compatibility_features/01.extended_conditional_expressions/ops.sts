@@ -1,6 +1,6 @@
 {%- for a in cases %}
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,18 +26,18 @@ enum Size { S, M, L }
 let a: {{a.type}} = {{a.val}};  // {% if a.truthy %}truthy{% else %}falsy{% endif %}
 
 function main() {
-    assert(!a ? {% if a.truthy %}false : true{% else %}true : false{% endif %});
+    assertTrue(!a ? {% if a.truthy %}false : true{% else %}true : false{% endif %});
 
 {%- for b in cases %}
 {%- if a != b %}
     {
         let b: {{b.type}} = {{b.val}};  // {% if b.truthy %}truthy{% else %}falsy{% endif %}
 {%- if a.truthy %}
-        assert((a && b) ? {% if b.truthy %}true : false{% else %}false : true{% endif %});
-        assert((a || b) ? true : false);
+        assertTrue((a && b) ? {% if b.truthy %}true : false{% else %}false : true{% endif %});
+        assertTrue((a || b) ? true : false);
 {%- else %}
-        assert(!(a && b) ? false : true);
-        assert((a || b) ? {% if b.truthy %}true : false{% else %}false : true{% endif %});
+        assertTrue(!(a && b) ? false : true);
+        assertTrue((a || b) ? {% if b.truthy %}true : false{% else %}false : true{% endif %});
 {%- endif %}
     }
 {%- endif %}

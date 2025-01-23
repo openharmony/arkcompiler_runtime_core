@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,7 +21,7 @@ cases:
           }
       use: |-
           // not array type
-          assert(foo(...a1) == -1)
+          assertTrue(foo(...a1) == -1)
       tags: 'negative, compile-only'
 
     - decl: |-
@@ -31,7 +31,7 @@ cases:
           }
       use: |-
           // not rest parameters
-          assert(foo(...a1) == 3.0)
+          assertTrue(foo(...a1) == 3.0)
       tags: 'negative, compile-only'
 
     - decl: |-
@@ -41,7 +41,7 @@ cases:
       use: |-
           // empty arrays
           let a1: Object[] = [], a2: Error[] = []
-          assert(foo(...[...a1, ...a2, new Object(), ...a1]) == 1)
+          assertTrue(foo(...[...a1, ...a2, new Object(), ...a1]) == 1)
 
     - decl: |-
           function foo(...p: char[]): int {
@@ -50,7 +50,7 @@ cases:
       use: |-
           // spread of char array
           let a: char[] = [c'b', c'c']
-          assert(foo(...a) == 2)
+          assertTrue(foo(...a) == 2)
 
     - decl: |-
           function foo(a: int, ...p: byte[]): int {
@@ -59,7 +59,7 @@ cases:
       use: |-
           // spread of byte array
           let a: byte[] = [1 as byte, 2 as byte, 3 as byte]
-          assert(foo(42, ...a) == 48)
+          assertTrue(foo(42, ...a) == 48)
 
     - decl: |-
           function foo(a: int, ...p: short[]): int {
@@ -68,7 +68,7 @@ cases:
       use: |-
           // spread of short array
           let a: short[] = [1 as short, 2 as short, 3 as short]
-          assert(foo(42, ...a) == 48)
+          assertTrue(foo(42, ...a) == 48)
 
     - decl: |-
           function foo(a: long, ...p: long[]): long {
@@ -77,7 +77,7 @@ cases:
       use: |-
           // spread of long array
           let a: long[] = [1 as long, 2 as long, 3 as long]
-          assert(foo(42, ...a) == 48)
+          assertTrue(foo(42, ...a) == 48)
 
     - decl: |-
           function foo(a: float, ...p: float[]): float {
@@ -86,7 +86,7 @@ cases:
       use: |-
           // spread of float array
           let a: float[] = [1f, 2f, 3f]
-          assert(foo(42f, ...a) == 48f)
+          assertTrue(foo(42f, ...a) == 48f)
 
     - decl: |-
           function foo(a: number, ...p: number[]): number {
@@ -95,7 +95,7 @@ cases:
       use: |-
           // spread of number array
           let a: number[] = [1.0, 2.0, 3.0]
-          assert(foo(42, ...a) == 48.0)
+          assertTrue(foo(42, ...a) == 48.0)
 
     - decl: |-
           type F = (p: number) => number
@@ -108,7 +108,7 @@ cases:
           // spread of function array
           let a: F[] = [(p: number) => p * 2, (p: number) => p * 3]
           let b: F[] = [(p: number) => p * 4, (p: number) => p * 5]
-          assert(foo(1.0, ...[...a, ...b]) == 360.0)
+          assertTrue(foo(1.0, ...[...a, ...b]) == 360.0)
 
     - decl: |-
           enum Color { Red, Green, Blue }
@@ -118,7 +118,7 @@ cases:
       use: |-
           // spread of enums
           let a: Color[] = [Color.Red, Color.Blue, Color.Green]
-          assert(foo(...a) == Color.Green)
+          assertTrue(foo(...a) == Color.Green)
 
     - decl: |-
           function foo(...p: number[]): number {
@@ -126,7 +126,7 @@ cases:
           }
       use: |-
           // expression in parentheses
-          assert(foo(...([1.0, 2.0])) == 2.0)
+          assertTrue(foo(...([1.0, 2.0])) == 2.0)
 
     - decl: |-
           function foo(a: int, ...p: Object[]): int {
@@ -135,7 +135,7 @@ cases:
       use: |-
           // ensure-not-nullish expression
           let a1: Object[]|null = [new Object, new Object]
-          assert(foo(5, ...a1!) == 7)
+          assertTrue(foo(5, ...a1!) == 7)
 
     - decl: |-
           function foo(a: int, ...p: Object[]): int {
@@ -144,7 +144,7 @@ cases:
           let a1: Object[]|null = null
       use: |-
           // ensure-not-nullish expression
-          assert(foo(5, ...a1!) == 7)  // NPE expected
+          assertTrue(foo(5, ...a1!) == 7)  // NPE expected
       tags: 'negative'
 
     - decl: |-
@@ -154,7 +154,7 @@ cases:
           let a1: Object[]|null = [new Object, new Object]
       use: |-
           // nullish expression
-          assert(foo(5, ...a1) == 7)  // CTE expected
+          assertTrue(foo(5, ...a1) == 7)  // CTE expected
       tags: 'negative, compile-only'
 
     - decl: |-
@@ -165,7 +165,7 @@ cases:
           }
       use: |-
           // nullish-coalescing expression
-          assert(foo(5, ...(a1 ?? a2)!) == 7)
+          assertTrue(foo(5, ...(a1 ?? a2)!) == 7)
 
     - decl: |-
           function foo(): number[] {
@@ -176,7 +176,7 @@ cases:
           }
       use: |-
           // function call in expression
-          assert(bar(...foo()) == 3.0)
+          assertTrue(bar(...foo()) == 3.0)
 
     - decl: |-
           function foo(...p: string[]): string {
@@ -185,7 +185,7 @@ cases:
       use: |-
           // function call in expression
           let s = ["h", "", "el", "", "", "l", "", "o"]
-          assert(foo(...((s: string[]): string[] => {
+          assertTrue(foo(...((s: string[]): string[] => {
                 let res: string[] = []
                 for (let el of s) if (el.length > 0) res = [...res, el]
                 return res
@@ -197,7 +197,7 @@ cases:
           }
       use: |-
           // new expression in expression
-          assert(foo(...(new number[256])) == 0)
+          assertTrue(foo(...(new number[256])) == 0)
 
     - decl: |-
           function foo(...p: double[]): double {
@@ -206,7 +206,7 @@ cases:
       use: |-
           // array index expression
           let a: double[][] = [[2.0, 3.0], []]
-          assert(foo(...a[0]) == 5)
+          assertTrue(foo(...a[0]) == 5)
 
     - decl: |-
           function foo(...p: double[]): double {
@@ -215,7 +215,7 @@ cases:
       use: |-
           // tuple index expression
           let a: [string, double[], string] = ["X", [2.0, 3.0, 4.0], "Z"]
-          assert(foo(...a[1]) == 9)
+          assertTrue(foo(...a[1]) == 9)
 
     - decl: |-
           function foo(...p: string[]): string {
@@ -225,7 +225,7 @@ cases:
           // assignment expression in expression
           let a1 = ["1", "2", "3"]
           let a2 = ["a", "b"]
-          assert(foo(...(a1 = a2)) == "a-b")
+          assertTrue(foo(...(a1 = a2)) == "a-b")
 
     - decl: |-
           let a1 = ["1", "2", "3"]
@@ -235,7 +235,7 @@ cases:
           }
       use: |-
           // conditional expression in expression
-          assert(foo(...(a1.length > a2.length ? a1 : a2)) == "1-2-3")
+          assertTrue(foo(...(a1.length > a2.length ? a1 : a2)) == "1-2-3")
 
     - decl: |-
           class A {
@@ -253,7 +253,7 @@ cases:
       use: |-
           // use this expression
           let a: A = new A([false, false], [true, true])
-          assert(a.meth() == 46)
+          assertTrue(a.meth() == 46)
 
     - decl: |-
           abstract class A {
@@ -279,7 +279,7 @@ cases:
       use: |-
           // use super expression
           let b: B = new B([false, false], [true, true])
-          assert(b.bar() == 46)
+          assertTrue(b.bar() == 46)
 
     - decl: |-
           function foo(...p: number[][]): int {
@@ -290,7 +290,7 @@ cases:
       use: |-
           // spread of arrays
           let a1: number[][] = [[1.0, 2.0], [], [3.0, 4.0], [5.0]]
-          assert(foo(...a1) == 5)
+          assertTrue(foo(...a1) == 5)
 
     - decl: |-
           function foo(...p: number[][]): number[] {
@@ -307,7 +307,7 @@ cases:
           // spread of arrays, flatten array
           let a1: number[][] = [[1.0, 2.0], [3.0, 4.0]]
           let a2: number[][] = [[5.0, 6.0], []]
-          assert(bar(...[...foo(...a1), ...foo(...a2)]) == 21.0)
+          assertTrue(bar(...[...foo(...a1), ...foo(...a2)]) == 21.0)
 
     - decl: |-
           function foo(...p: (Double|Short|Byte)[]): double {
@@ -319,7 +319,7 @@ cases:
           // union of value types in result array
           let a1: Double[] = [1, 2, 3], a2: Short[] = [4, 5], a3: Byte[] = [6]
           let ar = [-10.0, ...a1, ...a1, ...a2, ...a2, ...a3, 10.0, ...a3]
-          assert(foo(...ar) == 42.0)
+          assertTrue(foo(...ar) == 42.0)
 
     - decl: |-
           function foo(...p: (Int|Number|String|undefined)[]): int {
@@ -328,7 +328,7 @@ cases:
       use: |-
           // union of reference types in result array
           let a1: (Int|Number|String|undefined)[] = [new Int(), new Int(), undefined, "Z", 42.0]
-          assert(foo(...a1) == 5)
+          assertTrue(foo(...a1) == 5)
 
     - decl: |-
           class A<T> {}
@@ -340,7 +340,7 @@ cases:
       use: |-
           // use generics
           let a1: (A<String>|B<Long>|C<Error>|null)[] = [new A<String>, new B<Long>, new C<Error>]
-          assert(foo<String, Long, Error>(...a1) == 3)
+          assertTrue(foo<String, Long, Error>(...a1) == 3)
 
     - decl: |-
           let a1 = ["1", "2", "3"]
@@ -349,7 +349,7 @@ cases:
           }
       use: |-
           // lambda expression in expression
-          assert(foo(...((): string[] => a1)()) == "123")
+          assertTrue(foo(...((): string[] => a1)()) == "123")
 
     - decl: |-
           let a1 = ["1", "2", "3"]
@@ -358,7 +358,7 @@ cases:
           }
       use: |-
           // lambda expression in expression
-          assert(foo(...((p: string[], q: string[]): string[] => [...p, ...q])(a1, a1)) == "123123")
+          assertTrue(foo(...((p: string[], q: string[]): string[] => [...p, ...q])(a1, a1)) == "123123")
 
 # tuples
     - decl: |-
@@ -369,7 +369,7 @@ cases:
           // spread a tuple to same type tuple
           let t1: [number, boolean] = [1.0, true]
           let r: [boolean, number] = foo(...t1)
-          assert(r[0] && r[1] == 1.0)
+          assertTrue(r[0] && r[1] == 1.0)
 
     - decl: |-
           function foo(...p: [number, boolean]): [number, number, boolean, boolean] {
@@ -378,7 +378,7 @@ cases:
       use: |-
           // spread tuples to different types
           let r: [number, number, boolean, boolean] = foo(...[1.0, true])
-          assert(r[0] == 1.0 && r[1] == 1.0 && r[2] && r[3])
+          assertTrue(r[0] == 1.0 && r[1] == 1.0 && r[2] && r[3])
 
     - decl: |-
           function foo(...p: [byte, short, int, long, float, double, boolean, char, string]): [byte, short, int, long, float, double, boolean, char, string, int] {
@@ -388,7 +388,7 @@ cases:
           // spread tuples of all value types
           let r: [byte, short, int, long, float, double, boolean, char, string] =
               [1 as byte, 2 as short, 3, 4 as long, 5f, 6.0, true, c'Z', "X"]
-          assert(foo(...r)[9] == 42)
+          assertTrue(foo(...r)[9] == 42)
 
     - decl: |-
           function foo(...p: [Object, Error]): int {
@@ -397,7 +397,7 @@ cases:
           let a1: [Object, Error]|null = [new Object, new Error]
       use: |-
           // ensure-not-nullish expression
-          assert(foo(...a1!) == 3)
+          assertTrue(foo(...a1!) == 3)
 
     - decl: |-
           function foo(...p: [Object, Error]): int {
@@ -406,7 +406,7 @@ cases:
           let a1: [Object, Error]|null = null
       use: |-
           // ensure-not-nullish expression
-          assert(foo(...a1!) == 3) // NPE expected
+          assertTrue(foo(...a1!) == 3) // NPE expected
       tags: 'negative'
 
     - decl: |-
@@ -417,7 +417,7 @@ cases:
           }
       use: |-
           // nullish-coalescing expression
-          assert(foo(...(a1 ?? a2)!) == 3)
+          assertTrue(foo(...(a1 ?? a2)!) == 3)
 
     - decl: |-
           let a1: [Object, Error]|null = null
@@ -427,7 +427,7 @@ cases:
           }
       use: |-
           // nullish-coalescing expression
-          assert(foo(...(a1 ?? a2)!) == 3) // NPE expected
+          assertTrue(foo(...(a1 ?? a2)!) == 3) // NPE expected
       tags: 'negative'
 
     - decl: |-
@@ -438,7 +438,7 @@ cases:
           }
       use: |-
           // nullish-coalescing expression
-          assert(foo(...(a1 ?? a2)) == 3)  // CTE, nullish expression
+          assertTrue(foo(...(a1 ?? a2)) == 3)  // CTE, nullish expression
       tags: 'negative, compile-only'
 
     - decl: |-
@@ -451,7 +451,7 @@ cases:
       use: |-
           // function call in expression
           let r: [string, number] = bar(...foo())
-          assert(r[0] == "X" && r[1] == 1)
+          assertTrue(r[0] == "X" && r[1] == 1)
 
     - decl: |-
           function foo(...p: [double, double]): double {
@@ -460,7 +460,7 @@ cases:
       use: |-
           // tuple index expression
           let a: [[double, double], [char, char]] = [[2.0, 3.0], [c'Z', c'X']]
-          assert(foo(...a[0]) == 5.0)
+          assertTrue(foo(...a[0]) == 5.0)
 
     - decl: |-
           function foo(...p: [string, int]): int {
@@ -470,7 +470,7 @@ cases:
           // assignment expression in expression
           let a1: [string, int] = ["1", 10]
           let a2: [string, int] = ["2", 20]
-          assert(foo(...(a1 = a2)) == 20)
+          assertTrue(foo(...(a1 = a2)) == 20)
 
     - decl: |-
           let a1: [int, int] = [1, 2]
@@ -481,7 +481,7 @@ cases:
       use: |-
           // conditional expression in expression
           let r = foo(...(a1[0] > a2[0] ? a1 : a2))
-          assert(r == 11)
+          assertTrue(r == 11)
 
     - decl: |-
           class A {
@@ -499,7 +499,7 @@ cases:
       use: |-
           // use this expression
           let a: A = new A(1, c'Z')
-          assert(a.meth() == 111)
+          assertTrue(a.meth() == 111)
 
     - decl: |-
           abstract class A {
@@ -525,7 +525,7 @@ cases:
       use: |-
           // use super expression
           let b: B = new B(1, c'Z')
-          assert(b.meth() == 111)
+          assertTrue(b.meth() == 111)
 
     - decl: |-
           class A<T> {}
@@ -536,7 +536,7 @@ cases:
       use: |-
           // use generics
           let a1: [A<Long>, B<Error>] = [new A<Long>, new B<Error>]
-          assert(foo<Long, Error>(...a1) == false)
+          assertTrue(foo<Long, Error>(...a1) == false)
 
     - decl: |-
           let a2: [int, int] = [6, 5]
@@ -546,4 +546,4 @@ cases:
       use: |-
           // lambda expression in expression
           let r = foo(...((p: [int, int]): [int, int] => [p[1], p[0]])(a2))
-          assert(r == "56")
+          assertTrue(r == "56")

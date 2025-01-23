@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,10 +48,10 @@ function foo(p: number|string|undefined|Error|boolean): number {
 }
 
 function main() {
-    assert(foo("abc") == 1 && str == "a")
-    assert(foo(true) == 2 && !bool)
+    assertTrue(foo("abc") == 1 && str == "a")
+    assertTrue(foo(true) == 2 && !bool)
     let e: Error = new Error("xyz")
-    assert(foo(e) == 3 && err == e && str == "xyz")
-    assert(foo(42.0) == 4 && num == 84)
-    assert(foo(undefined) == 5 && a === undefined)
+    assertTrue(foo(e) == 3 && err == e && str == "xyz")
+    assertTrue(foo(42.0) == 4 && num == 84)
+    assertTrue(foo(undefined) == 5 && a === undefined)
 }

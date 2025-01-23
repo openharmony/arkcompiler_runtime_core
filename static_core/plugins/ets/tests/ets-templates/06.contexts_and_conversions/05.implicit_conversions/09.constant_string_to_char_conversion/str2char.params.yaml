@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,29 +19,29 @@ cases:
       use: |-
           // assignment-like context, variable declaration
           let v1: char = "\u0000"
-          assert v1 == c'\u0000'
+          assertEQ( v1, c'\u0000' )
 
           let v2: char = "\uFFFF" + ""
-          assert v2 == c'\uFFFF'
+          assertEQ( v2, c'\uFFFF' )
 
           let v3: char = s
-          assert v3 == c'Z'
+          assertEQ( v3, c'Z' )
 
           let v4: char = r + s + ""
-          assert v4 == c'Z'
+          assertEQ( v4, c'Z' )
 
           // assignment-like context, constant declaration
           const c1: char = "\u0000"
-          assert c1 == c'\u0000'
+          assertEQ( c1, c'\u0000' )
 
           const c2: char = "\uFFFF" + ""
-          assert c2 == c'\uFFFF'
+          assertEQ( c2, c'\uFFFF' )
 
           const c3: char = s
-          assert c3 == c'Z'
+          assertEQ( c3, c'Z' )
 
           const c4: char = r + s + ""
-          assert c4 == c'Z'
+          assertEQ( c4, c'Z' )
 
     - decl: |-
           const s: string = "Z"
@@ -55,10 +55,10 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assert a.c1 == c'\u0000'
-          assert a.c2 == c'\uCAFE'
-          assert a.c3 == c'Z'
-          assert a.c4 == c'Z'
+          assertEQ( a.c1, c'\u0000' )
+          assertEQ( a.c2, c'\uCAFE' )
+          assertEQ( a.c3, c'Z' )
+          assertEQ( a.c4, c'Z' )
 
     - decl: |-
           const s: string = "Z"
@@ -70,16 +70,16 @@ cases:
       use: |-
           // assignment-like context, variable assignment
           v1 = "\u0000"
-          assert v1 == c'\u0000'
+          assertEQ( v1, c'\u0000' )
 
           v2 = "\uFFFF" + ""
-          assert v2 == c'\uFFFF'
+          assertEQ( v2, c'\uFFFF' )
 
           v3 = s
-          assert v3 == c'Z'
+          assertEQ( v3, c'Z' )
 
           v4 = r + s + ""
-          assert v4 == c'Z'
+          assertEQ( v4, c'Z' )
 
     - decl: |-
           const s: string = "Z"
@@ -94,16 +94,16 @@ cases:
       use: |-
           let a: A = new A()
           a.c1 = "\u000F"
-          assert a.c1 == c'\u000F'
+          assertEQ( a.c1, c'\u000F' )
 
           a.c2 = "\uFFFF" + ""
-          assert a.c2 == c'\uFFFF'
+          assertEQ( a.c2, c'\uFFFF' )
 
           a.c3 = s
-          assert a.c3 == c'Z'
+          assertEQ( a.c3, c'Z' )
 
           a.c4 = r + s + ""
-          assert a.c4 == c'Z'
+          assertEQ( a.c4, c'Z' )
 
     - decl: |-
           // call context, function
@@ -113,10 +113,10 @@ cases:
           const s: string = "W"
           const r: string = ""
       use: |-
-          assert foo("\u0000") == c'\u0000'
-          assert foo("" + ("" + "\uCAFE") + "") == c'\uCAFE'
-          assert foo(s) == c'W'
-          assert foo(r + s + "") == c'W'
+          assertEQ( foo("\u0000"), c'\u0000' )
+          assertEQ( foo("" + ("" + "\uCAFE") + ""), c'\uCAFE' )
+          assertEQ( foo(s), c'W' )
+          assertEQ( foo(r + s + ""), c'W' )
 
     - decl: |-
           // call context, method
@@ -129,10 +129,10 @@ cases:
           const r: string = ""
       use: |-
           let a: A = new A()
-          assert a.meth("\u0000") == c'\u0000'
-          assert a.meth("" + ("" + "\uCAFE") + "") == c'\uCAFE'
-          assert a.meth(s) == c'W'
-          assert a.meth(r + s + "") == c'W'
+          assertEQ( a.meth("\u0000"), c'\u0000' )
+          assertEQ( a.meth("" + ("" + "\uCAFE") + ""), c'\uCAFE' )
+          assertEQ( a.meth(s), c'W' )
+          assertEQ( a.meth(r + s + ""), c'W' )
 
     - decl: |-
           // call context, constructor
@@ -145,20 +145,20 @@ cases:
           const s: string = "W"
           const r: string = ""
       use: |-
-          assert new A("\u0000").fld == c'\u0000'
-          assert new A("" + ("" + "\uCAFE") + "").fld == c'\uCAFE'
-          assert new A(s).fld == c'W'
-          assert new A(r + s + "").fld == c'W'
+          assertEQ( new A("\u0000").fld, c'\u0000' )
+          assertEQ( new A("" + ("" + "\uCAFE") + "").fld, c'\uCAFE' )
+          assertEQ( new A(s).fld, c'W' )
+          assertEQ( new A(r + s + "").fld, c'W' )
 
     - decl: |-
           // call context, lambda
           const s: string = "W"
           const r: string = ""
       use: |-
-          assert ((p: char): char => { return p })("\u0000") == c'\u0000'
-          assert ((p: char): char => { return p })("" + ("" + "\uCAFE") + "") == c'\uCAFE'
-          assert ((p: char): char => { return p })(s) == c'W'
-          assert ((p: char): char => { return p })(r + s + "") == c'W'
+          assertEQ( ((p: char): char => { return p })("\u0000"), c'\u0000' )
+          assertEQ( ((p: char): char => { return p })("" + ("" + "\uCAFE") + ""), c'\uCAFE' )
+          assertEQ( ((p: char): char => { return p })(s), c'W' )
+          assertEQ( ((p: char): char => { return p })(r + s + ""), c'W' )
 
     - decl: |-
           // array composite
@@ -166,18 +166,18 @@ cases:
           const r: string = ""
       use: |-
           let v1: char[] = ["\u0000", c'X', "\uFFFF"]
-          assert v1[0] == c'\u0000'
-          assert v1[1] == c'X'
-          assert v1[2] == c'\uFFFF'
+          assertEQ( v1[0], c'\u0000' )
+          assertEQ( v1[1], c'X' )
+          assertEQ( v1[2], c'\uFFFF' )
 
           v1 = ["" + "Z" + ""]
-          assert v1[0] == c'Z'
+          assertEQ( v1[0], c'Z' )
 
           v1 = [c'X', s, s + r, "" + s]
-          assert v1[0] == c'X'
-          assert v1[1] == c'W'
-          assert v1[2] == c'W'
-          assert v1[3] == c'W'
+          assertEQ( v1[0], c'X' )
+          assertEQ( v1[1], c'W' )
+          assertEQ( v1[2], c'W' )
+          assertEQ( v1[3], c'W' )
 
     - decl: |-
           // object composite
@@ -188,13 +188,13 @@ cases:
           }
       use: |-
           let a: A = { fld: "\u8000" }
-          assert a.fld == c'\u8000'
+          assertEQ( a.fld, c'\u8000' )
 
           a = { fld: "" + "" + "" + "\uCAFE" }
-          assert a.fld == c'\uCAFE'
+          assertEQ( a.fld, c'\uCAFE' )
 
           a = { fld: s }
-          assert a.fld == c'W'
+          assertEQ( a.fld, c'W' )
 
           a = { fld: "" + s + r }
-          assert a.fld == c'W'
+          assertEQ( a.fld, c'W' )

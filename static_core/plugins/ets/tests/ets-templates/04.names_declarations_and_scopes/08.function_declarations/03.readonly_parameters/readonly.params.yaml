@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,8 +22,8 @@ cases:
         let arr: number[] = [1.9, 2.7];
         let arr2: number[] = foo(arr);
         arr[0] = 1;
-        assert(arr2[0] == 1);
-        assert(arr == arr2);
+        assertTrue(arr2[0] == 1);
+        assertTrue(arr == arr2);
 
   # readonly parameter is of predefined type
     - decl: |-
@@ -35,8 +35,8 @@ cases:
         let arr: tarr = [1.9, 2.7];
         let arr2: tarr = foo(arr);
         arr[0] = 1;
-        assert(arr2[0] == 1);
-        assert(arr == arr2);
+        assertTrue(arr2[0] == 1);
+        assertTrue(arr == arr2);
 
     - decl: |-
         type tarr = Array<number>;
@@ -47,8 +47,8 @@ cases:
         let arr: tarr = new Array<number>(2);
         let arr2: tarr = foo(arr);
         arr[0] = 1;
-        assert(arr2[0] == 1);
-        assert(arr == arr2);
+        assertTrue(arr2[0] == 1);
+        assertTrue(arr == arr2);
 
     - decl: |-
         type tarr = [int, number];
@@ -59,41 +59,41 @@ cases:
         let arr: tarr = [2, 2.7];
         let arr2: tarr = foo(arr);
         arr[0] = 1;
-        assert(arr2[0] == 1);
-        assert(arr == arr2);
+        assertTrue(arr2[0] == 1);
+        assertTrue(arr == arr2);
 
   # readonly parameter along with the optional key
     - decl: |-
         function foo(array?: readonly number[]) {
-            assert array == undefined
+            assertEQ( array, undefined )
         }
       check: |-
         foo()
 
     - decl: |-
         function foo(array?: readonly Array<number>) {
-            assert array == undefined
+            assertEQ( array, undefined )
         }
       check: |-
         foo()
 
     - decl: |-
         function foo(array?: readonly [string, Number]) {
-            assert array == undefined
+            assertEQ( array, undefined )
         }
       check: |-
         foo()
 
     - decl: |-
         function foo(array?: readonly number[]) {
-            assert(array[0] == 2)
+            assertTrue(array[0] == 2)
         }
       check: |-
         foo([2, 3])
 
     - decl: |-
         function foo(array?: readonly Array<number>) {
-            assert(array[0] == 2)
+            assertTrue(array[0] == 2)
         }
       check: |-
         let arr = new Array<number>(1);
@@ -102,7 +102,7 @@ cases:
 
     - decl: |-
         function foo(array?: readonly [string, Number]) {
-            assert(array[1].unboxed() == 2.2)
+            assertTrue(array[1].unboxed() == 2.2)
         }
       check: |-
         foo(["str", new Number(2.2)])
@@ -114,8 +114,8 @@ cases:
         }
       check: |-
         let arr: number[] = foo();
-        assert(arr.length == 2);
-        assert(arr[0] + arr[1] == 3.3);
+        assertTrue(arr.length == 2);
+        assertTrue(arr[0] + arr[1] == 3.3);
 
     - decl: |-
         function foo(array?: readonly Array<number> = new Array<number>(1)) {
@@ -123,8 +123,8 @@ cases:
         }
       check: |-
         let arr = foo();
-        assert(arr.length == 1);
-        assert(arr[0] == 0 as number);
+        assertTrue(arr.length == 1);
+        assertTrue(arr[0] == 0 as number);
 
     - decl: |-
         type TPL = [string, number]
@@ -133,8 +133,8 @@ cases:
         }
       check: |-
         let arr = foo();
-        assert(arr[0] == "str");
-        assert(arr[1] == 2);
+        assertTrue(arr[0] == "str");
+        assertTrue(arr[1] == 2);
 
     # multiple readonly values
     - decl: |-
@@ -142,7 +142,7 @@ cases:
             return b[0]a[0]b[1]a[1];
         }
       check: |-
-        assert(foo(["str1", "str2"], [1, 2]) == "1str12str2");
+        assertTrue(foo(["str1", "str2"], [1, 2]) == "1str12str2");
 
     - decl: |-
         type TPL = [boolean, string]
@@ -152,7 +152,7 @@ cases:
       check: |-
         let a: TPL = [true, "str"];
         let b: int[] = [1, 2];
-        assert(foo(a, b) == "str2");
+        assertTrue(foo(a, b) == "str2");
 
     - decl: |-
         type TPL = [boolean, string]
@@ -162,7 +162,7 @@ cases:
       check: |-
         let a: TPL = [true, "str"];
         let b: int[] = [1, 2];
-        assert(foo(a, b, a, b) == "str2str1");
+        assertTrue(foo(a, b, a, b) == "str2str1");
 
     - decl: |-
         type TPL = [boolean, string]
@@ -175,7 +175,7 @@ cases:
         let c: Array<number> = new Array(2);
         c[0] = 3;
         c[1] = 4;
-        assert(foo(a, b, c, a, b, c) == "str24str13");
+        assertTrue(foo(a, b, c, a, b, c) == "str24str13");
 
     # Mixed readonly and writable parameters
     - decl: |-
@@ -185,7 +185,7 @@ cases:
             return a[0] + c + b[0];
         }
       check: |-
-        assert(foo([3], [4.5], "str") == "6strstr4.5");
+        assertTrue(foo([3], [4.5], "str") == "6strstr4.5");
 
     - decl: |-
         function foo(a: int[], b: readonly Array<number>, c: string): string {
@@ -196,7 +196,7 @@ cases:
       check: |-
         let a = new Array<number>(1);
         a[0] = 4.5;
-        assert(foo([3], a, "str") == "6strstr4.5");
+        assertTrue(foo([3], a, "str") == "6strstr4.5");
 
     - decl: |-
         function foo(a: int[], b: readonly [int, number], c: string): string {
@@ -208,7 +208,7 @@ cases:
         let a = new Array<number>(2);
         a[0] = 3;
         a[1] = 4.5;
-        assert(foo([3], a, "str") == "6strstr34.5");
+        assertTrue(foo([3], a, "str") == "6strstr34.5");
 
   # readonly decl as function parameter
     - decl: |-

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,13 +38,13 @@ function main(): void {
   let a: CBA = new CBA();
   let b: DA = new DA();
   let c = a ?? b;
-  assert(foo(c) == 2);
+  assertTrue(foo(c) == 2);
 
   let d: A = new A();
   let e = a ?? d;
-  assert(foo(e) == 2);
+  assertTrue(foo(e) == 2);
   
   let f: BA = new BA();
   let g = a ?? f;
-  assert(foo(g) == 3);
+  assertTrue(foo(g) == 3);
 }

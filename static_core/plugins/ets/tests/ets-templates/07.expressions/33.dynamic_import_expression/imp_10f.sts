@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,22 +26,22 @@ function main() {
     // import with failures
     import(dir + file1 + "bad")
     .then((res) => {
-        assert(false)
+        assertTrue(false)
     })
     .catch(() => {
         return import(dir + file1)
     })
     .then((res) => {
-        assert(res.foo(42) == 1764)
+        assertTrue(res.foo(42) == 1764)
         return import(dir + file2 + "bad")
     })
     .then((res) => {
-        assert(false)
+        assertTrue(false)
     })
     .catch(() => {
         return import(dir + file2)
     })
     .then((res) => {
-        assert(res.bar("abc") == "abc abc")
+        assertTrue(res.bar("abc") == "abc abc")
     })
 }

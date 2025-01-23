@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -36,19 +36,19 @@ function main(): void {
     A.x = 42 // reset due to jit mode warmup
 
     // no instances created
-    assert A.x == 42
+    assertTrue( A.x == 42 )
 
     // two instances created
     let i1: A = new A()
     let i2: A = new A()
 
-    assert A.x == 42;
+    assertTrue( A.x == 42 );
 
     i2.addX()
 
-    assert i1.getX() == 43
+    assertTrue( i1.getX() == 43 )
 
     A.x = A.x + 5
 
-    assert i2.getX() == 48
+    assertTrue( i2.getX() == 48 )
 }

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,15 +17,15 @@ cases:
           const index: number = 1.01
       use: |-
           let e: [string, boolean] = ["A", true]
-          assert e[index] == true // only int indices allowed
+          assertTrue( e[index] == true ) // only int indices allowed
 
     - use: |-
           let e: [string, boolean] = ["A", true]
-          assert e[2] == true // wrong index
+          assertTrue( e[2] == true ) // wrong index
 
     - use: |-
           let e: [string, boolean] = ["A", true]
-          assert e[-1] == true // wrong index
+          assertTrue( e[-1] == true ) // wrong index
 
     - decl: |-
           let index = 40
@@ -34,29 +34,29 @@ cases:
           }
       use: |-
           let e: [string, boolean] = ["A", true]
-          assert e[42 / getIndex()] == true // only const indices allowed
+          assertTrue( e[42 / getIndex()] == true ) // only const indices allowed
 
     - decl: |-
           let index: int = 1
       use: |-
           let e: [string, boolean] = ["A", true]
-          assert e[index] == true // only const indices allowed
+          assertTrue( e[index] == true ) // only const indices allowed
 
     - decl: |-
           const index: int = -1
       use: |-
           let e: [string, boolean] = ["A", true]
-          assert e[index] == true // negative index
+          assertTrue( e[index] == true ) // negative index
 
     - decl: |-
           const index: int = 2
       use: |-
           let e: [string, boolean] = ["A", true]
-          assert e[index] == true // out of range index
+          assertTrue( e[index] == true ) // out of range index
 
     - use: |-
           let e: [] = []  // empty tuple
-          assert e[0] instanceof Object // out of range index
+          assertTrue( e[0] instanceof Object ) // out of range index
 
     - use: |-
           let e: [] = []  // empty tuple

@@ -20,11 +20,11 @@ tags:
 ---*/
 
 function pass(): void {
-  assert true;
+  assertTrue( true )
 }
 
 function fail(): void {
-  assert false;
+  assertTrue( false )
 }
 
 {

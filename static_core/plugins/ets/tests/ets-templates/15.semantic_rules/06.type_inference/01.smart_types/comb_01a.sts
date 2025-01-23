@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,10 +62,10 @@ function foo(p: number|string|undefined|Error|boolean): number {
 }
 
 function main() {
-    assert(foo(undefined) == 1 && a === undefined)
-    assert(foo(42.0) == 2 && num == 84 && not_undef as Number == 42.0)
+    assertTrue(foo(undefined) == 1 && a === undefined)
+    assertTrue(foo(42.0) == 2 && num == 84 && not_undef as Number == 42.0)
     let e: Error = new Error("xyz")
-    assert(foo(e) == 3 && err == e && not_undef as Error == e && str == "xyz")
-    assert(foo("abc") == 4 && str == "a" && not_undef as string == "abc")
-    assert(foo(true) == 5 && !bool && not_undef as boolean == true)
+    assertTrue(foo(e) == 3 && err == e && not_undef as Error == e && str == "xyz")
+    assertTrue(foo("abc") == 4 && str == "a" && not_undef as string == "abc")
+    assertTrue(foo(true) == 5 && !bool && not_undef as boolean == true)
 }

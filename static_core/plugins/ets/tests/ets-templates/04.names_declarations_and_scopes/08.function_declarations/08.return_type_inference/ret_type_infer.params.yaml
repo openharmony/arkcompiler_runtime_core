@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,7 +18,7 @@ cases:
                 return 127 as byte;
             }
       call: |-
-            assert(foo() == 127 as byte);
+            assertTrue(foo() == 127 as byte);
 
     - decl: |-
             function foo() {  // infer Byte
@@ -26,15 +26,15 @@ cases:
             }
       call: |-
             let b = foo();
-            assert(b instanceof Byte);
-            assert(b.unboxed() == 127 as byte);
+            assertTrue(b instanceof Byte);
+            assertTrue(b.unboxed() == 127 as byte);
 
     - decl: |-
             function foo() {  // infer short
                 return 2 as short;
             }
       call: |-
-            assert(foo() == 2 as short);
+            assertTrue(foo() == 2 as short);
 
     - decl: |-
             function foo() {  // infer Short
@@ -42,8 +42,8 @@ cases:
             }
       call: |-
             let b = foo();
-            assert(b instanceof Short);
-            assert(b.unboxed() == 2 as short);
+            assertTrue(b instanceof Short);
+            assertTrue(b.unboxed() == 2 as short);
 
     - decl: |-
             function foo() {  // infer Int
@@ -51,15 +51,15 @@ cases:
             }
       call: |-
             let b = foo();
-            assert(b instanceof Int);
-            assert(b.unboxed() == 2 as int);
+            assertTrue(b instanceof Int);
+            assertTrue(b.unboxed() == 2 as int);
 
     - decl: |-
             function foo() {  // infer long
                 return 3 as long;
             }
       call: |-
-            assert(foo() == 3 as long);
+            assertTrue(foo() == 3 as long);
 
     - decl: |-
             function foo() {  // infer Long
@@ -67,15 +67,15 @@ cases:
             }
       call: |-
             let b = foo();
-            assert(b instanceof Long);
-            assert(b.unboxed() == 3 as long);
+            assertTrue(b instanceof Long);
+            assertTrue(b.unboxed() == 3 as long);
 
     - decl: |-
             function foo() {  // infer float
                 return 4.2 as float;
             }
       call: |-
-            assert(foo() == 4.2 as float);
+            assertTrue(foo() == 4.2 as float);
 
     - decl: |-
             function foo() {  // infer Float
@@ -83,15 +83,15 @@ cases:
             }
       call: |-
             let b = foo();
-            assert(b instanceof Float);
-            assert(b.unboxed() == 4.3 as float);
+            assertTrue(b instanceof Float);
+            assertTrue(b.unboxed() == 4.3 as float);
 
     - decl: |-
             function foo() {  // infer double
                 return 5.3 as double;
             }
       call: |-
-            assert(foo() == 5.3 as double);
+            assertTrue(foo() == 5.3 as double);
 
     - decl: |-
             function foo() {  // infer Double
@@ -99,8 +99,8 @@ cases:
             }
       call: |-
             let b = foo();
-            assert(b instanceof Double);
-            assert(b.unboxed() == 5.4 as double);
+            assertTrue(b instanceof Double);
+            assertTrue(b.unboxed() == 5.4 as double);
 
     - decl: |-
             function foo() {  // infer Number
@@ -108,15 +108,15 @@ cases:
             }
       call: |-
             let b = foo();
-            assert(b instanceof Number);
-            assert(b.unboxed() == 6.4 as number);
+            assertTrue(b instanceof Number);
+            assertTrue(b.unboxed() == 6.4 as number);
 
     - decl: |-
             function foo() {  // infer char
                 return c'A';
             }
       call: |-
-            assert(foo() == c'A');
+            assertTrue(foo() == c'A');
 
     - decl: |-
             function foo() {  // infer Char
@@ -124,8 +124,8 @@ cases:
             }
       call: |-
             let b = foo();
-            assert(b instanceof Char);
-            assert(b.unboxed() == c'b');
+            assertTrue(b instanceof Char);
+            assertTrue(b.unboxed() == c'b');
 
     - decl: |-
             function foo() {  // infer String
@@ -133,15 +133,15 @@ cases:
             }
       call: |-
             let b = foo();
-            assert(b instanceof String);
-            assert(b == "some str");
+            assertTrue(b instanceof String);
+            assertTrue(b == "some str");
 
     - decl: |-
             function foo() {  // infer boolean
                 return true;
             }
       call: |-
-            assert(foo());
+            assertTrue(foo());
 
     - decl: |-
             function foo() {  // infer Boolean
@@ -149,22 +149,22 @@ cases:
             }
       call: |-
             let b = foo();
-            assert(b instanceof Boolean);
-            assert(b.unboxed() == false);
+            assertTrue(b instanceof Boolean);
+            assertTrue(b.unboxed() == false);
 
     - decl: |-
             function foo() {  // infer null
                 return null;
             }
       call: |-
-            assert(foo() == null);
+            assertTrue(foo() == null);
 
     - decl: |-
             function foo() {  // infer undefined
                 return undefined;
             }
       call: |-
-            assert(foo() == undefined);
+            assertTrue(foo() == undefined);
 
     - decl: |-
             function foo() {  // infer undefined|null
@@ -172,7 +172,7 @@ cases:
                 return i;
             }
       call: |-
-            assert(foo() == undefined);
+            assertTrue(foo() == undefined);
 
     - decl: |-
             function foo() {  // infer undefined|null
@@ -180,7 +180,7 @@ cases:
                 return i;
             }
       call: |-
-            assert(foo() == undefined);
+            assertTrue(foo() == undefined);
 
     - decl: |-
             function foo() {  // infer union number|undefined|null
@@ -189,7 +189,7 @@ cases:
             }
       call: |-
             let i: number = foo();
-            assert(i == 1.1 as number);
+            assertTrue(i == 1.1 as number);
 
     - decl: |-
             abstract class AC {  // infer abstract class
@@ -209,11 +209,11 @@ cases:
             }
       call: |-
             let i = foo(true);
-            assert(i instanceof A);
-            assert(!(i instanceof B));
+            assertTrue(i instanceof A);
+            assertTrue(!(i instanceof B));
             let j = foo(false);
-            assert(j instanceof B);
-            assert(!(j instanceof A));
+            assertTrue(j instanceof B);
+            assertTrue(!(j instanceof A));
 
     - decl: |-
             interface I {} // infer interface
@@ -229,18 +229,18 @@ cases:
             }
       call: |-
             let i = foo(true);
-            assert(i instanceof II);
-            assert(!(i instanceof III));
+            assertTrue(i instanceof II);
+            assertTrue(!(i instanceof III));
             let j = foo(false);
-            assert(j instanceof III);
-            assert(!(j instanceof II));
+            assertTrue(j instanceof III);
+            assertTrue(!(j instanceof II));
 
     - decl: |-
             function foo() {  // infer std::Array
                 return new Array<int>(2);
             }
       call: |-
-            assert(foo() instanceof Array);
+            assertTrue(foo() instanceof Array);
 
     - decl: |-
             enum ENM {Red, Blue}  // infer enum
@@ -249,7 +249,7 @@ cases:
             }
       call: |-
             let i: ENM = foo()
-            assert(i == ENM.Blue);
+            assertTrue(i == ENM.Blue);
 
     - decl: |-
             type TPL = [number, string]  // infer tuple
@@ -259,7 +259,7 @@ cases:
             }
       call: |-
             let i = foo()
-            assert(i instanceof TPL);
+            assertTrue(i instanceof TPL);
 
     - decl: |-
           type A = Byte  // infer custom type
@@ -269,8 +269,8 @@ cases:
           }
       call: |-
           let i = foo();
-          assert(i instanceof Byte);
-          assert(i.unboxed() == 2 as byte);
+          assertTrue(i instanceof Byte);
+          assertTrue(i.unboxed() == 2 as byte);
 
     - decl: |-
           const cstr = "some string"  // infer string/char
@@ -279,8 +279,8 @@ cases:
               return c'A'
           }
       call: |-
-          assert(foo(true) == cstr);
-          assert(foo(false) == c'A');
+          assertTrue(foo(true) == cstr);
+          assertTrue(foo(false) == c'A');
 
     - decl: |-
           const cstr = "some string"  // infer boxing conversion + union Number|String|undefined|null
@@ -297,13 +297,13 @@ cases:
               }
           }
       call: |-
-          assert(foo(1) == 1)
-          assert(foo(2) == 2)
-          assert(foo(3) == 3)
-          assert(foo(4) == 4)
-          assert(foo(5) == 5)
-          assert(foo(6) == 6)
-          assert(foo(7) == "B")
+          assertTrue(foo(1) == 1)
+          assertTrue(foo(2) == 2)
+          assertTrue(foo(3) == 3)
+          assertTrue(foo(4) == 4)
+          assertTrue(foo(5) == 5)
+          assertTrue(foo(6) == 6)
+          assertTrue(foo(7) == "B")
 
     - decl: |-
           function foo(i: int) {  // infer string of different size
@@ -315,6 +315,6 @@ cases:
               }
           }
       call: |-
-          assert(foo(1) == "\u{D800}\u{D801}")
-          assert(foo(2) == "\u{A123}")
-          assert(foo(3) == "\u{00000069}")
+          assertTrue(foo(1) == "\u{D800}\u{D801}")
+          assertTrue(foo(2) == "\u{A123}")
+          assertTrue(foo(3) == "\u{00000069}")

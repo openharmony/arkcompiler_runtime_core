@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,23 +18,23 @@ cases:
       use: |-
           // assignment-like context, variable declaration
           let v1: number = Color.Red
-          assert v1 == 0
+          assertEQ( v1, 0 )
 
           let v2: number = Color.Green + Color.Blue
-          assert v2 == 201
+          assertEQ( v2, 201 )
 
           let v3: number = s + Color.Blue + 33
-          assert v3 == 176
+          assertEQ( v3, 176 )
 
           // assignment-like context, constant declaration
           const c1: number = Color.Red
-          assert c1 == 0
+          assertEQ( c1, 0 )
 
           const c2: number = Color.Green + Color.Blue
-          assert c2 == 201
+          assertEQ( c2, 201 )
 
           const c3: number = s + Color.Blue + 34
-          assert c3 == 177
+          assertEQ( c3, 177 )
 
     - decl: |-
           let s: int = 42
@@ -42,13 +42,13 @@ cases:
       use: |-
           // assignment-like context, variable assignment
           v = Color.Red
-          assert v == 0
+          assertEQ( v, 0 )
 
           v = Color.Green + Color.Blue
-          assert v == 201
+          assertEQ( v, 201 )
 
           v = s + Color.Blue + 12
-          assert v == 155
+          assertEQ( v, 155 )
 
     - decl: |-
           let s: int = 42
@@ -60,9 +60,9 @@ cases:
       use: |-
           // assignment-like context, field declaration
           let a: A = new A()
-          assert a.fld1 == 0
-          assert a.fld2 == 201
-          assert a.fld3 == 100
+          assertEQ( a.fld1, 0 )
+          assertEQ( a.fld2, 201 )
+          assertEQ( a.fld3, 100 )
 
     - decl: |-
           let s: int = 42
@@ -77,9 +77,9 @@ cases:
           a.fld1 = Color.Red
           a.fld2 = Color.Blue + Color.Green
           a.fld3 = s + Color.Green + 1
-          assert a.fld1 == 0
-          assert a.fld2 == 201
-          assert a.fld3 == 143
+          assertEQ( a.fld1, 0 )
+          assertEQ( a.fld2, 201 )
+          assertEQ( a.fld3, 143 )
 
     - decl: |-
           let s: int = 42
@@ -88,9 +88,9 @@ cases:
           }
       use: |-
           // call context, function
-          assert foo(Color.Red) == 1
-          assert foo(Color.Green + Color.Blue) == 202
-          assert foo(s + Color.Blue + 2) == 146
+          assertEQ( foo(Color.Red), 1 )
+          assertEQ( foo(Color.Green + Color.Blue), 202 )
+          assertEQ( foo(s + Color.Blue + 2), 146 )
 
     - decl: |-
           let s: number = 42.0
@@ -102,9 +102,9 @@ cases:
       use: |-
           // call context, method
           let a: A = new A()
-          assert a.meth(Color.Red) == 2.0
-          assert a.meth(Color.Green + Color.Blue) == 203.0
-          assert a.meth(s + Color.Blue) == 145.0
+          assertEQ( a.meth(Color.Red), 2.0 )
+          assertEQ( a.meth(Color.Green + Color.Blue), 203.0 )
+          assertEQ( a.meth(s + Color.Blue), 145.0 )
 
     - decl: |-
           let s: int = 42
@@ -116,17 +116,17 @@ cases:
           }
       use: |-
           // call context, constructor
-          assert new A(Color.Red).fld == 0
-          assert new A(Color.Green + Color.Blue).fld == 201
-          assert new A(s + Color.Blue + 10).fld == 153
+          assertEQ( new A(Color.Red).fld, 0 )
+          assertEQ( new A(Color.Green + Color.Blue).fld, 201 )
+          assertEQ( new A(s + Color.Blue + 10).fld, 153 )
 
     - decl: |-
           let s: int = 42
       use: |-
           // call context, lambda
-          assert ((p: number): number => { return p })(Color.Red) == 0.0
-          assert ((p: int): int => { return p })(Color.Green + Color.Blue) == 201
-          assert ((p: int): number => { return p })(s + Color.Blue + 5) == 148.0
+          assertEQ( ((p: number): number => { return p })(Color.Red), 0.0 )
+          assertEQ( ((p: int): int => { return p })(Color.Green + Color.Blue), 201 )
+          assertEQ( ((p: int): number => { return p })(s + Color.Blue + 5), 148.0 )
 
     - decl: |-
           let s: number = 42
@@ -136,18 +136,18 @@ cases:
       use: |-
           // composite object
           let a: A = { fld: Color.Red }
-          assert a.fld == 0
+          assertEQ( a.fld, 0 )
           a = { fld: Color.Blue + Color.Green }
-          assert a.fld == 201
+          assertEQ( a.fld, 201 )
           a = { fld: s + Color.Blue + 1 }
-          assert a.fld == 144
+          assertEQ( a.fld, 144 )
 
     - decl: |-
           let s: number = 42.0
       use: |-
           // composite array
           let v: number[] = [ Color.Red ]
-          assert v[0] == 0.0
+          assertEQ( v[0], 0.0 )
           v = [ Color.Green + Color.Blue, Color.Blue + s ]
-          assert v[0] == 201.0
-          assert v[1] == 143.0
+          assertEQ( v[0], 201.0 )
+          assertEQ( v[1], 143.0 )

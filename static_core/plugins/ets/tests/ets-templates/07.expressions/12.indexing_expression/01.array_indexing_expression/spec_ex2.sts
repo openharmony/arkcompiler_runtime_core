@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -28,8 +28,8 @@ function main() {
     const objects: RefType[] = [new RefType(), new RefType()]
     const object = objects[1]
     object.field = 777            // change the field in the array element
-    assert objects[0].field == 666
-    assert objects[1].field == 777
+    assertTrue( objects[0].field == 666 )
+    assertTrue( objects[1].field == 777 )
     // console.log(objects[0].filed) // prints 666
     // console.log(objects[1].filed) // prints 777
 }

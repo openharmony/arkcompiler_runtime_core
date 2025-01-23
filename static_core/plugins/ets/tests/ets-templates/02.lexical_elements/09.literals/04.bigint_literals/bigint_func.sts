@@ -21,6 +21,6 @@ desc: >-
 
 function main() {
     let x: bigint = {{f.func}};
-    assert x == {{f.res}}
+    assertEQ(x, {{f.res}})
 }
 {% endfor %}

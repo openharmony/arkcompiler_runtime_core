@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -34,7 +34,7 @@ let instance{{loop.index0}}: Clazz{{loop.index0}} = new Clazz{{loop.index0}}();
 {% if loop.last %}
 function main(): void {
     {% for qname1 in qualified_name %}
-	assert {{qname1}}
+	assertTrue( {{qname1}} )
     {% endfor %}
 }
 {% endif %}

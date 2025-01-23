@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -30,13 +30,13 @@ class A {
 }
 
 function main(): void {
-    assert A.b1 === theInstance
+    assertTrue( A.b1 === theInstance )
 
     // two instances created
     let i1: A = new A()
     let i2: A = new A()
 
-    assert A.b1 === theInstance
-    assert i1.b2 !== theInstance
-    assert i2.b2 !== theInstance
+    assertTrue( A.b1 === theInstance )
+    assertTrue( i1.b2 !== theInstance )
+    assertTrue( i2.b2 !== theInstance )
 }

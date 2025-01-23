@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,6 @@ import DefaultExportedClass from "../../08.top-level_declarations/01.exported_de
 function main(): void {
     let test_class = new DefaultExportedClass();
 
-    assert(test_class.hello("hello") == "hello_world");
-    assert((test_class.test_member + "_member") == "test_member");
+    assertTrue(test_class.hello("hello") == "hello_world");
+    assertTrue((test_class.test_member + "_member") == "test_member");
 }

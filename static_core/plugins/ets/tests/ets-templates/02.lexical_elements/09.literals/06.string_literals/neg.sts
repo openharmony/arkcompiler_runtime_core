@@ -21,6 +21,6 @@ tags: [negative, compile-only]
 
 function main() {
     let s: string = {{case}}
-    assert s instanceof Object
+    assertTrue(s instanceof Object)
 }
 {% endfor %}

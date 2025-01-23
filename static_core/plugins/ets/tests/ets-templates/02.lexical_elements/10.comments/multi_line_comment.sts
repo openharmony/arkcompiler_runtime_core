@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -73,9 +73,9 @@ function main(): int {
         /* this is not a comment either */
     `
 
-    // assert statements:
-    assert y[0] == 44/*1*/ && y[1] == 55 /*2*/ && x == 0/*3*/
-    assert new C().foo(2) == 4 /*4*/
+    // assertTrue() calls:
+    assertTrue( y[0] == 44/*1*/ && y[1] == 55 /*2*/ && x == 0/*3*/ )
+    assertTrue( new C().foo(2) == 4 /*4*/ )
 
     /* // */ return 0;
 }

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -97,24 +97,24 @@ cases:
       use: |-
           let a: A = new A()
           try {
-              assert a.meth(new Byte(-1 as byte)) == Byte.MAX_VALUE
-              assert a.meth(new Short(-1 as short)) == Short.MAX_VALUE
-              assert a.meth(new Int(-1 as int)) == Int.MAX_VALUE
-              assert a.meth(new Long(-1 as long)) == Long.MAX_VALUE
-              assert a.meth(new Char(c'A')) == Char.MAX_VALUE
-              assert a.meth(new Boolean(false)) == true
-              assert a.meth(new Float(3.14 as float)) == Float.MAX_VALUE
-              assert a.meth(new Double(3.14)) == Double.MAX_VALUE
-              assert a.meth(-1 as long) == Long.MIN_VALUE
-              assert a.meth(-1 as int) == Int.MIN_VALUE
-              assert a.meth(-1 as short) == Short.MIN_VALUE
-              assert a.meth(-1 as byte) == Byte.MIN_VALUE
-              assert a.meth(c'A') == Char.MIN_VALUE
-              assert a.meth(false) == false
-              assert a.meth(3.14) == Double.MIN_VALUE
-              assert a.meth(3.14 as float) == Float.MIN_VALUE
+              assertEQ( a.meth(new Byte(-1 as byte)), Byte.MAX_VALUE )
+              assertEQ( a.meth(new Short(-1 as short)), Short.MAX_VALUE )
+              assertEQ( a.meth(new Int(-1 as int)), Int.MAX_VALUE )
+              assertEQ( a.meth(new Long(-1 as long)), Long.MAX_VALUE )
+              assertEQ( a.meth(new Char(c'A')), Char.MAX_VALUE )
+              assertEQ( a.meth(new Boolean(false)), true )
+              assertEQ( a.meth(new Float(3.14 as float)), Float.MAX_VALUE )
+              assertEQ( a.meth(new Double(3.14)), Double.MAX_VALUE )
+              assertEQ( a.meth(-1 as long), Long.MIN_VALUE )
+              assertEQ( a.meth(-1 as int), Int.MIN_VALUE )
+              assertEQ( a.meth(-1 as short), Short.MIN_VALUE )
+              assertEQ( a.meth(-1 as byte), Byte.MIN_VALUE )
+              assertEQ( a.meth(c'A'), Char.MIN_VALUE )
+              assertEQ( a.meth(false), false )
+              assertEQ( a.meth(3.14), Double.MIN_VALUE )
+              assertEQ( a.meth(3.14 as float), Float.MIN_VALUE )
           } catch (e) {
-              assert false: "Unexpected exception"
+              assertTrue( false, "Unexpected exception" )
           }
 
     - decl: |-
@@ -142,24 +142,24 @@ cases:
       use: |-
           let a: A = new A()
           try {
-              assert a.meth([new Byte(-1 as byte)]) == Byte.MAX_VALUE
-              assert a.meth([new Short(-1 as short)]) == Short.MAX_VALUE
-              assert a.meth([new Int(-1 as int)]) == Int.MAX_VALUE
-              assert a.meth([new Long(-1 as long)]) == Long.MAX_VALUE
-              assert a.meth([new Char(c'A')]) == Char.MAX_VALUE
-              assert a.meth([new Boolean(false)]) == true
-              assert a.meth([new Float(3.14 as float)]) == Float.MAX_VALUE
-              assert a.meth([new Double(3.14)]) == Double.MAX_VALUE
-              assert a.meth([-1 as long]) == Long.MIN_VALUE
-              assert a.meth([-1 as int]) == Int.MIN_VALUE
-              assert a.meth([-1 as short]) == Short.MIN_VALUE
-              assert a.meth([-1 as byte]) == Byte.MIN_VALUE
-              assert a.meth([c'A']) == Char.MIN_VALUE
-              assert a.meth([false]) == false
-              assert a.meth([3.14]) == Double.MIN_VALUE
-              assert a.meth([3.14 as float]) == Float.MIN_VALUE
+              assertEQ( a.meth([new Byte(-1 as byte)]), Byte.MAX_VALUE )
+              assertEQ( a.meth([new Short(-1 as short)]), Short.MAX_VALUE )
+              assertEQ( a.meth([new Int(-1 as int)]), Int.MAX_VALUE )
+              assertEQ( a.meth([new Long(-1 as long)]), Long.MAX_VALUE )
+              assertEQ( a.meth([new Char(c'A')]), Char.MAX_VALUE )
+              assertEQ( a.meth([new Boolean(false)]), true )
+              assertEQ( a.meth([new Float(3.14 as float)]), Float.MAX_VALUE )
+              assertEQ( a.meth([new Double(3.14)]), Double.MAX_VALUE )
+              assertEQ( a.meth([-1 as long]), Long.MIN_VALUE )
+              assertEQ( a.meth([-1 as int]), Int.MIN_VALUE )
+              assertEQ( a.meth([-1 as short]), Short.MIN_VALUE )
+              assertEQ( a.meth([-1 as byte]), Byte.MIN_VALUE )
+              assertEQ( a.meth([c'A']), Char.MIN_VALUE )
+              assertEQ( a.meth([false]), false )
+              assertEQ( a.meth([3.14]), Double.MIN_VALUE )
+              assertEQ( a.meth([3.14 as float]), Float.MIN_VALUE )
           } catch (e) {
-              assert false: "Unexpected exception"
+              assertTrue( false, "Unexpected exception" )
           }
 
     - decl: |-
@@ -178,10 +178,10 @@ cases:
           let a: A = new A()
           try {
               a.meth(Color.Red)
-              assert a.meth(Size.L) == "Size"
-              assert a.meth(Status.ready) == Size.L
+              assertEQ( a.meth(Size.L), "Size" )
+              assertEQ( a.meth(Status.ready), Size.L )
           } catch (e) {
-              assert false: "Unexpected exception"
+              assertTrue( false, "Unexpected exception" )
           }
 
     - decl: |-
@@ -199,15 +199,15 @@ cases:
           let a: A = new A()
           try {
               let t: T = [3.14, "abc"]
-              assert a.meth(t) == 33
+              assertEQ( a.meth(t), 33 )
               let r: R = [3.14, false]
-              assert a.meth(r) == "R"
+              assertEQ( a.meth(r), "R" )
               t = [42.0, "xyz"]
-              assert a.meth(t) == 33
+              assertEQ( a.meth(t), 33 )
               r = [42.0, true]
-              assert a.meth(r) == "R"
+              assertEQ( a.meth(r), "R" )
           } catch (e) {
-              assert false: "Unexpected exception"
+              assertTrue( false, "Unexpected exception" )
           }
 
     - decl: |-
@@ -231,13 +231,13 @@ cases:
           let a: A = new A()
           try {
               let u: U = "3.14"
-              assert a.meth(u) == 333
+              assertEQ( a.meth(u), 333 )
               let v: V = new Boolean(true)
-              assert a.meth(v) == 1.0
+              assertEQ( a.meth(v), 1.0 )
               v = new Double(1.5)
-              assert a.meth(v) == 1.0
+              assertEQ( a.meth(v), 1.0 )
           } catch (e) {
-              assert false: "Unexpected exception"
+              assertTrue( false, "Unexpected exception" )
           }
 
     - decl: |-
@@ -266,10 +266,10 @@ cases:
       use: |-
           let a: A = new A()
           try {
-              assert a.meth(fff) == "FF"
-              assert a.meth(eee) == 12
+              assertEQ( a.meth(fff), "FF" )
+              assertEQ( a.meth(eee), 12 )
           } catch (e) {
-              assert false: "Unexpected exception"
+              assertTrue( false, "Unexpected exception" )
           }
 
     - decl: |-
@@ -291,19 +291,19 @@ cases:
           let a: A = new A()
           try {
               let s: S = "ABC"
-              assert a.meth(s) == ex
+              assertEQ( a.meth(s), ex )
               let sn: SN = "ABC"
-              assert a.meth(sn) == "SN"
+              assertEQ( a.meth(sn), "SN" )
               let su: SU = "ABC"
-              assert a.meth(su) == 1.0
+              assertEQ( a.meth(su), 1.0 )
               let snu: SNU = "ABC"
-              assert a.meth(snu) == true
+              assertEQ( a.meth(snu), true )
               sn = null
-              assert a.meth(sn) == "SN"
+              assertEQ( a.meth(sn), "SN" )
               su = undefined
-              assert a.meth(su) == 1.0
+              assertEQ( a.meth(su), 1.0 )
               snu = undefined
-              assert a.meth(snu) == true
+              assertEQ( a.meth(snu), true )
           } catch (e) {
-              assert false: "Unexpected exception"
+              assertTrue( false, "Unexpected exception" )
           }
