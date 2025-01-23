@@ -183,8 +183,8 @@ private:
         } else if constexpr (std::is_same_v<R, void>) {
             etsEnv_->CallStaticVoidMethod(cls, mtd, args...);
             return std::nullopt;
-        } else if constexpr (std::is_same_v<R, ets_object> || std::is_same_v<R, ets_array>) {
-            return static_cast<R>(etsEnv_->CallStaticObjectMethod(cls, mtd, std::forward<Args>(args)...));
+        } else if constexpr (std::is_same_v<R, ani_ref>) {
+            return reinterpret_cast<R>(etsEnv_->CallStaticObjectMethod(cls, mtd, std::forward<Args>(args)...));
         } else {
             enum { INCORRECT_TEMPLATE_TYPE = false };
             static_assert(INCORRECT_TEMPLATE_TYPE, "Incorrect template type");

@@ -37,6 +37,28 @@ public:
     {
         return env_;
     }
+
+    static inline bool IsUndefined(ani_ref ref)
+    {
+        return ref == nullptr;
+    }
+
+    static inline ani_ref GetUndefiendRef()
+    {
+        return nullptr;
+    }
+
+    bool inline IsNull(ani_ref ref)
+    {
+        return ToInternalType(ref)->GetCoreType() == GetCoroutine()->GetNullValue();
+    }
+
+    ani_ref inline GetNullRef()
+    {
+        EtsObject *nullObject = EtsObject::FromCoreType(GetCoroutine()->GetNullValue());
+        return AddLocalRef(nullObject);
+    }
+
     EtsArray *ToInternalType(ani_fixedarray array)
     {
         return reinterpret_cast<EtsArray *>(GetInternalType(env_, array));
@@ -192,6 +214,7 @@ public:
 
         GetCoroutine()->ManagedCodeBegin();
     }
+    explicit ScopedManagedCodeFix(ani_env *env) : ScopedManagedCodeFix(PandaEnv::FromAniEnv(env)) {}
 
     ~ScopedManagedCodeFix()
     {

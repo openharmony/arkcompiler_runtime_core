@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/ets_napi_env.h"
+#include "plugins/ets/runtime/ets_stubs-inl.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
@@ -41,6 +42,11 @@ template <typename T>
 using ArgVector = PandaSmallVector<T>;
 
 using TypeId = panda_file::Type::TypeId;
+
+static inline bool IsUndefined(ani_ref ref)
+{
+    return ManagedCodeAccessor::IsUndefined(ref);
+}
 
 static inline EtsMethod *ToInternalMethod(ani_method method)
 {
@@ -613,6 +619,115 @@ NO_UB_SANITIZE static ani_status DescribeError(ani_env *env)
     return ANI_OK;
 }
 
+NO_UB_SANITIZE static ani_status GetNull(ani_env *env, ani_ref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(result);
+
+    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
+    ScopedManagedCodeFix s(pandaEnv);
+    ani_ref nullRef = s.GetNullRef();
+    ANI_CHECK_RETURN_IF_EQ(nullRef, nullptr, ANI_OUT_OF_REF);
+    *result = nullRef;
+    return ANI_OK;
+}
+
+NO_UB_SANITIZE static ani_status GetUndefiend(ani_env *env, ani_ref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(result);
+
+    *result = ManagedCodeAccessor::GetUndefiendRef();
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Reference_IsNull(ani_env *env, ani_ref ref, ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(result);
+
+    // Fast path
+    if (IsUndefined(ref)) {
+        *result = ANI_FALSE;
+        return ANI_OK;
+    }
+    // Slow path
+    ScopedManagedCodeFix s(env);
+    *result = s.IsNull(ref) ? ANI_TRUE : ANI_FALSE;
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Reference_IsUndefined(ani_env *env, ani_ref ref, ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(result);
+
+    *result = IsUndefined(ref) ? ANI_TRUE : ANI_FALSE;
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Reference_IsNullish(ani_env *env, ani_ref ref, ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(result);
+
+    // Fast path
+    if (IsUndefined(ref)) {
+        *result = ANI_TRUE;
+        return ANI_OK;
+    }
+    // Slow path
+    ScopedManagedCodeFix s(env);
+    *result = s.IsNull(ref) ? ANI_TRUE : ANI_FALSE;
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Reference_Equals(ani_env *env, ani_ref ref0, ani_ref ref1, ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(result);
+
+    // Fast path
+    if (IsUndefined(ref0) && IsUndefined(ref1)) {
+        *result = ANI_TRUE;
+        return ANI_OK;
+    }
+    // Slow path
+    ScopedManagedCodeFix s(env);
+    bool isEquals = EtsReferenceEquals<false>(s.GetCoroutine(), s.ToInternalType(ref0), s.ToInternalType(ref1));
+    *result = isEquals ? ANI_TRUE : ANI_FALSE;
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Reference_StrictEquals(ani_env *env, ani_ref ref0, ani_ref ref1, ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(result);
+
+    // Fast path
+    if (IsUndefined(ref0) && IsUndefined(ref1)) {
+        *result = ANI_TRUE;
+        return ANI_OK;
+    }
+    // Slow path
+    ScopedManagedCodeFix s(env);
+    bool isStrictEquals = EtsReferenceEquals<true>(s.GetCoroutine(), s.ToInternalType(ref0), s.ToInternalType(ref1));
+    *result = isStrictEquals ? ANI_TRUE : ANI_FALSE;
+    return ANI_OK;
+}
+
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_InstanceOf(ani_env *env, ani_object object, ani_type type, ani_boolean *result)
 {
@@ -1043,13 +1158,13 @@ const __ani_interaction_api INTERACTION_API = {
     ResetError,
     DescribeError,
     NotImplementedAdapter<61>,
-    NotImplementedAdapter<62>,
-    NotImplementedAdapter<63>,
-    NotImplementedAdapter<64>,
-    NotImplementedAdapter<65>,
-    NotImplementedAdapter<66>,
-    NotImplementedAdapter<67>,
-    NotImplementedAdapter<68>,
+    GetNull,
+    GetUndefiend,
+    Reference_IsNull,
+    Reference_IsUndefined,
+    Reference_IsNullish,
+    Reference_Equals,
+    Reference_StrictEquals,
     NotImplementedAdapter<69>,
     String_GetUTF16Size,
     NotImplementedAdapter<71>,
