@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -75,7 +75,7 @@ In a qualified name *N.x* (where *N* is a simple name, and ``x`` is an
 identifier that can follow a sequence of identifiers separated with '``.``'
 tokens), *N* can name the following:
 
--  The name of a compilation unit (see :ref:`Modules and Compilation Units`)
+-  Name of a compilation unit (see :ref:`Modules and Compilation Units`)
    that is introduced as a result of ``import * as N`` (see :ref:`Bind All with Qualified Access`)
    with ``x`` to name the exported entity;
 
@@ -161,7 +161,7 @@ The examples below represent declarations distinguishable by names:
     }
 
 If a declaration is not distinguishable by name (except a valid overloading as
-in :ref:`Function and Method Overloading` and
+in :ref:`Function, Method and Constructor Overloading` and
 :ref:`Declaration Distinguishable by Signatures`), then a
 :index:`compile-time error` occurs:
 
@@ -262,6 +262,9 @@ The scope of an entity depends on the context the entity is declared in:
    compilation units.
 
 .. _namespace-access:
+
+.. meta:
+    frontend_status: Done
 
 -  *Namespace level scope* is applicable to namespaces only. A name
    declared in a namespace is accessible (see :ref:`Accessible`)
@@ -484,9 +487,8 @@ following:
 -  Names for anonymous types (array, function, and union types); or
 -  Alternative names for existing types.
 
-Scopes of type aliases are package or module level scopes. Names
-of all type aliases must be unique across all types in the current
-context.
+Scopes of type aliases are package, module, or namespace level scopes. Names of
+all type aliases must be unique across all types in the current context.
 
 .. index::
    type alias
@@ -983,7 +985,6 @@ introducing *named functions*. An optional function body is a block
 .. code-block:: abnf
 
     functionDeclaration:
-        functionOverloadSignature*
         modifiers? 'function' identifier
         typeParameters? signature block?
         ;
@@ -991,9 +992,6 @@ introducing *named functions*. An optional function body is a block
     modifiers:
         'native' | 'async'
         ;
-
-Function *overload signature* allows calling a function in different ways (see
-:ref:`Function Overload Signatures`).
 
 If a function is declared *generic* (see :ref:`Generics`), then its type
 parameters must be specified.
@@ -1012,7 +1010,6 @@ Functions must be declared on the top level (see :ref:`Top-Level Statements`).
    function body
    block
    body
-   function overload signature
    function call
    native function
    generic function
@@ -1053,8 +1050,8 @@ of a function, method, or constructor.
 See :ref:`Throwing Functions` for the details of ``throws`` marks, and
 :ref:`Rethrowing Functions` for the details of ``rethrows`` marks.
 
-Overloading (see :ref:`Function and Method Overloading`) is supported for
-functions and methods. The signatures of functions and methods are important
+Overloading (see :ref:`Function, Method and Constructor Overloading`) is supported for
+functions, methods and constructors. The signatures of overloaded entities are important
 for their unique identification.
 
 .. index::
@@ -1593,80 +1590,6 @@ If the compiler fails to recognize a particular type inference case, then
 a corresponding :index:`compile-time error` occurs.
 
 |
-
-.. _Function Overload Signatures:
-
-Function Overload Signatures
-============================
-
-.. meta:
-    frontend_status: None
-    todo: implement TS overload signature #16181
-
-|LANG| allows specifying a function that can have several *overload signatures*
-with the same name followed by one implementation function body:
-
-.. code-block:: abnf
-
-    functionOverloadSignature:
-      'async'? 'function' identifier typeParameters? signature
-      ;
-
-A call of a function with overload signatures is always a call of the
-implementation function. If the function implementation is missing, or does
-not immediately follow the declaration, then a :index:`compile-time error`
-occurs.
-
-The example below has overload signatures defined (one overload signature is
-parameterless, and other two have one parameter each):
-
-.. index::
-   function
-   overload signature
-   function
-   overload signature
-   function header
-   signature
-   implementation function
-   implementation
-   method overload signature
-   parameter
-
-.. code-block:: typescript
-   :linenos:
-
-    function foo(): void           // 1st signature
-    function foo(x: string): void  // 2nd signature
-    function foo(x?: string): void // 3rd - implementation signature
-    {
-        console.log(x)
-    }
-
-    foo()          // ok, call fits 1st and 3rd signatures
-    foo("aa")      // ok, call fits 2nd and 3rd signatures
-    foo(undefined) // ok, call fits the 3rd signature
-
-The call of ``foo()`` is executed as a call of the implementation function
-with the ``undefined`` argument. The call of ``foo(x)`` is executed as a call
-of the implementation function with the ``x`` argument.
-
-The compatibility requirements of *overload signatures* are described in
-:ref:`Overload Signature Correctness Check`.
-
-If not all overload signatures are either exported or non-exported, then a
-:index:`compile-time error` occurs.
-
-.. index::
-   call
-   implementation function
-   argument null
-   argument undefined
-   execution
-   signature
-   function
-   implementation
-   overload signature
-   compatibility
 
 .. raw:: pdf
 

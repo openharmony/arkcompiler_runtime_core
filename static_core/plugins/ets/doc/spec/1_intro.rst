@@ -488,10 +488,6 @@ as used in other languages, application areas, or industries.
      -- one of lexical input elements that separate tokens from one another
      in order to improve the source code readability and avoid ambiguities.
 
-   overload signature
-      -- signatures that have several function (or method) headers with the same
-      name and different signatures, and are followed by one implementation.
-
    widening conversion
      -- a conversion that causes no loss of information about the overall
      magnitude of a numeric value.
@@ -527,7 +523,8 @@ as used in other languages, application areas, or industries.
      handle any exception or error that is not handled by a preceding clause.
 
    overloading
-     -- situation where different methods inherited by or declared in the same
+     -- situation where different functions 
+     or methods inherited by or declared in the same
      class or interface have the same name but different signatures.
 
    shadowing

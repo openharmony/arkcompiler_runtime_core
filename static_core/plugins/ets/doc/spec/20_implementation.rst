@@ -51,6 +51,49 @@ If an import path ``<some path>/name`` is resolved to a path in the folder
 
 |
 
+.. _Compilation Units in Host System:
+
+Compilation Units in Host System
+**********************************
+
+.. meta:
+    frontend_status: Done
+
+Modules and packages are created and stored in a manner determined by the
+host system. The exact manner modules and packages are stored in a file
+system is determined by a particular implementation of the compiler and other
+tools.
+
+As an example in a simple implementation:
+
+-  A module (package module) is stored in a single file.
+
+-  Files that correspond to a package module are stored in a single folder.
+
+-  A folder can store several separate modules (one source file to contain a
+   separate module or a package module).
+
+-  A folder that stores a single package must not contain separate module
+   files or package modules from other packages.
+
+.. index::
+   compilation unit
+   host system
+   module
+   package
+   file system
+   implementation
+   package module
+   file
+   folder
+   source file
+   separate module
+
+
+
+
+|
+
 .. _Type Function:
 
 Type Function

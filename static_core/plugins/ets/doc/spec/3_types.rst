@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -629,8 +629,8 @@ An integer operator can throw errors (see :ref:`Error Handling`) as follows:
 
 -  An integer division operator '``/``' (see :ref:`Division`), and an
    integer remainder operator '``%``' (see :ref:`Remainder`) throw
-   ``ArithmeticError`` if their right-hand operand is zero.
--  An increment operator '``++``' and a decrement operator '``--`' (see
+   ``ArithmeticError`` if their right-hand-side operand is zero.
+-  An increment operator '``++``' and a decrement operator '``--``' (see
    :ref:`Additive Expressions`) throw ``OutOfMemoryError`` if boxing
    conversion (see :ref:`Boxing Conversions`) is required
    but the available memory is not sufficient to perform it.
@@ -1877,9 +1877,7 @@ Examples of incorrect union types are represented below:
    let x = cond? new Int (): new Double /* Compile-time error as conditional
         expression contains an invalid union type Int | Double */
 
-   type BadUnion4 = 1 | 2      // Compile-time error
-   type BadUnion5 = 1 | 2.0    // Compile-time error
-   type BadUnion6 = 1 | 1.0    // Compile-time error
+   type BadUnion4 = 1 | 2  // Compile-time error: only types allowed
 
 Typical usage examples of *union* type are represented below:
 

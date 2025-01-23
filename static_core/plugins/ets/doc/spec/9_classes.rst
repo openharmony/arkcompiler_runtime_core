@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -70,7 +70,7 @@ A newly declared method can shadow, overload, implement, or override a method
 declared in a superclass or superinterface.
 
 Every class defines two class-level scopes (see :ref:`Scopes`): one for
-instance members, and the other for static members. This means that two members
+instance members, and the other for static members. It means that two members
 of a class can have the same name if one is static while the other is not.
 
 .. index::
@@ -717,7 +717,7 @@ Class members are as follows:
 -  Members declared in the class body (see :ref:`Class Body`).
 
 Class members declared ``private`` are not accessible (see :ref:`Accessible`)
-to all subclasses of the class.
+to all subclasses of the current class.
 
 .. index::
    inheritance
@@ -729,12 +729,13 @@ to all subclasses of the class.
    private
    subclass
 
-Class members declared ``protected`` or ``public`` are inherited by subclasses
-that are declared in a package other than the package containing the class
-declaration.
+Class members declared ``protected`` or ``public`` are inherited by all
+subclasses of the class and accessible (see :ref:`Accessible`) for all
+subclasses.
 
-Class members declared ``internal`` are accessible for the classes and
-interfaces of the package the current class resides in.
+Class members declared ``internal`` are accessible within the package the
+current class resides in. They are inherited by all subclasses of the current
+class.
 
 Constructors and class initializers are not members, and are not inherited.
 
@@ -1280,7 +1281,6 @@ Method Declarations
 .. code-block:: abnf
 
     classMethodDeclaration:
-        methodOverloadSignature*
         methodModifier* identifier typeParameters? signature block?
         ;
 
@@ -1292,8 +1292,6 @@ Method Declarations
         | 'native'
         | 'async'
         ;
-
-*Overloading signature* of a method allows calling a method in different ways.
 
 The identifier of ``classMethodDeclaration`` is the method name that can be
 used to refer to a method (see :ref:`Method Call Expression`).
@@ -1504,100 +1502,6 @@ Native Methods
 
 Native methods are discussed in the chapter Experimental Features (see
 :ref:`Native Methods Experimental`).
-
-|
-
-.. _Method Overload Signatures:
-
-Method Overload Signatures
-==========================
-
-.. meta:
-    frontend_status: None
-    todo: implement TS overload signature #16181
-
-|LANG| allows specifying a method that has several *overload signatures*, i.e.,
-several method headers that have the same name followed by one implementation
-body:
-
-.. index::
-   overload signature
-   implementation body
-   method header
-
-.. code-block:: abnf
-
-    methodOverloadSignature:
-        methodModifier* identifier signature
-        ;
-
-A :index:`compile-time error` occurs if the method implementation is not
-present, or does not immediately follow the declaration.
-
-A call of a method with overload signatures is always a call of the
-implementation method.
-
-The example below has one overload signature parameterless, while the other
-two have one parameter each:
-
-.. index::
-   method implementation
-   method call
-   overload signature
-
-.. code-block:: typescript
-   :linenos:
-
-    class C {
-        foo(): void           // 1st signature
-        foo(x: string): void  // 2nd signature
-        foo(x?: string): void // implementation signature
-        {
-            console.log(x)
-        }
-    }
-    let c = new C()
-    c.foo()          // ok, call fits 1st and 3rd signatures
-    c.foo("aa")      // ok, call fits 2nd and 3rd signatures
-    c.foo(undefined) // ok, call fits the 3rd signature
-
-The call ``c.foo()`` is executed as a call of the implementation method with
-the argument ``undefined``. The call ``c.foo(x)`` is executed as a call of the
-implementation method with an argument.
-
-*Overload signature* compatibility requirements are discussed in
-:ref:`Overload Signature Correctness Check`.
-
-In addition, a :index:`compile-time error` occurs if not **all** of the
-following requirements are met:
-
--  Overload signatures and the implementation method have the same access
-   modifier.
--  All overload signatures and the implementation method are static or
-   non-static.
--  All overload signatures and the implementation method are final or
-   non-final.
--  Overload signatures are not native (however, native implementation
-   method is allowed).
--  Overload signatures are not abstract.
-
-.. index::
-   execution
-   call
-   signature
-   overload signature compatibility
-   implementation method
-   overload signature
-   access modifier
-   static implementation method
-   non-static implementation method
-   modifier public
-   modifier private
-   modifier protected
-   modifier abstract
-   native implementation method
-   final implementation method
-   non-final implementation method
 
 |
 
@@ -1918,7 +1822,6 @@ a method declaration with no return type:
 .. code-block:: abnf
 
     constructorDeclaration:
-        constructorOverloadSignature*
         'native'? 'constructor' parameters throwMark? constructorBody?
         ;
 
@@ -1975,93 +1878,6 @@ Formal Parameters
 
 The syntax and semantics of a constructor’s formal parameters are identical
 to those of a method.
-
-.. _Constructor Overload Signatures:
-
-Constructor Overload Signatures
-===============================
-
-.. meta:
-    frontend_status: None
-    todo: implement TS overload signature #16181
-
-|LANG| allows specifying a constructor that can be called in different ways by
-providing *overload signatures*, i.e., several constructor headers which are
-followed by one constructor implementation body.
-
-.. index::
-   overload signature
-   constructor
-   overload signature
-   implementation body
-
-.. code-block:: abnf
-
-    constructorOverloadSignature:
-        accessModifier? 'constructor' signature
-        ;
-
-A :index:`compile-time error` occurs if the constructor implementation is not
-present, or does not immediately follow the declaration.
-
-A call of a constructor with overload signature is always a call of the
-constructor implementation body.
-
-The example below has one overload signature parameterless, and others have one
-parameter each:
-
-.. index::
-   constructor implementation body
-   constructor
-   overload signature
-   constructor call
-
-.. code-block:: typescript
-   :linenos:
-
-    class C {
-        constructor()           // 1st signature
-        constructor(x: string)  // 2nd signature
-        constructor(x?: string) // 3rd - implementation signature
-        {
-            console.log(x)
-        }
-    }
-    new C()          // ok, fits the 1st and 3rd signatures
-    new C("aa")      // ok, fits the 2nd and 3rd signatures
-    new C(undefined) // ok, fits 3rd signature
-
-The new expression (see :ref:`New Expressions`) ``new C()`` leads to a call of
-the constructor implementation with the argument  ``undefined``. The ``new C(x)``
-creates an object that calls the constructor implementation with 'x' as an
-argument.
-
-*Overload signature* compatibility requirements are discussed in
-:ref:`Overload Signature Correctness Check`.
-
-A :index:`compile-time error` occurs if at least two different overload
-signatures or implementation signatures have different *access modifiers*.
-
-.. code-block:: typescript
-   :linenos:
-
-    class Incorrect {
-        // Constructors have different access modifiers
-        private constructor()             // private 1st signature
-        protected constructor(x: string)  // protected 2nd signature
-        constructor(x?: string)           // public 3rd - implementation signature
-        {}
-    }
-
-.. index::
-   expression
-   construction call
-   constructor implementation
-   overload signature
-   compatibility
-   access modifier
-
-|
 
 .. _Constructor Body:
 
@@ -2120,7 +1936,7 @@ The high-level sequence of a *primary constructor* body includes the following:
 
 1. Optional arbitrary code that does not use ``this`` or ``super``.
 
-2. Mandatory call to ``super([arguments])`` (see :ref:`Explicit Constructor Call`)
+2. Mandatory call to ``super(`` *arguments* ``)`` (see :ref:`Explicit Constructor Call`)
    if a class has an extension clause (see :ref:`Class Extension Clause`).
 
 3. Implicitly added compiler-generated code that:
@@ -2177,7 +1993,7 @@ The high-level sequence of a *secondary constructor* body includes the following
 
 1. Optional arbitrary code that does not use ``this`` or ``super``.
 
-2. Call to another same-class constructor ``this([arguments])`` with arguments.
+2. Call to another same-class constructor ``this(`` *arguments* ``)`` with arguments.
 
 3. Optional arbitrary code.
 

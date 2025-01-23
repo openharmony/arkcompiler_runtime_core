@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -128,7 +128,6 @@ Grammar Summary
         ;
 
     functionDeclaration:
-        functionOverloadSignature*
         modifiers? 'function' identifier
         typeParameters? signature block?
         ;
@@ -183,10 +182,6 @@ Grammar Summary
         )
         ;
 
-    functionOverloadSignature:
-      'async'? 'function' identifier typeParameters? signature
-      ;
-
     typeParameters:
         '<' typeParameterList '>'
         ;
@@ -225,7 +220,6 @@ Grammar Summary
         | stringInterpolation
         | lambdaExpression
         | lambdaExpressionWithReceiver
-        | dynamicImportExpression
         | launchExpression
         | awaitExpression
         ;
@@ -492,10 +486,6 @@ Grammar Summary
         identifier '?' (':' type)?
         ;
 
-    dynamicImportExpression:
-        'import' '(' expression ')'
-        ;
-
     constantExpression:
         expression
         ;
@@ -685,7 +675,6 @@ Grammar Summary
         ;
 
     classMethodDeclaration:
-        methodOverloadSignature*
         methodModifier* typeParameters? identifier signature block?
         ;
 
@@ -696,10 +685,6 @@ Grammar Summary
         | 'override'
         | 'native'
         | 'async'
-        ;
-
-    methodOverloadSignature:
-        methodModifier* identifier signature
         ;
 
     classAccessorDeclaration:
@@ -717,12 +702,7 @@ Grammar Summary
         ;
 
     constructorDeclaration:
-        constructorOverloadSignature*
         'constructor' parameters throwMark? constructorBody
-        ;
-
-    constructorOverloadSignature:
-        accessModifier? 'constructor' signature
         ;
 
     constructorBody:
@@ -893,18 +873,12 @@ Grammar Summary
         ;
 
     ambientConst:
-        identifier ((':' type) | ('=' (IntegerLiteral|FloatLiteral|StringLiteral )))
+        identifier ((':' type) | ('=' (IntegerLiteral|FloatLiteral|StringLiteral|MultilineStringLiteral)))
         ;
 
     ambientFunctionDeclaration:
-        ambientFunctionOverloadSignature*
         'function' identifier
         typeParameters? signature
-        ;
-
-    ambientFunctionOverloadSignature:
-        'declare'? 'function' identifier
-          typeParameters? signature ';'
         ;
 
     ambientClassDeclaration:
@@ -942,12 +916,7 @@ Grammar Summary
         ;
 
     ambientMethodDeclaration:
-        ambientMethodOverloadSignature*
         ambientMethodModifier* identifier signature
-        ;
-
-    ambientMethodOverloadSignature:
-        ambientMethodModifier* identifier signature ';'
         ;
 
     ambientMethodModifier:

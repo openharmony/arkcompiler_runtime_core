@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -243,7 +243,7 @@ with object literals only.
 
 .. code-block:: typescript
    :linenos:
-    
+
     function foo<T>(t: T, part_t: Partial<T>) {
         part_t = t // compile-time error in ArkTS
     }
@@ -256,35 +256,21 @@ with object literals only.
 
 |
 
-.. _Difference in Overload Signatures:
+.. _TS Overload Signatures:
 
-Difference in Overload Signatures
-*********************************
+|TS| Overload Signatures
+************************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
-*Implementation signature* is considered as an accessible (see
-:ref:`Accessible`) entity. The following code is valid in |LANG|, while it
-causes a compile-time error in |TS|:
+|LANG| does not support overload signatures in |TS|-style
+where several function headers are followed by a single body. 
+It requires each overloaded function, method or constructor to have
+a separate body.
 
-.. code-block-meta:
-   not-subset
-
-.. code-block:: typescript
-   :linenos:
-
-    function foo(): void
-    function foo(x: string): void
-    function foo(x?: string): void {
-        /*body*/
-    }
-
-    foo(undefined) // compile-time error in Typescript
-
-|LANG| supports calling function or method only with the number of arguments
-that corresponds to the number of the parameters. In some cases, |TS| allows
-providing more arguments than the actual function or method has.
+The following code is valid in |TS|, while it
+causes a compile-time error in |LANG|:
 
 .. code-block-meta:
    expect-cte
@@ -292,19 +278,27 @@ providing more arguments than the actual function or method has.
 .. code-block:: typescript
    :linenos:
 
-    function foo(p1: string, p2: boolean): void
-    function foo(p: string): void
-       { console.log ("1st parameter := ", p)  }
+    function foo(): void 
+    function foo(x: string): void
+    function foo(x?: string): void {
+        /*body*/
+    }
 
-    foo("1st argument", true) // compile-time error in ArkTS while OK for Typescript
+The following code is valid in |LANG|
+(see :ref:`Function, Method and Constructor Overloading`):
 
-.. index::
-   implementation signature
-   access
-   call
-   argument
-   method
-   function
+.. code-block-meta:
+   not-subset
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(): void {
+      /*body1*/
+    }
+    function foo(x: string): void {
+      /*body2*/
+    }
 
 |
 
@@ -421,7 +415,7 @@ type cannot be assigned into an array of a reference type:
 
     // ArkTS
     let a: Object[] = [1, 2, 3]
-    let b: Number[] = [1, 2, 3] 
+    let b: Number[] = [1, 2, 3]
     a = b // That works fine
 
 .. index::
@@ -442,13 +436,13 @@ Extending Class Object
     frontend_status: Done
 
 |TS| forbids using ``super`` and ``override`` if class ``Object`` is not
-explicitly listed in the ``extends`` clause of a class. |LANG| allows this as 
+explicitly listed in the ``extends`` clause of a class. |LANG| allows this as
 ``Object`` is a superclass for any class without an explicit ``extends`` clause:
 
 .. code-block:: typescript
    :linenos:
 
-    // Typescript reports an error while ArkTS compiles with no issues 
+    // Typescript reports an error while ArkTS compiles with no issues
     class A {
        override toString() {       // compile-time error
            return super.toString() // compile-time error

@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -144,46 +144,6 @@ process is performed in the following steps:
    compilation unit
    constant declaration
    top-level statement
-
-|
-
-.. _Compilation Units in Host System:
-
-Compilation Units in Host System
-**********************************
-
-.. meta:
-    frontend_status: Done
-
-Modules and packages are created and stored in a manner determined by the
-host system. The exact manner modules and packages are stored in a file
-system is determined by a particular implementation of the compiler and other
-tools.
-
-In a simple implementation:
-
--  A module (package module) is stored in a single file.
-
--  Files that correspond to a package module are stored in a single folder.
-
--  A folder can store several separate modules (one source file to contain a
-   separate module or a package module).
-
--  A folder that stores a single package must not contain separate module
-   files or package modules from other packages.
-
-.. index::
-   compilation unit
-   host system
-   module
-   package
-   file system
-   implementation
-   package module
-   file
-   folder
-   source file
-   separate module
 
 |
 
@@ -341,7 +301,7 @@ The import binding ``qualifiedName`` has two cases as follows:
 The import binding ``ident`` binds an exported entity with the name ``ident``
 to the declaration scope of the current module. The name ``ident`` can only
 correspond to several entities, where ``ident`` denotes several overloaded
-functions (see :ref:`Function and Method Overloading`).
+functions (see :ref:`Function, Method and Constructor Overloading`).
 
 The import binding ``ident as A`` binds an exported entity (entities) with the
 name *A* to the declaration scope of the current module.
@@ -1015,7 +975,7 @@ Namespace Declarations
 **********************
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 A *namespace declaration* introduces the qualified name to be used as a
 qualifier for access to each exported entity of a namespace. Appropriate
@@ -1492,22 +1452,23 @@ Program Entry Point
 .. meta:
     frontend_status: Done
 
-Separate modules can act as programs (applications). The two kinds of program
-(application) entry points are as follows:
+Separate modules or packages can act as programs (applications). The two kinds
+of program (application) entry points are as follows:
 
-- Top-level statements (see :ref:`Top-Level Statements`);
-- Top-level ``main`` function (see below).
+- Top-level statements  for separate modules (see :ref:`Top-Level Statements`);
+- Top-level entry point function (see below).
 
 Thus, a separate module can have the following:
 
-- Sole top-level ``main`` function (that is the entry point);
+- Sole top-level entry point function (``main`` or other as described above);
 - Sole top-level statements (the first statement in the top-level statements
   is the entry point);
-- Both top-level statements and ``main`` function (same as above, plus ``main``
-  is called after the top-level statements execution is completed).
+- Both top-level statements and entry point function (same as above, plus such
+  function is called after the top-level statements execution is completed).
 
-A top-level ``main`` function must have either no parameters, or one
-parameter of string type ``[]`` that provides access to the arguments of
+A top-level entry point function is to be called ``main`` or it is any other
+exported function. In any case such function must have either no parameters, or
+one parameter of type ``string[]`` that provides access to the arguments of
 program command-line. Its return type is either ``void`` (see :ref:`Type void`)
 or ``int``. No overloading is allowed for an entry point function.
 
@@ -1559,6 +1520,13 @@ below:
     // Option 4: top-level statement is the entry point
     console.log ("Hello, world!")
 
+    // Option 5: top-level exported function
+    export function entry() {}
+
+    // Option 5: top-level exported function with command-line arguments
+    export function entry(cmdLine: string[]) {}
+
+
 |
 
 .. _Program Exit:
@@ -1569,17 +1537,13 @@ Program Exit
 .. meta:
     frontend_status: Done
 
-Separate modules can act as programs (applications). Thus, a separate module
-can have the following:
-
-- Only a top-level ``main`` function;
-- Only top-level statements;
-- Both top-level statements and ``main`` function.
+Separate modules and packages can act as programs (applications) and their entry
+point is described above (see :ref:`Program Entry Point`).
 
 A program exit takes place when:
 
-- All top-level statements and statements of the ``main`` function body, if any,
-  complete normally.
+- All top-level statements (for separate modules) and statements of the entry
+  point function body, if any, complete normally.
 - An unhandled error or exception (see :ref:`Error Handling`, :ref:`Exceptions`)
   occurs during the program execution.
 

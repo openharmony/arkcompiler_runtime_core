@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -18,7 +18,7 @@ Statements
 .. meta:
     frontend_status: Done
 
-Statements are designed to control the execution:
+Statements are designed to control execution:
 
 .. code-block:: abnf
 
@@ -47,7 +47,7 @@ Normal and Abrupt Statement Execution
     frontend_status: Done
 
 The actions that every statement performs in a normal mode of execution are
-specific for the particular kind of statement. The normal modes of
+specific for the particular kind of statement. Normal modes of
 evaluation for each kind of statement are described in the following
 sections.
 
@@ -111,7 +111,7 @@ forms a *block*:
         ;
 
 The execution of a block means that all block statements, except type
-declarations, are executed one by one in the textual order of their
+declarations, are executed one after another in the textual order of their
 appearance within the block until exception (see :ref:`Exceptions`), error
 (see :ref:`Errors`), or return (see :ref:`Return Statements`) occurs.
 
@@ -144,7 +144,7 @@ Local Declarations
 .. meta:
     frontend_status: Done
 
-Local declarations define new mutable or immutable variables or types within
+*Local declarations* define new mutable or immutable variables or types within
 the enclosing context.
 
 ``Let`` and ``const`` declarations have the initialization part that presumes
@@ -206,7 +206,7 @@ certain conditions:
         statement
         ;
 
-Type of expression must be ``boolean``, or ``Boolean`` or type mentioned in
+Type of expression must be ``boolean``, ``Boolean``, or a type mentioned in
 :ref:`Extended Conditional Expressions`. Otherwise, a
 :index:`compile-time error` occurs.
 
@@ -244,8 +244,8 @@ A list of statements in braces (see :ref:`Block`) is used to combine the
 
 .. _Loop Statements:
 
-``loop`` Statements
-*******************
+Loop Statements
+***************
 
 .. meta:
     frontend_status: Done
@@ -305,7 +305,7 @@ the statement:
         : 'do' statement 'while' '(' expression ')'
         ;
 
-Type of expression must be ``boolean``, or ``Boolean`` or type mentioned in
+Type of expression must be ``boolean``, ``Boolean``, or a type mentioned in
 :ref:`Extended Conditional Expressions`.
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -346,7 +346,7 @@ Otherwise, a :index:`compile-time error` occurs.
         expressionSequence
         ;
 
-Type of forContinue expression must be ``boolean``, or ``Boolean`` or type
+Type of *forContinue* expression must be ``boolean``, ``Boolean``, or a type
 mentioned in :ref:`Extended Conditional Expressions`. Otherwise, a
 :index:`compile-time error` occurs.
 
@@ -398,13 +398,13 @@ of *iterable* class or interface (see :ref:`Iterable Types`):
         ;
 
 A :index:`compile-time error` occurs if the type of an expression is not
-``array``, ``string``, or iterable type.
+``array``, ``string``, or an iterable type.
 
 The execution of a ``for-of`` loop starts from the evaluation of ``expression``.
 If the evaluation is successful, then the resultant expression is used for
 loop iterations (execution of the ``statement``). On each iteration,
-``forVariable`` is set to successive elements of the ``array``, ``string``, or
-result of class iterator advancing.
+*forVariable* is set to successive elements of the ``array``, ``string``, or
+the result of class iterator advancing.
 
 .. index::
    for-of statement
@@ -421,12 +421,12 @@ result of class iterator advancing.
    loop iterations
    statement
 
-If ``forVariable`` has the modifiers ``let`` or ``const``, then a new variable
+If *forVariable* has the modifiers ``let`` or ``const``, then a new variable
 is used inside the loop. Otherwise, the variable is as declared above.
-The modifier ``const`` prohibits assignments into ``forVariable``,
+The modifier ``const`` prohibits assignments into *forVariable*,
 while ``let`` allows modifications.
 
-Explicit type annotation of ``forVariable`` is allowed as an experimental
+Explicit type annotation of *forVariable* is allowed as an experimental
 feature (see :ref:`For-of Type Annotation`).
 
 .. index::
@@ -491,9 +491,8 @@ or *switchStatement*:
 
 A ``break`` statement with the label *identifier* transfers control out of the
 enclosing statement with the same label *identifier*. If there is no enclosing
-loop statement with the same label identifier
-(within the body of the surrounding function or method),
-then a :index:`compile-time error` occurs.
+loop statement with the same label identifier (within the body of the
+surrounding function or method), then a :index:`compile-time error` occurs.
 
 A statement without a label transfers control out of the innermost enclosing
 ``switch``, ``while``, ``do``, ``for``, or ``for-of`` statement. If
@@ -783,7 +782,7 @@ determines the equality.
 A ``throw`` statement causes *exception* or *error* to be thrown (see
 :ref:`Error Handling`). It immediately transfers control, and can exit multiple
 statements, constructors, functions, and method calls until a ``try`` statement
-(see :ref:`Try Statements`) is found that catches the thrown value. If no
+(see :ref:`Try Statements`) is found that catches the value thrown. If no
 ``try`` statement is found, then ``UncaughtExceptionError`` is thrown.
 
 .. code-block:: abnf
@@ -795,7 +794,7 @@ statements, constructors, functions, and method calls until a ``try`` statement
 The expression type must be assignable (see :ref:`Assignment`) to type
 ``Exception`` or ``Error``. Otherwise, a :index:`compile-time error` occurs.
 
-This implies that the thrown object is never ``null``.
+This implies that the object thrown is never ``null``.
 
 It is necessary to check at compile time that a ``throw`` statement, which
 throws an exception, is placed in the ``try`` block of a ``try`` statement,
@@ -917,8 +916,8 @@ The type of *catch identifier* inside the block is ``Error | Exception``
    catch identifier
    Object
 
-See :ref:`Multiple Catch Clauses in Try Statements` for the details of
-*typed catch clause*.
+The details of *typed catch clause* are discussed in
+:ref:`Multiple Catch Clauses in Try Statements`.
 
 .. index::
    typed catch clause

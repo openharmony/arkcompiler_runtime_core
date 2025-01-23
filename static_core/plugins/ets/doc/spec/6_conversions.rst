@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -432,7 +432,8 @@ conversions cast an operand in a cast expression to an explicitly specified
 - :ref:`Numeric Casting Conversions`;
 - :ref:`Class or Interface Casting Conversions`;
 - :ref:`Casting Conversions from Type Parameter`;
-- :ref:`Casting Conversions from Union`.
+- :ref:`Casting Conversions from Union`;
+- :ref:`Casting Conversions to Enumeration`.
 
 If there is no applicable conversion, then a :index:`compile-time error`
 occurs.
@@ -707,6 +708,84 @@ with the target type:
    expression
    runtime error
    union
+
+|
+
+.. _Casting Conversions to Enumeration:
+
+Casting Conversions to Enumeration
+==================================
+
+.. meta:
+    frontend_status: None
+
+A value of expression of numeric type is converted to *enumeration* type if:
+
+-  Value can be converetd into type ``int``;
+-  Value is equal to the value of one of the enumeration type constants.
+
+A value of expression of ``string`` or ``string literal`` type is converted to
+*enumeration* type if:
+
+-  Value can be converetd into type ``string``;
+-  Value is equal to the value of one of the enumeration type constants.
+
+
+If expression is a constant then rules for
+:ref:`Constant to Enumeration Conversions` are applied.
+
+If the expression value can be evalauted at compile-time then the checks stated
+above are performed during compilation raising a :index:`compile-time error` if
+they fail. Otherwise the checks are performed during program execution leading
+to runtime errors if checks are not satisfied.
+
+
+.. code-block:: typescript
+   :linenos:
+
+    enum IntegerEnum {a, b, c}
+
+    let e: IntegerEnum = 1 // ok, e is set to IntegerEnum.b, constant to enumeration
+
+    e = (1 + 1 + 1) as IntegerEnum /* compile-time error, there is no constant
+                                      with this value */
+
+    let x = 1
+    e = x as IntegerEnum /* OK, as compiler can guarantee that enum
+                            consistency is not violated */
+
+    e = foo() as IntegerEnum // runtime check is required
+
+    function foo() {
+       if (some_condition)
+          return 1 // Valid enum constant value
+       else 
+          return 666 // Invalid enum constant value - will cause runtime error
+    }
+
+
+    enum StringEnum {a = "AA", b = "BBB", c = "C"}
+
+    let s: StringEnum = "BBB" // ok, e is set to StringEnum.b, constant to enumeration
+
+    s = ("1" + "1" + "1") as StringEnum /* compile-time error, there is no constant
+                                      with this value */
+
+    let y = "C"
+    s = y as StringEnum /* OK, as compiler can guarantee that enum
+                            consistency is not violated */
+
+    s = bar() as StringEnum // runtime check is required
+
+    function bar() {
+       if (some_condition)
+          return "AA" // Valid enum constant value
+       else 
+          return "666" // Invalid enum constant value - will cause runtime error
+    }
+
+
+
 
 |
 
@@ -1130,7 +1209,7 @@ runtime checks to ensure type-safety as show below:
     function foo (da: Derived[]) {
       let ba: Base[] = da // Derived[] is assigned into Base[]
       ba[0] = new AnotherDerived() /* This assignment of array element will
-         cause *ArrayStoreError* during program execution */
+         cause ``ArrayStoreError`` during program execution */
     }
 
 .. index::
@@ -1395,7 +1474,7 @@ Constant to Enumeration Conversions
 A constant value of some integer type is converted to *enumeration* type if:
 
 -  Enumeration constants are of type ``int``;
--  Value is equal to the value of an enumeration constant.
+-  Value is equal to the value of one of the enumeration type constants.
 
 This conversion never causes runtime errors.
 
@@ -1409,8 +1488,6 @@ This conversion never causes runtime errors.
     const one = 2
     e = one // ok, e is set to IntegerEnum.c
 
-    let x = 1
-    e = x // compile-time error, only constant conversions are allowed
 
 |
 

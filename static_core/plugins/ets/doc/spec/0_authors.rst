@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -23,15 +23,19 @@ Contributors:
 
 - Bronnikov Georgy
 - Gavrin Evgeny
+- Huo Qingyi
 - Kanatov Alexey
 - Nedoria Aleksei
 - Pavlyuk Alexander
+- Pei Jiajun
 - Polyakov Alexander
+- Qiu Yu
 - Rubanov Vladimir
 - Soldatov Anton
 - Solomennikov Dmitry
 - Trubenkov Dmitrii
 - Velikanov Michael
+- Xian Yuqiang
 - Zouev Evgeniy
 
 Authors of the language specification:

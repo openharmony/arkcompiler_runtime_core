@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -17,7 +17,7 @@ Ambient Declarations
 
 .. meta:
     frontend_status: Done
-    
+
 Ambient declarations are the way to specify entities that are declared
 somewhere else. Ambient declarations do not introduce new entities---as regular
 declarations do---but instead provide type information for the entities that
@@ -46,7 +46,7 @@ Ambient functions, methods, and constructors have no bodies.
 
     ambientDeclaration:
         'declare'
-        ( ambientConstantDeclaration 
+        ( ambientConstantDeclaration
         | ambientFunctionDeclaration
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
@@ -86,7 +86,7 @@ Ambient Constant Declarations
 
 .. meta:
     frontend_status: Done
-    
+
 .. code-block:: abnf
 
     ambientConstantDeclaration:
@@ -98,7 +98,7 @@ Ambient Constant Declarations
         ;
 
     ambientConst:
-        identifier ((':' type) | ('=' (IntegerLiteral|FloatLiteral|StringLiteral )))
+        identifier ((':' type) | ('=' (IntegerLiteral|FloatLiteral|StringLiteral|MultilineStringLiteral)))
         ;
 
 The initializer expression for an ambient constant must be a numeric or string
@@ -121,33 +121,22 @@ Ambient Function Declarations
 
 .. meta:
     frontend_status: Done
-    
+
 .. code-block:: abnf
 
     ambientFunctionDeclaration:
-        ambientFunctionOverloadSignature*
         'function' identifier
         typeParameters? signature
         ;
 
-    ambientFunctionOverloadSignature:
-        'declare'? 'function' identifier
-          typeParameters? signature ';'
-        ;        
-
-A :index:`compile-time error` occurs if:
-
--  Explicit return type is not specified for an ambient function declaration;
--  Not all overload signatures are marked as ambient in top-level ambient
-   overload signatures.
+A :index:`compile-time error` occurs if
+explicit return type is not specified for an ambient function declaration.
 
 .. index::
    ambient function declaration
    compile-time error
    type annotation
    return type
-   overload signature
-   top-level ambient overload signature
 
 .. code-block:: typescript
    :linenos:
@@ -185,7 +174,7 @@ Ambient Class Declarations
 
 .. meta:
     frontend_status: Done
-    
+
 .. code-block:: abnf
 
     ambientClassDeclaration:
@@ -196,7 +185,7 @@ Ambient Class Declarations
 
     ambientClassBodyDeclaration:
         ambientAccessModifier?
-        ( ambientFieldDeclaration 
+        ( ambientFieldDeclaration
         | ambientConstructorDeclaration
         | ambientMethodDeclaration
         | ambientAccessorDeclaration
@@ -205,7 +194,7 @@ Ambient Class Declarations
         | ambientIterableDeclaration
         )
         ;
-    
+
     ambientAccessModifier:
         'public' | 'protected'
         ;
@@ -224,7 +213,7 @@ Ambient field declarations have no initializers:
 
     ambientFieldModifier:
         'static' | 'readonly'
-        ;       
+        ;
 
 Ambient constructor, method, and accessor declarations have no bodies:
 
@@ -235,24 +224,19 @@ Ambient constructor, method, and accessor declarations have no bodies:
         ;
 
     ambientMethodDeclaration:
-        ambientMethodOverloadSignature*
         ambientMethodModifier* identifier signature
         ;
 
-    ambientMethodOverloadSignature:
-        ambientMethodModifier* identifier signature ';'
-        ;
-        
     ambientMethodModifier:
         'static'
-        ;       
+        ;
 
     ambientAccessorDeclaration:
         ambientMethodModifier*
-        ( 'get' identifier '(' ')' returnType 
+        ( 'get' identifier '(' ')' returnType
         | 'set' identifier '(' parameter ')'
         )
-        ;       
+        ;
 
 .. index::
    constructor
@@ -268,7 +252,7 @@ Ambient Indexer
 
 .. meta:
     frontend_status: Done
-       
+
 Ambient indexer declarations specify the indexing of a class instance
 in an ambient context. This feature is provided for |TS| compatibility:
 
@@ -314,7 +298,7 @@ Ambient Call Signature
 
 .. meta:
     frontend_status: Done
-       
+
 Ambient call signature declarations used to specify *callable types*
 in an ambient context. This feature is provided for |TS| compatibility:
 
@@ -351,7 +335,7 @@ Ambient Iterable
 
 .. meta:
     frontend_status: Done
-       
+
 An ambient iterable declaration indicates that a class instance is iterable.
 This feature is provided for |TS| compatibility, and can be used in ambient
 contexts only:
@@ -394,12 +378,12 @@ Ambient Interface Declarations
 
 .. meta:
     frontend_status: Done
-    
+
 .. code-block:: abnf
 
     ambientInterfaceDeclaration:
         'interface' identifier typeParameters?
-        interfaceExtendsClause? 
+        interfaceExtendsClause?
         '{' ambientInterfaceMember* '}'
         ;
 
@@ -444,7 +428,7 @@ them to specify the platform API or a third-party library API.
     ;
 
     ambientNamespaceElementDeclaration:
-        'export'? 
+        'export'?
         ( ambientConstantDeclaration
         | ambientFunctionDeclaration
         | ambientClassDeclaration
@@ -491,8 +475,11 @@ accessed by using qualified names.
 Implementing Ambient Namespace Declaration
 ==========================================
 
+.. meta:
+    frontend_status: Done
+
 In case an *ambient namespace* is implemented in |LANG|, a namespace with the
-same name must be declared (see :ref:`Namespace Declarations`) as the 
+same name must be declared (see :ref:`Namespace Declarations`) as the
 top-level declaration of a compilation unit. If a namespace is embedded into
 another namespace, then all namespace names must be same as in ambient context.
 
