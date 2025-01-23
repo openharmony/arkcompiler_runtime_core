@@ -193,25 +193,36 @@ static std::vector<napi_value> GetArgs(napi_env env, napi_callback_info info)
     return argv;
 }
 
-static void RegisterEventLoopModule()
+static void RegisterEventLoopModule(EtsCoroutine *coro)
 {
-    auto coro = EtsCoroutine::GetCurrent();
     ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
     coro->GetPandaVM()->CreateCallbackPosterFactory<EventLoopCallbackPosterFactoryImpl>();
     coro->GetPandaVM()->SetRunEventLoopFunction([](Coroutine *target) { EventLoop::RunEventLoop(target); });
 }
 
-static bool InitInteropContext(napi_env env)
+[[nodiscard]] static bool InitInteropContext(napi_env env)
 {
-    auto coro = EtsCoroutine::GetCurrent();
+    if (!RegisterTimerModule(env)) {
+        return false;
+    }
+    auto *coro = EtsCoroutine::GetCurrent();
+    RegisterEventLoopModule(coro);
     ScopedManagedCodeThread scoped(coro);
     napi_add_env_cleanup_hook(
-        env, [](void *) { DestroyRuntime(); }, nullptr);
+        env,
+        [](void *) {
+            XGC::Destroy();
+            DestroyRuntime();
+        },
+        nullptr);
     InteropCtx::Init(coro, env);
+    if (!XGC::Create(coro)) {
+        return false;
+    }
     auto mainPoster = coro->GetPandaVM()->CreateCallbackPoster(coro);
     ASSERT(mainPoster != nullptr);
     coro->GetWorker()->SetCallbackPoster(std::move(mainPoster));
-    return XGC::Create();
+    return true;
 }
 
 static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
@@ -257,8 +268,6 @@ static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
     napi_get_value_bool(env, argv[3U], &useAot);
 
     bool res = ark::ets::CreateRuntime(stdlibPath, indexPath, useJit, useAot);
-    res &= RegisterTimerModule(env);
-    RegisterEventLoopModule();
     if (res) {
         res = InitInteropContext(env);
     }
@@ -370,8 +379,6 @@ static napi_value CreateRuntime(napi_env env, napi_callback_info info)
     };
 
     bool res = ets::CreateRuntime(addOpts);
-    res &= RegisterTimerModule(env);
-    RegisterEventLoopModule();
     if (res) {
         res = InitInteropContext(env);
     }

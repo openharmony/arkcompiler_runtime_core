@@ -15,6 +15,7 @@
 
 #include "intrinsics.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
+#include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "interop_js/call/call.h"
 
@@ -167,7 +168,9 @@ uint8_t JSRuntimeStrictEqualIntrinsic(JSValue *lhs, JSValue *rhs)
 
 void JSRuntimeXgcStartIntrinsic()
 {
-    XgcStart();
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    XGC::GetInstance()->Trigger(coro->GetPandaVM()->GetGC());
 }
 
 EtsString *JSValueToStringIntrinsic(JSValue *object)
