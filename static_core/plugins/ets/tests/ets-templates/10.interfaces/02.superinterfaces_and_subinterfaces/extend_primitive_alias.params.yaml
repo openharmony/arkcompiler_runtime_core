@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,17 +11,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- 
-# List of identifiers
-identifiers:
-  - debug
-  - test
-  - main1
-  - x
-  - y
-  - z
-  - $
-  - $name
-  - _x
-  - _
-  - \u0424\u0430\u0439\u043b
+---
+
+# List of types
+types:
+    - {type: byte}
+    - {type: short}
+    - {type: int}
+    - {type: long}
+    - {type: float}
+    - {type: double}
+    - {type: char}
+    - {type: boolean}
+    - {type: ColorEnum}
+    - {type: Boolean | String }
+    - {type: FuncOp }

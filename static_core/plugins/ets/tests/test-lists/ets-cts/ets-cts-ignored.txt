@@ -1861,3 +1861,15 @@
 
 # 21846 Annotation name coinciding with type name gets compiled but shouldn't
 18.annotations/01.declaring_annotations/declaration_coincide_name_n_1.sts
+
+# 21929 - should fail, but compiles
+09.classes/06.method_declarations/03.abstract_methods/instance_method_overridden_by_abstract.sts
+
+#22005
+10.interfaces/02.superinterfaces_and_subinterfaces/extend_primitive_alias_10.sts
+
+# 17313
+10.interfaces/01.interface_declarations/empty_interface_declaration_negative_8.sts
+10.interfaces/01.interface_declarations/empty_interface_declaration_negative_9.sts
+10.interfaces/01.interface_declarations/empty_interface_declaration_negative_10.sts
+10.interfaces/01.interface_declarations/empty_interface_declaration_negative_11.sts
