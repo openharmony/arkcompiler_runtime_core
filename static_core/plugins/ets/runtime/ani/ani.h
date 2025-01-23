@@ -29,7 +29,10 @@
 
 #define ANI_VERSION_1 1
 
-typedef uint32_t ani_size;
+#define ANI_TRUE 1
+#define ANI_FALSE 0
+
+typedef size_t ani_size;
 
 // Primitive types:
 typedef uint8_t ani_boolean;
@@ -198,6 +201,9 @@ typedef enum {
     ANI_INVALID_ARGS,
     ANI_PENDING_ERROR,
     ANI_NOT_FOUND,
+    ANI_OUT_OF_MEMORY,
+    ANI_OUT_OF_RANGE,
+    ANI_BUFFER_TO_SMALL,
     // NOTE: Add necessary status codes
 } ani_status;
 

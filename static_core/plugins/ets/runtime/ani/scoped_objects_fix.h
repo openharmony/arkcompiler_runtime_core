@@ -37,6 +37,10 @@ public:
     {
         return env_;
     }
+    EtsArray *ToInternalType(ani_fixedarray array)
+    {
+        return reinterpret_cast<EtsArray *>(GetInternalType(env_, array));
+    }
 
     EtsObject *ToInternalType(ani_ref ref)
     {
@@ -56,6 +60,18 @@ public:
     EtsClass *ToInternalType(ani_class cls)
     {
         ASSERT(cls != nullptr);
+        return reinterpret_cast<EtsClass *>(GetInternalType(env_, cls));
+    }
+
+    EtsString *ToInternalType(ani_string str)
+    {
+        ASSERT(str != nullptr);
+        return reinterpret_cast<EtsString *>(GetInternalType(env_, str));
+    }
+
+    EtsClass *ToInternalType(ani_type cls)
+    {
+        ASSERT(cls != nullptr);
         return reinterpret_cast<EtsClass *>(GetInternalType(env_, static_cast<ani_object>(cls)));
     }
 
@@ -69,6 +85,18 @@ public:
         ASSERT_MANAGED_CODE();
         EtsReference *ref = GetEtsReferenceStorage(env)->NewEtsRef(obj, EtsReference::EtsObjectType::LOCAL);
         return EtsRefToAniRef(ref);
+    }
+
+    ani_gref AddGlobalRef(EtsObject *obj)
+    {
+        ASSERT_MANAGED_CODE();
+        EtsReference *ref = GetEtsReferenceStorage()->NewEtsRef(obj, EtsReference::EtsObjectType::GLOBAL);
+        return EtsRefToAniGlobalRef(ref);
+    }
+
+    static inline ani_gref EtsRefToAniGlobalRef(EtsReference *ref)
+    {
+        return reinterpret_cast<ani_gref>(ref);
     }
 
     void DelLocalRef(ani_object obj)

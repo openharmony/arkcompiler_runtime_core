@@ -76,6 +76,14 @@ static void CheckStaticMethodReturnType(ani_static_method method, EtsType type)
     }
 }
 
+static void CheckMethodReturnType(ani_method method, EtsType type)
+{
+    EtsMethod *m = ToInternalMethod(method);
+    if (UNLIKELY(m->GetReturnValueType() != type)) {
+        LOG(FATAL, ANI) << "Return type mismatch";
+    }
+}
+
 static ClassLinkerContext *GetClassLinkerContext(EtsCoroutine *coroutine)
 {
     auto stack = StackWalker::Create(coroutine);
@@ -295,6 +303,222 @@ NO_UB_SANITIZE static ani_status FindClass(ani_env *env, const char *classDescri
     return ANI_OK;
 }
 
+static ani_status PinPrimitiveTypeArray(ani_env *env, ani_fixedarray primitiveArray, void **result)
+{
+    ASSERT(primitiveArray != nullptr);
+    auto pandaEnv = PandaEnv::FromAniEnv(env);
+    ScopedManagedCodeFix s(pandaEnv);
+
+    auto vm = pandaEnv->GetEtsVM();
+    if (!vm->GetGC()->IsPinningSupported()) {
+        LOG(WARNING, ANI) << "Pinning is not supported with " << mem::GCStringFromType(vm->GetGC()->GetType());
+        return ANI_ERROR;
+    }
+
+    auto coreArray = s.ToInternalType(primitiveArray)->GetCoreType();
+    vm->GetHeapManager()->PinObject(coreArray);
+
+    *result = coreArray->GetData();
+    return ANI_OK;
+}
+
+static ani_status UnpinPrimitiveTypeArray(ani_env *env, ani_fixedarray primitiveArray)
+{
+    ASSERT(primitiveArray != nullptr);
+
+    auto pandaEnv = PandaEtsNapiEnv::FromAniEnv(env);
+    ScopedManagedCodeFix s(pandaEnv);
+
+    auto coreArray = s.ToInternalType(primitiveArray)->GetCoreType();
+    auto vm = pandaEnv->GetEtsVM();
+    vm->GetHeapManager()->UnpinObject(coreArray);
+    return ANI_OK;
+}
+
+template <typename AniType, typename InternalType>
+static AniType NewPrimitiveTypeArray(ani_env *env, ani_size length)
+{
+    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    // EtsArray
+    auto *array = InternalType::Create(length);
+    if (UNLIKELY(array == nullptr)) {
+        return nullptr;
+    }
+    ani_ref ret = s.AddLocalRef(reinterpret_cast<EtsObject *>(array));
+    return reinterpret_cast<AniType>(ret);
+}
+
+template <typename T>
+static ani_status GetPrimitiveTypeArrayRegion(ani_env *env, ani_fixedarray_byte array, ani_size start, ani_size len,
+                                              T *buf)
+{
+    ASSERT(array != nullptr);
+    ANI_CHECK_RETURN_IF_EQ(len != 0 && buf == nullptr, true, ANI_INVALID_ARGS);
+
+    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    EtsArray *internalArray = s.ToInternalType(array);
+    auto length = internalArray->GetLength();
+    if (UNLIKELY(start > length || len > (length - start))) {
+        return ANI_OUT_OF_RANGE;
+    }
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    auto res = memcpy_s(buf, len * sizeof(T), internalArray->GetData<T>() + start, len * sizeof(T));
+    if (res != 0) {
+        UNREACHABLE();
+    }
+    return ANI_OK;
+}
+
+template <typename T>
+static ani_status SetPrimitiveTypeArrayRegion(ani_env *env, ani_fixedarray_byte array, ani_size start, ani_size len,
+                                              T *buf)
+{
+    ASSERT(array != nullptr);
+    ANI_CHECK_RETURN_IF_EQ(len != 0 && buf == nullptr, true, ANI_INVALID_ARGS);
+    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    EtsArray *internalArray = s.ToInternalType(array);
+    auto length = internalArray->GetLength();
+    if (UNLIKELY(start > length || len > (length - start))) {
+        return ANI_OUT_OF_RANGE;
+    }
+    auto data = internalArray->GetData<std::remove_const_t<T>>();
+    auto dataLen = len * sizeof(T);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    auto res = memcpy_s(data + start, dataLen, buf, dataLen);
+    if (res != 0) {
+        UNREACHABLE();
+    }
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status FixedArray_Pin(ani_env *env, ani_fixedarray primitive_array, void **result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(primitive_array);
+    CHECK_PTR_ARG(result);
+
+    return PinPrimitiveTypeArray(env, primitive_array, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status FixedArray_Unpin(ani_env *env, ani_fixedarray primitive_array,
+                                                  [[maybe_unused]] void *data)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(primitive_array);
+
+    return UnpinPrimitiveTypeArray(env, primitive_array);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status FixedArray_New_Byte(ani_env *env, ani_size length, ani_fixedarray_byte *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(result);
+    *result = NewPrimitiveTypeArray<ani_fixedarray_byte, EtsByteArray>(env, length);
+    ANI_CHECK_RETURN_IF_EQ(*result, nullptr, ANI_OUT_OF_MEMORY);
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Byte(ani_env *env, ani_fixedarray_byte array, ani_size offset,
+                                                           ani_size length, const ani_byte *nativeBuffer)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(array);
+    CHECK_PTR_ARG(nativeBuffer);
+    return SetPrimitiveTypeArrayRegion(env, array, offset, length, nativeBuffer);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Byte(ani_env *env, ani_fixedarray_byte array, ani_size offset,
+                                                           ani_size length, ani_byte *nativeBuffer)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(array);
+    CHECK_PTR_ARG(nativeBuffer);
+    return GetPrimitiveTypeArrayRegion(env, array, offset, length, nativeBuffer);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_BindNativeMethods(ani_env *env, ani_class cls,
+                                                         const ani_native_function *methods, ani_size nrMethods)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(methods);
+    if (nrMethods == 0) {
+        return ANI_OK;
+    }
+    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    EtsClass *klass = s.ToInternalType(cls);
+
+    PandaVector<EtsMethod *> etsMethods;
+    etsMethods.reserve(nrMethods);
+    for (ani_size i = 0; i < nrMethods; ++i) {
+        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        const char *signature = methods[i].signature;
+        EtsMethod *method =
+            (signature == nullptr ? klass->GetMethod(methods[i].name) : klass->GetMethod(methods[i].name, signature));
+        // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+        if (method == nullptr || !method->IsNative()) {
+            return ANI_NOT_FOUND;
+        }
+        etsMethods.push_back(method);
+    }
+    for (ani_size i = 0; i < nrMethods; ++i) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        etsMethods[i]->RegisterNativeImpl(const_cast<void *>(methods[i].pointer));
+    }
+    return ANI_OK;
+}
+
+template <bool IS_STATIC_METHOD>
+static ani_status DoGetMethod(ani_env *env, ani_class cls, const char *name, const char *signature, EtsMethod **result)
+{
+    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    EtsClass *klass = GetInternalClass(&s, cls);
+    if (UNLIKELY(klass == nullptr)) {
+        if (s.GetCoroutine()->HasPendingException()) {
+            return ANI_PENDING_ERROR;
+        }
+        return ANI_ERROR;
+    }
+    EtsMethod *method = (signature == nullptr ? klass->GetMethod(name) : klass->GetMethod(name, signature));
+    if (method == nullptr || method->IsStatic() != IS_STATIC_METHOD) {
+        return ANI_NOT_FOUND;
+    }
+    *result = method;
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetMethod(ani_env *env, ani_class cls, const char *name, const char *signature,
+                                                 ani_method *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    EtsMethod *method = nullptr;
+    ani_status status = DoGetMethod<false>(env, cls, name, signature, &method);
+    if (UNLIKELY(status != ANI_OK)) {
+        return status;
+    }
+    *result = ToAniMethod(method);
+    return ANI_OK;
+}
+
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_GetStaticMethod(ani_env *env, ani_class cls, const char *name,
                                                        const char *signature, ani_static_method *result)
@@ -305,14 +529,10 @@ NO_UB_SANITIZE static ani_status Class_GetStaticMethod(ani_env *env, ani_class c
     CHECK_PTR_ARG(name);
     CHECK_PTR_ARG(result);
 
-    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
-    EtsClass *klass = GetInternalClass(&s, cls);
-    if (UNLIKELY(klass == nullptr)) {
-        return ANI_ERROR;
-    }
-    EtsMethod *method = (signature == nullptr ? klass->GetMethod(name) : klass->GetMethod(name, signature));
-    if (method == nullptr || !method->IsStatic()) {
-        return ANI_NOT_FOUND;
+    EtsMethod *method = nullptr;
+    ani_status status = DoGetMethod<true>(env, cls, name, signature, &method);
+    if (UNLIKELY(status != ANI_OK)) {
+        return status;
     }
     *result = ToAniStaticMethod(method);
     return ANI_OK;
@@ -358,6 +578,387 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Int_A(ani_env *env, ani_
 
     CheckStaticMethodReturnType(method, EtsType::INT);
     return GeneralMethodCall<EtsInt>(env, nullptr, method, result, args);
+}
+
+NO_UB_SANITIZE static ani_status ExistUnhandledError(ani_env *env, ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_PTR_ARG(result);
+
+    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
+    *result = pandaEnv->HasPendingException() ? ANI_TRUE : ANI_FALSE;
+    return ANI_OK;
+}
+
+NO_UB_SANITIZE static ani_status ResetError(ani_env *env)
+{
+    ANI_DEBUG_TRACE(env);
+    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
+    ScopedManagedCodeFix s(pandaEnv);
+    pandaEnv->ClearException();
+    return ANI_OK;
+}
+
+NO_UB_SANITIZE static ani_status DescribeError(ani_env *env)
+{
+    ANI_DEBUG_TRACE(env);
+
+    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
+    if (!pandaEnv->HasPendingException()) {
+        return ANI_OK;
+    }
+
+    // NOTE: Implement when #21687 will be solved, #22008
+    std::cerr << "DescribeError: method is not implemented" << std::endl;
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_InstanceOf(ani_env *env, ani_object object, ani_type type, ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_PTR_ARG(type);
+    CHECK_PTR_ARG(object);
+
+    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    EtsClass *internalClass = s.ToInternalType(type);
+    EtsObject *internalObject = s.ToInternalType(object);
+
+    // NOTE: Update implementation when all types will be supported. #22003
+    *result = internalObject->IsInstanceOf(internalClass) ? ANI_TRUE : ANI_FALSE;
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Ref_V(ani_env *env, ani_class cls, ani_static_method method,
+                                                              ani_ref *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+
+    CheckStaticMethodReturnType(method, EtsType::OBJECT);
+    return GeneralMethodCall<ani_ref>(env, nullptr, method, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Ref(ani_env *env, ani_class cls, ani_static_method method,
+                                                            ani_ref *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Class_CallStaticMethod_Ref_V(env, cls, method, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Ref_A(ani_env *env, ani_class cls, ani_static_method method,
+                                                              ani_ref *result, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(args);
+
+    CheckStaticMethodReturnType(method, EtsType::OBJECT);
+    return GeneralMethodCall<ani_ref>(env, nullptr, method, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status String_NewUTF8(ani_env *env, const char *utf8_string, ani_size size,
+                                                ani_string *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(utf8_string);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    auto internalString = EtsString::CreateFromUtf8(utf8_string, size);
+    if (UNLIKELY(internalString == nullptr)) {
+        return ANI_OUT_OF_MEMORY;
+    }
+    *result = reinterpret_cast<ani_string>(s.AddLocalRef(reinterpret_cast<EtsObject *>(internalString)));
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status String_GetUTF8Size(ani_env *env, ani_string string, ani_size *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(string);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    auto internalString = s.ToInternalType(string);
+    *result = internalString->GetUtf8Length();
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status String_GetUTF8SubString(ani_env *env, ani_string string, ani_size substr_offset,
+                                                         ani_size substrSize, char *utfBuffer, ani_size utfBufferSize,
+                                                         ani_size *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(string);
+    CHECK_PTR_ARG(utfBuffer);
+    CHECK_PTR_ARG(result);
+
+    if (UNLIKELY(utfBufferSize < substrSize || (utfBufferSize - substrSize) < 1)) {
+        return ANI_BUFFER_TO_SMALL;
+    }
+
+    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    EtsString *internalString = s.ToInternalType(string);
+    auto utf8Length = internalString->GetUtf8Length();
+    if (UNLIKELY(substr_offset > utf8Length || substrSize > (utf8Length - substr_offset))) {
+        return ANI_OUT_OF_RANGE;
+    }
+    ani_size actualCopiedSize = internalString->CopyDataRegionUtf8(utfBuffer, substr_offset, substrSize, substrSize);
+    utfBuffer[actualCopiedSize] = '\0';  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    *result = actualCopiedSize;
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status String_GetUTF16Size(ani_env *env, ani_string string, ani_size *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(string);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    auto internalString = s.ToInternalType(string);
+    *result = internalString->GetUtf16Length();
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean_V(ani_env *env, ani_object object, ani_method method,
+                                                             ani_boolean *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+
+    CheckMethodReturnType(method, EtsType::BOOLEAN);
+    return GeneralMethodCall<EtsBoolean>(env, object, method, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean(ani_env *env, ani_object object, ani_method method,
+                                                           ani_boolean *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status res = Object_CallMethod_Boolean_V(env, object, method, result, args);
+    va_end(args);
+    return res;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean_A(ani_env *env, ani_object object, ani_method method,
+                                                             ani_boolean *result, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(args);
+
+    CheckMethodReturnType(method, EtsType::BOOLEAN);
+    return GeneralMethodCall<EtsBoolean>(env, object, method, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Int_V(ani_env *env, ani_object object, ani_method method,
+                                                         ani_int *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+
+    CheckMethodReturnType(method, EtsType::INT);
+    return GeneralMethodCall<EtsInt>(env, object, method, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Int(ani_env *env, ani_object object, ani_method method,
+                                                       ani_int *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Object_CallMethod_Int_V(env, object, method, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Int_A(ani_env *env, ani_object object, ani_method method,
+                                                         ani_int *result, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+
+    CheckMethodReturnType(method, EtsType::INT);
+    return GeneralMethodCall<EtsInt>(env, object, method, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Long_A(ani_env *env, ani_object object, ani_method method,
+                                                          ani_long *result, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(args);
+
+    CheckMethodReturnType(method, EtsType::LONG);
+    return GeneralMethodCall<EtsLong>(env, object, method, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Long_V(ani_env *env, ani_object object, ani_method method,
+                                                          ani_long *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+    CheckMethodReturnType(method, EtsType::LONG);
+    return GeneralMethodCall<EtsLong>(env, object, method, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Long(ani_env *env, ani_object object, ani_method method,
+                                                        ani_long *result, ...)
+{
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status aniResult = Object_CallMethod_Long_V(env, object, method, result, args);
+    va_end(args);
+    return aniResult;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Double_V(ani_env *env, ani_object object, ani_method method,
+                                                            ani_double *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+
+    CheckMethodReturnType(method, EtsType::DOUBLE);
+    return GeneralMethodCall<EtsDouble>(env, object, method, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Double(ani_env *env, ani_object object, ani_method method,
+                                                          ani_double *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Object_CallMethod_Double_V(env, object, method, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Double_A(ani_env *env, ani_object object, ani_method method,
+                                                            ani_double *result, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(args);
+
+    CheckMethodReturnType(method, EtsType::DOUBLE);
+    return GeneralMethodCall<EtsDouble>(env, object, method, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Void_A(ani_env *env, ani_object object, ani_method method,
+                                                          const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(args);
+
+    CheckMethodReturnType(method, EtsType::VOID);
+    ani_boolean result;
+    // Use any primitive type as template parameter and just ignore the result
+    return GeneralMethodCall<EtsBoolean>(env, object, method, &result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Void_V(ani_env *env, ani_object object, ani_method method,
+                                                          va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(method);
+
+    CheckMethodReturnType(method, EtsType::VOID);
+    ani_boolean result;
+    // Use any primitive type as template parameter and just ignore the result
+    return GeneralMethodCall<EtsBoolean>(env, object, method, &result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Void(ani_env *env, ani_object object, ani_method method, ...)
+{
+    ANI_DEBUG_TRACE(env);
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, method);
+    ani_status status = Object_CallMethod_Void_V(env, object, method, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status GlobalReference_Create(ani_env *env, ani_ref ref,
+                                                        [[maybe_unused]] uint32_t initialRefcount, ani_gref *result)
+{
+    // This is a temporary implementation, it needs to be redone. #22006
+    ANI_DEBUG_TRACE(env);
+    CHECK_PTR_ARG(ref);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    EtsObject *internalObject = s.ToInternalType(ref);
+    *result = s.AddGlobalRef(internalObject);
+    return ANI_OK;
 }
 
 [[noreturn]] static void NotImplementedAPI(int nr)
@@ -406,7 +1007,7 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<23>,
     NotImplementedAdapter<24>,
     NotImplementedAdapter<25>,
-    NotImplementedAdapter<26>,
+    Object_InstanceOf,
     NotImplementedAdapter<27>,
     NotImplementedAdapter<28>,
     NotImplementedAdapter<29>,
@@ -429,7 +1030,7 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<46>,
     NotImplementedAdapter<47>,
     NotImplementedAdapter<48>,
-    NotImplementedAdapter<49>,
+    Class_BindNativeMethods,
     NotImplementedAdapter<50>,
     NotImplementedAdapter<51>,
     NotImplementedAdapter<52>,
@@ -437,10 +1038,10 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<54>,
     NotImplementedAdapter<55>,
     NotImplementedAdapter<56>,
-    NotImplementedAdapter<57>,
+    ExistUnhandledError,
     NotImplementedAdapter<58>,
-    NotImplementedAdapter<59>,
-    NotImplementedAdapter<60>,
+    ResetError,
+    DescribeError,
     NotImplementedAdapter<61>,
     NotImplementedAdapter<62>,
     NotImplementedAdapter<63>,
@@ -450,13 +1051,13 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<67>,
     NotImplementedAdapter<68>,
     NotImplementedAdapter<69>,
-    NotImplementedAdapter<70>,
+    String_GetUTF16Size,
     NotImplementedAdapter<71>,
     NotImplementedAdapter<72>,
-    NotImplementedAdapter<73>,
-    NotImplementedAdapter<74>,
+    String_NewUTF8,
+    String_GetUTF8Size,
     NotImplementedAdapter<75>,
-    NotImplementedAdapter<76>,
+    String_GetUTF8SubString,
     NotImplementedAdapter<77>,
     NotImplementedAdapter<78>,
     NotImplementedAdapter<79>,
@@ -472,7 +1073,7 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<89>,
     NotImplementedAdapter<90>,
     NotImplementedAdapter<91>,
-    NotImplementedAdapter<92>,
+    FixedArray_New_Byte,
     NotImplementedAdapter<93>,
     NotImplementedAdapter<94>,
     NotImplementedAdapter<95>,
@@ -480,7 +1081,7 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<97>,
     NotImplementedAdapter<98>,
     NotImplementedAdapter<99>,
-    NotImplementedAdapter<100>,
+    FixedArray_GetRegion_Byte,
     NotImplementedAdapter<101>,
     NotImplementedAdapter<102>,
     NotImplementedAdapter<103>,
@@ -488,14 +1089,14 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<105>,
     NotImplementedAdapter<106>,
     NotImplementedAdapter<107>,
-    NotImplementedAdapter<108>,
+    FixedArray_SetRegion_Byte,
     NotImplementedAdapter<109>,
     NotImplementedAdapter<110>,
     NotImplementedAdapter<111>,
     NotImplementedAdapter<112>,
     NotImplementedAdapter<113>,
-    NotImplementedAdapter<114>,
-    NotImplementedAdapter<115>,
+    FixedArray_Pin,
+    FixedArray_Unpin,
     NotImplementedAdapter<116>,
     NotImplementedAdapter<117>,
     NotImplementedAdapter<118>,
@@ -558,7 +1159,7 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<175>,
     NotImplementedAdapter<176>,
     NotImplementedAdapter<177>,
-    NotImplementedAdapter<178>,
+    Class_GetMethod,
     Class_GetStaticMethod,
     NotImplementedAdapter<180>,
     NotImplementedAdapter<181>,
@@ -626,9 +1227,9 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapterVargs<243>,
     NotImplementedAdapter<244>,
     NotImplementedAdapter<245>,
-    NotImplementedAdapterVargs<246>,
-    NotImplementedAdapter<247>,
-    NotImplementedAdapter<248>,
+    Class_CallStaticMethod_Ref,
+    Class_CallStaticMethod_Ref_A,
+    Class_CallStaticMethod_Ref_V,
     NotImplementedAdapterVargs<249>,
     NotImplementedAdapter<250>,
     NotImplementedAdapter<251>,
@@ -734,9 +1335,9 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<351>,
     NotImplementedAdapter<352>,
     NotImplementedAdapter<353>,
-    NotImplementedAdapterVargs<354>,
-    NotImplementedAdapter<355>,
-    NotImplementedAdapter<356>,
+    Object_CallMethod_Boolean,
+    Object_CallMethod_Boolean_A,
+    Object_CallMethod_Boolean_V,
     NotImplementedAdapterVargs<357>,
     NotImplementedAdapter<358>,
     NotImplementedAdapter<359>,
@@ -746,24 +1347,24 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapterVargs<363>,
     NotImplementedAdapter<364>,
     NotImplementedAdapter<365>,
-    NotImplementedAdapterVargs<366>,
-    NotImplementedAdapter<367>,
-    NotImplementedAdapter<368>,
-    NotImplementedAdapterVargs<369>,
-    NotImplementedAdapter<370>,
-    NotImplementedAdapter<371>,
+    Object_CallMethod_Int,
+    Object_CallMethod_Int_A,
+    Object_CallMethod_Int_V,
+    Object_CallMethod_Long,
+    Object_CallMethod_Long_A,
+    Object_CallMethod_Long_V,
     NotImplementedAdapterVargs<372>,
     NotImplementedAdapter<373>,
     NotImplementedAdapter<374>,
-    NotImplementedAdapterVargs<375>,
-    NotImplementedAdapter<376>,
-    NotImplementedAdapter<377>,
+    Object_CallMethod_Double,
+    Object_CallMethod_Double_A,
+    Object_CallMethod_Double_V,
     NotImplementedAdapterVargs<378>,
     NotImplementedAdapter<379>,
     NotImplementedAdapter<380>,
-    NotImplementedAdapterVargs<381>,
-    NotImplementedAdapter<382>,
-    NotImplementedAdapter<383>,
+    Object_CallMethod_Void,
+    Object_CallMethod_Void_A,
+    Object_CallMethod_Void_V,
     NotImplementedAdapterVargs<384>,
     NotImplementedAdapter<385>,
     NotImplementedAdapter<386>,
@@ -819,7 +1420,7 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<436>,
     NotImplementedAdapter<437>,
     NotImplementedAdapter<438>,
-    NotImplementedAdapter<439>,
+    GlobalReference_Create,
     NotImplementedAdapter<440>,
     NotImplementedAdapter<441>,
     NotImplementedAdapter<442>,
