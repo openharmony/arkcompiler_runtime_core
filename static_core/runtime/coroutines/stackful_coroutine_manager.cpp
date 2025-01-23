@@ -544,7 +544,8 @@ Coroutine *StackfulCoroutineManager::LaunchImpl(CompletionEvent *completionEvent
     auto affinityMask = CalcAffinityMaskFromLaunchMode(mode);
     co->GetContext<StackfulCoroutineContext>()->SetAffinityMask(affinityMask);
     auto *w = ChooseWorkerForCoroutine(co);
-    w->AddRunnableCoroutine(co, IsJsMode());
+
+    w->AddRunnableCoroutine(co, mode == CoroutineLaunchMode::SAME_WORKER);
 
 #ifndef NDEBUG
     GetCurrentWorker()->PrintRunnables("LaunchImpl end");

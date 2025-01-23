@@ -17,21 +17,22 @@ const helper = requireNapiPreview('libinterop_test_helper.so', false);
 
 async function runTest(test) {
     const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
-	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
-    
-	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+    const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
 
-	let runtimeCreated = etsVm.createRuntime({
-		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
-		'panda-files': gtestAbcPath,
-		'gc-trigger-type': 'heap-trigger',
-		'compiler-enable-jit': 'false',
-		'run-gc-in-place': 'true',
-		'coroutine-impl': 'stackful',
-		'coroutine-workers-count': 2,
-		'coroutine-js-mode': true,
-		'coroutine-enable-external-scheduling': 'true',
-	});
+    let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+
+    let runtimeCreated = etsVm.createRuntime({
+        'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
+        'panda-files': gtestAbcPath,
+        'gc-trigger-type': 'heap-trigger',
+        'compiler-enable-jit': 'false',
+        'run-gc-in-place': 'true',
+        'coroutine-impl': 'stackful',
+        'coroutine-workers-count': 2,
+        'coroutine-js-mode': true,
+        'coroutine-enable-external-scheduling': 'true',
+        // 'log-debug': 'coroutines'
+    });
     if (!runtimeCreated) {
         throw Error('Cannot create ETS runtime');
     }

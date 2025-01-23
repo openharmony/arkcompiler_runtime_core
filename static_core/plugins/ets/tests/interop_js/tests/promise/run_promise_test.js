@@ -33,7 +33,7 @@ function runTest(test) {
 	let res = etsVm.call(test);
 	let tId = 0;
 	let checkFn = () => {
-		if (!etsVm.call('.ready')) {
+		if (etsVm.call('.is_unset')) {
 			return;
 		}
 		helper.clearInterval(tId);

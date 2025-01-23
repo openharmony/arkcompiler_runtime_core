@@ -60,26 +60,20 @@ function runTest(test, iter) {
 			print('Wrong value: ' + value + ' (' + typeof value + ') !== ' + expectedValue + ' (' + typeof expectedValue + ')');
 		}
 	});
+	let tId = 0;
 	let callback = () => {
-		--iteration;
-		print('Checking #' + iteration);
 		if (!testSuccess) {
-			if (iteration > 0) {
-				helper.setTimeout(callback, 0);
-			} else {
-				throw Error('Promise is not resolved or value is wrong');
-			}
-		} else {
-			print('Test passed');
+			return;
 		}
+		print('Test passed');
+		helper.clearInterval(tId);
 	};
-	helper.setTimeout(callback, 0);
+	tId = helper.setInterval(callback, 0);
 }
 
 let args = helper.getArgv();
 if (args.length !== 7) {
 	throw Error('Expected <test name> <expected value> <number of iterations>');
 }
-iteration = args[6];
 expectedValue = args[5];
 runTest(args[4]);

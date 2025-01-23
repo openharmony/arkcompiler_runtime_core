@@ -29,18 +29,18 @@ globalThis.require = require;
 
 function runTest(test) {
     print('Running test ' + test);
-	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
-	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
-	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+    const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+    const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+    let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
     const etsOpts = {
-		'panda-files': gtestAbcPath,
-		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
-		'gc-trigger-type': 'heap-trigger',
-		'load-runtimes': 'ets',
-		'compiler-enable-jit': 'false',
-		'coroutine-js-mode': 'true',
-		'coroutine-enable-external-scheduling': 'true',
-	};
+        'panda-files': gtestAbcPath,
+        'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
+        'gc-trigger-type': 'heap-trigger',
+        'load-runtimes': 'ets',
+        'compiler-enable-jit': 'false',
+        'coroutine-js-mode': 'true',
+        'coroutine-enable-external-scheduling': 'true',
+    };
     if (!etsVm.createRuntime(etsOpts)) {
         throw Error('Cannot create ETS runtime');
     }

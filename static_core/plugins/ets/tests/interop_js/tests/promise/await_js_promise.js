@@ -47,7 +47,7 @@ function init() {
 		'coroutine-js-mode': 'true',
 		'coroutine-impl': 'stackful',
 		'coroutine-enable-external-scheduling': 'true',
-		//'log-debug': 'coroutines'
+		// 'log-debug': 'coroutines'
 	};
 	const createRes = etsVm.createRuntime(etsOpts);
 	if (!createRes) {

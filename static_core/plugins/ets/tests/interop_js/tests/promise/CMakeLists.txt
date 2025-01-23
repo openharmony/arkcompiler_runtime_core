@@ -70,13 +70,13 @@ panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_reject_promise_then_finall
 panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise7
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/return_promise_to_js_test.js
-    LAUNCHER_ARGS ".testReturnPromise" "Panda" 2
+    LAUNCHER_ARGS ".testReturnPromise" "Panda"
 )
 
 panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise8
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/return_promise_to_js_test.js
-    LAUNCHER_ARGS ".testReturnPromiseFromAsync" "Panda" 3
+    LAUNCHER_ARGS ".testReturnPromiseFromAsync" "Panda"
 )
 
 panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise9
