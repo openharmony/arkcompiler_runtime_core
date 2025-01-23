@@ -31,7 +31,11 @@ chapters:
     - 15.semantic_rules
     - 17.experimental_features
     - 18.annotations
-
+    - 19.standard_library
+    - 20.implementation_details
+    - 21.artks_ts_compatibility
+    - 22.grammar_summary
+    
   # One folder - one chapter
   - chapter02:
     - 02.lexical_elements
@@ -65,6 +69,14 @@ chapters:
     - 17.experimental_features
   - chapter18:
     - 18.annotations
+  - chapter19:
+    - 19.standard_library
+  - chapter20:
+    - 20.implementation_details
+  - chapter21:
+    - 21.artks_ts_compatibility
+  - chapter22:
+    - 22.grammar_summary
 
   # chapters by several folders
   - chapters02-05:
