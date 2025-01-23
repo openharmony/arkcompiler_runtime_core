@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -162,6 +162,8 @@ ohos_source_set("libarkruntime_set_static") {
     "interpreter/interpreter.cpp",
     "interpreter/runtime_interface.cpp",
     "intrinsics.cpp",
+    "jit/libprofile/pgo_file_builder.cpp",
+    "jit/profiling_saver.cpp",
     "language_context.cpp",
     "loadable_agent.cpp",
     "lock_order_graph.cpp",

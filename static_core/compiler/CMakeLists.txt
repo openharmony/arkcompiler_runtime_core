@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -367,6 +367,13 @@ set(PANDA_COMPILER_TESTS_SOURCES
     tests/profiling_runner_test.cpp
 )
 set_source_files_properties(tests/loop_unroll_test.cpp PROPERTIES COMPILE_FLAGS "-Wno-shadow -Wno-deprecated-declarations")
+
+# Disable profiling_saver_test for AARCH32 and X86
+if(NOT (PANDA_TARGET_ARM32 OR PANDA_TARGET_X86))
+    list(APPEND PANDA_COMPILER_TESTS_SOURCES
+        tests/profiling_saver_test.cpp
+    )
+endif()
 
 # Distinguish 'PANDA_COMPILER_TARGET_..' and 'PANDA_TARGET_..' because for PANDA_TARGET_AMD64 tests
 # are being executed for Arch::AARCH64

@@ -73,6 +73,7 @@
 #include "runtime/methodtrace/trace.h"
 #include "trace/trace.h"
 #include "runtime/tests/intrusive-tests/intrusive_test_option.h"
+#include "runtime/jit/profiling_saver.h"
 
 namespace ark {
 
@@ -419,6 +420,16 @@ bool Runtime::Destroy()
 
     trace::ScopedTrace scopedTrace("Runtime shutdown");
 
+    if (instance_->SaveProfileInfo()) {
+        ProfilingSaver profileSaver;
+        auto isAotVerifyAbsPath = instance_->GetOptions().IsAotVerifyAbsPath();
+        auto classCtxStr = instance_->GetClassLinker()->GetClassContextForAot(isAotVerifyAbsPath);
+        auto &profiledMethods = instance_->GetClassLinker()->GetAotManager()->GetProfiledMethods();
+        auto savingPath = PandaString(instance_->GetOptions().GetProfileOutput());
+        auto profiledPandaFiles = instance_->GetClassLinker()->GetAotManager()->GetProfiledPandaFiles();
+        profileSaver.SaveProfile(savingPath, classCtxStr, profiledMethods, profiledPandaFiles);
+    }
+
     if (GetOptions().ShouldLoadBootPandaFiles()) {
         // Performing some actions before Runtime destroy.
         // For example, traversing FinalizableWeakRefList
@@ -434,8 +445,6 @@ bool Runtime::Destroy()
     if (Trace::isTracing_) {
         Trace::StopTracing();
     }
-
-    instance_->GetPandaVM()->SaveProfileInfo();
 
     instance_->GetNotificationManager()->VmDeathEvent();
 

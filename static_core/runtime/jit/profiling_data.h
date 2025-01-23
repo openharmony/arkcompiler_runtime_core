@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -247,9 +247,19 @@ public:
     {
     }
 
-    Span<CallSiteInlineCache> GetInlineCaches()
+    Span<CallSiteInlineCache> GetInlineCaches() const
     {
         return inlineCaches_;
+    }
+
+    Span<BranchData> GetBranchData() const
+    {
+        return branchData_;
+    }
+
+    Span<ThrowData> GetThrowData() const
+    {
+        return throwData_;
     }
 
     CallSiteInlineCache *FindInlineCache(uintptr_t pc)

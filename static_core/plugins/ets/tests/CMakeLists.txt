@@ -193,6 +193,7 @@ function(run_int_ets_code TARGET WORK_DIR)
     set(arkopts_cpp
         --compiler-enable-jit=false
         --interpreter-type=cpp
+        --profilesaver-enabled=true
         ${ARG_RUNTIME_EXTRA_OPTIONS}
     )
     run_ets_code_impl(${TARGET}-cpp ${WORK_DIR} "${ARG_SOURCES}"
@@ -206,6 +207,7 @@ function(run_int_ets_code TARGET WORK_DIR)
     set(arkopts_irtoc
         --compiler-enable-jit=false
         --interpreter-type=irtoc
+        --profilesaver-enabled=true
         ${ARG_RUNTIME_EXTRA_OPTIONS}
     )
     run_ets_code_impl(${TARGET}-irtoc ${WORK_DIR} "${ARG_SOURCES}"
@@ -220,6 +222,7 @@ function(run_int_ets_code TARGET WORK_DIR)
         set(arkopts_llvm
             --compiler-enable-jit=false
             --interpreter-type=llvm
+            --profilesaver-enabled=true
             ${ARG_RUNTIME_EXTRA_OPTIONS}
         )
         run_ets_code_impl(${TARGET}-llvmirtoc ${WORK_DIR} "${ARG_SOURCES}"

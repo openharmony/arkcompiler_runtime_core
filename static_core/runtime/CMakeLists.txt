@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -129,6 +129,8 @@ set(SOURCES
     signal_handler.cpp
     profilesaver/profile_saver.cpp
     profilesaver/profile_dump_info.cpp
+    jit/libprofile/pgo_file_builder.cpp
+    jit/profiling_saver.cpp
     cha.cpp
     runtime_helpers.cpp
     handle_scope.cpp
