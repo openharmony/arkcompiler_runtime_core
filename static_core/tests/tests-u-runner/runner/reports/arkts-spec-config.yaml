@@ -619,8 +619,8 @@
     title: Runtime Evaluation of Lambda Expressions
     status: ''
 '7.33':
-    title: Dynamic Import Expression
-    status: 'Finished'
+    title: Constant Expressions
+    status: No testable assertions
 '7.34':
     title: Constant Expressions
     status: ''
@@ -760,9 +760,6 @@
     title: Native Methods
     status: No testable assertions
 9.6.8:
-    title: Method Overload Signatures
-    status: ''
-9.6.9:
     title: Method Body
     status: ''
 '9.7':
@@ -778,15 +775,12 @@
     title: Formal Parameters
     status: ''
 9.9.2:
-    title: Constructor Overload Signatures
-    status: ''
-9.9.3:
     title: Constructor Body
     status: ''
-9.9.4:
+9.9.3:
     title: Explicit Constructor Call
     status: ''
-9.9.5:
+9.9.4:
     title: Default Constructor
     status: ''
 '9.10':
