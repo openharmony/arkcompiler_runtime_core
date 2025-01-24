@@ -9,11 +9,11 @@
                 "${PANDA_ROOT}/plugins/ets/stdlib/std"
             ],
             "main_js": [
-                "${CMAKE_CURRENT_SOURCE_DIR}/constructor.js"
+                "${CMAKE_CURRENT_BINARY_DIR}/constructor.abc"
             ]
         },
         "dynamicPaths": {
-            "${CMAKE_CURRENT_SOURCE_DIR}/constructor.js": {
+            "${CMAKE_CURRENT_BINARY_DIR}/constructor.abc": {
                 "language": "js",
                 "hasDecl": false
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,28 @@
 #include <iostream>
 #include <csignal>  // NOLINTNEXTLINE(modernize-deprecated-headers)
 #include <vector>
+#include <uv.h>
 
 #include "js_runtime.h"
+#include "interop_test_helper.h"
 
 namespace panda::ecmascript {
 int Main(const int argc, const char **argv)
 {
+    // Provide symbol to link with interop_test_helper library.
+    ark::ets::interop::js::helper::LinkWithLibraryTrick();
+
+    // Workaround: concatenate all argv and set it into env variable.
+    {
+        std::string argvString;
+        char separator = '|';
+        for (int idx = 0; idx < argc; ++idx) {
+            argvString.append(argv[idx]);
+            argvString.push_back(separator);
+        }
+        uv_os_setenv("CONCATENATED_ARGV_ENV_VAR", argvString.c_str());
+    }
+
     auto runtime = panda::JsRuntime::Create();
 
     arg_list_t filenames;

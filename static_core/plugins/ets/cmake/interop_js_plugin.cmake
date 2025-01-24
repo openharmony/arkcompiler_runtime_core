@@ -30,7 +30,7 @@ function(panda_ets_interop_js_plugin TARGET)
         ARG
         ""
         "LIBRARY_OUTPUT_DIRECTORY"
-        "SOURCES;LIBRARIES"
+        "SOURCES;LIBRARIES;OUTPUT_SUFFIX"
         ${ARGN}
     )
 
@@ -51,7 +51,7 @@ function(panda_ets_interop_js_plugin TARGET)
                 # Set module name
                 PREFIX ""
                 OUTPUT_NAME "${TARGET}"
-                SUFFIX ".node"
+                SUFFIX ${ARG_OUTPUT_SUFFIX}
 
                 # Set output direcory
                 LIBRARY_OUTPUT_DIRECTORY ${ARG_LIBRARY_OUTPUT_DIRECTORY}

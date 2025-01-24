@@ -22,6 +22,7 @@
 #include <node_api.h>
 
 #include "libpandabase/macros.h"
+#include "interop_test_helper.h"
 
 namespace ark::ets::interop::js::testing {
 
@@ -33,6 +34,11 @@ public:
             std::cerr << "ARK_ETS_INTEROP_JS_GTEST_SOURCES not set" << std::endl;
             std::abort();
         }
+
+        if (std::getenv("JS_ABC_OUTPUT_PATH") == nullptr) {
+            std::cerr << "JS_ABC_OUTPUT_PATH not set" << std::endl;
+            std::abort();
+        }
     }
 
     void SetUp() override
@@ -42,6 +48,12 @@ public:
         ASSERT(status == napi_ok && !hasPendingExc);
 
         interopJsTestPath_ = std::getenv("ARK_ETS_INTEROP_JS_GTEST_SOURCES");
+        jsAbcFilePath_ = std::getenv("JS_ABC_OUTPUT_PATH");
+
+        if (std::getenv("NODE_PATH") == nullptr) {
+            runOnArkJSVM_ = true;
+        }
+
         // This object is used to save global js names
         if (!SetGtestEnv()) {
             std::abort();
@@ -82,6 +94,9 @@ public:
 
     [[nodiscard]] bool RunJsTestSuite(const std::string &path)
     {
+        if (runOnArkJSVM_) {
+            return DoRunJsTestSuiteArkJsVM(jsEnv_, path);
+        }
         return DoRunJsTestSuite(jsEnv_, path);
     }
 
@@ -122,6 +137,7 @@ private:
 
         napi_value jsPath;
         auto pathToModule = interopJsTestPath_ + "/" + modulePath;
+
         status = napi_create_string_utf8(jsEnv_, pathToModule.data(), pathToModule.length(), &jsPath);
 
         napi_value jsGtestEnvObject = GetJsGtestEnvObject(jsEnv_);
@@ -167,6 +183,15 @@ private:
             return false;
         }
         return status == napi_ok;
+    }
+
+    [[nodiscard]] bool DoRunJsTestSuiteArkJsVM(napi_env env, const std::string &path)
+    {
+        std::string fileWithoutExtension = path.substr(0, path.find_last_of('.'));
+        std::string outputPath = jsAbcFilePath_ + "/" + fileWithoutExtension + ".abc";
+
+        // RunAbcFileOnArkJSVM call should be replaced with napi_execute_abc after it is implemented (#20536).
+        return interop::js::helper::RunAbcFileOnArkJSVM(env, outputPath.c_str());
     }
 
     static std::string ReadFile(const std::string &fullPath)
@@ -427,8 +452,11 @@ private:
     static napi_env jsEnv_;
 
 protected:
-    // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
+    bool runOnArkJSVM_ {false};
     std::string interopJsTestPath_;
+    std::string jsAbcFilePath_;
+    // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 
 }  // namespace ark::ets::interop::js::testing

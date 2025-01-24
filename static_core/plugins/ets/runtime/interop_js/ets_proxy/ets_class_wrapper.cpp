@@ -357,7 +357,7 @@ void EtsClassWrapper::UpdatePropsWithBaseClasses(EtsClassWrapper::PropsMap *prop
         return true;
     };
 
-#if PANDA_TARGET_OHOS
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
     auto hasSquashedProto = hasSquashedProtoOhosImpl;
     (void)hasSquashedProtoOtherImpl;
 #else
@@ -607,7 +607,7 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
     EtsClass *instanceClass {};
 
     if (LIKELY(notExtensible)) {
-#ifndef PANDA_TARGET_OHOS
+#if !defined(PANDA_TARGET_OHOS) && !defined(PANDA_JS_ETS_HYBRID_MODE)
         // In case of OHOS sealed object can't be wrapped, therefore seal it after wrapping
         NAPI_CHECK_FATAL(napi_object_seal(env, jsThis));
 #endif  // PANDA_TARGET_OHOS
@@ -628,7 +628,7 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
     SharedReference *sharedRef;
     if (LIKELY(notExtensible)) {
         sharedRef = ctx->GetSharedRefStorage()->CreateETSObjectRef(ctx, etsObject.GetPtr(), jsThis);
-#ifdef PANDA_TARGET_OHOS
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
         // In case of OHOS sealed object can't be wrapped, therefore seal it after wrapping
         NAPI_CHECK_FATAL(napi_object_seal(env, jsThis));
 #endif  // PANDA_TARGET_OHOS

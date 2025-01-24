@@ -16,7 +16,7 @@
 #include "plugins/ets/runtime/interop_js/handshake.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 
-#include "native_node_api.h"
+#include "interfaces/inner_api/napi/native_node_api.h"
 
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_vm_handshake([[maybe_unused]] napi_env env, [[maybe_unused]] void *stsIface, [[maybe_unused]] void **ecmaIface)
@@ -28,7 +28,7 @@ napi_vm_handshake([[maybe_unused]] napi_env env, [[maybe_unused]] void *stsIface
 
 namespace ark::ets::interop::js {
 
-void Handshake::VmHandshake(napi_env env, EtsCoroutine *coro, arkplatform::STSVMInterface *stsVmIface)
+void Handshake::VmHandshake(napi_env env, [[maybe_unused]] EtsCoroutine *coro, arkplatform::STSVMInterface *stsVmIface)
 {
     auto ctx = InteropCtx::Current();
     JSNapiEnvScope envscope(ctx, env);

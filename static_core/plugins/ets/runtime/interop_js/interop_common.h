@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -209,17 +209,17 @@ inline napi_status NapiObjectSeal([[maybe_unused]] napi_env env, [[maybe_unused]
 {
 // Ark js vm crashes in napi_object_seal.
 // Disable the call temporary
-#ifndef PANDA_TARGET_OHOS
-    return napi_object_seal(env, jsVal);
-#else
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
     return napi_ok;
+#else
+    return napi_object_seal(env, jsVal);
 #endif  // PANDA_TARGET_OHOS
 }
 
 inline napi_status NapiCallFunction(napi_env env, napi_value recv, napi_value func, size_t argc, const napi_value *argv,
                                     napi_value *result)
 {
-#ifdef PANDA_TARGET_OHOS
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
     napi_value dummy;
     result = result != nullptr ? result : &dummy;
 #endif  // PANDA_TARGET_OHOS
@@ -229,7 +229,7 @@ inline napi_status NapiCallFunction(napi_env env, napi_value recv, napi_value fu
 inline napi_status NapiWrap(napi_env env, napi_value jsObject, void *nativeObject, napi_finalize finalizeCb,
                             void *finalizeHint, napi_ref *result)
 {
-#ifdef PANDA_TARGET_OHOS
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
     napi_status status = napi_wrap(env, jsObject, nativeObject, finalizeCb, finalizeHint, nullptr);
     if (result == nullptr || UNLIKELY(status != napi_ok)) {
         return status;
