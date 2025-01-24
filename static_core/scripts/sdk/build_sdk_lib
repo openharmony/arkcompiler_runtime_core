@@ -12,6 +12,8 @@
 # limitations under the License.
 
 # Arguments: build_dir, cmake_arguments, ninja_targets
+set -x
+
 function build_panda() {
     local build_dir="$1"
     local cmake_arguments="$2"
@@ -176,4 +178,207 @@ function icu_dat_file() {
     echo "> Copying icu data file into SDK..."
     mkdir -p "$PANDA_SDK_PATH"/icu/data
     cp -r "$ARK_ROOT"/third_party/icu/ohos_icu4j/data/icu*dat "$PANDA_SDK_PATH"/icu/data/
+}
+
+function print_help() {
+    HELP_MESSAGE="
+    This script builds Panda SDK.
+
+    SYNOPSIS
+
+    $0 /path/to/panda/sdk/destination [OPTIONS]
+
+    OPTIONS
+
+    --help, -h              Show this message and exit.
+
+    --build_type=...        [Release/Debug/FastVerify] Set build type
+
+    --ohos_arm32            Run building for OHOS ARM32
+
+    --ohos_arm64            Run building for OHOS ARM64
+
+    --linux_arm64_tools     Run building linux arm64 tools
+
+    --linux_tools           Run building linux tools
+
+    --windows_tools         Run building windows tools
+
+    --ts_linter             Run building ts_linter
+
+    --ets_std_lib           Copy ets std lib into SDK
+
+    --icu_dat_file          Copy icu data file into SDK
+
+    --panda_llvm_backend    Run building LLVM backend
+
+    --panda_build_llvm_bin  Run building LLVM-binaries
+    "
+
+    echo "$HELP_MESSAGE"
+}
+
+function enable_ohos_sdk_native() {
+    OHOS_SDK_ARCH_NAME=ohos-sdk.tar.gz
+    SDK_VERSION_STAGE='Beta1'
+    OHOS_SDK_VERSION='4.0.8.2'
+    local OHOS_SDK_NATIVE_URL=${OHOS_SDK_NATIVE_URL:-'http://download.ci.openharmony.cn/version/Master_Version/OpenHarmony_4.0.8.2/20230615_141012/version-Master_Version-OpenHarmony_4.0.8.2-20230615_141012-ohos-sdk-full.tar.gz'}
+
+    # Search for default OHOS SDK native or download it
+    if [ -z "$OHOS_SDK_NATIVE" ]; then
+        local OHOS_SDK_NATIVE_DEFAULT_1=/opt/ohos-sdk/native
+        local OHOS_SDK_NATIVE_DEFAULT_2="$(realpath ./native)"
+        if [ -d "$OHOS_SDK_NATIVE_DEFAULT_1" ]; then
+            OHOS_SDK_NATIVE="$OHOS_SDK_NATIVE_DEFAULT_1"
+        elif [ -d "$OHOS_SDK_NATIVE_DEFAULT_2" ]; then
+            OHOS_SDK_NATIVE="$OHOS_SDK_NATIVE_DEFAULT_2"
+        else
+            if [ -z "$OHOS_SDK_NATIVE_URL" ]; then
+                echo "Error: OHOS SDK not found, please set OHOS_SDK_NATIVE or OHOS_SDK_NATIVE_URL environment variable"
+                exit 1
+            fi
+            
+            curl --retry 5 -Lo "${OHOS_SDK_ARCH_NAME}" "${OHOS_SDK_NATIVE_URL}"
+            tar -xf "${OHOS_SDK_ARCH_NAME}"
+            unzip -q ohos-sdk/linux/native-linux-x64-$OHOS_SDK_VERSION-$SDK_VERSION_STAGE.zip
+            rm "${OHOS_SDK_ARCH_NAME}"
+            OHOS_SDK_NATIVE=native
+        fi
+    fi
+}
+
+function set_default() {
+    echo "No arguments provided. Set default-configuration."
+    OHOS_ARM32="true"
+    OHOS_ARM64="true"
+    LINUX_ARM64_TOOLS="true"
+    LINUX_TOOLS="true"
+    WINDOWS_TOOLS="true"
+    TS_LINTER="true"
+    ETS_STD_LIB="true"
+    ICU_DAT_FILE="true"
+}
+
+function parse_options() {
+    local has_args="false"
+    for i in "$@"; do
+        local ERROR_ARG=""
+        case $i in
+        -h|--help)
+            print_help
+            exit 0
+            ;;
+        --build_type=*)
+            TYPE_ARG=${i//[-a-zA-Z0-9]*=/}
+            if [[ "$TYPE_ARG" = "Release" ]]; then
+                PANDA_SDK_BUILD_TYPE="Release"
+            fi
+            if [[ "$TYPE_ARG" = "Debug" ]]; then
+                PANDA_SDK_BUILD_TYPE="Debug"
+            fi
+            if [[ "$TYPE_ARG" = "FastVerify" ]]; then
+                PANDA_SDK_BUILD_TYPE="FastVerify"
+            fi
+            shift
+            ;;
+        --ohos_arm32)
+            OHOS_ARM32="true"
+            has_args="true"
+            shift
+            ;;
+        --ohos_arm64)
+            OHOS_ARM64="true"
+            has_args="true"
+            shift
+            ;;
+        --linux_arm64_tools)
+            LINUX_ARM64_TOOLS="true"
+            has_args="true"
+            shift
+            ;;
+        --linux_tools)
+            LINUX_TOOLS="true"
+            has_args="true"
+            shift
+            ;;
+        --windows_tools)
+            WINDOWS_TOOLS="true"
+            has_args="true"
+            shift
+            ;;
+        --ts_linter)
+            TS_LINTER="true"
+            has_args="true"
+            shift
+            ;;
+        --ets_std_lib)
+            ETS_STD_LIB="true"
+            has_args="true"
+            shift
+            ;;
+        --icu_dat_file)
+            ICU_DAT_FILE="true"
+            has_args="true"
+            shift
+            ;;
+        --panda_llvm_backend)
+            PANDA_LLVM_BACKEND="ON"
+            shift
+            ;;
+        --panda_build_llvm_bin)
+            PANDA_BUILD_LLVM_BINARIES="ON"
+            shift
+            ;;
+        *)
+            ERROR_ARG="YES"
+        esac
+
+        if [[ -n "${ERROR_ARG}" ]]; then
+            echo "Error: Unsupported flag $i" >&2
+            exit 1
+        fi
+    done
+
+    if [ "$has_args" = "false" ]; then
+        set_default
+    fi
+}
+
+function build_sdk_targets() {
+    if [ "$OHOS_ARM32" = "true" ]; then 
+        ohos_arm32
+    fi
+
+    if [ "$OHOS_ARM64" = "true" ]; then 
+        ohos_arm64
+    fi
+
+    if [ "$LINUX_ARM64_TOOLS" = "true" ]; then
+        linux_arm64_tools
+    fi
+
+    if [ "$LINUX_TOOLS" = "true" ]; then
+        linux_tools
+    fi
+
+    if [ "$WINDOWS_TOOLS" = "true" ]; then
+        windows_tools
+    fi
+
+    if [ "$TS_LINTER" = "true" ]; then
+        ts_linter
+    fi
+
+    if [ "$ETS_STD_LIB" = "true" ]; then
+        ets_std_lib
+    fi
+
+    if [ "$ICU_DAT_FILE" = "true" ]; then
+        icu_dat_file
+    fi
+}
+
+function usage() {
+    print_help
+    exit 1
 }
