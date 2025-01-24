@@ -1873,3 +1873,6 @@
 10.interfaces/01.interface_declarations/empty_interface_declaration_negative_9.sts
 10.interfaces/01.interface_declarations/empty_interface_declaration_negative_10.sts
 10.interfaces/01.interface_declarations/empty_interface_declaration_negative_11.sts
+
+# 22148
+09.classes/01.class_declaration/03.class_extension_clause/extends_object_class.sts
