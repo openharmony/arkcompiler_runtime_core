@@ -51,7 +51,7 @@ static bool ReplaceTypeofWithIsInstance(IntrinsicInst *intrinsic)
         return false;
     }
     auto intrinsicId = typeOf->CastToIntrinsic()->GetIntrinsicId();
-    if (intrinsicId != RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_RUNTIME_TYPEOF) {
+    if (intrinsicId != RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_TYPEOF) {
         return false;
     }
     auto typeId = loadString->CastToLoadString()->GetTypeId();
@@ -341,6 +341,11 @@ bool Peepholes::PeepholeStrictEquals([[maybe_unused]] GraphVisitor *v, Intrinsic
     }
 
     return ReplaceIfNonValueTyped(intrinsic, graph);
+}
+
+bool Peepholes::PeepholeTypeof([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    return ReplaceTypeofWithIsInstance(intrinsic);
 }
 
 bool Peepholes::PeepholeDoubleToString([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)

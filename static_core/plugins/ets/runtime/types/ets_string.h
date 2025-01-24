@@ -424,6 +424,11 @@ public:
         return reinterpret_cast<coretypes::String *>(this);
     }
 
+    ObjectHeader *AsObjectHeader()
+    {
+        return reinterpret_cast<ObjectHeader *>(this);
+    }
+
     EtsObject *AsObject()
     {
         return reinterpret_cast<EtsObject *>(this);

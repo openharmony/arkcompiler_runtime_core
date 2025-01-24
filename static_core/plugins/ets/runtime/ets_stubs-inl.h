@@ -58,6 +58,11 @@ ALWAYS_INLINE inline bool EtsReferenceEquals(EtsCoroutine *coro, EtsObject *ref1
     return EtsValueTypedEquals(coro, ref1, ref2);
 }
 
+ALWAYS_INLINE inline EtsString *EtsReferenceTypeof(EtsCoroutine *coro, EtsObject *ref)
+{
+    return EtsGetTypeof(coro, ref);
+}
+
 // CC-OFFNXT(C_RULE_ID_INLINE_FUNCTION_SIZE) Perf critical common runtime code stub
 inline EtsClass *GetMethodOwnerClassInFrames(EtsCoroutine *coro, uint32_t depth)
 {

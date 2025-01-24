@@ -313,6 +313,13 @@ extern "C" bool CompareETSValueTypedEntrypoint(ManagedThread *thread, ObjectHead
     return EtsValueTypedEquals(coro, eobj1, eobj2);
 }
 
+extern "C" EtsString *EtsGetTypeofEntrypoint(ManagedThread *thread, ObjectHeader *obj)
+{
+    EtsCoroutine *coro = EtsCoroutine::CastFromThread(thread);
+    EtsObject *eobj = EtsObject::FromCoreType(obj);
+    return EtsGetTypeof(coro, eobj);
+}
+
 extern "C" ObjectHeader *StringBuilderToStringEntrypoint(ObjectHeader *sb)
 {
     ASSERT(sb != nullptr);

@@ -41,6 +41,8 @@
     BuildEquals<true>(instruction);
     % when "EQUALS"
     BuildEquals(instruction);
+    % when "TYPEOF"
+    BuildTypeof(instruction);
     % else
     UNREACHABLE();
     % end

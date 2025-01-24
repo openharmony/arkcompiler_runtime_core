@@ -263,6 +263,10 @@ macro(:is_valuetyped_cls) do |obj|
   call_runtime("IsClassValueTypedEntrypoint", obj).b
 end
 
+macro(:handle_ets_typeof) do |obj|
+  set_acc_object(call_runtime("EtsGetTypeofEntrypoint", %tr, obj).ref)
+end
+
 ['', '_strict'].each do |suffix|
   macro(:"handle_ets_equals#{suffix}") do |v1, v2|
     If(Compare(v1, v2).b, 0).NE.Unlikely {

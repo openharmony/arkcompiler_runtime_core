@@ -343,6 +343,12 @@ extern "C" uint8_t CompilerEtsStrictEquals(ObjectHeader *obj1, ObjectHeader *obj
         EtsReferenceEquals<true>(coro, EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2)));
 }
 
+extern "C" EtsString *CompilerEtsTypeof(ObjectHeader *obj)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    return EtsReferenceTypeof(coro, EtsObject::FromCoreType(obj));
+}
+
 extern "C" EtsString *CompilerDoubleToStringDecimal(ObjectHeader *cache, uint64_t number,
                                                     [[maybe_unused]] uint64_t unused)
 {
