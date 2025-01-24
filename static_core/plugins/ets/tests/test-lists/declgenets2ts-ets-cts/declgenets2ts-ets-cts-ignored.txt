@@ -1679,9 +1679,6 @@
 09.classes/04.access_modifiers/04.public_access_modifier/public_member_access_out_class_2.sts
 09.classes/04.access_modifiers/04.public_access_modifier/public_member_access_out_class_3.sts
 09.classes/04.access_modifiers/access_modifiers_10.sts
-09.classes/04.access_modifiers/access_modifiers_14.sts
-09.classes/04.access_modifiers/access_modifiers_15.sts
-09.classes/04.access_modifiers/access_modifiers_16.sts
 09.classes/04.access_modifiers/access_modifiers_2.sts
 09.classes/04.access_modifiers/access_modifiers_20.sts
 09.classes/04.access_modifiers/access_modifiers_21.sts
@@ -1986,7 +1983,6 @@
 13.compilation_units_packages_and_modules/10.export_directives/03.export_type_directive/negative_export_as_by_old_name.sts
 13.compilation_units_packages_and_modules/10.export_directives/03.export_type_directive/negative_export_as_twice.sts
 13.compilation_units_packages_and_modules/10.export_directives/03.export_type_directive/negative_export_type_of_not_a_type.sts
-13.compilation_units_packages_and_modules/10.export_directives/04.re-export_directive/re-export_all_by_old_names.sts
 14.ambient_declarations/ambient_declarations_38.sts
 14.ambient_declarations/ambient_declarations_56.sts
 14.ambient_declarations/bad_ambient_declarations_0.sts
@@ -2406,10 +2402,6 @@
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_levels_default_export_3.sts
 13.compilation_units_packages_and_modules/04.import_directives/05.type_binding/type_binding_class_alias.sts
 13.compilation_units_packages_and_modules/04.import_directives/05.type_binding/type_binding_var_default.sts
-13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_0.sts
-13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_1.sts
-13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_2.sts
-13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_3.sts
 13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_global.sts
 13.compilation_units_packages_and_modules/04.import_directives/06.import_path/file/import_path_file_0.sts
 13.compilation_units_packages_and_modules/04.import_directives/06.import_path/file/import_path_file_1.sts
@@ -2436,7 +2428,6 @@
 13.compilation_units_packages_and_modules/08.top-level_declarations/01.exported_declarations/import_exported_element.sts
 13.compilation_units_packages_and_modules/08.top-level_declarations/01.exported_declarations/import_not_exported_element.sts
 13.compilation_units_packages_and_modules/11.top-level_statements/block_declaration_4.sts
-14.ambient_declarations/ambient_declarations_24.sts
 14.ambient_declarations/bad_ambient_declarations_8.sts
 15.semantic_rules/04.type_compatibility/class_and_interface_30.sts
 15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_argument_equivalent_neg_n2_5.sts
@@ -2590,16 +2581,11 @@
 03.types/08.reference_types/10.undefined_type/undefined_union4.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_2.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_3.sts
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_2.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_3.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_6.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_0.sts
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_1.sts
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_10.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_11.sts
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_2.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_3.sts
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_4.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_5.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_6.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_7.sts
@@ -2940,7 +2926,6 @@
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_1.sts
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_2.sts
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_3.sts
-05.generics/03.utility_types/02.required_utility_type/required_module_abstract.sts
 05.generics/03.utility_types/02.required_utility_type/required_module_class_0.sts
 05.generics/03.utility_types/02.required_utility_type/required_module_class_1.sts
 05.generics/03.utility_types/02.required_utility_type/required_module_class_2.sts
@@ -3558,7 +3543,6 @@
 07.expressions/05.object_literal/01.object_literal_of_class_type/cl_n_2.sts
 07.expressions/05.object_literal/01.object_literal_of_class_type/cl_n_6.sts
 07.expressions/05.object_literal/02.object_literal_of_interface_type/in_4.sts
-07.expressions/06.spread_expression/spex_const_27.sts
 07.expressions/06.spread_expression/spex_const_28.sts
 07.expressions/06.spread_expression/spex_const_29.sts
 07.expressions/06.spread_expression/spex_const_9.sts
@@ -4146,8 +4130,6 @@
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_class_11.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_class_3.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_function_7.sts
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_parameter_11.sts
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_parameter_5.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_primitive_10.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_primitive_6.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatible_signature_1.sts

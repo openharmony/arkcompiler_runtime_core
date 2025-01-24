@@ -82,6 +82,7 @@
 05.generics/03.utility_types/01.partial_utility_type/module_interface_1.sts
 05.generics/03.utility_types/01.partial_utility_type/module_interface_2.sts
 05.generics/03.utility_types/01.partial_utility_type/module_interface_3.sts
+05.generics/03.utility_types/02.required_utility_type/required_module_abstract.sts
 05.generics/03.utility_types/02.required_utility_type/required_module_class_0.sts
 05.generics/03.utility_types/02.required_utility_type/required_module_extends.sts
 05.generics/03.utility_types/02.required_utility_type/required_module_interface_0.sts
