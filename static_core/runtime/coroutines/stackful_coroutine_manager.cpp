@@ -14,6 +14,8 @@
  */
 
 #include <algorithm>
+#include <limits>
+#include "coroutines/stackful_common.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/stackful_coroutine.h"
 #include "runtime/include/thread_scopes.h"
@@ -98,6 +100,9 @@ void StackfulCoroutineManager::OnWorkerStartup()
 size_t StackfulCoroutineManager::GetNextFreeWorkerId() const
 {
     os::memory::LockHolder lock(workersLock_);
+    if (activeWorkersCount_ > stackful_coroutines::MAX_WORKER_ID) {
+        return stackful_coroutines::INVALID_WORKER_ID;
+    }
     return activeWorkersCount_;
 }
 
@@ -137,18 +142,21 @@ void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
 
     // create and activate workers
     size_t numberOfAvailableCores = std::max(std::thread::hardware_concurrency() / 4ULL, 2ULL);
-    size_t targetNumberOfWorkers =
-        (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO)
-            ? std::min(numberOfAvailableCores, stackful_coroutines::MAX_WORKERS_COUNT)
-            : std::min(static_cast<size_t>(config.workersCount), stackful_coroutines::MAX_WORKERS_COUNT);
+
+    // workaround for issue #21582
+    const size_t maxCommonWorkers = stackful_coroutines::MAX_WORKERS_COUNT - exclusiveWorkersLimit_;
+
+    size_t targetNumberOfCommonWorkers = (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO)
+                                             ? std::min(numberOfAvailableCores, maxCommonWorkers)
+                                             : std::min(static_cast<size_t>(config.workersCount), maxCommonWorkers);
     if (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO) {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): AUTO mode selected, will set number of coroutine "
-                                  "workers to number of CPUs / 4, but not less than 2 = "
-                               << targetNumberOfWorkers;
+                                  "common workers to number of CPUs / 4, but not less than 2 and no more than "
+                               << maxCommonWorkers << " = " << targetNumberOfCommonWorkers;
     }
     os::memory::LockHolder lock(workersLock_);
-    CreateWorkers(targetNumberOfWorkers, runtime, vm);
-    commonWorkersCount_ = targetNumberOfWorkers;
+    CreateWorkers(targetNumberOfCommonWorkers, runtime, vm);
+    commonWorkersCount_ = targetNumberOfCommonWorkers;
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): successfully created and activated " << workers_.size()
                            << " coroutine workers";
     programCompletionEvent_ = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(this);
@@ -826,10 +834,18 @@ Coroutine *StackfulCoroutineManager::CreateExclusiveWorkerForThread(Runtime *run
     os::memory::LockHolder eWorkerLock(eWorkerCreationLock_);
 
     if (IsExclusiveWorkersLimitReached()) {
+        LOG(DEBUG, COROUTINES) << "The program reached the limit of exclusive workers";
         return nullptr;
     }
 
     auto workerId = GetNextFreeWorkerId();
+
+    ASSERT(workerId != stackful_coroutines::INVALID_WORKER_ID);
+    if (workerId == stackful_coroutines::INVALID_WORKER_ID) {
+        LOG(DEBUG, COROUTINES) << "The program reached the limit of worker ID's";
+        return nullptr;
+    }
+
     auto workerName = "[e-worker] " + ToPandaString(workerId);
 
     auto allocator = runtime->GetInternalAllocator();

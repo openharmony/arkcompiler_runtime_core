@@ -273,16 +273,16 @@ if (NOT PANDA_TARGET_ARM32)
                         WORKERS "AUTO" "ONE"
                         MODE "INT" "JIT"
     )
-
-    # Issue #21837
-    add_ets_coroutines_test(FILE eworker_id.sts
-                            SKIP_ARM32_COMPILER
-                            IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "DEFAULT"
-                            WORKERS "AUTO"
-                            MODE "INT"
-    )
 endif()
+
+add_ets_coroutines_test(FILE eworker_id.sts
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT"
+)
+
 # # Issue 12886
 add_ets_coroutines_test(FILE launch_return.sts
                         SKIP_ARM32_COMPILER
