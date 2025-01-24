@@ -84,6 +84,8 @@ private:
      * @returns true if linkers' chain was traversed successfully, false otherwise.
      */
     bool TryLoadingClassFromNative(const uint8_t *descriptor, ClassLinkerErrorHandler *errorHandler, Class **klass);
+
+    void EnumeratePandaFilesImpl(const std::function<bool(const panda_file::File &)> &cb) const;
 };
 
 }  // namespace ark::ets

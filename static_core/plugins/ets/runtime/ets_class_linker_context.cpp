@@ -21,6 +21,7 @@
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "runtime/include/thread_scopes.h"
 
 namespace ark::ets {
 
@@ -168,7 +169,7 @@ Class *EtsClassLinkerContext::LoadClass(const uint8_t *descriptor, [[maybe_unuse
     return nullptr;
 }
 
-void EtsClassLinkerContext::EnumeratePandaFiles(const std::function<bool(const panda_file::File &)> &cb) const
+void EtsClassLinkerContext::EnumeratePandaFilesImpl(const std::function<bool(const panda_file::File &)> &cb) const
 {
     auto *runtimeLinker = GetRuntimeLinker();
     auto *klass = PandaEtsVM::GetCurrent()->GetClassLinker()->GetAbcRuntimeLinkerClass();
@@ -185,10 +186,17 @@ void EtsClassLinkerContext::EnumeratePandaFiles(const std::function<bool(const p
     }
 }
 
+void EtsClassLinkerContext::EnumeratePandaFiles(const std::function<bool(const panda_file::File &)> &cb) const
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    ScopedManagedCodeThread scope(coro);
+    EnumeratePandaFilesImpl(cb);
+}
+
 Class *EtsClassLinkerContext::FindAndLoadClass(const uint8_t *descriptor, ClassLinkerErrorHandler *errorHandler)
 {
     Class *klass = nullptr;
-    EnumeratePandaFiles([this, &klass, descriptor, errorHandler](const auto &pf) {
+    EnumeratePandaFilesImpl([this, &klass, descriptor, errorHandler](const auto &pf) {
         auto classId = pf.GetClassId(descriptor);
         if (!classId.IsValid() || pf.IsExternal(classId)) {
             return true;
