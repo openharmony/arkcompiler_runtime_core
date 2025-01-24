@@ -6,7 +6,9 @@
         "paths": {
             "@foo": ["../foo"],
             "@bar": ["../bar"],
-            "@spawn": ["../spawn"]
+            "@spawn": ["../spawn"],
+            "@mismatched": ["../mismatched/src"],
+            "@loop_inheritance": ["../loop_inheritance/src"]
         }
     },
     "include": [
@@ -15,6 +17,8 @@
     "references": [
         { "path": "../foo" },
         { "path": "../bar" },
-        { "path": "../spawn" }
+        { "path": "../spawn" },
+        { "path": "../mismatched/src" },
+        { "path": "../loop_inheritance/src" }
     ]
 }

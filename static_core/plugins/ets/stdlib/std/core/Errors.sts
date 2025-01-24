@@ -233,3 +233,12 @@ export class CoroutinesLimitExceedError extends Error {
         super("CoroutinesLimitExceedError", message, options)
     }
 }
+
+/**
+ * Represents exception that is thrown when loop inheritance detects errors in class
+ */
+export final class ClassCircularityError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("ClassCircularityError", message, options)
+    }
+}
