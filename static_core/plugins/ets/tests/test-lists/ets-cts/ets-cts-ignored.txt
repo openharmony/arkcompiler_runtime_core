@@ -1803,3 +1803,9 @@
 17.experimental_features/19.packages/02.package_initializer/p1/init1_1.sts
 17.experimental_features/19.packages/02.package_initializer/p2/init2_1.sts
 17.experimental_features/19.packages/02.package_initializer/p4/init4_1.sts
+
+# 22252
+09.classes/06.method_declarations/09.methods_returning_this/methods_returning_this_08.sts
+
+# 22253
+09.classes/06.method_declarations/09.methods_returning_this/methods_returning_this_interface_03.sts
