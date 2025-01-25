@@ -17,6 +17,7 @@
 #include "runtime/include/class_linker.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/value-inl.h"
+#include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_method.h"
@@ -78,21 +79,21 @@ EtsValue EtsMethod::Invoke(napi::ScopedManagedCodeFix *s, Value *args)
     return EtsValue(res.GetAs<EtsLong>());
 }
 
-EtsValue EtsMethod::Invoke(ani::ScopedManagedCodeFix *s, Value *args)
+ani_status EtsMethod::Invoke(ani::ScopedManagedCodeFix &s, Value *args, EtsValue *result)
 {
-    Value res = GetPandaMethod()->Invoke(s->GetCoroutine(), args);
+    Value res = GetPandaMethod()->Invoke(s.GetCoroutine(), args);
+    ANI_CHECK_RETURN_IF_EQ(s.HasPendingException(), true, ANI_PENDING_ERROR);
     if (GetReturnValueType() == EtsType::VOID) {
         // Return any value, will be ignored
-        return EtsValue(0);
+        *result = EtsValue(0);
+        return ANI_OK;
     }
     if (GetReturnValueType() == EtsType::OBJECT) {
         auto *obj = reinterpret_cast<EtsObject *>(res.GetAs<ObjectHeader *>());
-        if (obj == nullptr) {
-            return EtsValue(nullptr);
-        }
-        return EtsValue(ani::ScopedManagedCodeFix::AddLocalRef(s->GetPandaEnv(), obj));
+        return s.AddLocalRef(obj, reinterpret_cast<ani_ref *>(result));
     }
-    return EtsValue(res.GetAs<EtsLong>());
+    *result = EtsValue(res.GetAs<EtsLong>());
+    return ANI_OK;
 }
 
 uint32_t EtsMethod::GetNumArgSlots() const

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,6 +101,7 @@ public:
     template <bool NEED_READ_BARRIER = true>
     PANDA_PUBLIC_API EtsObject *GetFieldObject(EtsField *field) const
     {
+        ASSERT(field->GetEtsType() == EtsType::OBJECT);
         return reinterpret_cast<EtsObject *>(
             GetCoreType()->GetFieldObject<NEED_READ_BARRIER>(*field->GetRuntimeField()));
     }
@@ -122,6 +123,7 @@ public:
     template <bool NEED_WRITE_BARRIER = true>
     void SetFieldObject(EtsField *field, EtsObject *value)
     {
+        ASSERT(field->GetEtsType() == EtsType::OBJECT);
         GetCoreType()->SetFieldObject<NEED_WRITE_BARRIER>(*field->GetRuntimeField(),
                                                           reinterpret_cast<ObjectHeader *>(value));
     }

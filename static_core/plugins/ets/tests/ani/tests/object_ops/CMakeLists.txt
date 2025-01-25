@@ -11,6 +11,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+ani_add_gtest(ani_test_object_ops_object_new
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_new_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_new_test.sts
+)
+
+ani_add_gtest(ani_test_object_ops_object_get_field_long
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_long_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_long_test.sts
+)
+
+ani_add_gtest(ani_test_object_ops_object_get_field_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_ref_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_ref_test.sts
+)
+
+ani_add_gtest(ani_test_object_ops_object_set_field_int
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_set_field_int_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_set_field_int_test.sts
+)
+
+ani_add_gtest(ani_test_object_ops_object_set_field_long
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_set_field_long_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_set_field_long_test.sts
+)
+
+ani_add_gtest(ani_test_object_ops_object_set_field_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_set_field_ref_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_set_field_ref_test.sts
+)
+
+ani_add_gtest(ani_test_object_ops_object_get_property_by_name_int
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_property_by_name_int_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_property_by_name_int_test.sts
+)
+
+ani_add_gtest(ani_test_object_ops_object_get_property_by_name_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_property_by_name_ref_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_property_by_name_ref_test.sts
+)
+
 ani_add_gtest(ani_test_object_ops_call_object_method_boolean
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_object_method_boolean_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_object_method_boolean_test.sts
@@ -29,6 +69,11 @@ ani_add_gtest(ani_test_object_ops_call_object_method_long
 ani_add_gtest(ani_test_object_ops_call_object_method_double
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_object_method_double_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_object_method_double_test.sts
+)
+
+ani_add_gtest(ani_test_object_ops_object_call_method_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_call_method_ref_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_call_method_ref_test.sts
 )
 
 ani_add_gtest(ani_test_object_ops_call_object_method_void

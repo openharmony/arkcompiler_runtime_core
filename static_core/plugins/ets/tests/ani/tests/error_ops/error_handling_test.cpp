@@ -45,7 +45,7 @@ TEST_F(ErrorHandlingTest, exist_unhandled_error_test)
     ani_boolean result;
     ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
     ASSERT_EQ(result, ANI_FALSE);
-    ASSERT_EQ(env_->Class_CallStaticMethod_Int(cls, method, &errorResult, 5U), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethod_Int(cls, method, &errorResult, 5U), ANI_PENDING_ERROR);
     ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
     ASSERT_EQ(result, ANI_TRUE);
 }
@@ -60,7 +60,7 @@ TEST_F(ErrorHandlingTest, reset_error_test)
     ani_boolean result;
     ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
     ASSERT_EQ(result, ANI_FALSE);
-    ASSERT_EQ(env_->Class_CallStaticMethod_Int(cls, method, &errorResult, 5U), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethod_Int(cls, method, &errorResult, 5U), ANI_PENDING_ERROR);
     ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
     ASSERT_EQ(result, ANI_TRUE);
     ASSERT_EQ(env_->ResetError(), ANI_OK);

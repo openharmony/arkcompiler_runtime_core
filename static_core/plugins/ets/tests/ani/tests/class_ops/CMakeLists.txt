@@ -11,6 +11,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+ani_add_gtest(ani_test_class_ops_class_get_field
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_field_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_field_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_class_get_static_field
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_test.sts
+)
+
 ani_add_gtest(ani_test_class_ops_get_static_method
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_static_method_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_static_method_test.sts
