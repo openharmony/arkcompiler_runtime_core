@@ -29,8 +29,8 @@
 
 #define ANI_VERSION_1 1
 
-#define ANI_TRUE 1
 #define ANI_FALSE 0
+#define ANI_TRUE 1
 
 typedef size_t ani_size;
 
@@ -233,6 +233,10 @@ extern "C" {
 
 ANI_EXPORT ani_status ANI_CreateVM(uint32_t version, size_t nr_options, const ani_vm_option *options, ani_vm **result);
 ANI_EXPORT ani_status ANI_GetCreatedVMs(ani_vm **vms_buffer, ani_size vms_buffer_length, ani_size *result);
+
+// Prototypes of exported functions for a shared library.
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result);
+ANI_EXPORT ani_status ANI_Destructor(ani_vm *vm);
 
 #ifdef __cplusplus
 }
