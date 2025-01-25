@@ -277,39 +277,10 @@
 # end of es2panda fails
 
 #19909
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_100.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_101.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_120.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_121.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_122.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_135.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_136.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_137.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_150.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_151.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_152.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_165.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_166.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_167.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_180.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_181.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_182.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_198.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_199.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_200.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_216.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_217.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_218.sts
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_24.sts
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_25.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_26.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_51.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_52.sts
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_53.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_78.sts
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_79.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_80.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_99.sts
 #end of #19909
 
 # 19135 Cannot infer array type from context
@@ -676,11 +647,6 @@
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_1.sts
 # end of es2panda fails
 
-# es2panda fails: panda:14382 Char type should not be permitted in index expression
-07.expressions/12.indexing_expression/01.array_indexing_expression/array_index_n_8.sts
-07.expressions/12.indexing_expression/01.array_indexing_expression/array_index_n_9.sts
-# end of es2panda fails
-
 # 13917 Casting of enum doesn't work as expected
 11.enumerations/02.enumeration_string_values/enum_str_4.sts
 
@@ -957,13 +923,6 @@
 # es2panda: 18152 Bad operand type, the type of the operand must be boolean type
 07.expressions/18.ensure-not-nullish_expression/undefined_4.sts
 # end of es2panda failure
-
-# es2panda: 16519 CTE if no expression set for the For loop
-08.statements/08.for_statements/for_loop_parameters_0.sts
-08.statements/08.for_statements/for_loop_parameters_1.sts
-08.statements/08.for_statements/for_loop_parameters_4.sts
-08.statements/08.for_statements/for_loop_parameters_6.sts
-# end of es2panda fails
 
 # 18445 No CTE when compared union types have no overlapping values
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/cte_3.sts
