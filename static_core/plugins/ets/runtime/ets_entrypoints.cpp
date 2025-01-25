@@ -320,6 +320,13 @@ extern "C" EtsString *EtsGetTypeofEntrypoint(ManagedThread *thread, ObjectHeader
     return EtsGetTypeof(coro, eobj);
 }
 
+extern "C" bool EtsIstrueEntrypoint(ManagedThread *thread, ObjectHeader *obj)
+{
+    EtsCoroutine *coro = EtsCoroutine::CastFromThread(thread);
+    EtsObject *eobj = EtsObject::FromCoreType(obj);
+    return EtsIstrue(coro, eobj);
+}
+
 extern "C" ObjectHeader *StringBuilderToStringEntrypoint(ObjectHeader *sb)
 {
     ASSERT(sb != nullptr);

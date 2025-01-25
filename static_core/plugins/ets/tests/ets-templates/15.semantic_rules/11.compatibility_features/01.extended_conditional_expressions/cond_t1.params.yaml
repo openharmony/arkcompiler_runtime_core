@@ -77,4 +77,3 @@ cases:
     - '{} as Object'
     - '[1, 2, 3]'
     - '[false]'
-    - 0n

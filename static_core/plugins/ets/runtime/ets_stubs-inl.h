@@ -63,6 +63,11 @@ ALWAYS_INLINE inline EtsString *EtsReferenceTypeof(EtsCoroutine *coro, EtsObject
     return EtsGetTypeof(coro, ref);
 }
 
+ALWAYS_INLINE inline bool EtsIstrue(EtsCoroutine *coro, EtsObject *obj)
+{
+    return EtsGetIstrue(coro, obj);
+}
+
 // CC-OFFNXT(C_RULE_ID_INLINE_FUNCTION_SIZE) Perf critical common runtime code stub
 inline EtsClass *GetMethodOwnerClassInFrames(EtsCoroutine *coro, uint32_t depth)
 {

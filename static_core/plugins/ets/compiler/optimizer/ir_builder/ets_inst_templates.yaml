@@ -43,6 +43,8 @@
     BuildEquals(instruction);
     % when "TYPEOF"
     BuildTypeof(instruction);
+    % when "ISTRUE"
+    BuildIstrue(instruction);
     % else
     UNREACHABLE();
     % end

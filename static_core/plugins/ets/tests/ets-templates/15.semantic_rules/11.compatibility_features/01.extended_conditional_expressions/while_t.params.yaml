@@ -92,7 +92,6 @@ cases:
     - { val: '{} as Object', type: 'Object' }
     - { val: '[1, 2, 3]', type: 'int[]' }
     - { val: '[false]', type: 'boolean[]' }
-    - { val: '0n', type: 'bigint' }
 
     - val: '(p: number): number => { return p+p }'
       type: '((p: number) => number)'

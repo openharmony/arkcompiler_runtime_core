@@ -297,3 +297,19 @@ groups:
         acc: out:ref
         format: [pref_op_v1_8]
         intrinsic_name: INTRINSIC_COMPILER_ETS_TYPEOF
+
+  - title: Check if value is 'true' in extended conditional semantics
+    description: >
+      Check if the value in the accumulator is considered true in ETS semantics.
+    verification:
+      - v1_obj_or_null
+      - acc_type
+    exceptions:
+      - x_none
+    namespace: ets
+    instructions:
+      - sig: ets.istrue v:in:ref
+        prefix: ets
+        acc: out:i32
+        format: [pref_op_v_8]
+        intrinsic_name: INTRINSIC_COMPILER_ETS_ISTRUE

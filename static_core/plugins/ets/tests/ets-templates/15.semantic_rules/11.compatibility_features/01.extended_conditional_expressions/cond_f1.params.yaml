@@ -67,3 +67,4 @@ cases:
     - new Float()
     - new Double()
     - new Number()
+    - 0n

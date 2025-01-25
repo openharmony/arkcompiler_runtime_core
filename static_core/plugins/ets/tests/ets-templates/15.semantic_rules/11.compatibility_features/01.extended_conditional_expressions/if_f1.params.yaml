@@ -67,3 +67,4 @@ cases:
 
     - 'new Boolean(false)'
     - '!(new Boolean(true))'
+    - 0n
