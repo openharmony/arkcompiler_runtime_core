@@ -81,6 +81,52 @@ add_custom_target(static_linker_tests_gen_abc DEPENDS ${test_asm_files})
 add_dependencies(static_linker_tests static_linker_tests_gen_abc arkruntime)
 
 if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSCOMPILING)
+    add_definitions(-DTEST_STATIC_LINKER_WITH_STS)
+    set(STS_TESTS_DIR ${CMAKE_CURRENT_BINARY_DIR}/data/sts)
+
+    set(STS_TESTS_SOURCES
+        fclass/1.sts
+        fclass/2.sts
+        filesinfo/1.sts
+        filesinfo/dir1/11.sts
+        filesinfo/dir1/dir11/111.sts
+        filesinfo/dir2/21.sts
+        filesinfo/dir2/22.sts
+        fmethod/1.sts
+        fmethod/2.sts
+        fmethod_overloaded/1.sts
+        fmethod_overloaded/2.sts
+        fmethod_overloaded_2/1.sts
+        fmethod_overloaded_2/2.sts
+        fmethod_overloaded_2/3.sts
+        fmethod_overloaded_2/4.sts
+        hello_world/1.sts
+    )
+    set(STS_TESTS_TARGETS "")
+    foreach(STS_SOURCE ${STS_TESTS_SOURCES})
+        set(ABC_FILE "${STS_TESTS_DIR}/${STS_SOURCE}.abc")
+        add_custom_command(
+            OUTPUT "${ABC_FILE}"
+            COMMAND $<TARGET_FILE:es2panda> --output "${ABC_FILE}"
+                --ets-module --extension=sts "${STS_TESTS_DIR}/${STS_SOURCE}"
+            DEPENDS es2panda "${STS_TESTS_DIR}/${STS_SOURCE}"
+        )
+        list(APPEND STS_TESTS_TARGETS "${ABC_FILE}")
+    endforeach()
+
+    # test filesinfo
+    add_custom_command(
+        OUTPUT "${STS_TESTS_DIR}/filesinfo/filesinfo.txt"
+        COMMAND python3 "${STS_TESTS_DIR}/filesinfo/generate_filesinfo.py"
+            --dir "${STS_TESTS_DIR}/filesinfo" --output "${STS_TESTS_DIR}/filesinfo/filesinfo.txt"
+        DEPENDS "${STS_TESTS_TARGETS}" "${STS_TESTS_DIR}/filesinfo/generate_filesinfo.py"
+    )
+    list(APPEND STS_TESTS_TARGETS "${STS_TESTS_DIR}/filesinfo/filesinfo.txt")
+
+    add_custom_target(static_linker_tests_sts
+        DEPENDS "${STS_TESTS_TARGETS}"
+    )
+
     # internal issue #15674
     add_custom_target(static_linker_tests_field_value
         COMMAND $<TARGET_FILE:es2panda> --output "${CMAKE_CURRENT_BINARY_DIR}/a.abc" --extension=sts "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/field_value/a.sts"
@@ -106,5 +152,5 @@ if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSC
             "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/dedup_debug_info/CustomInt.sts"
             "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/dedup_debug_info/CustomLong.sts"
     )
-    add_dependencies(static_linker_tests static_linker_tests_field_value static_linker_tests_debug_info)
+    add_dependencies(static_linker_tests static_linker_tests_sts static_linker_tests_field_value static_linker_tests_debug_info)
 endif()
