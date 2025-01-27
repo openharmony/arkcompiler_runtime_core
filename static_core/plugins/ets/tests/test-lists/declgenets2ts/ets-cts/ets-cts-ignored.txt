@@ -1,3 +1,4 @@
+# FailKind.SEGFAULT_FAIL
 02.lexical_elements/06.identifiers/identifiers_n_0.sts
 02.lexical_elements/06.identifiers/identifiers_n_1.sts
 02.lexical_elements/06.identifiers/identifiers_n_10.sts
@@ -1568,6 +1569,11 @@
 07.expressions/33.dynamic_import_expression/imp_neg_2.sts
 07.expressions/33.dynamic_import_expression/imp_neg_3.sts
 07.expressions/33.dynamic_import_expression/imp_neg_4.sts
+07.expressions/34.constant_expression/wrong_constant_expression_0.sts
+07.expressions/34.constant_expression/wrong_constant_expression_1.sts
+07.expressions/34.constant_expression/wrong_constant_expression_2.sts
+07.expressions/34.constant_expression/wrong_constant_expression_3.sts
+07.expressions/34.constant_expression/wrong_constant_expression_4.sts
 08.statements/05.if_statements/if_neg_0.sts
 08.statements/05.if_statements/if_neg_1.sts
 08.statements/05.if_statements/if_neg_2.sts
@@ -1714,6 +1720,7 @@
 09.classes/06.method_declarations/01.static_methods/static_method_with_body_type_parameter.sts
 09.classes/06.method_declarations/03.abstract_methods/abstract_method_declaration_with_keywords_2.sts
 09.classes/06.method_declarations/03.abstract_methods/abstract_method_declaration_with_keywords_4.sts
+09.classes/06.method_declarations/03.abstract_methods/abstract_method_declaration_with_keywords_6.sts
 09.classes/06.method_declarations/03.abstract_methods/abstract_method_override.sts
 09.classes/06.method_declarations/03.abstract_methods/duplicate_method_modifier.sts
 09.classes/06.method_declarations/04.final_methods/final_declaration_with_modifiers_negative_1.sts
@@ -1799,6 +1806,14 @@
 09.classes/11.local_classes_and_interfaces/local_class_with_access_modifier_9.sts
 09.classes/11.local_classes_and_interfaces/local_class_with_already_declared_name.sts
 09.classes/11.local_classes_and_interfaces/local_interface_with_already_declared_name.sts
+10.interfaces/01.interface_declarations/empty_interface_declaration_negative_0.sts
+10.interfaces/01.interface_declarations/empty_interface_declaration_negative_1.sts
+10.interfaces/01.interface_declarations/empty_interface_declaration_negative_2.sts
+10.interfaces/01.interface_declarations/empty_interface_declaration_negative_3.sts
+10.interfaces/01.interface_declarations/empty_interface_declaration_negative_4.sts
+10.interfaces/01.interface_declarations/empty_interface_declaration_negative_5.sts
+10.interfaces/01.interface_declarations/empty_interface_declaration_negative_6.sts
+10.interfaces/01.interface_declarations/empty_interface_declaration_negative_7.sts
 10.interfaces/01.interface_declarations/interface_extends_without_type.sts
 10.interfaces/01.interface_declarations/interface_fields_negative_0.sts
 10.interfaces/01.interface_declarations/interface_fields_negative_1.sts
@@ -2093,6 +2108,10 @@
 17.experimental_features/03.indexable_types/cte_18.sts
 17.experimental_features/04.iterable_types/it_0.sts
 17.experimental_features/05.callable_types/01.callable_types_with_invoke_method/ct_invoke_17.sts
+17.experimental_features/05.callable_types/01.callable_types_with_invoke_method/ct_invoke_0.sts
+17.experimental_features/05.callable_types/02.callable_types_with_instantiate_method/ct_inst1_0.sts
+17.experimental_features/05.callable_types/02.callable_types_with_instantiate_method/ct_inst1_1.sts
+17.experimental_features/05.callable_types/02.callable_types_with_instantiate_method/ct_inst_9.sts
 17.experimental_features/06.statements/01.for-of_type_annotation/for_of_n_6.sts
 17.experimental_features/06.statements/01.for-of_type_annotation/for_of_n_7.sts
 17.experimental_features/06.statements/01.for-of_type_annotation/for_of_n_8.sts
@@ -2183,6 +2202,8 @@
 18.annotations/01.declaring_annotations/declaration_default_values_n_2.sts
 18.annotations/01.declaring_annotations/declaration_default_values_n_3.sts
 18.annotations/01.declaring_annotations/declaration_top_level_n.sts
+
+# FailKind.ABORT_FAIL
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_12.sts
 03.types/08.reference_types/12.union_types/ut_25.sts
 03.types/08.reference_types/12.union_types/ut_27.sts
@@ -2334,6 +2355,7 @@
 09.classes/06.method_declarations/03.abstract_methods/abstract_method_declaration_with_keywords_0.sts
 09.classes/06.method_declarations/03.abstract_methods/abstract_method_declaration_with_keywords_1.sts
 09.classes/06.method_declarations/03.abstract_methods/abstract_method_declaration_with_keywords_3.sts
+09.classes/06.method_declarations/03.abstract_methods/abstract_method_declaration_with_keywords_5.sts
 09.classes/06.method_declarations/03.abstract_methods/abstract_method_in_simple_class.sts
 09.classes/06.method_declarations/03.abstract_methods/private_abstract_method_declaration.sts
 09.classes/06.method_declarations/04.final_methods/final_declaration_with_modifiers_negative_0.sts
@@ -2362,6 +2384,8 @@
 11.enumerations/03.enumeration_operations/enum_constant_to_string_1.sts
 11.enumerations/03.enumeration_operations/enum_member_name3.sts
 11.enumerations/03.enumeration_operations/enum_member_name5.sts
+11.enumerations/03.enumeration_operations/enum_member_values_0.sts
+11.enumerations/to_export.sts
 13.compilation_units_packages_and_modules/01.separate_modules/modules/reexported_directives.sts
 13.compilation_units_packages_and_modules/04.import_directives/01.bind_all_with_qualified_access/import_all_as_0.sts
 13.compilation_units_packages_and_modules/04.import_directives/01.bind_all_with_qualified_access/import_all_as_1.sts
@@ -2435,6 +2459,11 @@
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_10.sts
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_11.sts
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_9.sts
+17.experimental_features/05.callable_types/01.callable_types_with_invoke_method/ct_invoke_16.sts
+17.experimental_features/05.callable_types/01.callable_types_with_invoke_method/ct_invoke_17.sts
+17.experimental_features/05.callable_types/01.callable_types_with_invoke_method/ct_invoke_access_0.sts
+17.experimental_features/05.callable_types/01.callable_types_with_invoke_method/ct_invoke_access_2.sts
+17.experimental_features/05.callable_types/01.callable_types_with_invoke_method/ct_invoke_access_4.sts
 17.experimental_features/05.callable_types/01.callable_types_with_invoke_method/ct_invoke_access_6.sts
 17.experimental_features/05.callable_types/01.callable_types_with_invoke_method/ct_invoke_access_8.sts
 17.experimental_features/07.function_and_method_overloading/02.class_method_overloading/cm_over1_7.sts
@@ -2566,6 +2595,8 @@
 17.experimental_features/19.packages/package_declarations_1.sts
 17.experimental_features/19.packages/package_declarations_2.sts
 18.annotations/01.declaring_annotations/declaration_type_definition.sts
+
+# FailKind.TSC_FAIL
 03.types/08.reference_types/04.literal_types/class_literal_type_2.sts
 03.types/08.reference_types/04.literal_types/class_literal_type_7.sts
 03.types/08.reference_types/04.literal_types/function_literal_type_4.sts
@@ -3911,6 +3942,9 @@
 09.classes/10.inheritance/inheritance_abstract_methods_without.sts
 09.classes/10.inheritance/inheritance_method_with_subsignature.sts
 09.classes/10.inheritance/inheritance_private_methods_from_superinterface.sts
+10.interfaces/01.interface_declarations/empty_interface_declaration_negative_10.sts
+10.interfaces/01.interface_declarations/empty_interface_declaration_negative_8.sts
+10.interfaces/01.interface_declarations/empty_interface_declaration_negative_9.sts
 10.interfaces/04.interface_members/methods_overriding.sts
 10.interfaces/04.interface_members/object_method_declaring.sts
 10.interfaces/04.interface_members/object_method_override_0.sts
@@ -3925,6 +3959,12 @@
 10.interfaces/07.interface_inheritance/inheritance_method_with_declared_signature.sts
 11.enumerations/03.enumeration_operations/enum_ensure_not_nullish_call.sts
 11.enumerations/03.enumeration_operations/enum_ensure_not_nullish_interface.sts
+11.enumerations/enum_export_0.sts
+11.enumerations/enum_export_1.sts
+11.enumerations/enum_export_2.sts
+11.enumerations/enum_export_3.sts
+11.enumerations/enum_export_4.sts
+11.enumerations/enum_export_5.sts
 13.compilation_units_packages_and_modules/01.separate_modules/import_declarations_0.sts
 13.compilation_units_packages_and_modules/01.separate_modules/import_declarations_1.sts
 13.compilation_units_packages_and_modules/01.separate_modules/import_declarations_10.sts
@@ -4014,10 +4054,12 @@
 13.compilation_units_packages_and_modules/07.compilation_unit_initialization/module/init_once/test.sts
 13.compilation_units_packages_and_modules/07.compilation_unit_initialization/package/cyclic_dependency/pkgA/test.sts
 13.compilation_units_packages_and_modules/07.compilation_unit_initialization/package/cyclic_dependency/pkgB/module.sts
+13.compilation_units_packages_and_modules/08.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type_2_level_2.sts
 13.compilation_units_packages_and_modules/08.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class_same_name.sts
 13.compilation_units_packages_and_modules/08.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class_same_name_2.sts
 13.compilation_units_packages_and_modules/10.export_directives/01.selective_export_directive/selective_exports_0.sts
 13.compilation_units_packages_and_modules/10.export_directives/01.selective_export_directive/selective_exports_1.sts
+13.compilation_units_packages_and_modules/10.export_directives/01.selective_export_directive/selective_exports_2.sts
 13.compilation_units_packages_and_modules/10.export_directives/01.selective_export_directive/selective_exports_3.sts
 13.compilation_units_packages_and_modules/10.export_directives/01.selective_export_directive/selective_exports_4.sts
 13.compilation_units_packages_and_modules/10.export_directives/01.selective_export_directive/selective_exports_5.sts
@@ -4038,6 +4080,7 @@
 13.compilation_units_packages_and_modules/10.export_directives/02.single_export_directive/single_export_8.sts
 13.compilation_units_packages_and_modules/10.export_directives/02.single_export_directive/single_export_9.sts
 13.compilation_units_packages_and_modules/10.export_directives/03.export_type_directive/export_already_declared.sts
+13.compilation_units_packages_and_modules/10.export_directives/03.export_type_directive/export_as_already_declared.sts
 13.compilation_units_packages_and_modules/10.export_directives/04.re-export_directive/re-export_all.sts
 13.compilation_units_packages_and_modules/10.export_directives/04.re-export_directive/re-export_all_with_rename.sts
 14.ambient_declarations/ambient_declarations_39.sts
@@ -4102,6 +4145,19 @@
 15.semantic_rules/06.type_inference/01.smart_types/while_stmt_3.sts
 15.semantic_rules/06.type_inference/01.smart_types/while_stmt_7.sts
 15.semantic_rules/06.type_inference/01.smart_types/while_stmt_8.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/neg_1.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/neg_10.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/neg_11.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/neg_12.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/neg_13.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/neg_2.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/neg_3.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/neg_4.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/neg_5.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/neg_6.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/neg_7.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/neg_8.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/neg_9.sts
 15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_0.sts
 15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_1.sts
 15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_10.sts
@@ -4113,6 +4169,19 @@
 15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_7.sts
 15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_8.sts
 15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_9.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_0.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_1.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_10.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_11.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_12.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_13.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_2.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_4.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_5.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_6.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_7.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_8.sts
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_9.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/neg_0.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/neg_1.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/neg_10.sts

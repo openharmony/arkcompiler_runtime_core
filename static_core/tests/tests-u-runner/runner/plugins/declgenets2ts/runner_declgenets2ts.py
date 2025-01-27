@@ -26,9 +26,14 @@ import yaml
 
 from runner.logger import Log
 from runner.options.config import Config
-from runner.plugins.declgenets2ts.declgenets2ts_test_suite import DeclgenCtsEtsTestSuite
-from runner.plugins.declgenets2ts.declgenets2ts_suites import DeclgenEtsSuites, DeclgenEtsSuitesDir
+from runner.plugins.ets.ets_test_suite import (
+    CtsEtsTestSuite,
+    FuncEtsTestSuite,
+    RuntimeEtsTestSuite
+)
+from runner.plugins.ets.ets_suites import EtsSuites
 from runner.plugins.declgenets2ts.test_declgenets2ts import TestDeclgenETS2TS
+from runner.plugins.declgenets2ts.declgenets2ts_suites import DeclgenEtsSuites
 from runner.runner_base import get_test_id
 from runner.runner_file_based import RunnerFileBased
 from runner.enum_types.test_directory import TestDirectory
@@ -42,10 +47,10 @@ _LOGGER = logging.getLogger(
 class RunnerDeclgenETS2TS(RunnerFileBased):
     def __init__(self, config: Config):
         config.verifier.enable = False
+        self.__declgen_ets_name = self.get_declgen_ets_name(config.test_suites)
         self.__ets_suite_name = self.get_ets_suite_name(config.test_suites)
-        self.__ets_suite_dir = self.get_ets_suite_dir(config.test_suites)
 
-        super().__init__(config, self.__ets_suite_name)
+        super().__init__(config, self.__declgen_ets_name)
 
         self.declgen_ets2ts_executor = os.path.join(
             self.build_dir, "bin", "declgen_ets2ts")
@@ -59,9 +64,11 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
         self.process_typescript()
 
         test_suite_class = self.get_declgen_ets_class(self.__ets_suite_name)
-
+        if self.__ets_suite_name == EtsSuites.RUNTIME.value:
+            self.default_list_root = self._get_frontend_test_lists()
+        self.declgen_list_root = os.path.join(self.default_list_root, "declgenets2ts")
         test_suite = test_suite_class(
-            self.config, self.work_dir, self.default_list_root)
+            self.config, self.work_dir, self.declgen_list_root)
         test_suite.process(
             self.config.general.generate_only or self.config.ets.force_generate)
         self.test_root, self.list_root = test_suite.test_root, test_suite.list_root
@@ -76,7 +83,7 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
 
     @property
     def default_work_dir_root(self) -> Path:
-        return Path("/tmp") / self.__ets_suite_dir / self.__ets_suite_name
+        return Path("/tmp/declgenets2ts") / self.__ets_suite_name
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestDeclgenETS2TS:
         test = TestDeclgenETS2TS(self.test_env, test_file, flags, get_test_id(
@@ -153,26 +160,36 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
         except Exception as ex:  # pylint: disable=broad-except
             Log.exception_and_raise(_LOGGER, f"Error during the process: {ex}")
 
-    def get_ets_suite_name(self, test_suites: Set[str]) -> str:
+    def get_declgen_ets_name(self, test_suites: Set[str]) -> str:
         name = ""
         if "declgenets2ts_ets_cts" in test_suites:
             name = DeclgenEtsSuites.CTS.value
+        elif "declgenets2ts_ets_func_tests" in test_suites:
+            name = DeclgenEtsSuites.FUNC.value
+        elif "declgenets2ts_ets_runtime" in test_suites:
+            name = DeclgenEtsSuites.RUNTIME.value
         else:
             Log.exception_and_raise(
                 _LOGGER, f"Unsupported test suite: {self.config.test_suites}")
         return name
 
-    def get_ets_suite_dir(self, test_suites: Set[str]) -> str:
-        suite_dir = ""
+    def get_ets_suite_name(self, test_suites: Set[str]) -> str:
+        name = ""
         if "declgenets2ts_ets_cts" in test_suites:
-            suite_dir = DeclgenEtsSuitesDir.CTS.value
+            name = EtsSuites.CTS.value
+        elif "declgenets2ts_ets_func_tests" in test_suites:
+            name = EtsSuites.FUNC.value
+        elif "declgenets2ts_ets_runtime" in test_suites:
+            name = EtsSuites.RUNTIME.value
         else:
             Log.exception_and_raise(
                 _LOGGER, f"Unsupported test suite: {self.config.test_suites}")
-        return suite_dir
+        return name
 
-    def get_declgen_ets_class(self, declgen_ets_suite_name: str) -> Any:
+    def get_declgen_ets_class(self, ets_suite_name: str) -> Any:
         name_to_class = {
-            DeclgenEtsSuites.CTS.value: DeclgenCtsEtsTestSuite
+            EtsSuites.CTS.value: CtsEtsTestSuite,
+            EtsSuites.FUNC.value: FuncEtsTestSuite,
+            EtsSuites.RUNTIME.value: RuntimeEtsTestSuite,
         }
-        return name_to_class.get(declgen_ets_suite_name)
+        return name_to_class.get(ets_suite_name)

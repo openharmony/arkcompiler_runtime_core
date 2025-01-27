@@ -20,8 +20,5 @@ from enum import Enum
 
 class DeclgenEtsSuites(Enum):
     CTS = "declgenets2ts-ets-cts"
-
-
-class DeclgenEtsSuitesDir(Enum):
-    CTS = "ets-cts"
-    
+    FUNC = "declgenets2ts-ets-func-tests"
+    RUNTIME = "declgenets2ts-ets-runtime"
