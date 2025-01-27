@@ -19,6 +19,8 @@ CODEOWNERS           @ctw-ian @dmitriitr @Prof1983 @igelhaus @ragnvald
 bundle.json          @ctw-ian @dmitriitr @Prof1983 @igelhaus @ragnvald @ipetrov
 static_vm_config.gni @ctw-ian @dmitriitr @Prof1983 @igelhaus @ragnvald @ipetrov
 
+arkplatform/ @ctw-ian @dmitriitr @udav @ipetrov @molotkovmikhail @Prof1983 @igelhaus @ragnvald
+
 static_core/ @dmitriitr @Prof1983 @igelhaus @ragnvald
 
 static_core/assembler/                @igelhaus
@@ -101,6 +103,7 @@ static_core/runtime/include/mem/                         @dmitriitr @udav
 static_core/runtime/include/tooling/                     @ragnvald
 static_core/runtime/tests/tooling/                       @ragnvald
 static_core/plugins/ets/runtime/interop_js/*promise*                          @dmitriitr @konstanting
+static_core/plugins/ets/runtime/interop_js/sts_vm_interface_impl*             @dmitriitr @udav @ipetrov @molotkovmikhail
 static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @Prof1983
 static_core/plugins/ets/runtime/intrinsics/escompat_*                         @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/runtime/intrinsics/escompat_taskpool.cpp              @dmitriitr @konstanting @ipetrov
@@ -126,6 +129,7 @@ static_core/plugins/ets/tests/test-lists/                                     @s
 static_core/plugins/ets/tools/declgen_ts2sts/                                 @semenovaleksandr @trubachevilya  @hufeng20 @nazarovkonstantin
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        @dmitriitr @udav @ipetrov
+static_core/plugins/ets/runtime/interop_js/xgc/                               @dmitriitr @udav @ipetrov
 static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting @dmitriitr @udav
 static_core/plugins/ets/stdlib/std/containers/BlockingQueue.sts               @konstanting
 static_core/plugins/ets/stdlib/std/core/Coroutine.sts                         @dmitriitr @konstanting
