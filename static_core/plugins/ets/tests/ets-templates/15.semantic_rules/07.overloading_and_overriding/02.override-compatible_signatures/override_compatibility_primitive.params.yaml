@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -79,10 +79,12 @@ cases:
   - base: |-
       foo(): number {
           res = 1
+          return 1.0
       }
     derived: |-
       foo(): number {
           res = 2
+          return 1.0
       }
     call: |-
       new Derived().foo()
@@ -93,10 +95,12 @@ cases:
     base: |-
       foo(): number {
           res = 1
+          return 1.0
       }
     derived: |-
       override foo(): boolean {
           res = 2
+          return true
       }
     params: override-incompatible return value
 
@@ -104,10 +108,12 @@ cases:
     base: |-
       foo(): number {
           res = 1
+          return 1.0
       }
     derived: |-
       foo(): Number {
           res = 2
+          return new Number()
       }
     params: override-incompatible return value
 
@@ -115,10 +121,12 @@ cases:
     base: |-
       foo(): Number {
           res = 1
+          return new Number()
       }
     derived: |-
       foo(): number {
           res = 2
+          return 1.0
       }
     params: override-incompatible return value
 
@@ -130,6 +138,7 @@ cases:
     derived: |-
       foo(): number {
           res = 2
+          return 1.0
       }
     params: override-incompatible return value
 
@@ -137,6 +146,7 @@ cases:
     base: |-
       foo(): number {
           res = 1
+          return 1.0
       }
     derived: |-
       foo(): void {
