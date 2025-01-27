@@ -22,7 +22,7 @@ files:
 import u from "../../07.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_union"
 
 function main(): void {
-    assertEQ(u, undefined);
+    assertTrue(u == undefined);
     u = new Number(4.1);
     assertEQ(u, 4.1);
     u = "some str";

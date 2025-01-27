@@ -187,7 +187,7 @@ intrinsics:
       args: [ ref ]
     impl: ark::ets::intrinsics::CompilerEtsTypeof
     set_flags: [ no_nullptr ]
-    clear_flags: [ acc_read, no_dce, no_cse, no_hoist ]
+    clear_flags: [ acc_read, no_dce ]
     peephole_func: PeepholeTypeof
 
   - name: CompilerEtsIstrue
