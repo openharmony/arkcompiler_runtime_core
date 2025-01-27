@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -82,7 +82,8 @@ def test_compile_api(playground_client, code, disasm, run_compile, options):
     resp = playground_client.post("/run" if run_compile else "/compile", json={
         "code": code,
         "disassemble": disasm,
-        "options": options
+        "options": options,
+        "verifier": False
     })
     output_msg = f"testing output: {code}"
     output_with_opt = f"testing output: {code}, {list(options.keys())}"
@@ -93,7 +94,8 @@ def test_compile_api(playground_client, code, disasm, run_compile, options):
             "error": error_msg,
             "exit_code": 0
         },
-        "disassembly": None
+        "disassembly": None,
+        "verifier": None
     }
     if run_compile:
         result["run"] = {

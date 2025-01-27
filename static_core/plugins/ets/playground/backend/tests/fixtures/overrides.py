@@ -22,7 +22,7 @@ class FakeRunner:
         return list(options.keys())
 
     @staticmethod
-    async def compile_run_arkts(code: str, options: list, disasm: bool = False, **kwargs):
+    async def compile_run_arkts(code: str, options: list, disasm: bool = False, verifier: bool = False, **kwargs):
         _ = kwargs
         res = {
             "compile": {
@@ -35,7 +35,8 @@ class FakeRunner:
                 "error": f"testing error: {code}",
                 "exit_code": 0
             },
-            "disassembly": None
+            "disassembly": None,
+            "verifier": None
         }
         if disasm:
             res["disassembly"] = {
@@ -44,23 +45,36 @@ class FakeRunner:
                 "code": "disasm code",
                 "exit_code": 0
             }
+        if verifier:
+            res["verifier"] = {
+                "output": f"Verifier testing output: {code}",
+                "error": f"Verifier testing error: {code}",
+                "exit_code": 0
+            }
         return res
 
     @staticmethod
-    async def compile_arkts(code: str, options: list, disasm: bool = False):
+    async def compile_arkts(code: str, options: list, disasm: bool = False, verifier: bool = False):
         res = {
             "compile": {
                 "output": f"testing output: {code}, {options}",
                 "error": f"testing error: {code}",
                 "exit_code": 0
             },
-            "disassembly": None
+            "disassembly": None,
+            "verifier": None
         }
         if disasm:
             res["disassembly"] = {
                 "output": f"testing output: {code}",
                 "error": f"testing error: {code}",
                 "code": "disasm code",
+                "exit_code": 0
+            }
+        if verifier:
+            res["verifier"] = {
+                "output": f"Verifier testing output: {code}",
+                "error": f"Verifier testing error: {code}",
                 "exit_code": 0
             }
         return res

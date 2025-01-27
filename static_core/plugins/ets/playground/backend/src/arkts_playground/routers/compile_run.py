@@ -34,7 +34,8 @@ async def compile_arkts_code(body: CompileRequestModel,
     result = await runner.compile_arkts(
         body.code,
         options=runner.parse_compile_options(body.options),
-        disasm=body.disassemble
+        disasm=body.disassemble,
+        verifier=body.verifier
     )
     return CompileResponse(**result)
 
@@ -49,7 +50,8 @@ async def compile_run_arkts_code(body: CompileRequestModel,
         body.code,
         options=runner.parse_compile_options(body.options),
         disasm=body.disassemble,
-        runtime_verify=body.runtime_verify
+        runtime_verify=body.runtime_verify,
+        verifier=body.verifier
     )
     return RunResponse(**result)
 
