@@ -880,6 +880,10 @@ public:
     {
         return GetOpcode() == Opcode::CallStatic || GetOpcode() == Opcode::CallResolvedStatic || IsStaticLaunchCall();
     }
+    bool IsNativeCall() const
+    {
+        return GetOpcode() == Opcode::CallNative || GetOpcode() == Opcode::CallResolvedNative;
+    }
     bool IsMethodResolver() const
     {
         return opcode_ == Opcode::ResolveVirtual || opcode_ == Opcode::ResolveStatic;
@@ -2974,6 +2978,16 @@ public:
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
+    void SetIsNative(bool isNative)
+    {
+        SetField<IsNativeFlag>(isNative);
+    }
+
+    bool GetIsNative() const
+    {
+        return GetField<IsNativeFlag>();
+    }
+
     void SetCanNativeException(bool isNative)
     {
         SetField<IsNativeExceptionFlag>(isNative);
@@ -2988,11 +3002,16 @@ public:
 
     bool IsRuntimeCall() const override
     {
+        if (IsNativeCall()) {
+            // checking runtime_call flag is enough
+            return Base::IsRuntimeCall();
+        }
         return !IsInlined();
     }
 
 protected:
-    using IsNativeExceptionFlag = LastField::NextFlag;
+    using IsNativeFlag = LastField::NextFlag;
+    using IsNativeExceptionFlag = IsNativeFlag::NextFlag;
     using LastField = IsNativeExceptionFlag;
 };
 

@@ -185,6 +185,7 @@ private:
      * Returns true if a reference escapes the scope of current function:
      * Various function calls, constructors and stores to another objects' fields, arrays
      */
+    // CC-OFFNXT(huge_method) big switch case
     static bool IsEscapingAlias(const Inst *inst)
     {
         for (auto &user : inst->GetUsers()) {
@@ -221,6 +222,12 @@ private:
                 case Opcode::CallVirtual:
                 case Opcode::CallDynamic:
                     return true;
+                case Opcode::CallNative:
+                case Opcode::CallResolvedNative:
+                    if (user.GetInst()->IsRuntimeCall()) {
+                        return true;
+                    }
+                    break;
                 case Opcode::Intrinsic:
                     if (inst->GetFlagsMask() != 0) {
                         return true;

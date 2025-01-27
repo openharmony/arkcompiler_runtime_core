@@ -2196,6 +2196,18 @@ void EncodeVisitor::VisitCallDynamic(GraphVisitor *visitor, Inst *inst)
     enc->GetCodegen()->EmitCallDynamic(inst->CastToCallDynamic());
 }
 
+void EncodeVisitor::VisitCallNative(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<EncodeVisitor *>(visitor);
+    enc->GetCodegen()->EmitCallNative(inst->CastToCallNative());
+}
+
+void EncodeVisitor::VisitCallResolvedNative(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<EncodeVisitor *>(visitor);
+    enc->GetCodegen()->EmitCallNative(inst->CastToCallResolvedNative());
+}
+
 void EncodeVisitor::VisitLoadConstantPool(GraphVisitor *visitor, Inst *inst)
 {
     if (TryLoadConstantPoolGen(inst, static_cast<EncodeVisitor *>(visitor))) {

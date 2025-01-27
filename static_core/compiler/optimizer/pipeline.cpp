@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,7 @@
 #include "optimizer/optimizations/lse.h"
 #include "optimizer/optimizations/memory_barriers.h"
 #include "optimizer/optimizations/memory_coalescing.h"
+#include "optimizer/optimizations/native_call_optimization.h"
 #include "optimizer/optimizations/optimize_string_concat.h"
 #include "optimizer/optimizations/peepholes.h"
 #include "optimizer/optimizations/phi_type_resolving.h"
@@ -192,6 +193,7 @@ bool Pipeline::RunOptimizations()
         LOG(WARNING, COMPILER) << "Compiler detected incorrect monitor policy";
         return false;
     }
+    graph->RunPass<NativeCallOptimization>();
     graph->RunPass<Peepholes>();
     graph->RunPass<BranchElimination>();
     graph->RunPass<ValNum>();

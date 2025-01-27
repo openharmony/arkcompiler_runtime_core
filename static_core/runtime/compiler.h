@@ -292,6 +292,18 @@ public:
         return !(methodPtr->IsIntrinsic() || methodPtr->IsNative() || methodPtr->IsAbstract());
     }
 
+    bool IsMethodNative(MethodPtr method) const override
+    {
+        auto *methodPtr = MethodCast(method);
+        return methodPtr->IsNative();
+    }
+
+    void *GetMethodNativePointer(MethodPtr method) const override
+    {
+        auto *methodPtr = MethodCast(method);
+        return methodPtr->GetNativePointer();
+    }
+
     bool IsMethodStaticConstructor([[maybe_unused]] MethodPtr method) const override;
 
     std::string GetFileName(MethodPtr method) const override

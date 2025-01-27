@@ -268,6 +268,7 @@ private:
     static PANDA_PUBLIC_API void VisitLoadUnresolvedType(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitLoadFromConstantPool(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitLoadImmediate([[maybe_unused]] GraphVisitor *v, Inst *inst);
+    static PANDA_PUBLIC_API void VisitCallNative(GraphVisitor *v, Inst *inst);
 
 #include "visitor.inc"
 

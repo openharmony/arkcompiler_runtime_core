@@ -314,6 +314,11 @@ public:
         return GetPandaMethod()->GetClassSourceFile();
     }
 
+    static const EtsMethod *FromRuntimeMethod(const Method *method)
+    {
+        return reinterpret_cast<const EtsMethod *>(method);
+    }
+
     static EtsMethod *FromRuntimeMethod(Method *method)
     {
         return reinterpret_cast<EtsMethod *>(method);

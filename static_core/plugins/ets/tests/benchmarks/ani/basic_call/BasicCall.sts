@@ -25,15 +25,15 @@ class BasicCall {
     static OBJECT: Object = new Object();
     // NOTE (oignatenko) #699 enhance VMB to benchmark native methods directly
     public static native basic_call_s(a: int, b: string, c: long, d: Object): string;
-    // NOTE (oignatenko) decorator doesn't compile yet: @native.critical
+    @ani.unsafe.Direct
     public static native basic_call_sc(a: int, b: int, c: long, d: long): long;
-    // NOTE (oignatenko) decorator doesn't compile yet: @native.fast
+    @ani.unsafe.Quick
     public static native basic_call_sf(a: int, b: string, c: long, d: Object): string;
     public native basic_call_v(a: int, b: string, c: long, d: Object): string;
-    // NOTE (oignatenko) decorator doesn't compile yet: @native.fast
+    @ani.unsafe.Quick
     public native basic_call_vf(a: int, b: string, c: long, d: Object): string;
     public final native basic_call_v_final(a: int, b: string, c: long, d: Object): string;
-    // NOTE (oignatenko) decorator doesn't compile yet: @native.fast
+    @ani.unsafe.Quick
     public final native basic_call_vf_final(a: int, b: string, c: long, d: Object): string;
     public static native basic_call_baseline(): long;
 

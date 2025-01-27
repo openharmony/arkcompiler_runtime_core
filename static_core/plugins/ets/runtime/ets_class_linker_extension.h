@@ -72,10 +72,7 @@ public:
 
     const void *GetNativeEntryPointFor(Method *method) const override;
 
-    bool CanThrowException([[maybe_unused]] const Method *method) const override
-    {
-        return true;
-    }
+    bool CanThrowException([[maybe_unused]] const Method *method) const override;
 
     ClassLinkerErrorHandler *GetErrorHandler() override
     {

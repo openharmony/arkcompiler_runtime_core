@@ -53,10 +53,21 @@ enum class EtsNapiType {
 
 extern "C" void EtsAsyncEntryPoint();
 
-static EtsNapiType GetEtsNapiType([[maybe_unused]] Method *method)
+static EtsNapiType GetEtsNapiType(Method *method)
 {
-    // NOTE(#18101): support other NAPI types after annotations have been implemented.
-    return EtsNapiType::GENERIC;
+    EtsNapiType napiType = EtsNapiType::GENERIC;
+    const panda_file::File &pf = *method->GetPandaFile();
+    panda_file::MethodDataAccessor mda(pf, method->GetFileId());
+    mda.EnumerateAnnotations([&pf, &napiType](panda_file::File::EntityId annId) {
+        panda_file::AnnotationDataAccessor ada(pf, annId);
+        const char *className = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
+        if (className == panda_file_items::class_descriptors::ANI_UNSAFE_QUICK) {
+            napiType = EtsNapiType::FAST;
+        } else if (className == panda_file_items::class_descriptors::ANI_UNSAFE_DIRECT) {
+            napiType = EtsNapiType::CRITICAL;
+        }
+    });
+    return napiType;
 }
 
 static std::string_view GetClassLinkerErrorDescriptor(ClassLinker::Error error)
@@ -458,6 +469,16 @@ EtsClassLinkerExtension::~EtsClassLinkerExtension()
 
     // References from `EtsClassLinkerContext` are removed in their destructors, need to process only boot context.
     RemoveRefToLinker(GetBootContext());
+}
+
+bool EtsClassLinkerExtension::CanThrowException(const Method *method) const
+{
+    if (!method->IsNative()) {
+        return true;
+    }
+
+    const EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(method);
+    return !etsMethod->IsCriticalNative();
 }
 
 const void *EtsClassLinkerExtension::GetNativeEntryPointFor(Method *method) const

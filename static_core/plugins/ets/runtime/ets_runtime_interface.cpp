@@ -402,4 +402,9 @@ void *EtsRuntimeInterface::GetDoubleToStringCache() const
     return ark::ets::PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
 }
 
+bool EtsRuntimeInterface::IsNativeMethodOptimizationEnabled() const
+{
+    return true;
+}
+
 }  // namespace ark::ets

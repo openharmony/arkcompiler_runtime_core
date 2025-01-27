@@ -855,6 +855,20 @@ instructions:
     abckit_flags: [can_throw, heap_inv, no_dce, no_hoist, no_cse, barrier, runtime_call, call, acc_write, acc_read]
     description: Call runtime intrinsics directly.
 
+  - opcode: CallNative
+    base: CallInst
+    signature: [d-real-void, real-dyn, save_state]
+    flags: [can_throw, heap_inv, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, call]
+    modes: [jit_aot]
+    description: Call Native API method directly, without bridge.
+
+  - opcode: CallResolvedNative
+    base: CallInst
+    signature: [d-real-void, ptr, real-dyn, save_state]
+    flags: [can_throw, heap_inv, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, call]
+    modes: [jit_aot]
+    description: Calls native method resolved by ResolveStatic/ResolveVirtual. First input is a method address.
+
   - opcode: Builtin
     base: IntrinsicInst
     signature: [d-real-void, real-dyn]
