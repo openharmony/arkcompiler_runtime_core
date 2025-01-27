@@ -177,7 +177,10 @@ size_t STSVMInterfaceImpl::VMBarrier::IncrementCurrentWaitersCount()
 
 bool STSVMInterfaceImpl::VMBarrier::WaitNextEpochOrSignal(const NoWorkPred &noWorkPred)
 {
-    condVar_.Wait(&barrierMutex_);
+    do {
+        condVar_.Wait(&barrierMutex_);
+        // This while is needed only to avoid problems with spurious wakeups
+    } while (currentWaitersCount_ != 0);
     return CheckNoWorkPred(noWorkPred);
 }
 
