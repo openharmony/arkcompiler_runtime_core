@@ -3,5 +3,3 @@ std/core/SortInternalTestByte.sts
 std/core/SortInternalTestInt.sts
 # #20525
 std/concurrency/AsyncLockTest.sts
-# #20130
-std/core/std_core_typeduarrays_function2__BigUint64Array.sts

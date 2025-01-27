@@ -1,5 +1,4 @@
 # 20905 Multiline string literals not supported
-03.types/08.reference_types/12.union_types/ut_6.sts
 03.types/08.reference_types/12.union_types/ut_7.sts
 
 # 20907 No CTE when multiple numeric types in a union
@@ -159,19 +158,12 @@
 
 # 20939 Unexpected NoSuchFieldError for a field in a superclass
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_1.sts
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_2.sts
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_4.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_7.sts
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_12.sts
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_1.sts
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_2.sts
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_4.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_7.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_11.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_11.sts
 
 # 20940 SegFault when accessing common union members
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_10.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_12.sts
 
 # es2panda fails: panda#14423 Boxed floating values are different from the same unboxed
@@ -254,10 +246,7 @@
 07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_69.sts
 07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_70.sts
 07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_71.sts
-#19956
-09.classes/04.access_modifiers/access_modifiers_14.sts
-09.classes/04.access_modifiers/access_modifiers_15.sts
-09.classes/04.access_modifiers/access_modifiers_16.sts
+
 #19909
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_2.sts
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_3.sts
@@ -470,7 +459,6 @@
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_14.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_16.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_4.sts
-07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_6.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_9.sts
 # end of es2panda fails
 
@@ -813,13 +801,6 @@
 # es2panda fails: panda:14653 es2panda segfault when optional lambda is omitted
 17.experimental_features/12.trailing_lambda/trlambda_func_15.sts
 # end of es2panda fails
-
-13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_0.sts
-13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_1.sts
-13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_2.sts
-13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_3.sts
-
-13.compilation_units_packages_and_modules/10.export_directives/04.re-export_directive/re-export_all_by_old_names.sts
 
 # 15095
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/hiding_methods_with_different_access_modifiers_2.sts
@@ -1197,35 +1178,30 @@
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/assn_var/assn-var-lit_2.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/assn_var/assn-var-lit_3.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/assn_var/assn-var-lit_4.sts
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/assn_var/assn-var-lit_6.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/assn_var/assn-var-lit_7.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_func/call-func-lit_0.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_func/call-func-lit_1.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_func/call-func-lit_2.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_func/call-func-lit_3.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_func/call-func-lit_4.sts
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_func/call-func-lit_6.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_func/call-func-lit_7.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_lmbd/call-lmbd-lit_0.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_lmbd/call-lmbd-lit_1.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_lmbd/call-lmbd-lit_2.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_lmbd/call-lmbd-lit_3.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_lmbd/call-lmbd-lit_4.sts
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_lmbd/call-lmbd-lit_6.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_lmbd/call-lmbd-lit_7.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_meth/call-meth-lit_0.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_meth/call-meth-lit_1.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_meth/call-meth-lit_2.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_meth/call-meth-lit_3.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_meth/call-meth-lit_4.sts
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_meth/call-meth-lit_6.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_meth/call-meth-lit_7.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-lit_0.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-lit_1.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-lit_2.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-lit_3.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-lit_4.sts
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-lit_6.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-lit_7.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_obj/comp-obj-lit_0.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_obj/comp-obj-lit_1.sts
@@ -1240,21 +1216,18 @@
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_field/decl-field-lit_2.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_field/decl-field-lit_3.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_field/decl-field-lit_4.sts
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_field/decl-field-lit_6.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_field/decl-field-lit_7.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var-lit_0.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var-lit_1.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var-lit_2.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var-lit_3.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var-lit_4.sts
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var-lit_6.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var-lit_7.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_cons/call-cons-lit_0.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_cons/call-cons-lit_1.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_cons/call-cons-lit_2.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_cons/call-cons-lit_3.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_cons/call-cons-lit_4.sts
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_cons/call-cons-lit_6.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_cons/call-cons-lit_7.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/spec8.sts
 
@@ -1283,7 +1256,6 @@
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_9.sts
 
 # 20336, 20073 es2panda endlessly outputs identical errors in the console until gets killed by timeout
-07.expressions/06.spread_expression/spex_const_27.sts
 07.expressions/06.spread_expression/spex_const_31.sts
 07.expressions/06.spread_expression/spex_const_44.sts
 07.expressions/06.spread_expression/spex_const_45.sts
@@ -1469,9 +1441,6 @@
 # es2panda: #16409 Cannot declare class without body (ambient declarations)
 14.ambient_declarations/ambient_declarations_56.sts
 
-# es2panda: #16415 Cannot declare static field in generic ambient class
-14.ambient_declarations/ambient_declarations_24.sts
-
 # 17358: Avoid variable and type alias name collisions
 02.lexical_elements/07.keywords/types_8.sts
 02.lexical_elements/07.keywords/types_10.sts
@@ -1539,8 +1508,6 @@
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_parameter_6.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_array_3.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_function_6.sts
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_parameter_11.sts
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_parameter_5.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_parameter_7.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatible_signature_6.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatible_signature_7.sts
@@ -1794,9 +1761,7 @@
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_0.sts
 
 # 20379 Abstract class is not compatible with Partial<T>/Required<T>
-05.generics/03.utility_types/01.partial_utility_type/partial_abstract.sts
 05.generics/03.utility_types/02.required_utility_type/required_abstract.sts
-05.generics/03.utility_types/02.required_utility_type/required_module_abstract.sts
 
 # 20380 multiple optional parameters in class
 05.generics/03.utility_types/01.partial_utility_type/partial_generic.sts
@@ -1810,9 +1775,6 @@
 # 20774 rest parameter doesn`t work with tuples
 03.types/08.reference_types/04.literal_types/function_literal_type_18.sts
 # end of 20774
-
-# 17053 Cannot create array of nullish tuples
-07.expressions/04.array_literal/array_literal_13.sts
 
 # 20761 no support for package initializer
 13.compilation_units_packages_and_modules/07.compilation_unit_initialization/package/init_once/test.sts
