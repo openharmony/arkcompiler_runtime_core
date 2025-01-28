@@ -619,6 +619,7 @@ add_target_to_group(ets_time02_tests ets_code_verifier_tests)
 add_target_to_group(ets_time02_tests ets_run_jit_ets_code_tests)
 add_target_to_group(ets_time02_tests ets_tests_equals)
 add_target_to_group(ets_time02_tests ets_modules_tests)
+add_target_to_group(ets_time02_tests ets_app_linker_context_tests)
 
 if (PANDA_USE_CUSTOM_SIGNAL_STACK)
     add_target_to_group(ets_time01_tests sampler_asm_test_suite)

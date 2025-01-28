@@ -69,6 +69,7 @@ namespace ark::ets {
 class DoubleToStringCache;
 class FloatToStringCache;
 class LongToStringCache;
+class EtsAbcRuntimeLinker;
 class EtsFinalizableWeakRef;
 
 class PandaEtsVM final : public PandaVM, public EtsVM, public ani_vm {  // NOLINT(fuchsia-multiple-inheritance)
@@ -369,6 +370,8 @@ public:
 
     PANDA_PUBLIC_API void AddRootProvider(mem::RootProvider *provider);
     PANDA_PUBLIC_API void RemoveRootProvider(mem::RootProvider *provider);
+
+    EtsAbcRuntimeLinker *CreateApplicationRuntimeLinker(const PandaVector<PandaString> &abcFiles);
 
 protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;

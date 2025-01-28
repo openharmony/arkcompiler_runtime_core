@@ -42,6 +42,7 @@
 #include "runtime/coroutines/threaded_coroutine_manager.h"
 #include "runtime/mem/lock_config_helper.h"
 #include "plugins/ets/stdlib/native/init_native_methods.h"
+#include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_finalizable_weak_ref_list.h"
 
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
@@ -822,6 +823,50 @@ void PandaEtsVM::BeforeShutdown()
     auto *coreList = GetGlobalObjectStorage()->Get(finalizableWeakRefList_);
     auto *weakRefList = EtsFinalizableWeakRefList::FromCoreType(coreList);
     weakRefList->TraverseAndFinalize();
+}
+
+EtsAbcRuntimeLinker *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector<PandaString> &abcFiles)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+
+    [[maybe_unused]] ScopedManagedCodeThread sj(coro);
+    [[maybe_unused]] EtsHandleScope scope(coro);
+
+    const auto exceptionHandler = [this, coro]() {
+        ASSERT(coro->HasPendingException());
+        [[maybe_unused]] ScopedNativeCodeThread nj(coro);
+        HandleUncaughtException();
+        UNREACHABLE();
+    };
+
+    auto *klass = classLinker_->GetAbcRuntimeLinkerClass();
+    EtsHandle<EtsAbcRuntimeLinker> linkerHandle(coro, EtsAbcRuntimeLinker::FromEtsObject(EtsObject::Create(klass)));
+
+    EtsHandle<EtsObjectArray> pathsHandle(
+        coro, EtsObjectArray::Create(classLinker_->GetClassRoot(EtsClassRoot::STRING), abcFiles.size()));
+    for (size_t idx = 0; idx < abcFiles.size(); ++idx) {
+        auto *str = EtsString::CreateFromMUtf8(abcFiles[idx].data(), abcFiles[idx].length());
+        if (UNLIKELY(str == nullptr)) {
+            // Handle possible OOM
+            exceptionHandler();
+        }
+        pathsHandle->Set(idx, str->AsObject());
+    }
+    std::array args {Value(linkerHandle->GetCoreType()), Value(nullptr), Value(pathsHandle->GetCoreType())};
+
+    auto *ctor =
+        klass->GetDirectMethod(GetLanguageContext().GetCtorName(), "Lstd/core/RuntimeLinker;[Lstd/core/String;:V");
+    ASSERT(ctor != nullptr);
+    ctor->GetPandaMethod()->InvokeVoid(coro, args.data());
+    if (coro->HasPendingException()) {
+        // Print exceptions thrown in constructor (e.g. if file not found) and exit
+        exceptionHandler();
+    }
+
+    // Save global reference to created application `AbcRuntimeLinker`.
+    GetGlobalObjectStorage()->Add(linkerHandle->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+    return linkerHandle.GetPtr();
 }
 
 /* static */

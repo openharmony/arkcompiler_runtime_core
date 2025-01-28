@@ -88,7 +88,7 @@ foreach(test ${linker_tests})
 endforeach()
 
 function(test_runtime_linker_extensions test)
-    file(GLOB abc_runtime_linker_sources "${CMAKE_CURRENT_SOURCE_DIR}/abc_runtime_linker_sources/*.sts")
+    file(GLOB abc_runtime_linker_sources "${linker_tests_in_dir}/abc_runtime_linker_sources/*.sts")
     set(additional_abc_dir "${linker_tests_out_dir}/abc_runtime_linker_sources")
     set(additional_abc_files_list "")
     set(compilations_targets_list "")
@@ -114,3 +114,28 @@ function(test_runtime_linker_extensions test)
 endfunction()
 
 test_runtime_linker_extensions(runtime_linker_extensions)
+
+function(test_app_linker_context_exception TARGET WORK_DIR)
+    # Must provide a valid abc file, so that runtime would start creating application linker context
+    set(EXISTING_SOURCE "${linker_tests_in_dir}/abc_runtime_linker_sources/additional1.sts")
+    set(EXISTING_ABC "${WORK_DIR}/${TARGET}-existing.abc")
+    set(ABC_TARGET ${TARGET}-abc)
+    compile_ets_code(${EXISTING_SOURCE} ${EXISTING_ABC} ${ABC_TARGET})
+
+    # Provide non-existing abc file on which application linker context will fail
+    set(NON_EXISTING_ABC_FILE "${WORK_DIR}/${TARGET}-non-existing.abc")
+
+    add_custom_target(${TARGET}
+        COMMAND ${linker_tests_in_dir}/test_app_linker_context_exception.sh
+            --run-prefix="${PANDA_RUN_PREFIX}"
+            --ark-binary=$<TARGET_FILE:ark>
+            --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
+            --non-existing-abc=${NON_EXISTING_ABC_FILE}
+            --entry-abc=${EXISTING_ABC}
+            --entrypoint=additional1.ETSGLOBAL::main
+        DEPENDS ark etsstdlib ${ABC_TARGET}
+    )
+endfunction()
+
+test_app_linker_context_exception(ets_app_linker_context_tests ${linker_tests_out_dir})
+add_dependencies(ets_tests ets_app_linker_context_tests)
