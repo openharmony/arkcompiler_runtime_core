@@ -30,7 +30,7 @@ class A{{loop.index}} {
 function main() {
 {%- for v in c['values'] %}
     let a{{loop.index}}: A{{loop.index}} = new A{{loop.index}}();
-    assertTrue(a{{loop.index}}.d == {{v.val or v.expr}})
+    assertEQ(a{{loop.index}}.d, {{v.val or v.expr}})
 {%- endfor %}
 }
 {%- endfor %}

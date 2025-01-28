@@ -1,0 +1,147 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - decl: |-
+          const s: int = 100
+      use: |-
+          // assignment-like context, variable declaration
+          const v1: Color = s
+          assertEQ(v1, Color.Green)
+
+          const v2: Color = 0
+          const v3: Color = 101
+          const v4: int = Color.Green + Color.Red + Color.Blue
+          assertEQ(v4, 201)
+
+          // assignment-like context, constant declaration
+          const c1: Color = 101
+          assertEQ(c1, Color.Blue)
+
+          const c2: int = Color.Green + c1
+          assertEQ(c2, 201)
+
+    - decl: |-
+          const s: Color = 100
+          const v: Color = 0
+      use: |-
+          // assignment-like context, variable assignment
+          v = 0
+          assertEQ(v, Color.Red)
+
+          v = Color.Green + 1
+          assertEQ(v, Color.Blue)
+
+          v = Color.Red + s + 1
+          assertEQ(v, Color.Blue)
+
+    - decl: |-
+          const s: Color = 1
+          class A {
+              fld1: Color = 0
+              fld2: Color = 100
+              fld3: Color = 101
+          }
+      use: |-
+          // assignment-like context, field declaration
+          const a: A = new A()
+          assertEQ(a.fld1, Color.Red)
+          assertEQ(a.fld2, Color.Green)
+          assertEQ(a.fld3, Color.Blue)
+
+    - decl: |-
+          const s: int = 100
+          class A {
+              fld1: Color
+              fld2: Color
+              fld3: Color
+          }
+      use: |-
+          // assignment-like context, field assignment
+          const a: A = new A()
+          a.fld1 = 0
+          a.fld2 = 1 + Color.Green
+          a.fld3 = s
+          assertEQ(a.fld1, Color.Red)
+          assertEQ(a.fld2, Color.Blue)
+          assertEQ(a.fld3, Color.Green)
+
+    - decl: |-
+          const s: int = 100
+          function foo(p: Color): int {
+              return p + 1
+          }
+      use: |-
+          // call context, function
+          assertEQ(foo(Color.Red), 1)
+          assertEQ(foo(Color.Green + Color.Blue + s), 301)
+          assertEQ(foo(Color.Red + Color.Green + Color.Blue), 201)
+
+    - decl: |-
+          const s: Color = 100
+          class A {
+              meth(p: int): Color {
+                  return p + 1
+              }
+          }
+      use: |-
+          // call context, method
+          const a: A = new A()
+          assertEQ(a.meth(s), Color.Blue)
+          assertEQ(a.meth(Color.Red + s), Color.Green)
+          assertEQ(a.meth(s - Color.Green), Color.Red)
+
+    - decl: |-
+          const s: int = 100
+          class A {
+              fld: Color
+              constructor(p: int) {
+                  this.fld = p
+              }
+          }
+      use: |-
+          // call context, constructor
+          assertEQ(new A(Color.Red).fld, Color.Red)
+          assertEQ(new A(Color.Red + s).fld, Color.Green)
+          assertEQ(new A(Color.Green + 1).fld, Color.Blue)
+
+    - decl: |-
+          const s: int = 42
+      use: |-
+          // call context, lambda
+          assertEQ(((p: int): Color => { return p })(0), Color.Red)
+          assertEQ(((p: int): Color => { return p })(Color.Green + 1), Color.Blue)
+          assertEQ(((p: int): Color => { return p })(100), Color.Green)
+
+    - decl: |-
+          const s: int = 100
+          class A {
+              fld: Color
+          }
+      use: |-
+          // composite object
+          const a: A = { fld: s }
+          assertEQ(a.fld, Color.Green)
+          a = { fld: s + 1 + Color.Red }
+          assertEQ(a.fld, Color.Blue)
+
+    - decl: |-
+          const s: int = 100
+      use: |-
+          // composite array
+          const v: Color[] = [ s ]
+          assertEQ(v[0], Color.Green)
+          v = [ Color.Red + 0, Color.Green + 1 ]
+          assertEQ(v[0], Color.Red)
+          assertEQ(v[1], Color.Blue)

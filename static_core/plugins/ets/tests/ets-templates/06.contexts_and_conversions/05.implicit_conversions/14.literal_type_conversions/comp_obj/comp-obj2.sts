@@ -25,7 +25,7 @@ class A { fld: {{c.to_type}} }
 {%- for v in c['values'] %}
 function cvt{{loop.index}}(p: {{v.type}}) {
     let d: A = { fld: p };
-    assertTrue(d.fld == {{v.val or v.expr}})
+    assertEQ(d.fld, {{v.val or v.expr}})
 }
 {%- endfor %}
 

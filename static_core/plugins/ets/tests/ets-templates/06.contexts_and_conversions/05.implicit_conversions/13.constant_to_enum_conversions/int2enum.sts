@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,23 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 {%- for c in cases %}
-
 /*---
-desc: Composite context, interface field, literal type to type of literal conversion, implicit
-params: to {{c.to_type}}
-tags: [{{c.tags}}]
+desc: >-
+    A value of an enumeration type is converted to type int
+    if enumeration constants of this type are of type int.
 ---*/
+enum Color { Red, Green = 100, Blue }
 
-{%- for t in c['values'] %}
-interface J{{loop.index}} { fld: {{c.to_type}} }
-let s{{loop.index}}: {{t.type}} = {{t.expr}};
-{%- endfor %}
+{{c.decl}}
 
 function main() {
-{%- for t in c['values'] %}
-    let d{{loop.index}}: J{{loop.index}} = { fld: s{{loop.index}} };
-    assertEQ(d{{loop.index}}.fld, {{t.val or t.expr}})
-{%- endfor %}
+    {{c.use|indent}}
 }
 {%- endfor %}

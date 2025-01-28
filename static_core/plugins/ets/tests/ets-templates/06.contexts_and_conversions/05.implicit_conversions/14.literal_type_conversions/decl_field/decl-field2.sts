@@ -34,7 +34,7 @@ function cvt{{loop.index}}(p: {{v.type}}) {
 function main() {
 {%- for v in c['values'] %}
     cvt{{loop.index}}({{v.expr}});
-    assertTrue(d == {{v.val or v.expr}})
+    assertEQ(d, {{v.val or v.expr}})
 {%- endfor %}
 }
 {%- endfor %}
