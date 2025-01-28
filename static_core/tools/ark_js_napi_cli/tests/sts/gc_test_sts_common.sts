@@ -92,7 +92,7 @@ function RunPandaGC(): void {
 
 function RunInteropGC(): void {
     try {
-        GC.waitForFinishGC(GC.startGC(GC.CROSSREF_CAUSE));
+        JSRuntime.xgc();
     } catch(e) {
         assert false: "Unexpected exception during interop GC";
     }

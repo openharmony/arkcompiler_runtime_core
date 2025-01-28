@@ -183,7 +183,11 @@ if (with_stdlib) {
 
   group("hybrid_tests") {
     if (ark_standalone_build) {
-      deps = [ "$ark_root/plugins/ets/tests/interop_js/test_helper:interop_test_helper" ]
+      testonly = true
+      deps = [
+        "$ark_root/plugins/ets/tests/interop_js/test_helper:interop_test_helper",
+        "$ark_root/tools/ark_js_napi_cli:HybridXGCTests",
+      ]
     }
   }
 }
