@@ -1818,3 +1818,13 @@
 
 # 22409
 07.expressions/20.unary_expressions/08.logical_complement/logical_complement_char.sts
+
+
+# 22450 - should throw an exception
+06.contexts_and_conversions/04.casting_contexts_and_conversions/02.class_or_interface_casting_conversions/cce_5.sts
+
+
+# 21888 - not supported yet
+17.experimental_features/19.packages/02.package_initializer/p1/init1_1.sts
+17.experimental_features/19.packages/02.package_initializer/p2/init2_1.sts
+17.experimental_features/19.packages/02.package_initializer/p4/init4_1.sts
