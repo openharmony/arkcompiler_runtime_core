@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2024 Huawei Device Co., Ltd.
+Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -44,23 +44,23 @@ class C {
 
 function main() {
   let z: Readonly<I> = {i: 1.8, j: "some str"}
-  assert(z.i == 1.8)
-  assert(z.j == "some str")
+  assertTrue(z.i == 1.8)
+  assertTrue(z.j == "some str")
   z = new A(1.9, "new str")
-  assert(z.i == 1.9)
-  assert(z.j == "new str")
+  assertTrue(z.i == 1.9)
+  assertTrue(z.j == "new str")
 
   let x: Readonly<A> = new A(1.8, "some str")
-  assert(x.i == 1.8)
-  assert(x.j == "some str")
+  assertTrue(x.i == 1.8)
+  assertTrue(x.j == "some str")
   x = {i: 1.9, j: "new str"}
-  assert(x.i == 1.9)
-  assert(x.j == "new str")
+  assertTrue(x.i == 1.9)
+  assertTrue(x.j == "new str")
 
   let y: Readonly<C> = {i: 1.8, j: "some str"}
-  assert(y.i == 1.8)
-  assert(y.j == "some str")
+  assertTrue(y.i == 1.8)
+  assertTrue(y.j == "some str")
   y = new C( 1.5, "new str")
-  assert(y.i == 1.5)
-  assert(y.j == "new str")
+  assertTrue(y.i == 1.5)
+  assertTrue(y.j == "new str")
 }

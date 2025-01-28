@@ -85,7 +85,7 @@ cases:
     - decl: |-
           enum Color { Red = "red", Green = "green", Blue = "blue" }
           function foo(p: string): boolean {
-              return p ==  "blue"
+              return p == "blue"
           }
       use: |-
           assertEQ(foo(Color.Red), false)

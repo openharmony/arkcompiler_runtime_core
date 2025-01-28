@@ -26,7 +26,7 @@ function check(): boolean {
 }
 
 function pass(): void {
-  assert true;
+  assertTrue( true )
 }
 
 {

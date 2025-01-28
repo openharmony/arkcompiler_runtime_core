@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,16 +18,16 @@ cases:
         class B extends A {};
     call: |-
         let z: A = new A();
-        assert(z instanceof A);
+        assertTrue(z instanceof A);
         let x: B = new B();
-        assert(x instanceof A);
+        assertTrue(x instanceof A);
 
   - import: |-
         import {A} from "./modules/declarations.sts"  // Base class
         import {B} from "./modules/declarations.sts"  // Derived class
     call: |-
         let z: B = new B();
-        assert(z instanceof A);
+        assertTrue(z instanceof A);
 
   - import: |-
         import {AC} from "./modules/declarations.sts"  // Abstract class
@@ -36,11 +36,11 @@ cases:
         class B extends AC {};
     call: |-
         let z: AC = new C();
-        assert(z instanceof AC);
-        assert(z instanceof C);
+        assertTrue(z instanceof AC);
+        assertTrue(z instanceof C);
         let x: B = new B();
-        assert(x instanceof AC);
-        assert(x instanceof B);
+        assertTrue(x instanceof AC);
+        assertTrue(x instanceof B);
 
   - import: |-
         import {I} from "./modules/declarations.sts"  // Base interface
@@ -50,12 +50,12 @@ cases:
         class B implements II {};
     call: |-
         let z: I = new B();
-        assert(z instanceof B);
-        assert(z instanceof I);
-        assert(z instanceof II);
+        assertTrue(z instanceof B);
+        assertTrue(z instanceof I);
+        assertTrue(z instanceof II);
         let x: A = new A();
-        assert(x instanceof A);
-        assert(x instanceof I);
+        assertTrue(x instanceof A);
+        assertTrue(x instanceof I);
 
   - import: |-
         import {I} from "./modules/declarations.sts"  // Base interface
@@ -63,35 +63,35 @@ cases:
         import {D} from "./modules/declarations.sts"  // Derived class
     call: |-
         let z: I = new D();
-        assert(z instanceof D);
-        assert(z instanceof I);
-        assert(z instanceof II);
+        assertTrue(z instanceof D);
+        assertTrue(z instanceof I);
+        assertTrue(z instanceof II);
 
   - import: |-
         import {ENUM} from "./modules/declarations.sts"  // Enum
     call: |-
-        assert(ENUM.Red.valueOf() == 0);
-        assert(ENUM.Blue.valueOf() == 1);
+        assertTrue(ENUM.Red.valueOf() == 0);
+        assertTrue(ENUM.Blue.valueOf() == 1);
 
   - import: |-
         import {A} from "./modules/declarations.sts"  // Base class
         import {CLASS_A} from "./modules/declarations.sts"  // Type, class
     call: |-
         let z: CLASS_A = new CLASS_A();
-        assert(z instanceof A);
+        assertTrue(z instanceof A);
 
   - import: |-
         import {VAR_i} from "./modules/declarations.sts"  // variable of primitive type (int)
     call: |-
         let z: VAR_i = 3;
-        assert(z == 3);
+        assertTrue(z == 3);
 
   - import: |-
         import {TPL} from "./modules/declarations.sts"  // Tuple type
     call: |-
         let z: TPL = [new Number(), new String()];
-        assert(z[0] instanceof Number);
-        assert(z[1] instanceof String);
+        assertTrue(z[0] instanceof Number);
+        assertTrue(z[1] instanceof String);
 
   - import: |-
         import {NoArg} from "./modules/declarations.sts"  // Function without arguments
@@ -99,97 +99,97 @@ cases:
 
     call: |-
         NoArg();
-        assert(res == 1);
+        assertTrue(res == 1);
 
   - import: |-
         import {OneArg} from "./modules/declarations.sts"  // Function, argument of Number type
     call: |-
-        assert(OneArg(new Number()) == 2);
+        assertTrue(OneArg(new Number()) == 2);
 
   - import: |-
         import {TwoArgs} from "./modules/declarations.sts"  // Function, arguments of char and byte types
     call: |-
-        assert(TwoArgs(c'A', 1 as byte) == 3);
+        assertTrue(TwoArgs(c'A', 1 as byte) == 3);
 
   - import: |-
         import {Gen} from "./modules/declarations.sts"  // Function, generic argument
     call: |-
         let s = "knock-knock";
-        assert(Gen(s) == s);
-        assert(Gen(new Number(1.45)) == 1.45);
+        assertTrue(Gen(s) == s);
+        assertTrue(Gen(new Number(1.45)) == 1.45);
 
   - import: |-
         import {ArgFun} from "./modules/declarations.sts"  // Function, argument is of function type
     call: |-
-        assert(ArgFun( () => { return 3; } ) == 3);
+        assertTrue(ArgFun( () => { return 3; } ) == 3);
 
   - import: |-
         import {ArgFun2} from "./modules/declarations.sts"  // Function, arguments - function type + primitive
     call: |-
-        assert(ArgFun2( (i) => { return i; }, 4) == 4);
+        assertTrue(ArgFun2( (i) => { return i; }, 4) == 4);
 
   - import: |-
         import {a} from "./modules/declarations.sts"  // Variable, primitive, implicit type
     call: |-
-        assert(a == 1);
+        assertTrue(a == 1);
         a = 2;
-        assert(a == 2);
+        assertTrue(a == 2);
         a = 1;
 
   - import: |-
         import {i} from "./modules/declarations.sts"  // Variable, int
     call: |-
-        assert(i == 2);
+        assertTrue(i == 2);
         i += 3;
-        assert(i == 5);
+        assertTrue(i == 5);
         i = 2;
 
   - import: |-
         import {n} from "./modules/declarations.sts"  // Variable, number
     call: |-
-        assert(n == 3);
+        assertTrue(n == 3);
         n += 0.1;
-        assert(n == 3.1);
+        assertTrue(n == 3.1);
         n = 3;
 
   - import: |-
         import {s} from "./modules/declarations.sts"  // Variable, String
     call: |-
-        assert(s == "knock-knock");
+        assertTrue(s == "knock-knock");
         s += " who`s there";
-        assert(s == "knock-knock who`s there");
+        assertTrue(s == "knock-knock who`s there");
         s = "knock-knock";
 
   - import: |-
         import {c} from "./modules/declarations.sts"  // Variable, char
     call: |-
-        assert(c == c'A');
+        assertTrue(c == c'A');
         c = c'b';
-        assert(c == c'b');
+        assertTrue(c == c'b');
         c = c'A';
 
   - import: |-
         import {u} from "./modules/declarations.sts"  // Variable, union
     call: |-
-        assert(u == undefined);
+        assertTrue(u == undefined);
         u = new Number(1.2);
-        assert(u == 1.2);
+        assertTrue(u == 1.2);
         u = "hi there";
-        assert(u == "hi there");
+        assertTrue(u == "hi there");
         u = undefined;
 
   - import: |-
         import {arr} from "./modules/declarations.sts"  // Variable, bytes[3]
     call: |-
-        assert(arr.length == 3);
+        assertTrue(arr.length == 3);
         arr = new byte[2];
-        assert(arr.length == 2);
+        assertTrue(arr.length == 2);
         arr = new byte[3];
 
   - import: |-
         import {ca} from "./modules/declarations.sts"  // Const implicit int
     call: |-
-        assert(ca == 11);
+        assertTrue(ca == 11);
 
   - import: |-
         import {ca} from "./modules/declarations.sts"  // Const implicit int
@@ -201,7 +201,7 @@ cases:
   - import: |-
         import {ci} from "./modules/declarations.sts"  // Const int
     call: |-
-        assert(ci == 12);
+        assertTrue(ci == 12);
 
   - import: |-
         import {ci} from "./modules/declarations.sts"  // Const int
@@ -213,7 +213,7 @@ cases:
   - import: |-
         import {cs} from "./modules/declarations.sts"  // Const str
     call: |-
-        assert(cs == "who`s there");
+        assertTrue(cs == "who`s there");
 
   - import: |-
         import {cs} from "./modules/declarations.sts"  // Const str

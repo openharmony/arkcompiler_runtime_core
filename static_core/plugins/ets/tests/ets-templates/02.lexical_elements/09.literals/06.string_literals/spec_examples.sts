@@ -27,11 +27,11 @@ let g = 'don\'t do it'
 let h = 'don\u0027t do it'
 
 function main(): void {
-    assert b instanceof string
-    assert c instanceof string
-    assert d instanceof string
-    assert e instanceof string
-    assert f instanceof string
-    assert g instanceof string
-    assert h instanceof string
+    assertTrue(b instanceof string)
+    assertTrue(c instanceof string)
+    assertTrue(d instanceof string)
+    assertTrue(e instanceof string)
+    assertTrue(f instanceof string)
+    assertTrue(g instanceof string)
+    assertTrue(h instanceof string)
 }

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,8 +18,8 @@ cases:
     call: |-
         let a: A = new A();
         let b: RA = new RA();
-        assert(a instanceof RA);
-        assert(b instanceof A);
+        assertTrue(a instanceof RA);
+        assertTrue(b instanceof A);
 
   - import: |-
         import {A} from "./modules/declarations.sts"  // Base class
@@ -29,8 +29,8 @@ cases:
     call: |-
         let a: B = new B();
         let b: RB = new RB();
-        assert(a instanceof A);
-        assert(b instanceof RA);
+        assertTrue(a instanceof A);
+        assertTrue(b instanceof RA);
 
   - import: |-
         import {AC} from "./modules/declarations.sts"  // Abstract class
@@ -40,8 +40,8 @@ cases:
     call: |-
         let a: AC = new C();
         let b: RAC = new RC();
-        assert(a instanceof RAC);
-        assert(b instanceof AC);
+        assertTrue(a instanceof RAC);
+        assertTrue(b instanceof AC);
 
   - import: |-
         import {I} from "./modules/declarations.sts"  // Base interface
@@ -56,15 +56,15 @@ cases:
     call: |-
         let a: I = new B();
         let b: RI = new RB();
-        assert(a instanceof RI);
-        assert(a instanceof RII);
-        assert(b instanceof I);
-        assert(b instanceof II);
+        assertTrue(a instanceof RI);
+        assertTrue(a instanceof RII);
+        assertTrue(b instanceof I);
+        assertTrue(b instanceof II);
 
         let c: A = new A();
         let d: RA = new RA();
-        assert(c instanceof RI);
-        assert(d instanceof I);
+        assertTrue(c instanceof RI);
+        assertTrue(d instanceof I);
 
   - import: |-
         import {I} from "./modules/declarations.sts"  // Base interface
@@ -76,19 +76,19 @@ cases:
     call: |-
         let a: I = new D();
         let b: RI = new RD();
-        assert(a instanceof RD);
-        assert(a instanceof RI);
-        assert(a instanceof RII);
-        assert(b instanceof D);
-        assert(b instanceof I);
-        assert(b instanceof II);
+        assertTrue(a instanceof RD);
+        assertTrue(a instanceof RI);
+        assertTrue(a instanceof RII);
+        assertTrue(b instanceof D);
+        assertTrue(b instanceof I);
+        assertTrue(b instanceof II);
 
   - import: |-
         import {ENUM} from "./modules/declarations.sts"  // Enum
         import {RENUM} from "./modules/reexported_directives.sts"  // Enum
     call: |-
-        assert(ENUM.Red.valueOf() == RENUM.Red.valueOf());
-        assert(ENUM.Blue.valueOf() == RENUM.Blue.valueOf());
+        assertTrue(ENUM.Red.valueOf() == RENUM.Red.valueOf());
+        assertTrue(ENUM.Blue.valueOf() == RENUM.Blue.valueOf());
 
   - import: |-
         import {A} from "./modules/declarations.sts"  // Base class
@@ -98,8 +98,8 @@ cases:
     call: |-
         let a: CLASS_A = new CLASS_A();
         let b: RCLASS_A = new RCLASS_A();
-        assert(a instanceof RA);
-        assert(b instanceof A);
+        assertTrue(a instanceof RA);
+        assertTrue(b instanceof A);
 
   - import: |-
         import {VAR_i} from "./modules/declarations.sts"  // variable of primitive type (int)
@@ -107,7 +107,7 @@ cases:
     call: |-
         let a: VAR_i = 3;
         let b: RVAR_i = 3;
-        assert(a == b);
+        assertTrue(a == b);
 
   - import: |-
         import {TPL} from "./modules/declarations.sts"  // Tuple type
@@ -115,8 +115,8 @@ cases:
     call: |-
         let a: TPL = [new Number(), new String()];
         let b: RTPL = [new Number(), new String()];
-        assert(a instanceof RTPL);
-        assert(b instanceof TPL);
+        assertTrue(a instanceof RTPL);
+        assertTrue(b instanceof TPL);
 
   - import: |-
         import {NoArg} from "./modules/declarations.sts"  // Function without arguments
@@ -124,123 +124,123 @@ cases:
         import {RNoArg} from "./modules/reexported_directives.sts"  // Function without arguments
     call: |-
         NoArg();
-        assert(res == 1);
+        assertTrue(res == 1);
         res = 0;
         RNoArg();
-        assert(res == 1);
+        assertTrue(res == 1);
 
   - import: |-
         import {OneArg} from "./modules/declarations.sts"  // Function, argument of Number type
         import {ROneArg} from "./modules/reexported_directives.sts"  // Function, argument of Number type
     call: |-
-        assert(OneArg(new Number()) == ROneArg(new Number()));
+        assertTrue(OneArg(new Number()) == ROneArg(new Number()));
 
   - import: |-
         import {TwoArgs} from "./modules/declarations.sts"  // Function, arguments of char and byte types
         import {RTwoArgs} from "./modules/reexported_directives.sts"  // Function, arguments of char and byte types
     call: |-
-        assert(TwoArgs(c'A', 1 as byte) == RTwoArgs(c'B', 2 as byte));
+        assertTrue(TwoArgs(c'A', 1 as byte) == RTwoArgs(c'B', 2 as byte));
 
   - import: |-
         import {Gen} from "./modules/declarations.sts"  // Function, generic argument
         import {RGen} from "./modules/reexported_directives.sts"  // Function, generic argument
     call: |-
         let s = "knock-knock";
-        assert(Gen(s) == RGen(s));
-        assert(Gen(new Number(1.45)) == RGen(new Number(1.45)));
+        assertTrue(Gen(s) == RGen(s));
+        assertTrue(Gen(new Number(1.45)) == RGen(new Number(1.45)));
 
   - import: |-
         import {ArgFun} from "./modules/declarations.sts"  // Function, argument is of function type
         import {RArgFun} from "./modules/reexported_directives.sts"  // Function, argument is of function type
     call: |-
-        assert(ArgFun( () => { return 3; } ) == RArgFun( () => { return 3; } ));
-        assert(RArgFun( () => { return 4; } ) == 4 );
+        assertTrue(ArgFun( () => { return 3; } ) == RArgFun( () => { return 3; } ));
+        assertTrue(RArgFun( () => { return 4; } ) == 4 );
 
   - import: |-
         import {ArgFun2} from "./modules/declarations.sts"  // Function, arguments - function type + primitive
         import {RArgFun2} from "./modules/reexported_directives.sts"  // Function, arguments - function type + primitive
     call: |-
-        assert(ArgFun2( (i) => { return i; }, 4) == RArgFun2( (i) => { return i; }, 4));
-        assert(RArgFun2( (i) => { return i; }, 5) == 5);
+        assertTrue(ArgFun2( (i) => { return i; }, 4) == RArgFun2( (i) => { return i; }, 4));
+        assertTrue(RArgFun2( (i) => { return i; }, 5) == 5);
 
   - import: |-
         import {a} from "./modules/declarations.sts"  // Variable, primitive, implicit type
         import {ra} from "./modules/reexported_directives.sts"  // Variable, primitive, implicit type
     call: |-
-        assert(ra == 1);
+        assertTrue(ra == 1);
         ra += 3;
-        assert(a == 4);
-        assert(ra == 4);
+        assertTrue(a == 4);
+        assertTrue(ra == 4);
         a = 1;
 
   - import: |-
         import {i} from "./modules/declarations.sts"  // Variable, int
         import {ri} from "./modules/reexported_directives.sts"  // Variable, int
     call: |-
-        assert(ri == 2);
+        assertTrue(ri == 2);
         i += 3;
-        assert(i == 5);
-        assert(ri == 5);
+        assertTrue(i == 5);
+        assertTrue(ri == 5);
         i = 2;
 
   - import: |-
         import {n} from "./modules/declarations.sts"  // Variable, number
         import {rn} from "./modules/reexported_directives.sts"  // Variable, number
     call: |-
-        assert(rn == 3);
+        assertTrue(rn == 3);
         rn += 0.2;
-        assert(n == 3.2);
-        assert(rn == 3.2);
+        assertTrue(n == 3.2);
+        assertTrue(rn == 3.2);
         n = 3;
 
   - import: |-
         import {s} from "./modules/declarations.sts"  // Variable, String
         import {rs} from "./modules/reexported_directives.sts"  // Variable, String
     call: |-
-        assert(rs == "knock-knock");
+        assertTrue(rs == "knock-knock");
         s += " who`s there";
-        assert(s == "knock-knock who`s there");
-        assert(rs == "knock-knock who`s there");
+        assertTrue(s == "knock-knock who`s there");
+        assertTrue(rs == "knock-knock who`s there");
         s = "knock-knock";
 
   - import: |-
         import {c} from "./modules/declarations.sts"  // Variable, char
         import {rc} from "./modules/reexported_directives.sts"  // Variable, char
     call: |-
-        assert(rc == c'A');
+        assertTrue(rc == c'A');
         rc = c'b';
-        assert(c == c'b');
-        assert(rc == c'b');
+        assertTrue(c == c'b');
+        assertTrue(rc == c'b');
         c = c'A';
 
   - import: |-
         import {u} from "./modules/declarations.sts"  // Variable, union
         import {ru} from "./modules/reexported_directives.sts"  // Variable, union
     call: |-
-        assert(ru == undefined);
+        assertTrue(ru == undefined);
         u = new Number(1.2);
-        assert(u == 1.2);
-        assert(ru == 1.2);
+        assertTrue(u == 1.2);
+        assertTrue(ru == 1.2);
         ru = "str";
-        assert(u == "str");
-        assert(ru == "str");
+        assertTrue(u == "str");
+        assertTrue(ru == "str");
         u = undefined;
 
   - import: |-
         import {arr} from "./modules/declarations.sts"  // Variable, bytes[3]
         import {rarr} from "./modules/reexported_directives.sts"  // Variable, bytes[3]
     call: |-
-        assert(rarr.length == 3);
+        assertTrue(rarr.length == 3);
         arr = new byte[2];
-        assert(arr.length == 2);
-        assert(rarr.length == 2);
+        assertTrue(arr.length == 2);
+        assertTrue(rarr.length == 2);
         arr = new byte[3];
 
   - import: |-
         import {ca} from "./modules/declarations.sts"  // Const implicit int
         import {rca} from "./modules/reexported_directives.sts"  // Const implicit int
     call: |-
-        assert(rca == ca);
+        assertTrue(rca == ca);
 
   - import: |-
         import {ca} from "./modules/declarations.sts"  // Const implicit int
@@ -254,7 +254,7 @@ cases:
         import {ci} from "./modules/declarations.sts"  // Const int
         import {rci} from "./modules/reexported_directives.sts"  // Const int
     call: |-
-        assert(rci == ci);
+        assertTrue(rci == ci);
 
   - import: |-
         import {ci} from "./modules/declarations.sts"  // Const int
@@ -268,7 +268,7 @@ cases:
         import {cs} from "./modules/declarations.sts"  // Const str
         import {rcs} from "./modules/reexported_directives.sts"  // Const str
     call: |-
-        assert(rcs == cs);
+        assertTrue(rcs == cs);
 
   - import: |-
         import {cs} from "./modules/declarations.sts"  // Const str

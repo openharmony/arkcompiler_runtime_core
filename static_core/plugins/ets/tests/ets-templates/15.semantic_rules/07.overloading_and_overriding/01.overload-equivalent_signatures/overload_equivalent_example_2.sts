@@ -41,5 +41,5 @@ class A<T> {
 
 function main(): void {
   new A<number>().foo(1);
-  assert(res == 2);
+  assertTrue(res == 2);
 }

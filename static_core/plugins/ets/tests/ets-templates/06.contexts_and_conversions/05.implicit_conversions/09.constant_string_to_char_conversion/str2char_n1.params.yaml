@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,7 +19,7 @@ cases:
       use: |-
           // assignment-like context, variable declaration
           let v: char = r + s + ""
-          assert v == c'Z'
+          asserEQ( v, c'Z' )
 
     - decl: |-
           let s: string = "Z"
@@ -27,7 +27,7 @@ cases:
       use: |-
           // assignment-like context, constant declaration
           const v: char = r + s + ""
-          assert v == c'Z'
+          asserEQ( v, c'Z' )
 
     - decl: |-
           const s: string = "Z"
@@ -38,7 +38,7 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assert a.c == c'Z'
+          asserEQ( a.c, c'Z' )
 
     - decl: |-
           let s: string = "Z"
@@ -47,7 +47,7 @@ cases:
       use: |-
           // assignment-like context, variable assignment
           v = r + s + ""
-          assert v == c'Z'
+          asserEQ( v, c'Z' )
 
     - decl: |-
           const s: string = "Z"
@@ -59,7 +59,7 @@ cases:
       use: |-
           let a: A = new A()
           a.c = r + s + ""
-          assert a.c == c'Z'
+          asserEQ( a.c, c'Z' )
 
     - decl: |-
           // call context, function
@@ -69,7 +69,7 @@ cases:
           let s: string = "W"
           const r: string = ""
       use: |-
-          assert foo(r + s + "") == c'W'
+          asserEQ( foo(r + s + ""), c'W' )
 
     - decl: |-
           // call context, method
@@ -82,7 +82,7 @@ cases:
           let r: string = ""
       use: |-
           let a: A = new A()
-          assert a.meth(r + s + "") == c'W'
+          asserEQ( a.meth(r + s + ""), c'W' )
 
     - decl: |-
           // call context, constructor
@@ -95,14 +95,14 @@ cases:
           const s: string = "W"
           let r: string = ""
       use: |-
-          assert new A(r + s + "").fld == c'W'
+          asserEQ( new A(r + s + "").fld, c'W' )
 
     - decl: |-
           // call context, lambda
           let s: string = "W"
           const r: string = ""
       use: |-
-          assert ((p: char): char => { return p })(r + s + "") == c'W'
+          asserEQ( ((p: char): char => { return p })(r + s + ""), c'W' )
 
     - decl: |-
           // array composite
@@ -110,7 +110,7 @@ cases:
           const r: string = ""
       use: |-
           let v1: char[] = [c'X', s, s + r, "" + s]
-          assert v1[0] == c'X'
+          asserEQ( v1[0], c'X' )
 
     - decl: |-
           // object composite
@@ -122,4 +122,4 @@ cases:
       use: |-
           let a: A = { fld: "\u8000" }
           a = { fld: "" + s + r }
-          assert a.fld == c'W'
+          asserEQ( a.fld, c'W' )

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,11 +22,11 @@ function main() {
     // import variables and constants
     import("./aux_01/mod_01")  // literal path
     .then((dyn_obj) => {
-        assert(dyn_obj.VAR == 3.14)
-        assert(dyn_obj.STR == "Hello!")
-        assert(dyn_obj.ERR instanceof Error && dyn_obj.ERR.message == "Error 1")
-        assert(dyn_obj.C1 == 42)
-        assert(dyn_obj.C2 == "abc")
-        assert(dyn_obj.C3 instanceof Error && dyn_obj.C3.message == "Error 2")
+        assertTrue(dyn_obj.VAR == 3.14)
+        assertTrue(dyn_obj.STR == "Hello!")
+        assertTrue(dyn_obj.ERR instanceof Error && dyn_obj.ERR.message == "Error 1")
+        assertTrue(dyn_obj.C1 == 42)
+        assertTrue(dyn_obj.C2 == "abc")
+        assertTrue(dyn_obj.C3 instanceof Error && dyn_obj.C3.message == "Error 2")
     })
 }

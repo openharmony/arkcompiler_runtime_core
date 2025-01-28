@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ function main() {
     let d{{loop.index}}: {{c.to_type}}[] = [s{{loop.index}}];
     d{{loop.index}} = []
     d{{loop.index}} = [s{{loop.index}}, s{{loop.index}}]
-    assert(d{{loop.index}}[1] == {{v.val or v.expr}})
+    assertTrue(d{{loop.index}}[1] == {{v.val or v.expr}})
 {%- endfor %}
 }
 {%- endfor %}

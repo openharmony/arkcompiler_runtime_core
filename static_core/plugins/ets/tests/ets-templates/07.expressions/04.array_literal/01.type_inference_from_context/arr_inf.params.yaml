@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,27 +15,27 @@
 cases:
     - use: |-
           let a: Long[] = [1, 2, 3, 4,]
-          assert a[0] instanceof Long && a[0] == 1
+          assertTrue( a[0] instanceof Long && a[0] == 1 )
 
     - use: |-
           let a: Long[] = []
           a = [1, 2, 3,]
-          assert a[0] instanceof Long && a[0] == 1
+          assertTrue( a[0] instanceof Long && a[0] == 1 )
 
     - use: |-
           let a = [1, 2, 3,] as Long[]
-          assert a[0] instanceof Long && a[0] == 1
+          assertTrue( a[0] instanceof Long && a[0] == 1 )
 
     - use: |-
           let a: string[][] = [["a"]]
           let b: Object[][] = a
-          assert b[0][0] as string == "a"
+          assertEQ( b[0][0] as string,  "a" )
 
     - decl: |-
           class A {}
       use: |-
           let a: A[] = [{}]
-          assert a[0] instanceof A
+          assertTrue( a[0] instanceof A )
 
     - decl: |-
           function sum(p: number[]): number {
@@ -47,11 +47,11 @@ cases:
       use: |-
           let a: number[] = [0]
           a = [1, 2, 3]
-          assert a.length == 3 && sum(a) == 6.0
+          assertTrue( a.length == 3 && sum(a) == 6.0 )
           a = [1.1, 2.2, 3.3, 4.4]
-          assert a.length == 4 && sum(a) == 11.0
+          assertTrue( a.length == 4 && sum(a) == 11.0 )
           a = [0, 0]
-          assert a.length == 2 && sum(a) == 0.0
+          assertTrue( a.length == 2 && sum(a) == 0.0 )
 
     - decl: |-
           function sum(p: Long[]): long {
@@ -61,9 +61,9 @@ cases:
               return s
           }
       use: |-
-          assert sum([1, 2, 3]) == 6
-          assert sum([]) == 0
-          assert sum([0x0f0f0f0f, 0b10110011001, 42, 8 as byte]) == 252646618
+          assertEQ( sum([1, 2, 3]),  6 )
+          assertEQ( sum([]),  0 )
+          assertEQ( sum([0x0f0f0f0f, 0b10110011001, 42, 8 as byte]),  252646618 )
 
     - decl: |-
           class A {
@@ -76,7 +76,7 @@ cases:
               }
           }
       use: |-
-          assert new A().foo([new Object(), new Long(), new Int()]) == 0
-          assert new A().foo([new A(), new A(), new Object()]) == 2
-          assert new A().foo(["aaa", new A(), new Object()]) == 1
+          assertEQ( new A().foo([new Object(), new Long(), new Int()]),  0 )
+          assertEQ( new A().foo([new A(), new A(), new Object()]),  2 )
+          assertEQ( new A().foo(["aaa", new A(), new Object()]),  1 )
 

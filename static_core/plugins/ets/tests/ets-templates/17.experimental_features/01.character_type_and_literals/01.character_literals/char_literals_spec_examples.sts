@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,8 +28,8 @@ function main() {
     let c3b = new Char(c3)
     let c4b = new Char(c4)
 
-    assert c1b.unboxed() == c1
-    assert c2b.unboxed() == c2
-    assert c3b.unboxed() == c3
-    assert c4b.unboxed() == c4
+    assertEQ( c1b.unboxed(), c1 )
+    assertEQ( c2b.unboxed(), c2 )
+    assertEQ( c3b.unboxed(), c3 )
+    assertEQ( c4b.unboxed(), c4 )
 }

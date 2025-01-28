@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,13 +25,13 @@ let file1 = "mod_10a"
 
 function main() {
     // import same file statically and dynamically
-    assert(static_imp_obj.foo(3) == 9)
-    assert(static_imp_obj.init_counter == 1)
+    assertTrue(static_imp_obj.foo(3) == 9)
+    assertTrue(static_imp_obj.init_counter == 1)
 
     import(dir + file1)
     .then((dynamic_imp_obj) => {
-        assert(dynamic_imp_obj.foo(4) == 16)
-        assert(dynamic_imp_obj.init_counter == 1)
-        assert(dynamic_imp_obj == static_imp_obj)
+        assertTrue(dynamic_imp_obj.foo(4) == 16)
+        assertTrue(dynamic_imp_obj.init_counter == 1)
+        assertTrue(dynamic_imp_obj == static_imp_obj)
     })
 }

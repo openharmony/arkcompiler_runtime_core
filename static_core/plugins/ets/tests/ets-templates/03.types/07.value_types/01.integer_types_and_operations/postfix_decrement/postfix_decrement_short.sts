@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -21,8 +21,8 @@ desc: check postfix decrement for short integer operand
 function main(): void {
   let value: short = {{v.value}}
   let result: short = value--
-  assert value == {{v.result}}
-  assert result == {{v.value}}
+  assertEQ( value, {{v.result}} )
+  assertEQ( result, {{v.value}} )
 }
 
 {% endfor %}

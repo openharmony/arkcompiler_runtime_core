@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -28,14 +28,14 @@ cases:
           }
       use: |-
           // different enum types
-          assert(foo1(0) >= foo2(0))
+          assertTrue(foo1(0) >= foo2(0))
 
     - decl: |-
           enum Color { Red, Green, Blue }
           enum Size { XS, S, M, L, XL, XXL }
       use: |-
           // different enum types
-          assert(Color.Red <= Size.XL)
+          assertTrue(Color.Red <= Size.XL)
 
     - decl: |-
           enum Color { Red = "1", Green = "2", Blue = "3" }
@@ -43,19 +43,19 @@ cases:
           let c = Color.Blue
       use: |-
           // string values, different enum types
-          assert(c > Size.S)
+          assertTrue(c > Size.S)
 
     - decl: |-
           enum Size { XS, S, M, L, XL, XXL }
       use: |-
           // compare enum to int
-          assert(0 >= Size.XS)
+          assertTrue(0 >= Size.XS)
 
     - decl: |-
           enum Color { Red = "1", Green = "2", Blue = "3" }
       use: |-
           // compare enum to string
-          assert(Color.Blue > "2")
+          assertTrue(Color.Blue > "2")
 
     - decl: |-
           enum Color { Red, Green, Blue }
@@ -64,4 +64,4 @@ cases:
           let s: Color|Size = Size.XL
       use: |-
           // compare enums in unions
-          assert((c as Color) < (s as Size))
+          assertTrue((c as Color) < (s as Size))

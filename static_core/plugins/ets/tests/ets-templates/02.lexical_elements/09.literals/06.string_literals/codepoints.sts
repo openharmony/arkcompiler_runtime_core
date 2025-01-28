@@ -29,5 +29,5 @@ function main() {
             res += String.fromCharCode(Char.getLowSurrogate(i) as number)
         }
     }
-    assert s == res
+    assertEQ(s, res)
 }

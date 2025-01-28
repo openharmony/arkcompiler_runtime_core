@@ -37,5 +37,5 @@ class B extends A {
 
 function main(): void {
   let c: B = new B();
-  assert c.f1 == 5;
+  assertEQ( c.f1, 5 );
 }

@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -44,17 +44,17 @@ class D extends C {
 function main(): void {
     let d: D = new D()
 
-    assert d.get() == 10
-    assert d.getSuper() == 100
+    assertEQ( d.get(), 10 )
+    assertEQ( d.getSuper(), 100 )
 
     d.put(42)
-    assert d.get() == 42
-    assert d.getSuper() == 100
+    assertEQ( d.get(), 42 )
+    assertEQ( d.getSuper(), 100 )
 
     d.putSuper(22)
-    assert d.get() == 42
-    assert d.getSuper() == 22
+    assertEQ( d.get(), 42 )
+    assertEQ( d.getSuper(), 22 )
 
     // module level scope is not affected
-    assert x == -10
+    assertEQ( x, -10 )
 }

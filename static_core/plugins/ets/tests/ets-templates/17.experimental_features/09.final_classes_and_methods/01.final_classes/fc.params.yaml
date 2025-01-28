@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,9 +22,9 @@ cases:
           final class F extends A implements I {}
       use: |-
           let f: F = new F()
-          assert f instanceof F && f instanceof A && f instanceof I && f.fld == ''
+          assertTrue( f instanceof F && f instanceof A && f instanceof I && f.fld == '' )
           f = { fld: 'ABC' }
-          assert f.fld == 'ABC'
+          assertEQ( f.fld, 'ABC' )
 
     # double final
     - tags: 'compile-only, negative'
@@ -74,7 +74,7 @@ cases:
           final class F<T extends I> extends A<T> {}
       use: |-
           let f: F<I> = new F<I>()
-          assert f instanceof F
+          assertTrue( f instanceof F )
 
     # cannot extend final class, with type parameters
     - tags: 'compile-only, negative'

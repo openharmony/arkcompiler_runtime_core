@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -29,8 +29,8 @@ function f(a: Object): int {
 
 function main(): void {
   let colors = Color.values();
-  assert colors[0] == Color.Red;
-  assert colors[1] == Color.Green;
-  assert colors[2] == Color.blue;
-  assert f(colors) == 3;
+  assertEQ( colors[0], Color.Red );
+  assertEQ( colors[1], Color.Green );
+  assertEQ( colors[2], Color.blue );
+  assertEQ( f(colors), 3 );
 }

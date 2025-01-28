@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,8 +26,8 @@ function main() {
     // import package modules concurrently
     Promise.all([import(dir + file1), import(dir + file2)])
     .then((res) => {
-        assert(res[0] != res[1])
-        assert(res[0].bar("X", 42) == "AX43")
-        assert(res[1].bar("X", 42) == "BX44")
+        assertTrue(res[0] != res[1])
+        assertTrue(res[0].bar("X", 42) == "AX43")
+        assertTrue(res[1].bar("X", 42) == "BX44")
     })
 }

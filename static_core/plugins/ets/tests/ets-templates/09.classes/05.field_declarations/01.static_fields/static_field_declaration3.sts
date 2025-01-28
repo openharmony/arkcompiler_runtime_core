@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -40,16 +40,16 @@ function main(): void {
     B.y = 10
     B.setX(5)
 
-    assert A.x == 5
+    assertEQ( A.x, 5 )
 
-    assert B.getX() == 5
-    assert B.y == 10
+    assertEQ( B.getX(), 5 )
+    assertEQ( B.y, 10 )
 
     B.y++
     A.x++
 
-    assert A.x == 6
+    assertEQ( A.x, 6 )
 
-    assert B.getX() == 6
-    assert B.y == 11
+    assertEQ( B.getX(), 6 )
+    assertEQ( B.y, 11 )
 }

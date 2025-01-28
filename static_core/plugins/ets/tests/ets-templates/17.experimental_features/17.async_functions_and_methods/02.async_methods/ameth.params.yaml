@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,7 +20,7 @@ cases:
       use: |-
           // Promise of void
           let r = new A().foo()
-          assert((await r) == undefined)
+          assertTrue((await r) == undefined)
 
     - decl: |-
           class A {
@@ -30,7 +30,7 @@ cases:
           }
       use: |-
           // Promise of primitive
-          assert((await new A().foo(42)) == 84)
+          assertTrue((await new A().foo(42)) == 84)
 
     - decl: |-
           class A {
@@ -40,7 +40,7 @@ cases:
           }
       use: |-
           // Promise of primitive
-          assert((await new A().foo(42)) == 84)
+          assertTrue((await new A().foo(42)) == 84)
 
     - decl: |-
           class A {
@@ -50,7 +50,7 @@ cases:
           }
       use: |-
           // Promise of boxed
-          assert((await new A().foo(new Double(42.0))) == 84.0)
+          assertTrue((await new A().foo(new Double(42.0))) == 84.0)
 
     - decl: |-
           class A {
@@ -60,7 +60,7 @@ cases:
           }
       use: |-
           // Promise of boxed
-          assert((await new A().foo(new Double(42.0))) == 84.0)
+          assertTrue((await new A().foo(new Double(42.0))) == 84.0)
 
     - decl: |-
           class A {
@@ -71,7 +71,7 @@ cases:
       use: |-
           // Promise of string
           let r = new A().foo(42)
-          assert((await r) == '42')
+          assertTrue((await r) == '42')
 
     - decl: |-
           class A {
@@ -82,7 +82,7 @@ cases:
       use: |-
           // Promise of string
           let r = new A().foo(42)
-          assert((await r) == '4242')
+          assertTrue((await r) == '4242')
 
     - decl: |-
           class A {
@@ -92,7 +92,7 @@ cases:
           }
       use: |-
           // Promise of String
-          assert((await new A().foo(42)) instanceof String)
+          assertTrue((await new A().foo(42)) instanceof String)
 
     - decl: |-
           class A {
@@ -102,7 +102,7 @@ cases:
           }
       use: |-
           // Promise of String
-          assert((await new A().foo(42)) instanceof String)
+          assertTrue((await new A().foo(42)) instanceof String)
 
     - decl: |-
           class A {
@@ -112,7 +112,7 @@ cases:
           }
       use: |-
           // Promise of Object
-          assert((await new A().foo(new A())) instanceof A)
+          assertTrue((await new A().foo(new A())) instanceof A)
 
     - decl: |-
           class A {
@@ -122,7 +122,7 @@ cases:
           }
       use: |-
           // Promise of Object
-          assert((await new A().foo(new A())) instanceof A)
+          assertTrue((await new A().foo(new A())) instanceof A)
 
     - decl: |-
           class A {
@@ -132,7 +132,7 @@ cases:
           }
       use: |-
           // Promise of nullish
-          assert((await new A().foo(42)) == 43)
+          assertTrue((await new A().foo(42)) == 43)
 
     - decl: |-
           class A {
@@ -142,7 +142,7 @@ cases:
           }
       use: |-
           // Promise of nullish
-          assert((await new A().foo(42)) == 43)
+          assertTrue((await new A().foo(42)) == 43)
 
     - decl: |-
           class A {
@@ -152,7 +152,7 @@ cases:
           }
       use: |-
           // Promise of nullish
-          assert((await new A().foo(42)) == 43)
+          assertTrue((await new A().foo(42)) == 43)
 
     - decl: |-
           class A {
@@ -162,7 +162,7 @@ cases:
           }
       use: |-
           // Promise of nullish
-          assert((await new A().foo(42)) == 43)
+          assertTrue((await new A().foo(42)) == 43)
 
     - decl: |-
           class A {
@@ -172,7 +172,7 @@ cases:
           }
       use: |-
           // Promise of nullish
-          assert((await new A().foo(42)) == 43)
+          assertTrue((await new A().foo(42)) == 43)
 
     - decl: |-
           class A {
@@ -185,7 +185,7 @@ cases:
           }
       use: |-
           // Promise of nullish
-          assert((await new A().foo(42)) == 43)
+          assertTrue((await new A().foo(42)) == 43)
 
     - decl: |-
           class A {
@@ -199,7 +199,7 @@ cases:
           }
       use: |-
           // Promise of promise
-          assert((await new A().bar('A')) == 'AA')
+          assertTrue((await new A().bar('A')) == 'AA')
 
     - decl: |-
           class A {
@@ -213,7 +213,7 @@ cases:
           }
       use: |-
           // Promise of promise
-          assert((await new A().bar('A')) == 'AA')
+          assertTrue((await new A().bar('A')) == 'AA')
 
     - decl: |-
           class A {
@@ -224,7 +224,7 @@ cases:
       use: |-
           // Promise of array
           let q: int[] = await new A().foo()
-          assert(q[0] == 1 && q[1] == 2 && q[2] == 3)
+          assertTrue(q[0] == 1 && q[1] == 2 && q[2] == 3)
 
     - decl: |-
           class A {
@@ -235,7 +235,7 @@ cases:
       use: |-
           // Promise of array
           let q: int[] = await new A().foo()
-          assert(q[0] == 1 && q[1] == 2 && q[2] == 3)
+          assertTrue(q[0] == 1 && q[1] == 2 && q[2] == 3)
 
     - decl: |-
           class A {
@@ -245,7 +245,7 @@ cases:
           }
       use: |-
           // Promise of function
-          assert((await new A().foo())('A') == 'AA')
+          assertTrue((await new A().foo())('A') == 'AA')
 
     - decl: |-
           type FT = (p: string) => string
@@ -257,7 +257,7 @@ cases:
           }
       use: |-
           // Promise of function
-          assert((await new A().foo())('A') == 'AA')
+          assertTrue((await new A().foo())('A') == 'AA')
 
     - decl: |-
           type UT = number | string | boolean
@@ -269,7 +269,7 @@ cases:
       use: |-
           // Promise of union
           let q: boolean|number|string = await new A().foo(-1)
-          assert(q as string == '-1')
+          assertTrue(q as string == '-1')
 
     - decl: |-
           type UT = number | string | boolean
@@ -282,7 +282,7 @@ cases:
       use: |-
           // Promise of union
           let q: boolean|number|string = await new A().foo(-1)
-          assert(q as string == '-1')
+          assertTrue(q as string == '-1')
 
     - decl: |-
           class A {
@@ -293,7 +293,7 @@ cases:
       use: |-
           // Promise of tuple
           let q: [boolean, Error] = await new A().foo(42)
-          assert(q[0] && (q[1] instanceof Error))
+          assertTrue(q[0] && (q[1] instanceof Error))
 
     - decl: |-
           class A {
@@ -304,7 +304,7 @@ cases:
       use: |-
           // Promise of tuple
           let q: [boolean, Error] = await new A().foo(42)
-          assert(q[0] && (q[1] instanceof Error))
+          assertTrue(q[0] && (q[1] instanceof Error))
 
     - decl: |-
           class A {
@@ -315,7 +315,7 @@ cases:
       use: |-
           // Promise of BigInt
           let q: BigInt = await new A().foo('123456789012345678901234567890')
-          assert(q == 123456789012345678901234567890n)
+          assertTrue(q == 123456789012345678901234567890n)
 
     - decl: |-
           class A {
@@ -326,7 +326,7 @@ cases:
       use: |-
           // Promise of BigInt
           let q: BigInt = await new A().foo('123456789012345678901234567890')
-          assert(q == 123456789012345678901234567890n)
+          assertTrue(q == 123456789012345678901234567890n)
 
     - decl: |-
           class A {
@@ -337,7 +337,7 @@ cases:
       use: |-
           // Promise of bigint
           let q: bigint = await new A().foo(123456789012345678901234567890n)
-          assert(q == 123456789012345678901234567890n)
+          assertTrue(q == 123456789012345678901234567890n)
 
     - decl: |-
           class A {
@@ -348,7 +348,7 @@ cases:
       use: |-
           // Promise of bigint
           let q: bigint = await new A().foo(123456789012345678901234567890n)
-          assert(q == 123456789012345678901234567890n)
+          assertTrue(q == 123456789012345678901234567890n)
 
     - decl: |-
           class B {
@@ -374,7 +374,7 @@ cases:
           ]
           let cnt = 0.0
           for (let v of arr) cnt += (await v)
-          assert(cnt == 90.0)
+          assertTrue(cnt == 90.0)
 
     - decl: |-
           class A {
@@ -398,7 +398,7 @@ cases:
           ]
           let cnt = 0.0
           for (let v of arr) cnt += (await v)
-          assert(cnt == 90.0)
+          assertTrue(cnt == 90.0)
 
     - decl: |-
           enum Color { Red, Green, Blue }
@@ -409,7 +409,7 @@ cases:
           }
       use: |-
           // Promise of enum
-          assert((await new A().foo(42)) == Color.Green)
+          assertTrue((await new A().foo(42)) == Color.Green)
 
     - decl: |-
           enum Color { Red, Green, Blue }
@@ -420,7 +420,7 @@ cases:
           }
       use: |-
           // Promise of enum
-          assert((await new A().foo(42)) == Color.Green)
+          assertTrue((await new A().foo(42)) == Color.Green)
 
     - decl: |-
           enum Color { R="red", G="green", B="blue" }
@@ -431,7 +431,7 @@ cases:
           }
       use: |-
           // Promise of string-based enum
-          assert((await new A().foo(-42)) == Color.B)
+          assertTrue((await new A().foo(-42)) == Color.B)
 
     - decl: |-
           enum Color { R="red", G="green", B="blue" }
@@ -442,7 +442,7 @@ cases:
           }
       use: |-
           // Promise of string-based enum
-          assert((await new A().foo(-42)) == Color.B)
+          assertTrue((await new A().foo(-42)) == Color.B)
 
     - decl: |-
           class B<T> {
@@ -463,7 +463,7 @@ cases:
       use: |-
           // Promise of T
           let a: A<string> = new A<string>("abc")
-          assert(a.meth() == "abc")
+          assertTrue(a.meth() == "abc")
 
     - decl: |-
           class B<T> {
@@ -487,7 +487,7 @@ cases:
       use: |-
           // Promise of T
           let a: A<string> = new A<string>("abc")
-          assert(a.meth() == "abc")
+          assertTrue(a.meth() == "abc")
 
     - decl: |-
           class A {
@@ -501,7 +501,7 @@ cases:
       use: |-
           // Promise in object literal
           let a: A = { fld: new B().foo(42.0) }
-          assert((await a.fld!) == '42')
+          assertTrue((await a.fld!) == '42')
 
     - decl: |-
           class A {
@@ -515,7 +515,7 @@ cases:
       use: |-
           // Promise in object literal
           let a: A = { fld: B.foo(42.0) }
-          assert((await a.fld!) == '42')
+          assertTrue((await a.fld!) == '42')
 
     - decl: |-
           let s = 'ABC'
@@ -527,7 +527,7 @@ cases:
       use: |-
           // Launch in argument lambda
           let r = await new A().foo((): Promise<string> => launch ((): string => s)())
-          assert(r == 'ABC')
+          assertTrue(r == 'ABC')
 
     - decl: |-
           let s = 'ABC'
@@ -539,7 +539,7 @@ cases:
       use: |-
           // Launch in argument lambda
           let r = await new A().foo((): Promise<string> => launch ((): string => s)())
-          assert(r == 'ABC')
+          assertTrue(r == 'ABC')
 
     - decl: |-
           let s = 'ABC'
@@ -551,7 +551,7 @@ cases:
       use: |-
           // Launch in trailing lambda
           let r = await new A().foo() { launch ((): string => s)() }
-          assert(r == 'ABC')
+          assertTrue(r == 'ABC')
 
     - decl: |-
           let s = 'ABC'
@@ -563,7 +563,7 @@ cases:
       use: |-
           // Launch in trailing lambda
           let r = await A.foo() { launch ((): string => s)() }
-          assert(r == 'ABC')
+          assertTrue(r == 'ABC')
 
     - decl: |-
           let s = 'A'
@@ -578,7 +578,7 @@ cases:
               .then((p: string): string => p + p)
               .then((p: string): string => p + p)
 
-          assert((await r) == 'AAAAAAAA')
+          assertTrue((await r) == 'AAAAAAAA')
 
     - decl: |-
           type EN = Error|null
@@ -598,7 +598,7 @@ cases:
               .catch((p: EN): string => p!.message)
               .then((p: string): string => p + p)
 
-          assert((await r) == 'EE')
+          assertTrue((await r) == 'EE')
 
     - decl: |-
           type EN = Error|null
@@ -614,7 +614,7 @@ cases:
               .then((p: string): string => { throw new Error(p) })
               .catch((p: EN): string => p!.message + p!.message)
 
-          assert((await r) == 'AAAA')
+          assertTrue((await r) == 'AAAA')
 
     - decl: |-
           type EN = Error|null
@@ -636,7 +636,7 @@ cases:
           try {
               await r
           } catch (e: Error) {
-              assert(e.message == 'E')
+              assertTrue(e.message == 'E')
               return
           }
-          assert(false)
+          assertTrue(false)

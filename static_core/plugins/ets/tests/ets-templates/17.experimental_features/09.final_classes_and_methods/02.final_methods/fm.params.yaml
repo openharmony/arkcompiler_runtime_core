@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,8 +26,8 @@ cases:
               }
           }
       use: |-
-          assert new A().meth("x", 1) == "x1A"
-          assert new F().meth("y", 2) == "y2F"
+          assertEQ( new A().meth("x", 1), "x1A" )
+          assertEQ( new F().meth("y", 2), "y2F" )
 
     # duplicate final keyword
     - tags: 'compile-only, negative'

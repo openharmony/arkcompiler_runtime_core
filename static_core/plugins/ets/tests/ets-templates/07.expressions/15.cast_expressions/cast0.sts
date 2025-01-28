@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -30,22 +30,22 @@ function main(): void {
   b.fld = "b"
 
   let a = b as A
-  assert a instanceof A
-  assert a instanceof B
-  assert a.fld == "b"
+  assertTrue( a instanceof A )
+  assertTrue( a instanceof B )
+  assertTrue( a.fld == "b" )
 
   let o = a as Object
-  assert o instanceof A
-  assert o instanceof B
-  assert o instanceof Object
+  assertTrue( o instanceof A )
+  assertTrue( o instanceof B )
+  assertTrue( o instanceof Object )
 
   let a2 = o as A
-  assert a2 instanceof A
-  assert a2 instanceof B
-  assert a2.fld == "b"
+  assertTrue( a2 instanceof A )
+  assertTrue( a2 instanceof B )
+  assertTrue( a2.fld == "b" )
 
   let b2 = o as B
-  assert b2 instanceof A
-  assert b2 instanceof B
-  assert b2.fld == "b"
+  assertTrue( b2 instanceof A )
+  assertTrue( b2 instanceof B )
+  assertTrue( b2.fld == "b" )
 }
