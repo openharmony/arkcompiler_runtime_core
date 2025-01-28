@@ -242,7 +242,7 @@ function enable_ohos_sdk_native() {
             tar -xf "${OHOS_SDK_ARCH_NAME}"
             unzip -q ohos-sdk/linux/native-linux-x64-$OHOS_SDK_VERSION-$SDK_VERSION_STAGE.zip
             rm "${OHOS_SDK_ARCH_NAME}"
-            OHOS_SDK_NATIVE=native
+            OHOS_SDK_NATIVE="$(realpath ./native)"
         fi
     fi
 }
