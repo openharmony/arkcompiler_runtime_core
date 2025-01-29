@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -99,7 +99,7 @@ cases:
       assertEQ( res, 2 )
       new Derived().foo(new Derived())
       assertEQ( res, 2 )
-    params: override-compatible parameter (contravariant)
+    params: override-compatible parameter (invariant)
 
   - tags: 'negative, compile-only'
     base: |-
@@ -131,7 +131,7 @@ cases:
       }
     derived: |-
       class Derived extends Base {
-          override foo<J extends A>(i: J) {
+          override foo<J extends I>(i: J) {
               res = 2
           }
       }
@@ -159,7 +159,7 @@ cases:
       }
     derived: |-
       class Derived extends Base {
-          override foo<J extends I>(i: J) {
+          override foo<J extends III>(i: J) {
               res = 2
           }
       }
@@ -183,7 +183,7 @@ cases:
     call: |-
       new Derived().foo(new Derived())
       assertEQ( res, 2 )
-    params: override-compatible with itself parameter
+    params: override-compatible with itself return value
 
   - base: |-
       class Base {
@@ -202,7 +202,7 @@ cases:
     call: |-
       new Derived().foo(new Derived())
       assertEQ( res, 2 )
-    params: override-compatible with itself parameter
+    params: override-compatible with itself return value
 
   - base: |-
       class Base {
@@ -221,7 +221,7 @@ cases:
     call: |-
       new Derived().foo(new Derived())
       assertEQ( res, 2 )
-    params: override-compatible parameter (contravariance)
+    params: override-compatible return value (contravariance)
 
   - tags: 'negative, compile-only'
     base: |-
@@ -238,7 +238,4 @@ cases:
               return i
           }
       }
-    call: |-
-      new Derived().foo(new Derived())
-      assertEQ( res, 2 )
-    params: override-compatible with itself parameter
+    params: override-incompatible constraints (covariance)

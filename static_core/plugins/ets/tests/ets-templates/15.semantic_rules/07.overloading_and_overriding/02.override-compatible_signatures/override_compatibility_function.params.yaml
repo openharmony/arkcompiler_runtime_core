@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,12 +25,6 @@ cases:
     call: |-
       new Derived().foo( ( i:Base ): Derived => { return new Derived() } )
       assertEQ( res, 2)
-      new Derived().foo( ( i:Derived ): Base => { return new Base() } )
-      assertEQ( res, 2)
-      new Derived().foo( ( i:Base ): Base => { return new Base() } )
-      assertEQ( res, 2)
-      new Derived().foo( ( i:Derived ): Derived => { return new Derived() } )
-      assertEQ( res, 2)
     params: override-compatible with itself parameter
 
   - base: |-
@@ -45,10 +39,6 @@ cases:
       new Derived().foo( ( i:Base ): Derived => { return new Derived() } )
       assertEQ( res, 2)
       new Derived().foo( ( i:Derived ): Derived => { return new Derived() } )
-      assertEQ( res, 2)
-      new Derived().foo( ( i:Base ): Base => { return new Base() } )
-      assertEQ( res, 2)
-      new Derived().foo( ( i:Derived ): Base => { return new Base() } )
       assertEQ( res, 2)
     params: override-compatible parameter (covariance)
 
@@ -71,7 +61,8 @@ cases:
       assertEQ( res, 2)
     params: override-compatible parameter (covariance)
 
-  - base: |-
+  - tags: 'negative, compile-only'
+    base: |-
       foo( i: (j: Derived) => Base ): void {
           res = 1
       }
@@ -79,14 +70,10 @@ cases:
       override foo(i: (j: Base) => Derived): void {
           res = 2
       }
-    call: |-
-      new Derived().foo( ( i:Base ): Derived => { return new Derived() } )
-      assertEQ( res, 2)
-      new Derived().foo( ( i:Derived ): Base => { return new Base() } )
-      assertEQ( res, 2)
-    params: override-compatible parameter (contravariance)
+    params: override-incompatible parameter (contravariance)
 
-  - base: |-
+  - tags: 'negative, compile-only'
+    base: |-
       foo( i: (j: Derived) => Base ): void {
           res = 1
       }
@@ -94,16 +81,7 @@ cases:
       override foo(i: (j: Base) => Base): void {
           res = 2
       }
-    call: |-
-      new Derived().foo( ( i:Base ): Derived => { return new Derived() } )
-      assertEQ( res, 2)
-      new Derived().foo( ( i:Derived ): Base => { return new Base() } )
-      assertEQ( res, 2)
-      new Derived().foo( ( i:Base ): Base => { return new Base() } )
-      assertEQ( res, 2)
-      new Derived().foo( ( i:Derived ): Derived => { return new Derived() } )
-      assertEQ( res, 2)
-    params: override-compatible parameter (contravariance)
+    params: override-incompatible parameter (contravariance)
 
   - tags: 'negative, compile-only'
     base: |-
@@ -166,13 +144,16 @@ cases:
       function fdb(i: Derived): Base {
           return new Base()
       }
+      function fbb(i: Base): Base {
+          return i
+      }
     base: |-
       foo(): (i: Base) => Base {
           res = 1
-          return fdb
+          return fbb
       }
     derived: |-
-      override foo(): (i: Derived) => Base {
+      foo(): (i: Derived) => Base {
           res = 2
           return fdb
       }
