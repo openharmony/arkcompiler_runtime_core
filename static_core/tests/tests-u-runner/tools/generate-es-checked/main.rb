@@ -401,7 +401,11 @@ gen = Generator.new($options[:'filter'])
 
 ARGV.each { |a|
     puts "reading #{a}"
-    file = YAML.load_file(a)
+    if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('3.1.0')
+      file = YAML.load_file(a)
+    else
+      file = YAML.load_file(a, aliases: true)
+    end
     gen.prepare a, file
     gen.process file
 }

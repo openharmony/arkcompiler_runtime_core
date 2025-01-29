@@ -39,9 +39,18 @@ optparser.parse!(into: options)
 exit unless options.data
 exit if options.data.empty?
 
-data = YAML.load_file(File.expand_path(options.data.first))
+if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('3.1.0')
+  data = YAML.load_file(File.expand_path(options.data.first))
+else
+  data = YAML.load_file(File.expand_path(options.data.first), aliases: true)
+end
+
 options.data.drop(1).each do |plugin_path|
-  plugin_data = YAML.load_file(File.expand_path(plugin_path))
+  if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('3.1.0')
+    plugin_data = YAML.load_file(File.expand_path(plugin_path))
+  else
+    plugin_data = YAML.load_file(File.expand_path(plugin_path), aliases: true)
+  end
   # check that all instructions are prefixed:
   instructions = data_instructions(plugin_data)
   raise 'Plugged in instructions must be prefixed' unless instructions.reject { |i| i['prefix'] }.empty?

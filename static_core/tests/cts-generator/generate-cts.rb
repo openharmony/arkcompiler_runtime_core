@@ -85,7 +85,11 @@ LOG.level = Logger::DEBUG
 
 LOG.info "Loading '#{template_path}'"
 
-data = YAML.load_file(template_path)
+if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('3.1.0')
+  data = YAML.load_file(template_path)
+else
+  data = YAML.load_file(template_path, aliases: true)
+end
 
 data['tests'] = get_chunk data['tests'], chunk, chunks
 

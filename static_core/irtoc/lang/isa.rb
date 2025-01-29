@@ -33,7 +33,11 @@ end
 
 class ISA
   def self.setup(isa_filename, isapi_filename)
-    isa = YAML.load_file(File.expand_path(isa_filename))
+    if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('3.1.0')
+      isa = YAML.load_file(File.expand_path(isa_filename))
+    else
+      isa = YAML.load_file(File.expand_path(isa_filename), aliases: true)
+    end
     isa = JSON.parse(isa.to_json, object_class: OpenStruct).freeze
     require isapi_filename
     Gen.on_require(isa)
