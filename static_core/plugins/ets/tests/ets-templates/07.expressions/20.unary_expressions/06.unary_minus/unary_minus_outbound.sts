@@ -13,12 +13,18 @@
  * limitations under the License.
  */
 
+{% for onb in unary_minus_onbound %}
+
 /*---
-desc: Prefix decrement operator
+desc: Unary minus operator (onbound) (these are special cases for numeric overflow behavior. Special attention wanted).
+params: {{onb.type}} {{onb.origin}}
+tags: [negative, compile-only]
 ---*/
 
 function main(): void {
-  let a = 5;
-  assertTrue(--a == 4);
-  assertTrue(a == 4);
+  let a: {{onb.type}} = {{onb.origin}};
+  let b: {{onb.type}} = -a
+  assertEQ(b, -a);
 }
+
+{% endfor %}

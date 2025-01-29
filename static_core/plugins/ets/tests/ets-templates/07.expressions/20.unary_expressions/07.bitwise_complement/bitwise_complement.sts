@@ -22,7 +22,7 @@ params: {{bw.type}} {{bw.origin}} => {{bw.dest}}
 
 function main(): void {
   let a: {{bw.type}} = {{bw.origin}};
-  assertTrue(~a == {{bw.dest}});
+  assertEQ(~a, {{bw.dest}});
 }
 
 {% endfor %}

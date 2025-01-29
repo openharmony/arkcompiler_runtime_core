@@ -19,5 +19,12 @@ desc: Unary plus operator
 
 function main(): void {
   let a = 5;
-  assertTrue(+a == a);
+  assertEQ(+a, a);
+  a += +a
+  assertEQ(+a, 10)
+  assertEQ(a, +10)
+  let b = -6
+  assertEQ(+b, -6)
+  let c = 1.0
+  assertEQ(+c, 1.0)
 }

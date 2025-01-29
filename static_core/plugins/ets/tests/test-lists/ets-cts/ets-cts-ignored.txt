@@ -1805,3 +1805,6 @@
 06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_8.sts
 06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_9.sts
 06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_n.sts
+
+# 22409
+07.expressions/20.unary_expressions/08.logical_complement/logical_complement_char.sts

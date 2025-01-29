@@ -22,5 +22,5 @@ function main(): void {
   let b: Int = 4;
   let x = a! + b;
 
-  assertTrue( x == 9 )
+  assertEQ( x, 9 )
 }

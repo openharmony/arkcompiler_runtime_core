@@ -19,6 +19,10 @@ desc: Postfix increment operator
 
 function main(): void {
   let a = 5;
-  assertTrue(a++ == 5);
-  assertTrue(a == 6);
+  assertEQ(a++, 5);
+  assertEQ(a, 6);
+  a += a++
+  assertEQ(a, 12);
+  let c = 1.0
+  assertEQ(c++, 1.0)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,17 +14,16 @@
  */
 
 /*---
-desc: The type of ensure-not-nullish expression is the non-nullish variant of the type of e.
+desc: Logical complement operator
+name: 07.expressions/20.unary_expressions/08.logical_complement/logical_complement_3
+params: 1 => false
 ---*/
 
 function main(): void {
-  let i: Int|undefined = (): Int|undefined => { return undefined; }();
-  try {
-    let ii = i!;
-    assertTrue( false, "evaluation of e seems to be e" )
-  } catch(npe: NullPointerError) {
-    assertTrue( true, "NPE caught - correct")
-  } catch(e) {
-    assertTrue( false, "Some other Error thrown, not correct")
-  }
+  let b: int | null = null
+  assertEQ(!b, true, "Null is false");
+  b = 3
+  assertEQ(!b, false, "Int not 0 is true");
+  b = 0
+  assertEQ(!b, true, "Int 0 is true");
 }

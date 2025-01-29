@@ -19,6 +19,10 @@ desc: Postfix decrement operator
 
 function main(): void {
   let a = 5;
-  assertTrue(a-- == 5);
-  assertTrue(a == 4);
+  assertEQ(a--, 5);
+  assertEQ(a, 4);
+  a -= a--
+  assertEQ(a, 0)
+  let c = 1.0
+  assertEQ(c--, 1.0)
 }
