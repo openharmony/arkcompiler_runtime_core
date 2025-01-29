@@ -60,17 +60,21 @@ public:
         ASSERT_TRUE(etsVm_->DestroyEtsVM() == ETS_OK) << "Cannot destroy ETS VM";
     }
 
+    template <typename R, typename... Args>
+    R CallEtsClassStaticMethod(const std::string &className, const std::string &fnName, Args &&...args)
+    {
+        std::optional<R> result;
+        CallEtsFunctionImpl(&result, className, fnName, std::forward<Args>(args)...);
+        if constexpr (!std::is_same_v<R, void>) {
+            return result.value();
+        }
+    }
+
     /// Call function with name `fnName` from ETSGLOBAL
     template <typename R, typename... Args>
     R CallEtsFunction(const std::string &fnName, Args &&...args)
     {
-        std::optional<R> result;
-
-        CallEtsFunctionImpl(&result, fnName, std::forward<Args>(args)...);
-
-        if constexpr (!std::is_same_v<R, void>) {
-            return result.value();
-        }
+        return CallEtsClassStaticMethod<R>("ETSGLOBAL", fnName, std::forward<Args>(args)...);
     }
 
     class NativeFunction {
@@ -108,6 +112,21 @@ public:
         }
     }
 
+    void GetStdString(ani_string str, std::string &result)
+    {
+        GetStdString(env_, str, result);
+    }
+
+    static void GetStdString(ani_env *env, ani_string str, std::string &result)
+    {
+        ani_size sz {};
+        ASSERT_EQ(env->String_GetUTF8Size(str, &sz), ANI_OK);
+
+        result.resize(sz + 1);
+        ASSERT_EQ(env->String_GetUTF8SubString(str, 0, sz, result.data(), result.size(), &sz), ANI_OK);
+        result.resize(sz);
+    }
+
 private:
     static std::string GetFindClassFailureMsg(const std::string &className)
     {
@@ -124,11 +143,10 @@ private:
     }
 
     template <typename R, typename... Args>
-    void CallEtsFunctionImpl(std::optional<R> *result, const std::string &fnName, Args &&...args)
+    void CallEtsFunctionImpl(std::optional<R> *result, const std::string &className, const std::string &fnName,
+                             Args &&...args)
     {
-        auto className = "ETSGLOBAL";
-
-        ets_class cls = etsEnv_->FindClass(className);
+        ets_class cls = etsEnv_->FindClass(className.c_str());
         ASSERT_NE(cls, nullptr) << GetFindClassFailureMsg(className);
 
         ets_method fn = etsEnv_->GetStaticp_method(cls, fnName.data(), nullptr);

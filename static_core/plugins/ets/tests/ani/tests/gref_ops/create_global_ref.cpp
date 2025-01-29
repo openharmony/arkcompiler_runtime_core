@@ -32,16 +32,16 @@ TEST_F(CreateGlobalReferenceTest, create_global_ref)
     ani_ref ref = string;
 
     // create global reference
-    ASSERT_EQ(env_->GlobalReference_Create(ref, 0, &result), ANI_OK);
+    ASSERT_EQ(env_->GlobalReference_Create(ref, &result), ANI_OK);
 
     // create global successful
     ASSERT_NE(result, nullptr);
     // issue 22089
     // check invalid args
-    ASSERT_EQ(env_->GlobalReference_Create(nullptr, 0, &result), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->GlobalReference_Create(nullptr, &result), ANI_INVALID_ARGS);
 
     // check invalid args
-    ASSERT_EQ(env_->GlobalReference_Create(ref, 0, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->GlobalReference_Create(ref, nullptr), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing

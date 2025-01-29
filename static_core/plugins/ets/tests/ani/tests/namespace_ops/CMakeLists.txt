@@ -11,12 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ani_add_gtest(ani_test_find_class
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_class_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_class_test.sts
+ani_add_gtest(ani_test_namespace_find_function
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_function_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_function_test.sts
 )
 
-ani_add_gtest(ani_test_find_namespace
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_namespace_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_namespace_test.sts
+ani_add_gtest(ani_test_namespace_find_variable
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_variable_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_variable_test.sts
 )

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,6 +12,18 @@
 # limitations under the License.
 
 ani_add_gtest(ani_test_bind_ops_class_bind_native_methods
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_bind_native_methods.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_bind_native_methods.sts
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_bind_native_methods_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_bind_native_methods_test.sts
+)
+
+ani_add_gtest(ani_test_bind_ops_module_bind_native_functions
+    ETS_NAMED_MODE
+    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/module_bind_native_functions_test/arktsconfig.json
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_bind_native_functions_test/test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_bind_native_functions_test/test.sts
+)
+
+ani_add_gtest(ani_test_bind_ops_namespace_bind_native_functions
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_bind_native_functions_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_bind_native_functions_test.sts
 )

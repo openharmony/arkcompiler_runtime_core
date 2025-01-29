@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,7 @@ protected:
         EtsMethod *getCoroIdMethod = global->GetMethod("getCoroutineId");
         ASSERT_NE(nullptr, getCoroIdMethod);
         ASSERT_TRUE(getCoroIdMethod->IsNative());
-        getCoroIdMethod->RegisterNativeImpl(reinterpret_cast<void *>(GetCoroId));
+        getCoroIdMethod->RegisterNativeDeprecated(reinterpret_cast<void *>(GetCoroId));
     }
 
     void TearDown() override

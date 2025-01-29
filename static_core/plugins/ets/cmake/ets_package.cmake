@@ -16,6 +16,7 @@
 #
 # Example usage:
 #   do_panda_ets_package(package_name
+#     ETS_NAMED_MODE
 #     ABC_FILE
 #       path/to/file0.abc
 #     ETS_SOURCE
@@ -34,7 +35,7 @@ function(do_panda_ets_package TARGET)
     # Parse arguments
     cmake_parse_arguments(
         ARG
-        ""
+        "ETS_NAMED_MODE"
         "OUTPUT_DIRECTORY;ETS_CONFIG;VERIFY_SOURCES"
         "ABC_FILE;ETS_SOURCES;ETS_VERIFICATOR_ERRORS"
         ${ARGN}
@@ -72,6 +73,7 @@ function(do_panda_ets_package TARGET)
 
     if(DEFINED ARG_ETS_CONFIG)
         list(APPEND ES2PANDA_ARGUMENTS --arktsconfig=${ARG_ETS_CONFIG})
+        list(APPEND ES2PANDA_ARGUMENTS --stdlib=${PANDA_ROOT}/plugins/ets/stdlib)
     endif()
 
     set(BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/${TARGET})
@@ -82,12 +84,15 @@ function(do_panda_ets_package TARGET)
         list(LENGTH ARG_ETS_SOURCES list_length)
 
         if (list_length EQUAL 1)
+            if(NOT ARG_ETS_NAMED_MODE)
+                list(APPEND ES2PANDA_ARGUMENTS --ets-unnamed)
+            endif()
             # Compile one .sts file to OUTPUT_ABC
             add_custom_command(
                 OUTPUT ${OUTPUT_ABC}
                 COMMENT "${TARGET}: Convert sts files to ${OUTPUT_ABC}"
                 COMMAND mkdir -p ${BUILD_DIR}/src
-                COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS} --ets-unnamed --output=${OUTPUT_ABC} ${ARG_ETS_SOURCES}
+                COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS} --output=${OUTPUT_ABC} ${ARG_ETS_SOURCES}
                 DEPENDS ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc ${es2panda_target} ${ARG_ETS_SOURCES}
             )
         else()

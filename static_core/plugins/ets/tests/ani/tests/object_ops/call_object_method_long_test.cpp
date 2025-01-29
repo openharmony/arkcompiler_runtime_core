@@ -49,7 +49,7 @@ TEST_F(CallObjectMethodLongTest, CallMethodLongTestOK)
     ASSERT_EQ(env_->FindClass("LC;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
-    ani_object obj;
+    ani_object obj {};
     this->NewObject(cls, &obj);
 
     ani_method method;
@@ -81,7 +81,7 @@ TEST_F(CallObjectMethodLongTest, CallMethodLongTestError)
     ASSERT_EQ(env_->FindClass("LC;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
-    ani_object obj;
+    ani_object obj {};
     this->NewObject(cls, &obj);
 
     ani_method method;
