@@ -52,7 +52,7 @@ def main() -> None:
                             "or use special value `all` to use all available cores.")
     start = datetime.now(pytz.UTC)
     for test_suite in config.test_suites:
-        if test_suite.startswith("declgenets2ts"):
+        if test_suite.startswith("declgen_ets2ts"):
             plugin = "declgenets2ts"
         else:
             plugin = "ets" if test_suite.startswith("ets") or test_suite.startswith("sts") else test_suite

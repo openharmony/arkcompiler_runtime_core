@@ -17,7 +17,6 @@
 
 import subprocess
 import os
-import shutil
 import logging
 from pathlib import Path
 from typing import Any, List, Set
@@ -31,14 +30,11 @@ from runner.plugins.ets.ets_test_suite import (
     FuncEtsTestSuite,
     RuntimeEtsTestSuite
 )
-from runner.plugins.ets.ets_suites import EtsSuites
 from runner.plugins.declgenets2ts.test_declgenets2ts import TestDeclgenETS2TS
 from runner.plugins.declgenets2ts.declgenets2ts_suites import DeclgenEtsSuites
 from runner.runner_base import get_test_id
 from runner.runner_file_based import RunnerFileBased
 from runner.enum_types.test_directory import TestDirectory
-
-TSC_REPO_URL = "TSC_REPO_URL"
 
 _LOGGER = logging.getLogger(
     "runner.plugins.declgenets2ts.runner_declgenets2ts")
@@ -48,23 +44,14 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
     def __init__(self, config: Config):
         config.verifier.enable = False
         self.__declgen_ets_name = self.get_declgen_ets_name(config.test_suites)
-        self.__ets_suite_name = self.get_ets_suite_name(config.test_suites)
 
         super().__init__(config, self.__declgen_ets_name)
 
         self.declgen_ets2ts_executor = os.path.join(
             self.build_dir, "bin", "declgen_ets2ts")
-        self.tsc_executor = os.path.join(
-            self.build_dir, "typescript", "package", "bin", "tsc")
-        self.tsc_dir = os.path.join(self.build_dir, "typescript")
-        self.tsc_repo_url = os.getenv(TSC_REPO_URL)
-        if self.tsc_repo_url is None:
-            Log.exception_and_raise(
-                _LOGGER, "The TSC_REPO_URL environment variable does not exist.")
-        self.process_typescript()
 
-        test_suite_class = self.get_declgen_ets_class(self.__ets_suite_name)
-        if self.__ets_suite_name == EtsSuites.RUNTIME.value:
+        test_suite_class = self.get_declgen_ets_class(self.__declgen_ets_name)
+        if self.__declgen_ets_name == DeclgenEtsSuites.RUNTIME.value:
             self.default_list_root = self._get_frontend_test_lists()
         self.declgen_list_root = os.path.join(self.default_list_root, "declgenets2ts")
         test_suite = test_suite_class(
@@ -76,14 +63,14 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
         Log.summary(_LOGGER, f"TEST_ROOT set to {self.test_root}")
         Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
 
-        self.collect_excluded_test_lists(test_name=self.__ets_suite_name)
-        self.collect_ignored_test_lists(test_name=self.__ets_suite_name)
+        self.collect_excluded_test_lists(test_name=self.__declgen_ets_name)
+        self.collect_ignored_test_lists(test_name=self.__declgen_ets_name)
 
         self.add_directories([TestDirectory(self.test_root, "sts", [])])
 
     @property
     def default_work_dir_root(self) -> Path:
-        return Path("/tmp/declgenets2ts") / self.__ets_suite_name
+        return Path("/tmp/declgenets2ts") / self.__declgen_ets_name
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestDeclgenETS2TS:
         test = TestDeclgenETS2TS(self.test_env, test_file, flags, get_test_id(
@@ -130,57 +117,14 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
         except Exception as ex:  # pylint: disable=broad-except
             Log.exception_and_raise(_LOGGER, f"Error reading YAML file: {ex}")
 
-    def process_typescript(self) -> None:
-        try:
-            if os.path.exists(self.tsc_executor):
-                return
-
-            if os.path.exists(self.tsc_dir):
-                shutil.rmtree(self.tsc_dir)
-
-            self.run_command(["git", "clone", "--depth", "1", self.tsc_repo_url,
-                             self.tsc_dir], self.build_dir, "Cloning repository...")
-
-            self.run_command(["npm", "install"], self.tsc_dir,
-                             "Running npm install...")
-
-            self.run_command(["npm", "run", "build"],
-                             self.tsc_dir, "Running npm run build...")
-
-            self.run_command(["npm", "pack"], self.tsc_dir,
-                             "Running npm pack...")
-
-            package_name = self.read_package_info(
-                os.path.join(self.tsc_dir, "package.json"))
-            if package_name:
-                Log.summary(_LOGGER, f"Extracting {package_name}...")
-                shutil.unpack_archive(os.path.join(
-                    self.tsc_dir, package_name), extract_dir=self.tsc_dir)
-
-        except Exception as ex:  # pylint: disable=broad-except
-            Log.exception_and_raise(_LOGGER, f"Error during the process: {ex}")
-
     def get_declgen_ets_name(self, test_suites: Set[str]) -> str:
         name = ""
-        if "declgenets2ts_ets_cts" in test_suites:
+        if "declgen_ets2ts_cts" in test_suites:
             name = DeclgenEtsSuites.CTS.value
-        elif "declgenets2ts_ets_func_tests" in test_suites:
+        elif "declgen_ets2ts_func_tests" in test_suites:
             name = DeclgenEtsSuites.FUNC.value
-        elif "declgenets2ts_ets_runtime" in test_suites:
+        elif "declgen_ets2ts_runtime" in test_suites:
             name = DeclgenEtsSuites.RUNTIME.value
-        else:
-            Log.exception_and_raise(
-                _LOGGER, f"Unsupported test suite: {self.config.test_suites}")
-        return name
-
-    def get_ets_suite_name(self, test_suites: Set[str]) -> str:
-        name = ""
-        if "declgenets2ts_ets_cts" in test_suites:
-            name = EtsSuites.CTS.value
-        elif "declgenets2ts_ets_func_tests" in test_suites:
-            name = EtsSuites.FUNC.value
-        elif "declgenets2ts_ets_runtime" in test_suites:
-            name = EtsSuites.RUNTIME.value
         else:
             Log.exception_and_raise(
                 _LOGGER, f"Unsupported test suite: {self.config.test_suites}")
@@ -188,8 +132,8 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
 
     def get_declgen_ets_class(self, ets_suite_name: str) -> Any:
         name_to_class = {
-            EtsSuites.CTS.value: CtsEtsTestSuite,
-            EtsSuites.FUNC.value: FuncEtsTestSuite,
-            EtsSuites.RUNTIME.value: RuntimeEtsTestSuite,
+            DeclgenEtsSuites.CTS.value: CtsEtsTestSuite,
+            DeclgenEtsSuites.FUNC.value: FuncEtsTestSuite,
+            DeclgenEtsSuites.RUNTIME.value: RuntimeEtsTestSuite,
         }
         return name_to_class.get(ets_suite_name)
