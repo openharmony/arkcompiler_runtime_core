@@ -1585,4 +1585,10 @@ const __ani_interaction_api *GetInteractionAPI()
 {
     return &INTERACTION_API;
 }
+
+bool IsVersionSupported(uint32_t version)
+{
+    return version == ANI_VERSION_1;
+}
+
 }  // namespace ark::ets::ani

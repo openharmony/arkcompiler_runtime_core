@@ -52,6 +52,11 @@ public:
         return static_cast<PandaEtsNapiEnv *>(env);
     }
 
+    static PandaEtsNapiEnv *FromEtsEnv(EtsEnv *env)
+    {
+        return static_cast<PandaEtsNapiEnv *>(env);
+    }
+
     static PandaEtsNapiEnv *FromAniEnv(ani_env *env)
     {
         return static_cast<PandaEtsNapiEnv *>(env);
