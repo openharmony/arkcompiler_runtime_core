@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -62,21 +62,18 @@ cases:
       foo(i: Base): void {
           res = 1;
       }
-      bar(i: Derived): void {
-          res = 2;
-      }
     derived: |-
       foo(i: Base): void {
-          res = 3;
+          res = 2;
       }
       foo(i: Derived): void {
-          res = 4;
+          res = 3;
       }
     call: |-
       new Derived().foo(new Base())
-      assertEQ( res, 3 )
+      assertEQ( res, 2 )
       new Derived().foo(new Derived())
-      assertEQ( res, 4 )
+      assertEQ( res, 3 )
     doc: Class/Interface type
     params: overload-compatible with itself parameter
 
@@ -101,7 +98,7 @@ cases:
     base: |-
       foo(): Derived {
           res = 1;
-          return this;
+          return new Derived();
       }
     derived: |-
       override foo(): Base {
@@ -115,7 +112,7 @@ cases:
     base: |-
       foo(): Derived {
           res = 1;
-          return this;
+          return new Derived();
       }
     derived: |-
       foo(): Base {
@@ -123,7 +120,7 @@ cases:
           return this;
       }
     doc: Class/Interface type
-    params: neither override-incompatible return value (contravariance), nor overload-equivalent.
+    params: override-incompatible return value (contravariance) and overload-equivalent
 
   - base: |-
       foo(): Base {
@@ -154,7 +151,7 @@ cases:
   # INTERFACE, PARAMETER
   - decl: |-
       interface IBase {}
-      interface IDerived {}
+      interface IDerived extends IBase {}
       class A implements IBase {}
       class B implements IDerived {}
     base: |-
@@ -176,7 +173,7 @@ cases:
   - tags: 'negative, compile-only'
     decl: |-
       interface IBase {}
-      interface IDerived {}
+      interface IDerived extends IBase {}
       class A implements IBase {}
       class B implements IDerived {}
     base: |-
@@ -192,7 +189,7 @@ cases:
 
   - decl: |-
       interface IBase {}
-      interface IDerived {}
+      interface IDerived extends IBase {}
       class A implements IBase {}
       class B implements IDerived {}
     base: |-
@@ -209,11 +206,11 @@ cases:
       new Derived().foo(new B())
       assertEQ( res, 2 )
     doc: Class/Interface type
-    params: overload-compatible parameter (covariance)
+    params: override-incompatible parameter (covariance), not overload-equivalent
 
   - decl: |-
       interface IBase {}
-      interface IDerived {}
+      interface IDerived extends IBase {}
       class A implements IBase {}
       class B implements IDerived {}
     base: |-
@@ -241,18 +238,18 @@ cases:
   # INTERFACE, RETURN VALUE
   - decl: |-
       interface IBase {}
-      interface IDerived {}
+      interface IDerived extends IBase {}
       class A implements IBase {}
       class B implements IDerived {}
     base: |-
       foo(): IBase {
           res = 1;
-          return this;
+          return new A();
       }
     derived: |-
       override foo(): IDerived {
           res = 2;
-          return this;
+          return new B();
       }
     call: |-
       new Derived().foo();
@@ -263,18 +260,18 @@ cases:
   - tags: 'negative, compile-only'
     decl: |-
       interface IBase {}
-      interface IDerived {}
+      interface IDerived extends IBase {}
       class A implements IBase {}
       class B implements IDerived {}
     base: |-
       foo(): IDerived {
           res = 1;
-          return this;
+          return new B();
       }
     derived: |-
       override foo(): IBase {
           res = 2;
-          return this;
+          return new A();
       }
     doc: Class/Interface type
     params: override-incompatible return value (contravariance).
@@ -282,31 +279,31 @@ cases:
   - tags: 'negative, compile-only'
     decl: |-
       interface IBase {}
-      interface IDerived {}
+      interface IDerived extends IBase {}
       class A implements IBase {}
       class B implements IDerived {}
     base: |-
       foo(): IDerived {
           res = 1;
-          return this;
+          return new B();
       }
     derived: |-
       foo(): IBase {
           res = 2;
-          return this;
+          return new A();
       }
     doc: Class/Interface type
-    params: neither override-incompatible return value (contravariance), nor overload-equivalent.
+    params: override-incompatible return value (contravariance) and overload-equivalent.
 
   - decl: |-
       interface IBase {}
-      interface IDerived {}
+      interface IDerived extends IBase {}
       class A implements IBase {}
       class B implements IDerived {}
     base: |-
       foo(): IBase {
           res = 1;
-          return this;
+          return new A();
       }
       bar(): IDerived {
           res = 2;
@@ -319,7 +316,7 @@ cases:
       }
       bar(): IDerived {
           res = 4;
-          return this;
+          return new B();
       }
     call: |-
       new Derived().foo()
