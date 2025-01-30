@@ -131,7 +131,7 @@ Supertyping
     frontend_status: Done
 
 The *supertype* relationship between the two types ``T`` and ``S``, where ``T``
-is a supertype of ``T`` (recorded as ``T>:S``) is opposite to subtyping (see
+is a supertype of ``S`` (recorded as ``T>:S``) is opposite to subtyping (see
 :ref:`Subtyping`). *Supertyping* means that any object of type ``S`` can be
 safely used in any context to replace an object of type ``T``.
 
@@ -734,6 +734,8 @@ parameter types, or return types. There are five kinds of types for each case:
 - Class/interface type;
 - Function type;
 - Primitive type;
+- Enum types;
+- Union types;
 - Array type;
 - Tuple type; and
 - Type parameter.
@@ -791,11 +793,15 @@ positions are represented in the following table:
 +-+-----------------------+---------------------+-------------------+
 |3| Primitive types       | Invariance          | Invariance        |
 +-+-----------------------+---------------------+-------------------+
-|4| Array types           | Covariance <:       | Covariance <:     |
+|4| Union types           | Contravariance >:   | Contravariance >: |
 +-+-----------------------+---------------------+-------------------+
-|5| Tuple types           | Covariance <:       | Covariance <:     |
+|5| Enum types            | Invariance          | Invariance        |
 +-+-----------------------+---------------------+-------------------+
-|6| Type parameter        | Contravariance >:   | Contravariance >: |
+|6| Array types           | Covariance <:       | Covariance <:     |
++-+-----------------------+---------------------+-------------------+
+|7| Tuple types           | Invariance          | Covariance <:     |
++-+-----------------------+---------------------+-------------------+
+|8| Type parameter        | Contravariance >:   | Contravariance >: |
 | | constraint            |                     |                   |
 +-+-----------------------+---------------------+-------------------+
 
@@ -811,39 +817,80 @@ The semantics is illustrated by the example below:
 .. code-block:: typescript
    :linenos:
 
-    class Base {
-       kinds_of_parameters <T extends Derived, U extends Base>(
-          p1: Derived, p2: (q: Base)=>Derived, p3: number,
-          p4: Number, p5: Base[], p6: [Base, Base], p7: T, p8: U
-       )
-       kinds_of_return_type1(): Base
-       kinds_of_return_type2(): (q: Derived)=> Base
-       kinds_of_return_type3(): number
-       kinds_of_return_type4(): Number
-       kinds_of_return_type5(): Base[]
-       kinds_of_return_type6(): [Base, Base]
-       kinds_of_return_type7 <T extends Derived>(): T
+    enum E1  {Red, Green, Blue}
+    enum E2  {A, B, C}
+    interface BaseSuperType {}
+    interface Base extends BaseSuperType {
+       // Overriding for parameters
+       kinds_of_parameters01 <T extends Derived, U extends Base>(p: Derived): void
+       kinds_of_parameters02 <T extends Derived, U extends Base>(p: (q: Base)=>Derived): void
+       kinds_of_parameters03 <T extends Derived, U extends Base>(p: number): void
+       kinds_of_parameters04 <T extends Derived, U extends Base>(p: Number): void
+       kinds_of_parameters05 <T extends Derived, U extends Base>(p: T | U): void
+       kinds_of_parameters06 <T extends Derived, U extends Base>(p: E1): void
+       kinds_of_parameters07 <T extends Derived, U extends Base>(p: Base[]): void
+       kinds_of_parameters08 <T extends Derived, U extends Base>(p: [Base, Base]): void
+       kinds_of_parameters09 <T extends Derived, U extends Base>(p: T): void
+       kinds_of_parameters10 <T extends Derived, U extends Base>(p10: U): void
+
+       // Overriding for return type
+       kinds_of_return_type01(): Base
+       kinds_of_return_type02(): (q: Derived)=> Base
+       kinds_of_return_type03(): number
+       kinds_of_return_type04(): Number
+       kinds_of_return_type05<T extends Derived, U extends Base>(): T | U
+       kinds_of_return_type06(): E1
+       kinds_of_return_type07(): Base[]
+       kinds_of_return_type08(): [Base, Base]
+       kinds_of_return_type09 <T extends Derived>(): T
     }
-    class Derived extends Base {
-       // Overriding kinds for parameters
-       override kinds_of_parameters <T extends Base, U extends Object>(
-          p1: Base, // contravariant parameter type
-          p2: (q: Derived)=>Base, // Covariant parameter type, contravariant return type
-          p3: Number, // Compile-time error: parameter type is not override-compatible
-          p4: number, // Compile-time error: parameter type is not override-compatible
-          p5: Derived[], // Covariant array element type
-          p6: [Derived, Derived], // Covariant tuple type elements
-          p7: T, // Contravariance for constraints of type parameters
-          p8: U  // Contravariance for constraints of type parameters
-       )
+
+    interface Derived extends Base {
+       // Overriding kinds for parameters, Derived <: Base
+       kinds_of_parameters01 <T extends Base, U extends Object>(
+          p: Base // contravariant parameter type 
+       ): void
+       kinds_of_parameters02 <T extends Base, U extends Object>(
+          p: (q: Derived)=>Base // Covariant parameter type, contravariant return type
+       ): void
+       kinds_of_parameters03 <T extends Base, U extends Object>(
+          p: Number // Compile-time error: parameter type is not override-compatible
+       ): void
+       kinds_of_parameters04 <T extends Base, U extends Object>(
+          p: number // Compile-time error: parameter type is not override-compatible
+       ): void
+       kinds_of_parameters05 <T extends Base, U extends Object>(
+          p: Base | BaseSuperType // contravariant parameter type:  Derived | Base <: Base | BaseSuperType
+       ): void
+       kinds_of_parameters06 <T extends Base, U extends Object>(
+          // p: E2 // Compile-time error: parameter type is not override-compatible
+          p: E1 // Invariance parameter type
+       ): void
+       kinds_of_parameters07 <T extends Base, U extends Object>(
+          p: Derived[] // Covariant array element type
+       ): void
+       kinds_of_parameters08 <T extends Base, U extends Object>(
+          p: [Derived, Derived] // Compile-time error: parameter type is not override-compatible
+       ): void
+       kinds_of_parameters09 <T extends Base, U extends Object>(
+          p: T // Contravariance for constraints of type parameters
+       ): void
+       kinds_of_parameters10 <T extends Base, U extends Object>(
+          p: U  // Contravariance for constraints of type parameters
+       ): void
+
        // Overriding kinds for return type
-       override kinds_of_return_type1(): Derived // Covariant return type
-       override kinds_of_return_type2(): (q: Base)=> Derived // Contravariant parameter type, covariant return type
-       override kinds_of_return_type3(): Number // Compile-time error: return type is not override-compatible
-       override kinds_of_return_type4(): number // Compile-time error: return type is not override-compatible
-       override kinds_of_return_type5(): Derived[] // Covariant array element type
-       override kinds_of_return_type6(): [Derived, Derived] // Covariant tuple type elements
-       override kinds_of_return_type7 <T extends Base> (): T // OK, contravariance for constraints of the return type
+       kinds_of_return_type01(): Derived // Covariant return type
+       kinds_of_return_type02(): (q: Base)=> Derived // Contravariant parameter type, covariant return type
+       //kinds_of_return_type03(): Number // Compile-time error: return type is not override-compatible
+       //kinds_of_return_type04(): number // Compile-time error: return type is not override-compatible
+       kinds_of_return_type05<T extends Base, U extends BaseSuperType>(): T | U
+       //kinds_of_return_type06(): E2 // CTE
+       kinds_of_return_type06(): E1 // OK
+       kinds_of_return_type07(): Derived[] // Covariant array element type
+       kinds_of_return_type08(): [Derived, Derived] // Covariant tuple type elements
+       kinds_of_return_type09 <T extends Base> (): T // OK, contravariance for constraints of the return type 
+
     }
 
 The example below illustrates override-compatibility with ``Object``:
@@ -851,36 +898,56 @@ The example below illustrates override-compatibility with ``Object``:
 .. code-block:: typescript
    :linenos:
 
-    class Base {
-       kinds_of_parameters( // It represents all possible parameter type kinds
-          p1: Derived, p2: (q: Base)=>Derived, p3: number,
-          p4: Number, p5: Base[], p6: [Base, Base]
-       )
+    interface Base {
+       kinds_of_parameters<T extends Derived, U extends Base>( // It represents all possible parameter type kinds
+          p01: Derived,
+          p02: (q: Base)=>Derived,
+          p03: number,
+          p04: Number,
+          p05: T | U,
+          p06: E1,
+          p07: Base[],
+          p08: [Base, Base]
+       ): void
        kinds_of_return_type(): Object // It can be overridden by all subtypes except primitive ones
     }
-    class Derived extends Base {
-       override kinds_of_parameters( // Object is a supertype for all types except primitive ones
-          p1: Object, p2: Object,
+    interface Derived extends Base {
+       kinds_of_parameters( // Object is a supertype for all types except primitive ones
+          p1: Object,
+          p2: Object,
           p3: Object, // Compile-time error: number and Object are not override-compatible
-          p4: Object, p5: Object, p6: Object
-       )
-    class Derived1 extends Base {
-       override kinds_of_return_type(): Base // Valid overriding
+          p4: Object,
+          p5: Object,
+          p6: Object,
+          p7: Object,
+          p8: Object
+       ): void
     }
-    class Derived2 extends Base {
-       override kinds_of_return_type(): (q: Derived)=> Base // Valid overriding
+
+
+    interface Derived1 extends Base {
+       kinds_of_return_type(): Base // Valid overriding
     }
-    class Derived3 extends Base {
-       override kinds_of_return_type(): number // Compile-time error: number and Object are not override-compatible
+    interface Derived2 extends Base {
+       kinds_of_return_type(): (q: Derived)=> Base // Valid overriding
     }
-    class Derived4 extends Base {
-       override kinds_of_return_type(): Number // Valid overriding
+    interface Derived3 extends Base {
+       kinds_of_return_type(): number // Compile-time error: number and Object are not override-compatible
     }
-    class Derived5 extends Base {
-       override kinds_of_return_type(): Base[] // Valid overriding
+    interface Derived4 extends Base {
+       kinds_of_return_type(): Number // Valid overriding
     }
-    class Derived6 extends Base {
-       override kinds_of_return_type(): [Base, Base] // Valid overriding
+    interface Derived5 extends Base {
+       kinds_of_return_type(): number | string // Valid overriding
+    }
+    interface Derived6 extends Base {
+       kinds_of_return_type(): E1 // Valid overriding
+    }
+    interface Derived7 extends Base {
+       kinds_of_return_type(): Base[] // Valid overriding
+    }
+    interface Derived8 extends Base {
+       kinds_of_return_type(): [Base, Base] // Valid overriding
     }
 
 |
@@ -932,7 +999,8 @@ methods and partly for constructors.
 **Note**. Only accessible (see :ref:`Accessible`) methods are subject for
 overloading and overriding. For example, neither overriding nor overloading
 is considered if a superclass contains a ``private`` method, and a subclass
-has a method with the same name. Accessors are considered methods here.
+has a method with the same name. In case of overriding the same rules are 
+applied for accessors as well.
 
 An overriding member can keep or extend the access modifier (see
 :ref:`Access Modifiers`) of the inherited or implemented member. Otherwise, a

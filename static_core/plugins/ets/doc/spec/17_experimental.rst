@@ -2400,6 +2400,8 @@ The methods are used as follows:
 
 |
 
+.. _Async Functions and Methods:
+
 Async Functions and Methods
 ***************************
 

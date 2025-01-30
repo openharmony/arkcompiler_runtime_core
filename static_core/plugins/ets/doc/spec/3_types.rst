@@ -679,7 +679,6 @@ Floating-Point Types and Operations
 +=============+=====================================+==========================+
 | ``float``   | The set of all IEEE 754 [3]_ 32-bit | ``Float``                |
 |             | floating-point numbers              |                          |
-|             | floating-point numbers              |                          |
 +-------------+-------------------------------------+--------------------------+
 | ``number``, | The set of all IEEE 754 64-bit      | ``Number``               |
 | ``double``  | floating-point numbers              | ``Double``               |
@@ -2028,7 +2027,8 @@ after another:
    literal
 
 #. All nested union types are linearized.
-#. All type aliases (if any) are recursively replaced for non-alias types.
+#. All type aliases (if any and except recursive ones) are recursively replaced
+   for non-alias types.
 #. Identical types within the union type are replaced for a single type with
    account to the ``readonly`` type flag priority.
 #. If at least one type in the union is ``Object``, then all other non-nullish
@@ -2076,28 +2076,34 @@ is presented in the examples below:
 .. code-block:: typescript
    :linenos:
 
-    ( T1 | T2) | (T3 | T4) => T1 | T2 | T3 | T4  // Linearization
+    ( T1 | T2) | (T3 | T4) // normalized as T1 | T2 | T3 | T4. Linearization
 
-    number | number => number                    // Identical types elimination
+    type A = A[] | string  // No changes. Recursive type alias is kept
 
-    (number[]) | (readonly number[]) => readonly number[] // Readonly version wins
+    type B = number
+    type C = string
+    type D = B | C // normalized as number | string. Type aliases are unfolded
 
-    "1" | string | number => string | number    // Literal type value belongs to another type values
+    number | number // normalized as number. Identical types elimination
 
-    "1" | Object => Object                      // Object wins
-    AnyNonNullishType | Object => Object         
+    (number[]) | (readonly number[]) // normalized as readonly number[]. Readonly version wins
+
+    "1" | string | number // normalized as  string | number. Literal type value belongs to another type values
+
+    "1" | Object // normalized as Object. Object always wins
+    AnyNonNullishType | Object // normalized as Object         
 
     enum Strings1 {aa = "AA", bb = "BB"}
     enum Strings2 {aa = "AA", cc = "CC"}
-    Strings1 | Strings2 | string => string      // string wins
-    Strings1 | Strings2 | number => "AA" | "BB" | "CC" | number
-                                                // string enumerations unfolded and merged
+    Strings1 | Strings2 | string // normalized as string. string wins over strign literals
+    Strings1 | Strings2 | number // normalized as  "AA" | "BB" | "CC" | number
+                                 // string enumerations unfolded and merged
 
     class Base {}
     class Derived1 extends Base {}
     class Derived2 extends Base {}   
-    Base | Derived1 => Base                      // Base wins
-    Derived1 | Derived2 => Derived1 | Derived2   // End of normalization
+    Base | Derived1 // normalized as Base. Base wins over Derived.
+    Derived1 | Derived2 // normalized as Derived1 | Derived2. End of normalization
 
 The |LANG| compiler applies normalization while processing union types and
 handling the type inference for array literals (see
@@ -2178,20 +2184,14 @@ Nullish Types
     frontend_status: Done
 
 |LANG| has *nullish types* that are in fact a special form of union types (see
-:ref:`Union Types`):
+:ref:`Union Types`).
 
-.. code-block:: abnf
-
-    nullishType:
-          type '|' 'null' ('|' 'undefined')?
-        | type '|' 'undefined' ('|' 'null')?
-        ;
+``T | null`` or ``T | undefined`` or ``T | undefined | null`` 
+can be used as the type to specify a
+nullish version of type ``T``.
 
 All predefined and user-defined type declarations create non-nullish types.
 Non-nullish types cannot have a ``null`` or ``undefined`` value at runtime.
-
-``T | null`` or ``T | undefined`` can be used as the type to specify a
-nullish version of type ``T``.
 
 A variable declared to have type ``T | null`` can hold the values of type ``T``
 and its derived types, or the value ``null``. Such a type is called a *nullable

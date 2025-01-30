@@ -63,9 +63,6 @@ access modifiers (see :ref:`Access Modifiers`):
 -  ``Internal``, or
 -  ``Private``.
 
-A newly declared field can shadow a field declared in a superclass or
-superinterface.
-
 A newly declared method can shadow, overload, implement, or override a method
 declared in a superclass or superinterface.
 
@@ -852,7 +849,7 @@ within the class body of ``C``:
     }
 
     function increment(c: C) {
-      c.count++ // compile-time error – 'count' is private
+      c.count++ // compile-time error - 'count' is private
     }
 
 .. index::
@@ -914,7 +911,7 @@ class derived from ``C``:
     }
 
     function increment(c: C) {
-      c.count++ // compile-time error – 'count' is not accessible
+      c.count++ // compile-time error - 'count' is not accessible
     }
 
 .. index::
@@ -995,48 +992,8 @@ A :index:`compile-time error` occurs if:
    static field
    non-static field
 
-A field declared by a class with a certain name *shadows* any accessible (see
-:ref:`Accessible`) declaration of fields if they have the same name in
-superclasses of the class for they are in fact different fields:
-
-.. code-block:: typescript
-   :linenos:
-
-    class A {
-      field = 1 // 'field' in class A has type number
-      foo () { console.log (this) }
-    }
-    class B extends A {
-      field = "a string" // 'field' in class B has type string
-    }
-    class C extends B {
-      field = true // 'field' in class A has type boolean
-    }
-
-    let a:A = new A
-    a.foo()
-    a = new B
-    a.foo()
-    a = new C
-    a.foo()
-
-    // The output
-    A {field: 1} 
-    B {field: 1, field: "a string"} 
-    C {field: 1, field: "a string", field: true} 
-
-.. index::
-   accessibility
-   shadowing
-   field declaration
-   superclass
-
 Any static field can be accessed only with the qualification of a superclass
 name (see :ref:`Field Access Expression`).
-
-In case of *shadowing*, a class can access all non-private fields of a
-superclass and superinterfaces from its direct superclass and direct
-superinterfaces, respectively, by using qualifications *this* or *super*.
 
 A class can inherit more than one field or property with the same name from
 its superinterfaces, or from both its superclass and superinterfaces. However,
@@ -1272,9 +1229,11 @@ Overriding Fields
 .. meta:
     frontend_status: None
 
-While extending a class or implementing interfaces, instance fields declared in
-a superclass or a superintertafce can be overriden. Using the keyword *override*
-is not required. The new declaration acts as redeclaration. The type of the
+While extending a class or implementing interfaces, a field declared in
+a superclass or a superintertafce can be overriden by field
+with the same name and the same static or non-static status.
+Using the keyword *override* is not required. 
+The new declaration acts as redeclaration. The type of the
 overriding field is to be the same as the type of the overridden field.
 Otherwise a :index:`compile-time error` occurs.
 

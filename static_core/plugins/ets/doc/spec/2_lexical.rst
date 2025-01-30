@@ -290,8 +290,9 @@ Keywords
     frontend_status: Done
 
 *Keywords* are reserved words with permanently predefined meanings
-in |LANG|. Keywords are always lowercase. Keywords can be of four kinds as
-discussed below.
+in |LANG|. Keywords are case-sensitive, 
+see the exact spelling in the tables below.
+Kinds of keywords are discussed below.
 
 1. The following keywords are reserved in any context (*hard keywords*), and
 cannot be used as identifiers:
@@ -332,7 +333,24 @@ cannot be used as identifiers:
 |   ``do``           |   ``interface``   |   ``return``     |                  |
 +--------------------+-------------------+------------------+------------------+
 
-2. The following words have special meaning in certain contexts (*soft
+2. Names of primitive built-in types as well as their boxed versions
+also are *hard keywords*, and cannot be used as identifiers:
+
++---------------+---------------+---------------+---------------+---------------+---------------+
+|               |               |               |               |               |               |
++===============+===============+===============+===============+===============+===============+
+| ``boolean``   | ``double``    | ``number``    | ``Boolean``   | ``Double``    | ``Number``    |
++---------------+---------------+---------------+---------------+---------------+---------------+
+| ``byte``      | ``float``     | ``object``    | ``Byte``      | ``Float``     | ``Object``    |
++---------------+---------------+---------------+---------------+---------------+---------------+
+| ``bigint``    | ``int``       | ``short``     | ``Bigint``    | ``Int``       | ``Short``     |
++---------------+---------------+---------------+---------------+---------------+---------------+
+| ``char``      | ``long``      | ``string``    | ``Char``      | ``Long``      | ``String``    |
++---------------+---------------+---------------+---------------+---------------+---------------+
+| ``void``      |               |               |               |               |               |
++---------------+---------------+---------------+---------------+---------------+---------------+
+
+3. The following words have special meaning in certain contexts (*soft
 keywords*) but are valid identifiers elsewhere:
 
 .. index::
@@ -354,28 +372,6 @@ keywords*) but are valid identifiers elsewhere:
 |   ``get``       |     ``out``        |                   |
 +-----------------+--------------------+-------------------+
 
-3. The following words cannot be used as user-defined type names but are not
-otherwise restricted:
-
-.. index::
-   user-defined type name
-
-+---------------+---------------+---------------+---------------+---------------+---------------+
-|               |               |               |               |               |               |
-+===============+===============+===============+===============+===============+===============+
-| ``boolean``   | ``double``    | ``number``    | ``Boolean``   | ``Double``    | ``Number``    |
-+---------------+---------------+---------------+---------------+---------------+---------------+
-| ``byte``      | ``float``     | ``object``    | ``Byte``      | ``Float``     | ``Object``    |
-+---------------+---------------+---------------+---------------+---------------+---------------+
-| ``bigint``    | ``int``       | ``short``     | ``Bigint``    | ``Int``       | ``Short``     |
-+---------------+---------------+---------------+---------------+---------------+---------------+
-| ``char``      | ``long``      | ``string``    | ``Char``      | ``Long``      | ``String``    |
-+---------------+---------------+---------------+---------------+---------------+---------------+
-| ``void``      |               |               |               |               |               |
-+---------------+---------------+---------------+---------------+---------------+---------------+
-
-See also :ref:`Reserved Names of TS Types`.
-
 4. The following identifiers are also treated as *soft keywords* reserved for
 the future use (or used in |TS|):
 
@@ -388,6 +384,12 @@ the future use (or used in |TS|):
 +===============+===============+===============+===============+================+
 |   ``keyof``   |    ``is``     |   ``struct``  |    ``var``    |  ``yield``     |
 +---------------+---------------+---------------+---------------+----------------+
+
+5. The following words cannot be used as user-defined type names but are not
+otherwise restricted: see :ref:`Reserved Names of TS Types`.
+
+.. index::
+   user-defined type name
 
 |
 
