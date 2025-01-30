@@ -313,7 +313,6 @@ spec/03.types/References_Types/Tuples_type/tuple_as_generic_7.sts
 spec/03.types/References_Types/Tuples_type/tuple_write_6.sts
 ### Issue 19929
 spec/03.types/References_Types/Tuples_type/tuple_write_7.sts
-spec/03.types/References_Types/Tuples_type/recursive3.sts
 ### end of tuples
 
 ### Interfaces overriding issues
@@ -371,7 +370,6 @@ spec/09.classes/constructor-inheritance/issue14720_4.sts
 spec/09.classes/constructor-inheritance/issue14720_5.sts
 
 ## Issue 19725
-spec/09.classes/9.6.Method_Declarations/Issue-14273_0.sts
 spec/09.classes/9.6.Method_Declarations/Issue-14273_3.sts
 
 ### Type Erasure
@@ -439,10 +437,6 @@ spec/partial_type/partialType_main.sts
 ### Issue 18766 end
 
 ### ES2PANDA_FAIL - fails of negative, compile-only
-
-### Issue 15808
-regression/15588_wrong_readonly_field_return.sts
-### Issue 15808 end
 
 ### Issue 19529 begin
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-0004.sts

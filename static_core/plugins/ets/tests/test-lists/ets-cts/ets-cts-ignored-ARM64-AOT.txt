@@ -77,6 +77,10 @@ std/core/std_core_typeduarrays__Uint16Array.sts
 ### Issue 20260
 regression/16169_false_unreachable_statement_after_class.sts
 
+# 20290
+05.generics/03.utility_types/01.partial_utility_type/module_extends_1.sts
+05.generics/03.utility_types/01.partial_utility_type/module_extends_3.sts
+
 #18046 Update compilation process with modules for AOT mode
 05.generics/03.utility_types/01.partial_utility_type/module_class_0.sts
 05.generics/03.utility_types/01.partial_utility_type/module_class_1.sts
