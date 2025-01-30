@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -102,8 +102,7 @@ def add_gen_opts(parser: argparse.ArgumentParser, command: Command) -> None:
 
 
 def add_run_opts(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument('-p', '--platform', type=str,
-                        required=True,
+    parser.add_argument('-p', '--platform', type=str, required=True,
                         help='Platform plugin name')
     parser.add_argument('-m', '--mode', type=str,
                         default='default',
@@ -144,7 +143,8 @@ def add_run_opts(parser: argparse.ArgumentParser) -> None:
                         metavar='FAIL_LOGS_DIR',
                         help='Save failure messages to folder')
     parser.add_argument('--cpumask', default='', type=str,
-                        help='Use cores mask. F.e. 11110000 = low cores')
+                        help='Use cores mask in hex or bin format. '
+                             'E.g., 0x38 or 0b111000 = high cores')
     parser.add_argument('--aot-stats', action='store_true',
                         help='Collect aot compilation data')
     parser.add_argument('--jit-stats', action='store_true',

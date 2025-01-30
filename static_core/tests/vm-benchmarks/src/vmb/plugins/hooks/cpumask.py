@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -37,6 +37,13 @@ all_props = (
 def parse_bitmask(mask_s: Optional[str]) -> Tuple[str, List[bool]]:
     if not mask_s:
         return '', []
+    if mask_s.startswith('0b'):
+        n_cores = len(mask_s[len('0b'):])
+        mask_i = int(mask_s, base=2)
+        padding = (n_cores - 1) // 4 + 1
+        leftpadded_hex_mask = f'{mask_i:#0{padding+2}x}'
+        taskset_arg, leftpadded_mask = parse_bitmask(leftpadded_hex_mask)
+        return taskset_arg, leftpadded_mask[:n_cores]
     mask_s = mask_s[2:] if mask_s.startswith('0x') else mask_s
     mask_i = int(f'0x{mask_s}', base=16)
     return mask_s, [0 != mask_i & (1 << i) for i in range(len(mask_s) * 4)]
