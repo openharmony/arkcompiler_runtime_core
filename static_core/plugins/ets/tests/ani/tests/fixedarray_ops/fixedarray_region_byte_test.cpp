@@ -19,25 +19,37 @@
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
+// Add constants at namespace scope
+constexpr ani_byte TEST_VALUE_1 = 1U;
+constexpr ani_byte TEST_VALUE_2 = 2U;
+constexpr ani_byte TEST_VALUE_3 = 3U;
+constexpr ani_byte TEST_VALUE_4 = 4U;
+constexpr ani_byte TEST_VALUE_5 = 5U;
+
+constexpr ani_byte TEST_UPDATE_1 = 30U;
+constexpr ani_byte TEST_UPDATE_2 = 40U;
+constexpr ani_byte TEST_UPDATE_3 = 50U;
+
+constexpr ani_size TEST_ARRAY_SIZE = 5U;
+constexpr uint32_t TEST_BUFFER_SIZE = 10U;
+
 class FixedArraySetGetRegionByteTest : public AniTest {};
 
 // ninja ani_test_byte_array_region_gtests
 TEST_F(FixedArraySetGetRegionByteTest, SetByteArrayRegionErrorTests)
 {
     ani_fixedarray_byte fixedarray;
-    ASSERT_EQ(env_->FixedArray_New_Byte(5U, &fixedarray), ANI_OK);
-    const uint32_t bufferSize = 10U;
-    ani_byte nativeBuffer[bufferSize] = {0};
-    ani_size offset1 = -1;
-    ani_size len1 = 2;
+    ASSERT_EQ(env_->FixedArray_New_Byte(TEST_ARRAY_SIZE, &fixedarray), ANI_OK);
+    ani_byte nativeBuffer[TEST_BUFFER_SIZE] = {0};
+    const ani_size offset1 = -1;
+    const ani_size len1 = 2;
     ASSERT_EQ(env_->FixedArray_SetRegion_Byte(fixedarray, offset1, len1, nativeBuffer), ANI_OUT_OF_RANGE);
 
-    ani_size offset2 = 5;
+    const ani_size offset2 = 5;
     const ani_size len2 = 10U;
     ASSERT_EQ(env_->FixedArray_SetRegion_Byte(fixedarray, offset2, len2, nativeBuffer), ANI_OUT_OF_RANGE);
-    ani_size offset3 = 0;
-    ani_size len3 = 5;
-    // issue 22090
+    const ani_size offset3 = 0;
+    const ani_size len3 = 5;
     ASSERT_EQ(env_->FixedArray_SetRegion_Byte(fixedarray, offset3, len3, nativeBuffer), ANI_OK);
 }
 
@@ -47,14 +59,38 @@ TEST_F(FixedArraySetGetRegionByteTest, GetByteArrayRegionErrorTests)
     ASSERT_EQ(env_->FixedArray_New_Byte(5U, &fixedarray), ANI_OK);
     const uint32_t bufferSize = 10U;
     ani_byte nativeBuffer[bufferSize] = {0};
-    ani_size offset1 = 0;
-    ani_size len1 = 1;
+    const ani_size offset1 = 0;
+    const ani_size len1 = 1;
     ASSERT_EQ(env_->FixedArray_GetRegion_Byte(fixedarray, offset1, len1, nullptr), ANI_INVALID_ARGS);
-    ani_size offset2 = 5;
+    const ani_size offset2 = 5;
     const ani_size len2 = 10U;
-    // issue 22090
     ASSERT_EQ(env_->FixedArray_GetRegion_Byte(fixedarray, offset2, len2, nativeBuffer), ANI_OUT_OF_RANGE);
     ASSERT_EQ(env_->FixedArray_GetRegion_Byte(fixedarray, offset1, len1, nativeBuffer), ANI_OK);
+}
+
+TEST_F(FixedArraySetGetRegionByteTest, GetRegionByteTest)
+{
+    const auto array = static_cast<ani_fixedarray_byte>(CallEtsFunction<ani_ref>("GetArray"));
+
+    ani_byte nativeBuffer[TEST_ARRAY_SIZE] = {0};
+    const ani_size offset3 = 0;
+    const ani_size len3 = TEST_ARRAY_SIZE;
+    ASSERT_EQ(env_->FixedArray_GetRegion_Byte(array, offset3, len3, nativeBuffer), ANI_OK);
+    ASSERT_EQ(nativeBuffer[0U], TEST_VALUE_1);
+    ASSERT_EQ(nativeBuffer[1U], TEST_VALUE_2);
+    ASSERT_EQ(nativeBuffer[2U], TEST_VALUE_3);
+    ASSERT_EQ(nativeBuffer[3U], TEST_VALUE_4);
+    ASSERT_EQ(nativeBuffer[4U], TEST_VALUE_5);
+}
+
+TEST_F(FixedArraySetGetRegionByteTest, SetRegionByteTest)
+{
+    const auto array = static_cast<ani_fixedarray_byte>(CallEtsFunction<ani_ref>("GetArray"));
+    ani_byte nativeBuffer1[TEST_ARRAY_SIZE] = {TEST_UPDATE_1, TEST_UPDATE_2, TEST_UPDATE_3};
+    const ani_size offset4 = 2;
+    const ani_size len4 = 3;
+    ASSERT_EQ(env_->FixedArray_SetRegion_Byte(array, offset4, len4, nativeBuffer1), ANI_OK);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("CheckArray", array), ANI_TRUE);
 }
 
 }  // namespace ark::ets::ani::testing
