@@ -16,11 +16,19 @@
 #ifndef PANDA_PLUGINGS_ETS_RUNTIME_INTEROP_JS_HYBRID_XGC_XGC_H
 #define PANDA_PLUGINGS_ETS_RUNTIME_INTEROP_JS_HYBRID_XGC_XGC_H
 
-#include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage.h"
 #include "plugins/ets/runtime/interop_js/sts_vm_interface_impl.h"
 #include "runtime/mem/gc/gc_trigger.h"
 
+namespace ark::ets {
+class EtsCoroutine;
+class PandaEtsVM;
+}  // namespace ark::ets
+
 namespace ark::ets::interop::js {
+
+namespace ets_proxy {
+class SharedReferenceStorage;
+}  // namespace ets_proxy
 
 /**
  * Cross-reference garbage collector.
@@ -59,8 +67,9 @@ public:
     /**
      * Post XGC task to gc queue and trigger XMark for all related JS virtual machines
      * @param gc GC using in the current VM
+     * @return true if XGC successfully triggered, false - otherwise
      */
-    void Trigger(mem::GC *gc);
+    bool Trigger(mem::GC *gc, PandaUniquePtr<GCTask> task);
 
     /// @return XGC trigger type value
     mem::GCTriggerType GetType() const override
@@ -78,11 +87,15 @@ public:
 private:
     // For allocation of XGC with the private constructor by internal allocator
     friend mem::Allocator;
+    friend void STSVMInterfaceImpl::MarkFromObject(void *obj);
+
     XGC(PandaEtsVM *vm, STSVMInterfaceImpl *stsVmIface, ets_proxy::SharedReferenceStorage *storage);
     static XGC *instance_;
 
     /// @return new target threshold storage size for XGC trigger
     size_t ComputeNewSize();
+
+    void MarkFromObject(void *obj);
 
     /// External specific fields ///
 

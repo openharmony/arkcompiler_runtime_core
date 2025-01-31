@@ -16,6 +16,7 @@
 #include "intrinsics.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
+#include "plugins/ets/runtime/intrinsics/gc_task_tracker.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "interop_js/call/call.h"
 
@@ -166,11 +167,20 @@ uint8_t JSRuntimeStrictEqualIntrinsic(JSValue *lhs, JSValue *rhs)
     return JSRuntimeStrictEqual(lhs, rhs);
 }
 
-void JSRuntimeXgcStartIntrinsic()
+EtsLong JSRuntimeXgcStartIntrinsic()
 {
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
-    XGC::GetInstance()->Trigger(coro->GetPandaVM()->GetGC());
+    auto *gc = coro->GetPandaVM()->GetGC();
+    auto &gcTaskTracker = ets::intrinsics::GCTaskTracker::InitIfNeededAndGet(gc);
+    auto task = MakePandaUnique<GCTask>(GCTaskCause::CROSSREF_CAUSE, time::GetCurrentTimeInNanos());
+    auto id = task->GetId();
+    gcTaskTracker.AddTaskId(id);
+    if (!XGC::GetInstance()->Trigger(gc, std::move(task))) {
+        gcTaskTracker.RemoveId(id);
+        return static_cast<EtsLong>(-1);
+    }
+    return static_cast<EtsLong>(id);
 }
 
 EtsString *JSValueToStringIntrinsic(JSValue *object)

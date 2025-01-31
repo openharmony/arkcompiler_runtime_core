@@ -316,8 +316,10 @@ export final class JSRuntime {
 
     /**
      * The function triggers cross-reference GC
+     * @returns gc task id
+     * @see GC.waitForFinishGC 
      */
-    public static native xgc(): void;
+    public static native xgc(): long;
 
     private static checkIntrinsicMethod(): never {
         let msg = "This method must not be called";

@@ -19,8 +19,15 @@ export namespace interop {
 
 globalThis.test = {};
 globalThis.test.etsVm = requireNapiPreview('ets_interop_js_napi', true);
-if (!globalThis.test.etsVm.createEtsRuntime('etsstdlib.abc', 
-    'gc_test_sts_common.abc', false, false)) {
+if (!globalThis.test.etsVm.createRuntime({
+        'log-level': 'debug',
+		'load-runtimes': 'ets',
+		'log-components': 'ets_interop_js',
+		'boot-panda-files': 'etsstdlib.abc:gc_test_sts_common.abc',
+		'gc-trigger-type': 'heap-trigger',
+		'compiler-enable-jit': 'false',
+        'coroutine-workers-count': '1'
+    })) {
         throw new Error('Failed to create ETS runtime');
     }
 
@@ -41,4 +48,11 @@ export let RunInteropGC: () => void = globalThis.test.etsVm.getFunction('LPandaG
 export let GetPandaFreeHeapSize: () => number = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetPandaFreeHeapSize');
 export let GetPandaUsedHeapSize: () => number = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetPandaUsedHeapSize');
 export const PandaBaseClass = globalThis.test.etsVm.getClass('LPandaGC/PandaBaseClass;');
+}
+
+globalThis.test.RunJsGC = () => {
+    print('--- Start JS GC Full ---');
+    let gcId = globalThis.ArkTools.GC.startGC('full');
+    globalThis.ArkTools.GC.waitForFinishGC(gcId);
+    print('--- Finish JS GC Full ---');
 }

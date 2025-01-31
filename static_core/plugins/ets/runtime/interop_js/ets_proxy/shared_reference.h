@@ -173,6 +173,16 @@ public:
         return Iterator(this);
     }
 
+    friend std::ostream &operator<<(std::ostream &out, const SharedReference *ref)
+    {
+        out << static_cast<const void *>(ref);
+        if (LIKELY(ref != nullptr)) {
+            out << ": | ETSObject:" << ref->etsRef_ << " | napi_ref:" << ref->jsRef_ << " | ctx:" << ref->ctx_ << " | "
+                << ref->flags_ << " |";
+        }
+        return out;
+    }
+
 private:
     friend class SharedReferenceSanity;
     friend class SharedReferenceStorage;
