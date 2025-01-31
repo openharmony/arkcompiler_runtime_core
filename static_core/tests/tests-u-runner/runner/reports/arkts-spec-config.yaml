@@ -620,9 +620,6 @@
     status: ''
 '7.33':
     title: Constant Expressions
-    status: No testable assertions
-'7.34':
-    title: Constant Expressions
     status: ''
 '8':
     title: Statements
@@ -846,70 +843,67 @@
 '13.3':
     title: Compilation Units in Host System
     status: ''
-'13.4':
+'13.3':
     title: Import Directives
     status: ''
-13.4.1:
+13.3.1:
     title: Bind All with Qualified Access
     status: ''
-13.4.2:
+13.3.2:
     title: Simple Name Binding
     status: ''
-13.4.3:
+13.3.3:
     title: Several Bindings for One Import Path
     status: ''
-13.4.4:
+13.3.4:
     title: Default Import Binding
     status: ''
-13.4.5:
+13.3.5:
     title: Type Binding
     status: ''
-13.4.6:
-    title: Import with No Binding
-    status: ''
-13.4.7:
+13.3.6:
     title: Import Path
     status: ''
-'13.5':
+'13.4':
     title: Standard Library Usage
     status: Finished
-'13.6':
+'13.5':
     title: Declaration Modules
     status: ''
-'13.7':
+'13.6':
     title: Compilation Unit Initialization
     status: ''
-'13.8':
+'13.7':
     title: Top-Level Declarations
     status: ''
-13.8.1:
+13.7.1:
     title: Exported Declarations
     status: Finished
-'13.9':
+'13.8':
     title: Namespace Declarations
     status: ''
-'13.10':
+'13.9':
     title: Export Directives
     status: ''
-13.10.1:
+13.9.1:
     title: Selective Export Directive
     status: ''
-13.10.2:
+13.9.2:
     title: Single Export Directive
     status: Finished
-13.10.3:
+13.9.3:
     title: Export Type Directive
     status: ''
-13.10.4:
+13.9.4:
     title: Re-Export Directive
     status: ''
-'13.11':
+'13.10':
     title: Top-Level Statements
     status: ''
-'13.12':
+'13.11':
     title: Program Entry Point
     status: ''
-'13.13':
+'13.12':
     title: Program Exit
     status: ''
 '14':
@@ -968,7 +962,7 @@
     status: ''
 '15.4':
     title: Type Compatibility
-    status: No testable assertions
+    status: ''
 '15.5':
     title: Compatibility of Call Arguments
     status: ''
@@ -1005,11 +999,8 @@
 15.8.2:
     title: Selection of Best Candidate
     status: ''
-'15.9':
-    title: Overload Signatures
-    status: ''
-15.9.1:
-    title: Overload Signature Correctness Check
+15.9:
+    title:  Initializer Block
     status: ''
 '15.10':
     title: Compatibility Features
@@ -1060,7 +1051,7 @@
     title: Multiple Catch Clauses in Try Statements
     status: Finished
 '17.7':
-    title: Function and Method Overloading
+    title: Function, Method and Constructor Overloading
     status: No testable assertions
 17.7.1:
     title: Function Overloading
@@ -1163,7 +1154,7 @@
     status: ''
 '17.17':
     title: Async Functions and Methods
-    status: No testable assertions
+    status: ''
 17.17.1:
     title: Async Functions
     status: Finished
