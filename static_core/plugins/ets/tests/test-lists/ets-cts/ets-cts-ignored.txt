@@ -1763,6 +1763,10 @@
 #22005
 10.interfaces/02.superinterfaces_and_subinterfaces/extend_primitive_alias_10.sts
 
+# 22471
+17.experimental_features/11.extension_functions/05.lambda_expressions_with_receiver/lambda_expressions_with_receiver_6.sts
+17.experimental_features/11.extension_functions/05.lambda_expressions_with_receiver/lambda_expressions_with_receiver_7.sts
+
 # 17313
 10.interfaces/01.interface_declarations/empty_interface_declaration_negative_8.sts
 10.interfaces/01.interface_declarations/empty_interface_declaration_negative_9.sts
