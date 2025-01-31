@@ -75,6 +75,11 @@ public:
         promiseClassPtr_ = promiseClass;
     }
 
+    void SetJobClass(void *jobClass)
+    {
+        jobClassPtr_ = jobClass;
+    }
+
     static constexpr uint32_t GetTlsPromiseClassPointerOffset()
     {
         return MEMBER_OFFSET(EtsCoroutine, promiseClassPtr_);
@@ -128,8 +133,12 @@ private:
     EtsObject *GetReturnValueAsObject(panda_file::Type returnType, Value returnValue);
     EtsObject *GetValueFromPromiseSync(EtsPromise *promise);
 
+    void RequestPromiseCompletion(mem::Reference *promiseRef, Value returnValue);
+    void RequestJobCompletion(mem::Reference *jobRef, Value returnValue);
+
     std::unique_ptr<PandaEtsNapiEnv> etsNapiEnv_;
     void *promiseClassPtr_ {nullptr};
+    void *jobClassPtr_ {nullptr};
 
     ObjectHeader *nullValue_ {};
 

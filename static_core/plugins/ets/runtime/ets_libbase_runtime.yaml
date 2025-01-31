@@ -33,6 +33,9 @@ coretypes:
 - managed_class: std.core.Promise
   mirror_class: ark::ets::EtsPromise
 
+- managed_class: std.core.Job
+  mirror_class: ark::ets::EtsJob
+
 - managed_class: Array
   mirror_class: ark::ets::EtsCharArray
 
@@ -2310,6 +2313,19 @@ intrinsics:
       ret: void
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdFinalizationRegistryRegisterInstance
+
+########################
+# std.core.Job #
+########################
+  - name: StdJobAwait
+    space: ets
+    class_name: std.core.Job
+    method_name: Await
+    static: false
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsAwaitJob
 
 ######################
 # std.core.Promise #
@@ -5319,3 +5335,19 @@ intrinsics:
       ret: void
       args: [i64, std.core.Object]
     impl: ark::ets::intrinsics::TaskPosterPost
+
+###################
+# std.concurrency #
+###################
+
+  - name: EtsMlaunchInternalNative
+    space: ets
+    class_name: std.concurrency.ETSGLOBAL
+    method_name: mlaunchInternalNative
+    static: true
+    signature:
+      ret: std.core.Job
+      args:
+        - std.core.Object
+        - std.core.Object[]
+    impl: ark::ets::intrinsics::EtsMlaunchInternalNative

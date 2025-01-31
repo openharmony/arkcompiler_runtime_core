@@ -53,6 +53,7 @@ public:
                       ClassLinkerErrorHandler *errorHandler = nullptr);
     Method *GetAsyncImplMethod(Method *method, EtsCoroutine *coroutine);
     EtsClass *GetPromiseClass();
+    EtsClass *GetJobClass();
     EtsClass *GetPromiseRefClass();
     EtsClass *GetArrayClass();
     EtsClass *GetWaitersListClass();

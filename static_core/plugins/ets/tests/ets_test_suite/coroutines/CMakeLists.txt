@@ -365,3 +365,11 @@ add_ets_coroutines_test(FILE eworker_interop_exception.sts
                         WORKERS "AUTO"
                         MODE "INT"
 )
+
+add_ets_coroutines_test(FILE launch.sts
+                        SKIP_ARM32_COMPILER
+                        IMPL "THREADED" "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT" "JIT" "AOT"
+)
