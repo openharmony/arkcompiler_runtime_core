@@ -13,18 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_STD_CORE_INTL_COMMON_H
-#define PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_STD_CORE_INTL_COMMON_H
+#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLLOCALE_H
+#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLLOCALE_H
 
 #include "plugins/ets/runtime/napi/ets_napi.h"
-#include "unicode/unistr.h"
-#include <string>
 
 namespace ark::ets::stdlib::intl {
 
-std::string EtsToStdStr(EtsEnv *env, ets_string etsStr);
-icu::UnicodeString EtsToUnicodeStr(EtsEnv *env, ets_string etsStr);
-ets_string StdStrToEts(EtsEnv *env, const std::string &str);
+ets_int RegisterIntlLocaleNativeMethods(EtsEnv *env);
+
 }  // namespace ark::ets::stdlib::intl
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_STD_CORE_INTL_COMMON_H
+#endif  // PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLLOCALE_H

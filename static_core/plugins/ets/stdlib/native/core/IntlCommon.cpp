@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "IntlCommon.h"
+#include "libpandabase/macros.h"
+#include <cassert>
 
 namespace ark::ets::stdlib::intl {
 
@@ -22,6 +24,14 @@ std::string EtsToStdStr(EtsEnv *env, ets_string etsStr)
     std::string stdStr {charString};
     env->ReleaseStringUTFChars(etsStr, charString);
     return stdStr;
+}
+
+ets_string StdStrToEts(EtsEnv *env, const std::string &str)
+{
+    auto res =
+        env->NewString(reinterpret_cast<const uint16_t *>(icu::UnicodeString::fromUTF8(str).getBuffer()), str.length());
+    ASSERT(res != nullptr);
+    return res;
 }
 
 icu::UnicodeString EtsToUnicodeStr(EtsEnv *env, ets_string etsStr)

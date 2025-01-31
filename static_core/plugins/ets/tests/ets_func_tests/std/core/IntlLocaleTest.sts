@@ -1,0 +1,471 @@
+/**
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License")
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const success: int = 0
+const fail: int = 1
+
+function main(): int {
+    let failures: int = 0
+    failures += check(testLocaleDefault(), "Test create default")
+    failures += check(testParseTag(), "Test parse tag")
+    failures += check(testHourCycle(), "Test hour cycle")
+    failures += check(testCalendar(), "Test calendar")
+    failures += check(testNumeric(), "Test numeric")
+    failures += check(testCaseFirst(), "Test caseFirst")
+    failures += check(testNumberingSystem(), "Test numbering system")
+    failures += check(testCollation(), "Test collation")
+    failures += check(testMaximize(), "Test maximize")
+    failures += check(testMinimize(), "Test minimize")
+    failures += check(test2String(), "Test converting to string")
+    failures += check(testTagAndOptions(), "Test tag u-extensions & options")
+    failures += check(testIncorrect(), "Test incorrect data")
+    failures += check(testIncorrectWithoutErr(), "Test incorrect data but without error")
+    failures += check(testCreateWithOtherLocale(), "Test create with other locale")
+    failures += check(testManyExtensions(), "Test create with many extensions in tag")
+    failures += check(testUpperCaseExtensions(), "Test ignore case-sensitivity in locale tag")
+    return failures
+}
+
+function check(result: int, message: string): int {
+    if (result == 0) {
+        return success
+    }
+    console.println("\nFAILED: " + message)
+    return fail
+}
+
+function processCreateLocaleError(createLocaleFunction : () => Intl.Locale, msg ?: string) {
+    let assertOccurred = false
+    try {
+        createLocaleFunction()
+    }
+    catch (e) {
+        assertTrue(e instanceof RangeError)
+        assertEQ((e as RangeError).message, (msg != undefined ? msg : errMsg))
+        assertOccurred = true
+    }
+    finally {
+        assertTrue(assertOccurred)
+    }
+}
+
+function processInvalidValues(createLocaleFunction : ((arg : string) => Intl.Locale), msg ?: string) {
+    const incorrectValues: ReadonlyArray<string> = Array.of<string>("", " ", "78", "Err", "!!!", "<<>>", "invalid")
+    incorrectValues.forEach((invalidValue : string) => {
+        processCreateLocaleError(() => {createLocaleFunction(invalidValue)}, msg)
+    })
+}
+
+function testLocaleDefault() : int {
+    const l = new Intl.Locale("ru")
+    if (l.language != null && l.language != undefined) {
+        assertEQ(l.language!, "ru")
+    }
+    assertEQ(l.baseName, "ru")
+    assertEQ(l.calendar, undefined)
+    assertEQ(l.caseFirst, undefined)
+    assertEQ(l.numeric, false)
+    assertEQ(l.collation, undefined)
+    assertEQ(l.hourCycle, undefined)
+    assertEQ(l.numberingSystem, undefined)
+    assertEQ(l.region, undefined)
+    assertEQ(l.script, undefined)
+    assertEQ(l.minimize().toString(), "ru")
+    assertEQ(l.maximize().toString(), "ru-Cyrl-RU")
+    return success
+}
+
+function testParseTag() : int {
+    {
+        const l = new Intl.Locale("ru-Cyrl")
+        assertEQ(l.language, "ru")
+        assertEQ(l.script, "Cyrl")
+        assertEQ(l.region, undefined)
+    }
+    {
+        const l = new Intl.Locale("ru-Ru")
+        assertEQ(l.language, "ru")
+        assertEQ(l.script, undefined)
+        assertEQ(l.region, "RU")
+    }
+    {
+        const ruRu = new Intl.Locale("ru-Ru-u-kn-false")
+        assertEQ(ruRu.numeric, false)
+    }
+    {
+        const ruRu = new Intl.Locale("ru-Ru-u-kn-true")
+        assertEQ(ruRu.numeric, true)
+    }
+    {
+        const ruRu = new Intl.Locale("ru-Ru-u-kn")
+        assertEQ(ruRu.numeric, true)
+    }
+    {
+        processCreateLocaleError(() => new Intl.Locale("ru-u-kn-fggkhjkjg", {"numeric" : false} as Intl.LocaleOptions))
+    }
+    {
+        const ruRu = new Intl.Locale("ru-Ru-u-co-emoji")
+        assertEQ(ruRu.collation, "emoji")
+    }
+    {
+        const l = new Intl.Locale("ru-u-ca-gregory")
+        assertEQ(l.calendar, "gregory")
+    }
+    {
+        const l = new Intl.Locale("ru-u-hc-12h")
+        assertEQ(l.hourCycle, "12h")
+    }
+    {
+        const l = new Intl.Locale("ru-u-hc-invalid")
+        assertEQ(l.hourCycle, "invalid")
+    }
+    {
+        const l = new Intl.Locale("ru-u-kf-invalid")
+        assertEQ(l.caseFirst, "invalid")
+    }
+    {
+        const l = new Intl.Locale("ru-u-kf-lower")
+        assertEQ(l.caseFirst, "lower")
+    }
+    {
+        const l = new Intl.Locale("ru-u-nu-invalid")
+        assertEQ(l.numberingSystem, "invalid")
+    }
+    {
+        const l = new Intl.Locale("ru-u-nu-arab")
+        assertEQ(l.numberingSystem, "arab")
+    }
+    return success
+}
+
+function testHourCycle() : int {
+    {
+        const us12hour = new Intl.Locale("en-US", { hourCycle: "h12" } as Intl.LocaleOptions)
+        assertEQ(us12hour.hourCycle, "h12")
+    }
+    {
+        processInvalidValues((invalidValue : string) => new Intl.Locale("en-US", { hourCycle: invalidValue } as Intl.LocaleOptions))
+    }
+    return success
+}
+
+function testCalendar() : int {
+    {
+        const loc = new Intl.Locale("en-US")
+        assertEQ(loc.calendar, undefined)
+    }
+    {
+        const loc = new Intl.Locale("en-US", {"calendar": "gregory"} as Intl.LocaleOptions)
+        assertEQ(loc.calendar, "gregory")
+    }
+    {
+        processInvalidValues((invalidValue : string) => new Intl.Locale("en-US", { calendar: invalidValue } as Intl.LocaleOptions))
+    }
+    return success
+}
+
+function testCaseFirst() : int {
+    {
+        const loc = new Intl.Locale("en-US")
+        assertEQ(loc.caseFirst, undefined)
+    }
+    {
+        const loc = new Intl.Locale("en-US", {"caseFirst": "upper"} as Intl.LocaleOptions)
+        assertEQ(loc.caseFirst, "upper")
+    }
+    {
+        processInvalidValues((invalidValue : string) => new Intl.Locale("ru-u-cf-invalid", {"caseFirst" : invalidValue} as Intl.LocaleOptions))
+    }
+    return success
+}
+
+function testNumeric() : int {
+    {
+        const l = new Intl.Locale("en-US", { numeric: true } as Intl.LocaleOptions)
+        assertEQ(l.numeric as boolean, true)
+    }
+    {
+        const l = new Intl.Locale("en-US", { numeric: false } as Intl.LocaleOptions)
+        assertEQ(l.numeric as boolean, false)
+    }
+    {
+        const l = new Intl.Locale("en-US")
+        assertEQ(l.numeric as boolean, false)
+    }
+
+    return success
+}
+
+function testNumberingSystem() : int {
+    {
+        processInvalidValues((invalidValue : string) => new Intl.Locale("en-US", { numberingSystem: invalidValue } as Intl.LocaleOptions))
+    }
+    {
+        const l = new Intl.Locale("en-US", { numberingSystem: "arab" } as Intl.LocaleOptions)
+        assertEQ(l.numberingSystem as string, "arab")
+    }
+    {
+        const l = new Intl.Locale("en-US")
+        assertEQ(l.numberingSystem, undefined)
+    }
+    return success
+}
+
+function testCollation() : int {
+    {
+        const l = new Intl.Locale("en-US")
+        assertEQ(l.collation, undefined)
+    }
+    {
+        processInvalidValues((invalidValue : string) => new Intl.Locale("en-US", { collation: invalidValue } as Intl.LocaleOptions))
+    }
+    {
+        const l = new Intl.Locale("ru", { collation: "emoji" } as Intl.LocaleOptions)
+        assertEQ(l.collation, "emoji")
+    }
+    return success
+}
+
+function test2String() : int {
+    {
+        const l = new Intl.Locale("en-u-ca-gregory", {"calendar" : "buddhist"} as Intl.LocaleOptions)
+        assertFalse(l.language == null)
+        assertFalse(l.language == undefined)
+        assertEQ(l.toString(), l.language!.toLowerCase() + "-u-ca-buddhist")
+    }
+    {
+        const l = new Intl.Locale("en-u-kn", {"numeric" : false} as Intl.LocaleOptions)
+        assertFalse(l.language == null)
+        assertFalse(l.language == undefined)
+        assertEQ(l.toString(), l.language!.toLowerCase())
+    }
+    {
+        const l = new Intl.Locale("en-u-kn")
+        assertFalse(l.language == null)
+        assertFalse(l.language == undefined)
+        assertEQ(l.toString(), l.language!.toLowerCase() + "-u-kn")
+    }
+    {
+        processCreateLocaleError(()=>new Intl.Locale("ru-u-ca-gregory-u-kn-u-kf-upper"))
+    }
+    return success
+}
+
+function testMinimize() : int {
+    let l = new Intl.Locale("en-u-ca-gregory", {"calendar" : "chinese"} as Intl.LocaleOptions)
+    l = l.minimize()
+    assertEQ(l.region, undefined)
+    assertEQ(l.script, undefined)
+    if (l.language != null && l.language != undefined && l.language!.toLowerCase() == "ru") {
+        assertEQ(l.baseName, "ru")
+        assertEQ(l.toString(), "ru-u-ca-chinese")
+    }
+    else {
+        assertEQ(l.baseName, "en")
+        assertEQ(l.toString(), "en-u-ca-chinese")
+    }
+    return success
+}
+
+function testMaximize() : int {
+    let l = new Intl.Locale("ru", {collation : "emoji"} as Intl.LocaleOptions)
+    l = l.maximize()
+    if (l.language != null && l.language != undefined && l.language!.toLowerCase() == "ru") {
+        assertEQ(l.region, "RU")
+        assertEQ(l.script, "Cyrl")
+        assertEQ(l.baseName, "ru-Cyrl-RU")
+        assertEQ(l.toString(), "ru-Cyrl-RU-u-co-emoji")
+    }
+    else {
+        if (l.language != null && l.language != undefined) {
+            assertEQ(l.language!, "en")
+        }
+        assertEQ(l.region, "US")
+        assertEQ(l.script, "Latn")
+        assertEQ(l.baseName, "en-Latn-US")
+        assertEQ(l.toString(), "en-Latn-US-u-co-emoji")
+    }
+    return success
+}
+
+// NOTE(ekaterinazaytseva) options have higher priority when u-extensions
+function testTagAndOptions() : int {
+    {
+        // NOTE(ekaterinazaytseva) set collation in u-ext & in options
+        const l = new Intl.Locale("ru-u-co-emoji", {"collation" : "phonebk"} as Intl.LocaleOptions)
+        assertEQ(l.collation, "phonebk")
+    }
+    {
+        // NOTE(ekaterinazaytseva) set collation in u-ext & in options
+        const l = new Intl.Locale("ru-u-co-invalid", {"collation" : "phonebk"} as Intl.LocaleOptions)
+        assertEQ(l.collation, "phonebk")
+    }
+    {
+        // NOTE(ekaterinazaytseva) set numeric in u-ext & in options
+        const l = new Intl.Locale("ru-u-kn", {"numeric" : false} as Intl.LocaleOptions)
+        assertFalse(l.numeric as boolean)
+    }
+    {
+        // NOTE(ekaterinazaytseva) set calendar in u-ext & in options
+        const l = new Intl.Locale("ru-u-ca-invalid", {"calendar" : "gregory"} as Intl.LocaleOptions)
+        assertEQ(l.calendar, "gregory")
+    }
+    {
+        // NOTE(ekaterinazaytseva) set calendar in u-ext & in options
+        const l = new Intl.Locale("ru-u-ca-japanese", {"calendar" : "gregory"} as Intl.LocaleOptions)
+        assertEQ(l.calendar, "gregory")
+    }
+    {
+        // set caseFirst in u-ext & in options
+        const l = new Intl.Locale("ru-u-kf-upper", {"caseFirst" : "lower"} as Intl.LocaleOptions)
+        assertEQ(l.caseFirst, "lower")
+    }
+    {
+        // NOTE(ekaterinazaytseva) set caseFirst in u-ext & in options
+        const l = new Intl.Locale("ru-u-kf-invalid", {"caseFirst" : "lower"} as Intl.LocaleOptions)
+        assertEQ(l.caseFirst, "lower")
+    }
+    {
+        // NOTE(ekaterinazaytseva) set numberingSystem in u-ext & in options
+        const l = new Intl.Locale("ru-u-nu-invalid", {"numberingSystem" : "arab"} as Intl.LocaleOptions)
+        assertEQ(l.numberingSystem, "arab")
+    }
+    {
+        // set numberingSystem in u-ext & in options
+        processCreateLocaleError(() => new Intl.Locale("ru-u-nu-arab", {"numberingSystem" : "invalid"} as Intl.LocaleOptions))
+    }
+    {
+        // NOTE(ekaterinazaytseva) set numberingSystem in u-ext & in options
+        const l = new Intl.Locale("ru-u-nu-arab", {"numberingSystem" : "adlm"} as Intl.LocaleOptions)
+        assertEQ(l.numberingSystem, "adlm")
+    }
+    {
+        // NOTE(ekaterinazaytseva) lang conflict
+        const l = new Intl.Locale("ru-Cyrl", {language: "de"} as Intl.LocaleOptions)
+        assertEQ(l.language, "de")
+        assertEQ(l.script, "Cyrl")
+    }
+    return success
+}
+
+const errMsg = "Incorrect locale information provided"
+function testIncorrect() : int {
+    {
+        // NOTE(ekaterinazaytseva) invalid lang
+        processCreateLocaleError(() =>  new Intl.Locale("err-ru-Cyrl-u-kn-false"))
+        processCreateLocaleError(() => new Intl.Locale("ru-err-u-kn-false"))
+    }
+    {
+        // NOTE(ekaterinazaytseva) invalid region
+        processInvalidValues((invalidValue : string) => { new Intl.Locale("ru", {region : invalidValue} as Intl.LocaleOptions)} )
+    }
+    {
+        // NOTE(ekaterinazaytseva) invalid script
+        processCreateLocaleError(() => new Intl.Locale("ru-ru-err-u-kn-false"))
+        processCreateLocaleError(() => new Intl.Locale("ru", {script : "Err"} as Intl.LocaleOptions))
+    }
+    {
+        // NOTE(ekaterinazaytseva) incorrect symbols in tag
+        const incorrectSymbols: ReadonlyArray<string> = Array.of<string>(" ", "*", "!", "?", "_", "~", "@", "\\", "<", ">", ".", "\,")
+        incorrectSymbols.forEach((sym : string) => {
+        const tag = "Ru" + sym
+        processCreateLocaleError(() => new Intl.Locale(tag))
+      })
+    }
+    {
+        processCreateLocaleError(() => new Intl.Locale(""), "First argument to Intl.Locale constructor can't be empty or missing")
+    }
+    {
+        const incorrectValues: ReadonlyArray<string> = Array.of<string>("r", "1999", "19", "errrrrrrr")
+        incorrectValues.forEach((incorrectValue : string) => {
+            processCreateLocaleError(()=> new Intl.Locale(incorrectValue))
+        })
+    }
+    return success
+}
+
+function testIncorrectWithoutErr() : int {
+    // NOTE(ekaterinazaytseva) false correct - lang match [A-Z,a-z]{2,8}
+    {
+        // NOTE(ekaterinazaytseva) invalid lang - but no err on it
+        const falseCorrectValues: ReadonlyArray<string> = Array.of<string>("er", "err", "errrrrrr")
+        falseCorrectValues.forEach((correctValue : string) => {
+            const l = new Intl.Locale(correctValue)
+            assertEQ(l.language, correctValue)
+            assertEQ(l.toString(), correctValue)
+        })
+    }
+    {
+        const l = new Intl.Locale("ru", {language : "Err"} as Intl.LocaleOptions)
+        assertEQ(l.language, "Err")
+        assertEQ(l.toString(), "Err")
+    }
+    return success
+}
+
+function testCreateWithOtherLocale() : int {
+    {
+        const l = new Intl.Locale("ru", {numeric : true, collation : "emoji"} as Intl.LocaleOptions)
+        assertTrue(l.numeric as boolean)
+        const l1 = new Intl.Locale(l, {numeric : false,} as Intl.LocaleOptions)
+        assertFalse(l1.numeric as boolean)
+        assertEQ(l.language, (l1.language))
+        assertEQ(l.collation, (l1.collation))
+        assertEQ(l.numberingSystem, (l1.numberingSystem))
+    }
+    {
+        const l = new Intl.Locale("ru", {numeric : true, collation : "emoji"} as Intl.LocaleOptions)
+        assertTrue(l.numeric as boolean)
+        const l1 = new Intl.Locale(l, {numeric : false,} as Intl.LocaleOptions)
+        assertFalse(l1.numeric as boolean)
+        assertEQ(l.language, (l1.language))
+        assertEQ(l.collation, (l1.collation))
+        assertEQ(l.numberingSystem, (l1.numberingSystem))
+    }
+    return success
+}
+
+function testManyExtensions() : int {
+    // NOTE(ekaterinazaytseva) only 1 u-extension in tag is allowed
+    processCreateLocaleError(() => new Intl.Locale("ru-u-ca-gregory-u-nu-arab"))
+    {
+        const validExtensions: ReadonlyArray<string> = Array.of<string>("-u-ca-gregory", "-u-nu-arab", "-u-kn", "-u-co-emoji", "-u-kf-upper", "-u-hc-h12")
+        for (let i = 0;  i < validExtensions.length; ++i) {
+			for (let j = 0; j < validExtensions.length; ++j) {
+                if (i == j)
+                    continue
+                let tag = "ru" + validExtensions[i] + validExtensions[j]
+                processCreateLocaleError(() => { new Intl.Locale(tag)} )
+            }
+        }
+    }
+    return success
+}
+
+function testUpperCaseExtensions() : int {
+    {
+        let l = new Intl.Locale("ru-U-KN-TRUE")
+        assertEQ(l.numeric, true)
+    }
+    {
+        let l = new Intl.Locale("ru-u-KN-TRUE")
+        assertEQ(l.numeric, true)
+    }
+    {
+        let l = new Intl.Locale("ru-u-KN-true")
+        assertEQ(l.numeric, true)
+    }
+    return success
+}
