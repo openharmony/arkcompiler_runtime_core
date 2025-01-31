@@ -1803,7 +1803,7 @@
 # 22146 - should fail, but compiles
 09.classes/01.class_declaration/05.implementing_interface_properties/property_implementation_readonly_getter.sts
 
-# 20766
+# 20766 - not yet implemented
 06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_0.sts
 06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_1.sts
 06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_2.sts
@@ -1814,7 +1814,10 @@
 06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_7.sts
 06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_8.sts
 06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_9.sts
-06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_n.sts
+06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_n_0.sts
+06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_n_1.sts
+06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/str2enum_n_0.sts
+06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/str2enum_n_1.sts
 
 # 22409
 07.expressions/20.unary_expressions/08.logical_complement/logical_complement_char.sts
