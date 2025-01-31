@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 
 #include "plugins/ets/runtime/napi/ets_napi.h"
 
-namespace ark::ets::stdlib {
+namespace ark::ets::stdlib::intl {
 
 ets_int RegisterIntlNumberFormatNativeMethods(EtsEnv *env);
 
-}  // namespace ark::ets::stdlib
+}  // namespace ark::ets::stdlib::intl
 
 #endif  //  PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_STD_CORE_INTL_NUMBER_FORMAT_H

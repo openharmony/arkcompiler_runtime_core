@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,28 +16,17 @@
 #include "plugins/ets/stdlib/native/core/IntlNumberFormat.h"
 #include "plugins/ets/stdlib/native/core/IntlState.h"
 #include "libpandabase/macros.h"
-#include "libpandabase/os/mutex.h"
 #include "unicode/numberformatter.h"
 #include "unicode/numberrangeformatter.h"
 #include "unicode/locid.h"
-#include "unicode/coll.h"
 #include "unicode/unistr.h"
+#include "IntlCommon.h"
 
 #include <string>
-#include <unordered_map>
-#include <iterator>
 #include <cstdlib>
 #include <array>
 
-namespace ark::ets::stdlib {
-
-std::string EtsToStdStr(EtsEnv *env, ets_string etsStr)
-{
-    const char *charString = env->GetStringUTFChars(etsStr, nullptr);
-    std::string stdStr {charString};
-    env->ReleaseStringUTFChars(etsStr, charString);
-    return stdStr;
-}
+namespace ark::ets::stdlib::intl {
 
 icu::Locale LocTagToIcuLocale(EtsEnv *env, const std::string &locTag)
 {
@@ -182,4 +171,4 @@ ets_int RegisterIntlNumberFormatNativeMethods(EtsEnv *env)
     return env->RegisterNatives(numberFormatClass, methods.data(), methods.size());
 }
 
-}  // namespace ark::ets::stdlib
+}  // namespace ark::ets::stdlib::intl
