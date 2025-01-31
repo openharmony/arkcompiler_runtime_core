@@ -65,6 +65,8 @@ TEST_F(CallObjectMethodLongTest, CallMethodLongTestOK)
     // Object_CallMethod_Long
     ASSERT_EQ(env_->Object_CallMethod_Long(obj, method, &result, arg1, arg2), ANI_OK);
     ASSERT_EQ(result, arg3);
+    ASSERT_EQ(env_->c_api->Object_CallMethod_Long(env_, obj, method, &result, arg1, arg2), ANI_OK);
+    ASSERT_EQ(result, arg3);
     // Object_CallMethod_Long_A
     const std::vector<ani_value> longArgs = {arg1, arg2};
     ASSERT_EQ(env_->Object_CallMethod_Long_A(obj, method, &result, longArgs.data()), ANI_OK);
