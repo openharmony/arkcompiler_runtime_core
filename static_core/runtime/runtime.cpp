@@ -1131,6 +1131,7 @@ std::optional<Runtime::Error> Runtime::CreateApplicationClassLinkerContext(std::
             appFiles.push_back(path);
         }
         appContext_.ctx = ext->CreateApplicationClassLinkerContext(appFiles);
+        ASSERT(appContext_.ctx != nullptr);
     }
 
     PandaString aotCtx;

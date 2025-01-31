@@ -19,8 +19,6 @@
 #include "include/thread_scopes.h"
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/logger.h"
-#include "mem/refstorage/global_object_storage.h"
-#include "mem/refstorage/reference.h"
 #include "plugins/ets/runtime/ets_annotation.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
@@ -28,9 +26,7 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/napi/ets_napi_helpers.h"
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
-#include "plugins/ets/runtime/types/ets_field.h"
 #include "plugins/ets/runtime/types/ets_method.h"
-#include "plugins/ets/runtime/types/ets_object.h"
 #include "runtime/class_linker_context.h"
 #include "runtime/include/class_linker_extension.h"
 #include "runtime/include/class_linker-inl.h"
@@ -673,33 +669,9 @@ void EtsClassLinkerExtension::RemoveRefToLinker(ClassLinkerContext *ctx)
 
 ClassLinkerContext *EtsClassLinkerExtension::CreateApplicationClassLinkerContext(const PandaVector<PandaString> &path)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-
-    [[maybe_unused]] ScopedManagedCodeThread sj(coro);
-    [[maybe_unused]] EtsHandleScope scope(coro);
-
-    auto *klass = GetAbcRuntimeLinkerClass();
-    auto *runtimeLinker = EtsAbcRuntimeLinker::FromEtsObject(EtsObject::Create(EtsClass::FromRuntimeClass(klass)));
-    EtsHandle<EtsAbcRuntimeLinker> linkerHandle(coro, runtimeLinker);
-
-    auto *paths = EtsObjectArray::Create(EtsClass::FromRuntimeClass(GetClassRoot(ClassRoot::STRING)), path.size());
-    EtsHandle<EtsObjectArray> pathsHandle(coro, paths);
-    for (size_t idx = 0; idx < path.size(); ++idx) {
-        auto *str = EtsString::CreateFromMUtf8(path[idx].data(), path[idx].length());
-        pathsHandle->Set(idx, str->AsObject());
-    }
-    std::array args {Value(linkerHandle->GetCoreType()), Value(nullptr), Value(pathsHandle->GetCoreType())};
-
-    Method *ctor = klass->GetDirectMethod(GetLanguageContext().GetCtorName());
-    ASSERT(ctor != nullptr);
-    ctor->InvokeVoid(coro, args.data());
-    ASSERT(!coro->HasPendingException());
-
-    // Save global reference to created application `AbcRuntimeLinker`.
-    auto *objectStorage = PandaEtsVM::GetCurrent()->GetGlobalObjectStorage();
-    objectStorage->Add(linkerHandle->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
-    return linkerHandle->GetClassLinkerContext();
+    auto *appRuntimeLinker = PandaEtsVM::GetCurrent()->CreateApplicationRuntimeLinker(path);
+    ASSERT(appRuntimeLinker != nullptr);
+    return appRuntimeLinker->GetClassLinkerContext();
 }
 
 }  // namespace ark::ets
