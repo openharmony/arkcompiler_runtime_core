@@ -23,7 +23,7 @@ tags: [{{c.tags}}]
 {%- for t in c['values'] %}
 function cvt{{loop.index}}(p: {{t.type}}) {
     let d: {{c.to_type}} = p;
-    assertTrue(d == {{t.val or t.expr}})
+    assertEQ(d, {{t.val or t.expr}})
 }
 {%- endfor %}
 
