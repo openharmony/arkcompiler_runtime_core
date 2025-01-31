@@ -11,10 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
+set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig_no_decl.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
-set(ETS_CONFIG_DECL ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
+set(ETS_CONFIG_DECL ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig_decl.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.decl.json ${ETS_CONFIG_DECL})
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_class_composite
