@@ -86,11 +86,11 @@ static_core/libpandabase/tests/ringbuf/                  @udav
 static_core/libpandabase/tests/taskmanager/              @udav @molotkovmikhail
 static_core/plugins/ets/bytecode_optimizer/              @mbolshov
 static_core/plugins/ets/compiler/                        @Prof1983
-static_core/plugins/ets/doc/spec                         @dmitriitr @Prof1983 @igelhaus @ragnvald @sergeyandreev @mbolshov @akmaevaleksey @anedoria
+static_core/plugins/ets/doc/spec                         @dmitriitr @Prof1983 @igelhaus @ragnvald @sergeyandreev @mbolshov @akmaevaleksey @anedoria @semenovaleksandr
 static_core/plugins/ets/irtoc_scripts/                   @Prof1983 @mbolshov
 static_core/plugins/ets/isa/                             @mbolshov
 static_core/plugins/ets/libllvmbackend/                  @Prof1983 @kosovpavel @asidorov
-static_core/plugins/ets/runtime/                         @semenovaleksandr
+static_core/plugins/ets/runtime/                         @vpukhov
 static_core/plugins/ets/runtime/*coroutine*              @dmitriitr @konstanting
 static_core/plugins/ets/runtime/ets_entrypoints*         @Prof1983 @mbolshov
 static_core/plugins/ets/runtime/ets_handle*              @dmitriitr @udav
@@ -98,10 +98,11 @@ static_core/plugins/ets/runtime/ets_libbase_runtime.yaml @Prof1983
 static_core/plugins/ets/runtime/ets_runtime_interface*   @Prof1983
 static_core/plugins/ets/runtime/job_queue.h              @dmitriitr
 static_core/plugins/ets/stdlib/                          @ivan-tyulyandin @anton-sysoev
-static_core/plugins/ets/verification/                    @semenovaleksandr
+static_core/plugins/ets/verification/                    @igelhaus
 static_core/runtime/include/mem/                         @dmitriitr @udav
 static_core/runtime/include/tooling/                     @ragnvald
 static_core/runtime/tests/tooling/                       @ragnvald
+static_core/plugins/ets/runtime/interop_js/              @semenovaleksandr @vpukhov
 static_core/plugins/ets/runtime/interop_js/*promise*                          @dmitriitr @konstanting
 static_core/plugins/ets/runtime/interop_js/sts_vm_interface_impl*             @dmitriitr @udav @ipetrov @molotkovmikhail
 static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @Prof1983
@@ -124,9 +125,10 @@ static_core/plugins/ets/tests/benchmarks/interop_js                           @s
 static_core/plugins/ets/tests/checked/                                        @Prof1983
 static_core/plugins/ets/tests/ets-templates/                                  @dmitriitr @Prof1983 @igelhaus @ragnvald @troeglazovamaria @maksim-khramov
 static_core/plugins/ets/tests/ets_es_checked/                                 @ivan-tyulyandin @anton-sysoev
+static_core/plugins/ets/tests/interop_js/                                     @igelhaus @semenovaleksandr @rokashevichsvetlana @kurnevichstanislav
 static_core/plugins/ets/tests/stdlib-templates/                               @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/tests/test-lists/                                     @shirunova_viktoria @kuchkovairina
-static_core/plugins/ets/tools/declgen_ts2sts/                                 @semenovaleksandr @trubachevilya  @hufeng20 @nazarovkonstantin
+static_core/plugins/ets/tools/declgen_ts2sts/                                 @trubachevilya  @hufeng20 @nazarovkonstantin
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        @dmitriitr @udav @ipetrov
 static_core/plugins/ets/runtime/interop_js/xgc/                               @dmitriitr @udav @ipetrov
@@ -150,14 +152,14 @@ static_core/plugins/ets/tests/ets_test_suite/containers/blocking_queue.sts    @k
 static_core/plugins/ets/tests/ets_test_suite/coroutines/                      @konstanting
 static_core/plugins/ets/tests/ets_test_suite/gc/                              @udav
 static_core/plugins/ets/tests/ets_test_suite/taskpool/                        @konstanting @ipetrov
-static_core/plugins/ets/tests/interop_js/tests/                               @igelhaus @semenovaleksandr @ignatenkooleg @rokashevichsvetlana
+static_core/plugins/ets/tests/interop_js/tests/                               @igelhaus @semenovaleksandr @ignatenkooleg @rokashevichsvetlana @kurnevichstanislav
 static_core/plugins/ets/tests/native/promise/                                 @konstanting
 static_core/plugins/ets/tests/runtime/tooling/                                @ragnvald
 static_core/plugins/ets/tests/runtime/types/ets_promise_test.cpp              @konstanting @udav
 static_core/plugins/ets/stdlib/std/debug/concurrency/                         @konstanting
-static_core/plugins/ets/tests/interop_js/tests/checked/                       @igelhaus @semenovaleksandr @ignatenkooleg @rokashevichsvetlana @Prof1983
+static_core/plugins/ets/tests/interop_js/tests/checked/                       @igelhaus @semenovaleksandr @ignatenkooleg @rokashevichsvetlana @Prof1983 @kurnevichstanislav
 static_core/plugins/ets/tests/interop_js/tests/compiler/                      @igelhaus @semenovaleksandr @ignatenkooleg @rokashevichsvetlana @Prof1983
-static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                @igelhaus @semenovaleksandr @trubachevilya @ivagin @hufeng20 @Prof1983
+static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                @igelhaus @trubachevilya @ivagin @hufeng20 @Prof1983
 static_core/plugins/ets/tests/interop_js/tests/promise/                       @udav
 static_core/plugins/ets/tests/sts_ts_subset/std/core/Promise*                 @ivan-tyulyandin @anton-sysoev @dmitriitr @konstanting @udav
 
