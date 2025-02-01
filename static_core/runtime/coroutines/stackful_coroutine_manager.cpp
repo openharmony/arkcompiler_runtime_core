@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -561,7 +561,10 @@ void StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion()
 {
     os::memory::LockHolder lkCompletion(programCompletionLock_);
     auto *main = Coroutine::GetCurrent();
-    while (coroutineCount_ > 1 + GetActiveWorkersCount()) {  // 1 is for MAIN
+
+    // Hotfix for #22151 (deadlock)
+    auto activeWorkersCnt = GetActiveWorkersCount();
+    while (coroutineCount_ > 1 + activeWorkersCnt) {  // 1 is for MAIN
         programCompletionEvent_->SetNotHappened();
         programCompletionEvent_->Lock();
         programCompletionLock_.Unlock();
@@ -571,10 +574,15 @@ void StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion()
             << "StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion(): possibly spurious wakeup from wait...";
         // NOTE(konstanting, #I67QXC): test for the spurious wakeup
         programCompletionLock_.Lock();
+        activeWorkersCnt = GetActiveWorkersCount();
     }
     // coroutineCount_ < 1 + GetActiveWorkersCount() in case of concurrent EWorker destroy
     // in this case coroutineCount_ >= 1 + GetActiveWorkersCount() - ExclusiveWorkersCount()
-    ASSERT(coroutineCount_ <= (1 + GetActiveWorkersCount()));
+#ifndef NDEBUG
+    // Hotfix for #22151 (assert fail)
+    activeWorkersCnt = GetActiveWorkersCount();
+#endif
+    ASSERT(coroutineCount_ <= (1 + activeWorkersCnt));
 }
 
 void StackfulCoroutineManager::MainCoroutineCompleted()
