@@ -50,7 +50,7 @@ public:
     PANDA_PUBLIC_API static bool IsMethod(const PandaString &td);
 
     PANDA_PUBLIC_API EtsValue Invoke(napi::ScopedManagedCodeFix *s, Value *args);
-    PANDA_PUBLIC_API EtsValue Invoke(ani::ScopedManagedCodeFix *s, Value *args);
+    PANDA_PUBLIC_API ani_status Invoke(ani::ScopedManagedCodeFix &s, Value *args, EtsValue *result);
 
     void InvokeVoid(napi::ScopedManagedCodeFix *s, Value *args)
     {

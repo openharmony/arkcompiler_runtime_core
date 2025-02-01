@@ -17,36 +17,36 @@
 
 namespace ark::ets::ani::testing {
 
-class ReferenceIsNullishTest : public AniTest {};
+class ReferenceIsNullishValueTest : public AniTest {};
 
-TEST_F(ReferenceIsNullishTest, check_null)
+TEST_F(ReferenceIsNullishValueTest, check_null)
 {
     auto ref = CallEtsFunction<ani_ref>("GetNull");
     ani_boolean isUndefined;
-    ASSERT_EQ(env_->Reference_IsNullish(ref, &isUndefined), ANI_OK);
+    ASSERT_EQ(env_->Reference_IsNullishValue(ref, &isUndefined), ANI_OK);
     ASSERT_EQ(isUndefined, ANI_TRUE);
 }
 
-TEST_F(ReferenceIsNullishTest, check_undefined)
+TEST_F(ReferenceIsNullishValueTest, check_undefined)
 {
     auto ref = CallEtsFunction<ani_ref>("GetUndefined");
     ani_boolean isUndefined;
-    ASSERT_EQ(env_->Reference_IsNullish(ref, &isUndefined), ANI_OK);
+    ASSERT_EQ(env_->Reference_IsNullishValue(ref, &isUndefined), ANI_OK);
     ASSERT_EQ(isUndefined, ANI_TRUE);
 }
 
-TEST_F(ReferenceIsNullishTest, check_object)
+TEST_F(ReferenceIsNullishValueTest, check_object)
 {
     auto ref = CallEtsFunction<ani_ref>("GetObject");
     ani_boolean isUndefined;
-    ASSERT_EQ(env_->Reference_IsNullish(ref, &isUndefined), ANI_OK);
+    ASSERT_EQ(env_->Reference_IsNullishValue(ref, &isUndefined), ANI_OK);
     ASSERT_EQ(isUndefined, ANI_FALSE);
 }
 
-TEST_F(ReferenceIsNullishTest, invalid_argument)
+TEST_F(ReferenceIsNullishValueTest, invalid_argument)
 {
     auto ref = CallEtsFunction<ani_ref>("GetNull");
-    ASSERT_EQ(env_->Reference_IsNullish(ref, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Reference_IsNullishValue(ref, nullptr), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing

@@ -43,9 +43,15 @@ public:
         return ref == nullptr;
     }
 
-    static inline ani_ref GetUndefiendRef()
+    static inline bool IsUndefined(EtsObject *object)
     {
-        return nullptr;
+        return object == nullptr;
+    }
+
+    static inline ani_status GetUndefinedRef(ani_ref *result)
+    {
+        *result = nullptr;
+        return ANI_OK;
     }
 
     bool inline IsNull(ani_ref ref)
@@ -53,10 +59,15 @@ public:
         return ToInternalType(ref)->GetCoreType() == GetCoroutine()->GetNullValue();
     }
 
-    ani_ref inline GetNullRef()
+    bool inline IsNullishValue(ani_ref ref)
+    {
+        return IsUndefined(ref) || IsNull(ref);
+    }
+
+    ani_status inline GetNullRef(ani_ref *result)
     {
         EtsObject *nullObject = EtsObject::FromCoreType(GetCoroutine()->GetNullValue());
-        return AddLocalRef(nullObject);
+        return AddLocalRef(nullObject, result);
     }
 
     EtsArray *ToInternalType(ani_fixedarray array)
@@ -75,7 +86,7 @@ public:
 
     EtsObject *ToInternalType(ani_object obj)
     {
-        ASSERT(obj != nullptr);
+        ASSERT(!IsNullishValue(obj));
         return reinterpret_cast<EtsObject *>(GetInternalType(env_, obj));
     }
 
@@ -97,16 +108,17 @@ public:
         return reinterpret_cast<EtsClass *>(GetInternalType(env_, static_cast<ani_object>(cls)));
     }
 
-    ani_ref AddLocalRef(EtsObject *obj)
+    ani_status AddLocalRef(EtsObject *obj, ani_ref *result)
     {
-        return AddLocalRef(env_, obj);
-    }
-
-    static ani_ref AddLocalRef(PandaEnv *env, EtsObject *obj)
-    {
-        ASSERT_MANAGED_CODE();
-        EtsReference *ref = GetEtsReferenceStorage(env)->NewEtsRef(obj, EtsReference::EtsObjectType::LOCAL);
-        return EtsRefToAniRef(ref);
+        if (IsUndefined(obj)) {
+            return GetUndefinedRef(result);
+        }
+        ani_ref ref = DoAddLocalRef(obj);
+        if (UNLIKELY(ref == nullptr)) {
+            return ANI_OUT_OF_REF;
+        }
+        *result = ref;
+        return ANI_OK;
     }
 
     ani_gref AddGlobalRef(EtsObject *obj)
@@ -164,6 +176,14 @@ protected:
     }
 
 private:
+    ani_ref DoAddLocalRef(EtsObject *obj)
+    {
+        ASSERT_MANAGED_CODE();
+        ASSERT(obj != nullptr);
+        EtsReference *ref = GetEtsReferenceStorage(env_)->NewEtsRef(obj, EtsReference::EtsObjectType::LOCAL);
+        return EtsRefToAniRef(ref);
+    }
+
     static inline EtsReference *AniRefToEtsRef(ani_ref ref)
     {
         return reinterpret_cast<EtsReference *>(ref);

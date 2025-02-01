@@ -199,6 +199,7 @@ typedef enum {
     ANI_OK,
     ANI_ERROR,
     ANI_INVALID_ARGS,
+    ANI_INVALID_TYPE,
     ANI_PENDING_ERROR,
     ANI_NOT_FOUND,
     ANI_OUT_OF_REF,
@@ -484,9 +485,10 @@ struct __ani_interaction_api {
      * @param[in] cls The class of the object to create.
      * @param[in] method The constructor method to invoke.
      * @param[in] ... Variadic arguments to pass to the constructor method.
+     * @param[out] result A pointer to store the object return value.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Object_New)(ani_env *env, ani_class cls, ani_method method, ...);
+    ani_status (*Object_New)(ani_env *env, ani_class cls, ani_method method, ani_object *result, ...);
 
     /**
      * @brief Creates a new object of a specified class using a constructor method (array-based).
@@ -498,9 +500,11 @@ struct __ani_interaction_api {
      * @param[in] cls The class of the object to create.
      * @param[in] method The constructor method to invoke.
      * @param[in] args An array of arguments to pass to the constructor method.
+     * @param[out] result A pointer to store the object return value.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Object_New_A)(ani_env *env, ani_class cls, ani_method method, const ani_value *args);
+    ani_status (*Object_New_A)(ani_env *env, ani_class cls, ani_method method, ani_object *result,
+                               const ani_value *args);
 
     /**
      * @brief Creates a new object of a specified class using a constructor method (variadic arguments).
@@ -512,9 +516,10 @@ struct __ani_interaction_api {
      * @param[in] cls The class of the object to create.
      * @param[in] method The constructor method to invoke.
      * @param[in] args A `va_list` of arguments to pass to the constructor method.
+     * @param[out] result A pointer to store the object return value.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Object_New_V)(ani_env *env, ani_class cls, ani_method method, va_list args);
+    ani_status (*Object_New_V)(ani_env *env, ani_class cls, ani_method method, ani_object *result, va_list args);
 
     /**
      * @brief Retrieves the type of a given object.
@@ -993,7 +998,7 @@ struct __ani_interaction_api {
      * @param[out] result A pointer to store the undefined reference.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*GetUndefiend)(ani_env *env, ani_ref *result);
+    ani_status (*GetUndefined)(ani_env *env, ani_ref *result);
 
     /**
      * @brief Checks if a reference is null.
@@ -1020,16 +1025,16 @@ struct __ani_interaction_api {
     ani_status (*Reference_IsUndefined)(ani_env *env, ani_ref ref, ani_boolean *result);
 
     /**
-     * @brief Checks if a reference is nullish (null or undefined).
+     * @brief Checks if a reference is nullish value (null or undefined).
      *
      * This function determines if the specified reference is either null or undefined.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] ref The reference to check.
-     * @param[out] result A pointer to a boolean indicating if the reference is nullish.
+     * @param[out] result A pointer to a boolean indicating if the reference is nullish value.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Reference_IsNullish)(ani_env *env, ani_ref ref, ani_boolean *result);
+    ani_status (*Reference_IsNullishValue)(ani_env *env, ani_ref ref, ani_boolean *result);
 
     /**
      * @brief Compares two references for equality.
@@ -6900,21 +6905,21 @@ struct __ani_env {
     {
         return c_api->Reference_IsFixedArray_Ref(this, ref, result);
     }
-    ani_status Object_New(ani_class cls, ani_method method, ...)
+    ani_status Object_New(ani_class cls, ani_method method, ani_object *result, ...)
     {
         va_list args;
-        va_start(args, method);
-        ani_status status = c_api->Object_New_V(this, cls, method, args);
+        va_start(args, result);
+        ani_status status = c_api->Object_New_V(this, cls, method, result, args);
         va_end(args);
         return status;
     }
-    ani_status Object_New_A(ani_class cls, ani_method method, const ani_value *args)
+    ani_status Object_New_A(ani_class cls, ani_method method, ani_object *result, const ani_value *args)
     {
-        return c_api->Object_New_A(this, cls, method, args);
+        return c_api->Object_New_A(this, cls, method, result, args);
     }
-    ani_status Object_New_V(ani_class cls, ani_method method, va_list args)
+    ani_status Object_New_V(ani_class cls, ani_method method, ani_object *result, va_list args)
     {
-        return c_api->Object_New_V(this, cls, method, args);
+        return c_api->Object_New_V(this, cls, method, result, args);
     }
     ani_status Object_GetType(ani_object object, ani_type *result)
     {
@@ -7070,9 +7075,9 @@ struct __ani_env {
     {
         return c_api->GetNull(this, result);
     }
-    ani_status GetUndefiend(ani_ref *result)
+    ani_status GetUndefined(ani_ref *result)
     {
-        return c_api->GetUndefiend(this, result);
+        return c_api->GetUndefined(this, result);
     }
     ani_status Reference_IsNull(ani_ref ref, ani_boolean *result)
     {
@@ -7082,9 +7087,9 @@ struct __ani_env {
     {
         return c_api->Reference_IsUndefined(this, ref, result);
     }
-    ani_status Reference_IsNullish(ani_ref ref, ani_boolean *result)
+    ani_status Reference_IsNullishValue(ani_ref ref, ani_boolean *result)
     {
-        return c_api->Reference_IsNullish(this, ref, result);
+        return c_api->Reference_IsNullishValue(this, ref, result);
     }
     ani_status Reference_Equals(ani_ref ref0, ani_ref ref1, ani_boolean *result)
     {
