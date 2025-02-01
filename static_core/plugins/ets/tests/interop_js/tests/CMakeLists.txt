@@ -23,6 +23,7 @@ set(TESTS_EXECUTED_ON_ARKJSVM
     dynamic_with_lambda
     import
     class_method
+    test_cast
 )
 
 set(TESTS_EXECUTED_ON_NODEVM
