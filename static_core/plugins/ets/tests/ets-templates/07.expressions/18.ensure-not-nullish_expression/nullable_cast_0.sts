@@ -21,5 +21,5 @@ function main(): void {
   let a: Int | null = (): Int|null => { return new Int(1); }();
   let b: Int = a!;
 
-  assertTrue( b == 1 )
+  assertEQ( b, 1 )
 }

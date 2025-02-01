@@ -23,5 +23,5 @@ function main(): void {
   let b: Int|null = (): Int|null => { return 4; }();
   let x: Int = a! + b!;
 
-  assertTrue( x == 9 )
+  assertEQ( x, 9 )
 }

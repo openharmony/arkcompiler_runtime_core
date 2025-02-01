@@ -21,7 +21,7 @@ params: {{lc.origin}} => {{lc.dest}}
 
 function main(): void {
   let a = {{lc.origin}};
-  assertTrue(!a == {{lc.dest}});
+  assertEQ(!a, {{lc.dest}});
 }
 
 {% endfor %}

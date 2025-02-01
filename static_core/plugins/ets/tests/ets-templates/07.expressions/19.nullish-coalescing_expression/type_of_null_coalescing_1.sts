@@ -28,5 +28,5 @@ function main(): void {
   let a : A = new A();
   let b : Int = 2;
   let c = a ?? b;
-  assertTrue(foo(c) == 1);
+  assertEQ(foo(c), 1);
 }

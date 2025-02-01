@@ -22,10 +22,10 @@ function main(): void {
   let ii: Int|undefined|null = null;
   try {
     (1 ? ii : i)!;
-    assertTrue( false )
+    assertTrue( false, "evaluation of e seems to be e" )
   } catch(npe: NullPointerError) {
-    assertTrue( true )
+    assertTrue( true, "NPE caught - correct")
   } catch(e) {
-    assertTrue( false )
+    assertTrue( false, "Some other Error thrown, not correct")
   }
 }

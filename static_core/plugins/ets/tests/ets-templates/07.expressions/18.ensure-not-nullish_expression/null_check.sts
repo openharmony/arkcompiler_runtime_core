@@ -31,7 +31,7 @@ function main(): void {
   let a: Object|null = new Object();
   let b: Object|null = null;
 
-  assertTrue( foo(a) == 2 )
-  assertTrue( foo(a!) == 1 )
-  assertTrue( foo(b) == 2 )
+  assertEQ( foo(a), 2 )
+  assertEQ( foo(a!), 1 )
+  assertEQ( foo(b), 2 )
 }

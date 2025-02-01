@@ -31,5 +31,5 @@ function main(): void {
     res = 0;
   }
 
-  assertTrue( res == 1 )
+  assertEQ( res, 1, "NPE caught - correct" )
 }

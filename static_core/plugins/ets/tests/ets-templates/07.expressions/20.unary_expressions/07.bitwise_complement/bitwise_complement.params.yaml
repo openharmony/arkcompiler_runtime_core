@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,6 +29,7 @@ bitwise_complement:
   - {type: short, origin:   255, dest:   -256}
   - {type: short, origin: 21845, dest: -21846}
   - {type: short, origin: -3856, dest:   3855}
+  - {type: short, origin: 32767, dest: -32768}
 
   - {type:   int, origin:     0, dest:     -1}
   - {type:   int, origin:     1, dest:     -2}
@@ -39,13 +40,29 @@ bitwise_complement:
   - {type:   int, origin:   255, dest:   -256}
   - {type:   int, origin: 21845, dest: -21846}
   - {type:   int, origin: -3856, dest:   3855}
+  - {type:   int, origin: 2147483647, dest:   -2147483648}
 
-  - {type:  long, origin:     0, dest:     -1}
-  - {type:  long, origin:     1, dest:     -2}
-  - {type:  long, origin:   127, dest:   -128}
-  - {type:  long, origin:   -86, dest:     85}
-  - {type:  long, origin:    15, dest:    -16}
-  - {type:  long, origin:    51, dest:    -52}
-  - {type:  long, origin:   255, dest:   -256}
-  - {type:  long, origin: 21845, dest: -21846}
-  - {type:  long, origin: -3856, dest:   3855}
+  - {type: long, origin:     0, dest:     -1}
+  - {type: long, origin:     1, dest:     -2}
+  - {type: long, origin:   127, dest:   -128}
+  - {type: long, origin:   -86, dest:     85}
+  - {type: long, origin:    15, dest:    -16}
+  - {type: long, origin:    51, dest:    -52}
+  - {type: long, origin:   255, dest:   -256}
+  - {type: long, origin: 21845, dest: -21846}
+  - {type: long, origin: -3856, dest:   3855}
+  - {type: long,  origin: 9223372036854775807, dest: -9223372036854775808}
+
+  - {type: float, origin: 0.0,  dest:   -1.0}
+  - {type: float, origin: 127.0, dest:   -128.0}
+  - {type: float, origin: 32767.0, dest: -32768.0}
+  - {type: float, origin: 2147483647.0, dest: -2147483648.0}
+  - {type: float, origin: 2147483648.0, dest: -2147483648.0}
+  - {type: float, origin: 2147483649.0, dest: -2147483648.0}
+
+
+  - {type: double, origin: 0.0,  dest: -1.0}
+  - {type: double, origin: 127.0, dest: -128.0}
+  - {type: double, origin: 32767.0, dest: -32768.0}
+  - {type: double, origin: 2147483647.0, dest:   -2147483648.0}
+  - {type: double, origin: 9223372036854775807.0, dest: -9223372036854775808.0}

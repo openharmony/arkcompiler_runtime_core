@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,17 +14,11 @@
  */
 
 /*---
-desc: The type of ensure-not-nullish expression is the non-nullish variant of the type of e.
+desc: Prefix increment operator. TypeError Bad operand type, the type of the operand must be numeric type.
+tags: [negative, compile-only]
 ---*/
 
 function main(): void {
-  let i: Int|undefined = (): Int|undefined => { return undefined; }();
-  try {
-    let ii = i!;
-    assertTrue( false, "evaluation of e seems to be e" )
-  } catch(npe: NullPointerError) {
-    assertTrue( true, "NPE caught - correct")
-  } catch(e) {
-    assertTrue( false, "Some other Error thrown, not correct")
-  }
+  let c = "110"
+  assertEQ(++c, "110", "If prefix increment expression completes abruptly then no incrementation occurs.")
 }

@@ -22,7 +22,7 @@ params: {{un.origin}} => {{un.dest}}
 
 function main(): void {
   let a = {{un.origin}};
-  assertTrue(-a == {{un.dest}});
+  assertEQ(-a, {{un.dest}});
 }
 
 {% endfor %}
