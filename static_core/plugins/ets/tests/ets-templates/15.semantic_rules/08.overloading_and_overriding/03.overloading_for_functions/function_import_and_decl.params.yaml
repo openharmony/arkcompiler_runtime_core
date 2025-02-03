@@ -14,7 +14,8 @@
 ---
 cases:
     # import from a single file + declare in the current scope, overload-equivalent
-    - file_a: function_export_a_no_arg
+    - tags: 'negative,'
+      file_a: function_export_a_no_arg
       decl: |-
           function foo() {}
 
@@ -29,7 +30,8 @@ cases:
           function foo<T>(i: T) {}
 
     # import from multiple files + declare in the current scope, overload-equivalent
-    - file_a: function_export_a_no_arg
+    - tags: 'negative,'
+      file_a: function_export_a_no_arg
       file_b: function_export_b_no_arg
       decl: |-
           function foo() {}
@@ -41,13 +43,15 @@ cases:
           function foo(i: Object) {}
 
     # import from multiple files + declare in the current scope, overload-equivalent to the former import
-    - file_a: function_export_a_no_arg
+    - tags: 'negative,'
+      file_a: function_export_a_no_arg
       file_b: function_export_b_primitive
       decl: |-
           function foo() {}
 
     # import from multiple files + declare in the current scope, overload-equivalent to the latter import
-    - file_a: function_export_a_primitive
+    - tags: 'negative,'
+      file_a: function_export_a_primitive
       file_b: function_export_b_no_arg
       decl: |-
           function foo() {}

@@ -1586,9 +1586,6 @@
 15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/two_interfaces_9.sts
 
 # es2panda: #17984
-15.semantic_rules/08.overloading_and_overriding/03.overloading_for_functions/function_import_and_decl_1.sts
-15.semantic_rules/08.overloading_and_overriding/03.overloading_for_functions/function_import_and_decl_2.sts
-15.semantic_rules/08.overloading_and_overriding/03.overloading_for_functions/function_import_and_decl_4.sts
 15.semantic_rules/08.overloading_and_overriding/03.overloading_for_functions/function_import_neg_18.sts
 
 # 18550 es2panda aborts on implicit number conversion

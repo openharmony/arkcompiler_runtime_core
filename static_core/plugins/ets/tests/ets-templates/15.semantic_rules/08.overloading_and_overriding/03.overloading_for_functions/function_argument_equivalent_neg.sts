@@ -22,11 +22,15 @@ desc: >-
 tags: [compile-only, negative]
 ---*/
 
-function foo({{c.a}}): void {}
+type TPL = [boolean, string];
+type FUN = () => boolean;
 
-function foo({{c.a}}): void {}
+function foo({{c.arg}}): void {}
+
+function foo({{c.arg}}): void {}
 
 function main(): void {
+  let c: TPL = [true, "some str"];
   foo({{c.call}});
 }
 
