@@ -67,6 +67,10 @@
 13.compilation_units_packages_and_modules/03.import_directives/04.default_import_binding/multiple_default_export.sts
 13.compilation_units_packages_and_modules/03.import_directives/04.default_import_binding/multiple_export.sts
 
+# 20290
+05.generics/03.utility_types/01.partial_utility_type/module_extends_1.sts
+05.generics/03.utility_types/01.partial_utility_type/module_extends_3.sts
+
 #18046 Update compilation process with modules for AOT mode
 05.generics/03.utility_types/01.partial_utility_type/module_class_0.sts
 05.generics/03.utility_types/01.partial_utility_type/module_class_1.sts
