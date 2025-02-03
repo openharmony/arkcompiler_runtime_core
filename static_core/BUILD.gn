@@ -196,7 +196,6 @@ config("ark_config") {
       "PANDA_TARGET_WINDOWS",
       "PANDA_WITH_BYTECODE_OPTIMIZER",
       "PANDA_WITH_COMPILER",
-      "_CRTBLD",
       "__LIBMSVCRT__",
     ]
     if (enable_irtoc) {

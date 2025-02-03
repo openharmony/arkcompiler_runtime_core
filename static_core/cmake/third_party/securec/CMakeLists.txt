@@ -61,7 +61,7 @@ panda_add_library(c_secshared ${PANDA_DEFAULT_LIB_TYPE} ${SOURCES})
 panda_target_include_directories(c_secshared SYSTEM PUBLIC ${SECUREC_ROOT}/include)
 panda_target_compile_definitions(c_secshared PRIVATE NDEBUG SECUREC_SUPPORT_STRTOLD=1)
 if (PANDA_TARGET_WINDOWS)
-    panda_target_compile_definitions(c_secshared PUBLIC _CRTBLD __LIBMSVCRT__)
+    panda_target_compile_definitions(c_secshared PUBLIC __LIBMSVCRT__)
 endif()
 panda_target_compile_options(c_secshared PRIVATE -Wall -O1)
 
