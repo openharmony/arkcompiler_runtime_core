@@ -20,6 +20,7 @@
 #include "plugins/ets/stdlib/native/core/IntlLocaleMatch.h"
 #include "plugins/ets/stdlib/native/core/IntlCollator.h"
 #include "plugins/ets/stdlib/native/core/IntlCommon.h"
+#include "plugins/ets/stdlib/native/core/IntlLocale.h"
 
 namespace ark::ets::stdlib::intl {
 
@@ -32,6 +33,7 @@ ets_int InitCoreIntl(EtsEnv *env)
     ets_int err = RegisterIntlNumberFormatNativeMethods(env);
     err = err == ETS_OK ? RegisterIntlLocaleMatch(env) : err;
     err = err == ETS_OK ? RegisterIntlCollator(env) : err;
+    err = err == ETS_OK ? RegisterIntlLocaleNativeMethods(env) : err;
     return err;
 }
 

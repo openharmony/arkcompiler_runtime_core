@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/stdlib/native/core/IntlNumberFormat.h"
+#include "plugins/ets/stdlib/native/core/IntlCommon.h"
 #include "plugins/ets/stdlib/native/core/IntlState.h"
 #include "libpandabase/macros.h"
 #include "unicode/numberformatter.h"
