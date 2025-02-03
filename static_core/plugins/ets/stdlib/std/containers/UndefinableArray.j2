@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,13 @@
 
 package std.containers
 
-type Nullable{{T}} = {{T}} | null
+type Undefinable{{T}} = {{T}} | undefined
 
-export class Nullable{{T}}Array {
+export class Undefinable{{T}}Array {
     /* const */ static ArrayInitSize : int = 16
 
-    private init(capacity: int, val: Nullable{{T}}): void {
-        this.data = new Nullable{{T}}[capacity]
+    private init(capacity: int, val: Undefinable{{T}}): void {
+        this.data = new Undefinable{{T}}[capacity]
         for (let i = 0; i < this.data.length; ++i) {
             this.data[i] = val
         }
@@ -29,31 +29,31 @@ export class Nullable{{T}}Array {
     }
 
     /**
-     * Constructs new Nullable{{T}}Array with respect to capacity and initial value
+     * Constructs new Undefinable{{T}}Array with respect to capacity and initial value
      *
      * @param capacity
      *
      * @param val
      */
-    constructor(capacity: int, val: Nullable{{T}}) {
+    constructor(capacity: int, val: Undefinable{{T}}) {
         this.init(capacity, val)
     }
 
     /**
-     * Constructs new Nullable{{T}}Array with required capacity
+     * Constructs new Undefinable{{T}}Array with required capacity
      *
      * @param capacity
      */
     constructor(capacity: int) {
-        this.data = new Nullable{{T}}[capacity]
+        this.data = new Undefinable{{T}}[capacity]
         this.curSize = 0
     }
 
     /**
-     * Constructs new empty Nullable{{T}}Array
+     * Constructs new empty Undefinable{{T}}Array
      */
     constructor() {
-        this(Nullable{{T}}Array.ArrayInitSize)
+        this(Undefinable{{T}}Array.ArrayInitSize)
     }
 
     /**
@@ -63,7 +63,7 @@ export class Nullable{{T}}Array {
      */
     public reserve(capacity: int): void {
         if (this.data.length < capacity) {
-            let newData = new Nullable{{T}}[capacity]
+            let newData = new Undefinable{{T}}[capacity]
             for (let i = 0; i < this.curSize; ++i) {
                newData[i] = this.data[i]
             }
@@ -100,9 +100,9 @@ export class Nullable{{T}}Array {
      *
      * @param e value to push
      */
-    public pushBack(e: Nullable{{T}}): void {
+    public pushBack(e: Undefinable{{T}}): void {
         if (this.curSize == this.data.length) {
-            let newData = new Nullable{{T}}[Nullable{{T}}Array.getNewCapacity(this.data.length)]
+            let newData = new Undefinable{{T}}[Undefinable{{T}}Array.getNewCapacity(this.data.length)]
             for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i]
             }
@@ -117,8 +117,8 @@ export class Nullable{{T}}Array {
      *
      * @returns popped value
      */
-    public popBack(): Nullable{{T}} {
-        assert (this.curSize > 0): "No data to popBack in Nullable{{T}}Array!"
+    public popBack(): Undefinable{{T}} {
+        assert (this.curSize > 0): "No data to popBack in Undefinable{{T}}Array!"
         --this.curSize
         return this.data[this.curSize]
     }
@@ -137,7 +137,7 @@ export class Nullable{{T}}Array {
      *
      * @returns an element
      */
-    public at(index: int): Nullable{{T}} {
+    public at(index: int): Undefinable{{T}} {
         return this.data[index]
     }
 
@@ -148,10 +148,10 @@ export class Nullable{{T}}Array {
      *
      * @param e new value
      */
-    public set(index: int, e: Nullable{{T}}): void {
+    public set(index: int, e: Undefinable{{T}}): void {
         this.data[index] = e
     }
 
-    private data: Nullable{{T}}[] = []
+    private data: Undefinable{{T}}[] = []
     private curSize: int
 }

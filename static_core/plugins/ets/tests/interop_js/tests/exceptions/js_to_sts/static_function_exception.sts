@@ -26,7 +26,7 @@ function CheckCustomException():boolean{
 
     }catch(e){
         const exceptionEntries = Object.entries(e)
-        return exceptionEntries[2][1] ==='JSError'
+        return exceptionEntries[2]![1] === 'JSError'
     }
 
 }
@@ -38,7 +38,7 @@ function CheckNameCustomException():boolean{
         return false
     }catch(e){
          const exceptionEntries = Object.entries(e)
-         const cause = exceptionEntries[0] && (exceptionEntries[0][1] as string);
+         const cause = exceptionEntries[0]![1] as string;
          return cause.includes('CustomErrorA')
 
     }
@@ -52,7 +52,7 @@ function CheckMessageCustomException():boolean{
         return false
     }catch(e){
          const exceptionEntries = Object.entries(e)
-         const cause = exceptionEntries[0] && (exceptionEntries[0][1] as string);
+         const cause = exceptionEntries[0]![1] as string;
          return cause.includes('This is a custom error(from static function)')
 
     }
@@ -69,7 +69,7 @@ function CheckBuiltinExceptionInStatic():boolean{
 
     }catch(e){
         const exceptionEntries = Object.entries(e)
-        return exceptionEntries[2][1] ==='JSError'
+        return exceptionEntries[2]![1] ==='JSError'
     }
 
 }
@@ -81,7 +81,7 @@ function CheckNameBuiltinExceptionInStatic():boolean{
         return false
     }catch(e){
          const exceptionEntries = Object.entries(e)
-         const cause = exceptionEntries[0] && (exceptionEntries[0][1] as string);
+         const cause = exceptionEntries[0]![1] as string;
          return cause.includes('TypeError')
 
     }
@@ -95,7 +95,7 @@ function CheckMessageBuiltinExceptionInStatic():boolean{
         return false
     }catch(e){
          const exceptionEntries = Object.entries(e)
-         const cause = exceptionEntries[0] && (exceptionEntries[0][1] as string);
+         const cause = exceptionEntries[0]![1] as string;
          return cause.includes('This is a TypeError')
 
     }

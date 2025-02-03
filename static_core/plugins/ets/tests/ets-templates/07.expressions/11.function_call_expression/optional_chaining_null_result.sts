@@ -25,7 +25,7 @@ class A {
 }
 
 function getX(): Int|undefined {
-  let a: A|null;
+  let a: A|undefined;
   let res: Int|undefined = a?.evaluate(5);
 
   return res;

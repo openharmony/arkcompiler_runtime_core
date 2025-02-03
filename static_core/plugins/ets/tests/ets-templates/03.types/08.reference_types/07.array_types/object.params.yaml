@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -33,7 +33,7 @@ cases:
     - { type: 'Error[]', vals: '[new Error("A"), new Error("B"), new Error("C")]', assert: '[0].message == "A"' }
     - { type: 'string[][]', vals: 'new string[2][2]; arr[1][1] = "ABC"', assert: '[1][1] == "ABC"' }
     - decl: |-
-        type Z = Object|null
+        type Z = Object|undefined
       type: 'Z[][]'
       vals: 'new Z[2][2]'
-      assert: '[1][0] == null'
+      assert: '[1][0] == undefined'

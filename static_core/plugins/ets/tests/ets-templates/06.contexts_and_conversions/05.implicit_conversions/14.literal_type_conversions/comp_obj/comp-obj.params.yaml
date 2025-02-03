@@ -14,10 +14,12 @@
 ---
 cases:
     - to_type: 'null'
+      init_value: 'null'
       values:
           - { type: 'null', expr: 'null' }
 
     - to_type: 'null'
+      init_value: 'null'
       tags: 'compile-only, negative'
       values:
           - { type: 'string|boolean|null', expr: 'null' }

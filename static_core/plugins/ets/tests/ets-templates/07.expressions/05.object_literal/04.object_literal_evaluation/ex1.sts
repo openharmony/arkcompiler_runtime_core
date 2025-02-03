@@ -19,8 +19,8 @@ desc: >-
 ---*/
 
 class A {
-    name: string|null
-    age: number|null
+    name: string|null = null
+    age: number|null = null
 }
 
 function main(): int {

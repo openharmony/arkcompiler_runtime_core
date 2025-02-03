@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,10 +111,10 @@ class DeepCloner {
 
 		const objEntries = Object.entries(obj)
 		for (const objEntry of objEntries) {
-			const fieldName = objEntry[DeepCloner.OBJ_ENTRY_NAME]
+			const fieldName = objEntry![DeepCloner.OBJ_ENTRY_NAME]
 			const field = objType.getFieldByName(fieldName)
 
-			const objFieldValueCopy = this.clone<Object>(objEntry[DeepCloner.OBJ_ENTRY_VALUE])
+			const objFieldValueCopy = this.clone<Object>(objEntry![DeepCloner.OBJ_ENTRY_VALUE])
 			if (field.getType().assignableFrom(Type.of(objFieldValueCopy))) {
 				objCopyValue.setFieldByName(fieldName, Value.of(objFieldValueCopy))
 			}

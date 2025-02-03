@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -40,21 +40,21 @@ cases:
 
     - decl: |-
           class A {
-              name: string|null
+              name: string|null = null
           }
       use: |-
           let a: A = { age: 42 } // CTE, no such field
 
     - decl: |-
           class A {
-              private name: string|null
+              private name: string|null = null
           }
       use: |-
           let a: A = { name: "John" } // CTE, field is not accessible
 
     - decl: |-
           class B {
-              name: string|null
+              name: string|null = null
           }
       use: |-
           let b: B = { name: 0 }  // CTE, type is wrong

@@ -42,7 +42,7 @@ type CollectTypesCB = (tc: TypeOrCreator) => void
  * Base for all type creators, supports creation of {@link Type}
  */
 export abstract class TypeCreator {
-    internal typ: Type | undefined = undefined // not undefined if already created
+    internal typ?: Type // not undefined if already created
     internal ctxItemPtr: long = 0 // resides in ctx, no need to free
 
     /**
@@ -878,7 +878,7 @@ export final class FieldCreator {
  */
 export final class ParameterCreator {
     internal typ: TypeOrCreator
-    internal name: string | undefined = undefined
+    internal name?: string
     internal frozen: FreezableImpl = new FreezableImpl()
     internal attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.PARAMETER)
 
@@ -957,7 +957,7 @@ export final class MethodCreator {
     internal name: string
     internal params: Array<ParameterCreator> = new Array<ParameterCreator>();
     internal result: TypeOrCreator = TypeOrCreator.from(VoidType.REF);
-    internal body: CallableBody | undefined = undefined
+    internal body?: CallableBody
     internal frozen: FreezableImpl = new FreezableImpl()
     internal attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.METHOD)
     internal accessMod: HasAccessMod = new HasAccessMod(this.frozen)

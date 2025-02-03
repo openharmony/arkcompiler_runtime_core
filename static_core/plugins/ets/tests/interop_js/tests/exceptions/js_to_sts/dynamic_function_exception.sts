@@ -27,7 +27,7 @@ function CheckUserExceptionError():boolean{
 
     }catch(e){
         const exceptionEntries = Object.entries(e)
-        return exceptionEntries[2][1] ==='JSError'
+        return exceptionEntries[2]![1] === 'JSError'
     }
 
 }
@@ -39,7 +39,7 @@ function CheckNameUserExceptionError():boolean{
         return false
     }catch(e){
          const exceptionEntries = Object.entries(e)
-         const cause = exceptionEntries[0] && (exceptionEntries[0][1] as string);
+         const cause = exceptionEntries[0]![1] as string;
          return cause.includes('CustomError1')
 
     }
@@ -53,7 +53,7 @@ function CheckMessageUserExceptionError():boolean{
         return false
     }catch(e){
          const exceptionEntries = Object.entries(e)
-         const cause = exceptionEntries[0] && (exceptionEntries[0][1] as string);
+         const cause = exceptionEntries[0]![1] as string;
          return cause.includes('This is a custom error')
 
     }
@@ -70,7 +70,7 @@ function CatchUserException():boolean{
 
     }catch(e){
         const exceptionEntries = Object.entries(e)
-        return exceptionEntries[2][1] ==='JSError'
+        return exceptionEntries[2]![1] ==='JSError'
     }
 
 }
@@ -87,7 +87,7 @@ function CatchBuiltinException():boolean{
 
     }catch(e){
         const exceptionEntries = Object.entries(e)
-        return exceptionEntries[2][1] ==='JSError'
+        return exceptionEntries[2]![1] ==='JSError'
     }
 
 }
@@ -99,7 +99,7 @@ function CheckNameBuiltinException():boolean{
         return false
     }catch(e){
          const exceptionEntries = Object.entries(e)
-         const cause = exceptionEntries[0] && (exceptionEntries[0][1] as string);
+         const cause = exceptionEntries[0]![1] as string;
          return cause.includes('TypeError')
 
     }
@@ -113,7 +113,7 @@ function CheckMessageBuiltinException():boolean{
         return false
     }catch(e){
          const exceptionEntries = Object.entries(e)
-         const cause = exceptionEntries[0] && (exceptionEntries[0][1] as string);
+         const cause = exceptionEntries[0]![1] as string;
          return cause.includes('This is a TypeError')
 
     }

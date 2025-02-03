@@ -207,7 +207,7 @@ export final class Promise<out T> implements PromiseLike<T> {
         return p;
     }
 
-    static all<U>(promises: (U|PromiseLike<U>)[]): Promise<Array<U>> {
+    static all<U>(promises: (U|PromiseLike<U>|undefined)[]): Promise<Array<U>> {
         return new Promise<Array<U>>((resolve: (value: Array<U>) => void, reject: (error: NullishType) => void): void => {
             new AllPromiseConcurrency<U>(resolve, reject).all(promises);
         });
@@ -221,7 +221,7 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
-    static allSettled<U>(promises: (U|PromiseLike<U>)[]): Promise<PromiseSettledResult<U>[]> {
+    static allSettled<U>(promises: (U|PromiseLike<U>|undefined)[]): Promise<PromiseSettledResult<U>[]> {
         return new Promise<PromiseSettledResult<U>[]>((resolve: (value: PromiseSettledResult<U>[]) => void, reject: (error: NullishType) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
             new AllSettledPromiseConcurrency<U>(resolve, reject).allSettled(promises);
@@ -236,7 +236,7 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
-    static any<U>(promises: (U|PromiseLike<U>)[]): Promise<U> {
+    static any<U>(promises: (U|PromiseLike<U>|undefined)[]): Promise<U> {
         return new Promise<U>((resolve: (value: U) => void, reject: (error: NullishType) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
             new AnyPromiseConcurrency<U>(resolve, reject).any(promises);
@@ -251,7 +251,7 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
-    static race<U>(promises: (U|PromiseLike<U>)[]): Promise<U> {
+    static race<U>(promises: (U|PromiseLike<U>|undefined)[]): Promise<U> {
         return new Promise<U>((resolve: (value: U) => void, reject: (error: NullishType) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
             new RacePromiseConcurrency<U>(resolve, reject).race(promises);
@@ -266,13 +266,13 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
-    private static toArray<U>(values: Iterable<U>): U[] {
+    private static toArray<U>(values: Iterable<U>): (U | undefined)[] {
         let it = values.$_iterator();
         let v = it.next();
         if (v.done) {
-            return new U[0];
+            return new (U | undefined)[0];
         }
-        let array: U[] = new U[1];
+        let array = new (U | undefined)[1];
         array[0] = v.value!;
         let len = 1;
         while (true) {
@@ -286,22 +286,22 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
-    private static trim<U>(array: U[], length: int): U[] {
+    private static trim<U>(array: U[], length: int): (U | undefined)[] {
         if (array.length == length) {
             return array;
         }
-        let result = new U[length];
+        let result = new (U | undefined)[length];
         for (let i = 0; i < length; ++i) {
             result[i] = array[i];
         }
         return result;
     }
 
-    private static ensureCapacity<U>(queue: U[], size: int): U[] {
+    private static ensureCapacity<U>(queue: U[], size: int): (U | undefined)[] {
         if (size <= queue.length) {
             return queue;
         }
-        let newQueue = new U[size * 2];
+        let newQueue = new (U | undefined)[size * 2];
         for (let i = 0; i < queue.length; ++i) {
             newQueue[i] = queue[i];
         }
@@ -346,10 +346,10 @@ export final class Promise<out T> implements PromiseLike<T> {
     private value: NullishType = undefined;
     private mutex = new Mutex();
     private event = new Event();
-    private callbackQueue: Object[] | undefined = undefined;
-    private launchModeQueue: int[] | undefined = undefined;
-    private interopObject: Object|undefined = undefined;
-    private linkedPromise: Object | undefined = undefined;
+    private callbackQueue?: Object[];
+    private launchModeQueue?: int[];
+    private interopObject?: Object;
+    private linkedPromise?: Object;
     private queueSize: int = 0;
     private remotePromiseResolver: long = 0;
     private state: int = Promise.STATE_PENDING;
@@ -373,7 +373,7 @@ class AllPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         this.reject = reject;
     }
 
-    all(promises: (T|PromiseLike<T>)[]): void {
+    all(promises: (T|PromiseLike<T>|undefined)[]): void {
         if (promises.length == 0) {
             this.resolve(this.values);
             return;
@@ -382,7 +382,7 @@ class AllPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         }
         for (let i = 0; i < promises.length; ++i) {
             let idx = i;
-            this.toPromiseLike(promises[idx]).then<void, void>((value: T): void => {
+            this.toPromiseLike(promises[idx]!).then<void, void>((value: T): void => {
                 this.resolveImpl(value, idx);
             }, (error: NullishType): void => {
                 this.reject(error);
@@ -411,7 +411,7 @@ class AllSettledPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         this.reject = reject;
     }
 
-    allSettled(promises: (T|PromiseLike<T>)[]): void {
+    allSettled(promises: (T|PromiseLike<T>|undefined)[]): void {
         this.values = new PromiseSettledResultBase[promises.length];
         if (promises.length == 0) {
             this.resolve(this.getValues());
@@ -419,7 +419,7 @@ class AllSettledPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         }
         for (let i = 0; i < promises.length; ++i) {
             let idx = i;
-            this.toPromiseLike(promises[idx]).then<void, void>((value: T): void => {
+            this.toPromiseLike(promises[idx]!).then<void, void>((value: T): void => {
                 this.resolveImpl(value as T, idx);
             }, (error: NullishType): void => {
                 this.rejectImpl(error, idx);
@@ -455,7 +455,7 @@ class AllSettledPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
 
     private resolvedCnt = 0;
     private rejectedCnt = 0;
-    private values: PromiseSettledResultBase[]|undefined = undefined;
+    private values?: PromiseSettledResultBase[];
     private resolve: (value: PromiseSettledResult<T>[]) => void;
     private reject: (error: NullishType) => void;
 }
@@ -466,7 +466,7 @@ class AnyPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         this.reject = reject;
     }
 
-    any(promises: (T|PromiseLike<T>)[]): void {
+    any(promises: (T|PromiseLike<T>|undefined)[]): void {
         this.errors = new Error[promises.length];
         if (promises.length == 0) {
             this.reject(new AggregateError(this.errors!, "All promises are rejected"));
@@ -475,7 +475,7 @@ class AnyPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         for (let i = 0; i < promises.length; ++i) {
             let idx = i;
             try {
-                this.toPromiseLike(promises[idx]).then<void, void>((value: T): void => {
+                this.toPromiseLike(promises[idx]!).then<void, void>((value: T): void => {
                     this.resolveImpl(value as T);
                 }, (error: NullishType): void => {
                     this.rejectImpl(error, idx);
@@ -507,7 +507,7 @@ class AnyPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
 
     private resolvedCnt = 0;
     private rejectedCnt = 0;
-    private errors: Error[]|undefined = undefined;
+    private errors?: Error[];
     private resolve: (value: T) => void;
     private reject: (error: NullishType) => void;
 }
@@ -518,10 +518,10 @@ class RacePromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         this.reject = reject;
     }
 
-    race(promises: (T|PromiseLike<T>)[]): void {
+    race(promises: (T|PromiseLike<T>|undefined)[]): void {
         for (let i = 0; i < promises.length; ++i) {
             let idx = i;
-            this.toPromiseLike(promises[idx]).then<void, void>((value: T): void => {
+            this.toPromiseLike(promises[idx]!).then<void, void>((value: T): void => {
                 this.resolveImpl(value as T);
             }, (error: NullishType): void => {
                 this.rejectImpl(error);

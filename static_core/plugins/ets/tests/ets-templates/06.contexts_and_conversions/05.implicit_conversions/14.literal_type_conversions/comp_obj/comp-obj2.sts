@@ -20,7 +20,7 @@ params: to {{c.to_type}}
 tags: [{{c.tags}}]
 ---*/
 
-class A { fld: {{c.to_type}} }
+class A { fld: {{c.to_type}} {%- if c.init_value is defined %} = {{c.init_value}}{%- endif %} }
 
 {%- for v in c['values'] %}
 function cvt{{loop.index}}(p: {{v.type}}) {

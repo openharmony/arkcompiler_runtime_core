@@ -40,10 +40,10 @@ cases:
 
     - decl: |-
           class A {
-              b: B|null
+              b: B|null = null
           }
           class B {
-              c: C|null
+              c: C|null = null
           }
           class C {
               name: string = "";
@@ -129,7 +129,7 @@ cases:
 
     - decl: |-
           class A {
-              readonly name: string|null
+              readonly name: string|null = null
           }
       use: |-
           let a: A = { name: "John" }

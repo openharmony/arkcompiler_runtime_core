@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,17 +15,9 @@
 cases:
     # nullable union type arrays
     - decl: |-
-          type UT1 = string | boolean | null
-          type UT2 = number | undefined | string
+          type UT = number | undefined | string
       use: |-
-          let v: UT1[] = new UT1[2]
-          assertTrue(v[0] === null && v[1] === null)
-          v[0] = 'abc'
-          assertTrue(v[0] == 'abc' && v[1] === null)
-          v[0] = false
-          assertTrue(v[0] == false && v[1] === null)
-
-          let u: UT2[] = new UT2[2]
+          let u: UT[] = new UT[2]
           assertTrue(u[0] === undefined && u[1] === undefined)
           u[1] = 'abc'
           assertTrue(u[0] === undefined && u[1] == 'abc')
@@ -42,19 +34,19 @@ cases:
           assertEQ(v + "", 'F')
 
     - decl: |-
-          type UT = null | 'A' | 'B' | 'C' | 'D' | 'E' | 'F'
+          type UT = undefined | 'A' | 'B' | 'C' | 'D' | 'E' | 'F'
       use: |-
           let v: UT = 'A'
           assertEQ(v, 'A')
           v = 'F'
           assertEQ(v, 'F')
-          v = null
-          assertTrue(v === null)
+          v = undefined
+          assertTrue(v === undefined)
 
           let va: UT[] = new UT[2]
-          assertTrue(va[0] === null && va[1] === null)
+          assertTrue(va[0] === undefined && va[1] === undefined)
           va[1] = 'F'
-          assertTrue(va[0] === null && va[1] === 'F')
+          assertTrue(va[0] === undefined && va[1] === 'F')
 
     - decl: |-
           type UT = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | undefined
@@ -131,10 +123,10 @@ cases:
           type UT = `abc
 
 
-              def\u0000` | null
+              def\u0000` | undefined
       use: |-
           let v: UT[] = new UT[1]
-          assertTrue(v[0] === null)
+          assertTrue(v[0] === undefined)
           v[0] = `abc
 
           def\u0000`
@@ -286,7 +278,7 @@ cases:
     - decl: |-
           type UT = number | string
           class C<T> {
-              fld: T | null
+              fld: T | null = null
           }
       use: |-
           let c: C<UT> = new C<UT>()
@@ -304,7 +296,7 @@ cases:
               age: number = 0
           }
           class B {
-              id: Number|null
+              id: Number|null = null
               size: Size = Size.S
           }
           type UT = A | B
