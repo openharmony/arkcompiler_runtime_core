@@ -634,6 +634,9 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
         workers_.clear();
     }
 
+    // We need to lock programCompletionLock_ here to call
+    // programCompletionLock_.Unlock() in ExclusiveWorker before runtime destruction
+    os::memory::LockHolder lkCompletion(programCompletionLock_);
     GetCurrentContext()->MainThreadFinished();
     // MAIN finished, all workers are deleted, no active coros remain
     ASSERT(activeCoroutines_ == 0);
@@ -880,11 +883,13 @@ bool StackfulCoroutineManager::DestroyExclusiveWorker()
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(eWorker);
 
         auto *eaCoro = Coroutine::GetCurrent();
+        programCompletionLock_.Lock();
         DestroyEntrypointlessCoroutine(eaCoro);
         Coroutine::SetCurrent(nullptr);
     }
 
     OnWorkerShutdown();
+    programCompletionLock_.Unlock();
     return true;
 }
 
