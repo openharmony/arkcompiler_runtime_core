@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,9 @@ export class Declgen {
   private readonly rootFiles: readonly string[];
   private readonly compilerOptions: ts.CompilerOptions;
 
-  constructor(declgenOptions: DeclgenCLIOptions) {
+  constructor(
+    declgenOptions: DeclgenCLIOptions,
+    customResolveModuleNames?: (moduleName: string[], containingFile: string) => ts.ResolvedModuleFull[]) {
     const { rootNames, options } = Declgen.parseDeclgenOptions(declgenOptions);
 
     this.rootFiles = rootNames;
@@ -48,10 +50,14 @@ export class Declgen {
     this.compilerOptions = Object.assign(options, {
       declaration: true,
       emitDeclarationOnly: true,
-      outDir: declgenOptions.outDir
+      outDir: declgenOptions.outDir,
+      ...(declgenOptions.rootDir ? { rootDir: declgenOptions.rootDir } : {})
     });
 
     this.hookedHost = Declgen.createHookedCompilerHost(this.sourceFileMap, this.compilerOptions);
+    if (customResolveModuleNames) {
+      this.hookedHost.resolveModuleNames = customResolveModuleNames;
+    }
   }
 
   run(): DeclgenResult {

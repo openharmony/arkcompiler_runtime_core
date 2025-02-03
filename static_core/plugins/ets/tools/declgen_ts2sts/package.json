@@ -4,7 +4,7 @@
   "main": "dist/declgen.js",
   "bin": "bin/declgen.js",
   "files": [
-    "dist/*"
+    "build/*"
   ],
   "private": true,
   "license": "Apache-2.0",
@@ -42,8 +42,5 @@
     "webpack-cli": "^5.0.1"
   },
   "bundledDependencies": [
-    "typescript",
-    "log4js",
-    "commander"
   ]
 }
