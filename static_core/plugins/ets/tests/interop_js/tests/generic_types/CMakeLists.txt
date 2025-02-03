@@ -11,7 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js__ets_proxy_test_generic_types
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__ets_proxy_test_generic_types
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_generic_types.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_generic_types.sts
+    JS_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_compat_objects.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_ets_objects.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_js_objects.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_js_primitives.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/generic_types.test.js
 )

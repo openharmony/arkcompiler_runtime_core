@@ -21,12 +21,8 @@ namespace ark::ets::interop::js::testing {
 class EtsInteropNumberSubtypesTest : public EtsInteropTest {
     void SetUp() override
     {
-        interopJsTestPath_ = std::getenv("ARK_ETS_INTEROP_JS_GTEST_SOURCES");
-        // This object is used to save global js names
-        if (!SetGtestEnv()) {
-            std::abort();
-        }
-        LoadModuleAs("module", "module.js");
+        EtsInteropTest::SetUp();
+        LoadModuleAs("module", "module.abc");
     }
 };
 

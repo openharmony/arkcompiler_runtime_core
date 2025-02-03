@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,24 @@
  * limitations under the License.
  */
 
-let penv = process.env;
-globalThis.etsVm = require(penv.MODULE_PATH + '/ets_interop_js_napi.node');
+const helper = requireNapiPreview('libinterop_test_helper.so', false);
+const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+
+globalThis.etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
 
 const etsVmRes = globalThis.etsVm.createRuntime({
 	'log-level': 'error',
 	'log-components': 'ets_interop_js',
-	'boot-panda-files': penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-	'panda-files': penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
+	'boot-panda-files': stdlibPath + ':' + gtestAbcPath,
+	'panda-files': gtestAbcPath,
 	'gc-trigger-type': 'heap-trigger',
 	'compiler-enable-jit': 'false',
 	'run-gc-in-place': 'true',
 });
 
 if (!etsVmRes) {
-	console.error(`Failed to create ETS runtime`);
-	// eslint-disable-next-line
-	return 1;
+	throw Error(`Failed to create ETS runtime`);
 }
 
-require('./demo');
+require('./demo.abc');

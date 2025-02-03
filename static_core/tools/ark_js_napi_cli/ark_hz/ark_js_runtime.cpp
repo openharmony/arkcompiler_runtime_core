@@ -40,6 +40,7 @@ bool ArkJsRuntime::ProcessOptions(int argc, const char **argv, arg_list_t *filen
     for (int idx = 1; idx < argc; ++idx) {
         if (ecmascript::base::StringHelper::EndsWith(argv[idx], ".abc")) {
             jsvmArgsEndIdx = idx;
+            break;
         }
     }
 

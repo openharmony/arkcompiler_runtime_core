@@ -9,11 +9,11 @@
                 "${PANDA_ROOT}/plugins/ets/stdlib/std"
             ],
             "main_js": [
-                "${CMAKE_CURRENT_SOURCE_DIR}/generic_as_parameter.js"
+                "${CMAKE_CURRENT_BINARY_DIR}/generic_as_parameter.abc"
             ]
         },
         "dynamicPaths": {
-            "${CMAKE_CURRENT_SOURCE_DIR}/generic_as_parameter.js": {
+            "${CMAKE_CURRENT_BINARY_DIR}/generic_as_parameter.abc": {
                 "language": "js",
                 "hasDecl": false
             }

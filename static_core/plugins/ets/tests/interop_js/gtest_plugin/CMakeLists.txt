@@ -56,7 +56,7 @@ if(PANDA_JS_ETS_HYBRID_MODE)
     add_custom_target(create_slinks_for_interop_gtest_launcher
         COMMAND mkdir -p ${SO_FILES_OUTPUT}
                 && ln -sf ${INTEROP_LIB_SOURCE} ${INTEROP_HELPER_LIB_SOURCE} -t ${SO_FILES_OUTPUT}
-        DEPENDS ${INTEROP_LIB_SOURCE} ${INTEROP_HELPER_LIB_SOURCE}
+        DEPENDS ets_interop_js_napi_arkjsvm ${INTEROP_HELPER_LIB_SOURCE}
     )
 
     add_dependencies(ets_interop_js_gtest_launcher_arkjsvm create_slinks_for_interop_gtest_launcher)

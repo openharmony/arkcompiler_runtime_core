@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@ const {
     getFunction,
     jsArrInt,
     checkArray,
-} = require('generic_static.test');
+} = require('generic_static.test.abc');
 
 const SubsetByRefStatic = getClass('SubsetByRefStatic');
 const genericSubsetByRefStaticCallFromSts = getFunction('genericSubsetByRefStaticCallFromSts');
