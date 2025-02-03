@@ -26,7 +26,7 @@ chapters:
     - 10.interfaces
     - 11.enumerations
     - 12.error_handling
-    - 13.compilation_units_packages_and_modules
+    - 13.compilation_units
     - 14.ambient_declarations
     - 15.semantic_rules
     - 17.experimental_features
@@ -60,7 +60,7 @@ chapters:
   - chapter12:
     - 12.error_handling
   - chapter13:
-    - 13.compilation_units_packages_and_modules
+    - 13.compilation_units
   - chapter14:
     - 14.ambient_declarations
   - chapter15:
@@ -94,7 +94,7 @@ chapters:
     - 11.enumerations
     - 12.error_handling
   - chapters13-17:
-    - 13.compilation_units_packages_and_modules
+    - 13.compilation_units
     - 14.ambient_declarations
     - 15.semantic_rules
     - 17.experimental_features

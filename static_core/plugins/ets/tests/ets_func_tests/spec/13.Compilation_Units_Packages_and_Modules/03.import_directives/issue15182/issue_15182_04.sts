@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: 13.compilation_units_packages_and_modules\13.03.import_directives\issue_15182_04
+desc: 13.compilation_units\13.03.import_directives\issue_15182_04
 name: issue_15182_04.sts
 tags:
 files: ['./issue_15182_01.sts', './issue_15182_02.sts', './issue_15182_03.sts']

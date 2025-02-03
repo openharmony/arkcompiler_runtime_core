@@ -832,7 +832,7 @@
     title: Errors
     status: ''
 '13':
-    title: Compilation Units, Packages, and Modules
+    title: Compilation Units
     status: No testable assertions
 '13.1':
     title: Separate Modules
@@ -940,74 +940,80 @@
     title: Semantic Rules
     status: No testable assertions
 '15.1':
-    title: Subtyping
+    title: Type Identity
     status: ''
 '15.2':
-    title: Supertyping
+    title: Subtyping
     status: ''
 '15.3':
-    title: Variance
-    status: ''
-15.3.1:
-    title: Invariance
-    status: ''
-15.3.2:
-    title: Covariance
-    status: ''
-15.3.3:
-    title: Contravariance
-    status: ''
-15.3.4:
-    title: Examples
+    title: Supertyping
     status: ''
 '15.4':
-    title: Type Compatibility
+    title: Variance
+    status: ''
+15.4.1:
+    title: Invariance
+    status: ''
+15.4.2:
+    title: Covariance
+    status: ''
+15.4.3:
+    title: Contravariance
+    status: ''
+15.4.4:
+    title: Examples
     status: ''
 '15.5':
-    title: Compatibility of Call Arguments
+    title: Type Compatibility
     status: ''
 '15.6':
+    title: Compatibility of Call Arguments
+    status: ''
+'15.7':
     title: Type Inference
     status: No testable assertions
-15.6.1:
+15.7.1:
     title: Smart Types
     status: Finished
-'15.7':
+'15.8':
     title: Overloading and Overriding
     status: No testable assertions
-15.7.1:
+15.8.1:
     title: Overload-Equivalent Signatures
     status: ''
-15.7.2:
+15.8.2:
     title: Override-Compatible Signatures
     status: ''
-15.7.3:
+15.8.3:
     title: Overloading for Functions
     status: ''
-15.7.4:
+15.8.4:
     title: Overloading and Overriding in Classes
     status: ''
-15.7.5:
+15.8.5:
     title: Overloading and Overriding in Interfaces
     status: ''
-'15.8':
+'15.9':
     title: Overload Resolution
     status: ''
-15.8.1:
+15.9.1:
     title: Selection of Applicable Candidates
     status: ''
-15.8.2:
+15.9.2:
     title: Selection of Best Candidate
     status: ''
-15.9:
+15.10:
     title:  Initializer Block
     status: ''
-'15.10':
+'15.11':
     title: Compatibility Features
     status: No testable assertions
-15.10.1:
+15.11.1:
     title: Extended Conditional Expressions
     status: Finished
+16:
+    title: Support for GUI Programming
+    status: No testable assertions
 '17':
     title: Experimental Features
     status: No testable assertions
@@ -1020,120 +1026,102 @@
 17.1.2:
     title: Character Type and Operations
     status: Finished
-'17.2':
+'17.3':
     title: Array Creation Expressions
     status: Finished
-17.2.1:
+17.3.1:
     title: Runtime Evaluation of Array Creation Expressions
     status: Finished
-'17.3':
+'17.4':
     title: Indexable Types
     status: Finished
-'17.4':
+'17.5':
     title: Iterable Types
     status: Finished
-'17.5':
+'17.6':
     title: Callable Types
     status: Finished
-17.5.1:
+17.6.1:
     title: Callable Types with Invoke Method
     status: Finished
-17.5.2:
+17.6.2:
     title: Callable Types with Instantiate Method
     status: Finished
-'17.6':
+'17.7':
     title: Statements
     status: No testable assertions
-17.6.1:
+17.7.1:
     title: For-of Type Annotation
     status: Finished
-17.6.2:
-    title: Multiple Catch Clauses in Try Statements
-    status: Finished
-'17.7':
+'17.8':
     title: Function, Method and Constructor Overloading
     status: No testable assertions
-17.7.1:
+17.8.1:
     title: Function Overloading
     status: ''
-17.7.2:
+17.8.2:
     title: Class Method Overloading
     status: ''
-17.7.3:
+17.8.3:
     title: Constructor Overloading
     status: ''
-17.7.4:
+17.8.4:
     title: Declaration Distinguishable by Signatures
     status: ''
-'17.8':
+'17.9':
     title: Native Functions and Methods
     status: No testable assertions
-17.8.1:
+17.9.1:
     title: Native Functions
     status: Finished
-17.8.2:
+17.9.2:
     title: Native Methods
     status: ''
-17.8.3:
+17.9.3:
     title: Native Constructors
     status: ''
-'17.9':
+'17.10':
     title: Final Classes and Methods
     status: No testable assertions
-17.9.1:
+17.10.1:
     title: Final Classes
     status: Finished
-17.9.2:
+17.10.2:
     title: Final Methods
     status: Finished
-'17.10':
+'17.11':
     title: Default Interface Method Declarations
     status: No testable assertions
-'17.11':
+'17.12':
     title: Adding Functionality to Existing Types
     status: ''
-17.11.1:
+17.12.1:
     title: Functions with Receiver
     status: ''
-17.11.2:
+17.12.2:
     title: Receiver Type
     status: ''
-17.11.3:
+17.12.3:
     title: Accessors with Receiver
     status: ''
-17.11.4:
+17.12.4:
     title: Function Types with Receiver
     status: ''
-17.11.5:
+17.12.5:
     title: Lambda Expressions with Receiver
     status: ''
-'17.12':
+17.12.6:
+    title: Implicit this in Lambda with Receiver Body
+    status: ''
+'17.13':
     title: Trailing Lambdas
     status: Finished
-'17.13':
+'17.14':
     title: Enumeration Types Conversions
     status: ''
-'17.14':
+'17.15':
     title: Enumeration Methods
     status: ''
-'17.15':
-    title: Exceptions
-    status: Finished
-17.15.1:
-    title: Throwing Functions
-    status: Finished
-17.15.2:
-    title: Non-Throwing Functions
-    status: Finished
-17.15.3:
-    title: Rethrowing Functions
-    status: Finished
-17.15.4:
-    title: Exceptions and Initialization Expression
-    status: Finished
-17.15.5:
-    title: Exceptions and Errors Inside Field Initializers
-    status: Finished
 '17.16':
     title: Coroutines
     status: No testable assertions
@@ -1146,12 +1134,6 @@
 17.16.3:
     title: Promise<T> Class
     status: Finished
-17.16.4:
-    title: Structured Coroutines
-    status: ''
-17.16.5:
-    title: Channels Classes
-    status: ''
 '17.17':
     title: Async Functions and Methods
     status: ''
@@ -1231,7 +1213,7 @@
     title: Import Path Lookup
     status: ''
 '20.2':
-    title: Type Function
+    title: Compilation  Units in Host System
     status: ''
 '20.3':
     title: How to Get Type Via Reflection
@@ -1241,6 +1223,9 @@
     status: ''
 '20.5':
     title: Generic and Function Types Peculiarities
+    status: ''
+'20.6':
+    title: Keyword struct and ArkUI
     status: ''
 '21':
     title: ArkTS-TypeScript compatibility
@@ -1264,7 +1249,7 @@
     title: Compatibility for Utility Types
     status: ''
 '21.7':
-    title: Difference in Overload Signatures
+    title: TypeScript Overload Signatures
     status: ''
 '21.8':
     title: Class Fields While Inheriting
@@ -1273,15 +1258,21 @@
     title: Overriding for Primitive Types
     status: ''
 '21.10':
-    title: Excessive Arguments
+    title: Type void Compatibility
     status: ''
 '21.11':
     title: Built-in Arrays Compatibility
     status: ''
 '21.12':
-    title: Extending Class Object
+    title: Tuples and Arrays
     status: ''
 '21.13':
+    title: Extending Class Object
+    status: ''
+'21.14':
+    title: Differences in Namespaces
+    status: ''
+'21.15':
     title: Differences in Math.pow
     status: ''
 '22':

@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: 13.compilation_units_packages_and_modules\13.03.import_directives\issue_15182_01
+desc: 13.compilation_units\13.03.import_directives\issue_15182_01
 name: issue_15182_01.sts
 tags: [compile-only, not-a-test]
 ---*/

@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: 13.compilation_units_packages_and_modules\13.03import_directives\issue_15173_02
+desc: 13.compilation_units\13.03import_directives\issue_15173_02
 name: issue_15173_02.sts
 tags:
 files: ['./issue_15173_01.sts']

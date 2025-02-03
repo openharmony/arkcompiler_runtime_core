@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: 13.compilation_units_packages_and_modules\13.06.export_directives\13.06.03.re-export_directives\issue15371
+desc: 13.compilation_units\13.06.export_directives\13.06.03.re-export_directives\issue15371
 name: issue15371_05.sts
 tags: [negative, compile-only]
 files: [./issue15371_03.sts]
