@@ -122,7 +122,8 @@ void AbcCodeProcessor::FillProgramData()
             TranslateImmToLabel(immToLabel);
         }
         // check if method id is unknown external method. if so, emplace it in table
-        if (bcIns.HasFlag(BytecodeInstruction::Flags::METHOD_ID)) {
+        if (bcIns.HasFlag(BytecodeInstruction::Flags::METHOD_ID) ||
+            bcIns.HasFlag(BytecodeInstruction::Flags::STATIC_METHOD_ID)) {
             const auto argMethodIdx = bcIns.GetId().AsIndex();
             const auto argMethodId = file_->ResolveMethodIndex(methodId_, argMethodIdx);
 

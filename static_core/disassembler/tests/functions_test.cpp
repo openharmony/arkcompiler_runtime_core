@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,11 +89,11 @@ TEST(FunctionsTest, OverloadingTest)
     std::string line;
     std::stringstream main {bodyMain};
     std::getline(main, line);
-    EXPECT_EQ("\tcall.short f:()", line);
+    EXPECT_EQ("\tcall.short <static> f:()", line);
     std::getline(main, line);
-    EXPECT_EQ("\tcall.short f:(u1), v1", line);
+    EXPECT_EQ("\tcall.short <static> f:(u1), v1", line);
     std::getline(main, line);
-    EXPECT_EQ("\tcall.short f:(u1,i8), v1, v1", line);
+    EXPECT_EQ("\tcall.short <static> f:(u1,i8), v1, v1", line);
 
     EXPECT_TRUE(ss.str().find(".function void f() <static> {") != std::string::npos);
     EXPECT_TRUE(ss.str().find(".function void f(u1 a0) <static> {") != std::string::npos);

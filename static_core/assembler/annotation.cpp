@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,8 +81,8 @@ std::unique_ptr<ScalarValue> InitScalarValue(const ScalarValue &scVal)
             break;
         }
         case Value::Type::METHOD: {
-            copyVal =
-                std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::METHOD>(scVal.GetValue<std::string>()));
+            copyVal = std::make_unique<ScalarValue>(
+                ScalarValue::Create<Value::Type::METHOD>(scVal.GetValue<std::string>(), scVal.IsStatic()));
             break;
         }
         case Value::Type::ENUM: {
@@ -127,10 +127,13 @@ std::unique_ptr<Value> MakingValue(const AnnotationElement &annElem)
         case Value::Type::STRING:
         case Value::Type::STRING_NULLPTR:
         case Value::Type::RECORD:
-        case Value::Type::METHOD:
         case Value::Type::ENUM:
         case Value::Type::ANNOTATION:
         case Value::Type::LITERALARRAY: {
+            copyVal = InitScalarValue(*static_cast<ScalarValue *>(annElem.GetValue()));
+            break;
+        }
+        case Value::Type::METHOD: {
             copyVal = InitScalarValue(*static_cast<ScalarValue *>(annElem.GetValue()));
             break;
         }

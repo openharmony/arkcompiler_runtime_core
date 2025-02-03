@@ -56,7 +56,8 @@ void Disassembler::DisassembleImpl(const bool quiet, const bool skipStrings)
     prog_ = pandasm::Program {};
 
     recordNameToId_.clear();
-    methodNameToId_.clear();
+    methodStaticNameToId_.clear();
+    methodInstanceNameToId_.clear();
 
     skipStrings_ = skipStrings;
     quiet_ = quiet;
@@ -170,8 +171,11 @@ void Disassembler::CollectInfo()
         GetRecordInfo(pair.second, &progInfo_.recordsInfo[pair.first]);
     }
 
-    for (const auto &pair : methodNameToId_) {
-        GetMethodInfo(pair.second, &progInfo_.methodsInfo[pair.first]);
+    for (const auto &pair : methodStaticNameToId_) {
+        GetMethodInfo(pair.second, &progInfo_.methodsStaticInfo[pair.first]);
+    }
+    for (const auto &pair : methodInstanceNameToId_) {
+        GetMethodInfo(pair.second, &progInfo_.methodsInstanceInfo[pair.first]);
     }
 
     AddExternalFieldsInfoToRecords();
@@ -248,6 +252,7 @@ size_t Disassembler::SerializeIfPrintMethodInfo(
     return width;
 }
 
+// CC-OFFNXT(huge_method) solid logic
 void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, bool printInformation,
                              panda_file::LineNumberTable *lineTable) const
 {
@@ -270,8 +275,9 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
     headerSs << " {";
 
     const MethodInfo *methodInfo = nullptr;
-    auto methodInfoIt = progInfo_.methodsInfo.find(signature);
-    bool printMethodInfo = printInformation && methodInfoIt != progInfo_.methodsInfo.end();
+    auto &methodsInfo = method.IsStatic() ? progInfo_.methodsStaticInfo : progInfo_.methodsInstanceInfo;
+    auto methodInfoIt = methodsInfo.find(signature);
+    bool printMethodInfo = printInformation && methodInfoIt != methodsInfo.end();
     size_t width = SerializeIfPrintMethodInfo(method, printMethodInfo, headerSs, methodInfo, methodInfoIt);
 
     auto headerSsStr = headerSs.str();
@@ -339,17 +345,25 @@ void Disassembler::GetRecord(pandasm::Record &record, const panda_file::File::En
 
 void Disassembler::AddMethodToTables(const panda_file::File::EntityId &methodId)
 {
+    panda_file::MethodDataAccessor methodAccessor(*file_, methodId);
     pandasm::Function newMethod("", fileLanguage_);
     GetMethod(&newMethod, methodId);
 
     const auto signature = pandasm::GetFunctionSignatureFromName(newMethod.name, newMethod.params);
-    if (prog_.functionTable.find(signature) != prog_.functionTable.end()) {
+    auto isStatic = methodAccessor.IsStatic();
+    auto &functionTable = isStatic ? prog_.functionStaticTable : prog_.functionInstanceTable;
+    if (functionTable.find(signature) != functionTable.end()) {
         return;
     }
 
-    methodNameToId_.emplace(signature, methodId);
+    if (isStatic) {
+        methodStaticNameToId_.emplace(signature, methodId);
+    } else {
+        methodInstanceNameToId_.emplace(signature, methodId);
+    }
+
     prog_.functionSynonyms[newMethod.name].push_back(signature);
-    prog_.functionTable.emplace(signature, std::move(newMethod));
+    functionTable.emplace(signature, std::move(newMethod));
 }
 
 void Disassembler::GetMethod(pandasm::Function *method, const panda_file::File::EntityId &methodId)
@@ -1231,7 +1245,8 @@ std::string Disassembler::GetMethodSignature(const panda_file::File::EntityId &m
     GetParams(&method, methodAccessor.GetProtoId());
     GetMetaData(&method, methodId);
 
-    return pandasm::GetFunctionSignatureFromName(method.name, method.params);
+    auto res = pandasm::GetFunctionSignatureFromName(method.name, method.params);
+    return method.IsStatic() ? "<static> " + res : res;
 }
 
 std::string Disassembler::GetFullRecordName(const panda_file::File::EntityId &classId) const
@@ -1835,7 +1850,7 @@ void Disassembler::SerializeMethods(std::ostream &os, bool addSeparators, bool p
 {
     LOG(DEBUG, DISASSEMBLER) << "[serializing methods]";
 
-    if (prog_.functionTable.empty()) {
+    if (prog_.functionInstanceTable.empty() && prog_.functionStaticTable.empty()) {
         return;
     }
 
@@ -1844,7 +1859,10 @@ void Disassembler::SerializeMethods(std::ostream &os, bool addSeparators, bool p
               "# METHODS\n\n";
     }
 
-    for (const auto &m : prog_.functionTable) {
+    for (const auto &m : prog_.functionStaticTable) {
+        Serialize(m.second, os, printInformation);
+    }
+    for (const auto &m : prog_.functionInstanceTable) {
         Serialize(m.second, os, printInformation);
     }
 }
@@ -1865,7 +1883,8 @@ std::string Disassembler::IDToString(BytecodeInstruction bcIns, panda_file::File
 
         name.str("");
         name << type.GetPandasmName();
-    } else if (bcIns.HasFlag(BytecodeInstruction::Flags::METHOD_ID)) {
+    } else if (bcIns.HasFlag(BytecodeInstruction::Flags::METHOD_ID) ||
+               bcIns.HasFlag(BytecodeInstruction::Flags::STATIC_METHOD_ID)) {
         auto idx = bcIns.GetId().AsIndex();
         auto id = file_->ResolveMethodIndex(methodId, idx);
 
@@ -1959,6 +1978,7 @@ void Disassembler::CollectExternalFields(const panda_file::FieldDataAccessor &fi
     }
 }
 
+// CC-OFFNXT(huge_method) solid logic
 IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File::EntityId methodId,
                                      panda_file::File::EntityId codeId)
 {
@@ -2004,13 +2024,16 @@ IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File
         }
 
         // check if method id is unknown external method. if so, emplace it in table
-        if (bcIns.HasFlag(BytecodeInstruction::Flags::METHOD_ID)) {
+        if (bcIns.HasFlag(BytecodeInstruction::Flags::METHOD_ID) ||
+            bcIns.HasFlag(BytecodeInstruction::Flags::STATIC_METHOD_ID)) {
             const auto argMethodIdx = bcIns.GetId().AsIndex();
             const auto argMethodId = file_->ResolveMethodIndex(methodId, argMethodIdx);
 
             const auto argMethodSignature = GetMethodSignature(argMethodId);
-
-            const bool isPresent = prog_.functionTable.find(argMethodSignature) != prog_.functionTable.cend();
+            panda_file::MethodDataAccessor methodAccessor(*file_, argMethodId);
+            const auto &functionTable =
+                methodAccessor.IsStatic() ? prog_.functionStaticTable : prog_.functionInstanceTable;
+            const bool isPresent = functionTable.find(argMethodSignature) != functionTable.cend();
             const bool isExternal = file_->IsExternal(argMethodId);
             if (isExternal && !isPresent) {
                 unknownExternalMethods.push_back(argMethodId);

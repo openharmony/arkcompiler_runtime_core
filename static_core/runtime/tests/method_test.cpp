@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,8 +79,8 @@ public:
         auto res = p.Parse(source);
         auto &prog = res.Value();
         const std::string name = pandasm::GetFunctionSignatureFromName("foo", {});
-        ASSERT_NE(prog.functionTable.find(name), prog.functionTable.end());
-        auto &insVec = prog.functionTable.find(name)->second.ins;
+        ASSERT_NE(prog.functionStaticTable.find(name), prog.functionStaticTable.end());
+        auto &insVec = prog.functionStaticTable.find(name)->second.ins;
         const int insNum = insVec.size();
         ASSERT_EQ(lines.size(), insNum);
 
@@ -345,7 +345,7 @@ TEST_F(MethodTest, GetLineNumFromBytecodeOffset10)
 
     auto res = p.Parse(source);
     auto &prog = res.Value();
-    auto &function = prog.functionTable.at(pandasm::GetFunctionSignatureFromName("foo", {}));
+    auto &function = prog.functionStaticTable.at(pandasm::GetFunctionSignatureFromName("foo", {}));
 
     pandasm::debuginfo::LocalVariable lv;
     lv.name = "a";

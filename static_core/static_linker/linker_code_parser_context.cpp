@@ -222,7 +222,7 @@ void Context::MakeChangeWithId(CodePatcher &p, CodeData *data)
         if (inst.HasFlag(Flags::TYPE_ID)) {
             makeWithId(&panda_file::File::ResolveClassIndex);
             // inst.UpdateId()
-        } else if (inst.HasFlag(Flags::METHOD_ID)) {
+        } else if (inst.HasFlag(Flags::METHOD_ID) || inst.HasFlag(Flags::STATIC_METHOD_ID)) {
             makeWithId(&panda_file::File::ResolveMethodIndex);
         } else if (inst.HasFlag(Flags::FIELD_ID) || inst.HasFlag(Flags::STATIC_FIELD_ID)) {
             makeWithId(&panda_file::File::ResolveFieldIndex);

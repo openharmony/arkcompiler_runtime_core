@@ -36,7 +36,8 @@ namespace ark::disasm::test {
 
 TEST(MetadataTest, test1)
 {
-    auto program = ark::pandasm::Parser().Parse(R"(
+    auto p = ark::pandasm::Parser();
+    auto program = p.Parse(R"(
 .record B <external>
 
 .record A {
@@ -82,11 +83,11 @@ TEST(MetadataTest, test1)
 
     std::string line;
     std::getline(aEee, line);
-    EXPECT_EQ("\tcall.short DDD:(u1), v0", line);
+    EXPECT_EQ("\tcall.short <static> DDD:(u1), v0", line);
     std::getline(aEee, line);
-    EXPECT_EQ("\tinitobj.short A._ctor_:(u1), v0", line);
+    EXPECT_EQ("\tinitobj.short <static> A._ctor_:(u1), v0", line);
     std::getline(aEee, line);
-    EXPECT_EQ("\tinitobj.short A._cctor_:(u1), v1", line);
+    EXPECT_EQ("\tinitobj.short <static> A._cctor_:(u1), v1", line);
 }
 
 TEST(MetadataTest, ExternalFieldTest)

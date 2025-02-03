@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,17 @@
 #include "disassembler.h"
 
 namespace ark::disasm {
+void Disassembler::GetETSMetadata(const std::map<std::string, pandasm::Function> &functionTable)
+{
+    for (auto &pair : functionTable) {
+        if (pair.second.language == ark::panda_file::SourceLang::ETS) {
+            const auto methodId =
+                pair.second.IsStatic() ? methodStaticNameToId_[pair.first] : methodInstanceNameToId_[pair.first];
+
+            GetETSMetadata(const_cast<pandasm::Function *>(&pair.second), methodId);
+        }
+    }
+}
 void Disassembler::GeteTSMetadata()
 {
     LOG(DEBUG, DISASSEMBLER) << "\n[getting ETS-specific metadata]\n";
@@ -39,14 +50,8 @@ void Disassembler::GeteTSMetadata()
             });
         }
     }
-
-    for (auto &pair : prog_.functionTable) {
-        if (pair.second.language == ark::panda_file::SourceLang::ETS) {
-            const auto methodId = methodNameToId_[pair.first];
-
-            GetETSMetadata(&pair.second, methodId);
-        }
-    }
+    GetETSMetadata(prog_.functionStaticTable);
+    GetETSMetadata(prog_.functionInstanceTable);
 }
 
 void Disassembler::GetETSMetadata(pandasm::Record *record, const panda_file::File::EntityId &recordId)

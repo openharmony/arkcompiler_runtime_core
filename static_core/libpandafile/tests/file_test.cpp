@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -237,8 +237,8 @@ TEST(File, LineNumberProgramDeduplication)
     auto res = p.Parse(source, srcFilename);
     ASSERT(p.ShowError().err == pandasm::Error::ErrorType::ERR_NONE);
 
-    ASSERT_EQ(res.Value().functionTable.size(), 2);
-    for (auto &a : res.Value().functionTable) {
+    ASSERT_EQ(res.Value().functionStaticTable.size(), 2);
+    for (auto &a : res.Value().functionStaticTable) {
         ASSERT_TRUE(a.second.HasDebugInfo());
     }
 

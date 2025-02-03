@@ -1102,7 +1102,7 @@ void FileReader::InstCheckByFlags(BytecodeInstruction &inst, MethodItem *methodI
         ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
         auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
         methodItem->AddIndexDependency(idxItem);
-    } else if (inst.HasFlag(Flags::METHOD_ID)) {
+    } else if (inst.HasFlag(Flags::METHOD_ID) || inst.HasFlag(Flags::STATIC_METHOD_ID)) {
         BytecodeId bId = inst.GetId();
         File::Index idx = bId.AsIndex();
         File::EntityId methodId = reverseDone.find(methodItem)->second;
@@ -1182,7 +1182,7 @@ void FileReader::InstUpdateId(CodeItem *codeItem, MethodItem *methodItem,
             auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
             uint32_t index = idxItem->GetIndex(methodItem);
             inst.UpdateId(BytecodeId(index));
-        } else if (inst.HasFlag(Flags::METHOD_ID)) {
+        } else if (inst.HasFlag(Flags::METHOD_ID) || inst.HasFlag(Flags::STATIC_METHOD_ID)) {
             BytecodeId bId = inst.GetId();
             File::Index idx = bId.AsIndex();
 

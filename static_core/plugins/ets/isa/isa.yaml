@@ -30,7 +30,7 @@ groups:
     verification:
       - none
     properties:
-      - method_id
+      - static_method_id
       - short_long_range
     exceptions:
       - x_oom
@@ -51,6 +51,18 @@ groups:
         acc: out:top
         format: [pref_op_v_8_id_16]
 
+  - title: ETS launch instructions
+    description: >
+      ETS launch instructions for virtual methods. #TODO(audovichenko, kgrebenschikov): add description.
+    verification:
+      - none
+    properties:
+      - method_id
+      - short_long_range
+    exceptions:
+      - x_oom
+    namespace: ets
+    instructions:
       - sig: ets.launch.virt.short method_id, v1:in:top, v2:in:top
         prefix: ets
         acc: out:top

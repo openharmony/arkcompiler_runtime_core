@@ -1,6 +1,6 @@
 
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1696,8 +1696,9 @@ void TestLoadStoreField(bool isStatic)
 
     pandasm::Parser p;
     std::string source = GetSourceForFieldTest(isStatic);
+    pandasm::Program prog = p.Parse(source).Value();
 
-    auto classPf = pandasm::AsmEmitter::Emit(p.Parse(source).Value());
+    auto classPf = pandasm::AsmEmitter::Emit(prog);
 
     auto classLinker = CreateClassLinker(ManagedThread::GetCurrent());
     ASSERT_NE(classLinker, nullptr);

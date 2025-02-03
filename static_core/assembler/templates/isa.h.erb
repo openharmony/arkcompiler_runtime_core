@@ -36,6 +36,7 @@
 %   flags << "InstFlags::ACC_WRITE" if insn.acc_write?
 %   flags << "InstFlags::THROWING" if insn.throwing?
 %   flags << "InstFlags::METHOD_ID" if insn.properties.include? 'method_id'
+%   flags << "InstFlags::STATIC_METHOD_ID" if insn.properties.include? 'static_method_id'
 %   flags << "InstFlags::FIELD_ID" if insn.properties.include? 'field_id'
 %   flags << "InstFlags::STATIC_FIELD_ID" if insn.properties.include? 'static_field_id'
 %   flags << "InstFlags::TYPE_ID" if insn.properties.include? 'type_id'

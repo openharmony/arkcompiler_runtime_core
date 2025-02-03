@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,17 @@
 #include "class_data_accessor.h"
 
 namespace ark::abc2program {
+void AbcFileProcessor::GetETSMetadata(const std::map<std::string, pandasm::Function> &functionTable)
+{
+    for (auto &pair : functionTable) {
+        if (pair.second.language == ark::panda_file::SourceLang::ETS) {
+            const auto methodId = keyData_.GetMethodNameToIdTable()[pair.first];
+
+            GetETSMetadata(const_cast<pandasm::Function *>(&pair.second), methodId);
+        }
+    }
+}
+
 // CC-OFFNXT(G.FUD.01) project codestyle
 void AbcFileProcessor::GeteTSMetadata()
 {
@@ -42,14 +53,8 @@ void AbcFileProcessor::GeteTSMetadata()
             });
         }
     }
-
-    for (auto &pair : program_->functionTable) {
-        if (pair.second.language == ark::panda_file::SourceLang::ETS) {
-            const auto methodId = keyData_.GetMethodNameToIdTable()[pair.first];
-
-            GetETSMetadata(&pair.second, methodId);
-        }
-    }
+    GetETSMetadata(program_->functionStaticTable);
+    GetETSMetadata(program_->functionInstanceTable);
 }
 
 void AbcFileProcessor::GetETSMetadata(pandasm::Record *record, const panda_file::File::EntityId &recordId)

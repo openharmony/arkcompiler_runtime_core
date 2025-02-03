@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -713,7 +713,7 @@ public:
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
     }
 
-    void CheckOtherPasses(ark::pandasm::Program *prog, const std::string &funName)
+    void CheckOtherPasses(ark::pandasm::Program *prog, const std::string &funcName, bool isStatic)
     {
         GetGraph()->RunPass<compiler::Cleanup>();
         GetGraph()->RunPass<Canonicalization>();
@@ -726,16 +726,18 @@ public:
         EXPECT_TRUE(GetGraph()->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
         GetGraph()->RunPass<compiler::Cleanup>();
         EXPECT_TRUE(GetGraph()->RunPass<RegEncoder>());
-        ASSERT_TRUE(prog->functionTable.find(funName) != prog->functionTable.end());
-        auto &function = prog->functionTable.at(funName);
+
+        auto &functionTable = isStatic ? prog->functionStaticTable : prog->functionInstanceTable;
+        ASSERT_TRUE(functionTable.find(funcName) != functionTable.end());
+        auto function = const_cast<pandasm::Function *>(&functionTable.at(funcName));
         GetGraph()->RunPass<compiler::Cleanup>();
-        EXPECT_TRUE(GetGraph()->RunPass<BytecodeGen>(&function, GetIrInterface()));
+        EXPECT_TRUE(GetGraph()->RunPass<BytecodeGen>(function, GetIrInterface()));
         auto pf = pandasm::AsmEmitter::Emit(*prog);
         ASSERT_NE(pf, nullptr);
     }
 
     void CheckConstArrayFilling(ark::pandasm::Program *prog, [[maybe_unused]] const std::string &className,
-                                const std::string &funcName)
+                                const std::string &funcName, bool isStatic)
     {
         if (prog->literalarrayTable.size() == 1) {
             EXPECT_TRUE(prog->literalarrayTable["0"].literals[0U].tag == panda_file::LiteralTag::TAGVALUE);
@@ -759,9 +761,11 @@ public:
         EXPECT_TRUE(prog->literalarrayTable["0"].literals[2U].tag == panda_file::LiteralTag::ARRAY_STRING);
 
         EXPECT_TRUE(GetGraph()->RunPass<RegEncoder>());
-        ASSERT_TRUE(prog->functionTable.find(funcName) != prog->functionTable.end());
-        auto &function = prog->functionTable.at(funcName);
-        EXPECT_TRUE(GetGraph()->RunPass<BytecodeGen>(&function, GetIrInterface()));
+
+        auto &functionTable = isStatic ? prog->functionStaticTable : prog->functionInstanceTable;
+        ASSERT_TRUE(functionTable.find(funcName) != functionTable.end());
+        auto function = const_cast<pandasm::Function *>(&functionTable.at(funcName));
+        EXPECT_TRUE(GetGraph()->RunPass<BytecodeGen>(function, GetIrInterface()));
         ASSERT(pandasm::AsmEmitter::Emit(className + ".panda", *prog, nullptr, nullptr, false));
     }
 
@@ -796,7 +800,7 @@ public:
     }
 
     void CheckConstArray(ark::pandasm::Program *prog, const char *className, const std::string &funcName,
-                         CheckConstArrayTypes type)
+                         CheckConstArrayTypes type, bool isStatic)
     {
         g_options.SetConstArrayResolver(true);
 
@@ -811,9 +815,11 @@ public:
         }
 
         EXPECT_TRUE(GetGraph()->RunPass<RegEncoder>());
-        ASSERT_TRUE(prog->functionTable.find(funcName) != prog->functionTable.end());
-        auto &function = prog->functionTable.at(funcName);
-        EXPECT_TRUE(GetGraph()->RunPass<BytecodeGen>(&function, GetIrInterface()));
+
+        auto &functionTable = isStatic ? prog->functionStaticTable : prog->functionInstanceTable;
+        ASSERT_TRUE(functionTable.find(funcName) != functionTable.end());
+        auto function = const_cast<pandasm::Function *>(&functionTable.at(funcName));
+        EXPECT_TRUE(GetGraph()->RunPass<BytecodeGen>(function, GetIrInterface()));
         ASSERT(pandasm::AsmEmitter::Emit("LiteralArrayIntAccess.panda", *prog, nullptr, nullptr, false));
     }
 };

@@ -99,7 +99,10 @@ TEST_F(Abc2ProgramHelloWorldTest, Functions)
                                                "std.core.Console.log:std.core.Console;i32;void;",
                                                "std.core.Object._ctor_:std.core.Object;void;"};
     std::set<std::string> existingFunctions {};
-    for (auto &it : prog->functionTable) {
+    for (auto &it : prog->functionStaticTable) {
+        existingFunctions.insert(it.first);
+    }
+    for (auto &it : prog->functionInstanceTable) {
         existingFunctions.insert(it.first);
     }
     bool result = ValidateString(existingFunctions, expectedFunctions);
@@ -155,7 +158,10 @@ TEST_F(Abc2ProgramFunctionsTest, Functions)
         "std.core.StringBuilder.append:std.core.StringBuilder;std.core.String;std.core.StringBuilder;",
         "std.core.StringBuilder.toString:std.core.StringBuilder;std.core.String;"};
     std::set<std::string> existingFunctions {};
-    for (auto &it : prog->functionTable) {
+    for (auto &it : prog->functionStaticTable) {
+        existingFunctions.insert(it.first);
+    }
+    for (auto &it : prog->functionInstanceTable) {
         existingFunctions.insert(it.first);
     }
     bool result = ValidateString(existingFunctions, expectedFunctions);
