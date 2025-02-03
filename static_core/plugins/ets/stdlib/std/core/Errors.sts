@@ -227,3 +227,9 @@ export class ExceptionInInitializerError extends Error {
         super("ExceptionInInitializerError", message, options)
     }
 }
+
+export class CoroutinesLimitExceedError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("CoroutinesLimitExceedError", message, options)
+    }
+}

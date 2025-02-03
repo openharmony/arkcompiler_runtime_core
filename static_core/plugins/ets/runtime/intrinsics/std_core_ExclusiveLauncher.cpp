@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "intrinsics.h"
 #include "libpandabase/os/mutex.h"
+#include "runtime/include/exceptions.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/mem/refstorage/reference.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
@@ -37,19 +38,27 @@ void ExclusiveLaunch(EtsObject *task, uint8_t needInterop)
     auto *runtime = Runtime::GetCurrent();
     auto *coro = EtsCoroutine::GetCurrent();
     auto *etsVM = coro->GetPandaVM();
+    if (etsVM->GetCoroutineManager()->IsExclusiveWorkersLimitReached()) {
+        ThrowCoroutinesLimitExceedError("The limit of Exclusive Workers has been reached");
+        return;
+    }
     auto *refStorage = etsVM->GetGlobalObjectStorage();
     auto *taskRef = refStorage->Add(task->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     ASSERT(taskRef != nullptr);
 
     ScopedNativeCodeThread nativeScope(coro);
     auto event = os::memory::Event();
-    auto t = std::thread([&event, runtime, etsVM, taskRef, refStorage, needInterop] {
+    auto limitIsReached = false;
+    auto t = std::thread([&limitIsReached, &event, runtime, etsVM, taskRef, refStorage, needInterop] {
         auto *coroMan = etsVM->GetCoroutineManager();
         auto *exclusiveCoro = coroMan->CreateExclusiveWorkerForThread(runtime, etsVM);
+        // exclusiveCoro == nullptr means that we reached the limit of eaworkers count or memory resources
+        if (exclusiveCoro == nullptr) {
+            limitIsReached = true;
+            event.Fire();
+            return;
+        }
         event.Fire();
-        // exclusiveCoro == nullptr means that we reached the limit of eaworkers
-        // may be we should throw sts exception here (make rejected promise or modify Event a bit)
-        ASSERT(exclusiveCoro != nullptr);
 
         if (needInterop != 0U) {
             auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
@@ -67,9 +76,12 @@ void ExclusiveLaunch(EtsObject *task, uint8_t needInterop)
         }
         coroMan->DestroyExclusiveWorker();
     });
-
     event.Wait();
     t.detach();
+
+    if (limitIsReached) {
+        ThrowCoroutinesLimitExceedError("The limit of Exclusive Workers has been reached");
+    }
 }
 
 int64_t TaskPosterCreate()

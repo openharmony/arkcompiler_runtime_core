@@ -25,11 +25,8 @@ type Task = () => void;
  */
 export class ExclusiveLauncher {
     public static elaunch(task: Task, needInterop: boolean = false): void {
-        if (needInterop) {
-            ExclusiveLauncher.elaunch(() => { ExclusiveLauncher.asyncCall(task); } as Object, needInterop);
-        } else {
-            ExclusiveLauncher.elaunch(task as Object, needInterop);
-        }
+        let eTask = needInterop ? () => { ExclusiveLauncher.asyncCall(task); } : task;
+        ExclusiveLauncher.elaunch(eTask as Object, needInterop);
     }
 
     private static async asyncCall(task: Task) {

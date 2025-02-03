@@ -54,6 +54,7 @@ public:
     bool IsMainWorker(Coroutine *co) const override;
     Coroutine *CreateExclusiveWorkerForThread(Runtime *runtime, PandaVM *vm) override;
     bool DestroyExclusiveWorker() override;
+    bool IsExclusiveWorkersLimitReached() const override;
 
     /* ThreadManager interfaces, see ThreadManager class for the details */
     void WaitForDeregistration() override;

@@ -825,9 +825,7 @@ Coroutine *StackfulCoroutineManager::CreateExclusiveWorkerForThread(Runtime *run
     // actually we need this lock due to workerId problem
     os::memory::LockHolder eWorkerLock(eWorkerCreationLock_);
 
-    auto activeWorkersCnt = GetActiveWorkersCount();
-    if (activeWorkersCnt - commonWorkersCount_ > exclusiveWorkersLimit_) {
-        LOG(DEBUG, COROUTINES) << "The programm reached the limit of exclusive workers";
+    if (IsExclusiveWorkersLimitReached()) {
         return nullptr;
     }
 
@@ -891,6 +889,13 @@ bool StackfulCoroutineManager::DestroyExclusiveWorker()
     OnWorkerShutdown();
     programCompletionLock_.Unlock();
     return true;
+}
+
+bool StackfulCoroutineManager::IsExclusiveWorkersLimitReached() const
+{
+    bool limitIsReached = GetActiveWorkersCount() - commonWorkersCount_ > exclusiveWorkersLimit_;
+    LOG_IF(limitIsReached, DEBUG, COROUTINES) << "The programm reached the limit of exclusive workers";
+    return limitIsReached;
 }
 
 }  // namespace ark

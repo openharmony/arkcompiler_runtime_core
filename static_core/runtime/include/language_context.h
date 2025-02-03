@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -173,6 +173,12 @@ public:
     virtual const uint8_t *GetTypedErrorDescriptor() const = 0;
 
     virtual const uint8_t *GetIllegalMonitorStateExceptionDescriptor() const = 0;
+
+    virtual const uint8_t *GetCoroutinesLimitExceedErrorDescriptor() const
+    {
+        UNREACHABLE();
+        return nullptr;
+    }
 
     virtual void ThrowStackOverflowException([[maybe_unused]] ManagedThread *thread) const
     {
@@ -478,6 +484,11 @@ public:
     const uint8_t *GetClassCircularityErrorDescriptor() const
     {
         return base_->GetClassCircularityErrorDescriptor();
+    }
+
+    const uint8_t *GetCoroutinesLimitExceedErrorDescriptor() const
+    {
+        return base_->GetCoroutinesLimitExceedErrorDescriptor();
     }
 
     const uint8_t *GetNoSuchFieldErrorDescriptor() const
