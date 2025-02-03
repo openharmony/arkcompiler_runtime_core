@@ -128,6 +128,18 @@ public:
         }
     }
 
+    ALWAYS_INLINE void Mark(ObjectHeader *object) const
+    {
+        MarkBitmap *bitmap = ObjectToRegion(object)->GetMarkBitmap();
+        ASSERT(bitmap != nullptr);
+        if constexpr (ATOMIC) {
+            bitmap->AtomicTestAndSet(object);
+        } else {
+            bitmap->Set(object);
+        }
+        callback_(object);
+    }
+
 private:
     std::function<void(ObjectHeader *)> callback_;
 };

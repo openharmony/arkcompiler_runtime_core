@@ -220,9 +220,9 @@ private:
     /// Determine whether GC need to run concurrent mark or mixed GC
     bool ScheduleMixedGCAndConcurrentMark(ark::GCTask &task);
 
-    /// Start concurrent mark
+    /// Start concurrent GC
     template <typename OnPauseMarker, typename ConcurrentMarker>
-    void RunConcurrentMark(ark::GCTask &task, OnPauseMarker &pmarker, ConcurrentMarker &cmarker);
+    void RunConcurrentGC(ark::GCTask &task, OnPauseMarker &pmarker, ConcurrentMarker &cmarker);
 
     void RunPhasesForRegions([[maybe_unused]] ark::GCTask &task, const CollectionSet &collectibleRegions);
 
@@ -268,7 +268,8 @@ private:
     /// Caches refs from remset and marks objects in collection set (young-generation + maybe some tenured regions).
     void MixedMarkAndCacheRefs(const GCTask &task, const CollectionSet &collectibleRegions);
 
-    GCRootVisitor CreateGCRootVisitorForMixedMark(GCMarkingStackType &objectsStack);
+    template <typename Marker, typename Predicate>
+    GCRootVisitor CreateGCRootVisitor(GCMarkingStackType &objectsStack, Marker &marker, const Predicate &refPred);
 
     /**
      * Mark roots and add them to the stack
@@ -284,8 +285,11 @@ private:
      * STW
      * @param objects_stack
      */
-    template <typename Marker>
+    template <bool PROCESS_WEAK_REFS, typename Marker>
     void InitialMark(GCMarkingStackType &markingStack, Marker &marker);
+
+    template <typename Marker>
+    void UnmarkAll(Marker &marker);
 
     void MarkStackMixed(GCMarkingStackType *stack);
 
@@ -352,10 +356,6 @@ private:
      */
     void OnPauseMark(GCTask &task, GCMarkingStackType *objectsStack, bool useGcWorkers);
 
-    /// Start process of concurrent marking
-    template <typename OnPauseMarker, typename ConcurrentMarker>
-    void ConcurrentMarking(ark::GCTask &task, OnPauseMarker &pmarker, ConcurrentMarker &cmarker);
-
     /// Iterate over roots and mark them concurrently
     template <bool PROCESS_WEAK_REFS, typename Marker>
     NO_THREAD_SAFETY_ANALYSIS void ConcurrentMarkImpl(GCMarkingStackType *objectsStack, Marker &marker);
@@ -369,13 +369,17 @@ private:
     void ConcurrentMark(GCMarkingStackType *objectsStack, Marker &marker);
 
     /// ReMarks objects after Concurrent marking and actualize information about live bytes
-    template <typename Marker>
+    template <bool PROCESS_WEAK_REFS, typename Marker>
     void Remark(const GCTask &task, Marker &marker);
 
     /// Sweep VM refs for non-regular (humongous + nonmovable) objects
     void SweepNonRegularVmRefs();
 
     void SweepRegularVmRefs();
+
+    void VerifyHeapBeforeConcurrent();
+
+    void ConcurrentSweep(ark::GCTask &task);
 
     /// Return collectible regions
     CollectionSet GetCollectibleRegions(ark::GCTask const &task, bool isMixed);
