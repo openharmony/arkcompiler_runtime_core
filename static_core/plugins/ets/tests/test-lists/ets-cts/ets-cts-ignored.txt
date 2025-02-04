@@ -1783,6 +1783,13 @@
 10.interfaces/01.interface_declarations/empty_interface_declaration_negative_10.sts
 10.interfaces/01.interface_declarations/empty_interface_declaration_negative_11.sts
 
+# 22513
+08.statements/12.return_statements/return_4.sts
+
+# 22525
+08.statements/13.switch_statements/switch_negative_3.sts
+08.statements/13.switch_statements/switch_negative_4.sts
+
 # 22148
 09.classes/01.class_declaration/03.class_extension_clause/extends_object_class.sts
 

@@ -22,7 +22,7 @@ function main(): void {
   {
     class A {}
     let a: A = new A;
-    assertTrue(a != null)
+    assertNE(a, null)
   }
-  assert(a != null)
+  assertNE(a, null)
 }

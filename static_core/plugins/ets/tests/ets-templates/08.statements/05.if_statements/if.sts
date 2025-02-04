@@ -22,5 +22,5 @@ function main(): void {
   if (i > 0) {
     i--;
   }
-  assertTrue(i == 0)
+  assertEQ(i, 0)
 }

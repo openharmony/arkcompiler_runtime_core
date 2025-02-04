@@ -13,15 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for item in break_statements %}
+
 /*---
-desc: Local declaration in statement (const)
+desc: Break statements
 tags: [negative, compile-only]
 ---*/
 
+
 function main(): void {
-  {
-    const a: int = 0;
-    assertEQ(a, 0)
-  }
-  assertEQ(a, 0)
+  {{ item.use }}
 }
+
+{% endfor %}

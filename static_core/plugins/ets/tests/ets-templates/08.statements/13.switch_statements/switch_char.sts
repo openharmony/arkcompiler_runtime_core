@@ -20,13 +20,13 @@ desc: Switch statement with char
 function f(i: char): void {
   switch (i) {
     case c'0':
-      assertTrue( i == c'0' )
+      assertEQ( i, c'0' )
       break;
     case c'1':
-      assertTrue( i == c'1' )
+      assertEQ( i, c'1' )
       break;
     case c'2':
-      assertTrue( i == c'2' )
+      assertEQ( i, c'2' )
       break;
     default:
       assertTrue( false )
