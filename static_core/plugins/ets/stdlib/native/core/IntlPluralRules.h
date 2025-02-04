@@ -12,28 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "IntlCommon.h"
-#include "libpandabase/macros.h"
-#include "stdlib_ani_helpers.h"
-#include <cassert>
-#include "stdlib_ani_helpers.h"
+
+#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLPLURALRULES_H
+#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLPLURALRULES_H
+
+#include <ani.h>
 
 namespace ark::ets::stdlib::intl {
 
-ani_string StdStrToAni(ani_env *env, const std::string &str)
-{
-    return CreateUtf8String(env, str.data(), str.size());
-}
-
-ani_string UnicodeToAniStr(ani_env *env, icu::UnicodeString &ustr)
-{
-    return CreateUtf16String(env, reinterpret_cast<const uint16_t *>(ustr.getBuffer()), ustr.length());
-}
-
-icu::UnicodeString AniToUnicodeStr(ani_env *env, ani_string aniStr)
-{
-    auto str = icu::StringPiece(ConvertFromAniString(env, aniStr));
-    return icu::UnicodeString::fromUTF8(str);
-}
+ani_status RegisterIntlPluralRules(ani_env *env);
 
 }  // namespace ark::ets::stdlib::intl
+
+#endif  //  PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLPLURALRULES_H

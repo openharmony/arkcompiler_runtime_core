@@ -20,6 +20,7 @@
 #include "plugins/ets/stdlib/native/core/IntlCollator.h"
 #include "plugins/ets/stdlib/native/core/IntlCommon.h"
 #include "plugins/ets/stdlib/native/core/IntlLocale.h"
+#include "plugins/ets/stdlib/native/core/IntlPluralRules.h"
 #include "plugins/ets/stdlib/native/core/IntlDateTimeFormat.h"
 
 #include "plugins/ets/runtime/ets_napi_env.h"
@@ -37,6 +38,7 @@ ani_status InitCoreIntl(ani_env *env)
     err = err == ANI_OK ? RegisterIntlLocaleMatch(env) : err;
     err = err == ANI_OK ? RegisterIntlCollator(env) : err;
     err = err == ANI_OK ? RegisterIntlLocaleNativeMethods(env) : err;
+    err = err == ANI_OK ? RegisterIntlPluralRules(env) : err;
     err = err == ANI_OK ? RegisterIntlDateTimeFormatMethods(env) : err;
     return err;
 }
