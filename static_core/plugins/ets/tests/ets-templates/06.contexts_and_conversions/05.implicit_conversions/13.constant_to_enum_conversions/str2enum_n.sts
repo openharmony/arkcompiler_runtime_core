@@ -16,13 +16,15 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    A constant expression of some integer type is converted to enumeration type 
+    conversion of a string type expression is not supported as it is not part of TypeScript.
+tags: [negative, compile-only]
 ---*/
-enum Color { Red, Green = 100, Blue }
+enum Color { Red = "r", Green = "g", Blue = "b" }
 
 {{c.decl}}
 
 function main() {
     {{c.use|indent}}
+
 }
 {%- endfor %}

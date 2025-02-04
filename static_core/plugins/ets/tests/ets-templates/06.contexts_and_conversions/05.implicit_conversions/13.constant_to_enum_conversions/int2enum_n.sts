@@ -16,8 +16,7 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    A value of an enumeration type is converted to type int
-    if enumeration constants of this type are of type int.
+    A constant expression of some integer type is converted to enumeration type 
 tags: [negative, compile-only]
 ---*/
 enum Color { Red, Green = 100, Blue }
