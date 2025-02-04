@@ -90,6 +90,16 @@ public:
         return id_ == stackful_coroutines::MAIN_WORKER_ID;
     }
 
+    void DisableForCrossWorkersLaunch()
+    {
+        isDisabledForCrossWorkersLaunch_ = true;
+    }
+
+    bool IsDisabledForCrossWorkersLaunch() const
+    {
+        return isDisabledForCrossWorkersLaunch_;
+    }
+
     /**
      * @brief Adds a coroutine to the runnables queue. Any new incoming RUNNABLE coroutine should be added
      * via this interface! And vice versa: no intra-worker queue transitions should be done via this
@@ -139,14 +149,17 @@ public:
     /// @brief call to delete the fake "schedule loop" coroutine
     void FinalizeFiberScheduleLoop();
 
-    /// @brief schedule runnable exclusive coroutines and wait for blocked coroutines
-    void CompleteAllExclusiveCoroutines() NO_THREAD_SAFETY_ANALYSIS;
+    /// @brief schedule runnable coroutines and wait for blocked coroutines
+    void CompleteAllAffinedCoroutines() NO_THREAD_SAFETY_ANALYSIS;
 
     /* debugging tools */
     // See CoroutineManager/StackfulCoroutineManager for details
     void DisableCoroutineSwitch();
     void EnableCoroutineSwitch();
     bool IsCoroutineSwitchDisabled();
+
+    /// @brief Migrate all not affinned coroutines from worker
+    void MigrateCoroutines() {}
 
 #ifndef NDEBUG
     void PrintRunnables(const PandaString &requester);
@@ -262,7 +275,8 @@ private:
      * 2. child e-worker coroutines will be scheduled on the same worker
      */
     std::atomic<bool> inExclusiveMode_ = false;
-    GenericEvent exclusiveWorkerCompletionEvent_;
+    GenericEvent workerCompletionEvent_;
+    std::atomic<bool> isDisabledForCrossWorkersLaunch_ = false;
 
     /**
      * This counter is incremented on DisableCoroutineSwitch calls and decremented on EnableCoroutineSwitch calls.

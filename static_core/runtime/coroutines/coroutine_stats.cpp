@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -146,7 +146,7 @@ PandaString CoroutineStats::GetBriefStatistics() const
 }
 
 CoroutineStats::TimeStatsDataArray CoroutineStats::GenerateTimeStatsDataArray(
-    const PandaVector<CoroutineWorkerStats *> &workerStats)
+    const PandaVector<CoroutineWorkerStats> &workerStats)
 {
     TimeStatsDataArray timeStats;
     for (auto &s : timeStats) {
@@ -159,29 +159,29 @@ CoroutineStats::TimeStatsDataArray CoroutineStats::GenerateTimeStatsDataArray(
         };
     }
     using MetricAggregates = TimeStatsDataArray::value_type;
-    auto initMetric = [](CoroutineWorkerStats *ws, CoroutineTimeStats id, MetricAggregates &metricData) {
+    auto initMetric = [](const CoroutineWorkerStats &ws, CoroutineTimeStats id, MetricAggregates &metricData) {
         for (size_t aggrId = 0; aggrId < metricData.size(); ++aggrId) {
             switch (static_cast<AggregateType>(aggrId)) {
                 case AggregateType::MAX:
-                    metricData[aggrId] = std::max(metricData[aggrId], ws->GetTimeStatValue(id).GetMax());
+                    metricData[aggrId] = std::max(metricData[aggrId], ws.GetTimeStatValue(id).GetMax());
                     break;
                 case AggregateType::MIN:
-                    metricData[aggrId] = std::min(metricData[aggrId], ws->GetTimeStatValue(id).GetMin());
+                    metricData[aggrId] = std::min(metricData[aggrId], ws.GetTimeStatValue(id).GetMin());
                     break;
                 case AggregateType::AVG:
                     // should be re-calculated later because of a float data type
                     break;
                 case AggregateType::COUNT:
-                    metricData[aggrId] += ws->GetTimeStatValue(id).GetCount();
+                    metricData[aggrId] += ws.GetTimeStatValue(id).GetCount();
                     break;
                 case AggregateType::SUM:
                 default:
-                    metricData[aggrId] += ws->GetTimeStatValue(id).GetSum();
+                    metricData[aggrId] += ws.GetTimeStatValue(id).GetSum();
                     break;
             }
         }
     };
-    for (auto *ws : workerStats) {
+    for (auto &ws : workerStats) {
         for (auto &[id, descr] : GetTimeStatsDescription()) {
             auto &metricData = timeStats[ToIndex(id)];
             initMetric(ws, id, metricData);
@@ -190,18 +190,18 @@ CoroutineStats::TimeStatsDataArray CoroutineStats::GenerateTimeStatsDataArray(
     return timeStats;
 }
 
-PandaString CoroutineStats::GetFullStatistics(PandaVector<CoroutineWorkerStats *> &&workerStats) const
+PandaString CoroutineStats::GetFullStatistics(const PandaVector<CoroutineWorkerStats> &workerStats) const
 {
     PandaStringStream ss;
     // common stats
     ss << GetBriefStatistics();
     // per worker stats
     ss << "[Per worker stats]\n";
-    for (auto *ws : workerStats) {
-        ss << "Worker: " << ws->GetName() << "\n";
+    for (auto &ws : workerStats) {
+        ss << "Worker: " << ws.GetName() << "\n";
         for (auto &[id, descr] : GetTimeStatsDescription()) {
-            if (ws->GetTimeStatValue(id).GetCount() > 0) {
-                ss << "\t" << descr.prettyName << " [ns]: " << ws->GetTimeStatString(id) << "\n";
+            if (ws.GetTimeStatValue(id).GetCount() > 0) {
+                ss << "\t" << descr.prettyName << " [ns]: " << ws.GetTimeStatString(id) << "\n";
             }
         }
     }

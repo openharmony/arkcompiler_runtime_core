@@ -202,6 +202,25 @@ public:
         return false;
     }
 
+    /**
+     * @brief This method creates the required number of worker threads
+     * @param howMany - number of common workers to be created
+     */
+    virtual void CreateWorkers([[maybe_unused]] size_t howMany, [[maybe_unused]] Runtime *runtime,
+                               [[maybe_unused]] PandaVM *vm)
+    {
+    }
+
+    /**
+     * @brief This method finalizes the required number of common worker threads
+     * @param howMany - number of common workers to be finalized
+     * NOTE: Make sure that howMany is less than the number of active workers
+     */
+    virtual void FinalizeWorkers([[maybe_unused]] size_t howMany, [[maybe_unused]] Runtime *runtime,
+                                 [[maybe_unused]] PandaVM *vm)
+    {
+    }
+
     virtual bool IsExclusiveWorkersLimitReached() const
     {
         return false;

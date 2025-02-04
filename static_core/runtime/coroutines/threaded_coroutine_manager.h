@@ -86,7 +86,7 @@ protected:
      * Create the required number of worker instances. They are required only for the interface
      * level compatibility with other parts of the runtime.
      */
-    void CreateWorkers(size_t howMany, Runtime *runtime, PandaVM *vm) REQUIRES(workersLock_);
+    void CreateWorkers(size_t howMany, Runtime *runtime, PandaVM *vm) REQUIRES(workersLock_) override;
     CoroutineWorker *ChooseWorkerForCoroutine([[maybe_unused]] Coroutine *co);
 
 private:

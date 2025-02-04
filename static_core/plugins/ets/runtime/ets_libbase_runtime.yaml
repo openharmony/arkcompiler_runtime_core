@@ -3339,6 +3339,16 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::StdSystemIsMainWorker
 
+  - name: StdCoroutineScaleWorkersPool
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: scaleWorkersPool
+    static: true
+    signature:
+      ret: void
+      args: [i32]
+    impl: ark::ets::intrinsics::StdSystemScaleWorkersPool
+
   - name: StdAtomicFlagSet
     space: ets
     class_name: std.debug.concurrency.AtomicFlag
