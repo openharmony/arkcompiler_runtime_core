@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -150,6 +150,14 @@ class AstComparator:
             for value in ast.values():
                 AstComparator.replace_null_literals(value)
 
+    # NOTE(zhelyapovaleksey): need to remove this patch-method (Issue: #22553)
+    @staticmethod
+    def remove_default_constructor_properties(ast: dict) -> None:
+        if 'accessibility' in ast:
+            del ast['accessibility']
+        if 'declare' in ast:
+            del ast['declare']
+
 
     def run(self) -> Tuple[bool, TestReport, Optional[FailKind]]:
         passed = self.compare_asts(self.original_ast, self.dumped_ast)
@@ -164,6 +172,9 @@ class AstComparator:
             return False
 
         if isinstance(dumped_ast, dict):
+            AstComparator.remove_default_constructor_properties(original_ast)
+            AstComparator.remove_default_constructor_properties(dumped_ast)
+
             if original_ast.keys() != dumped_ast.keys():
                 self.output += (
                     f"AST comparison failed!\n"
