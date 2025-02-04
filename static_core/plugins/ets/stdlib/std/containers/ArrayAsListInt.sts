@@ -116,7 +116,7 @@ export class ArrayAsListInt implements ListInt {
      * @returns popped value
      */
     public override popFront(): Int {
-        assert (this.curSize > 0): "No data to popFront from ArrayAsList!"
+        assertLT(0, this.curSize, "No data to popFront from ArrayAsList!")
         let res: Int = this.data[0];
         for (let i = 1; i < this.curSize; ++i) {
             this.data[i-1] = this.data[i];
@@ -148,7 +148,7 @@ export class ArrayAsListInt implements ListInt {
      * @returns popped value
      */
     public override popBack(): Int {
-        assert (this.curSize > 0): "No data to popBack in ArrayAsList!"
+        assertLT(0, this.curSize, "No data to popBack in ArrayAsList!")
         --this.curSize;
         return this.data[this.curSize];
     }
@@ -190,7 +190,6 @@ export class ArrayAsListInt implements ListInt {
      * @returns true if value present, false otherwise
      */
     public override has(e: Int): boolean {
-        assert false: "Not implemented: internal issue with calling equals #10056";
         /*
         for (let i = 0; i < this.curSize; ++i) {
             if (this.data[i].equals(e)) {
@@ -198,7 +197,7 @@ export class ArrayAsListInt implements ListInt {
             }
         }
         */
-        return false;
+        throw new AssertionError("Not implemented");
     }
 
 /*  Code below is blocked by internal issue with lambdas #9994

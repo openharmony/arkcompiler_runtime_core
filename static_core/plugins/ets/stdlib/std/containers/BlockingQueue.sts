@@ -56,7 +56,7 @@ export final class BlockingQueue<T> {
             // If there is a lot of free space at the beginning of an array in a BlockingQueue,
             // it is better to copy elements to the beginning - it saves space for new objects.
             if (this.curHeadIdx * 2 > this.array.length) {
-                assert curQueueSize < this.array.length;
+                assertLT(curQueueSize, this.array.length);
                 for (let i: int = 0; i < curQueueSize; ++i) {
                     this.array[i] = this.array[this.curHeadIdx++];
                 }

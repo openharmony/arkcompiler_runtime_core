@@ -40,10 +40,10 @@ const FAST_TO_STRING_HANDLER_MAP: ToStringHandlerMap = () => {
  * BigInt class stub
  */
 export final class BigInt {
-    
+
     private readonly bytes: int[]
     private readonly sign: int
-    
+
     private static readonly shiftSys: long = 32 as long
     private static readonly baseSys: long = (1 as long) << BigInt.shiftSys
     private static readonly maskSys: long = BigInt.baseSys - (1 as long)
@@ -73,7 +73,7 @@ export final class BigInt {
             digits = BigInt.to2sComplement(digits)
         }
 
-        // remove leading zeroes 
+        // remove leading zeroes
         return BigInt.stripLeadingZeros(digits)
     }
 
@@ -331,7 +331,7 @@ export final class BigInt {
         return new BigInt(this.asBytes(), this.sign)
     }
 
-    // remove leading 0x0 
+    // remove leading 0x0
     private static stripLeadingZeros(d: int[]): int[] {
         let i = d.length - 1
 
@@ -354,7 +354,7 @@ export final class BigInt {
         let max_len = max(this.length(), other.length()) as int + 1
         let lhs: int[] = this.bytes
         let rhs: int[] = other.bytes
-    
+
         if (this.negative() != other.negative()) {
            if (this.negative()) {
               lhs = this.as2sComplementBytes(max_len - this.length())
@@ -441,7 +441,7 @@ export final class BigInt {
     }
 
     private static getCnt(from: long, to:long): long {
-        assert (from <= to): `from:${from}, to:${to}`
+        assertLE(from, to)
         return (from + ((to - from)/(2 as long)))
     }
 
@@ -535,14 +535,14 @@ export final class BigInt {
            result[i] = res[position - i - 1]
         }
 
-        return [result, div.bytes] 
+        return [result, div.bytes]
     }
 
     private operatorDivideInternal(other: BigInt): [BigInt, BigInt] {
         if (other.isZero()) {
             throw new Error("BigInt: division by zero")
         }
-        
+
         if (this.isZero()) {
             return [new BigInt(0), new BigInt(0)]
         }
@@ -606,9 +606,9 @@ export final class BigInt {
         if (this.negative() && other.positive()) {
             return false
         }
-        
+
         let sub = this.operatorSubtract(other)
-        
+
         if (sub.negative() || sub.isZero()) {
             return false
         }
@@ -664,7 +664,7 @@ export final class BigInt {
 
         // consider shifting limits, as we can not shift more
         // than stored at the BigInt object
-        let bit: long = (1 << (BigInt.shiftSys - 1)) 
+        let bit: long = (1 << (BigInt.shiftSys - 1))
         // it is equal to  len * 8 or len * log2(baseSys)
         let limit: long = this.length() * BigInt.shiftSys
         let lval: long = other.getLong()
@@ -752,7 +752,7 @@ export final class BigInt {
 
         return bytes
     }
-    
+
     private as2sComplementBytes(): int[] {
         return this.as2sComplementBytes(0)
     }
@@ -760,7 +760,7 @@ export final class BigInt {
     private as2sComplementBytes(pad: int): int[] {
         let size = this.length() + pad + 1
         let bytes = new int[size]
-        
+
         for (let i = 0; i < size; i++) {
             bytes[i] = i<this.length() ? this.bytes[i] : 0
         }
@@ -850,7 +850,7 @@ export final class BigInt {
 
         let bytes = BigInt.stripLeadingZeros(BigInt.toBytes(digits))
         let sign = bytes.length == 0 ? 0 : negative ? -1 : 1
-        
+
         return [bytes, sign]
     }
 
@@ -1009,7 +1009,7 @@ export final class BigInt {
     private static addDigits(lhs: int[], rhs: int[]): int[] {
         let max_len = max(lhs.length, rhs.length) as int
         let result = new int[max_len]
-        
+
         let carry: int = 0
         for (let i: int = 0; i < max_len; i++) {
             let l: int = i < lhs.length ? lhs[lhs.length - i - 1] : 0

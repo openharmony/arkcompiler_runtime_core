@@ -77,7 +77,7 @@ export class Object {
      * Returns an array of a given record property names
      *
      * @param rec a record
-     * 
+     *
      * @returns an array of strings representing the given record's property names
      */
     public static keys(rec: Record<PropertyKey, NullishType>): string[] {
@@ -172,9 +172,8 @@ export class Object {
             // NOTE(shumilov-petr): Not implemented
             throw new Error("Not implemented")
         }
-        assert(false)
 
-        throw new Error("Invalid object");
+        throw new AssertionError("Invalid object type");
     }
 
     public static values(rec: Record<PropertyKey, NullishType>): NullishType[] {
@@ -256,9 +255,8 @@ export class Object {
             // NOTE(shumilov-petr): Not implemented
             throw new Error("Not implemented")
         }
-        assert(false)
 
-        throw new Error("Invalid object")
+        throw new AssertionError("Invalid object type")
     }
 
     /**
@@ -347,9 +345,8 @@ export class Object {
             // NOTE(shumilov-petr): Not implemented
             throw new Error("Not implemented")
         }
-        assert(false)
 
-        throw new Error("Invalid object")
+        throw new AssertionError("Invalid object type")
     }
 
     public static getOwnPropertyNames(rec: Record<PropertyKey, NullishType>): string[] {
@@ -402,9 +399,8 @@ export class Object {
             // NOTE(shumilov-petr): Not implemented
             throw new Error("Not implemented")
         }
-        assert(false)
 
-        throw new Error("Invalid object")
+        throw new AssertionError("Invalid object type")
     }
 
     /**

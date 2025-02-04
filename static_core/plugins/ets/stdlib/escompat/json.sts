@@ -195,14 +195,14 @@ export class JSON {
      *
      * @param replacer A function that transforms the results.
      *
-     * @param space A string or number that's used to insert white space 
+     * @param space A string or number that's used to insert white space
      * (including indentation, line break characters, etc.) into the output JSON string for readability purposes.
      *
      * @returns String - JSON representation of Object
      */
     public static stringify(
-                obj: NullishType, 
-                replacer: ((key: string, value: NullishType) => NullishType) | undefined | null, 
+                obj: NullishType,
+                replacer: ((key: string, value: NullishType) => NullishType) | undefined | null,
                 space?: string | number): string {
 
         const replacerOpt: ((key: string, value: NullishType) => NullishType) | undefined = (replacer === null) ? undefined : replacer
@@ -219,10 +219,10 @@ export class JSON {
      *
      * @param obj: Object An object to be converted.
      *
-     * @param replacer An array with elements indicating names of the properties in the object 
+     * @param replacer An array with elements indicating names of the properties in the object
      * that should be included in the resulting JSON string
      *
-     * @param space A string or number that's used to insert white space 
+     * @param space A string or number that's used to insert white space
      * (including indentation, line break characters, etc.) into the output JSON string for readability purposes.
      *
      * @returns String - JSON representation of Object
@@ -567,7 +567,7 @@ class JSONWriter {
             } else if (objType instanceof LambdaType) {
                 this.buffer.append("undefined")
             } else {
-                assert false : "unsupported object type: " + objType
+                throw new AssertionError("Unsupported object type: " + objType)
             }
         }
     }
@@ -631,7 +631,7 @@ class JSONWriter {
 
                 this.checkReferencesCycle(objToDump)
                 this.writePadding()
-                
+
                 this.buffer.append('"')
                 this.buffer.append(objField.getName())
                 this.buffer.append('":')
@@ -1139,8 +1139,8 @@ class JSONValueParser {
     private parseObject(jsonObj: JSONObject, classType: ClassType): Object {
         let setClassFieldFn = (cv: ClassValue, fn: string, fv: NullishType) => { cv.setFieldByName(fn, Value.of(fv)) }
 
-        if (this.reviver != undefined) { 
-            setClassFieldFn = this.revivingClassFieldSetter 
+        if (this.reviver != undefined) {
+            setClassFieldFn = this.revivingClassFieldSetter
         }
 
         let object = classType.make()
