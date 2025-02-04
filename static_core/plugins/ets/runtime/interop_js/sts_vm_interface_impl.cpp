@@ -90,6 +90,7 @@ STSVMInterfaceImpl::VMBarrier::VMBarrier(size_t vmsCount)
     currentVMsCount_ = 0U;
     epochCount_ = 0U;
     currentWaitersCount_ = 0U;
+    weakCount_ = 0U;
 }
 
 void STSVMInterfaceImpl::VMBarrier::Increment()
@@ -168,16 +169,18 @@ size_t STSVMInterfaceImpl::VMBarrier::IncrementCurrentWaitersCount()
 
 bool STSVMInterfaceImpl::VMBarrier::WaitNextEpochOrSignal(const NoWorkPred &noWorkPred)
 {
+    size_t weakCount = weakCount_;
     do {
         condVar_.Wait(&barrierMutex_);
         // This while is needed only to avoid problems with spurious wakeups
-    } while (currentWaitersCount_ != 0);
+    } while (weakCount == weakCount_);
     return CheckNoWorkPred(noWorkPred);
 }
 
 void STSVMInterfaceImpl::VMBarrier::Wake()
 {
     currentWaitersCount_ = 0;
+    weakCount_++;
     condVar_.SignalAll();
 }
 
