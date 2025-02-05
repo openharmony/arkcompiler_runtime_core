@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -94,38 +94,6 @@ As an example in a simple implementation:
 
 |
 
-.. _Type Function:
-
-Type Function
-*************
-
-.. meta:
-    frontend_status: None
-
-The |LANG| supports the type called ``Function`` which is a supertype for all
-function types (see :ref:`Function Types`), and thus allows third party code
-interaction.
-
-.. code-block:: typescript
-   :linenos:
-
-    declare function processAnyFunction (a_function: Function)
-      // This is an external function which may handle any ArkTS function
-
-    function foo() {}
-    function bar(p1: number, p2: string, p3: boolean): Object {}
-
-    processAnyFunction (foo)         // pass 'foo' as an argument
-    processAnyFunction (bar)         // pass 'bar' as an argument
-    processAnyFunction (()=>void {}) // pass lambda expression as an argument
-
-.. index::
-   type function
-   supertype
-   function type
-
-|
-
 .. _How to get type via reflection:
 
 How to Get Type Via Reflection
@@ -213,6 +181,30 @@ the compile-time errors list in :ref:`InstanceOf Expression`.
    conversion
    variable
    primitive type
+
+|
+
+.. _Keyword struct and ArkUI:
+
+Keyword ``struct`` and ArkUI
+****************************
+
+.. meta:
+    frontend_status: Done
+
+The current compiler reserves the keyword ``struct``
+because it is used in legacy ArkUI code. 
+This keyword can be used as a replacement for the keyword ``class``
+in :ref:`Class declarations`.
+Class declarations marked with the keyword ``struct``
+are processed by the ArkUI plugin
+and replaced with class declarations that use specific ArkUI types.
+
+.. index::
+   compiler
+   struct
+   ArkUI
+   compiler plugin
 
 .. raw:: pdf
 

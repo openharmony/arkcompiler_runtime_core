@@ -752,8 +752,6 @@ A *method* is defined by the following:
 #. *Argument type*, i.e., the list of types of arguments applicable to the
    method member.
 #. *Return type*, i.e., the return type of the method member.
-#. A ``throws``/``rethrows`` clause, i.e., an indication of the ability of a
-   member method to raise exceptions.
 
 Members can be as follows:
 
@@ -778,8 +776,6 @@ same name.
    type parameter
    argument type
    return type
-   throws clause
-   rethrows clause
    class instance
    qualified name
    notation
@@ -1140,7 +1136,7 @@ Field Initialization
     frontend_status: Done
 
 Any field must be initialized before it is used for the first time (see
-:ref:`Field Access Expression`). The initialization is performed by using the
+:ref:`Field Access Expression`). Initialization is performed by using the
 result of the evaluation of the following:
 
 - Default values (see :ref:`Default Values for Types`), or
@@ -1229,8 +1225,8 @@ class instances as shown in the following examples:
 
     }
 
-The compiler could determine the right order of fields initialization.
-A :index:`compile-time error` occurs if the order cannot be determined or
+The compiler can determine the right order of field initialization.
+A :index:`compile-time error` occurs if the order cannot be determined, or
 circular dependencies are identified:
 
 .. code-block:: typescript
@@ -1262,9 +1258,49 @@ circular dependencies are identified:
    field declaration
    initializer
 
-Additional restrictions (as specified in :ref:`Exceptions and Errors Inside Field Initializers`)
+Additional restrictions (as specified in :ref:`Errors and Initialization Expression`)
 apply to variable initializers that refer to the fields that cannot be
 initialized yet.
+
+|
+
+.. _Override Fields:
+
+Overriding Fields
+=================
+
+.. meta:
+    frontend_status: None
+
+While extending a class or implementing interfaces, instance fields declared in
+a superclass or a superintertafce can be overriden. Using the keyword *override*
+is not required. The new declaration acts as redeclaration. The type of the
+overriding field is to be the same as the type of the overridden field.
+Otherwise a :index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base1 {
+        field: Base1 = new Base1
+    }
+    interface Base2 {
+        field: Base1
+    }
+    class Derived extends Base1 implements Base2 {
+        field: Base1 = new Derived // overriding 'field' and providing new initial value
+    }
+    
+
+
+.. index::
+   overriding
+   field overriding
+   superclass
+   superinterface
+
+
+
 
 |
 
@@ -1359,10 +1395,10 @@ Instance Methods
     frontend_status: Done
 
 A method that is not declared static is called *non-static method*, or
-an *instance method*.
+*instance method*.
 
 An instance method is always called with respect to an object that becomes
-the current object the keyword ``this`` refers to during the execution
+the current object which the keyword ``this`` refers to during the execution
 of the method body.
 
 .. index::
@@ -1383,8 +1419,8 @@ Abstract Methods
     frontend_status: Done
 
 An *abstract* method declaration introduces the method as a member along
-with its signature but without an implementation. An abstract method is
-declared with the modifier ``abstract`` in its declaration.
+with its signature but without implementation. An abstract method is
+declared with the modifier ``abstract`` in the declaration.
 
 Non-abstract methods can be referred to as *concrete methods*.
 
@@ -1393,10 +1429,10 @@ A :index:`compile-time error` occurs if:
 -  An abstract method is declared private.
 -  The method declaration contains another modifier (``static``, ``final``,
    ``native``, or ``async``) along with the modifier ``abstract``.
--  The declaration of an abstract method *m* does not appear directly within an
+-  The declaration of an abstract method *m* does not appear directly within
    abstract class ``A``.
 -  Any non-abstract subclass of ``A`` (see :ref:`Abstract Classes`) does not
-   provide an implementation for *m*.
+   provide implementation for *m*.
 
 An abstract method declaration provided by an abstract subclass can override
 another abstract method. A :index:`compile-time error` occurs if an abstract
@@ -1428,8 +1464,7 @@ Final Methods
 .. meta:
     frontend_status: Done
 
-Final methods are discussed in the chapter Experimental Features (see
-:ref:`Final Methods Experimental`).
+Final methods are discussed in :ref:`Final Methods Experimental`.
 
 |
 
@@ -1441,12 +1476,11 @@ Async Methods
 .. meta:
     frontend_status: Done
 
-Async methods are discussed in the chapter Experimental Features (see
-:ref:`Experimental Async Methods`).
+Async methods are discussed in :ref:`Experimental Async Methods`.
 
 |
 
-.. _Override Methods:
+.. _Overriding Methods:
 
 Overriding Methods
 ==================
@@ -1465,10 +1499,10 @@ A :index:`compile-time error` occurs if:
 
 -  A method marked with the modifier ``override`` does not override a method
    from a superclass.
--  A method declaration contains modifiers ``abstract`` or ``static``
-   along with the modifier ``override``.
+-  A method declaration contains modifier ``static`` along with the modifier
+   ``override``.
 
-If the signature of the overridden method contains parameters with default
+If the signature of an overridden method contains parameters with default
 values (see :ref:`Optional Parameters`), then the overriding method always
 uses the default parameter values of the overridden method.
 
@@ -1500,8 +1534,7 @@ Native Methods
 .. meta:
     frontend_status: Done
 
-Native methods are discussed in the chapter Experimental Features (see
-:ref:`Native Methods Experimental`).
+Native methods are discussed in :ref:`Native Methods Experimental`.
 
 |
 
@@ -1513,8 +1546,8 @@ Method Body
 .. meta:
     frontend_status: Done
 
-A *method body* is a block of code that implements a method. A semicolon, or
-an empty body (i.e., no body at all) indicate the absence of the implementation.
+*Method body* is a block of code that implements a method. A semicolon or
+an empty body (i.e., no body at all) indicate the absence of implementation.
 
 An abstract or native method must have an empty body.
 
@@ -1524,8 +1557,8 @@ In particular, a :index:`compile-time error` occurs if:
 -  The method declaration is neither abstract nor native, but its body
    is either empty or a semicolon.
 
-See :ref:`Return Statements` for the rules that apply to return statements
-in a method body.
+The rules that apply to return statements in a method body are discussed in
+:ref:`Return Statements`.
 
 A :index:`compile-time error` occurs if a method is declared to have a return
 type, but its body can complete normally (see :ref:`Normal and Abrupt Statement Execution`).
@@ -1543,6 +1576,62 @@ type, but its body can complete normally (see :ref:`Normal and Abrupt Statement 
    return statement
    return type
    normal completion
+
+|
+
+.. _Methods Returning this:
+
+Methods Returning ``this``
+==========================
+
+.. meta:
+    frontend_status: Done
+
+A return type of an instance method can be ``this``.
+It means that the return type is the class type that the method belongs to.
+The extended grammar for a method signature (see :ref:`Signatures`) is as
+follows:
+
+.. code-block:: abnf
+
+    returnType:
+        ':' (type | 'this')
+        ;
+
+The only result that is allowed to be returned from such a method is ``this``:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        foo(): this {
+            return this
+        }
+    }
+
+.. index::
+    return type
+    instance method
+    class
+    method signature
+    signature
+    subclass
+
+The return type of an overridden method in a subclass must also be ``this``:
+
+.. code-block:: typescript
+   :linenos:
+
+    class D extends C {
+        foo(): this {
+            return this
+        }
+    }
+
+    let x = new C().foo() // type of 'x' is 'C'
+    let y = new D().foo() // type of 'y' is 'D'
+
+Otherwise, a :index:`compile-time error` occurs.
 
 |
 
@@ -1572,13 +1661,15 @@ a getter or a setter.
         | 'static'
         | 'final'
         | 'override'
+        | 'native'
         ;
 
 Accessor modifiers are a subset of method modifiers. The allowed accessor
-modifiers have exactly the same meaning as the corresponding method modifiers 
+modifiers have exactly the same meaning as the corresponding method modifiers
 (see :ref:`Abstract Methods` for the modifier ``abstract``,
 :ref:`Static Methods` for the modifier ``static``, :ref:`Final Methods` for the
-modifier ``final``, and :ref:`Override Methods` for the modifier ``override``).
+modifier ``final``, :ref:`Overriding Methods` for the modifier ``override``, and
+:ref:`Native Methods` for the modifier ``native``).
 
 .. index::
    access declaration
@@ -1610,10 +1701,10 @@ modifier ``final``, and :ref:`Override Methods` for the modifier ``override``).
       }
     }
 
-A *get-accessor* (*getter*) must not have parameters but must have an
-explicit return type. A *set-accessor* (*setter*) must have a single parameter
-and no return type. The use of getters and setters looks the same as the use of
-fields. A :index:`compile-time error` occurs if:
+A *get-accessor* (*getter*) must have an explicit return type but no parameters.
+A *set-accessor* (*setter*) must have a single parameter and no return type. The
+use of getters and setters looks the same as the use of fields.
+A :index:`compile-time error` occurs if:
 
 -  Getters or setters are used as methods;
 -  *Set-accessor* (*setter*) has a single parameter that is optional (see
@@ -1678,7 +1769,7 @@ data (as in the example above).
         return this.surname + " " + this.name
       }
     }
-    console.log (new Person.fullName)
+    console.log (new Person().fullName)
 
 A name of an accessor cannot be the same as that of a non-static field, or of a
 method of class or interface. Otherwise, a :index:`compile-time error`
@@ -1757,13 +1848,13 @@ Class Initializer
 
 When a class is initialized, the *class initializer* declared in the class is
 executed along with all *class initializers* of all superclasses. The order of
-execution is from the top superclass to the current class. Class initializers
+execution is from the top superclass to the current class. *Class initializers*
 (along with field initializers for static fields as described in
 :ref:`Field Initialization`) ensure that all static fields receive their
 initial values before they are used for the first time.
 
-Syntactically *class initializer* is identical to the initializer block and
-reuses its semantics (see :ref:`Initializer Block`).
+*Class initializer* is syntactically identical to the initializer block and
+reuses the initializer block semantics (see :ref:`Initializer Block`):
 
 .. code-block:: abnf
 
@@ -1771,18 +1862,17 @@ reuses its semantics (see :ref:`Initializer Block`).
         initializerBlock
         ;
 
-In addition a :index:`compile-time error` occurs if a class initializer
+In addition, a :index:`compile-time error` occurs if a class initializer
 contains the following:
 
--  Keywords ``this`` (see :ref:`this Expression`) or ``super`` (see
-   :ref:`Method Call Expression` and :ref:`Field Access Expression`), or any
-   type of a variable declared outside the class initializer.
+-  Keyword ``this`` (see :ref:`this Expression`);
+-  Keyword ``super`` (see :ref:`Method Call Expression` and
+   :ref:`Field Access Expression`); or
+-  Any type of a variable declared outside the class initializer.
 
 Restrictions of class initializers’ ability to refer to static fields (even
-those within the scope) are specified in
-:ref:`Exceptions and Errors Inside Field Initializers`. Class initializers
-cannot throw exceptions as they are effectively non-throwing functions (see
-:ref:`Non-Throwing Functions`).
+static fields within a scope) are specified in
+:ref:`Errors and Initialization Expression`.
 
 .. index::
    class initializer
@@ -1797,9 +1887,6 @@ cannot throw exceptions as they are effectively non-throwing functions (see
    keyword super
    restriction
    scope
-   exception
-   error
-   non-throwing function
 
 |
 
@@ -1813,9 +1900,8 @@ Constructor Declaration
     todo: native constructors
     todo: Explicit Constructor Call - "Qualified superclass constructor calls" - not implemented, need more investigation (inner class)
 
-*Constructors* are used to initialize objects that are instances of class.
-
-A *constructor declaration* starts with the keyword ``constructor``, and has no
+*Constructors* are used to initialize objects that are instances of class. A
+*constructor declaration* starts with the keyword ``constructor``, and has no
 name. In any other syntactical aspect, a constructor declaration is similar to
 a method declaration with no return type:
 
@@ -1841,10 +1927,8 @@ can be created.
 A :index:`compile-time error` occurs if two constructors in a class are
 declared, and have identical signatures.
 
-Constructors marked with ``native`` keyword are discussed in the chapter Experimental Features (see :ref:`Native Constructors`).
-
-The ``throws`` mark is discussed in :ref:`Throwing Functions`, and the
-``rethrows`` mark in :ref:`Rethrowing Functions`.
+Constructors marked with the keyword ``native`` are discussed as an experimental
+feature in :ref:`Native Constructors`.
 
 .. index::
    constructor
@@ -1861,10 +1945,6 @@ The ``throws`` mark is discussed in :ref:`Throwing Functions`, and the
    access
    keyword native
    constructor
-   throwing function
-   rethrowing function
-   throws mark
-   rethrows mark
 
 |
 
@@ -1887,13 +1967,13 @@ Constructor Body
 .. meta:
     frontend_status: Done
 
-A *constructor body* is a block of code that implements a constructor.
+*Constructor body* is a block of code that implements a constructor.
 A semicolon, or an empty body (i.e., no body at all) indicates the absence
-of the implementation.
+of implementation.
 
 A native constructor (see :ref:`Native Constructors`) must have an empty body.
 
-In particular, a :index:`compile-time error` occurs if:
+A :index:`compile-time error` occurs in particular if:
 
 -  The body of a native constructor declaration is a block.
 -  The constructor declaration is not native, but its body
@@ -1909,12 +1989,12 @@ In particular, a :index:`compile-time error` occurs if:
 The constructor body must provide correct initialization of new class instances.
 Constructors have two variations:
 
-- *Primary constructor* that initializes its instance [1]_ own fields directly;
+- *Primary constructor* that initializes its instance own fields [1]_ directly;
 
 - *Secondary constructor* that uses another same-class constructor to initialize
   its instance fields.
 
-The syntax of both variations is the same:
+Both variations have the same syntax:
 
 .. code-block:: abnf
 
@@ -2026,7 +2106,7 @@ The example below represents *primary* and *secondary* constructors:
    constructor call
 
 A :index:`compile-time error` occurs if a constructor calls itself, directly or
-indirectly, through a series of one or more explicit constructor calls
+indirectly through a series of one or more explicit constructor calls
 using ``this``.
 
 A constructor body looks like a method body (see :ref:`Method Body`), except
@@ -2176,32 +2256,24 @@ Default Constructor
     frontend_status: Done
 
 If a class contains no constructor declaration, then a default constructor
-is implicitly declared. This guarantees that every class has effectively at
+is implicitly declared. This guarantees that every class effectively has at
 least one constructor. The form of a default constructor is as follows:
 
 -  Default constructor has modifier ``public`` (see :ref:`Access Modifiers`).
-
--  Default constructor has no ``throws`` or ``rethrows`` clauses.
 
 -  The default constructor body contains a call to a superclass constructor
    with no arguments except the primordial class ``Object``. The default
    constructor body for the primordial class ``Object`` is empty.
 
 A :index:`compile-time error` occurs if a default constructor is implicit, but
-the superclass:
-
--  Has no accessible constructor without parameters (see :ref:`Accessible`);
-   and
--  Has a constructor without parameters but with ``throws`` or ``rethrows``
-   clauses.
+the superclass has no accessible constructor without parameters
+(see :ref:`Accessible`).
 
 .. index::
    constructor declaration
    constructor
    modifier public
    access modifier
-   throws clause
-   rethrows clause
    constructor body
    superclass constructor
    primordial class
@@ -2225,7 +2297,7 @@ the superclass:
    class Base { constructor () { super () } }
    class Derived extends Base { constructor () { super () } }
 
-   // Example of an error case #1
+   // Example of an error case
    class A {
        private constructor () {}
    }
@@ -2234,16 +2306,6 @@ the superclass:
    class B extends A { constructor () { super () } } // Default constructor added
    // that leads to compile-time error as default constructor calls super()
    // which is private and inaccessible
-
-   // Example of an error case #2
-   class A {
-       constructor () throws {}
-   }
-   class B extends A {} // No constructor in B
-   // During compilation of B
-   class B extends A { constructor () { super () } } // Default constructor added
-   // that leads to compile-time error as default constructor is not marked as throws
-   // but it calls super() which throws
 
 |
 
@@ -2345,9 +2407,9 @@ Local classes and interfaces (see :ref:`Interfaces`) are declared within the
 body of a function, method, or any block delimited by balanced braces in a
 group of zero or more statements.
 
-Names of local classes and interfaces are visible only within the scope they
-are declared in. Local classes and interfaces have access to and can capture
-surrounding function/method parameters and local variables.
+Names of local classes and interfaces are visible only within the scope in
+which they are declared. Local classes and interfaces have access to, and can
+capture surrounding function/method parameters and local variables.
 
 .. index::
    local class
@@ -2451,7 +2513,7 @@ surrounding class members are not accessible from local classes (see
 -------------
 
 .. [1]
-   Class own fields here means fields declared within the class.
+   Instance own fields here means fields declared within an instance.
 
 .. raw:: pdf
 

@@ -75,8 +75,8 @@ In a qualified name *N.x* (where *N* is a simple name, and ``x`` is an
 identifier that can follow a sequence of identifiers separated with '``.``'
 tokens), *N* can name the following:
 
--  Name of a compilation unit (see :ref:`Modules and Compilation Units`)
-   that is introduced as a result of ``import * as N`` (see :ref:`Bind All with Qualified Access`)
+-  Name of a compilation unit (see :ref:`Compilation Units`) that is introduced
+   as a result of ``import * as N`` (see :ref:`Bind All with Qualified Access`)
    with ``x`` to name the exported entity;
 
 -  A class or interface type (see :ref:`Classes`, :ref:`Interfaces`) with ``x``
@@ -733,7 +733,7 @@ assignment. Otherwise, the variable is not initialized, and a
 
 If an initializer expression is provided, then additional restrictions apply to
 the content of the expression as described in
-:ref:`Exceptions and Initialization Expression`. An initializer expression
+:ref:`Errors and Initialization Expression`. An initializer expression
 must not lead to cyclic dependencies caused by the use of non-initialized
 variables. Otherwise, a :index:`compile-time error` occurs.
 
@@ -748,7 +748,6 @@ variables. Otherwise, a :index:`compile-time error` occurs.
    argument value
    class instance
    creation expression
-   exception parameter
    thrown object
    variable
    constructor
@@ -805,9 +804,6 @@ non-array type, then a :index:`compile-time error` occurs:
    initialization
    instance creation expression
    explicit constructor call
-   exception parameter
-   exception
-   error
    class
    instance
    local variable
@@ -882,7 +878,7 @@ The type ``T`` of a constant declaration is determined as follows:
     const y: number // compile-time error -- initializer is mandatory
 
 Additional restrictions on the content of the initializer expression are
-described in :ref:`Exceptions and Initialization Expression`.
+described in :ref:`Errors and Initialization Expression`.
 
 |
 
@@ -968,6 +964,17 @@ If the type of the initializer expression cannot be inferred, then a
 
     let f = {name: "aa"} // compile-time error
 
+    declare let   x1 = 1 // type of 'x1' is int
+    declare const x2 = 1 // type of 'x2' is int
+    let           x3 = 1 // type of 'x3' is int
+    const         x4 = 1 // type of 'x4' is int
+
+    declare let   s1 = "1" // type of 's1' is string
+    declare const s2 = "1" // type of 's2' is "1"
+    let           s3 = "1" // type of 's3' is string
+    const         s4 = "1" // type of 's4' is "1"
+
+
 |
 
 .. _Function Declarations:
@@ -1032,7 +1039,7 @@ of a function, method, or constructor.
 .. code-block:: abnf
 
     signature:
-        parameters returnType? throwMark?
+        parameters returnType?
         ;
 
     parameters:
@@ -1042,13 +1049,6 @@ of a function, method, or constructor.
     returnType:
         ':' type
         ;
-
-    throwMark:
-        'throws' | 'rethrows'
-        ;
-
-See :ref:`Throwing Functions` for the details of ``throws`` marks, and
-:ref:`Rethrowing Functions` for the details of ``rethrows`` marks.
 
 Overloading (see :ref:`Function, Method and Constructor Overloading`) is supported for
 functions, methods and constructors. The signatures of overloaded entities are important
@@ -1061,10 +1061,6 @@ for their unique identification.
    function
    method
    constructor
-   throwing function
-   rethrowing function
-   throws mark
-   rethrows mark
    function overloading
    method overloading
    identification
