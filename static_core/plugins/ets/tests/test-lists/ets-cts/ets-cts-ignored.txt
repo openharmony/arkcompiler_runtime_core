@@ -1760,3 +1760,10 @@
 07.expressions/12.indexing_expression/02.record_indexing_expression/ind_2.sts
 07.expressions/12.indexing_expression/02.record_indexing_expression/ind_4.sts
 07.expressions/12.indexing_expression/02.record_indexing_expression/ind_9.sts
+
+# 22692 
+15.semantic_rules/06.compatibility_call_args/tuple_rest_params_0.sts
+15.semantic_rules/06.compatibility_call_args/tuple_rest_params_1.sts
+
+# 22704
+15.semantic_rules/03.supertyping/supertyping_among_array_types/cast_to_class_n_1.sts
