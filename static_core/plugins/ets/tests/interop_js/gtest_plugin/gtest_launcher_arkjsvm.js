@@ -82,9 +82,11 @@ function main() {
 	globalThis.require = require;
 
 	let argv = helper.getArgv();
-	let gtestName = argv[2];
+	const arkJsNapiCliLastArgIdx = 4;
+
+	let gtestName = argv[arkJsNapiCliLastArgIdx];
 	if (gtestName === undefined) {
-		print(`Usage: ${argv[0]} ${argv[1]} <test name>`);
+		print(`Usage: ${argv[0]} ${argv[1]} ${argv[2]} ${argv[3]} <test name>`);
 		return 1;
 	}
 
@@ -102,7 +104,7 @@ function main() {
 		return 1;
 	}
 
-	let args = argv.slice(2);
+	let args = argv.slice(arkJsNapiCliLastArgIdx);
 	try {
 		return etsGtest.main(args);
 	} catch (e) {

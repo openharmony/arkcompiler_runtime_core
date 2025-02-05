@@ -11,7 +11,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js__generic_static_sts_to_ts
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__generic_static_sts_to_ts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_static.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_static.sts
+    JS_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_class_extends.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_static_extra_set.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_static_literal.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_subset_by_ref.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_subset_by_value.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_union_static.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_interface_static.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_static_method.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_user_class.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/generic_static.test.js
 )

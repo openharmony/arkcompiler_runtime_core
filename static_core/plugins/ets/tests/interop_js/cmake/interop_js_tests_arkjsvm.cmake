@@ -24,7 +24,7 @@ function(compile_js_file TARGET)
         ARG
         ""
         ""
-        "SOURCES;OUTPUT_DIR"
+        "SOURCES;OUTPUT_DIR;OUTPUT_ABC_PATHS"
         ${ARGN}
     )
 
@@ -42,8 +42,19 @@ function(compile_js_file TARGET)
     endif()
 
     foreach(JS_SOURCE ${ARG_SOURCES})
-        get_filename_component(CLEAR_NAME ${JS_SOURCE} NAME_WE)
-        set(CUR_OUTPUT_ABC ${BUILD_DIR}/${CLEAR_NAME}.abc)
+        set(CUR_OUTPUT_ABC)
+        get_filename_component(CLEAR_NAME ${JS_SOURCE} NAME_WLE)
+
+        # determine output path of abc file
+        get_filename_component(DIR_NAME "${JS_SOURCE}" DIRECTORY)
+        if (NOT ${DIR_NAME} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+            # in this case source file in in subdirectory
+            string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" DIR_NAME "${DIR_NAME}")
+            set(CUR_OUTPUT_ABC ${BUILD_DIR}/${DIR_NAME}/${CLEAR_NAME}.abc)
+        else()
+            set(CUR_OUTPUT_ABC ${BUILD_DIR}/${CLEAR_NAME}.abc)
+        endif()
+
         list(APPEND ABC_FILES ${CUR_OUTPUT_ABC})
 
         add_custom_command(
@@ -54,6 +65,8 @@ function(compile_js_file TARGET)
             DEPENDS ${JS_SOURCE}
         )
     endforeach()
+
+    set(${ARG_OUTPUT_ABC_PATHS} ${ABC_FILES} PARENT_SCOPE)
 
     add_custom_target(${TARGET} DEPENDS ${ABC_FILES})
 endfunction(compile_js_file)
@@ -120,7 +133,12 @@ function(panda_ets_interop_js_arkjsvm_gtest TARGET)
             "ARK_ETS_INTEROP_JS_GTEST_SOURCES=${CMAKE_CURRENT_SOURCE_DIR}"
             "ARK_ETS_INTEROP_JS_GTEST_DIR=${INTEROP_TESTS_DIR}"
             "FIXED_ISSUES=${FIXED_ISSUES}"
-        LAUNCHER ${ARK_JS_NAPI_CLI} ${INTEROP_TESTS_DIR}/gtest_launcher_arkjsvm.abc ${TARGET}
+        LAUNCHER 
+            ${ARK_JS_NAPI_CLI} 
+            --stub-file=${ARK_JS_STUB_FILE}
+            --entry-point=gtest_launcher_arkjsvm
+            ${INTEROP_TESTS_DIR}/gtest_launcher_arkjsvm.abc 
+            ${TARGET}
         DEPS_TARGETS ${TARGET} ets_interop_js_gtest_launcher_arkjsvm
         TEST_RUN_DIR ${INTEROP_TESTS_DIR}
         OUTPUT_DIRECTORY ${INTEROP_TESTS_DIR}
@@ -132,3 +150,77 @@ function(panda_ets_interop_js_arkjsvm_gtest TARGET)
 
     add_dependencies(ets_interop_js_arkjsvm_gtests ${TARGET}_gtests)
 endfunction(panda_ets_interop_js_arkjsvm_gtest)
+
+function(panda_ets_interop_js_test_arkjsvm TARGET)
+    # Parse arguments
+    cmake_parse_arguments(
+        ARG
+        ""
+        "JS_LAUNCHER;ETS_CONFIG"
+        "ETS_SOURCES;JS_SOURCES;ABC_FILE;LAUNCHER_ARGS;"
+        ${ARGN}
+    )
+
+    if(NOT DEFINED ARG_JS_LAUNCHER)
+        message("ARG_JS_LAUNCHER should be defined")
+        return()
+    endif()
+
+    set(TARGET_TEST_PACKAGE ${TARGET}_test_package)
+    panda_ets_package(${TARGET_TEST_PACKAGE}
+        ABC_FILE ${ARG_ABC_FILE}
+        ETS_SOURCES ${ARG_ETS_SOURCES}
+        ETS_CONFIG ${ARG_ETS_CONFIG}
+    )
+
+    if(DEFINED ARG_JS_SOURCES)
+        compile_js_file(${TARGET}_js_modules
+            SOURCES ${ARG_JS_SOURCES}
+        )
+    endif()
+
+    set(COMPILED_LAUNCHER_NAME ${TARGET}_launcher_abc_name)
+    compile_js_file(${TARGET}_js_launcher
+        SOURCES ${ARG_JS_LAUNCHER}
+        OUTPUT_ABC_PATHS ${COMPILED_LAUNCHER_NAME}
+    )
+
+    # Make symbolic links to convinient work with requireNapiPreview
+    set(SO_FILES_LINK_PATH "${CMAKE_CURRENT_BINARY_DIR}/module/")
+    set(INTEROP_LIB_SOURCE "${PANDA_BINARY_ROOT}/lib/module/ets_interop_js_napi_arkjsvm.so")
+    set(INTEROP_HELPER_LIB_SOURCE "${PANDA_BINARY_ROOT}/lib/arkjsvm_interop/libinterop_test_helper.so")
+    
+    add_custom_target(${TARGET}_create_symlinks
+        COMMAND mkdir -p ${SO_FILES_LINK_PATH}
+                && ln -sf ${INTEROP_LIB_SOURCE} ${INTEROP_HELPER_LIB_SOURCE} -t ${SO_FILES_LINK_PATH}
+        DEPENDS ets_interop_js_napi_arkjsvm ${INTEROP_HELPER_LIB_SOURCE}
+    )
+
+    set(OUTPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}_interop_js_output.txt")
+
+    set(CUSTOM_PRERUN_ENVIRONMENT
+        "LD_LIBRARY_PATH=${PANDA_BINARY_ROOT}/lib/arkjsvm_interop/:${PANDA_BINARY_ROOT}/lib/"
+        "ARK_ETS_INTEROP_JS_GTEST_ABC_PATH=${PANDA_BINARY_ROOT}/abc/${TARGET_TEST_PACKAGE}.zip"
+        "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
+    )
+
+    get_filename_component(LAUNCHER_CLEAR_NAME ${ARG_JS_LAUNCHER} NAME_WLE)
+
+    add_custom_target(${TARGET}
+        COMMAND
+            ${CUSTOM_PRERUN_ENVIRONMENT}
+            ${ARK_JS_NAPI_CLI}
+            --stub-file=${ARK_JS_STUB_FILE}
+            --entry-point=${LAUNCHER_CLEAR_NAME}
+            ${${COMPILED_LAUNCHER_NAME}} 
+            ${ARG_LAUNCHER_ARGS} 
+            > ${OUTPUT_FILE} 2>&1 || (cat ${OUTPUT_FILE} && false)
+        DEPENDS 
+            ${TARGET}_js_launcher 
+            ${TARGET}_js_modules 
+            ${TARGET}_create_symlinks 
+            ${TARGET_TEST_PACKAGE} 
+            ets_interop_js_napi_arkjsvm
+    )
+    add_dependencies(ets_interop_js_tests_nodevm ${TARGET})
+endfunction(panda_ets_interop_js_test_arkjsvm)

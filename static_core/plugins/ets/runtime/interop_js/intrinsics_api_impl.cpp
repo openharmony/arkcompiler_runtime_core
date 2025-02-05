@@ -403,18 +403,27 @@ EtsString *JSValueToString(JSValue *object)
     napi_env env = ctx->GetJSEnv();
 
     napi_value strObj;
-    napi_status status;
+    [[maybe_unused]] napi_status status;
     {
         auto napiValue = JSConvertJSValue::Wrap(env, object);
 
         ScopedNativeCodeThread nativeScope(coro);  // NOTE: Scope(Native/Managed)CodeThread should be optional here
         status = napi_coerce_to_string(env, napiValue, &strObj);
     }
+
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
+    // #22503 napi_coerce_to_string in arkui/napi implementation returns napi_ok in case of exception.
+    if (UNLIKELY(NapiIsExceptionPending(env))) {
+        ctx->ForwardJSException(coro);
+        return nullptr;
+    }
+#else
     if (UNLIKELY(status != napi_ok)) {
         INTEROP_FATAL_IF(status != napi_string_expected && status != napi_pending_exception);
         ctx->ForwardJSException(coro);
         return nullptr;
     }
+#endif
 
     auto res = JSConvertString::UnwrapWithNullCheck(ctx, env, strObj);
     if (UNLIKELY(!res.has_value())) {

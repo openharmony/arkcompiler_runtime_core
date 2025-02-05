@@ -11,38 +11,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(TESTS_EXECUTED_ON_ARKJSVM
-    bouncing_pandas
-    callable_signature
-    compiler
-    constructor
-    constructor_as_arg
-    conversion_types
-    dynamic_enum
-    dynamic_object
-    dynamic_with_lambda
-    import
-    class_method
-    test_cast
+set(DISABLES_TESTS
+    standalone_function
+    static_enum
+    sts_vm_interface_impl_tests
 )
 
-set(TESTS_EXECUTED_ON_NODEVM
+set(TESTS_EXECUTED_WITH_NODEJS
     checked
     class_composite
     class_extension
     class_operations
     declgen_ets2ts
-    dot_operator
-    escompat
-    escompat_demo
-    es_object
+    dot_operator_nodejs
     event_loop_callback_poster_tests
     exceptions
     generic
-    generic_as_parameter
-    generic_call_params
-    generic_static
-    generic_types
     getter
     implement_interfaces
     indexed_signature
@@ -50,9 +34,9 @@ set(TESTS_EXECUTED_ON_NODEVM
     instanceof
     interface
     interfaces
+    interop_hash_state
     intersection_signature
     map_mirror_classes
-    number_subtypes
     objects_passing
     operator_new
     optional_reference_type
@@ -63,8 +47,6 @@ set(TESTS_EXECUTED_ON_NODEVM
     sample
     scenarios
     setter
-    # standalone_function
-    # static_enum
     strict_equality
     test_callable
     test_class_methods_returning_values
@@ -77,12 +59,27 @@ set(TESTS_EXECUTED_ON_NODEVM
     timer
 )
 
+# NOTE: Remove this condition after all tests have been migrated to ArkJSVM.
+list(LENGTH TESTS_EXECUTED_WITH_NODEJS INTEROP_NODEJS_TEST_NUM)
+if(NOT ${INTEROP_NODEJS_TEST_NUM} EQUAL 39)
+    message(FATAL_ERROR "All new interop tests shouls be executed on ArkJSVM. 
+                         INTEROP_NODEJS_TEST_NUM = ${INTEROP_NODEJS_TEST_NUM}")
+endif()
+
 if(PANDA_JS_ETS_HYBRID_MODE)
+    set(NOT_ARKJSVM_TEST_PACKAGES ${TESTS_EXECUTED_WITH_NODEJS})
+    list(APPEND NOT_ARKJSVM_TEST_PACKAGES ${DISABLES_TESTS})
+
+    SUBDIRLIST(TESTS_EXECUTED_ON_ARKJSVM 
+        ${CMAKE_CURRENT_LIST_DIR}
+        NOT_ARKJSVM_TEST_PACKAGES
+    )
+
     foreach(TEST_DIR ${TESTS_EXECUTED_ON_ARKJSVM})
         add_subdirectory(${TEST_DIR})
     endforeach()
+else()
+    foreach(TEST_DIR ${TESTS_EXECUTED_WITH_NODEJS})
+        add_subdirectory(${TEST_DIR})
+    endforeach()
 endif()
-
-foreach(TEST_DIR ${TESTS_EXECUTED_ON_NODEVM})
-    add_subdirectory(${TEST_DIR})
-endforeach()

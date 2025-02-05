@@ -1,4 +1,3 @@
-
 /**
  * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,19 +13,22 @@
  * limitations under the License.
  */
 
-const {
-    CheckDotClass,
-} = require('dot_operator.test.abc');
+export const tsInt = 1;
+export const tsString = 'string';
+export const Obj = {
+    name: 'test',
+    inside: {
+        name: 'test',
+    },
+    sum: (): number => tsInt,
+    arr: [1, 2, 3],
+};
 
-const Obj = new CheckDotClass();
+type OptionalProp = {
+    name?: string,
+    secondName: null | undefined
+};
 
-function checkCallMethodForValue() {
-    ASSERT_TRUE(Obj.name.toUpperCase() !== Obj.name);
-}
-
-function checkCallMethodForValueWithOptionalOperator() {
-    ASSERT_TRUE(Obj?.name.toUpperCase() !== Obj.name);
-}
-
-checkCallMethodForValue();
-checkCallMethodForValueWithOptionalOperator();
+export const notNullishObj: OptionalProp = {
+    secondName: null,
+};

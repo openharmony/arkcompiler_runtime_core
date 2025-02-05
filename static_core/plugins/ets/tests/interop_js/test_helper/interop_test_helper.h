@@ -22,10 +22,10 @@
 namespace ark::ets::interop::js::helper {
 
 /**
- * @brief Execute given .abc on @param path.
+ * @brief Execute given .abc on @param path with given entrypoint @param testName.
  * @return Returns false if an exception occured during .abc file execution, returns true otherwise.
  */
-bool RunAbcFileOnArkJSVM(napi_env env, const std::string_view path);
+bool RunAbcFileOnArkJSVM(napi_env env, const std::string_view path, std::string_view testName);
 
 /// @brief Empty function to call in case of linking to binary without using library functions.
 void LinkWithLibraryTrick();

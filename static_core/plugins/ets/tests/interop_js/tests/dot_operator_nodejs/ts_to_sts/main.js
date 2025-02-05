@@ -1,4 +1,4 @@
-
+'use strict';
 /**
  * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-const {
-    ProtectedClass,
-    createProtectedClassFromSts,
-} = require('class_method.test.abc');
-
-function checkProtectedClassMethod() {
-    const ETSClass = new ProtectedClass();
-
-    ASSERT_TRUE(ETSClass.compare(ETSClass));
-}
-
-function checkCreateProtectedClassFromSts() {
-    const ETSClass = createProtectedClassFromSts();
-
-    ASSERT_TRUE(ETSClass.compare(ETSClass));
-}
-
-checkProtectedClassMethod();
-checkCreateProtectedClassFromSts();
+Object.defineProperty(exports, '__esModule', { value: true });
+exports.notNullishObj = exports.Obj = exports.tsString = exports.tsInt = void 0;
+exports.tsInt = 1;
+exports.tsString = 'string';
+exports.Obj = {
+    name: 'test',
+    inside: {
+        name: 'test'
+    },
+    sum: function () { return exports.tsInt; },
+    arr: [1, 2, 3]
+};
+exports.notNullishObj = {
+    secondName: null,
+};

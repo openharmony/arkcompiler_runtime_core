@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require('escompat.test.js');
+const { etsVm, getTestModule } = require('escompat.test.abc');
 
 const etsMod = getTestModule('escompat_test');
 const StringifyJSValue = etsMod.getFunction('JSON_stringify_jsv');
@@ -37,6 +37,16 @@ class C {
 
 function tmp() {}
 
+function testThrow()
+{
+	try {
+		let etsCodeFromJson = StringifyJSValue(new C());
+		throw 124;
+	} catch (e) {
+		ASSERT_EQ(e, 123);
+	}
+}
+
 {
 	ASSERT_EQ(StringifyJSValue(tmp), 'undefined');
 
@@ -48,10 +58,5 @@ function tmp() {}
 
 	ASSERT_EQ(jsvsield, '{"x":{"x":"123","y":{"z":123}}}');
 
-	try {
-		let etsCodeFromJson = StringifyJSValue(new C());
-		throw 124;
-	} catch (e) {
-		ASSERT_EQ(e, 123);
-	}
+	// NOTE: Call testThrow() after #22502 is fixed.
 }

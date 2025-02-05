@@ -25,13 +25,13 @@ namespace ark::ets::interop::js::helper {
 static constexpr const char *MODULE_PREFIX = "[INTEROP_TEST_HELPER] ";
 static constexpr const char *CONCATENATED_ARGV_ENV_VAR = "CONCATENATED_ARGV_ENV_VAR";
 
-bool RunAbcFileOnArkJSVM(napi_env env, const std::string_view path)
+bool RunAbcFileOnArkJSVM(napi_env env, const std::string_view path, std::string_view testName)
 {
     auto *engine = reinterpret_cast<NativeEngine *>(env);
     auto *vm = const_cast<EcmaVM *>(engine->GetEcmaVm());
 
     std::string normalizedPath = panda::JSNApi::NormalizePath(path.data());
-    std::string entrypoint("_GLOBAL::func_main_0");
+    std::string entrypoint(testName.data());
 
     return panda::JSNApi::Execute(vm, normalizedPath, entrypoint);
 }

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -34,16 +34,18 @@ gen_file(TARGET frontend_test_number_subtypes_gen_ets
     REQUIRES ${CMAKE_CURRENT_SOURCE_DIR}/number_subtypes.rb
 )
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_test_number_subtypes
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test_number_subtypes
     CPP_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes.cpp
     ETS_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes.sts
     ETS_CONFIG ${ETS_CONFIG}
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module.js
 )
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_frontend_test_number_subtypes
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_frontend_test_number_subtypes
     CPP_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes.cpp
     ETS_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes_frontend.sts
     ETS_CONFIG ${ETS_CONFIG}
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module.js
 )
 
 add_dependencies(ets_interop_js_test_number_subtypes test_number_subtypes_gen_cpp)

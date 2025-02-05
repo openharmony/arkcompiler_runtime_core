@@ -84,7 +84,7 @@ function testNanCall() : String {
 
 function testThrowing() : String {
     try {
-        return Throwing(123) + "A";
+        return Throwing() + "A";
     } catch (e: JSError) {
         return e.getValue() + "A";
     }

@@ -136,8 +136,12 @@ private:
         ASSERT(status == napi_ok);
 
         napi_value jsPath;
-        auto pathToModule = interopJsTestPath_ + "/" + modulePath;
-
+        std::string pathToModule;
+        if (runOnArkJSVM_) {
+            pathToModule = jsAbcFilePath_ + "/" + modulePath;
+        } else {
+            pathToModule = interopJsTestPath_ + "/" + modulePath;
+        }
         status = napi_create_string_utf8(jsEnv_, pathToModule.data(), pathToModule.length(), &jsPath);
 
         napi_value jsGtestEnvObject = GetJsGtestEnvObject(jsEnv_);
@@ -191,7 +195,7 @@ private:
         std::string outputPath = jsAbcFilePath_ + "/" + fileWithoutExtension + ".abc";
 
         // RunAbcFileOnArkJSVM call should be replaced with napi_execute_abc after it is implemented (#20536).
-        return interop::js::helper::RunAbcFileOnArkJSVM(env, outputPath.c_str());
+        return interop::js::helper::RunAbcFileOnArkJSVM(env, outputPath.c_str(), fileWithoutExtension.c_str());
     }
 
     static std::string ReadFile(const std::string &fullPath)
