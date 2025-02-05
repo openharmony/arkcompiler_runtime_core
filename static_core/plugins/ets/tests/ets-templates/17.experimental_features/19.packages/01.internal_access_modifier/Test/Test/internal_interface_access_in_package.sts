@@ -15,7 +15,10 @@ limitations under the License.
 
 /*---
 desc: Check interface with internal access modifier in package.
-assert: Member or constructor with private modifier can be accessed only within their declaring class.
+assert: >-
+    The modifier internal indicates that a class member, a constructor, or an interface member is accessible
+    within its compilation unit only. If the compilation unit is a package, then internal members can be used
+    in any package module.
 tags: [negative, compile-only]
 ---*/
 
