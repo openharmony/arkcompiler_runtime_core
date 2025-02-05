@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,41 +12,7 @@
 # limitations under the License.
 
 declarations:
-  # variables
-  - >
-    declare let x: int;
-  - >
-    declare const obj: Object;
-  - >
-    declare let a: int, b: float, c: string, d: Byte[], e: string[];
-  - >
-    declare const a: short, b: double, c: Object[];
-  # functions
-  - >
-    declare function fun(x: int): void
-  - >
-    declare function foo(x: number, y: string, z: Object[]): double
-  - >
-    declare function bar<U, V, R>(x: U, y: V): R
-  - >
-    declare function baz(x?: int, y?: number): void
   # classes
-  - >
-    declare class A
-  - >
-    declare final class B
-  - >
-    declare abstract class C
-  - >
-    class A {}
-
-    declare class B extends A
-  - >
-    interface A {}
-
-    declare class B implements A
-  - >
-    declare class A<T1, T2>
   - >
     declare class A {}
   - >
@@ -145,7 +111,7 @@ declarations:
     }
   - >
     declare class A {
-      foo(): int throws Exception
+      foo(): int throws
     }
   # classes and accessors
   - >
@@ -179,68 +145,54 @@ declarations:
       override get foo(): int
       override set foo(x: int): void
     }
-  # interfaces
   - >
-    declare interface A {}
-  - >
-    declare interface B {
-       a: int
-       b: float
-       c: Byte[]
+    declare class MyIndexable {
+      $_get(index: number): MyIndexable
+      $_set(index: number, value: MyIndexable): void
     }
   - >
-    declare interface C {
-      foo(x: number, y: string, z: double[]): void
+    declare class MyIndexable {
+      [index: number]: MyIndexable
     }
   - >
-    declare interface D<T1, T2> {
-      a: T1
-      b: T2
+    declare class MyIndexable {
+      readonly [index: number]: MyIndexable
     }
   - >
-    declare interface E<U, V, R> {
-      foo(x: U, y: V): R
+    declare class MyIndexable<R> {
+      [index: number]: R
     }
   - >
-    declare interface A {
+    class Returnee {}
+    
+    declare class MyIndexable {
+      readonly [index: number]: Returnee
+    }
+  - >
+    declare class CallSignatureDeclaration {
+      static $_invoke(a: number, b: number): number 
+    }
+  - >
+    declare class CallSignatureDeclaration {
+      static $_instantiate(factory: () => CallSignatureDeclaration): CallSignatureDeclaration 
+    }
+  - >
+    class MyIterable implements Iterator<String> {
+      next(): IteratorResult<String> {
+        return {done: true, value: 'Hello World'}
+      }
     }
     
-    declare interface B extends A {
+    declare class IterableClass  {
+      [Symbol.iterator](): MyIterable
     }
   - >
-    declare interface A {
-      get foo(): int
-      set foo(v: int): void
-    }
-  # namespaces
-  - >
-    declare namespace Ambient {}
-  - >
-    declare namespace Ambient {
-      let x: int
-      let y: double
-      let z: string
-    }
-  - >
-    declare namespace Ambient {
-      const x: Object
-      const y: float
-      const z: Byte[]
-    }
-  - >
-    declare namespace Ambient {
-      function foo(): void
-    }
-  - >
-    declare namespace Ambient {
-      class A
-    }
-  - >
-    declare namespace Ambient {
-      interface A
-    }
-  - >
-    declare namespace Ambient {
-      namespace NestedAmbient {
+    class MyIterable implements Iterator<String> {
+      next(): IteratorResult<String> {
+        return {done: true, value: 'Hello World'}
       }
+    }
+    
+    declare class IterableClass  {
+      $_iterator(): MyIterable
     }
