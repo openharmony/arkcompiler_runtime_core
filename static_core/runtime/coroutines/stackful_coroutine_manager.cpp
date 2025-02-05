@@ -909,7 +909,7 @@ bool StackfulCoroutineManager::DestroyExclusiveWorker()
 
 bool StackfulCoroutineManager::IsExclusiveWorkersLimitReached() const
 {
-    bool limitIsReached = GetActiveWorkersCount() - commonWorkersCount_ > exclusiveWorkersLimit_;
+    bool limitIsReached = GetActiveWorkersCount() - commonWorkersCount_ >= exclusiveWorkersLimit_;
     LOG_IF(limitIsReached, DEBUG, COROUTINES) << "The programm reached the limit of exclusive workers";
     return limitIsReached;
 }
