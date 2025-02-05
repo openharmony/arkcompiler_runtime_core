@@ -17,11 +17,11 @@
 
 #include "include/class.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_abc_file.h"
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_string.h"
-#include "runtime/include/thread_scopes.h"
 
 namespace ark::ets {
 
@@ -128,6 +128,38 @@ bool TryLoadingClassInChain(const uint8_t *descriptor, DecoratorErrorHandler &er
     return true;
 }
 
+/// @brief Walks through RuntimeLinker chain and enumerates all panda files
+bool TryEnumeratePandaFilesInChain(const ClassLinkerContext *ctx,
+                                   const std::function<bool(const panda_file::File &)> &cb)
+{
+    ASSERT(ctx != nullptr);
+
+    if (ctx->IsBootContext()) {
+        ctx->EnumeratePandaFiles(cb);
+        return true;
+    }
+
+    // All non-boot contexts are represented by EtsClassLinkerContext
+    auto *etsLinkerContext = reinterpret_cast<const EtsClassLinkerContext *>(ctx);
+    auto *runtimeLinker = etsLinkerContext->GetRuntimeLinker();
+    auto *abcRuntimeLinkerClass = PandaEtsVM::GetCurrent()->GetClassLinker()->GetAbcRuntimeLinkerClass();
+    if (!runtimeLinker->IsInstanceOf(abcRuntimeLinkerClass)) {
+        // Unexpected behavior, cannot walk through chain
+        return false;
+    }
+
+    auto *abcRuntimeLinker = EtsAbcRuntimeLinker::FromEtsObject(runtimeLinker);
+    auto *parentLinker = abcRuntimeLinker->GetParentLinker();
+    ASSERT(parentLinker != nullptr);
+    auto *parentContext = parentLinker->GetClassLinkerContext();
+    if (!TryEnumeratePandaFilesInChain(parentContext, cb)) {
+        return false;
+    }
+
+    parentContext->EnumeratePandaFiles(cb);
+    return true;
+}
+
 }  // namespace
 
 Class *EtsClassLinkerContext::LoadClass(const uint8_t *descriptor, [[maybe_unused]] bool needCopyDescriptor,
@@ -171,6 +203,7 @@ Class *EtsClassLinkerContext::LoadClass(const uint8_t *descriptor, [[maybe_unuse
 
 void EtsClassLinkerContext::EnumeratePandaFilesImpl(const std::function<bool(const panda_file::File &)> &cb) const
 {
+    ASSERT(PandaEtsVM::GetCurrent()->GetMutatorLock()->HasLock());
     auto *runtimeLinker = GetRuntimeLinker();
     auto *klass = PandaEtsVM::GetCurrent()->GetClassLinker()->GetAbcRuntimeLinkerClass();
     if (!runtimeLinker->IsInstanceOf(klass)) {
@@ -179,8 +212,8 @@ void EtsClassLinkerContext::EnumeratePandaFilesImpl(const std::function<bool(con
     auto *contextAbcFiles = EtsAbcRuntimeLinker::FromEtsObject(runtimeLinker)->GetAbcFiles();
     ASSERT(contextAbcFiles != nullptr);
     for (size_t i = 0, end = contextAbcFiles->GetLength(); i < end; ++i) {
-        auto *abcFile = EtsAbcFile::FromEtsObject(contextAbcFiles->Get(i));
-        if (!cb(*abcFile->GetPandaFile())) {
+        auto *pf = EtsAbcFile::FromEtsObject(contextAbcFiles->Get(i))->GetPandaFile();
+        if (!cb(*pf)) {
             break;
         }
     }
@@ -188,9 +221,15 @@ void EtsClassLinkerContext::EnumeratePandaFilesImpl(const std::function<bool(con
 
 void EtsClassLinkerContext::EnumeratePandaFiles(const std::function<bool(const panda_file::File &)> &cb) const
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ScopedManagedCodeThread scope(coro);
     EnumeratePandaFilesImpl(cb);
+}
+
+void EtsClassLinkerContext::EnumeratePandaFilesInChain(const std::function<bool(const panda_file::File &)> &cb) const
+{
+    [[maybe_unused]] bool succeeded = TryEnumeratePandaFilesInChain(this, cb);
+    // `RuntimeLinker` chain must be always traversed correctly,
+    // because `AbcRuntimeLinker` is the only base class for all user-defined linkers
+    ASSERT(succeeded);
 }
 
 Class *EtsClassLinkerContext::FindAndLoadClass(const uint8_t *descriptor, ClassLinkerErrorHandler *errorHandler)

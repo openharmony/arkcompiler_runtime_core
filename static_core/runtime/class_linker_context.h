@@ -96,6 +96,12 @@ public:
 
     virtual void EnumeratePandaFiles(const std::function<bool(const panda_file::File &)> & /* cb */) const {}
 
+    /// @brief Enumerate panda files in chained contexts
+    virtual void EnumeratePandaFilesInChain(const std::function<bool(const panda_file::File &)> &cb) const
+    {
+        EnumeratePandaFiles(cb);
+    }
+
     size_t NumLoadedClasses()
     {
         os::memory::LockHolder lock(classesLock_);

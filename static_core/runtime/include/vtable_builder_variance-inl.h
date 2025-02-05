@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,28 +21,31 @@
 namespace ark {
 
 template <class ProtoCompatibility, class OverridePred>
-bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::IsOverriddenBy(Method::ProtoId const &base,
+bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::IsOverriddenBy(const ClassLinkerContext *ctx,
+                                                                             Method::ProtoId const &base,
                                                                              Method::ProtoId const &derv)
 {
     if (&base.GetPandaFile() == &derv.GetPandaFile() && base.GetEntityId() == derv.GetEntityId()) {
         return true;
     }
-    return ProtoCompatibility()(base, derv);
+    return ProtoCompatibility(ctx)(base, derv);
 }
 
 template <class ProtoCompatibility, class OverridePred>
-bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::IsOverriddenOrOverrides(Method::ProtoId const &p1,
+bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::IsOverriddenOrOverrides(const ClassLinkerContext *ctx,
+                                                                                      Method::ProtoId const &p1,
                                                                                       Method::ProtoId const &p2)
 {
     if (&p1.GetPandaFile() == &p2.GetPandaFile() && p1.GetEntityId() == p2.GetEntityId()) {
         return true;
     }
-    return ProtoCompatibility()(p1, p2) || ProtoCompatibility()(p2, p1);
+    return ProtoCompatibility(ctx)(p1, p2) || ProtoCompatibility(ctx)(p2, p1);
 }
 
 template <class ProtoCompatibility, class OverridePred>
 bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ProcessClassMethod(const MethodInfo *info)
 {
+    auto *ctx = info->GetLoadContext();
     bool compatibleFound = false;
 
     for (auto it = SameNameMethodInfoIterator(vtable_.Methods(), info); !it.IsEmpty(); it.Next()) {
@@ -51,7 +54,7 @@ bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ProcessClassMethod
         if (!itInfo->IsBase()) {
             continue;
         }
-        if (IsOverriddenBy(itInfo->GetProtoId(), info->GetProtoId()) && OverridePred()(itInfo, info)) {
+        if (IsOverriddenBy(ctx, itInfo->GetProtoId(), info->GetProtoId()) && OverridePred()(itInfo, info)) {
             if (UNLIKELY(itInfo->IsFinal())) {
                 OnVTableConflict(errorHandler_, ClassLinker::Error::OVERRIDES_FINAL, "Method overrides final method",
                                  info, itInfo);
@@ -77,13 +80,14 @@ template <class ProtoCompatibility, class OverridePred>
 std::optional<MethodInfo const *>  // CC-OFF(G.FMT.07) project code style
 VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ScanConflictingDefaultMethods(const MethodInfo *info)
 {
+    auto *ctx = info->GetLoadContext();
     // NOTE(vpukhov): test public flag
     for (auto it = SameNameMethodInfoIterator(vtable_.Methods(), info); !it.IsEmpty(); it.Next()) {
         MethodInfo const *itinfo = it.Value().second.CandidateOr(it.Value().first);
         if (itinfo->IsInterfaceMethod()) {
             continue;
         }
-        if (IsOverriddenBy(info->GetProtoId(), itinfo->GetProtoId())) {
+        if (IsOverriddenBy(ctx, info->GetProtoId(), itinfo->GetProtoId())) {
             return std::nullopt;
         }
     }
@@ -94,7 +98,7 @@ VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ScanConflictingDefaultM
             continue;
         }
         ASSERT(itinfo->GetMethod()->GetClass() != info->GetMethod()->GetClass());
-        if (IsOverriddenOrOverrides(info->GetProtoId(), itinfo->GetProtoId())) {
+        if (IsOverriddenOrOverrides(ctx, info->GetProtoId(), itinfo->GetProtoId())) {
             return itinfo;
         }
     }
@@ -107,7 +111,7 @@ VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ScanConflictingDefaultM
         if (itinfo->GetMethod()->GetClass() == info->GetMethod()->GetClass()) {
             continue;
         }
-        if (IsOverriddenOrOverrides(info->GetProtoId(), itinfo->GetProtoId())) {
+        if (IsOverriddenOrOverrides(ctx, info->GetProtoId(), itinfo->GetProtoId())) {
             return itinfo;
         }
     }

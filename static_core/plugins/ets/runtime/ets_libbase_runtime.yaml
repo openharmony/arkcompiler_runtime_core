@@ -3558,6 +3558,18 @@ intrinsics:
       args: [ std.core.RuntimeLinker, std.core.String ]
     impl: ark::ets::intrinsics::EtsAbcFileLoadAbcFile
 
+  - name: StdCoreAbcFileLoadFromMemory
+    space: ets
+    class_name: std.core.AbcFile
+    method_name: loadFromMemory
+    static: true
+    signature:
+      ret: std.core.AbcFile
+      args:
+        - std.core.RuntimeLinker
+        - i8[]
+    impl: ark::ets::intrinsics::EtsAbcFileLoadFromMemory
+
   - name: StdCoreAbcFileLoadClass
     space: ets
     class_name: std.core.AbcFile
@@ -3577,6 +3589,30 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::EtsAbcFileGetFilename
+
+#############################
+# std.core.AbcRuntimeLinker #
+#############################
+  - name: StdCoreAbcRuntimeLinkerLoadClassFromAbcFiles
+    space: ets
+    class_name: std.core.AbcRuntimeLinker
+    method_name: loadClassFromAbcFiles
+    static: false
+    signature:
+      ret: std.core.Class
+      args: [ std.core.String, u1 ]
+    impl: ark::ets::intrinsics::EtsAbcRuntimeLinkerLoadClassFromAbcFiles
+
+  - name: StdCoreAbcRuntimeLinkerAddNewAbcFiles
+    space: ets
+    class_name: std.core.AbcRuntimeLinker
+    method_name: addAbcFiles
+    static: false
+    signature:
+      ret: void
+      args:
+        - std.core.AbcFile[]
+    impl: ark::ets::intrinsics::EtsAbcRuntimeLinkerAddNewAbcFiles
 
 ###################
 # std.core.RegExp #

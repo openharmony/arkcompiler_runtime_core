@@ -16,6 +16,8 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ABC_RUNTIME_LINKER_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ABC_RUNTIME_LINKER_H
 
+#include "include/object_accessor.h"
+#include "include/object_header.h"
 #include "mem/object_pointer.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_object.h"
@@ -49,6 +51,11 @@ public:
     {
         return EtsObjectArray::FromCoreType(
             ObjectAccessor::GetObject(this, MEMBER_OFFSET(EtsAbcRuntimeLinker, abcFiles_)));
+    }
+
+    void SetAbcFiles(EtsObjectArray *abcFiles)
+    {
+        ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsAbcRuntimeLinker, abcFiles_), abcFiles->GetCoreType());
     }
 
     EtsRuntimeLinker *GetParentLinker()

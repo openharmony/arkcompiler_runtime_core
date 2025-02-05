@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "file.h"
 #include "include/object_header.h"
 #include "include/thread_scopes.h"
 #include "intrinsics.h"
@@ -32,6 +33,17 @@
 
 namespace ark::ets::intrinsics {
 
+static EtsAbcFile *CreateAbcFile(EtsCoroutine *coro, ClassLinkerContext *ctx,
+                                 std::unique_ptr<const panda_file::File> &&pf)
+{
+    auto *abcFileClass = coro->GetPandaVM()->GetClassLinker()->GetAbcFileClass();
+    auto *abcFile = EtsAbcFile::FromEtsObject(EtsObject::Create(coro, abcFileClass));
+    abcFile->SetPandaFile(pf.get());
+
+    Runtime::GetCurrent()->GetClassLinker()->AddPandaFile(std::move(pf), ctx);
+    return abcFile;
+}
+
 EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *filePath)
 {
     ASSERT(filePath != nullptr);
@@ -47,6 +59,7 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
         ScopedNativeCodeThread etsNativeScope(coro);
         pf = panda_file::OpenPandaFileOrZip(path);
     }
+
     if (pf == nullptr) {
         // get hap path
         auto pathStr = std::string(path.begin(), path.end());
@@ -71,16 +84,36 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
 
     if (pf == nullptr) {
         ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ABC_FILE_NOT_FOUND_ERROR,
-                               PandaString("Panda file not found: ") + path);
+                               PandaString("Abc file not found: ") + path);
         return nullptr;
     }
+    return CreateAbcFile(coro, ctx, std::move(pf));
+}
 
-    auto *abcFileClass = coro->GetPandaVM()->GetClassLinker()->GetAbcFileClass();
-    auto *abcFile = EtsAbcFile::FromEtsObject(EtsObject::Create(coro, abcFileClass));
-    abcFile->SetPandaFile(pf.get());
+EtsAbcFile *EtsAbcFileLoadFromMemory(EtsRuntimeLinker *runtimeLinker, ObjectHeader *rawFileArray)
+{
+    ASSERT(rawFileArray != nullptr);
+    ASSERT(runtimeLinker != nullptr);
 
-    Runtime::GetCurrent()->GetClassLinker()->AddPandaFile(std::move(pf), ctx);
-    return abcFile;
+    auto *ctx = runtimeLinker->GetClassLinkerContext();
+    auto *coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope hs(coro);
+    EtsHandle arrayHandle(coro, reinterpret_cast<EtsByteArray *>(rawFileArray));
+
+    std::unique_ptr<const panda_file::File> pf {nullptr};
+    {
+        // Loading panda-file might be time-consuming, which would affect GC
+        // unless being executed in native scope
+        ScopedNativeCodeThread etsNativeScope(coro);
+        pf = panda_file::OpenPandaFileFromMemory(arrayHandle->GetData<void>(), arrayHandle->GetLength());
+    }
+
+    if (pf == nullptr) {
+        ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR,
+                               PandaString("Failed to load abc file from memory"));
+        return nullptr;
+    }
+    return CreateAbcFile(coro, ctx, std::move(pf));
 }
 
 EtsClass *EtsAbcFileLoadClass(EtsAbcFile *abcFile, EtsRuntimeLinker *runtimeLinker, EtsString *clsName, EtsBoolean init)

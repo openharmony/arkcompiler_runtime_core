@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <array>
 #include <sstream>
 
 #include "libpandabase/macros.h"

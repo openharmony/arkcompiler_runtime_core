@@ -40,7 +40,8 @@ endfunction()
 
 function(add_linker_test test additional_dependencies)
     set(noValues SKIP_ARM32_COMPILER)
-    cmake_parse_arguments(ARG "${noValues}" "" "" ${ARGN})
+    set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
+    cmake_parse_arguments(ARG "${noValues}" "" "${multiValueArgs}" ${ARGN})
 
     set(should_skip_compiler "")
     if (ARG_SKIP_ARM32_COMPILER)
@@ -51,7 +52,9 @@ function(add_linker_test test additional_dependencies)
     set(test_in "${linker_tests_in_dir}/${test}.sts")
     set(target ets_test_suite_linker_${test})
 
-    run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target} ${should_skip_compiler})
+    run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target}
+        ${should_skip_compiler}
+        RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
 
     # int
     get_ets_int_targets_list(int_targets_list ${target}-ets-int)
@@ -105,11 +108,35 @@ function(test_runtime_linker_extensions test)
             COMPILER_EXTRA_OPTIONS "--ets-module")
     endforeach()
 
-    list(JOIN additional_abc_files_list ":" additional_abc_files)
-    set(PANDA_RUN_PREFIX ADDITIONAL_ABC_FILES=${additional_abc_files} ${PANDA_RUN_PREFIX})
+    # Build rules for native shared library
+    set(native_lib ${test}-shared-lib)
+    panda_add_library(${native_lib} SHARED ${linker_tests_in_dir}/native/${test}.cpp)
+    panda_target_include_directories(${native_lib} PRIVATE
+        ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani
+        ${PANDA_ROOT}
+        ${PANDA_ROOT}/libpandabase
+        ${CMAKE_BINARY_DIR}/libpandabase
+        ${PANDA_BINARY_ROOT}
+        ${PANDA_BINARY_ROOT}/libpandabase/generated)
+    panda_target_link_libraries(${native_lib}
+        arkbase
+        arkfile
+    )
+    set(native_lib_dir "${linker_tests_out_dir}/lib")
+    file(MAKE_DIRECTORY ${native_lib_dir})
+    set_target_properties("${native_lib}" PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${native_lib_dir}")
 
-    add_custom_target(additional_dependencies DEPENDS ${compilations_targets_list})
-    add_linker_test(${test} additional_dependencies SKIP_ARM32_COMPILER)
+    # Run prefix with list of ABC files and path to native library
+    list(JOIN additional_abc_files_list ":" additional_abc_files)
+    set(PANDA_RUN_PREFIX
+        LD_LIBRARY_PATH=${native_lib_dir}
+        ADDITIONAL_ABC_FILES=${additional_abc_files}
+        ${PANDA_RUN_PREFIX})
+
+    add_custom_target(additional_dependencies DEPENDS ${compilations_targets_list} ${native_lib})
+    add_linker_test(${test} additional_dependencies
+        SKIP_ARM32_COMPILER
+        RUNTIME_EXTRA_OPTIONS "--compiler-inlining-blacklist=${test}.Test::createWeakRef")
 
 endfunction()
 
@@ -128,7 +155,7 @@ function(test_app_linker_context_exception TARGET WORK_DIR)
     set(BOOT_PANDA_FILES ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc)
 
     add_custom_target(${TARGET}
-        COMMAND ${linker_tests_in_dir}/test_app_linker_context_exception.sh
+        COMMAND ${linker_tests_in_dir}/scripts/test_app_linker_context_exception.sh
             --run-prefix="${PANDA_RUN_PREFIX}"
             --ark-binary=$<TARGET_FILE:ark>
             --boot-panda-files=${BOOT_PANDA_FILES}

@@ -864,7 +864,7 @@ void PandaEtsVM::BeforeShutdown()
     weakRefList->TraverseAndFinalize();
 }
 
-EtsAbcRuntimeLinker *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector<PandaString> &abcFiles)
+ClassLinkerContext *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector<PandaString> &abcFiles)
 {
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
@@ -903,9 +903,10 @@ EtsAbcRuntimeLinker *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVecto
         exceptionHandler();
     }
 
-    // Save global reference to created application `AbcRuntimeLinker`.
+    // Save global reference to created application `AbcRuntimeLinker`
     GetGlobalObjectStorage()->Add(linkerHandle->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
-    return linkerHandle.GetPtr();
+    // Safe to return a non-managed object
+    return linkerHandle->GetClassLinkerContext();
 }
 
 /* static */

@@ -39,16 +39,11 @@ export class AbcRuntimeLinker extends RuntimeLinker {
      * @throws errors happened on loading ABC file.
      */
     public addAbcFiles(paths: string[]): void {
-        const newAbcFiles = new (AbcFile | undefined)[this.abcFiles.length + paths.length];
-        let i = 0;
-        let currentLength = this.abcFiles.length;
-        for (; i < currentLength; i++) {
-            newAbcFiles[i] = this.abcFiles[i];
+        const newFiles = new (AbcFile | undefined)[paths.length];
+        for (let i = 0; i < paths.length; i++) {
+            newFiles[i] = AbcFile.loadAbcFile(this, paths[i]);
         }
-        for (; i < newAbcFiles.length; i++) {
-            newAbcFiles[i] = AbcFile.loadAbcFile(this, paths[i - currentLength]);
-        }
-        this.abcFiles = newAbcFiles;
+        this.addAbcFiles(newFiles);
     }
 
     /**
@@ -68,12 +63,15 @@ export class AbcRuntimeLinker extends RuntimeLinker {
         if (optClass) {
             return optClass;
         }
-        for (const file of this.abcFiles) {
-            optClass = file!.loadClass(this, clsName, init);
-            if (optClass) {
-                return optClass;
-            }
-        }
-        return undefined;
+        return this.loadClassFromAbcFiles(clsName, init);
     }
+
+    /**
+     * Adds new ABC files in the linker's context.
+     *
+     * @param newFiles ABC files loaded into current context.
+     */
+    protected final native addAbcFiles(newFiles: (AbcFile | undefined)[]): void
+
+    private native loadClassFromAbcFiles(clsName: string, init: boolean): Class | undefined
 }

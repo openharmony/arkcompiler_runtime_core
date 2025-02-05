@@ -698,9 +698,9 @@ void EtsClassLinkerExtension::RemoveRefToLinker(ClassLinkerContext *ctx)
 
 ClassLinkerContext *EtsClassLinkerExtension::CreateApplicationClassLinkerContext(const PandaVector<PandaString> &path)
 {
-    auto *appRuntimeLinker = PandaEtsVM::GetCurrent()->CreateApplicationRuntimeLinker(path);
-    ASSERT(appRuntimeLinker != nullptr);
-    return appRuntimeLinker->GetClassLinkerContext();
+    ClassLinkerContext *ctx = PandaEtsVM::GetCurrent()->CreateApplicationRuntimeLinker(path);
+    ASSERT(ctx != nullptr);
+    return ctx;
 }
 
 }  // namespace ark::ets

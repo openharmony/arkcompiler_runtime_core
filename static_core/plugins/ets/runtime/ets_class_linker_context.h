@@ -19,6 +19,7 @@
 #include <libpandafile/include/source_lang_enum.h>
 
 #include "libpandabase/macros.h"
+#include "os/mutex.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_runtime_linker.h"
@@ -51,6 +52,8 @@ public:
 
     void EnumeratePandaFiles(const std::function<bool(const panda_file::File &)> &cb) const override;
 
+    void EnumeratePandaFilesInChain(const std::function<bool(const panda_file::File &)> &cb) const override;
+
     PandaVector<std::string_view> GetPandaFilePaths() const override
     {
         PandaVector<std::string_view> filePaths;
@@ -73,6 +76,11 @@ public:
         return EtsRuntimeLinker::FromCoreType(linker);
     }
 
+    os::memory::RecursiveMutex &GetAbcFilesMutex()
+    {
+        return abcFilesMutex_;
+    }
+
 private:
     /**
      * @brief Try to find and load class in AbcRuntimeLinker's chain without invoking managed implementations.
@@ -86,6 +94,9 @@ private:
     bool TryLoadingClassFromNative(const uint8_t *descriptor, ClassLinkerErrorHandler *errorHandler, Class **klass);
 
     void EnumeratePandaFilesImpl(const std::function<bool(const panda_file::File &)> &cb) const;
+
+private:
+    os::memory::RecursiveMutex abcFilesMutex_;
 };
 
 }  // namespace ark::ets
