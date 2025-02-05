@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -58,7 +58,7 @@ class TestSRCDumper(TestFileBased):
     def check_for_parser_error(self) -> bool:
         with os.fdopen(os.open(self.path, os.O_RDONLY, mode=511), "r", encoding="utf-8") as file:
             data = file.read()
-            regex = r"\/\*\s+@@(@|\?)\s+.*?\s+Error\s+(SyntaxError|Error):\s+.*?\s+\*\/"
+            regex = r"\/\*\s+@@(@|\?)\s+.*?\s+Error\s+(SyntaxError|TypeError|Error):\s+.*?\s+\*\/"
             return re.search(regex, data) is not None
 
 

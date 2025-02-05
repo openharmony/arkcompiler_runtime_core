@@ -72,11 +72,11 @@ Usage Example
 4. Look through the ETS-Warnings in the output. For the code in the example
    above, "System |LANG|" gives the following warnings:
 
-    * ``ETS Warning: Suggest 'final' modifier for class 'K'. [usage.sts:7:11]``
+    * ``Warning: Suggest 'final' modifier for class 'K'. [usage.sts:7:11]``
 
-    * ``ETS Warning: Suggest 'final' modifier for method 'foo_to_suggest'. [usage.sts:8:23]``
+    * ``Warning: Suggest 'final' modifier for method 'foo_to_suggest'. [usage.sts:8:23]``
 
-    * ``ETS Warning: Suggest 'final' modifier for method 'foo'. [usage.sts:9:21]``
+    * ``Warning: Suggest 'final' modifier for method 'foo'. [usage.sts:9:21]``
 
 5. Rewrite the code as suggested by "System |LANG|". After rewriting |LANG|,
    the code is as follows:
