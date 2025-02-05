@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-import reducer, { setTheme, setPrimaryColor, setDisasm, Theme } from './appState';
+import reducer, { setTheme, setPrimaryColor, setDisasm, Theme, setRuntimeVerify } from './appState';
 
 describe('appStateSlice reducer', () => {
     const initialState = {
         theme: (localStorage.getItem('theme') as Theme) ||
         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
         disasm: false,
+        verifier: true,
+        runtimeVerify: false,
         primaryColor: '#e32b49',
         versions: {
             arktsVersion: '',

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@
   color: var(--primary1) !important;
 }
 .disasm {
-  margin: auto;
+  margin: auto 0;
   font-family: "Roboto Mono";
 }
 .disasm {
@@ -54,6 +54,9 @@
   display: flex;
 }
 .pop {
+  margin-left: 14px;
+}
+.pop {
   div > svg > path:last-child {
     fill: var(--divider) !important;
   }
@@ -66,4 +69,48 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.options {
+  background: var(--divider) !important;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+.header {
+  color: var(--text-color) !important;
+  font-family: "Roboto Mono";
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 14px;
+}
+.btn {
+  background-color: transparent !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--divider) !important;
+  border-radius: 4px;
+  padding: 4px 16px;
+  font-family: "Roboto Mono";
+  box-shadow: none !important;
+}
+.btnBorder {
+  border: 1px solid var(--text-color) !important;
+}
+.btn:hover {
+  color: var(--primary1) !important;
+  border: 1px solid var(--primary1) !important;
+}
+.btnCancel {
+  background-color: transparent !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--text-color) !important;
+  border-radius: 4px;
+  padding: 4px 16px;
+  font-family: "Roboto Mono";
+  box-shadow: none !important;
+}
+.btnContainer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,11 @@ interface IState {
     theme: Theme;
     primaryColor: string;
     disasm: boolean;
+    verifier: boolean;
     versions: Versions;
     versionsLoading: boolean;
     clearLogsEachRun: boolean;
+    runtimeVerify: boolean;
 }
 
 export interface Versions {
@@ -35,6 +37,8 @@ export interface Versions {
 const initialState: IState = {
     theme: (localStorage.getItem('theme') as Theme) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
     disasm: false,
+    verifier: true,
+    runtimeVerify: false,
     primaryColor: '#e32b49',
     versions: {
         frontend: '',
@@ -59,6 +63,12 @@ const appStateSlice = createSlice({
         setDisasm: (state, action: PayloadAction<boolean>) => {
             state.disasm = action.payload;
         },
+        setVerifier: (state, action: PayloadAction<boolean>) => {
+            state.verifier = action.payload;
+        },
+        setRuntimeVerify: (state, action: PayloadAction<boolean>) => {
+            state.runtimeVerify = action.payload;
+        },
         setVersions(state, action: PayloadAction<Versions>) {
             state.versions = action.payload;
         },
@@ -75,10 +85,12 @@ const appStateSlice = createSlice({
 export const {
     setTheme,
     setDisasm,
+    setVerifier,
     setPrimaryColor,
     setVersions,
     setVersionsLoading,
     setClearLogsEachRun,
+    setRuntimeVerify,
 } = appStateSlice.actions;
 
 export default appStateSlice.reducer;

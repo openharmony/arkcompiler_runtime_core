@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,9 +110,13 @@ const MosaicApp = (): JSX.Element => {
                 renderTile={(id, path): JSX.Element => (
                     <MosaicWindow<ViewId>
                         path={path}
-                        // @ts-ignore
-                        title={header(id)}
+                        title={TITLE_MAP[id]}
                         toolbarControls={<></>}
+                        renderToolbar={(props, draggable): JSX.Element => (
+                            <div className={styles.customHeader}>
+                                {header(id)}
+                            </div>
+                        )}
                         className={styles.window}
                     >
                         {TITLE_MAP[id] === 'Code editor' ? (

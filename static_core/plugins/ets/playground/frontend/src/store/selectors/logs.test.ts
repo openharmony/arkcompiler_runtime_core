@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,8 @@ describe('Log Selectors', () => {
                 runErr: [{ message: 'run error log', isRead: false }],
                 disasmOut: [{ message: 'disassembly output log', isRead: true }],
                 disasmErr: [{ message: 'disassembly error log', isRead: false }],
+                verifierOut: [{ message: 'verifier output log', isRead: true }],
+                verifierErr: [{ message: 'verifier error log', isRead: false }],
                 out: [{ message: 'general output log', isRead: true }],
                 err: [{ message: 'general error log', isRead: false }],
             },
