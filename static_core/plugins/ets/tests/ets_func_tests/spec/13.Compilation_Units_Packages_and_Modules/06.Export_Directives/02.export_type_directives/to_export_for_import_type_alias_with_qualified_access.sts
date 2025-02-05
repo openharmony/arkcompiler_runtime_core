@@ -15,7 +15,7 @@
  
 /*---
  desc: 13.07 Export Directives
- name: 13.compilation_units_packages_and_modules/13.07.export_directives/13.07.02.export_type_directives/import_type_alias_with_qualified_access_defect
+ name: 13.compilation_units/13.07.export_directives/13.07.02.export_type_directives/import_type_alias_with_qualified_access_defect
  tags: [compile-only, not-a-test]
  ---*/
 

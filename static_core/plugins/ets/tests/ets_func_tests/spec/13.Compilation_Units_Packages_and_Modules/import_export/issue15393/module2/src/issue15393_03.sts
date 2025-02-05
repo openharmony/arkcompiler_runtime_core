@@ -15,7 +15,7 @@
 
 /*---
  desc: 13.06.03 Re-Export Directives
- name: 13.compilation_units_packages_and_modules/13.06.export_directives/13.06.03.re-export_directives/issue15393/module1/src/issue15393_03
+ name: 13.compilation_units/13.06.export_directives/13.06.03.re-export_directives/issue15393/module1/src/issue15393_03
  tags:
  files: ['./issue15393_04.sts']
  ---*/
