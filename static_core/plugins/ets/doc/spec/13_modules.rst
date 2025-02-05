@@ -505,6 +505,10 @@ import an entity initially exported as default.
     // SomeFile
     export default class SomeClass {}
 
+    // Or 
+    class SomeClass {}
+    export default SomeClass
+
 .. index::
    import binding
    entity
@@ -1220,8 +1224,13 @@ in the example below exports variable 'v' by its name:
 .. code-block:: abnf
 
     singleExportDirective:
-        'export' identifier
+        'export' 'default'? identifier
         ;
+
+
+If ``default`` is added then there could be only one such export directive in
+the current compilation unit. Otherwise, a :index:`compile-time error` occurs.
+
 
 .. code-block:: typescript
    :linenos:
@@ -1229,11 +1238,16 @@ in the example below exports variable 'v' by its name:
     export v
     let v = 1
 
+    class A {}
+    export default A
+   
+
 .. index::
    export directive
    declaration
    export
    compilation unit
+   default export scheme
 
 |
 
@@ -1473,27 +1487,36 @@ Program Entry Point
 .. meta:
     frontend_status: Done
 
-Separate modules or packages can act as programs (applications). A *program
-entry point* can be of the following two kinds:
+Separate modules or packages can act as programs (applications). Program
+execution starts from the execution of a *program entry point* which can
+be of the following two kinds:
 
-- Top-level statements for separate modules (see :ref:`Top-Level Statements`); or
-- Top-level entry point function (see below).
+- Top-level statements for separate modules (see :ref:Top-Level Statements); or
+- Entry point function (see below).
 
-Thus, a separate module can have the following:
+A separate module can have the following forms of entry point:
 
-- Sole top-level entry point function (``main`` or other as described above);
-- Sole top-level statements (the first statement in the top-level statements
-  is the entry point);
-- Both top-level statements and entry point function (same as above, plus such
-  function is called after the top-level statements execution is completed).
+- Sole entry point function (``main`` or other as described below);
+- Sole top-level statement (the first statement in the top-level statements
+  acts as the entry point);
+- Both top-level statement and entry point function (same as above, plus the
+  function called after the top-level statement execution is completed).
 
-Any exported function can be used as a top-level entry point if the compiler
-environment so provides. By default, a top-level entry point function must be
-called ``main``. In any case, a function must either have no parameters, or
-have one parameter of type ``string[]`` that provides access to the arguments
-of the program command-line. Its return type is either ``void`` (see
-:ref:`Type void`) or ``int``. No overloading is allowed for an entry point
-function.
+A package can have a sole entry point function only (``main`` or other as
+described below).
+
+Entry point functions have the following features:
+
+- Any exported top-level function can be used as an entry point. An entry point
+  is selected by the compiler, the execution enviroment, or both;
+- Entry point function must either have no parameters, or have one parameter of
+  type ``string[]`` that provides access to the arguments of a program command
+  line;
+- Entry point function return type is either ``void`` (see :ref:Type void) or
+  ``int``;
+- Entry point function cannot have overloading;
+- Entry point function is called ``main`` by default.
+
 
 .. index::
    module
@@ -1507,7 +1530,7 @@ function.
    type void
    type int
    overloading
-   top-level statement
+   top-level statements
 
 The example below represents different forms of valid and invalid entry points:
 
@@ -1547,6 +1570,11 @@ The example below represents different forms of valid and invalid entry points:
 
     // Option 5: top-level exported function with command-line arguments
     export function entry(cmdLine: string[]) {}
+
+    // Package example - outputs "Package init" then "Package main"
+    package P
+    function main () { console.log ("Package main")}   
+    static { console.log ("Package init") }
 
 
 |

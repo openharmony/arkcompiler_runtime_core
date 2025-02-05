@@ -19,7 +19,7 @@ Annotations
     frontend_status: Partly
 
 An *annotation* is a special language element that changes the semantics of
-the declaration it is applied to by adding metadata.
+the declaration to which it is applied by adding metadata.
 
 The example below illustrates how an annotation is declared and used:
 
@@ -38,8 +38,8 @@ The example below illustrates how an annotation is declared and used:
 The annotation *ClassAuthor* in the example above adds meta information to
 the class declaration.
 
-An annotation must be placed immediately before the declaration it is applied to.
-An annotation can include arguments as in the example above.
+An annotation must be placed immediately before the declaration to which it is
+applied. An annotation can include arguments as in the example above.
 
 For an annotation to be used, the name of the annotation must be prefixed with
 the character '``@``' (e.g., ``@MyAnno``). Spaces and line separators between
@@ -108,7 +108,7 @@ keyword ``interface`` is prefixed with the character '``@``':
 As any other declared entity, an annotation can be exported by using the
 keyword ``export``.
 
-A *type* in the annotation field is restricted (see :ref:`Types of Annotation Fields`).
+*Type* in the annotation field is restricted (see :ref:`Types of Annotation Fields`).
 
 The default value of an *annotation field* can be specified by using
 *initializer* as *constant expression*. A :index:`compile-time error`
@@ -126,12 +126,12 @@ occurs if the value of this expression cannot be evaluated at compile time.
    keyword export
    type
 
-The *annotation* must be defined at the top level. Otherwise, a
+*Annotation* must be defined at the top level. Otherwise, a
 :index:`compile-time error` occurs.
 
-An *annotation* cannot be extended as inheritance is not supported.
+*Annotation* cannot be extended as inheritance is not supported.
 
-The name of an *annotation* cannot coincide with another entity name:
+The name of an *annotation* cannot coincide with the name of another entity:
 
 .. code-block:: typescript
    :linenos:
@@ -167,7 +167,7 @@ Types of Annotation Fields
 .. meta:
     frontend_status: Done
 
-The choice of types for annotation fields is limited to the following:
+The choice of *types for annotation fields* is limited to the following:
 
 - Numeric types (see :ref:`Numeric Types`);
 - Type ``boolean`` (see :ref:`Boolean Types and Operations`);
@@ -260,7 +260,7 @@ Annotations can be applied to the following:
 
 - Parameters (see :ref:`Parameter List`, :ref:`Optional Parameters`);
 
-- A lambda expression (see :ref:`Lambda Expressions`,
+- Lambda expression (see :ref:`Lambda Expressions`,
   :ref:`Lambda Expressions with Receiver`);
 
 - Local declarations (see :ref:`Local Declarations`).
@@ -315,8 +315,8 @@ Otherwise, a :index:`compile-time error` occurs:
    value
    field
 
-If a field of an array type for an annotation is defined, then the array
-literal syntax is used to set its value:
+If a field of an array type for an annotation is defined, then its value is set
+by using the array literal syntax:
 
 .. code-block:: typescript
    :linenos:
@@ -333,8 +333,8 @@ literal syntax is used to set its value:
     )
     class C3 {/*body*/}
 
-Parentheses after the annotation name can be omitted if setting annotation
-properties is not required:
+If setting annotation properties is not required, then parentheses can be
+omitted after the annotation name:
 
 .. code-block:: typescript
    :linenos:
@@ -374,8 +374,8 @@ short notation to specify just one expression instead of an object literal:
     @deprecated({fromVersion: "5.18"})
     function goo() {}
 
-The behavior of a short notation is exactly the same as that of a notation
-with an object literal.
+The behavior of a short notation and of a notation with an object literal is
+exactly the same.
 
 .. index::
    field annotation
@@ -568,8 +568,8 @@ Standard Annotations
 
 *Standard annotation* is an annotation that is defined in :ref:`Standard Library`,
 or implicitly defined in the compiler (*built-in annotation*).
-A *standard annotation* is usually known to the compiler. A *standard annotation*
-modifies semantics of the declaration it is applied to.
+*Standard annotation* is usually known to the compiler. It modifies the
+semantics of the declaration it is applied to.
 
 .. index::
    standard annotation
@@ -589,12 +589,12 @@ Retention Annotation
 .. meta:
     frontend_status: None
 
-*@Retention* is a standard annotation that is used to annotate
-declaration of other annotations.
+*@Retention* is a standard annotation that is used to annotate a declaration
+of another annotation.
 A :index:`compile-time error` occurs if it is used in other places.
 
-The annotation has a single field ``policy`` of type ``string``. 
-The typical use is:
+The annotation has a single field ``policy`` of type ``string``.
+The typical use is as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -605,28 +605,32 @@ The typical use is:
     @MyAnno // 
     class C {}
 
-The value of this field determine at which point an annotation is used
-and is discarded after use.
-There are three types of retention policies: "SOURCE", "BYTECODE, "RUNTIME":
+The value of this field determines at which point an annotation is used,
+and discarded after use.
+The retention policies can be of three types:
 
-- annotations that use "SOURCE" policy
-  are processed in compile-time and discarded after compilation;
+- "SOURCE"
 
-- metadata specified in annotations that use
-  "BYTECODE" policy is saved into bytecode file,
-  but are discarded during runtime.
+  Annotations that use "SOURCE" policy are processed at compile time, and are
+  discarded after compilation;
 
-- metadata specified in annotations that use
-  "RUNTIME" policy is saved into bytecode file,
-  retained during runtime and can be accessed during runtime.
+- "BYTECODE"
 
-"BYTECODE" is the default retention policy.
+  Metadata specified in annotations that use "BYTECODE" policy are saved into
+  the bytecode file, but are discarded at runtime.
+
+- "RUNTIME"
+
+  Metadata specified in annotations that use "RUNTIME" policy are saved into
+  the bytecode file, are retained and can be accessed at runtime.
+
+The default retention policy is "BYTECODE".
 
 A :index:`compile-time error` occurs if any other string literal is used as
 the value of ``policy`` field.
 
 As ``@Retention`` has a single field, it can be used with a short notation
-(see :ref:`Using Single Field Annotations`):
+(see :ref:`Using Single Field Annotations`) as follows:
 
 .. code-block:: typescript
    :linenos:

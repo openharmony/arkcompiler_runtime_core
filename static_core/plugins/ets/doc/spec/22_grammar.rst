@@ -132,11 +132,7 @@ Grammar Summary
         ;
 
     signature:
-        parameters returnType?
-        ;
-
-    parameters:
-        '(' parameterList? ')'
+        '(' parameterList? ')' returnType?
         ;
 
     returnType:
@@ -144,34 +140,25 @@ Grammar Summary
         ;
 
     parameterList:
-        requiredParameters ','?
-        | requiredParameters ',' optionalParameters ','?
-        | optionalParameters ','?
-        | requiredParameters ',' restParameter
-        | restParameter
-        ;
-
-    requiredParameters:
-        parameter (',' parameter)*
+        parameter (',' parameter)* (',' restParameter)? ','?
+        | restParameter ','?
         ;
 
     parameter:
-        annotationUsage? identifier ':' type
+        annotationUsage? (requiredParameter | optionalParameter)
         ;
 
-    restParameter:
-        '...' parameter
-        ;
-
-    optionalParameters:
-        optionalParameter (',' optionalParameter)
+    requiredParameter:
+        identifier ':' type
         ;
 
     optionalParameter:
-        annotationUsage?
-        ( identifier ':' type '=' expression
+        identifier ':' type '=' expression
         | identifier '?' ':' type
-        )
+        ;
+
+    restParameter:
+        annotationUsage? '...' identifier ':' type
         ;
 
     typeParameters:
@@ -448,35 +435,29 @@ Grammar Summary
         ;
 
     lambdaSignature:
-        lambdaParameters returnType? throwMark?
-        ;
-
-    lambdaParameters:
-        '(' lambdaParameterList? ')'
-        | identifier
+        '(' lambdaParameterList? ')' returnType?
+        | identifier    
         ;
 
     lambdaParameterList:
-        lambdaParameter (',' lambdaParameter)*
-               (',' lambdaOptionalParameters|lambdaRestParameter)?
-        | lambdaRestParameter
-        | optionalParameters
+        lambdaParameter (',' lambdaParameter)* (',' restParameter)? ','?
+        | restParameter ','?
         ;
 
     lambdaParameter:
+        annotationUsage? (lambdaRequiredParameter | lambdaOptionalParameter)    
+        ;
+
+    lambdaRequiredParameter:
         identifier (':' type)?
-        ;
-
-    lambdaRestParameter:
-        '...' lambdaParameter
-        ;
-
-    lambdaOptionalParameters:
-        lambdaOptionalParameter (',' lambdaOptionalParameter)
         ;
 
     lambdaOptionalParameter:
         identifier '?' (':' type)?
+        ;
+
+    lambdaRestParameter:
+        '...' lambdaRequiredParameter
         ;
 
     constantExpression:
@@ -831,7 +812,7 @@ Grammar Summary
         ;
 
     singleExportDirective:
-        'export' identifier
+        'export' 'default'? identifier
         ;
 
     exportTypeDirective:
@@ -999,7 +980,7 @@ Grammar Summary
         ;
 
     receiverParameter:
-        'this' ':' type
+        annotationUsage? 'this' ':' type
         ;
 
     accessorWithReceiverDeclaration:

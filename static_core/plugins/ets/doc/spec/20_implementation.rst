@@ -68,7 +68,7 @@ As an example in a simple implementation:
 
 -  A module (package module) is stored in a single file.
 
--  Files that correspond to a package module are stored in a single folder.
+-  All package modules are stored in files of the same folder.
 
 -  A folder can store several separate modules (one source file to contain a
    separate module or a package module).

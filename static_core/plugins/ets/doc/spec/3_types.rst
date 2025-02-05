@@ -82,20 +82,25 @@ Predefined types include the following:
 
      - Boolean type: ``boolean``;
 
--  Built-in reference types: ``object``, ``string``, ``[]`` (``array``),
-   ``bigint``, ``void``, ``never``, ``null``, ``undefined``;
-
--  Class types: ``Object``, ``String``, ``Array<T>``, ``BigInt``, and boxed
-   types (see :ref:`Boxed Types`).
+-  Reference types: 
+   
+   -  :ref:`Type Object`;
+   -  :ref:`Type never`;
+   -  :ref:`Type void`;
+   -  :ref:`Type undefined`;
+   -  :ref:`Type null`;
+   -  :ref:`Type string`;
+   -  :ref:`Type bigint`;
+   -  :ref:`Array Types` (``Array<T>`` or ``T[]``);
+   -  :ref:`Fixed Array Types`;
+   -  :ref:`Boxed Types`.
 
 .. index::
    predefined type
-   numeric value
    numeric type
    character type
    Boolean type
    reference type
-   class type
 
 |
 
@@ -169,7 +174,6 @@ User-Defined Types
 -  Class types (see :ref:`Classes`);
 -  Interface types (see :ref:`Interfaces`);
 -  Enumeration types (see :ref:`Enumerations`);
--  :ref:`Array Types`;
 -  :ref:`Function Types`;
 -  :ref:`Tuple Types`;
 -  :ref:`Union Types`;
@@ -181,7 +185,6 @@ User-Defined Types
    class type
    interface type
    enumeration type
-   array type
    function type
    union type
    type parameter
@@ -208,25 +211,25 @@ All |LANG| types are summarized in the following table:
    *Value Types*             *Reference Types*         *Value Types*             *Reference Types*
    (Primitive Types)
    ========================= ========================= ========================= =========================
-   ``number``, ``byte``,     ``Number``, ``Byte``,     enumeration types         class types,            
+   ``number``, ``byte``,     ``Number``, ``Byte``,     enumeration types         class types,
    ``short``, ``int``,       ``Short``, ``Int``,                                 interface types,
-   ``long``, ``float``,      ``Long``, ``Float``,                                array types,   
-   ``double``, ``char``,     ``Double``, ``Char``,                               function types,          
-   ``boolean``               ``Boolean``, ``never``,                             tuple types,             
+   ``long``, ``float``,      ``Long``, ``Float``,                                array types,
+   ``double``, ``char``,     ``Double``, ``Char``,                               fixed array types,
+   ``boolean``               ``Boolean``,                                        tuple types,
 
-                             ``String``, ``string``,                             union types,             
+                             ``String``, ``string``,                             union types,
 
-                             ``BigInt``, ``bigint``,                             literal types,           
+                             ``BigInt``, ``bigint``,                             literal types,
 
-                             ``Object``, ``object``,                             type parameters          
+                             ``Object``, ``object``,                             function types,
 
-                             ``void``, ``null``,                                                          
+                             ``never``, ``void``,                                type parameters
 
-                             ``undefined``, ``[]``                                                          
+                             ``undefined``, ``null``
    ========================= ========================= ========================= =========================
 
 **Note**. Type ``string`` (see :ref:`Type string`), type ``bigint`` (see
-:ref:`BigInt Type`), literal types (see :ref:`Literal Types`), and all boxed
+:ref:`Type bigint`), literal types (see :ref:`Literal Types`), and all boxed
 types (:ref:`Boxed Types`) have value type semantics in equality expressions
 (:ref:`Equality Expressions`).
 
@@ -340,6 +343,17 @@ has the lowest precedence as presented in the following example:
     let d: (() => string) | null
     d = null // ok, d is nullable
     d = (): string => { return "hi" } // ok
+
+
+If annotation is used in front of type in parentheses then parentheses become
+mandatory part of annotation to prevent ambiguilty.
+
+.. code-block:: typescript
+   :linenos:
+
+    let var_name1: @my_annotation() (A|B) // OK
+    let var_name2: @my_annotation (A|B)  // Compile-time error
+
 
 |
 
@@ -717,7 +731,7 @@ discussed below.
    + Bitwise complement operator '``~``' (see :ref:`Bitwise Complement`);
    + Integer bitwise operators '``&``', '``^``', and '``|``' (see
      :ref:`Integer Bitwise Operators`);
-   
+
 - Conditional operator '``?:``' (see :ref:`Conditional Expressions`);
 
 -  Cast operator (see :ref:`Cast Expressions`) that converts a floating-point
@@ -997,10 +1011,13 @@ Reference Types
 -  *Class* types (see :ref:`Classes`);
 -  *Interface* types (see :ref:`Interfaces`);
 -  :ref:`Array Types`;
+-  :ref:`Fixed Array Types`;
+-  :ref:`Tuple Types`;
 -  :ref:`Function Types`;
 -  :ref:`Union Types`;
--  ``String`` types (see :ref:`Type String`);
 -  :ref:`Literal Types`;
+-  :ref:`Type string`;
+-  :ref:`Type bigint`;
 -  :ref:`Type never`;
 -  :ref:`Type null`;
 -  :ref:`Type undefined`;
@@ -1012,6 +1029,7 @@ Reference Types
    class type
    interface type
    array type
+   fixed array type
    function type
    union type
    string type
@@ -1024,73 +1042,46 @@ Reference Types
 
 |
 
-.. _Objects:
+.. _Type Object:
 
-Objects
-=======
+Type ``Object``
+***************
 
 .. meta:
     frontend_status: Done
 
-An ``object`` can be as follows:
+Type ``Object`` is the superclass of all other classes,
+interfaces, arrays, tuples, function types, ``string`` and ``bigint`` types,
+unions except nullish ones, type parameters, and ``enum`` types.
+All these types inherit the methods of class ``Object`` (see :ref:`Inheritance`).
+All methods of class ``Object`` are described in full in the standard library
+(see :ref:`Standard Library`).
 
--  Class instance,
--  Function instance, or
--  Array.
+The method ``toString`` as used in the examples in this document returns a
+string representation of the object.
 
-Pointers to these objects are called *references* or *reference values*.
-
-*Class instance* is created explicitly by a class instance creation expression
-(see :ref:`New Expressions`).
-
-*Function instance* is created explicitly by referring to a declared function
-by its name, qualified name, or lambda expression (see :ref:`Lambda Expressions`).
-
-*Array* is created explicitly by an array creation expression (see
-:ref:`Array Creation Expressions`).
-
-A string literal initialization explicitly creates a *string*. Other
-expressions can implicitly create a class instance (see :ref:`New Expressions`),
-or an array (see :ref:`Array Creation Expressions`).
+Using ``Object`` is recommended in all cases, although the name ``object``
+refers to type ``Object``.
 
 .. index::
-   object
-   instance
+   class
+   interface
+   string type
+   bigint type
    array
-   reference value
-   reference
-   function instance
-   class instance
-   pointer
-   class instance
-   creation expression
-   reference
-   lambda expression
-   qualified name
-   name
-   string literal
-   initialization
-   declared function
-   array creation
-   expression
-   literal
-   initialization
+   union
+   function type
+   enum type
+   method
+   interface
+   array
+   inheritance
 
-The operations on references to objects are as follows:
+The term *object* is used in the specificaton to refer to
+an instance of any type that is subtype of ``Object``
+or of type ``Object`` itself.
 
--  Field access expression (see :ref:`Field Access Expression`);
--  Call expression (see :ref:`Method Call Expression` and :ref:`Function Call Expression`);
--  Cast expression (see :ref:`Cast Expressions`);
--  String concatenation operator (see :ref:`String Concatenation`) that---given
-   an operand of type ``string`` and a reference---calls the method ``toString``
-   of the referenced object, converts the reference to type ``string``,
-   and creates a concatenation of the two strings as a new ``string``;
--  ``instanceof`` expression (see :ref:`InstanceOf Expression`);
--  ``typeof`` expression (see :ref:`TypeOf Expression`);
--  Reference equality operators '``==``' and '``!=``' (see
-   :ref:`Reference Equality`);
--  Conditional expression '``?:``' (see :ref:`Conditional Expressions`).
-
+Pointers to these objects are called *references*.
 Multiple references to an object are possible.
 
 Most objects have state. The state is stored in the field if an object is
@@ -1101,76 +1092,216 @@ object is modified in the reference of either variable, then the state so
 modified can be seen in the reference of the other variable.
 
 .. index::
-   operator
    object
-   class
-   interface
-   type parameter
-   field access
-   qualified name
-   method call expression
-   function call expression
-   field access expression
-   cast expression
-   call expression
-   concatenation operator
-   conversion
-   reference equality operator
-   conditional operator
+   subtype
    state
    array element
    variable
-   field
    instance
    reference
 
 |
 
-.. _Object Class Type:
+.. _Type never:
 
-``Object`` Class Type
-=====================
+Type ``never``
+**************
 
 .. meta:
     frontend_status: Done
 
-All classes, interfaces, ``string`` and ``bigint`` types, arrays, unions except
-nullish ones, tuples, type parameters, function types, and ``enum`` types are
-compatible (see :ref:`Type Compatibility`) with, and all inherit (see
-:ref:`Inheritance`) the methods of class ``Object``. Full description of
-all methods of class ``Object`` is given in the standard library (see
-:ref:`Standard Library`).
+Type ``never`` is compatible with any other type (see :ref:`Type Compatibility`).
 
-The method ``toString`` as used in the examples in this document returns a
-string representation of the object.
+Type ``never`` has no instance. Type ``never`` is used as one of the following:
 
-Using ``Object`` is recommended in all cases, although the name ``object``
-refers to type ``Object``.
+- Return type for functions or methods that never return a value, but
+  throw an error when completing an operation.
+- Type of variables that can never be assigned.
+- Type of parameters of a function or a method to prevent the body of that
+  function or method from being executed.
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo (): never {
+        throw new Error("foo() never returns")
+    }
+
+    let x: never = foo() // x will never get a value
+
+    function bar (p: never) { // body of this
+       // function will never be executed
+    }
+
+    bar (foo())
 
 .. index::
-   class type
-   string type
-   string representation
-   array
-   union
-   function type
-   enum type
+   type never
+   instance
+   return type
    method
-   interface
-   array
-   inheritance
+   error
+   throw
+   variable
+   assignment
+   parameter
+   function
+   return
+   value
+
+|
+
+.. _Type void:
+
+Type ``void``
+*************
+
+.. meta:
+    frontend_status: Done
+
+Type ``void`` has no instance and no value. It is typically used as the
+return type if a function or a method returns no value:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo (): void {}
+
+    class C {
+        bar(): void {}
+    }
+
+    type FunctionWithNoParametersType = () => void
+
+    let funcTypeVariable: FunctionWithNoParametersType = (): void => {}
+
+A :index:`compile-time error` occurs if:
+
+-  Type ``void`` is used as type annotation;
+-  An expression of type ``void`` is used as a value.
+
+.. code-block-meta:
+   expect-cte:
+
+.. code-block:: typescript
+   :linenos:
+
+    let x: void // compile-time error - void used as type annotation
+
+    function foo (): void {}
+    let y = foo()  // compile-time error - void used as a value
+
+    type ErroneousType = void | number
+         // compile-time error - void used as type annotation
+
+.. index::
+   type void
+   instance
+   value
+   return type
+   function
+   method
+   type annotation
+
+Type ``void`` can be used as type argument that instantiates a generic type
+if a specific value of type argument is irrelevant. In this case, it is a
+synonym for type ``undefined`` (see :ref:`Type undefined`):
+
+.. code-block-meta:
+   expect-cte:
+
+.. code-block:: typescript
+   :linenos:
+
+   class A<T>
+   let a = new A<void>() // ok, type parameter is irrelevant
+   let a = new A<undefined>() // ok, the same
+
+   function foo<T>(x: T) {}
+
+   foo<void>(undefined) // ok
+   foo<void>(void) // compile-time error: void is used as value
+
+.. index::
+   type void
+   type argument
+   instantiation
+   generic type
+   type undefined
+
+|
+
+.. _Type undefined:
+
+Type ``undefined``
+******************
+
+.. meta:
+    frontend_status: Done
+
+The only value of type ``undefined`` is the keyword ``undefined`` (see
+:ref:`Undefined Literal`).
+
+Using type ``undefined`` as type annotation is not recommended, except in
+nullish types (see :ref:`Nullish Types`).
+
+Type ``undefined`` can be used as type argument to instantiate a generic
+type if the specific value of type argument is irrelevant:
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+   class A<T> {}
+   let a = new A<undefined>() // ok, type parameter is irrelevant
+   function foo<T>(x: T) {}
+
+   foo<undefined>(undefined) // ok
+
+.. index::
+   type undefined
+   keyword undefined
+   undefined literal
+   literal
+   type argument
+   annotation
+   nullish type
+
+|
+
+.. _Type null:
+
+Type ``null``
+*************
+
+.. meta:
+    frontend_status: Done
+
+The only value of type ``null`` is the keyword ``null`` (see
+:ref:`Null Literal`).
+
+Using type ``null`` as type annotation is not recommended, except in
+nullish types (see :ref:`Nullish Types`).
+
+.. index::
+   type null
+   null literal
+   keyword null
+   type annotation
+   nullish type
 
 |
 
 .. _Type string:
 
 Type ``string``
-===============
+***************
 
 .. meta:
     frontend_status: Done
 
-Type ``string`` is a predefined type. It stores sequences of characters as
+Type ``string`` stores sequences of characters as
 Unicode UTF-16 code units. Type ``string`` includes all string literals, e.g.,
 '``abc``'.
 
@@ -1214,10 +1345,56 @@ also refers to type ``string``.
 
 |
 
+.. _Type bigint:
+
+Type ``bigint``
+***************
+
+.. meta:
+    frontend_status: Done
+
+|LANG| has built-in ``bigint`` type. It allows dealing
+with theoretical arbitrary large integers. Values of this type can hold
+numbers larger than the maximum value of type ``long``. This type uses the
+arbitrary-precision arithmetic. Values of type ``bigint`` can be created from
+the following:
+
+- *Bigint literals* (see :ref:`Bigint Literals`); or
+- Numeric type values, by using a call to the standard library class ``BigInt``
+  methods or constructors (see :ref:`Standard Library`).
+
+Similarly to ``string``, ``bigint`` type has dual semantics:
+
+- If it is created, assigned, or passed as an argument, type ``bigint`` behaves
+  in the same manner as a reference type (see :ref:`Reference Types`).
+- All applicable operations handle type ``bigint`` as a value type (see
+  :ref:`Value Types`). Operations are described in
+  :ref:`Integer Types and Operations`.
+
+Using ``bigint`` is recommended in all cases, although the name ``BigInt``
+also refers to type ``bigint``. Using ``BigInt`` creates new objects and calls
+to static methods in order to improve |TS| compatibility.
+
+.. code-block:: typescript
+   :linenos:
+
+   let b1: bigint = new BigInt(5) // for Typescript compatibility
+   let b2: bigint = 123n
+
+.. index::
+   type bigint
+   integer
+   type long
+   bigint literal
+   value type
+   type annotation
+
+|
+
 .. _Literal Types:
 
 Literal Types
-=============
+*************
 
 .. meta:
     frontend_status: Partly
@@ -1248,7 +1425,7 @@ Only three literal types are supported.
 .. _Supertypes of Literal Types:
 
 Supertypes of Literal Types
----------------------------
+===========================
 
 .. meta:
     frontend_status: Done
@@ -1297,7 +1474,7 @@ The supertype for ``string`` literals (see :ref:`String Literals`) is type
 .. _Operations on Literal Types:
 
 Operations on Literal Types
----------------------------
+===========================
 
 .. meta:
     frontend_status: Done
@@ -1320,155 +1497,77 @@ itself:
 
 |
 
-.. _Type never:
-
-Type ``never``
-==============
-
-.. meta:
-    frontend_status: Done
-
-Type ``never`` is compatible (see :ref:`Type Compatibility`) with any other type.
-
-Type ``never`` has no instance. Type ``never`` is used as one of the following:
-
-- Return type for functions or methods that never return a value, but
-  throw an error when completing an operation.
-- Type of variables that can never be assigned.
-- Type of parameters of a function or a method to prevent the body of that
-  function or method from being executed.
-
-.. code-block:: typescript
-   :linenos:
-
-    function foo (): never {
-        throw new Error("foo() never returns")
-    }
-
-    let x: never = foo() // x will never get a value
-
-    function bar (p: never) { // body of this 
-       // function will never be executed
-    }
-
-    bar (foo())
-
-.. index::
-   type never
-   instance
-   return type
-   method
-   error
-   throw
-   variable
-   assignment
-   parameter
-   function
-   return
-   value
-
-|
-
-.. _Type void:
-
-Type ``void``
-=============
-
-.. meta:
-    frontend_status: Done
-
-Type ``void`` has no instance and no value. It is typically used as the
-return type if a function or a method returns no value:
-
-.. code-block:: typescript
-   :linenos:
-
-    function foo (): void {}
-   
-    class C {
-        bar(): void {}
-    }
-
-    type FunctionWithNoParametersType = () => void
-
-    let funcTypeVariable: FunctionWithNoParametersType = (): void => {}
-
-A :index:`compile-time error` occurs if:
-
--  Type ``void`` is used as type annotation;
--  An expression of type ``void`` is used as a value.
-
-.. code-block-meta:
-   expect-cte:
-
-.. code-block:: typescript
-   :linenos:
-
-    let x: void // compile-time error - void used as type annotation
-
-    function foo (): void {}
-    let y = foo()  // compile-time error - void used as a value
-
-    type ErroneousType = void | number 
-         // compile-time error - void used as type annotation
-
-.. index::
-   type void
-   instance
-   value
-   return type
-   function
-   method
-   type annotation
-
-Type ``void`` can be used as type argument that instantiates a generic type
-if a specific value of type argument is irrelevant. In this case, it is a
-synonym for type ``undefined`` (see :ref:`Type undefined`):
-
-.. code-block-meta:
-   expect-cte:
-
-.. code-block:: typescript
-   :linenos:
-
-   class A<T>
-   let a = new A<void>() // ok, type parameter is irrelevant
-   let a = new A<undefined>() // ok, the same
-
-   function foo<T>(x: T) {}
-
-   foo<void>(undefined) // ok
-   foo<void>(void) // compile-time error: void is used as value
-
-.. index::
-   type void
-   type argument
-   instantiation
-   generic type
-   type undefined
-
-|
-
 .. _Array Types:
 
 Array Types
-===========
+***********
 
 .. meta:
     frontend_status: Partly
 
-*Array type* is the built-in type characterized by the following:
+|LANG| supports two predefined array types:
 
--  Any object of array type contains elements, the number of elements 
-   is known as *array length*;
--  Array length is non-negative integer number;   
--  Array length can be set and changed at runtime;   
--  Array element are accessed by index, which is integer number
-   starting from *0* to *array length minus 1*;
--  Accessing an element by its index is a constant-time operation;
+- :ref:`Resizable Array Types`,
+
+- :ref:`Fixed Array Types` as experimental feature.
+
+*Resizable array types* are recommended for most cases. *Fixed array types*
+can be used where performance is the major requirement.
+
+*Resizable arrays* differ from *fixed arrays* as follows:
+
+- Length of *fixed array* is set once. It can lead to better performance.
+- *Fixed arrays* have no methods defined.
+
+.. index::
+   array length
+
+**Note**. The term *array type* as used in this document applies to both
+*resizable array type* and *fixed array type*. The same holds true for *array
+value* and *array instance*.
+*Resizable arrays* and *fixed arrays* are not assignable to each other.
+
+|
+
+.. _Resizable Array Types:
+
+Resizable Array Types
+=====================
+
+.. meta:
+    frontend_status: Partly
+
+There are two syntax forms of *resizable array type* with elements of type ``T``:
+
+- ``T[]``
+- ``Array<T>``
+
+The first form uses the following rule:
+
+.. code-block:: abnf
+
+    arrayType:
+       type '[' ']'
+       ;
+
+**Note**.  ``T[]`` and ``Array<T>`` specify identical (indistinguishable) types
+(see :ref:`Type Identity`).
+
+.. index::
+   type identity
+
+*Resizable array type* is the built-in type characterized by the following:
+
+-  Any object of resizable array type contains elements. The number of elements
+   is known as *array length*.
+-  Array length is a non-negative integer number.
+-  Array length can be set and changed at runtime.
+-  Array element is accessed by its index. The index is an integer number
+   in the range from *0* to *array length minus 1*.
+-  Accessing an element by its index is a constant-time operation.
 -  If passed to non-|LANG| environment, an array is represented as a contiguous
-   memory location;
--  Type of each array elements is compatible with the element type specified
+   memory location.
+-  Type of each array element is compatible with the element type specified
    in the array declaration (see :ref:`Type Compatibility`).
 
 .. index::
@@ -1480,57 +1579,27 @@ Array Types
    access
    array
 
-
-There are two syntax forms of array type with elements of type ``T``:
-
-- ``T[]``
-- ``Array<T>``
-
-The rule for the first form is
-
-.. code-block:: abnf
-
-    arrayType:
-       type '[' ']'
-       ;
-
-**Note**.  ``T[]`` and ``Array<T>`` specify identical (indistinguishable) type
-(see :ref:`Type Identity`).
-
-.. index::
-   type identity
-   array element
-   array
-   index expression
-   operator
-   field
-   array length
-   compiler
-   runtime error
-
 Two basic operations with array elements take elements out of, and put
 elements into an array by using the operator '``[]``' and index expression.
 
-The same syntax can be used to work with :ref:`Indexable Types`, 
+The same syntax can be used to work with :ref:`Indexable Types`,
 some of such types are parts of :ref:`Standard Library`.
 
 The number of elements in an array can be obtained by accessing the property
-``length``. 
+``length``.
 
 The length of an array can be set and changed in runtime using methods defined
 in the standard library (see :ref:`Standard Library`).
 
-|LANG| also support special *fixed array types* (see :ref:`Fixed Array Types`).
-The length of *fixed array types* can be set once in runtime
-and cannot be changed after that.
+An array can be created by using :ref:`Array Literal`,
+:ref:`Array Creation Expressions`, or the standard library defined constructors
+(see :ref:`Standard Library`).
 
-To provide better |TS| compatibility, |LANG| allows 
-to shrink the array by setting a new value to ``length`` 
-(new value must be less or equal to the previous length).
-Attempting to increase the length of the
-array by assignment to ``length`` causes a :index:`compile-time error`
-(if the compiler has the information
-sufficient to determine this) or a runtime error.
+|LANG| allows setting a new value to ``length`` to shrink an array and provide
+better |TS| compatibility. The new value must be less or equal to the previous
+length. Attempting to increase the length of the array by assignment to
+``length`` causes a :index:`compile-time error` (if the compiler has the
+information sufficient to determine this) or a runtime error.
 
 .. index::
    method
@@ -1542,7 +1611,7 @@ The examples are presented below:
 .. code-block:: typescript
    :linenos:
 
-    let a : number[] = [0, 0, 0, 0, 0] 
+    let a : number[] = [0, 0, 0, 0, 0]
       /* allocate array with 5 elements of type number */
     a[1] = 7 /* put 7 as the 2nd element of the array, index of this element is 1 */
     let y = a[4] /* get the last element of array 'a' */
@@ -1550,7 +1619,7 @@ The examples are presented below:
     a.length = 3 // shrink array
     y = a[2] // OK, 2 is the index of the last element now
     y = a[3] // Will lead to runtime error - attempt to access non-existing array element
-    
+
     let b: Array<number> = a // 'b' points to the same array as 'a'
 
 A type alias can set a name for an array type (see :ref:`Type Alias Declaration`):
@@ -1580,10 +1649,67 @@ An array as an object is assignable to a variable of type ``Object``:
 
 |
 
+.. _Tuple Types:
+
+Tuple Types
+***********
+
+.. meta:
+    frontend_status: Done
+
+.. code-block:: abnf
+
+    tupleType:
+        '[' (type (',' type)* ','?)? ']'
+        ;
+
+*Tuple type* is a reference type created as a fixed set of other types.
+The value of a tuple type is a group of values of types that comprise the tuple
+type. Types are specified in the order as declared within the tuple type
+declaration. It implies that each element of a tuple has its own type.
+The operator '``[]``' (square brackets) is used to access the elements of a
+tuple in a manner similar to how the elements of an array are accessed.
+
+An index expression belongs to an integer type. The index of the first tuple
+element is *0*. Only constant expressions can be used as the index providing
+access to tuple elements.
+
+.. code-block:: typescript
+   :linenos:
+
+   let tuple: [number, number, string, boolean, Object] =
+              [     6,      7,  "abc",    true,    666]
+   tuple[0] = 666
+   console.log (tuple[0], tuple[4]) // `666 666` be printed
+
+Any tuple type is compatible (see :ref:`Type Compatibility`) with class
+``Object`` (see :ref:`Type Object`).
+
+An empty tuple is a corner case. It is only added to support |TS| compatibility:
+
+.. code-block:: typescript
+   :linenos:
+
+   let empty: [] = [] // empty tuple with no elements in it
+
+.. index::
+   tuple type
+   type compatibility
+   object
+   class
+   reference type
+   value
+   type declaration
+   array element
+   index expression
+   constant expression
+
+|
+
 .. _Function Types:
 
 Function Types
-==============
+**************
 
 .. meta:
     frontend_status: Done
@@ -1687,7 +1813,7 @@ default value.
     }
 
 All function types are subtypes of ``Object`` (see
-:ref:`Object Class Type`). More details on function types assignability are
+:ref:`Type Object`). More details on function types assignability are
 provided in :ref:`Assignment-like Contexts`, and conversions in
 :ref:`Function Types Conversions`.
 
@@ -1702,130 +1828,10 @@ provided in :ref:`Assignment-like Contexts`, and conversions in
 
 |
 
-.. _Type null:
-
-Type ``null``
-=============
-
-.. meta:
-    frontend_status: Done
-
-The only value of type ``null`` is the keyword ``null`` (see
-:ref:`Null Literal`).
-
-Using type ``null`` as type annotation is not recommended, except in
-nullish types (see :ref:`Nullish Types`).
-
-.. index::
-   type null
-   null literal
-   keyword null
-   type annotation
-   nullish type
-
-|
-
-.. _Type undefined:
-
-Type ``undefined``
-==================
-
-.. meta:
-    frontend_status: Done
-
-The only value of type ``undefined`` is the keyword ``undefined`` (see
-:ref:`Undefined Literal`).
-
-Using type ``undefined`` as type annotation is not recommended, except in
-nullish types (see :ref:`Nullish Types`).
-
-Type ``undefined`` can be used as type argument to instantiate a generic
-type if the specific value of type argument is irrelevant:
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-   class A<T> {}
-   let a = new A<undefined>() // ok, type parameter is irrelevant
-   function foo<T>(x: T) {}
-
-   foo<undefined>(undefined) // ok
-
-.. index::
-   type undefined
-   keyword undefined
-   undefined literal
-   literal
-   type argument
-   annotation
-   nullish type
-
-|
-
-.. _Tuple Types:
-
-Tuple Types
-===========
-
-.. meta:
-    frontend_status: Done
-
-.. code-block:: abnf
-
-    tupleType:
-        '[' (type (',' type)* ','?)? ']'
-        ;
-
-*Tuple type* is a reference type created as a fixed set of other types.
-The value of a tuple type is a group of values of types that comprise the tuple
-type. The types are specified in the same order as declared within
-the tuple type declaration. It implies that each element of the tuple has
-its own type.
-The operator '``[]``' (square brackets) is used to access the elements of a
-tuple in a manner similar to how the elements of an array are accessed.
-
-An index expression belongs to an integer type. The index of the first tuple
-element is *0*. Only constant expressions can be used as the index to get
-the access to tuple elements.
-
-.. code-block:: typescript
-   :linenos:
-
-   let tuple: [number, number, string, boolean, Object] =
-              [     6,      7,  "abc",    true,    666]
-   tuple[0] = 666
-   console.log (tuple[0], tuple[4]) // `666 666` be printed
-
-Any tuple type is compatible (see :ref:`Type Compatibility`) with class
-``Object`` (see :ref:`Object Class Type`).
-
-An empty tuple is a corner case. It is only added to support |TS| compatibility:
-
-.. code-block:: typescript
-   :linenos:
-
-   let empty: [] = [] // empty tuple with no elements in it
-
-.. index::
-   tuple type
-   type compatibility
-   object
-   class
-   reference type
-   value
-   type declaration
-   array element
-   index expression
-   constant expression
-
-|
-
 .. _Union Types:
 
 Union Types
-===========
+***********
 
 .. meta:
    frontend_status: Partly
@@ -1908,7 +1914,7 @@ Typical usage examples of *union* type are represented below:
    // Cat, Dog, and Frog are some types (class or interface ones)
 
    let animal: Animal = new Cat()
-   animal = new Frog() 
+   animal = new Frog()
    animal = 42
    // One may assign the variable of the union type with any valid value
 
@@ -1931,7 +1937,7 @@ Different mechanisms can be used to get values of particular types from a
     type Animal = Cat | Dog | Frog
 
     let animal: Animal = new Cat()
-    if (animal instanceof Frog) { 
+    if (animal instanceof Frog) {
         // animal is of type Frog here, conversion can be used:
         let frog: Frog = animal as Frog
         frog.leap()
@@ -1999,7 +2005,7 @@ values of the *union* type:
 .. _Union Types Normalization:
 
 Union Types Normalization
--------------------------
+=========================
 
 .. meta:
    frontend_status: Partly
@@ -2091,7 +2097,7 @@ is presented in the examples below:
     "1" | string | number // normalized as  string | number. Literal type value belongs to another type values
 
     "1" | Object // normalized as Object. Object always wins
-    AnyNonNullishType | Object // normalized as Object         
+    AnyNonNullishType | Object // normalized as Object
 
     enum Strings1 {aa = "AA", bb = "BB"}
     enum Strings2 {aa = "AA", cc = "CC"}
@@ -2101,7 +2107,7 @@ is presented in the examples below:
 
     class Base {}
     class Derived1 extends Base {}
-    class Derived2 extends Base {}   
+    class Derived2 extends Base {}
     Base | Derived1 // normalized as Base. Base wins over Derived.
     Derived1 | Derived2 // normalized as Derived1 | Derived2. End of normalization
 
@@ -2121,7 +2127,7 @@ handling the type inference for array literals (see
 .. _Access to Common Union Members:
 
 Access to Common Union Members
-------------------------------
+==============================
 
 .. meta:
     frontend_status: Partly
@@ -2150,7 +2156,7 @@ A :index:`compile-time error` occurs otherwise:
         foo() {}
         goo(n: number) {}
     }
-    class B { 
+    class B {
         n = 2
         s = 3.14
         foo() {}
@@ -2161,7 +2167,7 @@ A :index:`compile-time error` occurs otherwise:
 
     let x = u.n // ok, common field
     u.foo() // ok, common method
-    
+
     console.log(u.s) // compile-time error as field types differ
     u.goo() // compile-time error as signatures differ
 
@@ -2178,7 +2184,7 @@ A :index:`compile-time error` occurs otherwise:
 .. _Nullish Types:
 
 Nullish Types
-=============
+*************
 
 .. meta:
     frontend_status: Done
@@ -2186,7 +2192,7 @@ Nullish Types
 |LANG| has *nullish types* that are in fact a special form of union types (see
 :ref:`Union Types`).
 
-``T | null`` or ``T | undefined`` or ``T | undefined | null`` 
+``T | null`` or ``T | undefined`` or ``T | undefined | null``
 can be used as the type to specify a
 nullish version of type ``T``.
 
@@ -2289,53 +2295,6 @@ The following nullish-safe options exist for dealing with nullish type ``T``:
 
 |
 
-.. _BigInt Type:
-
-Type ``BigInt``
-===============
-
-.. meta:
-    frontend_status: Done
-
-|LANG| has built-in ``bigint`` type and ``BigInt`` class type that allow to deal
-with theoretically arbitrary large integers. Values of this type can hold
-numbers larger than the maximum value of type ``long``. This type uses the
-arbitrary-precision arithmetic. Values of type ``bigint`` can be created from
-the following:
-
-- ``BigInt`` literals (see :ref:`BigInt Literals`); or
-- Numeric type values, by using a call to the standard library class ``BigInt``
-  methods or constructors (see :ref:`Standard Library`).
-
-Similarly to ``string``, ``bigint`` type has dual semantics:
-
-- Type ``bigint`` behaves in the same manner as a reference type
-  (see :ref:`Reference Types`) if it is created, assigned, or passed
-  as an argument.
-- Type ``bigint`` is handled as a value type (see :ref:`Value Types`)
-  by all applicable operations (the operations are described in
-  :ref:`Integer Types and Operations`).
-
-Type ``bigint`` is to be used as type annotation. Type ``BigInt`` is to
-create new objects and calls to static methods of class ``BigInt``
-(see :ref:`BigInt Literals`):
-
-.. code-block:: typescript
-   :linenos:
-
-   let b1: bigint = new BigInt (5)
-   let b2: bigint = 123n
-
-.. index::
-   type bigint
-   integer
-   type long
-   bigint literal
-   value type
-   type annotation
-
-|
-
 .. _Default Values for Types:
 
 Default Values for Types
@@ -2346,8 +2305,8 @@ Default Values for Types
 
 **Note**. This feature in |LANG| is experimental.
 
-The following types use so-called *default values* for variables without
-explicit initialization (see :ref:`Variable Declarations`):
+The following types use so-called *default values* for variables without a need
+for explicit initialization (see :ref:`Variable Declarations`):
 
 .. - All primitive types and *string* (see the table below).
 
@@ -2359,7 +2318,7 @@ explicit initialization (see :ref:`Variable Declarations`):
 
 All other types, including reference types, enumeration types, and type
 parameters have no default values. Variables of such types must be initialized
-explicitly with a value before a type is used for the first time.
+explicitly with a value before these variables are used for the first time.
 
 .. Default values of primitive types are as follows:
 
@@ -2411,7 +2370,7 @@ Default values of literal types are literals of such types:
     printThem (a, b, c)
     function printThem (p1: "string literal", p2: null, p3: undefined) {
         console.log (p1, p2, p3)
-        // Output: string literal null undefined 
+        // Output: string literal null undefined
     }
 
 The default value of a union type that contains type ``undefined`` is ``undefined``.

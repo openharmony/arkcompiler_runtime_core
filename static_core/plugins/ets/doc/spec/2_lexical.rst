@@ -716,20 +716,20 @@ too large for its type.
 
 |
 
-.. _BigInt Literals:
+.. _Bigint Literals:
 
-``BigInt`` Literals
-===================
+Bigint Literals
+===============
 
 .. meta:
     frontend_status: Done
 
-``BigInt`` literals represent integer numbers with unlimited number of digits.
-``BigInt`` literals use decimal radix only.
+*Bigint literals* represent integer numbers with unlimited number of digits.
+*Bigint literals* use decimal radix only.
 
-``BigInt`` literals are always of the ``bigint`` type (see :ref:`BigInt Type`).
+*Bigint literals* are always of the ``bigint`` type (see :ref:`Type bigint`).
 
-A ``BigInt`` literal is a sequence of digits followed by the symbol '``n``':
+A ``bigint`` literal is a sequence of digits followed by the symbol '``n``':
 
 .. code-block:: abnf
 
@@ -742,14 +742,14 @@ The concept is presented by the examples below:
 
 .. code-block:: typescript
 
-    153n // BigInt literal
-    1_153n // BigInt literal
-    -153n // negative BigInt literal
+    153n // bigint literal
+    1_153n // bigint literal
+    -153n // negative bigint literal
 
 The underscore character '``_``' used between successive digits can be used to
-denote a ``BigInt`` literal and improve readability. Underscore characters in
+denote a ``bigint`` literal and improve readability. Underscore characters in
 such positions do not change the values of literals. However, the underscore
-character must be neither the very first nor the very last symbol of a ``BigInt``
+character must be neither the very first nor the very last symbol of a ``bigint``
 literal.
 
 Strings that represent numbers or any integer value can be converted to
@@ -760,41 +760,40 @@ Strings that represent numbers or any integer value can be converted to
 
 .. code-block:: typescript
 
-    BigInt (other: string): bigint
-    BigInt (other: long): bigint
+    BigInt(other: string): bigint
+    BigInt(other: long): bigint
 
 .. index::
    integer
-   BigInt literal
+   bigint literal
    underscore character
    readability
    string
    number
    integer value
 
-Two other static methods allow taking *bitsCount* lower bits of a
-``BigInt`` number and return them as a result. Signed and unsigned versions
+Two methods allow taking *bitsCount* lower bits of a
+``bigint`` number and return them as a result. Signed and unsigned versions
 are both possible as seen below:
 
 .. code-block:: typescript
 
-    BigInt.asIntN(bitsCount: long, bigIntToCut: bigint): bigint
-    BigInt.asUintN(bitsCount: long, bigIntToCut: bigint): bigint
+    asIntN(bitsCount: long, bigIntToCut: bigint): bigint
+    asUintN(bitsCount: long, bigIntToCut: bigint): bigint
 
 .. index::
-   static method
    decimal
    radix
 
 .. _Boolean Literals:
 
-``Boolean`` Literals
-====================
+Boolean Literals
+================
 
 .. meta:
     frontend_status: Done
 
-The two ``Boolean`` literal values are represented by the keywords ``true`` and
+The two *boolean literal* values are represented by the keywords ``true`` and
 ``false``.
 
 .. code-block:: abnf
@@ -803,7 +802,7 @@ The two ``Boolean`` literal values are represented by the keywords ``true`` and
         'true' | 'false'
         ;
 
-``Boolean`` literals are of the ``boolean`` type.
+*Boolean literals* are of the ``boolean`` type.
 
 .. index::
    keyword
@@ -815,20 +814,20 @@ The two ``Boolean`` literal values are represented by the keywords ``true`` and
 
 .. _String Literals:
 
-``String`` Literals
-===================
+String Literals
+===============
 
 .. meta:
     frontend_status: Done
     todo: "" sample is invalid: SyntaxError: Newline is not allowed in strings
 
-``String`` literals consist of zero or more characters enclosed between
+*String literals* consist of zero or more characters enclosed between
 single or double quotes. A special form of string literals is
 *multiline string* literal (see :ref:`Multiline String Literal`).
 
-``String`` literals are of the literal type that corresponds to the literal.
+*String literals* are of the literal type that corresponds to the literal.
 If an operator is applied to the literal, then the literal type is replaced
-for ``string`` (see :ref:`Type String`).
+for ``string`` (see :ref:`Type string`).
 
 .. index::
    string literal
@@ -860,11 +859,11 @@ for ``string`` (see :ref:`Type String`).
         | ~[1-9xu\r\n]
         ;
 
-Characters in ``string`` literals normally represent themselves. However,
+Characters in *string literals* normally represent themselves. However,
 certain non-graphic characters can be represented by explicit specifications
 or Unicode codes. Such constructs are called *escape sequences*.
 
-Escape sequences can represent graphic characters within a ``string`` literal,
+Escape sequences can represent graphic characters within a *string literal*,
 e.g., single quotes '\'', double quotes '``"``', backslashes '``\``', and
 some others. An escape sequence always starts with the backslash character
 '``\``', followed by one of the following characters:

@@ -720,7 +720,7 @@ Every variable in a program must have an initial value before it can be used:
    + If the type of a variable is ``T``, and ``T`` has a *default value*
      (see :ref:`Default Values for Types`), then the variable is initialized
      with the default value.
-   + If the type of a variable is ``T[]`` (or a multidimensional array with
+   + If the type of a variable is ``T[]`` or ``FixedArray<T>`` (or a multidimensional array with
      elements of type ``T``), and ``T`` has a *default value* (see
      :ref:`Default Values for Types`), then all array elements are initialized
      with the default value.
@@ -1039,11 +1039,7 @@ of a function, method, or constructor.
 .. code-block:: abnf
 
     signature:
-        parameters returnType?
-        ;
-
-    parameters:
-        '(' parameterList? ')'
+        '(' parameterList? ')' returnType?
         ;
 
     returnType:
@@ -1073,7 +1069,8 @@ Parameter List
 ==============
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+    todo: change parser as grammar rules, are changed - rest can be after optional, annotation for rest
 
 A signature may contain a *parameter list* that specifies an identifier of
 each parameter name, and the type of each parameter. The type of each
@@ -1083,36 +1080,21 @@ the function or the method has no parameters.
 .. code-block:: abnf
 
     parameterList:
-        requiredParameters ','?
-        | requiredParameters ',' optionalParameters ','?
-        | optionalParameters ','?
-        | requiredParameters ',' restParameter
-        | restParameter
-        ;
-
-    requiredParameters:
-        parameter (',' parameter)*
+        parameter (',' parameter)* (',' restParameter)? ','?
+        | restParameter ','?
         ;
 
     parameter:
-        annotationUsage? identifier ':' type
+        annotationUsage? (requiredParameter | optionalParameter)
         ;
 
-    restParameter:
-        '...' parameter
+    requiredParameter:
+        identifier ':' type
         ;
 
-If a parameter type is prefixed with ``readonly``, then there are additional
-restrictions on the parameter as described in :ref:`Readonly Parameters`.
-
-The last parameter of a function or a method can be a single *rest parameter*
-(see :ref:`Rest Parameter`), or several *optional parameters*
-(see :ref:`Optional Parameters`). This construction allows omitting
-the corresponding argument when calling the function or the method.
-
-If a parameter is not *optional*, then each function or method call must contain
-an argument corresponding to that parameter. Non-optional parameters are called
-the *required parameters*. The function below has *required parameters*:
+If a parameter is *required*, then each function or method call must contain
+an argument corresponding to that parameter.
+The function below has *required parameters*:
 
 .. code-block:: typescript
    :linenos:
@@ -1122,8 +1104,14 @@ the *required parameters*. The function below has *required parameters*:
     }
     power(2, 3) // both arguments are required in the call
 
+Several parameters can be *optional*, allowing to omit
+corresponding arguments in a call (see :ref:`Optional Parameters`).
+
 A :index:`compile-time error` occurs if an *optional parameter* precedes a
 *required parameter* in the parameter list.
+
+The last parameter of a function or a method can be a single *rest parameter*
+(see :ref:`Rest Parameter`).
 
 .. index::
    signature
@@ -1134,12 +1122,13 @@ A :index:`compile-time error` occurs if an *optional parameter* precedes a
    function
    method
    rest parameter
-   optional parameter
    argument
-   non-optional parameter
    required parameter
    prefix readonly
    readonly parameter
+
+If a parameter type is prefixed with ``readonly``, then there are additional
+restrictions on the parameter as described in :ref:`Readonly Parameters`.
 
 |
 
@@ -1202,15 +1191,9 @@ Optional Parameters
 
 .. code-block:: abnf
 
-    optionalParameters:
-        optionalParameter (',' optionalParameter)
-        ;
-
     optionalParameter:
-        annotationUsage?
-        ( identifier ':' type '=' expression
+        identifier ':' type '=' expression
         | identifier '?' ':' type
-        )
         ;
 
 The first form contains an expression that specifies a *default value*. It is
@@ -1295,29 +1278,20 @@ Rest Parameter
 arbitrary numbers of arguments. *Rest parameters* have the ``spread`` operator
 '``...``' as prefix before the parameter name:
 
-.. code-block:: typescript
-   :linenos:
+.. code-block:: abnf
 
-    function sum(...numbers: number[]): number { // function
-      let res = 0
-      for (let n of numbers)
-        res += n
-      return res
-    }
-    const lambda = (...numbers: number[]): number => 0 // lambda
-    class A {
-        constructor (...numbers: number[]) {} // constructor
-        foo (...p: [undefined, null, Object]) {} // method
-    }
+    restParameter:
+        annotationUsage? '...' identifier ':' type
+        ;
 
 A :index:`compile-time error` occurs if a rest parameter:
 
 -  Is not the last parameter in a parameter list;
 -  Has a type that is neither an array type nor a tuple type.
 
-A function, method, constructor, or lambda with a rest parameter of type ``T[]``
-can accept any number of arguments of types that are compatible (see
-:ref:`Type Compatibility`) with ``T``:
+A call of entity with a rest parameter of array type ``T[]``
+(or ``FixedArray<T>``) can accept any number of arguments
+of types that are compatible (see :ref:`Type Compatibility`) with ``T``:
 
 .. index::
    rest parameter
@@ -1349,7 +1323,7 @@ can accept any number of arguments of types that are compatible (see
     sum(1) // returns 1
     sum(1, 2, 3) // returns 6
 
-If an argument of array type ``T[]`` is to be passed to a function or a method
+If an argument of array type ``T[]`` is to be passed to a call of entity
 with the rest parameter, then the spread expression (see
 :ref:`Spread Expression`) must be used with the ``spread`` operator '``...``'
 as prefix before the array argument:
@@ -1378,9 +1352,9 @@ as prefix before the array argument:
    method
    array argument
 
-A function, method, constructor, or lambda with a rest parameter of type
-``[T1, T2, ... Tn]`` can accept only ``n`` arguments of types that are
-compatible (see :ref:`Type Compatibility`) with the corresponding ``Ti``:
+A call of entity with a rest parameter of tuple type
+[``T``:sub:`1` ``, ..., T``:sub:`n`] can accept only ``n`` arguments of types that are
+compatible (see :ref:`Type Compatibility`) with the corresponding ``T``:sub:`i`:
 
 .. index::
    rest parameter
@@ -1401,13 +1375,15 @@ compatible (see :ref:`Type Compatibility`) with the corresponding ``Ti``:
       return numbers[0] + numbers[1] + numbers[2]
     }
 
-    sum()        // compile-time error: incorrect number of arguments, 0 instead of 3
-    sum(1)       // compile-time error: incorrect number of arguments, 1 instead of 3
-    sum(1, 2, 3) // returns 6
+    sum()          // compile-time error: wrong number of arguments, 0 instead of 3
+    sum(1)         // compile-time error: wrong number of arguments, 1 instead of 3
+    sum(1, 2, "a") // compile-time error: wrong type of 3rd arguments
+    sum(1, 2, 3)   // returns 6
 
-If an argument of tuple type ``[T1, T2, ... Tn]`` is to be passed to a function
-or a method with the rest parameter, then a spread expression (see
-:ref:`Spread Expression`) must have the ``spread`` operator '``...``' as a
+If an argument of tuple type [``T``:sub:`1` ``, ..., T``:sub:`n`]
+is to be passed to a call of entity with the rest parameter,
+then a spread expression (see :ref:`Spread Expression`)
+must have the ``spread`` operator '``...``' as a
 prefix before the tuple argument:
 
 .. code-block-meta:
@@ -1431,6 +1407,36 @@ prefix before the tuple argument:
    rest parameter
    tuple argument
    spread operator
+
+If an argument of fixed array type ``FixedArray<T>`` is to be passed to a function or a method
+with the rest parameter, then the spread expression (see
+:ref:`Spread Expression`) must be used with the ``spread`` operator '``...``'
+as prefix before the fixed array argument:
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+    function sum(...numbers: Array<number>): number {
+      let res = 0
+      for (let n of numbers)
+        res += n
+      return res
+    }
+
+    let x: FixedArray<number> = [1, 2, 3]
+    sum(...x) // spread an fixed array 'x'
+       // returns 6
+
+.. index::
+   argument
+   prefix
+   spread operator
+   function
+   method
+   array argument
+
 
 |
 

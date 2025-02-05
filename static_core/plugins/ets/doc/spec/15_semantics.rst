@@ -39,8 +39,8 @@ Subtyping
 .. meta:
     frontend_status: Done
 
-The *subtype* relationship between the two types ``S`` and ``T``, where ``S``
-is a subtype of ``T`` (recorded as ``S<:T``), means that any object of type
+*Subtype* relationship between types ``S`` and ``T``, where ``S`` is a
+subtype of ``T`` (recorded as ``S<:T``), means that any object of type
 ``S`` can be safely used in any context to replace an object of type ``T``.
 The opposite is called *supertype* relationship (see :ref:`Supertyping`).
 
@@ -69,10 +69,10 @@ are **all** of the following:
 
 -  Direct superclass of ``C`` (as mentioned in its extension clause, see
    :ref:`Class Extension Clause`) or type ``Object`` if ``C`` has no extension
-   clause specified.
+   clause specified;
 
 -  Direct superinterfaces of ``C`` (as mentioned in the implementation
-   clause of ``C``, see :ref:`Class Implementation Clause`).
+   clause of ``C``, see :ref:`Class Implementation Clause`); and
 
 -  Class ``Object`` if ``C`` is an interface type with no direct superinterfaces
    (see :ref:`Superinterfaces and Subinterfaces`).
@@ -98,9 +98,9 @@ are **all** of the following:
 (for a generic class or interface type declaration ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>
 with *n*>0) are **all** of the following:
 
--  Direct superclass of ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>.
+-  Direct superclass of ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>;
 
--  Direct superinterfaces of ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>.
+-  Direct superinterfaces of ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>, and
 
 -  Type ``Object`` if ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`> is a generic
    interface type with no direct superinterfaces.
@@ -130,8 +130,8 @@ Supertyping
 .. meta:
     frontend_status: Done
 
-The *supertype* relationship between the two types ``T`` and ``S``, where ``T``
-is a supertype of ``S`` (recorded as ``T>:S``) is opposite to subtyping (see
+*Supertype* relationship between types ``T`` and ``S``, where ``T``
+is a supertype of ``S`` (recorded as ``T>:S``), is opposite to subtyping (see
 :ref:`Subtyping`). *Supertyping* means that any object of type ``S`` can be
 safely used in any context to replace an object of type ``T``.
 
@@ -152,7 +152,7 @@ Variance
 .. meta:
     frontend_status: Done
 
-Variance is how subtyping between class types relates to subtyping between
+*Variance* is how subtyping between class types relates to subtyping between
 class member signatures (types of parameters, return type). Variance can be
 of three kinds:
 
@@ -310,27 +310,27 @@ Compatibility of Call Arguments
 .. meta:
     frontend_status: Done
 
-The definition of the term *compatible* is found in :ref:`Type Compatibility`.
+The term *compatible* is defined in :ref:`Type Compatibility`.
 
 The following semantic check must be performed for any function, method, or
 constructor call:
 
-- Type of any argument (except arguments of a rest parameter) must be
+- Type of any argument (except arguments of a ``rest`` parameter) must be
   compatible with the type of the corresponding parameter;
 
-- Type of each argument corresponding to the rest parameter without the spread
-  operator (:ref:`Spread Expression`) must be compatible with the element type
-  of the array rest type parameter. If the rest parameter is a tuple, then the
-  number of arguments must be equal to the number of tuple elements, and
-  argument types must be compatible with the appropriate tuple types;
+- Type of each argument corresponding to the ``rest`` parameter without the
+  spread operator (:ref:`Spread Expression`) must be compatible with the element
+  type of the array ``rest`` type parameter. If the rest parameter is a tuple,
+  then the number of arguments must be equal to the number of tuple elements,
+  and argument types must be compatible with the appropriate tuple types;
 
-- If a single argument corresponding to the rest parameter has the spread
+- If a single argument corresponding to the ``rest`` parameter has the spread
   operator (:ref:`Spread Expression`), then the *expression* that follows the
   operator must refer to one of the following:
 
-    - An array of a type compatible with the type of the array rest parameter;
-      or
-    - A tuple of types compatible with the proper types of the tuple rest
+    - An array of a type compatible with the type of the array ``rest``
+      parameter; or
+    - A tuple of types compatible with the proper types of the tuple ``rest``
       parameter.
 
 .. index::
@@ -356,18 +356,18 @@ Type Inference
 .. meta:
     frontend_status: Done
 
-In spite of the fact that |LANG| supports strong typing, it allows not to
-burden the programmer to specify type annotations everywhere. Smart compiler
-can infer the type of some entities from the surrounding context. This
-technique called *type inference* allows keeping program code readability,
-typing less, and focusing on the business logic while keeping type safety.
-Type inference can be applied by the compiler in several contexts as follows:
+|LANG| supports strong typing but allows not to burden a programmer with the
+task of specifying type annotations everywhere. A smart compiler can infer types
+of some entities from the surrounding context. This technique called *type
+inference* allows keeping type safety and program code readability, doing less
+typing, and focusing on business logic.
+Type inference can be applied by the compiler in the following contexts:
 
 - Variable and constant declarations (see :ref:`Type Inference from Initializer`);
 - Implicit generic instantiations (see :ref:`Implicit Generic Instantiations`);
 - Function or method return type (see :ref:`Return Type Inference`);
 - Lambda expression parameter type (see :ref:`Lambda Signature`);
-- Array literal type inference (see :ref:`Array Type Inference from Context`,
+- Array literal type inference (see :ref:`Array Literal Type Inference from Context`,
   and :ref:`Array Type Inference from Types of Elements`);
 - Smart types (see :ref:`Smart Types`).
 
@@ -432,11 +432,10 @@ operation):
    access
    declaration
 
-There can be cases when the type of an entity (mostly local variables) is a
-class or interface type (see :ref:`Classes` and :ref:`Interfaces`), or union
-type (see :ref:`Union Types`). In a particular program context, the compiler
+If an entity is class type (see :ref:`Classes`), interface type (see
+:ref:`Interfaces`), or union type (see :ref:`Union Types`), then the compiler
 can narrow (smart cast) a static type to a more precise type (smart type), and
-allow the operations specific to the narrowed type:
+allow operations that are specific to the type so narrowed:
 
 .. code-block:: typescript
    :linenos:
@@ -484,14 +483,13 @@ Other examples are explicit calls to ``instanceof``
    if statement
    conditional expression
 
-In like cases, the smart compiler can deduce the smart type of an entity
-without requiring unnecessary casting conversions (see
-:ref:`Cast Expressions`).
+In like cases, a smart compiler can deduce the smart type of an entity without
+requiring unnecessary casting conversions (see :ref:`Cast Expressions`).
 
-Overloading (see :ref:`Function, Method and Constructor Overloading`) can cause tricky
-situations when a smart type leads to the call of a function or a method
-(see :ref:`Overload Resolution`) that suits the smart type rather than the
-static type of an argument:
+Overloading (see :ref:`Function, Method and Constructor Overloading`) can cause
+tricky situations when a smart type leads to the call of a function or a method
+(see :ref:`Overload Resolution`) that suits smart rather than static type of an
+argument:
 
 .. code-block:: typescript
    :linenos:
@@ -535,8 +533,8 @@ this specification as follows:
 #. *Overriding* is closely connected with inheritance. It is used on methods
    but not on functions. Overriding allows a subclass to offer a specific
    implementation of a method already defined in its parent class.
-   The actual method to be called is determined at runtime based on the
-   object's type. Thus, overriding is related to runtime polymorphism.
+   The actual method to be called is determined at runtime based on object type.
+   Thus, overriding is related to runtime polymorphism.
 
 |LANG| uses two semantic rules related to these concepts:
 
@@ -584,18 +582,27 @@ parameters are *overload-equivalent* if:
 
 -  Parameter type at some position in *S*:sub:`1` is a *type parameter*
    (see :ref:`Type Parameters`), and a parameter type at the same position
-   in *S*:sub:`2` is any reference non-generic type or type parameter;
+   in *S*:sub:`2` is any non-generic reference type or type parameter;
 
 -  Parameter type at some position in *S*:sub:`1` is *generic type*
    ``G`` <``T``:sub:`1`, ``...``, ``T``:sub:`n`>, and a parameter type at the
    same position in *S*:sub:`2` is also ``G`` with any list of type arguments
    (see :ref:`Type Arguments`);
 
+-  Optional parameter (see :ref:`Optional Parameters`) at some position in
+   *S*:sub:`1` and a parameter type at the same position in *S*:sub:`2` is
+   non-optional of the same type or no parameter at all;
+
+-  Parameter at some position in *S*:sub:`1` is of union type (see
+   :ref:`Union Types`) and a parameter type at the same position in *S*:sub:`2`
+   is of union type as well or it is ``Object`` (see :ref:`Type Object`);
+
 -  All other parameter types in *S*:sub:`1` are equal to parameter types
    in the same positions in *S*:sub:`2`.
 
+
 Parameter names and return types do not influence *overload equivalence*.
-Signatures in the following series are *overload-equivalent*:
+In the following series signatures are *overload-equivalent*:
 
 .. index::
    overload-equivalent signature
@@ -653,7 +660,7 @@ Signatures in the following series are *overload-equivalent*:
    (y: T): void
    (x: S): void
 
-Signatures in the following series are not *overload-equivalent*:
+In the following series signatures are not *overload-equivalent*:
 
 .. code-block-meta:
 
@@ -687,13 +694,12 @@ Signatures in the following series are not *overload-equivalent*:
 Override-Compatible Signatures
 ==============================
 
-If there are two classes, ``Base`` and ``Derived``, and class ``Derived``
+If there are two classes ``Base`` and ``Derived``, and class ``Derived``
 overrides the method ``foo()`` of ``Base``, then ``foo()`` in ``Base`` has
 signature ``S``:sub:`1` <``V``:sub:`1` ``, ... V``:sub:`k`>
 (``U``:sub:`1` ``, ..., U``:sub:`n`) ``:U``:sub:`n+1`, and ``foo()`` in
 ``Derived`` has signature ``S``:sub:`2` <``W``:sub:`1` ``, ... W``:sub:`l`>
-(``T``:sub:`1` ``, ..., T``:sub:`m`) ``:T``:sub:`m+1` as illustrated by the
-example below:
+(``T``:sub:`1` ``, ..., T``:sub:`m`) ``:T``:sub:`m+1` as in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -729,7 +735,7 @@ if **all** of the following conditions are met:
    type parameter
 
 There are two cases of type override-compatibility, as types are used as either
-parameter types, or return types. There are five kinds of types for each case:
+parameter types, or return types. Each case has the following kinds of types:
 
 - Class/interface type;
 - Function type;
@@ -740,13 +746,13 @@ parameter types, or return types. There are five kinds of types for each case:
 - Tuple type; and
 - Type parameter.
 
-Every type is override-compatible with itself (see :ref:`Invariance`).
+Each type is override-compatible with itself (see :ref:`Invariance`).
 
 Mixed override-compatibility between types of different kinds is always false,
 except the compatibility with class type ``Object`` as any type is a subtype of
 ``Object``.
 
-The following rule applies in case of generics:
+The following rule applies to generics:
 
    - Derived class must have type parameter constraints to be type-compatible
      (see :ref:`Type Compatibility`) with the respective type parameter
@@ -780,7 +786,7 @@ The following rule applies in case of generics:
        // Compile-time error, derived class cannot have non-compatible constraints of type parameters
 
 Variances to be used for types that can be override-compatible in different
-positions are represented in the following table:
+positions are represented in the table below:
 
 +-+-----------------------+---------------------+-------------------+
 | | **Positions ==>**     | **Parameter Types** | **Return Types**  |
@@ -899,7 +905,7 @@ The example below illustrates override-compatibility with ``Object``:
    :linenos:
 
     interface Base {
-       kinds_of_parameters<T extends Derived, U extends Base>( // It represents all possible parameter type kinds
+       kinds_of_parameters<T extends Derived, U extends Base>( // It represents all possible kinds of parameter type
           p01: Derived,
           p02: (q: Base)=>Derived,
           p03: number,
@@ -962,18 +968,18 @@ functions is not defined.
 
 The correctness check for functions overloading is performed if two or more
 functions with the same name are accessible (see :ref:`Accessible`) in a scope
-(see :ref:`Scopes`). 
+(see :ref:`Scopes`).
 
-A function can be declared in, or imported to a scope. 
+A function can be declared in, or imported to a scope.
 
-The semantic check for these functions is as follows:
+The semantic check for overloading functions is as follows:
 
--  If signatures of functions are *overload-equivalent*, then
+-  If function signatures are *overload-equivalent*, then
    a :index:`compile-time error` occurs.
 
 -  Otherwise, *overloading* is valid.
 
-More details can be found in :ref:`Function Overloading` and in
+It is discussed in detail in :ref:`Function Overloading` and
 :ref:`Import and Overloading of Function Names`.
 
 .. index::
@@ -996,15 +1002,15 @@ Overloading and Overriding in Classes
 Both *overloading* and *overriding* must be considered in case of classes for
 methods and partly for constructors.
 
-**Note**. Only accessible (see :ref:`Accessible`) methods are subject for
+**Note**. Only accessible (see :ref:`Accessible`) methods are subjected to
 overloading and overriding. For example, neither overriding nor overloading
 is considered if a superclass contains a ``private`` method, and a subclass
-has a method with the same name. In case of overriding the same rules are 
-applied for accessors as well.
+has a method with the same name. The same rules are also applied to accessors
+in case of overriding.
 
-An overriding member can keep or extend the access modifier (see
-:ref:`Access Modifiers`) of the inherited or implemented member. Otherwise, a
-:index:`compile-time error` occurs:
+An overriding member can keep or extend an access modifier (see
+:ref:`Access Modifiers`) of an inherited member or an implemented member.
+Otherwise, a :index:`compile-time error` occurs:
 
 .. index::
    overloading
@@ -1040,8 +1046,7 @@ An overriding member can keep or extend the access modifier (see
          // A compile-time error occurs if an attempt is made to override private member
    }
 
-Semantic rules that work in various contexts are represented in the following
-table:
+The table below represents semantic rules for various contexts:
 
 +-------------------------------------+----------------------------------------------+
 | **Context**                         | **Semantic Check**                           |
@@ -1227,10 +1232,9 @@ Overload Resolution
 .. meta:
     frontend_status: Done
 
-The *overload resolution* is used to select one entity to call from a set of
+*Overload resolution* is used to select one entity to call from a set of
 *potentially applicable candidates* in a function, method, or constructor call.
-
-The overload resolution is performed in two steps as follows:
+Overload resolution is performed in two steps as follows:
 
 #. Select *applicable candidates* from *potentially applicable candidates*;
 
@@ -1263,7 +1267,7 @@ The selection of *applicable candidates* is the process of checking
 *potentially applicable candidates*. If any argument is not compatible with
 the corresponding parameter type, then the entity is deleted from the set.
 
-**Note**. Compile-time errors are not reported on this stage.
+**Note**. Compile-time errors are not reported at this stage.
 
 After processing all entities, one of the following results is achieved:
 
@@ -1320,7 +1324,7 @@ best candidate for the given list of arguments is to be identified, if possible.
 The selection of the best candidate is based on the following:
 
 - There are no candidates with the same list of parameters, as this situation
-  is already forbidden by the compiler (on declaration or import site);
+  is already forbidden by the compiler (at the place of declaration or import);
 
 - If several candidates can be called correctly by using the same argument list,
   then the same implicit argument transformations must be applied to make the
@@ -1333,9 +1337,9 @@ Possible argument transformations are listed below:
 - Passing default values to fill any missing arguments
   (:ref:`Optional Parameters`);
 
-- Passing the empty array to replace a rest parameter that has no argument;
+- Passing the empty array to replace a ``rest`` parameter that has no argument;
 
-- Folding several arguments to the array for a rest parameter.
+- Folding several arguments to the array for a ``rest`` parameter.
 
 .. index::
    applicable candidate
@@ -1394,7 +1398,7 @@ transformation:
    argument
 
 If there is no such candidate, then each argument transformation of each
-candidate is compared (taking optional and rest parameters into the account)
+candidate is compared (taking optional and ``rest`` parameters into the account)
 by calculating partial *better* relation:
 
 **Case 1**. No transformation is *better* than any transformation.
@@ -1408,7 +1412,7 @@ is *better*. E.g., the conversion of ``int`` to ``float`` is *better* than
 **Case 3**. In case of optional parameters, no parameter is *better*.
 
 **Case 4**. If the first candidate has several parameters, and the other
-candidate has a rest parameter for the same arguments, then the first one
+candidate has a ``rest`` parameter for the same arguments, then the first one
 is *better*.
 
 **Case 5**. All other variants are considered *not comparable*.
@@ -1460,8 +1464,8 @@ is *better*.
    foo(new Derived) // not comparable, no one is better
 
 If there is exactly one candidate that is *better* than others for at least
-one argument and *not comparable* to other arguments, then this one is the
-*best candidate* that is to be called.
+one argument and *not comparable* to other arguments, then this is the
+*best candidate* to be called.
 
 If no candidate is the *best candidate*, then a :index:`compile-time error`
 occurs. Examples of error cases are presented below:
@@ -1505,7 +1509,7 @@ packages (see :ref:`Package Initializer`) , and namespaces (see
 :ref:`Variable and Constant Declarations`) and fields (see
 :ref:`Field Declarations`) have valid initial values.
 
-The appropriate syntax is presented below:
+Appropriate syntax is presented below:
 
 .. code-block:: abnf
 
@@ -1513,15 +1517,13 @@ The appropriate syntax is presented below:
           'static' block
           ;
 
-A :index:`compile-time error` occurs if an *initializer block* contains a
-``return <expression>`` statement (see :ref:`Return Statements`).
-
-
-If code of an *initializer block* contains unhandled ``throw`` statement
-(see :ref:`Throw Statements`) then the program terminates (see
+If *initializer block* contains a ``return <expression>`` statement (see
+:ref:`Return Statements`), then a :index:`compile-time error` occurs.
+If the code of *initializer block* contains an unhandled ``throw`` statement
+(see :ref:`Throw Statements`), then a program terminates (see
 :ref:`Program Exit`).
 
-Examples of such situations are below:
+These situations are represented in the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -1571,8 +1573,7 @@ Extended Conditional Expressions
     frontend_status: Done
 
 |LANG| provides extended semantics for conditional expressions
-to ensure better |TS| alignment.
-It affects the semantics of
+to ensure better |TS| alignment. It affects the semantics of the following:
 
 -  Conditional expressions (see :ref:`Conditional Expressions`,
    :ref:`Conditional-And Expression`, :ref:`Conditional-Or Expression`, and
@@ -1585,17 +1586,16 @@ It affects the semantics of
 -  ``if`` statements (see :ref:`if Statements`).
 
 **Note:** The extended semantics is to be deprecated in one of the future
-versions of the language.
+versions of |LANG|.
 
-This approach is based on the concept of *truthiness* that extends the Boolean
-logic to operands of non-Boolean types.
+The extended semantics approach is based on the concept of *truthiness* that
+extends the Boolean logic to operands of non-Boolean types.
 
-Depending on the kind of the value type, the value of any valid expression can
-be handled as ``true`` or ``false`` as described in the table below:
+Depending on the type kind of any valid expression, its value can be treated as
+``true`` or ``false`` as described in the table below:
 
 .. index::
    extended conditional expression
-   semantic alignment
    conditional-and expression
    conditional-or expression
    conditional expression
@@ -1605,26 +1605,27 @@ be handled as ``true`` or ``false`` as described in the table below:
    if statement
    truthiness
    Boolean
-   value type
 
 +--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| Value Type                           | When ``false``                         | When ``true``                     | |LANG| Code                     |
+| Type kind                            | When ``false``                         | When ``true``                     | |LANG| Code                     |
 +======================================+========================================+===================================+=================================+
 | ``string``                           | empty string                           | non-empty string                  | ``s.length == 0``               |
 +--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
 | ``boolean``                          | ``false``                              | ``true``                          | ``x``                           |
 +--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| ``enum``                             | ``enum`` constant                      | enum constant                     | ``x.getValue()``                |
+| ``enum``                             | ``enum`` constant                      | enum constant                     | ``x.valueOf()``                 |
 |                                      |                                        |                                   |                                 |
 |                                      | handled as ``false``                   | handled as ``true``               |                                 |
 +--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| ``number`` (``double``/``float``)    | ``0`` or ``NaN``                       | any other number                  | ``n != 0 && n != NaN``          |
+| ``number`` (``double``/``float``)    | ``0`` or ``NaN``                       | any other number                  | ``n != 0 && !isNaN(n)``         |
 +--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
 | any integer type                     | ``== 0``                               | ``!= 0``                          | ``i != 0``                      |
 +--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
+| ``bigint``                           | ``== 0n``                              | ``!= 0n``                         | ``i != 0n``                     |
++--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
 | ``char``                             | ``== 0``                               | ``!= 0``                          | ``c != c'0'``                   |
 +--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| let T - is any nonNullish type                                                                                                                      |
+| In next 3 lines T stands for any nonNullish type                                                                                                    |
 +--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
 | ``T | null``                         | ``== null``                            | ``!= null``                       | ``x != null``                   |
 +--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+

@@ -98,9 +98,6 @@ handling is provided below:
         }
     }
 
-A :index:`compile-time error` occurs if a generic class is a subclass of
-``Error`` directly or indirectly.
-
 In most cases, errors are raised by the |LANG| runtime system, or by the
 standard library (see :ref:`Standard Library`) code.
 

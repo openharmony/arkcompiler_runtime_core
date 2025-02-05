@@ -169,8 +169,8 @@ Assignment-like Contexts
   :ref:`Explicit Constructor Call`, and :ref:`New Expressions`);
 
 - *Composite literal contexts* that allow setting an expression value to an
-  array element (see :ref:`Array Type Inference from Context`), a class, or
-  an interface field (see :ref:`Object Literal`);
+  array element (see :ref:`Array Literal Type Inference from Context`),
+  a class, or an interface field (see :ref:`Object Literal`);
 
 .. index::
    assignment
@@ -431,12 +431,24 @@ conversions cast an operand in a cast expression to an explicitly specified
 - :ref:`Implicit Conversions`;
 - :ref:`Numeric Casting Conversions`;
 - :ref:`Class or Interface Casting Conversions`;
+- :ref:`Casting Conversions from Object`;
 - :ref:`Casting Conversions from Type Parameter`;
 - :ref:`Casting Conversions from Union`;
 - :ref:`Casting Conversions to Enumeration`.
 
 If there is no applicable conversion, then a :index:`compile-time error`
 occurs.
+
+Note: casting conversion of any type to a type parameter is temporarily
+forbidden and may be allowed later.
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo<T> (p: AnyType) {
+       p as T // compile-time error
+    }
+
 
 .. index::
    casting context
@@ -594,6 +606,33 @@ type of a converted expression cannot be cast to the *target type*:
 
 |
 
+.. _Casting Conversions from Object:
+
+Casting Conversions from ``Object``
+===================================
+
+.. meta:
+    frontend_status: Done
+
+*Casting conversion from ``Object``* attempts to convert an expression
+of type ``Object`` to any reference type (see :ref:`Reference Types`) which
+is to be specified as a target type.
+
+.. code-block:: typescript
+   :linenos:
+
+    function check(kind: string, o: Object)
+        switch (kind) {
+        case "bool": console.log(o as boolean); break
+        case "str" : console.log(o as string); break
+        }
+    }
+
+This conversion cause a runtime error (``ClassCastError``) if the runtime
+type of an expression is not the *target type*.
+
+|
+
 .. _Casting Conversions from Type Parameter:
 
 Casting Conversions from Type Parameter
@@ -621,6 +660,10 @@ is to be specified as a target type.
           p as Number // OK use this cast instead of the cast above
        }
     }
+
+This conversion cause a runtime error (``ClassCastError``) if the runtime
+type of an expression is not the *target type*.
+
 
 |
 
@@ -676,7 +719,7 @@ A :index:`compile-time error` occurs if target type ``TT`` is not one of
    type
    target type
 
-These conversions can cause a runtime error (``ClassCastError``) if the runtime
+This conversion cause a runtime error (``ClassCastError``) if the runtime
 type of an expression is not the *target type*.
 
 Another form of *conversion from union* is implicit conversion from union type
@@ -719,13 +762,14 @@ Casting Conversions to Enumeration
 .. meta:
     frontend_status: None
 
-A value of expression of numeric type is converted to *enumeration* type if:
+A value of expression of numeric type can be converted into *enumeration* type
+value with help of castign conversion if:
 
 -  Value can be converetd into type ``int``;
 -  Value is equal to the value of one of the enumeration type constants.
 
-A value of expression of ``string`` or ``string literal`` type is converted to
-*enumeration* type if:
+A value of expression of ``string`` or ``string literal`` type can be converted
+into *enumeration* type value with help of castign conversion if:
 
 -  Value can be converetd into type ``string``;
 -  Value is equal to the value of one of the enumeration type constants.
@@ -745,7 +789,8 @@ to runtime errors if checks are not satisfied.
 
     enum IntegerEnum {a, b, c}
 
-    let e: IntegerEnum = 1 // ok, e is set to IntegerEnum.b, constant to enumeration
+    let e: IntegerEnum = 1 /* ok, e is set to IntegerEnum.b,
+                              constant to enumeration implicit conversion */
 
     e = (1 + 1 + 1) as IntegerEnum /* compile-time error, there is no constant
                                       with this value */
@@ -754,19 +799,20 @@ to runtime errors if checks are not satisfied.
     e = x as IntegerEnum /* OK, as compiler can guarantee that enum
                             consistency is not violated */
 
-    e = foo() as IntegerEnum // runtime check is required
+    e = foo(false) as IntegerEnum // runtime check is required
 
-    function foo() {
+    function foo(some_condition: boolean) {
        if (some_condition)
           return 1 // Valid enum constant value
-       else 
+       else
           return 666 // Invalid enum constant value - will cause runtime error
     }
 
 
     enum StringEnum {a = "AA", b = "BBB", c = "C"}
 
-    let s: StringEnum = "BBB" // ok, e is set to StringEnum.b, constant to enumeration
+    let s: StringEnum = "BBB" as StringEnum /* ok, e is set to StringEnum.b,
+                                               constant to enumeration cast */
 
     s = ("1" + "1" + "1") as StringEnum /* compile-time error, there is no constant
                                       with this value */
@@ -775,12 +821,12 @@ to runtime errors if checks are not satisfied.
     s = y as StringEnum /* OK, as compiler can guarantee that enum
                             consistency is not violated */
 
-    s = bar() as StringEnum // runtime check is required
+    s = bar(false) as StringEnum // runtime check is required
 
-    function bar() {
+    function bar(some_condition: boolean) {
        if (some_condition)
           return "AA" // Valid enum constant value
-       else 
+       else
           return "666" // Invalid enum constant value - will cause runtime error
     }
 
@@ -1174,28 +1220,6 @@ a :index:`compile-time error` as it can cause type-safety violations:
     b.b_method() /* this breaks type-safety if casting conversion to 'never'
                     is allowed */
 
-The conversion of array types (see :ref:`Array Types`) also works in accordance
-with the widening style of the type of array elements as shown below:
-
-.. index::
-   widening
-   reference conversion
-   subtype
-   supertype
-   runtime error
-   conversion
-   array type
-   type safety
-
-.. code-block:: typescript
-   :linenos:
-
-    class Base {}
-    class Derived extends Base {}
-    function foo (da: Derived[]) {
-      let ba: Base[] = da /* Derived[] is assigned into Base[] */
-    }
-
 This array assignment can cause ``ArrayStoreError`` at runtime if an object
 of incorrect type is included in the array. The runtime system performs
 runtime checks to ensure type-safety as show below:
@@ -1205,10 +1229,8 @@ runtime checks to ensure type-safety as show below:
 
     class Base {}
     class Derived extends Base {}
-    class AnotherDerived extends Base {}
     function foo (da: Derived[]) {
-      let ba: Base[] = da // Derived[] is assigned into Base[]
-      ba[0] = new AnotherDerived() /* This assignment of array element will
+      ba[0] = new Derived() /* This assignment of array element will
          cause ``ArrayStoreError`` during program execution */
     }
 
@@ -1355,7 +1377,7 @@ with more parameters.
     f(5)
 
 Worth to mention that overriding is governed by
-:ref:`Override-Compatible Signatures` and example below leads to 
+:ref:`Override-Compatible Signatures` and example below leads to
 compile-time error:
 
 .. code-block:: typescript
@@ -1482,7 +1504,7 @@ part of |TS|.
     enum StringEnum {"a", "b", "c"}
     let incorrect: StringEnum = "b" // compile-time error
     let correct: StringEnum = StringEnum.b // OK
-   
+
 
 |
 
