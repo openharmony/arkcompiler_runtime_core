@@ -16,6 +16,11 @@ ani_add_gtest(ani_test_object_ops_object_new
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_new_test.sts
 )
 
+ani_add_gtest(ani_test_object_get_field_by_name_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_ref_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_ref_test.sts
+)
+
 ani_add_gtest(ani_test_object_ops_object_get_field_long
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_long_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_long_test.sts

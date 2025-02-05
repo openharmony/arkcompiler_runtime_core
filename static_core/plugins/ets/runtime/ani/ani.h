@@ -131,6 +131,9 @@ typedef ani_fixedarray ani_fixedarray_ref;
 struct __ani_gref;
 typedef struct __ani_gref *ani_gref;
 
+struct __ani_wref;
+typedef struct __ani_wref *ani_wref;
+
 struct __ani_variable;
 typedef struct __ani_variable *ani_variable;
 
@@ -200,8 +203,10 @@ typedef enum {
     ANI_ERROR,
     ANI_INVALID_ARGS,
     ANI_INVALID_TYPE,
+    ANI_INVALID_DESCRIPTOR,
     ANI_PENDING_ERROR,
     ANI_NOT_FOUND,
+    ANI_ALREADY_BINDED,
     ANI_OUT_OF_REF,
     ANI_OUT_OF_MEMORY,
     ANI_OUT_OF_RANGE,
@@ -710,17 +715,18 @@ struct __ani_interaction_api {
     ani_status (*Module_FindEnum)(ani_env *env, ani_module module, const char *enum_descriptor, ani_enum *result);
 
     /**
-     * @brief Finds a function within a module by its descriptor.
+     * @brief Finds a function within a module by its name and signature.
      *
-     * This function locates a function within the specified module based on its descriptor.
+     * This function locates a function within the specified module based on its name and signature.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] module The module to search within.
-     * @param[in] function_descriptor The descriptor of the function to find.
+     * @param[in] name The name of the function to retrieve.
+     * @param[in] signature The signature of the function to retrieve.
      * @param[out] result A pointer to the function object.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Module_FindFunction)(ani_env *env, ani_module module, const char *function_descriptor,
+    ani_status (*Module_FindFunction)(ani_env *env, ani_module module, const char *name, const char *signature,
                                       ani_function *result);
 
     /**
@@ -778,17 +784,18 @@ struct __ani_interaction_api {
     ani_status (*Namespace_FindEnum)(ani_env *env, ani_namespace ns, const char *enum_descriptor, ani_enum *result);
 
     /**
-     * @brief Finds a function within a namespace by its descriptor.
+     * @brief Finds a function within a namespace by its name and signature.
      *
-     * This function locates a function within the specified namespace based on its descriptor.
+     * This function locates a function within the specified namespace based on its name and signature.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] ns The namespace to search within.
-     * @param[in] function_descriptor The descriptor of the function to find.
+     * @param[in] name The name of the function to retrieve.
+     * @param[in] signature The signature of the function to retrieve.
      * @param[out] result A pointer to the function object.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Namespace_FindFunction)(ani_env *env, ani_namespace ns, const char *function_descriptor,
+    ani_status (*Namespace_FindFunction)(ani_env *env, ani_namespace ns, const char *name, const char *signature,
                                          ani_function *result);
 
     /**
@@ -6244,15 +6251,14 @@ struct __ani_interaction_api {
     /**
      * @brief Creates a global reference.
      *
-     * This function creates a global reference from a local reference with an initial reference count.
+     * This function creates a global reference from a local reference.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] ref The local reference to convert to a global reference.
-     * @param[in] initial_refcount The initial reference count for the global reference.
      * @param[out] result A pointer to store the created global reference.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*GlobalReference_Create)(ani_env *env, ani_ref ref, uint32_t initial_refcount, ani_gref *result);
+    ani_status (*GlobalReference_Create)(ani_env *env, ani_ref ref, ani_gref *result);
 
     /**
      * @brief Deletes a global reference.
@@ -6260,46 +6266,45 @@ struct __ani_interaction_api {
      * This function deletes the specified global reference, releasing all associated resources.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The global reference to delete.
+     * @param[in] gref The global reference to delete.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*GlobalReference_Delete)(ani_env *env, ani_gref ref);
+    ani_status (*GlobalReference_Delete)(ani_env *env, ani_gref gref);
 
     /**
-     * @brief Increments the reference count of a global reference.
+     * @brief Creates a weak reference.
      *
-     * This function increments the reference count of the specified global reference and returns the updated count.
+     * This function creates a weak reference from a local reference.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] gref The global reference whose count is to be incremented.
-     * @param[out] result A pointer to store the updated reference count.
+     * @param[in] ref The local reference to convert to a weak reference.
+     * @param[out] result A pointer to store the created weak reference.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*GlobalReference_Inc)(ani_env *env, ani_gref gref, uint32_t *result);
+    ani_status (*WeakReference_Create)(ani_env *env, ani_ref ref, ani_wref *result);
 
     /**
-     * @brief Decrements the reference count of a global reference.
+     * @brief Deletes a weak reference.
      *
-     * This function decrements the reference count of the specified global reference and returns the updated count.
+     * This function deletes the specified weak reference, releasing all associated resources.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] gref The global reference whose count is to be decremented.
-     * @param[out] result A pointer to store the updated reference count.
+     * @param[in] wref The weak reference to delete.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*GlobalReference_Dec)(ani_env *env, ani_gref gref, uint32_t *result);
+    ani_status (*WeakReference_Delete)(ani_env *env, ani_wref wref);
 
     /**
-     * @brief Retrieves the local reference associated with a global reference.
+     * @brief Retrieves the local reference associated with a weak reference.
      *
-     * This function retrieves the local reference that corresponds to the specified global reference.
+     * This function retrieves the local reference that corresponds to the specified weak reference.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] gref The global reference to query.
+     * @param[in] wref The weak reference to query.
      * @param[out] result A pointer to store the retrieved local reference.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*GlobalReference_GetReference)(ani_env *env, ani_gref gref, ani_ref *result);
+    ani_status (*WeakReference_GetReference)(ani_env *env, ani_wref wref, ani_ref *result);
 
     /**
      * @brief Creates a new array buffer.
@@ -6981,9 +6986,9 @@ struct __ani_env {
     {
         return c_api->Module_FindEnum(this, module, enum_descriptor, result);
     }
-    ani_status Module_FindFunction(ani_module module, const char *function_descriptor, ani_function *result)
+    ani_status Module_FindFunction(ani_module module, const char *name, const char *signature, ani_function *result)
     {
-        return c_api->Module_FindFunction(this, module, function_descriptor, result);
+        return c_api->Module_FindFunction(this, module, name, signature, result);
     }
     ani_status Module_FindVariable(ani_module module, const char *variable_descriptor, ani_variable *result)
     {
@@ -7001,9 +7006,9 @@ struct __ani_env {
     {
         return c_api->Namespace_FindEnum(this, ns, enum_descriptor, result);
     }
-    ani_status Namespace_FindFunction(ani_namespace ns, const char *function_descriptor, ani_function *result)
+    ani_status Namespace_FindFunction(ani_namespace ns, const char *name, const char *signature, ani_function *result)
     {
-        return c_api->Namespace_FindFunction(this, ns, function_descriptor, result);
+        return c_api->Namespace_FindFunction(this, ns, name, signature, result);
     }
     ani_status Namespace_FindVariable(ani_namespace ns, const char *variable_descriptor, ani_variable *result)
     {
@@ -8863,25 +8868,25 @@ struct __ani_env {
     {
         return c_api->TupleValue_SetItem_Ref(this, tuple_value, index, value);
     }
-    ani_status GlobalReference_Create(ani_ref ref, uint32_t initial_refcount, ani_gref *result)
+    ani_status GlobalReference_Create(ani_ref ref, ani_gref *result)
     {
-        return c_api->GlobalReference_Create(this, ref, initial_refcount, result);
+        return c_api->GlobalReference_Create(this, ref, result);
     }
     ani_status GlobalReference_Delete(ani_gref ref)
     {
         return c_api->GlobalReference_Delete(this, ref);
     }
-    ani_status GlobalReference_Inc(ani_gref gref, uint32_t *result)
+    ani_status WeakReference_Create(ani_ref ref, ani_wref *result)
     {
-        return c_api->GlobalReference_Inc(this, gref, result);
+        return c_api->WeakReference_Create(this, ref, result);
     }
-    ani_status GlobalReference_Dec(ani_gref gref, uint32_t *result)
+    ani_status WeakReference_Delete(ani_wref wref)
     {
-        return c_api->GlobalReference_Dec(this, gref, result);
+        return c_api->WeakReference_Delete(this, wref);
     }
-    ani_status GlobalReference_GetReference(ani_gref gref, ani_ref *result)
+    ani_status WeakReference_GetReference(ani_wref wref, ani_ref *result)
     {
-        return c_api->GlobalReference_GetReference(this, gref, result);
+        return c_api->WeakReference_GetReference(this, wref, result);
     }
     ani_status CreateArrayBuffer(size_t length, void **data_result, ani_arraybuffer *arraybuffer_result)
     {

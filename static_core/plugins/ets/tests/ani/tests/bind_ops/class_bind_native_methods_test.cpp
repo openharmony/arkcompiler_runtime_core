@@ -49,6 +49,20 @@ TEST_F(ClassBindNativeMethodsTest, RegisterNativesTest)
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
 }
 
+TEST_F(ClassBindNativeMethodsTest, already_binded_method)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LRegisteringNativeMethodsTest;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    std::array methods = {
+        ani_native_function {"foo", ":I", reinterpret_cast<void *>(NativeMethodsFooNative)},
+        ani_native_function {"long_foo", ":J", reinterpret_cast<void *>(NativeMethodsLongFooNative)},
+    };
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_ALREADY_BINDED);
+}
+
 TEST_F(ClassBindNativeMethodsTest, RegisterNativesErrorTest)
 {
     ani_class cls;

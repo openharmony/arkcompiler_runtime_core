@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,12 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ani_add_gtest(ani_test_find_class
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_class_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_class_test.sts
-)
-
-ani_add_gtest(ani_test_find_namespace
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_namespace_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_namespace_test.sts
+ani_add_gtest(ani_test_function_call_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_ref_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_ref_test.sts
 )

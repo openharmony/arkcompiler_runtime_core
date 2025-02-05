@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_napi_env.h"
 #include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_namespace.h"
 
 namespace ark::ets::ani {
 
@@ -96,16 +97,22 @@ public:
         return reinterpret_cast<EtsClass *>(GetInternalType(env_, cls));
     }
 
+    EtsNamespace *ToInternalType(ani_namespace ns)
+    {
+        ASSERT(ns != nullptr);
+        return reinterpret_cast<EtsNamespace *>(GetInternalType(env_, ns));
+    }
+
     EtsString *ToInternalType(ani_string str)
     {
         ASSERT(str != nullptr);
         return reinterpret_cast<EtsString *>(GetInternalType(env_, str));
     }
 
-    EtsClass *ToInternalType(ani_type cls)
+    EtsClass *ToInternalType(ani_type type)
     {
-        ASSERT(cls != nullptr);
-        return reinterpret_cast<EtsClass *>(GetInternalType(env_, static_cast<ani_object>(cls)));
+        ASSERT(type != nullptr);
+        return reinterpret_cast<EtsClass *>(GetInternalType(env_, type));
     }
 
     ani_status AddLocalRef(EtsObject *obj, ani_ref *result)

@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ani/ani_type_info.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
+#include "plugins/ets/runtime/types/ets_namespace.h"
 #include "plugins/ets/runtime/ets_napi_env.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 
@@ -75,16 +76,28 @@ static inline ani_static_field ToAniStaticField(EtsField *field)
     return f;
 }
 
+static inline ani_variable ToAniVariable(EtsVariable *variable)
+{
+    return reinterpret_cast<ani_variable>(variable);
+}
+
+[[maybe_unused]] static inline EtsVariable *ToInternalVariable(ani_variable variable)
+{
+    return reinterpret_cast<EtsVariable *>(variable);
+}
+
 static inline EtsMethod *ToInternalMethod(ani_method method)
 {
     auto *m = reinterpret_cast<EtsMethod *>(method);
     ASSERT(!m->IsStatic());
+    ASSERT(!m->IsFunction());
     return m;
 }
 
 static inline ani_method ToAniMethod(EtsMethod *method)
 {
     ASSERT(!method->IsStatic());
+    ASSERT(!method->IsFunction());
     return reinterpret_cast<ani_method>(method);
 }
 
@@ -92,13 +105,30 @@ static inline EtsMethod *ToInternalMethod(ani_static_method method)
 {
     auto *m = reinterpret_cast<EtsMethod *>(method);
     ASSERT(m->IsStatic());
+    ASSERT(!m->IsFunction());
     return m;
 }
 
 static inline ani_static_method ToAniStaticMethod(EtsMethod *method)
 {
     ASSERT(method->IsStatic());
+    ASSERT(!method->IsFunction());
     return reinterpret_cast<ani_static_method>(method);
+}
+
+static inline EtsMethod *ToInternalFunction(ani_function fn)
+{
+    auto *m = reinterpret_cast<EtsMethod *>(fn);
+    ASSERT(m->IsStatic());
+    // NODE: Add assert 'ASSERT(method->IsFunction())' when #22482 is resolved.
+    return m;
+}
+
+static inline ani_function ToAniFunction(EtsMethod *method)
+{
+    ASSERT(method->IsStatic());
+    // NODE: Add assert 'ASSERT(method->IsFunction())' when #22482 is resolved.
+    return reinterpret_cast<ani_function>(method);
 }
 
 static void CheckStaticMethodReturnType(ani_static_method method, EtsType type)
@@ -112,6 +142,14 @@ static void CheckStaticMethodReturnType(ani_static_method method, EtsType type)
 static void CheckMethodReturnType(ani_method method, EtsType type)
 {
     EtsMethod *m = ToInternalMethod(method);
+    if (UNLIKELY(m->GetReturnValueType() != type)) {
+        LOG(FATAL, ANI) << "Return type mismatch";
+    }
+}
+
+static void CheckFunctionReturnType(ani_function fn, EtsType type)
+{
+    EtsMethod *m = ToInternalFunction(fn);
     if (UNLIKELY(m->GetReturnValueType() != type)) {
         LOG(FATAL, ANI) << "Return type mismatch";
     }
@@ -131,9 +169,8 @@ static ClassLinkerContext *GetClassLinkerContext(EtsCoroutine *coroutine)
     return nullptr;
 }
 
-static ani_status GetInternalClass(ScopedManagedCodeFix &s, ani_class cls, EtsClass **result)
+static ani_status DoGetInternalClass(ScopedManagedCodeFix &s, EtsClass *klass, EtsClass **result)
 {
-    EtsClass *klass = s.ToInternalType(cls);
     if (klass->IsInitialized()) {
         *result = klass;
         return ANI_OK;
@@ -152,6 +189,21 @@ static ani_status GetInternalClass(ScopedManagedCodeFix &s, ani_class cls, EtsCl
     }
     *result = klass;
     return ANI_OK;
+}
+
+static ani_status GetInternalClass(ScopedManagedCodeFix &s, ani_class cls, EtsClass **result)
+{
+    EtsClass *klass = s.ToInternalType(cls);
+    return DoGetInternalClass(s, klass, result);
+}
+
+static ani_status GetInternalNamespace(ScopedManagedCodeFix &s, ani_namespace ns, EtsNamespace **result)
+{
+    EtsNamespace *nsp = s.ToInternalType(ns);
+    EtsClass *klass {};
+    ani_status status = DoGetInternalClass(s, nsp->AsClass(), &klass);
+    *result = EtsNamespace::FromClass(klass);
+    return status;
 }
 
 static Value ConstructValueFromFloatingPoint(float val)
@@ -310,6 +362,14 @@ static ani_status GeneralMethodCall(ani_env *env, ani_object obj, MethodType met
     return DoGeneralMethodCall<EtsValueType, AniType, MethodType, Args>(s, obj, method, result, args);
 }
 
+template <typename EtsValueType, typename AniType, typename Args>
+static ani_status GeneralFunctionCall(ani_env *env, ani_function fn, AniType *result, Args args)
+{
+    auto method = reinterpret_cast<ani_static_method>(fn);
+    ScopedManagedCodeFix s(env);
+    return DoGeneralMethodCall<EtsValueType, AniType, ani_static_method, Args>(s, nullptr, method, result, args);
+}
+
 template <typename T>
 static inline ani_status GetPrimitiveTypeField(ani_env *env, ani_object object, ani_field field, T *result)
 {
@@ -341,6 +401,63 @@ static inline ani_status SetPrimitiveTypeField(ani_env *env, ani_object object, 
     EtsObject *etsObject = s.ToInternalType(object);
     etsObject->SetFieldPrimitive(etsField, value);
     return ANI_OK;
+}
+
+template <typename T>
+static ani_status DoFind(ani_env *env, const char *name, T *result)
+{
+    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
+    ScopedManagedCodeFix s(pandaEnv);
+    EtsClassLinker *classLinker = pandaEnv->GetEtsVM()->GetClassLinker();
+    EtsClass *klass = classLinker->GetClass(name, true, GetClassLinkerContext(s.GetCoroutine()));
+    if (UNLIKELY(pandaEnv->HasPendingException())) {
+        EtsThrowable *currentException = pandaEnv->GetThrowable();
+        std::string_view exceptionString = currentException->GetClass()->GetDescriptor();
+        if (exceptionString == panda_file_items::class_descriptors::CLASS_NOT_FOUND_EXCEPTION) {
+            pandaEnv->ClearException();
+            return ANI_NOT_FOUND;
+        }
+
+        // NOTE: Handle exception
+        return ANI_PENDING_ERROR;
+    }
+    ANI_CHECK_RETURN_IF_EQ(klass, nullptr, ANI_NOT_FOUND);
+
+    ASSERT_MANAGED_CODE();
+    return s.AddLocalRef(reinterpret_cast<EtsObject *>(klass), reinterpret_cast<ani_ref *>(result));
+}
+
+template <bool IS_STATIC_METHOD>
+static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char *signature, EtsMethod **result)
+{
+    ASSERT_MANAGED_CODE();
+    EtsMethod *method = (signature == nullptr ? klass->GetMethod(name) : klass->GetMethod(name, signature));
+    if (method == nullptr || method->IsStatic() != IS_STATIC_METHOD) {
+        return ANI_NOT_FOUND;
+    }
+    *result = method;
+    return ANI_OK;
+}
+
+template <bool IS_STATIC_METHOD>
+static ani_status GetClassMethod(ani_env *env, ani_class cls, const char *name, const char *signature,
+                                 EtsMethod **result)
+{
+    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    EtsClass *klass;
+    ani_status status = GetInternalClass(s, cls, &klass);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    return DoGetClassMethod<IS_STATIC_METHOD>(klass, name, signature, result);
+}
+
+static ani_status GetNamespaceFunction(ani_env *env, ani_namespace ns, const char *name, const char *signature,
+                                       EtsMethod **result)
+{
+    ScopedManagedCodeFix s(env);
+    EtsNamespace *etsNs;
+    ani_status status = GetInternalNamespace(s, ns, &etsNs);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    return DoGetClassMethod<true>(etsNs->AsClass(), name, signature, result);
 }
 
 NO_UB_SANITIZE static ani_status GetVersion(ani_env *env, uint32_t *result)
@@ -423,6 +540,35 @@ NO_UB_SANITIZE static ani_status Object_New(ani_env *env, ani_class cls, ani_met
     return status;
 }
 
+NO_UB_SANITIZE static ani_status FindModule(ani_env *env, const char *moduleDescriptor, ani_module *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(moduleDescriptor);
+    CHECK_PTR_ARG(result);
+
+    size_t len = strlen(moduleDescriptor);
+    ANI_CHECK_RETURN_IF_LE(len, 2U, ANI_INVALID_DESCRIPTOR);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    ANI_CHECK_RETURN_IF_NE(moduleDescriptor[len - 1], ';', ANI_INVALID_DESCRIPTOR);
+    PandaString descriptor(moduleDescriptor, len - 1);
+    descriptor += "/ETSGLOBAL;";
+
+    // NOTE: Check that results is namespace, #22400
+    return DoFind(env, descriptor.c_str(), result);
+}
+
+NO_UB_SANITIZE static ani_status FindNamespace(ani_env *env, const char *namespaceDescriptor, ani_namespace *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(namespaceDescriptor);
+    CHECK_PTR_ARG(result);
+
+    // NOTE: Check that results is namespace, #22400
+    return DoFind(env, namespaceDescriptor, result);
+}
+
 NO_UB_SANITIZE static ani_status FindClass(ani_env *env, const char *classDescriptor, ani_class *result)
 {
     ANI_DEBUG_TRACE(env);
@@ -430,23 +576,46 @@ NO_UB_SANITIZE static ani_status FindClass(ani_env *env, const char *classDescri
     CHECK_PTR_ARG(classDescriptor);
     CHECK_PTR_ARG(result);
 
-    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
-    ScopedManagedCodeFix s(pandaEnv);
-    EtsClassLinker *classLinker = pandaEnv->GetEtsVM()->GetClassLinker();
-    EtsClass *klass = classLinker->GetClass(classDescriptor, true, GetClassLinkerContext(s.GetCoroutine()));
-    if (UNLIKELY(pandaEnv->HasPendingException())) {
-        EtsThrowable *currentException = pandaEnv->GetThrowable();
-        std::string_view exceptionString = currentException->GetClass()->GetDescriptor();
-        if (exceptionString == panda_file_items::class_descriptors::CLASS_NOT_FOUND_EXCEPTION) {
-            pandaEnv->ClearException();
-            return ANI_NOT_FOUND;
-        }
+    // NOTE: Check that results is class, #22400
+    return DoFind(env, classDescriptor, result);
+}
 
-        // NOTE: Handle exception
-        return ANI_PENDING_ERROR;
-    }
-    ANI_CHECK_RETURN_IF_EQ(klass, nullptr, ANI_NOT_FOUND);
-    return s.AddLocalRef(reinterpret_cast<EtsObject *>(klass), reinterpret_cast<ani_ref *>(result));
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Namespace_FindFunction(ani_env *env, ani_namespace ns, const char *name,
+                                                        const char *signature, ani_function *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(ns);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    EtsMethod *method = nullptr;
+    ani_status status = GetNamespaceFunction(env, ns, name, signature, &method);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    *result = ToAniFunction(method);
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Namespace_FindVariable(ani_env *env, ani_namespace ns, const char *variableDescriptor,
+                                                        ani_variable *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(ns);
+    CHECK_PTR_ARG(variableDescriptor);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    EtsNamespace *etsNs {};
+    ani_status status = GetInternalNamespace(s, ns, &etsNs);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsVariable *variable = etsNs->GetVariabe(variableDescriptor);
+    ANI_CHECK_RETURN_IF_EQ(variable, nullptr, ANI_NOT_FOUND);
+
+    *result = ToAniVariable(variable);
+    return ANI_OK;
 }
 
 static ani_status PinPrimitiveTypeArray(ani_env *env, ani_fixedarray primitiveArray, void **result)
@@ -587,6 +756,78 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Byte(ani_env *env, ani_fix
     return GetPrimitiveTypeArrayRegion(env, array, offset, length, nativeBuffer);
 }
 
+template <bool IS_FUNCTION>
+static ani_status DoBindNative(ScopedManagedCodeFix &s, const PandaVector<EtsMethod *> &etsMethods,
+                               const ani_native_function *functions, ani_size nrFunctions)
+{
+    ASSERT(etsMethods.size() == nrFunctions);
+
+    // Get global mutex to guarantee that checked native methods don't changed in other thread.
+    os::memory::LockHolder lock(s.GetPandaEnv()->GetEtsVM()->GetAniBindMutex());
+
+    // Check native methods
+    for (EtsMethod *method : etsMethods) {
+        ANI_CHECK_RETURN_IF_EQ(method, nullptr, ANI_NOT_FOUND);
+        ANI_CHECK_RETURN_IF_EQ(method->IsNative(), false, ANI_NOT_FOUND);
+        ANI_CHECK_RETURN_IF_EQ(method->IsBindedNativeFunction(), true, ANI_ALREADY_BINDED);
+    }
+
+    // Bind native methods
+    for (ani_size i = 0; i < nrFunctions; ++i) {
+        EtsMethod *method = etsMethods[i];       // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        const void *ptr = functions[i].pointer;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        bool ret = [method, ptr]() {
+            if constexpr (IS_FUNCTION) {
+                return method->RegisterNativeFunction(ptr);
+            } else {
+                return method->RegisterNativeMethod(ptr);
+            }
+        }();
+        LOG_IF(!ret, FATAL, ANI) << "Cannot register native method";
+    }
+    return ANI_OK;
+}
+
+static ani_status DoBindNativeFunctions(ani_env *env, ani_namespace ns, const ani_native_function *functions,
+                                        ani_size nrFunctions)
+{
+    ANI_CHECK_RETURN_IF_EQ(nrFunctions, 0, ANI_OK);
+    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    EtsNamespace *etsNs = s.ToInternalType(ns);
+    PandaVector<EtsMethod *> etsMethods;
+    etsMethods.reserve(nrFunctions);
+    for (ani_size i = 0; i < nrFunctions; ++i) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        etsMethods.push_back(etsNs->GetFunction(functions[i].name, functions[i].signature));
+    }
+    return DoBindNative<true>(s, etsMethods, functions, nrFunctions);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Module_BindNativeFunctions(ani_env *env, ani_module module,
+                                                            const ani_native_function *functions, ani_size nrFunctions)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(module);
+    CHECK_PTR_ARG(functions);
+
+    return DoBindNativeFunctions(env, reinterpret_cast<ani_namespace>(module), functions, nrFunctions);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Namespace_BindNativeFunctions(ani_env *env, ani_namespace ns,
+                                                               const ani_native_function *functions,
+                                                               ani_size nrFunctions)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(ns);
+    CHECK_PTR_ARG(functions);
+
+    return DoBindNativeFunctions(env, ns, functions, nrFunctions);
+}
+
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_BindNativeMethods(ani_env *env, ani_class cls,
                                                          const ani_native_function *methods, ani_size nrMethods)
@@ -595,31 +836,20 @@ NO_UB_SANITIZE static ani_status Class_BindNativeMethods(ani_env *env, ani_class
     CHECK_ENV(env);
     CHECK_PTR_ARG(cls);
     CHECK_PTR_ARG(methods);
-    if (nrMethods == 0) {
-        return ANI_OK;
-    }
+
+    ANI_CHECK_RETURN_IF_EQ(nrMethods, 0, ANI_OK);
     ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
     EtsClass *klass = s.ToInternalType(cls);
 
     PandaVector<EtsMethod *> etsMethods;
     etsMethods.reserve(nrMethods);
     for (ani_size i = 0; i < nrMethods; ++i) {
-        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        const char *signature = methods[i].signature;
-        EtsMethod *method =
-            (signature == nullptr ? klass->GetMethod(methods[i].name) : klass->GetMethod(methods[i].name, signature));
-        // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-
-        if (method == nullptr || !method->IsNative()) {
-            return ANI_NOT_FOUND;
-        }
+        ani_native_function m = methods[i];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        const char *signature = m.signature;
+        EtsMethod *method = signature == nullptr ? klass->GetMethod(m.name) : klass->GetMethod(m.name, signature);
         etsMethods.push_back(method);
     }
-    for (ani_size i = 0; i < nrMethods; ++i) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        etsMethods[i]->RegisterNativeImpl(const_cast<void *>(methods[i].pointer));
-    }
-    return ANI_OK;
+    return DoBindNative<false>(s, etsMethods, methods, nrMethods);
 }
 
 template <bool IS_STATIC_FIELD>
@@ -628,9 +858,8 @@ static ani_status DoGetField(ani_env *env, ani_class cls, const char *name, EtsF
     ScopedManagedCodeFix s(env);
     EtsClass *klass;
     ani_status status = GetInternalClass(s, cls, &klass);
-    if (UNLIKELY(status != ANI_OK)) {
-        return status;
-    }
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
     EtsField *field = [&]() {
         if constexpr (IS_STATIC_FIELD) {
             return klass->GetStaticFieldIDByName(name, nullptr);
@@ -638,9 +867,8 @@ static ani_status DoGetField(ani_env *env, ani_class cls, const char *name, EtsF
             return klass->GetFieldIDByName(name, nullptr);
         }
     }();
-    if (field == nullptr) {
-        return ANI_NOT_FOUND;
-    }
+    ANI_CHECK_RETURN_IF_EQ(field, nullptr, ANI_NOT_FOUND);
+
     *result = field;
     return ANI_OK;
 }
@@ -682,23 +910,6 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField(ani_env *env, ani_class cl
     return ANI_OK;
 }
 
-template <bool IS_STATIC_METHOD>
-static ani_status DoGetMethod(ani_env *env, ani_class cls, const char *name, const char *signature, EtsMethod **result)
-{
-    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
-    EtsClass *klass;
-    ani_status status = GetInternalClass(s, cls, &klass);
-    if (UNLIKELY(status != ANI_OK)) {
-        return status;
-    }
-    EtsMethod *method = (signature == nullptr ? klass->GetMethod(name) : klass->GetMethod(name, signature));
-    if (method == nullptr || method->IsStatic() != IS_STATIC_METHOD) {
-        return ANI_NOT_FOUND;
-    }
-    *result = method;
-    return ANI_OK;
-}
-
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_GetMethod(ani_env *env, ani_class cls, const char *name, const char *signature,
                                                  ani_method *result)
@@ -710,10 +921,8 @@ NO_UB_SANITIZE static ani_status Class_GetMethod(ani_env *env, ani_class cls, co
     CHECK_PTR_ARG(result);
 
     EtsMethod *method = nullptr;
-    ani_status status = DoGetMethod<false>(env, cls, name, signature, &method);
-    if (UNLIKELY(status != ANI_OK)) {
-        return status;
-    }
+    ani_status status = GetClassMethod<false>(env, cls, name, signature, &method);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     *result = ToAniMethod(method);
     return ANI_OK;
 }
@@ -729,10 +938,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticMethod(ani_env *env, ani_class c
     CHECK_PTR_ARG(result);
 
     EtsMethod *method = nullptr;
-    ani_status status = DoGetMethod<true>(env, cls, name, signature, &method);
-    if (UNLIKELY(status != ANI_OK)) {
-        return status;
-    }
+    ani_status status = GetClassMethod<true>(env, cls, name, signature, &method);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     *result = ToAniStaticMethod(method);
     return ANI_OK;
 }
@@ -839,6 +1046,28 @@ NO_UB_SANITIZE static ani_status Object_SetField_Ref(ani_env *env, ani_object ob
     EtsObject *etsValue = s.ToInternalType(value);
     etsObject->SetFieldObject(etsField, etsValue);
     return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Ref(ani_env *env, ani_object object, const char *name,
+                                                           ani_ref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    EtsCoroutine *coroutine = s.GetCoroutine();
+    EtsHandleScope scope(coroutine);
+    EtsHandle<EtsObject> etsObject(coroutine, s.ToInternalType(object));
+    ASSERT(etsObject.GetPtr() != nullptr);
+    EtsField *etsField = etsObject->GetClass()->GetFieldIDByName(name, nullptr);
+    ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
+    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<ani_ref>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+    EtsObject *etsRes = etsObject->GetFieldObject(etsField);
+    return s.AddLocalRef(etsRes, result);
 }
 
 template <typename R>
@@ -1424,8 +1653,45 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Void(ani_env *env, ani_object
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status GlobalReference_Create(ani_env *env, ani_ref ref,
-                                                        [[maybe_unused]] uint32_t initialRefcount, ani_gref *result)
+NO_UB_SANITIZE static ani_status Function_Call_Ref_A(ani_env *env, ani_function fn, ani_ref *result,
+                                                     const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(args);
+
+    CheckFunctionReturnType(fn, EtsType::OBJECT);
+    return GeneralFunctionCall<ani_ref>(env, fn, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Ref_V(ani_env *env, ani_function fn, ani_ref *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    CHECK_PTR_ARG(result);
+
+    CheckFunctionReturnType(fn, EtsType::OBJECT);
+    return GeneralFunctionCall<ani_ref>(env, fn, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Ref(ani_env *env, ani_function fn, ani_ref *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Function_Call_Ref_V(env, fn, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status GlobalReference_Create(ani_env *env, ani_ref ref, ani_gref *result)
 {
     // This is a temporary implementation, it needs to be redone. #22006
     ANI_DEBUG_TRACE(env);
@@ -1488,8 +1754,8 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<27>,
     NotImplementedAdapter<28>,
     NotImplementedAdapter<29>,
-    NotImplementedAdapter<30>,
-    NotImplementedAdapter<31>,
+    FindModule,
+    FindNamespace,
     FindClass,
     NotImplementedAdapter<33>,
     NotImplementedAdapter<34>,
@@ -1503,10 +1769,10 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<42>,
     NotImplementedAdapter<43>,
     NotImplementedAdapter<44>,
-    NotImplementedAdapter<45>,
-    NotImplementedAdapter<46>,
-    NotImplementedAdapter<47>,
-    NotImplementedAdapter<48>,
+    Namespace_FindFunction,
+    Namespace_FindVariable,
+    Module_BindNativeFunctions,
+    Namespace_BindNativeFunctions,
     Class_BindNativeMethods,
     NotImplementedAdapter<50>,
     NotImplementedAdapter<51>,
@@ -1626,9 +1892,9 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapterVargs<165>,
     NotImplementedAdapter<166>,
     NotImplementedAdapter<167>,
-    NotImplementedAdapterVargs<168>,
-    NotImplementedAdapter<169>,
-    NotImplementedAdapter<170>,
+    Function_Call_Ref,
+    Function_Call_Ref_A,
+    Function_Call_Ref_V,
     NotImplementedAdapterVargs<171>,
     NotImplementedAdapter<172>,
     NotImplementedAdapter<173>,
@@ -1766,7 +2032,7 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<305>,
     NotImplementedAdapter<306>,
     NotImplementedAdapter<307>,
-    NotImplementedAdapter<308>,
+    Object_GetFieldByName_Ref,
     NotImplementedAdapter<309>,
     NotImplementedAdapter<310>,
     NotImplementedAdapter<311>,

@@ -17,37 +17,37 @@
 
 namespace ark::ets::ani::testing {
 
-class FindClassTest : public AniTest {};
+class FindNamespaceTest : public AniTest {};
 
-TEST_F(FindClassTest, has_class)
+TEST_F(FindNamespaceTest, has_namespace)
 {
-    ani_class cls;
-    ASSERT_EQ(env_->FindClass("LPoint;", &cls), ANI_OK);
-    ASSERT_NE(cls, nullptr);
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("Lgeometry;", &ns), ANI_OK);
+    ASSERT_NE(ns, nullptr);
 }
 
-TEST_F(FindClassTest, class_not_found)
+TEST_F(FindNamespaceTest, namespace_not_found)
 {
-    ani_class cls;
-    ASSERT_EQ(env_->FindClass("bla-bla-bla", &cls), ANI_NOT_FOUND);
+    ani_namespace ns;
+    ASSERT_EQ(env_->FindNamespace("bla-bla-bla", &ns), ANI_NOT_FOUND);
 }
 
-TEST_F(FindClassTest, invalid_argument_1)
+TEST_F(FindNamespaceTest, invalid_argument_1)
 {
-    ani_class cls;
-    ASSERT_EQ(env_->FindClass(nullptr, &cls), ANI_INVALID_ARGS);
+    ani_namespace ns;
+    ASSERT_EQ(env_->FindNamespace(nullptr, &ns), ANI_INVALID_ARGS);
 }
 
-TEST_F(FindClassTest, invalid_argument_2)
+TEST_F(FindNamespaceTest, invalid_argument_2)
 {
-    ASSERT_EQ(env_->FindClass("LPoint;", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FindNamespace("Lgeometry;", nullptr), ANI_INVALID_ARGS);
 }
 
 // Enable when #22400 is resolved.
-TEST_F(FindClassTest, DISABLED_class_is_not_namespace)
+TEST_F(FindNamespaceTest, DISABLED_namespace_is_not_class)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("LPoint;", &ns), ANI_NOT_FOUND);
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lgeometry;", &cls), ANI_NOT_FOUND);
 }
 
 }  // namespace ark::ets::ani::testing

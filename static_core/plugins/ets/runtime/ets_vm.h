@@ -279,6 +279,11 @@ public:
         }
     }
 
+    os::memory::Mutex &GetAniBindMutex()
+    {
+        return aniBindMutex_;
+    }
+
     os::memory::Mutex &GetAtomicsMutex()
     {
         return atomicsMutex_;
@@ -420,6 +425,7 @@ private:
     PandaUniquePtr<CallbackPosterFactoryIface> callbackPosterFactory_;
     os::memory::Mutex rootProviderlock_;
     PandaUnorderedSet<mem::RootProvider *> rootProviders_ GUARDED_BY(rootProviderlock_);
+    os::memory::Mutex aniBindMutex_;
     // optional for lazy initialization
     std::optional<std::mt19937> randomEngine_;
     // for JS Atomics

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -238,12 +238,9 @@ extern "C" void EtsNapiBeginCritical(Method *method, uint8_t *inRegsArgs, uint8_
 //       +---+--------------------+ <- out_stack_args -> +--------------------+---+
 //       |                        |                      |                        |
 // 0x0000
-extern "C" uint8_t *EtsNapiBegin(Method *method, uint8_t *inRegsArgs, uint8_t *inStackArgs, uint8_t *outStackArgs,
-                                 ManagedThread *thread)
+static uint8_t *PrepareArgsOnStack(Method *method, uint8_t *inRegsArgs, uint8_t *inStackArgs, uint8_t *outStackArgs,
+                                   PandaEnv *pandaEnv)
 {
-    ASSERT(!method->IsSynchronized());
-    ASSERT(thread == ManagedThread::GetCurrent());
-
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto outRegsArgs = inRegsArgs - ExtArchTraits ::FP_ARG_NUM_BYTES - ExtArchTraits ::GP_ARG_NUM_BYTES;
 
@@ -261,35 +258,60 @@ extern "C" uint8_t *EtsNapiBegin(Method *method, uint8_t *inRegsArgs, uint8_t *i
 
     argReader.Read<Method *>();  // Skip method
 
+    EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(method);
     EtsReference *classOrThisRef = nullptr;
     if (method->IsStatic()) {
-        // Handle class object
-        auto classObj = EtsClass::FromRuntimeClass(method->GetClass())->AsObject();
-        ASSERT(classObj != nullptr);
+        if (!etsMethod->IsFunction()) {
+            // Handle class object
+            auto classObj = EtsClass::FromRuntimeClass(method->GetClass())->AsObject();
+            ASSERT(classObj != nullptr);
 
-        // Replace the method pointer (Method *) with a pointer to the class object
-        auto classPtr = reinterpret_cast<EtsObject **>(inRegsArgs);
-        *classPtr = classObj;
+            // Replace the method pointer (Method *) with a pointer to the class object
+            auto classPtr = reinterpret_cast<EtsObject **>(inRegsArgs);
+            *classPtr = classObj;
 
-        classOrThisRef = EtsReferenceStorage::NewEtsStackRef(classPtr);
+            classOrThisRef = EtsReferenceStorage::NewEtsStackRef(classPtr);
+        }
     } else {
         ASSERT(method->GetNumArgs() != 0);
         ASSERT(!method->GetArgType(0).IsPrimitive());
+        ASSERT(!etsMethod->IsFunction());
 
         // Handle this arg
         auto thisPtr = const_cast<EtsObject **>(argReader.ReadPtr<EtsObject *>());
         classOrThisRef = EtsReferenceStorage::NewEtsStackRef(thisPtr);
     }
 
-    auto coroutine = EtsCoroutine::CastFromThread(thread);
-    auto etsNapiEnv = coroutine->GetEtsNapiEnv();
+    if (UNLIKELY(method->GetNativePointer() == nullptr)) {
+        // NOTE: Mark method that it has deprecated native API. Delete this code when #22435 is resolved.
+        method->SetAccessFlags(method->GetAccessFlags() | ACC_DEPRECATED_NATIVE_API);
+    }
 
     // Prepare eTS NAPI args
-    argWriter.Write(static_cast<EtsEnv *>(etsNapiEnv));
-    argWriter.Write(classOrThisRef);
+    if (UNLIKELY(etsMethod->IsDeprecatedNativeAPI())) {
+        argWriter.Write(static_cast<EtsEnv *>(pandaEnv));
+    } else {
+        argWriter.Write(static_cast<ani_env *>(pandaEnv));
+    }
+    if (!etsMethod->IsFunction()) {
+        argWriter.Write(classOrThisRef);
+    }
     ARCH_COPY_METHOD_ARGS(method, argReader, argWriter);
-
     // Completed the preparation of eTS NAPI arguments on the stack
+
+    return outRegsArgs;
+}
+
+extern "C" uint8_t *EtsNapiBegin(Method *method, uint8_t *inRegsArgs, uint8_t *inStackArgs, uint8_t *outStackArgs,
+                                 ManagedThread *thread)
+{
+    ASSERT(!method->IsSynchronized());
+    ASSERT(thread == ManagedThread::GetCurrent());
+
+    EtsCoroutine *coroutine = EtsCoroutine::CastFromThread(thread);
+    PandaEnv *pandaEnv = coroutine->GetEtsNapiEnv();
+
+    uint8_t *outRegsArgs = PrepareArgsOnStack(method, inRegsArgs, inStackArgs, outStackArgs, pandaEnv);
 
     // ATTENTION!!!
     // Don't move the following code above, because only from this point on,
@@ -297,17 +319,18 @@ extern "C" uint8_t *EtsNapiBegin(Method *method, uint8_t *inRegsArgs, uint8_t *i
     // (e.g. stop at a safepoint and walk the stack args of NAPI frame)
 
     if (UNLIKELY(method->GetNativePointer() == nullptr)) {
+        // NOTE: Delete this code and add throw an error when #22435 is resolved.
         coroutine->GetPandaVM()->ResolveNativeMethod(method);
     }
 
     Runtime::GetCurrent()->GetNotificationManager()->MethodEntryEvent(thread, method);
 
     constexpr uint32_t MAX_LOCAL_REF = 4096;
-    if (UNLIKELY(!etsNapiEnv->GetEtsReferenceStorage()->PushLocalEtsFrame(MAX_LOCAL_REF))) {
+    if (UNLIKELY(!pandaEnv->GetEtsReferenceStorage()->PushLocalEtsFrame(MAX_LOCAL_REF))) {
         LOG(FATAL, RUNTIME) << "eTS NAPI push local frame failed";
     }
 
-    auto etsMethod = EtsMethod::FromRuntimeMethod(method);
+    EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(method);
     if (!etsMethod->IsFastNative()) {
         thread->NativeCodeBegin();
     }
