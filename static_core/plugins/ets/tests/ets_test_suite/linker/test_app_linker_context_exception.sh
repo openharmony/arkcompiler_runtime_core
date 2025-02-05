@@ -49,10 +49,12 @@ RUNTIME_ARGUMENTS="${BOOT_PANDA_FILES} --load-runtimes=ets --gc-type=g1-gc --pan
 STDERR=$(${RUN_PREFIX} "${ARK_BINARY}" ${RUNTIME_ARGUMENTS} 2>&1 >/dev/null)
 RETURN_CODE=$?
 
-if [ ${RETURN_CODE} -eq 1 ] && echo "${STDERR}" | grep -q "${EXPECTED_ERROR_MESSAGE}"; then
+if [ ${RETURN_CODE} -eq 1 ] && [[ "${STDERR}" =~ "${EXPECTED_ERROR_MESSAGE}" ]]; then
     # Runtime failed with expected message in stderr - test has passed
     exit 0
 fi
 
 echo Expected runtime unhandled exception with the following message: "${EXPECTED_ERROR_MESSAGE}"
+echo Captured stderr: "${STDERR}"
+echo Return code: "${RETURN_CODE}"
 exit 1

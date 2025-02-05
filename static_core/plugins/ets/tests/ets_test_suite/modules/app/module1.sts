@@ -38,12 +38,24 @@ function testLazyLoading() {
     assertTrue(bar.ClassLoadingChecker_init, "`@bar.bar.ClassLoadingChecker` must be initialized");
 }
 
+function triggerGC() {
+    expectNoThrow((): void throws => {
+        const gcId = GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE);
+        if (gcId > 0) {
+            GC.waitForFinishGC(gcId);
+        }
+    });
+}
+
 function testNames() {
     const nameOf = (o: Object) => Class.of(o).getName()
 
     assertEQ(Class.ofCaller().getName(), "@app.module1.ETSGLOBAL")
 
     testLazyLoading();
+
+    // Check that garbage collection does not break user-defined RuntimeLinker
+    triggerGC();
 
     assertTrue(bar.dummy() instanceof bar.Dummy);
     assertEQ(nameOf(bar.dummy()), "@bar.bar.Dummy");

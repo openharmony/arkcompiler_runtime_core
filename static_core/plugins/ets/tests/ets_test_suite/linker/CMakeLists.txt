@@ -135,6 +135,7 @@ function(test_app_linker_context_exception TARGET WORK_DIR)
             --entrypoint=additional1.ETSGLOBAL::main
         DEPENDS ark etsstdlib ${ABC_TARGET}
     )
+    add_dependencies(ets_test_suite_linker ${TARGET})
 endfunction()
 
 test_app_linker_context_exception(ets_app_linker_context_tests ${linker_tests_out_dir})
