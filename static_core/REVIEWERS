@@ -123,7 +123,7 @@ static_core/plugins/ets/stdlib/escompat/Atomics.sts                           @d
 static_core/plugins/ets/templates/stdlib/                                     @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/tests/benchmarks/interop_js                           @semenovaleksandr @ignatenkooleg @Prof1983
 static_core/plugins/ets/tests/checked/                                        @Prof1983
-static_core/plugins/ets/tests/ets-templates/                                  @dmitriitr @Prof1983 @igelhaus @ragnvald @troeglazovamaria @maksim-khramov
+static_core/plugins/ets/tests/ets-templates/                                  @Prof1983 @igelhaus @ragnvald @troeglazovamaria @maksim-khramov
 static_core/plugins/ets/tests/ets_es_checked/                                 @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/tests/interop_js/                                     @igelhaus @semenovaleksandr @rokashevichsvetlana @kurnevichstanislav
 static_core/plugins/ets/tests/stdlib-templates/                               @ivan-tyulyandin @anton-sysoev
@@ -145,6 +145,9 @@ static_core/plugins/ets/stdlib/std/core/Promise.sts                           @d
 static_core/plugins/ets/stdlib/std/core/Type*                                 @smirnovandrei @anton-sysoev
 static_core/plugins/ets/stdlib/std/core/UnionCase.sts                         @smirnovandrei @anton-sysoev
 static_core/plugins/ets/stdlib/std/core/Value.sts                             @smirnovandrei @anton-sysoev
+static_core/plugins/ets/tests/ets-templates/17.experimental_features/         @dmitriitr @Prof1983 @igelhaus @ragnvald @troeglazovamaria @maksim-khramov
+static_core/plugins/ets/tests/ets-templates/7.expressions/                    @dmitriitr @Prof1983 @igelhaus @ragnvald @troeglazovamaria @maksim-khramov
+static_core/plugins/ets/tests/ets-templates/9.classes/                        @dmitriitr @Prof1983 @igelhaus @ragnvald @troeglazovamaria @maksim-khramov
 static_core/plugins/ets/tests/ets_func_tests/escompat/                        @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/tests/ets_func_tests/std/                             @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/tests/ets_test_suite/atomics/                         @konstanting
