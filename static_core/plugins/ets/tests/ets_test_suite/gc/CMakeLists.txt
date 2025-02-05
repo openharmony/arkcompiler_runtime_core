@@ -22,12 +22,13 @@ add_custom_target(ets_test_suite_gc)
 
 function(add_ets_gc_test)
     set(prefix ARG)
-    set(singleValues FILE MODE)
+    set(singleValues FILE MODE TIMEOUT_CMD TIMEOUT_TIME)
     set(multiValues OPTIONS)
     cmake_parse_arguments(${prefix} "" "${singleValues}" "${multiValues}" ${ARGN})
 
     get_filename_component(TEST_NAME "${ARG_FILE}" NAME_WE)
 
+    set(PANDA_RUN_PREFIX ${ARG_TIMEOUT_CMD} ${ARG_TIMEOUT_TIME} ${PANDA_RUN_PREFIX} )
     set(test_in "${gc_test_in_dir}/${ARG_FILE}")
     set(test_out_dir "${gc_test_out_dir}/${TEST_NAME}")
     string(TOLOWER "${ARG_MODE}" run_mode)
@@ -101,6 +102,7 @@ add_ets_gc_test(FILE weak_ref_test.sts OPTIONS "--gc-type=g1-gc" "--run-gc-in-pl
 add_ets_gc_test(FILE concurrent_start_gc.sts OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE register_native_allocation_test.sts OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE finalization_registry_test.sts OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
+add_ets_gc_test(TIMEOUT_CMD timeout TIMEOUT_TIME 10m FILE finalization_registry_deadlock_test.sts OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE scheduled_gc.sts OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" "--gc-use-nth-alloc-trigger=true" MODE "INT")
 add_ets_gc_test(FILE scheduled_gc_trigger_exception.sts OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" MODE "INT")
 

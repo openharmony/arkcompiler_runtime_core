@@ -32,6 +32,16 @@ final class Mutex {
         this.waiters = 0;
     }
 
+    public lockGuard(callback: () => void): void {
+        this.lock();
+        try {
+            callback();
+        } finally {
+            this.unlock();
+        }
+    }
+
+
     /**
      * Method gives exclusive access to critical section is case of successful mutex lock.
      * Otherwise, blocks current coroutine until other coroutine will unlock the mutex.

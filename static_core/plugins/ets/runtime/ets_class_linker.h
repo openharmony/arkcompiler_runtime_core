@@ -74,6 +74,7 @@ public:
     EtsClass *GetAbcFileClass();
     // NOTE(molotkovmikhail): Need to implement a method cache that should be accessible by some class and method ids.
     Method *GetSubscribeOnAnotherPromiseMethod();
+    Method *GetFinalizationRegistryExecCleanupMethod();
 
     EtsClassLinkerExtension *GetEtsClassLinkerExtension()
     {
