@@ -10,7 +10,7 @@ Documentation:
 
 ## How to download and build
 
-Download:
+### Download:
 
 ```sh
 repo init -u https://gitee.com/ark-standalone-build/manifest.git -b master
@@ -19,8 +19,16 @@ repo forall -c 'git lfs pull'
 ./prebuilts_download.sh
 ```
 
-Build AbcKit:
+### Build AbcKit:
 
 ```sh
 ./ark.py x64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
 ```
+
+### Generate doxygen documentation
+```sh
+cd out/x64.release
+ninja abckit_documentation
+```
+
+See generated documentation in `out/x64.release/gen/arkcompiler/runtime_core/libabckit/doxygen`

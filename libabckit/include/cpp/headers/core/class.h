@@ -100,14 +100,14 @@ public:
     core::Module GetModule() const;
 
     /**
-     * @brief Get the All Methods object
+     * @brief Get vector with all Methods
      * @return std::vector<core::Function>
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::vector<core::Function> GetAllMethods() const;
 
     /**
-     * @brief Get the Annotations object
+     * @brief Get vector with all Annotations
      * @return std::vector<core::Annotation>
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */

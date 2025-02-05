@@ -148,33 +148,38 @@ std::string ApiScanner::ApiUsageMapGetString() const
     const static std::string USAGES_FUNCNAME = "funcName";
     const static std::string API_IDX = "indexOfAPI";
 
-    ss << LEFT_BRACKET << std::endl;
+    LIBABCKIT_LOG(DEBUG) << LEFT_BRACKET << std::endl;
     for (const auto &[index, usageInfos] : apiUsages_) {
-        ss << INDENT_1 << LEFT_BRACKET << std::endl;
+        LIBABCKIT_LOG(DEBUG) << INDENT_1 << LEFT_BRACKET << std::endl;
 
         if (usageInfos.empty()) {
             continue;
         }
         const auto &apiInfo = apiList_[index];
-        ss << INDENT_2 << APIINFO << COLON << LEFT_BRACKET << std::endl;
-        ss << INDENT_3 << APIINFO_SOURCE << COLON << GetQuatatedStr(apiInfo.source) << COMMA << std::endl;
-        ss << INDENT_3 << APIINFO_OBJNAME << COLON << GetQuatatedStr(apiInfo.objName) << COMMA << std::endl;
-        ss << INDENT_3 << APIINFO_PROPNAME << COLON << GetQuatatedStr(apiInfo.propName) << COMMA << std::endl;
-        ss << INDENT_2 << RIGHT_BRACKET << COMMA << std::endl;
+        LIBABCKIT_LOG(DEBUG) << INDENT_2 << APIINFO << COLON << LEFT_BRACKET << std::endl;
+        LIBABCKIT_LOG(DEBUG) << INDENT_3 << APIINFO_SOURCE << COLON << GetQuatatedStr(apiInfo.source) << COMMA
+                             << std::endl;
+        LIBABCKIT_LOG(DEBUG) << INDENT_3 << APIINFO_OBJNAME << COLON << GetQuatatedStr(apiInfo.objName) << COMMA
+                             << std::endl;
+        LIBABCKIT_LOG(DEBUG) << INDENT_3 << APIINFO_PROPNAME << COLON << GetQuatatedStr(apiInfo.propName) << COMMA
+                             << std::endl;
+        LIBABCKIT_LOG(DEBUG) << INDENT_2 << RIGHT_BRACKET << COMMA << std::endl;
 
-        ss << INDENT_2 << USAGES << COLON << LEFT_BRACKET << std::endl;
+        LIBABCKIT_LOG(DEBUG) << INDENT_2 << USAGES << COLON << LEFT_BRACKET << std::endl;
         for (const auto &usage : usageInfos) {
-            ss << INDENT_3 << LEFT_BRACKET << std::endl;
-            ss << INDENT_4 << USAGES_SOURCE << COLON << GetQuatatedStr(usage.source) << COMMA << std::endl;
-            ss << INDENT_4 << USAGES_FUNCNAME << COLON << GetQuatatedStr(usage.funcName) << COMMA << std::endl;
-            ss << INDENT_4 << API_IDX << COLON << usage.idx << COMMA << std::endl;
-            ss << INDENT_3 << RIGHT_BRACKET << COMMA << std::endl;
+            LIBABCKIT_LOG(DEBUG) << INDENT_3 << LEFT_BRACKET << std::endl;
+            LIBABCKIT_LOG(DEBUG) << INDENT_4 << USAGES_SOURCE << COLON << GetQuatatedStr(usage.source) << COMMA
+                                 << std::endl;
+            LIBABCKIT_LOG(DEBUG) << INDENT_4 << USAGES_FUNCNAME << COLON << GetQuatatedStr(usage.funcName) << COMMA
+                                 << std::endl;
+            LIBABCKIT_LOG(DEBUG) << INDENT_4 << API_IDX << COLON << usage.idx << COMMA << std::endl;
+            LIBABCKIT_LOG(DEBUG) << INDENT_3 << RIGHT_BRACKET << COMMA << std::endl;
         }
-        ss << INDENT_2 << RIGHT_BRACKET << std::endl;
+        LIBABCKIT_LOG(DEBUG) << INDENT_2 << RIGHT_BRACKET << std::endl;
 
-        ss << INDENT_1 << RIGHT_BRACKET << COMMA << std::endl;
+        LIBABCKIT_LOG(DEBUG) << INDENT_1 << RIGHT_BRACKET << COMMA << std::endl;
     }
-    ss << RIGHT_BRACKET << std::endl;
+    LIBABCKIT_LOG(DEBUG) << RIGHT_BRACKET << std::endl;
 
     return ss.str();
 }

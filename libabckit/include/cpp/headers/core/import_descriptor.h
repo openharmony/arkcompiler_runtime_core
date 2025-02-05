@@ -95,14 +95,14 @@ public:
     const File *GetFile() const;
 
     /**
-     * @brief Get the Name object
+     * @brief Returns name
      * @return std::string
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::string GetName() const;
 
     /**
-     * @brief Get the Imported Module object
+     * @brief Returns imported module.
      * @return core::Module
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
@@ -124,10 +124,6 @@ public:
     std::string DescriptorGetAlias() const;
 
 protected:
-    /**
-     * @brief Get the Api Config object
-     * @return const ApiConfig*
-     */
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;

@@ -76,7 +76,7 @@ public:
     ~Namespace() override = default;
 
     /**
-     * @brief Get the Name object
+     * @brief Return namespace's name.
      * @return `std::string`
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
@@ -139,7 +139,7 @@ private:
 
 protected:
     /**
-     * @brief Get the Api Config object
+     * @brief Returns Api Config.
      * @return const ApiConfig*
      */
     const ApiConfig *GetApiConfig() const override

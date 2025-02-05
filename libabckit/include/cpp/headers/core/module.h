@@ -101,7 +101,7 @@ public:
     enum AbckitTarget GetTarget() const;
 
     /**
-     * @brief Get the Classes name
+     * @brief Returns name.
      * @return std::string
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
@@ -115,42 +115,42 @@ public:
     bool IsExternal() const;
 
     /**
-     * @brief Get the Classes object
+     * @brief Return vector with module's classes.
      * @return std::vector<core::Class>
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::vector<core::Class> GetClasses() const;
 
     /**
-     * @brief Get the Top Level Functions object
+     * @brief Return vector with module's functions.
      * @return std::vector<core::Function>
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::vector<core::Function> GetTopLevelFunctions() const;
 
     /**
-     * @brief Get the Annotation Interfaces object
+     * @brief Return vector with module's annotation interfaces.
      * @return std::vector<core::AnnotationInterface>
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::vector<core::AnnotationInterface> GetAnnotationInterfaces() const;
 
     /**
-     * @brief Get the Namespaces object
+     * @brief Return vector with module's namespaces.
      * @return std::vector<core::Namespace>
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::vector<core::Namespace> GetNamespaces() const;
 
     /**
-     * @brief Get the Imports object
+     * @brief Return vector with module's imports.
      * @return std::vector<core::ImportDescriptor>
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::vector<core::ImportDescriptor> GetImports() const;
 
     /**
-     * @brief Get the Exports object
+     * @brief Return vector with module's exports.
      * @return std::vector<core::ExportDescriptor>
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */

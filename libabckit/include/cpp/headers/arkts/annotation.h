@@ -82,7 +82,7 @@ public:
     arkts::Annotation AddElement(const abckit::Value &val, std::string_view name) const;
 
     /**
-     * @brief add and get element
+     * @brief Add and get element
      * @param val
      * @param name
      * @return arkts::AnnotationElement

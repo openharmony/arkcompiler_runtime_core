@@ -132,7 +132,7 @@ public:
     std::vector<core::Annotation> GetAnnotations() const;
 
     /**
-     * @brief is static
+     * @brief Tells if method is static.
      * @return bool
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
