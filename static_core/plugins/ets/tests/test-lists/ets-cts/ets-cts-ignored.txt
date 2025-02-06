@@ -136,12 +136,14 @@
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_5.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_6.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_0.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_3.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_5.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_6.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_7.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_0.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_5.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_6.sts
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_3.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_7.sts
 
 #  20948 No access to common union members if members are of a function type
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_10.sts
@@ -156,10 +158,8 @@
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_9.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_9.sts
 
-# 20939 Unexpected NoSuchFieldError for a field in a superclass
+# 19930
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_1.sts
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_7.sts
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_7.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_11.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_11.sts
 
@@ -244,8 +244,6 @@
 #19909
 09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_2.sts
 09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_3.sts
-
-10.interfaces/06.interface_method_declarations/inheriting_methods_with_override_equivalent_signatures/inheritance_multiple_default_methods.sts
 
 13.compilation_units/07.top-level_declarations/top_level_declarations_11.sts
 17.experimental_features/15.exceptions/01.throwing_functions/lambda_call_with_catch.sts
@@ -343,17 +341,6 @@
 # es2panda fails: panda#19947
 06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_39.sts
 06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_41.sts
-# end of es2panda fails
-
-# es2panda fails: panda# Wildcards not yet implemented
-06.contexts_and_conversions/01.assignment-like_contexts/unrelated_refs_2.sts
-06.contexts_and_conversions/01.assignment-like_contexts/unrelated_refs_21.sts
-06.contexts_and_conversions/01.assignment-like_contexts/unrelated_refs_23.sts
-06.contexts_and_conversions/01.assignment-like_contexts/unrelated_refs_25.sts
-06.contexts_and_conversions/01.assignment-like_contexts/unrelated_refs_27.sts
-06.contexts_and_conversions/01.assignment-like_contexts/unrelated_refs_3.sts
-06.contexts_and_conversions/01.assignment-like_contexts/unrelated_refs_5.sts
-06.contexts_and_conversions/01.assignment-like_contexts/unrelated_refs_7.sts
 # end of es2panda fails
 
 # es2panda fails: panda#14759 Widening + unboxing conversion for compatible types is not provided
@@ -749,13 +736,6 @@
 17.experimental_features/13.trailing_lambda/trlambda_func_15.sts
 # end of es2panda fails
 
-13.compilation_units/03.import_directives/06.import_path/dir/import_path_dir_0.sts
-13.compilation_units/03.import_directives/06.import_path/dir/import_path_dir_1.sts
-13.compilation_units/03.import_directives/06.import_path/dir/import_path_dir_2.sts
-13.compilation_units/03.import_directives/06.import_path/dir/import_path_dir_3.sts
-
-13.compilation_units/09.export_directives/04.re-export_directive/re-export_all_by_old_names.sts
-
 # 15095
 09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/hiding_methods_with_different_access_modifiers_2.sts
 # end 15095
@@ -778,7 +758,6 @@
 # #15709
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_23.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1n_4.sts
-17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading_n_10.sts
 
 # #15600 overloading methods with tuples in parameters
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_10.sts
@@ -1156,8 +1135,7 @@
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_8.sts
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_9.sts
 
-# 20336, 20073 es2panda endlessly outputs identical errors in the console until gets killed by timeout
-07.expressions/06.spread_expression/spex_const_31.sts
+# 20073 es2panda endlessly outputs identical errors in the console until gets killed by timeout
 07.expressions/06.spread_expression/spex_const_44.sts
 07.expressions/06.spread_expression/spex_const_45.sts
 
@@ -1226,16 +1204,16 @@
 # 20024 es2panda fails to infer type of spread expression of enum array
 07.expressions/06.spread_expression/spex_12.sts
 
-# 20358 es2panda aborts on function call in spread expression
-07.expressions/06.spread_expression/spex_32.sts
-
 # 20362 Class linker error: Cannot find class Lf64[]
 07.expressions/06.spread_expression/spex_26.sts
 07.expressions/06.spread_expression/spex_27.sts
 
 # 20371 Unexpected Type Error on string array
+07.expressions/06.spread_expression/spex_const_31.sts
 07.expressions/06.spread_expression/spex_func_31.sts
+07.expressions/06.spread_expression/spex_lmbd_31.sts
 07.expressions/06.spread_expression/spex_meth_31.sts
+07.expressions/06.spread_expression/spex_32.sts
 
 # 20376 No support for spread arguments in lambda
 07.expressions/06.spread_expression/spex_lmbd_2.sts
@@ -1680,9 +1658,6 @@
 # 20761 no support for package initializer
 13.compilation_units/06.compilation_unit_initialization/package/init_once/test.sts
 
-# 20762 Failed to export enumeration
-13.compilation_units/09.export_directives/02.single_export_directive/single_export_8.sts
-
 # 20763 cyclic dependencies don't cause compile-time error
 13.compilation_units/06.compilation_unit_initialization/module/cyclic_dependency/test.sts
 13.compilation_units/06.compilation_unit_initialization/package/cyclic_dependency/pkgA/test.sts
@@ -1719,8 +1694,6 @@
 03.types/08.reference_types/07.array_types/object_12.sts
 # value was not initialized
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/02.constant_declarations/const_decl_5.sts
-# value was not initialized
-07.expressions/11.function_call_expression/fcall_6.sts
 
 # 21846 Annotation name coinciding with type name gets compiled but shouldn't
 18.annotations/01.declaring_annotations/declaration_coincide_name_n_1.sts
@@ -1759,10 +1732,6 @@
 06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_7.sts
 06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_8.sts
 06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_9.sts
-06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_n_0.sts
-06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_n_1.sts
-06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/str2enum_n_0.sts
-06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/str2enum_n_1.sts
 
 # 22409
 07.expressions/20.unary_expressions/08.logical_complement/logical_complement_char.sts
