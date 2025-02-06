@@ -20,6 +20,6 @@ Promise.all(arg).then<void, void>((value: Array<Object>): void => {
         return;
     }
     console.log("Test passed.");
-}, (err: Object): void => {
+}, (err: Error): void => {
     console.log("Test failed. The promise should not be rejected.");
 });

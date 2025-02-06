@@ -24,11 +24,11 @@ let p2 = new Promise<string>((_: (v: string)=>void, _reject: (err: Object)=>void
 Promise.race<string>([p1, p2]).then<void, void>((value: Object): void => {
     console.log("Test failed. The promise should not be resolved.");
 }, (err: Object): void => {
-    if (err != "xyz") {
+    if (!(err instanceof Error) || (err as Error).message != "xyz") {
         console.log("Test failed. The promise should be rejected by the specified value.");
         return;
     }
     console.log("Test passed.");
 });
-reject!("xyz");
+reject!(new Error("xyz"));
 resolve!("abc");

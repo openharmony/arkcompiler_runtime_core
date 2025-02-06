@@ -27,9 +27,9 @@ function checkSequence(actual: Array<number>, expectedLength: number): void {
 }
 
 let sequence = new Array<number>();
-let p1 = Promise.reject<number>(1);
+let p1 = Promise.reject<number>(new Error("1"));
 let p2 = Promise.resolve<number>(2);
-let p3 = Promise.reject<number>(3);
+let p3 = Promise.reject<number>(new Error("3"));
 
 sequence.push(1);
 

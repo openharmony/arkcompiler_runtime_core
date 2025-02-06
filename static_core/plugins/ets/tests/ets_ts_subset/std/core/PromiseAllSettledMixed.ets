@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-let r1 = Promise.reject<string>("rejected 0")
+let r1 = Promise.reject<string>(new Error("rejected 0"))
 let f1 = Promise.resolve<string>("fulfilled 1");
-let r2 = Promise.reject<string>("rejected 2");
+let r2 = Promise.reject<string>(new Error("rejected 2"));
 let f2 = Promise.resolve<string>("fulfilled 3");
-let r3 = Promise.reject<string>("rejected 4");
+let r3 = Promise.reject<string>(new Error("rejected 4"));
 let f3 = Promise.resolve<string>("fulfilled 5");
 Promise.allSettled([r1, f1, r2, f2, r3, f3]).then<void, void>((values: PromiseSettledResult<string>[]): void => {
     if (values.length != 6) {
@@ -32,7 +32,7 @@ Promise.allSettled([r1, f1, r2, f2, r3, f3]).then<void, void>((values: PromiseSe
         console.log("Test failed. Expected elements 1, 3, 5 have status 'fulfilled'.");
         return;
     }
-    if ((values[0] as PromiseRejectedResult).reason != "rejected 0") {
+    if ((values[0] as PromiseRejectedResult).reason.message != "rejected 0") {
         console.log("Test failed. Unexpected value of the element 0.");
         return;
     }
@@ -40,7 +40,7 @@ Promise.allSettled([r1, f1, r2, f2, r3, f3]).then<void, void>((values: PromiseSe
         console.log("Test failed. Unexpected value of the element 1.");
         return;
     }
-    if ((values[2] as PromiseRejectedResult).reason != "rejected 2") {
+    if ((values[2] as PromiseRejectedResult).reason.message != "rejected 2") {
         console.log("Test failed. Unexpected value of the element 2.");
         return;
     }
@@ -48,7 +48,7 @@ Promise.allSettled([r1, f1, r2, f2, r3, f3]).then<void, void>((values: PromiseSe
         console.log("Test failed. Unexpected value of the element 3.");
         return;
     }
-    if ((values[4] as PromiseRejectedResult).reason != "rejected 4") {
+    if ((values[4] as PromiseRejectedResult).reason.message != "rejected 4") {
         console.log("Test failed. Unexpected value of the element 4.");
         return;
     }

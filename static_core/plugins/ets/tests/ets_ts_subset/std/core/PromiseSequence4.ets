@@ -43,7 +43,7 @@ new Promise<number>((_: (v: number) => void, _reject: (error: Object) => void) =
     sequence.push(2);
 });
 
-reject!("abc");
+reject!(new Error("abc"));
 resolve!(7);
 
 sequence.push(1);

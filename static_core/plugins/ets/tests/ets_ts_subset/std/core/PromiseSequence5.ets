@@ -36,7 +36,7 @@ let p2 = new Promise<number>((_: (v: number) => void, _reject: (error: Object) =
     reject = _reject;
 });
 
-reject!("abc");
+reject!(new Error("abc"));
 resolve!(7);
 
 Promise.resolve().then<void>((): void => {

@@ -20,7 +20,7 @@ class PoisonedIterable<T> implements Iterable<T> {
 
 Promise.all<Object>(new PoisonedIterable<Object>()).then<void, void>((value: Array<Object>): void => {
     console.log("Test failed. The promise should not be resolved.");
-}, (err: Object): void => {
+}, (err: Error): void => {
     if (!(err instanceof Error)) {
         console.log("Test failed. The promise should be rejected by the Error.");
         return;
