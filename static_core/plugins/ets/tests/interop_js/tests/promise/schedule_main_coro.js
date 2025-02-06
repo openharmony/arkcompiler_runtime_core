@@ -15,7 +15,12 @@
 
 function init() {
     let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
-    if (!etsVm.createEtsRuntime(process.env.ARK_ETS_STDLIB_PATH, process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH, false, false)) {
+
+    let runtimeCreated = etsVm.createRuntime({
+        'boot-panda-files': process.env.ARK_ETS_STDLIB_PATH + ':' + process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH
+    });
+
+    if (!runtimeCreated) {
         process.exit(1);
     }
     return etsVm;

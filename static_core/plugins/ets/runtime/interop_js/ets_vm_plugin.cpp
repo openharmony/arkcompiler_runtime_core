@@ -186,19 +186,6 @@ static bool RegisterTimerModule(napi_env jsEnv)
     return TimerModule::Init(etsEnv, jsEnv);
 }
 
-static std::vector<napi_value> GetArgs(napi_env env, napi_callback_info info)
-{
-    size_t argc = 0;
-    NAPI_ASSERT_OK(napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr));
-
-    std::vector<napi_value> argv(argc);
-    napi_value thisArg {};
-    void *data = nullptr;
-    NAPI_ASSERT_OK(napi_get_cb_info(env, info, &argc, argv.data(), &thisArg, &data));
-
-    return argv;
-}
-
 static void RegisterEventLoopModule(EtsCoroutine *coro)
 {
     ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
@@ -229,57 +216,6 @@ static void RegisterEventLoopModule(EtsCoroutine *coro)
     ASSERT(mainPoster != nullptr);
     coro->GetWorker()->SetCallbackPoster(std::move(mainPoster));
     return true;
-}
-
-static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
-{
-    napi_value napiFalse;
-    NAPI_ASSERT_OK(napi_get_boolean(env, false, &napiFalse));
-
-    auto argv = GetArgs(env, info);
-    if (argv.size() != 4U) {
-        LogError("CreateEtsRuntime: exactly 4 arguments are required");
-        return napiFalse;
-    }
-
-    napi_valuetype type;
-    napi_typeof(env, argv[0], &type);
-    if (type != napi_string) {
-        LogError("CreateEtsRuntime: first argument is not a string");
-        return napiFalse;
-    }
-    auto stdlibPath = GetString(env, argv[0]);
-
-    napi_typeof(env, argv[1], &type);
-    if (type != napi_string) {
-        LogError("CreateEtsRuntime: second argument is not a string");
-        return napiFalse;
-    }
-    auto indexPath = GetString(env, argv[1]);
-
-    napi_typeof(env, argv[2U], &type);
-    if (type != napi_boolean) {
-        LogError("CreateEtsRuntime: third argument is not a boolean");
-        return napiFalse;
-    }
-    bool useJit;
-    napi_get_value_bool(env, argv[2U], &useJit);
-
-    napi_typeof(env, argv[3U], &type);
-    if (type != napi_boolean) {
-        LogError("CreateEtsRuntime: fourth argument is not a boolean");
-        return napiFalse;
-    }
-    bool useAot;
-    napi_get_value_bool(env, argv[3U], &useAot);
-
-    bool res = ark::ets::CreateRuntime(stdlibPath, indexPath, useJit, useAot);
-    if (res) {
-        res = InitInteropContext(env);
-    }
-    napi_value napiRes;
-    NAPI_ASSERT_OK(napi_get_boolean(env, res, &napiRes));
-    return napiRes;
 }
 
 static std::optional<std::vector<std::string>> GetArgStrings(napi_env env, napi_value options)
@@ -400,7 +336,6 @@ static napi_value Init(napi_env env, napi_value exports)
         napi_property_descriptor {"fatal", 0, Fatal, 0, 0, 0, napi_enumerable, 0},
         napi_property_descriptor {"call", 0, Call, 0, 0, 0, napi_enumerable, 0},
         napi_property_descriptor {"callWithCopy", 0, CallWithCopy, 0, 0, 0, napi_enumerable, 0},
-        napi_property_descriptor {"createEtsRuntime", 0, CreateEtsRuntime, 0, 0, 0, napi_enumerable, 0},
         napi_property_descriptor {"createRuntime", 0, CreateRuntime, 0, 0, 0, napi_enumerable, 0},
         napi_property_descriptor {"getFunction", 0, GetEtsFunction, 0, 0, 0, napi_enumerable, 0},
         napi_property_descriptor {"getClass", 0, GetEtsClass, 0, 0, 0, napi_enumerable, 0},
