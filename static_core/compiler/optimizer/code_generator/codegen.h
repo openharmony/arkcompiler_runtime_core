@@ -323,6 +323,7 @@ public:
     void StoreFreeSlot(Reg src);
 
     ssize_t GetStackOffset(Location location);
+    ssize_t GetBaseOffset(Location location);
     MemRef GetMemRefForSlot(Location location);
     Reg SpReg() const;
     Reg FpReg() const;

@@ -21,8 +21,8 @@
 #include "plugins/ets/runtime/napi/ets_napi_native_interface.h"
 
 namespace ark::ets {
-Expected<std::unique_ptr<PandaEtsNapiEnv>, const char *> PandaEtsNapiEnv::Create(EtsCoroutine *coroutine,
-                                                                                 mem::InternalAllocatorPtr allocator)
+Expected<PandaEtsNapiEnv *, const char *> PandaEtsNapiEnv::Create(EtsCoroutine *coroutine,
+                                                                  mem::InternalAllocatorPtr allocator)
 {
     auto etsVm = coroutine->GetVM();
     auto referenceStorage = MakePandaUnique<EtsReferenceStorage>(etsVm->GetGlobalObjectStorage(), allocator, false);
@@ -30,13 +30,12 @@ Expected<std::unique_ptr<PandaEtsNapiEnv>, const char *> PandaEtsNapiEnv::Create
         return Unexpected("Cannot allocate EtsReferenceStorage");
     }
 
-    // Do not use PandaUniquePtr here as the environment could be accessed from daemon threads after destroy of runtime
-    auto etsNapiEnv = std::make_unique<PandaEtsNapiEnv>(coroutine, std::move(referenceStorage));
-    if (etsNapiEnv.get() == nullptr) {
+    auto *etsNapiEnv = allocator->New<PandaEtsNapiEnv>(coroutine, std::move(referenceStorage));
+    if (etsNapiEnv == nullptr) {
         return Unexpected("Cannot allocate PandaEtsNapiEnv");
     }
 
-    return Expected<std::unique_ptr<PandaEtsNapiEnv>, const char *>(std::move(etsNapiEnv));
+    return Expected<PandaEtsNapiEnv *, const char *>(etsNapiEnv);
 }
 
 PandaEtsNapiEnv *PandaEtsNapiEnv::GetCurrent()
@@ -45,8 +44,8 @@ PandaEtsNapiEnv *PandaEtsNapiEnv::GetCurrent()
 }
 
 PandaEtsNapiEnv::PandaEtsNapiEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceStorage> referenceStorage)
-    : EtsEnv {napi::GetNativeInterface()},
-      ani_env {ani::GetInteractionAPI()},
+    : ani_env {ani::GetInteractionAPI()},
+      EtsEnv {napi::GetNativeInterface()},
       coroutine_(coroutine),
       referenceStorage_(std::move(referenceStorage))
 {

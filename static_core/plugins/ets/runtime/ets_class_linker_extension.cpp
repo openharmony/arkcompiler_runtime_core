@@ -471,10 +471,36 @@ EtsClassLinkerExtension::~EtsClassLinkerExtension()
     RemoveRefToLinker(GetBootContext());
 }
 
+bool EtsClassLinkerExtension::IsMethodNativeApi(const Method *method) const
+{
+    // intrinsics and async methods are marked as native, but they are not native api calls
+    return method->IsNative() && !method->IsIntrinsic() && !EtsAnnotation::FindAsyncAnnotation(method).IsValid();
+}
+
 bool EtsClassLinkerExtension::CanThrowException(const Method *method) const
 {
     if (!method->IsNative()) {
         return true;
+    }
+
+    const EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(method);
+    return !etsMethod->IsCriticalNative();
+}
+
+bool EtsClassLinkerExtension::IsNecessarySwitchThreadState(const Method *method) const
+{
+    if (!IsMethodNativeApi(method)) {
+        return false;
+    }
+
+    const EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(method);
+    return !(etsMethod->IsFastNative() || etsMethod->IsCriticalNative());
+}
+
+bool EtsClassLinkerExtension::CanNativeMethodUseObjects(const Method *method) const
+{
+    if (!IsMethodNativeApi(method)) {
+        return false;
     }
 
     const EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(method);

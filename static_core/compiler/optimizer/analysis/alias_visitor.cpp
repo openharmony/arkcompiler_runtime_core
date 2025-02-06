@@ -152,7 +152,7 @@ std::ostream &operator<<(std::ostream &out, const Pointer &p)
  * Various function calls, constructors and stores to another objects' fields, arrays
  */
 /* static */
-// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) big switch case
+// CC-OFFNXT(huge_method[C++], huge_cyclomatic_complexity[C++], G.FUN.01-CPP) big switch case
 bool Pointer::IsEscapingAlias(const Inst *inst)
 {
     if (!inst->IsReferenceOrAny()) {
@@ -211,12 +211,14 @@ bool Pointer::IsEscapingAlias(const Inst *inst)
             case Opcode::CallLaunchVirtual:
             case Opcode::CallResolvedLaunchVirtual:
             case Opcode::Call:
-            case Opcode::CallNative:
-            case Opcode::CallResolvedNative:
-
             case Opcode::Bitcast:
             case Opcode::Cast:
                 return true;
+            case Opcode::CallNative:
+                if (inst->IsRuntimeCall()) {
+                    return true;
+                }
+                break;
             case Opcode::Intrinsic:
                 // if intrinsic has no side effects and has primitive type, it
                 //  does not move ref inputs anywhere
@@ -593,10 +595,6 @@ void AliasVisitor::VisitCallResolvedLaunchVirtual(GraphVisitor *v, Inst *inst)
     VisitCall(v, inst);
 }
 void AliasVisitor::VisitCallNative(GraphVisitor *v, Inst *inst)
-{
-    VisitCall(v, inst);
-}
-void AliasVisitor::VisitCallResolvedNative(GraphVisitor *v, Inst *inst)
 {
     VisitCall(v, inst);
 }

@@ -198,7 +198,8 @@ public:
           parentGraph_(parent)
     {
         SetNeedCleanup(true);
-        SetCanOptimizeNativeMethods(GetArch() != Arch::AARCH32 && GetRuntime()->IsNativeMethodOptimizationEnabled());
+        SetCanOptimizeNativeMethods(g_options.IsCompilerOptimizeNativeCalls() && (GetArch() != Arch::AARCH32) &&
+                                    GetRuntime()->IsNativeMethodOptimizationEnabled());
     }
 
     ~Graph() override;

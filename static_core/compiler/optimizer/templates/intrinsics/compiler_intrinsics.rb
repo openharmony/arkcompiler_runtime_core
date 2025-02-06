@@ -77,6 +77,10 @@ class Intrinsic < SimpleDelegator
     respond_to?(:codegen_virt) && codegen_virt == true
   end
 
+  def skip_codegen_decl?
+    respond_to?(:skip_codegen_decl) && skip_codegen_decl == true
+  end
+
 end
 
 module Compiler

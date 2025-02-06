@@ -1076,8 +1076,9 @@ void EscapeAnalysis::VisitAllocation(Inst *inst)
     // There are several reasons to materialize an object right at the allocation site:
     // (1) the object is an input for some instruction inside a catch block
     // (2) we already marked the object as one requiring materialization
-    bool materialize =
-        inst->GetFlag(inst_flags::Flags::CATCH_INPUT) || materializationInfo_.find(inst) != materializationInfo_.end();
+    bool materialize = inst->GetFlag(inst_flags::Flags::CATCH_INPUT) ||
+                       materializationInfo_.find(inst) != materializationInfo_.end() ||
+                       inst->IsReferenceForNativeApiCall();
 
     if (!relaxClassRestrictions_) {
         auto klassInput = inst->GetInput(0).GetInst();

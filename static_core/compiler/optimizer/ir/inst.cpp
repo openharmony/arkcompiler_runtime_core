@@ -787,7 +787,8 @@ bool Inst::IsZeroRegInst() const
 {
     ASSERT(GetBasicBlock() != nullptr);
     ASSERT(GetBasicBlock()->GetGraph() != nullptr);
-    return GetBasicBlock()->GetGraph()->GetZeroReg() != GetInvalidReg() && IsZeroConstantOrNullPtr(this);
+    return GetBasicBlock()->GetGraph()->GetZeroReg() != GetInvalidReg() && IsZeroConstantOrNullPtr(this) &&
+           !IsReferenceForNativeApiCall();
 }
 
 bool Inst::IsAccRead() const
@@ -874,6 +875,9 @@ bool Inst::IsMovableObject()
             MarkerHolder marker {GetBasicBlock()->GetGraph()};
             return IsMovableObjectRec(this, marker.GetMarker());
         }
+        case Opcode::Intrinsic:
+            return CastToIntrinsic()->GetIntrinsicId() !=
+                   RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_GET_NATIVE_METHOD_MANAGED_CLASS;
         default:
             return true;
     }

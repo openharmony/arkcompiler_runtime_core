@@ -65,7 +65,6 @@ public:
     static void VisitCall(GraphVisitor *visitor, Inst *inst);
     static void VisitCallDynamic(GraphVisitor *visitor, Inst *inst);
     static void VisitCallNative(GraphVisitor *visitor, Inst *inst);
-    static void VisitCallResolvedNative(GraphVisitor *visitor, Inst *inst);
     static void VisitIntrinsic(GraphVisitor *visitor, Inst *inst);
     static void VisitParameter(GraphVisitor *visitor, Inst *inst);
     static void VisitReturn(GraphVisitor *visitor, Inst *inst);

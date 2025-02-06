@@ -16,7 +16,7 @@
 #include <array>
 #include <iostream>
 
-#include "ets_napi.h"
+#include "ani.h"
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -33,16 +33,16 @@
     }
 
 // CC-OFFNXT(G.FUN.01-CPP, readability-function-size_parameters) function for testing
-static ets_int Direct(ets_int im1, ets_byte i0, ets_short i1, ets_int i2, ets_long i3, ets_float f0, ets_double f1,
-                      ets_double f2, ets_int i4, ets_int i5, ets_int i6, ets_long i7, ets_int i8, ets_short i9,
-                      ets_int i10, ets_int i11, ets_int i12, ets_int i13, ets_int i14, ets_float f3, ets_float f4,
-                      ets_double f5, ets_double f6, ets_double f7, ets_double f8, ets_double f9, ets_double f10,
-                      ets_double f11, ets_double f12, ets_double f13, ets_double f14)
+static ani_int Direct(ani_int im1, ani_byte i0, ani_short i1, ani_int i2, ani_long i3, ani_float f0, ani_double f1,
+                      ani_double f2, ani_int i4, ani_int i5, ani_int i6, ani_long i7, ani_int i8, ani_short i9,
+                      ani_int i10, ani_int i11, ani_int i12, ani_int i13, ani_int i14, ani_float f3, ani_float f4,
+                      ani_double f5, ani_double f6, ani_double f7, ani_double f8, ani_double f9, ani_double f10,
+                      ani_double f11, ani_double f12, ani_double f13, ani_double f14)
 {
-    ets_int errorCount = 0L;
+    ani_int errorCount = 0L;
 
     CHECK_EQUAL(im1, -1L);
-    CHECK_EQUAL(static_cast<ets_int>(i0), 0L);
+    CHECK_EQUAL(static_cast<ani_int>(i0), 0L);
     CHECK_EQUAL(i1, 1L);
     CHECK_EQUAL(i2, 2L);
     CHECK_EQUAL(i3, 3L);
@@ -77,16 +77,32 @@ static ets_int Direct(ets_int im1, ets_byte i0, ets_short i1, ets_int i2, ets_lo
     return errorCount;
 }
 
-extern "C" ets_int EtsNapiOnLoad(EtsEnv *env)
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
-    ets_class nativeModuleClass = env->FindClass("NativeModule");
-    if (nativeModuleClass == nullptr) {
-        return ETS_ERR;
+    ani_env *env;
+    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+        std::cerr << "Unsupported ANI_VERSION_1" << std::endl;
+        return ANI_ERROR;
     }
 
-    const std::array methods = {EtsNativeMethod {"direct", nullptr, reinterpret_cast<void *>(Direct)}};
-    ets_int errCode = env->RegisterNatives(nativeModuleClass, methods.data(), methods.size());
-    return errCode == ETS_OK ? ETS_NAPI_VERSION_1_0 : errCode;
+    static const char *className = "LNativeModule;";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        std::cerr << "Not found '" << className << "'" << std::endl;
+        return ANI_ERROR;
+    }
+
+    std::array methods = {
+        ani_native_function {"direct", nullptr, reinterpret_cast<void *>(Direct)},
+    };
+
+    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+        std::cerr << "Cannot bind native methods to '" << className << "'" << std::endl;
+        return ANI_ERROR;
+    };
+
+    *result = ANI_VERSION_1;
+    return ANI_OK;
 }
 
 // NOLINTEND(readability-magic-numbers)

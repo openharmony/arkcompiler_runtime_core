@@ -26,10 +26,10 @@ class EtsCoroutine;
 class PandaEtsVM;
 using EtsThrowable = EtsObject;
 
-class PandaEtsNapiEnv : public EtsEnv, public ani_env {  // NOLINT(fuchsia-multiple-inheritance)
+class PandaEtsNapiEnv : public ani_env, public EtsEnv {  // NOLINT(fuchsia-multiple-inheritance)
 public:
-    static Expected<std::unique_ptr<PandaEtsNapiEnv>, const char *> Create(EtsCoroutine *coroutine,
-                                                                           mem::InternalAllocatorPtr allocator);
+    static Expected<PandaEtsNapiEnv *, const char *> Create(EtsCoroutine *coroutine,
+                                                            mem::InternalAllocatorPtr allocator);
     PANDA_PUBLIC_API static PandaEtsNapiEnv *GetCurrent();
 
     PandaEtsNapiEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceStorage> referenceStorage);

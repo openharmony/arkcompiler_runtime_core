@@ -300,7 +300,7 @@ protected:
     static void VisitCallDynamic(GraphVisitor *visitor, Inst *inst);
 
     static void VisitCallNative(GraphVisitor *visitor, Inst *inst);
-    static void VisitCallResolvedNative(GraphVisitor *visitor, Inst *inst);
+    static void VisitWrapObjectNative(GraphVisitor *visitor, Inst *inst);
 
     static void VisitLoadConstantPool(GraphVisitor *visitor, Inst *inst);
     static void VisitLoadLexicalEnv(GraphVisitor *visitor, Inst *inst);

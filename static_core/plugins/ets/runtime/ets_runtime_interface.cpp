@@ -407,4 +407,24 @@ bool EtsRuntimeInterface::IsNativeMethodOptimizationEnabled() const
     return true;
 }
 
+uint64_t EtsRuntimeInterface::GetDeprecatedNativeApiMask() const
+{
+    return ACC_DEPRECATED_NATIVE_API;
+}
+
+uint64_t EtsRuntimeInterface::GetNativeApiStaticFunctionMask() const
+{
+    return ACC_FUNCTION;
+}
+
+uint32_t EtsRuntimeInterface::GetRuntimeClassOffset(Arch arch) const
+{
+    return ark::cross_values::GetEtsClassRuntimeClassOffset(arch);
+}
+
+size_t EtsRuntimeInterface::GetTlsNativeApiOffset(Arch arch) const
+{
+    return ark::cross_values::GetEtsCoroutineAniEnvOffset(arch);
+}
+
 }  // namespace ark::ets

@@ -80,4 +80,5 @@
 % if intrinsic.respond_to?(:interop_intrinsic_kind)
   interop_intrinsic_kind: <%= intrinsic.interop_intrinsic_kind %>
 % end
+  skip_codegen_decl: <%= intrinsic.respond_to?(:skip_codegen_decl) ? intrinsic.skip_codegen_decl : false %>
 % end

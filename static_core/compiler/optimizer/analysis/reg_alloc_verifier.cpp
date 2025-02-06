@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -521,39 +521,42 @@ void RegAllocVerifier::HandleConst(ConstantInst *inst)
 }
 
 // Verify instn's inputs and set instn's id to destination location.
+// CC-OFFNXT(huge_depth[C++]) solid logic
 void RegAllocVerifier::HandleInst(Inst *inst)
 {
-    for (size_t i = 0; i < inst->GetInputsCount(); i++) {
-        auto input = inst->GetDataFlowInput(i);
-        if (input->NoDest() && !IsPseudoUserOfMultiOutput(input)) {
-            ASSERT(!inst->GetLocation(i).IsFixedRegister());
-            continue;
-        }
+    if (!InstHasPseudoInputs(inst)) {
+        for (size_t i = 0; i < inst->GetInputsCount(); i++) {
+            auto input = inst->GetDataFlowInput(i);
+            if (input->NoDest() && !IsPseudoUserOfMultiOutput(input)) {
+                ASSERT(!inst->GetLocation(i).IsFixedRegister());
+                continue;
+            }
 
-        auto inputType = inst->GetInputType(i);
-        if (inputType == DataType::NO_TYPE) {
-            ASSERT(inst->GetOpcode() == Opcode::CallIndirect);
-            inputType = Is64BitsArch(GetGraph()->GetArch()) ? DataType::INT64 : DataType::INT32;
-        } else {
-            inputType = ConvertRegType(GetGraph(), inputType);
-        }
+            auto inputType = inst->GetInputType(i);
+            if (inputType == DataType::NO_TYPE) {
+                ASSERT(inst->GetOpcode() == Opcode::CallIndirect);
+                inputType = Is64BitsArch(GetGraph()->GetArch()) ? DataType::INT64 : DataType::INT32;
+            } else {
+                inputType = ConvertRegType(GetGraph(), inputType);
+            }
 
-        success_ &= ForEachLocation(inst->GetLocation(i), inputType, [input, inst, i](LocationState &location) {
-            if (location.GetState() != LocationState::State::KNOWN) {
-                COMPILER_LOG(ERROR, REGALLOC) << "Input #" << i << " is loaded from location with state "
-                                              << ToString(location.GetState()) << std::endl
-                                              << "Affected inst: " << *inst << std::endl
-                                              << "Input inst: " << *input;
+            success_ &= ForEachLocation(inst->GetLocation(i), inputType, [input, inst, i](LocationState &location) {
+                if (location.GetState() != LocationState::State::KNOWN) {
+                    COMPILER_LOG(ERROR, REGALLOC) << "Input #" << i << " is loaded from location with state "
+                                                  << ToString(location.GetState()) << std::endl
+                                                  << "Affected inst: " << *inst << std::endl
+                                                  << "Input inst: " << *input;
+                    return false;
+                }
+                if (location.IsValid(input)) {
+                    return true;
+                }
+                COMPILER_LOG(ERROR, REGALLOC) << "Input #" << i << " is loaded from location holding instruction "
+                                              << location.GetId() << " instead of " << input->GetId() << std::endl
+                                              << "Affected inst: " << *inst;
                 return false;
-            }
-            if (location.IsValid(input)) {
-                return true;
-            }
-            COMPILER_LOG(ERROR, REGALLOC) << "Input #" << i << " is loaded from location holding instruction "
-                                          << location.GetId() << " instead of " << input->GetId() << std::endl
-                                          << "Affected inst: " << *inst;
-            return false;
-        });
+            });
+        }
     }
     HandleDest(inst);
 }

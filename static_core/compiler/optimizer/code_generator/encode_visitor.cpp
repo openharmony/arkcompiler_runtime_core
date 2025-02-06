@@ -2202,10 +2202,10 @@ void EncodeVisitor::VisitCallNative(GraphVisitor *visitor, Inst *inst)
     enc->GetCodegen()->EmitCallNative(inst->CastToCallNative());
 }
 
-void EncodeVisitor::VisitCallResolvedNative(GraphVisitor *visitor, Inst *inst)
+void EncodeVisitor::VisitWrapObjectNative(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    enc->GetCodegen()->EmitCallNative(inst->CastToCallResolvedNative());
+    enc->GetCodegen()->WrapObjectNative(inst->CastToWrapObjectNative());
 }
 
 void EncodeVisitor::VisitLoadConstantPool(GraphVisitor *visitor, Inst *inst)

@@ -880,9 +880,22 @@ public:
     {
         return GetOpcode() == Opcode::CallStatic || GetOpcode() == Opcode::CallResolvedStatic || IsStaticLaunchCall();
     }
-    bool IsNativeCall() const
+    bool IsNativeApiCall() const
     {
-        return GetOpcode() == Opcode::CallNative || GetOpcode() == Opcode::CallResolvedNative;
+        return GetOpcode() == Opcode::CallNative;
+    }
+    bool IsReferenceForNativeApiCall() const
+    {
+        if (GetType() != DataType::REFERENCE) {
+            return false;
+        }
+
+        for (const auto &user : GetUsers()) {
+            if (user.GetInst()->GetOpcode() == Opcode::WrapObjectNative) {
+                return true;
+            }
+        }
+        return false;
     }
     bool IsMethodResolver() const
     {
@@ -3002,7 +3015,7 @@ public:
 
     bool IsRuntimeCall() const override
     {
-        if (IsNativeCall()) {
+        if (IsNativeApiCall()) {
             // checking runtime_call flag is enough
             return Base::IsRuntimeCall();
         }
@@ -4545,7 +4558,9 @@ protected:
 #include "intrinsics_flags.inl"
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API IntrinsicInst : public InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>, public TypeIdMixin {
+class PANDA_PUBLIC_API IntrinsicInst : public InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>,
+                                       public TypeIdMixin,
+                                       public MethodDataMixin {
 public:
     using Base = InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>;
     using Base::Base;
@@ -5828,6 +5843,25 @@ public:
 
 private:
     RuntimeInterface::ClassPtr klass_ {nullptr};
+};
+
+class PANDA_PUBLIC_API WrapObjectNativeInst : public FixedInputsInst1 {
+public:
+    using Base = FixedInputsInst1;
+    using Base::Base;
+
+    explicit WrapObjectNativeInst(Inst::Initializer t) : Base(std::move(t)) {}
+
+    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
+    {
+        ASSERT(index < GetInputsCount());
+        return DataType::REFERENCE;
+    }
+
+    Inst *Clone(const Graph *targetGraph) const override
+    {
+        return FixedInputsInst::Clone(targetGraph);
+    }
 };
 
 /// Get global var address inst

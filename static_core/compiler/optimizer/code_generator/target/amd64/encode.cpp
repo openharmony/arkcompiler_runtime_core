@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2977,6 +2977,14 @@ void Amd64Encoder::SetCursorOffset(size_t offset)
 {
     // NOLINTNEXTLINE(readability-identifier-naming)
     GetMasm()->setOffset(offset);
+}
+
+void Amd64Encoder::EncodeGetCurrentPc(Reg dst)
+{
+    ASSERT(dst.GetType() == INT64_TYPE);
+    EncodeRelativePcMov(dst, 0L, [this](Reg reg, intptr_t offset) {
+        GetMasm()->long_().lea(ArchReg(reg), asmjit::x86::ptr(asmjit::x86::rip, offset));
+    });
 }
 
 Reg Amd64Encoder::AcquireScratchRegister(TypeInfo type)

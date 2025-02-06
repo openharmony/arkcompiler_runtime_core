@@ -21,6 +21,7 @@
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/coroutine_manager.h"
 #include "runtime/coroutines/local_storage.h"
+#include "runtime/include/panda_vm.h"
 
 namespace ark::ets {
 class PandaEtsVM;
@@ -51,7 +52,12 @@ public:
         co->Initialize();
         return co;
     }
-    ~EtsCoroutine() override = default;
+
+    ~EtsCoroutine() override
+    {
+        auto allocator = GetVM()->GetHeapManager()->GetInternalAllocator();
+        allocator->Delete(etsNapiEnv_);
+    }
 
     static EtsCoroutine *CastFromThread(Thread *thread)
     {
@@ -102,12 +108,17 @@ public:
         return MEMBER_OFFSET(EtsCoroutine, nullValue_);
     }
 
+    static constexpr uint32_t GetTlsNapiEnvOffset()
+    {
+        return MEMBER_OFFSET(EtsCoroutine, etsNapiEnv_);
+    }
+
     PANDA_PUBLIC_API PandaEtsVM *GetPandaVM() const;
     PANDA_PUBLIC_API CoroutineManager *GetCoroutineManager() const;
 
     PandaEtsNapiEnv *GetEtsNapiEnv() const
     {
-        return etsNapiEnv_.get();
+        return etsNapiEnv_;
     }
 
     void Initialize() override;
@@ -136,7 +147,7 @@ private:
     void RequestPromiseCompletion(mem::Reference *promiseRef, Value returnValue);
     void RequestJobCompletion(mem::Reference *jobRef, Value returnValue);
 
-    std::unique_ptr<PandaEtsNapiEnv> etsNapiEnv_;
+    PandaEtsNapiEnv *etsNapiEnv_ {nullptr};
     void *promiseClassPtr_ {nullptr};
     void *jobClassPtr_ {nullptr};
 
@@ -145,6 +156,9 @@ private:
     static ExternalIfaceTable emptyExternalIfaceTable_;
 
     LocalStorage localStorage_;
+
+    static_assert(std::is_pointer_v<decltype(etsNapiEnv_)>,
+                  "we load a raw pointer in compiled code, please don't change the type!");
 
     // Allocator calls our protected ctor
     friend class mem::Allocator;

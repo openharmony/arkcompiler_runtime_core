@@ -57,7 +57,7 @@ void EtsCoroutine::Initialize()
     if (!etsNapiEnv) {
         LOG(FATAL, RUNTIME) << "Cannot create PandaEtsNapiEnv: " << etsNapiEnv.Error();
     }
-    etsNapiEnv_ = std::move(etsNapiEnv.Value());
+    etsNapiEnv_ = etsNapiEnv.Value();
     // Main EtsCoroutine is Initialized before class linker and promise_class_ptr_ will be set after creating the class
     if (Runtime::GetCurrent()->IsInitialized()) {
         promiseClassPtr_ = GetPandaVM()->GetClassLinker()->GetPromiseClass()->GetRuntimeClass();

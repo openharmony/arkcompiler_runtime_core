@@ -265,6 +265,13 @@ public:
     }
 
     bool HasNativeException(MethodPtr method) const override;
+
+    bool IsNecessarySwitchThreadState(MethodPtr method) const override;
+
+    uint8_t GetStackReferenceMask() const override;
+
+    bool CanNativeMethodUseObjects(MethodPtr method) const override;
+
     bool IsMethodExternal(MethodPtr parentMethod, MethodPtr calleeMethod) const override;
 
     bool IsMethodIntrinsic(MethodPtr method) const override
@@ -297,11 +304,7 @@ public:
         return !(methodPtr->IsIntrinsic() || methodPtr->IsNative() || methodPtr->IsAbstract());
     }
 
-    bool IsMethodNative(MethodPtr method) const override
-    {
-        auto *methodPtr = MethodCast(method);
-        return methodPtr->IsNative();
-    }
+    bool IsMethodNativeApi(MethodPtr method) const override;
 
     void *GetMethodNativePointer(MethodPtr method) const override
     {
