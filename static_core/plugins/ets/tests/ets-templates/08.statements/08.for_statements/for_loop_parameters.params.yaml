@@ -19,7 +19,7 @@ cases:
       for (;;) {
         if( m++ > 1) break;
       }
-      assertEQ( m, 2 );
+      assertEQ( m, 3 );
 
   - doc: For loop without any statement configured, spase as delimiter
     decl: |-
@@ -27,7 +27,7 @@ cases:
       for ( ; ; ) {
         if( m++ > 1) break;
       }
-      assertEQ( m, 2 );
+      assertEQ( m, 3 );
 
   - doc: For loop with init as the only configured statement. Creating variable with already existing name during the for loop initialization.
     decl: |-
@@ -48,7 +48,7 @@ cases:
 
   - doc: For loop with forUpdate as the only configured statement. Variable was created outside of the loop body and gets changed as forUpdate.
     decl: |-
-      let m;
+      let m : int;
       for (;; m++) {
         if(m > 1) break;
       }
@@ -69,7 +69,7 @@ cases:
         m = i;
         if(i > 10) break;
       }
-      assertEQ( m, 10);
+      assertEQ( m, 11 );
 
   - doc: For loop with condition and forUpdate statements configured. Verify 'continue' statement.
     decl: |-
