@@ -14,14 +14,22 @@
 set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_objects_passing
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_objects_passing
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/objects_passing.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/objects_passing.sts
+    JS_SOURCES 
+        ${CMAKE_CURRENT_SOURCE_DIR}/objects_passing.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/objects_passing_sts.test.js
     ETS_CONFIG ${ETS_CONFIG}
+    COMPILATION_JS_WITH_CJS_ON
 )
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_objects_passing_sts
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_objects_passing_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/objects_passing_sts.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/objects_passing_ets_test/objects_passing_sts.sts
+    JS_SOURCES 
+        ${CMAKE_CURRENT_SOURCE_DIR}/objects_passing.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/objects_passing_sts.test.js
     ETS_CONFIG ${ETS_CONFIG}
+    COMPILATION_JS_WITH_CJS_ON
 )

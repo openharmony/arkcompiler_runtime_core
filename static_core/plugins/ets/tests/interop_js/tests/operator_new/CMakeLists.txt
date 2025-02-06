@@ -14,14 +14,25 @@
 set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_operator_new
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_operator_new
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/operator_new.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/operator_new_test/operator_new.sts
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/operator_new.js
     ETS_CONFIG ${ETS_CONFIG}
+    COMPILATION_JS_WITH_CJS_ON
 )
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_operator_new_ets_to_js
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_operator_new_ets_to_js
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/operator_new_ets_to_js.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/operator_new_ets_to_js_test/operator_new_ets_to_js.sts
+    JS_SOURCES 
+        ${CMAKE_CURRENT_SOURCE_DIR}/operator_new.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/operator_new_many_arg.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/operator_new_no_arg.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/operator_new_one_arg.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/operator_new_sub_class.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/operator_new.test.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/operator_new_two_arg.js
     ETS_CONFIG ${ETS_CONFIG}
+    COMPILATION_JS_WITH_CJS_ON
 )

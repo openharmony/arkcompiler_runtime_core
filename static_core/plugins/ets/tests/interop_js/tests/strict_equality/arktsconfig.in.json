@@ -4,10 +4,10 @@
 		"paths": {
 			"escompat": ["${PANDA_ROOT}/plugins/ets/stdlib/escompat"],
 			"std": ["${PANDA_ROOT}/plugins/ets/stdlib/std"],
-			"strict_equality": ["${CMAKE_CURRENT_LIST_DIR}/strict_equality.js"]
+			"strict_equality": ["${CMAKE_CURRENT_BINARY_DIR}/strict_equality.abc"]
 		},
 		"dynamicPaths": {
-			"${CMAKE_CURRENT_LIST_DIR}/strict_equality.js": { "language": "js", "hasDecl": false }
+			"${CMAKE_CURRENT_BINARY_DIR}/strict_equality.abc": { "language": "js", "hasDecl": false }
 		}
 	}
 }

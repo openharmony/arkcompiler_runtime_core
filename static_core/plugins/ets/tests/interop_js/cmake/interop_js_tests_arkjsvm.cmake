@@ -227,10 +227,13 @@ function(panda_ets_interop_js_test_arkjsvm TARGET)
             > ${OUTPUT_FILE} 2>&1 || (cat ${OUTPUT_FILE} && false)
         DEPENDS
             ${TARGET}_js_launcher
-            ${TARGET}_js_modules
             ${TARGET}_create_symlinks
             ${TARGET_TEST_PACKAGE}
             ets_interop_js_napi_arkjsvm
     )
+
+    if(DEFINED ARG_JS_SOURCES)
+        add_dependencies(${TARGET} ${TARGET}_js_modules)
+    endif()
     add_dependencies(ets_interop_js_tests_nodevm ${TARGET})
 endfunction(panda_ets_interop_js_test_arkjsvm)

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,10 +89,10 @@ class CompositeTypesTestClass {
 exports.CompositeTypesTestClass = CompositeTypesTestClass;
 exports.compositeTypesTestClassInstance = new CompositeTypesTestClass();
 const test = () => {
-	console.log([exports.returnTuple, exports.returnStrArray, exports.returnNumArray, exports.returnRecord].map((x) => x()));
+	print([exports.returnTuple, exports.returnStrArray, exports.returnNumArray, exports.returnRecord].map((x) => x()));
 };
 const testInterface = () => {
-	console.log((0, exports.returnInterface)(true), (0, exports.returnInterface)(false));
+	print((0, exports.returnInterface)(true), (0, exports.returnInterface)(false));
 };
 test();
 testInterface();
