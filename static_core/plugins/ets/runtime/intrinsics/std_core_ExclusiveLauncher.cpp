@@ -33,9 +33,54 @@ static void RunExclusiveTask(mem::Reference *taskRef, mem::GlobalObjectStorage *
     LambdaUtils::InvokeVoid(EtsCoroutine::GetCurrent(), taskObj);
 }
 
-void ExclusiveLaunch(EtsObject *task, uint8_t needInterop)
+Coroutine *TryCreateEACoroutine(PandaEtsVM *etsVM, bool needInterop, bool &limitIsReached, bool &jsEnvEmpty,
+                                os::memory::Event &event)
 {
     auto *runtime = Runtime::GetCurrent();
+    auto *coroMan = etsVM->GetCoroutineManager();
+    auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
+    auto *jsEnv = ifaceTable->CreateJSRuntime();
+
+    // current we cannot create JSVM instance without jsEnv
+    // so we cannot create eaworker support interop withoutJSEnv
+    if (jsEnv == nullptr && needInterop) {
+        jsEnvEmpty = true;
+        event.Fire();
+        return nullptr;
+    }
+
+    auto *exclusiveCoro = coroMan->CreateExclusiveWorkerForThread(runtime, etsVM);
+    // exclusiveCoro == nullptr means that we reached the limit of eaworkers count or memory resources
+    if (exclusiveCoro == nullptr) {
+        limitIsReached = true;
+        event.Fire();
+        return nullptr;
+    }
+    ifaceTable->CreateInteropCtx(exclusiveCoro, jsEnv);
+    event.Fire();
+    return exclusiveCoro;
+}
+
+void RunTaskOnEACoroutine(PandaEtsVM *etsVM, bool needInterop, Coroutine *exclusiveCoro, mem::Reference *taskRef)
+{
+    auto *refStorage = etsVM->GetGlobalObjectStorage();
+    auto *coroMan = etsVM->GetCoroutineManager();
+
+    if (needInterop) {
+        auto poster = etsVM->CreateCallbackPoster(exclusiveCoro);
+        ASSERT(poster != nullptr);
+        poster->Post(RunExclusiveTask, taskRef, refStorage);
+        exclusiveCoro->GetWorker()->SetCallbackPoster(std::move(poster));
+        etsVM->RunEventLoop(exclusiveCoro);
+    } else {
+        ScopedManagedCodeThread ss(exclusiveCoro);
+        RunExclusiveTask(taskRef, refStorage);
+    }
+    coroMan->DestroyExclusiveWorker();
+}
+
+void ExclusiveLaunch(EtsObject *task, uint8_t needInterop)
+{
     auto *coro = EtsCoroutine::GetCurrent();
     auto *etsVM = coro->GetPandaVM();
     if (etsVM->GetCoroutineManager()->IsExclusiveWorkersLimitReached()) {
@@ -45,42 +90,36 @@ void ExclusiveLaunch(EtsObject *task, uint8_t needInterop)
     auto *refStorage = etsVM->GetGlobalObjectStorage();
     auto *taskRef = refStorage->Add(task->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     ASSERT(taskRef != nullptr);
-
-    ScopedNativeCodeThread nativeScope(coro);
-    auto event = os::memory::Event();
     auto limitIsReached = false;
-    auto t = std::thread([&limitIsReached, &event, runtime, etsVM, taskRef, refStorage, needInterop] {
-        auto *coroMan = etsVM->GetCoroutineManager();
-        auto *exclusiveCoro = coroMan->CreateExclusiveWorkerForThread(runtime, etsVM);
-        // exclusiveCoro == nullptr means that we reached the limit of eaworkers count or memory resources
-        if (exclusiveCoro == nullptr) {
-            limitIsReached = true;
-            event.Fire();
-            return;
-        }
-        event.Fire();
+    auto jsEnvEmpty = false;
+    bool supportInterop = static_cast<bool>(needInterop);
+    auto *worker = coro->GetWorker();
+    auto *interopCtx = worker->GetLocalStorage().Get<CoroutineWorker::DataIdx::INTEROP_CTX_PTR, void *>();
 
-        if (needInterop != 0U) {
-            auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
-            auto *jsEnv = ifaceTable->CreateJSRuntime();
-            ASSERT(jsEnv != nullptr);
-            ifaceTable->CreateInteropCtx(exclusiveCoro, jsEnv);
-            auto poster = etsVM->CreateCallbackPoster(exclusiveCoro);
-            ASSERT(poster != nullptr);
-            poster->Post(RunExclusiveTask, taskRef, refStorage);
-            exclusiveCoro->GetWorker()->SetCallbackPoster(std::move(poster));
-            etsVM->RunEventLoop(exclusiveCoro);
-        } else {
-            ScopedManagedCodeThread ss(exclusiveCoro);
-            RunExclusiveTask(taskRef, refStorage);
-        }
-        coroMan->DestroyExclusiveWorker();
-    });
-    event.Wait();
-    t.detach();
-
+    if (supportInterop && interopCtx == nullptr) {
+        ThrowRuntimeException("Cannot create EAWorker support interop without JsEnv");
+        return;
+    }
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        auto event = os::memory::Event();
+        auto t = std::thread([&jsEnvEmpty, &limitIsReached, &event, etsVM, taskRef, supportInterop]() {
+            auto *eaCoro = TryCreateEACoroutine(etsVM, supportInterop, limitIsReached, jsEnvEmpty, event);
+            if (eaCoro == nullptr) {
+                return;
+            }
+            RunTaskOnEACoroutine(etsVM, supportInterop, eaCoro, taskRef);
+        });
+        event.Wait();
+        t.detach();
+    }
     if (limitIsReached) {
         ThrowCoroutinesLimitExceedError("The limit of Exclusive Workers has been reached");
+        return;
+    }
+    if (jsEnvEmpty) {
+        ThrowRuntimeException("Cannot create EAWorker support interop without JsEnv");
+        return;
     }
 }
 
