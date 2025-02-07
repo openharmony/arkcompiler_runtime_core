@@ -1753,3 +1753,24 @@
 
 # 22253
 09.classes/06.method_declarations/09.methods_returning_this/methods_returning_this_interface_03.sts
+
+# 22662
+03.types/08.reference_types/05.never_type/never_class_instance_neg_12.sts
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_n_0.sts
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_n_10.sts
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_n_4.sts
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_n_5.sts
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_n_8.sts
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_n_9.sts
+17.experimental_features/04.indexable_types/cte_10.sts
+17.experimental_features/04.indexable_types/cte_12.sts
+17.experimental_features/05.iterable_types/it_7.sts
+
+# 22663
+17.experimental_features/12.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_negative.sts
+
+# 22664
+17.experimental_features/04.indexable_types/cte_4.sts
+07.expressions/12.indexing_expression/02.record_indexing_expression/ind_2.sts
+07.expressions/12.indexing_expression/02.record_indexing_expression/ind_4.sts
+07.expressions/12.indexing_expression/02.record_indexing_expression/ind_9.sts
