@@ -463,9 +463,7 @@
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_8.sts
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_9.sts
 
-# 20548 SegFault when use an expression in Record value
-07.expressions/12.indexing_expression/02.record_indexing_expression/ind_0.sts
-
+# 22219 Cannot use Enum in the Record value
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_10.sts
 
 # 20330 Compiler doesn't respect type argument for Array<T>

@@ -24,9 +24,9 @@ cases:
           }
           assertTrue(idx == 3)
           assertTrue(r["1"] == 1 && r["2"] == 1 && r["3"] == 3)
-          r["1"] = 10
-          r["2"] = 20
-          r["3"] = 30
+          r["1"] = 10 as short
+          r["2"] = 20 as short
+          r["3"] = 30 as short
           assertTrue(r["1"] == 10 && r["2"] == 20 && r["3"] == 30)
 
     - tags: 'compile-only, negative'
