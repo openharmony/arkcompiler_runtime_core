@@ -400,6 +400,7 @@ cases:
           let b: B = new B(1, c'Z')
           let r = b.meth()
           assertTrue(r[0] == 0 && r[1] == 1 && r[2] == c'Z' && r[3] == 5)
+      tags: 'negative, compile-only'
 
     - decl: |-
           class A<T> {}

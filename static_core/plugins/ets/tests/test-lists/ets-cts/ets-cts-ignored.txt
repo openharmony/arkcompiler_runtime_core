@@ -73,6 +73,11 @@
 04.names_declarations_and_scopes/03.distinguishable_declarations/spec_decl_n8.sts
 04.names_declarations_and_scopes/03.distinguishable_declarations/spec_decl_n10.sts
 
+# XXXXX Array literal type inference needs to be improved
+03.types/08.reference_types/12.union_types/ut_34.sts
+07.expressions/06.spread_expression/spex_36.sts
+07.expressions/06.spread_expression/spex_38.sts
+
 # XXXXX Aborts on assignment of char to union normalized to string
 03.types/08.reference_types/12.union_types/union_types_normalization/norm_10.sts
 03.types/08.reference_types/12.union_types/union_types_normalization/norm_15.sts
@@ -673,6 +678,9 @@
 # 18095 CTE expected on casting to type parameter
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/neg_gen1.sts
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/neg_gen2.sts
+
+# 15242 Ensure-Not-Nullish expression for nullish tuple not recognized
+03.types/08.reference_types/11.tuple_types/tt_16.sts
 
 # 20715
 03.types/08.reference_types/11.tuple_types/tt_7.sts

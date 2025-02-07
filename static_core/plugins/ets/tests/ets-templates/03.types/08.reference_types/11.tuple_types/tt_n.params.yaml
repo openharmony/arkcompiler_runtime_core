@@ -81,3 +81,8 @@ cases:
           let v: [number, number] = [1.0, 2.0]
           let t: Object = v
           let p: [boolean] = t as [boolean]  // wrong cast
+    - use: |-
+          let v: [string]|null = ():[string]|null => { let x = ["A"]; return x; }(); // when no target type is given, array expression is always inferred as an array
+          assertTrue( v?.[0] == "A" )
+          v = ():[string]|null => { return null; }();
+          assertTrue( v?.[0] === undefined )

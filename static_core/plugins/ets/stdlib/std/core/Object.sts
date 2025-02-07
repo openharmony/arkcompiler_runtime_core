@@ -304,8 +304,7 @@ export class Object {
             }
             let res = new NullishEntryType[len]
             for (let i = 0; i < len; i++) {
-                // NOTE(shumilov-petr): must be replaced by `sv.charAt(i) as string` when #15731 will be fixed
-                res[i] = [new Int(i).toString(), new Char(sv.charAt(i)).toString()]
+                res[i] = [new Int(i).toString(), new Char(sv.charAt(i)).toString()] as EntryType
             }
             return res
         }

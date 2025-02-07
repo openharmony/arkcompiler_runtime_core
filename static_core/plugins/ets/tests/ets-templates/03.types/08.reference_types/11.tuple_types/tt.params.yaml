@@ -183,12 +183,6 @@ cases:
           assertTrue( p[0] == "A" )
 
     - use: |-
-          let v: [string]|null = ():[string]|null => { let x = ["A"]; return x; }();
-          assertTrue( v?.[0] == "A" )
-          v = ():[string]|null => { return null; }();
-          assertTrue( v?.[0] === undefined )
-
-    - use: |-
           let res: boolean = false
           let v: [string]|null = ["A"]
           try {
