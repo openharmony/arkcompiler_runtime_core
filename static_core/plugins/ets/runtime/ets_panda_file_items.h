@@ -142,6 +142,10 @@ static constexpr std::string_view JS_ERROR                             = "Lstd/i
 static constexpr std::string_view ARRAY                                = "Lescompat/Array;";
 static constexpr std::string_view ARRAY_AS_LIST_INT                    = "Lstd/containers/ArrayAsListInt;";
 
+// ANI annotation classes
+static constexpr std::string_view ANI_UNSAFE_QUICK                     = "Lstd/annotations/ani/unsafe/Quick;";
+static constexpr std::string_view ANI_UNSAFE_DIRECT                    = "Lstd/annotations/ani/unsafe/Direct;";
+
 // escompat
 static constexpr std::string_view SHARED_MEMORY                        = "Lescompat/SharedMemory;";
 

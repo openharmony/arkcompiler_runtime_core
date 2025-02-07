@@ -330,6 +330,21 @@ public:
         return true;
     }
 
+    virtual bool IsMethodNative([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
+    virtual bool IsNativeMethodOptimizationEnabled() const
+    {
+        return false;
+    }
+
+    virtual void *GetMethodNativePointer([[maybe_unused]] MethodPtr method) const
+    {
+        return nullptr;
+    }
+
     virtual bool IsMethodFinal([[maybe_unused]] MethodPtr method) const
     {
         return false;
@@ -593,6 +608,10 @@ public:
     uint32_t GetCompiledEntryPointOffset(Arch arch) const
     {
         return ark::cross_values::GetMethodCompiledEntryPointOffset(arch);
+    }
+    uint32_t GetNativePointerOffset(Arch arch) const
+    {
+        return ark::cross_values::GetMethodNativePointerOffset(arch);
     }
     uint32_t GetPandaFileOffset(Arch arch) const
     {

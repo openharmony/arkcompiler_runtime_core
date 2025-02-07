@@ -170,7 +170,8 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
 {
     constexpr auto SLOT_KIND = UnresolvedTypesInterface::SlotKind::METHOD;
     if (method_ == nullptr || (GetRuntime()->IsMethodStatic(GetMethod(), methodId_) && classId == 0) ||
-        Builder()->ForceUnresolved() || (OPCODE == Opcode::CallLaunchStatic && GetGraph()->IsAotMode())) {
+        Builder()->ForceUnresolved() || (OPCODE == Opcode::CallLaunchStatic && GetGraph()->IsAotMode()) ||
+        builder_->NeedResolveNativeMethod(GetGraph(), method_)) {
         resolver_ = GetGraph()->CreateInstResolveStatic(DataType::POINTER, pc_, methodId_, nullptr);
         if constexpr (OPCODE == Opcode::CallStatic) {
             call_ = GetGraph()->CreateInstCallResolvedStatic(Builder()->GetMethodReturnType(methodId_), pc_, methodId_);
@@ -243,8 +244,7 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
     if (UNLIKELY(call_ == nullptr)) {
         UNREACHABLE();
     }
-    static_cast<CallInst *>(call_)->SetCanNativeException(method_ == nullptr ||
-                                                          GetRuntime()->HasNativeException(method_));
+    builder_->SetCallNativeFlags(static_cast<CallInst *>(call_), method_);
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
@@ -1346,7 +1346,7 @@ CallInst *InstBuilder::BuildCallStaticForInitObject(const BytecodeInstruction *b
     size_t inputsCount = ONE_FOR_OBJECT + argsCount + ONE_FOR_SSTATE;
     auto method = GetRuntime()->GetMethodById(graph_->GetMethod(), methodId);
     CallInst *call = nullptr;
-    if (method == nullptr || ForceUnresolved()) {
+    if (method == nullptr || ForceUnresolved() || NeedResolveNativeMethod(graph_, method)) {
         ResolveStaticInst *resolveStatic = graph_->CreateInstResolveStatic(DataType::POINTER, pc, methodId, nullptr);
         *resolver = resolveStatic;
         call = graph_->CreateInstCallResolvedStatic(GetMethodReturnType(methodId), pc, methodId);
@@ -1360,6 +1360,7 @@ CallInst *InstBuilder::BuildCallStaticForInitObject(const BytecodeInstruction *b
     }
     call->ReserveInputs(inputsCount);
     call->AllocateInputTypes(graph_->GetAllocator(), inputsCount);
+    SetCallNativeFlags(call, method);
     return call;
 }
 

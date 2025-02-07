@@ -2226,6 +2226,37 @@ void GraphChecker::VisitCallVirtual([[maybe_unused]] GraphVisitor *v, Inst *inst
                                          inst->Dump(&std::cerr), op->Dump(&std::cerr)));
 }
 
+void GraphChecker::VisitCallNative([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    [[maybe_unused]] auto *graph = inst->GetBasicBlock()->GetGraph();
+    [[maybe_unused]] auto *callNative = inst->CastToCallNative();
+
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, graph->GetMode().SupportManagedCode(),
+        (std::cerr << "CallNative must be only in managed code:\n", callNative->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, callNative->IsRuntimeCall() == (callNative->GetSaveState() != nullptr),
+        (std::cerr << "CallNative with runtime_call flag must have SaveState (and vice versa):\n",
+         callNative->Dump(&std::cerr)));
+    if (!callNative->IsRuntimeCall()) {
+        [[maybe_unused]] bool hasRefInputs = false;
+        for (auto input : callNative->GetInputs()) {
+            if (DataType::IsReference(input.GetInst()->GetType())) {
+                hasRefInputs = true;
+                break;
+            }
+        }
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v, !hasRefInputs,
+            (std::cerr << "CallNative without runtime_call flag cannot have ref inputs:\n",
+             callNative->Dump(&std::cerr)));
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v, !DataType::IsReference(callNative->GetType()),
+            (std::cerr << "CallNative without runtime_call flag cannot have ref type:\n",
+             callNative->Dump(&std::cerr)));
+    }
+}
+
 void GraphChecker::VisitCallDynamic([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(

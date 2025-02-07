@@ -17,12 +17,13 @@ add_subdirectory(jitinterface)
 
 function(panda_add_checked_test_ets)
     set(prefix ARG)
-    set(singleValues NAME FILE SUPPORT_RELEASE LIBCORE JITINTERFACE)
+    set(options SUPPORT_RELEASE JITINTERFACE NATIVE)
+    set(singleValues NAME FILE LIBCORE)
     set(multiValues AUX_FILES EXT_FILES)
-    cmake_parse_arguments(${prefix} "" "${singleValues}" "${multiValues}" ${ARGN})
+    cmake_parse_arguments(${prefix} "${options}" "${singleValues}" "${multiValues}" ${ARGN})
 
     # Events does not work in Release mode
-    if (NOT DEFINED ARG_SUPPORT_RELEASE AND "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    if (NOT ARG_SUPPORT_RELEASE AND "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
         return()
     endif()
 
@@ -97,6 +98,11 @@ function(panda_add_checked_test_ets)
         set(ARCHITECTURE "arm32")
     endif()
 
+    set(PANDA_OPTIONS "${OPTIONS}")
+    if (ARG_NATIVE)
+        set(PANDA_OPTIONS ${PANDA_OPTIONS} "--ets.native-library-path=${TEST_DIR}")
+    endif()
+
     # Run checker
     add_custom_target(${TEST_NAME}
                       COMMAND ${CHECKER} --source ${ARG_FILE}
@@ -105,7 +111,7 @@ function(panda_add_checked_test_ets)
                                          --frontend ${es2panda_bin}
                                          --run-prefix \"${PANDA_RUN_PREFIX}\"
                                          --test-file ${BINARY_FILE}
-                                         --panda-options \"${OPTIONS}\"
+                                         --panda-options \"${PANDA_OPTIONS}\"
                                          --paoc-options \"${OPTIONS}\"
                                          --frontend-options \"${ES2PANDA_OPTIONS}\"
                                          --command-token \"${COMMAND_TOKEN}\"
@@ -116,8 +122,20 @@ function(panda_add_checked_test_ets)
                       COMMENT "Running ${TEST_NAME} checked test"
                       DEPENDS ${BINARY_FILE} ${EXT_FILES})
 
-    if (DEFINED ARG_JITINTERFACE)
+    if (ARG_JITINTERFACE)
         add_dependencies(${TEST_NAME} jitinterface)
+    endif()
+
+    if (ARG_NATIVE)
+        cmake_path(REMOVE_EXTENSION ARG_FILE LAST_ONLY OUTPUT_VARIABLE NATIVE_FILE)
+        cmake_path(GET NATIVE_FILE FILENAME NATIVE_LIB)
+        set(NATIVE_FILE "${NATIVE_FILE}.cpp")
+        set(NATIVE_LIB "checked_test_${NATIVE_LIB}")
+
+        panda_add_library("${NATIVE_LIB}" SHARED "${NATIVE_FILE}")
+        set_target_properties("${NATIVE_LIB}" PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${TEST_DIR}")
+        panda_target_include_directories("${NATIVE_LIB}" PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/napi)
+        add_dependencies(${TEST_NAME} "${NATIVE_LIB}")
     endif()
 
     add_dependencies(ets_checked_tests ${TEST_NAME})
@@ -132,7 +150,7 @@ endfunction()
 
 # Disable checked tests with sanitizers for arm64, since it takes too long time running.
 if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_test.sts SUPPORT_RELEASE true)
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_test.sts SUPPORT_RELEASE)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_split_test.sts)
     if (PANDA_TARGET_AMD64 OR PANDA_TARGET_ARM64)
         # inlining of the following intrinsics is only enabled for these two targets
@@ -142,15 +160,15 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/loop_idioms/memmove_supported.sts)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/loop_idioms/memmove_unsupported.sts)
         # CallLaunch isn't supported for arm32 (need to fix storing args in stack)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/launch_test.sts SUPPORT_RELEASE true)
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/launch_test.sts SUPPORT_RELEASE)
         # AOT mode for arm32 is not supported
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_equals.sts SUPPORT_RELEASE true)
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_equals.sts SUPPORT_RELEASE)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_order_1.sts)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_order_2.sts)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_order_3.sts)
         if (NOT PANDA_PRODUCT_BUILD)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_tlab_allocations.sts JITINTERFACE true)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_tlab_repeat.sts JITINTERFACE true)
+            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_tlab_allocations.sts JITINTERFACE)
+            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_tlab_repeat.sts JITINTERFACE)
         endif()
         # LoadAndInitClass in AOT mode for arm32 is not supported
         # NOTE(pantos) Issue #17103 reassign readonly property
@@ -166,7 +184,7 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory_coalescing4.sts)
     endif()
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/gotos.sts)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_runtime_equals.sts SUPPORT_RELEASE true)
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_runtime_equals.sts SUPPORT_RELEASE)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_abs.sts)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_double_compare.sts)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_equals.sts)
@@ -271,3 +289,4 @@ panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escape_analysis_cast
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/load_array.sts)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_negation.sts)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/llvm_infer_flags.sts)
+panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/direct_native.sts NATIVE SUPPORT_RELEASE)

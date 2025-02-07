@@ -581,6 +581,7 @@ Inst *CallInst::Clone(const Graph *targetGraph) const
     auto callClone = static_cast<CallInst *>(instClone);
     callClone->SetCallMethodId(GetCallMethodId());
     callClone->SetCallMethod(GetCallMethod());
+    callClone->SetIsNative(GetIsNative());
     callClone->SetCanNativeException(GetCanNativeException());
     CloneTypes(targetGraph->GetAllocator(), callClone);
     return instClone;

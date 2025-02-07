@@ -198,6 +198,7 @@ public:
           parentGraph_(parent)
     {
         SetNeedCleanup(true);
+        SetCanOptimizeNativeMethods(GetArch() != Arch::AARCH32 && GetRuntime()->IsNativeMethodOptimizationEnabled());
     }
 
     ~Graph() override;
@@ -1126,6 +1127,16 @@ public:
         FlagNeedCleanup::Set(v, &bitFields_);
     }
 
+    bool CanOptimizeNativeMethods() const
+    {
+        return FlagCanOptimizeNativeMethods::Get(bitFields_);
+    }
+
+    void SetCanOptimizeNativeMethods(bool v)
+    {
+        FlagCanOptimizeNativeMethods::Set(v, &bitFields_);
+    }
+
     bool IsJitOrOsrMode() const
     {
         return !IsAotMode() && !IsBytecodeOptimizer() && SupportManagedCode();
@@ -1359,7 +1370,8 @@ private:
     using FlagDefaultLocationsInit = FlagFloatRegs::NextFlag;
     using FlagIrtocPrologEpilogOptimized = FlagDefaultLocationsInit::NextFlag;
     using FlagThrowApplied = FlagIrtocPrologEpilogOptimized::NextFlag;
-    using FlagUnrollComplete = FlagThrowApplied::NextFlag;
+    using FlagCanOptimizeNativeMethods = FlagThrowApplied::NextFlag;
+    using FlagUnrollComplete = FlagCanOptimizeNativeMethods::NextFlag;
 #if defined(NDEBUG) && !defined(ENABLE_LIBABCKIT)
     using LastField = FlagUnrollComplete;
 #else

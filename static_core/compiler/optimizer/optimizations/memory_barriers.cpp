@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -139,6 +139,22 @@ void OptimizeMemoryBarriers::VisitCallResolvedLaunchVirtual(GraphVisitor *v, Ins
 
 void OptimizeMemoryBarriers::VisitCallDynamic(GraphVisitor *v, Inst *inst)
 {
+    static_cast<OptimizeMemoryBarriers *>(v)->CheckAllInputs(inst);
+}
+
+void OptimizeMemoryBarriers::VisitCallNative(GraphVisitor *v, Inst *inst)
+{
+    if (!inst->CastToCallNative()->IsRuntimeCall()) {
+        return;
+    }
+    static_cast<OptimizeMemoryBarriers *>(v)->CheckAllInputs(inst);
+}
+
+void OptimizeMemoryBarriers::VisitCallResolvedNative(GraphVisitor *v, Inst *inst)
+{
+    if (!inst->CastToCallResolvedNative()->IsRuntimeCall()) {
+        return;
+    }
     static_cast<OptimizeMemoryBarriers *>(v)->CheckAllInputs(inst);
 }
 

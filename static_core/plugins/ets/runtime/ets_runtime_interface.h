@@ -64,6 +64,7 @@ public:
     IntrinsicId GetStringBuilderToStringIntrinsicId() const override;
     bool IsClassValueTyped(ClassPtr klass) const override;
     void *GetDoubleToStringCache() const override;
+    bool IsNativeMethodOptimizationEnabled() const override;
 
     FieldPtr ResolveLookUpField(FieldPtr rawField, ClassPtr klass) override;
     MethodPtr ResolveLookUpCall(FieldPtr rawField, ClassPtr klass, bool isSetter) override;
