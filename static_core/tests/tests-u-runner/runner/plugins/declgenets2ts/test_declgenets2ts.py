@@ -37,21 +37,25 @@ class TestDeclgenETS2TS(TestFileBased):
         self.decl_path = test_env.work_dir.intermediate
         makedirs(self.decl_path, exist_ok=True)
         name_without_ext, _ = path.splitext(self.test_id)
-        self.test_decl = path.join(self.decl_path, f"{name_without_ext}.ts")
-        makedirs(path.dirname(self.test_decl), exist_ok=True)
+        self.test_dts = path.join(self.decl_path, f"{name_without_ext}.d.ts")
+        self.test_ts = path.join(self.decl_path, "ts", f"{name_without_ext}.ts")
+        makedirs(path.dirname(self.test_dts), exist_ok=True)
+        makedirs(path.dirname(self.test_ts), exist_ok=True)
 
     def do_run(self) -> TestDeclgenETS2TS:
         self.passed, self.report, self.fail_kind = self._run_declgen_ets2ts(
-            self.test_decl)
+            self.test_dts, self.test_ts)
         if not self.passed:
             return self
         self.passed, self.report, self.fail_kind = self._run_tsc(
-            self.test_decl)
+            self.test_dts)
         return self
 
-    def _run_declgen_ets2ts(self, test_decl: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
+    def _run_declgen_ets2ts(self, test_dts: str, test_ts: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
         declgen_flags = []
-        declgen_flags.append(f"--output={test_decl}")
+        declgen_flags.append(f"--output-dts={test_dts}")
+        declgen_flags.append(f"--output-ts={test_ts}")
+        declgen_flags.append("--export-all")
         declgen_flags.append(self.path)
 
         params = Params(
@@ -68,13 +72,13 @@ class TestDeclgenETS2TS(TestFileBased):
         passed, report, fail_kind = self.run_one_step(
             name="declgen_ets2ts",
             params=params,
-            result_validator=lambda _, _2, rc: self._validate_declgen_ets2ts(rc, test_decl)
+            result_validator=lambda _, _2, rc: self._validate_declgen_ets2ts(rc, test_dts)
         )
         return passed, report, fail_kind
 
-    def _run_tsc(self, test_decl: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
+    def _run_tsc(self, test_dts: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
         tsc_flags = []
-        tsc_flags.append(test_decl)
+        tsc_flags.append(test_dts)
 
         params = Params(
             executor=self.tsc_executor,
