@@ -38,8 +38,7 @@ public:
     }
 };
 
-// NOTE: Enable when #22354 is resolved
-TEST_F(ObjectSetFieldRefTest, DISABLED_set_field_ref)
+TEST_F(ObjectSetFieldRefTest, set_field_ref)
 {
     ani_object box {};
     ani_field fieldInt {};
@@ -51,6 +50,35 @@ TEST_F(ObjectSetFieldRefTest, DISABLED_set_field_ref)
 
     ASSERT_EQ(env_->Object_SetField_Ref(box, fieldString, string), ANI_OK);
     ASSERT_EQ(CallEtsFunction<ani_boolean>("checkStringValue", box, string), ANI_TRUE);
+}
+
+TEST_F(ObjectSetFieldRefTest, set_field_ref2)
+{
+    auto boxc = static_cast<ani_object>(CallEtsFunction<ani_ref>("newBoxcObject"));
+
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LBoxc;", &cls), ANI_OK);
+
+    ani_field fieldInt;
+    ASSERT_EQ(env_->Class_GetField(cls, "int_value", &fieldInt), ANI_OK);
+
+    ani_field fieldString;
+    ASSERT_EQ(env_->Class_GetField(cls, "string_value", &fieldString), ANI_OK);
+
+    ani_field fieldStr;
+    ASSERT_EQ(env_->Class_GetField(cls, "str_value", &fieldStr), ANI_OK);
+
+    ani_string string {};
+    ASSERT_EQ(env_->String_NewUTF8("abcdef", 6U, &string), ANI_OK);
+
+    ASSERT_EQ(env_->Object_SetField_Ref(boxc, fieldString, string), ANI_OK);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkStringValue", boxc, string), ANI_TRUE);
+
+    ani_string str {};
+    ASSERT_EQ(env_->String_NewUTF8("fedcba", 6U, &str), ANI_OK);
+
+    ASSERT_EQ(env_->Object_SetField_Ref(boxc, fieldStr, str), ANI_OK);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkStrValue", boxc, str), ANI_TRUE);
 }
 
 TEST_F(ObjectSetFieldRefTest, set_field_ref_invalid_field_type)

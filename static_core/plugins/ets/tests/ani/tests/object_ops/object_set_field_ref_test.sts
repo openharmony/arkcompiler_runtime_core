@@ -18,10 +18,22 @@ class Boxx {
     string_value: String = "";
 }
 
+class Boxc extends Boxx {
+    str_value: String = "";
+}
+
 function newBoxObject() {
-    return new string();
+    return new Boxx();
+}
+
+function newBoxcObject() {
+    return new Boxc();
 }
 
 function checkStringValue(b: Boxx, value: String): boolean {
     return b.string_value == value;
+}
+
+function checkStrValue(b: Boxc, value: String): boolean {
+    return b.str_value == value;
 }

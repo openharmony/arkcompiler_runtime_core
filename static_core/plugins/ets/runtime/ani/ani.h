@@ -36,7 +36,7 @@ typedef size_t ani_size;
 
 // Primitive types:
 typedef uint8_t ani_boolean;
-typedef uint32_t ani_char;
+typedef uint16_t ani_char;  // NOTE: Change by uint32_t when #22672 is resolved.
 typedef int8_t ani_byte;
 typedef int16_t ani_short;
 typedef int32_t ani_int;
