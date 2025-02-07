@@ -94,7 +94,7 @@ function verifyObjectProxyOps(obj: ObjWithProps, objProxyHandler: ObjProxyHandle
     const objName = objProxy.name
     assertTrue(objProxyHandler.getTrapped)
 
-    assertTrue(objName == "foo1")
+    assertEQ(objName ,  "foo1")
 
     assertTrue(obj.isNameSet())
     assertFalse(objProxy.isNameSet())

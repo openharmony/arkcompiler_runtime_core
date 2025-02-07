@@ -23,6 +23,6 @@ name: eval-lazy_3.sts
 
 function main(): void {
     let ns: string | undefined;
-    assert (ns ?? "42") == "42";
+    assertEQ( (ns ?? "42") ,  "42")
 
 }

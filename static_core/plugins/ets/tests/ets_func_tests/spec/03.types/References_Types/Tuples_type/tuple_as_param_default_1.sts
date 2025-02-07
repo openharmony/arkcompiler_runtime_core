@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,8 +23,8 @@ tags: []
 type TNumberPair = [number, number];
 
 function receiver(tuple: TNumberPair = [12.0, 123.0]): void {
-    assert tuple[0] == 12.0;
-    assert tuple[1] == 123.0;
+    assertEQ( tuple[0] ,  12.0)
+    assertEQ( tuple[1] ,  123.0)
 }
 
 function main(): void {

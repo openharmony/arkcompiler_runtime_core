@@ -23,6 +23,6 @@ name: eval-lazy_0.sts
 
 function main(): void {
     let ns: Int | undefined;
-    assert (ns ?? 42) == 42;
+    assertEQ( (ns ?? 42) ,  42)
 
 }

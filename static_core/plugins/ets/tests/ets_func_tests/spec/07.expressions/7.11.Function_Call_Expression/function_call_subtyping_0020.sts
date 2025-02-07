@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,14 +49,14 @@ function f(): D {
 
 function main() {
   let x : A = f()
-  assert(x.countA == 6)
+  assertEQ(x.countA ,  6)
 
   let y : B = f()
-  assert(y.countA == 6)
-  assert(y.countB == 28)
+  assertEQ(y.countA ,  6)
+  assertEQ(y.countB ,  28)
 
   let z : D = f()
-  assert(y.countA == 6)
-  assert(y.countB == 28)
-  assert(y.countD == 496)
+  assertEQ(y.countA ,  6)
+  assertEQ(y.countB ,  28)
+  assertEQ(y.countD ,  496)
 }

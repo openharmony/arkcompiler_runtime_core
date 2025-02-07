@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,12 +69,12 @@ function main(): void {
     let ra21 = a2.bar(new UserType(), new UserName());
     let ra31 = a3.bar("hello", "world")
 
-    assert ra1 instanceof UserType
-    assert ra2 instanceof UserType
-    assert ra3 instanceof string
+    assertTrue( ra1 instanceof UserType)
+    assertTrue( ra2 instanceof UserType)
+    assertTrue( ra3 instanceof string)
 
-    assert ra11 instanceof UserName
-    assert ra21 instanceof UserName
-    assert ra31 instanceof string
+    assertTrue( ra11 instanceof UserName)
+    assertTrue( ra21 instanceof UserName)
+    assertTrue( ra31 instanceof string)
 }
 

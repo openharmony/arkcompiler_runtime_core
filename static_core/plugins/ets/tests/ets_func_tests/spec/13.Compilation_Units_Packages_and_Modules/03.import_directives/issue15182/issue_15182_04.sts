@@ -28,7 +28,7 @@ function main(): void {
   let t2 = new Test2();
   let t3 = new Test3();
 
-  assert t1 instanceof Test1;
-  assert t2 instanceof Test2;
-  assert t3 instanceof Test3;
+  assertTrue( t1 instanceof Test1)
+  assertTrue( t2 instanceof Test2)
+  assertTrue( t3 instanceof Test3)
 }

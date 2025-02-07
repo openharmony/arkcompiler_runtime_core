@@ -31,6 +31,6 @@ class TestC <T = NullableSub> {
 
 
 function main(): void {
-    assert new TestC().member === undefined;
+    assertTrue( new TestC().member === undefined)
 
 }

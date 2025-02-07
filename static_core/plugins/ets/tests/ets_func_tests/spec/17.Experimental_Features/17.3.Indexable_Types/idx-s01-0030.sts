@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,9 +38,9 @@ class Bar {
 
 function main() {
     let x : Bar = new Bar(new Foo(1));
-    assert (x[0].i == 1);
+    assertEQ(x[0].i ,  1)
     let y : Foo = new Foo(100);
     x[0] = y;
-    assert(x[0].i == 100);
+    assertEQ(x[0].i ,  100)
     return 1;
 }

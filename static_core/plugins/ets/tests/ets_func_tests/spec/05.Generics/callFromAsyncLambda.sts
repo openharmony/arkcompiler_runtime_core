@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,11 +36,11 @@ function main(): void {
     let arr: Int[] = [0, 1, 2];
     let foo: fooAsyncLambda = async (): Promise<void> => {
         let str = getter.get<string>("F");
-        assert str instanceof string;
+        assertTrue( str instanceof string)
 
         let arr2: Int[] = getter.get<Int>(arr);
-        assert arr2 instanceof Object;
-        assert arr2[0] instanceof Int;
+        assertTrue( arr2 instanceof Object)
+        assertTrue( arr2[0] instanceof Int)
     }
     await foo();
 }

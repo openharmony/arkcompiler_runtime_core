@@ -69,13 +69,13 @@ function verifyArrayProxyOps(array: Array<string>, handler: StringArrayProxyHand
     assertEQ(arrayProxy.length, 3, "unexpected arrayProxy.length")
 
     assertFalse(handler.getTrapped)
-    assertTrue(arrayProxy[0] == "zero")
+    assertEQ(arrayProxy[0] ,  "zero")
     assertTrue(handler.getTrapped)
 
     assertFalse(handler.setTrapped)
     arrayProxy[2] = "3"
     assertTrue(handler.setTrapped)
-    assertTrue(arrayProxy[2] == "two")
+    assertEQ(arrayProxy[2] ,  "two")
 
     assertFalse(handler.setLengthTrapped)
     arrayProxy.length = 2

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,5 +24,5 @@ type Margin = number | string
 function main(): void {
     let a1: string = "5 px"
     let b1: Margin = a1 as Margin // should work
-    assert b1 == "5 px"
+    assertEQ( b1 ,  "5 px")
 }

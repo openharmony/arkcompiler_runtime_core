@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,10 +33,10 @@ function main(): void {
     with_param() {
         switch (is_active() { return 1 }) {
             case 1:
-                assert a == 5
+                assertEQ( a ,  5)
                 break
             case 2:
-            default: assert false: "Not expected execution here"
+            default: assertTrue(false, "Not expected execution here")
         }
     }
 }
