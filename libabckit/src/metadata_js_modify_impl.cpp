@@ -37,7 +37,6 @@ extern "C" AbckitJsModule *FileAddExternalModule(AbckitFile *file,
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(params, nullptr);
 
-    std::cout << "\nADDMODULE\n";
     if (file->frontend != Mode::DYNAMIC) {
         statuses::SetLastError(ABCKIT_STATUS_WRONG_MODE);
         return nullptr;
@@ -62,6 +61,9 @@ extern "C" AbckitJsImportDescriptor *ModuleAddImportFromJsToJs(
     LIBABCKIT_BAD_ARGUMENT(imported, nullptr);
     LIBABCKIT_BAD_ARGUMENT(params, nullptr);
 
+    LIBABCKIT_INTERNAL_ERROR(importing->core, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(imported->core, nullptr);
+
     return ModuleAddImportFromDynamicModuleDynamic(importing->core, imported->core, params);
 }
 
@@ -73,6 +75,8 @@ extern "C" void ModuleRemoveImportJs(AbckitJsModule *m, AbckitJsImportDescriptor
     LIBABCKIT_BAD_ARGUMENT_VOID(m)
     LIBABCKIT_BAD_ARGUMENT_VOID(i)
 
+    LIBABCKIT_INTERNAL_ERROR_VOID(m->core)
+
     return ModuleRemoveImportDynamic(m->core, i);
 }
 
@@ -83,20 +87,26 @@ extern "C" AbckitJsExportDescriptor *ModuleAddExportFromJsToJs(AbckitJsModule *e
     LIBABCKIT_IMPLEMENTED;
 
     LIBABCKIT_BAD_ARGUMENT(exporting, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(exported, nullptr);
     LIBABCKIT_BAD_ARGUMENT(params, nullptr);
 
-    return DynamicModuleAddExportDynamic(exporting->core, exported != nullptr ? exported->core : nullptr, params);
+    LIBABCKIT_INTERNAL_ERROR(exporting->core, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(exported->core, nullptr);
+
+    return DynamicModuleAddExportDynamic(exporting->core, exported->core, params);
 }
 
-extern "C" void ModuleRemoveExportJs(AbckitJsModule *m, AbckitJsExportDescriptor *i)
+extern "C" void ModuleRemoveExportJs(AbckitJsModule *m, AbckitJsExportDescriptor *e)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(m)
-    LIBABCKIT_BAD_ARGUMENT_VOID(i)
+    LIBABCKIT_BAD_ARGUMENT_VOID(e)
 
-    return ModuleRemoveExportDynamic(m->core, i);
+    LIBABCKIT_INTERNAL_ERROR_VOID(m->core);
+
+    return ModuleRemoveExportDynamic(m->core, e);
 }
 
 // ========================================

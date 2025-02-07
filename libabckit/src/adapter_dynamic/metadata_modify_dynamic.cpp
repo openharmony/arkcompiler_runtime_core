@@ -502,7 +502,7 @@ AbckitArktsExportDescriptor *DynamicModuleAddExportDynamic(AbckitCoreModule *exp
     auto payloadDyn = AbckitDynamicExportDescriptorPayload();
     if (std::strcmp(params->name, "*") == 0) {
         payloadDyn.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_STAR_EXPORT;
-    } else if (exported == nullptr) {
+    } else if (exported == exporting) {
         payloadDyn.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_LOCAL_EXPORT;
         ed->exportedModule = exporting;
     } else {
@@ -532,7 +532,7 @@ AbckitJsExportDescriptor *DynamicModuleAddExportDynamic(AbckitCoreModule *export
     auto payloadDyn = AbckitDynamicExportDescriptorPayload();
     if (std::strcmp(params->name, "*") == 0) {
         payloadDyn.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_STAR_EXPORT;
-    } else if (exported == nullptr) {
+    } else if (exported == exporting) {
         payloadDyn.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_LOCAL_EXPORT;
         ed->exportedModule = exporting;
     } else {

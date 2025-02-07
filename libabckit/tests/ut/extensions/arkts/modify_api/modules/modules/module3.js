@@ -17,6 +17,10 @@ export {
 }
 from './module4';
 
+import {
+    regularImportFunc1FromModule1
+} from './module1';
+
 export default function regularDefaultImportFunc1FromModule3() {
     print('regular default import func1 from module3');
 }
