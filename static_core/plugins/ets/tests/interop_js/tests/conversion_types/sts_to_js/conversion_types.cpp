@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,11 @@
 namespace ark::ets::interop::js::testing {
 
 class EtsConversionTypesEtsToJsTest : public EtsInteropTest {};
+
+TEST_F(EtsConversionTypesEtsToJsTest, check_conversion_box_types)
+{
+    ASSERT_TRUE(RunJsTestSuite("check_conversion_box_type.js"));
+}
 
 TEST_F(EtsConversionTypesEtsToJsTest, check_conversion_int)
 {

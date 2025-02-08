@@ -85,6 +85,12 @@ static napi_value GetEtsFunction(napi_env env, napi_callback_info info)
     return ets_proxy::GetETSFunction(env, packageName, methodName);
 }
 
+// This function returns napi_value, thus it is possible to get accessto it`s fields
+// It gives opportunity to get acces to global variables from ETSGLOBAL
+// test.sts
+// export let x = 1
+// test.js
+// etsvm.getClass("ETSGLOBAL").x
 static napi_value GetEtsClass(napi_env env, napi_callback_info info)
 {
     ASSERT_SCOPED_NATIVE_CODE();

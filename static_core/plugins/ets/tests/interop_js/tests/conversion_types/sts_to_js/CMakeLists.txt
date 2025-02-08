@@ -16,6 +16,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_types_sts_to_ts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_types.sts
     JS_SOURCES 
         ${CMAKE_CURRENT_SOURCE_DIR}/check_conversion_int.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_conversion_box_type.js
         ${CMAKE_CURRENT_SOURCE_DIR}/check_conversion_null_and_undefined.js
         ${CMAKE_CURRENT_SOURCE_DIR}/check_conversion_string.js
         ${CMAKE_CURRENT_SOURCE_DIR}/conversion_types.test.js

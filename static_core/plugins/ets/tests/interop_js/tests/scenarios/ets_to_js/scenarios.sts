@@ -25,6 +25,61 @@ function standaloneFunctionEts(): int {
     return 1;
 }
 
+function functionReturnBoxedString(): String {
+    let stsString: String = new String("Hello");
+    return stsString;
+}
+
+function functionReturnBoxedNumber(): Number {
+    let stsNumber: Number = new Number(42 as number);
+    return stsNumber;
+}
+
+function functionReturnBoxedInt(): Int {
+    let stsInt: Int = new Int(42);
+    return stsInt;
+}
+
+function functionReturnBoxedByte(): Byte {
+    let stsByte: Byte = new Byte(126 as byte);
+    return stsByte;
+}
+
+function functionReturnBoxedShort(): Short {
+    let stsShort: Short = new Short(4242 as short);
+    return stsShort;
+}
+
+function functionReturnBoxedLong(): Long {
+    let stsLong: Long = new Long(12 as long);
+    return stsLong;
+}
+
+function functionReturnBoxedFloat(): Float {
+    let stsFloat: Float = new Float(42.42 as float);
+    return stsFloat;
+}
+
+function functionReturnBoxedDouble(): Double {
+    let stsDouble: Double = new Double(42.42 as double);
+    return stsDouble;
+}
+
+function functionReturnBoxedChar(): Char {
+    let stsChar: Char = new Char('a');
+    return stsChar;
+}
+
+function functionReturnBoxedBoolean(): Boolean {
+    let stsBoolean: Boolean = new Boolean(true);
+    return stsBoolean;
+}
+
+function functionReturnBoxedBigInt(): BigInt {
+    let stsBigInt: BigInt = new BigInt(42);
+    return stsBigInt;
+}
+
 class ClassWithMethodEts {
     public methodInClass(): int {
         return 1;
