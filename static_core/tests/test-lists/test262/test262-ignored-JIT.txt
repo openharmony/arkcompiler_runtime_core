@@ -1,4 +1,4 @@
-# TCO related issue #8217 #9416
+# TCO related issue #9416
 language/expressions/call/tco-call-args.js
 language/expressions/call/tco-member-args.js
 language/expressions/coalesce/tco-pos-null.js

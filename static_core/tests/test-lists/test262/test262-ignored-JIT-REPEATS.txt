@@ -3640,7 +3640,7 @@ language/statements/let/fn-name-class.js
 language/statements/variable/fn-name-class.js
 #end of #19916
 
-# #20447
+# #20544
 language/expressions/assignment/dstr/obj-rest-val-null.js
 language/expressions/assignment/dstr/obj-rest-val-undefined.js
 language/expressions/assignment/dstr/obj-rest-getter-abrupt-get-error.js
@@ -3649,7 +3649,7 @@ language/statements/for-of/dstr/obj-rest-val-undefined.js
 language/statements/for-of/dstr/obj-rest-val-null.js
 language/statements/for-of/dstr/obj-rest-getter-abrupt-get-error.js
 language/statements/class/elements/fields-computed-name-static-computed-var-propname-prototype.js
-#end of #20447
+#end of #20544
 
 # #12861
 built-ins/Math/round/S15.8.2.15_A6.js
