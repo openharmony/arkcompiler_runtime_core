@@ -391,7 +391,7 @@ export final class ClassValue extends Value {
             } else if (ft instanceof LongType) {
                 return new LongValue(ft as LongType, ValueAPIGetFieldByNameLong(this.data, name))
             }
-            assert(false)
+            throw new AssertionError("Type " + f.getType() + " is not a (un)boxed primitive")
         }
         return Value.of(ValueAPIGetFieldByNameObject(this.data, name))
     }
@@ -447,9 +447,9 @@ export final class ClassValue extends Value {
     }
 
     private isAssignableToObject(v: Value): boolean {
-        return v instanceof ClassValue 
-            || v instanceof LambdaValue 
-            || v instanceof StringValue 
+        return v instanceof ClassValue
+            || v instanceof LambdaValue
+            || v instanceof StringValue
             || v instanceof ArrayValue
     }
 
@@ -588,7 +588,7 @@ export final class ArrayValue extends Value {
             } else if (et instanceof LongType) {
                 return new LongValue(et as LongType, ValueAPIGetElementLong(this.data, i))
             }
-            assert(false)
+            throw new AssertionError("Type " + et + " is not a (un)boxed primitive")
         }
         return Value.of(ValueAPIGetElementObject(this.data, i))
     }

@@ -23,7 +23,9 @@ package std.testing;
  * @throws AssertionError if condition is false
  */
 function assertCommon(condition: boolean, message: string, description?: string): void {
-    assert condition : (description ? description + "\n" : "") + message;
+    if (!condition) {
+        throw new AssertionError((description ? description + "\n" : "") + message)
+    }
 }
 
 /**

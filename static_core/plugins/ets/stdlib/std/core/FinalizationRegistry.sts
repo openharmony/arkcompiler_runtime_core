@@ -52,7 +52,7 @@ export final class FinalizationRegistry<T> {
     }
 
     private init_arrays(size: int): void {
-        assert size > 1;
+        assertLT(1, size);
         this.idxarr = new int[size];
         this.idxarr[0] = -1; // first elem reserved for useidx head
         this.enlarge_freeidx(1);

@@ -225,11 +225,8 @@ export abstract class Type extends Object {
             case TypeKind.ENUM:
                 return new EnumType(td)
             default:
-                // NOTE(shumilov-petr): unknown type, need error
-                assert(false)
+                throw new AssertionError("Unexpected TypeKind " + kind)
         }
-
-        return undefined;
     }
 
     /**
@@ -775,7 +772,7 @@ export final class UndefinedType extends Type {
  * Represents void type
  */
 export final class VoidType extends Type {
-    public static readonly VAL: VoidType = new VoidType(ValueTypeDesc.VOID, true) 
+    public static readonly VAL: VoidType = new VoidType(ValueTypeDesc.VOID, true)
     public static readonly REF: VoidType = new VoidType(TypeAPIGetTypeDescriptor(Void.void_instance), false)
 
     private readonly value: boolean
@@ -2181,11 +2178,8 @@ export final class ArrayType extends Type {
             case TypeKind.UNION:
                 return new ArrayType(td, elemTD)
             default:
-                // NOTE(shumilov-petr): need throw exception
-                assert(false)
+                throw new AssertionError("Unexpected TypeKind " + ek)
         }
-
-        throw new Error("Invalid object")
     }
 
     internal static getInstance(td: TypeDesc): ArrayType {
@@ -2514,7 +2508,7 @@ export final class LambdaType extends FunctionType {
         if (l.getParametersNum() != r.getParametersNum()) {
             return false
         }
-        
+
         // Parameter types are using contravariance
         for (let i = 0; i < l.getParametersNum(); i++) {
             let lt = l.getParameter(i).getType()

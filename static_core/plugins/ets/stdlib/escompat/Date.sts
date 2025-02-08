@@ -84,7 +84,8 @@ const firstDayInMonthLeap: int[]   = [0, 31, 60, 91, 121, 152, 182, 213, 244, 27
  * @returns first day
  */
 function getFirstDayInMonth(year: int, month: int): int {
-    assert (year == 0 || year == 1) && (month >= 0 && month <= 11) : "Invalid year/month pair";
+    assertTrue((year == 0 || year == 1), "Invalid value " + year + " for \"year\", has to be 0 or 1")
+    assertTrue((month >= 0 && month <= 11), "Invalid value " + month + " for \"month\", has to be in range 0..11")
     if (year == 0) {
         return firstDayInMonthNormal[month];
     } else {
@@ -146,7 +147,8 @@ function ecmaMonthFromTime(time: long): byte {
     let year = ecmaYearFromTime(time);
     let dayWithinYear = ecmaDayFromTime(time) - ecmaDayFromYear(year);
 
-    assert dayWithinYear >= 0 && dayWithinYear < dayCountInLeapYear;
+    assertTrue(dayWithinYear >= 0 && dayWithinYear < dayCountInLeapYear,
+        "Invalid value " + dayWithinYear + " for \"dayWithinYear\", has to be in range 0.." + dayCountInLeapYear);
 
     let inLeapYear = ecmaInLeapYear(year);
 
@@ -168,7 +170,8 @@ function ecmaDateFromTime(time: long): byte {
     let year = ecmaYearFromTime(time);
     let dayWithinYear = ecmaDayFromTime(time) - ecmaDayFromYear(year);
 
-    assert dayWithinYear >= 0 && dayWithinYear < dayCountInLeapYear;
+    assertTrue(dayWithinYear >= 0 && dayWithinYear < dayCountInLeapYear,
+        "Invalid value " + dayWithinYear + " for dayWithinYear, has to be in range 0.." + dayCountInLeapYear);
 
     let inLeapYear = ecmaInLeapYear(year);
 
@@ -544,7 +547,7 @@ export final class Date {
             }
 
             timeZone *= timeZoneSign;
-        } 
+        }
         if (dateStrLen == 23) {
             timeZone = Date.getLocalTimezoneOffset(date.valueOf() as long) *  msPerMinute;
         }
@@ -574,7 +577,7 @@ export final class Date {
      */
 
     constructor(value: number | string | Date) {
-        
+
         if (value instanceof Date) {
             this.ms = trunc((value as Date).valueOf() as number) as long
             this.TZOffset = (value as Date).getTimezoneOffset() as long
@@ -616,15 +619,15 @@ export final class Date {
                 year,
                 monthIndex,
                 day != undefined ? day as number: 1
-            ), 
+            ),
             ecmaMakeTime(
-                hours != undefined ? hours as number : 0, 
+                hours != undefined ? hours as number : 0,
                 minutes != undefined ? minutes as number : 0,
                 seconds != undefined ? seconds as number : 0,
                 ms != undefined ? ms as number : 0
             )
         );
-        this.TZOffset = Date.getLocalTimezoneOffset(this.ms as long);   
+        this.TZOffset = Date.getLocalTimezoneOffset(this.ms as long);
         this.ms += this.TZOffset * msPerMinute
     }
 
@@ -1052,7 +1055,7 @@ export final class Date {
      * @param value new hours
      */
     public setHours(value: byte): void {
-        assert value >= 0 && value <= 23;
+        assertTrue(value >= 0 && value <= 23, "Invalid value " + value + " for \"value\", has to be in range 0..23");
         let hours = ecmaHourFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
         this.ms -= msPerHour * hours;
         this.ms += msPerHour * value;
@@ -1083,7 +1086,7 @@ export final class Date {
      * @param value new hours
      */
     public setUTCHours(value: byte): void {
-        assert value >= 0 && value <= 23;
+        assertTrue(value >= 0 && value <= 23, "Invalid value " + value + " for \"value\", has to be in range 0..23");
         let hours = ecmaHourFromTime(this.ms);
         this.ms -= msPerHour * hours;
         this.ms += msPerHour * value;
@@ -1182,9 +1185,9 @@ export final class Date {
                 year,
                 month,
                 day != undefined ? day as number: 1.0
-            ), 
+            ),
             ecmaMakeTime(
-                hours != undefined ? hours as number : 0, 
+                hours != undefined ? hours as number : 0,
                 minutes != undefined ? minutes as number : 0,
                 seconds != undefined ? seconds as number : 0,
                 ms != undefined ? ms as number : 0
@@ -1290,7 +1293,7 @@ export final class Date {
      * @param value new seconds
      */
     public setSeconds(value: byte): void {
-        assert value >= 0 && value < 60;
+        assertTrue(value >= 0 && value < 60, "Invalid value " + value + " for \"value\", has to be in range 0..60");
         let sec = ecmaSecFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
         this.ms -= sec * msPerSecond;
         this.ms += value * msPerSecond;
@@ -1302,7 +1305,7 @@ export final class Date {
      * @param value new seconds
      */
     public setUTCSeconds(value: byte): void {
-        assert value >= 0 && value < 60;
+        assertTrue(value >= 0 && value < 60, "Invalid value " + value + " for \"value\", has to be in range 0..60");
         let sec = ecmaSecFromTime(this.ms);
         this.ms -= sec * msPerSecond;
         this.ms += value * msPerSecond;
@@ -1345,7 +1348,7 @@ export final class Date {
      * @param value new minutes
      */
     public setUTCMinutes(value: byte): void {
-        assert value >= 0 && value < 60;
+        assertTrue(value >= 0 && value < 60, "Invalid value " + value + " for \"value\", has to be in range 0..60");
         let min = ecmaMinFromTime(this.ms);
         this.ms -= min * msPerMinute;
         this.ms += value * msPerMinute;
@@ -1382,7 +1385,7 @@ export final class Date {
      * @param value new minutes
      */
     public setMinutes(value: byte): void {
-        assert value >= 0 && value < 60;
+        assertTrue(value >= 0 && value < 60, "Invalid value " + value + " for \"value\", has to be in range 0..60");
         let min = ecmaMinFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
         this.ms -= min * msPerMinute;
         this.ms += value * msPerMinute;

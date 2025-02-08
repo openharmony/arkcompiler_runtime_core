@@ -55,17 +55,17 @@ export final class Field extends Object {
 
     public getStaticValue(): NullishType {
         if (!this.isStatic()) {
-            assert(false) // TODO(shumilov-petr): throw exception
+            throw new AssertionError("Field value is not static!")
         }
         return TypeAPIGetStaticFieldValue(this.ownerTD, this.name)
     }
 
     public setStaticValue(v: NullishType): void {
         if (!this.isStatic()) {
-            assert(false) // TODO(shumilov-petr): throw exception
+            throw new AssertionError("Field value is not static!")
         }
         if (!this.getType().assignableFrom(Type.of(v))) {
-            assert(false) // TODO(shumilov-petr): throw exception
+            throw new AssertionError("Cannot set value " + v + " to " + this.getType())
         }
         TypeAPISetStaticFieldValue(this.ownerTD, this.name, this.getType().convertObject(v))
     }
