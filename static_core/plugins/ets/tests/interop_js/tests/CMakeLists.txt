@@ -14,7 +14,6 @@
 set(DISABLES_TESTS
     standalone_function
     static_enum
-    sts_vm_interface_impl_tests
 )
 
 set(TESTS_EXECUTED_WITH_NODEJS

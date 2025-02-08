@@ -87,6 +87,7 @@ private:
         size_t vmsCount_ GUARDED_BY(barrierMutex_);
         size_t epochCount_ GUARDED_BY(barrierMutex_);
         size_t currentWaitersCount_ GUARDED_BY(barrierMutex_);
+        size_t weakCount_ GUARDED_BY(barrierMutex_);
     };
 
     VMBarrier xgcBarrier_;
