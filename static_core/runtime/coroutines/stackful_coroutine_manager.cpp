@@ -74,7 +74,7 @@ void StackfulCoroutineManager::CreateWorkers(size_t howMany, Runtime *runtime, P
 
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::CreateWorkers(): waiting for workers startup";
     while (activeWorkersCount_ < howMany) {
-        // NOTE(konstanting, #I67QXC): need timed wait?..
+        // NOTE(konstanting, #IAD5MH): need timed wait?..
         workersCv_.Wait(&workersLock_);
     }
 }
@@ -580,7 +580,7 @@ void StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion()
         GetCurrentWorker()->WaitForEvent(programCompletionEvent_);
         LOG(DEBUG, COROUTINES)
             << "StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion(): possibly spurious wakeup from wait...";
-        // NOTE(konstanting, #I67QXC): test for the spurious wakeup
+        // NOTE(konstanting, #IAD5MH): test for the spurious wakeup
         programCompletionLock_.Lock();
         activeWorkersCnt = GetActiveWorkersCount();
     }
@@ -611,7 +611,7 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
         while (activeWorkersCount_ > 1) {  // 1 is for MAIN
             // profiling: the SCH interval is expected to be started after the ctxswitch
             GetCurrentWorker()->GetPerfStats().FinishInterval(CoroutineTimeStats::SCH_ALL);
-            // NOTE(konstanting, #I67QXC): need timed wait?..
+            // NOTE(konstanting, #IAD5MH): need timed wait?..
             workersCv_.Wait(&workersLock_);
             // profiling: we don't want to profile the sleeping state
             GetCurrentWorker()->GetPerfStats().StartInterval(CoroutineTimeStats::SCH_ALL);

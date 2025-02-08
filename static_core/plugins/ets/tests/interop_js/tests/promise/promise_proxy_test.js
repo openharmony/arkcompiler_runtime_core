@@ -14,19 +14,31 @@
  */
 
 async function jsAsync() {
-    return new Promise((res) => {
-        setTimeout(() => res('success'));
-    });
+    return Promise.resolve('success');
+}
+
+async function jsAsyncFailing() {
+    return Promise.reject('rejected');
 }
 
 exports.jsAsync = jsAsync;
+exports.jsAsyncFailing = jsAsyncFailing;
 globalThis.require = require;
 
 
 function runTest(test) {
     console.log('Running test ' + test);
     let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
-    if (!etsVm.createEtsRuntime(process.env.ARK_ETS_STDLIB_PATH, process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH, false, false)) {
+    const etsOpts = {
+		'panda-files': process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
+		'boot-panda-files': `${process.env.ARK_ETS_STDLIB_PATH}:${process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH}`,
+		'gc-trigger-type': 'heap-trigger',
+		'load-runtimes': 'ets',
+		'compiler-enable-jit': 'false',
+		'coroutine-js-mode': 'true',
+	};
+    const createRes = etsVm.createRuntime(etsOpts);
+    if (!createRes) {
         console.log('Cannot create ETS runtime');
         process.exit(1);
     }

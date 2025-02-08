@@ -402,6 +402,8 @@ EtsString *JSValueToString(JSValue *object)
     auto ctx = InteropCtx::Current(coro);
     napi_env env = ctx->GetJSEnv();
 
+    NapiScope jsHandleScope(env);
+
     napi_value strObj;
     [[maybe_unused]] napi_status status;
     {

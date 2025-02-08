@@ -116,7 +116,7 @@ CoroutineManager::CoroutineFactory CoroutineManager::GetCoroutineFactory()
 uint32_t CoroutineManager::AllocateCoroutineId()
 {
     // Taken by copy-paste from MTThreadManager. Need to generalize if possible.
-    // NOTE(konstanting, #I67QXC): try to generalize internal ID allocation
+    // NOTE(konstanting, #IAD5MH): try to generalize internal ID allocation
     os::memory::LockHolder lock(idsLock_);
     for (size_t i = 0; i < coroutineIds_.size(); i++) {
         lastCoroutineId_ = (lastCoroutineId_ + 1) % coroutineIds_.size();
@@ -132,7 +132,7 @@ uint32_t CoroutineManager::AllocateCoroutineId()
 void CoroutineManager::FreeCoroutineId(uint32_t id)
 {
     // Taken by copy-paste from MTThreadManager. Need to generalize if possible.
-    // NOTE(konstanting, #I67QXC): try to generalize internal ID allocation
+    // NOTE(konstanting, #IAD5MH): try to generalize internal ID allocation
     id--;  // 0 is reserved as uninitialized value.
     os::memory::LockHolder lock(idsLock_);
     ASSERT(coroutineIds_[id]);
