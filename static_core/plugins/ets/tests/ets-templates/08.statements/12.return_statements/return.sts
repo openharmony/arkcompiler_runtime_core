@@ -13,17 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for item in block_statements %}
+
 /*---
-desc: Return statement
-tags: [negative, compile-only]
+desc: Expression statements
 ---*/
 
-function test(): void {
-  return;
-
-  assertTrue( false );  // CTE: unreachable statement
-}
+{{ item.decl }}
 
 function main(): void {
-  test();
+    {{ item.use }}
 }
+
+{% endfor %}

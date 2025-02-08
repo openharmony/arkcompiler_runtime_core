@@ -232,4 +232,4 @@ cases:
                   res += y
               }
           }
-          assertTrue(res == 'abcdefghi')
+          assertEQ(res, 'abcdefghi')

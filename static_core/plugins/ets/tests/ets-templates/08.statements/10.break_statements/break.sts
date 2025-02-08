@@ -13,19 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for item in break_statements %}
+
 /*---
-desc: Break statement
-tags: [negative, compile-only]
+desc: Break statements
 ---*/
 
+
 function main(): void {
-  let i = 2;
-
-  while (i > 0) {
-    break;
-    i--;     // compilation fails due to this unreachable statement.
-
-  }
-
-  assertTrue(i == 2)
+  {{ item.use }}
 }
+
+{% endfor %}
