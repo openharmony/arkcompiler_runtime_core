@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Override-equivalent functions to import to another test.
+desc: Overload-equivalent functions to import to another test.
 tags:
 - compile-only
 - negative

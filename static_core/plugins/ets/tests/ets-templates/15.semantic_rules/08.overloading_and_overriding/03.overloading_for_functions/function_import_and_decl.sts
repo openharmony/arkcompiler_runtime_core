@@ -27,7 +27,7 @@ desc: >-
     • If signatures of functions are overload-equivalent, then a compile-time error occurs.
     • Otherwise, overloading is valid.
 files: [ ./modules/{{c.file_a}}.sts {% if c.file_b %},./modules/{{c.file_b}}.sts{% endif %} ]
-tags: [negative, compile-only]
+tags: [{{c.tags}} compile-only]
 ---*/
 
 import {foo} from "./modules/{{c.file_a}}.sts"
