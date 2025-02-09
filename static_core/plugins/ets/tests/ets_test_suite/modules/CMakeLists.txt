@@ -120,6 +120,9 @@ function(prepare_app TARGET ABC_FILES WORK_DIR SOURCE_DIR)
         ${SOURCES_APP_DIR}/module1.sts
         ${SOURCES_APP_DIR}/module2.sts
         ${SOURCES_APP_DIR}/module3.sts
+        ${SOURCES_APP_DIR}/module4.sts
+        ${SOURCES_APP_DIR}/module5.sts
+        ${SOURCES_APP_DIR}/module6.sts
     )
     set(TARGET_APP ${TARGET}-app-abc)
     compile_arktsconfig_unit(${TARGET_APP} ABCS_MODULES ${WORK_DIR} ${SOURCES_APP_DIR}/arktsconfig.json
@@ -144,9 +147,33 @@ function(prepare_app TARGET ABC_FILES WORK_DIR SOURCE_DIR)
                              ${SOURCE_DIR}/bar/bar.sts
     )
     set(RESULT ${RESULT} ${ABCS_BAR})
-    set(${ABC_FILES} "${RESULT}" PARENT_SCOPE)
 
-    add_custom_target(${TARGET} DEPENDS ${TARGET_APP} ${TARGET_FOO} ${TARGET_BAR})
+    # `mismatched` package
+    set(TARGET_MIS_MATCHED ${TARGET}-mismatched-abc)
+    set(SOURCES_MIS_MATCHED
+        ${SOURCE_DIR}/mismatched/src/extends_final.sts
+        ${SOURCE_DIR}/mismatched/src/final.sts
+        ${SOURCE_DIR}/mismatched/src/override_final.sts
+        ${SOURCE_DIR}/mismatched/src/final_method.sts
+    )
+    compile_arktsconfig_unit(${TARGET_MIS_MATCHED} ABCS_MIS_MATCHED ${WORK_DIR} ${SOURCE_DIR}/mismatched/src/arktsconfig.json
+                             "${SOURCES_MIS_MATCHED}"
+    )
+    set(RESULT ${RESULT} ${ABCS_MIS_MATCHED})
+
+    # `loop_inheritance` package
+    set(TARGET_LOOP ${TARGET}-loop_inheritance-abc)
+    set(SOURCES_LOOP
+        ${SOURCE_DIR}/loop_inheritance/src/level_one.sts
+        ${SOURCE_DIR}/loop_inheritance/src/level_two.sts
+    )
+    compile_arktsconfig_unit(${TARGET_LOOP} ABCS_LOOP ${WORK_DIR} ${SOURCE_DIR}/loop_inheritance/src/arktsconfig.json
+                             "${SOURCES_LOOP}"
+    )
+    set(RESULT ${RESULT} ${ABCS_LOOP})
+
+    set(${ABC_FILES} "${RESULT}" PARENT_SCOPE)
+    add_custom_target(${TARGET} DEPENDS ${TARGET_APP} ${TARGET_FOO} ${TARGET_BAR} ${TARGET_MIS_MATCHED} ${TARGET_LOOP})
 endfunction()
 
 function(create_modules_test TARGET WORK_DIR SOURCE_DIR)
@@ -221,9 +248,87 @@ endfunction()
 
 create_incompatible_class_change_test(ets_modules_incompatible_class_change_test ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
+function(create_mismatched_extends_final_class_test TARGET WORK_DIR SOURCE_DIR)
+    prepare_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR})
+
+    # replace `Final` class with incompatible `Final` class
+    list_find_by_regex("${ABC_FILES}" "(.*)-final.abc" BASE_ABC_IDX)
+    list(REMOVE_AT ABC_FILES ${BASE_ABC_IDX})
+    set(TARGET_MIS_MATCHED ${TARGET}-incompatible-extends-final-abc)
+    compile_arktsconfig_unit(${TARGET_MIS_MATCHED} ABCS_MIS_MATCHED ${WORK_DIR} ${SOURCE_DIR}/mismatched/incompatible/arktsconfig.json
+                             ${SOURCE_DIR}/mismatched/incompatible/final.sts
+    )
+
+    set(ABC_FILES ${ABC_FILES} ${ABCS_MIS_MATCHED})
+    run_sts_app_mode(${TARGET}-run-sts-app-mode ${WORK_DIR} "@app.module4.MainAbility" "${ABC_FILES}"
+                     SPAWN_ENTRYPOINT_FUNCTION "mainMisatchedExtendsFinal")
+    add_dependencies(${TARGET}-run-sts-app-mode ${TARGET}-app ${TARGET_MIS_MATCHED})
+
+    add_custom_target(${TARGET}
+        COMMENT "Check class extends final class mainMisatchedExtendsFinal"
+        DEPENDS ${TARGET}-run-sts-app-mode
+    )
+
+endfunction()
+
+create_mismatched_extends_final_class_test(ets_modules_mismatched_extends_final_class_test ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+
+function(create_mismatched_override_final_class_test TARGET WORK_DIR SOURCE_DIR)
+    prepare_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR})
+
+    # replace `FinalMethod` class with incompatible `FinalMethod` class
+    list_find_by_regex("${ABC_FILES}" "(.*)-final_method.abc" BASE_ABC_IDX)
+    list(REMOVE_AT ABC_FILES ${BASE_ABC_IDX})
+    set(TARGET_MIS_MATCHED ${TARGET}-incompatible-override-final-abc)
+    compile_arktsconfig_unit(${TARGET_MIS_MATCHED} ABCS_MIS_MATCHED ${WORK_DIR} ${SOURCE_DIR}/mismatched/incompatible/arktsconfig.json
+                             ${SOURCE_DIR}/mismatched/incompatible/final_method.sts
+    )
+
+    set(ABC_FILES ${ABC_FILES} ${ABCS_MIS_MATCHED})
+    run_sts_app_mode(${TARGET}-run-sts-app-mode ${WORK_DIR} "@app.module5.MainAbility" "${ABC_FILES}"
+                     SPAWN_ENTRYPOINT_FUNCTION "mainMisatchedOverrideFinal")
+    add_dependencies(${TARGET}-run-sts-app-mode ${TARGET}-app ${TARGET_MIS_MATCHED})
+
+    add_custom_target(${TARGET}
+        COMMENT "Check class override final method mainMisatchedOverrideFinal"
+        DEPENDS ${TARGET}-run-sts-app-mode
+    )
+
+endfunction()
+
+create_mismatched_override_final_class_test(ets_modules_mismatched_override_final_class_test ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+
+function(create_loop_inheritance_class_test TARGET WORK_DIR SOURCE_DIR)
+    prepare_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR})
+
+    # replace `LevelOne` class with incompatible `LevelOne` class
+    list_find_by_regex("${ABC_FILES}" "(.*)-level_one.abc" BASE_ABC_IDX)
+    list(REMOVE_AT ABC_FILES ${BASE_ABC_IDX})
+    set(TARGET_LOOP ${TARGET}-incompatible-loop-abc)
+    compile_arktsconfig_unit(${TARGET_LOOP} ABCS_LOOP ${WORK_DIR} ${SOURCE_DIR}/loop_inheritance/incompatible/arktsconfig.json
+                             ${SOURCE_DIR}/loop_inheritance/incompatible/level_one.sts
+    )
+
+    set(ABC_FILES ${ABC_FILES} ${ABCS_LOOP})
+    run_sts_app_mode(${TARGET}-run-sts-app-mode ${WORK_DIR} "@app.module6.MainAbility" "${ABC_FILES}"
+                     SPAWN_ENTRYPOINT_FUNCTION "mainCircularityExtends")
+    add_dependencies(${TARGET}-run-sts-app-mode ${TARGET}-app ${TARGET_LOOP})
+
+    add_custom_target(${TARGET}
+        COMMENT "Check class loop inheritance class mainCircularityExtends"
+        DEPENDS ${TARGET}-run-sts-app-mode
+    )
+
+endfunction()
+
+create_loop_inheritance_class_test(ets_modules_loop_inheritance_class_test ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+
 add_custom_target(ets_modules_tests
                   DEPENDS
                     ets_modules_app_mode_test
                     ets_modules_no_class_def_found_test
-                    ets_modules_incompatible_class_change_test)
+                    ets_modules_incompatible_class_change_test
+                    ets_modules_mismatched_extends_final_class_test
+                    ets_modules_mismatched_override_final_class_test
+                    ets_modules_loop_inheritance_class_test)
 add_dependencies(ets_tests ets_modules_tests)

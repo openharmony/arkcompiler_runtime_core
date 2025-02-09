@@ -61,3 +61,36 @@ function mainCatchIncompatibleClassChangeError() {
     }
     return 1;
 }
+
+function mainMisatchedExtendsFinal() {
+    loadLibrary(getNativeLibName());
+    try {
+        loadAndInvokeAbility(getAppMainAbilityClassName());
+    } catch (e: VerifyError) {
+        assertEQ(e.message, "@mismatched.extends_final.ExtendsFinal");
+        return 0;
+    }
+    return 1;
+}
+
+function mainMisatchedOverrideFinal() {
+    loadLibrary(getNativeLibName());
+    try {
+        loadAndInvokeAbility(getAppMainAbilityClassName());
+    } catch (e: LinkageError) {
+        assertEQ(e.message, "Method overrides final method L@mismatched/override_final/OverrideFinal;func L@mismatched/final_method/FinalMethod;func");
+        return 0;
+    }
+    return 1;
+}
+
+function mainCircularityExtends() {
+    loadLibrary(getNativeLibName());
+    try {
+        loadAndInvokeAbility(getAppMainAbilityClassName());
+    } catch (e: ClassCircularityError) {
+        assertEQ(e.message, "Class or interface \"L@loop_inheritance/level_two/LevelTwo;\" is its own superclass or superinterface");
+        return 0;
+    }
+    return 1;
+}
