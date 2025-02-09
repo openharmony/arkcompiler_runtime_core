@@ -31,9 +31,39 @@ ani_add_gtest(ani_test_class_ops_get_method
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_method_test.sts
 )
 
+ani_add_gtest(ani_test_class_ops_call_static_method_bool
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_bool_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_bool_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_static_method_byte
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_byte_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_byte_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_static_method_short
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_short_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_short_test.sts
+)
+
 ani_add_gtest(ani_test_class_ops_call_static_method_int
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_int_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_int_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_static_method_long
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_long_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_long_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_static_method_float
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_float_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_float_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_static_method_double
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_double_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_double_test.sts
 )
 
 ani_add_gtest(ani_test_class_ops_call_static_method_ref
