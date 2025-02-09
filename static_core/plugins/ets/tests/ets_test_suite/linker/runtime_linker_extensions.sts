@@ -141,11 +141,50 @@ class Test {
         );
     }
 
+    private static triggerGC() {
+        expectNoThrow((): void throws => {
+            const gcId = GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE);
+            if (gcId > 0) {
+                GC.waitForFinishGC(gcId);
+            }
+        });
+    }
+
+    private static createAbcRuntimeLinker(): WeakRef<AbcRuntimeLinker> {
+        const abcLinker = new AbcRuntimeLinker(undefined, Test.getAdditionalFilesList());
+
+        const objectClass = abcLinker.loadClass(Test.stdCoreObjectName);
+        assertEQ(objectClass, Class.of(new Object()));
+        assertEQ(objectClass.getLinker(), getBootRuntimeLinker(), "std.core.Object must be loaded by BootRuntimeLinker");
+
+        // Load class from "additional1.sts"
+        const cls1 = abcLinker.loadClass(Test.additionalClass1Name, true);
+        assertNE(cls1, undefined, "AdditionalClass1 must be found");
+        assertEQ(cls1.getLinker(), abcLinker, "AdditionalClass1 must be loaded by custom linker");
+
+        Test.triggerGC();
+
+        // Load class from "additional2.sts"
+        // As side effect, this must load "additional3.sts" and execute code from it
+        const cls2 = abcLinker.loadClass(Test.additionalClass2Name, true);
+        assertNE(cls2, undefined, "AdditionalClass2 must be found");
+        assertEQ(cls2.getLinker(), abcLinker, "AdditionalClass2 must be loaded by custom linker");
+
+        return new WeakRef<AbcRuntimeLinker>(abcLinker);
+    }
+
+    static testAbcRuntimeLinkerUnload() {
+        const abcLinkerRef = Test.createAbcRuntimeLinker();
+        Test.triggerGC();
+        assertEQ(abcLinkerRef.deref(), undefined);
+    }
+
     static test() {
         Test.testDummyLinker();
         Test.testEmptyAbcRuntimeLinker();
         Test.testAbcRuntimeLinker();
         Test.testClassInitializationFail();
+        Test.testAbcRuntimeLinkerUnload();
     }
 }
 
