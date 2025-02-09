@@ -31,7 +31,7 @@ class TestDeclgenETS2TS(TestFileBased):
         self.declgen_ets2ts_executor = path.join(
             build_dir, "bin", "declgen_ets2ts")
         self.tsc_executor = path.join(
-            build_dir, "typescript", "package", "bin", "tsc")
+            self.test_env.config.general.static_core_root, "third_party", "typescript", "bin", "tsc")
         self.declgen_ets2ts_timeout = 120
         self.tsc_timeout = 120
         self.decl_path = test_env.work_dir.intermediate

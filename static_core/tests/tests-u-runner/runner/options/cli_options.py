@@ -515,15 +515,15 @@ def add_coverage_args(parser: argparse.ArgumentParser) -> None:
 
 def add_declgen_ets2ts_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
-        '--declgen-ets2ts-ets-cts', action='store_true', dest='declgenets2ts_ets_cts',
+        '--declgen-ets2ts-cts', action='store_true', dest='declgen_ets2ts_cts',
         default=None,
         help="run declgen_ets2ts ets-templates tests")
     parser.add_argument(
-        '--declgen-ets2ts-ets-func-tests', action='store_true', dest='declgenets2ts_ets_func_tests',
+        '--declgen-ets2ts-func-tests', action='store_true', dest='declgen_ets2ts_func_tests',
         default=None,
         help="run declgen_ets2ts test against ETS STDLIB TEMPLATES and manual written ETS tests")
     parser.add_argument(
-        '--declgen-ets2ts-ets-runtime', action='store_true', dest='declgenets2ts_ets_runtime',
+        '--declgen-ets2ts-runtime', action='store_true', dest='declgen_ets2ts_runtime',
         default=None,
         help="run declgen_ets2ts ETS runtime tests")
 

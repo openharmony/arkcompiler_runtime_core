@@ -66,14 +66,14 @@ _LOGGER = logging.getLogger("runner.runner_file_based")
 class PandaBinaries:
     DISABLE_CHECK_RUNTIME = [
         'parser',
-        'declgenets2ts-ets-cts',
-        'declgenets2ts-ets-func-tests',
-        'declgenets2ts-ets-runtime'
+        'declgen-ets2ts-cts',
+        'declgen-ets2ts-func-tests',
+        'declgen-ets2ts-runtime'
     ]
     DISABLE_CHECK_ES2PANDA = [
-        'declgenets2ts-ets-cts',
-        'declgenets2ts-ets-func-tests',
-        'declgenets2ts-ets-runtime'
+        'declgen-ets2ts-cts',
+        'declgen-ets2ts-func-tests',
+        'declgen-ets2ts-runtime'
     ]
 
     def __init__(self, runner_name: str, build_dir: str, config: Config, conf_kind: ConfigurationKind) -> None:

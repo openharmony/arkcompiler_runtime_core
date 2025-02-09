@@ -19,6 +19,6 @@ from enum import Enum
 
 
 class DeclgenEtsSuites(Enum):
-    CTS = "declgenets2ts-ets-cts"
-    FUNC = "declgenets2ts-ets-func-tests"
-    RUNTIME = "declgenets2ts-ets-runtime"
+    CTS = "declgen-ets2ts-cts"
+    FUNC = "declgen-ets2ts-func-tests"
+    RUNTIME = "declgen-ets2ts-runtime"
