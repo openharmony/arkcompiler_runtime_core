@@ -24,6 +24,22 @@
 
 #include <node_api.h>
 
+#if defined(PANDA_JS_ETS_HYBRID_MODE)
+#include "interfaces/inner_api/napi/native_node_api.h"
+#else
+using NapiXRefDirection = enum {
+    NAPI_DIRECTION_INVALID = 0,
+    NAPI_DIRECTION_DYNAMIC_TO_STATIC = 1,  // JS object references the STS object
+    NAPI_DIRECTION_STATIC_TO_DYNAMIC = 2,  // STS object references the JS object
+    NAPI_DIRECTION_HYBRID = 3,             // STS object and the JS object references each other
+};
+// NOLINTBEGIN(readability-identifier-naming)
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_xref_wrap(napi_env env, napi_value js_object, void *native_object, napi_finalize finalize_cb,
+               NapiXRefDirection ref_direction, napi_ref *result);
+// NOLINTEND(readability-identifier-naming)
+#endif
+
 namespace ark::ets::interop::js {
 
 constexpr size_t BIGINT_BITS_NUM = 32;
@@ -227,17 +243,13 @@ inline napi_status NapiCallFunction(napi_env env, napi_value recv, napi_value fu
 }
 
 inline napi_status NapiWrap(napi_env env, napi_value jsObject, void *nativeObject, napi_finalize finalizeCb,
-                            void *finalizeHint, napi_ref *result)
+                            napi_ref *result, [[maybe_unused]] NapiXRefDirection refDirection)
 {
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
-    napi_status status = napi_wrap(env, jsObject, nativeObject, finalizeCb, finalizeHint, nullptr);
-    if (result == nullptr || UNLIKELY(status != napi_ok)) {
-        return status;
-    }
-    return napi_create_reference(env, jsObject, 0, result);
+    return napi_xref_wrap(env, jsObject, nativeObject, finalizeCb, refDirection, result);
 #else
     ASSERT(result == nullptr || finalizeCb != nullptr);
-    return napi_wrap(env, jsObject, nativeObject, finalizeCb, finalizeHint, result);
+    return napi_wrap(env, jsObject, nativeObject, finalizeCb, nullptr, result);
 #endif
 }
 

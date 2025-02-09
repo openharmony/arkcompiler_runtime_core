@@ -21,6 +21,10 @@
 
 #include <node_api.h>
 
+#if defined(PANDA_JS_ETS_HYBRID_MODE)
+#include "interfaces/inner_api/napi/native_node_api.h"
+#endif
+
 namespace ark::ets::interop::js {
 class InteropCtx;
 }  // namespace ark::ets::interop::js
@@ -61,9 +65,23 @@ public:
         return ctx_;
     }
 
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+    static void *ExtractMaybeReferenceHybrid(napi_env env, napi_value jsObject)
+    {
+        void *data = nullptr;
+        if (UNLIKELY(napi_xref_unwrap(env, jsObject, &data) != napi_ok)) {
+            return nullptr;
+        }
+        return data;
+    }
+#endif
+
     static void *ExtractMaybeReference(napi_env env, napi_value jsObject)
     {
-        void *data;
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+        return ExtractMaybeReferenceHybrid(env, jsObject);
+#endif
+        void *data = nullptr;
         if (UNLIKELY(napi_unwrap(env, jsObject, &data) != napi_ok)) {
             return nullptr;
         }
@@ -187,7 +205,8 @@ private:
     friend class SharedReferenceSanity;
     friend class SharedReferenceStorage;
 
-    bool InitRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx);
+    bool InitRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx,
+                 NapiXRefDirection refDirection);
 
     void SetETSObject(EtsObject *obj)
     {

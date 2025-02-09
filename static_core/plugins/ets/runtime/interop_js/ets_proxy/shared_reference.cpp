@@ -25,13 +25,14 @@ namespace ark::ets::interop::js::ets_proxy {
 
 static void CBDoNothing([[maybe_unused]] napi_env env, [[maybe_unused]] void *data, [[maybe_unused]] void *hint) {}
 
-bool SharedReference::InitRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx)
+bool SharedReference::InitRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx,
+                              [[maybe_unused]] NapiXRefDirection refDirection)
 {
     auto env = ctx->GetJSEnv();
     // Always save link to first reference
     SharedReference *ref = SharedReferenceStorage::GetCurrent()->GetItemByIndex(refIdx);
     // NOTE(ipetrov, #20833): Use special OHOS interfaces for cross references
-    if (UNLIKELY(napi_ok != NapiWrap(env, jsObject, ref, CBDoNothing, nullptr, &jsRef_))) {
+    if (UNLIKELY(napi_ok != NapiWrap(env, jsObject, ref, CBDoNothing, &jsRef_, refDirection))) {
         return false;
     }
     // NOTE(ipetrov, 20833): Now we always keep the reference, special GC will remove such references
@@ -47,20 +48,20 @@ bool SharedReference::InitRef(InteropCtx *ctx, EtsObject *etsObject, napi_value 
 bool SharedReference::InitETSObject(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx)
 {
     flags_.SetBit<SharedReferenceFlags::Bit::ETS>();
-    return InitRef(ctx, etsObject, jsObject, refIdx);
+    return InitRef(ctx, etsObject, jsObject, refIdx, NapiXRefDirection::NAPI_DIRECTION_DYNAMIC_TO_STATIC);
 }
 
 bool SharedReference::InitJSObject(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx)
 {
     flags_.SetBit<SharedReferenceFlags::Bit::JS>();
-    return InitRef(ctx, etsObject, jsObject, refIdx);
+    return InitRef(ctx, etsObject, jsObject, refIdx, NapiXRefDirection::NAPI_DIRECTION_STATIC_TO_DYNAMIC);
 }
 
 bool SharedReference::InitHybridObject(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx)
 {
     flags_.SetBit<SharedReferenceFlags::Bit::ETS>();
     flags_.SetBit<SharedReferenceFlags::Bit::JS>();
-    return InitRef(ctx, etsObject, jsObject, refIdx);
+    return InitRef(ctx, etsObject, jsObject, refIdx, NapiXRefDirection::NAPI_DIRECTION_HYBRID);
 }
 
 bool SharedReference::MarkIfNotMarked()
