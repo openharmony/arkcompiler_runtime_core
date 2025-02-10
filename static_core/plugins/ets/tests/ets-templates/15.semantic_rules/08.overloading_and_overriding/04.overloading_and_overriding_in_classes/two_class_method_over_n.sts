@@ -40,7 +40,7 @@ class Gen2<T,S> {
 class Base<T,S> {
   {% for d in cases %}
     foo({{d.arg}}) { res = 100 + {{d.res}}; }
-    static foo({{d.arg}}) { res = 300 + {{d.res}}; }
+    static foo<T, S>({{d.arg}}) { res = 300 + {{d.res}}; }
   {% endfor %}
 }
 
@@ -51,7 +51,7 @@ class Derived<T,S> extends Base<T,S> {
 }
 
 class Derived2<T,S> extends Base<T,S> {
-    static foo({{c.arg}}) {
+    static foo<T, S>({{c.arg}}) {
         res = 400 + {{c.res}};
     }
 }

@@ -24,7 +24,3 @@ class Base<T,S> {
   constructor(i: T) {}
   constructor(i: S) {}
 }
-
-function main() {
-    new Base<String, Byte>();
-}

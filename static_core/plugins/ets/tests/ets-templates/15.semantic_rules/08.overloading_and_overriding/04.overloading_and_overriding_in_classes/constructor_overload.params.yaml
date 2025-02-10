@@ -85,7 +85,7 @@ cases:
       new Derived<Number>(new Number());
 
   - decl: |-
-      constructor(i: Number) { res == 24;}
+      constructor(i: Number) { res = 24;}
     use: |-
       new Derived<Number>(new Number());
       assertEQ( res, 24 );
@@ -96,7 +96,7 @@ cases:
       new Derived<Number>(a);
 
   - decl: |-
-      constructor(i: byte[]) { res == 25;}
+      constructor(i: byte[]) { res = 25;}
     use: |-
       let a: byte[] = [1 as byte, 2 as byte];
       new Derived<Number>(a);
@@ -108,7 +108,7 @@ cases:
       new Derived<Number>(a);
 
   - decl: |-
-      constructor(i: TPL) { res == 26;}
+      constructor(i: TPL) { res = 26;}
     use: |-
       let a: TPL = [ false, 1.2];
       new Derived<Number>(a);
@@ -119,7 +119,7 @@ cases:
       new Derived<Number>( () => { return true; } );
 
   - decl: |-
-      constructor(i: BoolFun) { res == 27;}
+      constructor(i: BoolFun) { res = 27;}
     use: |-
       new Derived<Number>( () => { return true; } );
       assertEQ( res, 27 );
@@ -129,7 +129,7 @@ cases:
       new Derived<Number>( undefined );
 
   - decl: |-
-      constructor(i: undefined|Number|null) { res == 28;}
+      constructor(i: undefined|Number|null) { res = 28;}
     use: |-
       new Derived<Number>( undefined );
       assertEQ( res, 28 );
@@ -139,7 +139,7 @@ cases:
       new Derived<Number>( null );
 
   - decl: |-
-      constructor(i: null|undefined|Number) { res == 28;}
+      constructor(i: null|undefined|Number) { res = 28;}
     use: |-
       new Derived<Number>( null );
       assertEQ( res, 28 );
@@ -149,7 +149,7 @@ cases:
       new Derived<Number>( new Gen<Byte>() );
 
   - decl: |-
-      constructor(i: Gen<T>) { res == 29;}
+      constructor(i: Gen<T>) { res = 29;}
     use: |-
       new Derived<Byte>( new Gen<Byte>() );
       assertEQ( res, 29 );

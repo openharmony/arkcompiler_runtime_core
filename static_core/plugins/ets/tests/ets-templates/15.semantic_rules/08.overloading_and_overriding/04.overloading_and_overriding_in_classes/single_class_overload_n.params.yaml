@@ -95,36 +95,26 @@ cases:
     decl: |-
       foo() { res = 1;}
       foo() { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       foo() { res = 1;}
       foo(): int { res = 2; return 1;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       foo(i: number) { res = 1;}
       foo(j: number) { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       foo(i: Number) { res = 1;}
       foo(j: Double) { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       foo(i: Number|undefined|null) { res = 1;}
       foo(j: undefined|null|Number) { res = 2;}
-    use: |-
-      new Base();
 
   # Instance methods
   - decl: |-
@@ -203,15 +193,11 @@ cases:
     decl: |-
       foo() { res = 1;}
       foo() { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       foo() { res = 1;}
       foo(): int { res = 2; return 1;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
@@ -220,29 +206,21 @@ cases:
         res = 2;
         return 1 as byte;
       }
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       foo(i: number) { res = 1;}
       foo(j: number) { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       foo(i: Number) { res = 1;}
       foo(j: Double) { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       foo(i: Number|undefined|null) { res = 1;}
       foo(j: undefined|null|Number) { res = 2;}
-    use: |-
-      new Base();
 
   # Static methods
   - decl: |-
@@ -267,62 +245,58 @@ cases:
       static foo(i: int, j: int) { res = 19;}
       static foo(i: Number|undefined|null) { res = 20;}
     use: |-
-      Base<Number, String>.foo();
+      Base.foo();
       assertEQ( res, 1);
-      Base<Number, String>.foo(1 as short);
+      Base.foo(1 as short);
       assertEQ( res, 2);
-      Base<Number, String>.foo(new Short());
+      Base.foo(new Short());
       assertEQ( res, 3);
-      Base<Number, String>.foo(1 as int);
+      Base.foo(1 as int);
       assertEQ( res, 4);
-      Base<Number, String>.foo(new Int());
+      Base.foo(new Int());
       assertEQ( res, 5);
-      Base<Number, String>.foo(1 as long);
+      Base.foo(1 as long);
       assertEQ( res, 6);
-      Base<Number, String>.foo(new Long());
+      Base.foo(new Long());
       assertEQ( res, 7);
-      Base<Number, String>.foo(1.1 as float);
+      Base.foo(1.1 as float);
       assertEQ( res, 8);
-      Base<Number, String>.foo(new Float());
+      Base.foo(new Float());
       assertEQ( res, 9);
-      Base<Number, String>.foo(1.2 as double);
+      Base.foo(1.2 as double);
       assertEQ( res, 10);
-      Base<Number, String>.foo(new Number());
+      Base.foo(new Number());
       assertEQ( res, 11);
-      Base<Number, String>.foo(c'A');
+      Base.foo(c'A');
       assertEQ( res, 12);
-      Base<Number, String>.foo(new Char());
+      Base.foo(new Char());
       assertEQ( res, 13);
-      Base<Number, String>.foo("some str");
+      Base.foo("some str");
       assertEQ( res, 14);
-      Base<Number, String>.foo(1 as byte);
+      Base.foo(1 as byte);
       assertEQ( res, 15);
-      Base<Number, String>.foo(new Byte());
+      Base.foo(new Byte());
       assertEQ( res, 16);
-      Base<Number, String>.foo(false);
+      Base.foo(false);
       assertEQ( res, 17);
-      Base<Number, String>.foo(new Boolean());
+      Base.foo(new Boolean());
       assertEQ( res, 18);
-      Base<Number, String>.foo(1 as int, 1 as int);
+      Base.foo(1 as int, 1 as int);
       assertEQ( res, 19);
-      Base<Number, String>.foo(undefined);
+      Base.foo(undefined);
       assertEQ( res, 20);
-      Base<Number, String>.foo(null);
+      Base.foo(null);
       assertEQ( res, 20);
 
   - tags: negative, compile-only
     decl: |-
       static foo() { res = 1;}
       static foo() { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       static foo() { res = 1;}
       static foo(): int { res = 2; return 1;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
@@ -331,26 +305,18 @@ cases:
         res = 2;
         return 1 as byte;
       }
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       static foo(i: number) { res = 1;}
       static foo(j: number) { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       static foo(i: Number) { res = 1;}
       static foo(j: Double) { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       static foo(i: Number|undefined|null) { res = 1;}
       static foo(j: undefined|null|Number) { res = 2;}
-    use: |-
-      new Base();
