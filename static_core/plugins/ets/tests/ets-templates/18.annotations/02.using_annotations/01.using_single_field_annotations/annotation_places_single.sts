@@ -23,6 +23,7 @@ tags: [compile-only]
 
 {{ case.decl }}
 
+@Retention("SOURCE")
 @interface SomeAnnotation {
    field1: {{ case.type }} = {{ case.value }}
 }

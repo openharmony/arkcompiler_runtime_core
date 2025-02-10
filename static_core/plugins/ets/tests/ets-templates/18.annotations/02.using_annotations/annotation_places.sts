@@ -28,6 +28,7 @@ tags: [compile-only]
 
 {{ case.decl }}
 
+@Retention("SOURCE")
 @interface SomeAnnotation {
    field1: {{ case.type1 }} = {{ case.value1 }}
    field2: {{ case.type2 }} = {{ case.value2 }}
