@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,6 @@ abstract class A1 implements I2 {}
 class A2 extends A1 implements I1 {}
 
 function main() {
-    assert ((x: I1) => x.foo())(new A2()) == "I2";
-    assert ((x: I2) => x.foo())(new A2()) == "I2";
+    assertEQ(((x: I1) => x.foo())(new A2()), "I2");
+    assertEQ(((x: I2) => x.foo())(new A2()), "I2");
 }

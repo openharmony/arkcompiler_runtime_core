@@ -33,7 +33,7 @@ function main(): void {
     let getme = ct.get();
     assertTrue( getme instanceof Object)
 
-    assertEQ( getme[0] ,  "12")
-    assertEQ( getme[1] ,  "24")
+    assertEQ( getme[0], "12")
+    assertEQ( getme[1], "24")
 
 }

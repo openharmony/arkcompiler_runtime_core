@@ -27,5 +27,5 @@ function main() : void {
     } catch (error: ArithmeticError) {
         caught_counter++;
     }
-    assertEQ( caught_counter ,  1)
+    assertEQ(caught_counter, 1)
 }

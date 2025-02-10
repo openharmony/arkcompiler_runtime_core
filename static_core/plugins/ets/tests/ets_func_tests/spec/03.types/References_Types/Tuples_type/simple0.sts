@@ -24,5 +24,5 @@ type TEmpty = [];
 function main(): void {
     let ti: TEmpty = [];
     assertTrue( ti != undefined)
-    assertEQ( ti.length ,  0)
+    assertEQ( ti.length, 0)
 }

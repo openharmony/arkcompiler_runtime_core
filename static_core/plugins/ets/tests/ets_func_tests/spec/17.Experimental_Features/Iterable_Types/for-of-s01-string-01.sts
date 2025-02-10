@@ -32,7 +32,7 @@ function main() {
         index++;
     }
 
-    assertEQ(index ,  testStr.length)
-    assertEQ(result ,  0)
+    assertEQ(index, testStr.length)
+    assertEQ(result, 0)
 }
 

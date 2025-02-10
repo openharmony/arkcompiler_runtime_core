@@ -42,6 +42,6 @@ function main(): void {
             is_active() { count++ }
         }
     }
-    assertEQ( count ,  2,  "Expected 2, actual " + count)
+    assertEQ( count, 2,  "Expected 2, actual " + count)
 }
 

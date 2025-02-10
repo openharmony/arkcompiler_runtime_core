@@ -218,34 +218,34 @@ function typeFor<T>(a: T[]): Type {
 
 class Assertions {
     static assertEquals(expected: NullishType, actual: NullishType): void {
-        assertTrue( __runtimeSameValueZero(expected, actual) ,  `expected ${expected} but was ${actual}`)
+        assertTrue( __runtimeSameValueZero(expected, actual),  `expected ${expected} but was ${actual}`)
     }
 
     static assertSame(expected: NullishType, actual: NullishType): void {
-        assertTrue( expected === actual ,  `expected "${expected}" but was "${actual}"`)
+        assertTrue( expected === actual,  `expected "${expected}" but was "${actual}"`)
     }
 
     static assertTrue(actual: boolean): void {
-        assertTrue( actual ,  "expected true but was false")
+        assertTrue( actual,  "expected true but was false")
     }
 
     static assertArrayEquals<T>(expected: T[] | undefined | null, actual: T[] | undefined | null): void {
         if (expected === null) {
-            assertTrue( actual === null ,  `expected 'null' but was [${actual}]`)
+            assertTrue( actual === null,  `expected 'null' but was [${actual}]`)
         } else if (expected === undefined) {
-            assertTrue( actual === undefined ,  `expected 'undefined' but was [${actual}]`)
+            assertTrue( actual === undefined,  `expected 'undefined' but was [${actual}]`)
         } else {
-            assertTrue( actual !== null ,  `expected [${expected}] but was 'null'`)
-            assertTrue( actual !== undefined ,  `expected [${expected}] but was 'udefined'`)
+            assertTrue( actual !== null,  `expected [${expected}] but was 'null'`)
+            assertTrue( actual !== undefined,  `expected [${expected}] but was 'udefined'`)
 
             if (expected !== actual) {
                 // making compiler happy, avoiding explicit 'actual!'
                 if (actual != null) {
-                    assertEQ( expected.length ,  actual.length ,  `expected [${expected}] but was [${actual}]`)
+                    assertEQ( expected.length,  actual.length,  `expected [${expected}] but was [${actual}]`)
 
                     for (let i = 0; i < expected.length; i++) {
                         if (!__runtimeSameValueZero(expected[i], actual[i])) {
-                            assertTrue( false ,  `expected [${expected}] but was [${actual}]`)
+                            assertTrue( false,  `expected [${expected}] but was [${actual}]`)
                         }
                     }
                 }

@@ -28,8 +28,8 @@ enum ConstExpr {
 }
 
 function main(): void {
-    assertEQ( ConstExpr.A.getValue() ,  10)
-    assertEQ( ConstExpr.B.getValue() ,  11)
-    assertEQ( ConstExpr.C.getValue() ,  13)
-    assertEQ( ConstExpr.D.getValue() ,  18)
+    assertEQ( ConstExpr.A.getValue(), 10)
+    assertEQ( ConstExpr.B.getValue(), 11)
+    assertEQ( ConstExpr.C.getValue(), 13)
+    assertEQ( ConstExpr.D.getValue(), 18)
 }

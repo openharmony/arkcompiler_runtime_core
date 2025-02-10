@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,10 +40,10 @@ class evalPatchFunction {
     private static evalPatchFunction() {
         let a_obj = new A(c'c', 123.321);
 
-        assert(a_obj.a == c'c');
-        assert(a_obj.b == 123.321);
+        assertEQ(a_obj.a, c'c');
+        assertEQ(a_obj.b, 123.321);
 
-        assert(a_obj.foo(42) == 100 * 42);
-        assert(a_obj.goo(42.42) == 200 * 42.42);
+        assertEQ(a_obj.foo(42), 100 * 42);
+        assertEQ(a_obj.goo(42.42), 200 * 42.42);
     }
 }

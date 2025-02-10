@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,12 @@
 
 function main() {
     let value = await Promise.resolve(42);
-    assert value == 42 : "Awaited value of resolved promise is different\
-                          from the expected value. Actual value: " + value;
+    assertEQ(value, 42, "Awaited value of resolved promise is different\
+                          from the expected value. Actual value: " + value);
     try {
         await Promise.reject(new Error("Panda"));
     } catch (err: Error) {
-        assert err.toString().contains("Panda", 0) : "Awaited value of rejected promise is different\
-                                                      from the expected value. Actual value: " + err;
+        assertTrue(err.toString().contains("Panda", 0), "Awaited value of rejected promise is different\
+                                                          from the expected value. Actual value: " + err);
     }
 }

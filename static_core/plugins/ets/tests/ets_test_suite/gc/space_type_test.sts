@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,23 +14,23 @@
  */
 
 function NonMovableTest(): void throws {
-    assert GC.getObjectSpaceType("spaceTypeTest") == GC.NON_MOVABLE_SPACE : "Must be non movable space";
+    assertEQ(GC.getObjectSpaceType("spaceTypeTest"), GC.NON_MOVABLE_SPACE, "Must be non movable space");
 }
 
 function AllocateAndMoveTest(): void throws {
     let obj: Object = new Object();
-    assert GC.getObjectSpaceType(obj) == GC.YOUNG_SPACE : "Must be young space";
+    assertEQ(GC.getObjectSpaceType(obj), GC.YOUNG_SPACE, "Must be young space");
 
     let gc_id = GC.startGC(GC.YOUNG_CAUSE);
     GC.waitForFinishGC(gc_id);
 
-    assert GC.getObjectSpaceType(obj) == GC.TENURED_SPACE : "Must be tenured space";
+    assertEQ(GC.getObjectSpaceType(obj), GC.TENURED_SPACE, "Must be tenured space");
 }
 
 function HumongousObjectTest(): void throws
 {
     let h_obj = new long[1024 * 1024];
-    assert GC.getObjectSpaceType(h_obj) == GC.HUMONGOUS_SPACE: "Must be humongous space";
+    assertEQ(GC.getObjectSpaceType(h_obj), GC.HUMONGOUS_SPACE, "Must be humongous space");
 }
 
 /**
@@ -43,7 +43,7 @@ function main(): int {
         HumongousObjectTest();
     }
     catch (e) {
-        assert false: "Space allocation test must not throw exceptions";
+        assertTrue(false, "Space allocation test must not throw exceptions");
     }
     return 0;
 }

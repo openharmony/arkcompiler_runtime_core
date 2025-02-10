@@ -37,5 +37,5 @@ function main(): void {
     };
     global_a = 0
     foo(fooLambdaB);
-    assertEQ( global_a ,  2)
+    assertEQ( global_a, 2)
 }

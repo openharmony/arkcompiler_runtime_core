@@ -76,7 +76,7 @@ function testDateChangeMonthImpl(date: Date, change: int) {
     let dmc = daysInMonth(date.getFullYear(), newMonth);
     if(dmc < dmo) newMonth++;
     date.setMonth(newMonth);
-    assertEQ( date.getMonth() ,  newMonth)
+    assertEQ( date.getMonth(), newMonth)
 }
 
 function testDateChangeMonth(): int {

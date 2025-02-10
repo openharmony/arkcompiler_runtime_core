@@ -26,6 +26,6 @@ enum ConstExpr {
 }
 
 function main(): void {
-    assertEQ( ConstExpr.A.getValue() ,  0)
-    assertEQ( ConstExpr.B.getValue() ,  1)
+    assertEQ( ConstExpr.A.getValue(), 0)
+    assertEQ( ConstExpr.B.getValue(), 1)
 }

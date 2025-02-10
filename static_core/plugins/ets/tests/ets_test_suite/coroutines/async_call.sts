@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -195,37 +195,37 @@ async function arm64_large(i1: int, i2: int, i3: int, i4: int, i5: int, i6: int,
 function main(): void {
     prepare();
     foo();
-    assert(called);
+    assertTrue(called);
 
     prepare();
     amd64_small(1, 2, 3, 4, 5, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
-    assert(called);
+    assertTrue(called);
 
     prepare();
     amd64_large(1, 2, 3, 4, 5, 6, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0);
-    assert(called);
+    assertTrue(called);
 
     prepare();
     arm32_small(1, 2, 3);
-    assert(called);
+    assertTrue(called);
 
     prepare();
     arm32_large(1, 2, 3, 4, 5);
-    assert(called);
+    assertTrue(called);
 
     prepare();
     arm32hf_small(1, 2, 3, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
-    assert(called);
+    assertTrue(called);
 
     prepare();
     arm32hf_large(1, 2, 3, 4, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0);
-    assert(called);
+    assertTrue(called);
 
     prepare();
     arm64_small(1, 2, 3, 4, 5, 6, 7, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
-    assert(called);
+    assertTrue(called);
 
     prepare();
     arm64_large(1, 2, 3, 4, 5, 6, 7, 8, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0);
-    assert(called);
+    assertTrue(called);
 }

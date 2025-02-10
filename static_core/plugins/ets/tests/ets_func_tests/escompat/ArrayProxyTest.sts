@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,13 +69,13 @@ function verifyArrayProxyOps(array: Array<string>, handler: StringArrayProxyHand
     assertEQ(arrayProxy.length, 3, "unexpected arrayProxy.length")
 
     assertFalse(handler.getTrapped)
-    assertEQ(arrayProxy[0] ,  "zero")
+    assertEQ(arrayProxy[0],  "zero")
     assertTrue(handler.getTrapped)
 
     assertFalse(handler.setTrapped)
     arrayProxy[2] = "3"
     assertTrue(handler.setTrapped)
-    assertEQ(arrayProxy[2] ,  "two")
+    assertEQ(arrayProxy[2],  "two")
 
     assertFalse(handler.setLengthTrapped)
     arrayProxy.length = 2

@@ -27,7 +27,7 @@ function no_param(fn: EmptyFn | null) {
     if (fn) {
         assertTrue( false,  "Not expected execution here")
     } else {
-        assertEQ( a ,  5)
+        assertEQ( a, 5)
     }
 }
 

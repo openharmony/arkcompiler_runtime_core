@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 function simpleTest(): void throws {
     GC.scheduleGcAfterNthAlloc(2, GC.YOUNG_CAUSE);
     new Object();
-    assert GC.isScheduledGCTriggered() == false : "GC was scheduled before 2nd allocation, current is 1st";
+    assertFalse(GC.isScheduledGCTriggered(), "GC was scheduled before 2nd allocation, current is 1st");
     new Object();
-    assert GC.isScheduledGCTriggered() == true : "2 allocation already done, but GC has not been trigger";
+    assertTrue(GC.isScheduledGCTriggered(), "2 allocation already done, but GC has not been trigger");
 }
 
 function incorrectCounterTest(): void {
@@ -29,7 +29,7 @@ function incorrectCounterTest(): void {
         detected = true;
     }
     catch (e) {}
-    assert detected == true: "scheduleGcAfterNthAlloc must throw IllegalArgumentException for negative counter";
+    assertTrue(detected, "scheduleGcAfterNthAlloc must throw IllegalArgumentException for negative counter");
 }
 
 function main(): int {
@@ -37,7 +37,7 @@ function main(): int {
         simpleTest();
     }
     catch (e) {
-        assert false: "Simple test must not throw exceptions";
+        assertTrue(false, "Simple test must not throw exceptions");
     }
     incorrectCounterTest();
     return 0;

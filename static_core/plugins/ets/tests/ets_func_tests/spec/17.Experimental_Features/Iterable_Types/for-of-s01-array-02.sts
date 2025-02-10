@@ -34,7 +34,7 @@ function main() : void {
     }
 
 
-    assertEQ(index ,  expectedArray.length)
-    assertEQ(result ,  0)
+    assertEQ(index, expectedArray.length)
+    assertEQ(result, 0)
 }
 

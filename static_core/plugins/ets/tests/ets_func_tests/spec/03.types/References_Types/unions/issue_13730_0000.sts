@@ -24,6 +24,6 @@ class X {}
 
 function main() : int {
     let x: X | undefined = undefined
-    assertEQ( x ,  undefined)
+    assertEQ( x, undefined)
     return 0;
 }

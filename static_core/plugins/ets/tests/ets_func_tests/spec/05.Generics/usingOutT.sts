@@ -55,15 +55,15 @@ function main(): void {
     let iteratorA = new TestIterator<A>(a_array);
     let firstElementA: A = iteratorA.getFirstElement();
     assertTrue((firstElementA instanceof A))
-    assertEQ(firstElementA.returnHello1() ,  "hello 1")
+    assertEQ(firstElementA.returnHello1(), "hello 1")
 
     let b_array = [new B(), new B()];
     let iteratorB = new TestIterator<B>(b_array);
     let firstElementB: B = iteratorB.getFirstElement();
     assertTrue((firstElementB instanceof B))
-    assertEQ(firstElementB.returnHello1() ,  "hello 1")
-    assertEQ(firstElementB.returnHello2() ,  "hello 2")
+    assertEQ(firstElementB.returnHello1(), "hello 1")
+    assertEQ(firstElementB.returnHello2(), "hello 2")
 
-    assertEQ(a_array ,  iteratorA.getAll())
-    assertEQ(b_array ,  iteratorB.getAll())
+    assertEQ(a_array, iteratorA.getAll())
+    assertEQ(b_array, iteratorB.getAll())
 }

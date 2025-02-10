@@ -29,6 +29,6 @@ function main(): void {
   try{
     increment($$n)
   }catch(e){
-    assertEQ(n ,  5)
+    assertEQ(n,  5)
   }
 }
