@@ -1502,6 +1502,32 @@ NO_UB_SANITIZE static ani_status Object_GetField_Ref(ani_env *env, ani_object ob
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetField_Boolean(ani_env *env, ani_object object, ani_field field,
+                                                         ani_boolean value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return SetPrimitiveTypeField(env, object, field, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetField_Byte(ani_env *env, ani_object object, ani_field field, ani_byte value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return SetPrimitiveTypeField(env, object, field, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetField_Short(ani_env *env, ani_object object, ani_field field,
+                                                       ani_short value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return SetPrimitiveTypeField(env, object, field, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_SetField_Int(ani_env *env, ani_object object, ani_field field, ani_int value)
 {
     ANI_DEBUG_TRACE(env);
@@ -1511,6 +1537,24 @@ NO_UB_SANITIZE static ani_status Object_SetField_Int(ani_env *env, ani_object ob
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_SetField_Long(ani_env *env, ani_object object, ani_field field, ani_long value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return SetPrimitiveTypeField(env, object, field, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetField_Float(ani_env *env, ani_object object, ani_field field,
+                                                       ani_float value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return SetPrimitiveTypeField(env, object, field, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetField_Double(ani_env *env, ani_object object, ani_field field,
+                                                        ani_double value)
 {
     ANI_DEBUG_TRACE(env);
 
@@ -3470,14 +3514,14 @@ const __ani_interaction_api INTERACTION_API = {
     Object_GetField_Float,
     Object_GetField_Double,
     Object_GetField_Ref,
-    NotImplementedAdapter<291>,
+    Object_SetField_Boolean,
     NotImplementedAdapter<292>,
-    NotImplementedAdapter<293>,
-    NotImplementedAdapter<294>,
+    Object_SetField_Byte,
+    Object_SetField_Short,
     Object_SetField_Int,
     Object_SetField_Long,
-    NotImplementedAdapter<297>,
-    NotImplementedAdapter<298>,
+    Object_SetField_Float,
+    Object_SetField_Double,
     Object_SetField_Ref,
     NotImplementedAdapter<300>,
     NotImplementedAdapter<301>,
