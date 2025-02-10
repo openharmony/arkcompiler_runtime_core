@@ -173,7 +173,7 @@ function(panda_ets_interop_js_test_arkjsvm TARGET)
     # Parse arguments
     cmake_parse_arguments(
         ARG
-        ""
+        "COMPILATION_JS_WITH_CJS_ON"
         "JS_LAUNCHER;ETS_CONFIG"
         "ETS_SOURCES;JS_SOURCES;ABC_FILE;LAUNCHER_ARGS;"
         ${ARGN}
@@ -198,11 +198,18 @@ function(panda_ets_interop_js_test_arkjsvm TARGET)
         )
     endif()
 
+    set(JS_COMPILATION_OPTIONS)
+    if(DEFINED ARG_COMPILATION_JS_WITH_CJS_ON)
+        set(JS_COMPILATION_OPTIONS --commonjs)
+    else()
+        set(JS_COMPILATION_OPTIONS --module)
+    endif()
+
     set(COMPILED_LAUNCHER_NAME ${TARGET}_launcher_abc_name)
     compile_dynamic_file(${TARGET}_js_launcher
         SOURCES ${ARG_JS_LAUNCHER}
         OUTPUT_ABC_PATHS ${COMPILED_LAUNCHER_NAME}
-        COMPILE_OPTION --commonjs
+        COMPILE_OPTION ${JS_COMPILATION_OPTIONS}
     )
 
     # Make symbolic links to convinient work with requireNapiPreview

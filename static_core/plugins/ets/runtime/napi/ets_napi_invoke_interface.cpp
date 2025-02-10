@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,8 +101,6 @@ static ets_int AttachThread(EtsVM *vm, EtsEnv **resultEnv, void **resultJsEnv)
     auto *jsEnv = ifaceTable->CreateJSRuntime();
     if (jsEnv != nullptr) {
         ifaceTable->CreateInteropCtx(exclusiveCoro, jsEnv);
-        auto poster = etsVM->CreateCallbackPoster(exclusiveCoro);
-        exclusiveCoro->GetWorker()->SetCallbackPoster(std::move(poster));
     }
     *resultEnv = PandaEtsNapiEnv::GetCurrent();
     *resultJsEnv = jsEnv;

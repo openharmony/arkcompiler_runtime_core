@@ -14,6 +14,7 @@
  */
 
 let iteration = 0;
+let expectedValue = '';
 
 function equal(actual, expected) {
 	// try to convert expected to actual's type
@@ -27,57 +28,58 @@ function equal(actual, expected) {
 	return String(actual) === String(expected);
 }
 
+const helper = requireNapiPreview('libinterop_test_helper.so', false);
+
 function runTest(test, iter) {
-	console.log("Running test '" + test + "'");
-	let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
+	print("Running test '" + test + "'");
+	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
 
-    let runtimeCreated = etsVm.createRuntime({
-        'boot-panda-files': process.env.ARK_ETS_STDLIB_PATH + ':' + process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH
-    });
-
-    if (!runtimeCreated) {
-		console.log('Cannot create ETS runtime');
-		process.exit(1);
+	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+	const etsOpts = {
+		'panda-files': gtestAbcPath,
+		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
+		'coroutine-js-mode': true,
+		'coroutine-enable-external-scheduling': 'true',
+	};
+	if (!etsVm.createRuntime(etsOpts)) {
+		throw Error('Cannot create ETS runtime');
 	}
 	let res = etsVm.call(test);
 	if (typeof res !== 'object') {
-		console.log('Result is not an object');
-		process.exit(1);
+		throw Error('Result is not an object');
 	}
 	if (res.constructor.name !== 'Promise') {
-		console.log("Expect result type 'Promise' but get '" + res.constructor.name + "'");
-		process.exit(1);
+		throw Error("Expect result type 'Promise' but get '" + res.constructor.name + "'");
 	}
 	let testSuccess = false;
 	res.then((value) => {
 		if (equal(value, expectedValue)) {
 			testSuccess = true;
 		} else {
-			console.log('Wrong value: ' + value + ' (' + typeof value + ') !== ' + expectedValue + ' (' + typeof expectedValue + ')');
+			print('Wrong value: ' + value + ' (' + typeof value + ') !== ' + expectedValue + ' (' + typeof expectedValue + ')');
 		}
 	});
 	let callback = () => {
 		--iteration;
-		console.log('Checking #' + iteration);
+		print('Checking #' + iteration);
 		if (!testSuccess) {
 			if (iteration > 0) {
-				queueMicrotask(callback);
+				helper.setTimeout(callback, 0);
 			} else {
-				console.log('Promise is not resolved or value is wrong');
-				process.exit(1);
+				throw Error('Promise is not resolved or value is wrong');
 			}
 		} else {
-			console.log('Test passed');
+			print('Test passed');
 		}
 	};
-	queueMicrotask(callback);
+	helper.setTimeout(callback, 0);
 }
 
-let args = process.argv;
-if (args.length !== 5) {
-	console.log('Expected <test name> <expected value> <number of iterations>');
-	process.exit(1);
+let args = helper.getArgv();
+if (args.length !== 7) {
+	throw Error('Expected <test name> <expected value> <number of iterations>');
 }
-iteration = args[4];
-expectedValue = args[3];
-runTest(args[2]);
+iteration = args[6];
+expectedValue = args[5];
+runTest(args[4]);

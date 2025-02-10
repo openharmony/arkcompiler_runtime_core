@@ -13,38 +13,43 @@
  * limitations under the License.
  */
 
+const helper = requireNapiPreview('libinterop_test_helper.so', false);
+
 function runTest(test) {
-	console.log('Running test ' + test);
-	let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
+	print('Running test ' + test);
+	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
 
-    let runtimeCreated = etsVm.createRuntime({
-        'boot-panda-files': process.env.ARK_ETS_STDLIB_PATH + ':' + process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH
-    });
-
-    if (!runtimeCreated) {
-		console.log('Cannot create ETS runtime');
-		process.exit(1);
+	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+	const etsOpts = {
+		'panda-files': gtestAbcPath,
+		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
+		'coroutine-js-mode': true,
+		'coroutine-enable-external-scheduling': 'true',
+	};
+	if (!etsVm.createRuntime(etsOpts)) {
+		throw Error('Cannot create ETS runtime');
 	}
 	let res = etsVm.call(test);
 	let counter = 0;
 	const maxCounter = 5;
 	const checkDelay = 1000;
+	let tId = 0;
 	let checkCallback = () => {
 		++counter;
 		if (counter === maxCounter) {
 			throw new Error('Test failed: timeout.');
 		}
 		let result = etsVm.call('.check');
-		if (!result) {
-			setTimeout(checkCallback, checkDelay);
+		if (result) {
+			helper.clearInterval(tId);
 		}
 	};
-	setTimeout(checkCallback, checkDelay);
+	tId = helper.setInterval(checkCallback, checkDelay);
 }
 
-let args = process.argv;
-if (args.length !== 3) {
-	console.log('Expected test name');
-	process.exit(1);
+let args = helper.getArgv();
+if (args.length !== 5) {
+	throw Error('Expected test name');
 }
-runTest(args[2]);
+runTest(args[4]);

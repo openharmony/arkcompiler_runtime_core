@@ -45,10 +45,6 @@ set(TESTS_EXECUTED_WITH_NODEJS
     # Blocked by #22822
     perf
 
-    # MM and concurrency team
-    event_loop_callback_poster_tests
-    promise
-
     # mem will be fixed by MM and concurrency, ets_function_proxy blocked by # 22648 
     proxies
 
@@ -61,16 +57,13 @@ set(TESTS_EXECUTED_WITH_NODEJS
     # Blocked by #22647
     test_intrins
 
-    # Blocked by #22455
-    timer
-
     # Blocked by 22820
     checked
 )
 
 # NOTE: Remove this condition after all tests have been migrated to ArkJSVM.
 list(LENGTH TESTS_EXECUTED_WITH_NODEJS INTEROP_NODEJS_TEST_NUM)
-if(NOT ${INTEROP_NODEJS_TEST_NUM} EQUAL 24)
+if(NOT ${INTEROP_NODEJS_TEST_NUM} EQUAL 21)
     message(FATAL_ERROR "All new interop tests shouls be executed on ArkJSVM. 
                          INTEROP_NODEJS_TEST_NUM = ${INTEROP_NODEJS_TEST_NUM}")
 endif()

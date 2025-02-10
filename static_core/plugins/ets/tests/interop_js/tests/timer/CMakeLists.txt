@@ -11,19 +11,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_test_nodevm(ets_interop_js_test_settimeout
+panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_settimeout
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
     LAUNCHER_ARGS ".testSetTimeout"
 )
 
-panda_ets_interop_js_test_nodevm(ets_interop_js_test_cleartimeout
+panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_cleartimeout
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
     LAUNCHER_ARGS ".testClearTimeout"
 )
 
-panda_ets_interop_js_test_nodevm(ets_interop_js_test_setinterval
+panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_setinterval
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
     LAUNCHER_ARGS ".testSetInterval"

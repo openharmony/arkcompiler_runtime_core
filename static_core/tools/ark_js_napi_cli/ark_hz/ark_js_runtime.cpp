@@ -14,6 +14,7 @@
  */
 
 #include "ark_hz/ark_js_runtime.h"
+#include <uv.h>
 #include "ark_js_runtime.h"
 #include "utils/utils.h"
 
@@ -94,7 +95,22 @@ uv_loop_t *ArkJsRuntime::GetUVLoop()
 
 void ArkJsRuntime::Loop()
 {
-    engine_->Loop(LoopMode::LOOP_NOWAIT, false);
+    // 2 here for NativeEngine async_t and 1 for main CallbackPoster
+    static constexpr uint32_t MANUALLY_HANDLED_ASYNC_COUNT = 2U + 1U;  // CC-OFF(G.NAM.03-CPP) project code style
+    auto *loop = GetUVLoop();
+    auto cntHandles = []([[maybe_unused]] uv_handle_t *handle, void *arg) {
+        auto *cnt = reinterpret_cast<uint32_t *>(arg);
+        (*cnt)++;
+    };
+    // CC-OFFNXT(G.CTL.03) false positive
+    while (true) {
+        uint32_t handleCount = 0;
+        uv_walk(loop, cntHandles, &handleCount);
+        if (handleCount <= MANUALLY_HANDLED_ASYNC_COUNT) {
+            break;
+        }
+        engine_->Loop(LOOP_ONCE);
+    }
 }
 
 }  // namespace panda

@@ -209,13 +209,7 @@ static void RegisterEventLoopModule(EtsCoroutine *coro)
         },
         nullptr);
     InteropCtx::Init(coro, env);
-    if (!XGC::Create(coro)) {
-        return false;
-    }
-    auto mainPoster = coro->GetPandaVM()->CreateCallbackPoster(coro);
-    ASSERT(mainPoster != nullptr);
-    coro->GetWorker()->SetCallbackPoster(std::move(mainPoster));
-    return true;
+    return XGC::Create(coro);
 }
 
 static std::optional<std::vector<std::string>> GetArgStrings(napi_env env, napi_value options)
