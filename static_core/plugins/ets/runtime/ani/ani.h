@@ -128,9 +128,6 @@ typedef ani_fixedarray ani_fixedarray_double;
 typedef ani_fixedarray ani_fixedarray_ref;
 #endif  // __cplusplus
 
-struct __ani_gref;
-typedef struct __ani_gref *ani_gref;
-
 struct __ani_wref;
 typedef struct __ani_wref *ani_wref;
 
@@ -204,6 +201,7 @@ typedef enum {
     ANI_INVALID_ARGS,
     ANI_INVALID_TYPE,
     ANI_INVALID_DESCRIPTOR,
+    ANI_INCORRECT_REF,
     ANI_PENDING_ERROR,
     ANI_NOT_FOUND,
     ANI_ALREADY_BINDED,
@@ -6258,7 +6256,7 @@ struct __ani_interaction_api {
      * @param[out] result A pointer to store the created global reference.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*GlobalReference_Create)(ani_env *env, ani_ref ref, ani_gref *result);
+    ani_status (*GlobalReference_Create)(ani_env *env, ani_ref ref, ani_ref *result);
 
     /**
      * @brief Deletes a global reference.
@@ -6269,7 +6267,7 @@ struct __ani_interaction_api {
      * @param[in] gref The global reference to delete.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*GlobalReference_Delete)(ani_env *env, ani_gref gref);
+    ani_status (*GlobalReference_Delete)(ani_env *env, ani_ref gref);
 
     /**
      * @brief Creates a weak reference.
@@ -6301,10 +6299,12 @@ struct __ani_interaction_api {
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] wref The weak reference to query.
-     * @param[out] result A pointer to store the retrieved local reference.
+     * @param[out] was_released_result A pointer to boolean flag which indicates that wref is GC collected.
+     * @param[out] ref_result A pointer to store the retrieved local reference.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*WeakReference_GetReference)(ani_env *env, ani_wref wref, ani_ref *result);
+    ani_status (*WeakReference_GetReference)(ani_env *env, ani_wref wref, ani_boolean *was_released_result,
+                                             ani_ref *ref_result);
 
     /**
      * @brief Creates a new array buffer.
@@ -8868,11 +8868,11 @@ struct __ani_env {
     {
         return c_api->TupleValue_SetItem_Ref(this, tuple_value, index, value);
     }
-    ani_status GlobalReference_Create(ani_ref ref, ani_gref *result)
+    ani_status GlobalReference_Create(ani_ref ref, ani_ref *result)
     {
         return c_api->GlobalReference_Create(this, ref, result);
     }
-    ani_status GlobalReference_Delete(ani_gref ref)
+    ani_status GlobalReference_Delete(ani_ref ref)
     {
         return c_api->GlobalReference_Delete(this, ref);
     }
@@ -8884,9 +8884,9 @@ struct __ani_env {
     {
         return c_api->WeakReference_Delete(this, wref);
     }
-    ani_status WeakReference_GetReference(ani_wref wref, ani_ref *result)
+    ani_status WeakReference_GetReference(ani_wref wref, ani_boolean *was_released_result, ani_ref *ref_result)
     {
-        return c_api->WeakReference_GetReference(this, wref, result);
+        return c_api->WeakReference_GetReference(this, wref, was_released_result, ref_result);
     }
     ani_status CreateArrayBuffer(size_t length, void **data_result, ani_arraybuffer *arraybuffer_result)
     {

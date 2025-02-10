@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_ANI_SCOPED_OBJECTS_FIX_H
 
 #include "plugins/ets/runtime/ani/ani.h"
+#include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_napi_env.h"
 #include "plugins/ets/runtime/types/ets_method.h"
@@ -39,33 +40,49 @@ public:
         return env_;
     }
 
-    static inline bool IsUndefined(ani_ref ref)
+    static bool IsUndefined(ani_ref ref)
     {
         return ref == nullptr;
     }
 
-    static inline bool IsUndefined(EtsObject *object)
+    static bool IsUndefined(ani_wref ref)
+    {
+        return ref == nullptr;
+    }
+
+    static bool IsUndefined(EtsObject *object)
     {
         return object == nullptr;
     }
 
-    static inline ani_status GetUndefinedRef(ani_ref *result)
+    static EtsObject *GetUndefinedObject()
+    {
+        return nullptr;
+    }
+
+    static ani_status GetUndefinedWRef(ani_wref *result)
     {
         *result = nullptr;
         return ANI_OK;
     }
 
-    bool inline IsNull(ani_ref ref)
+    static ani_status GetUndefinedRef(ani_ref *result)
+    {
+        *result = nullptr;
+        return ANI_OK;
+    }
+
+    bool IsNull(ani_ref ref)
     {
         return ToInternalType(ref)->GetCoreType() == GetCoroutine()->GetNullValue();
     }
 
-    bool inline IsNullishValue(ani_ref ref)
+    bool IsNullishValue(ani_ref ref)
     {
         return IsUndefined(ref) || IsNull(ref);
     }
 
-    ani_status inline GetNullRef(ani_ref *result)
+    ani_status GetNullRef(ani_ref *result)
     {
         EtsObject *nullObject = EtsObject::FromCoreType(GetCoroutine()->GetNullValue());
         return AddLocalRef(nullObject, result);
@@ -73,46 +90,110 @@ public:
 
     EtsArray *ToInternalType(ani_fixedarray array)
     {
-        return reinterpret_cast<EtsArray *>(GetInternalType(env_, array));
+        ASSERT(!IsNullishValue(array));
+        return reinterpret_cast<EtsArray *>(GetInternalType(array));
     }
 
     EtsObject *ToInternalType(ani_ref ref)
     {
-        // NOTE: Add undefined and null support
-        if (ref == nullptr) {
-            return nullptr;
+        if (IsUndefined(ref)) {
+            return GetUndefinedObject();
         }
-        return reinterpret_cast<EtsObject *>(GetInternalType(env_, ref));
+        return GetInternalType(ref);
     }
 
     EtsObject *ToInternalType(ani_object obj)
     {
         ASSERT(!IsNullishValue(obj));
-        return reinterpret_cast<EtsObject *>(GetInternalType(env_, obj));
+        return GetInternalType(obj);
     }
 
     EtsClass *ToInternalType(ani_class cls)
     {
-        ASSERT(cls != nullptr);
-        return reinterpret_cast<EtsClass *>(GetInternalType(env_, cls));
+        ASSERT(!IsNullishValue(cls));
+        return reinterpret_cast<EtsClass *>(GetInternalType(cls));
     }
 
     EtsNamespace *ToInternalType(ani_namespace ns)
     {
-        ASSERT(ns != nullptr);
-        return reinterpret_cast<EtsNamespace *>(GetInternalType(env_, ns));
+        ASSERT(!IsNullishValue(ns));
+        return reinterpret_cast<EtsNamespace *>(GetInternalType(ns));
     }
 
     EtsString *ToInternalType(ani_string str)
     {
-        ASSERT(str != nullptr);
-        return reinterpret_cast<EtsString *>(GetInternalType(env_, str));
+        ASSERT(!IsNullishValue(str));
+        return reinterpret_cast<EtsString *>(GetInternalType(str));
     }
 
     EtsClass *ToInternalType(ani_type type)
     {
-        ASSERT(type != nullptr);
-        return reinterpret_cast<EtsClass *>(GetInternalType(env_, type));
+        ASSERT(!IsNullishValue(type));
+        return reinterpret_cast<EtsClass *>(GetInternalType(type));
+    }
+
+    ani_status AddGlobalRef(ani_ref ref, ani_ref *result)
+    {
+        if (IsUndefined(ref)) {
+            return GetUndefinedRef(result);
+        }
+        EtsObject *obj = ToInternalType(ref);
+        EtsReference *gref = GetRefStorage()->NewEtsRef(obj, EtsReference::EtsObjectType::GLOBAL);
+        ANI_CHECK_RETURN_IF_EQ(gref, nullptr, ANI_OUT_OF_REF);
+        *result = EtsRefToAniRef(gref);
+        return ANI_OK;
+    }
+
+    ani_status DelGlobalRef(ani_ref gref)
+    {
+        if (IsUndefined(gref)) {
+            return ANI_OK;
+        }
+        EtsReference *etsGRef = AniRefToEtsRef(gref);
+        ANI_CHECK_RETURN_IF_EQ(etsGRef->IsGlobal(), false, ANI_INCORRECT_REF);
+        GetRefStorage()->RemoveEtsRef(etsGRef);
+        return ANI_OK;
+    }
+
+    ani_status AddWeakRef(ani_ref ref, ani_wref *result)
+    {
+        if (IsUndefined(ref)) {
+            return GetUndefinedWRef(result);
+        }
+        EtsObject *obj = ToInternalType(ref);
+        EtsReference *etsRef = GetRefStorage()->NewEtsRef(obj, EtsReference::EtsObjectType::WEAK);
+        ANI_CHECK_RETURN_IF_EQ(etsRef, nullptr, ANI_OUT_OF_REF);
+        *result = EtsRefToAniWRef(etsRef);
+        return ANI_OK;
+    }
+
+    ani_status DelWeakRef(ani_wref wref)
+    {
+        if (IsUndefined(wref)) {
+            return ANI_OK;
+        }
+        EtsReference *etsGRef = AniWRefToEtsRef(wref);
+        ASSERT(etsGRef->IsWeak());
+        GetRefStorage()->RemoveEtsRef(etsGRef);
+        return ANI_OK;
+    }
+
+    ani_status GetLocalRef(ani_wref wref, ani_boolean *wasReleasedResult, ani_ref *result)
+    {
+        if (IsUndefined(wref)) {
+            return GetUndefinedRef(result);
+        }
+        EtsReference *etsGRef = AniWRefToEtsRef(wref);
+        ASSERT(etsGRef->IsWeak());
+        EtsObject *obj = GetRefStorage()->GetEtsObject(etsGRef);
+        if (obj == nullptr) {
+            // Reference was freed.
+            *wasReleasedResult = ANI_TRUE;
+            *result = nullptr;
+            return ANI_OK;
+        }
+        *wasReleasedResult = ANI_FALSE;
+        return AddLocalRef(obj, result);
     }
 
     ani_status AddLocalRef(EtsObject *obj, ani_ref *result)
@@ -120,85 +201,67 @@ public:
         if (IsUndefined(obj)) {
             return GetUndefinedRef(result);
         }
-        ani_ref ref = DoAddLocalRef(obj);
-        if (UNLIKELY(ref == nullptr)) {
-            return ANI_OUT_OF_REF;
-        }
-        *result = ref;
+        EtsReference *etsRef = GetRefStorage()->NewEtsRef(obj, EtsReference::EtsObjectType::LOCAL);
+        ANI_CHECK_RETURN_IF_EQ(etsRef, nullptr, ANI_OUT_OF_REF);
+        *result = EtsRefToAniRef(etsRef);
         return ANI_OK;
     }
 
-    ani_gref AddGlobalRef(EtsObject *obj)
+    ani_status DelLocalRef(ani_ref ref)
     {
-        ASSERT_MANAGED_CODE();
-        EtsReference *ref = GetEtsReferenceStorage()->NewEtsRef(obj, EtsReference::EtsObjectType::GLOBAL);
-        return EtsRefToAniGlobalRef(ref);
-    }
-
-    static inline ani_gref EtsRefToAniGlobalRef(EtsReference *ref)
-    {
-        return reinterpret_cast<ani_gref>(ref);
-    }
-
-    void DelLocalRef(ani_object obj)
-    {
-        DelLocalRef(env_, obj);
-    }
-
-    static void DelLocalRef(PandaEnv *env, ani_ref ref)
-    {
-        ASSERT_MANAGED_CODE();
-        if (ref == nullptr) {
-            return;
+        if (IsUndefined(ref)) {
+            return ANI_OK;
         }
         EtsReference *etsRef = AniRefToEtsRef(ref);
-        if (!etsRef->IsLocal()) {
-            LOG(WARNING, RUNTIME) << "Try to remove non-local ref: " << std::hex << etsRef;
-            return;
-        }
-        env->GetEtsReferenceStorage()->RemoveEtsRef(etsRef);
+        ANI_CHECK_RETURN_IF_EQ(etsRef->IsLocal(), false, ANI_INCORRECT_REF);
+        GetRefStorage()->RemoveEtsRef(etsRef);
+        return ANI_OK;
     }
 
     NO_COPY_SEMANTIC(ManagedCodeAccessor);
     NO_MOVE_SEMANTIC(ManagedCodeAccessor);
 
-protected:
-    EtsReferenceStorage *GetEtsReferenceStorage()
+private:
+    EtsReferenceStorage *GetRefStorage()
     {
         return env_->GetEtsReferenceStorage();
     }
 
-    static EtsReferenceStorage *GetEtsReferenceStorage(PandaEnv *env)
+    EtsObject *GetInternalType(ani_ref ref)
     {
-        return env->GetEtsReferenceStorage();
-    }
-
-    static EtsObject *GetInternalType(PandaEnv *env, ani_ref ref)
-    {
-        if (ref == nullptr) {
-            return nullptr;
-        }
+        ASSERT(!IsUndefined(ref));
         EtsReference *etsRef = AniRefToEtsRef(ref);
-        return GetEtsReferenceStorage(env)->GetEtsObject(etsRef);
+        return GetRefStorage()->GetEtsObject(etsRef);
     }
 
-private:
-    ani_ref DoAddLocalRef(EtsObject *obj)
+    static EtsReference *AniRefToEtsRef(ani_ref ref)
     {
-        ASSERT_MANAGED_CODE();
-        ASSERT(obj != nullptr);
-        EtsReference *ref = GetEtsReferenceStorage(env_)->NewEtsRef(obj, EtsReference::EtsObjectType::LOCAL);
-        return EtsRefToAniRef(ref);
+        auto etsRef = reinterpret_cast<EtsReference *>(ref);
+        ASSERT(etsRef != nullptr);
+        ASSERT(!etsRef->IsWeak());
+        return etsRef;
     }
 
-    static inline EtsReference *AniRefToEtsRef(ani_ref ref)
+    static ani_ref EtsRefToAniRef(EtsReference *etsRef)
     {
-        return reinterpret_cast<EtsReference *>(ref);
+        ASSERT(etsRef != nullptr);
+        ASSERT(!etsRef->IsWeak());
+        return reinterpret_cast<ani_ref>(etsRef);
     }
 
-    static inline ani_ref EtsRefToAniRef(EtsReference *ref)
+    static EtsReference *AniWRefToEtsRef(ani_wref wref)
     {
-        return reinterpret_cast<ani_ref>(ref);
+        auto etsRef = reinterpret_cast<EtsReference *>(wref);
+        ASSERT(etsRef != nullptr);
+        ASSERT(etsRef->IsWeak());
+        return etsRef;
+    }
+
+    static ani_wref EtsRefToAniWRef(EtsReference *etsRef)
+    {
+        ASSERT(etsRef != nullptr);
+        ASSERT(etsRef->IsWeak());
+        return reinterpret_cast<ani_wref>(etsRef);
     }
 
     PandaEnv *env_;
@@ -263,7 +326,7 @@ public:
     NO_MOVE_SEMANTIC(ScopedManagedCodeFix);
 
 private:
-    inline bool IsAccessFromManagedAllowed()
+    bool IsAccessFromManagedAllowed()
     {
 #ifndef NDEBUG
         auto stack = StackWalker::Create(GetCoroutine());
