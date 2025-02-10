@@ -74,6 +74,19 @@ private:
     std::optional<BreakpointId> id_ {};  // "invalid" default value
 };
 
+class CustomUrlBreakpointLocations final : public JsonSerializable {
+public:
+    void Serialize(JsonObjectBuilder &builder) const override;
+
+    void Add(CustomUrlBreakpointResponse &&loc)
+    {
+        locations_.emplace_back(std::move(loc));
+    }
+
+private:
+    std::vector<CustomUrlBreakpointResponse> locations_;
+};
+
 }  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_TYPES_CUSTOM_URL_BREAKPOINT_RESPONSE_H

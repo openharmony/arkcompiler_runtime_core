@@ -23,22 +23,35 @@
 
 #include "include/console_call_type.h"
 #include "include/tooling/pt_thread.h"
+#include "json_serialization/serializable.h"
 #include "macros.h"
+#include "utils/expected.h"
 #include "utils/json_builder.h"
 #include "utils/json_parser.h"
 #include "utils/logger.h"
 
 #include "connection/server.h"
+#include "json_serialization/jrpc_error.h"
 #include "types/custom_url_breakpoint_response.h"
+#include "types/debugger_evaluation_request.h"
 #include "types/location.h"
 #include "types/numeric_id.h"
+#include "types/possible_breakpoints_response.h"
+#include "types/script_source_response.h"
 #include "types/url_breakpoint_request.h"
 #include "types/url_breakpoint_response.h"
 
 namespace ark::tooling::inspector {
 InspectorServer::InspectorServer(Server &server) : server_(server)
 {
-    server_.OnCall("Debugger.enable", [](auto, auto &result, auto &) { result.AddProperty("debuggerId", "debugger"); });
+    struct Response : public JsonSerializable {
+        void Serialize(JsonObjectBuilder &builder) const override
+        {
+            builder.AddProperty("debuggerId", "debugger");
+        }
+    };
+    server_.OnCall("Debugger.enable",
+                   [](auto, auto &) { return std::unique_ptr<JsonSerializable>(std::make_unique<Response>()); });
 }
 
 void InspectorServer::Kill()
@@ -221,18 +234,21 @@ void InspectorServer::CallTargetDetachedFromTarget(PtThread thread)
 void InspectorServer::OnCallDebuggerContinueToLocation(
     std::function<void(PtThread, std::string_view, size_t)> &&handler)
 {
-    server_.OnCall(
-        "Debugger.continueToLocation", [this, handler = std::move(handler)](auto &sessionId, auto &, auto &params) {
+    // clang-format off
+    server_.OnCall("Debugger.continueToLocation",
+        [this, handler = std::move(handler)](auto &sessionId, const auto &params) -> Server::MethodResponse {
             auto location = Location::FromJsonProperty(params, "location");
             if (!location) {
                 LOG(INFO, DEBUGGER) << location.Error();
-                return;
+                return Unexpected(JRPCError(location.Error()));
             }
 
             auto thread = sessionManager_.GetThreadBySessionId(sessionId);
-
-            handler(thread, sourceManager_.GetSourceFileName(location->GetScriptId()), location->GetLineNumber());
+            handler(thread, sourceManager_.GetSourceFileName(location->GetScriptId()),
+                    location->GetLineNumber());
+            return std::unique_ptr<JsonSerializable>();
         });
+    // clang-format on
 }
 
 void InspectorServer::OnCallDebuggerGetPossibleBreakpoints(
@@ -240,20 +256,21 @@ void InspectorServer::OnCallDebuggerGetPossibleBreakpoints(
 {
     // clang-format off
     server_.OnCall("Debugger.getPossibleBreakpoints",
-        [this, handler = std::move(handler)](auto &, auto &result, const JsonObject &params) {
-            auto start = Location::FromJsonProperty(params, "start");
-            if (!start) {
-                LOG(INFO, DEBUGGER) << start.Error();
-                return;
+        [this, handler = std::move(handler)](auto &, const JsonObject &params) -> Server::MethodResponse {
+            auto optStart = Location::FromJsonProperty(params, "start");
+            if (!optStart) {
+                LOG(INFO, DEBUGGER) << optStart.Error();
+                return Unexpected(JRPCError(optStart.Error(), ErrorCode::PARSE_ERROR));
             }
 
-            auto scriptId = start->GetScriptId();
+            auto scriptId = optStart->GetScriptId();
 
             size_t endLine = ~0U;
             if (auto end = Location::FromJsonProperty(params, "end")) {
                 if (end->GetScriptId() != scriptId) {
-                    LOG(INFO, DEBUGGER) << "Script ids don't match";
-                    return;
+                    std::string_view msg = "Script ids don't match";
+                    LOG(INFO, DEBUGGER) << msg;
+                    return Unexpected(JRPCError(msg, ErrorCode::INVALID_PARAMS));
                 }
 
                 endLine = end->GetLineNumber();
@@ -264,49 +281,57 @@ void InspectorServer::OnCallDebuggerGetPossibleBreakpoints(
                 restrictToFunction = *prop;
             }
 
-            auto lineNumbers = handler(sourceManager_.GetSourceFileName(scriptId), start->GetLineNumber(),
+            auto lineNumbers = handler(sourceManager_.GetSourceFileName(scriptId), optStart->GetLineNumber(),
                                        endLine, restrictToFunction);
-
-            result.AddProperty("locations", [scriptId, &lineNumbers](JsonArrayBuilder &array) {
-                for (auto lineNumber : lineNumbers) {
-                    array.Add(Location(scriptId, lineNumber));
-                }
-            });
+            auto response = std::make_unique<PossibleBreakpointsResponse>();
+            for (const auto &line : lineNumbers) {
+                response->Add(Location(scriptId, line));
+            }
+            return std::unique_ptr<JsonSerializable>(std::move(response));
         });
     // clang-format on
 }
 
 void InspectorServer::OnCallDebuggerGetScriptSource(std::function<std::string(std::string_view)> &&handler)
 {
+    // clang-format off
     server_.OnCall("Debugger.getScriptSource",
-                   [this, handler = std::move(handler)](auto &, auto &result, auto &params) {
-                       if (auto scriptId = ParseNumericId<ScriptId>(params, "scriptId")) {
-                           auto sourceFile = sourceManager_.GetSourceFileName(*scriptId);
-                           result.AddProperty("scriptSource", handler(sourceFile));
-                       } else {
-                           LOG(INFO, DEBUGGER) << scriptId.Error();
-                       }
-                   });
+        [this, handler = std::move(handler)](auto &, auto &params) -> Server::MethodResponse {
+            auto scriptId = ParseNumericId<ScriptId>(params, "scriptId");
+            if (scriptId) {
+                auto sourceFile = sourceManager_.GetSourceFileName(*scriptId);
+                return std::unique_ptr<JsonSerializable>(
+                    std::make_unique<ScriptSourceResponse>(handler(sourceFile)));
+            }
+            LOG(INFO, DEBUGGER) << scriptId.Error();
+            return Unexpected(JRPCError(scriptId.Error(), ErrorCode::PARSE_ERROR));
+        });
+    // clang-format on
 }
 
 void InspectorServer::OnCallDebuggerPause(std::function<void(PtThread)> &&handler)
 {
-    server_.OnCall("Debugger.pause", [this, handler = std::move(handler)](auto &sessionId, auto &, auto &) {
+    server_.OnCall("Debugger.pause", [this, handler = std::move(handler)](auto &sessionId, auto &) {
         auto thread = sessionManager_.GetThreadBySessionId(sessionId);
         handler(thread);
+        return std::unique_ptr<JsonSerializable>();
     });
 }
 
 void InspectorServer::OnCallDebuggerRemoveBreakpoint(std::function<void(PtThread, BreakpointId)> &&handler)
 {
+    // clang-format off
     server_.OnCall("Debugger.removeBreakpoint",
-                   [this, handler = std::move(handler)](auto &sessionId, auto &, auto &params) {
-                       if (auto breakpointId = ParseNumericId<BreakpointId>(params, "breakpointId")) {
-                           handler(sessionManager_.GetThreadBySessionId(sessionId), *breakpointId);
-                       } else {
-                           LOG(INFO, DEBUGGER) << breakpointId.Error();
-                       }
-                   });
+        [this, handler = std::move(handler)](auto &sessionId, auto &params) -> Server::MethodResponse {
+            auto breakpointId = ParseNumericId<BreakpointId>(params, "breakpointId");
+            if (breakpointId) {
+                handler(sessionManager_.GetThreadBySessionId(sessionId), *breakpointId);
+                return std::unique_ptr<JsonSerializable>();
+            }
+            LOG(INFO, DEBUGGER) << breakpointId.Error();
+            return Unexpected(JRPCError(breakpointId.Error()));
+        });
+    // clang-format on
 }
 
 static auto GetUrlFileFilter(const std::string &url)
@@ -321,54 +346,79 @@ void InspectorServer::OnCallDebuggerRemoveBreakpointsByUrl(std::function<void(Pt
 {
     // clang-format off
     server_.OnCall("Debugger.removeBreakpointsByUrl",
-        [this, handler = std::move(handler)](auto &sessionId, auto &, auto &params) {
+        [this, handler = std::move(handler)](auto &sessionId, auto &params) -> Server::MethodResponse {
             const auto *url = params.template GetValue<JsonObject::StringT>("url");
             if (url == nullptr) {
-                LOG(INFO, DEBUGGER) << "No 'url' parameter was provided for Debugger.removeBreakpointsByUrl";
-                return;
+                std::string_view msg = "No 'url' parameter was provided for Debugger.removeBreakpointsByUrl";
+                LOG(INFO, DEBUGGER) << msg;
+                return Unexpected(JRPCError(msg, ErrorCode::PARSE_ERROR));
             }
             handler(sessionManager_.GetThreadBySessionId(sessionId), GetUrlFileFilter(*url));
+            return std::unique_ptr<JsonSerializable>();
     });
     // clang-format on
 }
 
 void InspectorServer::OnCallDebuggerRestartFrame(std::function<void(PtThread, FrameId)> &&handler)
 {
+    struct Response : public JsonSerializable {
+        void Serialize(JsonObjectBuilder &builder) const override
+        {
+            builder.AddProperty("callFrames", [](JsonArrayBuilder &) {});
+        }
+    };
     // clang-format off
     server_.OnCall("Debugger.restartFrame",
-        [this, handler = std::move(handler)](auto &sessionId, auto &result, auto &params) {
+        [this, handler = std::move(handler)](auto &sessionId, auto &params) -> Server::MethodResponse {
             auto thread = sessionManager_.GetThreadBySessionId(sessionId);
 
             auto frameId = ParseNumericId<FrameId>(params, "callFrameId");
             if (!frameId) {
                 LOG(INFO, DEBUGGER) << frameId.Error();
-                return;
+                return Unexpected(JRPCError(frameId.Error(), ErrorCode::PARSE_ERROR));
             }
 
             handler(thread, *frameId);
-
-            result.AddProperty("callFrames", [](JsonArrayBuilder &) {});
+            return std::unique_ptr<JsonSerializable>(std::make_unique<Response>());
         });
     // clang-format on
 }
 
 void InspectorServer::OnCallDebuggerResume(std::function<void(PtThread)> &&handler)
 {
-    server_.OnCall("Debugger.resume", [this, handler = std::move(handler)](auto &sessionId, auto &, auto &) {
+    server_.OnCall("Debugger.resume", [this, handler = std::move(handler)](auto &sessionId, auto &) {
         auto thread = sessionManager_.GetThreadBySessionId(sessionId);
         handler(thread);
+        return std::unique_ptr<JsonSerializable>();
     });
 }
 
 void InspectorServer::OnCallDebuggerSetBreakpoint(std::function<SetBreakpointHandler> &&handler)
 {
+    class Response : public JsonSerializable {
+    public:
+        explicit Response(std::string &&bpId, Location &&loc)
+            : breakpointId_(std::move(bpId)), location_(std::move(loc))
+        {
+        }
+
+        void Serialize(JsonObjectBuilder &builder) const override
+        {
+            builder.AddProperty("breakpointId", breakpointId_);
+            builder.AddProperty("actualLocation", location_);
+        }
+
+    private:
+        std::string breakpointId_;
+        Location location_;
+    };
     // clang-format off
     server_.OnCall("Debugger.setBreakpoint",
-        [this, handler = std::move(handler)](auto &sessionId, auto &result, auto &params) {
+        [this, handler = std::move(handler)](auto &sessionId, auto &params) -> Server::MethodResponse {
             auto location = Location::FromJsonProperty(params, "location");
             if (!location) {
                 LOG(INFO, DEBUGGER) << location.Error();
-                return;
+                return Unexpected(JRPCError(location.Error(), ErrorCode::PARSE_ERROR));
             }
             auto condition = params.template GetValue<JsonObject::StringT>("condition");
 
@@ -381,17 +431,17 @@ void InspectorServer::OnCallDebuggerSetBreakpoint(std::function<SetBreakpointHan
                 thread, [sourceFile](auto fileName) { return fileName == sourceFile; },
                 location->GetLineNumber(), sourceFiles, condition);
             if (!id) {
-                LOG(INFO, DEBUGGER) << "Failed to set breakpoint";
-                return;
+                std::string_view msg = "Failed to set breakpoint";
+                LOG(INFO, DEBUGGER) << msg;
+                return Unexpected(JRPCError(msg, ErrorCode::INTERNAL_ERROR));
             }
-
-            result.AddProperty("breakpointId", std::to_string(*id));
-            result.AddProperty("actualLocation", *location);
+            auto response = std::make_unique<Response>(std::move(std::to_string(*id)), std::move(*location));
+            return std::unique_ptr<JsonSerializable>(std::move(response));
         });
     // clang-format on
 }
 
-std::unique_ptr<UrlBreakpointResponse> InspectorServer::SetBreakpointByUrl(
+Expected<std::unique_ptr<UrlBreakpointResponse>, std::string> InspectorServer::SetBreakpointByUrl(
     const std::string &sessionId, const UrlBreakpointRequest &breakpointRequest,
     const std::function<SetBreakpointHandler> &handler)
 {
@@ -414,49 +464,58 @@ std::unique_ptr<UrlBreakpointResponse> InspectorServer::SetBreakpointByUrl(
 
     auto id = handler(thread, sourceFileFilter, breakpointRequest.GetLineNumber(), sourceFiles, condition);
     if (!id) {
-        LOG(INFO, DEBUGGER) << "Failed to set breakpoint";
-        return nullptr;
+        std::string msg = "Failed to set breakpoint";
+        LOG(INFO, DEBUGGER) << msg;
+        return Unexpected(msg);
     }
     // Must be non-empty on success
     ASSERT(!sourceFiles.empty());
 
     auto breakpointInfo = std::make_unique<UrlBreakpointResponse>(*id);
     AddLocations(*breakpointInfo, sourceFiles, breakpointRequest.GetLineNumber(), thread);
-    return breakpointInfo;
+    return Expected<std::unique_ptr<UrlBreakpointResponse>, std::string>(std::move(breakpointInfo));
 }
 
 void InspectorServer::OnCallDebuggerSetBreakpointByUrl(std::function<SetBreakpointHandler> &&handler)
 {
     // clang-format off
     server_.OnCall("Debugger.setBreakpointByUrl",
-        [this, handler = std::move(handler)](auto &sessionId, auto &result, const JsonObject &params) {
+        [this, handler = std::move(handler)](auto &sessionId, const JsonObject &params) -> Server::MethodResponse {
             auto optRequest = UrlBreakpointRequest::FromJson(params);
             if (!optRequest) {
-                LOG(INFO, DEBUGGER) << "Parse error: " << optRequest.Error();
-                return;
+                std::stringstream ss;
+                ss << "Parse error: " << optRequest.Error();
+                auto msg = ss.str();
+                LOG(INFO, DEBUGGER) << msg;
+                return Unexpected(JRPCError(std::move(msg), ErrorCode::PARSE_ERROR));
             }
             auto optResponse = SetBreakpointByUrl(sessionId, *optRequest, handler);
             if (optResponse) {
-                optResponse->Serialize(result);
+                return std::unique_ptr<JsonSerializable>(std::move(optResponse.Value()));
             }
+            return Unexpected(JRPCError(optResponse.Error()));
         });
     // clang-format on
 }
 
-static std::optional<std::vector<UrlBreakpointRequest>> ParseUrlBreakpointRequests(
+static Expected<std::vector<UrlBreakpointRequest>, std::string> ParseUrlBreakpointRequests(
     const std::vector<JsonObject::Value> &rawRequests)
 {
     std::vector<UrlBreakpointRequest> requestedBreakpoints;
     for (const auto &rawRequest : rawRequests) {
         auto *jsonObject = rawRequest.Get<JsonObject::JsonObjPointer>();
         if (jsonObject == nullptr) {
-            LOG(INFO, DEBUGGER) << "Invalid 'locations' array in getPossibleAndSetBreakpointByUrl";
-            return {};
+            std::string msg = "Invalid 'locations' array in getPossibleAndSetBreakpointByUrl";
+            LOG(INFO, DEBUGGER) << msg;
+            return Unexpected(std::move(msg));
         }
         auto optBreakpointRequest = UrlBreakpointRequest::FromJson(**jsonObject);
         if (!optBreakpointRequest) {
-            LOG(INFO, DEBUGGER) << "Invalid breakpoint request: " << optBreakpointRequest.Error();
-            return {};
+            std::stringstream ss;
+            ss << "Invalid breakpoint request: " << optBreakpointRequest.Error();
+            auto msg = ss.str();
+            LOG(INFO, DEBUGGER) << msg;
+            return Unexpected(std::move(msg));
         }
         requestedBreakpoints.push_back(std::move(*optBreakpointRequest));
     }
@@ -467,28 +526,26 @@ void InspectorServer::OnCallDebuggerGetPossibleAndSetBreakpointByUrl(std::functi
 {
     // clang-format off
     server_.OnCall("Debugger.getPossibleAndSetBreakpointByUrl",
-        [this, handler = std::move(handler)](auto &sessionId, auto &result, const JsonObject &params) {
+        [this, handler = std::move(handler)](auto &sessionId, const JsonObject &params) -> Server::MethodResponse {
             auto rawRequests = params.GetValue<JsonObject::ArrayT>("locations");
             if (rawRequests == nullptr) {
-                LOG(INFO, DEBUGGER) << "No 'locations' array in getPossibleAndSetBreakpointByUrl";
-                return;
+                std::string_view msg = "No 'locations' array in getPossibleAndSetBreakpointByUrl";
+                LOG(INFO, DEBUGGER) << msg;
+                return Unexpected(JRPCError(msg, ErrorCode::PARSE_ERROR));
             }
             auto optRequests = ParseUrlBreakpointRequests(*rawRequests);
             if (!optRequests) {
-                return;
+                return Unexpected(JRPCError(std::move(optRequests.Error()), ErrorCode::PARSE_ERROR));
             }
 
-            auto outputLocationsBuilder = [this, &sessionId, &requests = *optRequests,
-                                           handler = std::as_const(handler)](JsonArrayBuilder &builder) {
-                for (const auto &req : requests) {
-                    auto optResponse = SetBreakpointByUrl(sessionId, req, handler);
-                    auto breakpointResponse = (optResponse != nullptr)
-                        ? optResponse->ToCustomUrlBreakpointResponse()
-                        : CustomUrlBreakpointResponse(req.GetLineNumber());
-                    builder.Add(std::move(breakpointResponse));
-                }
-            };
-            result.AddProperty("locations", outputLocationsBuilder);
+            auto response = std::make_unique<CustomUrlBreakpointLocations>();
+            for (const auto &req : *optRequests) {
+                auto optResponse = SetBreakpointByUrl(sessionId, req, handler);
+                response->Add((optResponse.Value() != nullptr)
+                    ? optResponse.Value()->ToCustomUrlBreakpointResponse()
+                    : CustomUrlBreakpointResponse(req.GetLineNumber()));
+            }
+            return std::unique_ptr<JsonSerializable>(std::move(response));
         });
     // clang-format on
 }
@@ -497,17 +554,19 @@ void InspectorServer::OnCallDebuggerSetBreakpointsActive(std::function<void(PtTh
 {
     // clang-format off
     server_.OnCall("Debugger.setBreakpointsActive",
-        [this, handler = std::move(handler)](auto &sessionId, auto &, const JsonObject &params) {
+        [this, handler = std::move(handler)](auto &sessionId, const JsonObject &params) -> Server::MethodResponse {
             bool active;
             if (auto prop = params.GetValue<JsonObject::BoolT>("active")) {
                 active = *prop;
             } else {
-                LOG(INFO, DEBUGGER) << "No 'active' property";
-                return;
+                std::string_view msg = "No 'active' property";
+                LOG(INFO, DEBUGGER) << msg;
+                return Unexpected(JRPCError(msg));
             }
 
             auto thread = sessionManager_.GetThreadBySessionId(sessionId);
             handler(thread, active);
+            return std::unique_ptr<JsonSerializable>();
         });
     // clang-format on
 }
@@ -516,17 +575,19 @@ void InspectorServer::OnCallDebuggerSetSkipAllPauses(std::function<void(PtThread
 {
     // clang-format off
     server_.OnCall("Debugger.setSkipAllPauses",
-        [this, handler = std::move(handler)](auto &sessionId, auto &, const JsonObject &params) {
+        [this, handler = std::move(handler)](auto &sessionId, const JsonObject &params) -> Server::MethodResponse {
             bool skip;
             if (auto prop = params.GetValue<JsonObject::BoolT>("skip")) {
                 skip = *prop;
             } else {
-                LOG(INFO, DEBUGGER) << "No 'active' property";
-                return;
+                std::string_view msg = "No 'active' property";
+                LOG(INFO, DEBUGGER) << msg;
+                return Unexpected(JRPCError(msg, ErrorCode::INVALID_PARAMS));
             }
 
             auto thread = sessionManager_.GetThreadBySessionId(sessionId);
             handler(thread, skip);
+            return std::unique_ptr<JsonSerializable>();
         });
     // clang-format on
 }
@@ -536,14 +597,15 @@ void InspectorServer::OnCallDebuggerSetPauseOnExceptions(
 {
     // clang-format off
     server_.OnCall("Debugger.setPauseOnExceptions",
-        [this, handler = std::move(handler)](auto &sessionId, auto &, const JsonObject &params) {
+        [this, handler = std::move(handler)](auto &sessionId, const JsonObject &params) -> Server::MethodResponse {
             auto thread = sessionManager_.GetThreadBySessionId(sessionId);
 
             PauseOnExceptionsState state;
             auto stateStr = params.GetValue<JsonObject::StringT>("state");
             if (stateStr == nullptr) {
-                LOG(INFO, DEBUGGER) << "No 'state' property";
-                return;
+                std::string_view msg = "No 'state' property";
+                LOG(INFO, DEBUGGER) << msg;
+                return Unexpected(JRPCError(msg, ErrorCode::INVALID_PARAMS));
             }
 
             if (*stateStr == "none") {
@@ -555,59 +617,110 @@ void InspectorServer::OnCallDebuggerSetPauseOnExceptions(
             } else if (*stateStr == "all") {
                 state = PauseOnExceptionsState::ALL;
             } else {
-                LOG(INFO, DEBUGGER) << "Invalid 'state' value: " << *stateStr;
-                return;
+                std::stringstream ss;
+                ss << "Invalid 'state' value: " << *stateStr;
+                auto msg = ss.str();
+                LOG(INFO, DEBUGGER) << msg;
+                return Unexpected(JRPCError(std::move(msg), ErrorCode::INVALID_PARAMS));
             }
 
             handler(thread, state);
+            return std::unique_ptr<JsonSerializable>();
         });
     // clang-format on
 }
 
 void InspectorServer::OnCallDebuggerStepInto(std::function<void(PtThread)> &&handler)
 {
-    server_.OnCall("Debugger.stepInto", [this, handler = std::move(handler)](auto &sessionId, auto &, auto &) {
+    server_.OnCall("Debugger.stepInto", [this, handler = std::move(handler)](auto &sessionId, auto &) {
         auto thread = sessionManager_.GetThreadBySessionId(sessionId);
         handler(thread);
+        return std::unique_ptr<JsonSerializable>();
     });
 }
 
 void InspectorServer::OnCallDebuggerStepOut(std::function<void(PtThread)> &&handler)
 {
-    server_.OnCall("Debugger.stepOut", [this, handler = std::move(handler)](auto &sessionId, auto &, auto &) {
+    server_.OnCall("Debugger.stepOut", [this, handler = std::move(handler)](auto &sessionId, auto &) {
         auto thread = sessionManager_.GetThreadBySessionId(sessionId);
         handler(thread);
+        return std::unique_ptr<JsonSerializable>();
     });
 }
 
 void InspectorServer::OnCallDebuggerStepOver(std::function<void(PtThread)> &&handler)
 {
-    server_.OnCall("Debugger.stepOver", [this, handler = std::move(handler)](auto &sessionId, auto &, auto &) {
+    server_.OnCall("Debugger.stepOver", [this, handler = std::move(handler)](auto &sessionId, auto &) {
         auto thread = sessionManager_.GetThreadBySessionId(sessionId);
         handler(thread);
+        return std::unique_ptr<JsonSerializable>();
     });
+}
+
+void InspectorServer::OnCallDebuggerEvaluateOnCallFrame(
+    std::function<Expected<EvaluationResult, std::string>(PtThread, const std::string &, size_t)> &&handler)
+{
+    // clang-format off
+    server_.OnCall("Debugger.evaluateOnCallFrame",
+        [this, handler = std::move(handler)](auto &sessionId, const JsonObject &params) -> Server::MethodResponse {
+            auto thread = sessionManager_.GetThreadBySessionId(sessionId);
+
+            auto optRequest = DebuggerEvaluationRequest::FromJson(params);
+            if (!optRequest) {
+                LOG(INFO, DEBUGGER) << optRequest.Error();
+                return Unexpected(JRPCError(std::move(optRequest.Error()), ErrorCode::PARSE_ERROR));
+            }
+
+            auto optResult = handler(thread, optRequest->GetExpression(), optRequest->GetCallFrameId());
+            if (!optResult) {
+                std::stringstream ss;
+                ss << "Evaluation failed: " << optResult.Error();
+                auto msg = ss.str();
+                LOG(DEBUG, DEBUGGER) << msg;
+                return Unexpected(JRPCError(std::move(msg), ErrorCode::INTERNAL_ERROR));
+            }
+
+            return std::unique_ptr<JsonSerializable>(std::make_unique<EvaluationResult>(std::move(*optResult)));
+        });
+    // clang-format on
 }
 
 void InspectorServer::OnCallRuntimeEnable(std::function<void(PtThread)> &&handler)
 {
-    server_.OnCall("Runtime.enable", [this, handler = std::move(handler)](auto &sessionId, auto &, auto &) {
+    server_.OnCall("Runtime.enable", [this, handler = std::move(handler)](auto &sessionId, auto &) {
         auto thread = sessionManager_.GetThreadBySessionId(sessionId);
         handler(thread);
+        return std::unique_ptr<JsonSerializable>();
     });
 }
 
 void InspectorServer::OnCallRuntimeGetProperties(
     std::function<std::vector<PropertyDescriptor>(PtThread, RemoteObjectId, bool)> &&handler)
 {
+    class Response : public JsonSerializable {
+    public:
+        explicit Response(std::vector<PropertyDescriptor> props) : properties_(std::move(props)) {}
+        void Serialize(JsonObjectBuilder &builder) const override
+        {
+            builder.AddProperty("result", [&](JsonArrayBuilder &array) {
+                for (auto &descriptor : properties_) {
+                    array.Add(descriptor);
+                }
+            });
+        }
+
+    private:
+        std::vector<PropertyDescriptor> properties_;
+    };
     // clang-format off
     server_.OnCall("Runtime.getProperties",
-        [this, handler = std::move(handler)](auto &sessionId, auto &result, const JsonObject &params) {
+        [this, handler = std::move(handler)](auto &sessionId, const JsonObject &params) -> Server::MethodResponse {
             auto thread = sessionManager_.GetThreadBySessionId(sessionId);
 
             auto objectId = ParseNumericId<RemoteObjectId>(params, "objectId");
             if (!objectId) {
                 LOG(INFO, DEBUGGER) << objectId.Error();
-                return;
+                return Unexpected(JRPCError(objectId.Error(), ErrorCode::PARSE_ERROR));
             }
 
             auto generatePreview = false;
@@ -615,50 +728,46 @@ void InspectorServer::OnCallRuntimeGetProperties(
                 generatePreview = *prop;
             }
 
-            result.AddProperty("result", [&](JsonArrayBuilder &array) {
-                for (auto &descriptor : handler(thread, *objectId, generatePreview)) {
-                    array.Add(descriptor);
-                }
-            });
+            auto properties = handler(thread, *objectId, generatePreview);
+            return std::unique_ptr<JsonSerializable>(std::make_unique<Response>(std::move(properties)));
         });
     // clang-format on
 }
 
 void InspectorServer::OnCallRuntimeRunIfWaitingForDebugger(std::function<void(PtThread)> &&handler)
 {
-    server_.OnCall("Runtime.runIfWaitingForDebugger",
-                   [this, handler = std::move(handler)](auto &sessionId, auto &, auto &) {
-                       auto thread = sessionManager_.GetThreadBySessionId(sessionId);
-                       handler(thread);
-                   });
+    server_.OnCall("Runtime.runIfWaitingForDebugger", [this, handler = std::move(handler)](auto &sessionId, auto &) {
+        auto thread = sessionManager_.GetThreadBySessionId(sessionId);
+        handler(thread);
+        return std::unique_ptr<JsonSerializable>();
+    });
 }
 
-void InspectorServer::OnCallRuntimeEvaluate(std::function<EvaluationResult(PtThread, const std::string &)> &&handler)
+void InspectorServer::OnCallRuntimeEvaluate(
+    std::function<Expected<EvaluationResult, std::string>(PtThread, const std::string &)> &&handler)
 {
     // clang-format off
     server_.OnCall("Runtime.evaluate",
-        [this, handler = std::move(handler)](auto &sessionId, auto &result, const JsonObject &params) {
+        [this, handler = std::move(handler)](auto &sessionId, const JsonObject &params) -> Server::MethodResponse {
             auto thread = sessionManager_.GetThreadBySessionId(sessionId);
 
-            auto expressionStr = params.GetValue<JsonObject::StringT>("expression");
+            auto *expressionStr = params.GetValue<JsonObject::StringT>("expression");
             if (expressionStr == nullptr || expressionStr->empty()) {
-                LOG(INFO, DEBUGGER) << "'expression' property is absent or empty";
-                return;
+                std::string_view msg = "'expression' property is absent or empty";
+                LOG(INFO, DEBUGGER) << msg;
+                return Unexpected(JRPCError(msg, ErrorCode::PARSE_ERROR));
             }
 
             auto optResult = handler(thread, *expressionStr);
             if (!optResult) {
-                // NOTE(dslynko): might return error instead of `undefined`.
-                LOG(DEBUG, DEBUGGER) << "Evaluation failed";
-                result.AddProperty("result", RemoteObject::Undefined());
-                return;
+                std::stringstream ss;
+                ss << "Evaluation failed: " << optResult.Error();
+                auto msg = ss.str();
+                LOG(DEBUG, DEBUGGER) << msg;
+                return Unexpected(JRPCError(std::move(msg), ErrorCode::INTERNAL_ERROR));
             }
 
-            auto [evalResult, exceptionDetails] = *optResult;
-            result.AddProperty("result", evalResult);
-            if (exceptionDetails) {
-                result.AddProperty("exceptionDetails", *exceptionDetails);
-            }
+            return std::unique_ptr<JsonSerializable>(std::make_unique<EvaluationResult>(std::move(*optResult)));
         });
     // clang-format on
 }

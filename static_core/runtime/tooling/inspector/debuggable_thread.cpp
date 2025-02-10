@@ -170,27 +170,31 @@ bool DebuggableThread::RequestToObjectRepository(std::function<void(ObjectReposi
     return true;
 }
 
-std::optional<std::pair<RemoteObject, std::optional<RemoteObject>>> DebuggableThread::EvaluateExpression(
+Expected<std::pair<RemoteObject, std::optional<RemoteObject>>, std::string> DebuggableThread::EvaluateExpression(
     uint32_t frameNumber, const ExpressionWrapper &bytecode)
 {
     std::optional<RemoteObject> optResult;
     std::optional<RemoteObject> optException;
-    RequestToObjectRepository([this, frameNumber, &bytecode, &optResult, &optException](ObjectRepository &objectRepo) {
-        Method *method = nullptr;
-        auto res = EvaluateExpression(frameNumber, bytecode, &method);
-        if (!res) {
-            HandleError(res.Error());
-            return;
-        }
+    std::optional<Error> optError;
+    RequestToObjectRepository(
+        [this, frameNumber, &bytecode, &optResult, &optException, &optError](ObjectRepository &objectRepo) {
+            Method *method = nullptr;
+            auto res = EvaluateExpression(frameNumber, bytecode, &method);
+            if (!res) {
+                HandleError(res.Error());
+                optError = res.Error();
+                return;
+            }
 
-        auto [result, exc] = res.Value();
-        optResult.emplace(objectRepo.CreateObject(result));
-        if (exc != nullptr) {
-            optException.emplace(objectRepo.CreateObject(TypedValue::Reference(exc)));
-        }
-    });
-    if (!optResult) {
-        return {};
+            auto [result, exc] = res.Value();
+            optResult.emplace(objectRepo.CreateObject(result));
+            if (exc != nullptr) {
+                optException.emplace(objectRepo.CreateObject(TypedValue::Reference(exc)));
+            }
+        });
+    if (optError) {
+        ASSERT(!optResult);
+        return Unexpected(optError->GetMessage());
     }
     return std::make_pair(*optResult, optException);
 }

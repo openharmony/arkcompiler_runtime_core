@@ -13,28 +13,16 @@
  * limitations under the License.
  */
 
-#include "types/custom_url_breakpoint_response.h"
+#include "json_serialization/jrpc_error.h"
 
 #include "utils/json_builder.h"
 
 namespace ark::tooling::inspector {
 
-void CustomUrlBreakpointResponse::Serialize(JsonObjectBuilder &builder) const
+void JRPCError::Serialize(JsonObjectBuilder &builder) const
 {
-    std::string id = id_.has_value() ? std::to_string(*id_) : "invalid";
-    builder.AddProperty("id", id);
-    builder.AddProperty("lineNumber", lineNumber_);
-    builder.AddProperty("columnNumber", columnNumber_);
-    builder.AddProperty("scriptId", scriptId_);
-}
-
-void CustomUrlBreakpointLocations::Serialize(JsonObjectBuilder &builder) const
-{
-    builder.AddProperty("locations", [this](JsonArrayBuilder &arrayBuilder) {
-        for (const auto &loc : locations_) {
-            arrayBuilder.Add(loc);
-        }
-    });
+    builder.AddProperty("code", static_cast<int>(code_));
+    builder.AddProperty("message", message_);
 }
 
 }  // namespace ark::tooling::inspector

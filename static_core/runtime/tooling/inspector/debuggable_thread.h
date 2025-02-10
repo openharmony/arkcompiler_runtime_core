@@ -131,9 +131,9 @@ public:
      * @brief Evaluates the given bytecode expression.
      * @param frameNumber frame depth to evaluate expression in.
      * @param bytecode fragment with expression.
-     * @returns optional pair of result (might be void) and optional exception objects.
+     * @returns pair of result (might be void) and optional exception objects OR error message
      */
-    std::optional<std::pair<RemoteObject, std::optional<RemoteObject>>> EvaluateExpression(
+    Expected<std::pair<RemoteObject, std::optional<RemoteObject>>, std::string> EvaluateExpression(
         uint32_t frameNumber, const ExpressionWrapper &bytecode);
 
 private:
