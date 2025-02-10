@@ -518,7 +518,7 @@ abstract class ArrayProxy<T> extends Array<T> {
             }
         }
 
-        throw new NoSuchMethodError("failed to find method: " + name)
+        throw new LinkerUnresolvedMethodError("failed to find method: " + name)
     }
 
     private static getArrayMethod(name: string, signature: Array<Type>): Method {
@@ -545,7 +545,7 @@ abstract class ArrayProxy<T> extends Array<T> {
             }
         }
 
-        throw new NoSuchMethodError("failed to find method: " + name)
+        throw new LinkerUnresolvedMethodError("failed to find method: " + name)
     }
 
     private static getArrayMethod(name: string, firstParam: Type, ...restParams: Type[]): Method {

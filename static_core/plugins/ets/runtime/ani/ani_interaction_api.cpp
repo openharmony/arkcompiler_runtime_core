@@ -413,7 +413,7 @@ static ani_status DoFind(ani_env *env, const char *name, T *result)
     if (UNLIKELY(pandaEnv->HasPendingException())) {
         EtsThrowable *currentException = pandaEnv->GetThrowable();
         std::string_view exceptionString = currentException->GetClass()->GetDescriptor();
-        if (exceptionString == panda_file_items::class_descriptors::CLASS_NOT_FOUND_EXCEPTION) {
+        if (exceptionString == panda_file_items::class_descriptors::LINKER_CLASS_NOT_FOUND_ERROR) {
             pandaEnv->ClearException();
             return ANI_NOT_FOUND;
         }

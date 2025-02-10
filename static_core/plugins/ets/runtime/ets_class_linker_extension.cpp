@@ -74,19 +74,19 @@ static std::string_view GetClassLinkerErrorDescriptor(ClassLinker::Error error)
 {
     switch (error) {
         case ClassLinker::Error::CLASS_NOT_FOUND:
-            return panda_file_items::class_descriptors::CLASS_NOT_FOUND_EXCEPTION;
+            return panda_file_items::class_descriptors::LINKER_CLASS_NOT_FOUND_ERROR;
         case ClassLinker::Error::FIELD_NOT_FOUND:
-            return panda_file_items::class_descriptors::NO_SUCH_FIELD_ERROR;
+            return panda_file_items::class_descriptors::LINKER_UNRESOLVED_FIELD_ERROR;
         case ClassLinker::Error::METHOD_NOT_FOUND:
-            return panda_file_items::class_descriptors::NO_SUCH_METHOD_ERROR;
+            return panda_file_items::class_descriptors::LINKER_UNRESOLVED_METHOD_ERROR;
         case ClassLinker::Error::NO_CLASS_DEF:
-            return panda_file_items::class_descriptors::NO_CLASS_DEF_FOUND_ERROR;
+            return panda_file_items::class_descriptors::LINKER_UNRESOLVED_CLASS_ERROR;
         case ClassLinker::Error::CLASS_CIRCULARITY:
-            return panda_file_items::class_descriptors::CLASS_CIRCULARITY_ERROR;
+            return panda_file_items::class_descriptors::LINKER_TYPE_CIRCULARITY_ERROR;
         case ClassLinker::Error::OVERRIDES_FINAL:
         case ClassLinker::Error::MULTIPLE_OVERRIDE:
         case ClassLinker::Error::MULTIPLE_IMPLEMENT:
-            return panda_file_items::class_descriptors::LINKAGE_ERROR;
+            return panda_file_items::class_descriptors::LINKER_METHOD_CONFLICT_ERROR;
         default:
             LOG(FATAL, CLASS_LINKER) << "Unhandled class linker error (" << helpers::ToUnderlying(error) << "): ";
             UNREACHABLE();

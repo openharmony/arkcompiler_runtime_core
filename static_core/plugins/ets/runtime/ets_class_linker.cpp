@@ -85,7 +85,7 @@ Method *EtsClassLinker::GetAsyncImplMethod(Method *method, EtsCoroutine *corouti
         panda_file::MethodDataAccessor mda(pf, implMethodId);
         PandaStringStream out;
         out << "Cannot resolve async method " << mda.GetFullName();
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NO_SUCH_METHOD_ERROR, out.str());
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::LINKER_UNRESOLVED_METHOD_ERROR, out.str());
     }
     return result;
 }

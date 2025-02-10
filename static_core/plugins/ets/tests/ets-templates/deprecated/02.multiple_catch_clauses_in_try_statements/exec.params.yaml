@@ -47,7 +47,7 @@ cases:
       }
       return 1;
 
-  # UncatchedExceptionError
+  # UncaughtExceptionError
   - defs: |-
       class Ex extends Exception {}
       function foo(): void {
@@ -62,7 +62,7 @@ cases:
     use: |-
       try {
           foo();
-      } catch (e: UncatchedExceptionError) {
+      } catch (e: UncaughtExceptionError) {
           return 0;
       } catch (def) {
           return 1;

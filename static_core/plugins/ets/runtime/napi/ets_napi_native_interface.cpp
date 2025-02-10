@@ -464,7 +464,7 @@ NO_UB_SANITIZE static ets_class FindClass(EtsEnv *env, const char *name)
     if (etsEnv->HasPendingException()) {
         EtsThrowable *currentException = etsEnv->GetThrowable();
         std::string_view exceptionString = currentException->GetClass()->GetDescriptor();
-        if (exceptionString == panda_file_items::class_descriptors::CLASS_NOT_FOUND_EXCEPTION) {
+        if (exceptionString == panda_file_items::class_descriptors::LINKER_CLASS_NOT_FOUND_ERROR) {
             etsEnv->ClearException();
 
             PandaStringStream ss;

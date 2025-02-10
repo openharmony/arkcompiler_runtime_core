@@ -40,57 +40,52 @@ function main() {
     return 0;
 }
 
-function mainCatchNoClassDefFoundError() {
-    loadLibrary(getNativeLibName());
+function abilityExpectFailure(cb: (e: Error) => void) {
+    loadLibrary(getNativeLibName())
     try {
-        loadAndInvokeAbility(getAppMainAbilityClassName());
-    } catch (e: NoClassDefFoundError) {
-        console.log(e.message);
-        return 0;
+        loadAndInvokeAbility(getAppMainAbilityClassName())
+    } catch (e: Error) {
+        cb(e)
+        return 0
     }
-    return 1;
+    throw new Error("Error expected, but nothing was thrown")
 }
 
-function mainCatchIncompatibleClassChangeError() {
-    loadLibrary(getNativeLibName());
-    try {
-        loadAndInvokeAbility(getAppMainAbilityClassName());
-    } catch (e: IncompatibleClassChangeError) {
+function mainCatchLinkerUnresolvedClassError() {
+    abilityExpectFailure((e: Error) => {
+        assertTrue(e instanceof LinkerVerificationError)
         console.log(e.message);
-        return 0;
-    }
-    return 1;
+    })
+}
+
+function mainCatchLinkerBadSupertypeError() {
+    abilityExpectFailure((e: Error) => {
+        assertTrue(e instanceof LinkerBadSupertypeError)
+        console.log(e.message);
+    })
 }
 
 function mainMisatchedExtendsFinal() {
-    loadLibrary(getNativeLibName());
-    try {
-        loadAndInvokeAbility(getAppMainAbilityClassName());
-    } catch (e: VerifyError) {
-        assertEQ(e.message, "@mismatched.extends_final.ExtendsFinal");
-        return 0;
-    }
-    return 1;
+    abilityExpectFailure((e: Error) => {
+        assertTrue(e instanceof LinkerVerificationError)
+        assertEQ(e.message, "@mismatched.extends_final.ExtendsFinal")
+    })
 }
 
 function mainMisatchedOverrideFinal() {
-    loadLibrary(getNativeLibName());
-    try {
-        loadAndInvokeAbility(getAppMainAbilityClassName());
-    } catch (e: LinkageError) {
-        assertEQ(e.message, "Method overrides final method L@mismatched/override_final/OverrideFinal;func L@mismatched/final_method/FinalMethod;func");
-        return 0;
-    }
-    return 1;
+    abilityExpectFailure((e: Error) => {
+        assertTrue(e instanceof LinkerVerificationError)
+        assertTrue(e.cause instanceof LinkerMethodConflictError)
+        let c = e.cause as LinkerMethodConflictError
+        assertEQ(c.message, "Method overrides final method L@mismatched/override_final/OverrideFinal;func L@mismatched/final_method/FinalMethod;func");
+    })
 }
 
 function mainCircularityExtends() {
-    loadLibrary(getNativeLibName());
-    try {
-        loadAndInvokeAbility(getAppMainAbilityClassName());
-    } catch (e: ClassCircularityError) {
-        assertEQ(e.message, "Class or interface \"L@loop_inheritance/level_two/LevelTwo;\" is its own superclass or superinterface");
-        return 0;
-    }
-    return 1;
+    abilityExpectFailure((e: Error) => {
+        assertTrue(e instanceof LinkerVerificationError)
+        assertTrue(e.cause instanceof LinkerTypeCircularityError)
+        let c = e.cause as LinkerTypeCircularityError
+        assertEQ(c.message, "Class or interface \"L@loop_inheritance/level_two/LevelTwo;\" is its own superclass or superinterface");
+    })
 }

@@ -534,7 +534,7 @@ void PandaEtsVM::ResolveNativeMethod(Method *method)
             ss << "No implementation found for " << method->GetFullName() << ", tried " << name;
 
             auto coroutine = EtsCoroutine::GetCurrent();
-            ThrowEtsException(coroutine, panda_file_items::class_descriptors::NO_SUCH_METHOD_ERROR, ss.str());
+            ThrowEtsException(coroutine, panda_file_items::class_descriptors::LINKER_UNRESOLVED_METHOD_ERROR, ss.str());
             return;
         }
     }

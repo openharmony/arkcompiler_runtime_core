@@ -103,7 +103,7 @@ class Test {
         assertEQ(cls2, cls);
 
         expectThrow(() => { linker.loadClass(cname("does.not.exist"), false) },
-            (e) => e instanceof NoClassDefFoundError
+            (e) => e instanceof LinkerClassNotFoundError
         );
     }
 
