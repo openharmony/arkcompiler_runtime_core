@@ -39,6 +39,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test_number_subtypes
     ETS_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_frontend_test_number_subtypes
@@ -46,6 +47,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_frontend_test_number_subtypes
     ETS_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes_frontend.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 add_dependencies(ets_interop_js_test_number_subtypes test_number_subtypes_gen_cpp)

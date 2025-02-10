@@ -19,4 +19,5 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_dynamic_with_lambda
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dynamic_with_lambda.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/index.js
+    COMPILATION_JS_WITH_CJS_ON
 )

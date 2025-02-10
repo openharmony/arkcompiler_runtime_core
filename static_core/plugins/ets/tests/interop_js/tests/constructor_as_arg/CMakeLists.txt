@@ -19,6 +19,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_parent_class_ts_to_ets
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/parent_class/parent_class.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_child_class_ts_to_ets
@@ -26,6 +27,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_child_class_ts_to_ets
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/child_class/child_class.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_anonymous_class_ts_to_ets
@@ -33,6 +35,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_anonymous_class_ts_to_ets
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/anonymous_class/anonymous_class.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 # IIFE --> iife in the name of target because requireNapiPreview cant work with capital letters
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_iife_class_ts_to_ets
@@ -40,6 +43,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_iife_class_ts_to_ets
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/IIFE_class/IIFE_class.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_method_constructor_ts_to_ets
@@ -47,6 +51,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_method_constructor_ts_to_ets
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/method_constructor/method_constructor.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_function_arg_constructor_ts_to_ets
@@ -54,6 +59,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_function_arg_constructor_ts_to
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function/function.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_constructor_as_arg_error_ts_to_ets
@@ -61,4 +67,5 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_constructor_as_arg_error_ts_to
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/error/error.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )

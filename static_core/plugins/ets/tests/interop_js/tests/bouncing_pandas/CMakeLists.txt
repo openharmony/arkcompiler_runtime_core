@@ -20,4 +20,5 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test_bouncing_pandas
                 ${PANDA_ETS_PLUGIN_SOURCE}/tests/common/bouncing_pandas/bouncing_pandas.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/bouncing_pandas.js
+    COMPILATION_JS_WITH_CJS_ON
 )

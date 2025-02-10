@@ -19,4 +19,5 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__generic_call_params_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_call_params.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_call_params.js
+    COMPILATION_JS_WITH_CJS_ON
 )

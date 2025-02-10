@@ -46,13 +46,14 @@ if(PANDA_JS_ETS_HYBRID_MODE)
     compile_js_file(ets_interop_js_gtest_launcher_arkjsvm
         SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/gtest_launcher_arkjsvm.js"
         OUTPUT_DIR "${INTEROP_TESTS_DIR}"
+        COMPILE_JS_OPTION --commonjs
     )
 
     # Make symbolic links to convinient work with requireNapiPreview
     set(SO_FILES_OUTPUT "${INTEROP_TESTS_DIR}/module/lib/")
     set(INTEROP_LIB_SOURCE "${PANDA_BINARY_ROOT}/lib/module/ets_interop_js_napi_arkjsvm.so")
     set(INTEROP_HELPER_LIB_SOURCE "${PANDA_BINARY_ROOT}/lib/arkjsvm_interop/libinterop_test_helper.so")
-    
+
     add_custom_target(create_slinks_for_interop_gtest_launcher
         COMMAND mkdir -p ${SO_FILES_OUTPUT}
                 && ln -sf ${INTEROP_LIB_SOURCE} ${INTEROP_HELPER_LIB_SOURCE} -t ${SO_FILES_OUTPUT}

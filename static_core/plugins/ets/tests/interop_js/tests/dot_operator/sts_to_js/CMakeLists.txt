@@ -19,4 +19,5 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__dot_operator_sts_to_js
         ${CMAKE_CURRENT_SOURCE_DIR}/check_call_method_for_value.js
         ${CMAKE_CURRENT_SOURCE_DIR}/check_not_nullish_operator.js
         ${CMAKE_CURRENT_SOURCE_DIR}/dot_operator.test.js
+    COMPILATION_JS_WITH_CJS_ON
 )

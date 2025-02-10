@@ -19,4 +19,5 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__constructor_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/constructor.sts
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/constructor.js
     ETS_CONFIG ${ETS_CONFIG}
+    COMPILATION_JS_WITH_CJS_ON
 )
