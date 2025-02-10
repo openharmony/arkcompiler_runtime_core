@@ -89,3 +89,51 @@ function mainCircularityExtends() {
         assertEQ(c.message, "Class or interface \"L@loop_inheritance/level_two/LevelTwo;\" is its own superclass or superinterface");
     })
 }
+function mainMultipleOverrideImpl(expectedMessage: string) {
+    abilityExpectFailure((e: Error) => {
+        assertTrue(e instanceof LinkerVerificationError)
+        assertTrue(e.cause instanceof LinkerMethodConflictError)
+        let c = e.cause as LinkerMethodConflictError
+        assertEQ(c.message, expectedMessage);
+    })
+}
+
+function mainMultipleOverrideBase() {
+    mainMultipleOverrideImpl("Multiple override L@multiple_override/override_base/OverrideBase;foo L@multiple_override/base/Base;foo");
+}
+
+function mainMultipleOverrideBase1() {
+    mainMultipleOverrideImpl("Multiple override L@multiple_override/override_base2/OverrideBase2;foo L@multiple_override/base2/Base2;foo");
+}
+
+function mainVerificationImpl(expectedMessage: string) {
+    abilityExpectFailure((e: Error) => {
+        assertTrue(e instanceof LinkerVerificationError)
+        assertEQ(e.message, expectedMessage);
+    })
+}
+
+function mainVerificationModeOnTheFly() {
+    mainVerificationImpl("@verification_mode.bar.ETSGLOBAL::bar");
+}
+
+function mainVerificationModeAheadOfTime() {
+    mainVerificationImpl("L@verification_mode/bar/ETSGLOBAL;");
+}
+
+function mainMultipleImplementImpl(expectedMessage: string) {
+    abilityExpectFailure((e: Error) => {
+        assertTrue(e instanceof LinkerVerificationError)
+        assertTrue(e.cause instanceof LinkerMethodConflictError)
+        let c = e.cause as LinkerMethodConflictError
+        assertEQ(c.message,  expectedMessage);
+    })
+}
+
+function mainMultipleImplement() {
+    mainMultipleImplementImpl("Conflicting default implementations L@multiple_implement/i2/I2;foo L@multiple_implement/i1/I1;foo");
+}
+
+function mainMultipleImplement1() {
+    mainMultipleImplementImpl("Conflicting default implementations L@multiple_implement/i1/I1;foo L@multiple_implement/i2/I2;foo");
+}
