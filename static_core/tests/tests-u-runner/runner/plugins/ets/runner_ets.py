@@ -66,6 +66,8 @@ class RunnerETS(RunnerFileBased):
         self.test_env.runtime_args.extend(load_runtime_ets)
         if self.__ets_suite_name == EtsSuites.SDK.value:
             self.test_env.runtime_args.append(f"--panda-files={self.sdk_path}")
+            self.test_env.verifier_args.append(f"--panda-files={self.sdk_path}")
+
         self.test_env.verifier_args.extend(load_runtime_ets)
         if self.conf_kind in [ConfigurationKind.AOT, ConfigurationKind.AOT_FULL]:
             self.aot_args.extend(load_runtime_ets)
