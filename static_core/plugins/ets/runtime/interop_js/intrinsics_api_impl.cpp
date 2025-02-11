@@ -349,7 +349,7 @@ JSValue *JSRuntimeLoadModule(EtsString *module)
     napi_value modObj;
     {
         ScopedNativeCodeThread etsNativeScope(coro);
-        NapiScope jsHandleScope(env);
+        NapiEscapableScope jsHandleScope(env);
         if (IsNoNativeOhmUrl(moduleName)) {
             return LoadJSModule(moduleName);
         }
@@ -375,6 +375,7 @@ JSValue *JSRuntimeLoadModule(EtsString *module)
             INTEROP_FATAL_IF(status != napi_ok);
         }
         INTEROP_FATAL_IF(IsNull(env, modObj));
+        jsHandleScope.Escape(modObj);
     }
 
     return JSValue::CreateRefValue(coro, ctx, modObj, napi_object);
