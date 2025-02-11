@@ -189,8 +189,7 @@ TEST_F(LibAbcKitIrInstInputsTest, DynamicSetInput)
                 {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
                 {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDOBJBYNAME, {5}},
                 {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1, {10, 11, 3}},
-                {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+                {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
             });
             helpers::BBSchema<AbckitIsaApiDynamicOpcode> bb2({{0}, {2}, insts2});
             helpers::BBSchema<AbckitIsaApiDynamicOpcode> bb3({{1}, {}, {}});
@@ -219,8 +218,7 @@ TEST_F(LibAbcKitIrInstInputsTest, DynamicSetInputs)
             {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
             {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDOBJBYNAME, {5}},
             {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1, {10, 11, 3}},
-            {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-            {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+            {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
         });
         helpers::BBSchema<AbckitIsaApiDynamicOpcode> bb2({{0}, {2}, insts2});
         helpers::BBSchema<AbckitIsaApiDynamicOpcode> bb3({{1}, {}, {}});

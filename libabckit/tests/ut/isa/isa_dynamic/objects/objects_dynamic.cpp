@@ -81,8 +81,7 @@ TEST_F(LibAbcKitObjectsTest, IcreateDynCreateemptyobject)
                      {3, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEEMPTYOBJECT, {}},
                      {4, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
                      {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, {4, 3}},
-                     {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                     {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+                     {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
                  }},
                 {{1}, {}, {}}};
 

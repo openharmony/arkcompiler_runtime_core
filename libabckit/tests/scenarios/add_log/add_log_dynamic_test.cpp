@@ -53,10 +53,9 @@ static void CreateEpilog(AbckitInst *inst, AbckitBasicBlock *bb, UserData *userD
     while (inst != nullptr) {
         if (g_dynG->iGetOpcode(inst) == ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED) {
             // Epilog
-            auto *undef = g_implG->iGetPrev(inst);
             auto *dateClass2 = g_dynG->iCreateTryldglobalbyname(graph, userData->date);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            g_implG->iInsertBefore(dateClass2, undef);
+            g_implG->iInsertBefore(dateClass2, inst);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             auto *dateObj2 = g_dynG->iCreateNewobjrange(graph, 1, dateClass2);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -206,8 +205,7 @@ static std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> GetCorrectBBSch
               {31, ABCKIT_ISA_API_DYNAMIC_OPCODE_SUB2, {9, 27}},
               {32, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
               {33, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, {32, 31}},
-              {34, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-              {35, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+              {34, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
           }},
          {{4}, {}, {}}});
     return bbSchemas;

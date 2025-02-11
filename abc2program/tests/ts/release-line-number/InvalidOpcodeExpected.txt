@@ -3,9 +3,9 @@
 # ====================
 # LITERALS
 
-_ESModuleRecord_616 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
+_ESModuleRecord_608 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
 
-_ESScopeNamesRecord_612 
+_ESScopeNamesRecord_604 
 
 
 
@@ -19,13 +19,13 @@ _ESScopeNamesRecord_612
 
 .language ECMAScript
 .record _ESModuleRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/InvalidOpcode.ts _ESModuleRecord_616
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/InvalidOpcode.ts _ESModuleRecord_608
 }
 .record.source_file 
 
 .language ECMAScript
 .record _ESScopeNamesRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/InvalidOpcode.ts _ESScopeNamesRecord_612
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/InvalidOpcode.ts _ESScopeNamesRecord_604
 }
 .record.source_file 
 
@@ -221,7 +221,6 @@ _ESScopeNamesRecord_612
 .language ECMAScript
 .function any .func_main_0(any a0, any a1, any a2) {
 	definefunc 0x0, .#*#testRelease, 0x0     # line: 18446744073709551615           # column: 0
-	ldundefined                              # line: 18446744073709551615           # column: 0
 	returnundefined                          # line: 18446744073709551615           # column: 0
 }
 

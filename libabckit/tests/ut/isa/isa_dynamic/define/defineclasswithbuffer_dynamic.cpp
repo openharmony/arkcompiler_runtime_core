@@ -61,14 +61,14 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_1)
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             auto *stringProt = g_implM->createString(file, "prototype", strlen("prototype"));
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, instDefine, stringProt);
-            auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
+            auto *returnundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
             auto *newobj = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_NEWOBJRANGE);
             g_implG->iSetInput(newobj, instDefine, 0x0);
             auto *definefunc = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINEFUNC);
             auto *callarg1 = g_dynG->iCreateCallarg1(graph, definefunc, newobj);
             g_implG->iInsertBefore(instDefine, newobj);
             g_implG->iInsertBefore(ldobjbyname, newobj);
-            g_implG->iInsertBefore(callarg1, ldundefined);
+            g_implG->iInsertBefore(callarg1, returnundefined);
         });
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR
@@ -102,11 +102,11 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_2)
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             auto *stringProt = g_implM->createString(file, "prototype", strlen("prototype"));
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, instDefine, stringProt);
-            auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
+            auto *returnundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
             auto *newobj = g_dynG->iCreateNewobjrange(graph, 1, instDefine);
-            g_implG->iInsertBefore(instDefine, ldundefined);
-            g_implG->iInsertBefore(ldobjbyname, ldundefined);
-            g_implG->iInsertBefore(newobj, ldundefined);
+            g_implG->iInsertBefore(instDefine, returnundefined);
+            g_implG->iInsertBefore(ldobjbyname, returnundefined);
+            g_implG->iInsertBefore(newobj, returnundefined);
         });
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR
@@ -143,16 +143,16 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_3)
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             auto *stringProt = g_implM->createString(file, "prototype", strlen("prototype"));
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, instDefine, stringProt);
-            auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
+            auto *returnundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
             auto *newobj = g_dynG->iCreateNewobjrange(graph, 1, instDefine);
             auto *stringMethod = g_implM->createString(file, "newClassMethod", strlen("newClassMethod"));
             auto *ldobjbyname2 = g_dynG->iCreateLdobjbyname(graph, newobj, stringMethod);
             auto *callthis = g_dynG->iCreateCallthis0(graph, ldobjbyname2, newobj);
-            g_implG->iInsertBefore(instDefine, ldundefined);
-            g_implG->iInsertBefore(ldobjbyname, ldundefined);
-            g_implG->iInsertBefore(newobj, ldundefined);
-            g_implG->iInsertBefore(ldobjbyname2, ldundefined);
-            g_implG->iInsertBefore(callthis, ldundefined);
+            g_implG->iInsertBefore(instDefine, returnundefined);
+            g_implG->iInsertBefore(ldobjbyname, returnundefined);
+            g_implG->iInsertBefore(newobj, returnundefined);
+            g_implG->iInsertBefore(ldobjbyname2, returnundefined);
+            g_implG->iInsertBefore(callthis, returnundefined);
         });
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR
@@ -192,17 +192,17 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_4)
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             auto *stringProt = g_implM->createString(file, "prototype", strlen("prototype"));
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, instDefine, stringProt);
-            auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
+            auto *returnundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
             auto *newobj = g_dynG->iCreateNewobjrange(graph, 1, instDefine);
             auto *stringMethod = g_implM->createString(file, "newClassMethod2", strlen("newClassMethod2"));
             auto *ldobjbyname2 = g_dynG->iCreateLdobjbyname(graph, newobj, stringMethod);
             auto *const1 = g_implG->gFindOrCreateConstantU64(graph, 5);
             auto *callthis = g_dynG->iCreateCallthis1(graph, ldobjbyname2, newobj, const1);
-            g_implG->iInsertBefore(instDefine, ldundefined);
-            g_implG->iInsertBefore(ldobjbyname, ldundefined);
-            g_implG->iInsertBefore(newobj, ldundefined);
-            g_implG->iInsertBefore(ldobjbyname2, ldundefined);
-            g_implG->iInsertBefore(callthis, ldundefined);
+            g_implG->iInsertBefore(instDefine, returnundefined);
+            g_implG->iInsertBefore(ldobjbyname, returnundefined);
+            g_implG->iInsertBefore(newobj, returnundefined);
+            g_implG->iInsertBefore(ldobjbyname2, returnundefined);
+            g_implG->iInsertBefore(callthis, returnundefined);
         });
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR
@@ -242,14 +242,14 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_5)
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             auto *stringProt = g_implM->createString(file, "prototype", strlen("prototype"));
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, instDefine, stringProt);
-            auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
+            auto *returnundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
             auto *string = g_implM->createString(file, "initialize", strlen("initialize"));
             auto *loadString = g_dynG->iCreateLoadString(graph, string);
             auto *newobj = g_dynG->iCreateNewobjrange(graph, 2, instDefine, loadString);
-            g_implG->iInsertBefore(instDefine, ldundefined);
-            g_implG->iInsertBefore(ldobjbyname, ldundefined);
-            g_implG->iInsertBefore(loadString, ldundefined);
-            g_implG->iInsertBefore(newobj, ldundefined);
+            g_implG->iInsertBefore(instDefine, returnundefined);
+            g_implG->iInsertBefore(ldobjbyname, returnundefined);
+            g_implG->iInsertBefore(loadString, returnundefined);
+            g_implG->iInsertBefore(newobj, returnundefined);
         });
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR
@@ -283,9 +283,9 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_6)
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             auto *stringProt = g_implM->createString(file, "prototype", strlen("prototype"));
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, instDefine, stringProt);
-            auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iInsertBefore(instDefine, ldundefined);
-            g_implG->iInsertBefore(ldobjbyname, ldundefined);
+            auto *returnundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+            g_implG->iInsertBefore(instDefine, returnundefined);
+            g_implG->iInsertBefore(ldobjbyname, returnundefined);
 
             auto *classConstr2 = helpers::FindMethodByName(file, "newClassConstr");
             ASSERT_NE(classConstr2, nullptr);
@@ -294,9 +294,9 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_6)
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             auto *ldobjbyname2 = g_dynG->iCreateLdobjbyname(graph, instDefine2, stringProt);
             auto *newobj = g_dynG->iCreateNewobjrange(graph, 1, instDefine2);
-            g_implG->iInsertBefore(instDefine2, ldundefined);
-            g_implG->iInsertBefore(ldobjbyname2, ldundefined);
-            g_implG->iInsertBefore(newobj, ldundefined);
+            g_implG->iInsertBefore(instDefine2, returnundefined);
+            g_implG->iInsertBefore(ldobjbyname2, returnundefined);
+            g_implG->iInsertBefore(newobj, returnundefined);
         });
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR

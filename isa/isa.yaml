@@ -175,6 +175,8 @@ properties:
     description: Indicates that the instruction takes some consective registers as inputs.
                  The start register of these consective inputs is the last register of the instruction.
                  The number of consective inputs is the last immediate of the instruction plus 1.
+  - tag: no_side_effect
+    description: The instruction doesn't have side effects. Can be safely optimized by bytecode optimizer.
 
 exceptions:
   - tag: x_none
@@ -313,18 +315,22 @@ groups:
         acc: out:top
         opcode_idx: [0x6a]
         format: [op_none]
+        properties: [no_side_effect]
       - sig: ldinfinity
         acc: out:top
         opcode_idx: [0x6b]
         format: [op_none]
+        properties: [no_side_effect]
       - sig: ldundefined
         acc: out:top
         opcode_idx: [0x00]
         format: [op_none]
+        properties: [no_side_effect]
       - sig: ldnull
         acc: out:top
         opcode_idx: [0x01]
         format: [op_none]
+        properties: [no_side_effect]
       - sig: ldsymbol
         acc: out:top
         opcode_idx: [0xad]
@@ -337,14 +343,17 @@ groups:
         acc: out:top
         opcode_idx: [0x02]
         format: [op_none]
+        properties: [no_side_effect]
       - sig: ldfalse
         acc: out:top
         opcode_idx: [0x03]
         format: [op_none]
+        properties: [no_side_effect]
       - sig: ldhole
         acc: out:top
         opcode_idx: [0x70]
         format: [op_none]
+        properties: [no_side_effect]
       - sig: deprecated.ldlexenv
         acc: out:top
         opcode_idx: [0x00]

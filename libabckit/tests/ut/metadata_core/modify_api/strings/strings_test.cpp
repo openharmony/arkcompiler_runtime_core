@@ -50,8 +50,7 @@ auto g_dynamicCreateString2Lambda = [](AbckitGraph *graph) {
         {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_LOADSTRING, {}},
         {10, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDLEXVAR, {}},
         {11, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, {10, 9}},
-        {12, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-        {13, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+        {12, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
     });
     helpers::BBSchema<AbckitIsaApiDynamicOpcode> bb2({{0}, {2}, insts2});
     helpers::BBSchema<AbckitIsaApiDynamicOpcode> bb3({{1}, {}, {}});

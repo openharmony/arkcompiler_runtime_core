@@ -66,23 +66,23 @@ auto g_icreateGettemplateobject1Lambda = [](AbckitFile *file, AbckitCoreFunction
     auto *callargs2 = g_dynG->iCreateCallargs2(graph, deffunc, gettemplateobject, loadStringWorld);
     auto *callarg1 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, callargs2);
 
-    auto *ldundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-    g_implG->iInsertBefore(loadStringWorld, ldundef);
-    g_implG->iInsertBefore(tryldglobalbyname, ldundef);
-    g_implG->iInsertBefore(createemptyarray1, ldundef);
-    g_implG->iInsertBefore(createemptyarray2, ldundef);
-    g_implG->iInsertBefore(loadStringHello, ldundef);
-    g_implG->iInsertBefore(definefieldbyvalue1, ldundef);
-    g_implG->iInsertBefore(definefieldbyvalue2, ldundef);
-    g_implG->iInsertBefore(loadString2, ldundef);
-    g_implG->iInsertBefore(definefieldbyvalue3, ldundef);
-    g_implG->iInsertBefore(definefieldbyvalue4, ldundef);
-    g_implG->iInsertBefore(createemptyarray3, ldundef);
-    g_implG->iInsertBefore(definefieldbyvalue5, ldundef);
-    g_implG->iInsertBefore(definefieldbyvalue6, ldundef);
-    g_implG->iInsertBefore(gettemplateobject, ldundef);
-    g_implG->iInsertBefore(callargs2, ldundef);
-    g_implG->iInsertBefore(callarg1, ldundef);
+    auto *returnundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+    g_implG->iInsertBefore(loadStringWorld, returnundef);
+    g_implG->iInsertBefore(tryldglobalbyname, returnundef);
+    g_implG->iInsertBefore(createemptyarray1, returnundef);
+    g_implG->iInsertBefore(createemptyarray2, returnundef);
+    g_implG->iInsertBefore(loadStringHello, returnundef);
+    g_implG->iInsertBefore(definefieldbyvalue1, returnundef);
+    g_implG->iInsertBefore(definefieldbyvalue2, returnundef);
+    g_implG->iInsertBefore(loadString2, returnundef);
+    g_implG->iInsertBefore(definefieldbyvalue3, returnundef);
+    g_implG->iInsertBefore(definefieldbyvalue4, returnundef);
+    g_implG->iInsertBefore(createemptyarray3, returnundef);
+    g_implG->iInsertBefore(definefieldbyvalue5, returnundef);
+    g_implG->iInsertBefore(definefieldbyvalue6, returnundef);
+    g_implG->iInsertBefore(gettemplateobject, returnundef);
+    g_implG->iInsertBefore(callargs2, returnundef);
+    g_implG->iInsertBefore(callarg1, returnundef);
 };
 
 }  // namespace

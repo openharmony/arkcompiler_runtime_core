@@ -105,7 +105,7 @@ HWTEST_F(DumpTest, dump_test_002, TestSize.Level1)
         EXPECT_EQ(data.str(), test_data);
         data.clear();
         data.str("");
-        test_data = "prop: end, bc: 0x00000026\n";
+        test_data = "prop: end, bc: 0x00000025\n";
         BlockProps(graph->GetEndBlock(), &data);
         EXPECT_EQ(data.str(), test_data);
         Loop loop(graph->GetAllocator(), graph->GetEndBlock(), 1);
@@ -117,7 +117,7 @@ HWTEST_F(DumpTest, dump_test_002, TestSize.Level1)
         loop3.SetAsRoot();
         data.clear();
         data.str("");
-        test_data = "prop: end, head, loop 1, bc: 0x00000026\n";
+        test_data = "prop: end, head, loop 1, bc: 0x00000025\n";
         BlockProps(graph->GetEndBlock(), &data);
         EXPECT_EQ(data.str(), test_data);
         data.clear();
@@ -151,7 +151,7 @@ HWTEST_F(DumpTest, dump_test_002, TestSize.Level1)
         }
         auto value1 = PcToString(graph->GetEndBlock()->GetGuestPc(), graph->GetLocalAllocator());
         std::string str = value1.data();
-        EXPECT_EQ(str, "bc: 0x00000026");
+        EXPECT_EQ(str, "bc: 0x00000025");
         EXPECT_EQ(data.str(), test_data);
     });
     EXPECT_TRUE(status);
@@ -615,7 +615,7 @@ HWTEST_F(DumpTest, dump_test_014, TestSize.Level1)
         std::string test_data = "       Intrinsic.definefunc"
                                 "       Intrinsic.stglobalvar        Intrinsic.definefunc"
                                 "       Intrinsic.stglobalvar Intrinsic.trystglobalbyname Intrinsic.tryldglobalbyname"
-                                "       Intrinsic.ldundefined   Intrinsic.returnundefined ";
+                                "   Intrinsic.returnundefined ";
         for (auto bb : graph->GetBlocksRPO()) {
             for (auto inst : bb->AllInsts()) {
                 if (inst->GetOpcode() != Opcode::Intrinsic) {
@@ -798,13 +798,11 @@ HWTEST_F(DumpTest, dump_test_018, TestSize.Level1)
                                 "succs: [bb 1]\n\n"
                                 "BB 1  preds: [bb 5, bb 6]\n"
                                 "prop: bc: 0x00000024\n"
-                                "   25.any  Intrinsic.ldundefined       ss26"
-                                "                                                            \n"
-                                "   27.void Intrinsic.returnundefined   ss28"
+                                "   25.void Intrinsic.returnundefined   ss26"
                                 "                                                            \n"
                                 "succs: [bb 8]\n\n"
                                 "BB 8  preds: [bb 1]\n"
-                                "prop: end, bc: 0x00000026\n\n";
+                                "prop: end, bc: 0x00000025\n\n";
         graph->Dump(&out);
         EXPECT_TRUE(graph->HasEndBlock());
         EXPECT_EQ(out.str(), test_data);
@@ -878,13 +876,11 @@ HWTEST_F(DumpTest, dump_test_019, TestSize.Level1)
                                 "succs: [bb 1]\n"
                                 "BB 1  preds: [bb 5, bb 6]\n"
                                 "prop: bc: 0x00000024\n"
-                                "   25.any  Intrinsic.ldundefined       ss26"
-                                "                                                            \n"
-                                "   27.void Intrinsic.returnundefined   ss28"
+                                "   25.void Intrinsic.returnundefined   ss26"
                                 "                                                            \n"
                                 "succs: [bb 8]\n"
                                 "BB 8  preds: [bb 1]\n"
-                                "prop: end, bc: 0x00000026\n";
+                                "prop: end, bc: 0x00000025\n";
         for (auto bb : graph->GetBlocksRPO()) {
             bb->Dump(&out);
         }
@@ -915,7 +911,7 @@ HWTEST_F(DumpTest, dump_test_020, TestSize.Level1)
         bool isAcc = true;
         std::stringstream out;
         std::string test_data = "0x1(acc)0x1(acc)0x1(acc)0x1(acc)0x1(acc)0x1(acc)0x1(acc)0x1(acc)0x1(acc)0x1(acc)0x1"
-                                "(acc)0x1(acc)0x1(acc)0x1(acc)0x1(acc)";
+                                "(acc)0x1(acc)0x1(acc)0x1(acc)";
 
         for (auto bb : graph->GetVectorBlocks()) {
             for (auto inst : bb->AllInsts()) {

@@ -176,7 +176,7 @@ HWTEST_F(PassManagerTest, pass_manager_test_001, TestSize.Level1)
         EXPECT_EQ(lines[8].substr(0, ID_PASSNAME_COLUMN_WIDTH), "   6 Lowering                          :");
         EXPECT_EQ(lines[9], "-----------------------------------------------------------------------------");
         EXPECT_EQ(lines[10].substr(0, ID_PASSNAME_COLUMN_WIDTH), "                                  TOTAL:");
-        EXPECT_EQ(lines[11], "PBC instruction number : 13");
+        EXPECT_EQ(lines[11], "PBC instruction number : 12");
         
         status = true;
     });

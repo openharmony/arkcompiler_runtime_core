@@ -193,15 +193,14 @@ static void TransformIrGetModuleNamespace(AbckitGraph *graph, AbckitString *func
 
     AbckitBasicBlock *mainBB = g_implG->bbGetSuccBlock(g_implG->gGetStartBasicBlock(graph), 0);
     AbckitInst *lastInst = g_implG->bbGetLastInst(mainBB);
-    auto ldundefI = g_implG->iGetPrev(lastInst);
     auto getModuleNamespaceInst = isWide ? g_dynG->iCreateWideGetmodulenamespace(graph, ctxFinder.module)
                                          : g_dynG->iCreateGetmodulenamespace(graph, ctxFinder.module);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     auto ldObjByNameInst = g_dynG->iCreateLdobjbyname(graph, getModuleNamespaceInst, funcName);
     auto callInst = g_dynG->iCreateCallthis0(graph, ldObjByNameInst, getModuleNamespaceInst);
-    g_implG->iInsertBefore(getModuleNamespaceInst, ldundefI);
-    g_implG->iInsertBefore(ldObjByNameInst, ldundefI);
-    g_implG->iInsertBefore(callInst, ldundefI);
+    g_implG->iInsertBefore(getModuleNamespaceInst, lastInst);
+    g_implG->iInsertBefore(ldObjByNameInst, lastInst);
+    g_implG->iInsertBefore(callInst, lastInst);
 }
 
 static void TransformIrLdExternalModuleVar(AbckitGraph *graph, AbckitString *funcName, bool isWide = false)
@@ -217,15 +216,14 @@ static void TransformIrLdExternalModuleVar(AbckitGraph *graph, AbckitString *fun
 
     AbckitBasicBlock *mainBB = g_implG->bbGetSuccBlock(g_implG->gGetStartBasicBlock(graph), 0);
     AbckitInst *lastInst = g_implG->bbGetLastInst(mainBB);
-    auto ldundefI = g_implG->iGetPrev(lastInst);
     auto ldExternalModuleVarInst = isWide ? g_dynG->iCreateWideLdexternalmodulevar(graph, importFinder.id)
                                           : g_dynG->iCreateLdexternalmodulevar(graph, importFinder.id);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     auto throwUndef = g_dynG->iCreateThrowUndefinedifholewithname(graph, ldExternalModuleVarInst, funcName);
     auto callInst = g_dynG->iCreateCallarg0(graph, ldExternalModuleVarInst);
-    g_implG->iInsertBefore(ldExternalModuleVarInst, ldundefI);
-    g_implG->iInsertBefore(throwUndef, ldundefI);
-    g_implG->iInsertBefore(callInst, ldundefI);
+    g_implG->iInsertBefore(ldExternalModuleVarInst, lastInst);
+    g_implG->iInsertBefore(throwUndef, lastInst);
+    g_implG->iInsertBefore(callInst, lastInst);
 }
 
 static void TransformIrLdLocalModuleVar(AbckitGraph *graph, AbckitString *localVarName, AbckitString *funcName,
@@ -242,17 +240,16 @@ static void TransformIrLdLocalModuleVar(AbckitGraph *graph, AbckitString *localV
 
     AbckitBasicBlock *mainBB = g_implG->bbGetSuccBlock(g_implG->gGetStartBasicBlock(graph), 0);
     AbckitInst *lastInst = g_implG->bbGetLastInst(mainBB);
-    auto ldundefI = g_implG->iGetPrev(lastInst);
     auto tryLdGlobalByNameInst = g_dynG->iCreateTryldglobalbyname(graph, funcName);
     auto ldLocalModuleVarInst = isWide ? g_dynG->iCreateWideLdlocalmodulevar(graph, exportFinder.ed)
                                        : g_dynG->iCreateLdlocalmodulevar(graph, exportFinder.ed);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     auto throwUndef = g_dynG->iCreateThrowUndefinedifholewithname(graph, ldLocalModuleVarInst, localVarName);
     auto callInst = g_dynG->iCreateCallarg1(graph, tryLdGlobalByNameInst, ldLocalModuleVarInst);
-    g_implG->iInsertBefore(tryLdGlobalByNameInst, ldundefI);
-    g_implG->iInsertBefore(ldLocalModuleVarInst, ldundefI);
-    g_implG->iInsertBefore(throwUndef, ldundefI);
-    g_implG->iInsertBefore(callInst, ldundefI);
+    g_implG->iInsertBefore(tryLdGlobalByNameInst, lastInst);
+    g_implG->iInsertBefore(ldLocalModuleVarInst, lastInst);
+    g_implG->iInsertBefore(throwUndef, lastInst);
+    g_implG->iInsertBefore(callInst, lastInst);
 }
 
 static void TransformIrStModuleVar(AbckitGraph *graph, AbckitString *localVarName, AbckitString *funcName,
@@ -271,7 +268,6 @@ static void TransformIrStModuleVar(AbckitGraph *graph, AbckitString *localVarNam
     auto *const1Inst = g_implG->bbGetLastInst(startBB);
     auto *mainBB = g_implG->bbGetSuccBlock(startBB, 0);
     auto *lastInst = g_implG->bbGetLastInst(mainBB);
-    auto ldundefI = g_implG->iGetPrev(lastInst);
     auto tryLdGlobalByNameInst = g_dynG->iCreateTryldglobalbyname(graph, funcName);
     auto stModuleVarInst = isWide ? g_dynG->iCreateWideStmodulevar(graph, const1Inst, exportFinder.ed)
                                   : g_dynG->iCreateStmodulevar(graph, const1Inst, exportFinder.ed);
@@ -281,11 +277,11 @@ static void TransformIrStModuleVar(AbckitGraph *graph, AbckitString *localVarNam
     auto throwUndef = g_dynG->iCreateThrowUndefinedifholewithname(graph, ldLocalModuleVarInst, localVarName);
     auto callInst = g_dynG->iCreateCallarg1(graph, tryLdGlobalByNameInst, ldLocalModuleVarInst);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    g_implG->iInsertBefore(tryLdGlobalByNameInst, ldundefI);
-    g_implG->iInsertBefore(stModuleVarInst, ldundefI);
-    g_implG->iInsertBefore(ldLocalModuleVarInst, ldundefI);
-    g_implG->iInsertBefore(throwUndef, ldundefI);
-    g_implG->iInsertBefore(callInst, ldundefI);
+    g_implG->iInsertBefore(tryLdGlobalByNameInst, lastInst);
+    g_implG->iInsertBefore(stModuleVarInst, lastInst);
+    g_implG->iInsertBefore(ldLocalModuleVarInst, lastInst);
+    g_implG->iInsertBefore(throwUndef, lastInst);
+    g_implG->iInsertBefore(callInst, lastInst);
 }
 
 static std::vector<helpers::InstSchema<AbckitIsaApiDynamicOpcode>> g_bb2Insts {
@@ -336,8 +332,7 @@ static std::vector<helpers::InstSchema<AbckitIsaApiDynamicOpcode>> g_bb2Insts {
     {54, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0, {53, 15}},
     {55, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDOBJBYNAME, {16}},
     {56, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0, {55, 16}},
-    {57, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-    {58, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}};
+    {57, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}};
 
 static std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> CreateBBSchemaForModules()
 {

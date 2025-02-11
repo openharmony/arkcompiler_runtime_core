@@ -60,8 +60,8 @@ const std::string HELLO_WORLD_DUMP_RESULT_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "H
 const std::string HELLO_WORLD_DEBUG_DUMP_RESULT_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "HelloWorldDebugDumpResult.txt";
 const std::string HELLO_WORLD_DUMP_EXPECTED_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "HelloWorldDumpExpected.txt";
 const std::string HELLO_WORLD_DEBUG_DUMP_EXPECTED_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "HelloWorldDebugDumpExpected.txt";
-constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_INS = 73;
-constexpr uint8_t INS_SIZE_OF_FUNCTION_HOO = 5;
+constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_INS = 72;
+constexpr uint8_t INS_SIZE_OF_FUNCTION_HOO = 4;
 constexpr uint8_t IMMS_SIZE_OF_OPCODE_FLDAI = 1;
 constexpr uint8_t SIZE_OF_LITERAL_ARRAY_TABLE = 7;
 constexpr uint8_t TOTAL_NUM_OF_ASYNC_METHOD_LITERALS = 6;
@@ -560,15 +560,9 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part4, Te
     // check ins[71]
     const pandasm::Ins &ins71 = function.ins[71];
     std::string pa_ins_str71 = ins71.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str71 == "label@71: ldundefined");
+    EXPECT_TRUE(pa_ins_str71 == "label@71: returnundefined");
     EXPECT_TRUE(ins71.label == "label@71");
     EXPECT_TRUE(ins71.set_label);
-    // check ins[72]
-    const pandasm::Ins &ins72 = function.ins[72];
-    std::string pa_ins_str72 = ins72.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str72 == "returnundefined");
-    EXPECT_TRUE(ins72.label == "");
-    EXPECT_FALSE(ins72.set_label);
     // check catch blocks
     constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_CATCH_BLOCKS = 3;
     EXPECT_TRUE(function.catch_blocks.size() == NUM_OF_CODE_TEST_UT_FOO_METHOD_CATCH_BLOCKS);
@@ -602,18 +596,11 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_goo, TestSize
 {
     const pandasm::Function &function = *goo_function_;
     size_t regs_num = function.regs_num;
-    constexpr uint32_t NUM_OF_CODE_TEST_UT_GOO_METHOD_INS = 2;
+    constexpr uint32_t NUM_OF_CODE_TEST_UT_GOO_METHOD_INS = 1;
     EXPECT_TRUE(function.name == FUNC_NAME.goo);
     EXPECT_TRUE(function.ins.size() == NUM_OF_CODE_TEST_UT_GOO_METHOD_INS);
     // check ins[0]
-    constexpr uint32_t INDEX_OF_FUNC_LDUNDEFINED = 0;
-    const pandasm::Ins &ins0 = function.ins[INDEX_OF_FUNC_LDUNDEFINED];
-    std::string pa_ins_str0 = ins0.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str0 == "ldundefined");
-    EXPECT_TRUE(ins0.label == "");
-    EXPECT_FALSE(ins0.set_label);
-    // check ins[1]
-    constexpr uint32_t INDEX_OF_FUNC_RETURNUNDEFINED = 1;
+    constexpr uint32_t INDEX_OF_FUNC_RETURNUNDEFINED = 0;
     const pandasm::Ins &ins1 = function.ins[INDEX_OF_FUNC_RETURNUNDEFINED];
     std::string pa_ins_str1 = ins1.ToString("", true, regs_num);
     EXPECT_TRUE(pa_ins_str1 == "returnundefined");

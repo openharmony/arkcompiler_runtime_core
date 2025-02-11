@@ -50,12 +50,12 @@ TEST_F(LibAbcKitCreateDynGetunmappedargs, IcreateGetunmappedargs_1)
         auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
         auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
         auto *callarg1 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbyvalue);
-        auto *ldundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
+        auto *returnundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
         // CC-OFFNXT(G.FMT.02)
-        g_implG->iInsertBefore(getunmappedargs, ldundef);
-        g_implG->iInsertBefore(ldobjbyvalue, ldundef);
-        g_implG->iInsertBefore(tryldglobalbyname, ldundef);
-        g_implG->iInsertBefore(callarg1, ldundef);
+        g_implG->iInsertBefore(getunmappedargs, returnundef);
+        g_implG->iInsertBefore(ldobjbyvalue, returnundef);
+        g_implG->iInsertBefore(tryldglobalbyname, returnundef);
+        g_implG->iInsertBefore(callarg1, returnundef);
     };
 
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/get_insts/getunmappedargs_dynamic.abc",
@@ -92,15 +92,15 @@ TEST_F(LibAbcKitCreateDynGetunmappedargs, IcreateGetunmappedargs_2)
             auto *callarg11 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbyvalue1);
             auto *callarg12 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbyvalue2);
 
-            auto *ldundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iInsertBefore(getunmappedargs, ldundef);
-            g_implG->iInsertBefore(tryldglobalbyname, ldundef);
-            g_implG->iInsertBefore(ldobjbyvalue0, ldundef);
-            g_implG->iInsertBefore(ldobjbyvalue1, ldundef);
-            g_implG->iInsertBefore(ldobjbyvalue2, ldundef);
-            g_implG->iInsertBefore(callarg10, ldundef);
-            g_implG->iInsertBefore(callarg11, ldundef);
-            g_implG->iInsertBefore(callarg12, ldundef);
+            auto *returnundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+            g_implG->iInsertBefore(getunmappedargs, returnundef);
+            g_implG->iInsertBefore(tryldglobalbyname, returnundef);
+            g_implG->iInsertBefore(ldobjbyvalue0, returnundef);
+            g_implG->iInsertBefore(ldobjbyvalue1, returnundef);
+            g_implG->iInsertBefore(ldobjbyvalue2, returnundef);
+            g_implG->iInsertBefore(callarg10, returnundef);
+            g_implG->iInsertBefore(callarg11, returnundef);
+            g_implG->iInsertBefore(callarg12, returnundef);
         });
 
     output = helpers::ExecuteDynamicAbc(

@@ -82,8 +82,7 @@ static std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> CreateBBSchemaF
              {
                  {3, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINEFUNC, {}},
                  callInstSchema,
-                 {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                 {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+                 {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
              }},
             {{1}, {}, {}}};
 }
