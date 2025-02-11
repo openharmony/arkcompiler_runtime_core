@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +14,14 @@
  */
 
 /*---
-desc: Several imports from one path
+desc: A name is explicitly used with alias and implicitly without alias. Sine is accessible
 ---*/
 
-import {sin} from "std/math";
-import {cos} from "std/math";
+import {sin as Sine} from "std/math";
+import * as all from "std/math";
 
 function main(): void {
-  let x = sin(1.0);
-  let y = cos(1.0);
+  let x = Sine(1.0);
+  let y = all.sin(1.0);
+  let z = Math.sin(1.0);
 }

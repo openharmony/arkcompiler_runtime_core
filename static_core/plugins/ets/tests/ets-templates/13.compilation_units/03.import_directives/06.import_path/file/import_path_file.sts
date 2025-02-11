@@ -19,7 +19,6 @@
 desc: |-
   The compiler imports the module that the import path refers to. The source code of the module is the
   file with the extension provided within the import path, or—if none is so provided—appended by the compiler.
-tags: [compile-only]
 params: {{stmt}}
 files: [module_a.sts, nesteddir/module_a.sts, nesteddir/../module_a.sts, ../module_a.sts]
 ---*/
