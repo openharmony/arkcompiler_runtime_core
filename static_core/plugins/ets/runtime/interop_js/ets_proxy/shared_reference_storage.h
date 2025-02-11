@@ -41,7 +41,7 @@ public:
     PANDA_PUBLIC_API static PandaUniquePtr<SharedReferenceStorage> Create(PandaEtsVM *vm);
     ~SharedReferenceStorage() override;
 
-    using PreInitJSObjectCallback = std::function<napi_value(SharedReference *)>;
+    using PreInitJSObjectCallback = std::function<napi_value(SharedReference **)>;
 
     size_t Size() const
     {
@@ -66,9 +66,6 @@ public:
 
     void NotifyXGCStarted();
     void NotifyXGCFinished();
-
-    void OnThreadAttached() {}
-    void OnThreadDetached() {}
 
     /**
      * @brief Visit all non-empty refs and call visitor as vm root for EtsObject from the ref
@@ -113,9 +110,10 @@ private:
 
     template <SharedReference::InitFn REF_INIT>
     PANDA_PUBLIC_API inline SharedReference *CreateReference(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject,
+                                                             NapiXRefDirection direction,
                                                              const PreInitJSObjectCallback &preInitCallback = nullptr);
 
-    PANDA_PUBLIC_API SharedReference *GetReference(void *data) const REQUIRES_SHARED(storageLock_);
+    PANDA_PUBLIC_API SharedReference *GetReference(void *data) const;
     PANDA_PUBLIC_API void RemoveReference(SharedReference *sharedRef);
     /**
      * Remove all unmarked references from related chain which contains passed shared references

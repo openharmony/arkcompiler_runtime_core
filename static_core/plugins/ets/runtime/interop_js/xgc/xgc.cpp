@@ -26,7 +26,6 @@
 #endif  // PANDA_JS_ETS_HYBRID_MODE
 
 namespace ark::ets::interop::js {
-
 // CC-OFFNXT(G.PRE.02) necessary macro
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_XGC(level) LOG(level, ETS_INTEROP_JS) << "[XGC] "
@@ -66,6 +65,26 @@ XGC::XGC(PandaEtsVM *vm, STSVMInterfaceImpl *stsVmIface, ets_proxy::SharedRefere
     targetThreasholdSize_.store(minimalThreasholdSize_, std::memory_order_relaxed);
 }
 
+ALWAYS_INLINE static void MarkJsObject(ets_proxy::SharedReference *ref, STSVMInterfaceImpl *stsVmIface)
+{
+    ASSERT(ref->HasJSFlag());
+    LOG_XGC(DEBUG) << "napi_mark_from_object for ref " << ref;
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+    napi_mark_from_object(ref->GetCtx()->GetJSEnv(), ref->GetJsRef());
+#endif  // PANDA_JS_ETS_HYBRID_MODE
+    LOG_XGC(DEBUG) << "Notify to JS waiters";
+    stsVmIface->NotifyWaiters();
+}
+
+ALWAYS_INLINE static void MarkEtsObject(ets_proxy::SharedReference *ref, PandaEtsVM *vm)
+{
+    ASSERT(ref->HasETSFlag());
+    EtsObject *etsObj = ref->GetEtsObject();
+    auto *gc = reinterpret_cast<mem::G1GC<EtsLanguageConfig> *>(vm->GetGC());
+    LOG_XGC(DEBUG) << "Start marking from " << etsObj << " (" << etsObj->GetClass()->GetDescriptor() << ")";
+    gc->MarkObjectRecursively(etsObj->GetCoreType());
+}
+
 static auto CreateXObjectHandler(ets_proxy::SharedReferenceStorage *storage, STSVMInterfaceImpl *stsVmIface)
 {
     return [storage, stsVmIface](ObjectHeader *obj) {
@@ -78,12 +97,7 @@ static auto CreateXObjectHandler(ets_proxy::SharedReferenceStorage *storage, STS
         ets_proxy::SharedReference::Iterator end;
         do {
             if (it->HasJSFlag() && it->MarkIfNotMarked()) {
-                LOG_XGC(DEBUG) << "napi_mark_from_object for ref " << *it;
-#ifdef PANDA_JS_ETS_HYBRID_MODE
-                napi_mark_from_object(it->GetCtx()->GetJSEnv(), it->GetJsRef());
-#endif  // PANDA_JS_ETS_HYBRID_MODE
-                LOG_XGC(DEBUG) << "Notify to JS waiters";
-                stsVmIface->NotifyWaiters();
+                MarkJsObject(*it, stsVmIface);
             }
             ++it;
         } while (it != end);
@@ -153,6 +167,7 @@ void XGC::GCStarted(const GCTask &task, [[maybe_unused]] size_t heapSize)
         return;
     }
     XGCScope xgcStartScope("XGC Start", vm_);
+    storage_->NotifyXGCStarted();
     vm_->RemoveRootProvider(storage_);
     isXGcInProgress_ = true;
     remarkFinished_ = false;
@@ -178,8 +193,9 @@ void XGC::GCFinished(const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeG
         XGCScope xgcSweepScope("XGC Sweep", vm_);
         storage_->SweepUnmarkedRefs();
     }
-    // NOTE(ipetrov, XGC): if table will be cleared in concurrent, then compute the new size should not be based on the
-    // current storage size, need storage size without dead references
+    storage_->NotifyXGCFinished();
+    // NOTE(ipetrov, XGC): if table will be cleared in concurrent, then compute the new size should not be based on
+    // the current storage size, need storage size without dead references
     auto newTargetThreshold = this->ComputeNewSize();
     LOG(DEBUG, GC_TRIGGER) << "XGC's new target threshold storage size = " << newTargetThreshold;
     // Atomic with relaxed order reason: data race with targetThreasholdSize_ with no synchronization or ordering
@@ -200,8 +216,11 @@ void XGC::GCPhaseStarted(mem::GCPhase phase)
             break;
         }
         case mem::GCPhase::GC_PHASE_REMARK: {
-            XGCScope xgcRemarkStartScope("RemarkStartBarrier", vm_);
-            stsVmIface_->RemarkStartBarrier();
+            {
+                XGCScope xgcRemarkStartScope("RemarkStartBarrier", vm_);
+                stsVmIface_->RemarkStartBarrier();
+            }
+            Remark();
             break;
         }
         default: {
@@ -236,18 +255,38 @@ void XGC::GCPhaseFinished(mem::GCPhase phase)
 void XGC::MarkFromObject([[maybe_unused]] void *obj)
 {
     ASSERT(obj != nullptr);
+#if defined(PANDA_JS_ETS_HYBRID_MODE)
     // NOTE(audovichenko): Find the corresponding ref
-#ifdef PANDA_JS_ETS_HYBRID_MODE
-    NativeReference *nativeRef = reinterpret_cast<NativeReference *>(obj);
-    auto *sharedRef = reinterpret_cast<ets_proxy::SharedReference *>(nativeRef->GetData());
+    auto *nativeRef = static_cast<NativeReference *>(obj);
+    auto *refRef = static_cast<ets_proxy::SharedReference **>(nativeRef->GetData());
+    // Atomic with acquire order reason: load visibility after shared reference initialization in mutator thread
+    auto *sharedRef = AtomicLoad(refRef, std::memory_order_acquire);
+    // Reference is not initialized yet, will be processed on Remark phase
+    if (sharedRef == nullptr) {
+        return;
+    }
     LOG_XGC(DEBUG) << "MarkFromObject for " << sharedRef;
     if (sharedRef->MarkIfNotMarked()) {
-        EtsObject *etsObj = sharedRef->GetEtsObject();
-        auto *gc = reinterpret_cast<mem::G1GC<EtsLanguageConfig> *>(vm_->GetGC());
-        LOG_XGC(DEBUG) << "Start marking from " << etsObj << " (" << etsObj->GetClass()->GetDescriptor() << ")";
-        gc->MarkObjectRecursively(etsObj->GetCoreType());
+        MarkEtsObject(sharedRef, vm_);
     }
 #endif  // PANDA_JS_ETS_HYBRID_MODE
+}
+
+void XGC::Remark()
+{
+    XGCScope remarkScope("SharedRefsRemark", vm_);
+    auto *ref = storage_->ExtractRefAllocatedDuringXGC();
+    while (ref != nullptr) {
+        if (ref->MarkIfNotMarked()) {
+            if (ref->HasJSFlag()) {
+                MarkJsObject(ref, stsVmIface_);
+            }
+            if (ref->HasETSFlag()) {
+                MarkEtsObject(ref, vm_);
+            }
+        }
+        ref = storage_->ExtractRefAllocatedDuringXGC();
+    }
 }
 
 size_t XGC::ComputeNewSize()
@@ -274,7 +313,8 @@ bool XGC::Trigger(mem::GC *gc, PandaUniquePtr<GCTask> task)
     ASSERT(ctx != nullptr);
     // NOTE(audovichenko): Need a way to wait for the gc. May be Promise? :) // NOTE(ipetrov): Please, no!
     // NOTE(audovichenko): Handle the situation when the function create several equal tasks
-    // NOTE(audovichenko): Handle the situation when GC is triggered in one VM but cannot be triggered in another VM.
+    // NOTE(audovichenko): Handle the situation when GC is triggered in one VM but cannot be triggered in another
+    // VM.
     if (!ctx->GetEcmaVMInterface()->StartXRefMarking()) {
         ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR, "Cannot start ArkJS XGC");
         return false;

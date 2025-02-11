@@ -37,6 +37,7 @@ using NapiXRefDirection = enum {
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_xref_wrap(napi_env env, napi_value js_object, void *native_object, napi_finalize finalize_cb,
                NapiXRefDirection ref_direction, napi_ref *result);
+napi_status __attribute__((weak)) napi_xref_unwrap(napi_env env, napi_value js_object, void **result);
 // NOLINTEND(readability-identifier-naming)
 #endif
 
@@ -240,17 +241,6 @@ inline napi_status NapiCallFunction(napi_env env, napi_value recv, napi_value fu
     result = result != nullptr ? result : &dummy;
 #endif  // PANDA_TARGET_OHOS
     return napi_call_function(env, recv, func, argc, argv, result);
-}
-
-inline napi_status NapiWrap(napi_env env, napi_value jsObject, void *nativeObject, napi_finalize finalizeCb,
-                            napi_ref *result, [[maybe_unused]] NapiXRefDirection refDirection)
-{
-#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
-    return napi_xref_wrap(env, jsObject, nativeObject, finalizeCb, refDirection, result);
-#else
-    ASSERT(result == nullptr || finalizeCb != nullptr);
-    return napi_wrap(env, jsObject, nativeObject, finalizeCb, nullptr, result);
-#endif
 }
 
 }  // namespace ark::ets::interop::js

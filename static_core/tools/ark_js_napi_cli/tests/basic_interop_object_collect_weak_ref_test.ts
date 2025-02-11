@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,8 +33,7 @@ function isSts2JsObjectCollectedTest(): number {
     let bTestResult = 0;
     let wr = getSTSWeakRef();
     interop.RunInteropGC();
-    let gcId = globalThis.ArkTools.GC.startGC("full");
-    globalThis.ArkTools.GC.waitForFinishGC(gcId);
+    globalThis.test.RunJsGC();
     interop.RunPandaGC();
 
     if (interop.isSTSObjectCollected()) {
@@ -53,8 +52,7 @@ function isJs2StsPromiseCollectedTest(): number {
     let bTestResult = 0;
     let wr = getJSPromiseWeakRef();
     interop.RunInteropGC();
-    let gcId = globalThis.ArkTools.GC.startGC("full");
-    globalThis.ArkTools.GC.waitForFinishGC(gcId);
+    globalThis.test.RunJsGC();
     interop.RunPandaGC();
 
     if (!(interop.isSTSPromiseCollected())) {

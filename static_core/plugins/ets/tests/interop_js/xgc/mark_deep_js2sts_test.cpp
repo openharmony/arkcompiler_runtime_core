@@ -97,7 +97,7 @@ public:
             errorMessages_.push_back(err.str());
             return;
         }
-        stsIface->MarkFromObject(xref_);
+        stsIface->MarkFromObject(xref_->GetJsRef());
         if (!gc->IsMarked(child_)) {
             std::stringstream err;
             err << "Expected child object is marked";

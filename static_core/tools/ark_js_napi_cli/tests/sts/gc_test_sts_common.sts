@@ -59,7 +59,7 @@ function isSTSPromiseCollected(): boolean {
     return gpwr.deref() === undefined;
 }
 
-function SetJSObject(obj: Object): void {
+function SetJSObject(obj: JSValue): void {
     let a = obj;
 }
 

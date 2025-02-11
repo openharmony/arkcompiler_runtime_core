@@ -135,7 +135,8 @@ void EtsClassWrapper::ThrowJSErrorNotAssignable(napi_env env, EtsClass *fromKlas
 EtsObject *EtsClassWrapper::CreateJSBuiltinProxy(InteropCtx *ctx, napi_value jsValue)
 {
     ASSERT(jsproxyWrapper_ != nullptr);
-    ASSERT(SharedReference::ExtractMaybeReference(ctx->GetJSEnv(), jsValue) == nullptr);
+    auto *storage = ctx->GetSharedRefStorage();
+    ASSERT(storage->GetReference(ctx->GetJSEnv(), jsValue) == nullptr);
 
     EtsObject *etsObject = EtsObject::Create(jsproxyWrapper_->GetProxyClass());
     if (UNLIKELY(etsObject == nullptr)) {
@@ -143,7 +144,7 @@ EtsObject *EtsClassWrapper::CreateJSBuiltinProxy(InteropCtx *ctx, napi_value jsV
         return nullptr;
     }
 
-    SharedReference *sharedRef = ctx->GetSharedRefStorage()->CreateJSObjectRef(ctx, etsObject, jsValue);
+    SharedReference *sharedRef = storage->CreateJSObjectRef(ctx, etsObject, jsValue);
     if (UNLIKELY(sharedRef == nullptr)) {
         ASSERT(InteropCtx::SanityJSExceptionPending());
         return nullptr;

@@ -30,7 +30,7 @@ public:
         return true;
     }
 
-    void MarkFromObject(void *obj) override {}
+    void MarkFromObject(void *obj) {}
 
     std::vector<std::string> GetErrors()
     {
@@ -100,7 +100,7 @@ public:
                     errorMessages_.push_back(err.str());
                     return;
                 }
-                stsIface->MarkFromObject(js2Sts_);
+                stsIface->MarkFromObject(js2Sts_->GetJsRef());
                 if (!sts2Js_->IsMarked()) {
                     std::stringstream err;
                     err << "Expected STS->JS xref is marked";
