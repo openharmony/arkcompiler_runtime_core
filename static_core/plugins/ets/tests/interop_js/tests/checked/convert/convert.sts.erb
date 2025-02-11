@@ -80,7 +80,7 @@ function test_deep_equal(): int {
 //! EVENT        /Compilation,ETSGLOBAL::call_js_get_<%= type_info.name %>,.*,COMPILED/
 //! METHOD       "call_js_get_<%= type_info.name %>"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jscall::$_invoke/
+//! INST_NOT     /CallStatic.*jscall::\$_invoke/
 //! INST         "Intrinsic.CompilerJSCallFunction"
 //! INST_NEXT    "Intrinsic.CompilerConvertLocalToJSValue"
 % if ["String","boolean", "double"].include?(type_info.name)
@@ -112,7 +112,7 @@ function test_js_get_<%= type_info.name %>(): int {
 //! EVENT        /Compilation,ETSGLOBAL::call_js_get_jsvalue_<%= type_info.name %>,.*,COMPILED/
 //! METHOD       "call_js_get_jsvalue_<%= type_info.name %>"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jscall::$_invoke/
+//! INST_NOT     /CallStatic.*jscall::\$_invoke/
 //! INST         "Intrinsic.CompilerJSCallFunction"
 //! INST_NEXT    "Intrinsic.CompilerConvertLocalToJSValue"
 //! PASS_AFTER   "Codegen"
@@ -136,7 +136,7 @@ function test_js_get_jsvalue_<%= type_info.name %>(): int {
 //! EVENT        /Compilation,ETSGLOBAL::call_js_set_<%= type_info.name %>,.*,COMPILED/
 //! METHOD       "call_js_set_<%= type_info.name %>"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jscall::$_invoke/
+//! INST_NOT     /CallStatic.*jscall::\$_invoke/
 //! INST         "Intrinsic.CompilerJSCallCheck"
 //! INST_NEXT    "Intrinsic.CompilerConvertI32ToLocal"
 //! INST_NEXT    "Intrinsic.CompilerConvert<%= type_info.wrap %>ToLocal"
