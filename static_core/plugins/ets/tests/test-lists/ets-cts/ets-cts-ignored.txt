@@ -385,18 +385,10 @@
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_18.sts
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_19.sts
 
-# es2panda fails: panda#11752
-13.compilation_units/10.top-level_statements/block_declaration_4.sts
-# end of es2panda fails
-
 # es2panda fails: panda#11660 panda#11541
 07.expressions/32.lambda_expression/02.lambda_body/lambda_captured_value_type_2.sts
 07.expressions/32.lambda_expression/lambda_evaluation.sts
 # end of es2panda fails
-
-# runtime fails
-13.compilation_units/03.import_directives/03.several_bindings_for_one_import_path/explicitly_and_implicitly_import_5.sts
-# end of runtime fails
 
 # es2panda fails: panda#14067
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_10.sts
@@ -687,10 +679,6 @@
 03.types/01.predefined_types/01.primitive_types/pt_type_6.sts
 03.types/01.predefined_types/01.primitive_types/pt_type_8.sts
 # end of es2panda fails
-
-# Disable struct test according I8EM2T
-13.compilation_units/03.import_directives/04.default_import_binding/default_import_struct.sts
-# end of Disable struct test according I8EM2T
 
 # es2panda fails: panda:14622 Following function call block is always taken as trailing lambda
 17.experimental_features/13.trailing_lambda/trlambda_func_8.sts

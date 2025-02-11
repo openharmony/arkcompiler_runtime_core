@@ -1,0 +1,2 @@
+deprecated/13.compilation_units/03.import_directives/04.default_import_binding/default_import_struct.sts
+deprecated/13.compilation_units/07.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_struct.sts
