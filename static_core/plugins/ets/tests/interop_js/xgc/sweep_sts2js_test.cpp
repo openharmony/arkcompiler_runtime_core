@@ -20,29 +20,38 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/tests/interop_js/xgc/test_xgc_vm_adaptor.h"
 
 namespace ark::ets::interop::js {
 
-class TestEcmaVMInterface : public arkplatform::EcmaVMInterface {
+struct TestXGCEcmaAdaptorValues {
+    std::vector<std::string> GetErrors()
+    {
+        return errors;
+    }
+
+    std::vector<std::string> errors;
+};
+static TestXGCEcmaAdaptorValues g_xgcAdaptorValues;
+
+class TestXGCEcmaVmAdaptor : public TestXGCVmAdaptor {
 public:
-    void MarkFromObject(void *obj)
+    explicit TestXGCEcmaVmAdaptor(napi_env env, TestXGCEcmaAdaptorValues *values)
+        : TestXGCVmAdaptor(env), values_(values)
+    {
+    }
+
+    void MarkFromObject([[maybe_unused]] napi_ref obj) override
     {
         std::stringstream err;
         err << "Unexpected call of MarkFromObject";
-        errors_.push_back(err.str());
+        values_->errors.push_back(err.str());
         return;
     }
 
-    std::vector<std::string> GetErrors()
-    {
-        return errors_;
-    }
-
 private:
-    std::vector<std::string> errors_;
+    TestXGCEcmaAdaptorValues *values_;
 };
-
-static TestEcmaVMInterface g_ecmaVMIface;
 
 class TestGCListener : public mem::GCListener {
 public:

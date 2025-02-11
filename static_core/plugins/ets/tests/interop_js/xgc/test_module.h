@@ -24,27 +24,6 @@
 namespace ark::ets::interop::js {
 
 class TestModule {
-private:
-    static auto CreateXObjectHandler(ets_proxy::SharedReferenceStorage *storage, STSVMInterfaceImpl *stsVmIface,
-                                     TestEcmaVMInterface *ecmaVmIface)
-    {
-        return [storage, stsVmIface, ecmaVmIface](ObjectHeader *obj) {
-            auto *etsObj = EtsObject::FromCoreType(obj);
-            if (!etsObj->HasInteropIndex()) {
-                return;
-            }
-            ets_proxy::SharedReference::Iterator it(storage->GetReference(etsObj));
-            ets_proxy::SharedReference::Iterator end;
-            do {
-                if (it->HasJSFlag() && it->MarkIfNotMarked()) {
-                    ecmaVmIface->MarkFromObject(it->GetJsRef());
-                    stsVmIface->NotifyWaiters();
-                }
-                ++it;
-            } while (it != end);
-        };
-    }
-
 public:
     NO_COPY_SEMANTIC(TestModule);
     NO_MOVE_SEMANTIC(TestModule);
@@ -54,18 +33,11 @@ public:
     static napi_value Setup(napi_env env, [[maybe_unused]] napi_callback_info info)
     {
         auto *ctx = InteropCtx::Current();
-        ctx->SetEcmaVMInterface(&g_ecmaVMIface);
+        ctx->CreateXGCVmAdaptor<TestXGCEcmaVmAdaptor>(env, &g_xgcAdaptorValues);
         ctx->GetSTSVMInterface()->OnVMDetach();
 
         mem::GC *gc = ets::PandaEtsVM::GetCurrent()->GetGC();
         gc->AddListener(&g_gcListener);
-        auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
-        allocator->Delete(gc->GetExtensionData());
-        auto xobjHandler =
-            CreateXObjectHandler(ctx->GetSharedRefStorage(),
-                                 reinterpret_cast<STSVMInterfaceImpl *>(ctx->GetSTSVMInterface()), &g_ecmaVMIface);
-        auto *extentionGCData = allocator->New<mem::XGCExtensionData>(xobjHandler);
-        gc->SetExtensionData(extentionGCData);
 
         napi_value result;
         napi_get_undefined(env, &result);
@@ -76,7 +48,7 @@ public:
     static napi_value Check(napi_env env, [[maybe_unused]] napi_callback_info info)
     {
         auto &gcErrors = g_gcListener.GetErrors();
-        auto ecmaVmIfaceErrors = g_ecmaVMIface.GetErrors();
+        auto ecmaVmIfaceErrors = g_xgcAdaptorValues.GetErrors();
         if (!gcErrors.empty() || !ecmaVmIfaceErrors.empty()) {
             std::stringstream totalErrorMsg;
             totalErrorMsg << "Test failed:\n";

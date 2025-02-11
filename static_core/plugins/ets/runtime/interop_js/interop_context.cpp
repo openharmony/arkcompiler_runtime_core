@@ -299,7 +299,7 @@ InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
       stackInfoManager_(this, coro)
 {
     stackInfoManager_.InitStackInfoIfNeeded();
-
+    ecmaVMIterfaceAdaptor_ = MakePandaUnique<XGCVmAdaptor>(env, nullptr);
     // the per-EtsVM part has to be initialized first
     RegisterBuiltinJSRefConvertors(this);
 

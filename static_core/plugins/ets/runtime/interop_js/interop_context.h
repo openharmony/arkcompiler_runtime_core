@@ -32,6 +32,8 @@
 #include "hybrid/sts_vm_interface.h"
 #include "hybrid/ecma_vm_interface.h"
 
+#include "plugins/ets/runtime/interop_js/xgc/xgc_vm_adaptor.h"
+
 #include <node_api.h>
 #include <unordered_map>
 
@@ -132,7 +134,7 @@ private:
     static std::atomic_uint32_t qnameBufferSize_;
 };
 
-class InteropCtx {
+class InteropCtx final {
 public:
     NO_COPY_SEMANTIC(InteropCtx);
     NO_MOVE_SEMANTIC(InteropCtx);
@@ -467,14 +469,17 @@ public:
         stackInfoManager_.UpdateStackInfoIfNeeded();
     }
 
-    void SetEcmaVMInterface(arkplatform::EcmaVMInterface *iface)
+    XGCVmAdaptor *GetXGCVmAdaptor() const
     {
-        ecmaVMInterface_ = iface;
+        return ecmaVMIterfaceAdaptor_.get();
     }
 
-    arkplatform::EcmaVMInterface *GetEcmaVMInterface() const
+    template <class EcmaVMAdaptorClass, class... Args>
+    void CreateXGCVmAdaptor(Args &&...args)
     {
-        return ecmaVMInterface_;
+        static_assert(std::is_base_of_v<XGCVmAdaptor, EcmaVMAdaptorClass>);
+        static_assert(std::is_constructible_v<EcmaVMAdaptorClass, Args...>);
+        ecmaVMIterfaceAdaptor_ = MakePandaUnique<EcmaVMAdaptorClass>(std::forward<Args>(args)...);
     }
 
     arkplatform::STSVMInterface *GetSTSVMInterface() const
@@ -582,7 +587,7 @@ private:
 
     StackInfoManager stackInfoManager_;
 
-    arkplatform::EcmaVMInterface *ecmaVMInterface_ = nullptr;
+    PandaUniquePtr<XGCVmAdaptor> ecmaVMIterfaceAdaptor_;
 
     // Allocator calls our protected ctor
     friend class mem::Allocator;

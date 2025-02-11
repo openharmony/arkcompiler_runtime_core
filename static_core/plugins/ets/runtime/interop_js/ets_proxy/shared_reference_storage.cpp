@@ -147,7 +147,7 @@ bool SharedReferenceStorage::HasReference(EtsObject *etsObject, napi_env env)
     uint32_t index = SharedReference::ExtractMaybeIndex(etsObject);
     do {
         const SharedReference *currentRef = GetItemByIndex(index);
-        if (currentRef->ctx_->GetJSEnv() == env) {
+        if (currentRef->ctx_->GetXGCVmAdaptor()->HasSameEnv(env)) {
             return true;
         }
         index = currentRef->flags_.GetNextIndex();
@@ -161,7 +161,7 @@ napi_value SharedReferenceStorage::GetJsObject(EtsObject *etsObject, napi_env en
     const SharedReference *currentRef = GetItemByIndex(SharedReference::ExtractMaybeIndex(etsObject));
     // CC-OFFNXT(G.CTL.03) false positive
     do {
-        if (currentRef->ctx_->GetJSEnv() == env) {
+        if (currentRef->ctx_->GetXGCVmAdaptor()->HasSameEnv(env)) {
             auto ref = currentRef->jsRef_;
             storageLock_.Unlock();
             ScopedNativeCodeThreadIfNeeded s(EtsCoroutine::GetCurrent());

@@ -20,57 +20,65 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/tests/interop_js/xgc/test_xgc_vm_adaptor.h"
 #include "native_reference.h"
 
 namespace ark::ets::interop::js {
 
-class TestEcmaVMInterface : public arkplatform::EcmaVMInterface {
-public:
-    bool StartXRefMarking() override
+struct TestXGCEcmaAdaptorValues {
+    void SetExpectedJsObject(napi_ref obj)
     {
-        return true;
-    }
-
-    void MarkFromObject(void *obj)
-    {
-        markFromObjectCalled_ = true;
-        if (obj != expectedJsObject_) {
-            std::stringstream err;
-            err << "MarkFromObject called with " << obj << ", but expected " << expectedJsObject_;
-            errors_.push_back(err.str());
-            return;
-        }
-        InteropCtx::Current()->GetSTSVMInterface()->MarkFromObject(refToMark_->GetJsRef());
-    }
-
-    void SetExpectedJsObject(void *obj)
-    {
-        expectedJsObject_ = obj;
+        expectedJsObject = obj;
     }
 
     void SetRefToMark(ets_proxy::SharedReference *ref)
     {
-        refToMark_ = ref;
+        refToMark = ref;
     }
 
     std::vector<std::string> GetErrors()
     {
-        if (!markFromObjectCalled_) {
+        if (!markFromObjectCalled) {
             std::stringstream err;
             err << "MarkFromObject was not called";
-            errors_.insert(errors_.begin(), err.str());
+            errors.insert(errors.begin(), err.str());
         }
-        return errors_;
+        return errors;
+    }
+
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
+    std::vector<std::string> errors;
+    napi_ref expectedJsObject = nullptr;
+    ets_proxy::SharedReference *refToMark = nullptr;
+    bool markFromObjectCalled = false;
+    // NOLINTEND(misc-non-private-member-variables-in-classes)
+};
+
+static TestXGCEcmaAdaptorValues g_xgcAdaptorValues;
+
+class TestXGCEcmaVmAdaptor : public TestXGCVmAdaptor {
+public:
+    explicit TestXGCEcmaVmAdaptor(napi_env env, TestXGCEcmaAdaptorValues *values)
+        : TestXGCVmAdaptor(env), values_(values)
+    {
+        ASSERT(values_ != nullptr);
+    }
+
+    void MarkFromObject(napi_ref obj) override
+    {
+        values_->markFromObjectCalled = true;
+        if (obj != values_->expectedJsObject) {
+            std::stringstream err;
+            err << "MarkFromObject called with " << obj << ", but expected " << values_->expectedJsObject;
+            values_->errors.push_back(err.str());
+            return;
+        }
+        InteropCtx::Current()->GetSTSVMInterface()->MarkFromObject(values_->refToMark->GetJsRef());
     }
 
 private:
-    std::vector<std::string> errors_;
-    void *expectedJsObject_ = nullptr;
-    ets_proxy::SharedReference *refToMark_ = nullptr;
-    bool markFromObjectCalled_ = false;
+    TestXGCEcmaAdaptorValues *values_ = nullptr;
 };
-
-static TestEcmaVMInterface g_ecmaVMIface;
 
 class TestGCListener : public mem::GCListener {
 public:
@@ -109,7 +117,7 @@ public:
                     return;
                 }
                 js2etsRef = true;
-                g_ecmaVMIface.SetRefToMark(xref);
+                g_xgcAdaptorValues.SetRefToMark(xref);
             }
             if (xref->HasJSFlag()) {
                 if (ets2jsRef) {
@@ -119,7 +127,7 @@ public:
                     return;
                 }
                 ets2jsRef = true;
-                g_ecmaVMIface.SetExpectedJsObject(xref->GetJsRef());
+                g_xgcAdaptorValues.SetExpectedJsObject(xref->GetJsRef());
             }
         });
     }
@@ -150,6 +158,7 @@ private:
 };
 
 static TestGCListener g_gcListener;
+
 }  // namespace ark::ets::interop::js
 
 #include "test_module.h"
