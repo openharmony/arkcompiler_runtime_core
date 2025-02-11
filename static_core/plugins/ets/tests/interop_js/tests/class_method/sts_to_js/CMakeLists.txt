@@ -24,4 +24,5 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__class_method_sts_to_ts
         ${CMAKE_CURRENT_SOURCE_DIR}/check_put_another_instance_class.js
         ${CMAKE_CURRENT_SOURCE_DIR}/check_user_class_method.js
         ${CMAKE_CURRENT_SOURCE_DIR}/class_method.test.js
+    COMPILATION_JS_WITH_CJS_ON
 )

@@ -20,4 +20,5 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__ets_proxy_test_generic_types
         ${CMAKE_CURRENT_SOURCE_DIR}/check_js_objects.js
         ${CMAKE_CURRENT_SOURCE_DIR}/check_js_primitives.js
         ${CMAKE_CURRENT_SOURCE_DIR}/generic_types.test.js
+    COMPILATION_JS_WITH_CJS_ON
 )

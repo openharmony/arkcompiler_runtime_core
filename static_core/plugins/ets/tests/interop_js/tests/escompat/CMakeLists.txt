@@ -12,7 +12,7 @@
 # limitations under the License.
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test__escompat
-    CPP_SOURCES 
+    CPP_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/escompat.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/escompat_error.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_buffer.cpp
@@ -58,4 +58,5 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test__escompat
         ${CMAKE_CURRENT_SOURCE_DIR}/error_js_suites/test_cause.js
         ${CMAKE_CURRENT_SOURCE_DIR}/error_js_suites/test_to_string.js
         ${CMAKE_CURRENT_SOURCE_DIR}/escompat.test.js
+    COMPILATION_JS_WITH_CJS_ON
 )

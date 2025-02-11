@@ -24,4 +24,5 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__generic_call_params_sts_to_ts
         ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_extends_class.js
         ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_subset_class.js
         ${CMAKE_CURRENT_SOURCE_DIR}/generic_call_params.test.js
+    COMPILATION_JS_WITH_CJS_ON
 )

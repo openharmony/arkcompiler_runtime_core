@@ -19,6 +19,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_int_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_int/conversion_int.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_array_int_ts_to_sts
@@ -26,6 +27,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_array_int_ts_to_st
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_array_int/conversion_array_int.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_binary_ts_to_sts
@@ -33,6 +35,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_binary_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_binary/conversion_binary.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_hexadecimal_ts_to_sts
@@ -40,6 +43,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_hexadecimal_ts_to_
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_hexadecimal/conversion_hexadecimal.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_string_to_int_ts_to_sts
@@ -47,6 +51,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_string_to_int_ts_t
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_string_to_int/conversion_string_to_int.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_byte_to_int_ts_to_sts
@@ -54,6 +59,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_byte_to_int_ts_to_
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_byte/conversion_byte.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_float_ts_to_ets
@@ -61,6 +67,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_float_ts_to_ets
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_float/conversion_float.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_big_int_ts_to_sts
@@ -68,6 +75,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_big_int_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_big_int/conversion_big_int.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_exponential_ts_to_sts
@@ -75,4 +83,5 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_exponential_ts_to_
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_exponential/conversion_exponential.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )

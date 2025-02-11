@@ -18,6 +18,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test__dynamic_object
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dynamic_object.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dynamic_object.sts
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/index.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test_dynamic_call
@@ -25,4 +26,5 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test_dynamic_call
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dynamic_call.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/index.js
+    COMPILATION_JS_WITH_CJS_ON
 )

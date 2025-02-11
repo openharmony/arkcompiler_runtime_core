@@ -19,6 +19,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_primitive_types_ts_to_
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/import_primitive_types/import_primitive_types.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_object_ts_to_sts
@@ -26,6 +27,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_object_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/import_object/import_object.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__destructured_import_ts_to_sts
@@ -33,6 +35,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__destructured_import_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/destructured_import/destructured_import.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/destructured_import.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_array_ts_to_sts
@@ -40,6 +43,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_array_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/import_array/import_array.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_function_ts_to_sts
@@ -47,6 +51,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_function_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/import_function/import_function.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_date_ts_to_sts
@@ -54,6 +59,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_date_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/import_date/import_date.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_reg_exp_ts_to_sts
@@ -61,6 +67,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_reg_exp_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/import_reg_exp/import_reg_exp.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_with_alias_ts_to_sts
@@ -68,6 +75,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_with_alias_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/import_with_alias/import_with_alias.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_default_ts_to_sts
@@ -75,6 +83,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_default_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/import_default/import_default.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_type_ts_to_sts
@@ -82,6 +91,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_type_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/import_type/import_type.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_class_ts_to_sts
@@ -89,4 +99,5 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__import_class_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/import_class/import_class.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+    COMPILATION_JS_WITH_CJS_ON
 )

@@ -24,7 +24,7 @@ function(compile_js_file TARGET)
         ARG
         ""
         ""
-        "SOURCES;OUTPUT_DIR;OUTPUT_ABC_PATHS"
+        "SOURCES;OUTPUT_DIR;OUTPUT_ABC_PATHS;COMPILE_JS_OPTION"
         ${ARGN}
     )
 
@@ -61,7 +61,7 @@ function(compile_js_file TARGET)
             OUTPUT ${CUR_OUTPUT_ABC}
             COMMENT "${TARGET}: Convert js file to ${CUR_OUTPUT_ABC}"
             COMMAND mkdir -p ${BUILD_DIR}
-            COMMAND ${ES2ABC} --extension=js --commonjs ${JS_SOURCE} --output=${CUR_OUTPUT_ABC}
+            COMMAND ${ES2ABC} --extension=js ${ARG_COMPILE_JS_OPTION} ${JS_SOURCE} --output=${CUR_OUTPUT_ABC}
             DEPENDS ${JS_SOURCE}
         )
     endforeach()
@@ -91,7 +91,7 @@ function(panda_ets_interop_js_arkjsvm_gtest TARGET)
     # Parse arguments
     cmake_parse_arguments(
         ARG
-        ""
+        "COMPILATION_JS_WITH_CJS_ON"
         "ETS_CONFIG"
         "CPP_SOURCES;ETS_SOURCES;JS_SOURCES;JS_TEST_SOURCE;LIBRARIES"
         ${ARGN}
@@ -113,9 +113,17 @@ function(panda_ets_interop_js_arkjsvm_gtest TARGET)
     )
     add_dependencies(${TARGET} ${TARGET_GTEST_PACKAGE})
 
+    set(JS_COMPILATION_OPTIONS)
+    if(DEFINED ARG_COMPILATION_JS_WITH_CJS_ON)
+        set(JS_COMPILATION_OPTIONS --commonjs)
+    else()
+        set(JS_COMPILATION_OPTIONS --module)
+    endif()
+
     if(DEFINED ARG_JS_SOURCES)
         compile_js_file(${TARGET}_js_modules
             SOURCES ${ARG_JS_SOURCES}
+            COMPILE_JS_OPTION ${JS_COMPILATION_OPTIONS}
         )
     endif()
 
@@ -133,11 +141,11 @@ function(panda_ets_interop_js_arkjsvm_gtest TARGET)
             "ARK_ETS_INTEROP_JS_GTEST_SOURCES=${CMAKE_CURRENT_SOURCE_DIR}"
             "ARK_ETS_INTEROP_JS_GTEST_DIR=${INTEROP_TESTS_DIR}"
             "FIXED_ISSUES=${FIXED_ISSUES}"
-        LAUNCHER 
-            ${ARK_JS_NAPI_CLI} 
+        LAUNCHER
+            ${ARK_JS_NAPI_CLI}
             --stub-file=${ARK_JS_STUB_FILE}
             --entry-point=gtest_launcher_arkjsvm
-            ${INTEROP_TESTS_DIR}/gtest_launcher_arkjsvm.abc 
+            ${INTEROP_TESTS_DIR}/gtest_launcher_arkjsvm.abc
             ${TARGET}
         DEPS_TARGETS ${TARGET} ets_interop_js_gtest_launcher_arkjsvm
         TEST_RUN_DIR ${INTEROP_TESTS_DIR}
@@ -176,6 +184,7 @@ function(panda_ets_interop_js_test_arkjsvm TARGET)
     if(DEFINED ARG_JS_SOURCES)
         compile_js_file(${TARGET}_js_modules
             SOURCES ${ARG_JS_SOURCES}
+            COMPILE_JS_OPTION --commonjs
         )
     endif()
 
@@ -183,13 +192,14 @@ function(panda_ets_interop_js_test_arkjsvm TARGET)
     compile_js_file(${TARGET}_js_launcher
         SOURCES ${ARG_JS_LAUNCHER}
         OUTPUT_ABC_PATHS ${COMPILED_LAUNCHER_NAME}
+        COMPILE_JS_OPTION --commonjs
     )
 
     # Make symbolic links to convinient work with requireNapiPreview
     set(SO_FILES_LINK_PATH "${CMAKE_CURRENT_BINARY_DIR}/module/")
     set(INTEROP_LIB_SOURCE "${PANDA_BINARY_ROOT}/lib/module/ets_interop_js_napi_arkjsvm.so")
     set(INTEROP_HELPER_LIB_SOURCE "${PANDA_BINARY_ROOT}/lib/arkjsvm_interop/libinterop_test_helper.so")
-    
+
     add_custom_target(${TARGET}_create_symlinks
         COMMAND mkdir -p ${SO_FILES_LINK_PATH}
                 && ln -sf ${INTEROP_LIB_SOURCE} ${INTEROP_HELPER_LIB_SOURCE} -t ${SO_FILES_LINK_PATH}
@@ -212,14 +222,14 @@ function(panda_ets_interop_js_test_arkjsvm TARGET)
             ${ARK_JS_NAPI_CLI}
             --stub-file=${ARK_JS_STUB_FILE}
             --entry-point=${LAUNCHER_CLEAR_NAME}
-            ${${COMPILED_LAUNCHER_NAME}} 
-            ${ARG_LAUNCHER_ARGS} 
+            ${${COMPILED_LAUNCHER_NAME}}
+            ${ARG_LAUNCHER_ARGS}
             > ${OUTPUT_FILE} 2>&1 || (cat ${OUTPUT_FILE} && false)
-        DEPENDS 
-            ${TARGET}_js_launcher 
-            ${TARGET}_js_modules 
-            ${TARGET}_create_symlinks 
-            ${TARGET_TEST_PACKAGE} 
+        DEPENDS
+            ${TARGET}_js_launcher
+            ${TARGET}_js_modules
+            ${TARGET}_create_symlinks
+            ${TARGET_TEST_PACKAGE}
             ets_interop_js_napi_arkjsvm
     )
     add_dependencies(ets_interop_js_tests_nodevm ${TARGET})

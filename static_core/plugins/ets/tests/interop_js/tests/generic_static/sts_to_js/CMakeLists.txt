@@ -25,4 +25,5 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__generic_static_sts_to_ts
         ${CMAKE_CURRENT_SOURCE_DIR}/check_static_method.js
         ${CMAKE_CURRENT_SOURCE_DIR}/check_user_class.js
         ${CMAKE_CURRENT_SOURCE_DIR}/generic_static.test.js
+    COMPILATION_JS_WITH_CJS_ON
 )
