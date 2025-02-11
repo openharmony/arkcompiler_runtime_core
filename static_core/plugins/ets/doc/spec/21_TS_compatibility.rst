@@ -325,16 +325,19 @@ The situations are illustrated by the following examples:
 
    // Both TypeScript and ArkTS do the same
    class Base {
-     field: number = 666
+     field: number = 123
+     foo () {
+        console.log (this.field)
+     }     
    }
    class Derived extends Base {
-     field: number = 555
+     field: number = 456
      foo () {
         console.log (this.field)
      }
    }
    let b: Base = new Derived()
-   b.foo()  // 555 is printed
+   b.foo()  // 456 is printed
 
 
    // That will be a compile-time error in ArkTS as type of 'field' in Child
@@ -455,8 +458,8 @@ Tuples and Arrays
 .. meta:
     frontend_status: None
 
-|TS| allows assignments of tuples into arrays while |LANG| does not allows
-this:
+|LANG| treats arrays and tuples as two different types. But |TS| allows
+assignments of tuples into arrays while |LANG| does not allows this:
 
 .. code-block:: typescript
    :linenos:

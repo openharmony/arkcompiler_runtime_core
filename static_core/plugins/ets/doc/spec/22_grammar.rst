@@ -50,7 +50,7 @@ Grammar Summary
        ;
 
     functionType:
-        '(' ftParameterList? ')' ftReturnType 
+        '(' ftParameterList? ')' ftReturnType
         ;
 
     ftParameterList:
@@ -76,11 +76,6 @@ Grammar Summary
 
     unionType:
         type ('|' type)*
-        ;
-
-    nullishType:
-          type '|' 'null' ('|' 'undefined')?
-        | type '|' 'undefined' ('|' 'null')?
         ;
 
     qualifiedName:
@@ -153,11 +148,12 @@ Grammar Summary
         | requiredParameters ',' optionalParameters ','?
         | optionalParameters ','?
         | requiredParameters ',' restParameter
-        | restParameter 
+        | restParameter
         ;
 
     requiredParameters:
-        parameter (',' parameter)* 
+        parameter (',' parameter)*
+        ;
 
     parameter:
         annotationUsage? identifier ':' type
@@ -225,6 +221,7 @@ Grammar Summary
         | namedReference
         | arrayLiteral
         | objectLiteral
+        | recordLiteral
         | thisExpression
         | parenthesizedExpression
         | methodCallExpression
@@ -360,11 +357,11 @@ Grammar Summary
 
     unaryExpression:
         expression '++'
-        | expression '––'
+        | expression '--'
         | '++' expression
-        | '––' expression
+        | '--' expression
         | '+' expression
-        | '–' expression
+        | '-' expression
         | '~' expression
         | '!' expression
         ;
@@ -461,7 +458,7 @@ Grammar Summary
 
     lambdaParameterList:
         lambdaParameter (',' lambdaParameter)*
-               (',' lambdaOptionalParameters|lambdaRestParameter)? 
+               (',' lambdaOptionalParameters|lambdaRestParameter)?
         | lambdaRestParameter
         | optionalParameters
         ;
@@ -477,7 +474,7 @@ Grammar Summary
     lambdaOptionalParameters:
         lambdaOptionalParameter (',' lambdaOptionalParameter)
         ;
-    
+
     lambdaOptionalParameter:
         identifier '?' (':' type)?
         ;
@@ -719,7 +716,7 @@ Grammar Summary
         'extends' interfaceTypeList
         ;
 
-    interfaceMember: 
+    interfaceMember:
         annotationUsage?
         ( interfaceProperty
         | interfaceMethodDeclaration
@@ -786,7 +783,7 @@ Grammar Summary
         ;
 
     nameBinding:
-        qualifiedName bindingAlias?
+        identifier bindingAlias?
         ;
 
     bindingAlias:
@@ -1009,15 +1006,15 @@ Grammar Summary
           'get' identifier '(' receiverParameter ')' returnType block
         | 'set' identifier '(' receiverParameter ',' parameter ')' block
         ;
-        
+
     functionTypeWithReceiver:
         '(' receiverParameter (',' ftParameterList)? ')' ftReturnType
         ;
 
     lambdaExpressionWithReceiver:
-        annotationUsage? typeParameters? '(' receiverParameter (',' lambdaParameterList)? ')' 
+        annotationUsage? typeParameters? '(' receiverParameter (',' lambdaParameterList)? ')'
         returnType? throwMark? '=>' lambdaBody
-        ;       
+        ;
 
     trailingLambdaCall:
         ( objectReference '.' identifier typeArguments?

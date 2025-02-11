@@ -55,6 +55,7 @@ described as experimental (see :ref:`Lambda Expressions with Receiver`).
         | namedReference
         | arrayLiteral
         | objectLiteral
+        | recordLiteral
         | thisExpression
         | parenthesizedExpression
         | methodCallExpression
@@ -89,7 +90,7 @@ expression rules:
 ``objectReference`` refers to one of the following three options:
 
 - Class that is to handle static members;
-- ``Super`` that is to access shadowed fields or constructors declared in the
+- ``super`` that is to access constructors declared in the
   superclass, or the overridden method version of the superclass;
 - *primaryExpression* that is to refer to an instance variable of a class,
   interface, or function type after evaluation, unless the manner of the
@@ -884,7 +885,7 @@ Array Type Inference from Types of Elements
 .. meta:
     frontend_status: Done
 
-If type of an array literal ``[`` ``expr``:sub:`1`, ``...`` , ``expr``:sub:`N` ``]``
+When type of an array literal ``[`` ``expr``:sub:`1`, ``...`` , ``expr``:sub:`N` ``]``
 cannot be inferred from the context, then the following algorithm is
 used to infer it from initialization expressions:
 
@@ -899,15 +900,15 @@ used to infer it from initialization expressions:
    :index:`compile-time error` occurs.
 
 #. If each initialization expression is of a numeric type (see
-   :ref:`Numeric Types`), then type is ``number[]``.
+   :ref:`Numeric Types`), then the type of the array literal is ``number[]``.
 
 #. If all initialization expressions are of the same type ``T``, then the
-   type is ``T[]``.
+   type of the array literal is ``T[]``.
 
-#. Otherwise, type is constructed as union type ``T``:sub:`1` ``| ... |
-   T``:sub:`N`, where ``T``:sub:`i` is the type of *expr*:sub:`i`.
-   Union type normalization (see :ref:`Union Types Normalization`) is applied
-   to this union type.
+#. Otherwise, the array literal type is an array of elements of the union type
+   which is constructed as a union of ``T``:sub:`1` ``| ... | T``:sub:`N`,
+   where ``T``:sub:`i` is the type of *expr*:sub:`i`. Union type normalization
+   (see :ref:`Union Types Normalization`) is applied to this union type.
 
 .. index::
    type inference
@@ -1019,7 +1020,7 @@ A :index:`compile-time error` occurs if:
 .. code-block:: typescript
    :linenos:
 
-    let p = {name: "Bob", age: 25} 
+    let p = {name: "Bob", age: 25}
             // compile-time error, type cannot be inferred
 
 |
@@ -1754,7 +1755,7 @@ Accessing SuperClass Properties
     frontend_status: None
 
 The the form ``super.identifier`` is valid when accessing the superclass
-property via accessor (see :ref:`Accessor Declarations`). 
+property via accessor (see :ref:`Accessor Declarations`).
 A :index:`compile-time error` occurs if identifier in 'super.identifier'
 denotes a field.
 
@@ -2492,7 +2493,7 @@ It optionally lists all actual arguments for the constructor.
     }
 
     new A(5) // create an instance and call constructor
-    const a = new A(6) /* create an instance, call constructor and store 
+    const a = new A(6) /* create an instance, call constructor and store
                           created and initialized instance in 'a' */
 
 
@@ -2948,11 +2949,11 @@ Unary Expressions
 
     unaryExpression:
         expression '++'
-        | expression '––'
+        | expression '--'
         | '++' expression
-        | '––' expression
+        | '--' expression
         | '+' expression
-        | '–' expression
+        | '-' expression
         | '~' expression
         | '!' expression
         ;

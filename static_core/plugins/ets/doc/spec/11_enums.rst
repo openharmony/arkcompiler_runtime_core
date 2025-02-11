@@ -18,7 +18,7 @@ Enumerations
 .. meta:
     frontend_status: Done
 
-An enumeration type ``enum`` specifies a distinct user-defined type with an
+Enumeration type ``enum`` specifies a distinct user-defined type with an
 associated set of named constants that define its possible values:
 
 .. code-block:: abnf
@@ -41,8 +41,8 @@ associated set of named constants that define its possible values:
    user-defined type
    constant
 
-``const enum`` is supported for source-level compatibility with |TS|,
-and ``const`` is skipped as it has no impact on ``enum`` semantics in
+Type ``const enum`` is supported for source-level compatibility with |TS|.
+Type ``const`` is skipped as it has no impact on ``enum`` semantics in
 |LANG|.
 
 Qualification by type is mandatory to access the enumeration constant:
@@ -69,18 +69,22 @@ are exported along with the mandatory qualification ``Color``.
    enum constant
    const enum
 
-The value of an enum constant can be set explicitly to a numeric constant
-expression (expression of type ``int``) or to a constant expression
-of type ``string``, or implicitly by omitting the constant expression. If
-the constant expression is omitted, then the value of the enum constant
-is set implicitly to a numeric value (see :ref:`Enumeration Integer Values`).
+The value of an enum constant can be set as follows:
+
+-  Explicitly to a numeric constant expression (expression of type ``int``) or
+   to a constant expression of type ``string``; or
+-  Implicitly by omitting the constant expression.
+
+
+If constant expression is omitted, then the value of the enum constant is set
+implicitly to a numeric value (see :ref:`Enumeration Integer Values`).
 
 A :index:`compile-time error` occurs if ``integer`` and ``string`` type
 enumeration constants are combined in one enumeration.
 
-Any enumeration constant is of type ``enumeration``. The implicit conversion
-(see :ref:`Enumeration to Constants Type Conversions`) of the enumeration
-constant to integer types or type *string* depends on the type of constants.
+Any enumeration constant is of type ``enumeration``. Implicit conversion (see
+:ref:`Enumeration to Constants Type Conversions`) of an enumeration constant
+to integer types or type ``string`` depends on the type of constants.
 
 In addition, all enumeration constant names must be unique. Otherwise,
 a :index:`compile-time error` occurs.
@@ -117,9 +121,9 @@ Enumeration Integer Values
 The integer value of an ``enum`` constant is set implicitly if an enumeration
 constant specifies no value.
 
-A constant expression of type ``int``---a signed 32-bit integer (see
-:ref:`Integer Types and Operations` for details)---can be used to set
-the value explicitly:
+A constant expression of type ``int`` is a signed 32-bit integer (see
+:ref:`Integer Types and Operations` for details). A constant expression of
+type ``int`` can be used to set the value explicitly:
 
 .. index::
    enumeration integer value
@@ -209,8 +213,8 @@ using the method ``toString``:
     let c: Color = Color.Green
     console.log(c.toString()) // prints: 10
 
-The name of enumeration type can be indexed by a value of this enumeration type
-to get the name of the constant:
+The name of enumeration type can be indexed by the value of this enumeration
+type to get the name of the constant:
 
 .. code-block:: typescript
    :linenos:
@@ -219,8 +223,8 @@ to get the name of the constant:
     let c: Color = Color.Green
     console.log(Color[c]) // prints: Green
 
-The additional methods available for enumeration types and constants can be
-found in :ref:`Enumeration Methods` in the chapter Experimental Features.
+Additional methods available for enumeration types and constants are discussed
+in :ref:`Enumeration Methods` in the chapter Experimental Features.
 
 .. index::
    enumeration constant

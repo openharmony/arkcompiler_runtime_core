@@ -169,8 +169,8 @@ in :ref:`Function, Method and Constructor Overloading` and
    :linenos:
 
     // compile-time error: The constant and the function have the same name.
-    const PI = 3.14                   
-    function PI() { return 3.14 }     
+    const PI = 3.14
+    function PI() { return 3.14 }
 
     // compile-time error: The type and the variable have the same name.
     class Person {}
@@ -186,7 +186,7 @@ in :ref:`Function, Method and Constructor Overloading` and
 
     /* compile-time error: Name of the declaration clashes with the predefined
         type or standard library entity name. */
-    let number: number = 1 
+    let number: number = 1
     let String = true
     function Record () {}
     interface Object {}
@@ -281,7 +281,7 @@ The scope of an entity depends on the context the entity is declared in:
    compilation unit
 
 .. _class-access:
-  
+
 -  A name declared inside a class (*class level scope*) is accessible (see
    :ref:`Accessible`) in the class and sometimes, depending on the access
    modifier (see :ref:`Access Modifiers`), outside the class, or by means of a
@@ -378,7 +378,7 @@ The scope of an entity depends on the context the entity is declared in:
    :linenos:
 
     function foo() {
-        let x = y // compile-time error – y is not accessible yet
+        let x = y // compile-time error - y is not accessible yet
         let y = 1
     }
 
@@ -611,7 +611,7 @@ a type argument:
 
 .. code-block:: typescript
    :linenos:
-   
+
     type A<T> = Array<A> // compile-time error
 
 **Note**. There is no restriction on using a type parameter *T* in
@@ -621,7 +621,7 @@ is valid:
 .. code-block:: typescript
    :linenos:
 
-    type NodeValue<T> = T | Array<T> | Array<NodeValue<T>>; 
+    type NodeValue<T> = T | Array<T> | Array<NodeValue<T>>;
 
 .. index::
    alias
@@ -663,7 +663,7 @@ via initialization before the first usage:
         ;
 
     variableDeclaration:
-        identifier ('?')? ':' ('readonly')? type initializer? 
+        identifier ('?')? ':' ('readonly')? type initializer?
         | identifier initializer
         ;
 
@@ -763,7 +763,7 @@ variables. Otherwise, a :index:`compile-time error` occurs.
 
    let a = b // a uses b for its initialization
    let b = a // b uses a for its initialization
-   
+
    class A {
      a = this.b // a uses b for its initialization
      b = this.a // b uses a for its initialization
@@ -957,7 +957,7 @@ If the type of the initializer expression cannot be inferred, then a
     let d = cond ? "one" : "two" // type of 'd' is string
     let e = cond ? 1 : "one"     // type of 'e' is Int | string
 
-    const bb = cond ? 1 : 2         // type of 'bb' is int 
+    const bb = cond ? 1 : 2         // type of 'bb' is int
     const cc = cond ? 3 : 3.14      // type of 'cc' is double
     const dd = cond ? "one" : "two" // type of 'dd' is "one" | "two"
     const ee = cond ? 1 : "one"     // type of 'ee' is Int | "one"
@@ -1087,11 +1087,12 @@ the function or the method has no parameters.
         | requiredParameters ',' optionalParameters ','?
         | optionalParameters ','?
         | requiredParameters ',' restParameter
-        | restParameter 
+        | restParameter
         ;
 
     requiredParameters:
-        parameter (',' parameter)* 
+        parameter (',' parameter)*
+        ;
 
     parameter:
         annotationUsage? identifier ':' type
@@ -1204,7 +1205,7 @@ Optional Parameters
     optionalParameters:
         optionalParameter (',' optionalParameter)
         ;
-    
+
     optionalParameter:
         annotationUsage?
         ( identifier ':' type '=' expression
