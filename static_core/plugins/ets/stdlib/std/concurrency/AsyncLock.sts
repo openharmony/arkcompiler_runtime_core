@@ -17,6 +17,12 @@ package std.concurrency;
 
 type AsyncLockCallback<T> = () => T | Promise<T>;
 
+export enum AsyncLockMode {
+    UNLOCKED = 0,
+    SHARED = 1,
+    EXCLUSIVE = 2,
+}
+
 export final class AsyncLock {
 
     constructor() {
@@ -47,7 +53,7 @@ export final class AsyncLock {
      * @returns { Promise<T> } Promise that will be resolved after the callback gets executed.
      */
     public lockAsync<T>(callback: AsyncLockCallback<T>): Promise<T> {
-        return this.lockAsync(callback, AsyncLock.MODE_EXCLUSIVE, new AsyncLockOptions());
+        return this.lockAsync(callback, AsyncLockMode.EXCLUSIVE, new AsyncLockOptions());
     }
 
     /**
@@ -59,7 +65,7 @@ export final class AsyncLock {
      * @param { AsyncLockMode } mode - mode of the lock operation.
      * @returns { Promise<T> } Promise that will be resolved after the callback gets executed or rejected.
      */
-    public lockAsync<T>(callback: AsyncLockCallback<T>, mode: int): Promise<T> {
+    public lockAsync<T>(callback: AsyncLockCallback<T>, mode: AsyncLockMode): Promise<T> {
         return this.lockAsync(callback, mode, new AsyncLockOptions());
     }
 
@@ -78,12 +84,12 @@ export final class AsyncLock {
      * @returns { Promise<T | U> } Promise that will be resolved after the callback gets executed or rejected in case
      *     timeout exceeded.
      */
-    public lockAsync<T, U>(callback: AsyncLockCallback<T>, mode: int, options: AsyncLockOptions<U>): Promise<T> {
+    public lockAsync<T, U>(callback: AsyncLockCallback<T>, mode: AsyncLockMode, options: AsyncLockOptions<U>): Promise<T> {
         let callerCID = CoroutineExtras.getCoroutineId();
         return launch this.wrapper<T, U>(callback, callerCID, mode, options) as Promise<T>;
     }
 
-    private wrapper<T, U>(callback: AsyncLockCallback<T>, callerCID: int, mode: int, options: AsyncLockOptions<U>) : T | Promise<T>{
+    private wrapper<T, U>(callback: AsyncLockCallback<T>, callerCID: int, mode: AsyncLockMode, options: AsyncLockOptions<U>) : T | Promise<T>{
         let asyncLockInfo = new AsyncLockInfo(this.name, mode, callerCID);
         ConcurrencyHelpers.mutexLock(this.mutex);
         this.pending.add(asyncLockInfo);
@@ -97,7 +103,7 @@ export final class AsyncLock {
         }
     }
 
-    private lock<U>(callerCID: int, mode: int, asyncLockInfo: AsyncLockInfo, options: AsyncLockOptions<U>): void {
+    private lock<U>(callerCID: int, mode: AsyncLockMode, asyncLockInfo: AsyncLockInfo, options: AsyncLockOptions<U>): void {
         let isDone = false;
         let timeout = options.timeout;
         let startTime = Chrono.milliNow();
@@ -117,7 +123,7 @@ export final class AsyncLock {
                 this.pending.delete(asyncLockInfo);
                 this.held.add(asyncLockInfo);
                 isDone = true;
-            } else if (mode == AsyncLock.MODE_SHARED && this.mode == AsyncLock.MODE_SHARED && this.holderCID == callerCID) {
+            } else if (mode == AsyncLockMode.SHARED && this.mode == AsyncLockMode.SHARED && this.holderCID == callerCID) {
                 this.counter++;
                 this.pending.delete(asyncLockInfo);
                 this.held.add(asyncLockInfo);
@@ -142,13 +148,21 @@ export final class AsyncLock {
         this.counter--;
         if (this.counter == 0) {
             this.holderCID = 0;
-            this.mode = AsyncLock.MODE_UNLOCKED;
+            this.mode = AsyncLockMode.UNLOCKED;
         }
         ConcurrencyHelpers.mutexUnlock(this.mutex);
     }
 
     public getName(): string {
         return this.name;
+    }
+
+    public static query(name: string): AsyncLockState {
+        return asyncLockManager.query(name);
+    }
+
+    public static queryAll(): AsyncLockState[] {
+        return asyncLockManager.queryAll();
     }
 
     public query(): AsyncLockState {
@@ -160,13 +174,9 @@ export final class AsyncLock {
 
     private name: string;
     private holderCID: int = 0;
-    private mode: int = AsyncLock.MODE_UNLOCKED;
+    private mode: AsyncLockMode = AsyncLockMode.UNLOCKED;
     private counter: int = 0;
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
     private held: Set<AsyncLockInfo> = new Set<AsyncLockInfo>();
     private pending: Set<AsyncLockInfo> = new Set<AsyncLockInfo>();
-
-    private static MODE_UNLOCKED: int = 0;
-    public static MODE_SHARED: int = 1;
-    public static MODE_EXCLUSIVE: int = 2;
 }
