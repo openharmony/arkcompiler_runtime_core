@@ -10101,3 +10101,8 @@ deprecated/15.exceptions/throw_exception_with_try_declaration.sts
 # 22783
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_abstr_or_native_wrong_constraint_87.sts
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_abstr_or_native_wrong_constraint_67.sts
+
+# 22784
+17.experimental_features/19.packages/02.package_initializer/p5/init5_1.sts
+17.experimental_features/19.packages/02.package_initializer/p6/init6_1.sts
+15.semantic_rules/10.initializer_block/bad-static-location.sts
