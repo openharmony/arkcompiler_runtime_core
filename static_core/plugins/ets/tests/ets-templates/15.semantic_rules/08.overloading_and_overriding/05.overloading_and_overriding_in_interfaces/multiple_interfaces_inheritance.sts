@@ -20,6 +20,7 @@ desc: >-
     A method is defined in a subinterface with the same name as the method in the superinterface.
     If signatures are override-compatible (see Override-Compatible Signatures), then overriding is used.
     Otherwise, overloading is used.
+tags: [{{c.tags}}]
 ---*/
 
 let res: number = 0;
@@ -27,7 +28,7 @@ let res: number = 0;
 {{c.decl}}
 
 function main(): void {
-    {{c.use}}
+    {{c.call}}
 }
 
 {% endfor %}
