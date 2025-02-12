@@ -19,17 +19,17 @@ add_custom_target(ets_interop_js_tests_arkjsvm COMMENT "Run ets_interop_js tests
 add_dependencies(ets_tests ets_interop_js_tests_arkjsvm)
 add_dependencies(ets_interop_tests ets_interop_js_tests_arkjsvm)
 
-function(compile_js_file TARGET)
+function(compile_dynamic_file TARGET)
     cmake_parse_arguments(
         ARG
         ""
         ""
-        "SOURCES;OUTPUT_DIR;OUTPUT_ABC_PATHS;COMPILE_JS_OPTION"
+        "SOURCES;OUTPUT_DIR;OUTPUT_ABC_PATHS;COMPILE_OPTION"
         ${ARGN}
     )
 
     if(NOT DEFINED ARG_SOURCES)
-        message(FATAL_ERROR "SOURCES should be passed in compile_js_file")
+        message(FATAL_ERROR "SOURCES should be passed in compile_dynamic_file")
     endif()
 
     set(BUILD_DIR)
@@ -41,12 +41,12 @@ function(compile_js_file TARGET)
         set(BUILD_DIR ${ARG_OUTPUT_DIR})
     endif()
 
-    foreach(JS_SOURCE ${ARG_SOURCES})
+    foreach(DYNAMIC_SOURCE ${ARG_SOURCES})
         set(CUR_OUTPUT_ABC)
-        get_filename_component(CLEAR_NAME ${JS_SOURCE} NAME_WLE)
+        get_filename_component(CLEAR_NAME ${DYNAMIC_SOURCE} NAME_WLE)
 
         # determine output path of abc file
-        get_filename_component(DIR_NAME "${JS_SOURCE}" DIRECTORY)
+        get_filename_component(DIR_NAME "${DYNAMIC_SOURCE}" DIRECTORY)
         if (NOT ${DIR_NAME} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
             # in this case source file in in subdirectory
             string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" DIR_NAME "${DIR_NAME}")
@@ -59,17 +59,17 @@ function(compile_js_file TARGET)
 
         add_custom_command(
             OUTPUT ${CUR_OUTPUT_ABC}
-            COMMENT "${TARGET}: Convert js file to ${CUR_OUTPUT_ABC}"
+            COMMENT "${TARGET}: Convert dynamic file to ${CUR_OUTPUT_ABC}"
             COMMAND mkdir -p ${BUILD_DIR}
-            COMMAND ${ES2ABC} --extension=js ${ARG_COMPILE_JS_OPTION} ${JS_SOURCE} --output=${CUR_OUTPUT_ABC}
-            DEPENDS ${JS_SOURCE}
+            COMMAND ${ES2ABC} ${ARG_COMPILE_OPTION} ${DYNAMIC_SOURCE} --output=${CUR_OUTPUT_ABC}
+            DEPENDS ${DYNAMIC_SOURCE}
         )
     endforeach()
 
     set(${ARG_OUTPUT_ABC_PATHS} ${ABC_FILES} PARENT_SCOPE)
 
     add_custom_target(${TARGET} DEPENDS ${ABC_FILES})
-endfunction(compile_js_file)
+endfunction(compile_dynamic_file)
 
 # Add Gtest-based tests to ets_interop_js_arkjsvm_gtests target.
 #
@@ -93,7 +93,7 @@ function(panda_ets_interop_js_arkjsvm_gtest TARGET)
         ARG
         "COMPILATION_JS_WITH_CJS_ON"
         "ETS_CONFIG"
-        "CPP_SOURCES;ETS_SOURCES;JS_SOURCES;JS_TEST_SOURCE;LIBRARIES"
+        "CPP_SOURCES;ETS_SOURCES;JS_SOURCES;TS_SOURCES;JS_TEST_SOURCE;LIBRARIES"
         ${ARGN}
     )
 
@@ -120,10 +120,20 @@ function(panda_ets_interop_js_arkjsvm_gtest TARGET)
         set(JS_COMPILATION_OPTIONS --module)
     endif()
 
+    set(ALL_SOURCES)
+
     if(DEFINED ARG_JS_SOURCES)
-        compile_js_file(${TARGET}_js_modules
-            SOURCES ${ARG_JS_SOURCES}
-            COMPILE_JS_OPTION ${JS_COMPILATION_OPTIONS}
+        list(APPEND ALL_SOURCES ${ARG_JS_SOURCES})
+    endif()
+
+    if(DEFINED ARG_TS_SOURCES)
+        list(APPEND ALL_SOURCES ${ARG_TS_SOURCES})
+    endif()
+
+    if(ALL_SOURCES)
+        compile_dynamic_file(${TARGET}_dynamic_modules
+            SOURCES ${ALL_SOURCES}
+            COMPILE_OPTION ${JS_COMPILATION_OPTIONS}
         )
     endif()
 
@@ -152,8 +162,8 @@ function(panda_ets_interop_js_arkjsvm_gtest TARGET)
         OUTPUT_DIRECTORY ${INTEROP_TESTS_DIR}
     )
 
-    if(DEFINED ARG_JS_SOURCES)
-        add_dependencies(${TARGET}_gtests ${TARGET}_js_modules)
+    if(DEFINED ARG_JS_SOURCES OR ARG_TS_SOURCES)
+        add_dependencies(${TARGET}_gtests ${TARGET}_dynamic_modules)
     endif()
 
     add_dependencies(ets_interop_js_arkjsvm_gtests ${TARGET}_gtests)
@@ -182,17 +192,17 @@ function(panda_ets_interop_js_test_arkjsvm TARGET)
     )
 
     if(DEFINED ARG_JS_SOURCES)
-        compile_js_file(${TARGET}_js_modules
+        compile_dynamic_file(${TARGET}_js_modules
             SOURCES ${ARG_JS_SOURCES}
-            COMPILE_JS_OPTION --commonjs
+            COMPILE_OPTION --commonjs
         )
     endif()
 
     set(COMPILED_LAUNCHER_NAME ${TARGET}_launcher_abc_name)
-    compile_js_file(${TARGET}_js_launcher
+    compile_dynamic_file(${TARGET}_js_launcher
         SOURCES ${ARG_JS_LAUNCHER}
         OUTPUT_ABC_PATHS ${COMPILED_LAUNCHER_NAME}
-        COMPILE_JS_OPTION --commonjs
+        COMPILE_OPTION --commonjs
     )
 
     # Make symbolic links to convinient work with requireNapiPreview

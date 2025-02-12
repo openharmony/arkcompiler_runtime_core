@@ -43,10 +43,10 @@ add_custom_target(ets_interop_js_gtest_launcher
 )
 
 if(PANDA_JS_ETS_HYBRID_MODE)
-    compile_js_file(ets_interop_js_gtest_launcher_arkjsvm
+    compile_dynamic_file(ets_interop_js_gtest_launcher_arkjsvm
         SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/gtest_launcher_arkjsvm.js"
         OUTPUT_DIR "${INTEROP_TESTS_DIR}"
-        COMPILE_JS_OPTION --commonjs
+        COMPILE_OPTION --commonjs
     )
 
     # Make symbolic links to convinient work with requireNapiPreview
