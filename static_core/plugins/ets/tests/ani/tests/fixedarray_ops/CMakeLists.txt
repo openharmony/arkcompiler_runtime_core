@@ -15,6 +15,41 @@ ani_add_gtest(ani_test_fixedarray_pin
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_pin_test.cpp
 )
 
-ani_add_gtest(ani_test_byte_array_region
+ani_add_gtest(ani_test_fixedarray_getlen
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_get_length_test.cpp
+)
+
+ani_add_gtest(ani_test_fixedarray_region_boolean
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_region_boolean_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_region_boolean_test.sts
+)
+
+ani_add_gtest(ani_test_fixedarray_region_byte
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_region_byte_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_region_byte_test.sts
+)
+
+ani_add_gtest(ani_test_fixedarray_region_short
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_region_short_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_region_short_test.sts
+)
+
+ani_add_gtest(ani_test_fixedarray_region_int
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_region_int_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_region_int_test.sts
+)
+
+ani_add_gtest(ani_test_fixedarray_region_long
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_region_long_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_region_long_test.sts
+)
+
+ani_add_gtest(ani_test_fixedarray_region_float
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_region_float_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_region_float_test.sts
+)
+
+ani_add_gtest(ani_test_fixedarray_region_double
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_region_double_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_region_double_test.sts
 )
