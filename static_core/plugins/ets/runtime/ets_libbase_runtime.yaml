@@ -1517,7 +1517,7 @@ intrinsics:
 ########################
   - name: TaskpoolGenerateId
     space: ets
-    class_name: escompat.taskpoolTask
+    class_name: escompat.taskpool.Task
     method_name: generateId
     static: true
     signature:
@@ -1527,7 +1527,7 @@ intrinsics:
 
   - name: TaskpoolGenerateGroupId
     space: ets
-    class_name: escompat.taskpoolTaskGroup
+    class_name: escompat.taskpool.TaskGroup
     method_name: generateGroupId
     static: true
     signature:
@@ -1537,7 +1537,7 @@ intrinsics:
 
   - name: TaskpoolGenerateSequenceRunnerId
     space: ets
-    class_name: escompat.taskpoolSequenceRunner
+    class_name: escompat.taskpool.SequenceRunner
     method_name: generateSeqRunnerId
     static: true
     signature:
