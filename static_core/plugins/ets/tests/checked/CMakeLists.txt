@@ -154,8 +154,9 @@ endfunction()
 # Disable checked tests with sanitizers for arm64, since it takes too long time running.
 if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_test.sts SUPPORT_RELEASE)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_split_test.sts)
     if (PANDA_TARGET_AMD64 OR PANDA_TARGET_ARM64)
+        # No deoptimization occurs in String.split on arm32
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_split_test.sts)
         # inlining of the following intrinsics is only enabled for these two targets
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_isFinite.sts)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_isNaN.sts)

@@ -563,23 +563,7 @@
 17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_7.sts
 # end of es2panda fails
 
-# 20289 es2panda aborts on extended conditional expression
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_1.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_10.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_11.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_16.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_17.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_19.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_20.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_22.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_25.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_27.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_28.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_29.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_30.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_34.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_36.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_4.sts
+# runtime fails: Enum object incorrect evaluation in runtime
 15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_0.sts
 15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_1.sts
 15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_10.sts
@@ -605,6 +589,9 @@
 15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_29.sts
 15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_3.sts
 15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_30.sts
+15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_31.sts
+15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_32.sts
+15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_33.sts
 15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_34.sts
 15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_35.sts
 15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_36.sts
@@ -614,34 +601,7 @@
 15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_7.sts
 15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_8.sts
 15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_9.sts
-
-# 20294 es2panda reports errors on equality with extended conditional expressions
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_0.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_12.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_13.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_14.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_15.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_18.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_2.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_21.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_23.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_24.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_26.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_3.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_31.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_32.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_33.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_35.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_5.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_6.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_7.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_8.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_9.sts
-
-# 20296 es2panda doesn't permit nullish types in extended conditional expressions
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_31.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_32.sts
-15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_33.sts
+# end of runtime fails
 
 # es2panda fails: panda#14338 es2panda fails to compile overloaded functions
 15.semantic_rules/08.overloading_and_overriding/01.overload-equivalent_signatures/pos_6.sts
@@ -1482,6 +1442,7 @@
 13.compilation_units/03.import_directives/05.type_binding/type_binding_class_same_name_2.sts
 
 # es2panda: #18843 type compatability
+07.expressions/25.equality_expressions/01.numerical_equality_operators/char_eq_n_2.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/eq_0.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/ne_0.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/ne_3.sts
