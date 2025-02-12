@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,8 +56,11 @@ public:
 
     static std::vector<MirrorFieldInfo> GetMembers()
     {
-        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsArrayBuffer, byteLength_, "_byteLength"),
-                                             MIRROR_FIELD_INFO(EtsArrayBuffer, data_, "data")};
+        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, managedData_, "data"),
+                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, byteLength_, "_byteLength"),
+                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, nativeData_, "dataExternal"),
+                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, isExternal_, "isExternal"),
+                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, wasDetached_, "wasDetached")};
     }
 
 protected:

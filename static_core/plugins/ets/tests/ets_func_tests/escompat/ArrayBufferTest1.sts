@@ -44,7 +44,7 @@ function createArrayBufferOfVariousLengths(): int {
     return 1;
   }
   catch(e) {
-    if (!(e instanceof NegativeArraySizeError))
+    if (!(e instanceof RangeError))
       return 1;
   }
 

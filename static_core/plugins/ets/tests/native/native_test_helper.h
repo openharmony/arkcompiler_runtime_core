@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,8 @@ public:
             *ret = env_->CallStaticFloatMethod(cls, fn, args...);
         } else if constexpr (std::is_same_v<R, ets_double>) {
             *ret = env_->CallStaticDoubleMethod(cls, fn, args...);
-        } else if constexpr (std::is_same_v<R, ets_object> || std::is_same_v<R, ets_array>) {
+        } else if constexpr (std::is_same_v<R, ets_object> || std::is_same_v<R, ets_array> ||
+                             std::is_same_v<R, ets_arraybuffer>) {
             *ret = static_cast<R>(env_->CallStaticObjectMethod(cls, fn, args...));
         } else if constexpr (std::is_same_v<R, void>) {
             // do nothing

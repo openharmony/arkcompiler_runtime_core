@@ -472,14 +472,14 @@ JSCONVERT_UNWRAP(Promise)
     return hpromise.GetPtr();
 }
 
-JSCONVERT_DEFINE_TYPE(ArrayBuffer, EtsArrayBuffer *);
+JSCONVERT_DEFINE_TYPE(ArrayBuffer, EtsEscompatArrayBuffer *);
 
 JSCONVERT_WRAP(ArrayBuffer)
 {
     napi_value buf;
     void *data;
     NAPI_CHECK_FATAL(napi_create_arraybuffer(env, etsVal->GetByteLength(), &data, &buf));
-    std::copy_n(reinterpret_cast<const uint8_t *>(etsVal->GetData()->GetData<const void *>()), etsVal->GetByteLength(),
+    std::copy_n(reinterpret_cast<const uint8_t *>(etsVal->GetData()), etsVal->GetByteLength(),
                 reinterpret_cast<uint8_t *>(data));
     return buf;
 }
@@ -497,14 +497,11 @@ JSCONVERT_UNWRAP(ArrayBuffer)
     NAPI_CHECK_FATAL(napi_get_arraybuffer_info(env, jsVal, &data, &byteLength));
     auto *currentCoro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope s(currentCoro);
-    EtsClass *arraybufKlass = currentCoro->GetPandaVM()->GetClassLinker()->GetArrayBufferClass();
-    EtsHandle<EtsArrayBuffer> buf(currentCoro,
-                                  reinterpret_cast<EtsArrayBuffer *>(EtsObject::Create(currentCoro, arraybufKlass)));
-    buf->SetByteLength(static_cast<EtsInt>(byteLength));
-    EtsHandle<EtsByteArray> byteArray(currentCoro, reinterpret_cast<EtsByteArray *>(EtsByteArray::Create(byteLength)));
-    buf->SetData(currentCoro, byteArray.GetPtr());
-    std::copy_n(reinterpret_cast<uint8_t *>(data), byteLength, buf->GetData()->GetData<EtsByte>());
-    return buf.GetPtr();
+    void *etsData = nullptr;
+    auto *arrayBuffer = EtsEscompatArrayBuffer::Create(currentCoro, byteLength, &etsData);
+    EtsHandle<EtsEscompatArrayBuffer> hbuffer(currentCoro, arrayBuffer);
+    std::copy_n(reinterpret_cast<uint8_t *>(data), byteLength, reinterpret_cast<uint8_t *>(etsData));
+    return hbuffer.GetPtr();
 }
 
 JSCONVERT_DEFINE_TYPE(EtsNull, EtsObject *);
