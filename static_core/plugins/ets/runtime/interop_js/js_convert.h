@@ -373,7 +373,14 @@ JSCONVERT_WRAP(JSError)
 JSCONVERT_UNWRAP(JSError)
 {
     auto coro = EtsCoroutine::GetCurrent();
-    auto value = JSValue::Create(coro, ctx, jsVal);
+    ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
+    ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsVal);
+    JSValue *value = nullptr;
+    if (sharedRef != nullptr) {
+        value = JSValue::FromEtsObject(sharedRef->GetEtsObject());
+    } else {
+        value = JSValue::Create(coro, ctx, jsVal);
+    }
     if (UNLIKELY(value == nullptr)) {
         return {};
     }

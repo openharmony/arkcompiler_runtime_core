@@ -378,6 +378,11 @@ JSValue *JSRuntimeLoadModule(EtsString *module)
         jsHandleScope.Escape(modObj);
     }
 
+    ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
+    ets_proxy::SharedReference *sharedRef = storage->GetReference(env, modObj);
+    if (sharedRef != nullptr) {
+        return JSValue::FromEtsObject(sharedRef->GetEtsObject());
+    }
     return JSValue::CreateRefValue(coro, ctx, modObj, napi_object);
 }
 
