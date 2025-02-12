@@ -26,6 +26,17 @@ cases:
       f(a)
   - decl: |
       class A {}
+      function f(this: A) {}
+    use: |
+      new A().f()
+  - decl: |
+      class A {}
+      function f(this: A) {}
+    use: |
+      let a: A = new A()
+      a.f()
+  - decl: |
+      class A {}
       function f(this: A, n: number) {}
     use: |
       let a: A = new A()
@@ -36,6 +47,12 @@ cases:
     use: |
       let a: A = new A()
       f(a, 1)
+  - decl: |
+      class A {}
+      function f(this: A, n: number) {}
+    use: |
+      let a: A = new A()
+      a.f(1)
   - decl: |
       class A {
         foo() {}  
@@ -113,12 +130,46 @@ cases:
       a = new B()
       assertEQ(f(b), 2)
   - decl: |
-      class A {}
+      import {A} from "./a.sts"
       function f(this: A) {}
     use: |
-      f(new A())
+      let a: A = new A()
+      a.f()
   - decl: |
-      class A {}
+      import {A} from "./a.sts"
       function f(this: A) {}
     use: |
-      f(new A())
+      let a: A = new A()
+      f(a)
+  - decl: |
+      import {I} from "./i.sts"
+      function f(this: I) {}
+    use: |
+      let i: I = {}
+      i.f()
+  - decl: |
+      import {I} from "./i.sts"
+      function f(this: I) {}
+    use: |
+      let i: I = {}
+      f(i)
+  - decl: |
+      import {A, f} from "./a1.sts"
+    use: |
+      let a: A = new A()
+      a.f()
+  - decl: |
+      import {A, f} from "./a1.sts"
+    use: |
+      let a: A = new A()
+      f(a)
+  - decl: |
+      import {I, f} from "./i1.sts"
+    use: |
+      let i: I = {}
+      i.f()
+  - decl: |
+      import {I, f} from "./i1.sts"
+    use: |
+      let i: I = {}
+      f(i)
