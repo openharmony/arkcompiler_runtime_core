@@ -15,7 +15,7 @@
 
 package escompat;
 
-export class IteratorResult<out T> {
+export class IteratorResult<T> {
     done: boolean
     value: T | undefined
 
