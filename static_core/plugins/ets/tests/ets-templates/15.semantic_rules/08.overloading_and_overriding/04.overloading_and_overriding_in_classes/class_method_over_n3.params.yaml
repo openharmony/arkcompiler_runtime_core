@@ -24,7 +24,7 @@ cases:
                 res = 11;
               }
 
-              static foo(i: T, j: S) {
+              static foo<X,Y>(i: X, j: Y) {
                 res = 12;
               }
           }
@@ -33,7 +33,7 @@ cases:
                 res = 21;
               }
 
-              static foo(i: T, j: S) {
+              static foo<X,Y>(i: X, j: Y) {
                 res = 22;
               }
           }
@@ -59,11 +59,11 @@ cases:
               }
           }
           class Derived extends Base {
-              foo(i: B) {
+              foo(i: A) {
                 res = 21;
               }
 
-              static foo(i: B) {
+              static foo(i: A) {
                 res = 22;
               }
           }
@@ -153,7 +153,7 @@ cases:
                 res = 11;
               }
 
-              static foo(i: T, j: S) {
+              static foo<X,Y>(i: X, j: Y) {
                 res = 12;
               }
           }
@@ -162,7 +162,7 @@ cases:
                 res = 21;
               }
 
-              static foo(i: T) {
+              static foo<X>(i: X) {
                 res = 22;
               }
           }
@@ -171,9 +171,9 @@ cases:
           assertEQ( res, 11);
           new Derived<A, B>().foo(new A());
           assertEQ( res, 21);
-          Derived<A, B>.foo(new A(), new B());
+          Derived.foo<A, B>(new A(), new B());
           assertEQ( res, 11);
-          Derived<A, B>.foo(new A());
+          Derived.foo<A>(new A());
           assertEQ( res, 22);
 
     - doc: |-
@@ -267,19 +267,19 @@ cases:
           class A {}
           class B extends A {}
           class Base<T,S> {
-              static foo(i: T, j: S): int {
+              static foo<X,Y>(i: X, j: Y): int {
                 res = 11;
                 return 1;
               }
           }
           class Derived<T,S> extends Base<T,S> {
-              static foo(i: S, j: T): float {
+              static foo<X,Y>(i: X, j: Y): float {
                 res = 21;
                 return 1.1 as float;
               }
           }
       use: |-
-          Derived<A,B>.foo(new A(), new B());
+          Derived.foo(new A(), new B());
           assertEQ( res, 21);
 
     # Tuple
@@ -358,8 +358,8 @@ cases:
           let tpl2: TPL_DE = [ new D(), new E() ];
           let tpl3: TPL_CDE = [ new C(), new D(), new E() ];
           a.foo(tpl1);
-          assertEQ( res, 22);
+          assertEQ( res, 11);
           a.foo(tpl2);
-          assertEQ( res, 22);
+          assertEQ( res, 21);
           a.foo(tpl3);
-          assertEQ( res, 23);
+          assertEQ( res, 22);
