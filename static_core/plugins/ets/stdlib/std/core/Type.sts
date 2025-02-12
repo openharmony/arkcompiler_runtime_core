@@ -15,75 +15,102 @@
 
 package std.core;
 
-export type TypeDesc = string
+export type TypeDescriptor = string
 
-/*
-    Type intrinsics
-*/
-native function TypeAPIGetTypeDescriptor(o: NullishType): string
+// Internal platform-dependent descriptor, part of implementation
+type RuntimeTypeDescriptor = string
 
-native function TypeAPIGetTypeKind(td: TypeDesc): byte
+class TypeAPI {
+    /*
+        Type intrinsics
+    */
+    native static getTypeKind(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): byte
 
-native function TypeAPIIsValueType(td: TypeDesc): boolean
+    native static isValueType(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): boolean
 
-native function TypeAPIGetTypeName(td: TypeDesc): string
+    native static getNullTypeDescriptor(): RuntimeTypeDescriptor
 
-native function TypeAPIGetTypeId(td: TypeDesc): long
+    native static getUndefinedTypeDescriptor(): RuntimeTypeDescriptor
 
-/*
-    Class type intrinsics
-*/
-native function TypeAPIGetClassAttributes(td: TypeDesc): int
+    /*
+        Class type intrinsics
+    */
+    native static getClass(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): Class | undefined
 
-native function TypeAPIGetFieldsNum(td: TypeDesc): long
+    native static getClassAttributes(cls: Class): int
 
-native function TypeAPIGetOwnFieldsNum(td: TypeDesc): long
+    native static getFieldsNum(cls: Class): long
 
-native function TypeAPIGetField(td: TypeDesc, i: long): Field
+    native static getOwnFieldsNum(cls: Class): long
 
-native function TypeAPIGetOwnField(td: TypeDesc, i: long): Field
+    native static getFieldPtr(cls: Class, i: long): Long | undefined
 
-native function TypeAPIGetFieldByName(td: TypeDesc, name: string): Field
+    native static getOwnFieldPtr(cls: Class, i: long): Long | undefined
 
-native function TypeAPIGetStaticFieldValue(ownerTD: TypeDesc, name: string): NullishType
+    native static getFieldPtrByName(cls: Class, name: string): Long | undefined
 
-native function TypeAPIGetMethodsNum(td: TypeDesc): long
+    native static getFieldDescriptor(fieldPtr: long): RuntimeTypeDescriptor
 
-native function TypeAPIGetMethod(td: TypeDesc, i: long): Method
+    native static getFieldOwner(fieldPtr: long): Class
 
-native function TypeAPIGetConstructorsNum(td: TypeDesc): long
+    native static getField(cls: Class, fieldPtr: long, fieldType: Type, ownerType: Type): Field
 
-native function TypeAPIGetConstructor(td: TypeDesc, i: long): Method
+    native static getMethodsNum(cls: Class): long
 
-native function TypeAPIGetBaseType(td: TypeDesc): TypeDesc
+    native static getMethodDescriptor(cls: Class, i: long): RuntimeTypeDescriptor | undefined
 
-native function TypeAPIGetInterfacesNum(td: TypeDesc): long
+    native static getMethod(cls: Class, methodType: MethodType): Method
 
-native function TypeAPIGetInterface(td: TypeDesc, i: long): TypeDesc
+    native static getConstructorsNum(cls: Class): long
 
-native function TypeAPISetStaticFieldValue(ownerTD: TypeDesc, name: string, val: NullishType): void
+    native static getConstructorDescriptor(cls: Class, i: long): RuntimeTypeDescriptor | undefined
 
-native function TypeAPIIsInheritedFrom(ltd: TypeDesc, rtd:TypeDesc): boolean
+    native static getInterfacesNum(cls: Class): long
 
-/*
-    Function (Lambda or Method) type intrinsics
-*/
-native function TypeAPIGetFunctionAttributes(td: TypeDesc): int
+    native static getInterface(cls: Class, i: long): Class | undefined
 
-native function TypeAPIGetReceiverType(td: TypeDesc): TypeDesc
+    native static isInheritedFrom(lhs: Class, rhs: Class): boolean
 
-native function TypeAPIGetParametersNum(td: TypeDesc): long
+    /*
+        Function (Lambda or Method) type intrinsics
+    */
+    native static getFunctionAttributes(td: RuntimeTypeDescriptor): int
 
-native function TypeAPIGetParameter(td: TypeDesc, i: long): Parameter
+    /*
+        Array type intrinsics
+    */
+    native static getArrayElementType(cls: Class): RuntimeTypeDescriptor
 
-native function TypeAPIGetResultType(td: TypeDesc): TypeDesc
+    native static makeArrayInstance(elemTD: RuntimeTypeDescriptor, contextLinker: RuntimeLinker, len: long): Object
 
-/*
-    Array type intrinsics
-*/
-native function TypeAPIGetArrayElementType(td: TypeDesc): TypeDesc
+    /*
+        General helpers
+    */
+    static getClassDescriptor(cls: Class): RuntimeTypeDescriptor {
+        return cls.getDescriptor()
+    }
 
-native function TypeAPIMakeArrayInstance(td: TypeDesc, len: long): Object
+    private static NullTypeDescriptor: RuntimeTypeDescriptor = TypeAPI.getNullTypeDescriptor()
+    private static UndefinedTypeDescriptor: RuntimeTypeDescriptor = TypeAPI.getUndefinedTypeDescriptor()
+
+    static getTypeDescriptor(o: NullishType): RuntimeTypeDescriptor {
+        if (o === null) {
+            return TypeAPI.NullTypeDescriptor
+        }
+        return (o === undefined) ? TypeAPI.UndefinedTypeDescriptor : TypeAPI.getClassDescriptor(Class.of(o))
+    }
+
+    static getTypeName(cls: Class): string {
+        return cls.getName()
+    }
+
+    static convertTypeDescriptor(td: TypeDescriptor): RuntimeTypeDescriptor {
+        let sb = new StringBuilder("L")
+        sb.append(td.replaceChar(c'.', c'/'))
+        sb.append(";")
+        return sb.toString()
+    }
+}
 
 // NOTE(shumilov-petr): replace to enum, enum not available now
 export class TypeKind {
@@ -120,21 +147,21 @@ export class TypeKind {
 const TypeKindMask: byte = (1 << 6) - 1
 
 // NOTE(shumilov-petr): replace to enum, enum not available now
-export class ValueTypeDesc {
-    public static readonly BOOLEAN: TypeDesc   = "Z"
-    public static readonly BYTE: TypeDesc      = "B"
-    public static readonly SHORT: TypeDesc     = "S"
-    public static readonly CHAR: TypeDesc      = "C"
-    public static readonly INT: TypeDesc       = "I"
-    public static readonly LONG: TypeDesc      = "J"
-    public static readonly FLOAT: TypeDesc     = "F"
-    public static readonly DOUBLE: TypeDesc    = "D"
-    public static readonly VOID: TypeDesc      = "V"
+class ValueTypeDesc {
+    public static readonly BOOLEAN: RuntimeTypeDescriptor   = "Z"
+    public static readonly BYTE: RuntimeTypeDescriptor      = "B"
+    public static readonly SHORT: RuntimeTypeDescriptor     = "S"
+    public static readonly CHAR: RuntimeTypeDescriptor      = "C"
+    public static readonly INT: RuntimeTypeDescriptor       = "I"
+    public static readonly LONG: RuntimeTypeDescriptor      = "J"
+    public static readonly FLOAT: RuntimeTypeDescriptor     = "F"
+    public static readonly DOUBLE: RuntimeTypeDescriptor    = "D"
+    public static readonly VOID: RuntimeTypeDescriptor      = "V"
+
+    private constructor() {}
 }
 
-const ObjectTD = "Lstd/core/Object;" // NOTE(shumilov-petr): get td from runtime
-
-export const ObjectType: ClassType = new ClassType(ObjectTD)
+export const ObjectType: ClassType = Type.of(new Object()) as ClassType
 
 export class Attributes {
     public static readonly STATIC: int      = 1 << 0  // Field, Method
@@ -167,8 +194,8 @@ export class AccessModifier {
  * Runtime ArkTS type representation
  */
 export abstract class Type extends Object {
-    internal td: TypeDesc = new TypeDesc()
-
+    private td: RuntimeTypeDescriptor
+    private contextLinker: RuntimeLinker
 
     /**
      * Resolves type by descriptor
@@ -177,53 +204,68 @@ export abstract class Type extends Object {
      *
      * @returns instance of appropriate type or undefined if resolving is failed
      */
-    public static resolve(td: TypeDesc): Type | undefined {
-        let kind = (TypeAPIGetTypeKind(td) & TypeKindMask) as byte
+    public static resolve(td: TypeDescriptor): Type | undefined {
+        const contextLinker = Class.ofCaller().getLinker()
+        const internalTd: RuntimeTypeDescriptor = TypeAPI.convertTypeDescriptor(td)
+        return Type.resolve(internalTd, contextLinker)
+    }
+
+    /**
+     * Resolves type by internal descriptor, part of implementation
+     *
+     * @param td internal runtime type descriptor
+     *
+     * @param contextLinker in which classes must be searched
+     *
+     * @returns instance of appropriate type or undefined if resolving is failed
+     */
+    internal static resolve(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): Type | undefined {
+        let kind = (TypeAPI.getTypeKind(td, contextLinker) & TypeKindMask) as byte
         switch (kind) {
             case TypeKind.NONE:
                 return undefined
             case TypeKind.VOID:
                 return td == ValueTypeDesc.VOID ? VoidType.VAL : VoidType.REF
             case TypeKind.CHAR:
-                return TypeAPIIsValueType(td) ? CharType.VAL : CharType.REF
+                return TypeAPI.isValueType(td, contextLinker) ? CharType.VAL : CharType.REF
             case TypeKind.BOOLEAN:
-                return TypeAPIIsValueType(td) ? BooleanType.VAL : BooleanType.REF
+                return TypeAPI.isValueType(td, contextLinker) ? BooleanType.VAL : BooleanType.REF
             case TypeKind.BYTE:
-                return TypeAPIIsValueType(td) ? ByteType.VAL : ByteType.REF
+                return TypeAPI.isValueType(td, contextLinker) ? ByteType.VAL : ByteType.REF
             case TypeKind.SHORT:
-                return TypeAPIIsValueType(td) ? ShortType.VAL : ShortType.REF
+                return TypeAPI.isValueType(td, contextLinker) ? ShortType.VAL : ShortType.REF
             case TypeKind.INT:
-                return TypeAPIIsValueType(td) ? IntType.VAL : IntType.REF
+                return TypeAPI.isValueType(td, contextLinker) ? IntType.VAL : IntType.REF
             case TypeKind.LONG:
-                return TypeAPIIsValueType(td) ? LongType.VAL : LongType.REF
+                return TypeAPI.isValueType(td, contextLinker) ? LongType.VAL : LongType.REF
             case TypeKind.FLOAT:
-                return TypeAPIIsValueType(td) ? FloatType.VAL : FloatType.REF
+                return TypeAPI.isValueType(td, contextLinker) ? FloatType.VAL : FloatType.REF
             case TypeKind.DOUBLE:
-                return TypeAPIIsValueType(td) ? DoubleType.VAL : DoubleType.REF
+                return TypeAPI.isValueType(td, contextLinker) ? DoubleType.VAL : DoubleType.REF
 
             case TypeKind.CLASS:
-                return new ClassType(td)
+                return new ClassType(td, contextLinker)
             case TypeKind.STRING:
                 return StringType.REF
             case TypeKind.INTERFACE:
-                return new InterfaceType(td)
+                return new InterfaceType(td, contextLinker)
             case TypeKind.ARRAY:
-                return ArrayType.getInstance(td)
+                return ArrayType.getInstance(td, contextLinker)
             case TypeKind.TUPLE:
-                return new TupleType(td)
+                return new TupleType(td, contextLinker)
             case TypeKind.LAMBDA:
-                return new LambdaType(td)
+                return new LambdaType(td, contextLinker)
             case TypeKind.METHOD:
-                return new MethodType(td)
+                return new MethodType(td, contextLinker)
             case TypeKind.UNION:
-                return new UnionType(td)
+                return new UnionType(td, contextLinker)
             case TypeKind.UNDEFINED:
                 return UndefinedType.REF
             case TypeKind.NULL:
                 return NullType.REF
 
             case TypeKind.ENUM:
-                return new EnumType(td)
+                return new EnumType(td, contextLinker)
             default:
                 throw new AssertionError("Unexpected TypeKind " + kind)
         }
@@ -320,8 +362,9 @@ export abstract class Type extends Object {
     // -----
 
     public static of(o: NullishType): Type {
-        let td = TypeAPIGetTypeDescriptor(o)
-        return Type.resolve(td)!
+        const td = TypeAPI.getTypeDescriptor(o)
+        const contextLinker = (o == null) ? Class.ofCaller().getLinker() : Class.of(o).getLinker()
+        return Type.resolve(td, contextLinker)!
     }
 
     // -----
@@ -430,7 +473,7 @@ export abstract class Type extends Object {
      * @returns Type instance of this value
      */
     public static of(v: boolean[]): Type {
-        return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v), ValueTypeDesc.BOOLEAN)
+        return ArrayType.getInstance(Class.of(v), ValueTypeDesc.BOOLEAN)
     }
 
     /**
@@ -441,7 +484,7 @@ export abstract class Type extends Object {
      * @returns Type instance of this value
      */
     public static of(v: char[]): Type {
-        return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v), ValueTypeDesc.CHAR)
+        return ArrayType.getInstance(Class.of(v), ValueTypeDesc.CHAR)
     }
 
     /**
@@ -452,7 +495,7 @@ export abstract class Type extends Object {
      * @returns Type instance of this value
      */
     public static of(v: byte[]): Type {
-        return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v), ValueTypeDesc.BYTE)
+        return ArrayType.getInstance(Class.of(v), ValueTypeDesc.BYTE)
     }
 
     /**
@@ -463,7 +506,7 @@ export abstract class Type extends Object {
      * @returns Type instance of this value
      */
     public static of(v: short[]): Type {
-        return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v), ValueTypeDesc.SHORT)
+        return ArrayType.getInstance(Class.of(v), ValueTypeDesc.SHORT)
     }
 
     /**
@@ -474,7 +517,7 @@ export abstract class Type extends Object {
      * @returns Type instance of this value
      */
     public static of(v: int[]): Type {
-        return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v), ValueTypeDesc.INT)
+        return ArrayType.getInstance(Class.of(v), ValueTypeDesc.INT)
     }
 
     /**
@@ -485,7 +528,7 @@ export abstract class Type extends Object {
      * @returns Type instance of this value
      */
     public static of(v: long[]): Type {
-        return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v), ValueTypeDesc.LONG)
+        return ArrayType.getInstance(Class.of(v), ValueTypeDesc.LONG)
     }
 
     /**
@@ -496,7 +539,7 @@ export abstract class Type extends Object {
      * @returns Type instance of this value
      */
     public static of(v: float[]): Type {
-        return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v), ValueTypeDesc.FLOAT)
+        return ArrayType.getInstance(Class.of(v), ValueTypeDesc.FLOAT)
     }
 
     /**
@@ -507,7 +550,7 @@ export abstract class Type extends Object {
      * @returns Type instance of this value
      */
     public static of(v: double[]): Type {
-        return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v), ValueTypeDesc.DOUBLE)
+        return ArrayType.getInstance(Class.of(v), ValueTypeDesc.DOUBLE)
     }
 
     // -----
@@ -520,7 +563,7 @@ export abstract class Type extends Object {
      * @returns Type instance of this value
      */
     public static of(v: Object[]): Type {
-        return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v))
+        return ArrayType.getInstance(Class.of(v))
     }
 
     public abstract isPrimitive(): boolean // Or Composite
@@ -528,6 +571,19 @@ export abstract class Type extends Object {
     public abstract isReference(): boolean // Or Value
 
     public abstract hasName(): boolean
+
+    protected constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
+        this.td = td
+        this.contextLinker = contextLinker
+    }
+
+    internal getTypeDesc(): RuntimeTypeDescriptor {
+        return this.td
+    }
+
+    protected getContextLinker(): RuntimeLinker {
+        return this.contextLinker
+    }
 
     // T.subTypeOf(U) means that `T extends U`
     protected subTypeOf(other: Type): boolean {
@@ -560,10 +616,6 @@ export abstract class Type extends Object {
             || (this) instanceof LongType
             || (this) instanceof FloatType
             || (this) instanceof DoubleType
-    }
-
-    public getId(): long {
-        return TypeAPIGetTypeId(this.td);
     }
 
     public abstract getName(): string
@@ -631,7 +683,7 @@ export final class NullType extends Type {
     public static readonly REF: NullType = new NullType()
 
     private constructor() {
-        this.td = TypeAPIGetTypeDescriptor(null)
+        super(TypeAPI.getTypeDescriptor(null), getBootRuntimeLinker())
     }
 
     /**
@@ -704,7 +756,7 @@ export final class UndefinedType extends Type {
     public static readonly REF: UndefinedType = new UndefinedType()
 
     private constructor() {
-        this.td = TypeAPIGetTypeDescriptor(undefined)
+        super(TypeAPI.getTypeDescriptor(undefined), getBootRuntimeLinker())
     }
 
     /**
@@ -772,13 +824,13 @@ export final class UndefinedType extends Type {
  * Represents void type
  */
 export final class VoidType extends Type {
-    public static readonly VAL: VoidType = new VoidType(ValueTypeDesc.VOID, true)
-    public static readonly REF: VoidType = new VoidType(TypeAPIGetTypeDescriptor(Void.void_instance), false)
+    public static readonly VAL: VoidType = new VoidType(ValueTypeDesc.VOID, true) 
+    public static readonly REF: VoidType = new VoidType(TypeAPI.getTypeDescriptor(Void.void_instance), false)
 
     private readonly value: boolean
 
-    private constructor(td: TypeDesc, value: boolean) {
-        this.td = td
+    private constructor(td: RuntimeTypeDescriptor, value: boolean) {
+        super(td, getBootRuntimeLinker())
         this.value = value
     }
 
@@ -854,12 +906,13 @@ export final class VoidType extends Type {
 
 export final class CharType extends Type {
     public static readonly VAL: CharType = new CharType(ValueTypeDesc.CHAR, true)
-    public static readonly REF: CharType = new CharType(TypeAPIGetTypeDescriptor(new Char()), false)
+    public static readonly REF: CharType = new CharType(TypeAPI.getTypeDescriptor(new Char()), false)
+    private static readonly CLASS = Class.of(new Char())
 
     private isValue: boolean
 
-    private constructor(td: TypeDesc, isValue: boolean) {
-        this.td = td
+    private constructor(td: RuntimeTypeDescriptor, isValue: boolean) {
+        super(td, getBootRuntimeLinker())
         this.isValue = isValue
     }
 
@@ -902,7 +955,7 @@ export final class CharType extends Type {
         if (this.isValue) {
             return ""
         }
-        return TypeAPIGetTypeName(this.td)
+        return TypeAPI.getTypeName(CharType.CLASS)
     }
 
     /**
@@ -937,12 +990,13 @@ export final class CharType extends Type {
  */
 export final class BooleanType extends Type {
     public static readonly VAL: BooleanType = new BooleanType(ValueTypeDesc.BOOLEAN, true)
-    public static readonly REF: BooleanType = new BooleanType(TypeAPIGetTypeDescriptor(new Boolean()), false)
+    public static readonly REF: BooleanType = new BooleanType(TypeAPI.getTypeDescriptor(new Boolean()), false)
+    private static readonly CLASS = Class.of(new Boolean())
 
     private isValue: boolean
 
-    private constructor(td: TypeDesc, isValue: boolean) {
-        this.td = td
+    private constructor(td: RuntimeTypeDescriptor, isValue: boolean) {
+        super(td, getBootRuntimeLinker())
         this.isValue = isValue
     }
 
@@ -985,7 +1039,7 @@ export final class BooleanType extends Type {
         if (this.isValue) {
             return ""
         }
-        return TypeAPIGetTypeName(this.td)
+        return TypeAPI.getTypeName(BooleanType.CLASS)
     }
 
     /**
@@ -1000,7 +1054,7 @@ export final class BooleanType extends Type {
         return "Boolean"
     }
 
-    override equals(other: Type): boolean {
+    public override equals(other: Type): boolean {
         return other instanceof BooleanType && this.isValue != (other as BooleanType).isReference()
     }
 
@@ -1020,12 +1074,13 @@ export final class BooleanType extends Type {
  */
 export final class ByteType extends Type {
     public static readonly VAL: ByteType = new ByteType(ValueTypeDesc.BYTE, true)
-    public static readonly REF: ByteType = new ByteType(TypeAPIGetTypeDescriptor(new Byte()), false)
+    public static readonly REF: ByteType = new ByteType(TypeAPI.getTypeDescriptor(new Byte()), false)
+    private static readonly CLASS = Class.of(new Byte())
 
     private isValue: boolean
 
-    private constructor(td: TypeDesc, isValue: boolean) {
-        this.td = td
+    private constructor(td: RuntimeTypeDescriptor, isValue: boolean) {
+        super(td, getBootRuntimeLinker())
         this.isValue = isValue
     }
 
@@ -1068,7 +1123,7 @@ export final class ByteType extends Type {
         if (this.isValue) {
             return ""
         }
-        return TypeAPIGetTypeName(this.td)
+        return TypeAPI.getTypeName(ByteType.CLASS)
     }
 
     /**
@@ -1106,12 +1161,13 @@ export final class ByteType extends Type {
  */
 export final class ShortType extends Type {
     public static readonly VAL: ShortType = new ShortType(ValueTypeDesc.SHORT, true)
-    public static readonly REF: ShortType = new ShortType(TypeAPIGetTypeDescriptor(new Short()), false)
+    public static readonly REF: ShortType = new ShortType(TypeAPI.getTypeDescriptor(new Short()), false)
+    private static readonly CLASS = Class.of(new Short())
 
     private isValue: boolean
 
-    private constructor(td: TypeDesc, isValue: boolean) {
-        this.td = td
+    private constructor(td: RuntimeTypeDescriptor, isValue: boolean) {
+        super(td, getBootRuntimeLinker())
         this.isValue = isValue
     }
 
@@ -1154,7 +1210,7 @@ export final class ShortType extends Type {
         if (this.isValue) {
             return ""
         }
-        return TypeAPIGetTypeName(this.td)
+        return TypeAPI.getTypeName(ShortType.CLASS)
     }
 
     /**
@@ -1200,12 +1256,13 @@ export final class ShortType extends Type {
  */
 export final class IntType extends Type {
     public static readonly VAL: IntType = new IntType(ValueTypeDesc.INT, true)
-    public static readonly REF: IntType = new IntType(TypeAPIGetTypeDescriptor(new Int()), false)
+    public static readonly REF: IntType = new IntType(TypeAPI.getTypeDescriptor(new Int()), false)
+    private static readonly CLASS = Class.of(new Int())
 
     private isValue: boolean
 
-    private constructor(td: TypeDesc, isValue: boolean) {
-        this.td = td
+    private constructor(td: RuntimeTypeDescriptor, isValue: boolean) {
+        super(td, getBootRuntimeLinker())
         this.isValue = isValue
     }
 
@@ -1248,7 +1305,7 @@ export final class IntType extends Type {
         if (this.isValue) {
             return ""
         }
-        return TypeAPIGetTypeName(this.td)
+        return TypeAPI.getTypeName(IntType.CLASS)
     }
 
     /**
@@ -1294,12 +1351,13 @@ export final class IntType extends Type {
  */
 export final class LongType extends Type {
     public static readonly VAL = new LongType(ValueTypeDesc.LONG, true)
-    public static readonly REF = new LongType(TypeAPIGetTypeDescriptor(new Long()), false)
+    public static readonly REF = new LongType(TypeAPI.getTypeDescriptor(new Long()), false)
+    private static readonly CLASS = Class.of(new Long())
 
     private isValue: boolean
 
-    private constructor(td: TypeDesc, isValue: boolean) {
-        this.td = td
+    private constructor(td: RuntimeTypeDescriptor, isValue: boolean) {
+        super(td, getBootRuntimeLinker())
         this.isValue = isValue
     }
 
@@ -1342,7 +1400,7 @@ export final class LongType extends Type {
         if (this.isValue) {
             return ""
         }
-        return TypeAPIGetTypeName(this.td)
+        return TypeAPI.getTypeName(LongType.CLASS)
     }
 
     /**
@@ -1388,12 +1446,13 @@ export final class LongType extends Type {
  */
 export final class FloatType extends Type {
     public static readonly VAL: FloatType = new FloatType(ValueTypeDesc.FLOAT, true)
-    public static readonly REF: FloatType = new FloatType(TypeAPIGetTypeDescriptor(new Float()), false)
+    public static readonly REF: FloatType = new FloatType(TypeAPI.getTypeDescriptor(new Float()), false)
+    private static readonly CLASS = Class.of(new Float())
 
     private isValue: boolean
 
-    private constructor(td: TypeDesc, isValue: boolean) {
-        this.td = td
+    private constructor(td: RuntimeTypeDescriptor, isValue: boolean) {
+        super(td, getBootRuntimeLinker())
         this.isValue = isValue
     }
 
@@ -1436,7 +1495,7 @@ export final class FloatType extends Type {
         if (this.isValue) {
             return ""
         }
-        return TypeAPIGetTypeName(this.td)
+        return TypeAPI.getTypeName(FloatType.CLASS)
     }
 
     /**
@@ -1482,12 +1541,13 @@ export final class FloatType extends Type {
  */
 export final class DoubleType extends Type {
     public static readonly VAL: DoubleType = new DoubleType(ValueTypeDesc.DOUBLE, true)
-    public static readonly REF: DoubleType = new DoubleType(TypeAPIGetTypeDescriptor(new Double()), false)
+    public static readonly REF: DoubleType = new DoubleType(TypeAPI.getTypeDescriptor(new Double()), false)
+    private static readonly CLASS = Class.of(new Double())
 
     private isValue: boolean
 
-    private constructor(td: TypeDesc, isValue: boolean) {
-        this.td = td
+    private constructor(td: RuntimeTypeDescriptor, isValue: boolean) {
+        super(td, getBootRuntimeLinker())
         this.isValue = isValue
     }
 
@@ -1530,7 +1590,7 @@ export final class DoubleType extends Type {
         if (this.isValue) {
             return ""
         }
-        return TypeAPIGetTypeName(this.td)
+        return TypeAPI.getTypeName(DoubleType.CLASS)
     }
 
     /**
@@ -1573,11 +1633,13 @@ export final class DoubleType extends Type {
  * Represents type of classes
  */
 export final class ClassType extends Type {
+    private readonly cls: Class
     private readonly attrs: int
 
-    internal constructor(td: TypeDesc) {
-        this.td = td
-        this.attrs = TypeAPIGetClassAttributes(td)
+    internal constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
+        super(td, contextLinker)
+        this.cls = TypeAPI.getClass(td, contextLinker)!
+        this.attrs = TypeAPI.getClassAttributes(this.cls)
     }
 
     /**
@@ -1613,7 +1675,7 @@ export final class ClassType extends Type {
      * @returns type name
      */
     public override getName(): string {
-        return TypeAPIGetTypeName(this.td)
+        return TypeAPI.getTypeName(this.cls)
     }
 
     /**
@@ -1634,7 +1696,8 @@ export final class ClassType extends Type {
      * @returns true if object also has ClassType and their names are the same
      */
     public override equals(other: Type): boolean {
-        return (other instanceof ClassType) && (other as ClassType).td == this.td
+        // Must compare classes, as descriptors might be equal between classes from different contexts
+        return (other instanceof ClassType) && (other as ClassType).cls == this.cls
     }
 
     /**
@@ -1644,7 +1707,8 @@ export final class ClassType extends Type {
      * @returns base type of class
      */
     public getBaseType(): ClassType {
-        return Type.resolve(TypeAPIGetBaseType(this.td))! as ClassType
+        const base = this.cls.getSuper()
+        return (base == null) ? this : Type.resolve(base.getDescriptor(), base.getLinker())! as ClassType
     }
 
     /**
@@ -1653,7 +1717,7 @@ export final class ClassType extends Type {
      * @returns number of interfaces that was implemented by this class directly
      */
     public getInterfacesNum(): long {
-        return TypeAPIGetInterfacesNum(this.td)
+        return TypeAPI.getInterfacesNum(this.cls)
     }
 
     /**
@@ -1661,12 +1725,16 @@ export final class ClassType extends Type {
      *
      * @param i index
      *
-     * @throws error when i greater then num of interfaces
+     * @throws TypeError when i greater then num of interfaces
      *
      * @returns type of ith superinterface
      */
     public getInterface(i: long): InterfaceType {
-        return Type.resolve(TypeAPIGetInterface(this.td, i))! as InterfaceType
+        const iface = TypeAPI.getInterface(this.cls, i)
+        if (iface) {
+            return Type.resolve(iface.getDescriptor(), iface.getLinker()) as InterfaceType
+        }
+        throw new TypeError("no interface at " + i)
     }
 
     /**
@@ -1690,11 +1758,11 @@ export final class ClassType extends Type {
      * Note that Object class also is super class of B
      */
     public getFieldsNum(): long {
-        return TypeAPIGetFieldsNum(this.td)
+        return TypeAPI.getFieldsNum(this.cls)
     }
 
     public getOwnFieldsNum(): long {
-        return TypeAPIGetOwnFieldsNum(this.td)
+        return TypeAPI.getOwnFieldsNum(this.cls)
     }
 
     /**
@@ -1702,17 +1770,33 @@ export final class ClassType extends Type {
      *
      * @param i index (using flat semantic)
      *
-     * @throws error when i greater then number of fields
+     * @throws NoSuchFieldError when i greater then number of fields
      *
      * @returns ith Field
      */
-    //NOTE(kirill-mitkin): add error
     public getField(i: long): Field {
-        return TypeAPIGetField(this.td, i)
+        const fieldPtr = TypeAPI.getFieldPtr(this.cls, i)
+        if (fieldPtr) {
+            return this.getFieldImpl(fieldPtr)
+        }
+        throw new NoSuchFieldError("no field at " + i)
     }
 
+    /**
+     * Returns ith Field owned by this class
+     *
+     * @param i index (using flat semantic)
+     *
+     * @throws NoSuchFieldError when i greater then number of fields
+     *
+     * @returns ith Field
+     */
     public getOwnField(i: long): Field {
-        return TypeAPIGetOwnField(this.td, i)
+        const fieldPtr = TypeAPI.getOwnFieldPtr(this.cls, i)
+        if (fieldPtr) {
+            return this.getFieldImpl(fieldPtr)
+        }
+        throw new NoSuchFieldError("no own field at " + i)
     }
 
     /**
@@ -1720,13 +1804,24 @@ export final class ClassType extends Type {
      *
      * @param name name of field
      *
-     * @throws error when class doesn't have field with this name
+     * @throws NoSuchFieldError when class doesn't have field with this name
      *
      * @returns Field instance with this name
      */
-    //NOTE(kirill-mitkin): add error
     public getFieldByName(name: string): Field {
-        return TypeAPIGetFieldByName(this.td, name)
+        const fieldPtr = TypeAPI.getFieldPtrByName(this.cls, name)
+        if (fieldPtr) {
+            return this.getFieldImpl(fieldPtr)
+        }
+        throw new NoSuchFieldError("no field \"" + name + "\"")
+    }
+
+    private getFieldImpl(fieldPtr: long): Field {
+        const fieldDesc = TypeAPI.getFieldDescriptor(fieldPtr)
+        const fieldType = Type.resolve(fieldDesc, this.getContextLinker())!
+        const ownerClass = TypeAPI.getFieldOwner(fieldPtr)
+        const ownerType = Type.resolve(ownerClass.getDescriptor(), ownerClass.getLinker())!
+        return TypeAPI.getField(this.cls, fieldPtr, fieldType, ownerType)
     }
 
     /**
@@ -1748,7 +1843,7 @@ export final class ClassType extends Type {
      * @returns number of methods
      */
     public getMethodsNum(): long {
-        return TypeAPIGetMethodsNum(this.td)
+        return TypeAPI.getMethodsNum(this.cls)
     }
 
     /**
@@ -1756,13 +1851,17 @@ export final class ClassType extends Type {
      *
      * @param i index (using flat semantic)
      *
-     * @throws error when i greater then number of methods
+     * @throws NoSuchMethodError when i greater then number of methods
      *
      * @returns ith method
      */
-    //NOTE(kirill-mitkin): add error
     public getMethod(i: long): Method {
-        return TypeAPIGetMethod(this.td, i)
+        const td = TypeAPI.getMethodDescriptor(this.cls, i)
+        if (td) {
+            const methodType = Type.resolve(td, this.getContextLinker())! as MethodType
+            return TypeAPI.getMethod(this.cls, methodType)
+        }
+        throw new NoSuchMethodError("no method at " + i)
     }
 
     /**
@@ -1772,7 +1871,7 @@ export final class ClassType extends Type {
      * @returns number of constructors
      */
     public getConstructorsNum(): long {
-        return TypeAPIGetConstructorsNum(this.td)
+        return TypeAPI.getConstructorsNum(this.cls)
     }
 
     /**
@@ -1780,13 +1879,17 @@ export final class ClassType extends Type {
      *
      * @param i index
      *
-     * @throws error then i greater then number of constructors
+     * @throws NoSuchMethodError then i greater then number of constructors
      *
      * @returns {@link Method} instance representing ith constructor
      */
-    //NOTE(kirill-mitkin): add error
     public getConstructor(i: long): Method {
-        return TypeAPIGetConstructor(this.td, i)
+        const td = TypeAPI.getConstructorDescriptor(this.cls, i)
+        if (td) {
+            const methodType = Type.resolve(td, this.getContextLinker())! as MethodType
+            return TypeAPI.getMethod(this.cls, methodType)
+        }
+        throw new NoSuchMethodError("no constructor at " + i)
     }
 
     /**
@@ -1809,14 +1912,8 @@ export final class ClassType extends Type {
     }
 
     public hasField(name: string): boolean {
-        // NOTE(shumilov-petr): may be faster if implement via intrinsic
-        let fnum = this.getFieldsNum()
-        for (let i = 0; i < fnum; i++) {
-            if (this.getField(i).getName() == name) {
-                return true
-            }
-        }
-        return false
+        const fieldPtr = TypeAPI.getFieldPtrByName(this.cls, name)
+        return (fieldPtr !== undefined)
     }
 
     /**
@@ -1850,8 +1947,7 @@ export final class ClassType extends Type {
      * @throws error when class doesn't have an empty constructor
      */
     public make(): Object {
-        const emptyArgs = new NullishType[0]
-        return this.make(emptyArgs)
+        return this.cls.createInstance()
     }
 
     // todo(kprokopenko): make varargs
@@ -1956,10 +2052,11 @@ export final class ClassType extends Type {
  * Represents interface type
  */
 export final class InterfaceType extends Type {
-    public constructor() {}
+    private cls: Class
 
-    public constructor(td: TypeDesc) {
-        this.td = td
+    internal constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
+        super(td, contextLinker)
+        this.cls = TypeAPI.getClass(td, contextLinker)!
     }
 
     /**
@@ -1995,7 +2092,7 @@ export final class InterfaceType extends Type {
      * @returns name of type
      */
     public override getName(): string {
-        return TypeAPIGetTypeName(this.td)
+        return TypeAPI.getTypeName(this.cls)
     }
 
     /**
@@ -2017,7 +2114,8 @@ export final class InterfaceType extends Type {
      * their names are the same
      */
     public override equals(other: Type): boolean {
-        return other instanceof InterfaceType && this.td == (other as InterfaceType).td
+        // Must compare classes, as descriptors might be equal between classes from different contexts
+        return other instanceof InterfaceType && this.cls == (other as InterfaceType).cls
     }
 
     // `this` extends of `other` interface?
@@ -2032,11 +2130,24 @@ export final class InterfaceType extends Type {
     }
 
     public getInterfacesNum(): long {
-        return TypeAPIGetInterfacesNum(this.td)
+        return TypeAPI.getInterfacesNum(this.cls)
     }
 
+    /**
+     * Returns ith direct superinterface of this interface
+     *
+     * @param i index
+     *
+     * @throws TypeError when i greater then num of interfaces
+     *
+     * @returns type of ith superinterface
+     */
     public getInterface(i: long): InterfaceType {
-        return Type.resolve(TypeAPIGetInterface(this.td, i))! as InterfaceType
+        const iface = TypeAPI.getInterface(this.cls, i)
+        if (iface) {
+            return Type.resolve(iface.getDescriptor(), iface.getLinker()) as InterfaceType
+        }
+        throw new TypeError("no interface at " + i)
     }
 
     /**
@@ -2058,7 +2169,7 @@ export final class InterfaceType extends Type {
      * @returns number of methods
      */
     public getMethodsNum(): long {
-        return TypeAPIGetMethodsNum(this.td)
+        return TypeAPI.getMethodsNum(this.cls)
     }
 
     /**
@@ -2071,7 +2182,12 @@ export final class InterfaceType extends Type {
      * @returns ith method
      */
     public getMethod(i: long): Method {
-        return TypeAPIGetMethod(this.td, i)
+        const td = TypeAPI.getMethodDescriptor(this.cls, i)
+        if (td) {
+            const methodType = Type.resolve(td, this.getContextLinker())! as MethodType
+            return TypeAPI.getMethod(this.cls, methodType)
+        }
+        throw new NoSuchMethodError("no method at " + i)
     }
 
     /**
@@ -2102,7 +2218,7 @@ export final class InterfaceType extends Type {
         if (this.equals(expected)) {
             return true
         }
-        return TypeAPIIsInheritedFrom(this.td, expected.td)
+        return TypeAPI.isInheritedFrom(this.cls, expected.cls)
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -2118,27 +2234,27 @@ export final class InterfaceType extends Type {
  * Represents array type
  */
 export final class ArrayType extends Type {
-    private elemTD: TypeDesc
+    private elemTD: RuntimeTypeDescriptor
 
-    public static readonly BOOLEAN_VAL: ArrayType   = new ArrayType(TypeAPIGetTypeDescriptor(new boolean[0]), ValueTypeDesc.BOOLEAN)
-    public static readonly BOOLEAN_REF: ArrayType   = new ArrayType(TypeAPIGetTypeDescriptor(new Boolean[0]), TypeAPIGetTypeDescriptor(new Boolean()))
-    public static readonly CHAR_VAL: ArrayType      = new ArrayType(TypeAPIGetTypeDescriptor(new char[0]), ValueTypeDesc.CHAR)
-    public static readonly CHAR_REF: ArrayType      = new ArrayType(TypeAPIGetTypeDescriptor(new Char[0]), TypeAPIGetTypeDescriptor(new Char()))
-    public static readonly BYTE_VAL: ArrayType      = new ArrayType(TypeAPIGetTypeDescriptor(new byte[0]), ValueTypeDesc.BYTE)
-    public static readonly BYTE_REF: ArrayType      = new ArrayType(TypeAPIGetTypeDescriptor(new Byte[0]), TypeAPIGetTypeDescriptor(new Byte()))
-    public static readonly SHORT_VAL: ArrayType     = new ArrayType(TypeAPIGetTypeDescriptor(new short[0]), ValueTypeDesc.SHORT)
-    public static readonly SHORT_REF: ArrayType     = new ArrayType(TypeAPIGetTypeDescriptor(new Short[0]), TypeAPIGetTypeDescriptor(new Short()))
-    public static readonly INT_VAL: ArrayType       = new ArrayType(TypeAPIGetTypeDescriptor(new int[0]), ValueTypeDesc.INT)
-    public static readonly INT_REF: ArrayType       = new ArrayType(TypeAPIGetTypeDescriptor(new Int[0]), TypeAPIGetTypeDescriptor(new Int()))
-    public static readonly LONG_VAL: ArrayType      = new ArrayType(TypeAPIGetTypeDescriptor(new long[0]), ValueTypeDesc.LONG)
-    public static readonly LONG_REF: ArrayType      = new ArrayType(TypeAPIGetTypeDescriptor(new Long[0]), TypeAPIGetTypeDescriptor(new Long()))
-    public static readonly FLOAT_VAL: ArrayType     = new ArrayType(TypeAPIGetTypeDescriptor(new float[0]), ValueTypeDesc.FLOAT)
-    public static readonly FLOAT_REF: ArrayType     = new ArrayType(TypeAPIGetTypeDescriptor(new Float[0]), TypeAPIGetTypeDescriptor(new Float()))
-    public static readonly DOUBLE_VAL: ArrayType    = new ArrayType(TypeAPIGetTypeDescriptor(new double[0]), ValueTypeDesc.DOUBLE)
-    public static readonly DOUBLE_REF: ArrayType    = new ArrayType(TypeAPIGetTypeDescriptor(new Double[0]), TypeAPIGetTypeDescriptor(new Double()))
+    public static readonly BOOLEAN_VAL: ArrayType   = new ArrayType(Class.of(new boolean[0]), ValueTypeDesc.BOOLEAN)
+    public static readonly BOOLEAN_REF: ArrayType   = new ArrayType(Class.of(new Boolean[0]), TypeAPI.getTypeDescriptor(new Boolean()))
+    public static readonly CHAR_VAL: ArrayType      = new ArrayType(Class.of(new char[0]), ValueTypeDesc.CHAR)
+    public static readonly CHAR_REF: ArrayType      = new ArrayType(Class.of(new Char[0]), TypeAPI.getTypeDescriptor(new Char()))
+    public static readonly BYTE_VAL: ArrayType      = new ArrayType(Class.of(new byte[0]), ValueTypeDesc.BYTE)
+    public static readonly BYTE_REF: ArrayType      = new ArrayType(Class.of(new Byte[0]), TypeAPI.getTypeDescriptor(new Byte()))
+    public static readonly SHORT_VAL: ArrayType     = new ArrayType(Class.of(new short[0]), ValueTypeDesc.SHORT)
+    public static readonly SHORT_REF: ArrayType     = new ArrayType(Class.of(new Short[0]), TypeAPI.getTypeDescriptor(new Short()))
+    public static readonly INT_VAL: ArrayType       = new ArrayType(Class.of(new int[0]), ValueTypeDesc.INT)
+    public static readonly INT_REF: ArrayType       = new ArrayType(Class.of(new Int[0]), TypeAPI.getTypeDescriptor(new Int()))
+    public static readonly LONG_VAL: ArrayType      = new ArrayType(Class.of(new long[0]), ValueTypeDesc.LONG)
+    public static readonly LONG_REF: ArrayType      = new ArrayType(Class.of(new Long[0]), TypeAPI.getTypeDescriptor(new Long()))
+    public static readonly FLOAT_VAL: ArrayType     = new ArrayType(Class.of(new float[0]), ValueTypeDesc.FLOAT)
+    public static readonly FLOAT_REF: ArrayType     = new ArrayType(Class.of(new Float[0]), TypeAPI.getTypeDescriptor(new Float()))
+    public static readonly DOUBLE_VAL: ArrayType    = new ArrayType(Class.of(new double[0]), ValueTypeDesc.DOUBLE)
+    public static readonly DOUBLE_REF: ArrayType    = new ArrayType(Class.of(new Double[0]), TypeAPI.getTypeDescriptor(new Double()))
 
-    private constructor(td: TypeDesc, elemTD: TypeDesc) {
-        this.td = td
+    private constructor(arrayClass: Class, elemTD: RuntimeTypeDescriptor) {
+        super(TypeAPI.getClassDescriptor(arrayClass), arrayClass.getLinker())
         this.elemTD = elemTD
     }
 
@@ -2149,41 +2265,43 @@ export final class ArrayType extends Type {
         return other instanceof ArrayType && (other as ArrayType).getElementType().subTypeOf(this.getElementType())
     }
 
-    internal static getInstance(td: TypeDesc, elemTD: TypeDesc): ArrayType {
-        let ek = (TypeAPIGetTypeKind(elemTD) & TypeKindMask) as byte
+    internal static getInstance(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): ArrayType {
+        const arrayClass = TypeAPI.getClass(td, contextLinker)!
+        return ArrayType.getInstance(arrayClass)
+    }
+
+    internal static getInstance(arrayClass: Class, elemTD?: RuntimeTypeDescriptor): ArrayType {
+        elemTD = elemTD ?? TypeAPI.getArrayElementType(arrayClass)
+        const contextLinker = arrayClass.getLinker()
+        let ek = (TypeAPI.getTypeKind(elemTD, contextLinker) & TypeKindMask) as byte
         switch (ek) {
             case TypeKind.BOOLEAN:
-                return (TypeAPIIsValueType(elemTD)) ? ArrayType.BOOLEAN_VAL : ArrayType.BOOLEAN_REF
+                return TypeAPI.isValueType(elemTD, contextLinker) ? ArrayType.BOOLEAN_VAL : ArrayType.BOOLEAN_REF
             case TypeKind.CHAR:
-                return (TypeAPIIsValueType(elemTD)) ? ArrayType.CHAR_VAL : ArrayType.CHAR_REF
+                return TypeAPI.isValueType(elemTD, contextLinker) ? ArrayType.CHAR_VAL : ArrayType.CHAR_REF
             case TypeKind.BYTE:
-                return (TypeAPIIsValueType(elemTD)) ? ArrayType.BYTE_VAL : ArrayType.BYTE_REF
+                return TypeAPI.isValueType(elemTD, contextLinker) ? ArrayType.BYTE_VAL : ArrayType.BYTE_REF
             case TypeKind.SHORT:
-                return (TypeAPIIsValueType(elemTD)) ? ArrayType.SHORT_VAL : ArrayType.SHORT_REF
+                return TypeAPI.isValueType(elemTD, contextLinker) ? ArrayType.SHORT_VAL : ArrayType.SHORT_REF
             case TypeKind.INT:
-                return (TypeAPIIsValueType(elemTD)) ? ArrayType.INT_VAL : ArrayType.INT_REF
+                return TypeAPI.isValueType(elemTD, contextLinker) ? ArrayType.INT_VAL : ArrayType.INT_REF
             case TypeKind.LONG:
-                return (TypeAPIIsValueType(elemTD)) ? ArrayType.LONG_VAL : ArrayType.LONG_REF
+                return TypeAPI.isValueType(elemTD, contextLinker) ? ArrayType.LONG_VAL : ArrayType.LONG_REF
             case TypeKind.FLOAT:
-                return (TypeAPIIsValueType(elemTD)) ? ArrayType.FLOAT_VAL : ArrayType.FLOAT_REF
+                return TypeAPI.isValueType(elemTD, contextLinker) ? ArrayType.FLOAT_VAL : ArrayType.FLOAT_REF
             case TypeKind.DOUBLE:
-                return (TypeAPIIsValueType(elemTD)) ? ArrayType.DOUBLE_VAL : ArrayType.DOUBLE_REF
+                return TypeAPI.isValueType(elemTD, contextLinker) ? ArrayType.DOUBLE_VAL : ArrayType.DOUBLE_REF
             case TypeKind.CLASS:
             case TypeKind.STRING:
             case TypeKind.INTERFACE:
             case TypeKind.ARRAY:
             case TypeKind.TUPLE:
             case TypeKind.LAMBDA:
-            case TypeKind.METHOD:
             case TypeKind.UNION:
-                return new ArrayType(td, elemTD)
+                return new ArrayType(arrayClass, elemTD)
             default:
                 throw new AssertionError("Unexpected TypeKind " + ek)
         }
-    }
-
-    internal static getInstance(td: TypeDesc): ArrayType {
-        return ArrayType.getInstance(td, TypeAPIGetArrayElementType(td))
     }
 
     /**
@@ -2251,7 +2369,7 @@ export final class ArrayType extends Type {
      * @returns element type
      */
     public getElementType(): Type {
-        return Type.resolve(this.elemTD)!
+        return Type.resolve(this.elemTD, this.getContextLinker())!
     }
 
     /**
@@ -2266,7 +2384,7 @@ export final class ArrayType extends Type {
      * @returns new instance of array
      */
     public make(length: long): Object {
-        return TypeAPIMakeArrayInstance(this.elemTD, length)
+        return TypeAPI.makeArrayInstance(this.elemTD, this.getContextLinker(), length)
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -2282,8 +2400,8 @@ export final class ArrayType extends Type {
 }
 
 export final class TupleType extends Type {
-    public constructor(td: TypeDesc) {
-        this.td = td
+    internal constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
+        super(td, contextLinker)
     }
 
     public override isPrimitive(): boolean {
@@ -2323,9 +2441,9 @@ export final class TupleType extends Type {
 export abstract class FunctionType extends Type {
     private readonly attrs: int
 
-    protected constructor(td: TypeDesc) {
-        this.td = td
-        this.attrs = TypeAPIGetFunctionAttributes(td)
+    protected constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
+        super(td, contextLinker)
+        this.attrs = TypeAPI.getFunctionAttributes(td)
     }
 
     /**
@@ -2370,7 +2488,8 @@ export abstract class FunctionType extends Type {
      * @returns result type
      */
     public getResultType(): Type {
-        return Type.resolve(TypeAPIGetResultType(this.td))!
+        const resultTypeTd = this.getResultTypeDescriptor()
+        return Type.resolve(resultTypeTd, this.getContextLinker())!
     }
 
     /**
@@ -2418,7 +2537,7 @@ export abstract class FunctionType extends Type {
      * they both has same signatures
      */
     public override equals(other: Type): boolean {
-        return (other instanceof FunctionType) && (other as FunctionType).td == this.td
+        return (other instanceof FunctionType) && (other as FunctionType).getTypeDesc() == this.getTypeDesc()
     }
 
     /**
@@ -2428,17 +2547,24 @@ export abstract class FunctionType extends Type {
      *
      * @returns number of parameters
      */
-    public getParametersNum(): long {
-        return TypeAPIGetParametersNum(this.td)
-    }
+    public native getParametersNum(): long
 
     /**
      * Returns ith parameter of function type
      *
+     * @param i index
+     *
+     * @throws TypeError when i greater then number of parameters
+     *
      * @return Parameter, corresponding ith parameter in signature
      */
     public getParameter(i: long): Parameter {
-        return TypeAPIGetParameter(this.td, i)
+        const paramDescriptor = this.getParameterDescriptor(i)
+        if (paramDescriptor) {
+            const paramType = Type.resolve(paramDescriptor, this.getContextLinker())!
+            return this.getParameter(i, paramType)
+        }
+        throw new TypeError("no parameter at " + i)
     }
 
     /**
@@ -2464,12 +2590,18 @@ export abstract class FunctionType extends Type {
         // NOTE(shumilov-petr): not implemented
         throw new Error("not implemented")
     }
+
+    private native getResultTypeDescriptor(): RuntimeTypeDescriptor
+
+    private native getParameterDescriptor(i: long): RuntimeTypeDescriptor | undefined
+
+    private native getParameter(i: long, paramType: Type): Parameter
 }
 
 
 export final class LambdaType extends FunctionType {
-    public constructor(td: TypeDesc) {
-        super(td)
+    internal constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
+        super(td, contextLinker)
     }
 
     public override getLiteral(): string {
@@ -2492,8 +2624,7 @@ export final class LambdaType extends FunctionType {
      * @returns LambdaType instance
      */
     public make(): Object {
-        // NOTE(kprokopenko): not implemented
-        throw new Error("Not implemented")
+        return this.getDeclaringClass()!.createInstance()
     }
 
     public override assignableFrom(other: Type): boolean {
@@ -2549,20 +2680,24 @@ export final class LambdaType extends FunctionType {
         }
         throw new Error("invalid conversion")
     }
+
+    private native getDeclaringClass(): Class | undefined
 }
 
-
 export final class MethodType extends FunctionType {
-    public constructor(td: TypeDesc) {
-        super(td)
+    internal constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
+        super(td, contextLinker)
     }
 
     public override getLiteral(): string {
-        let sb = new StringBuilder("(this: ")
-        sb.append(this.getReceiverType().toString())
+        let sb = new StringBuilder("(")
         const paramsNum = this.getParametersNum()
-        if (paramsNum > 0) {
-            sb.append(", ")
+        if (this.hasReceiver()) {
+            sb.append("this: ")
+            sb.append(this.getReceiverType().toString())
+            if (paramsNum > 0) {
+                sb.append(", ")
+            }
         }
         for (let i = 0; i < paramsNum; ++i) {
             sb.append(this.getParameter(i).toString())
@@ -2575,17 +2710,34 @@ export final class MethodType extends FunctionType {
         return sb.toString()
     }
 
+    /**
+     * Returns receiver type of this method
+     *
+     * @throws TypeError if method has no receiver (i.e. static)
+     *
+     * @return Type corresponding to method's receiver
+     */
     public getReceiverType(): Type {
-        return Type.resolve(TypeAPIGetReceiverType(this.td))!
+        const receiverTd = this.getReceiverTypeDescriptor()
+        if (receiverTd) {
+            return Type.resolve(receiverTd, this.getContextLinker())!
+        }
+        throw new TypeError("Method does not have receiver")
     }
 
     public override assignableFrom(other: Type): boolean {
         return false
     }
 
+    public hasReceiver(): boolean {
+        return this.getReceiverTypeDescriptor() !== undefined
+    }
+
     internal override convertObject(obj: NullishType): NullishType {
         throw new Error("Only LambdaType can be converted")
     }
+
+    private native getReceiverTypeDescriptor(): RuntimeTypeDescriptor | undefined
 }
 
 /**
@@ -2595,7 +2747,7 @@ export final class StringType extends Type {
     public static readonly REF: StringType = new StringType()
 
     internal constructor() {
-        this.td = TypeAPIGetTypeDescriptor("")
+        super(TypeAPI.getTypeDescriptor(""), getBootRuntimeLinker())
     }
 
     /**
@@ -2645,7 +2797,6 @@ export final class StringType extends Type {
         return "string"
     }
 
-
     /**
      * Checks for equality this instance with provided object, treated as a StringType
      *
@@ -2670,8 +2821,8 @@ export final class StringType extends Type {
  * Represents enum type
  */
 export final class EnumType extends Type {
-    internal constructor(td: TypeDesc) {
-        this.td = td
+    internal constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
+        super(td, contextLinker)
     }
 
     public override assignableFrom(other: Type): boolean {
@@ -2778,8 +2929,8 @@ export final class EnumType extends Type {
  * Represents union type
  */
 export final class UnionType extends Type {
-    internal constructor(td: TypeDesc) {
-        this.td = td
+    internal constructor(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker) {
+        super(td, contextLinker)
     }
 
     public override assignableFrom(other: Type): boolean {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,18 @@
 #ifndef PANDA_PLUGINS_ETS_TYPEAPI_METHOD_H_
 #define PANDA_PLUGINS_ETS_TYPEAPI_METHOD_H_
 
+#include "mem/object_pointer.h"
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_string.h"
-#include "types/ets_primitives.h"
-#include "types/ets_typeapi.h"
+#include "plugins/ets/runtime/types/ets_typeapi.h"
+#include "plugins/ets/runtime/types/ets_typeapi_type.h"
 
 namespace ark::ets {
+
+namespace test {
+class EtsTypeAPITest;
+}  // namespace test
 
 class EtsCoroutine;
 
@@ -50,14 +56,10 @@ public:
         return reinterpret_cast<EtsTypeAPIMethod *>(field);
     }
 
-    void SetTypeDesc(const char *td)
+    void SetMethodType(EtsTypeAPIType *methodType)
     {
-        auto coro = EtsCoroutine::GetCurrent();
-        [[maybe_unused]] HandleScope<ObjectHeader *> scope {coro};
-        VMHandle<EtsTypeAPIMethod> self {coro, this};
-        // allocate beforehand to ensure order and keep self/this pointer valid in SetObject
-        auto val = EtsString::CreateFromMUtf8(td)->AsObject()->GetCoreType();
-        ObjectAccessor::SetObject(self.GetPtr(), MEMBER_OFFSET(EtsTypeAPIMethod, td_), val);
+        ASSERT(methodType != nullptr);
+        ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsTypeAPIMethod, methodType_), methodType->GetCoreType());
     }
 
     void SetName(EtsString *name)
@@ -76,10 +78,12 @@ public:
     }
 
 private:
-    ObjectPointer<EtsString> td_;
+    ObjectPointer<EtsTypeAPIType> methodType_;
     ObjectPointer<EtsString> name_;
     FIELD_UNUSED EtsInt attr_;  // note alignment
     FIELD_UNUSED EtsByte accessMod_;
+
+    friend class test::EtsTypeAPITest;
 };
 
 }  // namespace ark::ets

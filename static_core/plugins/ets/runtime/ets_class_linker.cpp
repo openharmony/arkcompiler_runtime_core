@@ -65,19 +65,22 @@ EtsClass *EtsClassLinker::GetClass(const panda_file::File &pf, panda_file::File:
     return LIKELY(cls != nullptr) ? EtsClass::FromRuntimeClass(cls) : nullptr;
 }
 
-Method *EtsClassLinker::GetMethod(const panda_file::File &pf, panda_file::File::EntityId id)
+Method *EtsClassLinker::GetMethod(const panda_file::File &pf, panda_file::File::EntityId id,
+                                  ClassLinkerContext *classLinkerContext, ClassLinkerErrorHandler *errorHandler)
 {
-    return classLinker_->GetMethod(pf, id);
+    return classLinker_->GetMethod(pf, id, classLinkerContext, errorHandler);
 }
 
 Method *EtsClassLinker::GetAsyncImplMethod(Method *method, EtsCoroutine *coroutine)
 {
+    ASSERT(method != nullptr);
     panda_file::File::EntityId asyncAnnId = EtsAnnotation::FindAsyncAnnotation(method);
     ASSERT(asyncAnnId.IsValid());
     const panda_file::File &pf = *method->GetPandaFile();
     panda_file::AnnotationDataAccessor ada(pf, asyncAnnId);
     auto implMethodId = ada.GetElement(0).GetScalarValue().Get<panda_file::File::EntityId>();
-    Method *result = GetMethod(pf, implMethodId);
+    auto *ctx = method->GetClass()->GetLoadContext();
+    Method *result = GetMethod(pf, implMethodId, ctx);
     if (result == nullptr) {
         panda_file::MethodDataAccessor mda(pf, implMethodId);
         PandaStringStream out;

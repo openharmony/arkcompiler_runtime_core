@@ -146,7 +146,7 @@ export final class Runtime {
     internal static failedTypeCastException(src: NullishType, dstStr: string): ClassCastError {
         let srcStr = src === null ? "null" :
             (src === undefined ? "undefined" :
-                TypeAPIGetTypeDescriptor(src));
+                Class.of(src).getName());
         return new ClassCastError(srcStr + " cannot be cast to " + dstStr);
     }
 }

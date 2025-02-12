@@ -22,6 +22,8 @@ export function getBootRuntimeLinker(): BootRuntimeLinker {
     return BootRuntimeLinker.instance;
 }
 
+export native function getNearestNonBootRuntimeLinker(): RuntimeLinker | undefined;
+
 final class BootRuntimeLinker extends RuntimeLinker {
     public static instance: BootRuntimeLinker = Class.of(new Object()).getLinker() as BootRuntimeLinker;
 

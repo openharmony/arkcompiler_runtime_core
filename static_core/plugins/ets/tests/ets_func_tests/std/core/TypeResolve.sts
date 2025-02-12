@@ -27,21 +27,24 @@ class AHAH {
 }
 
 function main() {
-    const iType = Type.resolve("LTypeResolve/AHAH;") as ClassType
-    const ctorsN = iType.getConstructorsNum()
+    const typ = Type.resolve("TypeResolve.AHAH")
+    assertNE(typ, undefined)
+    assertTrue(typ instanceof ClassType)
+    const cType = typ as ClassType
+    const ctorsN = cType.getConstructorsNum()
 
-    assertEQ( iType.getConstructorsNum() ,  2)
-    iType.getConstructor(1).getName()
+    assertEQ(cType.getConstructorsNum(), 2)
+    cType.getConstructor(1).getName()
 
     let ok = false
-    for (let i = 0; i < iType.getMethodsNum(); i++) {
-        const m = iType.getMethod(i)
+    for (let i = 0; i < cType.getMethodsNum(); i++) {
+        const m = cType.getMethod(i)
         if (m.getName() == "meth") {
             assertTrue( m.getType().getResultType() instanceof IntType)
             ok = true
             break
         }
     }
-    assertTrue( ok)
-    assertEQ( (iType.make() as AHAH).meth() ,  3)
+    assertTrue(ok)
+    assertEQ((cType.make() as AHAH).meth(), 3)
 }

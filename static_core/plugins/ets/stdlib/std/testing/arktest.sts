@@ -267,12 +267,14 @@ export function expectException(fn: () => void throws, expect?: string | Excepti
         } else if (typeof expect == "string") {
             return e.message == expect
         } else {
-            expect = expect as Exception // broken smartcast
-            if (Type.of(e).getId() != Type.of(expect).getId()) {
-                return "Expected " + Type.of(expect).getName() + ", got " + Type.of(e).getName()
+            const expectedException = expect as Exception // broken smartcast
+            const eType = Type.of(e)
+            const expectType = Type.of(expectedException)
+            if (!eType.equals(expectType)) {
+                return "Expected " + expectType.getName() + ", got " + eType.getName()
             }
-            if (e.message != (expect as Exception).message) { // broken smartcast
-                return "Expected " + (expect as Exception).message + ", got " + e.message // broken smartcast
+            if (e.message != expectedException.message) {
+                return "Expected '" + expectedException.message + "', got '" + e.message + "'"
             }
             return true
         }
@@ -295,12 +297,14 @@ export function expectError(fn: () => void throws, expect?: string | Error): voi
         } else if (typeof expect == "string") {
             return e.message == expect
         } else {
-            expect = expect as Error // broken smartcast
-            if (Type.of(e).getId() != Type.of(expect).getId()) {
-                return "Expected " + Type.of(expect).getName() + ", got " + Type.of(e).getName()
+            const expectedError = expect as Error // broken smartcast
+            const eType = Type.of(e)
+            const expectType = Type.of(expectedError)
+            if (!eType.equals(expectType)) {
+                return "Expected " + expectType.getName() + ", got " + eType.getName()
             }
-            if (e.message != (expect as Error).message) { // broken smartcast
-                return "Expected " + (expect as Error).message + ", got " + e.message // broken smartcast
+            if (e.message != expectedError.message) {
+                return "Expected '" + expectedError.message + "', got '" + e.message + "'"
             }
             return true
         }

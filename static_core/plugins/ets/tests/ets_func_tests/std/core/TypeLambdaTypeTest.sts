@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,25 @@ class Base {}
 
 class Derived extends Base {}
 
+function testNoThrow(fn: () => boolean throws): boolean {
+    try {
+        return fn()
+    } catch (ignored) {
+        return false
+    }
+}
+
+function testGetParameterError(lambdaType: LambdaType): boolean {
+    try {
+        lambdaType.getParameter(1000)
+    } catch (ignored: TypeError) {
+        // Expected error is catched
+        return true
+    } catch (other) {
+    }
+    return false
+}
+
 function testLambdaType(): int {
     let foo: () => Base = () : Base => { return new Base() }
     let foo2: (p: Base) => Derived = (p: Base): Derived => { return new Derived() }
@@ -40,7 +59,12 @@ function testLambdaType(): int {
             test(fooType.getResultType().equals(baseType),            "   Base result type") +
             test(foo2Type.getParametersNum() == 1,                    "   1 Parameter") +
             test(foo2Type.getParameter(0).getType().equals(baseType), "       base type param") +
-            test(foo2Type.getResultType().equals(derivedType),        "   Derived result type")
+            test(testGetParameterError(foo2Type),                     "   non-existing parameter") +
+            test(foo2Type.getResultType().equals(derivedType),        "   Derived result type") +
+            test(testNoThrow((): boolean throws => {
+                const foo2 = fooType.make()
+                return Type.of(foo).equals(Type.of(foo2))
+            }),  " Lambda instantiation")
 }
 
 function main(): int {

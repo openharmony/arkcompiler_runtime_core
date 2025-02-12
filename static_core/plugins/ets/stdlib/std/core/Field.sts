@@ -15,13 +15,16 @@
 
 package std.core;
 
+native function TypeAPIGetStaticFieldValue(ownerType: Type, name: string): NullishType
+native function TypeAPISetStaticFieldValue(ownerType: Type, name: string, val: NullishType): void
+
 /**
  * Represents field of class or interface
  *
  */
 export final class Field extends Object {
-    private td: TypeDesc = new TypeDesc()
-    private ownerTD: TypeDesc = new TypeDesc()
+    private fieldType: Type | undefined // not undefined if already created
+    private ownerType: Type | undefined // not undefined if already created
     private name: string = ""
     private attributes: int
     private accessMod: byte
@@ -34,11 +37,11 @@ export final class Field extends Object {
      * @returns {@link Type} of this field
      */
     public getType(): Type {
-        return Type.resolve(this.td)!
+        return this.fieldType!
     }
 
     public getOwnerType(): Type {
-        return Type.resolve(this.ownerTD)!
+        return this.ownerType!
     }
 
     public getName(): String {
@@ -57,7 +60,7 @@ export final class Field extends Object {
         if (!this.isStatic()) {
             throw new AssertionError("Field value is not static!")
         }
-        return TypeAPIGetStaticFieldValue(this.ownerTD, this.name)
+        return TypeAPIGetStaticFieldValue(this.ownerType!, this.name)
     }
 
     public setStaticValue(v: NullishType): void {
@@ -67,7 +70,7 @@ export final class Field extends Object {
         if (!this.getType().assignableFrom(Type.of(v))) {
             throw new AssertionError("Cannot set value " + v + " to " + this.getType())
         }
-        TypeAPISetStaticFieldValue(this.ownerTD, this.name, this.getType().convertObject(v))
+        TypeAPISetStaticFieldValue(this.ownerType!, this.name, this.getType().convertObject(v))
     }
 
     public isInherited(): boolean {
@@ -89,7 +92,7 @@ export final class Field extends Object {
 
     public equals(oth: NullishType): boolean {
         return oth instanceof Field &&
-                this.td == (oth as Field).td &&
+                this.fieldType!.equals((oth as Field).fieldType!) &&
                 this.name == (oth as Field).name &&
                 this.accessMod == (oth as Field).accessMod &&
                 this.attributes == (oth as Field).attributes

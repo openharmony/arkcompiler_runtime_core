@@ -49,7 +49,8 @@ public:
     EtsClass *GetClass(const panda_file::File &pf, panda_file::File::EntityId id,
                        ClassLinkerContext *classLinkerContext = nullptr,
                        ClassLinkerErrorHandler *errorHandler = nullptr);
-    Method *GetMethod(const panda_file::File &pf, panda_file::File::EntityId id);
+    Method *GetMethod(const panda_file::File &pf, panda_file::File::EntityId id, ClassLinkerContext *classLinkerContext,
+                      ClassLinkerErrorHandler *errorHandler = nullptr);
     Method *GetAsyncImplMethod(Method *method, EtsCoroutine *coroutine);
     EtsClass *GetPromiseClass();
     EtsClass *GetPromiseRefClass();

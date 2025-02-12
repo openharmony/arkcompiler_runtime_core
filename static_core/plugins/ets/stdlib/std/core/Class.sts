@@ -46,6 +46,11 @@ export final class Class {
     /**
      * Get class of caller method
      */
+    public static native current(): Class
+
+    /**
+     * Get class of caller method which is calling this method
+     */
     public static native ofCaller(): Class
 
     public native createInstance(): Object

@@ -157,6 +157,8 @@ public:
     void SetStaticFieldObject(EtsField *field, EtsObject *value);
     void SetStaticFieldObject(int32_t fieldOffset, bool isVolatile, EtsObject *value);
 
+    EtsObject *CreateInstance();
+
     bool IsEtsObject()
     {
         return GetRuntimeClass()->IsObjectClass();

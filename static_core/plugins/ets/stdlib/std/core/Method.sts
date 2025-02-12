@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,14 @@
 
 package std.core;
 
-native function TypeAPIMethodInvoke(methodDesc: string, recv: NullishType, args: NullishType[]): NullishType
-native function TypeAPIMethodInvokeConstructor(methodDesc: string, args: NullishType[]): Object
+native function TypeAPIMethodInvoke(methodType: MethodType, recv: NullishType, args: NullishType[]): NullishType
+native function TypeAPIMethodInvokeConstructor(methodType: MethodType, args: NullishType[]): Object
 
 /**
  * Represents method of class or interface
  */
 export final class Method extends Object {
-    private td: TypeDesc = new TypeDesc()
+    private methodType: MethodType | undefined // not undefined if already created
     private name: string = ""
     private attributes: int
     private accessMod: byte
@@ -35,15 +35,11 @@ export final class Method extends Object {
      * @returns method's {@link MethodType}
      */
     public getType(): MethodType {
-        return Type.resolve(this.td)! as MethodType
+        return this.methodType!
     }
 
     public getName(): string {
         return this.name
-    }
-
-    internal getTD(): TypeDesc {
-        return this.td
     }
 
     public isInherited(): boolean {
@@ -94,12 +90,12 @@ export final class Method extends Object {
             convertedArgs[i] = thisType.getParameter(i).getType().convertObject(args[i])
         }
         if (isCtor) {
-            return TypeAPIMethodInvokeConstructor(this.td, convertedArgs)
+            return TypeAPIMethodInvokeConstructor(this.methodType!, convertedArgs)
         } else {
             if (!isStatic) {
                 recv = thisType.getReceiverType().convertObject(recv)
             }
-            return TypeAPIMethodInvoke(this.td, recv, convertedArgs)
+            return TypeAPIMethodInvoke(this.methodType!, recv, convertedArgs)
         }
     }
 
@@ -113,7 +109,7 @@ export final class Method extends Object {
 
     public equals(oth: NullishType): boolean {
         return oth instanceof Method &&
-                this.td == (oth as Method).td &&
+                this.methodType!.equals((oth as Method).methodType!) &&
                 this.name == (oth as Method).name &&
                 this.accessMod == (oth as Method).accessMod &&
                 this.attributes == (oth as Method).attributes

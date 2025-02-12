@@ -24,7 +24,7 @@ class C extends A {
 }
 
 function main(): void {
-    const a = Type.resolve("LTypeMethodInvokeVirt/A;") as ClassType
+    const a = Type.resolve("TypeMethodInvokeVirt.A") as ClassType
     let got = 0
     for (let i = 0; i < a.getMethodsNum(); i++) {
         const m = a.getMethod(i)

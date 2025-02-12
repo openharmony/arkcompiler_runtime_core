@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "assembly-function.h"
 #include "assembly-program.h"
+#include "class_linker_context.h"
 #include "ets_typeapi_create_panda_constants.h"
 
 namespace ark {
@@ -71,12 +72,12 @@ public:
      * Saves objects into current context to provide them to TypeAPI$CtxData$_.cctor
      * @param objects must live until end of call to `InitializeCtxDataRecord` and may be changed inside this function
      */
-    void SaveObjects(EtsCoroutine *coro, VMHandle<EtsArray> &objects);
+    void SaveObjects(EtsCoroutine *coro, VMHandle<EtsArray> &objects, ClassLinkerContext *ctx);
 
     EtsArray *GetObjects(EtsCoroutine *coro);
 
     /// Initializes TypeAPI$CtxData$_
-    void InitializeCtxDataRecord(EtsCoroutine *coro);
+    [[nodiscard]] bool InitializeCtxDataRecord(EtsCoroutine *coro, ClassLinkerContext *ctx, const panda_file::File *pf);
 
     /**
      * Creates TypeAPI$CtxData record if it wasn't created before
@@ -85,6 +86,8 @@ public:
     pandasm::Record &GetTypeAPICtxDataRecord();
 
     pandasm::Record &AddRefTypeAsExternal(const std::string &name);
+
+    std::pair<pandasm::Record &, bool> AddPandasmRecord(pandasm::Record &&record);
 
     /**
      * Lazily declares primitive reference wrapper
@@ -106,6 +109,9 @@ public:
     }
 
 private:
+    void LoadCreatedClasses(ClassLinkerContext *ctx, const panda_file::File *pf);
+
+private:
     pandasm::Program prog_;
     pandasm::Record ctxDataRecord_ {"", panda_file::SourceLang::ETS};
     std::string ctxDataRecordName_ {};
@@ -113,6 +119,7 @@ private:
     std::map<std::string, std::pair<std::string, std::string>> primitiveTypesCtorDtor_;
     std::vector<std::shared_ptr<void>> datas_;
     std::string error_;
+    std::vector<std::string> createdRecords_;
 
     coretypes::Array *initArrObject_ {};
 };

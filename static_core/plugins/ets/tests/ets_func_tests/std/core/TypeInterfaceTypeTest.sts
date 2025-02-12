@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,28 @@ function findMethodByName(ct: InterfaceType, name: string): Method | null {
     return null
 }
 
+function testGetInterfaceError(it: InterfaceType): boolean {
+    try {
+        it.getInterface(1000)
+    } catch (ignored: TypeError) {
+        // Expected error is catched
+        return true
+    } catch (other) {
+    }
+    return false
+}
+
+function testGetMethodError(it: InterfaceType): boolean {
+    try {
+        it.getMethod(1000)
+    } catch (ignored: NoSuchMethodError) {
+        // Expected error is catched
+        return true
+    } catch (other) {
+    }
+    return false
+}
+
 function testInterfaceTypeC(): int {
     let ict = (Type.of(new InstanceC()) as ClassType).getInterface(0)
     let iat = ict.getInterface(0)
@@ -80,7 +102,9 @@ function testInterfaceTypeC(): int {
             test(ict.getInterface(0).equals(iat),               "       A interface") +
             test(ict.getMethodsNum() == 2,                      "   2 Methods:") +
             test(findMethodByName(ict, "doA") != null,          "       doA method") +
-            test(findMethodByName(ict, "doC") != null,          "       doC method")
+            test(findMethodByName(ict, "doC") != null,          "       doC method") +
+            test(testGetInterfaceError(ict),                    " non-existing interface") +
+            test(testGetMethodError(ict),                       " non-existing method")
 }
 
 function testInterfaceTypeD(): int {
@@ -95,7 +119,9 @@ function testInterfaceTypeD(): int {
             test(findMethodByName(idt, "doA") != null,  "       doA method") +
             test(findMethodByName(idt, "doB") != null,  "       doB method") +
             test(findMethodByName(idt, "doC") != null,  "       doC method") +
-            test(findMethodByName(idt, "doD") != null,  "       doD method")
+            test(findMethodByName(idt, "doD") != null,  "       doD method") +
+            test(testGetInterfaceError(idt),            " non-existing interface") +
+            test(testGetMethodError(idt),               " non-existing method")
 }
 
 function main(): int {
