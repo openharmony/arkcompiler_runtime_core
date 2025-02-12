@@ -42,7 +42,6 @@ function check(result: int, message: string): int {
     if (result == 0) {
         return success
     }
-    console.println("\nFAILED: " + message)
     return fail
 }
 
