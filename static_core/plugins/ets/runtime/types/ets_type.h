@@ -16,6 +16,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_H_
 
 #include "plugins/ets/runtime/napi/ets_napi.h"
+#include "plugins/ets/runtime/types/ets_primitives.h"
 #include "libpandafile/file.h"
 #include "libpandafile/file_items.h"
 
@@ -125,6 +126,30 @@ inline std::string ConvertEtsPrimitiveTypeToString(const EtsType type)
             return "ets_double";
         default:
             UNREACHABLE();
+    }
+}
+
+template <typename T>
+constexpr EtsType GetEtsTypeByPrimitive()
+{
+    if constexpr (std::is_same_v<T, EtsBoolean>) {
+        return EtsType::BOOLEAN;
+    } else if constexpr (std::is_same_v<T, EtsChar>) {
+        return EtsType::CHAR;
+    } else if constexpr (std::is_same_v<T, EtsByte>) {
+        return EtsType::BYTE;
+    } else if constexpr (std::is_same_v<T, EtsShort>) {
+        return EtsType::SHORT;
+    } else if constexpr (std::is_same_v<T, EtsInt>) {
+        return EtsType::INT;
+    } else if constexpr (std::is_same_v<T, EtsLong>) {
+        return EtsType::LONG;
+    } else if constexpr (std::is_same_v<T, EtsFloat>) {
+        return EtsType::FLOAT;
+    } else if constexpr (std::is_same_v<T, EtsDouble>) {
+        return EtsType::DOUBLE;
+    } else {
+        static_assert(true, "Unsupported Ets primitive");
     }
 }
 

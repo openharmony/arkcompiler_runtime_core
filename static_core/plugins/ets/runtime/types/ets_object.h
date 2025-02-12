@@ -51,6 +51,11 @@ public:
         return klass->IsAssignableFrom(GetClass());
     }
 
+    bool HasField(EtsField *field) const
+    {
+        return field->GetDeclaringClass()->IsAssignableFrom(field->GetDeclaringClass());
+    }
+
     EtsObject *GetAndSetFieldObject(size_t offset, EtsObject *value, std::memory_order memoryOrder)
     {
         return FromCoreType(GetCoreType()->GetAndSetFieldObject(offset, value->GetCoreType(), memoryOrder));
@@ -59,6 +64,8 @@ public:
     template <class T>
     T GetFieldPrimitive(EtsField *field)
     {
+        ASSERT(field->GetEtsType() == GetEtsTypeByPrimitive<T>());
+        ASSERT(HasField(field));
         return GetCoreType()->GetFieldPrimitive<T>(*field->GetRuntimeField());
     }
 
@@ -80,6 +87,8 @@ public:
     template <class T>
     void SetFieldPrimitive(EtsField *field, T value)
     {
+        ASSERT(field->GetEtsType() == GetEtsTypeByPrimitive<T>());
+        ASSERT(HasField(field));
         GetCoreType()->SetFieldPrimitive<T>(*field->GetRuntimeField(), value);
     }
 
@@ -102,6 +111,7 @@ public:
     PANDA_PUBLIC_API EtsObject *GetFieldObject(EtsField *field) const
     {
         ASSERT(field->GetEtsType() == EtsType::OBJECT);
+        ASSERT(HasField(field));
         return reinterpret_cast<EtsObject *>(
             GetCoreType()->GetFieldObject<NEED_READ_BARRIER>(*field->GetRuntimeField()));
     }
@@ -124,6 +134,7 @@ public:
     void SetFieldObject(EtsField *field, EtsObject *value)
     {
         ASSERT(field->GetEtsType() == EtsType::OBJECT);
+        ASSERT(HasField(field));
         GetCoreType()->SetFieldObject<NEED_WRITE_BARRIER>(*field->GetRuntimeField(),
                                                           reinterpret_cast<ObjectHeader *>(value));
     }
