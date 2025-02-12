@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,18 +67,18 @@ function not_equals_str_null(str: String | null) {
 function main() {
     let str = "abc";
 
-    assert equals_str_str(str, str);
-    assert!equals_str_str(null, str);
-    assert!equals_str_str(str, null);
-    assert equals_str_str(null, null);
+    assertTrue(equals_str_str(str, str));
+    assertTrue(!equals_str_str(null, str));
+    assertTrue(!equals_str_str(str, null));
+    assertTrue(equals_str_str(null, null));
 
-    assert!equals_null_str(str);
-    assert not_equals_null_str(str);
-    assert!equals_str_null(str);
-    assert not_equals_str_null(str);
+    assertTrue(!equals_null_str(str));
+    assertTrue(not_equals_null_str(str));
+    assertTrue(!equals_str_null(str));
+    assertTrue(not_equals_str_null(str));
 
-    assert equals_null_str(null);
-    assert!not_equals_null_str(null);
-    assert equals_str_null(null);
-    assert!not_equals_str_null(null);
+    assertTrue(equals_null_str(null));
+    assertTrue(!not_equals_null_str(null));
+    assertTrue(equals_str_null(null));
+    assertTrue(!not_equals_str_null(null));
 }

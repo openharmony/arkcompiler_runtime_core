@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -249,16 +249,16 @@ function loop_if_reserve10(cond: boolean) : string {
 }
 
 function main() : int {
-    assert reserve1() == "0": "Wrong result at reserve1";
-    assert reserve2() == "01": "Wrong result at reserve2";
-    assert loop_reserve3() == "012": "Wrong result at loop_reserve3";
-    assert loop_reserve4() == "0123": "Wrong result at loop_reserve4";
-    assert loop_reserve5() == "01234": "Wrong result at loop_reserve5";
-    assert nested_loop_reserve6() == "012345678910111213": "Wrong result at nested_loop_reserve6";
-    assert if_reserve7(true) == "0": "Wrong result at if_reserve7";
-    assert if_reserve8(true) == "0123": "Wrong result at if_reserve8";
-    assert if_loop_reserve9(true) == "012345": "Wrong result at if_loop_reserve9";
-    assert loop_if_reserve10(true) == "012345678": "Wrong result at loop_if_reserve10";
+    assertEQ(reserve1(), "0", "Wrong result at reserve1")
+    assertEQ(reserve2(), "01", "Wrong result at reserve2")
+    assertEQ(loop_reserve3(), "012", "Wrong result at loop_reserve3")
+    assertEQ(loop_reserve4(), "0123", "Wrong result at loop_reserve4")
+    assertEQ(loop_reserve5(), "01234", "Wrong result at loop_reserve5")
+    assertEQ(nested_loop_reserve6(), "012345678910111213", "Wrong result at nested_loop_reserve6")
+    assertEQ(if_reserve7(true), "0", "Wrong result at if_reserve7")
+    assertEQ(if_reserve8(true), "0123", "Wrong result at if_reserve8")
+    assertEQ(if_loop_reserve9(true), "012345", "Wrong result at if_loop_reserve9")
+    assertEQ(loop_if_reserve10(true), "012345678", "Wrong result at loop_if_reserve10")
 
     return 0
 }

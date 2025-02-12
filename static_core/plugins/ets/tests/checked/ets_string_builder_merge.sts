@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -711,40 +711,40 @@ function chain_concat19(): void {
     sb_abc.append(c)
     let _abc = sb_abc.toString()
 
-    assert _a == "_a";
-    assert _ab == "_ab";
-    assert _abc == "_abc";
+    assertEQ(_a, "_a");
+    assertEQ(_ab, "_ab");
+    assertEQ(_abc, "_abc");
 }
 
 function main() {
-    assert chain_concat0("a", 4, "b", 3) == "_aaaa_bbb_": "Wrong result at chain_concat0"
-    assert chain_concat1("a", 4, "b", 3, "c", 5) == "_aaaa_bbb_ccccc_": "Wrong result at chain_concat1"
-    assert chain_concat2("a", 4, "b", 3, "c", 5, "d", 2) == "_aaaa_bbb_ccccc_dd_": "Wrong result at chain_concat2"
-    assert chain_concat3("a", 4, "b", 3, "c", 5, "d", 2) == "_aaaa_bbb_aaaa_bbb_ccccc_dd_": "Wrong result at chain_concat3"
+    assertEQ(chain_concat0("a", 4, "b", 3), "_aaaa_bbb_", "Wrong result at chain_concat0");
+    assertEQ(chain_concat1("a", 4, "b", 3, "c", 5), "_aaaa_bbb_ccccc_", "Wrong result at chain_concat1");
+    assertEQ(chain_concat2("a", 4, "b", 3, "c", 5, "d", 2), "_aaaa_bbb_ccccc_dd_", "Wrong result at chain_concat2");
+    assertEQ(chain_concat3("a", 4, "b", 3, "c", 5, "d", 2), "_aaaa_bbb_aaaa_bbb_ccccc_dd_", "Wrong result at chain_concat3");
 
-    assert supported_chain_concat5() == "012 012": "Wrong result at supported_chain_concat5"
-    assert supported_chain_concat6() == " abcΣΨΩ0123456789 true false A 57 127 32767 128934675 701234987654321 string [object Object] 1 1 1  abcΣΨΩ0123456789 true false A 57 127 32767 128934675 701234987654321 string [object Object] 1 1 1 ": "Wrong result at supported_chain_concat6"
+    assertEQ(supported_chain_concat5(), "012 012", "Wrong result at supported_chain_concat5");
+    assertEQ(supported_chain_concat6(), " abcΣΨΩ0123456789 true false A 57 127 32767 128934675 701234987654321 string [object Object] 1 1 1  abcΣΨΩ0123456789 true false A 57 127 32767 128934675 701234987654321 string [object Object] 1 1 1 ", "Wrong result at supported_chain_concat6");
 
-    assert unsupported_append_chain_concat7() == "0 0": "Wrong result at unsupported_append_chain_concat7"
-    assert unsupported_constructor_chain_concat8() == "00": "Wrong result at unsupported_constructor_chain_concat8"
-    assert unsupported_usage_chain_concat9() == "0": "Wrong result at unsupported_usage_chain_concat9"
+    assertEQ(unsupported_append_chain_concat7(), "0 0", "Wrong result at unsupported_append_chain_concat7");
+    assertEQ(unsupported_constructor_chain_concat8(), "00", "Wrong result at unsupported_constructor_chain_concat8");
+    assertEQ(unsupported_usage_chain_concat9(), "0", "Wrong result at unsupported_usage_chain_concat9");
 
-    assert unsupported_chain_concat10(false) == "210 012": "Wrong result at unsupported_chain_concat10(false)"
-    assert unsupported_chain_concat10(true) == "012 012": "Wrong result at unsupported_chain_concat10(true)"
+    assertEQ(unsupported_chain_concat10(false), "210 012", "Wrong result at unsupported_chain_concat10(false)");
+    assertEQ(unsupported_chain_concat10(true), "012 012", "Wrong result at unsupported_chain_concat10(true)");
 
-    assert unsupported_chain_concat11(false) == "0 2": "Wrong result at unsupported_chain_concat11(false)"
-    assert unsupported_chain_concat11(true) == "1 2": "Wrong result at unsupported_chain_concat11(true)"
+    assertEQ(unsupported_chain_concat11(false), "0 2", "Wrong result at unsupported_chain_concat11(false)");
+    assertEQ(unsupported_chain_concat11(true), "1 2", "Wrong result at unsupported_chain_concat11(true)");
 
-    assert unsupported_chain_concat12(false) == "0 1": "Wrong result at unsupported_chain_concat12(false)"
-    assert unsupported_chain_concat12(true) == "0 1": "Wrong result at unsupported_chain_concat12(true)"
+    assertEQ(unsupported_chain_concat12(false), "0 1", "Wrong result at unsupported_chain_concat12(false)");
+    assertEQ(unsupported_chain_concat12(true), "0 1", "Wrong result at unsupported_chain_concat12(true)");
 
-    assert unsupported_chain_concat13() == "0 1": "Wrong result at unsupported_chain_concat13()"
+    assertEQ(unsupported_chain_concat13(), "0 1", "Wrong result at unsupported_chain_concat13()");
 
-    assert partially_supported_chain_concat14("ab", "c", "d", "e") == "abcde": "Wrong result at partially_supported_chain_concat14";
-    assert supported_chain_concat15("ab", "c", "d", "e") == "abcde": "Wrong result at supported_chain_concat15";
-    assert partially_supported_chain_concat16("ab", "c", "d", "e") == "abcde": "Wrong result at partially_supported_chain_concat16";
-    assert unsupported_usage_chain_concat17("abc") == "abc": "Wrong result at unsupported_usage_chain_concat17";
-    assert unsupported_usage_chain_concat18("abc") == "abc": "Wrong result at unsupported_usage_chain_concat18";
+    assertEQ(partially_supported_chain_concat14("ab", "c", "d", "e"), "abcde", "Wrong result at partially_supported_chain_concat14");
+    assertEQ(supported_chain_concat15("ab", "c", "d", "e"), "abcde", "Wrong result at supported_chain_concat15");
+    assertEQ(partially_supported_chain_concat16("ab", "c", "d", "e"), "abcde", "Wrong result at partially_supported_chain_concat16");
+    assertEQ(unsupported_usage_chain_concat17("abc"), "abc", "Wrong result at unsupported_usage_chain_concat17");
+    assertEQ(unsupported_usage_chain_concat18("abc"), "abc", "Wrong result at unsupported_usage_chain_concat18");
 
     chain_concat19();
 }

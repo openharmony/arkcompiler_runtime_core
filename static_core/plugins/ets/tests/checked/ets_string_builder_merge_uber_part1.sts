@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,6 @@ const uber_golden_FFFF = "_aaaa_cacaca_aaaa_dbdbdb_bbbbb_aaaa_dbdbdb_acacac_cccc
 const uber_golden_FFFT = "_aaaa_cbacbacba_aaaa_dcbdcbdcb_bbbbb_aaaa_dcbdcbdcb_adcadcadc_ccccc_bdbbdb_adcadcadc_aaaa_dcbdcbdcb_adcadcadc_ccccc_caccac_";
 
 function main() {
-    assert uber_chain_concat4(false, "a", 4, "b", 3, "c", 5, "d", 2, false, false, false, false) == uber_golden_FFFF: "Wrong result at uber_golden_FFFF"
-    assert uber_chain_concat4(false, "a", 4, "b", 3, "c", 5, "d", 2, false, false, false, true)  == uber_golden_FFFT: "Wrong result at uber_golden_FFFT"
+    assertEQ(uber_chain_concat4(false, "a", 4, "b", 3, "c", 5, "d", 2, false, false, false, false), uber_golden_FFFF, "Wrong result at uber_golden_FFFF");
+    assertEQ(uber_chain_concat4(false, "a", 4, "b", 3, "c", 5, "d", 2, false, false, false, true) , uber_golden_FFFT, "Wrong result at uber_golden_FFFT");
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -432,17 +432,17 @@ function toString11(str: String): String {
 }
 
 function main(): int {
-    assert toString0("abcde") == "abcde": "Wrong at toString0";
-    assert toString1("abcde") == "abcde": "Wrong at toString1";
-    assert toString2("abcde") == "abcde1": "Wrong at toString2";
-    assert toString3("abcde") == "abcde": "Wrong at toString3";
-    assert toString4("abcde") == "abcde": "Wrong at toString4";
-    assert toString5("abcde") == "abcde": "Wrong at toString5";
-    assert toString6("abcde") == "abcde": "Wrong at toString6";
-    assert toString7("abcde") == "abcde": "Wrong at toString7";
-    assert toString8("abcde") == "abcde1": "Wrong at toString8";
-    assert toString9("abcde") == "abcde1": "Wrong at toString9";
-    assert toString10("abcde") == "abcde1": "Wrong at toString10";
-    assert toString11("abcde") == "abcde1": "Wrong at toString10";
+    assertEQ(toString0("abcde"), "abcde", "Wrong at toString0")
+    assertEQ(toString1("abcde"), "abcde", "Wrong at toString1")
+    assertEQ(toString2("abcde"), "abcde1", "Wrong at toString2")
+    assertEQ(toString3("abcde"), "abcde", "Wrong at toString3")
+    assertEQ(toString4("abcde"), "abcde", "Wrong at toString4")
+    assertEQ(toString5("abcde"), "abcde", "Wrong at toString5")
+    assertEQ(toString6("abcde"), "abcde", "Wrong at toString6")
+    assertEQ(toString7("abcde"), "abcde", "Wrong at toString7")
+    assertEQ(toString8("abcde"), "abcde1", "Wrong at toString8")
+    assertEQ(toString9("abcde"), "abcde1", "Wrong at toString9")
+    assertEQ(toString10("abcde"), "abcde1", "Wrong at toString10")
+    assertEQ(toString11("abcde"), "abcde1", "Wrong at toString10")
     return 0;
 }

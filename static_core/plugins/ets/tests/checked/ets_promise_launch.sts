@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@
 function main(): int {
     for (let i = 0; i < 100; i++) {
         let r: Promise<number> = launch ((p: number): number => p + p)(42.0)
-        assert((await r) == 84.0)
+        assertEQ((await r), 84.0);
     }
     return 0;
 }

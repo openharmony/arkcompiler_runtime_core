@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -177,16 +177,16 @@ function _0_if2_else2_0_append4(cond: boolean): string {
 }
 
 function main() : int {
-    assert _0_if1_else1_2_append4(true ) == "023": 'Wrong result at _0_if1_else1_2_append4(true )';
-    assert _0_if1_else1_2_append4(false) == "123": 'Wrong result at _0_if1_else1_2_append4(false)';
-    assert _1_if1_else1_1_append4(true ) == "013": 'Wrong result at _1_if1_else1_1_append4(true )';
-    assert _1_if1_else1_1_append4(false) == "023": 'Wrong result at _1_if1_else1_1_append4(false)';
-    assert _2_if1_else1_0_append4(true ) == "012": 'Wrong result at _2_if1_else1_0_append4(true )';
-    assert _2_if1_else1_0_append4(false) == "013": 'Wrong result at _2_if1_else1_0_append4(false)';
-    assert _1_if2_else1_0_append4(true ) == "012": 'Wrong result at _1_if2_else1_0_append4(true )';
-    assert _1_if2_else1_0_append4(false) == "03" : 'Wrong result at _1_if2_else1_0_append4(false)';
-    assert _0_if2_else2_0_append4(true ) == "01" : 'Wrong result at _0_if2_else2_0_append4(true )';
-    assert _0_if2_else2_0_append4(false) == "23" : 'Wrong result at _0_if2_else2_0_append4(false)';
+    assertEQ(_0_if1_else1_2_append4(true ), "023", 'Wrong result at _0_if1_else1_2_append4(true )');
+    assertEQ(_0_if1_else1_2_append4(false), "123", 'Wrong result at _0_if1_else1_2_append4(false)');
+    assertEQ(_1_if1_else1_1_append4(true ), "013", 'Wrong result at _1_if1_else1_1_append4(true )');
+    assertEQ(_1_if1_else1_1_append4(false), "023", 'Wrong result at _1_if1_else1_1_append4(false)');
+    assertEQ(_2_if1_else1_0_append4(true ), "012", 'Wrong result at _2_if1_else1_0_append4(true )');
+    assertEQ(_2_if1_else1_0_append4(false), "013", 'Wrong result at _2_if1_else1_0_append4(false)');
+    assertEQ(_1_if2_else1_0_append4(true ), "012", 'Wrong result at _1_if2_else1_0_append4(true )');
+    assertEQ(_1_if2_else1_0_append4(false), "03" , 'Wrong result at _1_if2_else1_0_append4(false)');
+    assertEQ(_0_if2_else2_0_append4(true ), "01" , 'Wrong result at _0_if2_else2_0_append4(true )');
+    assertEQ(_0_if2_else2_0_append4(false), "23" , 'Wrong result at _0_if2_else2_0_append4(false)');
 
     return 0
 }

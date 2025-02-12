@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -346,15 +346,15 @@ function not_countable_nested_loop() : number
 }
 
 function main(): void {
-    assert switch_case_loop() == 1;
-    assert simple_loop() == 15000001;
-    assert two_vars_loop() == 2;
-    assert nested_loops() == 1;
-    assert triple_nested_loops() == 1;
-    assert loop_init_without_update() == 21;
-    assert different_operations() == 9999997;
-    assert operations_chain() == 9999998;
-    assert linked_vars() == 2;
-    assert not_countable_nested_loop() == 1;
+    assertEQ(switch_case_loop(), 1);
+    assertEQ(simple_loop(), 15000001);
+    assertEQ(two_vars_loop(), 2);
+    assertEQ(nested_loops(), 1);
+    assertEQ(triple_nested_loops(), 1);
+    assertEQ(loop_init_without_update(), 21);
+    assertEQ(different_operations(), 9999997);
+    assertEQ(operations_chain(), 9999998);
+    assertEQ(linked_vars(), 2);
+    assertEQ(not_countable_nested_loop(), 1);
 }
 
