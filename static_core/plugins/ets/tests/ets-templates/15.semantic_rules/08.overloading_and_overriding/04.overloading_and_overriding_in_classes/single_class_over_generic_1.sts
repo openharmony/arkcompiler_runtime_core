@@ -24,7 +24,3 @@ class Base<T> {
   constructor(i: T) {}
   constructor(i: Number) {}
 }
-
-function main() {
-    new Base<String>();
-}
