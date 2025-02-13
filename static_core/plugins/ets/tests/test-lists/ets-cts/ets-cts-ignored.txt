@@ -1543,7 +1543,7 @@
 # end es2panda
 
 ### ES2PANDA_FAIL - fails of negative, compile-only
-### Issue 19680 #22788 
+### Issue 19680 #22788
 09.classes/11.local_classes_and_interfaces/local_class_out_of_visibility_area_7.sts
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_21.sts
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_10.sts
@@ -1735,4 +1735,6 @@
 17.experimental_features/12.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_4.sts
 17.experimental_features/12.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_6.sts
 
-
+# 22818
+17.experimental_features/09.native_functions_and_methods/03.native_constructors/natc_local_1.sts
+17.experimental_features/09.native_functions_and_methods/03.native_constructors/natc_local_2.sts
