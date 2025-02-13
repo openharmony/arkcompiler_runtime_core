@@ -113,7 +113,7 @@ public:
         return *current_defs_;
     }
 
-    void AddCatchPhiInputs(const ArenaUnorderedSet<BasicBlock *> &catch_handlers, const InstVector &defs,
+    void AddCatchPhiInputs(const ArenaSet<BasicBlock *> &catch_handlers, const InstVector &defs,
                            Inst *throwable_inst);
 
     SaveStateInst *CreateSaveState(Opcode opc, size_t pc);
