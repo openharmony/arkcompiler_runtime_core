@@ -357,3 +357,11 @@ add_ets_coroutines_test(FILE eworkers_reached_limit.sts
                         WORKERS "AUTO"
                         MODE "INT"
 )
+
+add_ets_coroutines_test(FILE eworker_interop_exception.sts
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT"
+)
