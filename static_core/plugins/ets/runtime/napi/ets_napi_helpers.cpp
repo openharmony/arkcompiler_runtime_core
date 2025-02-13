@@ -189,54 +189,54 @@ extern "C" void EtsNapiBeginCritical(Method *method, uint8_t *inRegsArgs, uint8_
     Runtime::GetCurrent()->GetNotificationManager()->MethodEntryEvent(thread, method);
 }
 
-//              Input stack               =======>              Output stack
+//              Input stack              =======>             Output stack
 // 0xFFFF
-//       |                        |                      |                        |
-//       |       Prev frame       |                      |       Prev frame       |
-//       |          ...           |                      |          ...           |
-//       +------------------------+                      +------------------------+
-//       |          ...           |                      |          ...           |
-//       |       stack args       |                      |       stack args       | <--------+
-//       |          ...           |                      |          ...           |          |
-//       +---+---+----------------+ <- in_stack_args --> +----------------+---+---+          |
-//       |   |   |       LR       |                      |       LR       |   |   |          |
-//       |   |   |       FP       |                      |       FP       |   |   |          |
-//       |   |   |     Method *   |                      |     Method *   |   |   |          |
-//       |   | c |      FLAGS     |                      |      FLAGS     | c |   |          |
-//       |   | f +----------------+                      +----------------+ f |   |          |
-//       |   | r |       ...      |                      |       ...      | r |   |          |
-//       |   | a |     locals     |                      |     locals     | a |   |          |
-//       |   | m |       ...      |                      |       ...      | m |   |          |
-//       |   | e +----------------+                      +----------------+ e |   |          |
-//       | N |   |       ...      |                      |       ...      |   | N |          |
-//       | A |   |  callee saved  |                      |  callee saved  |   | A |          |
-//       | P |   |       ...      |                      |       ...      |   | P |          |
-//       | I +---+----------------+                      +----------------+---+ I |          |
-//       |   |        ...         |                      |        ...         |   |          |
-//       |   |     float args     |                      |     float args     |   |          |
-//       | f |        ...         |                      |        ...         | f |          |
-//       | r +--------------------+                      +--------------------+ r |          |
-//       | a |        ...         |                      |        ...         | a |          |
-//       | m |    general args    |                      |    general args    | m | <----+   |
-//       | e |        ...         |                      |        ...         | e |      |   |
-//       |   |    arg0|Method*    |                      |  arg0|class(opt)   |   |      |   |
-//       |   +--------------------+ <-- in_regs_args --> +--------------------+   |      |   |     References
-//       |   |                    |                      |        ...         |   |      |   | to ObjectHeader *s
-//       |   |                    |                      |  NAPI float args   |   |      |   |    on the stack
-//       |   |                    |                      |     (on regs)      |   |      |   |
-//       |   |                    |                      |        ...         |   |      |   |
-//       |   |                    |                      +--------------------+   |      |   |
-//       |   |                    |                      |        ...         |   |      |   |
-//       |   |     space for      |                      | NAPI general args  |   | -----+   |
-//       |   |     NAPI args      |                      |     (on regs)      |   |          |
-//       |   |                    |                      |        ...         |   |          |
-//       |   |                    |                      +--------------------+   |          |
-//       |   |                    |                      |        ...         |   |          |
-//       |   |                    |                      |     NAPI args      |   | ---------+
-//       |   |                    |                      |     (on stack)     |   |
-//       |   |                    |                      |        ...         |   |
-//       +---+--------------------+ <- out_stack_args -> +--------------------+---+
-//       |                        |                      |                        |
+//       |                        |                    |                        |
+//       |       Prev frame       |                    |       Prev frame       |
+//       |          ...           |                    |          ...           |
+//       +------------------------+                    +------------------------+
+//       |          ...           |                    |          ...           |
+//       |       stack args       |                    |       stack args       | <--------+
+//       |          ...           |                    |          ...           |          |
+//       +---+---+----------------+ <- inStackArgs --> +----------------+---+---+          |
+//       |   |   |       LR       |                    |       LR       |   |   |          |
+//       |   |   |       FP       |                    |       FP       |   |   |          |
+//       |   |   |     Method *   |                    |     Method *   |   |   |          |
+//       |   | c |      FLAGS     |                    |      FLAGS     | c |   |          |
+//       |   | f +----------------+                    +----------------+ f |   |          |
+//       |   | r |       ...      |                    |       ...      | r |   |          |
+//       |   | a |     locals     |                    |     locals     | a |   |          |
+//       |   | m |       ...      |                    |       ...      | m |   |          |
+//       |   | e +----------------+                    +----------------+ e |   |          |
+//       | N |   |       ...      |                    |       ...      |   | N |          |
+//       | A |   |  callee saved  |                    |  callee saved  |   | A |          |
+//       | P |   |       ...      |                    |       ...      |   | P |          |
+//       | I +---+----------------+                    +----------------+---+ I |          |
+//       |   |        ...         |                    |        ...         |   |          |
+//       |   |     float args     |                    |     float args     |   |          |
+//       | f |        ...         |                    |        ...         | f |          |
+//       | r +--------------------+                    +--------------------+ r |          |
+//       | a |        ...         |                    |        ...         | a |          |
+//       | m |    general args    |                    |    general args    | m | <----+   |
+//       | e |        ...         |                    |        ...         | e |      |   |
+//       |   |    arg0|Method*    |                    |arg0|class/null(opt)|   |      |   |
+//       |   +--------------------+ <-- inRegsArgs --> +--------------------+   |      |   |     References
+//       |   |                    |                    |        ...         |   |      |   | to ObjectHeader *s
+//       |   |                    |                    |  NAPI float args   |   |      |   |    on the stack
+//       |   |                    |                    |     (on regs)      |   |      |   |
+//       |   |                    |                    |        ...         |   |      |   |
+//       |   |                    |                    +--------------------+   |      |   |
+//       |   |                    |                    |        ...         |   |      |   |
+//       |   |     space for      |                    | NAPI general args  |   | -----+   |
+//       |   |     NAPI args      |                    |     (on regs)      |   |          |
+//       |   |                    |                    |        ...         |   |          |
+//       |   |                    |                    +--------------------+   |          |
+//       |   |                    |                    |        ...         |   |          |
+//       |   |                    |                    |     NAPI args      |   | ---------+
+//       |   |                    |                    |     (on stack)     |   |
+//       |   |                    |                    |        ...         |   |
+//       +---+--------------------+ <- outStackArgs -> +--------------------+---+
+//       |                        |                    |                        |
 // 0x0000
 static uint8_t *PrepareArgsOnStack(Method *method, uint8_t *inRegsArgs, uint8_t *inStackArgs, uint8_t *outStackArgs,
                                    PandaEnv *pandaEnv)
@@ -261,7 +261,13 @@ static uint8_t *PrepareArgsOnStack(Method *method, uint8_t *inRegsArgs, uint8_t 
     EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(method);
     EtsReference *classOrThisRef = nullptr;
     if (method->IsStatic()) {
-        if (!etsMethod->IsFunction()) {
+        if (etsMethod->IsFunction()) {
+            // NOTE:
+            //  Replace the method pointer (Method *) with a pointer to the nullptr
+            //  to avoid GC crash during traversal of method arguments.
+            auto classPtr = reinterpret_cast<EtsObject **>(inRegsArgs);
+            *classPtr = nullptr;
+        } else {
             // Handle class object
             auto classObj = EtsClass::FromRuntimeClass(method->GetClass())->AsObject();
             ASSERT(classObj != nullptr);
