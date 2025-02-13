@@ -173,7 +173,7 @@ srcs_runtime = [
   "stdlib/native/core/IntlLocale.cpp",
   "stdlib/native/core/IntlLocaleMatch.cpp",
   "stdlib/native/core/IntlCollator.cpp",
-  "stdlib/native/etsstdlib.cpp"
+  "stdlib/native/etsstdlib.cpp",
 ]
 
 configs_runtime = []
@@ -208,9 +208,7 @@ if (ark_ets_interop_js) {
   ]
 
   if (ark_ets_hybrid) {
-    srcs_runtime += [
-      "runtime/interop_js/handshake.cpp",
-    ]
+    srcs_runtime += [ "runtime/interop_js/handshake.cpp" ]
   }
 
   if (current_cpu == "amd64" || current_cpu == "x64" ||
