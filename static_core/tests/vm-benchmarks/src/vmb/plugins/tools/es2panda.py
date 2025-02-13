@@ -120,7 +120,7 @@ class Tool(ToolBase):
             f'LD_LIBRARY_PATH={self.panda_root}/lib '
             f'{self.es2panda} {opts} '
             f'--arktsconfig={arktsconfig} '
-            f'--output={abc} {src}',
+            f'--output={abc} {src if not bu.src_for_es2panda_override else str(bu.src_for_es2panda_override)}',
             measure_time=True)
         if res.ret != 0 or not abc.is_file():
             bu.status = BUStatus.COMPILATION_FAILED

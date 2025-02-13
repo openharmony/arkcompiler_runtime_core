@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -59,9 +59,10 @@ class Tool(ToolBase):
         if not js.is_file():
             js = self.runner_script
         test_zip = bu.src('.zip')
+        unit_name = bu.name[:-len('_test')] if hasattr(bu, 'tags') and 'bu_a2j' in bu.tags else bu.name
         formatted_cmd = self.cmd.format(test_zip=test_zip,
                                         test_js=js,
-                                        name=bu.name
+                                        name=unit_name
                                         )
         res = self.x_run(formatted_cmd,
                          measure_time=True)
