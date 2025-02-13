@@ -15,6 +15,7 @@
 
 /*---
 desc: Import default entity from module A, imported from module B being non-default.
+tags: [compile-only, negative]
 files:
 - ../../07.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type_2_level_2.sts
 ---*/

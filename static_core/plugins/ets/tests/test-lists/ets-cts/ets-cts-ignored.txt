@@ -245,7 +245,6 @@
 09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_2.sts
 09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_3.sts
 
-13.compilation_units/07.top-level_declarations/top_level_declarations_11.sts
 17.experimental_features/15.exceptions/01.throwing_functions/lambda_call_with_catch.sts
 17.experimental_features/15.exceptions/01.throwing_functions/lambda_call_with_default_catch.sts
 17.experimental_features/15.exceptions/02.non_throwing_functions/lambda_with_default_catch.sts
@@ -1514,13 +1513,6 @@
 
 # es2panda: #18598 import type with the same name as not imported module entity
 13.compilation_units/03.import_directives/05.type_binding/type_binding_class_same_name_2.sts
-
-# es2panda: #18603 export entity as default, imported from another module as non-default
-13.compilation_units/03.import_directives/04.default_import_binding/multiple_levels_default_export_2.sts
-
-# test runner: #18046 Update compilation process with modules for AOT mode
-13.compilation_units/03.import_directives/04.default_import_binding/multiple_levels_default_export.sts
-13.compilation_units/03.import_directives/04.default_import_binding/multiple_levels_default_export_3.sts
 
 # es2panda: #18843 type compatability
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/eq_0.sts

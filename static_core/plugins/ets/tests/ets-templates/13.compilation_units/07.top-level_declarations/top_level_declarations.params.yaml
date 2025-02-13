@@ -27,5 +27,5 @@ topLevelTypes:
   - "const a: int = 1;"
   # Function declarations
   - "function Dist(x: int, y: int): void {}"
-  # Extension function declarations
-  - "static function Date.daysUntilTheNewYear(): int { return 0 ; // no implementation }"
+  # Function with receiver
+  - "function daysUntilTheNewYear(this: Date): int { return 0; }"
