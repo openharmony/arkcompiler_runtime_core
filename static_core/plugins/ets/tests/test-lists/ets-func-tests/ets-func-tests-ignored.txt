@@ -1,12 +1,8 @@
-### Issue 16444
-std/core/std_core_string_String_fromCharCode_005.sts
-std/core/std_core_string_String_localeCompare_string_001.sts
 ### Issue 16242
 std/core/std_core_string_String_localeCompare_string_005.sts
-### Issue 16242 end
-### Issue 19717
 std/core/std_core_char_static_Char_isPartOfSurrogatePair.sts
 std/core/std_core_char_static_Char_isValidCodePoint.sts
+
 ### Issue 11468 begin
 std/core/std_core_array_forEach_int_array_func_int.sts
 std/core/std_core_array_forEach_char_array_func_char_int_char_array.sts
@@ -101,7 +97,7 @@ spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-as-name_2.sts
 spec/11.Enumerations/enumCallToStringFromAsyncLambda.sts
 ### Issue 19956
 spec/11.Enumerations/enum_trailing_comma_04.sts
-### Issue 14654
+### Issue 22825
 spec/11.Enumerations/enum_const_expr_01_01.sts
 spec/11.Enumerations/enum_const_expr_01_02.sts
 spec/11.Enumerations/enum_const_expr_01_03.sts
@@ -147,11 +143,9 @@ spec/03.types/References_Types/Type_undefined/define/define-class-member-as-unde
 ###### Issue 19961
 spec/03.types/References_Types/Type_undefined/assign/assign-undefined-to-undefined_1.sts
 spec/03.types/References_Types/Type_undefined/assign/assign-undefined-to-untyped_1.sts
-###### End Issue 14166
 ###### Issue 19963
 spec/03.types/References_Types/Type_undefined/array-of-complex-type.sts
 spec/03.types/References_Types/Type_undefined/complex-type.sts
-###### End Issue 14108
 ###### Issue 19947
 spec/03.types/References_Types/Type_undefined/define/define-class-member-as-question-and-assign.sts
 ###### End Issue 19947
@@ -162,7 +156,6 @@ spec/03.types/References_Types/Type_undefined/array-of-type_1.sts
 ### Feature: Callable classes
 ### issue 19966
 spec/16.Support_for_GUI_Programming/callable-classes/type-call-instantiate_7.sts
-### issue 14539
 ### End of Feature: Callable classes
 
 ### Feature: Null safety tests
@@ -207,8 +200,7 @@ spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_isnt_expor
 ### Issue 19933
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re-export_directive_01.sts
 
-### Issue 14647
-spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.import_path/import_path_01.sts
+### Issue 22167
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.import_path/import_path_02.sts
 ### Issue 19967
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_isnt_exported_but_func_takes_t_as_return_value_exported.sts
@@ -219,6 +211,7 @@ spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue15371/issue15371_06.sts
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/05.default_import_binding/default_import_binding.sts
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_all_2.sts
+spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.import_path/import_path_01.sts
 
 ### Issue 19712
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_is_proxed_through_chain_of_files_2.sts
@@ -291,15 +284,13 @@ spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-08.sts
 ### end for of
 
 ### accessors
-### Issue 19721
+### Issue 20724
 spec/09.classes/Accessor_Declarations/issue-13330_7.sts
+spec/09.classes/Accessor_Declarations/issue-15142_7.sts
+spec/09.classes/Accessor_Declarations/issue-15142_8.sts
 spec/09.classes/Accessor_Declarations/issue-15142_10.sts
 ### Issue 19722
 spec/09.classes/Accessor_Declarations/issue-15142_5.sts
-
-### Issue 15647
-spec/09.classes/Accessor_Declarations/issue-15142_7.sts
-spec/09.classes/Accessor_Declarations/issue-15142_8.sts
 ### end of accessors
 
 ### tuples
@@ -310,7 +301,7 @@ spec/03.types/References_Types/Tuples_type/func_tuple_1.sts
 spec/03.types/References_Types/Tuples_type/tuple_as_generic_7.sts
 ### Issue 15394
 spec/03.types/References_Types/Tuples_type/tuple_write_6.sts
-### Issue 19929
+### Issue 21639
 spec/03.types/References_Types/Tuples_type/tuple_write_7.sts
 ### end of tuples
 
@@ -325,13 +316,11 @@ spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interf
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_05.sts
 
 ### End of Overriding
-### Issue 13952
+### Issue 19727
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload1.sts
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload2.sts
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload3.sts
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload4.sts
-### Issue 13952 end
-### Issue 19727
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload5.sts
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload6.sts
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload7.sts
@@ -344,10 +333,9 @@ spec/10.Interfaces/method_overload6.sts
 spec/10.Interfaces/method_overload7.sts
 ### Issue 19727 end
 
-### Issue 17680
+### Issue 19950
 std/core/std_core_typedarrays_bignum__BigInt64Array.sts
 std/core/std_core_typedarrays_bignum__BigUint64Array.sts
-### Issue 17680 end
 
 ### Failures #15642
 # Type violation in type erasure
@@ -376,15 +364,10 @@ std/containers/BuiltinArrayMapTest.sts
 
 ### Negative tests
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue15371/issue15371_04.sts
-
-### Issue 19733
-spec/07.expressions/7.19.Nullish-Coalescing_Expressions/issue14609_02.sts
-
-### Issue 1654
 spec/07.expressions/7.19.Nullish-Coalescing_Expressions/issue14609_01.sts
-### Issue 1654 end
 
 ### Issue 16535
+spec/07.expressions/7.19.Nullish-Coalescing_Expressions/issue14609_02.sts
 spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0000.sts
 spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0001.sts
 spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0002.sts
@@ -401,16 +384,14 @@ spec/05.Generics/issue15089_06.sts
 spec/05.Generics/issue15089_08.sts
 spec/05.Generics/wrongUsingInT.sts
 ###  Issue 16696 end
-### Issue #15808
-spec/10.Interfaces/method_overiding_0005.sts
+
 # Issue 16622
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/override_static_instance_0011.sts
 # Issue 16623
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_static_instance_0002.sts
 ### Issue 17149
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.2.Static_Method_Declarations/static_method_0003.sts
-### Issue 16242 (STDLIB)
-std/core/std_core_string_String_localeCompare_string_005.sts
+
 ### Issue 19809
 spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0001.sts
 spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0002.sts
@@ -425,11 +406,11 @@ spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_ty
 spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0011.sts
 ### Issue 19809 end
 
-### Issue 17725 begin
+### Issue 22831 begin
 spec/05.Generics/function_as_type_generic_0010.sts
 spec/05.Generics/function_as_type_generic_0020.sts
 spec/05.Generics/function_as_type_generic_0030.sts
-### Issue 17725
+### Issue 22831
 
 ### Issue 18766 begin
 spec/partial_type/partialType_main.sts

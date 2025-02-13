@@ -1,4 +1,4 @@
-# 20905 Multiline string literals not supported
+# 22857
 03.types/08.reference_types/12.union_types/ut_7.sts
 
 # 20907 No CTE when multiple numeric types in a union
@@ -163,12 +163,11 @@
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_11.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_11.sts
 
-# 20940 SegFault when accessing common union members
+# 22858
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_12.sts
 
-# es2panda fails: panda#14423 Boxed floating values are different from the same unboxed
+# 22859
 07.expressions/31.string_interpolation_expressions/siexp_1.sts
-# end of es2panda fails
 
 # es2panda fails: panda, cannot convert to int
 17.experimental_features/03.array_creation_expressions/expr_2.sts
@@ -731,8 +730,6 @@
 # Throwing function types
 17.experimental_features/15.exceptions/01.throwing_functions/lambda.sts
 
-#19929 Leftovers from bit operations on floats, verifier failure with opt-level=0
-
 # #15577 union type inference
 07.expressions/05.object_literal/01.object_literal_of_class_type/cl_2.sts
 17.experimental_features/13.trailing_lambda/trlambda_func_1.sts
@@ -804,6 +801,9 @@
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_0_7.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_7.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_7.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_8.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_9.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_10.sts
 
 # 14673 Method Overload is not supported
 # enum
@@ -818,11 +818,6 @@
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_13.sts
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_11.sts
 # end
-
-# 17816 cannot overload a function from a package
-17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_8.sts
-17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_9.sts
-17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_10.sts
 
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_0.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_1.sts
@@ -1121,7 +1116,7 @@
 07.expressions/06.spread_expression/spex_const_44.sts
 07.expressions/06.spread_expression/spex_const_45.sts
 
-# 20003, 20046 Fails on spread expression with tuple, tuples in rest parameters not supported
+# 20774 Fails on spread expression with tuple, tuples in rest parameters not supported
 07.expressions/06.spread_expression/spex_42.sts
 07.expressions/06.spread_expression/spex_46.sts
 07.expressions/06.spread_expression/spex_const_32.sts
@@ -1347,9 +1342,6 @@
 10.interfaces/05.interface_properties/external_interface_with_property_0.sts
 10.interfaces/05.interface_properties/external_interface_with_property_1.sts
 
-# 20737 Compiler complains on return statement without expression in constructor
-09.classes/09.constructor_declaration/02.constructor_body/constructor_with_return_expression3.sts
-
 # 14673,16369, 14338 Function, method, constructor overload signatures
 15.semantic_rules/05.type_compatibility/classes_compatibility_2.sts
 15.semantic_rules/08.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_tuple_0.sts
@@ -1482,8 +1474,6 @@
 # es2panda: #17766 Order of initialization of global const and let
 07.expressions/17.typeof_expression/tof_const_11.sts
 
-# 17488: Separate module initializer not implemented yet
-
 # es2panda: #18344 Invalid test, ArkTS doesn't have intersection type
 06.contexts_and_conversions/01.assignment-like_contexts/identity2_11.sts
 
@@ -1535,7 +1525,7 @@
 # end es2panda
 
 ### ES2PANDA_FAIL - fails of negative, compile-only
-### Issue 19680
+### Issue 19680 #22788 
 09.classes/11.local_classes_and_interfaces/local_class_out_of_visibility_area_7.sts
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_21.sts
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_10.sts
@@ -1548,7 +1538,7 @@
 # 20510 unclear semantics
 07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum2_neg_3.sts
 
-# 20290
+# 22852
 05.generics/03.utility_types/01.partial_utility_type/partial_inherit3.sts
 
 # 20291: reserve names for Required/Partial/Readonly
