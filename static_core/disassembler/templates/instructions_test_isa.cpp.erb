@@ -53,6 +53,8 @@
 %       elsif properties.include?("string_id")
 %           result += (escape_strings) ?  "\\\"string_literal\\\"": "\"string_literal\""
 %       elsif properties.include?("method_id")
+%           result += "A.init:(A)"
+%       elsif properties.include?("static_method_id")
 %           result += "A.init:()"
 %       elsif properties.include?("literalarray_id")
 %           result += "array_0"
@@ -84,6 +86,12 @@ TEST(InstructionsTest, TestInsIsa)
 }
 
 .function A A.init() {
+    newobj v0, A
+    lda.obj v0
+    return.obj
+}
+
+.function A A.init(A a0) {
     newobj v0, A
     lda.obj v0
     return.obj
@@ -124,6 +132,9 @@ TEST(InstructionsTest, TestInsIsa)
     ASSERT_EQ(line, "jump_label_0:");
 % gen_ins_examples(true, true).each do |ins|
     std::getline(g, line);
+%   if ins.include? 'A.init:()'
+%     ins.gsub! 'A.init:()', '<static> A.init:()'\
+%   end
     ASSERT_EQ(std::string("\t<%= ins%>").rfind(line, 0), 0);
 % end
     std::getline(g, line);

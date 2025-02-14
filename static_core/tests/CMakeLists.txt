@@ -1237,7 +1237,6 @@ add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_2107_2.pa
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_2136.pa")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_2256.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad call")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_2260.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad register type")
-add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_2374.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad call static method as virtual")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/issue_964.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad register type")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_1833.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Inconsistent register and field types")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/jumps_1.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Register type conflict")

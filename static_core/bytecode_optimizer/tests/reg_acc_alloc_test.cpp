@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1071,7 +1071,7 @@ TEST_F(RegAccAllocTest, Ldai_Exist)
     EXPECT_TRUE(OptimizeBytecode(&program, &maps, fileName, false, true));
     ark::bytecodeopt::g_options = oldOptions;
     bool fldaiExists = false;
-    for (const auto &inst : program.functionTable.find("main:()")->second.ins) {
+    for (const auto &inst : program.functionStaticTable.find("main:()")->second.ins) {
         if (inst.opcode == ark::pandasm::Opcode::FLDAI) {
             fldaiExists = true;
             break;
@@ -1111,7 +1111,7 @@ TEST_F(RegAccAllocTest, Lda_Extra1)
     EXPECT_TRUE(OptimizeBytecode(&program, &maps, fileName, false, true));
     ark::bytecodeopt::g_options = oldOptions;
     bool ldaExists = false;
-    for (const auto &inst : program.functionTable.find("main:()")->second.ins) {
+    for (const auto &inst : program.functionStaticTable.find("main:()")->second.ins) {
         if (inst.opcode == ark::pandasm::Opcode::LDA) {
             ldaExists = true;
             break;
@@ -1162,7 +1162,7 @@ TEST_F(RegAccAllocTest, Lda_Extra2)
     EXPECT_TRUE(OptimizeBytecode(&program, &maps, fileName, false, true));
     ark::bytecodeopt::g_options = oldOptions;
     int ldaAmount = 0;
-    for (const auto &inst : program.functionTable.find("main:(i32)")->second.ins) {
+    for (const auto &inst : program.functionStaticTable.find("main:(i32)")->second.ins) {
         if (inst.opcode == ark::pandasm::Opcode::LDA) {
             ldaAmount += 1;
         }

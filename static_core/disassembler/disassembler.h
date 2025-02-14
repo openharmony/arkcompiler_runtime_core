@@ -264,7 +264,8 @@ private:
     ark::panda_file::SourceLang fileLanguage_ = ark::panda_file::SourceLang::PANDA_ASSEMBLY;
 
     std::map<std::string, panda_file::File::EntityId> recordNameToId_ {};
-    std::map<std::string, panda_file::File::EntityId> methodNameToId_ {};
+    std::map<std::string, panda_file::File::EntityId> methodStaticNameToId_ {};
+    std::map<std::string, panda_file::File::EntityId> methodInstanceNameToId_ {};
 
     std::map<std::string, std::vector<pandasm::Field>> externalFieldTable_ {};
     std::map<std::string, std::vector<std::string>> externalFieldsInfoTable_ {};

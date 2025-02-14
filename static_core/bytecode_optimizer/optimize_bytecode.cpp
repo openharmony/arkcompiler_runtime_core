@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -250,6 +250,7 @@ static void SetCompilerOptions(bool isDynamic)
     }
 }
 
+// CC-OFFNXT(huge_method) solid logic
 bool OptimizeFunction(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps,
                       const panda_file::MethodDataAccessor &mda, bool isDynamic, SourceLanguage lang)
 {
@@ -263,8 +264,9 @@ bool OptimizeFunction(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFi
     auto funcName = irInterface.GetMethodIdByOffset(mda.GetMethodId().GetOffset());
     LOG(INFO, BYTECODE_OPTIMIZER) << "Optimizing function: " << funcName;
 
-    auto it = prog->functionTable.find(funcName);
-    if (it == prog->functionTable.end()) {
+    auto it = mda.IsStatic() ? prog->functionStaticTable.find(funcName) : prog->functionInstanceTable.find(funcName);
+    if ((mda.IsStatic() && it == prog->functionStaticTable.end()) ||
+        (!mda.IsStatic() && it == prog->functionInstanceTable.end())) {
         LOG(ERROR, BYTECODE_OPTIMIZER) << "Cannot find function: " << funcName;
         return false;
     }

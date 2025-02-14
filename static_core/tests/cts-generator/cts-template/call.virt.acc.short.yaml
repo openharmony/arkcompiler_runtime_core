@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -93,20 +93,16 @@ tests:
             bugid: ['5593']
             ignore: true
           - values: ['R.sf1, v0, 0']
-            runner-options: [verifier-failure, verifier-config]
-            tags: [verifier]
+            runner-options: [compile-failure]
           - values: ['R.sf2, v0, 1']
-            runner-options: [verifier-failure, verifier-config]
-            tags: [verifier]
+            runner-options: [compile-failure]
           - values: ['R.sf3, v0, 1']
             bugid: ['5593']
             ignore: true
           - values: ['sf1, v0, 0']
-            runner-options: [verifier-failure, verifier-config]
-            tags: [verifier]
+            runner-options: [compile-failure]
           - values: ['sf2, v0, 1']
-            runner-options: [verifier-failure, verifier-config]
-            tags: [verifier]
+            runner-options: [compile-failure]
           - values: ['sf3, v0, 1']
             bugid: ['5593']
             ignore: true
@@ -326,13 +322,12 @@ tests:
             - v0, 1
 
       - file-name: static_method
-        description: Check that verifier reports an error on static method.
+        description: Check that compiler reports an error on static method.
         isa:
           verification:
             - method_id_non_static
         header-template: []
-        runner-options: [verifier-failure, verifier-config]
-        tags: [verifier]
+        runner-options: [compile-failure]
         check-type: exit-positive
         code-template: |
           .record R {}

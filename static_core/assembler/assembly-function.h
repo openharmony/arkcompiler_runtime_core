@@ -134,6 +134,7 @@ struct Function {
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
     bool Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
               const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods,
+              const std::unordered_map<std::string, panda_file::BaseMethodItem *> &staticMethods,
               const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
               const std::unordered_map<std::string, panda_file::BaseFieldItem *> &staticFields,
               const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,

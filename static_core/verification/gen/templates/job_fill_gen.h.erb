@@ -76,10 +76,10 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %   combination_flags = ""
 %   mnemonic = i.mnemonic.split('.').map { |p| p == '64' ? 'Wide' : p.capitalize }.join
 %   value_dispatch = "HANDLE_" + i.handler_name
-%   if i.properties.any? {  |prop| ['method_id', 'field_id', 'static_field_id', 'type_id', 'literalarray_id'].include?(prop)}
+%   if i.properties.any? {  |prop| ['method_id', 'static_method_id', 'field_id', 'static_field_id', 'type_id', 'literalarray_id'].include?(prop)}
 %                           combination_flags += "Prop_"
 %   end
-%   if (['method_id', 'field_id', 'static_field_id', 'type_id', 'string_id', 'literalarray_id'] & i.properties).size > 1
+%   if (['method_id', 'static_method_id', 'field_id', 'static_field_id', 'type_id', 'string_id', 'literalarray_id'] & i.properties).size > 1
 %       cache_api = "cache_api"
 %       combination_flags += "CacheApi_"
 %   else
@@ -89,7 +89,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %   if i.properties.include?('literalarray_id')
 %       combination_flags += "LiteralliId_"
 %   end
-%   if i.properties.include?('method_id')
+%   if i.properties.include?('method_id') || i.properties.include?('static_method_id')
 %       combination_flags += "MethodId_"
 %   end
 %   if i.properties.include?('field_id')

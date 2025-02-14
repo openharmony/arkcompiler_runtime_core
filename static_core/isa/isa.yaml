@@ -112,6 +112,8 @@ properties:
     description: Use an id which resolves into a type constant.
   - tag: method_id
     description: Use an id which resolves into a method constant.
+  - tag: static_method_id
+    description: Use an id which resolves into a static method constant.
   - tag: string_id
     description: Use an id which resolves into a string constant.
   - tag: literalarray_id
@@ -2701,7 +2703,7 @@ groups:
       - method_id_non_abstract
       - compatible_arguments
     properties:
-      - method_id
+      - static_method_id
       - call
       - initialize_type
       - short_long_range
@@ -2749,7 +2751,7 @@ groups:
       - method_id_non_abstract
       - compatible_arguments
     properties:
-      - method_id
+      - static_method_id
       - call
       - short_long_range
     exceptions:

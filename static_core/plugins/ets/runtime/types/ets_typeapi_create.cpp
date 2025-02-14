@@ -70,7 +70,7 @@ void TypeCreatorCtx::FlushTypeAPICtxDataRecordsToProgram()
     // Record must be unique
     ASSERT(res.second);
     auto name = ctxDataRecordCctor_.name;
-    prog_.functionTable.emplace(std::move(name), std::move(ctxDataRecordCctor_));
+    prog_.functionStaticTable.emplace(std::move(name), std::move(ctxDataRecordCctor_));
 }
 
 void TypeCreatorCtx::SaveObjects(EtsCoroutine *coro, VMHandle<EtsArray> &objects, ClassLinkerContext *ctx)
@@ -168,8 +168,7 @@ pandasm::Record &TypeCreatorCtx::GetTypeAPICtxDataRecord()
     getObjectsArray.returnType = pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 1};
     getObjectsArray.params.emplace_back(
         pandasm::Type::FromPrimitiveId(ConvertEtsTypeToPandaType(EtsType::LONG).GetId()), SourceLanguage::ETS);
-    auto getObjectsArrayName = getObjectsArray.name;
-    prog_.functionTable.emplace(std::move(getObjectsArrayName), std::move(getObjectsArray));
+    prog_.AddToFunctionTable(std::move(getObjectsArray));
 
     return ctxDataRecord_;
 }
@@ -282,7 +281,7 @@ void LambdaTypeCreator::Create()
     fn_.metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
     fn_.metadata->SetAttributeValue(typeapi_create_consts::ATTR_ACCESS_FUNCTION,
                                     typeapi_create_consts::ATTR_ACCESS_VAL_PUBLIC);
-    GetCtx()->Program().functionTable.emplace(fnName_, std::move(fn_));
+    GetCtx()->Program().AddToFunctionTable(std::move(fn_));
 }
 
 void PandasmMethodCreator::AddParameter(pandasm::Type param)
@@ -306,7 +305,9 @@ void PandasmMethodCreator::Create()
     ASSERT(!finished_);
     finished_ = true;
     fn_.name = name_;
-    auto ok = ctx_->Program().functionTable.emplace(name_, std::move(fn_)).second;
+
+    auto &functionTable = fn_.IsStatic() ? ctx_->Program().functionStaticTable : ctx_->Program().functionInstanceTable;
+    auto ok = functionTable.emplace(name_, std::move(fn_)).second;
     if (!ok) {
         ctx_->AddError("duplicate function " + name_);
     }

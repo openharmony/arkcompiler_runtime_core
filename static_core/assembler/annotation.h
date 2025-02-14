@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -460,8 +460,11 @@ public:
     template <Value::Type TYPE>
     // Disable checks due to clang-tidy bug https://bugs.llvm.org/show_bug.cgi?id=40640
     // NOLINTNEXTLINE(readability-magic-numbers)
-    static ScalarValue Create(ValueTypeHelperT<TYPE> value)
+    static ScalarValue Create(ValueTypeHelperT<TYPE> value, [[maybe_unused]] bool isStatic = false)
     {
+        if constexpr (TYPE == Type::METHOD) {
+            return ScalarValue(TYPE, value, isStatic);
+        }
         // NOLINTNEXTLINE(readability-magic-numbers)
         using T = ValueTypeHelperT<TYPE>;
         // Disable checks due to clang-tidy bug https://bugs.llvm.org/show_bug.cgi?id=32203
@@ -498,6 +501,12 @@ public:
         return value_;
     }
 
+    bool IsStatic() const
+    {
+        ASSERT(GetType() == Value::Type::METHOD);
+        return isStatic_;
+    }
+
     DEFAULT_MOVE_SEMANTIC(ScalarValue);
     DEFAULT_COPY_SEMANTIC(ScalarValue);
 
@@ -512,11 +521,17 @@ private:
 
     ScalarValue(Type type, std::string_view value) : Value(type), value_(std::string(value)) {}
 
+    ScalarValue(Type type, std::string_view value, bool isStatic)
+        : Value(type), value_(std::string(value)), isStatic_(isStatic)
+    {
+    }
+
     ScalarValue(Type type, pandasm::Type value) : Value(type), value_(std::move(value)) {}
 
     ScalarValue(Type type, AnnotationData &value) : Value(type), value_(value) {}
 
     std::variant<uint64_t, float, double, std::string, pandasm::Type, AnnotationData> value_;
+    bool isStatic_ {false};
 };
 
 class ArrayValue : public Value {

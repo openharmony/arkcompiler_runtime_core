@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -413,7 +413,7 @@ TEST(linkertests, ForeignBase)
         func.AddInstruction(ark::pandasm::Create_LDOBJ(0, "Derv.fld"));
         func.AddInstruction(ark::pandasm::Create_RETURN_VOID());
 
-        progDer.functionTable.emplace(func.name, std::move(func));
+        progDer.functionInstanceTable.emplace(func.name, std::move(func));
 
         ASSERT_TRUE(ark::pandasm::AsmEmitter::Emit(dervPath, progDer));
     }

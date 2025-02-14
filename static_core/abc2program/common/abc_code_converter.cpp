@@ -35,7 +35,8 @@ std::string AbcCodeConverter::IDToString(BytecodeInstruction bcIns, panda_file::
             stringTable_->GetStringById(file_->ResolveClassIndex(methodId, bcIns.GetId().AsIndex())));
         name.str("");
         name << type.GetPandasmName();
-    } else if (bcIns.HasFlag(BytecodeInstruction::Flags::METHOD_ID)) {
+    } else if (bcIns.HasFlag(BytecodeInstruction::Flags::METHOD_ID) ||
+               bcIns.HasFlag(BytecodeInstruction::Flags::STATIC_METHOD_ID)) {
         auto id = file_->ResolveMethodIndex(methodId, bcIns.GetId().AsIndex());
         AbcMethodProcessor methodProcessor(id, keyData_);
         name << methodProcessor.GetMethodSignature();

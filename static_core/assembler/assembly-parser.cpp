@@ -644,6 +644,19 @@ void Parser::ParseAsFunction(const std::vector<Token> &tokens)
                 open_ = false;
             }
         }
+        if ((currFunc_->params.empty() ||
+             currFunc_->params[0].type.GetName() != pandasm::GetOwnerName(currFunc_->name) ||
+             currFunc_->metadata->IsCctor())) {
+            currFunc_->metadata->SetAccessFlags(currFunc_->metadata->GetAccessFlags() | ACC_STATIC);
+        }
+        const auto &it = ambiguousFunctionTable_.find({currFunc_->name, true});
+        if (it != ambiguousFunctionTable_.end()) {
+            ASSERT(ambiguousFunctionTable_.find({currFunc_->name, false}) != ambiguousFunctionTable_.end());
+            const auto &homonymFunc = ambiguousFunctionTable_.at({currFunc_->name, false});
+            if (homonymFunc.IsStatic() == it->second.IsStatic()) {
+                context_.err = GetError("This function already exists.", Error::ErrorType::ERR_BAD_ID_FUNCTION);
+            }
+        }
     }
 }
 
@@ -674,25 +687,15 @@ void Parser::ParseAsBraceRight(const std::vector<Token> &tokens)
     ++context_;
 }
 
-void Parser::ParseResetFunctionLabelsAndParams()
+void Parser::ParseResetFunctionParams(bool isHomonym)
 {
-    if (open_ || err_.err != Error::ErrorType::ERR_NONE) {
-        return;
-    }
-
-    for (const auto &f : program_.functionTable) {
-        for (const auto &k : f.second.labelTable) {
-            if (!k.second.fileLocation->isDefined) {
-                context_.err = Error("This label does not exist.", lineStric_, Error::ErrorType::ERR_BAD_LABEL_EXT, "",
-                                     k.second.fileLocation->boundLeft, k.second.fileLocation->boundRight,
-                                     k.second.fileLocation->wholeLine);
-                SetError();
-            }
-        }
-    }
-
     for (const auto &t : context_.functionArgumentsLists) {
-        currFunc_ = &(program_.functionTable.at(t.first));
+        auto it = ambiguousFunctionTable_.find({t.first, isHomonym});
+        ASSERT(it != ambiguousFunctionTable_.end() || isHomonym);
+        if (it == ambiguousFunctionTable_.end()) {
+            continue;
+        }
+        currFunc_ = &(it->second);
         currFunc_->regsNum = static_cast<size_t>(currFunc_->valueOfFirstParam + 1);
 
         for (const auto &v : t.second) {
@@ -713,10 +716,30 @@ void Parser::ParseResetFunctionLabelsAndParams()
     }
 }
 
+void Parser::ParseResetFunctionLabelsAndParams()
+{
+    if (open_ || err_.err != Error::ErrorType::ERR_NONE) {
+        return;
+    }
+    for (const auto &f : ambiguousFunctionTable_) {
+        for (const auto &k : f.second.labelTable) {
+            if (!k.second.fileLocation->isDefined) {
+                context_.err = Error("This label does not exist.", lineStric_, Error::ErrorType::ERR_BAD_LABEL_EXT, "",
+                                     k.second.fileLocation->boundLeft, k.second.fileLocation->boundRight,
+                                     k.second.fileLocation->wholeLine);
+                SetError();
+            }
+        }
+    }
+
+    ParseResetFunctionParams(false);
+    ParseResetFunctionParams(true);
+}
+
 void Parser::ParseInsFromFuncTable(ark::pandasm::Function &func)
 {
     for (auto &insn : func.ins) {
-        if (!insn.HasFlag(InstFlags::METHOD_ID)) {
+        if (!insn.HasFlag(InstFlags::METHOD_ID) && !insn.HasFlag(InstFlags::STATIC_METHOD_ID)) {
             // we need to correct all method_id's
             continue;
         }
@@ -744,7 +767,9 @@ void Parser::ParseInsFromFuncTable(ark::pandasm::Function &func)
             insn.ids[0] = program_.functionSynonyms.at(funcName)[0];
         }
 
-        if (insn.OperandListLength() - diff < program_.functionTable.at(insn.ids[0]).GetParamsNum()) {
+        auto foundFunc = ambiguousFunctionTable_.find({insn.ids[0], false});
+        ASSERT(foundFunc != ambiguousFunctionTable_.end());
+        if (insn.OperandListLength() - diff < foundFunc->second.GetParamsNum()) {
             if (insn.IsCallRange() && (static_cast<int>(insn.regs.size()) - static_cast<int>(diff) >= 0)) {
                 continue;
             }
@@ -758,9 +783,43 @@ void Parser::ParseInsFromFuncTable(ark::pandasm::Function &func)
     }
 }
 
+bool Parser::CheckVirtualCallInsn(const ark::pandasm::Ins &insn)
+{
+    switch (insn.opcode) {
+        case Opcode::CALL_VIRT:
+        case Opcode::CALL_VIRT_SHORT:
+        case Opcode::CALL_VIRT_RANGE:
+        case Opcode::CALL_VIRT_ACC:
+        case Opcode::CALL_VIRT_ACC_SHORT: {
+            if (program_.functionStaticTable.find(insn.ids[0]) != program_.functionStaticTable.cend()) {
+                const auto &debug = insn.insDebug;
+                context_.err =
+                    Error("Virtual instruction calls static method.", debug.lineNumber,
+                          Error::ErrorType::ERR_BAD_OPERAND, "", debug.boundLeft, debug.boundRight, debug.wholeLine);
+                SetError();
+                return false;
+            }
+            return true;
+        }
+        default:
+            return true;
+    }
+}
+
+void Parser::CheckVirtualCalls(const std::map<std::string, ark::pandasm::Function> &functionTable)
+{
+    for (const auto &func : functionTable) {
+        for (const auto &insn : func.second.ins) {
+            if (!CheckVirtualCallInsn(insn)) {
+                return;
+            }
+        }
+    }
+}
+
 void Parser::ParseResetFunctionTable()
 {
-    for (auto &[unusedKey, func] : program_.functionTable) {
+    for (auto &[unusedKey, func] : ambiguousFunctionTable_) {
         (void)unusedKey;
         if (!func.fileLocation->isDefined) {
             context_.err = Error("This function does not exist.", func.fileLocation->lineNumber,
@@ -1021,10 +1080,22 @@ Expected<Program, Error> Parser::ParseAfterMainLoop(const std::string &fileName)
         return Unexpected(err_);
     }
 
-    for (auto &func : program_.functionTable) {
-        if (func.second.metadata->HasImplementation()) {
-            func.second.sourceFile = fileName;
+    for (auto &[key, func] : ambiguousFunctionTable_) {
+        if (func.metadata->HasImplementation()) {
+            func.sourceFile = fileName;
         }
+        if (func.IsStatic()) {
+            program_.functionStaticTable.emplace(key.first, std::move(func));
+        } else {
+            program_.functionInstanceTable.emplace(key.first, std::move(func));
+        }
+    }
+    ambiguousFunctionTable_.clear();
+
+    CheckVirtualCalls(program_.functionStaticTable);
+    CheckVirtualCalls(program_.functionInstanceTable);
+    if (err_.err != Error::ErrorType::ERR_NONE) {
+        return Unexpected(err_);
     }
 
     for (auto &rec : program_.recordTable) {
@@ -1339,8 +1410,6 @@ bool Parser::ParseOperandCall()
     const auto p = std::string(context_.GiveToken().data(), context_.GiveToken().length());
     currIns_->ids.emplace_back(p);
 
-    AddObjectInTable(false, program_.functionTable);
-
     ++context_;
 
     std::string funcSignature {};
@@ -1352,6 +1421,9 @@ bool Parser::ParseOperandCall()
     if (funcSignature.empty()) {
         const auto itSynonym = program_.functionSynonyms.find(currIns_->ids.back());
         if (itSynonym == program_.functionSynonyms.end()) {
+            [[maybe_unused]] auto it = ambiguousFunctionTable_.find({currIns_->ids.back(), false});
+            ASSERT(it == ambiguousFunctionTable_.end() || !it->second.fileLocation->isDefined);
+            AddObjectInTable(false, ambiguousFunctionTable_, currIns_->ids.back());
             return true;
         }
 
@@ -1360,18 +1432,9 @@ bool Parser::ParseOperandCall()
                                     Error::ErrorType::ERR_FUNCTION_MULTIPLE_ALTERNATIVES);
             return false;
         }
-
-        program_.functionTable.erase(p);
     } else {
         currIns_->ids.back() += funcSignature;
-
-        if (program_.functionTable.find(currIns_->ids.back()) == program_.functionTable.end()) {
-            auto nodeHandle = program_.functionTable.extract(p);
-            nodeHandle.key() = currIns_->ids.back();
-            program_.functionTable.insert(std::move(nodeHandle));
-        } else {
-            program_.functionTable.erase(p);
-        }
+        AddObjectInTable(false, ambiguousFunctionTable_, currIns_->ids.back());
     }
 
     return true;
@@ -1952,23 +2015,38 @@ bool Parser::ParseFunctionFullSign()
 bool Parser::UpdateFunctionName()
 {
     auto signature = GetFunctionSignatureFromName(currFunc_->name, currFunc_->params);
-    auto iter = program_.functionTable.find(signature);
-    if (iter == program_.functionTable.end() || !iter->second.fileLocation->isDefined) {
+    auto iter = ambiguousFunctionTable_.find({signature, false});
+    if (iter == ambiguousFunctionTable_.end()) {
         program_.functionSynonyms[currFunc_->name].push_back(signature);
-        program_.functionTable.erase(signature);
-        auto nodeHandle = program_.functionTable.extract(currFunc_->name);
-        nodeHandle.key() = signature;
-        program_.functionTable.insert(std::move(nodeHandle));
-        currFunc_->name = signature;
-        context_.maxValueOfReg = &(currFunc_->valueOfFirstParam);
-        context_.functionArgumentsList = &(context_.functionArgumentsLists[currFunc_->name]);
 
-        return true;
+        auto nodeHandle = ambiguousFunctionTable_.extract({currFunc_->name, false});
+        nodeHandle.key() = {signature, false};
+        ambiguousFunctionTable_.insert(std::move(nodeHandle));
+    } else if (!iter->second.fileLocation->isDefined) {
+        program_.functionSynonyms[currFunc_->name].push_back(signature);
+
+        ambiguousFunctionTable_.erase({signature, false});
+        auto nodeHandle = ambiguousFunctionTable_.extract({currFunc_->name, false});
+        nodeHandle.key() = {signature, false};
+        ambiguousFunctionTable_.insert(std::move(nodeHandle));
+    } else {
+        iter = ambiguousFunctionTable_.find({signature, true});
+        if (iter == ambiguousFunctionTable_.end()) {
+            auto nodeHandle = ambiguousFunctionTable_.extract({currFunc_->name, false});
+            nodeHandle.key() = {signature, true};
+            ambiguousFunctionTable_.insert(std::move(nodeHandle));
+        } else {
+            ASSERT(iter->second.fileLocation->isDefined);
+            context_.err = GetError("This function already exists.", Error::ErrorType::ERR_BAD_ID_FUNCTION);
+            return false;
+        }
     }
 
-    context_.err = GetError("This function already exists.", Error::ErrorType::ERR_BAD_ID_FUNCTION);
+    currFunc_->name = signature;
+    context_.maxValueOfReg = &(currFunc_->valueOfFirstParam);
+    context_.functionArgumentsList = &(context_.functionArgumentsLists[currFunc_->name]);
 
-    return false;
+    return true;
 }
 
 bool Parser::ParseArrayFullSign()
@@ -2094,23 +2172,23 @@ bool Parser::ParseFunctionName()
 
 void Parser::SetFunctionInformation()
 {
-    auto p = std::string(context_.GiveToken());
+    auto funcName = std::string(context_.GiveToken());
 
     context_++;
     if (*context_ == Token::Type::DEL_SQUARE_BRACKET_L || context_.Mask()) {
         auto dim = ParseMultiArrayHallmark();
         for (uint8_t i = 0; i < dim; i++) {
-            p += "[]";
+            funcName += "[]";
         }
         if (context_.GiveToken() == ".ctor") {
-            p += ".ctor";
-            AddObjectInTable(true, program_.functionTable, p);
+            funcName += ".ctor";
+            AddObjectInTable(true, ambiguousFunctionTable_, funcName);
         }
     } else {
         context_--;
-        AddObjectInTable(true, program_.functionTable);
+        AddObjectInTable(true, ambiguousFunctionTable_);
     }
-    currFunc_ = &(program_.functionTable.at(p));
+    currFunc_ = &(ambiguousFunctionTable_.at({funcName, false}));
     labelTable_ = &(currFunc_->labelTable);
     currFunc_->returnType = context_.currFuncReturnType;
 }
@@ -2573,14 +2651,14 @@ bool Parser::ParseOperandInitobj()
         cid += ".ctor";
         currIns_->ids.emplace_back(cid);
         bool findFuncInTable = false;
-        for (const auto &func : program_.functionTable) {
-            if (GetFuncNameWithoutArgs(func.first) == cid) {
+        for (const auto &[key, func] : ambiguousFunctionTable_) {
+            if (GetFuncNameWithoutArgs(key.first) == cid) {
                 findFuncInTable = true;
                 break;
             }
         }
         if (!findFuncInTable) {
-            AddObjectInTable(false, program_.functionTable, cid);
+            AddObjectInTable(false, ambiguousFunctionTable_, cid);
         }
         context_++;
         return true;

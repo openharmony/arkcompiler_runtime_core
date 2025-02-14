@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,8 @@ void AbcFieldProcessor::FillProgramData()
         auto &fieldList =
             keyData_.GetExternalFieldTable()[keyData_.GetFullRecordNameById(fieldDataAccessor_->GetClassId())];
         auto retField = std::find_if(fieldList.begin(), fieldList.end(), [&field](pandasm::Field &fieldFromList) {
-            return field.name == fieldFromList.name;
+            return field.name == fieldFromList.name && field.IsStatic() == fieldFromList.IsStatic();
+            ;
         });
         if (retField == fieldList.end()) {
             fieldList.push_back(std::move(field));
