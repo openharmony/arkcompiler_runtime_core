@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -103,34 +103,22 @@ class Consumer {
     };
 };
 
+$common
+
+$src
+
 function log(msg) {
-    console.log(msg);
+    console.log(msg); // NOTE only difference with Template.mjs is console.log here instead of print
 }
+
+var bench = new $state_name();
+$state_params
+$state_setup
 
 var loopCount1;
 var totalOps;
 var totalMs;
 var iter;
-
-
-let penv = process.env;
-let stsVm = require(penv.MODULE_PATH + '/ets_interop_js_napi.node');
-const stsRT = stsVm.createRuntime({
-    'boot-panda-files':
-        penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-    'panda-files': penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-    'gc-trigger-type': 'heap-trigger',
-    'compiler-enable-jit': 'false',
-    'run-gc-in-place': 'true',
-});
-if (!stsRT) {
-    console.error('Failed to create ETS runtime');
-    return 1;
-}
-const State = stsVm.getClass('L$state_name;');
-let bench = new State();
-$state_params
-$state_setup
 
 function tune() {
     let iterMs = 1 * S2MS;
@@ -173,17 +161,30 @@ function runIters(phase, count, time) {
 }
 
 log('Startup execution started: ' + Date.now() * MS2NS);
-tune();
-if (WI > 0) {
-    iter = 1;
-    // Re-entering runIters in warmup loop to allow profiler complete the method.
-    // Possible deoptimizations and recompilations is done in warmup instead of measure phase.
-    for (let wi = 0; wi < WI; ++wi) {
-        runIters('Warmup', 1, WT);
+if (FI > 0) {
+    let start = Date.now();
+    for (let i = 0; i < FI; i++) {
+        $method_call
     }
+    let elapsed = Date.now() - start;
+    if (elapsed <= 0) {
+        elapsed = 1;  // 0 is invalid result
+    }
+    log('Benchmark result: $bench_name ' + elapsed*MS2NS / FI);
+} else {
+    tune();
+    if (WI > 0) {
+        iter = 1;
+        // Re-entering runIters in warmup loop to allow profiler complete the method.
+        // Possible deoptimizations and recompilations is done in warmup instead of measure phase.
+        for (let wi = 0; wi < WI; ++wi) {
+            runIters('Warmup', 1, WT);
+        }
+    }
+    iter = 1;
+    var measure_iters = MI >> 0; // make sure it has int type
+    runIters('Iter', measure_iters, IT);
+    log('Benchmark result: $bench_name ' + totalMs*MS2NS/totalOps);
 }
-iter = 1;
-var measure_iters = MI >> 0; // make sure it has int type
-runIters('Iter', measure_iters, IT);
-log('Benchmark result: $bench_name ' + totalMs*MS2NS/totalOps);
+
 Consumer.consumeObj(bench);
