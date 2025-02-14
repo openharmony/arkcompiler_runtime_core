@@ -825,15 +825,18 @@ void ClassRemoveAnnotationDynamic(AbckitCoreClass *klass, AbckitCoreAnnotation *
 {
     auto progFunc = klass->GetArkTSImpl()->impl.GetDynamicClass();
 
-    auto ai = anno->ai;
-
-    auto str = AnnotationInterfaceGetNameDynamic(ai);
-    auto name = str->impl;
+    auto name = anno->name->impl;
 
     progFunc->metadata->DeleteAnnotationByName(name);
     auto &annotations = klass->annotations;
     auto iter = std::find_if(annotations.begin(), annotations.end(),
                              [&name](auto &annoIt) { return name == annoIt.get()->name->impl; });
+    if (iter == annotations.end()) {
+        LIBABCKIT_LOG(DEBUG) << "Can not find the annotation to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return;
+    }
+
     annotations.erase(iter);
 }
 
@@ -863,20 +866,17 @@ void FunctionRemoveAnnotationDynamic(AbckitCoreFunction *function, AbckitCoreAnn
 {
     auto progFunc = function->GetArkTSImpl()->GetDynamicImpl();
 
-    auto ai = anno->ai;
-
-    auto str = AnnotationInterfaceGetNameDynamic(ai);
-    auto name = str->impl;
+    auto name = anno->name->impl;
 
     progFunc->metadata->DeleteAnnotationByName(name);
     auto &annotations = function->annotations;
     auto iter = std::find_if(annotations.begin(), annotations.end(),
                              [&name](auto &annoIt) { return name == annoIt.get()->name->impl; });
     if (iter == annotations.end()) {
-        statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
+        LIBABCKIT_LOG(DEBUG) << "Can not find the annotation to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
         return;
     }
-
     annotations.erase(iter);
     anno = nullptr;
 }
@@ -931,14 +931,15 @@ void AnnotationRemoveAnnotationElementDynamic(AbckitCoreAnnotation *anno, Abckit
         progOwner->metadata->DeleteAnnotationElementByName(anno->name->impl, name->impl);
     }
 
-    auto &annotationElementes = anno->elements;
-    auto iter = std::find_if(annotationElementes.begin(), annotationElementes.end(),
+    auto &annotationElements = anno->elements;
+    auto iter = std::find_if(annotationElements.begin(), annotationElements.end(),
                              [&name](auto &annoElemIt) { return name->impl == annoElemIt.get()->name->impl; });
-    if (iter == annotationElementes.end()) {
-        statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
+    if (iter == annotationElements.end()) {
+        LIBABCKIT_LOG(DEBUG) << "Can not find the annotation element to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
         return;
     }
-    annotationElementes.erase(iter);
+    annotationElements.erase(iter);
 }
 
 std::string TypeToName(AbckitType *type)
@@ -1035,7 +1036,8 @@ void AnnotationInterfaceRemoveFieldDynamic(AbckitCoreAnnotationInterface *ai, Ab
 
     auto fieldsIter = std::find_if(fields.begin(), fields.end(), [&name](auto &field) { return name == field.name; });
     if (fieldsIter == fields.end()) {
-        statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
+        LIBABCKIT_LOG(DEBUG) << "Can not find the field to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
         return;
     }
     fields.erase(fieldsIter);
@@ -1044,7 +1046,8 @@ void AnnotationInterfaceRemoveFieldDynamic(AbckitCoreAnnotationInterface *ai, Ab
     auto iter = std::find_if(aiFields.begin(), aiFields.end(),
                              [&name](auto &field) { return name == field.get()->name->impl; });
     if (iter == aiFields.end()) {
-        statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
+        LIBABCKIT_LOG(DEBUG) << "Can not find the field to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
         return;
     }
     aiFields.erase(iter);

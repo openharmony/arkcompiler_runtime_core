@@ -545,6 +545,7 @@ struct AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
      * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if class `klass` doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if class `klass` doesn't have the annotation `anno`.
      */
     void (*classRemoveAnnotation)(AbckitArktsClass *klass, AbckitArktsAnnotation *anno);
 
@@ -605,6 +606,7 @@ struct AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
      * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if function `function` doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if function `function` doesn't have the annotation `anno`.
      */
     void (*functionRemoveAnnotation)(AbckitArktsFunction *function, AbckitArktsAnnotation *anno);
 
@@ -633,6 +635,7 @@ struct AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `elem` is NULL.
      * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if annotation `anno` doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if annotation `anno` doesn't have the annotation element `elem`.
      */
     void (*annotationRemoveAnnotationElement)(AbckitArktsAnnotation *anno, AbckitArktsAnnotationElement *elem);
 
