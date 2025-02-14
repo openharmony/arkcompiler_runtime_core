@@ -55,6 +55,7 @@ static_core/static_linker/            @igelhaus
 static_core/tests/                    @Prof1983
 static_core/tests/cts-*               @igelhaus
 static_core/tests/irtoc-interpreter-* @igelhaus
+static_core/tests/vm-benchmarks       @ignatenkooleg @Prof1983 @asidorov
 static_core/verification/             @igelhaus
 static_core/docs/coroutines/                             @dmitriitr
 static_core/docs/diagrams/                               @dmitriitr
@@ -122,6 +123,7 @@ static_core/plugins/ets/runtime/types/*promise*                               @d
 static_core/plugins/ets/runtime/types/*typeapi*                               @smirnovandrei @anton-sysoev
 static_core/plugins/ets/stdlib/escompat/Atomics.sts                           @dmitriitr @konstanting
 static_core/plugins/ets/templates/stdlib/                                     @anton-sysoev @aleksander-sotov @ivan-tyulyandin
+static_core/plugins/ets/tests/benchmarks/ani                                  @ignatenkooleg @v-cherkashin @Prof1983 @asidorov
 static_core/plugins/ets/tests/benchmarks/interop_js                           @semenovaleksandr @ignatenkooleg @Prof1983
 static_core/plugins/ets/tests/checked/                                        @Prof1983
 static_core/plugins/ets/tests/ets-templates/                                  @Prof1983 @igelhaus @ragnvald @troeglazovamaria @maksim-khramov
