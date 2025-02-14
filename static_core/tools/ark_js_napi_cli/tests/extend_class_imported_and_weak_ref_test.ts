@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 // that is derived from STS class and transferred from STS -> JS
 // creating cyclic reference - can be collected by GC
 
-import { interop } from './gc_test_common_ts';
+import { interop } from './gc_test_common';
 
 class JsDerivedClass extends interop.PandaBaseClass {
     derivedObj: Object;
@@ -39,8 +39,7 @@ function main(): void {
     let wr = getObjWeakRef();
     interop.RunInteropGC();
     interop.RunPandaGC();
-    let gcId = globalThis.ArkTools.GC.startGC("full");
-    globalThis.ArkTools.GC.waitForFinishGC(gcId);
+    globalThis.test.RunJsGC();
     if (wr.deref() !== undefined) {
         throw Error('WeakRef referred object is not collected after GCs');
     }    

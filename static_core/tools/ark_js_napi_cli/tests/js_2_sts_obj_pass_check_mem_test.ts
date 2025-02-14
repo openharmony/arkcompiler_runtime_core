@@ -16,7 +16,7 @@
 // This test check that transferring JS objects from JS -> STS
 // are collected and no memory leak occurs
 
-import { interop } from './gc_test_common_ts';
+import { interop } from './gc_test_common';
 
 let a = new Object();
 

@@ -16,7 +16,7 @@
 // This test check basic cases of interop objects
 // being collected by GC
 
-import { interop } from './gc_test_common_ts';
+import { interop } from './gc_test_common';
 
 function getSTSWeakRef(): WeakRef<Object> {
     return new WeakRef(interop.GetSTSObjectWithWeakRef())
@@ -36,11 +36,11 @@ function isSts2JsObjectCollectedTest(): number {
     globalThis.test.RunJsGC();
     interop.RunPandaGC();
 
-    if (interop.isSTSObjectCollected()) {
+    if (!interop.isSTSObjectCollected()) {
         print('isSts2JsObjectCollectedTest failed. STS object is collected.');
         bTestResult = 1;
     }
-    if (wr.deref() === undefined) {
+    if (wr.deref() !== undefined) {
         print('isSts2JsObjectCollectedTest failed. JS object is collected.');
         bTestResult = 1;
     }

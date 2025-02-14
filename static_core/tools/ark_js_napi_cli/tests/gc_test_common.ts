@@ -20,16 +20,24 @@ export namespace interop {
 globalThis.test = {};
 globalThis.test.etsVm = requireNapiPreview('ets_interop_js_napi', true);
 if (!globalThis.test.etsVm.createRuntime({
-        'log-level': 'debug',
-		'load-runtimes': 'ets',
-		'log-components': 'ets_interop_js',
-		'boot-panda-files': 'etsstdlib.abc:gc_test_sts_common.abc',
-		'gc-trigger-type': 'heap-trigger',
-		'compiler-enable-jit': 'false',
-        'coroutine-workers-count': '1'
-    })) {
-        throw new Error('Failed to create ETS runtime');
-    }
+    'log-level': 'debug',
+	'load-runtimes': 'ets',
+	'log-components': 'ets_interop_js:gc_trigger',
+	'boot-panda-files': 'etsstdlib.abc:gc_test_sts_common.abc',
+	'gc-trigger-type': 'heap-trigger',
+	'compiler-enable-jit': 'false',
+    'coroutine-workers-count': '1'
+})) {
+    throw new Error('Failed to create ETS runtime');
+}
+
+globalThis.test.RunJsGC = () => {
+    globalThis.ArkTools.GC.clearWeakRefForTest();
+    print('--- Start JS GC Full ---');
+    let gcId = globalThis.ArkTools.GC.startGC('full');
+    globalThis.ArkTools.GC.waitForFinishGC(gcId);
+    print('--- Finish JS GC Full ---');
+}
 
 export let GetSTSObject: () => Object = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetSTSObject');
 export let GetSTSArrayOfObjects: () => Object[] = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetSTSArrayOfObjects');
@@ -42,17 +50,14 @@ export let SetJSObject: (obj: Object) => void = globalThis.test.etsVm.getFunctio
 export let SetJSObjectAndKeepIt: (obj: Object) => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'SetJSObjectAndKeepIt');
 export let SetJSObjectWithWeakRef: (obj: Object) => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'SetJSObjectWithWeakRef');
 export let SetJSPromiseWithWeakRef: (prms: Promise<Object>) => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'SetJSPromiseWithWeakRef');
-export let AddPandaArray: (arr: Object[]) => number[] = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'AddPandaArray');
+export let AddPandaArray: (arr: Object[]) => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'AddPandaArray');
 export let RunPandaGC: () => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'RunPandaGC');
-export let RunInteropGC: () => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'RunInteropGC');
+let RunInteropGCInternal: () => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'RunInteropGC');
+export let RunInteropGC: () => void = () => {
+    globalThis.ArkTools.GC.clearWeakRefForTest();
+    RunInteropGCInternal();
+}
 export let GetPandaFreeHeapSize: () => number = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetPandaFreeHeapSize');
 export let GetPandaUsedHeapSize: () => number = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetPandaUsedHeapSize');
 export const PandaBaseClass = globalThis.test.etsVm.getClass('LPandaGC/PandaBaseClass;');
-}
-
-globalThis.test.RunJsGC = () => {
-    print('--- Start JS GC Full ---');
-    let gcId = globalThis.ArkTools.GC.startGC('full');
-    globalThis.ArkTools.GC.waitForFinishGC(gcId);
-    print('--- Finish JS GC Full ---');
 }
