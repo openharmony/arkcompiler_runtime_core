@@ -15,7 +15,7 @@
 
 /*---
 desc: A name is explicitly used with alias several times.
-tags: [compile-only, negative]
+tags: [compile-only]
 ---*/
 
 import {sin as Sine, sin as SIN} from "std/math";

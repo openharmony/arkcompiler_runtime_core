@@ -1987,7 +1987,6 @@ deprecated/15.exceptions/03.rethrowing_functions/rethrowing_function_without_cat
 11.enumerations/repeating_constants.sts
 13.compilation_units/03.import_directives/04.default_import_binding/default_export_neg.sts
 13.compilation_units/03.import_directives/04.default_import_binding/default_export_neg_2.sts
-13.compilation_units/03.import_directives/04.default_import_binding/default_import_struct.sts
 13.compilation_units/03.import_directives/04.default_import_binding/import_default_exported_func_neg_3.sts
 13.compilation_units/03.import_directives/04.default_import_binding/multiple_default_export_neg.sts
 13.compilation_units/03.import_directives/04.default_import_binding/multiple_levels_default_export_2.sts
@@ -2011,7 +2010,6 @@ deprecated/15.exceptions/03.rethrowing_functions/rethrowing_function_without_cat
 13.compilation_units/03.import_directives/import_2.sts
 13.compilation_units/06.compilation_unit_initialization/package/init_once/pkg/module.sts
 13.compilation_units/06.compilation_unit_initialization/package/init_once/test.sts
-13.compilation_units/07.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_struct.sts
 13.compilation_units/07.top-level_declarations/bad_top_level_declarations_2.sts
 13.compilation_units/07.top-level_declarations/top_level_declarations_11.sts
 13.compilation_units/09.export_directives/01.selective_export_directive/negative_selective_exports_0.sts

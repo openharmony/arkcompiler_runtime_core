@@ -138,3 +138,4 @@ deprecated/02.multiple_catch_clauses_in_try_statements/catch_n_1.sts
 deprecated/02.multiple_catch_clauses_in_try_statements/finally_0.sts
 deprecated/02.multiple_catch_clauses_in_try_statements/catch_4.sts
 deprecated/02.multiple_catch_clauses_in_try_statements/finally_5.sts
+deprecated/13.compilation_units/03.import_directives/04.default_import_binding/default_import_struct.sts
