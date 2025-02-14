@@ -11,33 +11,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # Method modifiers for implemented methods
-abstr_or_native_method_modifiers:
-  - abstract
-  - static native
-  - native static
-  - native
-
-wrong_constraints:
-  - boolean
-  - byte
-  - char
-  - double
-  - float
-  - int
-  - int & Object
-  - int & Object & String
-  - long
-  - Object & int
-  - Object & int & String
-  - Object & String & int
-  - short
-  - void
-  - 'null'
-  - undefined
-  - "enum Color { Red, Green, Blue }"
-  - "int[]"
-  - Int[]
-  - 1 | 2
-  - 1.0 | 2.0
-  - true | false
+--- # Type constraints for generic parameters
+constraints:
+  - type: Int
+    use: Int
+    p: 1
+  - type: Int | Double
+    use: Int
+    p: 1
+  - type: Int | Double
+    use: Double
+    p: 1.0
+  - type: Byte
+    use: Byte
+    p: 1 as byte
+  - type: Short
+    use: Short
+    p: 1 as short
+  - type: Long
+    use: Long
+    p: 1
+  - type: Float
+    use: Float
+    p: new Float(1.0)
+  - type: Double
+    use: Double
+    p: 1.0
+  - type: Boolean
+    use: Boolean
+    p: 'true'
+  - type: Char
+    use: Char
+    p: new Char("1")
+  - type: '"a" | "b"'
+    use: '"a"'
+    p: '"a"'
