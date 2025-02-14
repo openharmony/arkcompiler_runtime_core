@@ -911,6 +911,8 @@ std/core/IntlNumberFormatRangePosNegTest.sts
 std/core/IntlNumberFormatRangePosNegTest2.sts
 std/core/IntlNumberFormatTest.sts
 std/core/IntlNumberFormatTest2.sts
+std/core/IntlLocaleTest.sts
+std/core/IntlLocaleTest2.sts
 std/core/Object.sts
 std/core/StringConstructorTest.sts
 std/core/TypeAssignableFromTest.sts
