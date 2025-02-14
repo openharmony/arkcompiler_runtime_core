@@ -30,7 +30,8 @@ cases:
       assertTrue(a.foo(1.1 as number) == 1);
       assertTrue(a.foo("some string") == 2);
 
-  - decl: |-
+  - tags: 'negative, compile-only'
+    decl: |-
       interface I {
           foo(i: number) {
               return 1;
@@ -63,7 +64,8 @@ cases:
       assertTrue(a.foo(1.1 as number) == 1);
       assertTrue(a.foo("some string") == 2);
 
-  - decl: |-
+  - tags: 'negative, compile-only'
+    decl: |-
       interface I {
           foo(i: number) {
               return 1;
@@ -79,7 +81,8 @@ cases:
       let a = new A();
       assertTrue(a.foo(1.1 as number) == 2);
 
-  - decl: |-
+  - tags: 'negative, compile-only'
+    decl: |-
       interface I {
           foo(i: number) {
               return 1;

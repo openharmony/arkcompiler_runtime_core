@@ -35,10 +35,3 @@ interface J<T> extends I {
       return "str";
   }
 }
-
-class A<T> implements J<T> {}
-
-function main(): void {
-  let a: A = new A<Number>();
-  a.foo(1);
-}

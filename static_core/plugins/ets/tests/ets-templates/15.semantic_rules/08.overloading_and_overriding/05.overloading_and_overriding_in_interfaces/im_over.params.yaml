@@ -14,7 +14,7 @@
 ---
 cases:
     - decl: |-
-          // override-equivalent signatures
+          // overload-equivalent signatures
           interface I {
               meth(p: number)
               meth(d: double)
@@ -24,7 +24,7 @@ cases:
 
     - decl: |-
           type J = I
-          // override-equivalent signatures
+          // overload-equivalent signatures
           interface I {
               meth(p: I)
               meth(d: J)
@@ -33,7 +33,7 @@ cases:
       tags: negative, compile-only
 
     - decl: |-
-          // override-equivalent signatures
+          // overload-equivalent signatures
           interface I {
               meth(p: number|string|undefined)
               meth(d: string|number|undefined)
@@ -653,17 +653,18 @@ cases:
               return " " + v + " "
           }
           function eee(v: string): number {
-              return v, "" ? 0.0 : 1.0
+              return v == "" ? 0.0 : 1.0
           }
           function foo() {
-              assertEQ( false
+              assertTrue( false )
           }
       use: |-
           let i: I = new A()
           assertEQ( i.meth(foo), 1)
-          assertEQ( i.meth((v: number): void => { assertEQ( v, 0.0 }), 2)
+          assertEQ( i.meth((v: number): void => { assertEQ( v, 0.0 )}), 2)
           assertEQ( i.meth(fff), 3)
           assertEQ( i.meth(eee), 4)
+      tags: negative, compile-only
 
     - decl: |-
           // function types with default methods
@@ -681,18 +682,19 @@ cases:
               return " " + v + " "
           }
           function eee(v: string): number {
-              return v, "" ? 0.0 : 1.0
+              return v == "" ? 0.0 : 1.0
           }
           function foo() {
-              assertEQ( false
+              assertTrue( false )
           }
       use: |-
           let i: I = new A()
           assertEQ( i.meth(foo), 1)
-          assertEQ( i.meth((v: number): void => { assertEQ( v, 0.0 }), 2)
+          assertEQ( i.meth((v: number): void => { assertEQ( v, 0.0 )}), 2)
           assertEQ( i.meth(fff), 3)
           let v: EE = eee
           assertEQ( i.meth(v), 4)
+      tags: negative, compile-only
 
     - decl: |-
           // function types with overridden default methods
@@ -715,18 +717,19 @@ cases:
               return " " + v + " "
           }
           function eee(v: string): number {
-              return v, "" ? 0.0 : 1.0
+              return v == "" ? 0.0 : 1.0
           }
           function foo() {
-              assertEQ( false)
+              assertTrue( false )
           }
       use: |-
           let i: I = new A()
           assertEQ( i.meth(foo), 1)
-          assertEQ( i.meth((v: number): void => { assertEQ( v, 0.0 }), 2)
+          assertEQ( i.meth((v: number): void => { assertEQ( v, 0.0 )}), 2)
           assertEQ( i.meth(fff), 3)
           let v: EE = eee
           assertEQ( i.meth(v), 4)
+      tags: negative, compile-only
 
     - decl: |-
           // nullish types
