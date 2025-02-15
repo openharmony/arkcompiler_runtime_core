@@ -86,7 +86,7 @@ function testGetInterfaceError(it: InterfaceType): boolean {
 function testGetMethodError(it: InterfaceType): boolean {
     try {
         it.getMethod(1000)
-    } catch (ignored: NoSuchMethodError) {
+    } catch (ignored: TypeError) {
         // Expected error is catched
         return true
     } catch (other) {

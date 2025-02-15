@@ -3882,7 +3882,9 @@ deprecated/15.exceptions/03.rethrowing_functions/rethrowing_function_without_cat
 06.contexts_and_conversions/01.assignment-like_contexts/forbidden2_3.sts
 06.contexts_and_conversions/01.assignment-like_contexts/forbidden2_4.sts
 06.contexts_and_conversions/01.assignment-like_contexts/identity2_10.sts
+06.contexts_and_conversions/01.assignment-like_contexts/identity2_6.sts
 06.contexts_and_conversions/01.assignment-like_contexts/identity2_7.sts
+06.contexts_and_conversions/01.assignment-like_contexts/identity2_8.sts
 06.contexts_and_conversions/01.assignment-like_contexts/identity2_9.sts
 06.contexts_and_conversions/01.assignment-like_contexts/identity_call.sts
 06.contexts_and_conversions/01.assignment-like_contexts/null_call.sts

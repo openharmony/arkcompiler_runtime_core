@@ -146,7 +146,7 @@ public:
 
     const uint8_t *GetAbstractMethodErrorClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ABSTRACT_METHOD_ERROR.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINKER_ABSTRACT_METHOD_ERROR.data());
     }
 
     const uint8_t *GetArrayStoreExceptionClassDescriptor() const override
@@ -161,12 +161,12 @@ public:
 
     const uint8_t *GetFileNotFoundExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::FILE_NOT_FOUND_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::FILE_NOT_FOUND_ERROR.data());
     }
 
     const uint8_t *GetIOExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::IO_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::IO_ERROR.data());
     }
 
     const uint8_t *GetIllegalArgumentExceptionClassDescriptor() const override
@@ -176,7 +176,7 @@ public:
 
     const uint8_t *GetIllegalAccessExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ILLEGAL_ACCESS_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ILLEGAL_ACCESS_ERROR.data());
     }
 
     const uint8_t *GetOutOfMemoryErrorClassDescriptor() const override
@@ -186,12 +186,12 @@ public:
 
     const uint8_t *GetNoClassDefFoundErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::NO_CLASS_DEF_FOUND_ERROR.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINKER_UNRESOLVED_CLASS_ERROR.data());
     }
 
     const uint8_t *GetClassCircularityErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::CLASS_CIRCULARITY_ERROR.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINKER_TYPE_CIRCULARITY_ERROR.data());
     }
 
     const uint8_t *GetCoroutinesLimitExceedErrorDescriptor() const override
@@ -201,12 +201,12 @@ public:
 
     const uint8_t *GetNoSuchFieldErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::NO_SUCH_FIELD_ERROR.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINKER_UNRESOLVED_FIELD_ERROR.data());
     }
 
     const uint8_t *GetNoSuchMethodErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::NO_SUCH_METHOD_ERROR.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINKER_UNRESOLVED_METHOD_ERROR.data());
     }
 
     const uint8_t *GetExceptionInInitializerErrorDescriptor() const override
@@ -216,7 +216,7 @@ public:
 
     const uint8_t *GetClassNotFoundExceptionDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::CLASS_NOT_FOUND_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINKER_CLASS_NOT_FOUND_ERROR.data());
     }
 
     const uint8_t *GetInstantiationErrorDescriptor() const override
@@ -231,7 +231,7 @@ public:
 
     const uint8_t *GetVerifyErrorClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::VERIFY_ERROR.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINKER_VERIFICATION_ERROR.data());
     }
 
     const uint8_t *GetErrorClassDescriptor() const override
@@ -241,7 +241,7 @@ public:
 
     const uint8_t *GetIncompatibleClassChangeErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::INCOMPATIBLE_CLASS_CHANGE_ERROR.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINKER_BAD_SUPERTYPE_ERROR.data());
     }
 
     coretypes::TaggedValue GetInitialTaggedValue() const override
@@ -288,7 +288,7 @@ public:
 
     const uint8_t *GetIllegalMonitorStateExceptionDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ILLEGAL_MONITOR_STATE_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ILLEGAL_MONITOR_STATE_ERROR.data());
     }
 
     void ThrowException(ManagedThread *thread, const uint8_t *mutf8Name, const uint8_t *mutf8Msg) const override;

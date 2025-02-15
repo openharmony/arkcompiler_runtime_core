@@ -118,11 +118,8 @@ inline void LookUpException(ark::Class *klass, Field *rawField)
     auto type = IS_GETTER ? "getter" : "setter";
     auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) + " does not have field and " +
                     ark::ConvertToString(type) + " with name " + utf::Mutf8AsCString(rawField->GetName().data);
-    ThrowEtsException(
-        EtsCoroutine::GetCurrent(),
-        utf::Mutf8AsCString(
-            Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS).GetNoSuchFieldErrorDescriptor()),
-        errorMsg);
+    ThrowEtsException(EtsCoroutine::GetCurrent(),
+                      panda_file_items::class_descriptors::LINKER_UNRESOLVED_FIELD_ERROR.data(), errorMsg);
 }
 
 template <bool IS_GETTER>

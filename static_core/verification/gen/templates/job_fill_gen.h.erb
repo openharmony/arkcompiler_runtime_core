@@ -219,10 +219,10 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %                                 << method_->GetFullName();
 %        }
 %    }),
-%    "FieldId_" => %({
+%    "StaticFieldId_" => %({
 %        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
 %        auto fieldIdx = method_->GetClass()->ResolveFieldIndex(id.AsIndex());
-%        auto *cachedField = classLinker_->GetField(*method_, fieldIdx, false, &errorHandler);
+%        auto *cachedField = classLinker_->GetField(*method_, fieldIdx, true, &errorHandler);
 %        if (cachedField != nullptr) {
 %            AddField(inst.GetOffset(), cachedField);
 %            auto classType = Type {cachedField->GetClass()};
@@ -232,10 +232,10 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %                                 << method_->GetFullName();
 %        }
 %    }),
-%    "StaticFieldId_" => %({
+%    "FieldId_" => %({
 %        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
 %        auto fieldIdx = method_->GetClass()->ResolveFieldIndex(id.AsIndex());
-%        auto *cachedField = classLinker_->GetField(*method_, fieldIdx, true, &errorHandler);
+%        auto *cachedField = classLinker_->GetField(*method_, fieldIdx, false, &errorHandler);
 %        if (cachedField != nullptr) {
 %            AddField(inst.GetOffset(), cachedField);
 %            auto classType = Type {cachedField->GetClass()};

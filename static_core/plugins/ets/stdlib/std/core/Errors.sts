@@ -44,11 +44,11 @@ export class NullPointerError extends Error {
 }
 
 /**
- * @class Represents an error that occurs when exception is thrown and not catched
+ * @class Represents an error that occurs when exception is thrown and not caught
  */
-export class UncatchedExceptionError extends Error {
+export class UncaughtExceptionError extends Error {
     constructor(message?: String, options?: ErrorOptions) {
-        super("UncatchedExceptionError", message, options)
+        super("UncaughtExceptionError", message, options)
     }
 }
 
@@ -115,15 +115,6 @@ export class OutOfMemoryError extends Error {
 }
 
 /**
- * @class Represents an error that occurs when no such method is found in the class
- */
-export class NoSuchMethodError extends Error {
-    constructor(message?: String, options?: ErrorOptions) {
-        super("NoSuchMethodError", message, options)
-    }
-}
-
-/**
  * @class Represents an error that occurs when the available memory is not sufficient to create the activation frame
  */
 export class StackOverflowError extends Error {
@@ -151,29 +142,11 @@ export class InternalError extends Error {
 }
 
 /**
- * @class Represents an error that occurs when no class definition has been found
+ * @class Represents an error that is thrown when attempting to wait, notify or notifyAll on object, that hasn't been synchronised
  */
-export class NoClassDefFoundError extends Error {
+export class IllegalMonitorStateError extends Error {
     constructor(message?: String, options?: ErrorOptions) {
-        super("NoClassDefFoundError", message, options)
-    }
-}
-
-/**
- * @class Represents an error that occurs when no such field is found in the class
- */
-export class NoSuchFieldError extends Error {
-    constructor(message?: String, options?: ErrorOptions) {
-        super("NoSuchFieldError", message, options)
-    }
-}
-
-/**
- * @class The AbstractMethodError object represents an error that occures when abstract method get called.
- */
-export class AbstractMethodError extends Error {
-    constructor(message?: String, options?: ErrorOptions) {
-        super("AbstractMethodError", message, options)
+        super("IllegalMonitorStateError", message, options)
     }
 }
 
@@ -231,14 +204,5 @@ export class ExceptionInInitializerError extends Error {
 export class CoroutinesLimitExceedError extends Error {
     constructor(message?: String, options?: ErrorOptions) {
         super("CoroutinesLimitExceedError", message, options)
-    }
-}
-
-/**
- * Represents exception that is thrown when loop inheritance detects errors in class
- */
-export final class ClassCircularityError extends Error {
-    constructor(message?: String, options?: ErrorOptions) {
-        super("ClassCircularityError", message, options)
     }
 }

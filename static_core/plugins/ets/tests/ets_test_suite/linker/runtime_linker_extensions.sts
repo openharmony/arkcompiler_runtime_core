@@ -137,7 +137,7 @@ class Test {
         assertEQ(cls2.getLinker(), linker);
         // Trigger initialization, which will not find "AdditionalClass1"
         expectThrow(() => { linker.loadClass(Test.additionalClass2Name, true); },
-            (e) => e instanceof NoClassDefFoundError
+            (e) => e instanceof LinkerUnresolvedClassError
         );
     }
 

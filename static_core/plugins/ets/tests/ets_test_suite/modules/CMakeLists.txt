@@ -94,6 +94,8 @@ function(run_sts_app_mode TARGET WORK_DIR APP_MAIN_ABILITY_CLASS APP_ABC_FILES)
     set(RUNTIME_ARGUMENTS
         --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc:${SPAWN_ABC_FILES}
         --load-runtimes=ets
+        --verification-enabled=true
+        --verification-mode=on-the-fly
         --gc-type=g1-gc
         ${ARG_RUNTIME_EXTRA_OPTIONS}
         ${SPAWN_ENTRY_ABC}
@@ -208,13 +210,13 @@ function(create_no_class_def_found_test TARGET WORK_DIR SOURCE_DIR)
     set(STDOUT_FILE ${WORK_DIR}/${TARGET}-output.txt)
     run_sts_app_mode(${TARGET}-run-sts-app-mode ${WORK_DIR} "@app.module1.MainAbility" "${ABC_FILES}"
                      STDOUT_FILE ${STDOUT_FILE}
-                     SPAWN_ENTRYPOINT_FUNCTION "mainCatchNoClassDefFoundError"
+                     SPAWN_ENTRYPOINT_FUNCTION "mainCatchLinkerUnresolvedClassError"
     )
     add_dependencies(${TARGET}-run-sts-app-mode ${TARGET}-app)
 
     add_custom_target(${TARGET}
-        COMMENT "Check class not loaded due to NoClassDefFoundError"
-        COMMAND ${CMAKE_COMMAND} -E compare_files ${STDOUT_FILE} ${SOURCE_DIR}/incompatible_foo/not_loaded_class.txt
+        COMMENT "Check class not loaded due to LinkerUnresolvedClassError"
+        COMMAND ${CMAKE_COMMAND} -E compare_files ${STDOUT_FILE} ${SOURCE_DIR}/incompatible_foo/not_verified_method.txt
         DEPENDS ${TARGET}-run-sts-app-mode
     )
 endfunction()
@@ -236,11 +238,11 @@ function(create_incompatible_class_change_test TARGET WORK_DIR SOURCE_DIR)
     set(STDOUT_FILE ${WORK_DIR}/${TARGET}-output.txt)
     run_sts_app_mode(${TARGET}-run-sts-app-mode ${WORK_DIR} "@app.module1.MainAbility" "${ABC_FILES}"
                      STDOUT_FILE ${STDOUT_FILE}
-                     SPAWN_ENTRYPOINT_FUNCTION "mainCatchIncompatibleClassChangeError")
+                     SPAWN_ENTRYPOINT_FUNCTION "mainCatchLinkerBadSupertypeError")
     add_dependencies(${TARGET}-run-sts-app-mode ${TARGET}-app ${TARGET_INCOMPATIBLE_FOO})
 
     add_custom_target(${TARGET}
-        COMMENT "Check class not loaded due to IncompatibleClassChangeError"
+        COMMENT "Check class not loaded due to LinkerBadSupertypeError"
         COMMAND ${CMAKE_COMMAND} -E compare_files ${STDOUT_FILE} ${SOURCE_DIR}/incompatible_foo/not_loaded_class.txt
         DEPENDS ${TARGET}-run-sts-app-mode
     )

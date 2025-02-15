@@ -95,7 +95,7 @@ public:
     /* Make TypeSystem remember the class for dumping */
     void MentionClass(Class const *klass);
 
-    Type DescriptorToType(uint8_t const *descr);
+    Type BootDescriptorToType(uint8_t const *descr);
 
     void ResetTypeSpans()
     {
@@ -122,13 +122,11 @@ public:
         return span.begin() - typeSpans_.data();
     }
 
-    Class const *DescriptorToClass(uint8_t const *descr);
-
 private:
     VerifierService *service_;
     plugin::Plugin const *plugin_;
     LanguageContext langCtx_;
-    ClassLinkerContext *linkerCtx_;
+    ClassLinkerContext *bootLinkerCtx_;
 
     PandaUnorderedMap<Type, Type> normalizedTypeOf_;
     PandaUnorderedMap<Method::UniqId, Method const *> methodOfId_;

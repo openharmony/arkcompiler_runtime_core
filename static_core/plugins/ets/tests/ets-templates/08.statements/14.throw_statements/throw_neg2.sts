@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,9 +14,9 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Throw statements cause an exception to be thrown. If no such try statement is found, then the UncatchedExceptionError is thrown.
+desc: Throw statements cause an exception to be thrown. If no such try statement is found, then the UncaughtExceptionError is thrown.
 tags: [negative]
-params: UncatchedExceptionError expected
+params: UncaughtExceptionError expected
 ---*/
 
 class Ex extends Exception {}

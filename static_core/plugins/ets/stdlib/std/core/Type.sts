@@ -1770,7 +1770,7 @@ export final class ClassType extends Type {
      *
      * @param i index (using flat semantic)
      *
-     * @throws NoSuchFieldError when i greater then number of fields
+     * @throws TypeError when i greater then number of fields
      *
      * @returns ith Field
      */
@@ -1779,7 +1779,7 @@ export final class ClassType extends Type {
         if (fieldPtr) {
             return this.getFieldImpl(fieldPtr)
         }
-        throw new NoSuchFieldError("no field at " + i)
+        throw new TypeError("no field at " + i)
     }
 
     /**
@@ -1787,7 +1787,7 @@ export final class ClassType extends Type {
      *
      * @param i index (using flat semantic)
      *
-     * @throws NoSuchFieldError when i greater then number of fields
+     * @throws TypeError when i greater then number of fields
      *
      * @returns ith Field
      */
@@ -1796,7 +1796,7 @@ export final class ClassType extends Type {
         if (fieldPtr) {
             return this.getFieldImpl(fieldPtr)
         }
-        throw new NoSuchFieldError("no own field at " + i)
+        throw new TypeError("no own field at " + i)
     }
 
     /**
@@ -1804,7 +1804,7 @@ export final class ClassType extends Type {
      *
      * @param name name of field
      *
-     * @throws NoSuchFieldError when class doesn't have field with this name
+     * @throws TypeError when class doesn't have field with this name
      *
      * @returns Field instance with this name
      */
@@ -1813,7 +1813,7 @@ export final class ClassType extends Type {
         if (fieldPtr) {
             return this.getFieldImpl(fieldPtr)
         }
-        throw new NoSuchFieldError("no field \"" + name + "\"")
+        throw new TypeError("no field \"" + name + "\"")
     }
 
     private getFieldImpl(fieldPtr: long): Field {
@@ -1851,7 +1851,7 @@ export final class ClassType extends Type {
      *
      * @param i index (using flat semantic)
      *
-     * @throws NoSuchMethodError when i greater then number of methods
+     * @throws TypeError when i greater then number of methods
      *
      * @returns ith method
      */
@@ -1861,7 +1861,7 @@ export final class ClassType extends Type {
             const methodType = Type.resolve(td, this.getContextLinker())! as MethodType
             return TypeAPI.getMethod(this.cls, methodType)
         }
-        throw new NoSuchMethodError("no method at " + i)
+        throw new TypeError("no method at " + i)
     }
 
     /**
@@ -1879,7 +1879,7 @@ export final class ClassType extends Type {
      *
      * @param i index
      *
-     * @throws NoSuchMethodError then i greater then number of constructors
+     * @throws TypeError then i greater then number of constructors
      *
      * @returns {@link Method} instance representing ith constructor
      */
@@ -1889,7 +1889,7 @@ export final class ClassType extends Type {
             const methodType = Type.resolve(td, this.getContextLinker())! as MethodType
             return TypeAPI.getMethod(this.cls, methodType)
         }
-        throw new NoSuchMethodError("no constructor at " + i)
+        throw new TypeError("no constructor at " + i)
     }
 
     /**
@@ -2187,7 +2187,7 @@ export final class InterfaceType extends Type {
             const methodType = Type.resolve(td, this.getContextLinker())! as MethodType
             return TypeAPI.getMethod(this.cls, methodType)
         }
-        throw new NoSuchMethodError("no method at " + i)
+        throw new TypeError("no method at " + i)
     }
 
     /**
