@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "debuggable_thread.h"
 #include "error.h"
+#include "types/numeric_id.h"
 
 namespace ark::tooling::inspector {
 DebuggableThread::DebuggableThread(ManagedThread *thread, DebugInterface *debugger, SuspensionCallbacks &&callbacks)
@@ -95,6 +96,12 @@ void DebuggableThread::SetBreakpointsActive(bool active)
     state_.SetBreakpointsActive(active);
 }
 
+void DebuggableThread::SetSkipAllPauses(bool skip)
+{
+    os::memory::LockHolder lock(mutex_);
+    state_.SetSkipAllPauses(skip);
+}
+
 std::optional<BreakpointId> DebuggableThread::SetBreakpoint(const std::vector<PtLocation> &locations,
                                                             const std::string *condition)
 {
@@ -114,6 +121,22 @@ void DebuggableThread::RemoveBreakpoint(BreakpointId id)
 {
     os::memory::LockHolder lock(mutex_);
     state_.RemoveBreakpoint(id);
+}
+
+void DebuggableThread::RemoveBreakpoints(const std::function<bool(const PtLocation &loc)> &filter)
+{
+    os::memory::LockHolder lock(mutex_);
+
+    std::vector<BreakpointId> breakpointsToRemove;
+    state_.EnumerateBreakpoints([&breakpointsToRemove, &filter](const auto &loc, auto id) {
+        if (filter(loc)) {
+            breakpointsToRemove.emplace_back(id);
+        }
+    });
+
+    for (auto id : breakpointsToRemove) {
+        state_.RemoveBreakpoint(id);
+    }
 }
 
 void DebuggableThread::SetPauseOnExceptions(PauseOnExceptionsState state)

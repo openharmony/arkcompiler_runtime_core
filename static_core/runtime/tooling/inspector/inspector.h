@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,8 @@
 #ifndef PANDA_TOOLING_INSPECTOR_INSPECTOR_H
 #define PANDA_TOOLING_INSPECTOR_INSPECTOR_H
 
-#include <array>
 #include <atomic>
 #include <cstddef>
-#include <functional>
-#include <memory>
 #include <optional>
 #include <set>
 #include <string_view>
@@ -76,13 +73,15 @@ private:
     void Continue(PtThread thread);
 
     void SetBreakpointsActive(PtThread thread, bool active);
+    void SetSkipAllPauses(PtThread thread, bool skip);
     std::set<size_t> GetPossibleBreakpoints(std::string_view sourceFile, size_t startLine, size_t endLine,
                                             bool restrictToFunction);
     std::optional<BreakpointId> SetBreakpoint(PtThread thread,
-                                              const std::function<bool(std::string_view)> &sourceFilesFilter,
+                                              const InspectorServer::SourceFileFilter &sourceFilesFilter,
                                               size_t lineNumber, std::set<std::string_view> &sourceFiles,
                                               const std::string *condition);
     void RemoveBreakpoint(PtThread thread, BreakpointId id);
+    void RemoveBreakpoints(PtThread thread, const InspectorServer::SourceFileFilter &sourceFilesFilter);
 
     void SetPauseOnExceptions(PtThread thread, PauseOnExceptionsState state);
 

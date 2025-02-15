@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,23 +40,21 @@ Expected<Location, std::string> Location::FromJsonProperty(const JsonObject &obj
         return Unexpected(scriptId.Error());
     }
 
-    auto lineNumber = property->get()->GetValue<JsonObject::NumT>("lineNumber");
-    if (lineNumber == nullptr) {
-        return Unexpected("Invalid Location: No 'lineNumber' property"s);
+    auto optLineNumber = ParseSizeProperty(**property, "lineNumber");
+    if (!optLineNumber) {
+        return Unexpected(optLineNumber.Error());
     }
 
-    auto lineNumberTrunc = std::trunc(*lineNumber);
-    if (*lineNumber < 0 || *lineNumber - lineNumberTrunc > lineNumberTrunc * DBL_EPSILON) {
-        return Unexpected("Invalid line number: " + std::to_string(*lineNumber));
-    }
-
-    return Location(*scriptId, lineNumberTrunc + 1);
+    return Location(*scriptId, optLineNumber.Value() + 1);
 }
 
 void Location::Serialize(JsonObjectBuilder &builder) const
 {
     builder.AddProperty("scriptId", std::to_string(scriptId_));
     builder.AddProperty("lineNumber", lineNumber_ - 1);
+    if (columnNumber_) {
+        builder.AddProperty("columnNumber", *columnNumber_);
+    }
 }
 
 }  // namespace ark::tooling::inspector

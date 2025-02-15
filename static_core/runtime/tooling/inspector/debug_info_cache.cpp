@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 #include "debug_info_extractor.h"
 #include "include/tooling/pt_location.h"
 #include "libpandabase/utils/bit_utils.h"
-#include "optimizer/ir_builder/inst_builder.h"
 
 namespace ark::tooling::inspector {
 void DebugInfoCache::AddPandaFile(const panda_file::File &file)
@@ -344,6 +343,23 @@ std::string DebugInfoCache::GetSourceCode(std::string_view sourceFile)
     }
 
     return result;
+}
+
+std::vector<std::string> DebugInfoCache::GetPandaFiles(const std::function<bool(std::string_view)> &sourceFileFilter)
+{
+    std::vector<std::string> pandaFiles;
+    // clang-format off
+    EnumerateLineEntries(
+        [](auto, auto &) { return true; },
+        [&sourceFileFilter](auto, auto &debugInfo, auto methodId) {
+            return sourceFileFilter(debugInfo.GetSourceFile(methodId));
+        },
+        [&pandaFiles](const auto *pf, auto &, auto, auto &, auto) {
+            pandaFiles.emplace_back(pf->GetFilename());
+            return false;
+        });
+    // clang-format on
+    return pandaFiles;
 }
 
 const panda_file::DebugInfoExtractor &DebugInfoCache::GetDebugInfo(const panda_file::File *file)
