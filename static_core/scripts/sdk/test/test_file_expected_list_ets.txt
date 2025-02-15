@@ -1,7 +1,5 @@
 build-sdk/sdk/ets
 build-sdk/sdk/ets/etsstdlib.abc
 build-sdk/sdk/ets/stdlib
-build-sdk/sdk/ets/stdlib/README.md
 build-sdk/sdk/ets/stdlib/escompat
-build-sdk/sdk/ets/stdlib/native
 build-sdk/sdk/ets/stdlib/std
