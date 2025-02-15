@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -234,11 +234,11 @@ export class Test {
         for (i = 0; i < n; i++) {
             vv6 += v[i];
         }
-        assert vv1 == vv2: "ERROR: Test incorrect result vv1 != vv2";
-        assert vv2 == vv3: "ERROR: Test incorrect result vv2 != vv3";
-        assert vv3 == vv4: "ERROR: Test incorrect result vv3 != vv4";
-        assert vv4 == vv5: "ERROR: Test incorrect result vv4 != vv5";
-        assert vv5 == vv6: "ERROR: Test incorrect result vv5 != vv6";
+        assertEQ(vv1, vv2)
+        assertEQ(vv2, vv3)
+        assertEQ(vv3, vv4)
+        assertEQ(vv4, vv5)
+        assertEQ(vv5, vv6)
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,11 +100,11 @@ function main() {
     let a = new Int(123);
     let b = new Int(123);
 
-    assert(!equals_dce(a, b));
-    assert(equals_cse(a, b));
-    assert(equals_same_inputs(a));
-    assert(equals_null(null) && equals_null(undefined) && !equals_null(a));
-    assert(equals_undefined(undefined) && equals_undefined(null) && !equals_undefined(a));
-    assert(equals_null_undefined());
-    assert(!equals_reftyped_input());
+    assertTrue(!equals_dce(a, b));
+    assertTrue(equals_cse(a, b));
+    assertTrue(equals_same_inputs(a));
+    assertTrue(equals_null(null) && equals_null(undefined) && !equals_null(a));
+    assertTrue(equals_undefined(undefined) && equals_undefined(null) && !equals_undefined(a));
+    assertTrue(equals_null_undefined());
+    assertTrue(!equals_reftyped_input());
 }

@@ -371,15 +371,15 @@ function concat14(src: string|undefined): string {
 }
 
 function main() {
-    assert concat0("abc", "de") == "abcde": "Wrong result at concat0";
-    assert concat1("abc", "de") == "abcde": "Wrong result at concat1";
-    assert concat2("abc", "de") == "abcde": "Wrong result at concat2";
-    assert concat3("abc", "de") == "abcde": "Wrong result at concat3";
-    assert concat4("ab", "c", "de") == "abcde": "Wrong result at concat4";
-    assert concat5("ab", "c", "d", "e") == "abcde": "Wrong result at concat5";
-    assert concat8("abc", "de") == "abcde": "Wrong result at concat8";
-    assert concat10("a", "b", "c", "d", "e") == "abcde": "Wrong result at concat10";
-    assert concat11("abc", "de") == "abcde1": "Wrong result at concat11";
-    assert concat13() == "1": "Wrong result at concat13";
-    assert concat14(undefined) == "undefined": "Wrong result at concat14";
+    assertEQ(concat0("abc", "de"), "abcde", "Wrong result at concat0")
+    assertEQ(concat1("abc", "de"), "abcde", "Wrong result at concat1")
+    assertEQ(concat2("abc", "de"), "abcde", "Wrong result at concat2")
+    assertEQ(concat3("abc", "de"), "abcde", "Wrong result at concat3")
+    assertEQ(concat4("ab", "c", "de"), "abcde", "Wrong result at concat4")
+    assertEQ(concat5("ab", "c", "d", "e"), "abcde", "Wrong result at concat5")
+    assertEQ(concat8("abc", "de"), "abcde", "Wrong result at concat8")
+    assertEQ(concat10("a", "b", "c", "d", "e"), "abcde", "Wrong result at concat10")
+    assertEQ(concat11("abc", "de"), "abcde1", "Wrong result at concat11")
+    assertEQ(concat13(), "1", "Wrong result at concat13")
+    assertEQ(concat14(undefined), "undefined", "Wrong result at concat14")
 }

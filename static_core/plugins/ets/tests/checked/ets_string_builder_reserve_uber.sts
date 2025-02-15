@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,6 +120,6 @@ function uber_reserve38(cond: boolean) : string
 }
 
 function main() : void {
-    assert uber_reserve38(false) == "null-0000-111-210111213142-31224577891212123-494-null": "Wrong result at uber_reserve38";
-    assert uber_reserve38(true) == "null-0000-111-210111213142-31224577891212123-4512569104-null": "Wrong result at uber_reserve38";
+    assertEQ(uber_reserve38(false), "null-0000-111-210111213142-31224577891212123-494-null", "Wrong result at uber_reserve38")
+    assertEQ(uber_reserve38(true), "null-0000-111-210111213142-31224577891212123-4512569104-null", "Wrong result at uber_reserve38")
 }

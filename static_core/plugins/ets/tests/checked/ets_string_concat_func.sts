@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -198,13 +198,13 @@ function concat8(...args: string[]): string {
 }
 
 function main() {
-    assert concat0("abcde") == "abcde": "Wrong result at concat0";
-    assert concat1("abcd", "e") == "abcde": "Wrong result at concat1";
-    assert concat2("abc", "d", "e") == "abcde": "Wrong result at concat2";
-    assert concat3("ab", "c", "d", "e") == "abcde": "Wrong result at concat3";
-    assert concat4("a", "b", "c", "d", "e") == "abcde": "Wrong result at concat4";
-    assert concat5("", "a", "b", "c", "d", "e") == "abcde": "Wrong result at concat5";
-    assert concat6() == "abcde": "Wrong result at concat6";
-    assert concat7() == "abcde": "Wrong result at concat7";
-    assert concat8("ab", "c", "d", "e") == "abcde": "Wrong result at concat8";
+    assertEQ(concat0("abcde"), "abcde", "Wrong result at concat0")
+    assertEQ(concat1("abcd", "e"), "abcde", "Wrong result at concat1")
+    assertEQ(concat2("abc", "d", "e"), "abcde", "Wrong result at concat2")
+    assertEQ(concat3("ab", "c", "d", "e"), "abcde", "Wrong result at concat3")
+    assertEQ(concat4("a", "b", "c", "d", "e"), "abcde", "Wrong result at concat4")
+    assertEQ(concat5("", "a", "b", "c", "d", "e"), "abcde", "Wrong result at concat5")
+    assertEQ(concat6(), "abcde", "Wrong result at concat6")
+    assertEQ(concat7(), "abcde", "Wrong result at concat7")
+    assertEQ(concat8("ab", "c", "d", "e"), "abcde", "Wrong result at concat8")
 }

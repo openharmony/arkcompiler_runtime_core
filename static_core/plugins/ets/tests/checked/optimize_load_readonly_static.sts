@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,10 +20,10 @@ class Base {
     static {
         Base.x = 2
         __noinline__doSomething()
-        assert getBaseX() == 2
+        assertEQ(getBaseX(), 2)
         Base.x = 3
         __noinline__doSomething()
-        assert getBaseX() == 3
+        assertEQ(getBaseX(), 3)
         Base.x = 4
         Base.y = 10
     }
@@ -35,11 +35,11 @@ class NotReadonly {
     static {
         NotReadonly.x = 2
         __noinline__changeX()
-        assert getNotReadonlyX() == 3
+        assertEQ(getNotReadonlyX(), 3)
         __noinline__changeX()
-        assert getNotReadonlyX() == 4
+        assertEQ(getNotReadonlyX(), 4)
         __noinline__doSomething()
-        assert getNotReadonlyX() == 4
+        assertEQ(getNotReadonlyX(), 4)
     }
 }
 
@@ -100,7 +100,7 @@ function getNotReadonlyX(): int {
 
 function checkGetBaseX(): int {
     for (let i = 0; i < 5; i++) {
-        assert getBaseX() == 4
+        assertEQ(getBaseX(), 4)
     }
     return 0
 }
@@ -147,7 +147,7 @@ function checkGetBaseX(): int {
 
 function checkGetNotReadonlyX(): int {
     for (let i = 0; i < 5; i++) {
-        assert getNotReadonlyX() == 4 + i
+        assertEQ(getNotReadonlyX(), 4 + i)
         __noinline__changeX()
     }
     return 0
@@ -188,10 +188,10 @@ function checkGetNotReadonlyX(): int {
 //! RUN          options: "--compiler-enable-jit=false", entry: "ETSGLOBAL::checkBaseX"
 
 function checkBaseX(): int {
-    assert Base.x == 4
+    assertEQ(Base.x, 4)
     __noinline__doSomething()
-    assert Base.y == 10
-    assert Base.x == 4
+    assertEQ(Base.y, 10)
+    assertEQ(Base.x, 4)
     return 0
 }
 
@@ -218,8 +218,8 @@ function checkBaseX(): int {
 //! RUN          options: "--compiler-enable-jit=false", entry: "ETSGLOBAL::checkNotReadonlyX"
 
 function checkNotReadonlyX(): int {
-    assert NotReadonly.x == 4
+    assertEQ(NotReadonly.x, 4)
     __noinline__changeX()
-    assert NotReadonly.x == 5
+    assertEQ(NotReadonly.x, 5)
     return 0
 }

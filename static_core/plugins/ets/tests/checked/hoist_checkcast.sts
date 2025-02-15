@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,7 @@ function test(arr: A[], value: A | B) : int {
             set(arr, i, value);
         }
     } catch (e: ClassCastError) {
-        assert e.toString().match('ClassCastError: B cannot be cast to A') != null
+        assertNE(e.toString().match('ClassCastError: B cannot be cast to A'), null);
         return -iters;
     }
     return iters;
@@ -105,7 +105,7 @@ function test2(arr: Object[], value: A | B) : int {
         }
     } catch (e: ArrayStoreError) {
         // NOTE: line number is invalid in interpreter, see #17098
-        assert e.toString().match('ArrayStoreError: B cannot be stored in an array of type [LA;') != null
+        assertNE(e.toString().match('ArrayStoreError: B cannot be stored in an array of type [LA;'), null);
         return -iters;
     }
     return iters;

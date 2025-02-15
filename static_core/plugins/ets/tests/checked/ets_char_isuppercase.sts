@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,29 +85,29 @@ function callToLowerCase(ch: Char): char {
 }
 
 function main(): int {
-    assert !callIsUpperCase(c'a');
-    assert !callIsUpperCase(c'z');
-    assert  callIsUpperCase(c'A');
-    assert  callIsUpperCase(c'Z');
-    assert !callIsUpperCase(c'+');
+    assertTrue(!callIsUpperCase(c'a'));
+    assertTrue(!callIsUpperCase(c'z'));
+    assertTrue(callIsUpperCase(c'A'));
+    assertTrue(callIsUpperCase(c'Z'));
+    assertTrue(!callIsUpperCase(c'+'));
 
-    assert  callIsLowerCase(c'a');
-    assert  callIsLowerCase(c'z');
-    assert !callIsLowerCase(c'A');
-    assert !callIsLowerCase(c'Z');
-    assert !callIsLowerCase(c'+');
+    assertTrue(callIsLowerCase(c'a'));
+    assertTrue(callIsLowerCase(c'z'));
+    assertTrue(!callIsLowerCase(c'A'));
+    assertTrue(!callIsLowerCase(c'Z'));
+    assertTrue(!callIsLowerCase(c'+'));
 
-    assert c'A' == callToUpperCase(c'a');
-    assert c'Z' == callToUpperCase(c'z');
-    assert c'A' == callToUpperCase(c'A');
-    assert c'Z' == callToUpperCase(c'Z');
-    assert c'+' == callToUpperCase(c'+');
+    assertEQ(c'A', callToUpperCase(c'a'));
+    assertEQ(c'Z', callToUpperCase(c'z'));
+    assertEQ(c'A', callToUpperCase(c'A'));
+    assertEQ(c'Z', callToUpperCase(c'Z'));
+    assertEQ(c'+', callToUpperCase(c'+'));
 
-    assert c'a' == callToLowerCase(c'a');
-    assert c'z' == callToLowerCase(c'z');
-    assert c'a' == callToLowerCase(c'A');
-    assert c'z' == callToLowerCase(c'Z');
-    assert c'+' == callToLowerCase(c'+');
+    assertEQ(c'a', callToLowerCase(c'a'));
+    assertEQ(c'z', callToLowerCase(c'z'));
+    assertEQ(c'a', callToLowerCase(c'A'));
+    assertEQ(c'z', callToLowerCase(c'Z'));
+    assertEQ(c'+', callToLowerCase(c'+'));
 
     return 0;
 }

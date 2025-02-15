@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -346,46 +346,46 @@ function LongModByM7(num: long): long {
 
 // Int Div/Mod by Int.MIN_VALUE
 function IntDivByMin(num: int): int {
-    assert Int.MIN_VALUE == -2147483648
+    assertEQ(Int.MIN_VALUE, -2147483648)
     return num / (-2147483648 as int);
 }
 
 function IntModByMin(num: int): int {
-    assert Int.MIN_VALUE == -2147483648
+    assertEQ(Int.MIN_VALUE, -2147483648)
     return num % (-2147483648 as int);
 }
 
 // Long Div/Mod by Long.MIN_VALUE
 function LongDivByMin(num: long): long {
-    assert Long.MIN_VALUE == -9223372036854775808
+    assertEQ(Long.MIN_VALUE, -9223372036854775808)
     return num / (-9223372036854775808 as long);
 }
 
 function LongModByMin(num: long): long {
-    assert Long.MIN_VALUE == -9223372036854775808
+    assertEQ(Long.MIN_VALUE, -9223372036854775808)
     return num % (-9223372036854775808 as long);
 }
 
 function main(): int {
-    assert IntDivBy7(1405) == 200: "Int: / 7";
-    assert IntModBy7(1405) == 5: "Int: % 7";
-    assert LongDivBy7(1405) == 200: "Long: / 7";
-    assert LongModBy7(1405) == 5: "Long: % 7";
+    assertEQ(IntDivBy7(1405), 200)
+    assertEQ(IntModBy7(1405), 5)
+    assertEQ(LongDivBy7(1405), 200)
+    assertEQ(LongModBy7(1405), 5)
 
-    assert IntDivByM7(1405) == -200: "Int: / -7";
-    assert IntModByM7(1405) == 5: "Int: % -7";
-    assert LongDivByM7(1405) == -200: "Long: / -7";
-    assert LongModByM7(1405) == 5: "Long: % -7";
+    assertEQ(IntDivByM7(1405), -200)
+    assertEQ(IntModByM7(1405), 5)
+    assertEQ(LongDivByM7(1405), -200)
+    assertEQ(LongModByM7(1405), 5)
 
-    assert IntDivByMin(1405) == 0: "Int: / MIN";
-    assert IntModByMin(1405) == 1405: "Int: % MIN";
-    assert LongDivByMin(1405) == 0: "Long: / MIN";
-    assert LongModByMin(1405) == 1405: "Long: % MIN";
+    assertEQ(IntDivByMin(1405), 0)
+    assertEQ(IntModByMin(1405), 1405)
+    assertEQ(LongDivByMin(1405), 0)
+    assertEQ(LongModByMin(1405), 1405)
 
-    assert IntDivByMin(Int.MIN_VALUE) == 1: "Int: MIN / MIN";
-    assert IntModByMin(Int.MIN_VALUE) == 0: "Int: MIN % MIN";
-    assert LongDivByMin(Long.MIN_VALUE) == 1: "Long: MIN / MIN";
-    assert LongModByMin(Long.MIN_VALUE) == 0: "Long: MIN % MIN";
+    assertEQ(IntDivByMin(Int.MIN_VALUE), 1)
+    assertEQ(IntModByMin(Int.MIN_VALUE), 0)
+    assertEQ(LongDivByMin(Long.MIN_VALUE), 1)
+    assertEQ(LongModByMin(Long.MIN_VALUE), 0)
 
     return 0;
 }

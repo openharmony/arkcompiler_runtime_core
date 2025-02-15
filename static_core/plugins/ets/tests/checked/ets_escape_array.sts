@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,8 +82,8 @@ function test3(): number {
         arr[0] = 1;
         arr[1] = 2;
     } catch (e) {
-        assert e instanceof ArrayIndexOutOfBoundsError :"Throwed not ArrayIndexOutOfBoundsError"
-        assert arr[0] == 1;
+        assertTrue(e instanceof ArrayIndexOutOfBoundsError, "Throwed not ArrayIndexOutOfBoundsError");
+        assertEQ(arr[0], 1);
         return 0;
     }
     return 1;
@@ -99,9 +99,9 @@ function test5(a: String, b: String, c: String, d: String, e: String, f: String,
 }
 
 function main() {
-    assert test1() == 21: "test1 failed";
-    assert test2(true) == 10: "test2 failed";
-    assert test3() == 0: "test3 failed";
-    assert test4() == "aBcDaBcD": "test4 failed";
-    assert test5("a", "B", "c", "D", "a", "B", "c", "D") == "aBcDaBcD": "test5 failed";
+    assertEQ(test1(), 21, "test1 failed");
+    assertEQ(test2(true), 10, "test2 failed");
+    assertEQ(test3(), 0, "test3 failed");
+    assertEQ(test4(), "aBcDaBcD", "test4 failed");
+    assertEQ(test5("a", "B", "c", "D", "a", "B", "c", "D"), "aBcDaBcD", "test5 failed");
 }
