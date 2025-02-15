@@ -16,9 +16,7 @@
 Typecheck conversion rules
 ++++++++++++++++++++++++++
 
-Typecheck performs only for ArkTS/TS files.
-
-Let describe the relationships:
+Typecheck performs only for ArkTS/TS files. Let us describe the relationships:
 
 1. ArkTS to TS type conversion
 2. TS to ArkTS type conversion
@@ -34,23 +32,23 @@ ArkTS to TS type conversion
 +-------------------------+-------------------------+
 | ArkTS                   | TS                      |
 +=========================+=========================+
-| ``number/Number``       | ``Number``              |
+| ``number/Number``       | ``number``              |
 +-------------------------+-------------------------+
-| ``byte/Byte``           | ``Number``              |
+| ``byte/Byte``           | ``number``              |
 +-------------------------+-------------------------+
-| ``short/Short``         | ``Number``              |
+| ``short/Short``         | ``number``              |
 +-------------------------+-------------------------+
-| ``int/Int``             | ``Number``              |
+| ``int/Int``             | ``number``              |
 +-------------------------+-------------------------+
-| ``long/Long``           | ``Number``              |
+| ``long/Long``           | ``number``              |
 +-------------------------+-------------------------+
-| ``float/Float``         | ``Number``              |
+| ``float/Float``         | ``number``              |
 +-------------------------+-------------------------+
-| ``double/Double``       | ``Number``              |
+| ``double/Double``       | ``number``              |
 +-------------------------+-------------------------+
 | ``char/Char``           | ``string``              |
 +-------------------------+-------------------------+
-| ``boolean/Boolean``     | ``Boolean``             |
+| ``boolean/Boolean``     | ``boolean``             |
 +-------------------------+-------------------------+
 | ``string/String``       | ``string``              |
 +-------------------------+-------------------------+
@@ -77,9 +75,9 @@ TS to ArkTS type conversion
 +--------------------------+-------------------------+
 | TS                       | ArkTS                   |
 +==========================+=========================+
-| ``number/Number``        | ``Number``              |
+| ``number/Number``        | ``number``              |
 +--------------------------+-------------------------+
-| ``boolean/Boolean``      | ``Boolean``             |
+| ``boolean/Boolean``      | ``boolean``             |
 +--------------------------+-------------------------+
 | ``string/String``        | ``string``              |
 +--------------------------+-------------------------+
@@ -103,7 +101,7 @@ TS to ArkTS type conversion
 +--------------------------+-------------------------+
 | ``void(variable type)``  | ``undefined``           |
 +--------------------------+-------------------------+
-| ``void(return type)``    |  ``void``               |
+| ``void(return type)``    | ``void``                |
 +--------------------------+-------------------------+
 | ``never``                | ``never``               |
 +--------------------------+-------------------------+
@@ -182,7 +180,6 @@ Interfaces:
   export class MyClass implements MyInface {
       data: number = 0;
   }
-
   export type MyFunction = Function;
 
 .. code-block:: typescript

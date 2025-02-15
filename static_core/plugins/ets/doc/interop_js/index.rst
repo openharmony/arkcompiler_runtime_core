@@ -19,11 +19,9 @@
    :maxdepth: 3
 
    /1_introduction
-   /2_esobject
    /3_conversions_type_check
    /4_conversions_runtime
    /5_js
    /6_ts
    /7_arkts
    /99_backlog_features_recheck
-
