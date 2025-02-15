@@ -23,5 +23,7 @@ params: imported logic = {{class}}, identifier = {{word}}
 
 import * as {{word}} from "std/math";
 
+let mmm = {{word}}.{{class}};
+
 {%- endfor %}
 {%- endfor %}

@@ -273,6 +273,18 @@
 03.types/07.value_types/01.integer_types_and_operations/remainder/remainder_by_zero_short.sts
 # end of es2panda fails
 
+#22786
+13.compilation_units/08.namespace_declarations/simple_spec_pos4.sts
+#end of #22786
+
+#22807
+13.compilation_units/03.import_directives/06.import_path/file/import_baseURL_path_file.sts
+#end of #22807
+
+#22846
+13.compilation_units/08.namespace_declarations/pack1/namespace_package3.sts
+#end of 22846
+
 #19909
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_24.sts
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_25.sts
@@ -383,6 +395,12 @@
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_func_20.sts
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_18.sts
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_19.sts
+
+# es2panda fails: panda#22755
+13.compilation_units/03.import_directives/01.bind_all_with_qualified_access/import_all_as_3.sts
+13.compilation_units/03.import_directives/01.bind_all_with_qualified_access/import_all_as_4.sts
+13.compilation_units/03.import_directives/01.bind_all_with_qualified_access/import_all_as_5.sts
+# end of es2panda fails
 
 # es2panda fails: panda#11660 panda#11541
 07.expressions/32.lambda_expression/02.lambda_body/lambda_captured_value_type_2.sts
@@ -1712,7 +1730,7 @@
 07.expressions/12.indexing_expression/02.record_indexing_expression/ind_4.sts
 07.expressions/12.indexing_expression/02.record_indexing_expression/ind_9.sts
 
-# 22692 
+# 22692
 15.semantic_rules/06.compatibility_call_args/tuple_rest_params_0.sts
 15.semantic_rules/06.compatibility_call_args/tuple_rest_params_1.sts
 

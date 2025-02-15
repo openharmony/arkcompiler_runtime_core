@@ -32,8 +32,8 @@ import {n} from "./modules/statements.sts";
 import {cn} from "./modules/statements.sts";
 
 function main(): void {
-  assertTrue( i == 17 );
-  assertTrue( str == "updated str" );
-  assertTrue( n == 11.1 );
-  assertTrue( cn == 2.5 );
+  assertEQ( i, 17 );
+  assertEQ( str, "updated str" );
+  assertEQ( n, 11.1 );
+  assertEQ( cn, 2.5 );
 }

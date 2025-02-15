@@ -31,6 +31,6 @@ class B extends A {
 
 function main(): void {
   let b: A = new B();
-  assert b.run() == 10;
+  assertEQ(b.run(), 10)
 }
 

@@ -70,8 +70,8 @@ cases:
   - import: |-
         import {ENUM} from "./modules/declarations.sts"  // Enum
     call: |-
-        assertTrue(ENUM.Red.valueOf() == 0);
-        assertTrue(ENUM.Blue.valueOf() == 1);
+        assertEQ(ENUM.Red.valueOf(), 0);
+        assertEQ(ENUM.Blue.valueOf(), 1);
 
   - import: |-
         import {A} from "./modules/declarations.sts"  // Base class
@@ -84,7 +84,7 @@ cases:
         import {VAR_i} from "./modules/declarations.sts"  // variable of primitive type (int)
     call: |-
         let z: VAR_i = 3;
-        assertTrue(z == 3);
+        assertEQ(z, 3);
 
   - import: |-
         import {TPL} from "./modules/declarations.sts"  // Tuple type
@@ -99,97 +99,97 @@ cases:
 
     call: |-
         NoArg();
-        assertTrue(res == 1);
+        assertEQ(res, 1);
 
   - import: |-
         import {OneArg} from "./modules/declarations.sts"  // Function, argument of Number type
     call: |-
-        assertTrue(OneArg(new Number()) == 2);
+        assertEQ(OneArg(new Number()), 2);
 
   - import: |-
         import {TwoArgs} from "./modules/declarations.sts"  // Function, arguments of char and byte types
     call: |-
-        assertTrue(TwoArgs(c'A', 1 as byte) == 3);
+        assertEQ(TwoArgs(c'A', 1 as byte), 3);
 
   - import: |-
         import {Gen} from "./modules/declarations.sts"  // Function, generic argument
     call: |-
         let s = "knock-knock";
-        assertTrue(Gen(s) == s);
-        assertTrue(Gen(new Number(1.45)) == 1.45);
+        assertEQ(Gen(s), s);
+        assertEQ(Gen(new Number(1.45)), 1.45);
 
   - import: |-
         import {ArgFun} from "./modules/declarations.sts"  // Function, argument is of function type
     call: |-
-        assertTrue(ArgFun( () => { return 3; } ) == 3);
+        assertEQ(ArgFun( () => { return 3; } ), 3);
 
   - import: |-
         import {ArgFun2} from "./modules/declarations.sts"  // Function, arguments - function type + primitive
     call: |-
-        assertTrue(ArgFun2( (i) => { return i; }, 4) == 4);
+        assertEQ(ArgFun2( (i) => { return i; }, 4), 4);
 
   - import: |-
         import {a} from "./modules/declarations.sts"  // Variable, primitive, implicit type
     call: |-
-        assertTrue(a == 1);
+        assertEQ(a, 1);
         a = 2;
-        assertTrue(a == 2);
+        assertEQ(a, 2);
         a = 1;
 
   - import: |-
         import {i} from "./modules/declarations.sts"  // Variable, int
     call: |-
-        assertTrue(i == 2);
+        assertEQ(i, 2);
         i += 3;
-        assertTrue(i == 5);
+        assertEQ(i, 5);
         i = 2;
 
   - import: |-
         import {n} from "./modules/declarations.sts"  // Variable, number
     call: |-
-        assertTrue(n == 3);
+        assertEQ(n, 3);
         n += 0.1;
-        assertTrue(n == 3.1);
+        assertEQ(n, 3.1);
         n = 3;
 
   - import: |-
         import {s} from "./modules/declarations.sts"  // Variable, String
     call: |-
-        assertTrue(s == "knock-knock");
+        assertEQ(s, "knock-knock");
         s += " who`s there";
-        assertTrue(s == "knock-knock who`s there");
+        assertEQ(s, "knock-knock who`s there");
         s = "knock-knock";
 
   - import: |-
         import {c} from "./modules/declarations.sts"  // Variable, char
     call: |-
-        assertTrue(c == c'A');
+        assertEQ(c, c'A');
         c = c'b';
-        assertTrue(c == c'b');
+        assertEQ(c, c'b');
         c = c'A';
 
   - import: |-
         import {u} from "./modules/declarations.sts"  // Variable, union
     call: |-
-        assertTrue(u == undefined);
+        assertEQ(u, undefined);
         u = new Number(1.2);
-        assertTrue(u == 1.2);
+        assertEQ(u, 1.2);
         u = "hi there";
-        assertTrue(u == "hi there");
+        assertEQ(u, "hi there");
         u = undefined;
 
   - import: |-
         import {arr} from "./modules/declarations.sts"  // Variable, bytes[3]
     call: |-
-        assertTrue(arr.length == 3);
+        assertEQ(arr.length, 3);
         arr = new byte[2];
-        assertTrue(arr.length == 2);
+        assertEQ(arr.length, 2);
         arr = new byte[3];
 
   - import: |-
         import {ca} from "./modules/declarations.sts"  // Const implicit int
     call: |-
-        assertTrue(ca == 11);
+        assertEQ(ca, 11);
 
   - import: |-
         import {ca} from "./modules/declarations.sts"  // Const implicit int
@@ -201,7 +201,7 @@ cases:
   - import: |-
         import {ci} from "./modules/declarations.sts"  // Const int
     call: |-
-        assertTrue(ci == 12);
+        assertEQ(ci, 12);
 
   - import: |-
         import {ci} from "./modules/declarations.sts"  // Const int
@@ -213,7 +213,7 @@ cases:
   - import: |-
         import {cs} from "./modules/declarations.sts"  // Const str
     call: |-
-        assertTrue(cs == "who`s there");
+        assertEQ(cs, "who`s there");
 
   - import: |-
         import {cs} from "./modules/declarations.sts"  // Const str

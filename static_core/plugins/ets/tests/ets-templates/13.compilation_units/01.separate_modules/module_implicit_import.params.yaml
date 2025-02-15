@@ -16,17 +16,17 @@ cases:
   - import: |-
       import {decode} from "./modules/stdlib_implicit_import.sts"
     call: |-
-      assertTrue( decode("some%20str") == "some str" )
+      assertEQ( decode("some%20str"), "some str" )
 
   - import: |-
       import {encode} from "./modules/stdlib_implicit_import.sts"
     call: |-
-      assertTrue( encode("some str") == "some%20str" )
+      assertEQ( encode("some str"), "some%20str" )
 
   - import: |-
       import {encodeComp} from "./modules/stdlib_implicit_import.sts"
     call: |-
-      assertTrue( encodeComp("some str") == "some%20str" )
+      assertEQ( encodeComp("some str"), "some%20str" )
 
   # classes
   - import: |-
