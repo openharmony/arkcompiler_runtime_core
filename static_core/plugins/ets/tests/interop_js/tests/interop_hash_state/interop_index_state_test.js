@@ -13,18 +13,31 @@
  * limitations under the License.
  */
 
+const helper = requireNapiPreview('libinterop_test_helper.so', false);
+const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+
+globalThis.etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+
 function runTest(test) {
-    console.log('Running test ' + test);
-	let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
-	if (!etsVm.createEtsRuntime(process.env.ARK_ETS_STDLIB_PATH, process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH, false, false)) {
-		console.log('Cannot create ETS runtime');
-		process.exit(1);
-	}
+    print('Running test ' + test);
+	const etsVmRes = etsVm.createRuntime({
+        'log-level': 'error',
+        'log-components': 'ets_interop_js',
+        'boot-panda-files': stdlibPath + ':' + gtestAbcPath,
+        'panda-files': gtestAbcPath,
+        'gc-trigger-type': 'heap-trigger',
+        'compiler-enable-jit': 'false',
+        'run-gc-in-place': 'true',
+    });
+    if (!etsVmRes) {
+        throw Error(`Failed to create ETS runtime`);
+    }
+    
     if (test === 'hash_to_info') {
         hashToInfo(etsVm);
     } else {
-        console.log('Expected test name');
-	    process.exit(1);
+	    throw Error('Expected test name');
     }
 }
 
@@ -32,14 +45,14 @@ function hashToInfo(etsVm) {
     // This test should show correct usage of interop hash for object that already have hash
     let obj = etsVm.call('.createHashedObject');
     if (!etsVm.call('.checkIfInSet', obj)) {
-        console.log('Problem with hash');
+        throw Error('Problem with hash');
     }
 }
 
-let args = process.argv;
-if (args.length !== 3) {
-	console.log('Expected test name');
-	process.exit(1);
+const testNameNum = 5;
+let args = helper.getArgv();
+if (args.length !== testNameNum) {
+	throw Error('Expected test name');
 }
 
-runTest(args[2]);
+runTest(args[testNameNum - 1]);

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,7 +12,7 @@
 # limitations under the License.
 
 
-panda_ets_interop_js_test_nodevm(ets_interop_js_object_state_interop_interop_hashed_test
+panda_ets_interop_js_test_arkjsvm(ets_interop_js_object_state_interop_interop_hashed_test
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/hashed_object.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/interop_index_state_test.js
     LAUNCHER_ARGS "hash_to_info"

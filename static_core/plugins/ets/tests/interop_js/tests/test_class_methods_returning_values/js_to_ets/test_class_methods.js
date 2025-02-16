@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -283,7 +283,7 @@ exports.ReturnTestClass = ReturnTestClass;
 exports.returnTestClassInstance = new ReturnTestClass();
 
 const testAny = () => {
-	console.log(
+	print(
 		[
 			exports.returnIntegerAsAny,
 			exports.returnStringAsAny,
@@ -298,15 +298,15 @@ const testAny = () => {
 };
 
 const testLiterals = () => {
-	console.log([exports.returnStrLiteral, exports.returnIntLiteral, exports.returnBoolLiteral, exports.returnsBigNLiteral].map((x) => x()));
+	print([exports.returnStrLiteral, exports.returnIntLiteral, exports.returnBoolLiteral, exports.returnsBigNLiteral].map((x) => x()));
 };
 
 const testExtraSet = () => {
-	console.log([exports.returnMap, exports.returnSet, exports.returnTuple].map((x) => x()));
+	print([exports.returnMap, exports.returnSet, exports.returnTuple].map((x) => x()));
 };
 
 const testSubset = () => {
-	console.log(
+	print(
 		[
 			exports.returnStringSubsetByRef,
 			exports.returnMapSubsetByRef,
@@ -321,11 +321,11 @@ const testSubset = () => {
 };
 
 const testUnion = () => {
-	console.log((0, exports.returnUnion)(true), (0, exports.returnUnion)(false));
+	print((0, exports.returnUnion)(true), (0, exports.returnUnion)(false));
 };
 
 const testClassInterface = () => {
-	console.log([exports.returnClass, exports.returnInterface].map((x) => x()));
+	print([exports.returnClass, exports.returnInterface].map((x) => x()));
 };
 
 testAny();

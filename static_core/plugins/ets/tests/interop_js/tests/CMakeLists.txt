@@ -17,50 +17,60 @@ set(DISABLES_TESTS
 )
 
 set(TESTS_EXECUTED_WITH_NODEJS
-    checked
+    # Blocked by #21277
     class_composite
     class_extension
     class_operations
-    declgen_ets2ts
-    dot_operator_nodejs
-    event_loop_callback_poster_tests
-    exceptions
-    generic
-    getter
     implement_interfaces
-    indexed_signature
-    indexed_type
     instanceof
     interface
     interfaces
-    interop_hash_state
-    intersection_signature
-    map_mirror_classes
-    objects_passing
-    operator_new
-    optional_reference_type
-    passing_optional_type
-    perf
-    promise
-    proxies
-    sample
-    scenarios
     setter
-    strict_equality
+    scenarios
+    generic
+    getter
+
+    # Blocked by #22353
+    dot_operator_nodejs
+
+    # Blocked by #22659
+    exceptions
+
+    # Blocked by #22422
+    indexed_type
+
+    # Blocked by #22821
+    declgen_ets2ts
+
+    # Blocked by #22822
+    perf
+
+    # MM and concurrency team
+    event_loop_callback_poster_tests
+    promise
+
+    # mem will be fixed by MM and concurrency, ets_function_proxy blocked by # 22648 
+    proxies
+
+    #Blocked by #22430
     test_callable
-    test_class_methods_returning_values
-    test_composite_types
-    test_frontend
+
+    # Blocked by #21832
     test_incorrect_conversion_types
+
+    # Blocked by #22647
     test_intrins
-    test_return_this
-    test_undefined
+
+    # Blocked by #22455
     timer
+
+    # Blocked by 22820
+    checked
 )
 
 # NOTE: Remove this condition after all tests have been migrated to ArkJSVM.
 list(LENGTH TESTS_EXECUTED_WITH_NODEJS INTEROP_NODEJS_TEST_NUM)
-if(NOT ${INTEROP_NODEJS_TEST_NUM} EQUAL 39)
+if(NOT ${INTEROP_NODEJS_TEST_NUM} EQUAL 24)
     message(FATAL_ERROR "All new interop tests shouls be executed on ArkJSVM. 
                          INTEROP_NODEJS_TEST_NUM = ${INTEROP_NODEJS_TEST_NUM}")
 endif()

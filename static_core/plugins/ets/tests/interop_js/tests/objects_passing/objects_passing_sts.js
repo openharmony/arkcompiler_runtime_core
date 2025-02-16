@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require('objects_passing/objects_passing_sts.test.js');
+const { etsVm, getTestModule } = require('objects_passing/objects_passing_sts.test.abc');
 
 const etsMod = getTestModule('objects_passing_ets_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
@@ -33,12 +33,12 @@ const testOuterObject = {
 
 {
 	let ret = getValueObject(testObject);
-	console.log(ret);
+	print(ret);
 	ASSERT_EQ(ret, 'TestName');
 }
 
 {
 	let ret = getOuterObject(testOuterObject);
-	console.log(ret);
+	print(ret);
 	ASSERT_EQ(ret, 456);
 }

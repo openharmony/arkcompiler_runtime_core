@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,7 +69,7 @@ const testClass = () => {
     let testVal = testClass.getThis();
 };
 const test = () => {
-    console.log(getThis.call(TEST_NUMBER), 
+    print(getThis.call(TEST_NUMBER), 
     getThis.call(TEST_STRING), 
     getThis.call(TEST_NULL), 
     getThis.call(TEST_MAP), 
@@ -80,7 +80,7 @@ const test = () => {
     getThisAsFunction.call(testFuncReturnStr()));
 };
 const testAsync = async () => {
-    console.log(await getThisAsAsyncFunction.call(testFuncReturnStr()));
+    print(await getThisAsAsyncFunction.call(testFuncReturnStr()));
 };
 testClass();
 test();
