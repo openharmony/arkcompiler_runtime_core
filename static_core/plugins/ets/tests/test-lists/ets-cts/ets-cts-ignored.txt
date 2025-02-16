@@ -1736,3 +1736,9 @@
 
 # 22704
 15.semantic_rules/03.supertyping/supertyping_among_array_types/cast_to_class_n_1.sts
+
+# vpukhov - fix after fnarity-r is merged
+17.experimental_features/12.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_1.sts
+17.experimental_features/12.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_3.sts
+17.experimental_features/12.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_4.sts
+17.experimental_features/12.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_6.sts
