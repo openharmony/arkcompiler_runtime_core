@@ -68,12 +68,14 @@ class PandaBinaries:
         'parser',
         'declgen-ets2ts-cts',
         'declgen-ets2ts-func-tests',
-        'declgen-ets2ts-runtime'
+        'declgen-ets2ts-runtime',
+        'declgents2ets-ts-cts'
     ]
     DISABLE_CHECK_ES2PANDA = [
         'declgen-ets2ts-cts',
         'declgen-ets2ts-func-tests',
-        'declgen-ets2ts-runtime'
+        'declgen-ets2ts-runtime',
+        'declgents2ets-ts-cts'
     ]
 
     def __init__(self, runner_name: str, build_dir: str, config: Config, conf_kind: ConfigurationKind) -> None:

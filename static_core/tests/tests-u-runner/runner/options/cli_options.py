@@ -528,6 +528,13 @@ def add_declgen_ets2ts_args(parser: argparse.ArgumentParser) -> None:
         help="run declgen_ets2ts ETS runtime tests")
 
 
+def add_declgen_ts2ets_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        '--declgen-ts2ets-cts', action='store_true', dest='declgen_ts2ets_cts',
+        default=None,
+        help="run declgen_ts2ets ts-templates tests")
+
+
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Regression test runner")
 
@@ -547,5 +554,6 @@ def get_args() -> argparse.Namespace:
     add_test_lists_args(parser)
     add_coverage_args(parser)
     add_declgen_ets2ts_args(parser)
+    add_declgen_ts2ets_args(parser)
 
     return parser.parse_args()

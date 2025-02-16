@@ -65,4 +65,8 @@ class FailKind(Enum):
     TSC_FAIL = 39
     TSC_TIMEOUT = 40
     TSC_OTHER = 41
+
+    DECLGEN_TS2ETS_FAIL = 42
+    DECLGEN_TS2ETS_TIMEOUT = 43
+    DECLGEN_TS2ETS_OTHER = 44
     
