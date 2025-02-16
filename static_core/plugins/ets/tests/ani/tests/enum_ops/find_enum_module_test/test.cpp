@@ -26,15 +26,15 @@ TEST_F(EnumFindInNamespaceTest, find_enum)
     ASSERT_NE(module, nullptr);
 
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->Module_FindEnum(module, "L#ToFind;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->Module_FindEnum(module, "LToFind;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum aniEnumInt {};
-    ASSERT_EQ(env_->Module_FindEnum(module, "L#ToFindInt;", &aniEnumInt), ANI_OK);
+    ASSERT_EQ(env_->Module_FindEnum(module, "LToFindInt;", &aniEnumInt), ANI_OK);
     ASSERT_NE(aniEnumInt, nullptr);
 
     ani_enum aniEnumString {};
-    ASSERT_EQ(env_->Module_FindEnum(module, "L#ToFindString;", &aniEnumString), ANI_OK);
+    ASSERT_EQ(env_->Module_FindEnum(module, "LToFindString;", &aniEnumString), ANI_OK);
     ASSERT_NE(aniEnumString, nullptr);
 }
 
@@ -45,11 +45,11 @@ TEST_F(EnumFindInNamespaceTest, invalid_arg_enum)
     ASSERT_NE(module, nullptr);
 
     ani_enum en {};
-    ASSERT_EQ(env_->Module_FindEnum(nullptr, "L#ToFind;", &en), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Module_FindEnum(nullptr, "LToFind;", &en), ANI_INVALID_ARGS);
 
     ASSERT_EQ(env_->Module_FindEnum(module, nullptr, &en), ANI_INVALID_ARGS);
 
-    ASSERT_EQ(env_->Module_FindEnum(module, "L#ToFind;", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Module_FindEnum(module, "LToFind;", nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(EnumFindInNamespaceTest, invalid_arg_name)
@@ -58,7 +58,7 @@ TEST_F(EnumFindInNamespaceTest, invalid_arg_name)
     ASSERT_EQ(env_->FindModule("L@abcModule/test;", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
     ani_enum en {};
-    ASSERT_EQ(env_->Module_FindEnum(module, "L#NotFound;", &en), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Module_FindEnum(module, "LNotFound;", &en), ANI_NOT_FOUND);
 }
 
 }  // namespace ark::ets::ani::testing

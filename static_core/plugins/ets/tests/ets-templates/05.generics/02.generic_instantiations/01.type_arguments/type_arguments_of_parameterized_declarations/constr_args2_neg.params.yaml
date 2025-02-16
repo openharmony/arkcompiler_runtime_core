@@ -65,3 +65,10 @@ cases:
     decl: |-
         type B = Y[]
         type C = Color[]
+
+  - use: |-
+      let v: A<C|null,B|null> = new A<C|null,B|null>(new Color[0], new Y[0])
+    bound: ' extends X[]|null'
+    decl: |-
+        type B = X[]
+        type C = Color[]

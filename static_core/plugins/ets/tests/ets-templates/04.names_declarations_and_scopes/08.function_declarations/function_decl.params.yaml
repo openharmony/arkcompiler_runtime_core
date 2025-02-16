@@ -84,15 +84,3 @@ function_decls:
       call: |-
         let e: Color  = foo();
         assertEQ( e, Color.Red )
-
-    # no params, return enum array
-    - decl: |-
-        enum Color { Red, Green, Blue }
-        function foo(): Color[] {
-            let arr: Color[] = new Color[1]
-            arr[0] = Color.Red
-            return arr;
-        }
-      call: |-
-        let arr: Color[] = foo();
-        assertTrue( arr instanceof Color[] && arr.length == 1 && arr[0] == Color.Red )

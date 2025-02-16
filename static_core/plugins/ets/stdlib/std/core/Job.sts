@@ -35,5 +35,5 @@ export final class Job<T> {
     private val: T
     private mutex: Mutex = new Mutex()
     private event: Event = new Event()
-    private status: JobStatus
+    private status : int = JobStatus.RUNNING
 }

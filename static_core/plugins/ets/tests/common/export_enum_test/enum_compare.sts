@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,30 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*---
+files: [enum_export.sts]
+---*/
 
- /*---
- desc: Issue 18012. Cannot find Enum fromInt method when cast to int
- tags: []
- ---*/
+import { Letter } from "./enum_export"
 
-enum Color {Red, Green, Blue, Black = -1}
-
-function castIntToString(val: int): string {
-    let cr = "" + ((val as Color) as int)
-    return cr
-}
-
-function handleBadValue(val: int): int {
-    try {
-        castIntToString(val)
-    } catch (e: Error) {
-        return 0;
+function main() {
+    let letter: Letter = Letter.A
+    if (letter == Letter.A) {
+        assertTrue(true);
+    } else {
+        assertTrue(false);
     }
-    return 1;
-}
-
-function main(): int {
-    let cr = castIntToString(1)
-    assertEQ<String, String>(cr,"1");
-    return handleBadValue(4)
 }

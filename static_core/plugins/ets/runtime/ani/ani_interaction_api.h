@@ -26,10 +26,10 @@ const __ani_interaction_api *GetInteractionAPI();
 bool IsVersionSupported(uint32_t version);
 
 struct EnumArrayNames {
-    static constexpr std::string_view NAMES = "NamesArray";
-    static constexpr std::string_view VALUES = "ValuesArray";
-    static constexpr std::string_view STRING_VALUES = "StringValuesArray";
-    static constexpr std::string_view BOXED_ITEMS = "BoxedItemsArray";
+    static constexpr std::string_view NAMES = "#NamesArray";
+    static constexpr std::string_view VALUES = "#ValuesArray";
+    static constexpr std::string_view STRING_VALUES = "#StringValuesArray";
+    static constexpr std::string_view BOXED_ITEMS = "#ItemsArray";
 };
 }  // namespace ark::ets::ani
 

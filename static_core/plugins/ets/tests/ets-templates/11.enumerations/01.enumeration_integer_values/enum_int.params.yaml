@@ -60,13 +60,6 @@ cases:
     - decl: |-
           enum Enum { first = -1, second, third = -42 }
       use: |-
-          assertTrue( Enum.first == -1 )
-          assertTrue( Enum.second == 0 )
-          assertTrue( Enum.third == -42 )
-
-    - decl: |-
-          enum Enum { first = -1, second, third = -42 }
-      use: |-
           assertEQ( "" + Enum.first, "-1" )
           assertEQ( "" + Enum.second, "0" )
           assertEQ( "" + Enum.third, "-42" )
@@ -93,3 +86,9 @@ cases:
               default: assertTrue( false); break;
           }
 
+    - decl: |-
+          enum Enum { first = -1, second, third = -42 }
+      use: |-
+          assertTrue( Enum.first == -1 )
+          assertTrue( Enum.second == 0 )
+          assertTrue( Enum.third == -42 )

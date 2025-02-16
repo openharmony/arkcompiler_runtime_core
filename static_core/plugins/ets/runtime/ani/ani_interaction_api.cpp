@@ -5821,7 +5821,7 @@ NO_UB_SANITIZE static ani_status EnumItem_GetValue_Int(ani_env *env, ani_enum_it
     EtsHandleScope scope(coroutine);
     EtsHandle<EtsObject> internalEnumItem(coroutine, s.ToInternalType(enum_item));
     EtsHandle<EtsClass> enumClass(coroutine, internalEnumItem->GetClass());
-    EtsField *etsField = enumClass->GetFieldIDByName("ordinal", nullptr);
+    EtsField *etsField = enumClass->GetFieldIDByName("#ordinal", nullptr);
     auto ordinal = internalEnumItem->GetFieldPrimitive<int32_t>(etsField);
 
     auto *itemsArr = GetArrayFromInternalEnum<EtsIntArray>(enumClass, EnumArrayNames::VALUES.data());
@@ -5841,7 +5841,7 @@ static ani_status GetStringArrayFromEnumItem(ani_env *env, ani_enum_item enumIte
     EtsHandleScope scope(coroutine);
     EtsHandle<EtsObject> internalEnumItem(coroutine, s.ToInternalType(enumItem));
     EtsHandle<EtsClass> enumClass(coroutine, internalEnumItem->GetClass());
-    EtsField *etsField = enumClass->GetFieldIDByName("ordinal", nullptr);
+    EtsField *etsField = enumClass->GetFieldIDByName("#ordinal", nullptr);
     auto ordinal = internalEnumItem->GetFieldPrimitive<int32_t>(etsField);
 
     auto *itemsArr = GetArrayFromInternalEnum<EtsObjectArray>(enumClass, arrayName);
@@ -5884,7 +5884,7 @@ NO_UB_SANITIZE static ani_status EnumItem_GetIndex(ani_env *env, ani_enum_item e
     EtsHandleScope scope(coroutine);
     EtsHandle<EtsObject> internalEnumItem(coroutine, s.ToInternalType(enum_item));
     EtsHandle<EtsClass> enumClass(coroutine, internalEnumItem->GetClass());
-    EtsField *etsField = enumClass->GetFieldIDByName("ordinal", nullptr);
+    EtsField *etsField = enumClass->GetFieldIDByName("#ordinal", nullptr);
     auto ordinal = internalEnumItem->GetFieldPrimitive<int32_t>(etsField);
 
     *result = ordinal;

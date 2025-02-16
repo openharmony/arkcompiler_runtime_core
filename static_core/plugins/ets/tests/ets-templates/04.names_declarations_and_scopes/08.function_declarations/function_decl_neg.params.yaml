@@ -49,3 +49,15 @@ function_decls:
       call: |-
           let f: BarType[] = foo();
           assertTrue( f instanceof BarType[] && f.length == 1 )
+
+    # no params, return enum array
+    - decl: |-
+          enum Color { Red, Green, Blue }
+          function foo(): Color[] {
+              let arr: Color[] = new Color[1]
+              arr[0] = Color.Red
+              return arr;
+          }
+      call: |-
+          let arr: Color[] = foo();
+          assertTrue( arr instanceof Color[] && arr.length == 1 && arr[0] == Color.Red )

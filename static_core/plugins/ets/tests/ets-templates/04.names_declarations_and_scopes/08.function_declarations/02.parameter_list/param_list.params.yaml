@@ -66,15 +66,6 @@ function_decls:
       call: |-
           foo(Color.Red);
 
-    # enum array param, void return
-    - decl: |-
-          enum Color { Red, Green, Blue }
-          function foo(a: Color[]) {}
-      call: |-
-          let arr: Color[] =  new Color[1]
-          arr[0] = Color.Red
-          foo(arr);
-
     # T param, T return
     - decl: |-
           function foo<T>(a: T): T {

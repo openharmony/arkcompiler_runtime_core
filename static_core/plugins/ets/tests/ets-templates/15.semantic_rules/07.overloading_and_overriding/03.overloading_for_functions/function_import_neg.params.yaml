@@ -35,4 +35,3 @@ cases:
     - { file_a: "function_export_neg_1" }
     - { file_a: "function_export_neg_2" }
     - { file_a: "function_export_neg_3" }
-    - { file_a: "function_export_neg_4" }

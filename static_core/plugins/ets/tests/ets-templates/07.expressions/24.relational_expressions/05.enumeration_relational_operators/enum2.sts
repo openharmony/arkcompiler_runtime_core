@@ -13,22 +13,18 @@
  * limitations under the License.
  */
 
+{%- for c in cases %}
 /*---
-desc: Overload-equivalent functions to import to another test.
-tags:
-- compile-only
-- negative
-- not-a-test
+desc: >-
+    If both operands are of the same Enumeration type, then Numerical Relational Operators
+    or String Relational Operators are used depending on the kind of enumeration constant value.
+    Otherwise, a compile-time error occurs.
+tags: {{c.tags}}
 ---*/
 
-export enum Color { Blue, White }
+{{c.decl}}
 
-export function foo(i: int): int {
-    return -1;
+function main() {
+    {{c.use|indent}}
 }
-
-export function foo(i: Color): int {
-    return 22;
-}
-
-
+{%- endfor %}
