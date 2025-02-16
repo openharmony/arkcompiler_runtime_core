@@ -64,7 +64,12 @@ function(create_declgen_ets2ts_test TARGET)
 
     # Replaces path prefix from ARG_ROOT_DIR to ARG_BINARY_ROOT_DIR and extension
     function(rebase_path SRC DST)
-        string(REGEX REPLACE "^${ARG_ROOT_DIR}" "${ARG_BINARY_ROOT_DIR}/" RES ${SRC})
+        if(ARGC GREATER 2 AND ARGV2 STREQUAL "ts")
+            file(MAKE_DIRECTORY "${ARG_BINARY_ROOT_DIR}/glue_file")
+            string(REGEX REPLACE "^${ARG_ROOT_DIR}" "${ARG_BINARY_ROOT_DIR}/glue_file" RES ${SRC})
+        else()
+            string(REGEX REPLACE "^${ARG_ROOT_DIR}" "${ARG_BINARY_ROOT_DIR}" RES ${SRC})
+        endif()
         if(ARGC GREATER 2)
             set(NEW_EXT ${ARGV2})
             string(REGEX REPLACE "\.[a-zA-Z0-9]+$" ".${NEW_EXT}" RES ${RES})
@@ -112,18 +117,22 @@ function(create_declgen_ets2ts_test TARGET)
     # Compile source .sts files into .abc and declaration .ts files
     set(ABC_FILES "")
     set(DECL_FILES "")
+    set(GLUE_FILES "")
     set(ABC_TARGETS "")
     set(ETS_MODULE_KEY "")
     foreach(ETS_SOURCE ${ARG_ETS_SOURCES})
         rebase_path(${ETS_SOURCE} ABC_PATH "abc")
         list(APPEND ABC_FILES ${ABC_PATH})
-        rebase_path(${ETS_SOURCE} DECL_PATH "ts")
+        rebase_path(${ETS_SOURCE} DECL_PATH "d.ts")
         list(APPEND DECL_FILES ${DECL_PATH})
+        rebase_path(${ETS_SOURCE} GLUE_PATH "ts")
+        list(APPEND GLUE_FILES ${GLUE_PATH})
+
         add_custom_command(
             OUTPUT ${ABC_PATH} ${DECL_PATH}
             COMMENT "Compiling: ${ETS_SOURCE}"
             COMMAND $<TARGET_FILE:es2panda> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output ${ABC_PATH} --extension=sts --ast-verifier:errors=${ETS_VERIFICATOR_ERRORS} ${ETS_SOURCE}
-            COMMAND $<TARGET_FILE:declgen_ets2ts> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output ${DECL_PATH} --extension=sts ${ETS_SOURCE}
+            COMMAND $<TARGET_FILE:declgen_ets2ts> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output-dts=${DECL_PATH} --output-ts=${GLUE_PATH} ${ETS_SOURCE}
             DEPENDS es2panda declgen_ets2ts ${ETS_SOURCE} ${ARKTSCONFIG}
         )
 
@@ -151,9 +160,8 @@ function(create_declgen_ets2ts_test TARGET)
     endforeach()
 
     # Compute destination JS file paths for generated TS declarations
-    foreach(TS_SOURCE ${DECL_FILES})
+    foreach(TS_SOURCE ${GLUE_FILES})
         rebase_path(${TS_SOURCE} JS_SOURCE "js")
-        set(JS_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/${JS_SOURCE}")
         list(APPEND JS_FILES ${JS_SOURCE})
     endforeach()
 
@@ -167,8 +175,9 @@ function(create_declgen_ets2ts_test TARGET)
     # Compile source .ts and declaratin .ts files into .js
     add_custom_command(
         OUTPUT ${JS_FILES}
-        COMMENT "Compile ts files: ${COPIED_TS_SOURCES} ${DECL_FILES}"
+        COMMENT "Compile ts files: ${COPIED_TS_SOURCES} ${DECL_FILES} ${GLUE_FILES}"
         COMMAND ${PANDA_THIRD_PARTY_SOURCES_DIR}/typescript/bin/tsc --target es5 --strict --outDir ${CMAKE_CURRENT_BINARY_DIR} ${COPIED_TS_SOURCES} ${DECL_FILES}
+        COMMAND ${PANDA_THIRD_PARTY_SOURCES_DIR}/typescript/bin/tsc --target es5 --strict --outDir "${CMAKE_CURRENT_BINARY_DIR}" ${GLUE_FILES}
         DEPENDS es2panda ark_link ${ABC_TARGETS} ${ARKTSCONFIG} ${COPIED_TS_SOURCES} ${DECL_FILES}
     )
     add_custom_target(${TARGET}_tsc
