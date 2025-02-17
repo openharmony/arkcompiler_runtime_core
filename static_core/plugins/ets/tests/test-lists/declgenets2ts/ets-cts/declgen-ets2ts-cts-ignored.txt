@@ -4040,6 +4040,10 @@ deprecated/15.exceptions/throw_exception_with_try_declaration.sts
 17.experimental_features/19.packages/02.package_initializer/p6/init6_1.sts
 15.semantic_rules/10.initializer_block/bad-static-location.sts
 
+# 22925
+17.experimental_features/14.enumeration_types_conversions/enum_to_obj_cast_0.sts
+17.experimental_features/14.enumeration_types_conversions/enum_to_obj_cast_1.sts
+
 # 22906
 18.annotations/02.using_annotations/annotation_places_arrays_4.sts
 18.annotations/02.using_annotations/annotation_places_arrays_3.sts
