@@ -36,6 +36,10 @@ ani_add_gtest(ani_test_reference_is_nullish_value
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_is_nullish_value_test.sts
 )
 
+ani_add_gtest(ani_test_reference_delete
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_delete_test.cpp
+)
+
 ani_add_gtest(ani_test_reference_equals
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_equals_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_equals_test.sts

@@ -1052,6 +1052,16 @@ NO_UB_SANITIZE static ani_status Class_BindNativeMethods(ani_env *env, ani_class
     return DoBindNative<false>(s, etsMethods, methods, nrMethods);
 }
 
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Reference_Delete(ani_env *env, ani_ref ref)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+
+    ScopedManagedCodeFix s(env);
+    return s.DelLocalRef(ref);
+}
+
 template <bool IS_STATIC_FIELD>
 static ani_status DoGetField(ani_env *env, ani_class cls, const char *name, EtsField **result)
 {
@@ -2143,17 +2153,59 @@ NO_UB_SANITIZE static ani_status Function_Call_Ref(ani_env *env, ani_function fn
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status GlobalReference_Create(ani_env *env, ani_ref ref, ani_gref *result)
+NO_UB_SANITIZE static ani_status GlobalReference_Create(ani_env *env, ani_ref ref, ani_ref *result)
 {
-    // This is a temporary implementation, it needs to be redone. #22006
     ANI_DEBUG_TRACE(env);
-    CHECK_PTR_ARG(ref);
+    CHECK_ENV(env);
     CHECK_PTR_ARG(result);
 
-    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
-    EtsObject *internalObject = s.ToInternalType(ref);
-    *result = s.AddGlobalRef(internalObject);
-    return ANI_OK;
+    ScopedManagedCodeFix s(env);
+    return s.AddGlobalRef(ref, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status GlobalReference_Delete(ani_env *env, ani_ref gref)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+
+    ScopedManagedCodeFix s(env);
+    return s.DelGlobalRef(gref);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status WeakReference_Create(ani_env *env, ani_ref ref, ani_wref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    return s.AddWeakRef(ref, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status WeakReference_Delete(ani_env *env, ani_wref wref)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+
+    ScopedManagedCodeFix s(env);
+    return s.DelWeakRef(wref);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status WeakReference_GetReference(ani_env *env, ani_wref wref, ani_boolean *wasReleasedResult,
+                                                            ani_ref *refResult)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(wref);
+    CHECK_PTR_ARG(wasReleasedResult);
+    CHECK_PTR_ARG(refResult);
+
+    ScopedManagedCodeFix s(env);
+    return s.GetLocalRef(wref, wasReleasedResult, refResult);
 }
 
 [[noreturn]] static void NotImplementedAPI(int nr)
@@ -2226,7 +2278,7 @@ const __ani_interaction_api INTERACTION_API = {
     Module_BindNativeFunctions,
     Namespace_BindNativeFunctions,
     Class_BindNativeMethods,
-    NotImplementedAdapter<50>,
+    Reference_Delete,
     NotImplementedAdapter<51>,
     NotImplementedAdapter<52>,
     NotImplementedAdapter<53>,
@@ -2616,10 +2668,10 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<437>,
     NotImplementedAdapter<438>,
     GlobalReference_Create,
-    NotImplementedAdapter<440>,
-    NotImplementedAdapter<441>,
-    NotImplementedAdapter<442>,
-    NotImplementedAdapter<443>,
+    GlobalReference_Delete,
+    WeakReference_Create,
+    WeakReference_Delete,
+    WeakReference_GetReference,
     NotImplementedAdapter<444>,
     NotImplementedAdapter<445>,
     NotImplementedAdapter<446>,

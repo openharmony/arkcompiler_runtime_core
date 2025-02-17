@@ -11,11 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ani_add_gtest(ani_test_global_reference_create
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/global_reference_create_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/global_reference_create_test.sts
+ani_add_gtest(ani_test_weak_reference_create
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/weak_reference_create_test.cpp
 )
 
-ani_add_gtest(ani_test_global_reference_delete
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/global_reference_delete_test.cpp
+ani_add_gtest(ani_test_weak_reference_delete
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/weak_reference_delete_test.cpp
+)
+
+ani_add_gtest(ani_test_weak_reference_get_reference
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/weak_reference_get_reference_test.cpp
 )
