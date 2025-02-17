@@ -28,10 +28,10 @@ public:
         ASSERT_EQ(env_->FindClass("LMan;", &cls), ANI_OK);
 
         ani_field fieldName;
-        ASSERT_EQ(env_->Class_GetField(cls, "name", &fieldName), ANI_OK);
+        ASSERT_EQ(env_->Class_FindField(cls, "name", &fieldName), ANI_OK);
 
         ani_field fieldAge;
-        ASSERT_EQ(env_->Class_GetField(cls, "age", &fieldAge), ANI_OK);
+        ASSERT_EQ(env_->Class_FindField(cls, "age", &fieldAge), ANI_OK);
 
         *objectResult = bob;
         *fieldNameResult = fieldName;

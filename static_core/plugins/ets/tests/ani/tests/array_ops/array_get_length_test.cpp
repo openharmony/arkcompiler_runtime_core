@@ -19,25 +19,24 @@
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class FixedarrayGetLengthTest : public AniTest {};
+class ArrayGetLengthTest : public AniTest {};
 
-// ninja ani_test_fixedarray_getlen_gtests
-TEST_F(FixedarrayGetLengthTest, GetLengthErrorTests)
+TEST_F(ArrayGetLengthTest, GetLengthErrorTests)
 {
-    ani_fixedarray_byte fixedarray;
-    ASSERT_EQ(env_->FixedArray_New_Byte(5U, &fixedarray), ANI_OK);
+    ani_array_byte array;
+    ASSERT_EQ(env_->Array_New_Byte(5U, &array), ANI_OK);
     ani_size length = 0;
-    ASSERT_EQ(env_->FixedArray_GetLength(nullptr, &length), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->FixedArray_GetLength(fixedarray, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Array_GetLength(nullptr, &length), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Array_GetLength(array, nullptr), ANI_INVALID_ARGS);
 }
 
-TEST_F(FixedarrayGetLengthTest, GetLengthOkTests)
+TEST_F(ArrayGetLengthTest, GetLengthOkTests)
 {
-    ani_fixedarray_byte fixedarray;
+    ani_array_byte array;
     const ani_size arraySize = 5U;
-    ASSERT_EQ(env_->FixedArray_New_Byte(arraySize, &fixedarray), ANI_OK);
+    ASSERT_EQ(env_->Array_New_Byte(arraySize, &array), ANI_OK);
     ani_size length = 0;
-    ASSERT_EQ(env_->FixedArray_GetLength(fixedarray, &length), ANI_OK);
+    ASSERT_EQ(env_->Array_GetLength(array, &length), ANI_OK);
     ASSERT_EQ(length, arraySize);
 }
 

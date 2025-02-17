@@ -19,7 +19,7 @@
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class FixedArraySetGetRegionLongTest : public AniTest {
+class ArraySetGetRegionLongTest : public AniTest {
 protected:
     static constexpr ani_long TEST_VALUE1 = 1;
     static constexpr ani_long TEST_VALUE2 = 2;
@@ -32,48 +32,47 @@ protected:
     static constexpr ani_long TEST_UPDATE3 = 50;
 };
 
-// ninja ani_test_long_array_region_gtests
-TEST_F(FixedArraySetGetRegionLongTest, SetLongArrayRegionErrorTests)
+TEST_F(ArraySetGetRegionLongTest, SetLongArrayRegionErrorTests)
 {
-    ani_fixedarray_long fixedarray;
-    ASSERT_EQ(env_->FixedArray_New_Long(5U, &fixedarray), ANI_OK);
+    ani_array_long array;
+    ASSERT_EQ(env_->Array_New_Long(5U, &array), ANI_OK);
     const uint32_t bufferSize = 10U;
     ani_long nativeBuffer[bufferSize] = {0};
     const ani_size offset1 = -1;
     const ani_size len1 = 2;
-    ASSERT_EQ(env_->FixedArray_SetRegion_Long(fixedarray, offset1, len1, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_SetRegion_Long(array, offset1, len1, nativeBuffer), ANI_OUT_OF_RANGE);
 
     const ani_size offset2 = 5;
     const ani_size len2 = 10U;
-    ASSERT_EQ(env_->FixedArray_SetRegion_Long(fixedarray, offset2, len2, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_SetRegion_Long(array, offset2, len2, nativeBuffer), ANI_OUT_OF_RANGE);
     const ani_size offset3 = 0;
     const ani_size len3 = 5;
-    ASSERT_EQ(env_->FixedArray_SetRegion_Long(fixedarray, offset3, len3, nativeBuffer), ANI_OK);
+    ASSERT_EQ(env_->Array_SetRegion_Long(array, offset3, len3, nativeBuffer), ANI_OK);
 }
 
-TEST_F(FixedArraySetGetRegionLongTest, GetLongArrayRegionErrorTests)
+TEST_F(ArraySetGetRegionLongTest, GetLongArrayRegionErrorTests)
 {
-    ani_fixedarray_long fixedarray;
-    ASSERT_EQ(env_->FixedArray_New_Long(5U, &fixedarray), ANI_OK);
+    ani_array_long array;
+    ASSERT_EQ(env_->Array_New_Long(5U, &array), ANI_OK);
     const uint32_t bufferSize = 10U;
     ani_long nativeBuffer[bufferSize] = {0};
     const ani_size offset1 = 0;
     const ani_size len1 = 1;
-    ASSERT_EQ(env_->FixedArray_GetRegion_Long(fixedarray, offset1, len1, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Array_GetRegion_Long(array, offset1, len1, nullptr), ANI_INVALID_ARGS);
     const ani_size offset2 = 5;
     const ani_size len2 = 10U;
-    ASSERT_EQ(env_->FixedArray_GetRegion_Long(fixedarray, offset2, len2, nativeBuffer), ANI_OUT_OF_RANGE);
-    ASSERT_EQ(env_->FixedArray_GetRegion_Long(fixedarray, offset1, len1, nativeBuffer), ANI_OK);
+    ASSERT_EQ(env_->Array_GetRegion_Long(array, offset2, len2, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_GetRegion_Long(array, offset1, len1, nativeBuffer), ANI_OK);
 }
 
-TEST_F(FixedArraySetGetRegionLongTest, GetRegionIntTest)
+TEST_F(ArraySetGetRegionLongTest, GetRegionIntTest)
 {
-    const auto array = static_cast<ani_fixedarray_long>(CallEtsFunction<ani_ref>("GetArray"));
+    const auto array = static_cast<ani_array_long>(CallEtsFunction<ani_ref>("GetArray"));
 
     ani_long nativeBuffer[5U] = {0};
     const ani_size offset3 = 0;
     const ani_size len3 = 5;
-    ASSERT_EQ(env_->FixedArray_GetRegion_Long(array, offset3, len3, nativeBuffer), ANI_OK);
+    ASSERT_EQ(env_->Array_GetRegion_Long(array, offset3, len3, nativeBuffer), ANI_OK);
     ASSERT_EQ(nativeBuffer[0U], TEST_VALUE1);
     ASSERT_EQ(nativeBuffer[1U], TEST_VALUE2);
     ASSERT_EQ(nativeBuffer[2U], TEST_VALUE3);
@@ -81,13 +80,13 @@ TEST_F(FixedArraySetGetRegionLongTest, GetRegionIntTest)
     ASSERT_EQ(nativeBuffer[4U], TEST_VALUE5);
 }
 
-TEST_F(FixedArraySetGetRegionLongTest, SetRegionIntTest)
+TEST_F(ArraySetGetRegionLongTest, SetRegionIntTest)
 {
-    const auto array = static_cast<ani_fixedarray_long>(CallEtsFunction<ani_ref>("GetArray"));
+    const auto array = static_cast<ani_array_long>(CallEtsFunction<ani_ref>("GetArray"));
     ani_long nativeBuffer1[5U] = {TEST_UPDATE1, TEST_UPDATE2, TEST_UPDATE3};
     const ani_size offset4 = 2;
     const ani_size len4 = 3;
-    ASSERT_EQ(env_->FixedArray_SetRegion_Long(array, offset4, len4, nativeBuffer1), ANI_OK);
+    ASSERT_EQ(env_->Array_SetRegion_Long(array, offset4, len4, nativeBuffer1), ANI_OK);
     ASSERT_EQ(CallEtsFunction<ani_boolean>("CheckArray", array), ANI_TRUE);
 }
 

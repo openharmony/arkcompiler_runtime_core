@@ -27,10 +27,10 @@ public:
         ASSERT_EQ(env_->FindClass("LBoxx;", &cls), ANI_OK);
 
         ani_field fieldInt;
-        ASSERT_EQ(env_->Class_GetField(cls, "int_value", &fieldInt), ANI_OK);
+        ASSERT_EQ(env_->Class_FindField(cls, "int_value", &fieldInt), ANI_OK);
 
         ani_field fieldString;
-        ASSERT_EQ(env_->Class_GetField(cls, "string_value", &fieldString), ANI_OK);
+        ASSERT_EQ(env_->Class_FindField(cls, "string_value", &fieldString), ANI_OK);
 
         *boxResult = static_cast<ani_object>(boxRef);
         *fieldIntResult = fieldInt;
@@ -60,13 +60,13 @@ TEST_F(ObjectSetFieldRefTest, set_field_ref2)
     ASSERT_EQ(env_->FindClass("LBoxc;", &cls), ANI_OK);
 
     ani_field fieldInt;
-    ASSERT_EQ(env_->Class_GetField(cls, "int_value", &fieldInt), ANI_OK);
+    ASSERT_EQ(env_->Class_FindField(cls, "int_value", &fieldInt), ANI_OK);
 
     ani_field fieldString;
-    ASSERT_EQ(env_->Class_GetField(cls, "string_value", &fieldString), ANI_OK);
+    ASSERT_EQ(env_->Class_FindField(cls, "string_value", &fieldString), ANI_OK);
 
     ani_field fieldStr;
-    ASSERT_EQ(env_->Class_GetField(cls, "str_value", &fieldStr), ANI_OK);
+    ASSERT_EQ(env_->Class_FindField(cls, "str_value", &fieldStr), ANI_OK);
 
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8("abcdef", 6U, &string), ANI_OK);

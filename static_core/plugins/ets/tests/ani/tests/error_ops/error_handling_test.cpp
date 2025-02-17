@@ -27,7 +27,7 @@ public:
         ASSERT_NE(cls, nullptr);
 
         ani_static_method method;
-        ASSERT_EQ(env_->Class_GetStaticMethod(cls, "errorThrow", "I:I", &method), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "errorThrow", "I:I", &method), ANI_OK);
         ASSERT_NE(method, nullptr);
 
         *clsResult = cls;

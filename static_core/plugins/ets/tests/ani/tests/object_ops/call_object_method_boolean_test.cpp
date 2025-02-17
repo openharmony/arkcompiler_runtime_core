@@ -45,14 +45,14 @@ public:
         // Emulate allocation an instance of class.
         ani_static_method newMethod;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        ASSERT_EQ(env_->Class_GetStaticMethod(cls, "new_A", ":LA;", &newMethod), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_A", ":LA;", &newMethod), ANI_OK);
         ani_ref ref;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
 
         ani_method method;
         // Retrieve a method named "boolean_method" with signature "II:Z".
-        ASSERT_EQ(env_->Class_GetMethod(cls, "boolean_method", "II:Z", &method), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls, "boolean_method", "II:Z", &method), ANI_OK);
         ASSERT_NE(method, nullptr);
 
         *objectResult = static_cast<ani_object>(ref);

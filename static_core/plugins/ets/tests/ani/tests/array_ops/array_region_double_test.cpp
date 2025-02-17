@@ -19,7 +19,7 @@
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class FixedArraySetGetRegionDoubleTest : public AniTest {
+class ArraySetGetRegionDoubleTest : public AniTest {
 protected:
     static constexpr double TEST_VALUE_1 = 1.0;
     static constexpr double TEST_VALUE_2 = 2.0;
@@ -32,50 +32,49 @@ protected:
     static constexpr double TEST_UPDATE_3 = 50.0;
 };
 
-// ninja ani_test_double_array_region_gtests
-TEST_F(FixedArraySetGetRegionDoubleTest, SetDoubleArrayRegionErrorTests)
+TEST_F(ArraySetGetRegionDoubleTest, SetDoubleArrayRegionErrorTests)
 {
-    ani_fixedarray_double fixedarray;
-    ASSERT_EQ(env_->FixedArray_New_Double(5U, &fixedarray), ANI_OK);
+    ani_array_double array;
+    ASSERT_EQ(env_->Array_New_Double(5U, &array), ANI_OK);
     const uint32_t bufferSize = 5U;
     ani_double nativeBuffer[bufferSize] = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4, TEST_VALUE_5};
     const ani_size offset1 = -1;
     const ani_size len1 = 2;
-    ASSERT_EQ(env_->FixedArray_SetRegion_Double(fixedarray, offset1, len1, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_SetRegion_Double(array, offset1, len1, nativeBuffer), ANI_OUT_OF_RANGE);
 
     const ani_size offset2 = 5;
     const ani_size len2 = 10U;
-    ASSERT_EQ(env_->FixedArray_SetRegion_Double(fixedarray, offset2, len2, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_SetRegion_Double(array, offset2, len2, nativeBuffer), ANI_OUT_OF_RANGE);
     const ani_size offset3 = 0;
     const ani_size len3 = 5;
-    ASSERT_EQ(env_->FixedArray_SetRegion_Double(fixedarray, offset3, len3, nativeBuffer), ANI_OK);
+    ASSERT_EQ(env_->Array_SetRegion_Double(array, offset3, len3, nativeBuffer), ANI_OK);
 }
 
-TEST_F(FixedArraySetGetRegionDoubleTest, GetDoubleArrayRegionErrorTests)
+TEST_F(ArraySetGetRegionDoubleTest, GetDoubleArrayRegionErrorTests)
 {
-    ani_fixedarray_double fixedarray;
-    ASSERT_EQ(env_->FixedArray_New_Double(5U, &fixedarray), ANI_OK);
+    ani_array_double array;
+    ASSERT_EQ(env_->Array_New_Double(5U, &array), ANI_OK);
     const uint32_t bufferSize = 5U;
     ani_double nativeBuffer[bufferSize] = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4, TEST_VALUE_5};
     const ani_size offset1 = 0;
     const ani_size len1 = 1;
-    ASSERT_EQ(env_->FixedArray_GetRegion_Double(fixedarray, offset1, len1, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Array_GetRegion_Double(array, offset1, len1, nullptr), ANI_INVALID_ARGS);
     const ani_size offset2 = 5;
     const ani_size len2 = 10U;
-    ASSERT_EQ(env_->FixedArray_GetRegion_Double(fixedarray, offset2, len2, nativeBuffer), ANI_OUT_OF_RANGE);
-    ASSERT_EQ(env_->FixedArray_GetRegion_Double(fixedarray, offset1, len1, nativeBuffer), ANI_OK);
+    ASSERT_EQ(env_->Array_GetRegion_Double(array, offset2, len2, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_GetRegion_Double(array, offset1, len1, nativeBuffer), ANI_OK);
 }
 
-TEST_F(FixedArraySetGetRegionDoubleTest, GetRegionDoubleTest)
+TEST_F(ArraySetGetRegionDoubleTest, GetRegionDoubleTest)
 {
-    const auto array = static_cast<ani_fixedarray_double>(CallEtsFunction<ani_ref>("GetArray"));
+    const auto array = static_cast<ani_array_double>(CallEtsFunction<ani_ref>("GetArray"));
 
     ani_double nativeBuffer[5U] = {0.0};
     const ani_size offset3 = 0;
     const ani_size len3 = 5;
     const double epsilon = 1e-6;  // Define acceptable tolerance
 
-    ASSERT_EQ(env_->FixedArray_GetRegion_Double(array, offset3, len3, nativeBuffer), ANI_OK);
+    ASSERT_EQ(env_->Array_GetRegion_Double(array, offset3, len3, nativeBuffer), ANI_OK);
     ASSERT_NEAR(nativeBuffer[0U], TEST_VALUE_1, epsilon);
     ASSERT_NEAR(nativeBuffer[1U], TEST_VALUE_2, epsilon);
     ASSERT_NEAR(nativeBuffer[2U], TEST_VALUE_3, epsilon);
@@ -83,13 +82,13 @@ TEST_F(FixedArraySetGetRegionDoubleTest, GetRegionDoubleTest)
     ASSERT_NEAR(nativeBuffer[4U], TEST_VALUE_5, epsilon);
 }
 
-TEST_F(FixedArraySetGetRegionDoubleTest, SetRegionDoubleTest)
+TEST_F(ArraySetGetRegionDoubleTest, SetRegionDoubleTest)
 {
-    const auto array = static_cast<ani_fixedarray_double>(CallEtsFunction<ani_ref>("GetArray"));
+    const auto array = static_cast<ani_array_double>(CallEtsFunction<ani_ref>("GetArray"));
     ani_double nativeBuffer1[5U] = {TEST_UPDATE_1, TEST_UPDATE_2, TEST_UPDATE_3};
     const ani_size offset4 = 2;
     const ani_size len4 = 3;
-    ASSERT_EQ(env_->FixedArray_SetRegion_Double(array, offset4, len4, nativeBuffer1), ANI_OK);
+    ASSERT_EQ(env_->Array_SetRegion_Double(array, offset4, len4, nativeBuffer1), ANI_OK);
     ASSERT_EQ(CallEtsFunction<ani_boolean>("CheckArray", array), ANI_TRUE);
 }
 

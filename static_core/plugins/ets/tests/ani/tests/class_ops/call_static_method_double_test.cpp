@@ -31,7 +31,7 @@ public:
         ASSERT_NE(cls, nullptr);
 
         ani_static_method method;
-        ASSERT_EQ(env_->Class_GetStaticMethod(cls, "sum", "DD:D", &method), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "sum", "DD:D", &method), ANI_OK);
         ASSERT_NE(method, nullptr);
 
         *clsResult = cls;

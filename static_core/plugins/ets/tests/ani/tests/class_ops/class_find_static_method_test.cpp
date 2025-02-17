@@ -17,73 +17,73 @@
 
 namespace ark::ets::ani::testing {
 
-class GetStaticMethodTest : public AniTest {};
+class ClassFindStaticMethodTest : public AniTest {};
 
-TEST_F(GetStaticMethodTest, has_static_method_1)
+TEST_F(ClassFindStaticMethodTest, has_static_method_1)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LPhone;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method;
-    ASSERT_EQ(env_->Class_GetStaticMethod(cls, "get_button_names", ":[Lstd/core/String;", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", ":[Lstd/core/String;", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 }
 
-TEST_F(GetStaticMethodTest, has_static_method_2)
+TEST_F(ClassFindStaticMethodTest, has_static_method_2)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LPhone;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method;
-    ASSERT_EQ(env_->Class_GetStaticMethod(cls, "get_button_names", nullptr, &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", nullptr, &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 }
 
-TEST_F(GetStaticMethodTest, static_method_not_found_1)
+TEST_F(ClassFindStaticMethodTest, static_method_not_found_1)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LPhone;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method;
-    ASSERT_EQ(env_->Class_GetStaticMethod(cls, "bla_bla_bla", nullptr, &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "bla_bla_bla", nullptr, &method), ANI_NOT_FOUND);
 }
 
-TEST_F(GetStaticMethodTest, static_method_not_found_2)
+TEST_F(ClassFindStaticMethodTest, static_method_not_found_2)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LPhone;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method;
-    ASSERT_EQ(env_->Class_GetStaticMethod(cls, "get_button_names", "bla_bla_bla", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", "bla_bla_bla", &method), ANI_NOT_FOUND);
 }
 
-TEST_F(GetStaticMethodTest, invalid_argument_name)
+TEST_F(ClassFindStaticMethodTest, invalid_argument_name)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LPhone;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method;
-    ASSERT_EQ(env_->Class_GetStaticMethod(cls, nullptr, nullptr, &method), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, nullptr, nullptr, &method), ANI_INVALID_ARGS);
 }
 
-TEST_F(GetStaticMethodTest, invalid_argument_cls)
+TEST_F(ClassFindStaticMethodTest, invalid_argument_cls)
 {
     ani_static_method method;
-    ASSERT_EQ(env_->Class_GetStaticMethod(nullptr, "get_button_names", nullptr, &method), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Class_FindStaticMethod(nullptr, "get_button_names", nullptr, &method), ANI_INVALID_ARGS);
 }
 
-TEST_F(GetStaticMethodTest, invalid_argument_result)
+TEST_F(ClassFindStaticMethodTest, invalid_argument_result)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LPhone;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
-    ASSERT_EQ(env_->Class_GetStaticMethod(cls, "get_button_names", nullptr, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", nullptr, nullptr), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing

@@ -27,16 +27,16 @@ public:
         ASSERT_NE(cls, nullptr);
 
         ani_static_method newMethod;
-        ASSERT_EQ(env_->Class_GetStaticMethod(cls, "new_A", ":LA;", &newMethod), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_A", ":LA;", &newMethod), ANI_OK);
         ani_ref ref;
         ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
 
         ani_method getMethod;
-        ASSERT_EQ(env_->Class_GetMethod(cls, "getCount", nullptr, &getMethod), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls, "getCount", nullptr, &getMethod), ANI_OK);
         ASSERT_NE(getMethod, nullptr);
 
         ani_method voidMethod;
-        ASSERT_EQ(env_->Class_GetMethod(cls, "voidMethod", nullptr, &voidMethod), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls, "voidMethod", nullptr, &voidMethod), ANI_OK);
         ASSERT_NE(voidMethod, nullptr);
 
         *objectResult = static_cast<ani_object>(ref);

@@ -36,7 +36,7 @@ public:
 
         // Emulate allocation an instance of class.
         ani_static_method newMethod;
-        ASSERT_EQ(env_->Class_GetStaticMethod(cls, newClassName, signature, &newMethod), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, newClassName, signature, &newMethod), ANI_OK);
         ani_ref ref;
         ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
 
