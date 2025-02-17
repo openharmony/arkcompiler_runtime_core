@@ -196,6 +196,15 @@ xgc_test("mark_cycle_test") {
   sources = [ "mark_cycle_test.cpp" ]
 }
 
+xgc_test("mark_cycle2_test") {
+  js = [
+    "mark_cycle2_test.js",
+    "test_utils.js",
+  ]
+  sts = "xgc_tests.sts"
+  sources = [ "mark_cycle2_test.cpp" ]
+}
+
 xgc_test("sweep_cycle_test") {
   js = [
     "sweep_cycle_test.js",
