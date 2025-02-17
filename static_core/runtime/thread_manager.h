@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -160,31 +160,30 @@ public:
         // issue #3085
         SuspendAllThreads();
         MTManagedThread *self = MTManagedThread::GetCurrent();
+        ASSERT(self != nullptr);
         self->GetMutatorLock()->WriteLock();
         {
             os << "ARK THREADS (" << threadsCount_ << "):\n";
         }
-        if (self != nullptr) {
-            os::memory::LockHolder lock(threadLock_);
-            int64_t start = ark::os::time::GetClockTimeInThreadCpuTime();
-            int64_t end;
-            int64_t lastTime = start;
-            cb(self, os);
-            for (const auto &thread : threads_) {
-                if (thread == self) {
-                    continue;
-                }
-                cb(thread, os);
-                end = ark::os::time::GetClockTimeInThreadCpuTime();
-                if ((end - lastTime) > K_MAX_SINGLE_DUMP_TIME_NS) {
-                    LOG(ERROR, RUNTIME) << "signal catcher: thread_list_dump thread : " << thread->GetId()
-                                        << "timeout : " << (end - lastTime);
-                }
-                lastTime = end;
-                if ((end - start) > K_MAX_DUMP_TIME_NS) {
-                    LOG(ERROR, RUNTIME) << "signal catcher: thread_list_dump timeout : " << end - start << "\n";
-                    break;
-                }
+        os::memory::LockHolder lock(threadLock_);
+        int64_t start = ark::os::time::GetClockTimeInThreadCpuTime();
+        int64_t end;
+        int64_t lastTime = start;
+        cb(self, os);
+        for (const auto &thread : threads_) {
+            if (thread == self) {
+                continue;
+            }
+            cb(thread, os);
+            end = ark::os::time::GetClockTimeInThreadCpuTime();
+            if ((end - lastTime) > K_MAX_SINGLE_DUMP_TIME_NS) {
+                LOG(ERROR, RUNTIME) << "signal catcher: thread_list_dump thread : " << thread->GetId()
+                                    << "timeout : " << (end - lastTime);
+            }
+            lastTime = end;
+            if ((end - start) > K_MAX_DUMP_TIME_NS) {
+                LOG(ERROR, RUNTIME) << "signal catcher: thread_list_dump timeout : " << end - start << "\n";
+                break;
             }
         }
         DumpUnattachedThreads(os);
