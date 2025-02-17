@@ -1265,12 +1265,14 @@ struct __ani_interaction_api {
      * This function creates a new array of references, optionally initializing it with an array of references.
      *
      * @param[in] env A pointer to the environment structure.
+     * @param[in] type The type of the elements of the array.
      * @param[in] length The length of the array to be created.
-     * @param[in] initial_array An optional array of references to initialize the array. Can be null.
+     * @param[in] initial_element An optional reference to initialize the array. Can be null.
      * @param[out] result A pointer to store the created array of references.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Array_New_Ref)(ani_env *env, ani_size length, ani_ref *initial_array, ani_array_ref *result);
+    ani_status (*Array_New_Ref)(ani_env *env, ani_type type, ani_size length, ani_ref initial_element,
+                                ani_array_ref *result);
 
     /**
      * @brief Sets a reference at a specific index in an array.
@@ -5979,9 +5981,9 @@ struct __ani_env {
     {
         return c_api->Array_SetRegion_Double(this, array, offset, length, native_buffer);
     }
-    ani_status Array_New_Ref(ani_size length, ani_ref *initial_array, ani_array_ref *result)
+    ani_status Array_New_Ref(ani_type type, ani_size length, ani_ref initial_element, ani_array_ref *result)
     {
-        return c_api->Array_New_Ref(this, length, initial_array, result);
+        return c_api->Array_New_Ref(this, type, length, initial_element, result);
     }
     ani_status Array_Set_Ref(ani_array_ref array, ani_size index, ani_ref ref)
     {
