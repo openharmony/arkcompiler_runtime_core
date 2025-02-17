@@ -62,8 +62,10 @@ add_custom_target(etsnapi_test_suite COMMENT "Running etsnapi tests")
 
 set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=sts --ets-unnamed --opt-level=0)
 
+set(BOOT_PANDA_FILES ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc)
+
 set(RUNTIME_ARGUMENTS
-    --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
+    --boot-panda-files=${BOOT_PANDA_FILES}
     --load-runtimes=ets
     --compiler-enable-jit=false
 )
