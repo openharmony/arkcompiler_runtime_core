@@ -567,10 +567,6 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
     InitializeVerifierRuntime();
 
     isZygote_ = options_.IsStartAsZygote();
-
-#ifdef PANDA_ENABLE_RELAYOUT_PROFILE
-    relayoutProfiler_ = internalAllocator_->New<RelayoutProfiler>();
-#endif
     /* @sync 2
      * @description At the very end of the Runtime's constructor when all initialization actions have completed.
      * */
@@ -603,11 +599,6 @@ Runtime::~Runtime()
          * */
     }
 
-#ifdef PANDA_ENABLE_RELAYOUT_PROFILE
-    if (relayoutProfiler_ != nullptr) {
-        internalAllocator_->Delete(relayoutProfiler_);
-    }
-#endif
     /* @sync 1
      * @description Right after runtime's destructor has deleted panda virtual machine
      * */
@@ -1475,8 +1466,6 @@ void Runtime::DumpForSigQuit(std::ostream &os)
     os << "-> Dump Ark VM\n";
     pandaVm_->DumpForSigQuit(os);
     os << "\n";
-
-    WRITE_RELAYOUT_PROFILE_DATA();
 }
 
 void Runtime::InitNonZygoteOrPostFork(bool isSystemServer, [[maybe_unused]] const char *isa,

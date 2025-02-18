@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,6 @@
 
 #include "runtime/string_table.h"
 
-#include "runtime/include/relayout_profiler.h"
 #include "runtime/include/runtime.h"
 #include "runtime/mem/object_helpers.h"
 
@@ -55,8 +54,6 @@ coretypes::String *StringTable::GetOrInternInternalString(const panda_file::File
                                                           const LanguageContext &ctx)
 {
     auto data = pf.GetStringData(id);
-
-    ADD_PROFILE_STRING_ITEM(pf.GetFilename(), utf::Mutf8AsCString(data.data));
 
     coretypes::String *str = table_.GetString(data.data, data.utf16Length, data.isAscii, ctx);
     if (str != nullptr) {

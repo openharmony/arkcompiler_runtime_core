@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -145,7 +145,6 @@ set(SOURCES
     mem/gc/g1/update_remset_task_queue.cpp
     mem/gc/g1/g1_pause_tracker.cpp
     mem/gc/g1/hot_cards.cpp
-    relayout_profiler.cpp
     loadable_agent.cpp
     default_debugger_agent.cpp
     coroutines/coroutine.cpp

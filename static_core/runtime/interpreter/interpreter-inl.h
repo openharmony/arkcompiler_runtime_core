@@ -44,7 +44,6 @@
 #include "runtime/include/locks.h"
 #include "runtime/include/method-inl.h"
 #include "runtime/include/object_header-inl.h"
-#include "runtime/include/relayout_profiler.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/thread-inl.h"
@@ -3419,7 +3418,6 @@ public:
         if (method->HasCompiledCode()) {
             CallCompiledCode<FORMAT, IS_DYNAMIC_T>(method);
         } else {
-            ADD_PROFILE_CODE_ITEM(method);
             CallInterpreterStackless<FrameHelper, FORMAT, IS_DYNAMIC_T, IS_RANGE, ACCEPT_ACC, INITOBJ, CALL>(method);
         }
     }
