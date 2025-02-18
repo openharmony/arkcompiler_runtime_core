@@ -1580,6 +1580,136 @@ NO_UB_SANITIZE static ani_status Object_SetField_Ref(ani_env *env, ani_object ob
     return ANI_OK;
 }
 
+template <typename R>
+static ani_status DoGetFieldByName(ani_env *env, ani_object object, const char *name, R *result)
+{
+    static constexpr auto IS_REF = std::is_same_v<R, ani_ref>;
+    using Res = std::conditional_t<IS_REF, EtsObject *, R>;
+
+    ScopedManagedCodeFix s(env);
+    EtsCoroutine *coroutine = s.GetCoroutine();
+    EtsHandleScope scope(coroutine);
+    EtsHandle<EtsObject> etsObject(coroutine, s.ToInternalType(object));
+    ASSERT(etsObject.GetPtr() != nullptr);
+    EtsField *etsField = etsObject->GetClass()->GetFieldIDByName(name, nullptr);
+    ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
+    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<R>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+
+    Res etsRes {};
+    if constexpr (IS_REF) {
+        etsRes = etsObject->GetFieldObject(etsField);
+        return s.AddLocalRef(etsRes, result);
+    } else {
+        etsRes = etsObject->GetFieldPrimitive<R>(etsField);
+        *result = etsRes;
+        return ANI_OK;
+    }
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Boolean(ani_env *env, ani_object object, const char *name,
+                                                               ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    return DoGetFieldByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Char(ani_env *env, ani_object object, const char *name,
+                                                            ani_char *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    return DoGetFieldByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Byte(ani_env *env, ani_object object, const char *name,
+                                                            ani_byte *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    return DoGetFieldByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Short(ani_env *env, ani_object object, const char *name,
+                                                             ani_short *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    return DoGetFieldByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Int(ani_env *env, ani_object object, const char *name,
+                                                           ani_int *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    return DoGetFieldByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Long(ani_env *env, ani_object object, const char *name,
+                                                            ani_long *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    return DoGetFieldByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Float(ani_env *env, ani_object object, const char *name,
+                                                             ani_float *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    return DoGetFieldByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Double(ani_env *env, ani_object object, const char *name,
+                                                              ani_double *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    return DoGetFieldByName(env, object, name, result);
+}
+
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_GetFieldByName_Ref(ani_env *env, ani_object object, const char *name,
                                                            ani_ref *result)
@@ -1590,16 +1720,7 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Ref(ani_env *env, ani_obj
     CHECK_PTR_ARG(name);
     CHECK_PTR_ARG(result);
 
-    ScopedManagedCodeFix s(env);
-    EtsCoroutine *coroutine = s.GetCoroutine();
-    EtsHandleScope scope(coroutine);
-    EtsHandle<EtsObject> etsObject(coroutine, s.ToInternalType(object));
-    ASSERT(etsObject.GetPtr() != nullptr);
-    EtsField *etsField = etsObject->GetClass()->GetFieldIDByName(name, nullptr);
-    ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
-    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<ani_ref>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
-    EtsObject *etsRes = etsObject->GetFieldObject(etsField);
-    return s.AddLocalRef(etsRes, result);
+    return DoGetFieldByName(env, object, name, result);
 }
 
 template <typename T>
@@ -1797,6 +1918,19 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Short(ani_env *env, an
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Int(ani_env *env, ani_object object, const char *name,
                                                               ani_int *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    return DoGetPropertyByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Char(ani_env *env, ani_object object, const char *name,
+                                                               ani_char *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -3611,14 +3745,14 @@ const __ani_interaction_api INTERACTION_API = {
     Object_SetField_Float,
     Object_SetField_Double,
     Object_SetField_Ref,
-    NotImplementedAdapter<300>,
-    NotImplementedAdapter<301>,
-    NotImplementedAdapter<302>,
-    NotImplementedAdapter<303>,
-    NotImplementedAdapter<304>,
-    NotImplementedAdapter<305>,
-    NotImplementedAdapter<306>,
-    NotImplementedAdapter<307>,
+    Object_GetFieldByName_Boolean,
+    Object_GetFieldByName_Char,
+    Object_GetFieldByName_Byte,
+    Object_GetFieldByName_Short,
+    Object_GetFieldByName_Int,
+    Object_GetFieldByName_Long,
+    Object_GetFieldByName_Float,
+    Object_GetFieldByName_Double,
     Object_GetFieldByName_Ref,
     Object_SetFieldByName_Boolean,
     NotImplementedAdapter<310>,
@@ -3630,7 +3764,7 @@ const __ani_interaction_api INTERACTION_API = {
     Object_SetFieldByName_Double,
     Object_SetFieldByName_Ref,
     Object_GetPropertyByName_Boolean,
-    NotImplementedAdapter<337>,
+    Object_GetPropertyByName_Char,
     Object_GetPropertyByName_Byte,
     Object_GetPropertyByName_Short,
     Object_GetPropertyByName_Int,

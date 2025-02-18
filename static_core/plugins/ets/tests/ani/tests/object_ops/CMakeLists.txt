@@ -16,6 +16,46 @@ ani_add_gtest(ani_test_object_ops_object_new
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_new_test.sts
 )
 
+ani_add_gtest(ani_test_object_get_field_by_name_boolean
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_boolean_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_boolean_test.sts
+)
+
+ani_add_gtest(ani_test_object_get_field_by_name_char
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_char_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_char_test.sts
+)
+
+ani_add_gtest(ani_test_object_get_field_by_name_byte
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_byte_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_byte_test.sts
+)
+
+ani_add_gtest(ani_test_object_get_field_by_name_short
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_short_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_short_test.sts
+)
+
+ani_add_gtest(ani_test_object_get_field_by_name_int
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_int_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_int_test.sts
+)
+
+ani_add_gtest(ani_test_object_get_field_by_name_long
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_long_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_long_test.sts
+)
+
+ani_add_gtest(ani_test_object_get_field_by_name_float
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_float_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_float_test.sts
+)
+
+ani_add_gtest(ani_test_object_get_field_by_name_double
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_double_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_double_test.sts
+)
+
 ani_add_gtest(ani_test_object_get_field_by_name_ref
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_ref_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_ref_test.sts
@@ -155,6 +195,11 @@ ani_add_gtest(ani_test_object_ops_object_get_property_by_name_byte
 ani_add_gtest(ani_test_object_ops_object_get_property_by_name_short
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_property_by_name_short_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_property_by_name_short_test.sts
+)
+
+ani_add_gtest(ani_test_object_ops_object_get_property_by_name_char
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_property_by_name_char_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_property_by_name_char_test.sts
 )
 
 ani_add_gtest(ani_test_object_ops_object_get_property_by_name_int
