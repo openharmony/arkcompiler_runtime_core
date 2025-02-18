@@ -127,9 +127,9 @@ EtsJob *EtsMlaunchInternalNative(EtsObject *func, EtsArray *arr)
     // we would like to do this transfer below all potential GC invocation points
     PandaVector<Value> realArgs = CreateArgsVector(function, method, array);
 
-    auto *coroNew = coro->GetCoroutineManager()->Launch(evt, method->GetPandaMethod(), std::move(realArgs),
-                                                        CoroutineLaunchMode::DEFAULT);
-    if (UNLIKELY(coroNew == nullptr)) {
+    bool launchResult = coro->GetCoroutineManager()->Launch(evt, method->GetPandaMethod(), std::move(realArgs),
+                                                            CoroutineLaunchMode::DEFAULT);
+    if (UNLIKELY(!launchResult)) {
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
         ThrowOutOfMemoryError("OOM");
         return nullptr;

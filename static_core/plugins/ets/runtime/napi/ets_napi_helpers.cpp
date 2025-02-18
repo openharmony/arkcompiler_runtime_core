@@ -456,14 +456,13 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
 
     [[maybe_unused]] EtsHandleScope scope(currentCoro);
     EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
-    auto *coro = cm->Launch(evt, impl, std::move(args), CoroutineLaunchMode::SAME_WORKER);
-    if (UNLIKELY(coro == nullptr)) {
+    bool launchResult = cm->LaunchImmediately(evt, impl, std::move(args), CoroutineLaunchMode::SAME_WORKER);
+    if (UNLIKELY(!launchResult)) {
         ASSERT(currentCoro->HasPendingException());
         // OOM is thrown by Launch
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
         return 0;
     }
-    cm->Schedule();
     return ToObjPtr(promiseHandle.GetPtr());
 }
 #if defined(__clang__)

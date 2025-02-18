@@ -82,8 +82,8 @@ void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, Corouti
     auto *method = EtsMethod::ToRuntimeMethod(callback->GetClass()->GetMethod(LAMBDA_METHOD_NAME));
     ASSERT(method != nullptr);
     auto args = PandaVector<Value> {Value(callback->GetCoreType())};
-    [[maybe_unused]] auto *launchedCoro = coroManager->Launch(event, method, std::move(args), launchMode);
-    ASSERT(launchedCoro != nullptr);
+    [[maybe_unused]] bool launchResult = coroManager->Launch(event, method, std::move(args), launchMode);
+    ASSERT(launchResult);
 }
 
 }  // namespace ark::ets

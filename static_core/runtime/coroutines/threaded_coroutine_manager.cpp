@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -165,18 +165,27 @@ bool ThreadedCoroutineManager::TerminateCoroutine(Coroutine *co)
     // NOTE(konstanting): issue debug notifications to runtime
 }
 
-Coroutine *ThreadedCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
-                                            PandaVector<Value> &&arguments, [[maybe_unused]] CoroutineLaunchMode mode)
+bool ThreadedCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
+                                      PandaVector<Value> &&arguments, [[maybe_unused]] CoroutineLaunchMode mode)
 {
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Launch started";
 
-    auto *result = LaunchImpl(completionEvent, entrypoint, std::move(arguments));
-    if (result == nullptr) {
+    bool result = LaunchImpl(completionEvent, entrypoint, std::move(arguments));
+    if (!result) {
         ThrowOutOfMemoryError("Launch failed");
     }
 
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Launch finished";
-    return result;
+    return true;
+}
+
+bool ThreadedCoroutineManager::LaunchImmediately([[maybe_unused]] CompletionEvent *completionEvent,
+                                                 [[maybe_unused]] Method *entrypoint,
+                                                 [[maybe_unused]] PandaVector<Value> &&arguments,
+                                                 [[maybe_unused]] CoroutineLaunchMode mode)
+{
+    LOG(FATAL, COROUTINES) << "ThreadedCoroutineManager::LaunchImmediately not supported";
+    return false;
 }
 
 bool ThreadedCoroutineManager::RegisterWaiter(Coroutine *waiter, CoroutineEvent *awaitee)
@@ -358,8 +367,8 @@ CoroutineWorker *ThreadedCoroutineManager::ChooseWorkerForCoroutine([[maybe_unus
     return workers_[0];
 }
 
-Coroutine *ThreadedCoroutineManager::LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint,
-                                                PandaVector<Value> &&arguments, bool startSuspended)
+bool ThreadedCoroutineManager::LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint,
+                                          PandaVector<Value> &&arguments, bool startSuspended)
 {
     os::memory::LockHolder l(coroSwitchLock_);
 #ifndef NDEBUG
@@ -371,7 +380,7 @@ Coroutine *ThreadedCoroutineManager::LaunchImpl(CompletionEvent *completionEvent
     Runtime::GetCurrent()->GetNotificationManager()->ThreadStartEvent(co);
     if (co == nullptr) {
         LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::LaunchImpl: failed to create a coroutine!";
-        return co;
+        return false;
     }
     // assign a worker
     auto *w = ChooseWorkerForCoroutine(co);
@@ -392,7 +401,7 @@ Coroutine *ThreadedCoroutineManager::LaunchImpl(CompletionEvent *completionEvent
 #ifndef NDEBUG
     PrintRunnableQueue("LaunchImpl end");
 #endif
-    return co;
+    return true;
 }
 
 void ThreadedCoroutineManager::MainCoroutineCompleted()

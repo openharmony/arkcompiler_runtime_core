@@ -376,9 +376,9 @@ void PandaEtsVM::HandleGCRoutineInMutator()
         auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
         Method *cleanup = this->GetClassLinker()->GetFinalizationRegistryExecCleanupMethod();
         auto args = PandaVector<Value> {Value(objArray->GetCoreType())};
-        [[maybe_unused]] auto *launchedCoro =
+        [[maybe_unused]] bool launchResult =
             coroManager->Launch(event, cleanup, std::move(args), CoroutineLaunchMode::SAME_WORKER);
-        ASSERT(launchedCoro != nullptr);
+        ASSERT(launchResult);
     }
     coroutine->GetPandaVM()->CleanFinalizableReferenceList();
 }

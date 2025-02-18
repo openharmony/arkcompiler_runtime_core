@@ -497,9 +497,9 @@ private:
         PandaVector<Value> args(numArgs);
         FillArgs<FORMAT, IS_RANGE>(args);
 
-        auto *coro =
+        bool launchResult =
             coroutine->GetCoroutineManager()->Launch(evt, method, std::move(args), CoroutineLaunchMode::DEFAULT);
-        if (UNLIKELY(coro == nullptr)) {
+        if (UNLIKELY(!launchResult)) {
             // OOM
             Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
             this->MoveToExceptionHandler();

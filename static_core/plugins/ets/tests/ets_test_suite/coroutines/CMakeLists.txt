@@ -96,8 +96,7 @@ add_ets_coroutines_test(FILE async_call.sts
 
 add_ets_coroutines_test(FILE async_call.sts
                         SKIP_ARM32_COMPILER
-                        IMPL "THREADED" "STACKFUL"
-                        OPTION_SETS_THREADED "DEFAULT"
+                        IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "ONE"
                         MODE "INT" "JIT"
