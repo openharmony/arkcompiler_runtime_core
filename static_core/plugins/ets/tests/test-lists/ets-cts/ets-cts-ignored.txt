@@ -1953,3 +1953,13 @@
 15.semantic_rules/05.type_compatibility/functions_compatibility_opt_3.sts
 15.semantic_rules/08.overloading_and_overriding/04.overloading_and_overriding_in_classes/instance_method_over_n2_20.sts
 15.semantic_rules/08.overloading_and_overriding/04.overloading_and_overriding_in_classes/static_method_over_n2_19.sts
+
+# not yet implemented
+17.experimental_features/20.non_nullish_type_parameter/ex1.sts
+17.experimental_features/20.non_nullish_type_parameter/ex2.sts
+17.experimental_features/20.non_nullish_type_parameter/ex2_1.sts
+17.experimental_features/20.non_nullish_type_parameter/ex3.sts
+17.experimental_features/20.non_nullish_type_parameter/ex3_1.sts
+17.experimental_features/20.non_nullish_type_parameter/ex4.sts
+17.experimental_features/20.non_nullish_type_parameter/ex4_1.sts
+17.experimental_features/20.non_nullish_type_parameter/ex5.sts

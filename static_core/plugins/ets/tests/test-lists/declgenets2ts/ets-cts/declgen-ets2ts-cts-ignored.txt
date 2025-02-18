@@ -4222,3 +4222,15 @@ deprecated/15.exceptions/throw_exception_with_try_declaration.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkg_a/pkg_3.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkg_a/pkg_4.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkg_a/pkg_9.sts
+
+
+# 22784
+17.experimental_features/20.non_nullish_type_parameter/ex0.sts
+17.experimental_features/20.non_nullish_type_parameter/ex1.sts
+17.experimental_features/20.non_nullish_type_parameter/ex2.sts
+17.experimental_features/20.non_nullish_type_parameter/ex2_1.sts
+17.experimental_features/20.non_nullish_type_parameter/ex3.sts
+17.experimental_features/20.non_nullish_type_parameter/ex3_1.sts
+17.experimental_features/20.non_nullish_type_parameter/ex4.sts
+17.experimental_features/20.non_nullish_type_parameter/ex4_1.sts
+17.experimental_features/20.non_nullish_type_parameter/ex5.sts
