@@ -27,6 +27,7 @@
 #include "runtime/interpreter/runtime_interface.h"
 #include "runtime/handle_scope.h"
 #include "runtime/handle_scope-inl.h"
+#include "types/ets_primitives.h"
 
 namespace ark::ets::intrinsics {
 
@@ -143,6 +144,12 @@ extern "C" void StdSystemSetCoroutineSchedulingPolicy(int32_t policy)
 extern "C" int32_t StdSystemGetCoroutineId()
 {
     return EtsCoroutine::GetCurrent()->GetCoroutineId();
+}
+
+extern "C" EtsBoolean StdSystemIsMainWorker()
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    return static_cast<EtsBoolean>(coro->GetCoroutineManager()->IsMainWorker(coro));
 }
 
 extern "C" void StdSystemAtomicFlagSet(EtsAtomicFlag *instance, EtsBoolean v)

@@ -373,3 +373,11 @@ add_ets_coroutines_test(FILE launch.sts
                         WORKERS "AUTO"
                         MODE "INT" "JIT" "AOT"
 )
+
+add_ets_coroutines_test(FILE setTimeout.sts
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT"
+)

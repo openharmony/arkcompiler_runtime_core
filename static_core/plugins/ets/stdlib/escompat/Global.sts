@@ -523,7 +523,7 @@ export function setTimeout(func: () => void): int {
  * @returns int - timer id
  */
 export function setTimeout(func: () => void, delayMs: int): int {
-    return startTimer(func as Object, delayMs, true);
+    return startTimer(func, delayMs, true);
 }
 
 /**
@@ -553,7 +553,7 @@ export function setInterval(func: () => void): int {
  * @returns int - timer id
  */
 export function setInterval(func: () => void, delayMs: int): int {
-    return startTimer(func as Object, delayMs, false);
+    return startTimer(func, delayMs, false);
 }
 
 /**
@@ -565,5 +565,22 @@ export function clearInterval(timerId: int): void {
     stopTimer(timerId);
 }
 
-native function startTimer(func: Object, delayMs: int, oneShotTimer: boolean): int;
-native function stopTimer(timerId: int): void;
+function startTimer(func: () => void, delayMs: int, oneShotTimer: boolean): int
+{
+    if (CoroutineExtras.isMainWorker()) {
+        return startTimerImpl(func as Object, delayMs, oneShotTimer);
+    }
+    return registerTimer(func, delayMs, !oneShotTimer);
+}
+
+function stopTimer(timerId: int): void
+{
+    if (CoroutineExtras.isMainWorker()) {
+        stopTimerImpl(timerId);
+        return;
+    }
+    clearTimer(timerId);
+}
+
+native function startTimerImpl(func: Object, delayMs: int, oneShotTimer: boolean): int;
+native function stopTimerImpl(timerId: int): void;
