@@ -1779,6 +1779,21 @@
 17.experimental_features/09.native_functions_and_methods/03.native_constructors/natc_local_1.sts
 17.experimental_features/09.native_functions_and_methods/03.native_constructors/natc_local_2.sts
 
+# 22969
+18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_0.sts
+18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_1.sts
+18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_2.sts
+18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_3.sts
+18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_4.sts
+18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_5.sts
+18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_6.sts
+18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_n_0.sts
+18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_n_1.sts
+18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_n_2.sts
+18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_n_3.sts
+18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_n_4.sts
+18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_n_5.sts
+
 # 23079
 06.contexts_and_conversions/01.assignment-like_contexts/forbidden2_5.sts
 
