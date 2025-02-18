@@ -126,7 +126,6 @@
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_7.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_8.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_9.sts
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_7.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_10.sts
 
 # 20935 Runtime aborts on access to common field with generics
@@ -140,11 +139,9 @@
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_3.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_5.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_6.sts
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_7.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_0.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_5.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_6.sts
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_7.sts
 
 #  20948 No access to common union members if members are of a function type
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_10.sts
