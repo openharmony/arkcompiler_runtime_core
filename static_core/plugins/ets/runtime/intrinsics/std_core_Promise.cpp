@@ -80,16 +80,8 @@ void EtsPromiseResolve(EtsPromise *promise, EtsObject *value)
     if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(coro->GetPandaVM()->GetClassLinker()->GetPromiseClass())) {
         auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
         EtsHandle<EtsPromise> hInternalPromise(coro, internalPromise);
-        if (hInternalPromise->IsPending() || coro->GetCoroutineManager()->IsJsMode()) {
-            SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
-            return;
-        }
-        if (hInternalPromise->IsRejected()) {
-            hpromise->Reject(coro, hInternalPromise->GetValue(coro));
-            return;
-        }
-        // We can use internal promise's value as return value
-        hvalue = EtsHandle<EtsObject>(coro, hInternalPromise->GetValue(coro));
+        SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
+        return;
     }
     hpromise->Resolve(coro, hvalue.GetPtr());
 }

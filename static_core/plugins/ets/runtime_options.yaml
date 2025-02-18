@@ -207,13 +207,10 @@ options:
     type: bool
     default: false
     description: "Drain the coroutine queue after native interface calls"
-
-- name: coroutine-js-mode
-  lang:
-    - ets
-  type: bool
-  default: false
-  description: Enable JS interop mode (affects launch behaviour and async functions)
+  - name: migration
+    type: bool
+    default: false
+    description: "migration"
 
 - name: coroutine-dump-stats
   lang:

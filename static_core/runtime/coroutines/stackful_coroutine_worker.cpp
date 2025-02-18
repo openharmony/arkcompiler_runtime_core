@@ -44,11 +44,11 @@ StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, 
     }
 }
 
-void StackfulCoroutineWorker::AddRunnableCoroutine(Coroutine *newCoro, bool prioritize)
+void StackfulCoroutineWorker::AddRunnableCoroutine(Coroutine *newCoro)
 {
     ASSERT(newCoro != nullptr);
     os::memory::LockHolder lock(runnablesLock_);
-    PushToRunnableQueue(newCoro, prioritize);
+    PushToRunnableQueue(newCoro);
     RegisterIncomingActiveCoroutine(newCoro);
 }
 
@@ -252,13 +252,9 @@ void StackfulCoroutineWorker::ScheduleLoopProxy(void *worker)
     static_cast<StackfulCoroutineWorker *>(worker)->ScheduleLoop();
 }
 
-void StackfulCoroutineWorker::PushToRunnableQueue(Coroutine *co, bool pushFront)
+void StackfulCoroutineWorker::PushToRunnableQueue(Coroutine *co)
 {
-    if (pushFront) {
-        runnables_.push_front(co);
-    } else {
-        runnables_.push_back(co);
-    }
+    runnables_.push_back(co);
     UpdateLoadFactor();
     runnablesCv_.Signal();
 }
@@ -346,7 +342,7 @@ void StackfulCoroutineWorker::SuspendCurrentCoroGeneric()
     currentCoro->RequestSuspend(SUSPEND_AS_BLOCKED);
     if constexpr (!SUSPEND_AS_BLOCKED) {
         os::memory::LockHolder lock(runnablesLock_);
-        PushToRunnableQueue(currentCoro, false);
+        PushToRunnableQueue(currentCoro);
     }
 }
 

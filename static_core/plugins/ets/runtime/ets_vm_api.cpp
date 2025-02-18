@@ -122,7 +122,6 @@ bool CreateRuntime(const std::string &stdlibAbc, const std::string &pathAbc, con
         runtimeOptions->SetGcTriggerType("heap-trigger");
         runtimeOptions->SetCompilerEnableJit(useJit);
         runtimeOptions->SetEnableAn(useAot);
-        runtimeOptions->SetCoroutineJsMode(true);
         runtimeOptions->SetCoroutineImpl("stackful");
         return true;
     };

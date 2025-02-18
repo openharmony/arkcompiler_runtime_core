@@ -40,7 +40,7 @@ set(atomics_tests
 set(tests_in_dir "${CMAKE_CURRENT_SOURCE_DIR}")
 set(tests_out_dir "${CMAKE_CURRENT_BINARY_DIR}")
 
-set(coroutine_options --coroutine-impl=threaded --coroutine-js-mode=false --coroutine-workers-count=10 --gc-type=g1-gc)
+set(coroutine_options --coroutine-impl=threaded --coroutine-workers-count=10 --gc-type=g1-gc)
 
 add_custom_target(ets_test_suite_atomics)
 

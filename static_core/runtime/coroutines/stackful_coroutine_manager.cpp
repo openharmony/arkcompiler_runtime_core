@@ -140,7 +140,6 @@ void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
     size_t coroStackAreaSizeBytes = Runtime::GetCurrent()->GetOptions().GetCoroutinesStackMemLimit();
     coroutineCountLimit_ = coroStackAreaSizeBytes / coroStackSizeBytes_;
     exclusiveWorkersLimit_ = config.exclusiveWorkersLimit;
-    jsMode_ = config.emulateJs;
 
     // create and activate workers
     size_t numberOfAvailableCores = std::max(std::thread::hardware_concurrency() / 4ULL, 2ULL);
@@ -547,8 +546,7 @@ bool StackfulCoroutineManager::LaunchImpl(CompletionEvent *completionEvent, Meth
         return false;
     }
     auto *w = ChooseWorkerForCoroutine(co);
-
-    w->AddRunnableCoroutine(co, mode == CoroutineLaunchMode::SAME_WORKER);
+    w->AddRunnableCoroutine(co);
 
 #ifndef NDEBUG
     GetCurrentWorker()->PrintRunnables("LaunchImpl end");
@@ -715,11 +713,6 @@ bool StackfulCoroutineManager::IsMainWorker(Coroutine *co) const
 {
     auto *worker = co->GetContext<StackfulCoroutineContext>()->GetWorker();
     return worker->IsMainWorker();
-}
-
-bool StackfulCoroutineManager::IsJsMode()
-{
-    return jsMode_;
 }
 
 void StackfulCoroutineManager::DestroyEntrypointfulCoroutine(Coroutine *co)

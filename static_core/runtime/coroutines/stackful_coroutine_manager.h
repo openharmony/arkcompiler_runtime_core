@@ -100,7 +100,6 @@ public:
     void DisableCoroutineSwitch() override;
     void EnableCoroutineSwitch() override;
     bool IsCoroutineSwitchDisabled() override;
-    bool IsJsMode() override;
     bool IsDrainQueueInterfaceEnabled()
     {
         return enableDrainQueueIface_;
@@ -206,7 +205,7 @@ private:
     size_t exclusiveWorkersLimit_ = 0;
     size_t commonWorkersCount_ = 0;
     size_t coroStackSizeBytes_ = 0;
-    bool jsMode_ = false;
+
     // active coroutines are runnable + running coroutines
     std::atomic_uint32_t activeCoroutines_ = 0;
     // NOTE(konstanting): make it a map once number of the coroutine types gets bigger

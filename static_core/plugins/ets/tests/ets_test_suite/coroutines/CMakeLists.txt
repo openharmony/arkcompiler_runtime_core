@@ -63,12 +63,8 @@ function(add_ets_coroutines_test)
 
             foreach(option_set ${ARG_OPTION_SETS_${impl}})
                 set(additional_options "")
-                if(option_set STREQUAL "JS")
-                    set(additional_options "--coroutine-js-mode=true")
-                elseif(option_set STREQUAL "POOL")
+                if(option_set STREQUAL "POOL")
                     set(additional_options "--use-coroutine-pool=true")
-                elseif(option_set STREQUAL "JS_POOL")
-                    set(additional_options "--coroutine-js-mode=true" "--use-coroutine-pool=true")
                 elseif(option_set STREQUAL "STATS")
                     set(additional_options "--coroutine-dump-stats=true")
                 endif()
@@ -89,23 +85,15 @@ endfunction()
 add_ets_coroutines_test(FILE async_call.sts
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
-                        OPTION_SETS_STACKFUL "JS"
-                        WORKERS "ONE"
-                        MODE "INT" "JIT" "AOT"
-)
-
-add_ets_coroutines_test(FILE async_call.sts
-                        SKIP_ARM32_COMPILER
-                        IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "ONE"
-                        MODE "INT" "JIT"
+                        MODE "INT" "JIT" "AOT"
 )
 
 add_ets_coroutines_test(FILE launch_instruction.sts
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
-                        OPTION_SETS_STACKFUL "JS_POOL"
+                        OPTION_SETS_STACKFUL "POOL"
                         WORKERS "ONE"
                         MODE "INT" "JIT" "AOT"
 )
@@ -114,7 +102,7 @@ add_ets_coroutines_test(FILE launch_instruction.sts
                         SKIP_ARM32_COMPILER
                         IMPL "THREADED" "STACKFUL"
                         OPTION_SETS_THREADED "DEFAULT"
-                        OPTION_SETS_STACKFUL "DEFAULT" "JS" "POOL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "ONE"
                         MODE "INT" "JIT"
 )
@@ -139,7 +127,7 @@ if (NOT PANDA_TARGET_ARM32)
     add_ets_coroutines_test(FILE await.sts
                             SKIP_ARM32_COMPILER
                             IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "JS_POOL"
+                            OPTION_SETS_STACKFUL "POOL"
                             WORKERS "AUTO"
                             MODE "INT" "JIT" "AOT"
     )
@@ -147,7 +135,7 @@ if (NOT PANDA_TARGET_ARM32)
     add_ets_coroutines_test(FILE await.sts
                             SKIP_ARM32_COMPILER
                             IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "DEFAULT" "JS" "POOL" "JS_POOL"
+                            OPTION_SETS_STACKFUL "DEFAULT" "POOL"
                             WORKERS "ONE"
                             MODE "INT" "JIT"
     )
@@ -156,7 +144,7 @@ if (NOT PANDA_TARGET_ARM32)
                             SKIP_ARM32_COMPILER
                             IMPL "THREADED" "STACKFUL"
                             OPTION_SETS_THREADED "DEFAULT"
-                            OPTION_SETS_STACKFUL "DEFAULT" "JS" "POOL" "JS_POOL"
+                            OPTION_SETS_STACKFUL "DEFAULT" "POOL"
                             WORKERS "AUTO" "ONE"
                             MODE "INT" "JIT"
     )
@@ -165,17 +153,8 @@ if (NOT PANDA_TARGET_ARM32)
                             SKIP_ARM32_COMPILER
                             IMPL "THREADED" "STACKFUL"
                             OPTION_SETS_THREADED "DEFAULT"
-                            OPTION_SETS_STACKFUL "DEFAULT" "JS" "POOL" "JS_POOL"
-                            WORKERS "AUTO"
-                            MODE "INT" "JIT"
-    )
-
-    add_ets_coroutines_test(FILE launch_instr_array.sts
-                            SKIP_ARM32_COMPILER
-                            IMPL "THREADED" "STACKFUL"
-                            OPTION_SETS_THREADED "DEFAULT"
-                            OPTION_SETS_STACKFUL "DEFAULT" "JS" "JS_POOL"
-                            WORKERS "ONE"
+                            OPTION_SETS_STACKFUL "DEFAULT" "POOL"
+                            WORKERS "AUTO" "ONE"
                             MODE "INT" "JIT"
     )
 
@@ -184,14 +163,14 @@ if (NOT PANDA_TARGET_ARM32)
                             IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "POOL"
                             WORKERS "ONE"
-                            MODE "INT" "JIT" "AOT"
+                            MODE "AOT"
     )
 
     add_ets_coroutines_test(FILE class_load_race.sts
                             SKIP_ARM32_COMPILER
                             IMPL "THREADED" "STACKFUL"
                             OPTION_SETS_THREADED "DEFAULT"
-                            OPTION_SETS_STACKFUL "DEFAULT" "JS" "POOL" "JS_POOL"
+                            OPTION_SETS_STACKFUL "DEFAULT" "POOL"
                             WORKERS "AUTO" "ONE"
                             MODE "INT" "JIT"
     )
@@ -207,7 +186,7 @@ if (NOT PANDA_TARGET_ARM32)
     add_ets_coroutines_test(FILE launch_n_workers.sts
                             SKIP_ARM32_COMPILER
                             IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "JS" "POOL" "JS_POOL"
+                            OPTION_SETS_STACKFUL "POOL"
                             WORKERS "AUTO"
                             MODE "INT" "JIT"
     )
@@ -216,7 +195,7 @@ if (NOT PANDA_TARGET_ARM32)
                             SKIP_ARM32_COMPILER
                             OPTIONS "--gc-type=epsilon"
                             IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "JS_POOL"
+                            OPTION_SETS_STACKFUL "POOL"
                             WORKERS "ONE"
                             MODE "INT" "JIT" "AOT"
     )
@@ -225,7 +204,7 @@ if (NOT PANDA_TARGET_ARM32)
                             SKIP_ARM32_COMPILER
                             OPTIONS "--gc-type=epsilon"
                             IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "DEFAULT" "JS" "POOL"
+                            OPTION_SETS_STACKFUL "DEFAULT"
                             WORKERS "ONE"
                             MODE "INT" "JIT"
     )
@@ -235,17 +214,8 @@ if (NOT PANDA_TARGET_ARM32)
                             SKIP_ARM32_COMPILER
                             IMPL "THREADED" "STACKFUL"
                             OPTION_SETS_THREADED "DEFAULT"
-                            OPTION_SETS_STACKFUL "DEFAULT" "JS" "JS_POOL"
-                            WORKERS "AUTO"
-                            MODE "INT" "JIT"
-    )
-
-    add_ets_coroutines_test(FILE multiple_launch.sts
-                            SKIP_ARM32_COMPILER
-                            IMPL "THREADED" "STACKFUL"
-                            OPTION_SETS_THREADED "DEFAULT"
-                            OPTION_SETS_STACKFUL "JS" "POOL"
-                            WORKERS "ONE"
+                            OPTION_SETS_STACKFUL "DEFAULT" "POOL"
+                            WORKERS "AUTO" "ONE"
                             MODE "INT" "JIT"
     )
 
@@ -254,15 +224,15 @@ if (NOT PANDA_TARGET_ARM32)
                             IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "POOL"
                             WORKERS "AUTO"
-                            MODE "INT" "JIT" "AOT"
+                            MODE "AOT"
     )
 
     add_ets_coroutines_test(FILE multiple_launch.sts
                             SKIP_ARM32_COMPILER
                             IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "DEFAULT" "JS_POOL"
+                            OPTION_SETS_STACKFUL "DEFAULT" "POOL"
                             WORKERS "ONE"
-                            MODE "INT" "JIT" "AOT"
+                            MODE "AOT"
     )
 
     add_ets_coroutines_test(FILE concurrent_await.sts
@@ -287,7 +257,7 @@ add_ets_coroutines_test(FILE launch_return.sts
                         SKIP_ARM32_COMPILER
                         IMPL "THREADED" "STACKFUL"
                         OPTION_SETS_THREADED "DEFAULT"
-                        OPTION_SETS_STACKFUL "DEFAULT" "JS"
+                        OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "ONE"
                         MODE "INT" "JIT"
 )
@@ -304,7 +274,7 @@ add_ets_coroutines_test(FILE launch_yield.sts
 add_ets_coroutines_test(FILE launch_yield.sts
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
-                        OPTION_SETS_STACKFUL "JS" "JS_POOL"
+                        OPTION_SETS_STACKFUL "POOL"
                         WORKERS "ONE"
                         MODE "INT" "JIT"
 )
