@@ -22,6 +22,8 @@ add_dependencies(ets_sdk_prereqs ark_link)
 # Note(ivan-tyulyandin): provide script to collect all sts files in build time on each rerun, issue #21800
 set(SDK_SRCS
     "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.buffer.sts"
+    "${CMAKE_CURRENT_SOURCE_DIR}/url/@ohos.url.sts"
+    "${CMAKE_CURRENT_SOURCE_DIR}/uri/@ohos.uri.sts"
     "${CMAKE_CURRENT_SOURCE_DIR}/util/@ohos.util.LRUCache.sts"
     "${CMAKE_CURRENT_SOURCE_DIR}/arkts/@arkts.math.Decimal.sts"
 )
