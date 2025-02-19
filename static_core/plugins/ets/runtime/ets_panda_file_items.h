@@ -140,6 +140,9 @@ static constexpr std::string_view DOUBLE_TO_STRING_CACHE_ELEMENT       = "Lstd/c
 static constexpr std::string_view FLOAT_TO_STRING_CACHE_ELEMENT        = "Lstd/core/FloatToStringCacheElement;";
 static constexpr std::string_view LONG_TO_STRING_CACHE_ELEMENT         = "Lstd/core/LongToStringCacheElement;";
 
+// interop
+static constexpr std::string_view NO_INTEROP_CONTEXT_ERROR             = "Lstd/interop/js/NoInteropContextError;";
+
 // interop/js
 static constexpr std::string_view JS_RUNTIME                           = "Lstd/interop/js/JSRuntime;";
 static constexpr std::string_view JS_VALUE                             = "Lstd/interop/js/JSValue;";

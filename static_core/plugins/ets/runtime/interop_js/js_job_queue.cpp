@@ -58,7 +58,12 @@ void JsJobQueue::Post(EtsObject *callback)
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     INTEROP_CODE_SCOPE_ETS(coro);
 
-    napi_env env = InteropCtx::Current(coro)->GetJSEnv();
+    auto *ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return;
+    }
+    napi_env env = ctx->GetJSEnv();
 
     napi_deferred deferred;
     napi_value undefined;
@@ -139,6 +144,10 @@ void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     PandaEtsVM *vm = coro->GetPandaVM();
     InteropCtx *ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return;
+    }
     napi_env env = ctx->GetJSEnv();
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
     napi_value jsPromise = storage->GetJsObject(jsObject, env);

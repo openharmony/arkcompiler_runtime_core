@@ -53,6 +53,8 @@ std::pair<SmallVector<uint64_t, 4U>, int> GetBigInt(napi_env env, napi_value jsV
 SmallVector<uint64_t, 4U> ConvertBigIntArrayFromEtsToJs(const std::vector<uint32_t> &etsArray);
 std::vector<EtsInt> ConvertBigIntArrayFromJsToEts(SmallVector<uint64_t, 4U> &jsArray);
 
+PANDA_PUBLIC_API void ThrowNoInteropContextException();
+
 // Alternative for ASSERT(!expr) with interop stacktraces, enabled in NDEBUG
 #define INTEROP_FATAL_IF(expr)                     \
     do {                                           \
