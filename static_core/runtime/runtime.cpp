@@ -1015,7 +1015,7 @@ Expected<Method *, Runtime::Error> Runtime::ResolveEntryPoint(std::string_view e
     if (method == nullptr) {
         method = cls->GetDirectMethod(methodNameBytes);
         if (method == nullptr) {
-            LOG(ERROR, RUNTIME) << "Cannot find method '" << entryPoint << "'";
+            LOG(ERROR, RUNTIME) << "Entry point '" << entryPoint << "' not found";
             return Unexpected(Runtime::Error::METHOD_NOT_FOUND);
         }
     }
