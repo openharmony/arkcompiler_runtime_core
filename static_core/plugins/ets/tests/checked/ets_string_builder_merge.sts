@@ -748,3 +748,24 @@ function main() {
 
     chain_concat19();
 }
+
+//! CHECKER       Unsupported concat pattern AOT (IBLDF4/22718)
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_PAOC      options: "--compiler-regex='.*bugfix_chain_concat20' --compiler-inlining=true"
+
+//! CHECKER       Unsupported concat pattern JIT (IBLDF4/22718)
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           force_jit: true, entry: "ETSGLOBAL::bugfix_chain_concat20"
+
+function bugfix_chain_concat20(): void
+{
+    let a = "a";
+    let b = "b";
+    let abc = a + b + "c";
+    let abcd = abc + "d";
+    let abce = abc + "e";
+
+    assertEQ(abc, "abc");
+    assertEQ(abcd, "abcd");
+    assertEQ(abce, "abce");
+}

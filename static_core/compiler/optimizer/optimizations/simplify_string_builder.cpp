@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1998,6 +1998,15 @@ bool SimplifyStringBuilder::CanMergeStringBuilders(Inst *instance, const InstPai
         if (inputInstanceLastToStringCall->IsDominate(userInst)) {
             return false;
         }
+    }
+
+    // Check if 'inputInstance' toString call has single append call user
+    if (CountUsers(inputInstanceLastToStringCall, [instanceFirstCall](auto &user) {
+            auto userInst = user.GetInst();
+            auto isAppend = IsStringBuilderAppend(userInst);
+            return isAppend && userInst != instanceFirstCall;
+        }) > 0) {
+        return false;
     }
 
     // Check if all 'inputInstance' calls comes before any 'instance' call

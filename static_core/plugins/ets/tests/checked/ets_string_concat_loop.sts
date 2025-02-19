@@ -482,10 +482,7 @@
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
 //! PASS_AFTER    "ChecksElimination"
-//! INST_COUNT    /StringBuilder::<ctor>/,1
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString2/,1
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString /,1
-//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! INST_NOT      /StringBuilder::<ctor>/
 //!
 //! METHOD        "ETSGLOBAL::reuse_concat_loop4"
 //! PASS_BEFORE   "BranchElimination"
@@ -997,10 +994,7 @@
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
 //! PASS_AFTER    "ChecksElimination"
-//! INST_COUNT    /StringBuilder::<ctor>/,1
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString2/,1
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString /,1
-//! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//! INST_NOT      /StringBuilder::<ctor>/
 //!
 //! METHOD        "ETSGLOBAL::reuse_concat_loop4"
 //! PASS_BEFORE   "BranchElimination"
@@ -1469,8 +1463,8 @@ function reuse_concat_loop2(a: String, n: int): String {
 function reuse_concat_loop3(a: String, n: int): String {
     let str: String = "";
     for (let i = 0; i < n; ++i) {
-        str += a;                               // partially applied
-        str += str;                             // two SBs merged into one
+        str += a;                               // not applied
+        str += str;                             // unsupported string concatenation pattern
     }
     return str;
 }
