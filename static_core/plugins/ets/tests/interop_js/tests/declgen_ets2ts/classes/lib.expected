@@ -12,24 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 export declare interface I0 {
     I0Method(a: string): string;
 }
-
 export declare interface I1 {
     I1Method(a: number): number;
 }
-
 export declare class Base {
     public a: number;
     public constructor(a: number);
 }
-
 export declare class Derived extends Base implements I0, I1 {
     public I0Method(a: string): string;
     public I1Method(a: number): number;
     public b: number;
     public constructor(a: number, b: number);
 }
-

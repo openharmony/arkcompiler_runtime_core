@@ -21,4 +21,3 @@ export declare class Simple {
     public constructor(x: number);
     public val: number;
 }
-

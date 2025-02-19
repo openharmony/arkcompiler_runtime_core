@@ -53,8 +53,8 @@ class TestDeclgenETS2TS(TestFileBased):
 
     def _run_declgen_ets2ts(self, test_dts: str, test_ts: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
         declgen_flags = []
-        declgen_flags.append(f"--output-dts={test_dts}")
-        declgen_flags.append(f"--output-ts={test_ts}")
+        declgen_flags.append(f"--output-dets={test_dts}")
+        declgen_flags.append(f"--output-ets={test_ts}")
         declgen_flags.append("--export-all")
         declgen_flags.append(self.path)
 

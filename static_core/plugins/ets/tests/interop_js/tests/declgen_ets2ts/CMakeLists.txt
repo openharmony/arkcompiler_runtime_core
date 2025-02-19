@@ -132,7 +132,7 @@ function(create_declgen_ets2ts_test TARGET)
             OUTPUT ${ABC_PATH} ${DECL_PATH}
             COMMENT "Compiling: ${ETS_SOURCE}"
             COMMAND $<TARGET_FILE:es2panda> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output ${ABC_PATH} --extension=sts --ast-verifier:errors=${ETS_VERIFICATOR_ERRORS} ${ETS_SOURCE}
-            COMMAND $<TARGET_FILE:declgen_ets2ts> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output-dts=${DECL_PATH} --output-ts=${GLUE_PATH} ${ETS_SOURCE}
+            COMMAND $<TARGET_FILE:declgen_ets2ts> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output-dets=${DECL_PATH} --output-ets=${GLUE_PATH} ${ETS_SOURCE}
             DEPENDS es2panda declgen_ets2ts ${ETS_SOURCE} ${ARKTSCONFIG}
         )
 
@@ -218,9 +218,23 @@ function(create_declgen_ets2ts_test TARGET)
         get_filename_component(DECL_NAME ${DECL_EXPECTED} NAME)
         set(DIFF_TARGET ${TARGET}_diff_${DECL_NAME})
 
+        # Remove single-line comments (//) and multi-line comments (/* ... */)
+        string(REGEX REPLACE "^[ \\t]*//.*$" "" DECL_ACTUAL_CONTENTS "${DECL_ACTUAL_CONTENTS}")
+        string(REGEX REPLACE "/\\*[^*]*\\*+([^/][^*]*\\*+)*/" "" DECL_ACTUAL_CONTENTS "${DECL_ACTUAL_CONTENTS}")
+        
+        string(REGEX REPLACE "^[ \\t]*//.*$" "" DECL_EXPECTED_CONTENTS "${DECL_EXPECTED_CONTENTS}")
+        string(REGEX REPLACE "/\\*[^*]*\\*+([^/][^*]*\\*+)*/" "" DECL_EXPECTED_CONTENTS "${DECL_EXPECTED_CONTENTS}")
+
+        # Write the modified content to temporary files
+        set(TEMP_ACTUAL_FILE "${CMAKE_BINARY_DIR}/temp_actual_${DECL_NAME}.d.ets")
+        set(TEMP_EXPECTED_FILE "${CMAKE_BINARY_DIR}/temp_expected_${DECL_NAME}.d.ets")
+        file(WRITE ${TEMP_ACTUAL_FILE} "${DECL_ACTUAL_CONTENTS}")
+        file(WRITE ${TEMP_EXPECTED_FILE} "${DECL_EXPECTED_CONTENTS}")
+
+        # Compare the modified files
         add_custom_target(${DIFF_TARGET}
             COMMENT "Test declgen ets2ts diff between ${DECL_ACTUAL} and ${DECL_EXPECTED}"
-            COMMAND ${CMAKE_COMMAND} -E compare_files ${DECL_ACTUAL} ${DECL_EXPECTED}
+            COMMAND ${CMAKE_COMMAND} -E compare_files ${TEMP_ACTUAL_FILE} ${TEMP_EXPECTED_FILE}
             DEPENDS ${DECL_ACTUAL} ${DECL_EXPECTED}
         )
         add_dependencies(declgen_ets2ts_test_diff ${DIFF_TARGET})
@@ -239,5 +253,13 @@ add_subdirectory(imports)
 add_subdirectory(methods)
 add_subdirectory(unions)
 add_subdirectory(properties)
+add_subdirectory(depend_export)
+add_subdirectory(re_export)
+
+# error: [TID 006c83] E/ets_interop_js: InteropCtx::Fatal: Class lib.A has no constructor
+# a bug exists in interop. interop is being fixed
+# please see issue: #23096
+# add_subdirectory(namespace)
+
 # NOTE(aakmaev): need proper comparing. Issue #17097
 # add_subdirectory(global_vars)

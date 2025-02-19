@@ -30,4 +30,3 @@ export declare class Fields {
     public uint32Array_: Uint32Array;
     constructor();
 }
-

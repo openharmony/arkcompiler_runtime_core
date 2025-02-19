@@ -20,9 +20,7 @@ export declare class C {
     public o2: Lib2Class2;
     public v1: number;
 }
-
 export declare class DynObjWrapper {
     public dynObj_: any;
     constructor();
 }
-
