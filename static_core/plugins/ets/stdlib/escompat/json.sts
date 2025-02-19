@@ -15,6 +15,9 @@
 
 package escompat
 
+
+const BigIntType: Type = Type.of(new BigInt())
+
 export class JSON {
     /**
      * Converts byte to JSON format
@@ -88,6 +91,17 @@ export class JSON {
         } else {
             return "null"
         }
+    }
+
+    /**
+     * Converts bigint to JSON format
+     *
+     * @param d: bigint - bigint to be converted to a JSON as a Number
+     *
+     * @returns String - JSON representation of bigint
+     */
+    public static stringify(d: bigint): String {
+        return d.toString()
     }
 
     /**
@@ -449,7 +463,9 @@ export class JSON {
         }
         used.push(new TypeColor(typ, TypeColor.AT_STACK))
         let ok = true
-        if (typ instanceof ClassType) {
+        if (typ.equals(BigIntType)) {
+            ok = true
+        } else if (typ instanceof ClassType) {
             let ct = typ as ClassType
             ok &= ct.hasEmptyConstructor()
             for (let f = 0; f < ct.getFieldsNum(); f++) {
@@ -479,13 +495,19 @@ export class JSON {
         return JSON.parse<T>(text, undefined, type)
     }
 
-    public static parse<T>(text: string, reviver: ((key: string, value: NullishType) => NullishType) | undefined, type: Type): Nullish<T> {
+    public static parse<T>(text: string, reviver: ((key: string, value: NullishType) => NullishType) | undefined, type: Type, bigIntMode?: int): Nullish<T> {
         if (!JSON.checkType(type, new Array<TypeColor>())) {
             throw new Error("Incorrect type: " + type.toString())
         }
 
+        if (bigIntMode == undefined) {
+            bigIntMode = 0
+        } else if (bigIntMode > 2 || bigIntMode < 0) {
+            throw new Error("bigIntMode value should be from 0 to 2, current value is" + bigIntMode)
+        }
+
         let jsonValue = JSONParser.parse(text)
-        const parsingResult = new JSONValueParser(reviver).parse(jsonValue, type) as T
+        const parsingResult = new JSONValueParser(reviver, bigIntMode).parse(jsonValue, type) as T
 
         if (reviver !== undefined) {
             return reviver("", parsingResult) as T
@@ -763,6 +785,9 @@ class JSONWriter {
         } else if (obj instanceof Double) {
             this.buffer.append(JSON.stringify(obj.unboxed()))
             return true
+        } else if (obj instanceof BigInt) {
+            this.buffer.append(JSON.stringify(obj))
+            return true
         } else {
             return false
         }
@@ -1028,6 +1053,7 @@ export class JSONParser {
                                                this.curChar == c'-' ||
                                                this.curChar == c'+' ))
         res.value = Double.parseFloat(number.toString())
+        res.bigintValue = Double.isInteger(res.value) ? new BigInt(res.value) : new BigInt()
         this.curPos.restoreFromCopy(posCopy)
         return res
     }
@@ -1097,9 +1123,21 @@ export class JSONParser {
 
 class JSONValueParser {
     private reviver: ((key: string, value: NullishType) => NullishType) | undefined
+    private bigIntMode: int
 
-    constructor(reviver: ((key: string, value: NullishType) => NullishType) | undefined) {
+    constructor(reviver: ((key: string, value: NullishType) => NullishType) | undefined, bigIntMode: int) {
         this.reviver = reviver
+        this.bigIntMode = bigIntMode
+    }
+
+    private createNumber(value: JSONNumber, typ: Type): NullishType {
+        if (typ.equals(BigIntType) && (this.bigIntMode === 2 || (!Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
+            return new BigInt(value.bigintValue)
+        } else if (typ instanceof DoubleType && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
+            return new Double(value.value)
+        } else {
+            throw new Error(typ + " is expected, but get " + Type.of(value.value) + " with bigIntMode=" + this.bigIntMode)
+        }
     }
 
     parse(value: JSONValue, typ: Type): NullishType {
@@ -1107,8 +1145,8 @@ class JSONValueParser {
             return this.parseObject(value as JSONObject, typ as ClassType)
         } else if (value instanceof JSONArray && typ instanceof ArrayType) {
             return this.parseArray(value as JSONArray, typ as ArrayType)
-        } else if (value instanceof JSONNumber && typ instanceof DoubleType) {
-            return new Double((value as JSONNumber).value)
+        } else if (value instanceof JSONNumber && (typ instanceof DoubleType || typ.equals(BigIntType))) {
+            return this.createNumber(value as JSONNumber, typ)
         } else if (value instanceof JSONString && typ instanceof StringType) {
             return (value as JSONString).value
         } else if (value instanceof JSONTrue && typ instanceof BooleanType) {
@@ -1245,6 +1283,7 @@ export class JSONArray extends JSONValue {
 
 export class JSONNumber extends JSONValue {
     value: double
+    bigintValue: bigint = new BigInt()
 
     public override toString(): String {
         return (new Double(this.value)).toString()
