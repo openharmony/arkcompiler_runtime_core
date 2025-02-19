@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -303,6 +303,24 @@ std::unique_ptr<const File> OpenPandaFileFromMemory(const void *buffer, size_t s
         return nullptr;
     }
     std::hash<void *> hash;
+    return panda_file::File::OpenFromMemory(std::move(ptr), std::to_string(hash(mem)));
+}
+
+std::unique_ptr<const File> OpenPandaFileFromSecureMemory(uint8_t *buffer, size_t size)
+{
+    if (buffer == nullptr) {
+        PLOG(ERROR, PANDAFILE) << "OpenPandaFileFromSecureMemory buffer is nullptr'";
+        return nullptr;
+    }
+
+    auto *mem = reinterpret_cast<std::byte *>(buffer);
+    os::mem::ConstBytePtr ptr(mem, size, nullptr);
+    if (ptr.Get() == nullptr) {
+        PLOG(ERROR, PANDAFILE) << "Failed to open panda file from secure memory'";
+        return nullptr;
+    }
+
+    std::hash<std::byte *> hash;
     return panda_file::File::OpenFromMemory(std::move(ptr), std::to_string(hash(mem)));
 }
 

@@ -41,7 +41,7 @@ case "$ARGUMENT" in
 esac
 done
 
-EXPECTED_ERROR_MESSAGE="Error: Panda file not found: ${NON_EXISTING_ABC}"
+EXPECTED_ERROR_MESSAGE="Error: Open failed, file: ${NON_EXISTING_ABC}"
 
 RUNTIME_ARGUMENTS="${BOOT_PANDA_FILES} --load-runtimes=ets --gc-type=g1-gc --panda-files=${NON_EXISTING_ABC} ${ENTRY_ABC} ${ENTRYPOINT}"
 

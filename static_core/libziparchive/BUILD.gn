@@ -30,7 +30,14 @@ config("arkziparchive_config") {
 }
 
 ohos_source_set("libarktsziparchive_static") {
-  sources = [ "zip_archive.cpp" ]
+  sources = [
+    "extractortool/extractor.cpp",
+    "extractortool/file_mapper.cpp",
+    "extractortool/zip_file.cpp",
+    "extractortool/zip_file_reader.cpp",
+    "extractortool/zip_file_reader_io.cpp",
+    "zip_archive.cpp",
+  ]
 
   public_configs = [
     ":arkziparchive_config",
