@@ -108,7 +108,7 @@ specify its *in-* or *out-* variance (see :ref:`Type Parameter Variance`).
         ;
 
     constraint:
-        'extends' typeReference | unionType
+        'extends' type
         ;
 
     typeParameterDefault:
@@ -178,12 +178,12 @@ If possible instantiations need to be constrained, then an individual
 *constraint* can be set for each type parameter.
 
 A constraint of any type parameter can follow the keyword ``extends``. The
-constraint is denoted as a type reference, or a union type. If no constraint is
-declared, then the type parameter is not compatible with ``Object``, and has no
-methods or fields available for use. Lack of constraint effectively means
+constraint is denoted as any type. If no constraint is declared, then the type
+parameter is not compatible with ``Object``, and has no methods or fields
+available for use. Lack of constraint effectively means 
 ``extends Object|null|undefined``. If type parameter *T* has type constraint
-*S*, then the actual type of the generic instantiation must be compatible with
-*S* (see :ref:`Type Compatibility`). If the constraint *S* is a non-nullish
+*S*, then the actual type of the generic instantiation must be assignable to
+*S* (see :ref:`Assignability`). If the constraint *S* is a non-nullish
 type (see :ref:`Nullish Types`), then *T* is also non-nullish.
 
 .. index::
@@ -360,8 +360,8 @@ Type Parameter Variance
 Normally, two different argument types used to instantiate a generic class or
 interface are handled as different and unrelated types (*invariance*). |LANG|
 supports type parameter variance that allows such instantiations become base
-classes and derived classes (:ref:`Covariance`), or vice versa
-(:ref:`Contravariance`), depending on the relationship of inheritance between
+classes and derived classes (:ref:`Invariance, Covariance and Contravariance`), or vice versa
+(:ref:`Invariance, Covariance and Contravariance`), depending on the relationship of inheritance between
 argument types.
 
 .. index::
@@ -383,7 +383,7 @@ expressed as keywords ``in`` or ``out`` (a *variance modifier* that specifies
 the variance of the type parameter).
 
 Type parameters with the keyword ``out`` are *covariant* (see
-:ref:`Covariance`), and can be used in the out-position only:
+:ref:`Invariance, Covariance and Contravariance`), and can be used in the out-position only:
 
    - Methods may have ``out`` type parameters as return types
    - Fields of ``out`` type parameters as type should be ``readonly``.
@@ -391,7 +391,7 @@ Type parameters with the keyword ``out`` are *covariant* (see
 Otherwise a :index:`compile-time error` occurs.
 
 Type parameters with the keyword ``in`` are *contravariant* (see
-:ref:`Contravariance`), and can be used in the in-position only:
+:ref:`Invariance, Covariance and Contravariance`), and can be used in the in-position only:
 
    - Methods may have ``in`` type parameters as parameter types
 
@@ -458,8 +458,8 @@ type parameter *F* defines the subtyping between ``T<A>`` and ``T<B>`` (in the
 case of declaration-site variance with two different types ``A`` <: ``B``) as
 follows:
 
--  Covariant -- :ref:`Covariance` (*out F*): ``T<A>`` <: ``T<B>``;
--  Contravariant -- :ref:`Contravariance` (*in F*): ``T<A>`` :> ``T<B>``;
+-  Covariant -- :ref:`Invariance, Covariance and Contravariance` (*out F*): ``T<A>`` <: ``T<B>``;
+-  Contravariant -- :ref:`Invariance, Covariance and Contravariance` (*in F*): ``T<A>`` :> ``T<B>``;
 -  Invariant -- default (*F*).
 
 .. index::
@@ -645,8 +645,8 @@ the list of its type arguments.
 
 If type parameters *T*:sub:`1`, ``...``, *T*:sub:`n` of a generic
 declaration are constrained by the corresponding ``C``:sub:`1`, ``...``,
-``C``:sub:`n`, then *T*:sub:`i` is compatible with each constraint type
-*C*:sub:`i` (see :ref:`Type Compatibility`). All subtypes of the type listed
+``C``:sub:`n`, then *T*:sub:`i` is assignable to each constraint type
+*C*:sub:`i` (see :ref:`Assignability`). All subtypes of the type listed
 in the corresponding constraint have each type argument *T*:sub:`i` of the
 parameterized declaration ranging over them.
 
@@ -655,8 +655,8 @@ A generic instantiation *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`> is
 
 -  The generic declaration name is *G*;
 -  The number of type arguments equals the number of type parameters of *G*; and
--  All type arguments are compatible with the corresponding type parameter
-   constraint (see :ref:`Type Compatibility`).
+-  All type arguments are assignable to the corresponding type parameter
+   constraint (see :ref:`Assignability`).
 
 A :index:`compile-time error` occurs if an instantiation is not well-formed.
 
@@ -794,7 +794,7 @@ analogous type as follows:
    getter
    setter
 
-Type ``T`` is not compatible with ``Partial<T>`` (see :ref:`Type Compatibility`),
+Type ``T`` is not assignable to ``Partial<T>`` (see :ref:`Assignability`),
 and variables of ``Partial<T>`` are to be initialized with valid object
 literals.
 
@@ -870,7 +870,7 @@ but analogous type as follows:
         description: string
     }
 
-Type ``T`` is not compatible (see :ref:`Type Compatibility`) with
+Type ``T`` is not assignable (see :ref:`Assignability`) to
 ``Required<T>``, and variables of ``Required<T>`` are to be initialized with
 valid object literals.
 
@@ -922,7 +922,7 @@ represented in the example below:
    getter
    setter
 
-Type ``T`` is compatible (see :ref:`Type Compatibility`) with ``Readonly<T>``,
+Type ``T`` is assignable (see :ref:`Assignability`) to ``Readonly<T>``,
 and allows assignments as a consequence:
 
 .. code-block:: typescript
@@ -950,8 +950,8 @@ Type ``Record<K, V>`` constructs a container that maps keys (of type ``K``)
 to values of type ``V``.
 
 Type ``K`` is restricted to numeric types (see :ref:`Numeric Types`), type
-``string``, string literal types, and union types constructed from these
-types.
+``string``, string literal types, enum types, and union types constructed from
+these types.
 
 A :index:`compile-time error` occurs if any other type, or literal of any other
 type is used in place of this type:
@@ -979,6 +979,10 @@ type is used in place of this type:
     type R4 = Record<"salary" | boolean, Object> // compile-time error
     type R5 = Record<"salary" | number, Object>  // ok
     type R6 = Record<string | number, Object>    // ok
+    enum Strings { A = "AA", B = "BB"}
+    type R7 = Record<Strings, Object>            // ok
+    enum Numbers { A, B}
+    type R7 = Record<Numbers, Object>            // ok
 
 Type ``V`` has no restrictions.
 

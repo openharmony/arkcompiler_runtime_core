@@ -81,7 +81,7 @@ with ``enums``.
 
 The |LANG| language supports writing concurrent applications in the form of
 *coroutines* (see :ref:`Coroutines`) that allow executing functions
-concurrently. Coroutines can produce results through asynchronous *channels*.
+concurrently.
 
 There is a basic set of language constructs that support concurrency. A function
 to be launched asynchronously is marked by adding the modifier ``async``
@@ -262,8 +262,8 @@ Fixed Array Types
 -  Accessing an element by its index is a constant-time operation.
 -  If passed to non-|LANG| environment, an array is represented as a contiguous
    memory location.
--  Type of each array element is compatible with the element's type specified
-   in the array declaration (see :ref:`Type Compatibility`).
+-  Type of each array element is assignable to the element's type specified
+   in the array declaration (see :ref:`Assignability`).
 
 *Fixed arrays* differ from *resizable arrays* as follows:
 
@@ -271,9 +271,7 @@ Fixed Array Types
 - *Fixed arrays* have no methods defined;
 - *Fixed arrays* are not compatible with *resizable arrays*.
 
-*Fixed array* can be created by using :ref:`Array Literal`
-or :ref:`Array Creation Expressions`.
-
+*Fixed array* can be created by using :ref:`Array Literal`.
 
 The examples are presented below:
 
@@ -365,8 +363,8 @@ If the type of any *dimensionExpression* is ``number`` or other floating-point
 type, and its fractional part is different from '0', then errors occur as
 follows:
 
-- Runtime error, if the situation is identified during program execution; and
-- Compile-time error, if the situation is identified during compilation.
+- Compile-time error, if the situation is identified during compilation; and
+- Runtime error, if the situation is identified during program execution.
 
 If ``arrayElement`` is provided, then the type of the ``expression`` can be
 as follows:
@@ -438,7 +436,7 @@ parameter:
    constructor
    array
 
-Creating an array with a known number of elements is presented below:
+The creation of an array with a known number of elements is presented below:
 
 .. code-block:: typescript
    :linenos:
@@ -462,7 +460,8 @@ Creating an array with a known number of elements is presented below:
             have initial value equal to the result of lambda function execution with
             different indices */
 
-Creating exotic arrays with different kinds of element types is presented below:
+The creation of exotic arrays with different kinds of element types is presented
+below:
 
 .. code-block:: typescript
    :linenos:
@@ -472,7 +471,7 @@ Creating exotic arrays with different kinds of element types is presented below:
       type aliasTypeName = number []
       let array_of_array = new aliasTypeName [5] ( [3.141592653589] )
 
-Creating fixed arrays is presented below:
+The creation of fixed arrays is presented below:
 
 .. code-block:: typescript
    :linenos:
@@ -678,8 +677,8 @@ class or the interface can be used in ``for-of`` statements (see
 :ref:`For-Of Statements`).
 
 Some type ``C`` is *iterable* if it declares a parameterless function with name
-``$_iterator`` and return type that is compatible (see :ref:`Type Compatibility`)
-with type ``Iterator`` as defined in the standard library (see
+``$_iterator`` and return type that is assignable (see :ref:`Assignability`)
+to type ``Iterator`` as defined in the standard library (see
 :ref:`Standard Library`). It guarantees that the object returned is of the
 class type which implements ``Iterator`` and allows traversing an object of
 class type ``C``. The example below defines *iterable* class ``C``:
@@ -999,8 +998,9 @@ Function, Method and Constructor Overloading
 .. meta:
     frontend_status: Done
 
-As many other languages, |LANG| supports overloading that allows to declare
-several functions or methods with the same name but different signatures.
+As many other languages do, |LANG| supports overloading. Overloading allows
+declaring several functions or methods with the same name but different
+signatures.
 |LANG| does not support |TS| overload signatures that allow
 specifying several headers for a function or method with a single body but
 different signatures (see :ref:`TS Overload Signatures`).
@@ -1322,8 +1322,6 @@ Final Classes and Methods
 .. meta:
     frontend_status: Done
 
-|
-
 .. _Final Classes Experimental:
 
 Final Classes
@@ -1428,8 +1426,9 @@ Adding Functionality to Existing Types
 usage of functions so added looks the same as if they are methods and accessors
 of these types. The mechanism is called :ref:`Functions with Receiver`
 and :ref:`Accessors with Receiver`. This feature is often used to add new
-functionality to a class without having to inherit from this class.
-However, it can be used not only for classes but also for other types.
+functionality to a class or interface without having to inherit from this class
+or implement this interface. However, it can be used not only for classes and 
+interfaces but also for other types.
 
 Moreover, :ref:`Function Types with Receiver` and
 :ref:`Lambda Expressions with Receiver` can be defined and used to make the
@@ -1464,7 +1463,7 @@ and the keyword ``this`` is used as its name:
         annotationUsage? 'this' ':' type
         ;
 
-A *function with receiver* can be called in two ways as follows:
+A *function with receiver* can be called in the following two ways:
 
 -  Making a function call (see :ref:`Function Call Expression`), and
    passing the first parameter in the usual way;
@@ -1491,15 +1490,32 @@ A *function with receiver* can be called in two ways as follows:
       c.foo()
       c.bar(1)
 
+      interface D {}
+      function foo1(this: D) {}
+      function bar1(this: D, n: number): void {}
+
+      function demo (d: D) {
+         // as a function call:
+         foo(d)
+         bar(d, 1)
+
+         // as a method call:
+         d.foo()
+         d.bar(1)
+      }
+
+
+
 The keyword ``this`` can be used inside a *function with receiver*. It
 corresponds to the first parameter. The type of ``this`` parameter is
 called the *receiver type* (see :ref:`Receiver Type`).
 
-If the *receiver type* is a class type, then ``private`` or ``protected``
-members are not accessible (see :ref:`Accessible`) within the body of a
-*function with receiver*. Only ``public`` and  ``internal`` members can be
-accessed. The ``internal`` members can be accessed only when *function with
-receiver* and class type are declared in the same compilation unit:
+If the *receiver type* is a class or interface type, then ``private`` or
+``protected`` members are not accessible (see :ref:`Accessible`) within the
+body of a *function with receiver*. Only ``public`` and  ``internal`` members
+can be accessed. The ``internal`` members can be accessed only when *function
+with receiver* and class or interface type are declared in the same compilation
+unit:
 
 .. index::
    keyword this
@@ -1529,12 +1545,25 @@ receiver* and class type are declared in the same compilation unit:
       a.foo() // Ordinary class method is called
       a.bar() // Function with receiver is called
 
-The name of a *function with receiver* cannot be the same as the name of an
-accessible method or field, and the global function with the only explicit
-first parameter of the receiver type. Otherwise, a :index:`compile-time error`
-occurs. It also means that a *function with receiver* cannot overload a method
-defined for the receiver type or the global function with the only explicit
-first parameter of the receiver type.
+A :index:`compile-time error` occurs is the name of a *function with receiver* 
+is the same as the name of an accessible instance method or field 
+of the receiver type.
+It means that a *function with receiver* cannot overload a method
+defined for the receiver type.
+
+.. code-block:: typescript
+   :linenos:
+
+      class A {
+          foo () { ...  }
+      }
+
+      function foo(this: A) { ... } // Compile-time error
+
+A function with reciever can overload a global function with 
+the same name. A compile-time error occurs if signatures of
+a function with receiver is overload-equivalent
+(see Overload-Equivalent Signatures) to such overloaded function.
 
 .. code-block:: typescript
    :linenos:
@@ -1817,8 +1846,8 @@ The use of lambda is illustrated by the example below:
       foo(aa, (this: A) => { console.log(this.name)} ) // output: "aa" "bb"
 
 
-**Note**. If *lambda expression with reciever* is declared in a class or
-inteface, then the use of ``this`` in a lambda body always refers to the first
+**Note**. If *lambda expression with receiver* is declared in a class or
+interface, then the use of ``this`` in a lambda body always refers to the first
 lambda parameter, but not to ``this`` of the surrounding class or interface.
 
 .. code-block:: typescript
@@ -1830,7 +1859,7 @@ lambda parameter, but not to ``this`` of the surrounding class or interface.
       class A {
         foo() { console.log ("foo() from A is called") }
         bar() {
-            let lambda = (this: B): void => { this.foo() } 
+            let lambda = (this: B): void => { this.foo() }
             new B().lambda()
         }
       }
@@ -1903,7 +1932,7 @@ with receiver:
      }
 
 If a simple name used in a lambda body can be resolved as instance method,
-field or accessor of the reciever type, and as another entity in the current
+field or accessor of the receiver type, and as another entity in the current
 scope at the same time, then a :index:`compile-time error` occurs to prevent
 ambiguity and improve readability.
 
@@ -2032,8 +2061,8 @@ Enumeration Types Conversions
 .. meta:
     frontend_status: Partly
 
-Every *enum* type is compatible with type ``Object`` (see
-:ref:`Type Compatibility`). Every variable of type ``enum`` can thus be
+Every *enum* type is subtype of type ``Object`` (see
+:ref:`Subtyping`). Every variable of type ``enum`` can thus be
 assigned into a variable of type ``Object``. The ``instanceof`` check can
 be used to get an enumeration variable back by applying the casting conversion
 as follows:
@@ -2283,7 +2312,8 @@ Awaiting a Promise
 .. meta:
     frontend_status: Done
 
-The ``await`` expressions are used while a previously called async function finishes and returns a value:
+The ``await`` expressions are used while an ``async`` function called previously
+finishes and returns a value:
 
 .. code-block:: abnf
 
@@ -2291,8 +2321,9 @@ The ``await`` expressions are used while a previously called async function fini
         'await' expression
         ;
 
-A :index:`compile-time error` occurs if await is called not from the async function.
-A :index:`compile-time error` occurs if the expression type is not ``Promise<T>``.
+A :index:`compile-time error` occurs if ``await`` is called not from the
+``async`` function. A :index:`compile-time error` occurs if the expression
+type is not ``Promise<T>``.
 
 .. index::
    expression await
@@ -2378,7 +2409,7 @@ The methods are used as follows:
 
 .. code-block:: typescript
 
-        Promise<U> Promise<T>::then<U>(fulfilCallback :
+        Promise<U> Promise<T>::then<U>(fulfillCallback :
             function
         <T>(val: T) : Promise<U>, rejectCallback : (err: Object)
         : Promise<U>)
@@ -2416,7 +2447,6 @@ Async Functions and Methods
 .. meta:
     frontend_status: Done
 
-|
 
 .. _Async Functions:
 
@@ -2566,8 +2596,8 @@ The wrapper can raise an error if:
 
 - No property with the specified name exists in the underlying object; or
 - Field access is in the right-hand-side part of the assignment, and the
-  type of the assigned value is not compatible with the type of the property
-  (see :ref:`Type Compatibility`).
+  type of the assigned value is not assignable to the type of the property
+  (see :ref:`Assignability`).
 
 .. index::
    wrapper

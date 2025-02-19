@@ -488,7 +488,8 @@ following:
 -  Alternative names for existing types.
 
 Scopes of type aliases are package, module, or namespace level scopes. Names of
-all type aliases must be unique across all types in the current context.
+all type aliases must be follow uniqueness rules of
+:ref:`Distinguishable Declarations` in the current context.
 
 .. index::
    type alias
@@ -646,7 +647,9 @@ Variable Declarations
 =====================
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+    todo: arrays never have default values 
+	todo: raise error for non initialized arrays: let x: number[];console.log(x)
 
 A *variable declaration* introduces a new named storage location. The named
 storage location is assigned an initial value as part of the declaration, or
@@ -679,7 +682,7 @@ variable is determined as follows:
    - If the name of the variable is followed by the '``?``' sign, then the
      type of the variable is semantically equivalent to ``type | undefined``.
    - If the declaration also has an initializer, then the initializer expression
-     type must be compatible with ``T`` (see :ref:`Type Compatibility with Initializer`).
+     type must be assignable to ``T`` (see :ref:`Assignability with Initializer`).
 
 -  If no type annotation is available, then ``T`` is inferred from the
    initializer expression (see :ref:`Type Inference from Initializer`).
@@ -720,14 +723,10 @@ Every variable in a program must have an initial value before it can be used:
    + If the type of a variable is ``T``, and ``T`` has a *default value*
      (see :ref:`Default Values for Types`), then the variable is initialized
      with the default value.
-   + If the type of a variable is ``T[]`` or ``FixedArray<T>`` (or a multidimensional array with
-     elements of type ``T``), and ``T`` has a *default value* (see
-     :ref:`Default Values for Types`), then all array elements are initialized
-     with the default value.
    + If a variable has no default value, then a value must be set by the
      :ref:`Simple Assignment Operator` before attempting to use the variable.
 
-**Note**. A variable of an array type must be initalized as a whole by a single
+**Note**. A variable of an array type must be initialized as a whole by a single
 assignment. Otherwise, the variable is not initialized, and a
 :index:`compile-time error` occurs.
 
@@ -770,10 +769,10 @@ variables. Otherwise, a :index:`compile-time error` occurs.
    }
 
 If the type of a variable declaration has the prefix ``readonly``, then the
-type must be of the *array* kind, and the restrictions on its operations
-apply to the variable as described in :ref:`Readonly Parameters`, and in
-:ref:`Contexts and Conversions`. If the prefix ``readonly`` is used with a
-non-array type, then a :index:`compile-time error` occurs:
+type must be of the *array* or *tuple* kind, and the restrictions on its
+operations apply to the variable as described in :ref:`Readonly Parameters`,
+and in :ref:`Contexts and Conversions`. If the prefix ``readonly`` is used with
+a non-array or non-tuple type, then a :index:`compile-time error` occurs:
 
 .. code-block-meta:
    expect-cte:
@@ -846,8 +845,8 @@ its properties or items can be modified.
 The type ``T`` of a constant declaration is determined as follows:
 
 -  If ``T`` is the type specified in a type annotation (if any) of the
-   declaration, then the initializer expression must be compatible with
-   ``T`` (see :ref:`Type Compatibility with Initializer`).
+   declaration, then the initializer expression must be assignable to
+   ``T`` (see :ref:`Assignability with Initializer`).
 -  If no type annotation is available, then ``T`` is inferred from the
    initializer expression (see :ref:`Type Inference from Initializer`).
 -  If '``?``' is used after the name of the constant, then the type of the
@@ -882,17 +881,17 @@ described in :ref:`Errors and Initialization Expression`.
 
 |
 
-.. _Type Compatibility with Initializer:
+.. _Assignability with Initializer:
 
-Type Compatibility with Initializer
-===================================
+Assignability with Initializer
+==============================
 
 .. meta:
     frontend_status: Done
 
 If a variable or constant declaration contains type annotation ``T`` and
-initializer expression *E*, then the type of *E* must be compatible with ``T``
-(see :ref:`Assignment-like Contexts`).
+initializer expression *E*, then the type of *E* must be assignable to ``T``
+(see :ref:`Assignability`).
 
 .. index::
    initializer expression
@@ -1291,7 +1290,7 @@ A :index:`compile-time error` occurs if a rest parameter:
 
 A call of entity with a rest parameter of array type ``T[]``
 (or ``FixedArray<T>``) can accept any number of arguments
-of types that are compatible (see :ref:`Type Compatibility`) with ``T``:
+of types that are assignable (see :ref:`Assignability`) to ``T``:
 
 .. index::
    rest parameter
@@ -1354,7 +1353,7 @@ as prefix before the array argument:
 
 A call of entity with a rest parameter of tuple type
 [``T``:sub:`1` ``, ..., T``:sub:`n`] can accept only ``n`` arguments of types that are
-compatible (see :ref:`Type Compatibility`) with the corresponding ``T``:sub:`i`:
+assignable (see :ref:`Assignability`) to the corresponding ``T``:sub:`i`:
 
 .. index::
    rest parameter
@@ -1377,7 +1376,7 @@ compatible (see :ref:`Type Compatibility`) with the corresponding ``T``:sub:`i`:
 
     sum()          // compile-time error: wrong number of arguments, 0 instead of 3
     sum(1)         // compile-time error: wrong number of arguments, 1 instead of 3
-    sum(1, 2, "a") // compile-time error: wrong type of 3rd arguments
+    sum(1, 2, "a") // compile-time error: wrong type of the 3rd argument
     sum(1, 2, 3)   // returns 6
 
 If an argument of tuple type [``T``:sub:`1` ``, ..., T``:sub:`n`]
@@ -1495,7 +1494,7 @@ Return Type
 Function or method return type defines the static type of the result of the
 function or method execution (see :ref:`Function Call Expression` and
 :ref:`Method Call Expression`). During the execution, the function or method
-can produce a value of a type compatible (see :ref:`Type Compatibility`) to the
+can produce a value of a type assignable (see :ref:`Assignability`) to the
 return type.
 
 If function or method return type is not ``void`` (see :ref:`Type void`), and
@@ -1510,7 +1509,7 @@ function or method return type is ``void`` (see :ref:`Type void`).
    return type
    function
    method
-   type compatibility
+   assignability
    return statement
    method body
    type void

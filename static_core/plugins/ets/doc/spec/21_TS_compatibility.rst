@@ -18,7 +18,7 @@
 .. meta:
     frontend_status: None
 
-This section discusses all issues related to different compatibility aspects
+This section discusses all issues related to different aspects of compatibility
 between |LANG| and |TS|.
 
 |
@@ -36,7 +36,7 @@ user-defined type names, but are not otherwise restricted.
    compatibility
    user-defined type name
 
-1. Names of |TS| utility types that are not supported by |LANG|:
+1. The following names of |TS| utility types are not supported by |LANG|:
 
 +---------------------------+-----------------------+-----------------------+
 |                           |                       |                       |
@@ -52,7 +52,7 @@ user-defined type names, but are not otherwise restricted.
 | ``InstanceType``          | ``Parameters``        |                       |
 +---------------------------+-----------------------+-----------------------+
 
-2. Names of |TS| utility string types that are not supported by |LANG|:
+2. The following names of |TS| utility string types are not supported by |LANG|:
 
 +----------------+-------------------+
 |                |                   |
@@ -62,7 +62,7 @@ user-defined type names, but are not otherwise restricted.
 | ``Lowercase``  | ``Uppercase``     |
 +----------------+-------------------+
 
-3. Class names from |TS| standard library that are not supported by |LANG|
+3. The following class names from |TS| standard library that are not supported by |LANG|
 standard library:
 
 +---------------------------+-------------------------+-----------------------------+
@@ -159,12 +159,11 @@ Covariant Overriding
     frontend_status: Done
 
 |TS| object runtime model enables |TS| to handle situations where a
-non-existing property is accessed from some object during program execution.
+non-existing property is accessed from an object during program execution.
 
 |LANG| allows generating highly efficient code that relies on an objects'
-layout known at compile time. Covariant overriding (see :ref:`Covariance`)
-is prohibited because type-safety violations are prevented
-by compiler-generated compile-time errors:
+layout known at compile time. Covariant overriding (see :ref:`Invariance, Covariance and Contravariance`)
+is prohibited because it violates type-safety:
 
 .. code-block:: typescript
    :linenos:
@@ -210,8 +209,8 @@ Function Types Compatibility
 .. meta:
     frontend_status: Done
 
-|TS| allows more relaxed assignments into variables of function type, while
-|LANG| follows stricter rules stated in :ref:`Function Types Conversions`.
+|TS| allows more relaxed assignments into variables of function type.
+|LANG| follows stricter rules as stated in :ref:`Function Types Conversions`.
 
 .. code-block:: typescript
    :linenos:
@@ -237,8 +236,8 @@ Compatibility for Utility Types
 .. meta:
     frontend_status: Done
 
-Utility type ``Partial<T>`` in |LANG| is not compatible with ``T`` (see
-:ref:`Type Compatibility`), and variables of this type are to be initialized
+Utility type ``Partial<T>`` in |LANG| is not assignable to ``T`` (see
+:ref:`Assignability`). Variables of this type are to be initialized
 with object literals only.
 
 .. code-block:: typescript
@@ -264,13 +263,11 @@ with object literals only.
 .. meta:
     frontend_status: Done
 
-|LANG| does not support overload signatures in |TS|-style
-where several function headers are followed by a single body. 
-It requires each overloaded function, method or constructor to have
-a separate body.
+|LANG| does not support overload signatures in |TS|-style where several function
+headers are followed by a single body. Each overloaded function, method, or
+constructor is required to have a separate body.
 
-The following code is valid in |TS|, while it
-causes a compile-time error in |LANG|:
+The following code is valid in |TS| but causes a compile-time error in |LANG|:
 
 .. code-block-meta:
    expect-cte
@@ -369,9 +366,9 @@ The situations are illustrated by the following examples:
 Overriding for Primitive Types
 ******************************
 
-|TS| allows overriding class type version of the primitive type into a pure
-primitive type. |LANG| allows no such overriding. These situation is
-illustrated by the example below:
+|TS| allows overriding class type version of a primitive type into a pure
+primitive type. |LANG| does not allow such overriding. This situation is
+represented by the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -398,7 +395,8 @@ Type ``void`` Compatibility
 .. meta:
     frontend_status: Done
 
-|TS| allows to use type ``void`` in union types while |LANG| does not.
+|TS| allows using type ``void`` in union types. |LANG| does not allow ``void``
+in union types. This situation is represented by the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -417,8 +415,8 @@ Invariant Array Assignment
 .. meta:
     frontend_status: None
 
-|TS| allows covariant array assignment,
-while |LANG| allows invariant array assignment only:
+|TS| allows covariant array assignment.
+|LANG| allows invariant array assignment only:
 
 .. code-block:: typescript
    :linenos:
@@ -453,8 +451,9 @@ Tuples and Arrays
 .. meta:
     frontend_status: None
 
-|LANG| treats arrays and tuples as two different types. But |TS| allows
-assignments of tuples into arrays while |LANG| does not allows this:
+|TS| allows assignments of tuples into arrays. |LANG| handles arrays and tuples
+as different types, and does not allow assignment of tuples into arrays. This
+situation is represented by the folowing example:
 
 .. code-block:: typescript
    :linenos:
@@ -476,7 +475,7 @@ Extending Class Object
     frontend_status: Done
 
 |TS| forbids using ``super`` and ``override`` if class ``Object`` is not
-explicitly listed in the ``extends`` clause of a class. |LANG| allows this as
+listed explicitly in the ``extends`` clause of a class. |LANG| allows this as
 ``Object`` is a superclass for any class without an explicit ``extends`` clause:
 
 .. code-block:: typescript
@@ -509,8 +508,8 @@ Syntax of ``extends`` and ``implements`` Clauses
 .. meta:
     frontend_status: Done
 
-|TS| considers enities listed in ``extends`` and ``implements``
-clauses as an expression. 
+|TS| handles entities listed in ``extends`` and ``implements`` clauses as
+expressions.
 |LANG| handles such clauses at compile time, and allows no expressions
 but *type references*:
 
@@ -535,9 +534,9 @@ Uniqueness of Functional Objects
 .. meta:
     frontend_status: Done
 
-|TS| and |LANG| handle function objects differently and thus equality test can
-perform differently. This difference may be elimiated in the future |LANG|
-versions.
+|TS| and |LANG| handle function objects differently, and the equality test can
+perform differently. The difference can be eliminated in the future versions of
+|LANG|.
 
 .. code-block:: typescript
    :linenos:
@@ -553,6 +552,36 @@ versions.
    function object
    equality test
 
+
+|
+
+.. _Functional Objects for Methods:
+
+Functional Objects for Methods
+******************************
+
+.. meta:
+    frontend_status: None
+
+|TS| allows creating function objects for methods. |LANG| does not allow
+creating function objects for methods. This difference can be elimiated in
+the future versions of |LANG|.
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+      method() {
+         let method_ref = this.method // compile-time error in ArkTS
+      }
+    }
+
+    interface I { method(): void }
+    function bar (i: I) {
+      let method_ref = i.method // compile-time error in ArkTS
+    }
+
+
 |
 
 .. _Differences in Namespaces:
@@ -564,9 +593,9 @@ Differences in Namespaces
     frontend_status: Done
 
 |TS| allows having non-exported entities with the same name in two or more
-different declarations of a namespace for these entities are local to a
-particular declaration of the namespace. Such situations are forbidden in |LANG|
-as this language merges all declarations into one:
+different declarations of a namespace, because these entities are local to a
+particular declaration of the namespace. Such situations are forbidden in
+|LANG|, because this language merges all declarations into one:
 
 
 .. code-block:: typescript
@@ -595,7 +624,7 @@ Differences in Math.pow
     frontend_status: Done
 
 The function ``Math.pow`` in |LANG| conforms to the latest IEEE 754-2019
-standard, and the following calls produce the result *1* (one):
+standard. The following calls produce the result *1* (one):
 
 - ``Math.pow(1, Infinity)``,
 - ``Math.pow(-1, Infinity)``,
@@ -603,7 +632,7 @@ standard, and the following calls produce the result *1* (one):
 - ``Math.pow(-1, -Infinity)``.
 
 The function ``Math.pow`` in |TS| conforms to the outdated 2008 version of the
-standard, and the same calls produce ``NaN``.
+IEEE 754-2019 standard. The same calls as listed above produce ``NaN`` in |TS|.
 
 .. index::
    IEEE 754

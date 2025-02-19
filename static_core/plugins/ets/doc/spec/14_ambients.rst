@@ -466,6 +466,35 @@ accessed by using qualified names only.
    qualified name
    access
 
+If an ambient namespace is imported from the declaration module then all
+ambient namespace declarations are accessible across all declarations and
+top-level statements of the current module.
+
+.. code-block:: typescript
+   :linenos:
+
+    // File1.d.sts
+    export declare namespace A { // namespace itself must be exported
+        function foo(): void
+        type X = Array<Number>
+    }
+
+    // File2.sts
+    import {A} from 'File1.d.sts'
+
+    A.foo() // Valid function call, as 'foo' is acessible for top-level statements
+    function foo () {
+        A.foo() // Valid function call, as 'foo' is acessible here as well
+    }
+    class C {
+        method () {
+            A.foo() // Valid function call, as 'foo' is acessible here too
+            let x: A.X = [] // Type A.X can be used
+        }
+    }
+
+
+
 |
 
 .. _Implementing Ambient Namespace Declaration:

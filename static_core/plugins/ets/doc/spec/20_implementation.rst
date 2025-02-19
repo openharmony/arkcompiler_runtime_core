@@ -64,16 +64,16 @@ host system. The exact manner modules and packages are stored in a file
 system is determined by a particular implementation of the compiler and other
 tools.
 
-As an example in a simple implementation:
+As an example, a simple implementation is characterised by the following:
 
--  A module (package module) is stored in a single file.
+-  Module (package module) is stored in a single file.
 
 -  All package modules are stored in files of the same folder.
 
--  A folder can store several separate modules (one source file to contain a
+-  Folder that can store several separate modules (one source file to contain a
    separate module or a package module).
 
--  A folder that stores a single package must not contain separate module
+-  Folder that stores a single package must not contain separate module
    files or package modules from other packages.
 
 .. index::
@@ -88,8 +88,6 @@ As an example in a simple implementation:
    folder
    source file
    separate module
-
-
 
 
 |

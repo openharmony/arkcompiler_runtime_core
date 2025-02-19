@@ -174,7 +174,7 @@ Grammar Summary
         ;
 
     constraint:
-        'extends' typeReference | unionType
+        'extends' type
         ;
 
     typeParameterDefault:
@@ -619,7 +619,7 @@ Grammar Summary
 
     classBody:
         '{'
-           classBodyDeclaration* gloablInitializer? classBodyDeclaration*
+           classBodyDeclaration* globalInitializer? classBodyDeclaration*
         '}'
         ;
 
@@ -793,6 +793,7 @@ Grammar Summary
         | functionWithReceiverDeclaration
         | accessorWithReceiverDeclaration
         | namespaceDeclaration
+        | ambientDeclaration
         )
         ;
 
@@ -851,13 +852,11 @@ Grammar Summary
         ;
 
     ambientFunctionDeclaration:
-        'function' identifier
-        typeParameters? signature
+        'function' identifier typeParameters? signature
         ;
 
     ambientClassDeclaration:
-        'class' identifier typeParameters?
-        classExtendsClause? implementsClause?
+        'class' identifier typeParameters? classExtendsClause? implementsClause?
         '{' ambientClassBodyDeclaration* '}'
         ;
 

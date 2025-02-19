@@ -60,7 +60,7 @@ expression* with its surrounding context:
    target type (expression types can be different in different contexts).
 
 #. If the inferred expression type is different from the target type, then
-   performing an implicit *conversion* can ensure type compatibility.
+   performing an implicit *conversion* can ensure :ref:`Assignability`.
    The conversion from type ``S`` to type ``T`` causes a type ``S`` expression to
    be handled as a type ``T`` expression at compile time.
 
@@ -433,21 +433,12 @@ conversions cast an operand in a cast expression to an explicitly specified
 - :ref:`Class or Interface Casting Conversions`;
 - :ref:`Casting Conversions from Object`;
 - :ref:`Casting Conversions from Type Parameter`;
+- :ref:`Casting Conversions to Type Parameter`;
 - :ref:`Casting Conversions from Union`;
 - :ref:`Casting Conversions to Enumeration`.
 
 If there is no applicable conversion, then a :index:`compile-time error`
 occurs.
-
-Note: casting conversion of any type to a type parameter is temporarily
-forbidden and may be allowed later.
-
-.. code-block:: typescript
-   :linenos:
-
-    function foo<T> (p: AnyType) {
-       p as T // compile-time error
-    }
 
 
 .. index::
@@ -579,7 +570,7 @@ superinterface, see  :ref:`Supertyping`) to a subclass or subinterface:
     let b: Base = new Derived()
     let d: Derived = b as Derived
 
-If *target type* is not compatible (see :ref:`Type Compatibility`) with the
+If *target type* is not assignable (see :ref:`Assignability`) to the
 expression type then a :index:`compile-time error` occurs.
 
 A runtime error (``ClassCastError``) occurs during this conversion if the
@@ -616,7 +607,7 @@ Casting Conversions from ``Object``
 
 *Casting conversion from ``Object``* attempts to convert an expression
 of type ``Object`` to any reference type (see :ref:`Reference Types`) which
-is to be specified as a target type.
+is to be specified as *target type*.
 
 .. code-block:: typescript
    :linenos:
@@ -628,7 +619,7 @@ is to be specified as a target type.
         }
     }
 
-This conversion cause a runtime error (``ClassCastError``) if the runtime
+This conversion causes a runtime error (``ClassCastError``) if the runtime
 type of an expression is not the *target type*.
 
 |
@@ -643,7 +634,7 @@ Casting Conversions from Type Parameter
 
 *Casting conversion from a type parameter* attempts to convert an expression
 of the type parameter to any reference type (see :ref:`Reference Types`) which
-is to be specified as a target type.
+is to be specified as *target type*.
 
 .. code-block:: typescript
    :linenos:
@@ -661,7 +652,31 @@ is to be specified as a target type.
        }
     }
 
-This conversion cause a runtime error (``ClassCastError``) if the runtime
+This conversion causes a runtime error (``ClassCastError``) if the runtime
+type of an expression is not the *target type*.
+
+|
+
+.. _Casting Conversions to Type Parameter:
+
+Casting Conversions to Type Parameter
+=====================================
+
+.. meta:
+    frontend_status: Done
+
+*Casting conversion to type parameter* attempts to convert an expression of any
+type to type parameter type (see :ref:`Type Parameters`) which is to be
+specified as *target type*.
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo<T> (p: AnyType) {
+       p as T // attempt to convert of any type to type parameter
+    }
+
+This conversion causes a runtime error (``ClassCastError``) if the runtime
 type of an expression is not the *target type*.
 
 
@@ -724,10 +739,10 @@ type of an expression is not the *target type*.
 
 Another form of *conversion from union* is implicit conversion from union type
 to the target type. The conversion is only possible if each type in a union is
-compatible (see :ref:`Type Compatibility`) with the target type. If so, the
+assignable (see :ref:`Assignability`) to the target type. If so, the
 conversion never causes a runtime error. The conversion causes a
-:index:`compile-time error` if at least one type of a union is not compatible
-with the target type:
+:index:`compile-time error` if at least one type of a union is not assignable
+to the target type:
 
 .. code-block-meta:
    expect-cte
@@ -740,7 +755,7 @@ with the target type:
     class Derived2 extends Base {}
 
     let d: Derived1 | Derived2 = ...
-    let b: Base = d // OK, as Derived1 and Derived2 are compatible with Base
+    let b: Base = d // OK, as Derived1 and Derived2 are assignable to Base
 
     let x: Double | Base = ...
     let y: double = x // Compile-time error, as Base cannot be converted to double
@@ -762,26 +777,27 @@ Casting Conversions to Enumeration
 .. meta:
     frontend_status: None
 
-A value of expression of numeric type can be converted into *enumeration* type
-value with help of castign conversion if:
+Casting conversion can be used to convert a value of a numeric type expression
+into a value of *enumeration* type if the value:
 
--  Value can be converetd into type ``int``;
--  Value is equal to the value of one of the enumeration type constants.
+-  Can be converted into type ``int``;
+-  Equals the value of an enumeration type constant.
 
-A value of expression of ``string`` or ``string literal`` type can be converted
-into *enumeration* type value with help of castign conversion if:
+Casting conversion can be used to convert a value of a ``string`` or
+``string literal`` expression type into a value of *enumeration* type if the
+value:
 
--  Value can be converetd into type ``string``;
--  Value is equal to the value of one of the enumeration type constants.
+-  Can be converted into type ``string``;
+-  Equals the value of an enumeration type constant.
 
 
-If expression is a constant then rules for
-:ref:`Constant to Enumeration Conversions` are applied.
+If an expression is a constant, then rules of
+:ref:`Constant to Enumeration Conversions` apply.
 
-If the expression value can be evalauted at compile-time then the checks stated
-above are performed during compilation raising a :index:`compile-time error` if
-they fail. Otherwise the checks are performed during program execution leading
-to runtime errors if checks are not satisfied.
+If the expression value can be evaluated at compile-time, then the checks
+described above are performed at compile time. A :index:`compile-time error`
+occurs if a check fails. Otherwise, the checks are performed during program
+execution. A runtime error occurs if a check fails.
 
 
 .. code-block:: typescript
@@ -1104,8 +1120,8 @@ normalization (see :ref:`Union Types Normalization`) the following is true:
    lines 724 764  initially was *U*:sub:`1` | ... | *U*:sub:`n` line  725 initially was *V*:sub:`1` | ... | *V*:sub:`m`
 
   - For every type ``U``:sub:`i` (*i* in 1..n-normalized) there is at least one
-    type ``V``:sub:`j` (*i* in 1..m-normalized), when ``U``:sub:`i` is compatible
-    with ``V``:sub:`j` (see :ref:`Type Compatibility`).
+    type ``V``:sub:`j` (*i* in 1..m-normalized), when ``U``:sub:`i` is assignable
+    to ``V``:sub:`j` (see :ref:`Assignability`).
   - For every value ``U``:sub:`i` there is a value ``V``:sub:`j`, when
     ``U``:sub:`i` == ``V``:sub:`j`.
 
@@ -1220,29 +1236,6 @@ a :index:`compile-time error` as it can cause type-safety violations:
     b.b_method() /* this breaks type-safety if casting conversion to 'never'
                     is allowed */
 
-This array assignment can cause ``ArrayStoreError`` at runtime if an object
-of incorrect type is included in the array. The runtime system performs
-runtime checks to ensure type-safety as show below:
-
-.. code-block:: typescript
-   :linenos:
-
-    class Base {}
-    class Derived extends Base {}
-    function foo (da: Derived[]) {
-      ba[0] = new Derived() /* This assignment of array element will
-         cause ``ArrayStoreError`` during program execution */
-    }
-
-.. index::
-   array assignment
-   array type
-   widening
-   type safety
-   runtime system
-   runtime error
-   array
-
 |
 
 .. _Character to String Conversions:
@@ -1308,13 +1301,10 @@ Function Types Conversions
 *Function types conversion* is the conversion of one function type to another.
 A *function types conversion* is valid if the following conditions are met:
 
-- Parameter types are converted by using *contravariance* (:ref:`Contravariance`);
+- Parameter types are converted by using *contravariance* (:ref:`Invariance, Covariance and Contravariance`);
 - Non-optional parameter types can be converted to the type of an optional
   parameter;
-- Return types are converted by using *covariance* (:ref:`Covariance`).
-
-Contravariance and covariance are discussed in detail in
-:ref:`Type Compatibility`.
+- Return types are converted by using *covariance* (:ref:`Invariance, Covariance and Contravariance`).
 
 .. index::
    function types conversion

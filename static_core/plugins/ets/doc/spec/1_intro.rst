@@ -58,10 +58,12 @@ The following major aspects characterize the |LANG| language as a whole:
    object
    object orientation
    object-oriented
-   OOP (object-oriented programming)
+   object-oriented programming
+   OOP
    inheritance
    overriding
    abstraction
+   dynamically dispatched overriding
 
 -  Modularity
 
@@ -82,6 +84,8 @@ The following major aspects characterize the |LANG| language as a whole:
 .. index::
    modularity
    compilation unit
+   component programming
+   maintainability
    module
    package
 
@@ -106,9 +110,10 @@ The following major aspects characterize the |LANG| language as a whole:
    abstract notion
    abstract data structure
    genericity
-   type parameterization
+   type parameterized entity
    compile-time feature
-   generics
+   program entity
+   generic
    template
 
 -  Multitargeting
@@ -122,19 +127,25 @@ The following major aspects characterize the |LANG| language as a whole:
 
 .. index::
    multitargeting
+   cross-platform development
 
 |LANG| is designed as a part of the modern language manifold. To provide an
 efficient and safely executable code, the language takes flexibility and
-power from |TS| and its predecessor JavaScript, and the static
-typing principle from Java and Kotlin. The overall design keeps the |LANG|’
+power from |TS| and its predecessor |JS|, and the static
+typing principle from Java and Kotlin. The overall design keeps the |LANG|
 syntax style similar to that of those languages, and some of its important
 constructs are almost identical to theirs on purpose.
 
 In other words, there is a significant *common subset* of features of |LANG|
-on the one hand, and of |TS|, JavaScript, Java, and Kotlin on the other.
-Consequently, the |LANG|’ style and constructs are no puzzle for the |TS| and
+on the one hand, and of |TS|, |JS|, Java, and Kotlin on the other.
+Consequently, the |LANG| style and constructs are no puzzle for the |TS| and
 Java users who can sense the meaning of most constructs of the new language
 even if not understand them completely.
+
+.. index::
+   construct
+   syntax
+   common subset
 
 This stylistic and semantic similarity permits smoothly migrating the
 applications originally written in |TS|, Java, or Kotlin to |LANG|.
@@ -157,9 +168,14 @@ automatic or semi-automatic transition from other languages (currently,
 |TS| and Java) to |LANG|.
 
 .. index::
-   object
+   high-level language
+   low-level representation
+   storage management
+   dynamically created object
+   deallocation
    migration
    automatic transition
+   semi-automatic transition
 
 |
 
@@ -174,6 +190,8 @@ a program.
 
 .. index::
    context-free grammar
+   lexical structure
+   syntactic structure
 
 The |LANG| lexical notation defines a set of productions (rules) that specify
 the structure of the elementary language parts called *tokens*. All tokens are
@@ -183,6 +201,7 @@ numbers/numeric literals, operator signs, delimiters), special characters
 *alphabet*.
 
 .. index::
+   lexical notation
    production
    token
    lexical element
@@ -219,7 +238,7 @@ production:
 - Is comprised of an abstract symbol (*nonterminal*) as its left-hand side,
   and a sequence of one or more *nonterminal* and *terminal* symbols as its
   *right-hand side*.
-- Includes the '``:``' character as a separator between the left- and 
+- Includes the '``:``' character as a separator between the left- and
   right-hand sides, and the '``;``' character as the end marker.
 
 .. index::
@@ -232,7 +251,7 @@ production:
    separator
    end marker
 
-Grammars draw terminal symbols from a fixed width form. Starting from the
+Grammars draw terminal symbols from a fixed-width form. Starting from the
 goal symbol, grammars specify the language itself, i.e., the set of possible
 sequences of terminal symbols that can result from repeatedly replacing
 any nonterminal in the left-hand-side sequence for a right-hand side of the
@@ -242,6 +261,8 @@ production.
    goal symbol
    nonterminal
    terminal symbol
+   sequence
+   production
 
 Grammars can use the following additional symbols---sometimes called
 *metasymbols*---in the right-hand side of a grammar production along
@@ -288,9 +309,13 @@ All grammar rules are presented in the Grammar section (see
 :ref:`Grammar Summary`) of this specification.
 
 .. index::
-   terminal
+   structuring rule
+   sequence
+   terminal symbol
    expression
    grammar rule
+
+|
 
 Terms and Definitions
 *********************

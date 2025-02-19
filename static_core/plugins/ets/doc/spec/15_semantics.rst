@@ -24,13 +24,6 @@ are omitted to simplify the understanding.
 
 |
 
-.. _Type Identity:
-
-Type Identity
-*************
-
-WIP
-
 .. _Subtyping:
 
 Subtyping
@@ -125,7 +118,7 @@ constraint of that type parameter.
 .. _Supertyping:
 
 Supertyping
-***********
+===========
 
 .. meta:
     frontend_status: Done
@@ -144,10 +137,62 @@ safely used in any context to replace an object of type ``T``.
 
 |
 
-.. _Variance:
+.. _Type Identity:
 
-Variance
-********
+Type Identity
+*************
+
+.. meta:
+    frontend_status: Done
+
+*Identity* relation between two types means
+that types are indistinguishable. This relation is
+commutative and transitive.
+
+Types ``A`` and ``B`` are *identical*, if
+
+- ``A`` is subtype of ``B`` (``A<:B``) and ``B`` is subtype of ``A`` (``A:>B``); or
+
+- ``A`` is defined as ``T[]`` and ``B`` is defined as ``Array<T>``, meaning
+  that two syntax form defines identical types.
+
+**Note.** :ref:`Type Alias Declaration` does not create new type, but
+only new name to the existing type, so an alias and its base type
+are also indistinguishable.
+
+|
+
+.. _Assignability:
+
+Assignability
+*************
+
+.. meta:
+    frontend_status: Done
+
+Type ``T``:sub:`1` is assignable to type ``T``:sub:`2` if:
+
+-  ``T``:sub:`1` is subtype of ``T``:sub:`2`, or
+
+-  There is an *implicit conversion* (see :ref:`Implicit Conversions`)
+   that allows converting value of type ``T``:sub:`1` to type ``T``:sub:`2`.
+
+*Assignability* relationship  is asymmetric, i.e., that ``T``:sub:`1`
+is assignable to ``T``:sub:`2` does not imply that ``T``:sub:`2` is
+assignable to type ``T``:sub:`1`.
+
+.. index::
+   assignability
+   conversion
+   implicit conversion
+   asymmetric relationship
+
+|
+
+.. _Invariance, Covariance and Contravariance:
+
+Invariance, Covariance and Contravariance
+*****************************************
 
 .. meta:
     frontend_status: Done
@@ -171,59 +216,23 @@ of three kinds:
    covariance
    contravariance
 
-|
-
-.. _Invariance:
-
-Invariance
-==========
-
-.. meta:
-    frontend_status: Done
-
 *Invariance* refers to the ability to use the originally-specified type as a
 derived one.
 
 .. index::
    invariance
-   type
-
-|
-
-.. _Covariance:
-
-Covariance
-==========
-
-.. meta:
-    frontend_status: Done
 
 *Covariance* is the ability to use a type that is more specific than originally
 specified.
 
 .. index::
    covariance
-   type
-
-|
-
-.. _Contravariance:
-
-Contravariance
-==============
-
-.. meta:
-    frontend_status: Done
 
 *Contravariance* is the ability to use a type that is more general than
 originally specified.
 
 .. index::
    contravariance
-   type
-
-Examples
-========
 
 The examples below illustrate valid and invalid usages of variance.
 If class ``Base`` is defined as follows:
@@ -275,33 +284,6 @@ On the contrary, the following code causes compile-time errors:
 
 |
 
-.. _Type Compatibility:
-
-Type Compatibility
-******************
-
-.. meta:
-    frontend_status: Done
-
-Type ``T``:sub:`1` is compatible with type ``T``:sub:`2` if:
-
--  ``T``:sub:`1` is the same as ``T``:sub:`2`, or
-
--  There is an *implicit conversion* (see :ref:`Implicit Conversions`)
-   that allows converting type ``T``:sub:`1` to type ``T``:sub:`2`.
-
-*Type compatibility* relationship  is asymmetric, i.e., that ``T``:sub:`1`
-is compatible with type ``T``:sub:`2` does not imply that ``T``:sub:`2` is
-compatible with type ``T``:sub:`1`.
-
-.. index::
-   type compatibility
-   conversion
-   implicit conversion
-   asymmetric relationship
-
-|
-
 .. _Compatibility of Call Arguments:
 
 Compatibility of Call Arguments
@@ -310,27 +292,27 @@ Compatibility of Call Arguments
 .. meta:
     frontend_status: Done
 
-The term *compatible* is defined in :ref:`Type Compatibility`.
+The term *assignable* is defined in :ref:`Assignability`.
 
 The following semantic check must be performed for any function, method, or
 constructor call:
 
 - Type of any argument (except arguments of a ``rest`` parameter) must be
-  compatible with the type of the corresponding parameter;
+  assignable to the type of the corresponding parameter;
 
 - Type of each argument corresponding to the ``rest`` parameter without the
-  spread operator (:ref:`Spread Expression`) must be compatible with the element
+  spread operator (:ref:`Spread Expression`) must be assignable to the element
   type of the array ``rest`` type parameter. If the rest parameter is a tuple,
   then the number of arguments must be equal to the number of tuple elements,
-  and argument types must be compatible with the appropriate tuple types;
+  and argument types must be assignable to the appropriate tuple types;
 
 - If a single argument corresponding to the ``rest`` parameter has the spread
   operator (:ref:`Spread Expression`), then the *expression* that follows the
   operator must refer to one of the following:
 
-    - An array of a type compatible with the type of the array ``rest``
+    - An array of a type assignable to the type of the array ``rest``
       parameter; or
-    - A tuple of types compatible with the proper types of the tuple ``rest``
+    - A tuple of types assignable to the proper types of the tuple ``rest``
       parameter.
 
 .. index::
@@ -342,9 +324,8 @@ constructor call:
    argument
    rest parameter
    spread operator
-   compatible type
+   assignable
    type
-   compatibility
 
 |
 
@@ -575,34 +556,31 @@ See :ref:`Overloading for Functions`,
 Overload-Equivalent Signatures
 ==============================
 
-Signatures *S*:sub:`1` with *n* parameters, and *S*:sub:`2` with *m*
-parameters are *overload-equivalent* if:
+Signatures *S*:sub:`1` with *n* parameters, and *S*:sub:`2` with 
+the same number of parameters are *overload-equivalent* if:
 
--  ``n = m``;
-
--  Parameter type at some position in *S*:sub:`1` is a *type parameter*
+#. Parameter type at some position in *S*:sub:`1` is a *type parameter*
    (see :ref:`Type Parameters`), and a parameter type at the same position
-   in *S*:sub:`2` is any non-generic reference type or type parameter;
+   in *S*:sub:`2` is any non-generic reference type (including *union type*)
+   or *type parameter*;
 
--  Parameter type at some position in *S*:sub:`1` is *generic type*
-   ``G`` <``T``:sub:`1`, ``...``, ``T``:sub:`n`>, and a parameter type at the
-   same position in *S*:sub:`2` is also ``G`` with any list of type arguments
-   (see :ref:`Type Arguments`);
+#. Parameter type at some position in *S*:sub:`1` is *generic type*
+   ``G`` <``T``:sub:`1`, ``...``, ``T``:sub:`n`>, where there is at least one
+   ``T``:sub:`i` which is a type parameter (see :ref:`Type Parameters`), and a
+   parameter type at the same position in *S*:sub:`2` is also ``G`` with any
+   list of :ref:`Type Arguments` or a *union type* that contains ``G``;
 
--  Optional parameter (see :ref:`Optional Parameters`) at some position in
-   *S*:sub:`1` and a parameter type at the same position in *S*:sub:`2` is
-   non-optional of the same type or no parameter at all;
+#. Parameter types at some position in *S*:sub:`1` and *S*:sub:`2` 
+   are *union types* 
+   that contain types falling under the cases 1. or 2. above;
 
--  Parameter at some position in *S*:sub:`1` is of union type (see
-   :ref:`Union Types`) and a parameter type at the same position in *S*:sub:`2`
-   is of union type as well or it is ``Object`` (see :ref:`Type Object`);
-
--  All other parameter types in *S*:sub:`1` are equal to parameter types
-   in the same positions in *S*:sub:`2`.
-
+#. All other parameter types in *S*:sub:`1` are identical
+   (see :ref:`Type Identity`) to parameter types
+   in the same positions in *S*:sub:`2` and both parameters are 
+   of the same kind, so they both are *required* or *optional* or ``rest``.
 
 Parameter names and return types do not influence *overload equivalence*.
-In the following series signatures are *overload-equivalent*:
+Signatures are *overload-equivalent*  in the following examples:
 
 .. index::
    overload-equivalent signature
@@ -651,6 +629,7 @@ In the following series signatures are *overload-equivalent*:
    (y: G<Number>): void
    (x: G<T>): void
 
+
 .. code-block-meta:
 
 .. code-block:: typescript
@@ -660,7 +639,9 @@ In the following series signatures are *overload-equivalent*:
    (y: T): void
    (x: S): void
 
-In the following series signatures are not *overload-equivalent*:
+
+
+Signatures are not *overload-equivalent* in the following examples:
 
 .. code-block-meta:
 
@@ -683,8 +664,27 @@ In the following series signatures are not *overload-equivalent*:
    class A<T> {
        foo(p: T) {}
        foo(p: T[]) {}
-       foo(p: A<T>) {}
    }
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+   class Base {}
+   class Derived1 extends Base {}
+   class Derived2 extends Base {}
+   (p: Derived1 | Derived2 ): void
+   (p: Base): void
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+   class G<T>
+   (y: G<Number>): void
+   (x: G<String>): void
 
 
 |
@@ -719,7 +719,7 @@ if **all** of the following conditions are met:
    for ``i`` in ``1..n+1``. Type override compatibility is defined below.
 3. Number of type parameters of either method is the same, i.e., ``k = l``.
 4. Constraints of ``W``:sub:`1`, ... ``W``:sub:`l` are to be contravariant
-   (see :ref:`Contravariance`) to the appropriate constraints of ``V``:sub:`1`,
+   (see :ref:`Invariance, Covariance and Contravariance`) to the appropriate constraints of ``V``:sub:`1`,
    ... ``V``:sub:`k`.
 
 .. index::
@@ -746,7 +746,7 @@ parameter types, or return types. Each case has the following kinds of types:
 - Tuple type; and
 - Type parameter.
 
-Each type is override-compatible with itself (see :ref:`Invariance`).
+Each type is override-compatible with itself (see :ref:`Invariance, Covariance and Contravariance`).
 
 Mixed override-compatibility between types of different kinds is always false,
 except the compatibility with class type ``Object`` as any type is a subtype of
@@ -754,8 +754,8 @@ except the compatibility with class type ``Object`` as any type is a subtype of
 
 The following rule applies to generics:
 
-   - Derived class must have type parameter constraints to be type-compatible
-     (see :ref:`Type Compatibility`) with the respective type parameter
+   - Derived class must have type parameter constraints to be assignable
+     (see :ref:`Assignability`) to the respective type parameter
      constraint in the base type;
    - Otherwise, a :index:`compile-time error` occurs.
 
@@ -803,9 +803,9 @@ positions are represented in the table below:
 +-+-----------------------+---------------------+-------------------+
 |5| Enum types            | Invariance          | Invariance        |
 +-+-----------------------+---------------------+-------------------+
-|6| Array types           | Covariance <:       | Covariance <:     |
+|6| Array types           | Invariance          | Invariance        |
 +-+-----------------------+---------------------+-------------------+
-|7| Tuple types           | Invariance          | Covariance <:     |
+|7| Tuple types           | Invariance          | Invariance        |
 +-+-----------------------+---------------------+-------------------+
 |8| Type parameter        | Contravariance >:   | Contravariance >: |
 | | constraint            |                     |                   |
@@ -854,7 +854,7 @@ The semantics is illustrated by the example below:
     interface Derived extends Base {
        // Overriding kinds for parameters, Derived <: Base
        kinds_of_parameters01 <T extends Base, U extends Object>(
-          p: Base // contravariant parameter type 
+          p: Base // contravariant parameter type
        ): void
        kinds_of_parameters02 <T extends Base, U extends Object>(
           p: (q: Derived)=>Base // Covariant parameter type, contravariant return type
@@ -873,7 +873,7 @@ The semantics is illustrated by the example below:
           p: E1 // Invariance parameter type
        ): void
        kinds_of_parameters07 <T extends Base, U extends Object>(
-          p: Derived[] // Covariant array element type
+          p: Base[] // Invariant array element type
        ): void
        kinds_of_parameters08 <T extends Base, U extends Object>(
           p: [Derived, Derived] // Compile-time error: parameter type is not override-compatible
@@ -893,10 +893,10 @@ The semantics is illustrated by the example below:
        kinds_of_return_type05<T extends Base, U extends BaseSuperType>(): T | U
        //kinds_of_return_type06(): E2 // CTE
        kinds_of_return_type06(): E1 // OK
-       kinds_of_return_type07(): Derived[] // Covariant array element type
-       kinds_of_return_type08(): [Derived, Derived] // Covariant tuple type elements
-       kinds_of_return_type09 <T extends Base> (): T // OK, contravariance for constraints of the return type 
-
+       //kinds_of_return_type07(): Derived[] // Compile-time error
+       //kinds_of_return_type08(): [Derived, Derived] // Compile-time error
+       kinds_of_return_type09 <T extends Base> (): T // OK, contravariance for constraints of the return type
+       kinds_of_return_type09 <T extends Base> (): T // OK, contravariance for constraints of the return type
     }
 
 The example below illustrates override-compatibility with ``Object``:
@@ -1005,11 +1005,11 @@ methods and partly for constructors.
 **Note**. Only accessible (see :ref:`Accessible`) methods are subjected to
 overloading and overriding. For example, neither overriding nor overloading
 is considered if a superclass contains a ``private`` method, and a subclass
-has a method with the same name. The same rules are also applied to accessors
-in case of overriding.
+has a method with the same name. The same rules also apply to accessors in
+case of overriding.
 
 An overriding member can keep or extend an access modifier (see
-:ref:`Access Modifiers`) of an inherited member or an implemented member.
+:ref:`Access Modifiers`) of a member that is inherited or implemented.
 Otherwise, a :index:`compile-time error` occurs:
 
 .. index::
@@ -1046,7 +1046,7 @@ Otherwise, a :index:`compile-time error` occurs:
          // A compile-time error occurs if an attempt is made to override private member
    }
 
-The table below represents semantic rules for various contexts:
+The table below represents semantic rules that apply in various contexts:
 
 +-------------------------------------+----------------------------------------------+
 | **Context**                         | **Semantic Check**                           |
@@ -1324,11 +1324,12 @@ best candidate for the given list of arguments is to be identified, if possible.
 The selection of the best candidate is based on the following:
 
 - There are no candidates with the same list of parameters, as this situation
-  is already forbidden by the compiler (at the place of declaration or import);
+  is already forbidden by the compiler (at the place of declaration or import)
+  (see :ref:`Overload-Equivalent Signatures`);
 
 - If several candidates can be called correctly by using the same argument list,
-  then the same implicit argument transformations must be applied to make the
-  call.
+  then at least one implicit argument transformation
+  must be applied to make the call.
 
 Possible argument transformations are listed below:
 
@@ -1370,7 +1371,7 @@ The examples of transformations are presented below:
    foo4(1, 2) // folding to array -> foo(...[1, 2])
 
 The candidate that does not require transformations for all arguments is the
-*best candidate*. Other candidates are not considered.
+*best candidate*. Other candidates are not considered in this case.
 
 The examples below represent the best candidate selected without
 transformation:
@@ -1381,41 +1382,43 @@ transformation:
    function foo(i: int)    // #1
    function foo(n: number) // #2
 
-   let x: int = 1
-   foo(x) // #1 - is the best candidate, no transformations
+   function max(a: number, b: number)  // #1
+   function max(...args: number[]) // #2
 
-   function goo(s: string)  // #1
-   function goo(s?: string) // #2
-
-   goo("abc") // #1 - is the best candidate, no transformations
-
-   let x: string|undefined = "abc"
-   goo(x) // #2 - is the best candidate, no transformations
+   max(1, 2) // #1 - is the best candidate, no transformations
 
 .. index::
    best candidate
    transformation
    argument
 
-If there is no such candidate, then each argument transformation of each
-candidate is compared (taking optional and ``rest`` parameters into the account)
-by calculating partial *better* relation:
+If there is no *best candidate* on this step,
+then candidates are compared for each
+argument (taking default values for optional parameters
+and arguments of ``rest`` parameter into the account)
+by calculating partial *better* relation.
 
-**Case 1**. No transformation is *better* than any transformation.
+If for the argument, parameter types and parameter kinds (optional or rest)
+are the same, this argument is skipped from comparison. Otherwise:
 
-**Case 2**. If argument type is of a numeric type (see :ref:`Numeric Types`),
+**Case 1**. No argument is *better* than default value for optional parameter
+and empty list for ``rest`` parameter.
+
+**Case 2**. If an argument or several arguments correspond
+to non-optional parameters in the first candidate,
+and the other candidate has a ``rest`` parameter for these arguments,
+then the first one is *better*.
+
+**Case 3**. No transformation for an argument is *better* than any transformation.
+
+**Case 4**. If argument type is of a numeric type (see :ref:`Numeric Types`),
 char, or its boxed counterpart, then the candidate with a *shorter* conversion
 is *better*. E.g., the conversion of ``int`` to ``float`` is *better* than
 ``int`` to ``double``, and ``int`` to ``Int`` is *better* than ``int`` to
 ``Long``.
 
-**Case 3**. In case of optional parameters, no parameter is *better*.
-
-**Case 4**. If the first candidate has several parameters, and the other
-candidate has a ``rest`` parameter for the same arguments, then the first one
-is *better*.
-
-**Case 5**. All other variants are considered *not comparable*.
+**Case 5**. If transformations are applied to the argument for both first and second
+candidates, then both candidates are not *best candidates*.
 
 .. index::
    best candidate
@@ -1430,57 +1433,57 @@ is *better*.
    :linenos:
 
    // Case 1:
+   function foo(n: number, s?: string)  // #1
+   function foo(n: number)              // #2
+
+   foo(1) // #2 is better, less parameters
+
+   function bar(...args: number[])  // #1
+   function bar()                   // #2
+
+   bar(1) // #2 is better, less parameters
+
+   // Case 2:
+   function foo(sum: number, a: number, b: number)  // #1
+   function foo(sum: number, ...x: number[])        // #2
+
+   foo(1, 2, 3) // #1 is better, non-rest parameters
+
+   // Case 3:
    function foo(n: number, s: string|null)  // #1
    function foo(n: number, s: string)       // #2
 
    goo(1, "abc") // #2 is better, no transformation for 2nd argument
 
-   // Case 2:
+   // Case 4:
    function foo(i: long)  // #1
    function foo(n: float) // #2
 
    let x: int = 1
    foo(x) //  #1 is better, conversion is shorter
 
-   // Case 3:
-   function foo(n: number, s?: string)  // #1
-   function foo(n: number)              // #2
-
-   foo(1) // #2 is better, less parameters
-
-   // Case 4:
-   function foo(sum: number, a: number, b: number)  // #1
-   function foo(sum: number, ...x: number[])        // #2
-
-   foo(1, 2, 3) // #1 is better, non-rest parameters
-
    // Case 5:
-   class Base { }
-   class Derived extends Base { }
+   function foo(n: number)          // #1
+   function foo(x: number | string) // #2
 
-   function foo(p: Base) { ... }     // #1
-   function foo(p: Derived) { ... }  // #2
-
-   foo(new Derived) // not comparable, no one is better
+   foo(1) // different non-compared transformations - compile-time error
 
 If there is exactly one candidate that is *better* than others for at least
-one argument and *not comparable* to other arguments, then this is the
-*best candidate* to be called.
+one argument or several arguments and
+other arguments were skipped from comparison,
+then this is the *best candidate*.
 
-If no candidate is the *best candidate*, then a :index:`compile-time error`
-occurs. Examples of error cases are presented below:
+A index:`compile-time error` occurs:
+
+-  if no candidate is the *best candidate*.
+
+-  if according to some argument the first candidate is better and for other
+   argument the other candidate is better.
+
+Example of the last case is presented below:
 
 .. code-block:: typescript
    :linenos:
-
-   class Base { }
-   class Derived extends Base { }
-
-   function foo(p: Base) { ... }     // #1
-   function foo(p: Derived) { ... }  // #2
-
-   foo(new Derived) // compile-time error, as
-                    // there is no argument where one candidate is better
 
    function goo(a: int; b: float)  // #1
    function goo(a: float, b: int)  // #2
@@ -1517,9 +1520,9 @@ Appropriate syntax is presented below:
           'static' block
           ;
 
-If *initializer block* contains a ``return <expression>`` statement (see
+If an *initializer block* contains a ``return <expression>`` statement (see
 :ref:`Return Statements`), then a :index:`compile-time error` occurs.
-If the code of *initializer block* contains an unhandled ``throw`` statement
+If the code of an *initializer block* contains an unhandled ``throw`` statement
 (see :ref:`Throw Statements`), then a program terminates (see
 :ref:`Program Exit`).
 
@@ -1585,14 +1588,15 @@ to ensure better |TS| alignment. It affects the semantics of the following:
 
 -  ``if`` statements (see :ref:`if Statements`).
 
-**Note:** The extended semantics is to be deprecated in one of the future
+**Note**. The extended semantics is to be deprecated in one of the future
 versions of |LANG|.
 
 The extended semantics approach is based on the concept of *truthiness* that
 extends the Boolean logic to operands of non-Boolean types.
 
-Depending on the type kind of any valid expression, its value can be treated as
-``true`` or ``false`` as described in the table below:
+Depending on the type kind of a valid expression, the value of such valid
+expression can be handled as ``true`` or ``false`` as described in the table
+below:
 
 .. index::
    extended conditional expression
@@ -1606,38 +1610,35 @@ Depending on the type kind of any valid expression, its value can be treated as
    truthiness
    Boolean
 
-+--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| Type kind                            | When ``false``                         | When ``true``                     | |LANG| Code                     |
-+======================================+========================================+===================================+=================================+
-| ``string``                           | empty string                           | non-empty string                  | ``s.length == 0``               |
-+--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| ``boolean``                          | ``false``                              | ``true``                          | ``x``                           |
-+--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| ``enum``                             | ``enum`` constant                      | enum constant                     | ``x.valueOf()``                 |
-|                                      |                                        |                                   |                                 |
-|                                      | handled as ``false``                   | handled as ``true``               |                                 |
-+--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| ``number`` (``double``/``float``)    | ``0`` or ``NaN``                       | any other number                  | ``n != 0 && !isNaN(n)``         |
-+--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| any integer type                     | ``== 0``                               | ``!= 0``                          | ``i != 0``                      |
-+--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| ``bigint``                           | ``== 0n``                              | ``!= 0n``                         | ``i != 0n``                     |
-+--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| ``char``                             | ``== 0``                               | ``!= 0``                          | ``c != c'0'``                   |
-+--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| In next 3 lines T stands for any nonNullish type                                                                                                    |
-+--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| ``T | null``                         | ``== null``                            | ``!= null``                       | ``x != null``                   |
-+--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| ``T | undefined``                    | ``== undefined``                       | ``!= undefined``                  | ``x != undefined``              |
-+--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| ``T | undefined | null``             | ``== undefined`` or ``== null``        | ``!= undefined`` and ``!= null``  | ``x != undefined && x != null`` |
-+--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| Boxed primitive type                 | primitive type is ``false``            | primitive type is ``true``        | ``new Boolean(true) == true``   |
-| (``Boolean``, ``Char``, ``Int`` ...) |                                        |                                   | ``new Int (0) == 0``            |
-+--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| any other nonNullish type            | ``never``                              | ``always``                        | ``new SomeType != null``        |
-+--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
++--------------------------------------+-----------------------------+------------------------------+------------------------------------+
+| Value Type Kind                      | When ``false``              | When ``true``                | |LANG| Code Example to Check       |
++======================================+=============================+==============================+====================================+
+| ``string``                           | empty string                | non-empty string             | ``s.length == 0``                  |
++--------------------------------------+-----------------------------+------------------------------+------------------------------------+
+| ``boolean``                          | ``false``                   | ``true``                     | ``x``                              |
++--------------------------------------+-----------------------------+------------------------------+------------------------------------+
+| ``enum``                             | ``enum`` constant           | enum constant                | ``x.valueOf()``                    |
+|                                      |                             |                              |                                    |
+|                                      | handled as ``false``        | handled as ``true``          |                                    |
++--------------------------------------+-----------------------------+------------------------------+------------------------------------+
+| ``number`` (``double``/``float``)    | ``0`` or ``NaN``            | any other number             | ``n != 0 && !isNaN(n)``            |
++--------------------------------------+-----------------------------+------------------------------+------------------------------------+
+| any integer type                     | ``== 0``                    | ``!= 0``                     | ``i != 0``                         |
++--------------------------------------+-----------------------------+------------------------------+------------------------------------+
+| ``bigint``                           | ``== 0n``                   | ``!= 0n``                    | ``i != 0n``                        |
++--------------------------------------+-----------------------------+------------------------------+------------------------------------+
+| ``char``                             | ``== 0``                    | ``!= 0``                     | ``c != c'\u0000'``                 |
++--------------------------------------+-----------------------------+------------------------------+------------------------------------+
+| ``null`` or ``undefined``            | ``always``                  | ``never``                    | ``x != null`` or ``x != undefined``|
++--------------------------------------+-----------------------------+------------------------------+------------------------------------+
+| Union types                          | when value is ``falsy``     | when value is ``truthy``     | ``x != null`` or ``x != undefined``|
+|                                      |                             |                              | for union types with nullish types |
++--------------------------------------+-----------------------------+------------------------------+------------------------------------+
+| Boxed primitive type                 | primitive type is ``falsy`` | primitive type is ``truthy`` | ``new Boolean(true) == true``      |
+| (``Boolean``, ``Char``, ``Int`` ...) |                             |                              | ``new Int (0) == 0``               |
++--------------------------------------+-----------------------------+------------------------------+------------------------------------+
+| any other nonNullish type            | ``never``                   | ``always``                   | ``new SomeType != null``           |
++--------------------------------------+-----------------------------+------------------------------+------------------------------------+
 
 Extended semantics of :ref:`Conditional-And Expression` and
 :ref:`Conditional-Or Expression` affects the resultant type of expressions

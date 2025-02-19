@@ -109,7 +109,7 @@ forms a *block*:
 
 The execution of a block means that all block statements, except type
 declarations, are executed one after another in the textual order of their
-appearance within the block until an erroneous sitation is thrown (see
+appearance within the block until an erroneous situation is thrown (see
 :ref:`Errors`), or return (see :ref:`Return Statements`) occurs.
 
 If a block is the body of a ``functionDeclaration`` (see
@@ -272,7 +272,7 @@ An ``identifier`` at the beginning of a loop statement denotes a *label*
 that can be used in :ref:`Break Statements` and :ref:`Continue Statements`.
 
 A :index:`compile-time error` occurs if the label *identifier* is not used
-within ``loopStatment``.
+within ``loopStatement``.
 
 |
 
@@ -702,7 +702,7 @@ or ``enum``.
 A :index:`compile-time error` occurs if not **all** of the following is true:
 
 -  Every case expression type is
-   compatible (see :ref:`Type Compatibility`) with the type of the ``switch``
+   assignable (see :ref:`Assignability`) to the type of the ``switch``
    statement expression.
 
 -  In a ``switch`` statement expression of type ``enum``, every case expression

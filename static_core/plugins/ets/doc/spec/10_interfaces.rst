@@ -72,10 +72,8 @@ enough for a class to implement all methods of an interface. A class or one of
 its superclasses must be actually declared to implement an interface.
 Otherwise, the class is not considered to implement the interface.
 
-Interfaces without ``interfaceExtendsClause`` are compatible with the class
-``Object`` (see :ref:`Type Compatibility`). The compatibility allows assignments
-on the basis of reference types conversions (see
-:ref:`Widening Reference Conversions`).
+Interfaces are assignable to the class
+``Object`` (see :ref:`Assignability`).
 
 .. index::
    variable
@@ -84,11 +82,6 @@ on the basis of reference types conversions (see
    method
    implementation
    assignment
-   reference type
-   conversion
-   compatibility
-   assignment
-   superclass
 
 |
 
