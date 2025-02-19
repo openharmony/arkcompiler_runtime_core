@@ -19,6 +19,7 @@ message(STATUS "eTS plugin is found")
 include(cmake/import.cmake)
 
 add_custom_target(ets_tests COMMENT "Running ets test suites")
+set(DEFAULT_TEST_GROUP ets_tests)
 
 function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
     set(oneValueArgs ARKTS_CONFIG ETSPATH OPT_LEVEL UNNAMED)
