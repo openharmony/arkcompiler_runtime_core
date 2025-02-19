@@ -122,6 +122,14 @@ ohos_executable("ark_link") {
     "$ark_root/libpandabase:libarktsbase",
   ]
 
+  if (target_os != "win" && target_os != "mingw" && target_os != "winuwp") {
+    if (is_linux) {
+      deps += [ "$ark_root/plugins/ets:etsstdlib_copy_linux" ]
+    } else if (is_mingw || is_win) {
+      deps += [ "$ark_root/plugins/ets:etsstdlib_copy_windows" ]
+    }
+  }
+
   libs = platform_libs
   ldflags = platform_ldflags
 
