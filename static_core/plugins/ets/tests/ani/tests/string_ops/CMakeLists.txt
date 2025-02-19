@@ -23,6 +23,11 @@ ani_add_gtest(ani_test_string_ops_get_utf16_size
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/string_get_utf16_size_test.cpp
 )
 
+ani_add_gtest(ani_test_string_ops_get_utf8
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/string_get_utf8_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/string_get_utf8_test.sts
+)
+
 ani_add_gtest(ani_test_string_ops_get_utf8_substr
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/string_get_utf8_substr.cpp
 )
