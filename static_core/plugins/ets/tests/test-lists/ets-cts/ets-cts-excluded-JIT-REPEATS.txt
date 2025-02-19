@@ -31,9 +31,8 @@ escompat/ArrayTest.sts
 03.types/08.reference_types/14.type_bigint/bint_tup_8.sts
 03.types/08.reference_types/14.type_bigint/bint_un_8.sts
 
-# es2panda: 16707 error working with string
+# 22848
 08.statements/08.for_statements/for_loop_parameters_12.sts
-# end of 16707
 
 # 17053 Cannot create array of nullish tuples
 07.expressions/04.array_literal/array_literal_13.sts

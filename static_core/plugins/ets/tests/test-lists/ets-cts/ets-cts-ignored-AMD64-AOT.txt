@@ -39,9 +39,8 @@
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_22.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_23.sts
 
-# es2panda: 16707 error working with string
+# 22848
 08.statements/08.for_statements/for_loop_parameters_12.sts
-# end of 16707
 
 # 17965 ERRNO: 12 (Cannot allocate memory)
 17.experimental_features/17.async_functions_and_methods/01.async_functions/afunc_45.sts
@@ -53,9 +52,7 @@
 17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_47.sts
 17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_48.sts
 
-# 17488: Separate module initializer not implemented yet for AOT
-13.compilation_units/03.import_directives/04.default_import_binding/default_import_abstract_class.sts
-13.compilation_units/03.import_directives/04.default_import_binding/default_import_const_var.sts
+# Separate module initializer not implemented yet for AOT
 13.compilation_units/03.import_directives/04.default_import_binding/default_import_enum.sts
 13.compilation_units/03.import_directives/04.default_import_binding/default_import_function_gen.sts
 13.compilation_units/03.import_directives/04.default_import_binding/default_import_generic_class.sts
@@ -66,17 +63,15 @@
 13.compilation_units/03.import_directives/04.default_import_binding/multiple_default_export.sts
 13.compilation_units/03.import_directives/04.default_import_binding/multiple_export.sts
 
-# 20290
-05.generics/03.utility_types/01.partial_utility_type/module_extends_1.sts
-05.generics/03.utility_types/01.partial_utility_type/module_extends_3.sts
-
 #18046 Update compilation process with modules for AOT mode
 05.generics/03.utility_types/01.partial_utility_type/module_class_0.sts
 05.generics/03.utility_types/01.partial_utility_type/module_class_1.sts
 05.generics/03.utility_types/01.partial_utility_type/module_class_2.sts
 05.generics/03.utility_types/01.partial_utility_type/module_class_3.sts
 05.generics/03.utility_types/01.partial_utility_type/module_extends_0.sts
+05.generics/03.utility_types/01.partial_utility_type/module_extends_1.sts
 05.generics/03.utility_types/01.partial_utility_type/module_extends_2.sts
+05.generics/03.utility_types/01.partial_utility_type/module_extends_3.sts
 05.generics/03.utility_types/01.partial_utility_type/module_implements_0.sts
 05.generics/03.utility_types/01.partial_utility_type/module_implements_1.sts
 05.generics/03.utility_types/01.partial_utility_type/module_implements_2.sts
