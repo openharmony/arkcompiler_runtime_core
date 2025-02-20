@@ -2208,6 +2208,47 @@ NO_UB_SANITIZE static ani_status WeakReference_GetReference(ani_env *env, ani_wr
     return s.GetLocalRef(wref, wasReleasedResult, refResult);
 }
 
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status CreateLocalScope(ani_env *env, ani_size nrRefs)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+
+    ScopedManagedCodeFix s(env);
+    return s.CreateLocalScope(nrRefs);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE ani_status DestroyLocalScope(ani_env *env)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+
+    ScopedManagedCodeFix s(env);
+    return s.DestroyLocalScope();
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status CreateEscapeLocalScope(ani_env *env, ani_size nrRefs)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+
+    ScopedManagedCodeFix s(env);
+    return s.CreateEscapeLocalScope(nrRefs);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status DestroyEscapeLocalScope(ani_env *env, ani_ref ref, ani_ref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    return s.DestroyEscapeLocalScope(ref, result);
+}
+
 [[noreturn]] static void NotImplementedAPI(int nr)
 {
     LOG(FATAL, ANI) << "Not implemented interaction_api, nr=" << nr;
@@ -2280,10 +2321,10 @@ const __ani_interaction_api INTERACTION_API = {
     Class_BindNativeMethods,
     Reference_Delete,
     NotImplementedAdapter<51>,
-    NotImplementedAdapter<52>,
-    NotImplementedAdapter<53>,
-    NotImplementedAdapter<54>,
-    NotImplementedAdapter<55>,
+    CreateLocalScope,
+    DestroyLocalScope,
+    CreateEscapeLocalScope,
+    DestroyEscapeLocalScope,
     NotImplementedAdapter<56>,
     ExistUnhandledError,
     NotImplementedAdapter<58>,

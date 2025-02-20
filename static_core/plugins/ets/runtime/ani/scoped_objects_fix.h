@@ -218,6 +218,47 @@ public:
         return ANI_OK;
     }
 
+    ani_status CreateLocalScope(ani_size nrRefs)
+    {
+        ANI_CHECK_RETURN_IF_EQ(nrRefs, 0, ANI_INVALID_ARGS);
+        ANI_CHECK_RETURN_IF_GT(nrRefs, std::numeric_limits<uint32_t>::max(), ANI_INVALID_ARGS);
+
+        auto nrRefsU32 = static_cast<uint32_t>(nrRefs);
+        bool ret = GetRefStorage()->PushLocalEtsFrame(nrRefsU32);
+        ANI_CHECK_RETURN_IF_EQ(ret, false, ANI_OUT_OF_MEMORY);
+        return ANI_OK;
+    }
+
+    ani_status DestroyLocalScope()
+    {
+        GetRefStorage()->PopLocalEtsFrame(nullptr);
+        return ANI_OK;
+    }
+
+    ani_status CreateEscapeLocalScope(ani_size nrRefs)
+    {
+        ANI_CHECK_RETURN_IF_EQ(nrRefs, 0, ANI_INVALID_ARGS);
+        ANI_CHECK_RETURN_IF_GT(nrRefs, std::numeric_limits<uint32_t>::max(), ANI_INVALID_ARGS);
+
+        auto nrRefsU32 = static_cast<uint32_t>(nrRefs);
+        bool ret = GetRefStorage()->PushLocalEtsFrame(nrRefsU32);
+        ANI_CHECK_RETURN_IF_EQ(ret, false, ANI_OUT_OF_MEMORY);
+        return ANI_OK;
+    }
+
+    ani_status DestroyEscapeLocalScope(ani_ref ref, ani_ref *result)
+    {
+        if (IsUndefined(ref)) {
+            GetRefStorage()->PopLocalEtsFrame(nullptr);
+            return GetUndefinedRef(result);
+        }
+        EtsReference *resultEtsRef = AniRefToEtsRef(ref);
+        EtsReference *etsRef = GetRefStorage()->PopLocalEtsFrame(resultEtsRef);
+        ANI_CHECK_RETURN_IF_EQ(etsRef, nullptr, ANI_OUT_OF_REF);
+        *result = EtsRefToAniRef(etsRef);
+        return ANI_OK;
+    }
+
     NO_COPY_SEMANTIC(ManagedCodeAccessor);
     NO_MOVE_SEMANTIC(ManagedCodeAccessor);
 
