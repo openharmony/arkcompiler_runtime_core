@@ -130,6 +130,7 @@ set(SOURCES
     profilesaver/profile_saver.cpp
     profilesaver/profile_dump_info.cpp
     jit/libprofile/pgo_file_builder.cpp
+    jit/profiling_loader.cpp
     jit/profiling_saver.cpp
     cha.cpp
     runtime_helpers.cpp

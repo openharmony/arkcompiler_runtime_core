@@ -14,10 +14,14 @@
  */
 
 #include "pgo_file_builder.h"
+#include "compiler/aot/aot_manager.h"
+#include "include/mem/panda_string.h"
 #include "zlib.h"
+#include "utils/expected.h"
 #include "utils/logger.h"
 
 #include <iostream>
+#include <iomanip>
 
 namespace ark::pgo {
 // NOLINTNEXTLINE(readability-magic-numbers)
@@ -146,7 +150,7 @@ uint32_t AotPgoFile::GetMaxMethodSectionSize(AotProfilingData::MethodsMap &metho
 uint32_t AotPgoFile::GetMethodSectionProf(AotProfilingData::MethodsMap &methods)
 {
     uint32_t savedType = 0;
-    for (auto &[methodIdx, methodProfData] : methods) {
+    for (const auto &[methodIdx, methodProfData] : methods) {
         auto inlineCaches = methodProfData.GetInlineCaches();
         auto branches = methodProfData.GetBranchData();
         auto throws = methodProfData.GetThrowData();
@@ -332,7 +336,7 @@ uint32_t AotPgoFile::GetSavedTypes(FileToMethodsMap &allMethodsMap)
 // CC-OFFNXT(G.FUN.01-CPP) Decreasing the number of arguments will decrease the clarity of the code.
 uint32_t AotPgoFile::WriteFileHeader(std::ofstream &fd, const std::array<char, MAGIC_SIZE> &magic,
                                      const std::array<char, VERSION_SIZE> &version, uint32_t versionPType,
-                                     uint32_t savedPType, PandaString &classCtxStr)
+                                     uint32_t savedPType, const PandaString &classCtxStr)
 {
     uint32_t cha = classCtxStr.size() + 1;
     uint32_t headerSize = sizeof(PgoHeader) + cha;
@@ -371,7 +375,7 @@ uint32_t AotPgoFile::WriteFileHeader(std::ofstream &fd, const std::array<char, M
         writtenBytes += checkBytes;                                           \
     }
 
-uint32_t AotPgoFile::Save(const PandaString &fileName, AotProfilingData *profObject, PandaString &classCtxStr)
+uint32_t AotPgoFile::Save(const PandaString &fileName, AotProfilingData *profObject, const PandaString &classCtxStr)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     std::ofstream fd(fileName.data(), std::ios::binary | std::ios::out);
@@ -407,4 +411,268 @@ uint32_t AotPgoFile::Save(const PandaString &fileName, AotProfilingData *profObj
     return writtenBytes;
 }
 #undef CheckAndAddBytes
+
+std::ifstream &AotPgoFile::ReadBytes(std::ifstream &inputFile, char *dst, size_t n, uint32_t *checkSum)
+{
+    if (dst != nullptr) {
+        inputFile.read(dst, n);
+        if (checkSum != nullptr) {
+            *checkSum = adler32(*checkSum, reinterpret_cast<unsigned char *>(dst), n);
+        }
+    } else {
+        char ch;
+        for (size_t i = 0; i < n; i++) {
+            if (!ReadBytes(inputFile, &ch, 1, checkSum)) {
+                break;
+            }
+        }
+    }
+    return inputFile;
+}
+
+using UnexpectedS = Unexpected<PandaString>;
+
+Expected<PandaVector<PandaString>, PandaString> AotPgoFile::ReadPandaFilesSection(std::ifstream &inputFile)
+{
+    PandaFilesSectionHeader sectionHeader {};
+    if (!Read(inputFile, &sectionHeader)) {
+        return UnexpectedS("Cannot read panda files section header");
+    }
+
+    PandaVector<PandaString> pandaFiles(sectionHeader.numberOfFiles);
+    for (auto &pandaFile : pandaFiles) {
+        PandaFileInfoHeader fileInfoHeader {};
+        if (!Read(inputFile, &fileInfoHeader)) {
+            return UnexpectedS("Cannot read panda file info header");
+        }
+
+        pandaFile.resize(fileInfoHeader.fileNameLen - 1, '\0');
+        if (!Read(inputFile, pandaFile.data(), fileInfoHeader.fileNameLen - 1) ||
+            // fileNameLen is written with the 0-terminator
+            !ReadBytes(inputFile, nullptr, 1)) {
+            return UnexpectedS("Cannot read panda file info name");
+        }
+    }
+
+    return pandaFiles;
+}
+
+Expected<uint32_t, PandaString> AotPgoFile::ReadMethodsSection(std::ifstream &inputFile, AotProfilingData &data)
+{
+    using namespace std::string_literals;
+    uint32_t checkSum = adler32(0L, Z_NULL, 0);
+    MethodsHeader methodsSectionHeader {};
+    if (!Read(inputFile, &methodsSectionHeader, 1, &checkSum)) {
+        return UnexpectedS("Couldn't read profile methods section header");
+    }
+
+    AotProfilingData::MethodsMap methodsMap;
+
+    for (uint32_t i = 0; i < methodsSectionHeader.numberOfMethods; i++) {
+        auto methodProfDataOrError = ReadMethodSubSection(inputFile, checkSum);
+        if (!methodProfDataOrError) {
+            return Unexpected(methodProfDataOrError.Error());
+        }
+        data.AddMethod(methodsSectionHeader.pandaFileIdx, methodProfDataOrError->GetMethodIdx(),
+                       std::move(*methodProfDataOrError));
+    }
+
+    return checkSum;
+}
+
+Expected<AotProfilingData::AotMethodProfilingData, PandaString> AotPgoFile::ReadMethodSubSection(
+    std::ifstream &inputFile, uint32_t &checkSum)
+{
+    using namespace std::string_literals;
+    MethodDataHeader methodHeader {};
+    if (!Read(inputFile, &methodHeader, 1, &checkSum)) {
+        return UnexpectedS("Couldn't read profile method data header");
+    }
+    PandaVector<AotProfilingData::AotCallSiteInlineCache> inlineCaches;
+    PandaVector<AotProfilingData::AotBranchData> branchData;
+    PandaVector<AotProfilingData::AotThrowData> throwData;
+
+    size_t readBytes = sizeof(MethodDataHeader);
+    while (readBytes < methodHeader.chunkSize) {
+        AotProfileDataHeader header {};
+        if (!Read(inputFile, &header, 1, &checkSum)) {
+            return UnexpectedS("Couldn't read profile data header");
+        }
+
+        Expected<size_t, PandaString> errorOrBytesRead;
+        if ((methodHeader.savedType & ProfileType::VCALL) != 0 && header.profType == ProfileType::VCALL) {
+            errorOrBytesRead = ReadProfileData(inputFile, header, inlineCaches, checkSum);
+        } else if ((methodHeader.savedType & ProfileType::BRANCH) != 0 && header.profType == ProfileType::BRANCH) {
+            errorOrBytesRead = ReadProfileData(inputFile, header, branchData, checkSum);
+        } else if ((methodHeader.savedType & ProfileType::THROW) != 0 && header.profType == ProfileType::THROW) {
+            errorOrBytesRead = ReadProfileData(inputFile, header, throwData, checkSum);
+        } else {
+            errorOrBytesRead = 0;
+        }
+
+        if (!errorOrBytesRead) {
+            return Unexpected(errorOrBytesRead.Error());
+        }
+
+        if (sizeof(AotProfileDataHeader) + *errorOrBytesRead < header.chunkSize) {
+            ReadBytes(inputFile, nullptr, header.chunkSize - sizeof(AotProfileDataHeader) - *errorOrBytesRead,
+                      &checkSum);
+        }
+
+        readBytes += header.chunkSize;
+    }
+
+    if (readBytes != methodHeader.chunkSize) {
+        return UnexpectedS("Inconsistent method data size in profile");
+    }
+
+    return AotProfilingData::AotMethodProfilingData(methodHeader.methodIdx, methodHeader.classIdx,
+                                                    std::move(inlineCaches), std::move(branchData),
+                                                    std::move(throwData));
+}
+
+template <typename T>
+Expected<size_t, PandaString> AotPgoFile::ReadProfileData(std::ifstream &inputFile, const AotProfileDataHeader &header,
+                                                          PandaVector<T> &data, uint32_t &checkSum)
+{
+    using namespace std::string_literals;
+    size_t oldSize = data.size();
+    data.resize(oldSize + header.numberOfRecords);
+    size_t bytesToRead = sizeof(AotProfilingData::AotCallSiteInlineCache) * header.numberOfRecords;
+    if (!Read(inputFile, &data[oldSize], header.numberOfRecords, &checkSum)) {
+        return UnexpectedS("Couldn't read method profile data");
+    }
+    return bytesToRead;
+}
+
+template <typename Range>
+static PandaStringStream &PrintBytesToSS(PandaStringStream &ss, const Range &rng)
+{
+    ss << std::setfill('0');
+    for (auto &b : rng) {
+        ss << std::hex << std::setw(2U) << static_cast<int>(b);
+    }
+    return ss;
+}
+
+Expected<std::pair<PgoHeader, PandaString>, PandaString> AotPgoFile::ReadFileHeader(std::ifstream &inputFile)
+{
+    using namespace std::string_literals;
+    PgoHeader header {};
+    if (!Read(inputFile, &header)) {
+        return UnexpectedS("Couldn't read profile header");
+    }
+    if (header.magic != MAGIC) {
+        PandaStringStream ss("Wrong profile header magic: expected ");
+        PrintBytesToSS(ss, MAGIC) << ", got ";
+        PrintBytesToSS(ss, header.magic);
+        return Unexpected(std::move(ss).str());
+    }
+    if (header.version != VERSION) {
+        PandaStringStream ss("Unsupported profile version: expected");
+        PrintBytesToSS(ss, VERSION) << ", got ";
+        PrintBytesToSS(ss, header.version);
+        return Unexpected(std::move(ss).str());
+    }
+    if ((header.versionProfileType & ~PROFILE_TYPE) != 0) {
+        // CC-OFFNXT(G.NAM.03-CPP) project code style
+        constexpr size_t MASK_SIZE = sizeof(PROFILE_TYPE) * CHAR_BIT;
+        PandaStringStream ss("Unsupported profile type: ");
+        ss << std::bitset<MASK_SIZE>(header.versionProfileType) << ", expected submask of "
+           << std::bitset<MASK_SIZE>(PROFILE_TYPE);
+        return Unexpected(std::move(ss).str());
+    }
+    // Class context string is written with the 0-terminator
+    auto classCtxStrSize = header.withCha;
+    PandaString classCtxStr(classCtxStrSize - 1, '\0');
+    if (!Read(inputFile, classCtxStr.data(), classCtxStrSize - 1) || !ReadBytes(inputFile, nullptr, 1)) {
+        return UnexpectedS("Cannot read profile class context");
+    }
+
+    return std::make_pair(header, classCtxStr);
+}
+
+Expected<PandaVector<SectionInfo>, PandaString> AotPgoFile::ReadSectionInfos(std::ifstream &inputFile)
+{
+    using namespace std::string_literals;
+    SectionsInfoSectionHeader header {};
+    if (!Read(inputFile, &header)) {
+        return UnexpectedS("Couldn't read profile section information header");
+    }
+
+    PandaVector<SectionInfo> sectionInfos(header.sectionNumber);
+    if (!Read(inputFile, sectionInfos.data(), sectionInfos.size())) {
+        return UnexpectedS("Couldn't read profile section information");
+    }
+
+    return sectionInfos;
+}
+
+Expected<size_t, PandaString> AotPgoFile::ReadAllMethodsSections(std::ifstream &inputFile,
+                                                                 PandaVector<SectionInfo> &sectionInfos,
+                                                                 AotProfilingData &data)
+{
+    using namespace std::string_literals;
+    size_t nSections = 0;
+    for (auto &info : sectionInfos) {
+        if (info.sectionType != SectionType::METHODS) {
+            inputFile.seekg(info.zippedSize != 0 ? info.zippedSize : info.unzippedSize, std::ios_base::cur);
+            continue;
+        }
+        if (info.zippedSize != 0) {
+            return UnexpectedS("Zipped profile method sections are unsupported");
+        }
+        auto checkSumOrError = ReadMethodsSection(inputFile, data);
+        if (!checkSumOrError) {
+            return Unexpected(checkSumOrError.Error());
+        }
+        if (info.checkSum != *checkSumOrError) {
+            return UnexpectedS("Check sum mismatch for method profile data");
+        }
+        nSections++;
+    }
+
+    return nSections;
+}
+
+Expected<AotProfilingData, PandaString> AotPgoFile::Load(const PandaString &fileName, PandaString &classCtxStr,
+                                                         PandaVector<PandaString> &pandaFiles)
+{
+    using namespace std::string_literals;
+    AotProfilingData data;
+
+    std::ifstream inputFile(fileName.c_str(), std::ios_base::in | std::ios_base::binary);
+    if (!inputFile.is_open()) {
+        return UnexpectedS("Cannot open file");
+    }
+
+    {
+        auto headerOrError = ReadFileHeader(inputFile);
+        if (!headerOrError) {
+            return Unexpected(headerOrError.Error());
+        }
+        classCtxStr = std::move(headerOrError->second);
+    }
+
+    {
+        auto pandaFilesOrError = ReadPandaFilesSection(inputFile);
+        if (!pandaFilesOrError) {
+            return Unexpected(pandaFilesOrError.Error());
+        }
+        pandaFiles = std::move(*pandaFilesOrError);
+    }
+    data.AddPandaFiles(pandaFiles);
+
+    auto sectionInfosOrError = ReadSectionInfos(inputFile);
+    if (!sectionInfosOrError) {
+        return Unexpected(sectionInfosOrError.Error());
+    }
+
+    auto nOrError = ReadAllMethodsSections(inputFile, *sectionInfosOrError, data);
+    if (!nOrError) {
+        return Unexpected(nOrError.Error());
+    }
+
+    return data;
+}
 }  // namespace ark::pgo

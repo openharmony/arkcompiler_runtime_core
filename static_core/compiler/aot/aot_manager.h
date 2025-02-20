@@ -50,25 +50,7 @@ public:
         return bootClassContext_;
     }
 
-    void ParseClassContextToFile(std::string_view context)
-    {
-        size_t start = 0;
-        size_t end;
-        size_t pathEnd;
-        if (context.empty()) {
-            profiledPandaFiles_.insert("");
-            return;
-        }
-        while ((end = context.find(':', start)) != std::string_view::npos) {
-            pathEnd = context.find('*', start);
-            ASSERT(pathEnd != std::string_view::npos);
-            profiledPandaFiles_.insert(context.substr(start, pathEnd - start));
-            start = end + 1;
-        }
-        pathEnd = context.find('*', start);
-        ASSERT(pathEnd != std::string_view::npos);
-        profiledPandaFiles_.insert(context.substr(start, pathEnd - start));
-    }
+    void ParseClassContextToFile(std::string_view context);
 
     void SetBootClassContext(PandaString context)
     {
@@ -210,6 +192,10 @@ private:
 
 class AotClassContextCollector {
 public:
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    static constexpr char DELIMETER = ':';
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    static constexpr char HASH_DELIMETER = '*';
     explicit AotClassContextCollector(PandaString *acc, bool useAbsPath = true) : acc_(acc), useAbsPath_(useAbsPath) {};
     bool operator()(const panda_file::File &pf);
 

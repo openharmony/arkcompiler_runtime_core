@@ -25,14 +25,24 @@
 //! PASS_AFTER   "TryCatchResolving"
 //! INST_NOT     "Throw"
 
-//! CHECKER      Try Catch Resolving AOT with with exception instances as function parameters
-//! SKIP_IF       @architecture == "arm32"
+//! CHECKER      Try Catch Resolving AOT optimize with nested catches
+//! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC     options: "--compiler-regex=ets_try_catch8.MultipleCatch::multipleCatch"
 //! METHOD       "ets_try_catch8.MultipleCatch::multipleCatch"
 //! PASS_AFTER   "Inline"
 //! INST_COUNT   "Throw",2
 //! PASS_AFTER   "TryCatchResolving"
 //! INST_COUNT   "Throw",2
+
+//! CHECKER      Try Catch Resolving AOT+PGO optimize with nested catches
+//! SKIP_IF      @architecture == "arm32"
+//! RUN_PGO_PROF entry: "ets_try_catch8.ETSGLOBAL::main"
+//! RUN_PGO_PAOC options: "--compiler-regex=ets_try_catch8.MultipleCatch::multipleCatch"
+//! METHOD       "ets_try_catch8.MultipleCatch::multipleCatch"
+//! PASS_AFTER   "Inline"
+//! INST_COUNT   "Throw",2
+//! PASS_AFTER   "TryCatchResolving"
+//! INST_NOT     "Throw"
 
 class Exception0 extends Exception {}
 

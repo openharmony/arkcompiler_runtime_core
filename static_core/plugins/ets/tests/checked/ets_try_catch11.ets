@@ -24,7 +24,7 @@
 //! INST         "DeoptimizeIf"
 
 //! CHECKER      Try Catch Resolving AOT IfImm is not replaced by DeoptimizeIf
-//! SKIP_IF       @architecture == "arm32"
+//! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC     options: "--compiler-regex=ets_try_catch11.IfCatch::__noinline__ifCatch"
 //! METHOD       "ets_try_catch11.IfCatch::__noinline__ifCatch"
 //! PASS_AFTER   "Inline"
@@ -32,6 +32,17 @@
 //! PASS_AFTER   "TryCatchResolving"
 //! INST_COUNT   "Throw",2
 //! INST_NOT     "DeoptimizeIf"
+
+//! CHECKER      Try Catch Resolving AOT+PGO IfImm is replaced by DeoptimizeIf
+//! SKIP_IF      @architecture == "arm32"
+//! RUN_PGO_PROF entry: "ets_try_catch11.ETSGLOBAL::main"
+//! RUN_PGO_PAOC options: "--compiler-regex=ets_try_catch11.IfCatch::__noinline__ifCatch"
+//! METHOD       "ets_try_catch11.IfCatch::__noinline__ifCatch"
+//! PASS_AFTER   "Inline"
+//! INST_COUNT   "Throw",2
+//! PASS_AFTER   "TryCatchResolving"
+//! INST_NOT     "Throw"
+//! INST         "DeoptimizeIf"
 
 class Exception0 extends Exception {}
 class Exception1 extends Exception {}
