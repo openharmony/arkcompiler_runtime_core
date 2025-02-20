@@ -93,19 +93,37 @@ endfunction()
 
 function(compile_ets_sources WORK_DIR ABC_TARGET ABC_FILES ETS_SOURCES)
     set(oneValueArgs ARKTS_CONFIG ETSPATH OPT_LEVEL)
-    set(multiValueArgs )
+    set(multiValueArgs ARKTS_CONFIGS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     add_custom_target(${ABC_TARGET})
 
     # Required for clearing `RESULT` when calling the function multiple times from a single scope
     set(RESULT "")
-    foreach(SOURCE_ETS IN LISTS ETS_SOURCES)
+
+    list(LENGTH ETS_SOURCES SOURCES_LIST_LENGTH)
+
+    if(DEFINED ARG_ARKTS_CONFIGS)
+        list(LENGTH ARG_ARKTS_CONFIGS CONFIG_LIST_LENGTH)
+        if(NOT SOURCES_LIST_LENGTH EQUAL CONFIG_LIST_LENGTH)
+            error("If set, the number of elements in ARKTS_CONFIGS should be equal to the number of ETS_SOURCES")
+        endif()
+    endif()
+
+    math(EXPR LAST_INDEX "${SOURCES_LIST_LENGTH} - 1")
+
+    foreach(i RANGE ${LAST_INDEX})
+        list(GET ETS_SOURCES ${i} SOURCE_ETS)
+        if(DEFINED ARG_ARKTS_CONFIGS)
+            list(GET ARG_ARKTS_CONFIGS ${i} ARKTS_CONFIG)
+        else()
+            set(ARKTS_CONFIG "${ARG_ARKTS_CONFIG}")
+        endif()
         get_filename_component(SOURCE_FNAME ${SOURCE_ETS} NAME_WE)
         set(SOURCE_ABC ${WORK_DIR}/${ABC_TARGET}-${SOURCE_FNAME}.abc)
         set(SOURCE_ABC_TARGET ${ABC_TARGET}-${SOURCE_FNAME}-ets-es2panda)
         compile_ets_code(${SOURCE_ETS} ${SOURCE_ABC} ${SOURCE_ABC_TARGET}
-                         ARKTS_CONFIG ${ARG_ARKTS_CONFIG}
+                         ARKTS_CONFIG ${ARKTS_CONFIG}
                          ETSPATH ${ARG_ETSPATH}
                          OPT_LEVEL ${ARG_OPT_LEVEL})
         add_dependencies(${ABC_TARGET} ${SOURCE_ABC_TARGET})

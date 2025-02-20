@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "package": "@dir",
+    "baseUrl": ".",
+    "paths": {
+      "@dir_with_same_prefix": ["../dir_with_same_prefix"]
+    }
+  }
+}

@@ -139,11 +139,12 @@ function(run_ets_code_impl TARGET WORK_DIR ETS_SOURCES)
     endif()
 
     set(oneValueArgs ENTRYPOINT ETSPATH OPT_LEVEL)
-    set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
+    set(multiValueArgs ARKTS_CONFIGS RUNTIME_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     set(ABC_TARGET ${TARGET}-abc)
     compile_ets_sources(${WORK_DIR} ${ABC_TARGET} ABC_FILES "${ETS_SOURCES}"
+                        ARKTS_CONFIGS ${ARG_ARKTS_CONFIGS}
                         ETSPATH ${ARG_ETSPATH}
                         OPT_LEVEL ${ARG_OPT_LEVEL}
     )
@@ -184,7 +185,7 @@ add_custom_target(ets_run_int_ets_code_tests)
 # NOTE(vpukhov): use a common format
 function(run_int_ets_code TARGET WORK_DIR)
     set(oneValueArgs ENTRYPOINT ETSPATH OPT_LEVEL)
-    set(multiValueArgs SOURCES RUNTIME_EXTRA_OPTIONS)
+    set(multiValueArgs SOURCES ARKTS_CONFIGS RUNTIME_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     add_custom_target(${TARGET})
@@ -196,6 +197,7 @@ function(run_int_ets_code TARGET WORK_DIR)
         ${ARG_RUNTIME_EXTRA_OPTIONS}
     )
     run_ets_code_impl(${TARGET}-cpp ${WORK_DIR} "${ARG_SOURCES}"
+                      ARKTS_CONFIGS ${ARG_ARKTS_CONFIGS}
                       ETSPATH ${ARG_ETSPATH}
                       ENTRYPOINT ${ARG_ENTRYPOINT}
                       OPT_LEVEL ${ARG_OPT_LEVEL}
@@ -209,6 +211,7 @@ function(run_int_ets_code TARGET WORK_DIR)
         ${ARG_RUNTIME_EXTRA_OPTIONS}
     )
     run_ets_code_impl(${TARGET}-irtoc ${WORK_DIR} "${ARG_SOURCES}"
+                      ARKTS_CONFIGS ${ARG_ARKTS_CONFIGS}
                       ETSPATH ${ARG_ETSPATH}
                       ENTRYPOINT ${ARG_ENTRYPOINT}
                       OPT_LEVEL ${ARG_OPT_LEVEL}
@@ -223,6 +226,7 @@ function(run_int_ets_code TARGET WORK_DIR)
             ${ARG_RUNTIME_EXTRA_OPTIONS}
         )
         run_ets_code_impl(${TARGET}-llvmirtoc ${WORK_DIR} "${ARG_SOURCES}"
+                          ARKTS_CONFIGS ${ARG_ARKTS_CONFIGS}
                           ETSPATH ${ARG_ETSPATH}
                           ENTRYPOINT ${ARG_ENTRYPOINT}
                           OPT_LEVEL ${ARG_OPT_LEVEL}
