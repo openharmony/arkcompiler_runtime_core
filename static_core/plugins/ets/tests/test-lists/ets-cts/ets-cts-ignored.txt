@@ -126,6 +126,16 @@
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_7.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_10.sts
 
+# 23238 Method returning 'this' returns wrong instance
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_8.sts
+
+# 23239 Methods returning 'this' have wrong return types
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_n_1.sts
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_n_3.sts
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_n_4.sts
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_n_8.sts
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_n_9.sts
+
 # 20935 Runtime aborts on access to common field with generics
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_11.sts
 
