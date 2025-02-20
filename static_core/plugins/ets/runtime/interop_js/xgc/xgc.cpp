@@ -20,6 +20,10 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+#include "native_engine/native_reference.h"
+#include "interfaces/inner_api/napi/native_node_api.h"
+#endif  // PANDA_JS_ETS_HYBRID_MODE
 
 namespace ark::ets::interop::js {
 
@@ -75,8 +79,9 @@ static auto CreateXObjectHandler(ets_proxy::SharedReferenceStorage *storage, STS
         do {
             if (it->HasJSFlag() && it->MarkIfNotMarked()) {
                 LOG_XGC(DEBUG) << "napi_mark_from_object for ref " << *it;
-                arkplatform::EcmaVMInterface *ecmaIface = it->GetCtx()->GetEcmaVMInterface();
-                ecmaIface->MarkFromObject(it->GetJsRef());
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+                napi_mark_from_object(it->GetCtx()->GetJSEnv(), it->GetJsRef());
+#endif  // PANDA_JS_ETS_HYBRID_MODE
                 LOG_XGC(DEBUG) << "Notify to JS waiters";
                 stsVmIface->NotifyWaiters();
             }
@@ -228,11 +233,13 @@ void XGC::GCPhaseFinished(mem::GCPhase phase)
     }
 }
 
-void XGC::MarkFromObject(void *obj)
+void XGC::MarkFromObject([[maybe_unused]] void *obj)
 {
     ASSERT(obj != nullptr);
     // NOTE(audovichenko): Find the corresponding ref
-    auto *sharedRef = reinterpret_cast<ets_proxy::SharedReference *>(obj);
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+    NativeReference *nativeRef = reinterpret_cast<NativeReference *>(obj);
+    auto *sharedRef = reinterpret_cast<ets_proxy::SharedReference *>(nativeRef->GetData());
     LOG_XGC(DEBUG) << "MarkFromObject for " << sharedRef;
     if (sharedRef->MarkIfNotMarked()) {
         EtsObject *etsObj = sharedRef->GetEtsObject();
@@ -240,6 +247,7 @@ void XGC::MarkFromObject(void *obj)
         LOG_XGC(DEBUG) << "Start marking from " << etsObj << " (" << etsObj->GetClass()->GetDescriptor() << ")";
         gc->MarkObjectRecursively(etsObj->GetCoreType());
     }
+#endif  // PANDA_JS_ETS_HYBRID_MODE
 }
 
 size_t XGC::ComputeNewSize()

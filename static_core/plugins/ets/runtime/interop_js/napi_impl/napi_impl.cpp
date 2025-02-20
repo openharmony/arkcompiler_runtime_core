@@ -31,6 +31,14 @@ napi_xref_unwrap([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js_o
                        << " is implemented in later versions of OHOS, please update." << std::endl;
     return napi_ok;
 }
+
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_mark_from_object([[maybe_unused]] napi_env env, [[maybe_unused]] napi_ref ref)
+{
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+                       << " is implemented in later versions of OHOS, please update." << std::endl;
+    return napi_ok;
+}
 #endif
 
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)

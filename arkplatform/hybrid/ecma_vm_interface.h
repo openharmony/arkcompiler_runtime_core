@@ -38,7 +38,6 @@ public:
         return VMInterface::VMInterfaceType::ECMA_VM_IFACE;
     }
 
-    virtual void MarkFromObject(void* obj) = 0;
     virtual bool StartXRefMarking()
     {
         return true;

@@ -29,7 +29,7 @@ public:
         return true;
     }
 
-    void MarkFromObject([[maybe_unused]] void *obj) override {}
+    void MarkFromObject([[maybe_unused]] void *obj) {}
 
     std::vector<std::string> GetErrors()
     {
@@ -69,7 +69,7 @@ public:
             }
             auto *xref = xrefStorage->GetReference(obj);
             if (xref->HasETSFlag()) {
-                refs_[idx] = xref;
+                refs_[idx] = xref->GetJsRef();
                 ++idx;
             } else {
                 std::stringstream err;
@@ -127,7 +127,7 @@ public:
 private:
     // CC-OFFNXT(G.FMT.13-CPP) project code style
     static constexpr size_t EXPECTED_XREFS_COUNT = 3U;
-    std::array<ets_proxy::SharedReference *, EXPECTED_XREFS_COUNT> refs_;
+    std::array<napi_ref, EXPECTED_XREFS_COUNT> refs_;
     std::vector<std::string> errorMessages_;
 };
 

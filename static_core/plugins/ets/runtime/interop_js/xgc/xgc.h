@@ -87,7 +87,7 @@ public:
 private:
     // For allocation of XGC with the private constructor by internal allocator
     friend mem::Allocator;
-    friend void STSVMInterfaceImpl::MarkFromObject(void *obj);
+    friend void STSVMInterfaceImpl::MarkFromObject([[maybe_unused]] void *obj);
 
     XGC(PandaEtsVM *vm, STSVMInterfaceImpl *stsVmIface, ets_proxy::SharedReferenceStorage *storage);
     static XGC *instance_;
