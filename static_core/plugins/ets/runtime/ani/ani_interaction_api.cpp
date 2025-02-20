@@ -1449,8 +1449,61 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Double_A(ani_env *env, a
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetField_Boolean(ani_env *env, ani_object object, ani_field field,
+                                                         ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return GetPrimitiveTypeField(env, object, field, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetField_Byte(ani_env *env, ani_object object, ani_field field,
+                                                      ani_byte *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return GetPrimitiveTypeField(env, object, field, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetField_Short(ani_env *env, ani_object object, ani_field field,
+                                                       ani_short *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return GetPrimitiveTypeField(env, object, field, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetField_Int(ani_env *env, ani_object object, ani_field field, ani_int *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return GetPrimitiveTypeField(env, object, field, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_GetField_Long(ani_env *env, ani_object object, ani_field field,
                                                       ani_long *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return GetPrimitiveTypeField(env, object, field, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetField_Float(ani_env *env, ani_object object, ani_field field,
+                                                       ani_float *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return GetPrimitiveTypeField(env, object, field, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetField_Double(ani_env *env, ani_object object, ani_field field,
+                                                        ani_double *result)
 {
     ANI_DEBUG_TRACE(env);
 
@@ -1581,8 +1634,86 @@ static ani_status DoGetPropertyByName(ani_env *env, ani_object object, const cha
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Boolean(ani_env *env, ani_object object, const char *name,
+                                                                  ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    return DoGetPropertyByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Byte(ani_env *env, ani_object object, const char *name,
+                                                               ani_byte *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    return DoGetPropertyByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Short(ani_env *env, ani_object object, const char *name,
+                                                                ani_short *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    return DoGetPropertyByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Int(ani_env *env, ani_object object, const char *name,
                                                               ani_int *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    return DoGetPropertyByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Long(ani_env *env, ani_object object, const char *name,
+                                                               ani_long *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    return DoGetPropertyByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Float(ani_env *env, ani_object object, const char *name,
+                                                                ani_float *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    return DoGetPropertyByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Double(ani_env *env, ani_object object, const char *name,
+                                                                 ani_double *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1914,6 +2045,88 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean_A(ani_env *env, ani_o
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Byte_V(ani_env *env, ani_object object, ani_method method,
+                                                          ani_byte *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+
+    CheckMethodReturnType(method, EtsType::BYTE);
+    return GeneralMethodCall<EtsByte>(env, object, method, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Byte(ani_env *env, ani_object object, ani_method method,
+                                                        ani_byte *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Object_CallMethod_Byte_V(env, object, method, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Byte_A(ani_env *env, ani_object object, ani_method method,
+                                                          ani_byte *result, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(args);
+
+    CheckMethodReturnType(method, EtsType::BYTE);
+    return GeneralMethodCall<EtsByte>(env, object, method, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Short_V(ani_env *env, ani_object object, ani_method method,
+                                                           ani_short *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+
+    CheckMethodReturnType(method, EtsType::SHORT);
+    return GeneralMethodCall<EtsShort>(env, object, method, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Short(ani_env *env, ani_object object, ani_method method,
+                                                         ani_short *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Object_CallMethod_Short_V(env, object, method, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Short_A(ani_env *env, ani_object object, ani_method method,
+                                                           ani_short *result, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(args);
+
+    CheckMethodReturnType(method, EtsType::SHORT);
+    return GeneralMethodCall<EtsShort>(env, object, method, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_CallMethod_Int_V(ani_env *env, ani_object object, ani_method method,
                                                          ani_int *result, va_list args)
 {
@@ -1989,6 +2202,48 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Long(ani_env *env, ani_object
     ani_status aniResult = Object_CallMethod_Long_V(env, object, method, result, args);
     va_end(args);
     return aniResult;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Float_V(ani_env *env, ani_object object, ani_method method,
+                                                           ani_float *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+
+    CheckMethodReturnType(method, EtsType::FLOAT);
+    return GeneralMethodCall<EtsFloat>(env, object, method, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Float(ani_env *env, ani_object object, ani_method method,
+                                                         ani_float *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Object_CallMethod_Float_V(env, object, method, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Float_A(ani_env *env, ani_object object, ani_method method,
+                                                           ani_float *result, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(args);
+
+    CheckMethodReturnType(method, EtsType::FLOAT);
+    return GeneralMethodCall<EtsFloat>(env, object, method, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2551,14 +2806,14 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapterVargs<279>,
     NotImplementedAdapter<280>,
     NotImplementedAdapter<281>,
-    NotImplementedAdapter<282>,
+    Object_GetField_Boolean,
     NotImplementedAdapter<283>,
-    NotImplementedAdapter<284>,
-    NotImplementedAdapter<285>,
-    NotImplementedAdapter<286>,
+    Object_GetField_Byte,
+    Object_GetField_Short,
+    Object_GetField_Int,
     Object_GetField_Long,
-    NotImplementedAdapter<288>,
-    NotImplementedAdapter<289>,
+    Object_GetField_Float,
+    Object_GetField_Double,
     Object_GetField_Ref,
     NotImplementedAdapter<291>,
     NotImplementedAdapter<292>,
@@ -2605,14 +2860,14 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<333>,
     NotImplementedAdapter<334>,
     NotImplementedAdapter<335>,
-    NotImplementedAdapter<336>,
+    Object_GetPropertyByName_Boolean,
     NotImplementedAdapter<337>,
-    NotImplementedAdapter<338>,
-    NotImplementedAdapter<339>,
+    Object_GetPropertyByName_Byte,
+    Object_GetPropertyByName_Short,
     Object_GetPropertyByName_Int,
-    NotImplementedAdapter<341>,
-    NotImplementedAdapter<342>,
-    NotImplementedAdapter<343>,
+    Object_GetPropertyByName_Long,
+    Object_GetPropertyByName_Float,
+    Object_GetPropertyByName_Double,
     Object_GetPropertyByName_Ref,
     NotImplementedAdapter<345>,
     NotImplementedAdapter<346>,
@@ -2629,21 +2884,21 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapterVargs<357>,
     NotImplementedAdapter<358>,
     NotImplementedAdapter<359>,
-    NotImplementedAdapterVargs<360>,
-    NotImplementedAdapter<361>,
-    NotImplementedAdapter<362>,
-    NotImplementedAdapterVargs<363>,
-    NotImplementedAdapter<364>,
-    NotImplementedAdapter<365>,
+    Object_CallMethod_Byte,
+    Object_CallMethod_Byte_A,
+    Object_CallMethod_Byte_V,
+    Object_CallMethod_Short,
+    Object_CallMethod_Short_A,
+    Object_CallMethod_Short_V,
     Object_CallMethod_Int,
     Object_CallMethod_Int_A,
     Object_CallMethod_Int_V,
     Object_CallMethod_Long,
     Object_CallMethod_Long_A,
     Object_CallMethod_Long_V,
-    NotImplementedAdapterVargs<372>,
-    NotImplementedAdapter<373>,
-    NotImplementedAdapter<374>,
+    Object_CallMethod_Float,
+    Object_CallMethod_Float_A,
+    Object_CallMethod_Float_V,
     Object_CallMethod_Double,
     Object_CallMethod_Double_A,
     Object_CallMethod_Double_V,
