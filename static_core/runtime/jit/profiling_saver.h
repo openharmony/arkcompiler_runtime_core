@@ -38,7 +38,7 @@ public:
     void CreateThrowData(pgo::AotProfilingData::AotMethodProfilingData *profilingData, Span<ThrowData> &runtimeThrow);
     void AddMethod(pgo::AotProfilingData *profileData, const Method *method, int32_t pandaFileIdx);
     void AddProfiledMethods(pgo::AotProfilingData *profileData, PandaVector<const Method *> &profiledMethods);
-    void SaveProfile(const PandaString &saveFilePath, PandaString &classCtxStr,
+    void SaveProfile(const PandaString &saveFilePath, const PandaString &classCtxStr,
                      PandaVector<const Method *> profiledMethods,
                      PandaUnorderedSet<std::string_view> &profiledPandaFiles);
 };

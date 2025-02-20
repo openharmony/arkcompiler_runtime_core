@@ -74,7 +74,10 @@ public:
         uint32_t currSize_;
     };
 
-    uint32_t Save(const PandaString &fileName, AotProfilingData *profObject, PandaString &classCtxStr);
+    uint32_t Save(const PandaString &fileName, AotProfilingData *profObject, const PandaString &classCtxStr);
+
+    static Expected<AotProfilingData, PandaString> Load(const PandaString &fileName, PandaString &classCtxStr,
+                                                        PandaVector<PandaString> &pandaFiles);
 
 private:
     static constexpr std::array MAGIC = {'.', 'a', 'p', '\0'};    // CC-OFF(G.NAM.03-CPP) project code style
@@ -99,7 +102,7 @@ private:
     // CC-OFFNXT(G.FUN.01-CPP) Decreasing the number of arguments will decrease the clarity of the code.
     static uint32_t WriteFileHeader(std::ofstream &fd, const std::array<char, MAGIC_SIZE> &magic,
                                     const std::array<char, VERSION_SIZE> &version, uint32_t versionPType,
-                                    uint32_t savedPType, PandaString &classCtxStr);
+                                    uint32_t savedPType, const PandaString &classCtxStr);
 
     static uint32_t WriteSectionInfosSection(std::ofstream &fd, PandaVector<SectionInfo> &sectionInfos);
 
@@ -128,6 +131,32 @@ private:
     uint32_t GetSavedTypes(FileToMethodsMap &allMethodsMap);
 
     PandaVector<SectionInfo> sectionInfos_;
+
+    template <typename T>
+    static std::ifstream &Read(std::ifstream &inputFile, T *dst, size_t n = 1, uint32_t *checkSum = nullptr)
+    {
+        return ReadBytes(inputFile, reinterpret_cast<char *>(dst), sizeof(T) * n, checkSum);
+    }
+
+    static std::ifstream &ReadBytes(std::ifstream &inputFile, char *dst, size_t n, uint32_t *checkSum = nullptr);
+
+    static Expected<PandaVector<PandaString>, PandaString> ReadPandaFilesSection(std::ifstream &inputFile);
+
+    static Expected<PandaVector<SectionInfo>, PandaString> ReadSectionInfos(std::ifstream &inputFile);
+
+    template <typename T>
+    static Expected<size_t, PandaString> ReadProfileData(std::ifstream &inputFile, const AotProfileDataHeader &header,
+                                                         PandaVector<T> &data, uint32_t &checkSum);
+
+    static Expected<uint32_t, PandaString> ReadMethodsSection(std::ifstream &inputFile, AotProfilingData &data);
+    static Expected<AotProfilingData::AotMethodProfilingData, PandaString> ReadMethodSubSection(
+        std::ifstream &inputFile, uint32_t &checkSum);
+
+    static Expected<std::pair<PgoHeader, PandaString>, PandaString> ReadFileHeader(std::ifstream &inputFile);
+
+    static Expected<size_t, PandaString> ReadAllMethodsSections(std::ifstream &inputFile,
+                                                                PandaVector<SectionInfo> &sectionInfos,
+                                                                AotProfilingData &data);
 };
 
 }  // namespace ark::pgo

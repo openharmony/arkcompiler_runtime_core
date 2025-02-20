@@ -103,3 +103,15 @@ options:
     type: std::string
     default: ""
     description: Path of the panda file in zip
+
+  - name: paoc-use-profile
+    description: Load and use AOT profile information
+    sub_options:
+    - name: path
+      type: std::string
+      default: none
+      description: Path to the file with AOT profile information
+    - name: force
+      type: bool
+      default: false
+      description: Crash if profiling file is missing or broken

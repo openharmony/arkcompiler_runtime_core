@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -324,7 +324,7 @@ class Checker
       when :pgo_use_profdata
         next unless value
         raise "call RUN with `pgo_emit_profdata: true` (or RUN_PGO_PROF) before :pgo_use_profdata" unless @profdata_file
-        options << "--paoc-use-profile=#{@profdata_file}"
+        options << "--paoc-use-profile:path=#{@profdata_file},force"
         options << "--panda-files=#{@options.test_file}"  # NOTE (urandon): this is required for compiler's runtime now
       when :env
         env = value
