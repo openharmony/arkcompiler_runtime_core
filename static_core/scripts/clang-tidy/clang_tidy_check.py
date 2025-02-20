@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
-# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -382,14 +382,10 @@ def check_file_list_duplicate(dup_path : str, file_list: list) -> bool:
 # Remove same files if their compile keys has minor differents.
 def filter_file_duplicated_options(file_list: list) -> list:
     filtered = []
-    regexp = re.compile(".*DPANDA_ENABLE_RELAYOUT_PROFILE.*")
     for file_path, keys in file_list:
         if not check_file_list_duplicate(file_path, file_list):
             filtered.append((file_path, keys))
             continue
-
-        if not regexp.search(keys):
-            filtered.append((file_path, keys))
 
     filtered.sort(key=lambda tup: tup[0])
     return filtered;
