@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,21 +13,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for cm in class_members %}
+{% for member in members %}
+
 /*---
 desc: >-
-    A class body can contain declarations of the following members:
-        • Fields,
-        • Methods,
-        • Accessors,
-        • Constructors, and
-        • Class initializers.
-tags: [negative, compile-only]
+    While extending a class or implementing interfaces, a field declared in a superclass or
+    a superintertafce can be overridden by field with the same name and the same static or
+    non-static status.
+params: {{member.params}}
+tags: [{{member.tags}}]
 ---*/
 
-class A {
-  {{cm}}
+class Base {
+  {{member.base}}
 }
 
-function main(): void {}
+class A extends Base{
+  {{member.child}}
+}
+
+function main(): void {
+  {{member.main}}
+}
+
 {% endfor %}

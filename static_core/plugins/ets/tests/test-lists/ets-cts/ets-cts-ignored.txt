@@ -1711,6 +1711,24 @@
 # 22253
 09.classes/06.method_declarations/09.methods_returning_this/methods_returning_this_interface_03.sts
 
+# 23056
+09.classes/05.field_declarations/04.overriding_fields/sample.sts
+# 23050
+09.classes/05.field_declarations/04.overriding_fields/overriding_fields_1.sts
+# 23059
+09.classes/05.field_declarations/04.overriding_fields/overriding_fields_4.sts
+09.classes/05.field_declarations/04.overriding_fields/overriding_fields_5.sts
+09.classes/05.field_declarations/04.overriding_fields/overriding_fields_6.sts
+09.classes/05.field_declarations/04.overriding_fields/overriding_fields_8.sts
+
+# 23061 Removed keyword throws
+09.classes/07.accessor_declarations/getter_exception.sts
+09.classes/07.accessor_declarations/setter_exception.sts
+
+# 23060 native accessors
+09.classes/07.accessor_declarations/getter_native_modifier.sts
+09.classes/07.accessor_declarations/setter_native_modifier.sts
+
 # 22662
 03.types/08.reference_types/05.never_type/never_class_instance_neg_12.sts
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_n_0.sts
