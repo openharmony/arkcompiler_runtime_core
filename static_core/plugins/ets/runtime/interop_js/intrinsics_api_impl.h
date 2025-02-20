@@ -61,6 +61,7 @@ void PromiseInteropReject(EtsObject *etsValue, EtsLong deferred);
 EtsString *JSONStringify(JSValue *jsvalue);
 EtsString *CompilerConvertLocalToString(void *value);
 EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value);
+JSValue *JSRuntimeGetPropertyJSValueyByKey(JSValue *objectValue, JSValue *keyValue);
 
 template <typename T>
 typename T::cpptype JSValueNamedGetter(JSValue *etsJsValue, EtsString *etsPropName)

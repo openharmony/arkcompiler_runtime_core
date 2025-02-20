@@ -126,6 +126,10 @@ export final class JSRuntime {
         JSRuntime.checkIntrinsicMethod();
     }
 
+    public static getPropertyJSValue(object: JSValue, key: JSValue): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
     // ===================
     // setProperty<TYPE>()
     // ===================
@@ -283,6 +287,51 @@ export final class JSRuntime {
     }
 
     // ===================
+    // Public API
+    // ===================
+
+    public static iterate(object: JSValue, callback: (arrElem: JSValue) => void): void
+    {
+        const global = JSRuntime.getGlobal();
+        const symbol = JSRuntime.getPropertyJSValue(global, "Symbol");
+        const symbolIterator = JSRuntime.getPropertyJSValue(symbol, "iterator");
+
+        const symbolIteratorMethod = JSRuntime.getPropertyJSValue(object, symbolIterator);
+        if (symbolIteratorMethod === undefined) {
+            throw new Error('Can not retrieve [Symbol.iterator] from given object, object is not iterable.');
+        }
+
+        const iterator = symbolIteratorMethod.call(object);
+
+        let next: JSValue;
+        let done: JSValue;
+        let value: JSValue;
+
+        while (true) {
+            next = iterator.next();
+            if (next === undefined) {
+                throw new Error('`next() return undefined, but IterationResult was expected.`')
+            }
+
+            done = next.done;
+            if (done === undefined) {
+                throw new Error('`done` field is expected in IteratorResult.');
+            }
+
+            if ((done as boolean) === true) {
+                return;
+            }
+
+            value = next.value;
+            if (value === undefined) {
+                throw new Error('`value` field is expected in IteratorResult when `done` = false.');
+            }
+
+            callback(value);
+        }
+    }
+
+    // ===================
     // Internal api
     // ===================
     public static getNumSharedJSValues(): int {
@@ -317,7 +366,7 @@ export final class JSRuntime {
     /**
      * The function triggers cross-reference GC
      * @returns gc task id
-     * @see GC.waitForFinishGC 
+     * @see GC.waitForFinishGC
      */
     public static native xgc(): long;
 
@@ -330,7 +379,7 @@ export final class JSRuntime {
     }
 
     // NOTE(konstanting): currently we keep the reference to the finQueue for the first interop context only.
-    // As this field is used only in the tests, it is okay for now, because the Interop Context instances obtain 
+    // As this field is used only in the tests, it is okay for now, because the Interop Context instances obtain
     // the correct finreg values during their initialization. But of course we should keep all the finreg references
     // here and use the tests to verify that they function correctly.
     private static finQueue: FinalizationRegistry<Object> | null = null;

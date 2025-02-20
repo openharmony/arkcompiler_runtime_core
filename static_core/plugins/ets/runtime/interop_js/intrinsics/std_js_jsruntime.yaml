@@ -148,6 +148,17 @@ intrinsics:
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetPropertyJSValueIntrinsic
     clear_flags: [can_throw, heap_inv]
 
+  - name: JSRuntimeGetPropertyJSValueByKey
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: getPropertyJSValue
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ std.interop.js.JSValue, std.interop.js.JSValue ]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeGetPropertyJSValueyByKeyIntrinsic
+    clear_flags: [can_throw, heap_inv]
+
   - name: JSRuntimeGetPropertyDouble
     space: ets
     class_name: std.interop.js.JSRuntime
@@ -440,7 +451,7 @@ intrinsics:
     interop_intrinsic_kind: creates_local
     peephole_func: PeepholeResolveQualifiedJSCall
     clear_flags: [ no_dce ]
-  
+
   # Not implemented, must be removed before codegen
   - name: CompilerLoadResolvedJSFunction
     space: ets
