@@ -470,6 +470,16 @@ NO_UB_SANITIZE static ani_status GetVersion(ani_env *env, uint32_t *result)
     return ANI_OK;
 }
 
+ani_status GetVM(ani_env *env, ani_vm **result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(result);
+
+    *result = PandaEnv::FromAniEnv(env)->GetEtsVM();
+    return ANI_OK;
+}
+
 static ani_status AllocObject(ScopedManagedCodeFix &s, ani_class cls, ani_object *result)
 {
     EtsClass *klass;
@@ -2529,7 +2539,7 @@ const __ani_interaction_api INTERACTION_API = {
     nullptr,
     nullptr,
     GetVersion,
-    NotImplementedAdapter<5>,
+    GetVM,
     NotImplementedAdapter<6>,
     NotImplementedAdapter<7>,
     NotImplementedAdapter<8>,
