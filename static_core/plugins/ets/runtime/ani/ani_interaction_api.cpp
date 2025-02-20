@@ -81,7 +81,7 @@ static inline ani_variable ToAniVariable(EtsVariable *variable)
     return reinterpret_cast<ani_variable>(variable);
 }
 
-[[maybe_unused]] static inline EtsVariable *ToInternalVariable(ani_variable variable)
+static inline EtsVariable *ToInternalVariable(ani_variable variable)
 {
     return reinterpret_cast<EtsVariable *>(variable);
 }
@@ -2837,6 +2837,94 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Void(ani_env *env, ani_object
     return status;
 }
 
+template <typename R>
+static ani_status DoVariableGetValue(ani_env *env, ani_variable variable, R *result)
+{
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(variable);
+    CHECK_PTR_ARG(result);
+
+    static constexpr auto IS_REF = std::is_same_v<R, ani_ref>;
+    using Res = std::conditional_t<IS_REF, EtsObject *, R>;
+
+    ScopedManagedCodeFix s(env);
+    EtsVariable *internalVariable = ToInternalVariable(variable);
+    EtsField *field = internalVariable->AsField();
+    ANI_CHECK_RETURN_IF_NE(field->GetEtsType(), AniTypeInfo<R>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+    EtsClass *cls = field->GetDeclaringClass();
+    Res etsRes {};
+    if constexpr (IS_REF) {
+        etsRes = cls->GetStaticFieldObject(field);
+        return s.AddLocalRef(etsRes, result);
+    } else {
+        *result = cls->GetStaticFieldPrimitive<R>(field);
+        return ANI_OK;
+    }
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Boolean(ani_env *env, ani_variable variable, ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Char(ani_env *env, ani_variable variable, ani_char *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Byte(ani_env *env, ani_variable variable, ani_byte *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Short(ani_env *env, ani_variable variable, ani_short *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Int(ani_env *env, ani_variable variable, ani_int *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Long(ani_env *env, ani_variable variable, ani_long *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Float(ani_env *env, ani_variable variable, ani_float *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Double(ani_env *env, ani_variable variable, ani_double *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Ref(ani_env *env, ani_variable variable, ani_ref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Function_Call_Short_A(ani_env *env, ani_function fn, ani_short *result,
                                                        const ani_value *args)
@@ -3361,15 +3449,15 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<132>,
     NotImplementedAdapter<133>,
     NotImplementedAdapter<134>,
-    NotImplementedAdapter<135>,
-    NotImplementedAdapter<136>,
-    NotImplementedAdapter<137>,
-    NotImplementedAdapter<138>,
-    NotImplementedAdapter<139>,
-    NotImplementedAdapter<140>,
-    NotImplementedAdapter<141>,
-    NotImplementedAdapter<142>,
-    NotImplementedAdapter<143>,
+    Variable_GetValue_Boolean,
+    Variable_GetValue_Char,
+    Variable_GetValue_Byte,
+    Variable_GetValue_Short,
+    Variable_GetValue_Int,
+    Variable_GetValue_Long,
+    Variable_GetValue_Float,
+    Variable_GetValue_Double,
+    Variable_GetValue_Ref,
     Function_Call_Boolean,
     Function_Call_Boolean_A,
     Function_Call_Boolean_V,
