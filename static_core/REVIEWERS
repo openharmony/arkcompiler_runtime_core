@@ -87,7 +87,7 @@ static_core/libpandabase/tests/ringbuf/                  @udav
 static_core/libpandabase/tests/taskmanager/              @udav @molotkovmikhail
 static_core/plugins/ets/bytecode_optimizer/              @mbolshov
 static_core/plugins/ets/compiler/                        @Prof1983
-static_core/plugins/ets/doc/spec                         @dmitriitr @Prof1983 @igelhaus @ragnvald @sergeyandreev @mbolshov @akmaevaleksey @anedoria @semenovaleksandr
+static_core/plugins/ets/doc/spec                         @dmitriitr @Prof1983 @igelhaus @ragnvald @sergeyandreev @mbolshov @akmaevaleksey @anedoria @semenovaleksandr @qyhuo32 @klooer
 static_core/plugins/ets/irtoc_scripts/                   @Prof1983 @mbolshov
 static_core/plugins/ets/isa/                             @mbolshov
 static_core/plugins/ets/libllvmbackend/                  @Prof1983 @kosovpavel @asidorov
