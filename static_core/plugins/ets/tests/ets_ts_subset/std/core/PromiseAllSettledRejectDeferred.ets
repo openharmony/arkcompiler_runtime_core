@@ -27,7 +27,7 @@ class Thenable implements PromiseLike<string> {
 
 let error = new Error('abc');
 let thenable = new Thenable(error);
-Promise.allSettled([thenable]).then<void, void>((values: PromiseSettledResult<string>[]): void => {
+Promise.allSettled([thenable]).then<void, void>((values): void => {
     if (values.length != 1) {
         console.log('Test failed. Expected an array of length 1 but got length ' + values.length + '.');
         return;

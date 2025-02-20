@@ -84,7 +84,7 @@ function main(): int {
         let queueIntPop: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
         assertEQ(queueIntPop.size, 0);
         for (let i: int = 0; i < elementsNum; ++i) {
-            let el = (random() * 10000) as int;
+            let el = (random() * 10000).toInt();
             queueIntPop.push(el);
         }
         assertEQ(queueIntPop.size, elementsNum);
@@ -132,7 +132,7 @@ function main(): int {
 
 function pusherInt() {
     for (let i = 0; i < elementsNum; i++) {
-        let el = (random() * 10000) as int;
+        let el = (random() * 10000).toInt();
         testArrayInt[i] = el;
         queueInt.push(el);
     }

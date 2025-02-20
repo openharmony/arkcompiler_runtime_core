@@ -20,7 +20,7 @@ function test1(shor: String): int {
     let lambda : (str: String, args: Object[]) => String = (str: String, args: Object[]) : String => {
         failure += checkTestResult(str, "x")
         failure += checkTestResult(args[0] as Double, new Double(0.0))
-        failure += checkTestResult(args[1] as String, shor)
+        failure += checkTestResult(args[1].toString(), shor)
         let ans = ctr.toString();
         ctr++;
         return ans;
@@ -37,7 +37,7 @@ function test2(shor: String): int {
     let lambda : (str: String, args: Object[]) => String = (str: String, args: Object[]) : String => {
         failure += checkTestResult(str, "x")
         failure += checkTestResult(args[0] as Double, new Double(0.0))
-        failure += checkTestResult(args[1] as String, shor)
+        failure += checkTestResult(args[1].toString(), shor)
         let ans = ctr.toString();
         ctr++;
         return ans;
@@ -54,8 +54,8 @@ function test3(shor: String): int {
 
     let lambda : (str: String, args: Object[]) => String = (str: String, args: Object[]) : String => {
         failure += checkTestResult(str, "x")
-        failure += checkTestResult(args[0] as Double, new Double((ctr.unboxed() * 2) as double))
-        failure += checkTestResult(args[1] as String, shor)
+        failure += checkTestResult(args[0] as Double, new Double((ctr.unboxed() * 2).toDouble()))
+        failure += checkTestResult(args[1].toString(), shor)
         let ans = ctr.toString();
         ctr++;
         return ans;
@@ -72,10 +72,10 @@ function test4(shor: String): int {
     let test : String[] = ["a", "b", "c"]
     let lambda : (str: String, args: Object[]) => String = (str: String, args: Object[]) : String => {
         failure += checkTestResult(str, "x")
-        failure += checkTestResult(args[0] as String, "x")
-        failure += checkTestResult(args[1] as String, test[ctr.unboxed()])
-        failure += checkTestResult(args[2] as Double, new Double((ctr.unboxed() * 2) as double))
-        failure += checkTestResult(args[3] as String, shor)
+        failure += checkTestResult(args[0].toString(), "x")
+        failure += checkTestResult(args[1].toString(), test[ctr.unboxed()])
+        failure += checkTestResult(args[2] as Double, new Double((ctr.unboxed() * 2).toDouble()))
+        failure += checkTestResult(args[3].toString(), shor)
         let ans = ctr.toString();
         ctr++;
         return ans;

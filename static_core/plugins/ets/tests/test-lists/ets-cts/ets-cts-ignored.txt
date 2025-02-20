@@ -26,6 +26,17 @@
 #24420
 03.types/19.union_types/ut_34.ets
 
+#26072 expected equality failed: '0' === ' ''
+06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var_1.ets
+
+#26102 Readonly array assignment does not throw CTE
+03.types/15.literal_types/function_literal_type_7.ets
+03.types/19.union_types/01.union_types_normalization/norm_29.ets
+03.types/19.union_types/01.union_types_normalization/norm_30.ets
+03.types/19.union_types/01.union_types_normalization/norm_32.ets
+03.types/19.union_types/01.union_types_normalization/norm_34.ets
+03.types/19.union_types/01.union_types_normalization/norm_35.ets
+
 #24649
 04.names_declarations_and_scopes/04.scopes/type_param_class_neg_3.ets
 
@@ -47,112 +58,17 @@
 04.names_declarations_and_scopes/08.function_declarations/throws_clause_2.ets
 04.names_declarations_and_scopes/08.function_declarations/throws_clause_3.ets
 
-#25662
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_11.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_12.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_14.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_15.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_17.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_18.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_20.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_21.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_23.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_24.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_26.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_27.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_29.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_30.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_32.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_33.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_35.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_36.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_38.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_42.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_44.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_60.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_62.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_63.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_65.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_9.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_union_normalization_3.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_union_normalization_4.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_union_normalization_5.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_10.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_11.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_12.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_13.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_17.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_3.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_4.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_5.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_6.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_7.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_8.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_9.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_multiple_0.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_multiple_2.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_interfaces/generic_interface_constraint_10.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_interfaces/generic_interface_constraint_11.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_interfaces/generic_interface_constraint_12.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_interfaces/generic_interface_constraint_13.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_interfaces/generic_interface_constraint_14.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_interfaces/generic_interface_constraint_15.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_interfaces/generic_interface_constraint_17.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_interfaces/generic_interface_constraint_23.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_interfaces/generic_interface_constraint_24.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_interfaces/generic_interface_constraint_6.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_interfaces/generic_interface_constraint_7.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_interfaces/generic_interface_constraint_8.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_interfaces/generic_interface_constraint_9.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_10.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_11.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_12.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_13.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_14.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_15.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_16.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_17.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_18.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_19.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_20.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_21.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_22.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_23.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_24.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_25.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_26.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_27.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_34.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_35.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_6.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_7.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_8.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_9.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_multiple_0.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_multiple_1.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_multiple_2.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_multiple_3.ets
-
 #24441
 05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_1.ets
 05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_2.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_3.ets
 05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_4.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_5.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_6.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_7.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_8.ets
 05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/type_parameter_variance_out_1.ets
 05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/type_parameter_variance_out_2.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/type_parameter_variance_out_3.ets
 05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/type_parameter_variance_out_4.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/type_parameter_variance_out_5.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/type_parameter_variance_out_6.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/type_parameter_variance_out_7.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/type_parameter_variance_out_8.ets
 
 #24448
 05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/wrong_type_parameter_variance_4.ets
+
 
 #24444
 05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/interface_type_parameter_variance.ets
@@ -207,6 +123,9 @@
 05.generics/03.utility_types/03.readonly_utility_type/method_excluded_from_readonly_8.ets
 05.generics/03.utility_types/03.readonly_utility_type/method_excluded_from_readonly_9.ets
 
+#14001
+06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_access_7.ets
+
 #25175
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_9.ets
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_12.ets
@@ -222,9 +141,6 @@
 
 #18118 No ClassCastError on casting to a wrong function type
 06.contexts_and_conversions/04.casting_contexts_and_conversions/06.casting_conversions_from_union/cce_5.ets
-
-#18115 CTE on a union type variable in instanceof
-06.contexts_and_conversions/04.casting_contexts_and_conversions/06.casting_conversions_from_union/un2_0.ets
 
 #25224
 06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_2.ets
@@ -248,24 +164,19 @@
 06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_8.ets
 06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_9.ets
 
-#25056
-07.expressions/01.evaluation_of_expressions/typ_2.ets
+#24036
+07.expressions/01.evaluation_of_expressions/03.operator_precedence/typeof.ets
 
 #22791 FixedArray and Array<T> support is not implemented yet
+07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_assn_28.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_cast_23.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_cast_27.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_decl_27.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_28.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_18.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_23.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_27.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_27.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_assn_22.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_assn_27.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_assn_28.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_call_28.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_cast_23.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_cast_26.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_cast_27.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_decl_26.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_decl_27.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_27.ets
 
 #24879 Cannot determine type of array expression in Union type
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_assn_29.ets
@@ -273,9 +184,6 @@
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_decl_28.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_call_30.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_cast_28.ets
-
-#23450 Cannot determine type of array literal in call context
-07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_call_28.ets
 
 #23453 Cannot cast array literal to union of arrays
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_cast_27.ets
@@ -293,15 +201,6 @@
 
 #25990
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_14.ets
-
-#24003
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_8.ets
-
-#24005
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_9.ets
-
-#20024 es2panda fails to infer type of spread expression of enum array
-07.expressions/06.spread_expression/spex_12.ets
 
 #24006 Array literal type inference needs to be improved
 07.expressions/06.spread_expression/spex_lmbd_35.ets
@@ -371,9 +270,6 @@
 
 #23062
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_23.ets
-
-#23725
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1n_2.ets
 
 #14001 Type number cannot be used as an index type
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_0.ets
@@ -487,20 +383,17 @@
 
 #18843 type compatability
 07.expressions/25.equality_expressions/01.numerical_equality_operators/char_eq_n_2.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/eq_0.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/ne_0.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/ne_3.ets
 
 #23051 Reference comparison
 07.expressions/25.equality_expressions/07.reference_equality/type_conversion_of_one_operand_to_another_type.ets
 
-#23513
+#
 07.expressions/33.constant_expression/check_array/constant_logical_expression_10.ets
 07.expressions/33.constant_expression/check_array/constant_logical_expression_11.ets
 07.expressions/33.constant_expression/check_enum/constant_logical_expression_11.ets
 07.expressions/33.constant_expression/check_enum/constant_logical_expression_12.ets
 
-#23515
+#
 07.expressions/33.constant_expression/check_array/constant_logical_expression_12.ets
 07.expressions/33.constant_expression/check_array/constant_logical_expression_13.ets
 07.expressions/33.constant_expression/check_array/constant_logical_expression_14.ets
@@ -510,11 +403,14 @@
 07.expressions/33.constant_expression/check_enum/constant_logical_expression_9.ets
 07.expressions/33.constant_expression/check_enum/constant_logical_expression_10.ets
 
-#23309
+#
 07.expressions/33.constant_expression/check_enum/constant_str_chain_initializer_2.ets
 
-#24126 es2panda aborts on for-of over a union type array
+#es2panda aborts on for-of over a union type array
 08.statements/09.for_of_statements/for_of_28.ets
+
+#24401 Generic lambda is not supported by compiler
+07.expressions/32.lambda_expression/generic.ets
 
 #25042 Ast verifier failure for for-of with labelled statement
 08.statements/11.continue_statements/continue_for_of3l.ets
@@ -559,8 +455,6 @@
 15.semantic_rules/01.subtyping/04.subtyping_for_function_types/positive_3.ets
 
 #23537
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_13.ets
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_17.ets
 15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_argument_equivalent_neg_n2_0.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/access_modifier_over_25.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/instance_method_over_n2_20.ets
@@ -575,9 +469,7 @@
 #14338 Function, method, constructor overload signatures
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_tuple_1.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_tuple_3.ets
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_array_9.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatible_signature_7.ets
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_15.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_10.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_5.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/class_method_over_n3_1.ets
@@ -673,9 +565,7 @@
 #15600 overloading methods with tuples in parameters
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_10.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_9.ets
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_6.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_14.ets
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_8.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_4.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_4.ets
 
@@ -697,7 +587,6 @@
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_10.ets
 
 #24121
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_4.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_8.ets
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_6.ets
 
@@ -742,6 +631,7 @@
 #21301 Not work overloading with union parameter, different union have the similar assambly signature, mangling is necessary
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_22.ets
 
+
 #24859 undefined register, Register type conflict
 17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_1.ets
 17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_2.ets
@@ -752,7 +642,229 @@
 17.experimental_features/09.native_functions_and_methods/01.native_functions/nat7.ets
 17.experimental_features/09.native_functions_and_methods/01.native_functions/nat8.ets
 
+#25179
+05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_11.ets
+
+#25177
+
+#25187
+
 #25679
 17.experimental_features/02.fixed_array_types/far4a.ets
 17.experimental_features/02.fixed_array_types/far4c.ets
 17.experimental_features/02.fixed_array_types/far4d.ets
+
+############
+# temporary place for the tests related to primitive types refactoring
+############
+
+# 1.
+# Resizable array is inferred for array literal in union context instead of FixedArray
+07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_assn_27.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_assn_28.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_assn_29.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_call_28.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_decl_26.ets
+# verifier error
+07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_cast_26.ets
+
+# 2.
+# TypeError: Type '[String, Double]' is not compatible with the enclosing method's
+# return type '[Object|null|undefined, Object|null|undefined]' [x.ets:1:21]
+05.generics/generic_declarations/generic_classes/test_bridge_methods_in_generic_overrides/bridge_methods_generic_5.ets
+
+# 4.
+# TypeError: Floating-point value cannot be converted [init4_2.ets:27:19]
+# it seems double literal should also be inferred via preferred type to float
+17.experimental_features/17.packages/02.package_initializer/p4/init4_1.ets
+17.experimental_features/17.packages/02.package_initializer/p4/init4_2.ets
+
+# 5. mb
+# Seems should be CTE, but now: 1. the test is positive; 2. CTE exists, but it looks like a bug with strange message
+10.interfaces/07.interface_inheritance/multi_layer_interface/type_system/type_system_26.ets
+
+# 13.
+# Assertion in IsLegalBoxedPrimitiveConversion
+17.experimental_features/07.statements/01.for-of_type_annotation/for_of_n_5.ets
+
+# 16.
+# Need to reimplement a check for overload-equivalent sigs in case of type params. Previous impl was buggy
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/neg_2.ets
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_2.ets
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_3.ets
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_4.ets
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_5.ets
+17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading_n_6.ets
+
+# 40
+# FailKind.ES2PANDA_NEG_FAIL - 24 tests:
+05.generics/03.utility_types/02.required_utility_type/method_excluded_from_required_0.ets
+05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_neg_1.ets
+05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_neg_2.ets
+
+# 46 TypeError: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type.
+07.expressions/33.constant_expression/check_enum/constant_calculation_25.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_26.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_27.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_28.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_29.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_30.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_31.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_32.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_33.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_34.ets
+07.expressions/33.constant_expression/check_enum/constant_number_conversion_5.ets
+07.expressions/33.constant_expression/check_enum/constant_number_conversion_6.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_11.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_12.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_5.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_6.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_11.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_12.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_5.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_6.ets
+
+# 47 'VERIFIER_FAIL: [TID 000c96] E/verifier: Verifier error 8: Bad array element type3
+17.experimental_features/02.fixed_array_types/far3_6.ets
+
+# 41 (divided into groups)
+
+# Runtime Fail Ignore list (looks like should work)
+05.generics/03.utility_types/01.partial_utility_type/partial_inherit3.ets
+
+# Invalid annotation field type. Only numeric, boolean, string, enum, or arrays of these types are permitted for annotation fields.
+07.expressions/33.constant_expression/check_annotation/constant_number_conversion_2.ets
+07.expressions/33.constant_expression/check_annotation/constant_unary_operation_2.ets
+
+# TypeError: Property 'fld' might not have been initialized.
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/comp_obj/comp-obj_p.ets
+
+# TypeError: Type '[String, Double]' is not compatible with the enclosing method's return type '[Object|null|undefined, Object|null|undefined]'
+05.generics/generic_declarations/generic_classes/test_bridge_methods_in_generic_overrides/bridge_methods_generic_5.ets
+
+# TypeError: Property 'dog' does not exist on type 'GermanShepherd' [2.ets:63:20] (Strange error on call GermanShepherd.guard())
+10.interfaces/07.interface_inheritance/multi_layer_interface/type_system/type_system_26.ets
+
+# IrBuilder Assert Failed ((inputType == realInputType || (realInputType == DataType::ANY && (inputType == DataType::REFERENCE || inputType == DataType::POINTER)) || (IsZeroConstant(input) && (inputType == DataType::REFERENCE || inputType == DataType::POINTER)) || (inputType == DataType::ANY && input->IsConst() && realInputType == DataType::INT64) || (GetGraph()->IsThrowApplied() && (input->GetBasicBlock()->IsEndWithThrow() || ((input->GetOpcode() == Opcode::CatchPhi || input->GetOpcode() == Opcode::Phi) && (inst->GetOpcode() == Opcode::Phi || inst->GetOpcode() == Opcode::CatchPhi))))))
+07.expressions/29.assignment/01.simple_assignment_operator/ord25.ets
+
+# Segfault
+17.experimental_features/07.statements/01.for-of_type_annotation/for_of_n_5.ets
+
+# Negative tests passed successfully (narrowing conversion from int, function oveload and enum comparision...)
+03.types/15.literal_types/function_literal_type_7.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/07.casting_conversions_to_enumeration/cte_int_enum.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var-n_6.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var-n_7.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_cons/call-cons-n3_7.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_func/call-func-n3_7.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_lmbd/call-lmbd-n3_7.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_meth/call-meth-n3_7.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_arr/comp-arr-n_6.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_arr/comp-arr-n_7.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_obj/comp-clss-n_6.ets
+06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_obj/comp-clss-n_7.ets
+07.expressions/12.indexing_expression/02.record_indexing_expression/ind_1.ets
+07.expressions/25.equality_expressions/eq_neg_101.ets
+07.expressions/25.equality_expressions/eq_neg_146.ets
+07.expressions/25.equality_expressions/eq_neg_148.ets
+07.expressions/25.equality_expressions/eq_neg_5.ets
+07.expressions/25.equality_expressions/eq_neg_52.ets
+07.expressions/25.equality_expressions/eq_neg_54.ets
+07.expressions/25.equality_expressions/eq_neg_7.ets
+07.expressions/25.equality_expressions/eq_neg_99.ets
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/neg_2.ets
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_2.ets
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_3.ets
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_4.ets
+15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_5.ets
+17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading_n_6.ets
+
+# end of 41
+
+# 48 ES2PANDA_NEG_FAIL The return type of an async function must be Promise<T>.
+17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_n_10.ets
+17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_n_11.ets
+17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_n_9.ets
+17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_n_12.ets
+17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_n_13.ets
+17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_n_14.ets
+
+# 49 Type '(resolve: (p: String) => void, reject: (p: Object|null) => void) => void' is not compatible with
+# 49 type '(resolve: (value: String|PromiseLike<String>) => void, reject: (error: Error) => void) => void' at index 1
+17.experimental_features/15.coroutines/promise_class/p_0.ets
+17.experimental_features/15.coroutines/promise_class/p_1.ets
+17.experimental_features/15.coroutines/promise_class/p_2.ets
+17.experimental_features/15.coroutines/promise_class/p_3.ets
+17.experimental_features/15.coroutines/promise_class/p_4.ets
+17.experimental_features/15.coroutines/promise_class/p_5.ets
+
+# 50 RUNTIME_FAIL RangeError: Out of bounds
+05.generics/generic_declarations/generic_in_out/generic_in_out_2.ets
+05.generics/generic_declarations/generic_in_out/generic_in_out_5.ets
+
+# 51 ASSERT IN ES2PANDA 'SyntaxError: Invalid number.' This line should be unreachable: lexer/token/number.h:169
+07.expressions/20.unary_expressions/07.bitwise_complement/bitwise_complement_neg.ets
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.assignability_with_initializer/initializer_compatibility_n_13.ets
+
+# 52 ES2PANDA_NEG_FAIL missed cte: implicit cast T -> primitive
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_2.ets
+
+# 53 'TypeError: Array initializer's type is not assignable to tuple type at index: 2
+07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_cast_1.ets
+07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_cast_3.ets
+07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_decl_1.ets
+07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_decl_3.ets
+
+# 54 RUNTIME_FAIL ClassCastError: std.core.Float cannot be cast to std.core.Double
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-un_2.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-un_4.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-un_2.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-un_4.ets
+
+# 55 RUNTIME_FAIL bug in constant values equality (fe (26.7f == 26.7) is false now :( ))
+07.expressions/33.constant_expression/check_array/constant_logical_expression_10.ets
+07.expressions/33.constant_expression/check_array/constant_logical_expression_11.ets
+07.expressions/33.constant_expression/check_enum/constant_logical_expression_11.ets
+07.expressions/33.constant_expression/check_enum/constant_logical_expression_12.ets
+
+# 56 ES2PANDA_NEG_FAIL A value of type Function can not be called directly. A developer must use the unsafeCall method instead.
+03.types/18.function_types/01.type_function/negative_1.ets
+
+# 57 ES2PANDA_NEG_FAIL Literal type does not match, have to be CTE
+03.types/19.union_types/union_type_narrowing_attribute_n.ets
+
+#58: flaky, do not delete if it passed
+07.expressions/33.constant_expression/check_array/constant_bitwise_complement_4.ets
+07.expressions/33.constant_expression/check_array/constant_bitwise_complement_5.ets
+15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_array_9.ets
+15.semantic_rules/06.type_inference/01.smart_types/un_bool_ops_8.ets
+15.semantic_rules/06.type_inference/01.smart_types/un_bool_ops_10.ets
+08.statements/15.try_statements/02.finally_clause/finally_0.ets
+08.statements/15.try_statements/02.finally_clause/finally_2.ets
+08.statements/15.try_statements/02.finally_clause/finally_3.ets
+08.statements/15.try_statements/try_2.ets
+
+#59 verifier in lambda
+07.expressions/06.spread_expression/spex_lmbd_32.ets
+07.expressions/06.spread_expression/spex_lmbd_33.ets
+07.expressions/06.spread_expression/spex_lmbd_34.ets
+07.expressions/06.spread_expression/spex_lmbd_36.ets
+07.expressions/06.spread_expression/spex_lmbd_38.ets
+07.expressions/06.spread_expression/spex_lmbd_40.ets
+07.expressions/06.spread_expression/spex_lmbd_41.ets
+07.expressions/06.spread_expression/spex_lmbd_42.ets
+07.expressions/06.spread_expression/spex_lmbd_43.ets
+07.expressions/06.spread_expression/spex_lmbd_44.ets
+07.expressions/06.spread_expression/spex_lmbd_45.ets
+07.expressions/06.spread_expression/spex_lmbd_47.ets
+05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_2.ets
+05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_2.ets
+
+# #25111
+17.experimental_features/02.fixed_array_types/far3_0.ets
+17.experimental_features/02.fixed_array_types/far3_1.ets
+17.experimental_features/02.fixed_array_types/far3_2.ets
+17.experimental_features/02.fixed_array_types/far3_3.ets
+17.experimental_features/02.fixed_array_types/far3_4.ets
+17.experimental_features/02.fixed_array_types/far3_7.ets

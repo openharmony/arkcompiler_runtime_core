@@ -16,13 +16,13 @@
 
 class Operations {
     static sum(a0: short, a1: short): short {
-        return a0 + a1 as short;
+        return (a0 + a1).toShort();
     }
 }
 
 class A {
     static funcA(a0: short, a1: short): short {
-        return a0 + a1 as short;
+        return (a0 + a1).toShort();
     }
 
     static funcA(a0: int, a1: int): int {
@@ -36,7 +36,7 @@ class A {
 
 class B extends A{
     static funcB(a0: short, a1: short): short {
-        return a1 - a0 as short;
+        return (a1 - a0).toShort();
     }
 }
 
@@ -45,7 +45,7 @@ class C extends A{
 
 class D extends A{
     static funcA(a0: short, a1: short): short {
-        return a1 - a0 as short;
+        return (a1 - a0).toShort();
     }
 }
 
@@ -70,11 +70,11 @@ class F {
 
 class G {
     public static publicMethod(a0: short, a1: short): short {
-        return a0 + a1 as short;
+        return (a0 + a1).toShort();
     }
 
     private static privateMethod(a0: short, a1: short): short {
-        return a1 - a0 as short;
+        return (a1 - a0).toShort();
     }
 
     static callPrivateMethod(a0: short, a1: short): short {

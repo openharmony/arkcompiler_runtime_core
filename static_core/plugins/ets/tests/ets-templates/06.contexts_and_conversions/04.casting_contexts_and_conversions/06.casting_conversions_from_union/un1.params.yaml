@@ -48,7 +48,7 @@ cases:
           type N2 = string|undefined
           type N3 = Error|Boolean[]|number[]
           type UT = N1|N2|N3
-          let la: long[] = [42.0 as long] as long[]
+          let la: long[] = [42 as long] as long[]
           let nab: Number[] = [new Number()] as Number[]
           let s: string = "abc"
           let e: Error = new Error()

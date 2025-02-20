@@ -18,8 +18,8 @@ desc: Test floating point self reduction(--a).
 ---*/
 
 function main(): void {
-  let a: float = 10.5;
+  let a: float = 10.5f;
   let b = --a;
 
-  assertTrue(b === 9.5);
+  assertTrue(b === 9.5f);
 }

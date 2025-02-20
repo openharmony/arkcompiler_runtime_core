@@ -10,23 +10,14 @@ koala-related-benchmarks/arkts-phase1.ets
 #19807
 regression/12581_custom_class_Engine_array.ets
 
-#25112
-regression/25112.ets
-
 #25425
-regression/15278_0.ets
 regression/15278_1.ets
 
 #22791
-regression/16158_0.ets
 regression/16158_2.ets
 
 #19666  (Feature: Null safety tests)
-spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-default-param_2.ets
-spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-default-param_8.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-result_2.ets
-spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-default-param_2.ets
-spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-default-param_8.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-result_2.ets
 spec/nullables/nullable-member_2.ets
 
@@ -39,7 +30,6 @@ spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-para
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-param_6.ets
 
 ### Undefined type
-spec/03.types/References_Types/Type_undefined/define/define-class-member-as-undefined-in-other-class_1.ets
 spec/03.types/References_Types/Type_undefined/undefined-and-array-of-class-and-undefined_10.ets
 spec/03.types/References_Types/Type_undefined/undefined-and-array-of-class-and-undefined_9.ets
 
@@ -165,12 +155,6 @@ spec/09.classes/constructor-inheritance/issue14720_6.ets
 #24361
 spec/09.classes/constructor-inheritance/issue14720_4.ets
 spec/09.classes/constructor-inheritance/issue14720_5.ets
-
-#21176
-spec/09.classes/9.5.Field_Declaration/class_with_optional_attributes_0006.ets
-
-19725
-spec/09.classes/9.6.Method_Declarations/Issue-14273_3.ets
 
 ### Negative tests (Interfaces overriding issues)
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interface_overriding_02.ets
@@ -304,10 +288,6 @@ spec/16.Support_for_GUI_Programming/struct-type/test-struct-invoke_0.ets
 spec/16.Support_for_GUI_Programming/struct-type/test-struct-invoke_1.ets
 spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-as-name_2.ets
 
-### Trailing lambda issues: Valid cases but not supported features
-spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_03.ets
-spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_04.ets
-
 #19719
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s01-0030.ets
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s01-0080.ets
@@ -328,12 +308,8 @@ spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-08.ets
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
 
-#25851
-std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
-
 #25344
 std/core/IntlNumberFormatSupportedLocalesOfTest2.ets
-std/core/IntlNumberFormatFaultLocaleTest.ets
 
 #25239
 std/core/IntlNumberFormatSupportedLocalesOfTest3.ets
@@ -363,8 +339,6 @@ std/core/std_core_typedarrays_bignum__BigInt64Array.ets
 std/core/std_core_typedarrays_bignum__BigUint64Array.ets
 
 #22948 TypeApi produces invalid bytecode
-std/core/TypeCreateClassTest.ets
-std/core/TypeCreateInterfaceTest.ets
 std/core/TypeCreatePrimitiveNameTest.ets
 
 ### Negative tests (Import-export)
@@ -401,3 +375,183 @@ std/math/std_math_clz64_long.ets
 
 #18766
 spec/partial_type/partialType_main.ets
+
+#25752
+float32array_newFloat32Array_newArrayBuffer_2_Float32Array_BYTES_PER_ELEMENT___1_0_pars_0.ets
+#25740
+uint32array_newUint32Array_newArrayBuffer_2_Uint32Array_BYTES_PER_ELEMENT__1_0_pars_0.ets
+#25741
+uint32array_newUint32Array_newArrayBuffer_2_Uint32Array_BYTES_PER_ELEMENT__9_0_pars_0.ets
+
+#21382 - fixed array -> T[] casts
+escompat/ArrayTest1.ets
+escompat/ArrayTest2.ets
+escompat/ArrayTest3.ets
+escompat/ArrayTest4.ets
+escompat/ArrayTest5.ets
+escompat/ArrayTest6.ets
+escompat/ArrayProxyTest.ets
+std/core/std_core_typedarrays_function2_Int8Array.ets
+
+#21382 - instance method on primitive
+std/core/std_core_char_instance_Char_toUpperCase.ets
+
+#24986 (17 tests)
+std/core/Object.ets
+std/math/std_math_sign_double.ets
+std/core/IntlPluralRulesTest.ets
+std/core/TypeAssignableFromTest.ets
+std/core/std_core_char_instance_Char_toLowerCase.ets
+std/core/std_core_type_numeric_type_numeric_type.ets
+escompat/JsonTest.ets
+spec/09.classes/Accessor_Declarations/issue-15142_9.ets
+spec/03.types/References_Types/Tuples_type/tuple_write_3.ets
+std/core/NumberTest.ets
+escompat/JsonStringifyTest.ets
+
+############
+# temporary place for the tests related to primitive types refactoring
+############
+
+# 1.
+# TypeError: Reference to splice is ambiguous
+
+# 2.
+# TypeError: Property 'toBigInt' does not exist on type 'BigInt'
+spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-11.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-12.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-13.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-18.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-19.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-dec-1.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-dec-2.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-dec.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-4-1.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-4.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-5-1.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-5.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-1.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-2.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-inc.ets
+
+# 3.
+# TypeError: Value is possibly nullish
+std/containers/concurrent_hash_map/ConcurrentHashMap_ForEachTest.ets
+std/containers/concurrent_hash_map/ConcurrentHashMap_PressureTest_Remove.ets
+std/core/TypeCreateErasedBodyTest.ets
+std/core/TypeMethodInvoke.ets
+std/core/std_core_string_String_repeat_int.ets
+std/core/std_core_string_String_repeat_number.ets
+escompat/escompat_BigInt_instance_BigInt_toString_011.ets
+std/core/std_core_string_String_codePointCount_number_number.ets
+
+# 4.
+# TypeError: Reference to lastIndexOf is ambiguous
+std/core/std_core_typedarrays_methods__Float32Array.ets
+std/core/std_core_typedarrays_methods__Float64Array.ets
+std/core/std_core_typedarrays_methods__Float64Array_001.ets
+std/core/std_core_typedarrays_methods__Int16Array.ets
+std/core/std_core_typedarrays_methods__Int32Array.ets
+std/core/std_core_typedarrays_methods__Int8Array.ets
+std/core/std_core_typeduarrays_methods__Uint16Array.ets
+std/core/std_core_typeduarrays_methods__Uint32Array.ets
+std/core/std_core_typeduarrays_methods__Uint8Array.ets
+std/core/std_core_typeduarrays_methods__Uint8ClampedArray.ets
+
+# 5.
+# TypeError: Unresolved reference compareWrapperObjectValue
+# TypeError: This expression is not callable
+
+# 6.
+# verifier failures:
+std/core/std_core_typedarrays_methods__Float32Array.ets
+std/core/std_core_typedarrays_methods__Float64Array.ets
+std/core/std_core_typedarrays_methods__Float64Array_001.ets
+std/core/std_core_typedarrays_methods__Int16Array.ets
+std/core/std_core_typedarrays_methods__Int32Array.ets
+std/core/std_core_typedarrays_methods__Int8Array.ets
+escompat/JsonTest.ets
+spec/09.classes/Accessor_Declarations/issue-15142_9.ets
+
+# 7.
+# runtime failures:
+std/core/std_core_value_array_value_all_006.ets
+std/serialization/std_serialization_json_stringify_float_array.ets
+
+# 8.
+# abort
+spec/03.types/References_Types/Tuples_type/tuple_write_3.ets
+spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-03.ets
+std/core/NumberTest.ets
+
+# 9.
+# other fails 
+escompat/JsonStringifyTest.ets
+escompat/escompat_BigInt_instance_BigInt_toString_011.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-11.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-12.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-13.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-18.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-19.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-dec-1.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-dec-2.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-dec.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-4-1.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-4.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-5-1.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-5.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-1.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-2.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-inc.ets
+std/concurrency/AsyncLockTest.ets
+std/containers/concurrent_hash_map/ConcurrentHashMap_ForEachTest.ets
+std/containers/concurrent_hash_map/ConcurrentHashMap_PressureTest_Remove.ets
+std/core/TypeCreateErasedBodyTest.ets
+std/core/TypeMethodInvoke.ets
+std/core/std_core_string_String_codePointCount_number_number.ets
+std/core/std_core_string_String_repeat_int.ets
+std/core/std_core_string_String_repeat_number.ets
+std/core/std_core_typedarrays_methods__Float32Array.ets
+std/core/std_core_typedarrays_methods__Float64Array.ets
+std/core/std_core_typedarrays_methods__Float64Array_001.ets
+std/core/std_core_typedarrays_methods__Int16Array.ets
+std/core/std_core_typedarrays_methods__Int32Array.ets
+std/core/std_core_typedarrays_methods__Int8Array.ets
+std/core/std_core_typeduarrays_methods__Uint16Array.ets
+std/core/std_core_typeduarrays_methods__Uint32Array.ets
+std/core/std_core_typeduarrays_methods__Uint8Array.ets
+std/core/std_core_typeduarrays_methods__Uint8ClampedArray.ets
+std/core/tolocalestr/NumberLocaleStringTest.ets
+escompat/JsonReplacerTest.ets
+escompat/JsonStringifyRegExpExecArrayTest.ets
+std/core/ConsoleDirTest.ets
+std/core/std_core_value_class_value_all_006.ets
+std/serialization/std_serialization_json_2_stringify_Empty_User_Array.ets
+std/serialization/std_serialization_json_2_stringify_User_With_Desc_Array.ets
+std/serialization/std_serialization_json_2_stringify_User_With_Long_Array.ets
+std/serialization/std_serialization_json_2_stringify_User_array.ets
+std/serialization/std_serialization_json_2_stringify_User_array_with_null.ets
+std/serialization/std_serialization_json_stringify_Long_array.ets
+std/serialization/std_serialization_json_stringify_Object_Mix_Array.ets
+std/serialization/std_serialization_json_stringify_Object_array.ets
+std/serialization/std_serialization_json_stringify_String_array.ets
+std/serialization/std_serialization_json_stringify_String_array_white_space.ets
+std/serialization/std_serialization_json_stringify_boolean_array.ets
+std/serialization/std_serialization_json_stringify_byte_array.ets
+std/serialization/std_serialization_json_stringify_char_array.ets
+std/serialization/std_serialization_json_stringify_int_array.ets
+std/serialization/std_serialization_json_stringify_long_array.ets
+std/serialization/std_serialization_json_stringify_short_array.ets
+std/core/std_core_string_String_charCodeAt_int.ets
+std/core/std_core_string_String_getLength.ets
+std/core/std_core_string_String_indexOf_String_int.ets
+std/core/std_core_string_String_indexOf_String_number.ets
+std/core/std_core_string_String_indexOf_char_int.ets
+std/core/std_core_string_String_lastIndexOf_String_int.ets
+std/core/std_core_string_String_lastIndexOf_char_int.ets
+std/core/std_core_string_String_search_String.ets
+std/core/std_core_typeduarrays_methods__BigUint64Array.ets
+regression/15278_0.ets
+spec/07.expressions/7.32.Lambda_Expressions/callMethodFromAsyncLambda2.ets
+std/core/IntlNumberFormatResolvedOptionsTest.ets
+std/core/dateformat/IntlDateFormatRangeOptionsTest.ets

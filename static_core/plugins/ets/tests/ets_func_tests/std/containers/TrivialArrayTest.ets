@@ -18,15 +18,15 @@ function main(): void {
     assertEQ( arr.length, 0)
     for (let i = 0; i < 30; i++) {
         assertEQ( arr.length, i)
-        arr.push(i as number)
+        arr.push(i)
     }
     for (let i = 0; i < 30; i++) {
-        assertTrue( arr.includes(i as number, undefined))
+        assertTrue( arr.includes(i, undefined))
     }
     assertEQ( arr.at(50), undefined)
     assertEQ( arr.length, 30)
     for (let i = 0; i < 30; i++) {
-        assertEQ( arr.pop()! as Object as Double as double as int, 30 - 1 - i)
+        assertEQ( arr.pop()!, 30 - 1 - i)
     }
     assertEQ( arr.length, 0)
 
@@ -40,26 +40,26 @@ function test_reverse(): void {
     assertEQ( arr.length, 0)
     for (let i = 0; i < 30; i++) {
         assertEQ( arr.length, i)
-        arr.push(i as number)
+        arr.push(i)
     }
     arr.reverse()
     for (let i = 0; i < 30; i++) {
-        assertEQ( arr.indexOf(i as number, undefined), 30 - 1 - i)
+        assertEQ( arr.indexOf(i, undefined), 30 - 1 - i)
     }
 }
 
 function test_splice_1(): void {
     const arr = new Array<number>()
     for (let i = 0; i <= 3; i++) {
-        arr.push(i as number)
+        arr.push(i)
     }
     const other = arr.splice(1)
     assertEQ( arr.length, 1)
-    assertEQ( arr.indexOf(0 as number, undefined), 0)
+    assertEQ( arr.indexOf(0, undefined), 0)
 
     assertEQ( other.length, 3)
     for (let i = 1; i <= 3; i++) {
-        assertEQ( other.indexOf(i as number, undefined), i - 1)
+        assertEQ( other.indexOf(i, undefined), i - 1)
     }
 
     other.splice(1, undefined, 6, 7, 8);

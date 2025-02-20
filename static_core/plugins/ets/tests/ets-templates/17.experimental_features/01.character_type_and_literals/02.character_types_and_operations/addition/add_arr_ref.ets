@@ -25,7 +25,7 @@ function main() {
     const v1 = new Char({{v.v1}})
     const v2 = new Char({{v.v2}})
 
-    a[0] = ({{v.exp}}) as Char  // Explicit cast to Char is needed here
+    a[0] = ({{v.exp}}).toChar()  // Explicit cast to Char is needed here
     assertEQ(a[0], {{v.r}})
 }
 {%- endfor %}

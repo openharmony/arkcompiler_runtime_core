@@ -14,7 +14,7 @@
  */
 
 const SINGLE = [1];
-const ARRAY = [Int.MAX_VALUE,-1,0,1,2,3,4,5,6,7,8,9,Int.MIN_VALUE];
+const ARRAY: Array<Double> = [Int.MAX_VALUE,-1,0,1,2,3,4,5,6,7,8,9,Int.MIN_VALUE];
 const EMPTY_JOINED = "2147483647-10123456789-2147483648";
 const COMMA_JOINED = "2147483647,-1,0,1,2,3,4,5,6,7,8,9,-2147483648";
 const NSIGN_JOINED = "2147483647###-1###0###1###2###3###4###5###6###7###8###9###-2147483648";

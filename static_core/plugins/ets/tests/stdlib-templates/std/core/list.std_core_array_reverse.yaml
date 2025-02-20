@@ -142,16 +142,16 @@
     method_throws: "false",
     method_test_index_data:
       {
-        test1: { arr: "[1.0 as float]" },
-        test2: { arr: "[1.0 as float, 2.0 as float]" },
-        test3: { arr: "[1.0 as float, 2.0 as float, 3.0 as float]" },
+        test1: { arr: "[1.0f]" },
+        test2: { arr: "[1.0f, 2.0f]" },
+        test3: { arr: "[1.0f, 2.0f, 3.0f]" },
         test4: { arr: "[]" },
       },
     method_expected_data:
       {
-        test1: "[1.0 as float]",
-        test2: "[2.0 as float, 1.0 as float]",
-        test3: "[3.0 as float, 2.0 as float, 1.0 as float]",
+        test1: "[1.0f]",
+        test2: "[2.0f, 1.0f]",
+        test3: "[3.0f, 2.0f, 1.0f]",
         test4: "[]",
       },
   }

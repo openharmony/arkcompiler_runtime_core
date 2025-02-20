@@ -15,80 +15,80 @@
 cases:
 
   - src_type: Byte
-    dst_type: short
+    dst_type: Short
     values: [-128 as byte, 0 as byte, 127 as byte]
 
   - src_type: Byte
-    dst_type: int
+    dst_type: Int
     values: [-128 as byte, 0 as byte, 127 as byte]
 
   - src_type: Byte
-    dst_type: long
+    dst_type: Long
     values: [-128 as byte, 0 as byte, 127 as byte]
 
   - src_type: Byte
-    dst_type: float
+    dst_type: Float
     values: [-128 as byte, 0 as byte, 127 as byte]
 
   - src_type: Byte
-    dst_type: double
+    dst_type: Double
     values: [-128 as byte, 0 as byte, 127 as byte]
 
 
   - src_type: Char
-    dst_type: int
+    dst_type: Int
     values: ["c'\\u0000'", "c'X'", "c'\\uffff'"]
 
   - src_type: Char
-    dst_type: long
+    dst_type: Long
     values: ["c'\\u0000'", "c'X'", "c'\\uffff'"]
 
   - src_type: Char
-    dst_type: float
+    dst_type: Float
     values: ["c'\\u0000'", "c'X'", "c'\\uffff'"]
 
   - src_type: Char
-    dst_type: double
+    dst_type: Double
     values: ["c'\\u0000'", "c'X'", "c'\\uffff'"]
 
 
   - src_type: Short
-    dst_type: int
+    dst_type: Int
     values: [-32768 as short, -128 as short, 0 as short]
 
   - src_type: Short
-    dst_type: long
+    dst_type: Long
     values: [-32768 as short, -128 as short, 0 as short]
 
   - src_type: Short
-    dst_type: float
+    dst_type: Float
     values: [-32768 as short, -128 as short, 0 as short]
 
   - src_type: Short
-    dst_type: double
+    dst_type: Double
     values: [-32768 as short, -128 as short, 0 as short]
 
 
   - src_type: Int
-    dst_type: long
+    dst_type: Long
     values: [127, 32767, 2147483647]
 
   - src_type: Int
-    dst_type: float
+    dst_type: Float
     values: [127, 32767]
 
   - src_type: Int
-    dst_type: double
+    dst_type: Double
     values: [127, 32768]
 
   - src_type: Long
-    dst_type: float
+    dst_type: Float
     values: [-1 as long, 0 as long, 1 as long]
 
   - src_type: Long
-    dst_type: double
+    dst_type: Double
     values: [-128 as long, 127 as long]
 
   - src_type: Float
-    dst_type: double
+    dst_type: Double
     values: [1.4e-10 as float, 0.0000001 as float]

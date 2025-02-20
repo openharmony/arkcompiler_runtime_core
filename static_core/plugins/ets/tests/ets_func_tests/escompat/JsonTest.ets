@@ -451,7 +451,7 @@ class A {
     integerValue: int = 0;
     longValue: long = 1;
     shortValue: short = 1;
-    floatValue: float = 1.2;
+    floatValue: float = 1.2f;
     byteValue: byte = 1;
 }
 
@@ -463,7 +463,7 @@ function testJSONParse(): int {
     assertEQ(parsingResult.integerValue, 12)
     assertEQ(parsingResult.longValue, 2)
     assertEQ(parsingResult.shortValue, 3)
-    assertEQ(parsingResult.floatValue, 1.5)
+    assertEQ(parsingResult.floatValue, 1.5f)
     assertEQ(parsingResult.byteValue, 7)
     return testResult
 }

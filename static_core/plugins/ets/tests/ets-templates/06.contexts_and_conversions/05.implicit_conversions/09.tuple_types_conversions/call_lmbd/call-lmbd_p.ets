@@ -14,16 +14,18 @@
  */
 
 /*---
-desc: >-
-    Casting conversion from a type parameter attempts to convert an expression
-    of the type parameter to any reference type (see Reference Types) which
-    is to be specified as a target type
-tags: [compile-only, negative]
+desc: Tuple types conversion is the conversion of one tuple type to another. Call
+  context, lambda, tuple type conversion, implicit
+name: call-lmbd_n_0
+tags:
+- compile-only
 ---*/
 
+let s: [number] = [Double.POSITIVE_INFINITY];
 
-class X<S, T> {
-    method (p: T) {
-        p as number // compile-time error, cast to value type
-    }
+function main() {
+    let res1: [Number] =
+        ((p: [Number]): [Number] => { return p})([Double.POSITIVE_INFINITY])
+    let res2: [Number] =
+        ((p: [Number]): [Number] => { return p})(s)
 }

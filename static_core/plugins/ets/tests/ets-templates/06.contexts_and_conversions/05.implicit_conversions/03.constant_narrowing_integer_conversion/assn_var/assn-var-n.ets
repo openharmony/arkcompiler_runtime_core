@@ -19,8 +19,9 @@ desc: Assignment context, variable, constant narrowing integer conversion, impli
 tags: [compile-only, negative]
 ---*/
 let d: {{c.to_type}}
+const s: {{c.from_type}} = {{c.expr}}
 
 function main() {
-    d = {{c.expr|safe}}  // constant expression value doesn't fit in the variable type range
+    d = s  // constant expression value doesn't fit in the variable type range
 }
 {%- endfor %}

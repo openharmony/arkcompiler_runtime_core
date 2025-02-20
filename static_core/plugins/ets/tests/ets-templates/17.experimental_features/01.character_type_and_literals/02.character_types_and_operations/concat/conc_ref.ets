@@ -25,14 +25,14 @@ function main() {
 
     assertEQ("" + v1 + v2, {{v.r1}})
     assertEQ(v1 + "" + v2, {{v.r1}})
-    assertEQ((v1 + v2) as Char + "", {{v.r2}})
+    assertEQ((v1 + v2).toChar() + "", {{v.r2}})
 
     assertEQ("" + {{v.v1}} + v2, {{v.r1}})
     assertEQ({{v.v1}} + "" + v2, {{v.r1}})
-    assertEQ(({{v.v1}} + v2) as Char + "", {{v.r2}})
+    assertEQ(({{v.v1}} + v2).toChar() + "", {{v.r2}})
 
     assertEQ("" + {{v.v1}} + {{v.v2}}, {{v.r1}})
     assertEQ({{v.v1}} + "" + {{v.v2}}, {{v.r1}})
-    assertEQ(({{v.v1}} + {{v.v2}}) as Char + "", {{v.r2}})
+    assertEQ(({{v.v1}} + {{v.v2}}).toChar() + "", {{v.r2}})
 }
 {%- endfor %}

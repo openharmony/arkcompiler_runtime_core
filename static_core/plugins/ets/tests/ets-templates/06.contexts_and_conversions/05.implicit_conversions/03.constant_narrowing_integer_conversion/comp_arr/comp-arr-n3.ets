@@ -16,24 +16,16 @@
 
 /*---
 desc: Composite context, array element, constant narrowing integer conversion, implicit
-tags: [compile-only, negative]
 params: from {{c.from_type}} to {{c.to_type}}
 ---*/
 {%- for v in c['values'] %}
 const c{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
 {%- endfor %}
 
-function main(): int {
+function main() {
 {%- for v in c['values'] %}
-    let d{{loop.index}}: {{c.to_type}}[] = [{{v.expr|safe}}, {{v.expr|safe}}]  // expression
-    if (d{{loop.index}}[1] != {{v.val}}) {
-        return 1
-    }
-    d{{loop.index}} = [c{{loop.index}}]  // constant
-    if (d{{loop.index}}[0] != {{v.val}}) {
-        return 1
-    }
-{%- endfor %}
-    return 0
+    let d{{loop.index}}: {{c.to_type}}[] = [c{{loop.index}}.to{{c.to_type}}()]
+    assertEQ(d{{loop.index}}[0], {{v.val}})
+{% endfor %}
 }
 {%- endfor %}

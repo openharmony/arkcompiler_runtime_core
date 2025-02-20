@@ -128,7 +128,7 @@ class Mixture {
     private arr: int[] = [1, 2, 3];
     private byteArr: byte[] = [10, 11, 12];
     private i: int = 0;
-    private f: float = 1.0;
+    private f: float = 1.0f;
     private d: double = 20.0;
     private b: boolean = false;
     private longVal: long = 100;

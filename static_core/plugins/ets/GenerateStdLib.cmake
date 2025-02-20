@@ -51,7 +51,7 @@ function(regenerate_and_check_stdlib)
             RESULT_VARIABLE compare_result
         )
         if( NOT compare_result EQUAL 0)
-            message(FATAL_ERROR "Generated ${file} is not equal to currently used ${file}, fix and rerun generating script. "
+            message(FATAL_ERROR "Generate ${file} is not equal to currently used ${file}, fix and rerun generating script. "
             "Checkout the guide: "
             "https://gitee.com/OpenHarmony/arkcompiler_runtime_core/blob/master/static_core/plugins/ets/stdlib/README.md")
         endif()

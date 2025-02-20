@@ -31,7 +31,7 @@ let d: {{c.to_type}}
 function main() {
 {%- for t in c['values'] %}
     d = s{{loop.index}}
-    assertTrue( d as {{t.ref_type}} {{t.eq}} {{t.expr|safe}} )
+    assertTrue( d {{'as ' + t.ref_type if t.ref_type}} {{t.eq}} {{t.expr|safe}} )
 {%- endfor %}
 }
 {%- endfor %}

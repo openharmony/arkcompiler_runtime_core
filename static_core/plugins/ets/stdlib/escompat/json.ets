@@ -155,7 +155,7 @@ export class JSON {
      * @returns String - JSON representation of byte
      */
     public static stringify(d: String): String {
-        let sb = new StringBuilder([c'\"'])
+        let sb = new StringBuilder([c'\"'] as FixedArray<char>)
         let len = d.getLength()
 
         let prevChar: char = 0
@@ -298,7 +298,7 @@ export class JSON {
             if (space > JSON.JSON_SPACE_INDENT_LIMIT) {
                 spacesCount = JSON.JSON_SPACE_INDENT_LIMIT
             } else {
-                spacesCount = space as int
+                spacesCount = space.toInt()
             }
         }
 
@@ -602,7 +602,7 @@ export class JSON {
         }
 
         let jsonValue = JSONParser.parse(text)
-        const parsingResult = new JSONValueParser(reviver, bigIntMode).parse(jsonValue, type) as T
+        const parsingResult = new JSONValueParser(reviver, bigIntMode as int).parse(jsonValue, type) as T
 
         if (reviver !== undefined) {
             return reviver("", parsingResult) as T
@@ -970,8 +970,8 @@ class JSONWriter {
         for (let fieldIdx = 0; fieldIdx < writableFields.length; fieldIdx++) {
             const fieldTypeValuePair = writableFields[fieldIdx]
 
-            const objField = fieldTypeValuePair[FIELD_TYPE]
-            const objFieldValue = fieldTypeValuePair[FIELD_VALUE]
+            const objField = fieldTypeValuePair[0] as Field
+            const objFieldValue = fieldTypeValuePair[1] as Value
 
             const objToDump = this.useReplacer ? this.replacer!(objField.getName(), objFieldValue.getData()) : objFieldValue.getData()
             fieldDumped = this.writeField(objField.getName(), objToDump, fieldDumped)
@@ -1026,7 +1026,7 @@ class JSONWriter {
             this.indentLevel += 1
         }
 
-        const arrayLength = arrayValue.getLength() as int
+        const arrayLength = arrayValue.getLength().toInt()
         if (arrayLength > 0) {
             const array: Object = __narrowAny(arrayValue.getData())!
 
@@ -1106,7 +1106,7 @@ class JSONWriter {
         if (array.length > 0) {
             this.path.add(array)
 
-            const lastElementIndex = (array.length as int) - 1
+            const lastElementIndex = array.length.toInt()
 
             for (let idx = 0; idx < lastElementIndex; idx++) {
                 this.writeObjectsArrayElement(array[idx], idx)
@@ -1301,7 +1301,7 @@ function escapeString(str: string): string {
                 break
             default:
                 if (ch < 32) {
-                    let int_value = new Int(ch as int);
+                    let int_value = new Int(ch.toInt());
                     result += "\\u" + int_value.toString(16).padStart(4, "0")
                 } else {
                     result += ch
@@ -1324,7 +1324,7 @@ function getIndentation(space: string | number | undefined, depth: number): stri
         return unit.repeat(depth)
     }
     let as_number = space as number
-    let as_int = as_number as int
+    let as_int = as_number.toInt()
     let lower = as_int > 0
         ? as_int
         : 0
@@ -1683,7 +1683,7 @@ class JSONValueParser {
 
     private parseArray(jVal: JSONArray, aType: ArrayType): Object | null {
         let len = jVal.values.length
-        let arr = aType.make(len as int) as FixedArray<NullishType>
+        let arr = aType.make(len.toInt()) as FixedArray<NullishType>
 
         let setArrayElementFn = (a: FixedArray<NullishType>, i: int, v: NullishType) => { a[i] = v }
 
@@ -1897,7 +1897,7 @@ class JsonElementParser
         if (token.value.includes(".")) {
             return jsonx.JsonElement.createDouble(Double.parseFloat(token.value))
         }
-        return jsonx.JsonElement.createInteger(Double.parseInt(token.value) as int)
+        return jsonx.JsonElement.createInteger(Double.parseInt(token.value).toInt())
     }
 
     private parseBool(): jsonx.JsonElement
@@ -2074,8 +2074,8 @@ export class JsonLexer
             codeStr += ch
         }
 
-        let codePoint = Double.parseInt(codeStr, 16) as int
-        return String.fromCharCode(codePoint as number)
+        let codePoint = Double.parseInt(codeStr, 16).toInt()
+        return String.fromCharCode(codePoint.toDouble())
     }
 
     /**
@@ -2253,7 +2253,7 @@ export class JSONObject extends JSONValue {
     }
 
     public override toString(): String {
-        let res = new StringBuilder([JSONObject.START_CHAR])
+        let res = new StringBuilder([JSONObject.START_CHAR] as FixedArray<char>)
         for (let i = 0; i < this.keys_.length - 1; ++i) {
             res.append("" + this.keys_.at(i) + JSONObject.SEPARATOR + this.values.at(i) + JSONObject.DELIMETER)
         }
@@ -2272,7 +2272,7 @@ export class JSONArray extends JSONValue {
     readonly static SEPARATOR = c','
 
     public override toString(): String {
-        let res = new StringBuilder([JSONArray.START_CHAR])
+        let res = new StringBuilder([JSONArray.START_CHAR] as FixedArray<char>)
         for (let i = 0; i < this.values.length - 1; ++i) {
             res.append("" + this.values.at(i) + JSONArray.SEPARATOR)
         }

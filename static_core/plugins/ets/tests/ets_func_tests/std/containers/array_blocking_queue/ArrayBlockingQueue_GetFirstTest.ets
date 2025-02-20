@@ -113,7 +113,7 @@ function main(): int {
         }
         let frontNum = 0;
         for (let i: int = 0; i < elementsNum; ++i) {
-            let el = (random() * 10000) as int;
+            let el = (random() * 10000).toInt();
             queueInt.push(el);
             if (i == 0) {
                 frontNum = el;

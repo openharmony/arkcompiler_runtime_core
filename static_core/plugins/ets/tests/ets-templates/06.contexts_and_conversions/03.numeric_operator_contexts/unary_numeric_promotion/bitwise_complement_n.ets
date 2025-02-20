@@ -30,22 +30,6 @@ function foo(a: String): int {
   return 0;
 }
 
-function foo(a: Integral): int {
-  return 0;
-}
-
-function foo(a: Floating): int {
-  return 0;
-}
-
-function foo(a: Double): int {
-  return 0;
-}
-
-function foo(a: Float): int {
-  return 0;
-}
-
 function foo(a: boolean): int {
   return 0;
 }

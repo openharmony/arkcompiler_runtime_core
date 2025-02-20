@@ -389,7 +389,7 @@ export function mergeSort(array: FixedArray<byte>, cmp: (lhs: byte, rhs: byte) =
     if (arrLength <= 1) {
         return array;
     }
-    const middle = Math.floor(begin + arrLength / 2) as int
+    const middle = Math.floor(begin + arrLength / 2).toInt()
     const leftHalf:FixedArray<byte> = new byte[middle]
     let counter: int = 0
     copyPart(leftHalf, counter, array, 0, middle)
@@ -977,7 +977,7 @@ function countSort(arr: FixedArray<byte>, startIndex: int, endIndex: int): void 
     let idx = 0
     for (let i = 0; i < 256; i++) {
         for (let j = 0; j < cnts[i]; j++) {
-            arr[startIndex + idx++] = (i - 128) as byte
+            arr[startIndex + idx++] = (i - 128).toByte()
         }
     }
 }
@@ -1197,7 +1197,7 @@ export function mergeSort(array: FixedArray<short>, cmp: (lhs: short, rhs: short
     if (arrLength <= 1) {
         return array;
     }
-    const middle = Math.floor(begin + arrLength / 2) as int
+    const middle = Math.floor(begin + arrLength / 2).toInt()
     const leftHalf:FixedArray<short> = new short[middle]
     let counter: int = 0
     copyPart(leftHalf, counter, array, 0, middle)
@@ -1986,7 +1986,7 @@ export function mergeSort(array: FixedArray<int>, cmp: (lhs: int, rhs: int) => n
     if (arrLength <= 1) {
         return array;
     }
-    const middle = Math.floor(begin + arrLength / 2) as int
+    const middle = Math.floor(begin + arrLength / 2).toInt()
     const leftHalf:FixedArray<int> = new int[middle]
     let counter: int = 0
     copyPart(leftHalf, counter, array, 0, middle)
@@ -2775,7 +2775,7 @@ export function mergeSort(array: FixedArray<long>, cmp: (lhs: long, rhs: long) =
     if (arrLength <= 1) {
         return array;
     }
-    const middle = Math.floor(begin + arrLength / 2) as int
+    const middle = Math.floor(begin + arrLength / 2).toInt()
     const leftHalf:FixedArray<long> = new long[middle]
     let counter: int = 0
     copyPart(leftHalf, counter, array, 0, middle)
@@ -3564,7 +3564,7 @@ export function mergeSort(array: FixedArray<float>, cmp: (lhs: float, rhs: float
     if (arrLength <= 1) {
         return array;
     }
-    const middle = Math.floor(begin + arrLength / 2) as int
+    const middle = Math.floor(begin + arrLength / 2).toInt()
     const leftHalf:FixedArray<float> = new float[middle]
     let counter: int = 0
     copyPart(leftHalf, counter, array, 0, middle)
@@ -4353,7 +4353,7 @@ export function mergeSort(array: FixedArray<double>, cmp: (lhs: double, rhs: dou
     if (arrLength <= 1) {
         return array;
     }
-    const middle = Math.floor(begin + arrLength / 2) as int
+    const middle = Math.floor(begin + arrLength / 2).toInt()
     const leftHalf:FixedArray<double> = new double[middle]
     let counter: int = 0
     copyPart(leftHalf, counter, array, 0, middle)
@@ -5841,7 +5841,7 @@ export function test_sortAllOn(arr: FixedArray<char>) {
 }
 // ======== end of tests section ========
 
-function bubbleSort(arr: FixedArray<NullishType>, startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
+function bubbleSort<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, mustPrecede: (lhs: T, rhs: T) => boolean): void {
     let was = true
     while (was) {
         was = false
@@ -5856,7 +5856,7 @@ function bubbleSort(arr: FixedArray<NullishType>, startIndex: int, endIndex: int
     }
 }
 
-function insertionSort(arr: FixedArray<NullishType>, startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean, initIndex: int = startIndex): void {
+function insertionSort<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, mustPrecede: (lhs: T, rhs: T) => boolean, initIndex: int = startIndex): void {
     if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
@@ -5887,7 +5887,7 @@ function insertionSort(arr: FixedArray<NullishType>, startIndex: int, endIndex: 
         }
     }
 }
-function heapSortUp(arr: FixedArray<NullishType>, idxFromStart: int, startIndex: int, heapRoot: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
+function heapSortUp<T>(arr: FixedArray<T>, idxFromStart: int, startIndex: int, heapRoot: int, mustPrecede: (lhs: T, rhs: T) => boolean): void {
     const tmp = arr[startIndex + idxFromStart]
     while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
@@ -5901,7 +5901,7 @@ function heapSortUp(arr: FixedArray<NullishType>, idxFromStart: int, startIndex:
 }
 
 // Build max heap with root in startIndex given its children are roots of valid heaps
-function heapSortDown(arr: FixedArray<NullishType>, idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
+function heapSortDown<T>(arr: FixedArray<T>, idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: T, rhs: T) => boolean): void {
     let heapRoot = startIndex + idxFromStart
     let arrIndex = heapRoot
     let childIndex = startIndex + idxFromStart * 2 + 1
@@ -5924,7 +5924,7 @@ function heapSortDown(arr: FixedArray<NullishType>, idxFromStart: int, startInde
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
 }
 
-export function heapSort(arr: FixedArray<NullishType>, startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
+export function heapSort<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, mustPrecede: (lhs: T, rhs: T) => boolean): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
@@ -5940,7 +5940,7 @@ export function heapSort(arr: FixedArray<NullishType>, startIndex: int, endIndex
 }
 
 // Put median of three array elements to arr[index1]
-function median3(arr: FixedArray<NullishType>, index1: int, index2: int, index3: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
+function median3<T>(arr: FixedArray<T>, index1: int, index2: int, index3: int, mustPrecede: (lhs: T, rhs: T) => boolean): void {
     let swap_idx = index2
     if (mustPrecede(arr[index1], arr[index2])) {
         if (mustPrecede(arr[index3], arr[index1])) {
@@ -5964,7 +5964,7 @@ function median3(arr: FixedArray<NullishType>, index1: int, index2: int, index3:
 
 // Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
 // Elements equal to pivot go to the right
-function quickSortSplit(arr: FixedArray<NullishType>, startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): int {
+function quickSortSplit<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, mustPrecede: (lhs: T, rhs: T) => boolean): int {
     const pivot = arr[startIndex]
     let i = startIndex + 1
     let j = endIndex - 1
@@ -5998,7 +5998,7 @@ function quickSortSplit(arr: FixedArray<NullishType>, startIndex: int, endIndex:
 
 // Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
 // Elements equal to pivot go to the left
-function quickSortSplitLeft(arr: FixedArray<NullishType>, startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): int {
+function quickSortSplitLeft<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, mustPrecede: (lhs: T, rhs: T) => boolean): int {
     const pivot = arr[startIndex]
     let i = startIndex + 1
     let j = endIndex - 1
@@ -6029,7 +6029,7 @@ function quickSortSplitLeft(arr: FixedArray<NullishType>, startIndex: int, endIn
     return j
 }
 
-function quickSortImpl3(arr: FixedArray<NullishType>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
+function quickSortImpl3<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: T, rhs: T) => boolean): void {
     while (endIndex - startIndex > 3) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
@@ -6049,7 +6049,7 @@ function quickSortImpl3(arr: FixedArray<NullishType>, startIndex: int, endIndex:
     }
     insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
-function quickSortImpl40(arr: FixedArray<NullishType>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
+function quickSortImpl40<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: T, rhs: T) => boolean): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
@@ -6070,7 +6070,7 @@ function quickSortImpl40(arr: FixedArray<NullishType>, startIndex: int, endIndex
     insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
 
-function quickSort(arr: FixedArray<NullishType>, startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
+function quickSort<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, mustPrecede: (lhs: T, rhs: T) => boolean): void {
     let size = endIndex - startIndex
     if (size <= 1) {
         return
@@ -6100,7 +6100,7 @@ function quickSort(arr: FixedArray<NullishType>, startIndex: int, endIndex: int,
  * sort(arr, 0, arr.length)
  * ```
  */
-export function sort_subarray(arr: FixedArray<NullishType>, startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
+export function sort_subarray<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, mustPrecede: (lhs: T, rhs: T) => boolean): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
         throw new ArrayIndexOutOfBoundsError("sort: bounds verification failed")
     }
@@ -6113,11 +6113,11 @@ export function sort_subarray(arr: FixedArray<NullishType>, startIndex: int, end
  *
  * @param arr an array to sort
  */
-export function sort_subarray(arr: FixedArray<NullishType>, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
+export function sort_subarray<T>(arr: FixedArray<T>, mustPrecede: (lhs: T, rhs: T) => boolean): void {
     sort_subarray(arr, 0, arr.length, mustPrecede);
 }
 
-export function sort_subarray(arr: FixedArray<NullishType>, startIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
+export function sort_subarray<T>(arr: FixedArray<T>, startIndex: int, mustPrecede: (lhs: T, rhs: T) => boolean): void {
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
 }
 

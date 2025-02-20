@@ -20,12 +20,12 @@ desc: >-
 ---*/
 
 function incPre(p: char): char {
-    return ++p
+    return (++p).toChar()
 }
 
 function incPost(p: char): char {
     p++
-    return p
+    return p.toChar()
 }
 
 function main() {

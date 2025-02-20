@@ -316,13 +316,13 @@ export final class BigInt {
         let dividend = this.abs()
         while (dividend > 0n) {
             if (dividend < MAX_REGULAR_INTEGER) {
-                result = StringBuilder.concatStrings((dividend.getLong() as Number).toString(radix), result)
+                result = StringBuilder.concatStrings(Long.toDouble(dividend.getLong()).toString(radix), result)
                 break
             }
             // NOTE(@aendrewpolyakov, #18313): Rewrite once destructuring assignment got support
             let divisionResult = dividend.operatorDivideInternal(radixBigInt)
             let quotent = divisionResult[0], remainder = divisionResult[1]
-            result = StringBuilder.concatStrings((remainder.getLong() as Number).toString(radix), result)
+            result = StringBuilder.concatStrings(Long.toDouble(remainder.getLong()).toString(radix), result)
             dividend = quotent
         }
         return result.toString()
@@ -336,7 +336,7 @@ export final class BigInt {
         let result = new StringBuilder
         let bitChunks = this.sliceToBinaryChunks(chunkSize)
         for (let bitChunk of bitChunks) {
-            result = result.append((parseInt(bitChunk!, 2) as Number).toString(radix))
+            result = result.append(parseInt(bitChunk!, 2).toString(radix))
         }
         return result.toString()
     }

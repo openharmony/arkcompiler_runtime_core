@@ -13,7 +13,7 @@
 ---
 vals:
     - v1: c'\u0020'
-      exp: '(minus(plus(v1)) - plus(minus(v1))) as char'
+      exp: '(minus(plus(v1)) - plus(minus(v1))).toChar()'
       r: c'\u0000'
 
     - v1: c'∬'

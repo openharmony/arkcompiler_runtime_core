@@ -38,7 +38,7 @@ class A {
     }
 
     static funcA(a0: short, a1: short): short {
-        return a1 - a0 as short;
+        return (a1 - a0).toShort();
     }
 
     static count: int = 0;
@@ -101,7 +101,7 @@ class A {
     }
 
     static funcA(a0: short, a1: short): short {
-        return a1 - a0 as short;
+        return (a1 - a0).toShort();
     }
 
     static funcB(a0: int, a1: int): void {

@@ -20,9 +20,11 @@ tags: [compile-only, negative]
 ---*/
 class A { fld: {{c.to_type}} }
 
+const s: {{c.from_type}} = {{c.expr|safe}}
+
 function main() {
     // constant expression doesn't fit in the field type range
-    let d: A = { fld: {{c.expr|safe}} }
+    let d: A = { fld: s }
     let x = d.fld
 }
 {%- endfor %}

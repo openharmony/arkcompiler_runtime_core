@@ -24,6 +24,7 @@ desc: >-
           • All other parameter types in S1 are equal to parameter types in the same positions in S2.
           Parameter names and return types do not influence overload-equivalence.
           The following signatures are not overload-equivalent.
+tags: [negative, compile-only]
 ---*/
 
 let res: int = 0;

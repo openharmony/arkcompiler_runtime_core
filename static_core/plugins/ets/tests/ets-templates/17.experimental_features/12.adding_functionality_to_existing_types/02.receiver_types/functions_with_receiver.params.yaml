@@ -57,3 +57,8 @@ cases:
     use: |
       let i: I = {}
       i.f()
+  - decl: |
+      function f(this: number) {}
+    use: |
+      let n: number = 1
+      f(n)

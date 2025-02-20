@@ -15,9 +15,9 @@
 
 const ARRAY_SIZE = 15;
 const AB_SIZE = ARRAY_SIZE * Int.BYTE_SIZE;
-const UNSORTED = [5, 3, Int.MAX_VALUE, 2, 4, -1, 99, 10, 7, 0, 45, 1, 88, Int.MIN_VALUE, 37];
-const SORTED = [Int.MIN_VALUE, -1, 0, 1, 2, 3, 4, 5, 7, 10, 37, 45, 88, 99, Int.MAX_VALUE];
-const SORTED_UNALIGNED = [Int.MIN_VALUE, -1, 0, 1, 2, 3, 4, 7, 10, 37, 45, 88, 99, Int.MAX_VALUE];
+const UNSORTED: Array<Double> = [5,3,Int.MAX_VALUE,2,4,-1,99,10,7,0,45,1,88,Int.MIN_VALUE,37];
+const SORTED   = [Int.MIN_VALUE,-1,0,1,2,3,4,5,7,10,37,45,88,99,Int.MAX_VALUE];
+const SORTED_UNALIGNED = [Int.MIN_VALUE,-1,0,1,2,3,4,7,10,37,45,88,99,Int.MAX_VALUE];
 const SINGLE = [88];
 
 function fillBuffer(buf: ArrayBuffer): void {
@@ -27,15 +27,15 @@ function fillBuffer(buf: ArrayBuffer): void {
         if ((i % Int.BYTE_SIZE) == 0) {
             let v: int = UNSORTED[i / Int.BYTE_SIZE] as int;
             if (Runtime.isLittleEndianPlatform()) {
-                buf.set(i, v as byte);
-                buf.set(i + 1, (v >>> 8) as byte);
-                buf.set(i + 2, (v >>> 16) as byte);
-                buf.set(i + 3, (v >>> 24) as byte);
+                buf.set(i, v.toByte());
+                buf.set(i + 1, (v >>> 8).toByte());
+                buf.set(i + 2, (v >>> 16).toByte());
+                buf.set(i + 3, (v >>> 24).toByte());
             } else {
-                buf.set(i, (v >>> 24) as byte);
-                buf.set(i + 1, (v >>> 16) as byte);
-                buf.set(i + 2, (v >>> 8) as byte);
-                buf.set(i + 3, v as byte);
+                buf.set(i, (v >>> 24).toByte());
+                buf.set(i + 1, (v >>> 16).toByte());
+                buf.set(i + 2, (v >>> 8).toByte());
+                buf.set(i + 3, v.toByte());
             }
         }
     }

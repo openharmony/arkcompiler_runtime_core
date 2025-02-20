@@ -19,8 +19,8 @@ desc: check unary plus operation for float operand
 ---*/
 
 function main(): void {
-  const v: float = {{v.value}} as float
-  const r: float = {{v.result}} as float
+  const v: float = ( {{v.value}} ).toFloat()
+  const r: float = ( {{v.result}}  ).toFloat()
     if (Float.isNaN(v)) {
         assertTrue(Float.isNaN(r))
     } else {

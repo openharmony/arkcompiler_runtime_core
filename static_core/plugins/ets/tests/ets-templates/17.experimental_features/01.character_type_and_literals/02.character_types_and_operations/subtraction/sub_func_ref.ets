@@ -20,7 +20,7 @@ desc: >-
 ---*/
 
 function sub(p: Char, q: Char): Char {
-    return (p - q) as Char
+    return (p - q).toChar()
 }
 
 function main() {

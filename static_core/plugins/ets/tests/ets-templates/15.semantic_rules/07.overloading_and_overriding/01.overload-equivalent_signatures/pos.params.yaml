@@ -14,10 +14,6 @@
 ---
 cases:
   # functions
-  - decl: |-
-      function foo(a: int) {}
-      function foo(a: Int) {}
-    tags: [compile-only]
 
   - decl: |-
       function foo(a: Int) {}

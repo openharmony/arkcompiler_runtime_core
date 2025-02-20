@@ -30,7 +30,7 @@ class TestData {
     static readonly expected2 = TestData.src.slice(0, 2);
     static readonly arrayLength3: number = 5;
     static readonly expected3 = Array.from<number>(TestData.src);
-    static readonly arrayLength4: number = Int.MIN_VALUE as number;
+    static readonly arrayLength4: number = Int.MIN_VALUE.toDouble()
     static readonly limit4: number = 10;
     static readonly expected4 = new Array<number>;
 }

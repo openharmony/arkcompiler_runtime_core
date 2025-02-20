@@ -17,6 +17,7 @@ limitations under the License.
 /*---
 desc: >-
     As there is more than one applicable method, the most specific method must be selected.
+tags: [{{c.tags}}]
 ---*/
 
 {{c.decl}}

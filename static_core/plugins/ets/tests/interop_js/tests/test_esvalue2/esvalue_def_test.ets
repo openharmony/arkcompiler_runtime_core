@@ -298,11 +298,11 @@ function checkSetPropertyByIndex(): boolean {
 
 // setProperty(property: ESValue, value: ESValue): void
 function checkSetProperty(): boolean {
-    let value = ESValue.wrapNumber(5);
+    let value = ESValue.wrapNumber(8);
     let property = ESValue.wrapString("property1");
     jsObjectA.setProperty(property, value);
     let val = jsObjectA.getProperty(property);
-    return val.toNumber() == 5;
+    return val.toNumber() == 8;
 }
 
 // hasProperty(property: ESValue): boolean

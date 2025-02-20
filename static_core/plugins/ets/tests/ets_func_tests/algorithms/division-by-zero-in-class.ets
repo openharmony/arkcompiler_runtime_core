@@ -13,19 +13,13 @@
  * limitations under the License.
  */
 
+/*---
+desc: Division by zero in class initializer block
+tags: [compile-only, negative]
+---*/
 
 class AA {
-    p=1/0;
+    p = 1/0;
 }
 
-function main() : void {
-    let caught_counter = 0;
 
-    try {
-        let aa = new AA();
-        aa.p;
-    } catch (error: ArithmeticError) {
-        caught_counter++;
-    }
-    assertEQ(caught_counter, 1)
-}

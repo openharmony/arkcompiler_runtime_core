@@ -20,9 +20,11 @@ tags: [compile-only, negative]
 ---*/
 interface J { fld: {{c.to_type}} }
 
+const s: {{c.from_type}} = {{c.expr|safe}}
+
 function main() {
     // constant expression value doesn't fit in the field type range
-    let d: J = { fld: {{c.expr|safe}} }
+    let d: J = { fld: c }
     let x = d.fld
 }
 {%- endfor %}

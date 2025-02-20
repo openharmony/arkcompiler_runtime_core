@@ -301,16 +301,14 @@ cases:
       a.get_foo(new Number(), "some str");
       assertEQ( res, 11);
 
+  # access_modifier_over_34
   - decl: |-
       class Derived extends Base {
         protected protected_foo(i: number) { res = 11;}
         get_foo(a: Number) {this.protected_foo(a)}
-        get_foo(a: number) {this.protected_foo(a)}
       }
     use: |-
       let a = new Derived();
-      a.get_foo(new Number());
-      assertEQ( res, 2);
       a.get_foo(1 as number);
       assertEQ( res, 11);
 

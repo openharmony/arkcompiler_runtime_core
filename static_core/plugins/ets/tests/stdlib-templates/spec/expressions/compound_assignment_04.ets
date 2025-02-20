@@ -16,15 +16,15 @@
 {% for item in compound_assignment_01 %}
 
 /*---
-desc: {function: only_main_simple_{{.item.type1}}_{{.item.op_name}}_{{.item.type2}}}
+desc: {function: only_main_simple_{{.item.type1|lower}}_{{.item.op_name}}_{{.item.type2|lower}}}
 tags: []
 ---*/
 
 function main(): void {
-  let count: {{.item.type2}} = {{.item.value2}} as {{.item.type2}}
-  let value: {{.item.type1}} = {{.item.value1}} as {{.item.type1}}
-  value = (value {{.item.operation}} count) as {{.item.type1}}
-  assertEQ(value {{.item.casting}}, {{.item.result}}, "value = " + value)
+  let count: {{.item.type2}} = {{.item.value2}}
+  let value: {{.item.type1}} = {{.item.value1}}
+  value = (value {{.item.operation}} count).to{{.item.type1}}()
+  assertEQ(value{{.item.casting}}, {{.item.result}}, "value = " + value)
 }
 
 {%- endfor %}

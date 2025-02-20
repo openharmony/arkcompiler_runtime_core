@@ -127,7 +127,7 @@
     init_object_data_type: "FixedArray<String>",
     init_object_type: String,
     init_object_data: '["", "", "abcd", "abcd"]',
-    param_list: {"param1": "[E as float, (-E) as float, E as float, (-E) as float]"},
+    param_list: {"param1": "[E.toFloat(), (-E).toFloat(), E.toFloat(), (-E).toFloat()]"},
     param_types: {"param1": float},
     param_nature: {"param1": "primitive"},
     param_init_data_types: {"param1" : "FixedArray<float>"},

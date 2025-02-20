@@ -25,7 +25,7 @@ vals:
       r: c'A' + c'\uF000'
 
     # 2.
-    - v1: (c'\uFFFE' + c'\u0023') as char
-      v2: (c'\u0021' + c'\u0001') as char
+    - v1: (c'\uFFFE' + c'\u0023').toChar()
+      v2: (c'\u0021' + c'\u0001').toChar()
       b: 'true'
       r: c'!'

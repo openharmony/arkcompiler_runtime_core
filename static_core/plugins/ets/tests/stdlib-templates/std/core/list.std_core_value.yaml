@@ -49,7 +49,7 @@
   }
 - {
     name: float,
-    init_values: {"0.0 as float", "1.0 as float", "-1.0 as float", "Float.MIN_VALUE as float", "Float.MAX_VALUE as float"},
+    init_values: {"0.0f", "1.0 as float", "-1.0 as float", "Float.MIN_VALUE as float", "Float.MAX_VALUE as float"},
     value_name: Float,
     primitive: true
   }
@@ -151,7 +151,7 @@
   }
 - {
     name: "FixedArray<float>",
-    init_values: {"[0.0 as float] as FixedArray<float>", "[0.0 as float, 1.0 as float, -1.0 as float, Float.MIN_VALUE as float, Float.MAX_VALUE as float] as FixedArray<float>"},
+    init_values: {"[0.0f] as FixedArray<float>", "[0.0f, 1.0f, -1.0f, Float.MIN_VALUE, Float.MAX_VALUE] as FixedArray<float>"},
     value_name: Array,
     primitive: false
   }

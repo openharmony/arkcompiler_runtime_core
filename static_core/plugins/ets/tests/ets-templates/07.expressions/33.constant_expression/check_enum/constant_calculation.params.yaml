@@ -42,15 +42,15 @@ cases:
   - { type: long, value: 50006, sign: '+', expected: 50016 }
   - { type: long, value: 50006, sign: '-', expected: 49996 }
 
-  - { type: float, value: 123.2f, sign: '*', expected: 1232, conversion: as int }
-  - { type: float, value: 123.2f, sign: '/', expected: 12,   conversion: as int }
-  - { type: float, value: 123.2f, sign: '%', expected: 3,    conversion: as int }
-  - { type: float, value: 123.2f, sign: '+', expected: 133,  conversion: as int }
-  - { type: float, value: 123.2f, sign: '-', expected: 113,  conversion: as int }
+  - { type: float, value: 123.2f, sign: '*', expected: 1232  }
+  - { type: float, value: 123.2f, sign: '/', expected: 12    }
+  - { type: float, value: 123.2f, sign: '%', expected: 3     }
+  - { type: float, value: 123.2f, sign: '+', expected: 133   }
+  - { type: float, value: 123.2f, sign: '-', expected: 113   }
 
-  - { type: number, value: 5051.9, sign: '*', expected: 50519, conversion: as int }
-  - { type: number, value: 5051.9, sign: '/', expected: 505,   conversion: as int }
-  - { type: number, value: 5051.9, sign: '%', expected: 1,     conversion: as int }
-  - { type: number, value: 5051.9, sign: '+', expected: 5061,  conversion: as int }
-  - { type: number, value: 5051.9, sign: '-', expected: 5041,  conversion: as int }
+  - { type: number, value: 5051.9, sign: '*', expected: 50519  }
+  - { type: number, value: 5051.9, sign: '/', expected: 505    }
+  - { type: number, value: 5051.9, sign: '%', expected: 1      }
+  - { type: number, value: 5051.9, sign: '+', expected: 5061   }
+  - { type: number, value: 5051.9, sign: '-', expected: 5041   }
       

@@ -148,7 +148,7 @@ bridge_methods_generic:
       }
 
       class Child extends Parent<string, number> {
-        process(a: string, b: number): [string, number] {
+        process(a: string, b: number): [string, double] {
           return [a.toUpperCase(), b * 2];
         }
       }
@@ -214,8 +214,7 @@ bridge_methods_generic:
 
       class Child extends Parent<string> {
         process(value: string): string {
-          let ch = new Char(value.charAt(1));
-          return ch.toString();
+          return value.charAt(1).toString();
         }
       }
     check: |-

@@ -19,7 +19,9 @@ cases:
   - use: |
       enum Num { One = 1, Two = 2 }
   - use: |
-      enum Num { One = 1.0 as int, Two = 2.0 as int }
+      const value1: int = 1
+      const value2: int = 2
+      enum Num { One = value1, Two = value2 }
   - use: |
       enum Bool { False = !true ? 1 : 2, True = !false ? 3 : 4 }
   - use: |
@@ -34,8 +36,6 @@ cases:
   - use: |
       enum BitOp { And = 3 & 3, Xor = 3 ^ 3, Or = 3 | 3 }
   - use: |
-      enum Bool { Or = 3 || 3, And = 3 && 3 }
-  - use: |
       enum Parenthesized { Par = (3 + 3) }
   - use: |
       const num1: int = 1
@@ -46,4 +46,3 @@ cases:
       const num2: int = 2
     use: |
       enum Num { Num1 = num1, Num2 = num2 }
-      

@@ -15,7 +15,6 @@ limitations under the License.
 
 /*---
 desc: Test with an left-operand that is not a reference type
-tags: [compile-only, negative]
 ---*/
 
 function main(): void {

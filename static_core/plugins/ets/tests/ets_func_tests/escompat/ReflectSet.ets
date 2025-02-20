@@ -45,7 +45,7 @@ class Point3D extends Point2D {
 
 class C {
     public p1:number = 0;
-    public p2:float = 0.0;
+    public p2:float = 0.0f;
     public p3:long = 0;
     public p4:int = 0;
     public p5:short = 0;
@@ -92,7 +92,7 @@ function reflectSetTypeConvert(): int {
     let b: short = 2;
     let c: int  = 3;
     let d: long = 4;
-    let e: float = 5.0;
+    let e: float = 5.0f;
 
     Reflect.set(sample, 'p1', a);
     result += (sample.p1 == a) ? 0  : 1

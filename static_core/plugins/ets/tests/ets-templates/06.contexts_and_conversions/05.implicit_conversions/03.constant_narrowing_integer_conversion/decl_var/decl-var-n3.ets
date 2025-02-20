@@ -16,24 +16,16 @@
 
 /*---
 desc: Declaration context, variable declaration, constant narrowing integer conversion, implicit
-tags: [compile-only, negative]
 params: from {{c.from_type}} to {{c.to_type}}
 ---*/
 {%- for v in c['values'] %}
 const c{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
 {%- endfor %}
 
-function main(): int {
+function main() {
 {%- for v in c['values'] %}
-    let d{{loop.index}}: {{c.to_type}} = {{v.expr|safe}}  // expression
-    if (d{{loop.index}} != {{v.val}}) {
-        return 1
-    }
-    let e{{loop.index}} = c{{loop.index}}  // constant
-    if (e{{loop.index}} != {{v.val}}) {
-        return 1
-    }
-{%- endfor %}
-    return 0
+    let e{{loop.index}}: {{c.to_type}} = c{{loop.index}}
+    assertEQ(e{{loop.index}}, {{v.val}})
+{% endfor %}
 }
 {%- endfor %}

@@ -61,38 +61,6 @@ function foo(p: double): int {
   return 8;
 }
 
-function foo(p: Byte): int {
-  return 21;
-}
-
-function foo(p: Short): int {
-  return 22;
-}
-
-function foo(p: Int): int {
-  return 23;
-}
-
-function foo(p: Long): int {
-  return 24;
-}
-
-function foo(p: Char): int {
-  return 25;
-}
-
-function foo(p: Boolean): int {
-  return 26;
-}
-
-function foo(p: Float): int {
-  return 27;
-}
-
-function foo(p: Double): int {
-  return 28;
-}
-
 function foo(p: Object): int {
   return 40;
 }

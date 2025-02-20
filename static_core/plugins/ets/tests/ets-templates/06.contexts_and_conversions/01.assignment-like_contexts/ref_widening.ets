@@ -23,12 +23,9 @@ tags: [{{t.tags}}]
 
 {{t.defs}}
 
-function main(): int {
+function main() {
   let src: {{t.stype}} = {{t.src|safe}};
   let dst: {{t.dtype}} = src as {{t.dtype}};
-  if (src !== dst ) {  // reference equality
-      return 1;
-  }
-  return 0;
+  assertEQ(src, dst) // reference equality
 }
 {% endfor %}

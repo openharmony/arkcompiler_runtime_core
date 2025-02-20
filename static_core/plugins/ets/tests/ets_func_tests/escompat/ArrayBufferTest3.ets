@@ -86,13 +86,13 @@ function resizeArrayBuffer(): void {
     assertEQ(a.byteLength, 5)
 
     errorCheck = (e: Error | Exception) => { return (e instanceof IndexOutOfBoundsError) }
-    expectThrow((): void throws => { a.set(5, 0 as byte) }, errorCheck)
+    expectThrow((): void throws => { a.set(5, 0 .toByte()) }, errorCheck)
     expectThrow((): void throws => { a.at(5) }, errorCheck)
 
     // Return previous length
     a.resize(10);
     assertEQ(a.byteLength, 10)
-    const VALUE = 42 as byte
+    const VALUE = 42 .toByte()
     a.set(5, VALUE)
     assertEQ(a.at(5), VALUE)
 
@@ -102,7 +102,7 @@ function resizeArrayBuffer(): void {
 
     a = new ArrayBuffer(10, 12)
     errorCheck = (e: Error | Exception) => { return (e instanceof IndexOutOfBoundsError) }
-    expectThrow((): void throws => { a.set(10, 0 as byte) }, errorCheck)
+    expectThrow((): void throws => { a.set(10, 0 .toByte()) }, errorCheck)
     expectThrow((): void throws => { a.at(10) }, errorCheck)
 
     a.resize(11)
@@ -116,7 +116,7 @@ function testManagedAccessors(): void {
     let a = new ArrayBuffer(FULL_LENGTH, FULL_LENGTH)
     const expectedBytes = new byte[a.getByteLength()]
     for (let i = 0; i < a.getByteLength(); i++) {
-        expectedBytes[i] = i as byte
+        expectedBytes[i] = i .toByte()
     }
 
     for (let i = 0; i < a.getByteLength(); i++) {

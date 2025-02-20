@@ -108,7 +108,7 @@ function testDateChangeMonthBad(): int {
 
 function testDateChangeDay(): int {
     let date: Date = new Date();
-    let day: byte = date.getDate() as byte;
+    let day: byte = date.getDate().toByte();
     let newDay: byte = 15;
     if(newDay == day) newDay++;
     date.setDate(newDay);
@@ -119,7 +119,7 @@ function testDateChangeDay(): int {
 
 function testDateChangeHour(): int {
     let date: Date = new Date();
-    let hour: byte = date.getHours() as byte;
+    let hour: byte = date.getHours().toByte();
     let newHour: byte = 12;
     if(newHour == hour) newHour = 11;
     date.setHours(newHour);
@@ -130,7 +130,7 @@ function testDateChangeHour(): int {
 
 function testDateChangeMinutes(): int {
     let date: Date = new Date();
-    let minutes: byte = date.getMinutes() as byte;
+    let minutes: byte = date.getMinutes().toByte();
     let newMinutes: byte = 30;
     if(newMinutes == minutes) newMinutes = 21;
     date.setMinutes(newMinutes);
@@ -141,7 +141,7 @@ function testDateChangeMinutes(): int {
 
 function testDateChangeSeconds(): int {
     let date: Date = new Date();
-    let seconds: byte = date.getSeconds() as byte;
+    let seconds: byte = date.getSeconds().toByte();
     let newSeconds: byte = 30;
     if(newSeconds == seconds) newSeconds = 21;
     date.setSeconds(newSeconds);

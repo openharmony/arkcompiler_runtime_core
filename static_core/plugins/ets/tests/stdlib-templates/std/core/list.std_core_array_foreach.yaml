@@ -25,12 +25,12 @@
         test1:
           {
             arr: "[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]",
-            fn: '(value:boolean,index:number,self:FixedArray<boolean>): void =>  {self[index as int] = !value}',
+            fn: '(value:boolean,index:number,self:FixedArray<boolean>): void =>  {self[index.toInt()] = !value}',
           },
         test2:
           {
             arr: "[]",
-            fn: '(value:boolean,index:number,self:FixedArray<boolean>): void =>  {self[index as int] = !value}',
+            fn: '(value:boolean,index:number,self:FixedArray<boolean>): void =>  {self[index.toInt()] = !value}',
           },
 
       },
@@ -54,17 +54,17 @@
         test1:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:byte,index:number,self:FixedArray<byte>): void =>  {self[index as int] = ((value * 2) as byte)}',
+            fn: '(value:byte,index:number,self:FixedArray<byte>): void =>  {self[index.toInt()] = ((value * 2).toByte())}',
           },
           test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:byte,index:number,self:FixedArray<byte>): void =>  {self[index as int] = ((value + index as int) as byte)}',
+            fn: '(value:byte,index:number,self:FixedArray<byte>): void =>  {self[index.toInt()] = ((value + index.toInt()).toByte())}',
           },
           test3:
           {
             arr: "[]",
-            fn: '(value:byte,index:number,self:FixedArray<byte>): void =>  {self[index as int] = ((value + index as int) as byte)}',
+            fn: '(value:byte,index:number,self:FixedArray<byte>): void =>  {self[index.toInt()] = ((value + index.toInt()).toByte())}',
           },
       },
       method_expected_data:
@@ -88,17 +88,17 @@
         test1:
           {
             arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:short,index:number,self:FixedArray<short>): void =>  {self[index as int] = ((value * 2) as short)}',
+            fn: '(value:short,index:number,self:FixedArray<short>): void =>  {self[index.toInt()] = ((value * 2).toShort())}',
           },
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:short,index:number,self:FixedArray<short>): void =>  {self[index as int] = ((value + index as int) as short)}',
+            fn: '(value:short,index:number,self:FixedArray<short>): void =>  {self[index.toInt()] = ((value + index.toInt()).toShort())}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:short,index:number,self:FixedArray<short>): void =>  {self[index as int] = ((value + index as int) as short)}',
+            fn: '(value:short,index:number,self:FixedArray<short>): void =>  {self[index.toInt()] = ((value + index.toInt()).toShort())}',
           },
       },
       method_expected_data:
@@ -122,17 +122,17 @@
         test1:
           {
             arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:int,index:number,self:FixedArray<int>): void =>  {self[index as int] = value * 2}',
+            fn: '(value:int,index:number,self:FixedArray<int>): void =>  {self[index.toInt()] = value * 2}',
           },
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:int,index:number,self:FixedArray<int>): void =>  {self[index as int] = value + index as int}',
+            fn: '(value:int,index:number,self:FixedArray<int>): void =>  {self[index.toInt()] = value + index.toInt()}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:int,index:number,self:FixedArray<int>): void =>  {self[index as int] = value + index as int}',
+            fn: '(value:int,index:number,self:FixedArray<int>): void =>  {self[index.toInt()] = value + index.toInt()}',
           },
       },
       method_expected_data:
@@ -156,17 +156,17 @@
        test1:
          {
           arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-          fn: '(value:long,index:number,self:FixedArray<long>): void =>  {self[index as int] = value * 2}',
+          fn: '(value:long,index:number,self:FixedArray<long>): void =>  {self[index.toInt()] = value * 2}',
         },
       test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:long,index:number,self:FixedArray<long>): void =>  {self[index as int] = value + index as int}',
+            fn: '(value:long,index:number,self:FixedArray<long>): void =>  {self[index.toInt()] = value + index.toInt()}',
           },
       test3:
           {
             arr: "[]",
-            fn: '(value:long,index:number,self:FixedArray<long>): void =>  {self[index as int] = value + index as int}',
+            fn: '(value:long,index:number,self:FixedArray<long>): void =>  {self[index.toInt()] = value + index.toInt()}',
           },
       },
       method_expected_data:
@@ -190,17 +190,17 @@
         test1:
           {
             arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:float,index:number,self:FixedArray<float>): void =>  {self[index as int] = value * 2}',
+            fn: '(value:float,index:number,self:FixedArray<float>): void =>  {self[index.toInt()] = value * 2}',
           },
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:float,index:number,self:FixedArray<float>): void =>  {self[index as int] = value + index as int}',
+            fn: '(value:float,index:number,self:FixedArray<float>): void =>  {self[index.toInt()] = value + index.toInt()}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:float,index:number,self:FixedArray<float>): void =>  {self[index as int] = value + index as int}',
+            fn: '(value:float,index:number,self:FixedArray<float>): void =>  {self[index.toInt()] = value + index.toInt()}',
           },
       },
       method_expected_data:
@@ -224,17 +224,17 @@
         test1:
           {
             arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:double,index:number,self:FixedArray<double>): void =>  {self[index as int] = value * 2}',
+            fn: '(value:double,index:number,self:FixedArray<double>): void =>  {self[index.toInt()] = value * 2}',
           },
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:double,index:number,self:FixedArray<double>): void =>  {self[index as int] = value + index as int}',
+            fn: '(value:double,index:number,self:FixedArray<double>): void =>  {self[index.toInt()] = value + index.toInt()}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:double,index:number,self:FixedArray<double>): void =>  {self[index as int] = value + index as int}',
+            fn: '(value:double,index:number,self:FixedArray<double>): void =>  {self[index.toInt()] = value + index.toInt()}',
           },
       },
       method_expected_data:
@@ -258,17 +258,17 @@
         test1:
           {
             arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:char,index:number,self:FixedArray<char>): void =>  {self[index as int] = value * 2}',
+            fn: '(value:char,index:number,self:FixedArray<char>): void =>  {self[index.toInt()] = value * 2}',
           },
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:char,index:number,self:FixedArray<char>): void =>  {self[index as int] = value + index as int}',
+            fn: '(value:char,index:number,self:FixedArray<char>): void =>  {self[index.toInt()] = value + index.toInt()}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:char,index:number,self:FixedArray<char>): void =>  {self[index as int] = value + index as int}',
+            fn: '(value:char,index:number,self:FixedArray<char>): void =>  {self[index.toInt()] = value + index.toInt()}',
           },
       },
       method_expected_data:

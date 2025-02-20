@@ -22,7 +22,7 @@ desc:
 const size: {{c.type}} = {{c.value}}
 
 function main() {
-    const data = new int[size as int]
+    const data = new int[size.toInt()]
     assertEQ(data.length, {{c.expected}})
 }
 

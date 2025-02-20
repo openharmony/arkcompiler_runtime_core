@@ -58,7 +58,7 @@ cases:
           assertEQ( a.meth(new Byte(-1 as byte)), Byte.MAX_VALUE )
           assertEQ( a.meth(new Int(-1 as int)), Int.MAX_VALUE )
           assertEQ( a.meth(new Char(c'A')), Char.MAX_VALUE )
-          assertEQ( a.meth(new Float(3.14 as float)), Float.MAX_VALUE )
+          assertEQ( a.meth(new Float(3.14f)), Float.MAX_VALUE )
           assertEQ( a.meth(-1 as long), Long.MIN_VALUE )
           assertEQ( a.meth(-1 as short), Short.MIN_VALUE )
           assertEQ( a.meth(false), false )

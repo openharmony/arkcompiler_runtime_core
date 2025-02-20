@@ -66,12 +66,12 @@ cases:
   - argtype:
       float
     input:
-      -0.2
+      -0.2f
 
   - argtype:
       Float
     input:
-      -0.0000008
+      -0.0000008f
 
   - argtype:
       Object

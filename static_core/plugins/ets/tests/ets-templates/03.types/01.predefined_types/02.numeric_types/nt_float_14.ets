@@ -18,8 +18,8 @@ desc: Test floating point self addition(++a).
 ---*/
 
 function main(): void {
-  let a: float = 10.5;
+  let a: float = 10.5f;
   let b = ++a;
 
-  assertTrue(b === 11.5);
+  assertTrue(b === 11.5f);
 }

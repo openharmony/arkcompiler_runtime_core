@@ -28,9 +28,10 @@ function foo({{c.sig2}}): int {
     return 2
 }
 
-function main(): int {
+function main(): void {
     let v1 = foo({{c.arg1}})
     let v2 = foo({{c.arg2}})
-    return v1 == 1 && v2 == 2 ? 0 : 1
+    assertEQ(v1, 1)
+    assertEQ(v2, 2)
 }
 {%- endfor %}

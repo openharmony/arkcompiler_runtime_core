@@ -132,23 +132,23 @@ export namespace util {
         }
 
         public getCreateCount(): number {
-            return this.createCount as number;
+            return this.createCount.toDouble();
         }
 
         public getMissCount(): number {
-            return this.missCount as number;
+            return this.missCount.toDouble();
         }
 
         public getRemovalCount(): number {
-            return this.evictionCount as number;
+            return this.evictionCount.toDouble();
         }
 
         public getMatchCount(): number {
-            return this.hitCount as number;
+            return this.hitCount.toDouble();
         }
 
         public getPutCount(): number {
-            return this.putCount as number;
+            return this.putCount.toDouble();
         }
 
         public $_iterator(): IterableIterator<[K, V]> {
@@ -299,7 +299,7 @@ export namespace util {
                 if (ch == c'=') {
                     break;
                 }
-                let index: int = table.indexOf(ch) as int;
+                let index: int = table.indexOf(ch).toInt();
                 if (index == -1) {
                     continue;
                 }

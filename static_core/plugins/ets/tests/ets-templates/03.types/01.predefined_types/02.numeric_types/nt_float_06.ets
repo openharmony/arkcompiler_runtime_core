@@ -18,8 +18,8 @@ desc: Verify the negative value of floating-point numbers.
 ---*/
 
 function main(): void {
-  let a: float = 10.5;
+  let a: float = 10.5f;
   let b = -a;
 
-  assertTrue(b === -10.5);
+  assertTrue(b === -10.5f);
 }

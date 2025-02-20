@@ -274,7 +274,7 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
      * @param { ArrayLike<[K, V]> } entries initial ArrayLike
      */
     constructor(entries: ArrayLike<[K, V]>) {
-        const bucketsCount = this.getInitialBucketsCount(entries.length as Int);
+        const bucketsCount = this.getInitialBucketsCount(Double.toInt(entries.length));
         this.buckets = new ConcurrentHashMapBucket < K, V > [bucketsCount];
         this.bucketMutex = new (Object | undefined)[bucketsCount];
         for (let i = 0; i < entries.length; ++i) {
@@ -309,7 +309,7 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
      * @param { Map<K, V> } map another map
      */
     constructor(map: Map<K, V>) {
-        const bucketsCount = this.getInitialBucketsCount(map.size as int);
+        const bucketsCount = this.getInitialBucketsCount(Double.toInt(map.size));
         this.buckets = new ConcurrentHashMapBucket<K, V>[bucketsCount];
         this.bucketMutex = new (Object | undefined)[bucketsCount];
 

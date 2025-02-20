@@ -75,7 +75,7 @@ function main(): int {
 
     let wssCount: int = 0;
     for (let i = 0; i <= 0xFFFF; ++i) {
-        let c = i as char;
+        let c = i.toChar();
         if (Char.isWhiteSpace(c)) {
             ++wssCount;
             assertNE(Wss.indexOf(c), -1, 'Bad char code is encountered: ' + i);

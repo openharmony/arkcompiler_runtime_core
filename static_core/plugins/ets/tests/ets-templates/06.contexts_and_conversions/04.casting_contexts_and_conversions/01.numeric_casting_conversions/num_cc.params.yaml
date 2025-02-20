@@ -13,8 +13,8 @@
 
 ---
 cases:
-    - from_type: double
-      to_type: byte
+    - from_type: Double
+      to_type: Byte
       values:
           - { sval: 'Double.NaN', dval: '0' }
           - { sval: 'Double.NEGATIVE_INFINITY', dval: '0' }
@@ -56,18 +56,18 @@ cases:
           - { sval: '1.7976931348623157E308', dval: '-1' }
           - { sval: 'Double.POSITIVE_INFINITY', dval: '-1' }
 
-    - from_type: double
-      to_type: byte
+    - from_type: Double
+      to_type: Byte
       values:
           - { sval: '-4.9E-308', dval: '0' }
 
-    - from_type: double
-      to_type: byte
+    - from_type: Double
+      to_type: Byte
       values:
           - { sval: '4.9E-308', dval: '0' }
 
-    - from_type: double
-      to_type: short
+    - from_type: Double
+      to_type: Short
       values:
           - { sval: 'Double.NaN', dval: '0' }
           - { sval: 'Double.NEGATIVE_INFINITY', dval: '0' }
@@ -109,18 +109,18 @@ cases:
           - { sval: '1.7976931348623157E308', dval: '-1' }
           - { sval: 'Double.POSITIVE_INFINITY', dval: '-1' }
 
-    - from_type: double
-      to_type: short
+    - from_type: Double
+      to_type: Short
       values:
           - { sval: '-4.9E-308', dval: '0' }
 
-    - from_type: double
-      to_type: short
+    - from_type: Double
+      to_type: Short
       values:
           - { sval: '4.9E-308', dval: '0' }
 
-    - from_type: double
-      to_type: int
+    - from_type: Double
+      to_type: Int
       values:
           - { sval: 'Double.NaN', dval: '0' }
           - { sval: 'Double.NEGATIVE_INFINITY', dval: '-2147483648' }
@@ -162,18 +162,18 @@ cases:
           - { sval: '1.7976931348623157E308', dval: '2147483647' }
           - { sval: 'Double.POSITIVE_INFINITY', dval: '2147483647' }
 
-    - from_type: double
-      to_type: int
+    - from_type: Double
+      to_type: Int
       values:
           - { sval: '-4.9E-308', dval: '0' }
 
-    - from_type: double
-      to_type: int
+    - from_type: Double
+      to_type: Int
       values:
           - { sval: '4.9E-308', dval: '0' }
 
-    - from_type: double
-      to_type: long
+    - from_type: Double
+      to_type: Long
       values:
           - { sval: 'Double.NaN', dval: '0' }
           - { sval: 'Double.NEGATIVE_INFINITY', dval: '-9223372036854775808' }
@@ -215,18 +215,18 @@ cases:
           - { sval: '1.7976931348623157E308', dval: '9223372036854775807' }
           - { sval: 'Double.POSITIVE_INFINITY', dval: '9223372036854775807' }
 
-    - from_type: double
-      to_type: long
+    - from_type: Double
+      to_type: Long
       values:
           - { sval: '-4.9E-308', dval: '0' }
 
-    - from_type: double
-      to_type: long
+    - from_type: Double
+      to_type: Long
       values:
           - { sval: '4.9E-308', dval: '0' }
 
-    - from_type: double
-      to_type: float
+    - from_type: Double
+      to_type: Float
       values:
           - { sval: 'Double.NEGATIVE_INFINITY', dval: 'Float.NEGATIVE_INFINITY' }
           - { sval: '-1.7976931348623157E308', dval: 'Float.NEGATIVE_INFINITY' }
@@ -267,18 +267,18 @@ cases:
           - { sval: '1.7976931348623157E308', dval: 'Float.POSITIVE_INFINITY' }
           - { sval: 'Double.POSITIVE_INFINITY', dval: 'Float.POSITIVE_INFINITY' }
 
-    - from_type: double
-      to_type: float
+    - from_type: Double
+      to_type: Float
       values:
           - { sval: '-4.9E-308', dval: '-0.0f' }
 
-    - from_type: double
-      to_type: float
+    - from_type: Double
+      to_type: Float
       values:
           - { sval: '4.9E-308', dval: '0.0f' }
 
-    - from_type: double
-      to_type: double
+    - from_type: Double
+      to_type: Double
       values:
           - { sval: 'Double.NEGATIVE_INFINITY', dval: 'Double.NEGATIVE_INFINITY' }
           - { sval: '-1.7976931348623157E308', dval: '-1.7976931348623157E308' }
@@ -321,8 +321,8 @@ cases:
           - { sval: '1.7976931348623157E308', dval: '1.7976931348623157E308' }
           - { sval: 'Double.POSITIVE_INFINITY', dval: 'Double.POSITIVE_INFINITY' }
 
-    - from_type: double
-      to_type: char
+    - from_type: Double
+      to_type: Char
       values:
           - { sval: 'Double.NaN', dval: "c'\\u0000'" }
           - { sval: 'Double.NEGATIVE_INFINITY', dval: "c'\\u0000'" }
@@ -364,18 +364,18 @@ cases:
           - { sval: '1.7976931348623157E308', dval: "c'\\uffff'" }
           - { sval: 'Double.POSITIVE_INFINITY', dval: "c'\\uffff'" }
 
-    - from_type: double
-      to_type: char
+    - from_type: Double
+      to_type: Char
       values:
           - { sval: '-4.9E-308', dval: "c'\\u0000'" }
 
-    - from_type: double
-      to_type: char
+    - from_type: Double
+      to_type: Char
       values:
           - { sval: '4.9E-308', dval: "c'\\u0000'" }
 
-    - from_type: float
-      to_type: byte
+    - from_type: Float
+      to_type: Byte
       values:
           - { sval: 'Float.NaN', dval: '0' }
           - { sval: 'Float.NEGATIVE_INFINITY', dval: '0' }
@@ -415,8 +415,8 @@ cases:
           - { sval: '3.4028235E38f', dval: '-1' }
           - { sval: 'Float.POSITIVE_INFINITY', dval: '-1' }
 
-    - from_type: float
-      to_type: short
+    - from_type: Float
+      to_type: Short
       values:
           - { sval: 'Float.NaN', dval: '0' }
           - { sval: 'Float.NEGATIVE_INFINITY', dval: '0' }
@@ -456,8 +456,8 @@ cases:
           - { sval: '3.4028235E38f', dval: '-1' }
           - { sval: 'Float.POSITIVE_INFINITY', dval: '-1' }
 
-    - from_type: float
-      to_type: int
+    - from_type: Float
+      to_type: Int
       values:
           - { sval: 'Float.NaN', dval: '0' }
           - { sval: 'Float.NEGATIVE_INFINITY', dval: '-2147483648' }
@@ -497,8 +497,8 @@ cases:
           - { sval: '3.4028235E38f', dval: '2147483647' }
           - { sval: 'Float.POSITIVE_INFINITY', dval: '2147483647' }
 
-    - from_type: float
-      to_type: long
+    - from_type: Float
+      to_type: Long
       values:
           - { sval: 'Float.NaN', dval: '0' }
           - { sval: 'Float.NEGATIVE_INFINITY', dval: '-9223372036854775808' }
@@ -538,8 +538,8 @@ cases:
           - { sval: '3.4028235E38f', dval: '9223372036854775807' }
           - { sval: 'Float.POSITIVE_INFINITY', dval: '9223372036854775807' }
 
-    - from_type: float
-      to_type: float
+    - from_type: Float
+      to_type: Float
       values:
           - { sval: 'Float.NEGATIVE_INFINITY', dval: 'Float.NEGATIVE_INFINITY' }
           - { sval: '-3.4028235E38f', dval: '-3.4028235E38f' }
@@ -578,8 +578,8 @@ cases:
           - { sval: '3.4028235E38f', dval: '3.4028235E38f' }
           - { sval: 'Float.POSITIVE_INFINITY', dval: 'Float.POSITIVE_INFINITY' }
 
-    - from_type: float
-      to_type: double
+    - from_type: Float
+      to_type: Double
       values:
           - { sval: 'Float.NEGATIVE_INFINITY', dval: 'Double.NEGATIVE_INFINITY' }
           - { sval: '-3.4028235E38f', dval: '-3.4028234663852886E38' }
@@ -618,8 +618,8 @@ cases:
           - { sval: '3.4028235E38f', dval: '3.4028234663852886E38' }
           - { sval: 'Float.POSITIVE_INFINITY', dval: 'Double.POSITIVE_INFINITY' }
 
-    - from_type: float
-      to_type: char
+    - from_type: Float
+      to_type: Char
       values:
           - { sval: 'Float.NaN', dval: "c'\\u0000'" }
           - { sval: 'Float.NEGATIVE_INFINITY', dval: "c'\\u0000'" }
@@ -659,8 +659,8 @@ cases:
           - { sval: '3.4028235E38f', dval: "c'\\uffff'" }
           - { sval: 'Float.POSITIVE_INFINITY', dval: "c'\\uffff'" }
 
-    - from_type: long
-      to_type: byte
+    - from_type: Long
+      to_type: Byte
       values:
           - { sval: '-9223372036854775808', dval: '0' }
           - { sval: '-9223372036854775807', dval: '1' }
@@ -688,8 +688,8 @@ cases:
           - { sval: '9223372036854775806', dval: '-2' }
           - { sval: '9223372036854775807', dval: '-1' }
 
-    - from_type: long
-      to_type: short
+    - from_type: Long
+      to_type: Short
       values:
           - { sval: '-9223372036854775808', dval: '0' }
           - { sval: '-9223372036854775807', dval: '1' }
@@ -717,8 +717,8 @@ cases:
           - { sval: '9223372036854775806', dval: '-2' }
           - { sval: '9223372036854775807', dval: '-1' }
 
-    - from_type: long
-      to_type: int
+    - from_type: Long
+      to_type: Int
       values:
           - { sval: '-9223372036854775808', dval: '0' }
           - { sval: '-9223372036854775807', dval: '1' }
@@ -746,8 +746,8 @@ cases:
           - { sval: '9223372036854775806', dval: '-2' }
           - { sval: '9223372036854775807', dval: '-1' }
 
-    - from_type: long
-      to_type: long
+    - from_type: Long
+      to_type: Long
       values:
           - { sval: '-9223372036854775808', dval: '-9223372036854775808' }
           - { sval: '-9223372036854775807', dval: '-9223372036854775807' }
@@ -775,8 +775,8 @@ cases:
           - { sval: '9223372036854775806', dval: '9223372036854775806' }
           - { sval: '9223372036854775807', dval: '9223372036854775807' }
 
-    - from_type: long
-      to_type: float
+    - from_type: Long
+      to_type: Float
       values:
           - { sval: '-9223372036854775808', dval: '-9.223372E18f' }
           - { sval: '-9223372036854775807', dval: '-9.223372E18f' }
@@ -804,8 +804,8 @@ cases:
           - { sval: '9223372036854775806', dval: '9.223372E18f' }
           - { sval: '9223372036854775807', dval: '9.223372E18f' }
 
-    - from_type: long
-      to_type: double
+    - from_type: Long
+      to_type: Double
       values:
           - { sval: '-9223372036854775808', dval: '-9.223372036854776E18' }
           - { sval: '-9223372036854775807', dval: '-9.223372036854776E18' }
@@ -833,8 +833,8 @@ cases:
           - { sval: '9223372036854775806', dval: '9.223372036854776E18' }
           - { sval: '9223372036854775807', dval: '9.223372036854776E18' }
 
-    - from_type: long
-      to_type: char
+    - from_type: Long
+      to_type: Char
       values:
           - { sval: '-9223372036854775808', dval: "c'\\u0000'" }
           - { sval: '-9223372036854775807', dval: "c'\\u0001'" }
@@ -862,8 +862,8 @@ cases:
           - { sval: '9223372036854775806', dval: "c'\\ufffe'" }
           - { sval: '9223372036854775807', dval: "c'\\uffff'" }
 
-    - from_type: int
-      to_type: byte
+    - from_type: Int
+      to_type: Byte
       values:
           - { sval: '-2147483648', dval: '0' }
           - { sval: '-2147483647', dval: '1' }
@@ -885,8 +885,8 @@ cases:
           - { sval: '2147483646', dval: '-2' }
           - { sval: '2147483647', dval: '-1' }
 
-    - from_type: int
-      to_type: short
+    - from_type: Int
+      to_type: Short
       values:
           - { sval: '-2147483648', dval: '0' }
           - { sval: '-2147483647', dval: '1' }
@@ -908,8 +908,8 @@ cases:
           - { sval: '2147483646', dval: '-2' }
           - { sval: '2147483647', dval: '-1' }
 
-    - from_type: int
-      to_type: int
+    - from_type: Int
+      to_type: Int
       values:
           - { sval: '-2147483648', dval: '-2147483648' }
           - { sval: '-2147483647', dval: '-2147483647' }
@@ -931,8 +931,8 @@ cases:
           - { sval: '2147483646', dval: '2147483646' }
           - { sval: '2147483647', dval: '2147483647' }
 
-    - from_type: int
-      to_type: long
+    - from_type: Int
+      to_type: Long
       values:
           - { sval: '-2147483648', dval: '-2147483648' }
           - { sval: '-2147483647', dval: '-2147483647' }
@@ -954,8 +954,8 @@ cases:
           - { sval: '2147483646', dval: '2147483646' }
           - { sval: '2147483647', dval: '2147483647' }
 
-    - from_type: int
-      to_type: float
+    - from_type: Int
+      to_type: Float
       values:
           - { sval: '-2147483648', dval: '-2.14748365E9f' }
           - { sval: '-2147483647', dval: '-2.14748365E9f' }
@@ -977,8 +977,8 @@ cases:
           - { sval: '2147483646', dval: '2.14748365E9f' }
           - { sval: '2147483647', dval: '2.14748365E9f' }
 
-    - from_type: int
-      to_type: double
+    - from_type: Int
+      to_type: Double
       values:
           - { sval: '-2147483648', dval: '-2.147483648E9' }
           - { sval: '-2147483647', dval: '-2.147483647E9' }
@@ -1000,8 +1000,8 @@ cases:
           - { sval: '2147483646', dval: '2.147483646E9' }
           - { sval: '2147483647', dval: '2.147483647E9' }
 
-    - from_type: int
-      to_type: char
+    - from_type: Int
+      to_type: Char
       values:
           - { sval: '-2147483648', dval: "c'\\u0000'" }
           - { sval: '-2147483647', dval: "c'\\u0001'" }
@@ -1023,8 +1023,8 @@ cases:
           - { sval: '2147483646', dval: "c'\\ufffe'" }
           - { sval: '2147483647', dval: "c'\\uffff'" }
 
-    - from_type: short
-      to_type: byte
+    - from_type: Short
+      to_type: Byte
       values:
           - { sval: '-32768', dval: '0' }
           - { sval: '-32767', dval: '1' }
@@ -1040,8 +1040,8 @@ cases:
           - { sval: '32766', dval: '-2' }
           - { sval: '32767', dval: '-1' }
 
-    - from_type: short
-      to_type: short
+    - from_type: Short
+      to_type: Short
       values:
           - { sval: '-32768', dval: '-32768' }
           - { sval: '-32767', dval: '-32767' }
@@ -1057,8 +1057,8 @@ cases:
           - { sval: '32766', dval: '32766' }
           - { sval: '32767', dval: '32767' }
 
-    - from_type: short
-      to_type: int
+    - from_type: Short
+      to_type: Int
       values:
           - { sval: '-32768', dval: '-32768' }
           - { sval: '-32767', dval: '-32767' }
@@ -1074,8 +1074,8 @@ cases:
           - { sval: '32766', dval: '32766' }
           - { sval: '32767', dval: '32767' }
 
-    - from_type: short
-      to_type: long
+    - from_type: Short
+      to_type: Long
       values:
           - { sval: '-32768', dval: '-32768' }
           - { sval: '-32767', dval: '-32767' }
@@ -1091,8 +1091,8 @@ cases:
           - { sval: '32766', dval: '32766' }
           - { sval: '32767', dval: '32767' }
 
-    - from_type: short
-      to_type: float
+    - from_type: Short
+      to_type: Float
       values:
           - { sval: '-32768', dval: '-32768.0f' }
           - { sval: '-32767', dval: '-32767.0f' }
@@ -1108,8 +1108,8 @@ cases:
           - { sval: '32766', dval: '32766.0f' }
           - { sval: '32767', dval: '32767.0f' }
 
-    - from_type: short
-      to_type: double
+    - from_type: Short
+      to_type: Double
       values:
           - { sval: '-32768', dval: '-32768.0' }
           - { sval: '-32767', dval: '-32767.0' }
@@ -1125,8 +1125,8 @@ cases:
           - { sval: '32766', dval: '32766.0' }
           - { sval: '32767', dval: '32767.0' }
 
-    - from_type: short
-      to_type: char
+    - from_type: Short
+      to_type: Char
       values:
           - { sval: '-32768', dval: "c'\\u8000'" }
           - { sval: '-32767', dval: "c'\\u8001'" }
@@ -1142,8 +1142,8 @@ cases:
           - { sval: '32766', dval: "c'\\u7ffe'" }
           - { sval: '32767', dval: "c'\\u7fff'" }
 
-    - from_type: byte
-      to_type: byte
+    - from_type: Byte
+      to_type: Byte
       values:
           - { sval: '-128', dval: '-128' }
           - { sval: '-127', dval: '-127' }
@@ -1153,8 +1153,8 @@ cases:
           - { sval: '126', dval: '126' }
           - { sval: '127', dval: '127' }
 
-    - from_type: byte
-      to_type: short
+    - from_type: Byte
+      to_type: Short
       values:
           - { sval: '-128', dval: '-128' }
           - { sval: '-127', dval: '-127' }
@@ -1164,8 +1164,8 @@ cases:
           - { sval: '126', dval: '126' }
           - { sval: '127', dval: '127' }
 
-    - from_type: byte
-      to_type: int
+    - from_type: Byte
+      to_type: Int
       values:
           - { sval: '-128', dval: '-128' }
           - { sval: '-127', dval: '-127' }
@@ -1175,8 +1175,8 @@ cases:
           - { sval: '126', dval: '126' }
           - { sval: '127', dval: '127' }
 
-    - from_type: byte
-      to_type: long
+    - from_type: Byte
+      to_type: Long
       values:
           - { sval: '-128', dval: '-128' }
           - { sval: '-127', dval: '-127' }
@@ -1186,8 +1186,8 @@ cases:
           - { sval: '126', dval: '126' }
           - { sval: '127', dval: '127' }
 
-    - from_type: byte
-      to_type: float
+    - from_type: Byte
+      to_type: Float
       values:
           - { sval: '-128', dval: '-128.0f' }
           - { sval: '-127', dval: '-127.0f' }
@@ -1197,8 +1197,8 @@ cases:
           - { sval: '126', dval: '126.0f' }
           - { sval: '127', dval: '127.0f' }
 
-    - from_type: byte
-      to_type: double
+    - from_type: Byte
+      to_type: Double
       values:
           - { sval: '-128', dval: '-128.0' }
           - { sval: '-127', dval: '-127.0' }
@@ -1208,8 +1208,8 @@ cases:
           - { sval: '126', dval: '126.0' }
           - { sval: '127', dval: '127.0' }
 
-    - from_type: byte
-      to_type: char
+    - from_type: Byte
+      to_type: Char
       values:
           - { sval: '-128', dval: "c'\\uff80'" }
           - { sval: '-127', dval: "c'\\uff81'" }
@@ -1219,8 +1219,8 @@ cases:
           - { sval: '126', dval: "c'\\u007e'" }
           - { sval: '127', dval: "c'\\u007f'" }
 
-    - from_type: char
-      to_type: byte
+    - from_type: Char
+      to_type: Byte
       values:
           - { sval: "c'\\u0000'", dval: '0' }
           - { sval: "c'\\u0001'", dval: '1' }
@@ -1234,8 +1234,8 @@ cases:
           - { sval: "c'\\ufffe'", dval: '-2' }
           - { sval: "c'\\uffff'", dval: '-1' }
 
-    - from_type: char
-      to_type: short
+    - from_type: Char
+      to_type: Short
       values:
           - { sval: "c'\\u0000'", dval: '0' }
           - { sval: "c'\\u0001'", dval: '1' }
@@ -1249,8 +1249,8 @@ cases:
           - { sval: "c'\\ufffe'", dval: '-2' }
           - { sval: "c'\\uffff'", dval: '-1' }
 
-    - from_type: char
-      to_type: int
+    - from_type: Char
+      to_type: Int
       values:
           - { sval: "c'\\u0000'", dval: '0' }
           - { sval: "c'\\u0001'", dval: '1' }
@@ -1264,8 +1264,8 @@ cases:
           - { sval: "c'\\ufffe'", dval: '65534' }
           - { sval: "c'\\uffff'", dval: '65535' }
 
-    - from_type: char
-      to_type: long
+    - from_type: Char
+      to_type: Long
       values:
           - { sval: "c'\\u0000'", dval: '0' }
           - { sval: "c'\\u0001'", dval: '1' }
@@ -1279,8 +1279,8 @@ cases:
           - { sval: "c'\\ufffe'", dval: '65534' }
           - { sval: "c'\\uffff'", dval: '65535' }
 
-    - from_type: char
-      to_type: float
+    - from_type: Char
+      to_type: Float
       values:
           - { sval: "c'\\u0000'", dval: '0.0f' }
           - { sval: "c'\\u0001'", dval: '1.0f' }
@@ -1294,8 +1294,8 @@ cases:
           - { sval: "c'\\ufffe'", dval: '65534.0f' }
           - { sval: "c'\\uffff'", dval: '65535.0f' }
 
-    - from_type: char
-      to_type: double
+    - from_type: Char
+      to_type: Double
       values:
           - { sval: "c'\\u0000'", dval: '0.0' }
           - { sval: "c'\\u0001'", dval: '1.0' }
@@ -1309,8 +1309,8 @@ cases:
           - { sval: "c'\\ufffe'", dval: '65534.0' }
           - { sval: "c'\\uffff'", dval: '65535.0' }
 
-    - from_type: char
-      to_type: char
+    - from_type: Char
+      to_type: Char
       values:
           - { sval: "c'\\u0000'", dval: "c'\\u0000'" }
           - { sval: "c'\\u0001'", dval: "c'\\u0001'" }

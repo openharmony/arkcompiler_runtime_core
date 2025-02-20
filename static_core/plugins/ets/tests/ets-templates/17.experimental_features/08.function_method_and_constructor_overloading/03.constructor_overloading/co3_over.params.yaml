@@ -88,20 +88,17 @@ cases:
           class A {
               fld: number
               constructor(a: boolean) { this.fld = 1.0 }
-              constructor(a: Boolean) { this.fld = 2.0 }
-              constructor(a: boolean, b: number) { this.fld = 3.0 }
-              constructor(a: boolean, b: Number) { this.fld = 4.0 }
               constructor(a: Boolean, b: Number) { this.fld = 5.0 }
           }
       use: |-
           let a = new A(true)
-          assertEQ(a.fld, 1.0)
+          assertEQ(a.fld,  1.0)
           a = new A(new Boolean())
-          assertEQ(a.fld, 2.0)
+          assertTrue(a.fld == 1.0)
           a = new A(true, 1.0)
-          assertEQ(a.fld, 3.0)
+          assertTrue(a.fld == 5.0)
           a = new A(false, new Double())
-          assertEQ(a.fld, 4.0)
+          assertTrue(a.fld == 5.0)
           a = new A(new Boolean(), new Double())
           assertEQ(a.fld, 5.0)
 

@@ -121,7 +121,7 @@ cases:
           let v: string|number|Error|null = new Error()
           v = -42.0
           if (!res) {
-              res = ~v + ~(~v) == -1
+              res = v == -42
           }
 
     - code: |-
@@ -129,8 +129,7 @@ cases:
           if (!res) {
               v = -42.0
           }
-          res = ~v + ~(~v) == -1
-      tags: 'compile-only, negative'
+          res = v == -42
 
     - code: |-
           let v: string|number|Error|null = new Error()

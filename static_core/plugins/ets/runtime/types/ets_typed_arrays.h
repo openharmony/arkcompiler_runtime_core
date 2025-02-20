@@ -93,7 +93,7 @@ public:
         byteLength_ = byteLength;
     }
 
-    EtsDouble GetBytesPerElement() const
+    EtsInt GetBytesPerElement() const
     {
         return bytesPerElement_;
     }
@@ -116,9 +116,9 @@ public:
 private:
     ObjectPointer<EtsObject> buffer_;
     ObjectPointer<EtsString> name_;
-    EtsDouble bytesPerElement_;
     EtsDouble byteOffset_;
     EtsDouble byteLength_;
+    EtsInt bytesPerElement_;
     EtsInt lengthInt_;
 };
 

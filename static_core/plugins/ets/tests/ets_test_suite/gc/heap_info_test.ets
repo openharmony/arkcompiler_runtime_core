@@ -28,7 +28,7 @@ function main(): void {
     const MAX_ALLOCATION_COUNT = 100;
     const MAX_ALLOC_SIZE = 100;
     for (let i = 0; i < MAX_ALLOCATION_COUNT; ++i) {
-        let alloc_size = (random() * MAX_ALLOC_SIZE) as int;
+        let alloc_size = (random() * MAX_ALLOC_SIZE).toInt();
         new Object[alloc_size];
         checkHeapInfo();
     }

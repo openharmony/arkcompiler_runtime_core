@@ -177,7 +177,7 @@ function BoundsCheck(): int {
         if (str1char.length <= 100000) {
             RES += 1;
         } else {
-            RES += str1char.charAt(10000) as int;
+            RES += Char.toInt(str1char.charAt(10000));
         }
     }
     return RES;

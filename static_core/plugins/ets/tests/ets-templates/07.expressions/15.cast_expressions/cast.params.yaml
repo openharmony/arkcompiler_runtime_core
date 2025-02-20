@@ -15,13 +15,13 @@ cases:
     - decl: |-
           let s = 42
       use: |-
-          let t = s as number  // primitive widening
+          let t = Int.toDouble(s)  // primitive widening
           assertEQ( t, 42.0 )
 
     - decl: |-
           let s = 42
       use: |-
-          let t = s as Number  // primitive widening and boxing
+          let t = Int.toDouble(s)  // primitive widening and boxing
           assertTrue( t instanceof Number && t.unboxed() == 42.0 )
 
     - decl: |-
@@ -45,13 +45,13 @@ cases:
     - decl: |-
           let s = 42.0
       use: |-
-          let t = s as int  // primitive narrowing
+          let t = Double.toInt(s)  // primitive narrowing
           assertEQ( t, 42 )
 
     - decl: |-
           let s: byte = 0x40 as byte
       use: |-
-          let t = s as char  // primitive widening and narrowing
+          let t = Byte.toChar(s)  // primitive widening and narrowing
           assertEQ( t, c'@' )
 
     - decl: |-

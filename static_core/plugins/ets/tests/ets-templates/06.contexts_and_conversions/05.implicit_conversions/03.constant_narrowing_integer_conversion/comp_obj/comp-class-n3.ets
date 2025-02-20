@@ -16,7 +16,6 @@
 
 /*---
 desc: Composite context, class field, constant narrowing integer conversion, implicit
-tags: [compile-only, negative]
 params: from {{c.from_type}} to {{c.to_type}}
 ---*/
 {%- for v in c['values'] %}
@@ -25,17 +24,10 @@ const c{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
 
 class A { fld: {{c.to_type}} }
 
-function main(): int {
+function main() {
 {%- for v in c['values'] %}
-    let d{{loop.index}}: A = { fld: {{v.expr|safe}} }
-    if (d{{loop.index}}.fld != {{v.val}}) {
-        return 1
-    }
-    d{{loop.index}} = { fld: c{{loop.index}} }
-    if (d{{loop.index}}.fld != {{v.val}}) {
-        return 1
-    }
-{%- endfor %}
-    return 0
+    let d{{loop.index}}: A = { fld: c{{loop.index}}.to{{c.to_type}}() }
+    assertEQ(d{{loop.index}}.fld, {{v.val}})
+{% endfor %}
 }
 {%- endfor %}

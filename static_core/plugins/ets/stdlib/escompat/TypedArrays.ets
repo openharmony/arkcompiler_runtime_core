@@ -22,7 +22,7 @@ class Int8ArrayIteratorKeys implements IterableIterator<number> {
     private idx: int = 0
 
     constructor(parent: Int8Array) {
-        this.length = parent.length as int
+        this.length = parent.length.toInt()
     }
 
     public override $_iterator(): IterableIterator<number> {
@@ -33,7 +33,7 @@ class Int8ArrayIteratorKeys implements IterableIterator<number> {
         if (this.idx < 0 || this.idx >= this.length) {
             return new IteratorResult<number>()
         }
-        return new IteratorResult<number>(false, this.idx++ as number)
+        return new IteratorResult<number>(false, (this.idx++).toDouble())
     }
 }
 
@@ -50,7 +50,7 @@ class Int8ArrayIterator implements IterableIterator<Number> {
     }
 
     override next(): IteratorResult<Number> {
-        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+        if (this.idx < 0 || this.idx >= this.parent.length.toInt()) {
             return new IteratorResult<Number>()
         }
         return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
@@ -70,7 +70,7 @@ class Int8ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
     }
 
     override next(): IteratorResult<[Number, Number]> {
-        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+        if (this.idx < 0 || this.idx >= this.parent.length.toInt()) {
             return new IteratorResult<[Number, Number]>()
         }
         return new IteratorResult<[Number, Number]>(
@@ -84,15 +84,15 @@ class Int8ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
  * JS Int8Array API-compatible class
  */
 export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
-    public static readonly BYTES_PER_ELEMENT: number = 1
-    public readonly BYTES_PER_ELEMENT: number = Int8Array.BYTES_PER_ELEMENT
+    public static readonly BYTES_PER_ELEMENT: int = 1
+    public readonly BYTES_PER_ELEMENT: int = Int8Array.BYTES_PER_ELEMENT
     internal readonly lengthInt: int
 
     /**
      * Creates an empty Int8Array.
      */
     public constructor() {
-        this(0 as int)
+        this(0)
     }
 
     /**
@@ -102,9 +102,9 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
             const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
-            this.byteLength = arr.length as int * Int8Array.BYTES_PER_ELEMENT as int
-            this.lengthInt = arr.length as int
-            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteLength = arr.length.toInt() * Int8Array.BYTES_PER_ELEMENT
+            this.lengthInt = arr.length.toInt()
+            this.buffer = new ArrayBuffer(this.byteLength.toInt())
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toByte())
@@ -143,48 +143,22 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         let intLength: int
         if (length != undefined) {
             intLength = length.toInt()
-            if (intLength > intByteLength / Int8Array.BYTES_PER_ELEMENT as int) {
+            if (intLength > (intByteLength / Int8Array.BYTES_PER_ELEMENT).toInt()) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
         } else {
-            intLength = intByteLength / Int8Array.BYTES_PER_ELEMENT as int
+            intLength = (intByteLength / Int8Array.BYTES_PER_ELEMENT).toInt()
         }
         if (intLength < 0) {
             throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer")
         }
-        if (intLength < intByteLength / Int8Array.BYTES_PER_ELEMENT as int) {
-            intByteLength = intLength * Int8Array.BYTES_PER_ELEMENT as int
+        if (intLength < (intByteLength / Int8Array.BYTES_PER_ELEMENT).toInt()) {
+            intByteLength = intLength * Int8Array.BYTES_PER_ELEMENT
         }
         this.byteLength = intByteLength
         this.byteOffset = intByteOffset
         this.lengthInt = intLength
         this.buffer = buf
-    }
-
-    /**
-     * Creates an Int8Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type byte in newly created Int8Array
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined) {
-        this(buf, byteOffset, undefined)
-    }
-
-    /**
-     * Creates an Int8Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type byte in newly created Int8Array
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: number, length: number) {
-        this(buf, new Number(byteOffset), new Number(length))
     }
 
     /**
@@ -232,19 +206,19 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
             this.byteLength = (buf as ArrayBuffer).getByteLength()
-            if (this.byteLength % Int8Array.BYTES_PER_ELEMENT as int != 0) {
+            if (this.byteLength % Int8Array.BYTES_PER_ELEMENT.toInt() != 0) {
                throw new RangeError("ArrayBuffer.byteLength should be multiple of 1 as Int8Array.BYTES_PER_ELEMENT")
             }
-            this.lengthInt = this.byteLength / Int8Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = (this.byteLength / Int8Array.BYTES_PER_ELEMENT).toInt()
             this.buffer = buf as ArrayBuffer
             this.byteOffset = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
             // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
             let arr = Array.from<Number>((buf as ArrayLike<Number>))
-            this.byteLength = arr.length as int * Int8Array.BYTES_PER_ELEMENT as int
-            this.lengthInt = arr.length as int
-            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteLength = arr.length.toInt() * Int8Array.BYTES_PER_ELEMENT.toInt()
+            this.lengthInt = arr.length.toInt()
+            this.buffer = new ArrayBuffer(this.byteLength.toInt())
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toByte())
@@ -260,7 +234,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: int) {
-        this(length as number)
+        this(length.toDouble())
     }
 
     /**
@@ -269,13 +243,13 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: number) {
-        if (length < 0 || length > (Int.MAX_VALUE / Int8Array.BYTES_PER_ELEMENT)) {
+        if (length < 0 || length > (Int.MAX_VALUE / Int8Array.BYTES_PER_ELEMENT).toInt()) {
             throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
         }
-        this.lengthInt = length as int
-        this.byteLength = this.lengthInt * Int8Array.BYTES_PER_ELEMENT as int
+        this.lengthInt = length.toInt()
+        this.byteLength = this.lengthInt * Int8Array.BYTES_PER_ELEMENT
         this.byteOffset = 0
-        this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.buffer = new ArrayBuffer(this.byteLength.toInt())
     }
 
     /**
@@ -284,9 +258,9 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param other data initializer
      */
     public constructor(other: Int8Array) {
-        this.buffer = other.buffer.slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
+        this.buffer = other.buffer.slice(other.byteOffset.toInt(), (other.byteOffset + other.byteLength).toInt()) as ArrayBuffer
         this.byteLength = other.byteLength
-        this.lengthInt = other.length as int
+        this.lengthInt = other.length.toInt()
         this.byteOffset = 0
     }
 
@@ -296,7 +270,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as byte)
+            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]).toByte())
         }
     }
 
@@ -306,20 +280,20 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as byte)
+            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]).toByte())
         }
     }
 
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
-            return 0 as number
+            return 0
         }
-        return val as number
+        return (val).toDouble()
     }
 
     internal zeroIfInfinity(val: byte): byte {
         if ((val == Infinity) || (val == -Infinity)) {
-            return 0 as byte
+            return Int.toByte(0)
         }
         return val
     }
@@ -332,7 +306,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: number, val: number): void {
-        this.$_set(index as int, val)
+        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -344,7 +318,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public $_set(index: int, val: number): void {
         let v = this.zeroIfInfinity(val)
-        this.$_set(index, v as byte)
+        this.$_set(index, v.toByte())
     }
 
     /**
@@ -355,7 +329,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: number, val: int): void {
-        this.$_set(index as int, val)
+        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -375,7 +349,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: number, val: byte): void {
-        this.$_set(index as int, val)
+        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -400,7 +374,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a primitive at index
      */
     public override $_get(index: number): Number {
-        return this.$_get(index as int) as Number
+        return this.$_get(index.toInt())
     }
 
     /**
@@ -420,7 +394,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a primitive at index
      */
     public at(index: number): Number | undefined {
-        return this.at(index as int)
+        return this.at(index.toInt())
     }
 
     /**
@@ -455,7 +429,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: number, start: number, end?: number): Int8Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -470,7 +444,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: number, end?: number): Int8Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target, start.toInt(), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -485,7 +459,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: number, start: int, end?: number): Int8Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target.toInt(), start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -500,7 +474,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: int, end?: number): Int8Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target, start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -525,7 +499,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: number): Int8Array {
-        return this.copyWithin(target as int)
+        return this.copyWithin(target.toInt())
     }
 
     /**
@@ -558,7 +532,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public fill(value: number, start?: number, end?: number): this {
         value = this.zeroIfInfinity(value)
-        this.fill(value as byte, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value.toByte(), asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -571,20 +545,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public fill(value: number, start: int, end?: number): this {
         value = this.zeroIfInfinity(value)
-        this.fill(value as byte, start as int, asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Int8Array with specified value
-     *
-     * @param value new valuy
-     *
-     * @returns modified Int8Array
-     */
-    public fill(value: number, start: int, end: number): this {
-        value = this.zeroIfInfinity(value)
-        this.fill(value as byte, start as int, end as int)
+        this.fill(value.toByte(), start, asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -597,7 +558,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public fill(value: number, start: number, end: int): this {
         value = this.zeroIfInfinity(value)
-        this.fill(value as byte, start as int, end as int)
+        this.fill(value.toByte(), start.toInt(), end)
         return this
     }
 
@@ -610,7 +571,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public fill(value: number, start: int, end: int): this {
         value = this.zeroIfInfinity(value)
-        this.fill(value as byte, start as int, end as int)
+        this.fill(value.toByte(), start, end)
         return this
     }
 
@@ -622,7 +583,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Int8Array
      */
     public fill(value: byte, start?: number, end?: number): this {
-        this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value, asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -634,19 +595,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Int8Array
      */
     public fill(value: byte, start: int, end?: number): this {
-        this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Int8Array with specified value
-     *
-     * @param value new valuy
-     *
-     * @returns modified Int8Array
-     */
-    public fill(value: byte, start: int, end: number): this {
-        this.fill(value, start as int, end as int)
+        this.fill(value, start, asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -658,7 +607,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Int8Array
      */
     public fill(value: byte, start: number, end: int): this {
-        this.fill(value, start as int, end as int)
+        this.fill(value, start.toInt(), end)
         return this
     }
 
@@ -712,13 +661,13 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: FixedArray<number>, insertPos: number): void {
-        const offset = insertPos as int
+        const offset = insertPos.toInt()
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < arr.length as int; ++i) {
+        for (let i = 0; i < arr.length.toInt(); ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.$_set(offset + i, v as byte)
+            this.$_set(offset + i, v.toByte())
         }
     }
 
@@ -732,11 +681,11 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: FixedArray<byte>, insertPos: int): void {
-        const offset = insertPos as int
+        const offset = insertPos
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < arr.length as int; ++i) {
+        for (let i = 0; i < arr.length.toInt(); ++i) {
             let v = this.zeroIfInfinity(arr[i])
             this.$_set(offset + i, v)
         }
@@ -748,7 +697,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param arr array to copy data from
      */
     public set(arr: FixedArray<number>): void {
-        this.set(arr, 0 as number)
+        this.set(arr, 0)
     }
 
     /**
@@ -757,7 +706,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param arr array to copy data from
      */
     public set(arr: FixedArray<byte>): void {
-        this.set(arr, 0 as int)
+        this.set(arr, 0)
     }
 
     public native set(array: Int8Array): void
@@ -772,13 +721,13 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param offset Optional. The offset into the target array at which to begin writing values from the source array
      */
     public set(array: ArrayLike<number>, offset: number = 0): void {
-        const insertPos = offset as int
+        const insertPos = offset.toInt()
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length - 1 as int; i >= 0; --i) {
+        for (let i = array.length.toInt() - 1; i >= 0; --i) {
             let v = this.zeroIfInfinity(array[i])
-            this.$_set(insertPos + i, v as byte)
+            this.$_set(insertPos + i, v.toByte())
         }
     }
 
@@ -790,9 +739,9 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int8Array
      */
     public static of(...items: FixedArray<number>): Int8Array {
-        let res = new Int8Array(items.length as int)
+        let res = new Int8Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, res.zeroIfInfinity(items[i]) as byte)
+            res.setUnsafe(i, res.zeroIfInfinity(items[i]).toByte())
         }
         return res
     }
@@ -805,9 +754,9 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int8Array
      */
     public static of(...items: FixedArray<int>): Int8Array {
-        let res = new Int8Array(items.length as int)
+        let res = new Int8Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i] as byte)
+            res.setUnsafe(i, items[i].toByte())
         }
         return res
     }
@@ -820,7 +769,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int8Array
      */
     public static of(...items: FixedArray<byte>): Int8Array {
-        let res = new Int8Array(items.length as int)
+        let res = new Int8Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i])
         }
@@ -835,7 +784,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int8Array
      */
     public static of(): Int8Array {
-        return new Int8Array(0 as int)
+        return new Int8Array(0)
     }
 
     /**
@@ -876,7 +825,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
                 if (x.done) {
                     return new Int8Array(result.buffer, 0, i)
                 }
-                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x.value!, i)) as byte)
+                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x.value!, i)).toByte())
             }
             return result
         }
@@ -896,7 +845,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
                 }
                 temp = new Int8Array(tb)
             }
-            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0])) as byte)
+            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0])).toByte())
             index[0]++
         })
         return new Int8Array(temp.buffer, 0, index[0])
@@ -918,7 +867,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            res.setUnsafe(idx[0] as int, res.zeroIfInfinity(mapfn(x as T, idx[0] as number)) as byte)
+            res.setUnsafe(idx[0], res.zeroIfInfinity(mapfn(x as T, idx[0].toDouble()).toByte()))
             idx[0] += 1
         })
         return res
@@ -950,7 +899,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns true if e is in Int8Array, false otherwise
      */
     public includes(searchElement: byte, fromIndex: int): boolean {
-        return this.indexOf(searchElement as int, fromIndex) != -1
+        return this.indexOf(searchElement.toInt(), fromIndex) != -1
     }
 
     /**
@@ -1005,7 +954,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: int, fromIndex: int): number {
-        return this.indexOfImpl(searchElement as long, fromIndex)
+        return this.indexOfImpl(searchElement.toLong(), fromIndex)
     }
 
     /**
@@ -1132,7 +1081,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: int, fromIndex: int): number {
-        return this.lastIndexOfImpl(searchElement as long, fromIndex)
+        return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
     }
 
     /**
@@ -1203,22 +1152,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): Int8Array {
-        return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a slice of current Int8Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Int8Array with elements of current Int8Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: number, end: number): Int8Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(asIntOrDefault(begin, 0), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -1233,7 +1167,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): Int8Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(begin.toInt(), end)
     }
 
     /**
@@ -1248,7 +1182,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): Int8Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(begin, end.toInt())
     }
 
     /**
@@ -1270,19 +1204,8 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        let buf = this.buffer.slice(relStart * Int8Array.BYTES_PER_ELEMENT as int, relEnd * Int8Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+        let buf = this.buffer.slice(relStart * Int8Array.BYTES_PER_ELEMENT.toInt(), relEnd * Int8Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
         return new Int8Array(buf)
-    }
-
-    /**
-     * Creates a slice of current Int8Array using range [begin, this.length).
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @returns a new Int8Array with elements of current Int8Array[begin, this.length)
-     */
-    public slice(begin: number): Int8Array {
-        return this.slice(begin as int)
     }
 
     /**
@@ -1318,21 +1241,8 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: number, end: number): Int8Array {
-        return this.subarray(begin as int, end as int)
-    }
-
-    /**
-     * Creates a Int8Array with the same underlying ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Int8Array with the same underlying ArrayBuffer
-     */
     public subarray(begin: number, end: int): Int8Array {
-        return this.subarray(begin as int, end as int)
+        return this.subarray(begin.toInt(), end)
     }
 
     /**
@@ -1345,7 +1255,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int8Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: number): Int8Array {
-        return this.subarray(begin as int, end as int)
+        return this.subarray(begin, end.toInt())
     }
 
     /**
@@ -1365,7 +1275,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        return new Int8Array(this.buffer, relStart * Int8Array.BYTES_PER_ELEMENT as int, count)
+        return new Int8Array(this.buffer, relStart * Int8Array.BYTES_PER_ELEMENT.toInt(), count)
     }
 
     /**
@@ -1376,7 +1286,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int8Array with the same ArrayBuffer
      */
     public subarray(begin: number): Int8Array {
-        return this.subarray(begin as int, this.lengthInt)
+        return this.subarray(begin.toInt(), this.lengthInt)
     }
 
     /**
@@ -1387,7 +1297,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int8Array with the same ArrayBuffer
      */
     public subarray(begin: int): Int8Array {
-        return this.subarray(begin as int, this.lengthInt)
+        return this.subarray(begin, this.lengthInt)
     }
 
     /**
@@ -1422,11 +1332,11 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public toLocaleString(): string {
         let res: StringBuilder = new StringBuilder("")
         for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append((this.getUnsafe(i) as Number).toLocaleString())
+            res.append(new Number(this.getUnsafe(i)).toLocaleString())
             res.append(",")
         }
         if (this.lengthInt > 0) {
-            res.append((this.getUnsafe(this.lengthInt - 1) as Number).toLocaleString())
+            res.append(new Number(this.getUnsafe(this.lengthInt - 1))).toLocaleString()
         }
         return res.toString()
     }
@@ -1484,7 +1394,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Int8Array with replaced value on index
      */
     public with(index: number, value: number): Int8Array {
-        return this.with(index as int, value as byte)
+        return this.with(index.toInt(), value.toByte())
     }
 
     /**
@@ -1514,7 +1424,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public findLast(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Int8Array) => boolean =
             (val: number, index: number, array: Int8Array): boolean => { return fn(val) }
-        return this.findLast(newF) as number
+        return (this.findLast(newF)).toDouble()
     }
 
     /**
@@ -1544,8 +1454,13 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let cmp = (l: byte, r: byte): number => {
-            const result = compareFn!(l as number, r as number)
-            return result
+                return (l - r).toDouble()
+            }
+        if (compareFn != undefined) {
+            cmp = (l: byte, r: byte): number => {
+                const result = compareFn!((l).toDouble(), (r).toDouble())
+                return result
+            }
         }
         const MAX_SHORT_LENGTH = 24
         if (arr.length > MAX_SHORT_LENGTH) {
@@ -1571,7 +1486,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public some(predicate: (element: number, index: number, array: Int8Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
+            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
                 return true
             }
         }
@@ -1596,7 +1511,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -1618,9 +1533,9 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
-        let accumulatedValue = this.getUnsafe(0) as number
+        let accumulatedValue = (this.getUnsafe(0)).toDouble()
         for (let i = 1; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -1643,7 +1558,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -1666,9 +1581,9 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
-        let accumulatedValue: number = this.getUnsafe(this.lengthInt - 1) as number
+        let accumulatedValue: number = (this.getUnsafe(this.lengthInt - 1)).toDouble()
         for (let i = this.lengthInt - 2; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -1681,10 +1596,10 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     * @returns a new Int8Array where for each element from current Int8Array fn was applied
     */
     public map(fn: (val: number, index: number, array: Int8Array) => number): Int8Array {
-        let resBuf = new ArrayBuffer(this.lengthInt * Int8Array.BYTES_PER_ELEMENT as int)
-        let res = new Int8Array(resBuf, 0, resBuf.getByteLength() / Int8Array.BYTES_PER_ELEMENT as int)
+        let resBuf = new ArrayBuffer(this.lengthInt * Int8Array.BYTES_PER_ELEMENT)
+        let res = new Int8Array(resBuf, 0, (resBuf.getByteLength() / Int8Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn(this.getUnsafe(i) as number, i as number, this) as byte)
+            res.set(i, fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this).toByte())
         }
         return res
     }
@@ -1701,7 +1616,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public every(predicate: (element: number, index: number, array: Int8Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (!predicate(this.getUnsafe(i) as number, i as number, this)) {
+            if (!predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
                 return false
             }
         }
@@ -1719,12 +1634,12 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
-            markers[i] = fn(this.getUnsafe(i) as number, i as number, this)
+            markers[i] = fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * Int8Array.BYTES_PER_ELEMENT as int)
+        let resBuf = new ArrayBuffer(resLen * Int8Array.BYTES_PER_ELEMENT)
         let res = new Int8Array(resBuf, 0)
         for (let i = 0, j = 0; i < this.lengthInt; ++i) {
             if (markers[i]) {
@@ -1748,8 +1663,8 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public find(predicate: (value: number, index: number, obj: Int8Array) => boolean): number | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
             let val = this.getUnsafe(i)
-            if (predicate(val as number, i as number, this)) {
-                return val as number
+            if (predicate((val).toDouble(), i.toDouble(), this)) {
+                return (val).toDouble()
             }
         }
         return undefined
@@ -1767,11 +1682,11 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public findIndex(predicate: (value: number, index: number, obj: Int8Array) => boolean): number {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
-                return i as number
+            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
+                return i.toDouble()
             }
         }
-        return -1 as number
+        return (-1).toDouble()
     }
 
     /**
@@ -1784,7 +1699,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public findLast(fn: (val: number, index: number, array: Int8Array) => boolean): byte {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (fn((val).toDouble(), i.toDouble(), this)) {
                 return val
             }
         }
@@ -1801,11 +1716,11 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public findLastIndex(fn: (val: number, index: number, array: Int8Array) => boolean): number {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (fn((val).toDouble(), i.toDouble(), this)) {
                 return i
             }
         }
-        return -1 as number
+        return (-1).toDouble()
     }
 
     /**
@@ -1818,7 +1733,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public forEach(callbackfn: (value: number, index: number, array: Int8Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
-            callbackfn(this.getUnsafe(i) as number, i as number, this)
+            callbackfn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
     }
 
@@ -1834,16 +1749,16 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     private final native getUnsafe(index: int): byte
 
     internal setUnsafe(insertPos: int, val: byte): void {
-        let startByte = insertPos * Int8Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let startByte = insertPos * Int8Array.BYTES_PER_ELEMENT + this.byteOffset.toInt()
         let bits = val
         if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
-                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT.toInt(); ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
                 this.buffer.set(startByte + i, byteVal)
             }
         } else {
-            for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT as int; i++) {
-                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT.toInt(); i++) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
                 this.buffer.set(startByte + 0 - i, byteVal)
             }
         }
@@ -1867,7 +1782,7 @@ class Int16ArrayIteratorKeys implements IterableIterator<number> {
     private idx: int = 0
 
     constructor(parent: Int16Array) {
-        this.length = parent.length as int
+        this.length = parent.length.toInt()
     }
 
     public override $_iterator(): IterableIterator<number> {
@@ -1878,7 +1793,7 @@ class Int16ArrayIteratorKeys implements IterableIterator<number> {
         if (this.idx < 0 || this.idx >= this.length) {
             return new IteratorResult<number>()
         }
-        return new IteratorResult<number>(false, this.idx++ as number)
+        return new IteratorResult<number>(false, (this.idx++).toDouble())
     }
 }
 
@@ -1895,7 +1810,7 @@ class Int16ArrayIterator implements IterableIterator<Number> {
     }
 
     override next(): IteratorResult<Number> {
-        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+        if (this.idx < 0 || this.idx >= this.parent.length.toInt()) {
             return new IteratorResult<Number>()
         }
         return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
@@ -1915,7 +1830,7 @@ class Int16ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
     }
 
     override next(): IteratorResult<[Number, Number]> {
-        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+        if (this.idx < 0 || this.idx >= this.parent.length.toInt()) {
             return new IteratorResult<[Number, Number]>()
         }
         return new IteratorResult<[Number, Number]>(
@@ -1929,15 +1844,15 @@ class Int16ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
  * JS Int16Array API-compatible class
  */
 export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
-    public static readonly BYTES_PER_ELEMENT: number = 2
-    public readonly BYTES_PER_ELEMENT: number = Int16Array.BYTES_PER_ELEMENT
+    public static readonly BYTES_PER_ELEMENT: int = 2
+    public readonly BYTES_PER_ELEMENT: int = Int16Array.BYTES_PER_ELEMENT
     internal readonly lengthInt: int
 
     /**
      * Creates an empty Int16Array.
      */
     public constructor() {
-        this(0 as int)
+        this(0)
     }
 
     /**
@@ -1947,9 +1862,9 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
             const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
-            this.byteLength = arr.length as int * Int16Array.BYTES_PER_ELEMENT as int
-            this.lengthInt = arr.length as int
-            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteLength = arr.length.toInt() * Int16Array.BYTES_PER_ELEMENT
+            this.lengthInt = arr.length.toInt()
+            this.buffer = new ArrayBuffer(this.byteLength.toInt())
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toShort())
@@ -1985,58 +1900,32 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 
-        if (intByteLength % Int16Array.BYTES_PER_ELEMENT as int != 0) {
+        if (intByteLength % Int16Array.BYTES_PER_ELEMENT.toInt() != 0) {
             throw new RangeError("ArrayBuffer.byteLength should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
         }
-        if (intByteOffset % Int16Array.BYTES_PER_ELEMENT as int != 0) {
+        if (intByteOffset % Int16Array.BYTES_PER_ELEMENT != 0) {
             throw new RangeError("byteOffset should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
         }
 
         let intLength: int
         if (length != undefined) {
             intLength = length.toInt()
-            if (intLength > intByteLength / Int16Array.BYTES_PER_ELEMENT as int) {
+            if (intLength > (intByteLength / Int16Array.BYTES_PER_ELEMENT).toInt()) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
         } else {
-            intLength = intByteLength / Int16Array.BYTES_PER_ELEMENT as int
+            intLength = (intByteLength / Int16Array.BYTES_PER_ELEMENT).toInt()
         }
         if (intLength < 0) {
             throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer")
         }
-        if (intLength < intByteLength / Int16Array.BYTES_PER_ELEMENT as int) {
-            intByteLength = intLength * Int16Array.BYTES_PER_ELEMENT as int
+        if (intLength < (intByteLength / Int16Array.BYTES_PER_ELEMENT).toInt()) {
+            intByteLength = intLength * Int16Array.BYTES_PER_ELEMENT
         }
         this.byteLength = intByteLength
         this.byteOffset = intByteOffset
         this.lengthInt = intLength
         this.buffer = buf
-    }
-
-    /**
-     * Creates an Int16Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type short in newly created Int16Array
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined) {
-        this(buf, byteOffset, undefined)
-    }
-
-    /**
-     * Creates an Int16Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type short in newly created Int16Array
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: number, length: number) {
-        this(buf, new Number(byteOffset), new Number(length))
     }
 
     /**
@@ -2084,19 +1973,19 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
             this.byteLength = (buf as ArrayBuffer).getByteLength()
-            if (this.byteLength % Int16Array.BYTES_PER_ELEMENT as int != 0) {
+            if (this.byteLength % Int16Array.BYTES_PER_ELEMENT.toInt() != 0) {
                throw new RangeError("ArrayBuffer.byteLength should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
             }
-            this.lengthInt = this.byteLength / Int16Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = (this.byteLength / Int16Array.BYTES_PER_ELEMENT).toInt()
             this.buffer = buf as ArrayBuffer
             this.byteOffset = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
             // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
             let arr = Array.from<Number>((buf as ArrayLike<Number>))
-            this.byteLength = arr.length as int * Int16Array.BYTES_PER_ELEMENT as int
-            this.lengthInt = arr.length as int
-            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteLength = arr.length.toInt() * Int16Array.BYTES_PER_ELEMENT.toInt()
+            this.lengthInt = arr.length.toInt()
+            this.buffer = new ArrayBuffer(this.byteLength.toInt())
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toShort())
@@ -2112,7 +2001,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: int) {
-        this(length as number)
+        this(length.toDouble())
     }
 
     /**
@@ -2121,13 +2010,13 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: number) {
-        if (length < 0 || length > (Int.MAX_VALUE / Int16Array.BYTES_PER_ELEMENT)) {
+        if (length < 0 || length > (Int.MAX_VALUE / Int16Array.BYTES_PER_ELEMENT).toInt()) {
             throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
         }
-        this.lengthInt = length as int
-        this.byteLength = this.lengthInt * Int16Array.BYTES_PER_ELEMENT as int
+        this.lengthInt = length.toInt()
+        this.byteLength = this.lengthInt * Int16Array.BYTES_PER_ELEMENT
         this.byteOffset = 0
-        this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.buffer = new ArrayBuffer(this.byteLength.toInt())
     }
 
     /**
@@ -2136,9 +2025,9 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param other data initializer
      */
     public constructor(other: Int16Array) {
-        this.buffer = other.buffer.slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
+        this.buffer = other.buffer.slice(other.byteOffset.toInt(), (other.byteOffset + other.byteLength).toInt()) as ArrayBuffer
         this.byteLength = other.byteLength
-        this.lengthInt = other.length as int
+        this.lengthInt = other.length.toInt()
         this.byteOffset = 0
     }
 
@@ -2148,7 +2037,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as short)
+            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]).toShort())
         }
     }
 
@@ -2158,20 +2047,20 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as short)
+            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]).toShort())
         }
     }
 
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
-            return 0 as number
+            return 0
         }
-        return val as number
+        return (val).toDouble()
     }
 
     internal zeroIfInfinity(val: short): short {
         if ((val == Infinity) || (val == -Infinity)) {
-            return 0 as short
+            return Int.toShort(0)
         }
         return val
     }
@@ -2184,7 +2073,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: number, val: number): void {
-        this.$_set(index as int, val)
+        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -2196,7 +2085,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public $_set(index: int, val: number): void {
         let v = this.zeroIfInfinity(val)
-        this.$_set(index, v as short)
+        this.$_set(index, v.toShort())
     }
 
     /**
@@ -2207,7 +2096,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: number, val: int): void {
-        this.$_set(index as int, val)
+        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -2227,7 +2116,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: number, val: short): void {
-        this.$_set(index as int, val)
+        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -2252,7 +2141,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a primitive at index
      */
     public override $_get(index: number): Number {
-        return this.$_get(index as int) as Number
+        return this.$_get(index.toInt())
     }
 
     /**
@@ -2272,7 +2161,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a primitive at index
      */
     public at(index: number): Number | undefined {
-        return this.at(index as int)
+        return this.at(index.toInt())
     }
 
     /**
@@ -2307,7 +2196,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: number, start: number, end?: number): Int16Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -2322,7 +2211,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: number, end?: number): Int16Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target, start.toInt(), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -2337,7 +2226,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: number, start: int, end?: number): Int16Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target.toInt(), start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -2352,7 +2241,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: int, end?: number): Int16Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target, start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -2377,7 +2266,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: number): Int16Array {
-        return this.copyWithin(target as int)
+        return this.copyWithin(target.toInt())
     }
 
     /**
@@ -2410,7 +2299,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public fill(value: number, start?: number, end?: number): this {
         value = this.zeroIfInfinity(value)
-        this.fill(value as short, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value.toShort(), asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -2423,20 +2312,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public fill(value: number, start: int, end?: number): this {
         value = this.zeroIfInfinity(value)
-        this.fill(value as short, start as int, asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Int16Array with specified value
-     *
-     * @param value new valuy
-     *
-     * @returns modified Int16Array
-     */
-    public fill(value: number, start: int, end: number): this {
-        value = this.zeroIfInfinity(value)
-        this.fill(value as short, start as int, end as int)
+        this.fill(value.toShort(), start, asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -2449,7 +2325,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public fill(value: number, start: number, end: int): this {
         value = this.zeroIfInfinity(value)
-        this.fill(value as short, start as int, end as int)
+        this.fill(value.toShort(), start.toInt(), end)
         return this
     }
 
@@ -2462,7 +2338,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public fill(value: number, start: int, end: int): this {
         value = this.zeroIfInfinity(value)
-        this.fill(value as short, start as int, end as int)
+        this.fill(value.toShort(), start, end)
         return this
     }
 
@@ -2474,7 +2350,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Int16Array
      */
     public fill(value: short, start?: number, end?: number): this {
-        this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value, asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -2486,19 +2362,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Int16Array
      */
     public fill(value: short, start: int, end?: number): this {
-        this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Int16Array with specified value
-     *
-     * @param value new valuy
-     *
-     * @returns modified Int16Array
-     */
-    public fill(value: short, start: int, end: number): this {
-        this.fill(value, start as int, end as int)
+        this.fill(value, start, asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -2510,7 +2374,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Int16Array
      */
     public fill(value: short, start: number, end: int): this {
-        this.fill(value, start as int, end as int)
+        this.fill(value, start.toInt(), end)
         return this
     }
 
@@ -2564,13 +2428,13 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: FixedArray<number>, insertPos: number): void {
-        const offset = insertPos as int
+        const offset = insertPos.toInt()
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < arr.length as int; ++i) {
+        for (let i = 0; i < arr.length.toInt(); ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.$_set(offset + i, v as short)
+            this.$_set(offset + i, v.toShort())
         }
     }
 
@@ -2584,11 +2448,11 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: FixedArray<short>, insertPos: int): void {
-        const offset = insertPos as int
+        const offset = insertPos
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < arr.length as int; ++i) {
+        for (let i = 0; i < arr.length.toInt(); ++i) {
             let v = this.zeroIfInfinity(arr[i])
             this.$_set(offset + i, v)
         }
@@ -2600,7 +2464,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param arr array to copy data from
      */
     public set(arr: FixedArray<number>): void {
-        this.set(arr, 0 as number)
+        this.set(arr, 0)
     }
 
     /**
@@ -2609,7 +2473,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param arr array to copy data from
      */
     public set(arr: FixedArray<short>): void {
-        this.set(arr, 0 as int)
+        this.set(arr, 0)
     }
 
     public native set(array: Int16Array): void
@@ -2624,13 +2488,13 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param offset Optional. The offset into the target array at which to begin writing values from the source array
      */
     public set(array: ArrayLike<number>, offset: number = 0): void {
-        const insertPos = offset as int
+        const insertPos = offset.toInt()
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length - 1 as int; i >= 0; --i) {
+        for (let i = array.length.toInt() - 1; i >= 0; --i) {
             let v = this.zeroIfInfinity(array[i])
-            this.$_set(insertPos + i, v as short)
+            this.$_set(insertPos + i, v.toShort())
         }
     }
 
@@ -2642,9 +2506,9 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int16Array
      */
     public static of(...items: FixedArray<number>): Int16Array {
-        let res = new Int16Array(items.length as int)
+        let res = new Int16Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, res.zeroIfInfinity(items[i]) as short)
+            res.setUnsafe(i, res.zeroIfInfinity(items[i]).toShort())
         }
         return res
     }
@@ -2657,9 +2521,9 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int16Array
      */
     public static of(...items: FixedArray<int>): Int16Array {
-        let res = new Int16Array(items.length as int)
+        let res = new Int16Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i] as short)
+            res.setUnsafe(i, items[i].toShort())
         }
         return res
     }
@@ -2672,7 +2536,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int16Array
      */
     public static of(...items: FixedArray<short>): Int16Array {
-        let res = new Int16Array(items.length as int)
+        let res = new Int16Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i])
         }
@@ -2687,7 +2551,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int16Array
      */
     public static of(): Int16Array {
-        return new Int16Array(0 as int)
+        return new Int16Array(0)
     }
 
     /**
@@ -2728,7 +2592,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
                 if (x.done) {
                     return new Int16Array(result.buffer, 0, i)
                 }
-                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x.value!, i)) as short)
+                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x.value!, i)).toShort())
             }
             return result
         }
@@ -2748,7 +2612,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
                 }
                 temp = new Int16Array(tb)
             }
-            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0])) as short)
+            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0])).toShort())
             index[0]++
         })
         return new Int16Array(temp.buffer, 0, index[0])
@@ -2770,7 +2634,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            res.setUnsafe(idx[0] as int, res.zeroIfInfinity(mapfn(x as T, idx[0] as number)) as short)
+            res.setUnsafe(idx[0], res.zeroIfInfinity(mapfn(x as T, idx[0].toDouble()).toShort()))
             idx[0] += 1
         })
         return res
@@ -2802,7 +2666,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns true if e is in Int16Array, false otherwise
      */
     public includes(searchElement: short, fromIndex: int): boolean {
-        return this.indexOf(searchElement as int, fromIndex) != -1
+        return this.indexOf(searchElement.toInt(), fromIndex) != -1
     }
 
     /**
@@ -2857,7 +2721,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: int, fromIndex: int): number {
-        return this.indexOfImpl(searchElement as long, fromIndex)
+        return this.indexOfImpl(searchElement.toLong(), fromIndex)
     }
 
     /**
@@ -2984,7 +2848,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: int, fromIndex: int): number {
-        return this.lastIndexOfImpl(searchElement as long, fromIndex)
+        return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
     }
 
     /**
@@ -3055,22 +2919,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): Int16Array {
-        return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a slice of current Int16Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Int16Array with elements of current Int16Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: number, end: number): Int16Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(asIntOrDefault(begin, 0), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -3085,7 +2934,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): Int16Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(begin.toInt(), end)
     }
 
     /**
@@ -3100,7 +2949,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): Int16Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(begin, end.toInt())
     }
 
     /**
@@ -3122,19 +2971,8 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        let buf = this.buffer.slice(relStart * Int16Array.BYTES_PER_ELEMENT as int, relEnd * Int16Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+        let buf = this.buffer.slice(relStart * Int16Array.BYTES_PER_ELEMENT.toInt(), relEnd * Int16Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
         return new Int16Array(buf)
-    }
-
-    /**
-     * Creates a slice of current Int16Array using range [begin, this.length).
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @returns a new Int16Array with elements of current Int16Array[begin, this.length)
-     */
-    public slice(begin: number): Int16Array {
-        return this.slice(begin as int)
     }
 
     /**
@@ -3170,21 +3008,8 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: number, end: number): Int16Array {
-        return this.subarray(begin as int, end as int)
-    }
-
-    /**
-     * Creates a Int16Array with the same underlying ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Int16Array with the same underlying ArrayBuffer
-     */
     public subarray(begin: number, end: int): Int16Array {
-        return this.subarray(begin as int, end as int)
+        return this.subarray(begin.toInt(), end)
     }
 
     /**
@@ -3197,7 +3022,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int16Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: number): Int16Array {
-        return this.subarray(begin as int, end as int)
+        return this.subarray(begin, end.toInt())
     }
 
     /**
@@ -3217,7 +3042,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        return new Int16Array(this.buffer, relStart * Int16Array.BYTES_PER_ELEMENT as int, count)
+        return new Int16Array(this.buffer, relStart * Int16Array.BYTES_PER_ELEMENT.toInt(), count)
     }
 
     /**
@@ -3228,7 +3053,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int16Array with the same ArrayBuffer
      */
     public subarray(begin: number): Int16Array {
-        return this.subarray(begin as int, this.lengthInt)
+        return this.subarray(begin.toInt(), this.lengthInt)
     }
 
     /**
@@ -3239,7 +3064,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int16Array with the same ArrayBuffer
      */
     public subarray(begin: int): Int16Array {
-        return this.subarray(begin as int, this.lengthInt)
+        return this.subarray(begin, this.lengthInt)
     }
 
     /**
@@ -3274,11 +3099,11 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public toLocaleString(): string {
         let res: StringBuilder = new StringBuilder("")
         for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append((this.getUnsafe(i) as Number).toLocaleString())
+            res.append(new Number(this.getUnsafe(i)).toLocaleString())
             res.append(",")
         }
         if (this.lengthInt > 0) {
-            res.append((this.getUnsafe(this.lengthInt - 1) as Number).toLocaleString())
+            res.append(new Number(this.getUnsafe(this.lengthInt - 1))).toLocaleString()
         }
         return res.toString()
     }
@@ -3336,7 +3161,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Int16Array with replaced value on index
      */
     public with(index: number, value: number): Int16Array {
-        return this.with(index as int, value as short)
+        return this.with(index.toInt(), value.toShort())
     }
 
     /**
@@ -3366,7 +3191,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public findLast(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Int16Array) => boolean =
             (val: number, index: number, array: Int16Array): boolean => { return fn(val) }
-        return this.findLast(newF) as number
+        return (this.findLast(newF)).toDouble()
     }
 
     /**
@@ -3396,8 +3221,13 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let cmp = (l: short, r: short): number => {
-            const result = compareFn!(l as number, r as number)
-            return result
+                return (l - r).toDouble()
+            }
+        if (compareFn != undefined) {
+            cmp = (l: short, r: short): number => {
+                const result = compareFn!((l).toDouble(), (r).toDouble())
+                return result
+            }
         }
         const MAX_SHORT_LENGTH = 24
         if (arr.length > MAX_SHORT_LENGTH) {
@@ -3423,7 +3253,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public some(predicate: (element: number, index: number, array: Int16Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
+            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
                 return true
             }
         }
@@ -3448,7 +3278,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -3470,9 +3300,9 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
-        let accumulatedValue = this.getUnsafe(0) as number
+        let accumulatedValue = (this.getUnsafe(0)).toDouble()
         for (let i = 1; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -3495,7 +3325,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -3518,9 +3348,9 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
-        let accumulatedValue: number = this.getUnsafe(this.lengthInt - 1) as number
+        let accumulatedValue: number = (this.getUnsafe(this.lengthInt - 1)).toDouble()
         for (let i = this.lengthInt - 2; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -3533,10 +3363,10 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     * @returns a new Int16Array where for each element from current Int16Array fn was applied
     */
     public map(fn: (val: number, index: number, array: Int16Array) => number): Int16Array {
-        let resBuf = new ArrayBuffer(this.lengthInt * Int16Array.BYTES_PER_ELEMENT as int)
-        let res = new Int16Array(resBuf, 0, resBuf.getByteLength() / Int16Array.BYTES_PER_ELEMENT as int)
+        let resBuf = new ArrayBuffer(this.lengthInt * Int16Array.BYTES_PER_ELEMENT)
+        let res = new Int16Array(resBuf, 0, (resBuf.getByteLength() / Int16Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn(this.getUnsafe(i) as number, i as number, this) as short)
+            res.set(i, fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this).toShort())
         }
         return res
     }
@@ -3553,7 +3383,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public every(predicate: (element: number, index: number, array: Int16Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (!predicate(this.getUnsafe(i) as number, i as number, this)) {
+            if (!predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
                 return false
             }
         }
@@ -3571,12 +3401,12 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
-            markers[i] = fn(this.getUnsafe(i) as number, i as number, this)
+            markers[i] = fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * Int16Array.BYTES_PER_ELEMENT as int)
+        let resBuf = new ArrayBuffer(resLen * Int16Array.BYTES_PER_ELEMENT)
         let res = new Int16Array(resBuf, 0)
         for (let i = 0, j = 0; i < this.lengthInt; ++i) {
             if (markers[i]) {
@@ -3600,8 +3430,8 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public find(predicate: (value: number, index: number, obj: Int16Array) => boolean): number | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
             let val = this.getUnsafe(i)
-            if (predicate(val as number, i as number, this)) {
-                return val as number
+            if (predicate((val).toDouble(), i.toDouble(), this)) {
+                return (val).toDouble()
             }
         }
         return undefined
@@ -3619,11 +3449,11 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public findIndex(predicate: (value: number, index: number, obj: Int16Array) => boolean): number {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
-                return i as number
+            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
+                return i.toDouble()
             }
         }
-        return -1 as number
+        return (-1).toDouble()
     }
 
     /**
@@ -3636,7 +3466,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public findLast(fn: (val: number, index: number, array: Int16Array) => boolean): short {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (fn((val).toDouble(), i.toDouble(), this)) {
                 return val
             }
         }
@@ -3653,11 +3483,11 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public findLastIndex(fn: (val: number, index: number, array: Int16Array) => boolean): number {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (fn((val).toDouble(), i.toDouble(), this)) {
                 return i
             }
         }
-        return -1 as number
+        return (-1).toDouble()
     }
 
     /**
@@ -3670,7 +3500,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public forEach(callbackfn: (value: number, index: number, array: Int16Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
-            callbackfn(this.getUnsafe(i) as number, i as number, this)
+            callbackfn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
     }
 
@@ -3686,16 +3516,16 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     private final native getUnsafe(index: int): short
 
     internal setUnsafe(insertPos: int, val: short): void {
-        let startByte = insertPos * Int16Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let startByte = insertPos * Int16Array.BYTES_PER_ELEMENT + this.byteOffset.toInt()
         let bits = val
         if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
-                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT.toInt(); ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
                 this.buffer.set(startByte + i, byteVal)
             }
         } else {
-            for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT as int; i++) {
-                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT.toInt(); i++) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
                 this.buffer.set(startByte + 1 - i, byteVal)
             }
         }
@@ -3719,7 +3549,7 @@ class Int32ArrayIteratorKeys implements IterableIterator<number> {
     private idx: int = 0
 
     constructor(parent: Int32Array) {
-        this.length = parent.length as int
+        this.length = parent.length.toInt()
     }
 
     public override $_iterator(): IterableIterator<number> {
@@ -3730,7 +3560,7 @@ class Int32ArrayIteratorKeys implements IterableIterator<number> {
         if (this.idx < 0 || this.idx >= this.length) {
             return new IteratorResult<number>()
         }
-        return new IteratorResult<number>(false, this.idx++ as number)
+        return new IteratorResult<number>(false, (this.idx++).toDouble())
     }
 }
 
@@ -3747,7 +3577,7 @@ class Int32ArrayIterator implements IterableIterator<Number> {
     }
 
     override next(): IteratorResult<Number> {
-        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+        if (this.idx < 0 || this.idx >= this.parent.length.toInt()) {
             return new IteratorResult<Number>()
         }
         return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
@@ -3767,7 +3597,7 @@ class Int32ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
     }
 
     override next(): IteratorResult<[Number, Number]> {
-        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+        if (this.idx < 0 || this.idx >= this.parent.length.toInt()) {
             return new IteratorResult<[Number, Number]>()
         }
         return new IteratorResult<[Number, Number]>(
@@ -3781,15 +3611,15 @@ class Int32ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
  * JS Int32Array API-compatible class
  */
 export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
-    public static readonly BYTES_PER_ELEMENT: number = 4
-    public readonly BYTES_PER_ELEMENT: number = Int32Array.BYTES_PER_ELEMENT
+    public static readonly BYTES_PER_ELEMENT: int = 4
+    public readonly BYTES_PER_ELEMENT: int = Int32Array.BYTES_PER_ELEMENT
     internal readonly lengthInt: int
 
     /**
      * Creates an empty Int32Array.
      */
     public constructor() {
-        this(0 as int)
+        this(0)
     }
 
     /**
@@ -3799,9 +3629,9 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
             const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
-            this.byteLength = arr.length as int * Int32Array.BYTES_PER_ELEMENT as int
-            this.lengthInt = arr.length as int
-            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteLength = arr.length.toInt() * Int32Array.BYTES_PER_ELEMENT
+            this.lengthInt = arr.length.toInt()
+            this.buffer = new ArrayBuffer(this.byteLength.toInt())
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toInt())
@@ -3837,58 +3667,32 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 
-        if (intByteLength % Int32Array.BYTES_PER_ELEMENT as int != 0) {
+        if (intByteLength % Int32Array.BYTES_PER_ELEMENT.toInt() != 0) {
             throw new RangeError("ArrayBuffer.byteLength should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
         }
-        if (intByteOffset % Int32Array.BYTES_PER_ELEMENT as int != 0) {
+        if (intByteOffset % Int32Array.BYTES_PER_ELEMENT != 0) {
             throw new RangeError("byteOffset should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
         }
 
         let intLength: int
         if (length != undefined) {
             intLength = length.toInt()
-            if (intLength > intByteLength / Int32Array.BYTES_PER_ELEMENT as int) {
+            if (intLength > (intByteLength / Int32Array.BYTES_PER_ELEMENT).toInt()) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
         } else {
-            intLength = intByteLength / Int32Array.BYTES_PER_ELEMENT as int
+            intLength = (intByteLength / Int32Array.BYTES_PER_ELEMENT).toInt()
         }
         if (intLength < 0) {
             throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer")
         }
-        if (intLength < intByteLength / Int32Array.BYTES_PER_ELEMENT as int) {
-            intByteLength = intLength * Int32Array.BYTES_PER_ELEMENT as int
+        if (intLength < (intByteLength / Int32Array.BYTES_PER_ELEMENT).toInt()) {
+            intByteLength = intLength * Int32Array.BYTES_PER_ELEMENT
         }
         this.byteLength = intByteLength
         this.byteOffset = intByteOffset
         this.lengthInt = intLength
         this.buffer = buf
-    }
-
-    /**
-     * Creates an Int32Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type int in newly created Int32Array
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined) {
-        this(buf, byteOffset, undefined)
-    }
-
-    /**
-     * Creates an Int32Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type int in newly created Int32Array
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: number, length: number) {
-        this(buf, new Number(byteOffset), new Number(length))
     }
 
     /**
@@ -3936,19 +3740,19 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
             this.byteLength = (buf as ArrayBuffer).getByteLength()
-            if (this.byteLength % Int32Array.BYTES_PER_ELEMENT as int != 0) {
+            if (this.byteLength % Int32Array.BYTES_PER_ELEMENT.toInt() != 0) {
                throw new RangeError("ArrayBuffer.byteLength should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
             }
-            this.lengthInt = this.byteLength / Int32Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = (this.byteLength / Int32Array.BYTES_PER_ELEMENT).toInt()
             this.buffer = buf as ArrayBuffer
             this.byteOffset = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
             // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
             let arr = Array.from<Number>((buf as ArrayLike<Number>))
-            this.byteLength = arr.length as int * Int32Array.BYTES_PER_ELEMENT as int
-            this.lengthInt = arr.length as int
-            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteLength = arr.length.toInt() * Int32Array.BYTES_PER_ELEMENT.toInt()
+            this.lengthInt = arr.length.toInt()
+            this.buffer = new ArrayBuffer(this.byteLength.toInt())
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toInt())
@@ -3964,7 +3768,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: int) {
-        this(length as number)
+        this(length.toDouble())
     }
 
     /**
@@ -3973,13 +3777,13 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: number) {
-        if (length < 0 || length > (Int.MAX_VALUE / Int32Array.BYTES_PER_ELEMENT)) {
+        if (length < 0 || length > (Int.MAX_VALUE / Int32Array.BYTES_PER_ELEMENT).toInt()) {
             throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
         }
-        this.lengthInt = length as int
-        this.byteLength = this.lengthInt * Int32Array.BYTES_PER_ELEMENT as int
+        this.lengthInt = length.toInt()
+        this.byteLength = this.lengthInt * Int32Array.BYTES_PER_ELEMENT
         this.byteOffset = 0
-        this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.buffer = new ArrayBuffer(this.byteLength.toInt())
     }
 
     /**
@@ -3988,9 +3792,9 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param other data initializer
      */
     public constructor(other: Int32Array) {
-        this.buffer = other.buffer.slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
+        this.buffer = other.buffer.slice(other.byteOffset.toInt(), (other.byteOffset + other.byteLength).toInt()) as ArrayBuffer
         this.byteLength = other.byteLength
-        this.lengthInt = other.length as int
+        this.lengthInt = other.length.toInt()
         this.byteOffset = 0
     }
 
@@ -4000,7 +3804,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as int)
+            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]).toInt())
         }
     }
 
@@ -4010,20 +3814,20 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as int)
+            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]).toInt())
         }
     }
 
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
-            return 0 as number
+            return 0
         }
-        return val as number
+        return (val).toDouble()
     }
 
     internal zeroIfInfinity(val: int): int {
         if ((val == Infinity) || (val == -Infinity)) {
-            return 0 as int
+            return 0
         }
         return val
     }
@@ -4036,7 +3840,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: number, val: number): void {
-        this.$_set(index as int, val)
+        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -4048,7 +3852,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public $_set(index: int, val: number): void {
         let v = this.zeroIfInfinity(val)
-        this.$_set(index, v as int)
+        this.$_set(index, v.toInt())
     }
 
     /**
@@ -4059,7 +3863,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: number, val: int): void {
-        this.$_set(index as int, val)
+        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -4084,7 +3888,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a primitive at index
      */
     public override $_get(index: number): Number {
-        return this.$_get(index as int) as Number
+        return this.$_get(index.toInt())
     }
 
     /**
@@ -4104,7 +3908,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a primitive at index
      */
     public at(index: number): Number | undefined {
-        return this.at(index as int)
+        return this.at(index.toInt())
     }
 
     /**
@@ -4139,7 +3943,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: number, start: number, end?: number): Int32Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -4154,7 +3958,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: number, end?: number): Int32Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target, start.toInt(), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -4169,7 +3973,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: number, start: int, end?: number): Int32Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target.toInt(), start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -4184,7 +3988,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: int, end?: number): Int32Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target, start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -4209,7 +4013,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: number): Int32Array {
-        return this.copyWithin(target as int)
+        return this.copyWithin(target.toInt())
     }
 
     /**
@@ -4242,7 +4046,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public fill(value: number, start?: number, end?: number): this {
         value = this.zeroIfInfinity(value)
-        this.fill(value as int, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value.toInt(), asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -4255,20 +4059,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public fill(value: number, start: int, end?: number): this {
         value = this.zeroIfInfinity(value)
-        this.fill(value as int, start as int, asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Int32Array with specified value
-     *
-     * @param value new valuy
-     *
-     * @returns modified Int32Array
-     */
-    public fill(value: number, start: int, end: number): this {
-        value = this.zeroIfInfinity(value)
-        this.fill(value as int, start as int, end as int)
+        this.fill(value.toInt(), start, asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -4281,7 +4072,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public fill(value: number, start: number, end: int): this {
         value = this.zeroIfInfinity(value)
-        this.fill(value as int, start as int, end as int)
+        this.fill(value.toInt(), start.toInt(), end)
         return this
     }
 
@@ -4294,7 +4085,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public fill(value: number, start: int, end: int): this {
         value = this.zeroIfInfinity(value)
-        this.fill(value as int, start as int, end as int)
+        this.fill(value.toInt(), start, end)
         return this
     }
 
@@ -4306,7 +4097,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Int32Array
      */
     public fill(value: int, start?: number, end?: number): this {
-        this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value, asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -4318,19 +4109,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Int32Array
      */
     public fill(value: int, start: int, end?: number): this {
-        this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Int32Array with specified value
-     *
-     * @param value new valuy
-     *
-     * @returns modified Int32Array
-     */
-    public fill(value: int, start: int, end: number): this {
-        this.fill(value, start as int, end as int)
+        this.fill(value, start, asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -4342,7 +4121,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Int32Array
      */
     public fill(value: int, start: number, end: int): this {
-        this.fill(value, start as int, end as int)
+        this.fill(value, start.toInt(), end)
         return this
     }
 
@@ -4396,13 +4175,13 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: FixedArray<number>, insertPos: number): void {
-        const offset = insertPos as int
+        const offset = insertPos.toInt()
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < arr.length as int; ++i) {
+        for (let i = 0; i < arr.length.toInt(); ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.$_set(offset + i, v as int)
+            this.$_set(offset + i, v.toInt())
         }
     }
 
@@ -4416,11 +4195,11 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: FixedArray<int>, insertPos: int): void {
-        const offset = insertPos as int
+        const offset = insertPos
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < arr.length as int; ++i) {
+        for (let i = 0; i < arr.length.toInt(); ++i) {
             let v = this.zeroIfInfinity(arr[i])
             this.$_set(offset + i, v)
         }
@@ -4432,7 +4211,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param arr array to copy data from
      */
     public set(arr: FixedArray<number>): void {
-        this.set(arr, 0 as number)
+        this.set(arr, 0)
     }
 
     /**
@@ -4441,7 +4220,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param arr array to copy data from
      */
     public set(arr: FixedArray<int>): void {
-        this.set(arr, 0 as int)
+        this.set(arr, 0)
     }
 
     public native set(array: Int32Array): void
@@ -4456,13 +4235,13 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param offset Optional. The offset into the target array at which to begin writing values from the source array
      */
     public set(array: ArrayLike<number>, offset: number = 0): void {
-        const insertPos = offset as int
+        const insertPos = offset.toInt()
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length - 1 as int; i >= 0; --i) {
+        for (let i = array.length.toInt() - 1; i >= 0; --i) {
             let v = this.zeroIfInfinity(array[i])
-            this.$_set(insertPos + i, v as int)
+            this.$_set(insertPos + i, v.toInt())
         }
     }
 
@@ -4474,9 +4253,9 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int32Array
      */
     public static of(...items: FixedArray<number>): Int32Array {
-        let res = new Int32Array(items.length as int)
+        let res = new Int32Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, res.zeroIfInfinity(items[i]) as int)
+            res.setUnsafe(i, res.zeroIfInfinity(items[i]).toInt())
         }
         return res
     }
@@ -4489,7 +4268,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int32Array
      */
     public static of(...items: FixedArray<int>): Int32Array {
-        let res = new Int32Array(items.length as int)
+        let res = new Int32Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i])
         }
@@ -4504,7 +4283,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int32Array
      */
     public static of(): Int32Array {
-        return new Int32Array(0 as int)
+        return new Int32Array(0)
     }
 
     /**
@@ -4545,7 +4324,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
                 if (x.done) {
                     return new Int32Array(result.buffer, 0, i)
                 }
-                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x.value!, i)) as int)
+                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x.value!, i)).toInt())
             }
             return result
         }
@@ -4565,7 +4344,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
                 }
                 temp = new Int32Array(tb)
             }
-            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0])) as int)
+            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0])).toInt())
             index[0]++
         })
         return new Int32Array(temp.buffer, 0, index[0])
@@ -4587,7 +4366,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            res.setUnsafe(idx[0] as int, res.zeroIfInfinity(mapfn(x as T, idx[0] as number)) as int)
+            res.setUnsafe(idx[0], res.zeroIfInfinity(mapfn(x as T, idx[0].toDouble()).toInt()))
             idx[0] += 1
         })
         return res
@@ -4619,7 +4398,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns true if e is in Int32Array, false otherwise
      */
     public includes(searchElement: int, fromIndex: int): boolean {
-        return this.indexOf(searchElement as int, fromIndex) != -1
+        return this.indexOf(searchElement.toInt(), fromIndex) != -1
     }
 
     /**
@@ -4674,7 +4453,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: int, fromIndex: int): number {
-        return this.indexOfImpl(searchElement as long, fromIndex)
+        return this.indexOfImpl(searchElement.toLong(), fromIndex)
     }
 
     /**
@@ -4801,7 +4580,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: int, fromIndex: int): number {
-        return this.lastIndexOfImpl(searchElement as long, fromIndex)
+        return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
     }
 
     /**
@@ -4872,22 +4651,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): Int32Array {
-        return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a slice of current Int32Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Int32Array with elements of current Int32Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: number, end: number): Int32Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(asIntOrDefault(begin, 0), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -4902,7 +4666,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): Int32Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(begin.toInt(), end)
     }
 
     /**
@@ -4917,7 +4681,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): Int32Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(begin, end.toInt())
     }
 
     /**
@@ -4939,19 +4703,8 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        let buf = this.buffer.slice(relStart * Int32Array.BYTES_PER_ELEMENT as int, relEnd * Int32Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+        let buf = this.buffer.slice(relStart * Int32Array.BYTES_PER_ELEMENT.toInt(), relEnd * Int32Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
         return new Int32Array(buf)
-    }
-
-    /**
-     * Creates a slice of current Int32Array using range [begin, this.length).
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @returns a new Int32Array with elements of current Int32Array[begin, this.length)
-     */
-    public slice(begin: number): Int32Array {
-        return this.slice(begin as int)
     }
 
     /**
@@ -4987,21 +4740,8 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int32Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: number, end: number): Int32Array {
-        return this.subarray(begin as int, end as int)
-    }
-
-    /**
-     * Creates a Int32Array with the same underlying ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Int32Array with the same underlying ArrayBuffer
-     */
     public subarray(begin: number, end: int): Int32Array {
-        return this.subarray(begin as int, end as int)
+        return this.subarray(begin.toInt(), end)
     }
 
     /**
@@ -5014,7 +4754,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int32Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: number): Int32Array {
-        return this.subarray(begin as int, end as int)
+        return this.subarray(begin, end.toInt())
     }
 
     /**
@@ -5034,7 +4774,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        return new Int32Array(this.buffer, relStart * Int32Array.BYTES_PER_ELEMENT as int, count)
+        return new Int32Array(this.buffer, relStart * Int32Array.BYTES_PER_ELEMENT.toInt(), count)
     }
 
     /**
@@ -5045,7 +4785,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int32Array with the same ArrayBuffer
      */
     public subarray(begin: number): Int32Array {
-        return this.subarray(begin as int, this.lengthInt)
+        return this.subarray(begin.toInt(), this.lengthInt)
     }
 
     /**
@@ -5056,7 +4796,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int32Array with the same ArrayBuffer
      */
     public subarray(begin: int): Int32Array {
-        return this.subarray(begin as int, this.lengthInt)
+        return this.subarray(begin, this.lengthInt)
     }
 
     /**
@@ -5091,11 +4831,11 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public toLocaleString(): string {
         let res: StringBuilder = new StringBuilder("")
         for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append((this.getUnsafe(i) as Number).toLocaleString())
+            res.append(new Number(this.getUnsafe(i)).toLocaleString())
             res.append(",")
         }
         if (this.lengthInt > 0) {
-            res.append((this.getUnsafe(this.lengthInt - 1) as Number).toLocaleString())
+            res.append(new Number(this.getUnsafe(this.lengthInt - 1))).toLocaleString()
         }
         return res.toString()
     }
@@ -5153,7 +4893,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Int32Array with replaced value on index
      */
     public with(index: number, value: number): Int32Array {
-        return this.with(index as int, value as int)
+        return this.with(index.toInt(), value.toInt())
     }
 
     /**
@@ -5183,7 +4923,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public findLast(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Int32Array) => boolean =
             (val: number, index: number, array: Int32Array): boolean => { return fn(val) }
-        return this.findLast(newF) as number
+        return (this.findLast(newF)).toDouble()
     }
 
     /**
@@ -5213,8 +4953,13 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let cmp = (l: int, r: int): number => {
-            const result = compareFn!(l as number, r as number)
-            return result
+                return (l - r).toDouble()
+            }
+        if (compareFn != undefined) {
+            cmp = (l: int, r: int): number => {
+                const result = compareFn!((l).toDouble(), (r).toDouble())
+                return result
+            }
         }
         const MAX_SHORT_LENGTH = 24
         if (arr.length > MAX_SHORT_LENGTH) {
@@ -5240,7 +4985,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public some(predicate: (element: number, index: number, array: Int32Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
+            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
                 return true
             }
         }
@@ -5265,7 +5010,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -5287,9 +5032,9 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
-        let accumulatedValue = this.getUnsafe(0) as number
+        let accumulatedValue = (this.getUnsafe(0)).toDouble()
         for (let i = 1; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -5312,7 +5057,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -5335,9 +5080,9 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
-        let accumulatedValue: number = this.getUnsafe(this.lengthInt - 1) as number
+        let accumulatedValue: number = (this.getUnsafe(this.lengthInt - 1)).toDouble()
         for (let i = this.lengthInt - 2; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -5350,10 +5095,10 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     * @returns a new Int32Array where for each element from current Int32Array fn was applied
     */
     public map(fn: (val: number, index: number, array: Int32Array) => number): Int32Array {
-        let resBuf = new ArrayBuffer(this.lengthInt * Int32Array.BYTES_PER_ELEMENT as int)
-        let res = new Int32Array(resBuf, 0, resBuf.getByteLength() / Int32Array.BYTES_PER_ELEMENT as int)
+        let resBuf = new ArrayBuffer(this.lengthInt * Int32Array.BYTES_PER_ELEMENT)
+        let res = new Int32Array(resBuf, 0, (resBuf.getByteLength() / Int32Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn(this.getUnsafe(i) as number, i as number, this) as int)
+            res.set(i, fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this).toInt())
         }
         return res
     }
@@ -5370,7 +5115,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public every(predicate: (element: number, index: number, array: Int32Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (!predicate(this.getUnsafe(i) as number, i as number, this)) {
+            if (!predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
                 return false
             }
         }
@@ -5388,12 +5133,12 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
-            markers[i] = fn(this.getUnsafe(i) as number, i as number, this)
+            markers[i] = fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * Int32Array.BYTES_PER_ELEMENT as int)
+        let resBuf = new ArrayBuffer(resLen * Int32Array.BYTES_PER_ELEMENT)
         let res = new Int32Array(resBuf, 0)
         for (let i = 0, j = 0; i < this.lengthInt; ++i) {
             if (markers[i]) {
@@ -5417,8 +5162,8 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public find(predicate: (value: number, index: number, obj: Int32Array) => boolean): number | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
             let val = this.getUnsafe(i)
-            if (predicate(val as number, i as number, this)) {
-                return val as number
+            if (predicate((val).toDouble(), i.toDouble(), this)) {
+                return (val).toDouble()
             }
         }
         return undefined
@@ -5436,11 +5181,11 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public findIndex(predicate: (value: number, index: number, obj: Int32Array) => boolean): number {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
-                return i as number
+            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
+                return i.toDouble()
             }
         }
-        return -1 as number
+        return (-1).toDouble()
     }
 
     /**
@@ -5453,7 +5198,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public findLast(fn: (val: number, index: number, array: Int32Array) => boolean): int {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (fn((val).toDouble(), i.toDouble(), this)) {
                 return val
             }
         }
@@ -5470,11 +5215,11 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public findLastIndex(fn: (val: number, index: number, array: Int32Array) => boolean): number {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (fn((val).toDouble(), i.toDouble(), this)) {
                 return i
             }
         }
-        return -1 as number
+        return (-1).toDouble()
     }
 
     /**
@@ -5487,7 +5232,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public forEach(callbackfn: (value: number, index: number, array: Int32Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
-            callbackfn(this.getUnsafe(i) as number, i as number, this)
+            callbackfn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
     }
 
@@ -5503,16 +5248,16 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     private final native getUnsafe(index: int): int
 
     internal setUnsafe(insertPos: int, val: int): void {
-        let startByte = insertPos * Int32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let startByte = insertPos * Int32Array.BYTES_PER_ELEMENT + this.byteOffset.toInt()
         let bits = val
         if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
-                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT.toInt(); ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
                 this.buffer.set(startByte + i, byteVal)
             }
         } else {
-            for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT as int; i++) {
-                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT.toInt(); i++) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
                 this.buffer.set(startByte + 3 - i, byteVal)
             }
         }
@@ -5536,7 +5281,7 @@ class BigInt64ArrayIteratorKeys implements IterableIterator<number> {
     private idx: int = 0
 
     constructor(parent: BigInt64Array) {
-        this.length = parent.length as int
+        this.length = parent.length.toInt()
     }
 
     public override $_iterator(): IterableIterator<number> {
@@ -5547,7 +5292,7 @@ class BigInt64ArrayIteratorKeys implements IterableIterator<number> {
         if (this.idx < 0 || this.idx >= this.length) {
             return new IteratorResult<number>()
         }
-        return new IteratorResult<number>(false, this.idx++ as number)
+        return new IteratorResult<number>(false, (this.idx++).toDouble())
     }
 }
 
@@ -5564,7 +5309,7 @@ class BigInt64ArrayIterator implements IterableIterator<BigInt> {
     }
 
     override next(): IteratorResult<BigInt> {
-        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+        if (this.idx < 0 || this.idx >= this.parent.length.toInt()) {
             return new IteratorResult<BigInt>()
         }
         return new IteratorResult<BigInt>(false, new BigInt(this.parent[this.idx++]))
@@ -5584,7 +5329,7 @@ class BigInt64ArrayIteratorEntries implements IterableIterator<[Number, BigInt]>
     }
 
     override next(): IteratorResult<[Number, BigInt]> {
-        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+        if (this.idx < 0 || this.idx >= this.parent.length.toInt()) {
             return new IteratorResult<[Number, BigInt]>()
         }
         return new IteratorResult<[Number, BigInt]>(
@@ -5598,15 +5343,15 @@ class BigInt64ArrayIteratorEntries implements IterableIterator<[Number, BigInt]>
  * JS BigInt64Array API-compatible class
  */
 export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
-    public static readonly BYTES_PER_ELEMENT: number = 8
-    public readonly BYTES_PER_ELEMENT: number = BigInt64Array.BYTES_PER_ELEMENT
+    public static readonly BYTES_PER_ELEMENT: int = 8
+    public readonly BYTES_PER_ELEMENT: int = BigInt64Array.BYTES_PER_ELEMENT
     internal readonly lengthInt: int
 
     /**
      * Creates an empty BigInt64Array.
      */
     public constructor() {
-        this(0 as int)
+        this(0)
     }
 
     /**
@@ -5616,9 +5361,9 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
             const arr = Types.identity_cast<BigInt>(items as ArrayLike<BigInt>)
-            this.byteLength = arr.length as int * BigInt64Array.BYTES_PER_ELEMENT as int
-            this.lengthInt = arr.length as int
-            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteLength = arr.length.toInt() * BigInt64Array.BYTES_PER_ELEMENT
+            this.lengthInt = arr.length.toInt()
+            this.buffer = new ArrayBuffer(this.byteLength.toInt())
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).getLong())
@@ -5654,58 +5399,32 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 
-        if (intByteLength % BigInt64Array.BYTES_PER_ELEMENT as int != 0) {
+        if (intByteLength % BigInt64Array.BYTES_PER_ELEMENT.toInt() != 0) {
             throw new RangeError("ArrayBuffer.byteLength should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
         }
-        if (intByteOffset % BigInt64Array.BYTES_PER_ELEMENT as int != 0) {
+        if (intByteOffset % BigInt64Array.BYTES_PER_ELEMENT != 0) {
             throw new RangeError("byteOffset should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
         }
 
         let intLength: int
         if (length != undefined) {
             intLength = length.toInt()
-            if (intLength > intByteLength / BigInt64Array.BYTES_PER_ELEMENT as int) {
+            if (intLength > (intByteLength / BigInt64Array.BYTES_PER_ELEMENT).toInt()) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
         } else {
-            intLength = intByteLength / BigInt64Array.BYTES_PER_ELEMENT as int
+            intLength = (intByteLength / BigInt64Array.BYTES_PER_ELEMENT).toInt()
         }
         if (intLength < 0) {
             throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer")
         }
-        if (intLength < intByteLength / BigInt64Array.BYTES_PER_ELEMENT as int) {
-            intByteLength = intLength * BigInt64Array.BYTES_PER_ELEMENT as int
+        if (intLength < (intByteLength / BigInt64Array.BYTES_PER_ELEMENT).toInt()) {
+            intByteLength = intLength * BigInt64Array.BYTES_PER_ELEMENT
         }
         this.byteLength = intByteLength
         this.byteOffset = intByteOffset
         this.lengthInt = intLength
         this.buffer = buf
-    }
-
-    /**
-     * Creates an BigInt64Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type long in newly created BigInt64Array
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined) {
-        this(buf, byteOffset, undefined)
-    }
-
-    /**
-     * Creates an BigInt64Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type long in newly created BigInt64Array
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: number, length: number) {
-        this(buf, new Number(byteOffset), new Number(length))
     }
 
     /**
@@ -5753,19 +5472,19 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
             this.byteLength = (buf as ArrayBuffer).getByteLength()
-            if (this.byteLength % BigInt64Array.BYTES_PER_ELEMENT as int != 0) {
+            if (this.byteLength % BigInt64Array.BYTES_PER_ELEMENT.toInt() != 0) {
                throw new RangeError("ArrayBuffer.byteLength should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
             }
-            this.lengthInt = this.byteLength / BigInt64Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = (this.byteLength / BigInt64Array.BYTES_PER_ELEMENT).toInt()
             this.buffer = buf as ArrayBuffer
             this.byteOffset = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
             // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
             let arr = Array.from<Number>((buf as ArrayLike<Number>))
-            this.byteLength = arr.length as int * BigInt64Array.BYTES_PER_ELEMENT as int
-            this.lengthInt = arr.length as int
-            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteLength = arr.length.toInt() * BigInt64Array.BYTES_PER_ELEMENT.toInt()
+            this.lengthInt = arr.length.toInt()
+            this.buffer = new ArrayBuffer(this.byteLength.toInt())
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toLong())
@@ -5781,7 +5500,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @param length data initializer
      */
     public constructor(length: int) {
-        this(length as number)
+        this(length.toDouble())
     }
 
     /**
@@ -5790,13 +5509,13 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @param length data initializer
      */
     public constructor(length: number) {
-        if (length < 0 || length > (Int.MAX_VALUE / BigInt64Array.BYTES_PER_ELEMENT)) {
+        if (length < 0 || length > (Int.MAX_VALUE / BigInt64Array.BYTES_PER_ELEMENT).toInt()) {
             throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
         }
-        this.lengthInt = length as int
-        this.byteLength = this.lengthInt * BigInt64Array.BYTES_PER_ELEMENT as int
+        this.lengthInt = length.toInt()
+        this.byteLength = this.lengthInt * BigInt64Array.BYTES_PER_ELEMENT
         this.byteOffset = 0
-        this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.buffer = new ArrayBuffer(this.byteLength.toInt())
     }
 
     /**
@@ -5805,9 +5524,9 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @param other data initializer
      */
     public constructor(other: BigInt64Array) {
-        this.buffer = other.buffer.slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
+        this.buffer = other.buffer.slice(other.byteOffset.toInt(), (other.byteOffset + other.byteLength).toInt()) as ArrayBuffer
         this.byteLength = other.byteLength
-        this.lengthInt = other.length as int
+        this.lengthInt = other.length.toInt()
         this.byteOffset = 0
     }
 
@@ -5817,7 +5536,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, numbers[i] as long)
+            this.setUnsafe(i, numbers[i].toLong())
         }
     }
 
@@ -5827,7 +5546,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, numbers[i] as long)
+            this.setUnsafe(i, numbers[i].toLong())
         }
     }
 
@@ -5849,7 +5568,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @param index index to change
      */
     public $_set(index: number, val: BigInt): void {
-        this.$_set(index as int, val)
+        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -5871,7 +5590,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @param index index to change
      */
     public $_set(index: number, val: long): void {
-        this.$_set(index as int, val)
+        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -5896,7 +5615,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns a primitive at index
      */
     public override $_get(index: number): BigInt {
-        return this.$_get(index as int) as BigInt
+        return new BigInt(this.$_get(index.toInt()))
     }
 
     /**
@@ -5920,7 +5639,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns a primitive at index
      */
     public at(index: number): BigInt | undefined {
-        return this.at(index as int)
+        return this.at(index.toInt())
     }
 
     /**
@@ -5955,7 +5674,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: number, start: number, end?: number): BigInt64Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -5970,7 +5689,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: number, end?: number): BigInt64Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target, start.toInt(), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -5985,7 +5704,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: number, start: int, end?: number): BigInt64Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target.toInt(), start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -6000,7 +5719,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: int, end?: number): BigInt64Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target, start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -6025,7 +5744,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: number): BigInt64Array {
-        return this.copyWithin(target as int)
+        return this.copyWithin(target.toInt())
     }
 
     /**
@@ -6057,7 +5776,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns modified BigInt64Array
      */
     public fill(value: BigInt, start?: number, end?: number): this {
-        this.fill(value.getLong(), asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value.getLong(), asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -6069,19 +5788,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns modified BigInt64Array
      */
     public fill(value: BigInt, start: int, end?: number): this {
-        this.fill(value.getLong(), start as int, asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the BigInt64Array with specified value
-     *
-     * @param value new valuy
-     *
-     * @returns modified BigInt64Array
-     */
-    public fill(value: BigInt, start: int, end: number): this {
-        this.fill(value.getLong(), start as int, end as int)
+        this.fill(value.getLong(), start, asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -6093,7 +5800,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns modified BigInt64Array
      */
     public fill(value: BigInt, start: number, end: int): this {
-        this.fill(value.getLong(), start as int, end as int)
+        this.fill(value.getLong(), start.toInt(), end)
         return this
     }
 
@@ -6105,7 +5812,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns modified BigInt64Array
      */
     public fill(value: BigInt, start: int, end: int): this {
-        this.fill(value.getLong(), start as int, end as int)
+        this.fill(value.getLong(), start, end)
         return this
     }
 
@@ -6117,7 +5824,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns modified BigInt64Array
      */
     public fill(value: long, start?: number, end?: number): this {
-        this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value, asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -6129,19 +5836,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns modified BigInt64Array
      */
     public fill(value: long, start: int, end?: number): this {
-        this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the BigInt64Array with specified value
-     *
-     * @param value new valuy
-     *
-     * @returns modified BigInt64Array
-     */
-    public fill(value: long, start: int, end: number): this {
-        this.fill(value, start as int, end as int)
+        this.fill(value, start, asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -6153,7 +5848,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns modified BigInt64Array
      */
     public fill(value: long, start: number, end: int): this {
-        this.fill(value, start as int, end as int)
+        this.fill(value, start.toInt(), end)
         return this
     }
 
@@ -6207,11 +5902,11 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: FixedArray<BigInt>, insertPos: number): void {
-        const offset = insertPos as int
+        const offset = insertPos.toInt()
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < arr.length as int; ++i) {
+        for (let i = 0; i < arr.length.toInt(); ++i) {
             let truncatedVal: BigInt = BigInt.asIntN(64, arr[i])
             this.$_set(offset + i, truncatedVal.getLong())
         }
@@ -6227,11 +5922,11 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: FixedArray<long>, insertPos: int): void {
-        const offset = insertPos as int
+        const offset = insertPos
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < arr.length as int; ++i) {
+        for (let i = 0; i < arr.length.toInt(); ++i) {
             this.$_set(offset + i, arr[i])
         }
     }
@@ -6242,7 +5937,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @param arr array to copy data from
      */
     public set(arr: FixedArray<BigInt>): void {
-        this.set(arr, 0 as number)
+        this.set(arr, 0)
     }
 
     /**
@@ -6251,7 +5946,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @param arr array to copy data from
      */
     public set(arr: FixedArray<long>): void {
-        this.set(arr, 0 as int)
+        this.set(arr, 0)
     }
 
     public native set(array: BigInt64Array): void
@@ -6266,11 +5961,11 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @param offset Optional. The offset into the target array at which to begin writing values from the source array
      */
     public set(array: ArrayLike<BigInt>, offset: number = 0): void {
-        const insertPos = offset as int
+        const insertPos = offset.toInt()
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length - 1 as int; i >= 0; --i) {
+        for (let i = array.length.toInt() - 1; i >= 0; --i) {
             let truncatedVal: BigInt = BigInt.asIntN(64, array[i])
             this.$_set(offset + i, truncatedVal.getLong())
         }
@@ -6284,9 +5979,9 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns new BigInt64Array
      */
     public static of(...items: FixedArray<number>): BigInt64Array {
-        let res = new BigInt64Array(items.length as int)
+        let res = new BigInt64Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i] as long)
+            res.setUnsafe(i, items[i].toLong())
         }
         return res
     }
@@ -6299,9 +5994,9 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns new BigInt64Array
      */
     public static of(...items: FixedArray<int>): BigInt64Array {
-        let res = new BigInt64Array(items.length as int)
+        let res = new BigInt64Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i] as long)
+            res.setUnsafe(i, items[i].toLong())
         }
         return res
     }
@@ -6314,7 +6009,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns new BigInt64Array
      */
     public static of(...items: FixedArray<long>): BigInt64Array {
-        let res = new BigInt64Array(items.length as int)
+        let res = new BigInt64Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i])
         }
@@ -6329,7 +6024,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns new BigInt64Array
      */
     public static of(...items: FixedArray<bigint>): BigInt64Array {
-        let res = new BigInt64Array(items.length as int)
+        let res = new BigInt64Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i].getLong())
         }
@@ -6344,7 +6039,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns new BigInt64Array
      */
     public static of(): BigInt64Array {
-        return new BigInt64Array(0 as int)
+        return new BigInt64Array(0)
     }
 
     /**
@@ -6427,7 +6122,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            res.setUnsafe(idx[0] as int, mapfn(x as T, idx[0] as number).getLong())
+            res.setUnsafe(idx[0], mapfn(x as T, idx[0]).getLong())
             idx[0] += 1
         })
         return res
@@ -6456,7 +6151,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns true if e is in BigInt64Array, false otherwise
      */
     public includes(searchElement: long, fromIndex: int): boolean {
-        return this.indexOf(searchElement as int, fromIndex) != -1
+        return this.indexOf(searchElement.toInt(), fromIndex) != -1
     }
 
     /**
@@ -6511,7 +6206,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: int, fromIndex: int): number {
-        return this.indexOfImpl(searchElement as long, fromIndex)
+        return this.indexOfImpl(searchElement.toLong(), fromIndex)
     }
 
     /**
@@ -6638,7 +6333,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: int, fromIndex: int): number {
-        return this.lastIndexOfImpl(searchElement as long, fromIndex)
+        return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
     }
 
     /**
@@ -6709,22 +6404,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): BigInt64Array {
-        return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a slice of current BigInt64Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new BigInt64Array with elements of current BigInt64Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: number, end: number): BigInt64Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(asIntOrDefault(begin, 0), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -6739,7 +6419,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): BigInt64Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(begin.toInt(), end)
     }
 
     /**
@@ -6754,7 +6434,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): BigInt64Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(begin, end.toInt())
     }
 
     /**
@@ -6776,19 +6456,8 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         if (count < 0) {
             count = 0
         }
-        let buf = this.buffer.slice(relStart * BigInt64Array.BYTES_PER_ELEMENT as int, relEnd * BigInt64Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+        let buf = this.buffer.slice(relStart * BigInt64Array.BYTES_PER_ELEMENT.toInt(), relEnd * BigInt64Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
         return new BigInt64Array(buf)
-    }
-
-    /**
-     * Creates a slice of current BigInt64Array using range [begin, this.length).
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @returns a new BigInt64Array with elements of current BigInt64Array[begin, this.length)
-     */
-    public slice(begin: number): BigInt64Array {
-        return this.slice(begin as int)
     }
 
     /**
@@ -6824,21 +6493,8 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: number, end: number): BigInt64Array {
-        return this.subarray(begin as int, end as int)
-    }
-
-    /**
-     * Creates a BigInt64Array with the same underlying ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new BigInt64Array with the same underlying ArrayBuffer
-     */
     public subarray(begin: number, end: int): BigInt64Array {
-        return this.subarray(begin as int, end as int)
+        return this.subarray(begin.toInt(), end)
     }
 
     /**
@@ -6851,7 +6507,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns new BigInt64Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: number): BigInt64Array {
-        return this.subarray(begin as int, end as int)
+        return this.subarray(begin, end.toInt())
     }
 
     /**
@@ -6871,7 +6527,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         if (count < 0) {
             count = 0
         }
-        return new BigInt64Array(this.buffer, relStart * BigInt64Array.BYTES_PER_ELEMENT as int, count)
+        return new BigInt64Array(this.buffer, relStart * BigInt64Array.BYTES_PER_ELEMENT.toInt(), count)
     }
 
     /**
@@ -6882,7 +6538,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns new BigInt64Array with the same ArrayBuffer
      */
     public subarray(begin: number): BigInt64Array {
-        return this.subarray(begin as int, this.lengthInt)
+        return this.subarray(begin.toInt(), this.lengthInt)
     }
 
     /**
@@ -6893,7 +6549,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns new BigInt64Array with the same ArrayBuffer
      */
     public subarray(begin: int): BigInt64Array {
-        return this.subarray(begin as int, this.lengthInt)
+        return this.subarray(begin, this.lengthInt)
     }
 
     /**
@@ -6990,7 +6646,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns an BigInt64Array with replaced value on index
      */
     public with(index: number, value: BigInt): BigInt64Array {
-        return this.with(index as int, value.getLong())
+        return this.with(index.toInt(), value.getLong())
     }
 
     /**
@@ -7050,11 +6706,16 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         }
 
         let cmp = (l: long, r: long): number => {
-            const result = compareFn!(new BigInt(l), new BigInt(r))
-            if (result instanceof BigInt) {
-                return (result as BigInt).getLong()
-            } else {
-                return result as number
+                return (l - r).toDouble()
+            }
+        if (compareFn != undefined) {
+            cmp = (l: long, r: long): number => {
+                const result = compareFn!(new BigInt(l), new BigInt(r))
+                if (result instanceof BigInt) {
+                    return result.getLong()
+                } else {
+                    return result as number
+                }
             }
         }
         const MAX_SHORT_LENGTH = 24
@@ -7081,7 +6742,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      */
     public some(predicate: (element: BigInt, index: number, array: BigInt64Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate(new BigInt(this.getUnsafe(i)), i as number, this)) {
+            if (predicate(new BigInt(this.getUnsafe(i)), i.toDouble(), this)) {
                 return true
             }
         }
@@ -7106,7 +6767,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -7130,7 +6791,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
 
         let accumulatedValue = new BigInt(this.getUnsafe(0))
         for (let i = 1; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -7153,7 +6814,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -7178,7 +6839,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
 
         let accumulatedValue: BigInt = new BigInt(this.getUnsafe(this.lengthInt - 1))
         for (let i = this.lengthInt - 2; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -7191,10 +6852,10 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     * @returns a new BigInt64Array where for each element from current BigInt64Array fn was applied
     */
     public map(fn: (val: BigInt, index: number, array: BigInt64Array) => BigInt): BigInt64Array {
-        let resBuf = new ArrayBuffer(this.lengthInt * BigInt64Array.BYTES_PER_ELEMENT as int)
-        let res = new BigInt64Array(resBuf, 0, resBuf.getByteLength() / BigInt64Array.BYTES_PER_ELEMENT as int)
+        let resBuf = new ArrayBuffer(this.lengthInt * BigInt64Array.BYTES_PER_ELEMENT)
+        let res = new BigInt64Array(resBuf, 0, (resBuf.getByteLength() / BigInt64Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn(new BigInt(this.getUnsafe(i)), i as number, this).getLong())
+            res.set(i, fn(new BigInt(this.getUnsafe(i)), i.toDouble(), this).getLong())
         }
         return res
     }
@@ -7211,7 +6872,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      */
     public every(predicate: (element: BigInt, index: number, array: BigInt64Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (!predicate(new BigInt(this.getUnsafe(i)), i as number, this)) {
+            if (!predicate(new BigInt(this.getUnsafe(i)), i.toDouble(), this)) {
                 return false
             }
         }
@@ -7229,12 +6890,12 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
-            markers[i] = fn(new BigInt(this.getUnsafe(i)), i as number, this)
+            markers[i] = fn(new BigInt(this.getUnsafe(i)), i.toDouble(), this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * BigInt64Array.BYTES_PER_ELEMENT as int)
+        let resBuf = new ArrayBuffer(resLen * BigInt64Array.BYTES_PER_ELEMENT)
         let res = new BigInt64Array(resBuf, 0)
         for (let i = 0, j = 0; i < this.lengthInt; ++i) {
             if (markers[i]) {
@@ -7258,7 +6919,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public find(predicate: (value: BigInt, index: number, obj: BigInt64Array) => boolean): BigInt | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
             let val = this.getUnsafe(i)
-            if (predicate(new BigInt(val), i as number, this)) {
+            if (predicate(new BigInt(val), i.toDouble(), this)) {
                 return new BigInt(val)
             }
         }
@@ -7277,11 +6938,11 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      */
     public findIndex(predicate: (value: BigInt, index: number, obj: BigInt64Array) => boolean): number {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate(new BigInt(this.getUnsafe(i)), i as number, this)) {
-                return i as number
+            if (predicate(new BigInt(this.getUnsafe(i)), i.toDouble(), this)) {
+                return i.toDouble()
             }
         }
-        return -1 as number
+        return (-1).toDouble()
     }
 
     /**
@@ -7294,7 +6955,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public findLast(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): long {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn(new BigInt(val), i as number, this)) {
+            if (fn(new BigInt(val), i.toDouble(), this)) {
                 return val
             }
         }
@@ -7311,11 +6972,11 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public findLastIndex(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): number {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn(new BigInt(val), i as number, this)) {
+            if (fn(new BigInt(val), i.toDouble(), this)) {
                 return i
             }
         }
-        return -1 as number
+        return (-1).toDouble()
     }
 
     /**
@@ -7328,7 +6989,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      */
     public forEach(callbackfn: (value: BigInt, index: number, array: BigInt64Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
-            callbackfn(new BigInt(this.getUnsafe(i)), i as number, this)
+            callbackfn(new BigInt(this.getUnsafe(i)), i.toDouble(), this)
         }
     }
 
@@ -7344,16 +7005,16 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     private final native getUnsafe(index: int): long
 
     internal setUnsafe(insertPos: int, val: long): void {
-        let startByte = insertPos * BigInt64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let startByte = insertPos * BigInt64Array.BYTES_PER_ELEMENT + this.byteOffset.toInt()
         let bits = val
         if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
-                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT.toInt(); ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
                 this.buffer.set(startByte + i, byteVal)
             }
         } else {
-            for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; i++) {
-                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT.toInt(); i++) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
                 this.buffer.set(startByte + 7 - i, byteVal)
             }
         }
@@ -7377,7 +7038,7 @@ class Float32ArrayIteratorKeys implements IterableIterator<number> {
     private idx: int = 0
 
     constructor(parent: Float32Array) {
-        this.length = parent.length as int
+        this.length = parent.length.toInt()
     }
 
     public override $_iterator(): IterableIterator<number> {
@@ -7388,7 +7049,7 @@ class Float32ArrayIteratorKeys implements IterableIterator<number> {
         if (this.idx < 0 || this.idx >= this.length) {
             return new IteratorResult<number>()
         }
-        return new IteratorResult<number>(false, this.idx++ as number)
+        return new IteratorResult<number>(false, (this.idx++).toDouble())
     }
 }
 
@@ -7405,7 +7066,7 @@ class Float32ArrayIterator implements IterableIterator<Number> {
     }
 
     override next(): IteratorResult<Number> {
-        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+        if (this.idx < 0 || this.idx >= this.parent.length.toInt()) {
             return new IteratorResult<Number>()
         }
         return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
@@ -7425,7 +7086,7 @@ class Float32ArrayIteratorEntries implements IterableIterator<[Number, Number]> 
     }
 
     override next(): IteratorResult<[Number, Number]> {
-        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+        if (this.idx < 0 || this.idx >= this.parent.length.toInt()) {
             return new IteratorResult<[Number, Number]>()
         }
         return new IteratorResult<[Number, Number]>(
@@ -7439,15 +7100,15 @@ class Float32ArrayIteratorEntries implements IterableIterator<[Number, Number]> 
  * JS Float32Array API-compatible class
  */
 export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
-    public static readonly BYTES_PER_ELEMENT: number = 4
-    public readonly BYTES_PER_ELEMENT: number = Float32Array.BYTES_PER_ELEMENT
+    public static readonly BYTES_PER_ELEMENT: int = 4
+    public readonly BYTES_PER_ELEMENT: int = Float32Array.BYTES_PER_ELEMENT
     internal readonly lengthInt: int
 
     /**
      * Creates an empty Float32Array.
      */
     public constructor() {
-        this(0 as int)
+        this(0)
     }
 
     /**
@@ -7457,9 +7118,9 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
             const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
-            this.byteLength = arr.length as int * Float32Array.BYTES_PER_ELEMENT as int
-            this.lengthInt = arr.length as int
-            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteLength = arr.length.toInt() * Float32Array.BYTES_PER_ELEMENT
+            this.lengthInt = arr.length.toInt()
+            this.buffer = new ArrayBuffer(this.byteLength.toInt())
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toFloat())
@@ -7495,58 +7156,32 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 
-        if (intByteLength % Float32Array.BYTES_PER_ELEMENT as int != 0) {
+        if (intByteLength % Float32Array.BYTES_PER_ELEMENT.toInt() != 0) {
             throw new RangeError("ArrayBuffer.byteLength should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
         }
-        if (intByteOffset % Float32Array.BYTES_PER_ELEMENT as int != 0) {
+        if (intByteOffset % Float32Array.BYTES_PER_ELEMENT != 0) {
             throw new RangeError("byteOffset should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
         }
 
         let intLength: int
         if (length != undefined) {
             intLength = length.toInt()
-            if (intLength > intByteLength / Float32Array.BYTES_PER_ELEMENT as int) {
+            if (intLength > (intByteLength / Float32Array.BYTES_PER_ELEMENT).toInt()) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
         } else {
-            intLength = intByteLength / Float32Array.BYTES_PER_ELEMENT as int
+            intLength = (intByteLength / Float32Array.BYTES_PER_ELEMENT).toInt()
         }
         if (intLength < 0) {
             throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer")
         }
-        if (intLength < intByteLength / Float32Array.BYTES_PER_ELEMENT as int) {
-            intByteLength = intLength * Float32Array.BYTES_PER_ELEMENT as int
+        if (intLength < (intByteLength / Float32Array.BYTES_PER_ELEMENT).toInt()) {
+            intByteLength = intLength * Float32Array.BYTES_PER_ELEMENT
         }
         this.byteLength = intByteLength
         this.byteOffset = intByteOffset
         this.lengthInt = intLength
         this.buffer = buf
-    }
-
-    /**
-     * Creates an Float32Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type float in newly created Float32Array
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined) {
-        this(buf, byteOffset, undefined)
-    }
-
-    /**
-     * Creates an Float32Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type float in newly created Float32Array
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: number, length: number) {
-        this(buf, new Number(byteOffset), new Number(length))
     }
 
     /**
@@ -7594,19 +7229,19 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
             this.byteLength = (buf as ArrayBuffer).getByteLength()
-            if (this.byteLength % Float32Array.BYTES_PER_ELEMENT as int != 0) {
+            if (this.byteLength % Float32Array.BYTES_PER_ELEMENT.toInt() != 0) {
                throw new RangeError("ArrayBuffer.byteLength should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
             }
-            this.lengthInt = this.byteLength / Float32Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = (this.byteLength / Float32Array.BYTES_PER_ELEMENT).toInt()
             this.buffer = buf as ArrayBuffer
             this.byteOffset = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
             // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
             let arr = Array.from<Number>((buf as ArrayLike<Number>))
-            this.byteLength = arr.length as int * Float32Array.BYTES_PER_ELEMENT as int
-            this.lengthInt = arr.length as int
-            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteLength = arr.length.toInt() * Float32Array.BYTES_PER_ELEMENT.toInt()
+            this.lengthInt = arr.length.toInt()
+            this.buffer = new ArrayBuffer(this.byteLength.toInt())
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toFloat())
@@ -7622,7 +7257,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: int) {
-        this(length as number)
+        this(length.toDouble())
     }
 
     /**
@@ -7631,13 +7266,13 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: number) {
-        if (length < 0 || length > (Int.MAX_VALUE / Float32Array.BYTES_PER_ELEMENT)) {
+        if (length < 0 || length > (Int.MAX_VALUE / Float32Array.BYTES_PER_ELEMENT).toInt()) {
             throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
         }
-        this.lengthInt = length as int
-        this.byteLength = this.lengthInt * Float32Array.BYTES_PER_ELEMENT as int
+        this.lengthInt = length.toInt()
+        this.byteLength = this.lengthInt * Float32Array.BYTES_PER_ELEMENT
         this.byteOffset = 0
-        this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.buffer = new ArrayBuffer(this.byteLength.toInt())
     }
 
     /**
@@ -7646,9 +7281,9 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param other data initializer
      */
     public constructor(other: Float32Array) {
-        this.buffer = other.buffer.slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
+        this.buffer = other.buffer.slice(other.byteOffset.toInt(), (other.byteOffset + other.byteLength).toInt()) as ArrayBuffer
         this.byteLength = other.byteLength
-        this.lengthInt = other.length as int
+        this.lengthInt = other.length.toInt()
         this.byteOffset = 0
     }
 
@@ -7658,7 +7293,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, numbers[i] as float)
+            this.setUnsafe(i, numbers[i].toFloat())
         }
     }
 
@@ -7668,7 +7303,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, numbers[i] as float)
+            this.setUnsafe(i, numbers[i].toFloat())
         }
     }
 
@@ -7680,7 +7315,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: number, val: number): void {
-        this.$_set(index as int, val)
+        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -7691,7 +7326,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        this.$_set(index, val as float)
+        this.$_set(index, val.toFloat())
     }
 
     /**
@@ -7702,7 +7337,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: number, val: float): void {
-        this.$_set(index as int, val)
+        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -7727,7 +7362,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a primitive at index
      */
     public override $_get(index: number): Number {
-        return this.$_get(index as int) as Number
+        return this.$_get(index.toInt())
     }
 
     /**
@@ -7747,7 +7382,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a primitive at index
      */
     public at(index: number): Number | undefined {
-        return this.at(index as int)
+        return this.at(index.toInt())
     }
 
     /**
@@ -7782,7 +7417,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: number, start: number, end?: number): Float32Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -7797,7 +7432,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: number, end?: number): Float32Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target, start.toInt(), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -7812,7 +7447,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: number, start: int, end?: number): Float32Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target.toInt(), start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -7827,7 +7462,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: int, end?: number): Float32Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target, start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -7852,7 +7487,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: number): Float32Array {
-        return this.copyWithin(target as int)
+        return this.copyWithin(target.toInt())
     }
 
     /**
@@ -7884,7 +7519,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Float32Array
      */
     public fill(value: number, start?: number, end?: number): this {
-        this.fill(value as float, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value.toFloat(), asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -7896,19 +7531,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Float32Array
      */
     public fill(value: number, start: int, end?: number): this {
-        this.fill(value as float, start as int, asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Float32Array with specified value
-     *
-     * @param value new valuy
-     *
-     * @returns modified Float32Array
-     */
-    public fill(value: number, start: int, end: number): this {
-        this.fill(value as float, start as int, end as int)
+        this.fill(value.toFloat(), start, asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -7920,7 +7543,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Float32Array
      */
     public fill(value: number, start: number, end: int): this {
-        this.fill(value as float, start as int, end as int)
+        this.fill(value.toFloat(), start.toInt(), end)
         return this
     }
 
@@ -7932,7 +7555,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Float32Array
      */
     public fill(value: number, start: int, end: int): this {
-        this.fill(value as float, start as int, end as int)
+        this.fill(value.toFloat(), start, end)
         return this
     }
 
@@ -7944,7 +7567,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Float32Array
      */
     public fill(value: float, start?: number, end?: number): this {
-        this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value, asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -7956,19 +7579,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Float32Array
      */
     public fill(value: float, start: int, end?: number): this {
-        this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Float32Array with specified value
-     *
-     * @param value new valuy
-     *
-     * @returns modified Float32Array
-     */
-    public fill(value: float, start: int, end: number): this {
-        this.fill(value, start as int, end as int)
+        this.fill(value, start, asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -7980,7 +7591,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Float32Array
      */
     public fill(value: float, start: number, end: int): this {
-        this.fill(value, start as int, end as int)
+        this.fill(value, start.toInt(), end)
         return this
     }
 
@@ -8034,12 +7645,12 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: FixedArray<number>, insertPos: number): void {
-        const offset = insertPos as int
+        const offset = insertPos.toInt()
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < arr.length as int; ++i) {
-            this.$_set(offset + i, arr[i] as float)
+        for (let i = 0; i < arr.length.toInt(); ++i) {
+            this.$_set(offset + i, arr[i].toFloat())
         }
     }
 
@@ -8053,11 +7664,11 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: FixedArray<float>, insertPos: int): void {
-        const offset = insertPos as int
+        const offset = insertPos
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < arr.length as int; ++i) {
+        for (let i = 0; i < arr.length.toInt(); ++i) {
             this.$_set(offset + i, arr[i])
         }
     }
@@ -8068,7 +7679,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param arr array to copy data from
      */
     public set(arr: FixedArray<number>): void {
-        this.set(arr, 0 as number)
+        this.set(arr, 0)
     }
 
     /**
@@ -8077,7 +7688,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param arr array to copy data from
      */
     public set(arr: FixedArray<float>): void {
-        this.set(arr, 0 as int)
+        this.set(arr, 0)
     }
 
     public native set(array: Float32Array): void
@@ -8092,12 +7703,12 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param offset Optional. The offset into the target array at which to begin writing values from the source array
      */
     public set(array: ArrayLike<number>, offset: number = 0): void {
-        const insertPos = offset as int
+        const insertPos = offset.toInt()
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length - 1 as int; i >= 0; --i) {
-            this.$_set(insertPos + i, array[i] as float)
+        for (let i = array.length.toInt() - 1; i >= 0; --i) {
+            this.$_set(insertPos + i, array[i].toFloat())
         }
     }
 
@@ -8109,9 +7720,9 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Float32Array
      */
     public static of(...items: FixedArray<number>): Float32Array {
-        let res = new Float32Array(items.length as int)
+        let res = new Float32Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i] as float)
+            res.setUnsafe(i, items[i].toFloat())
         }
         return res
     }
@@ -8124,9 +7735,9 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Float32Array
      */
     public static of(...items: FixedArray<int>): Float32Array {
-        let res = new Float32Array(items.length as int)
+        let res = new Float32Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i] as float)
+            res.setUnsafe(i, items[i].toFloat())
         }
         return res
     }
@@ -8139,7 +7750,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Float32Array
      */
     public static of(...items: FixedArray<float>): Float32Array {
-        let res = new Float32Array(items.length as int)
+        let res = new Float32Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i])
         }
@@ -8154,7 +7765,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Float32Array
      */
     public static of(): Float32Array {
-        return new Float32Array(0 as int)
+        return new Float32Array(0)
     }
 
     /**
@@ -8195,7 +7806,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
                 if (x.done) {
                     return new Float32Array(result.buffer, 0, i)
                 }
-                result.setUnsafe(i, (mapfn)!(x.value!, i) as float)
+                result.setUnsafe(i, (mapfn)!(x.value!, i).toFloat())
             }
             return result
         }
@@ -8215,7 +7826,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
                 }
                 temp = new Float32Array(tb)
             }
-            temp.setUnsafe(index[0], (mapfn)!(x, index[0]) as float)
+            temp.setUnsafe(index[0], (mapfn)!(x, index[0]).toFloat())
             index[0]++
         })
         return new Float32Array(temp.buffer, 0, index[0])
@@ -8237,7 +7848,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            res.setUnsafe(idx[0] as int, mapfn(x as T, idx[0] as number) as float)
+            res.setUnsafe(idx[0], mapfn(x as T, idx[0]).toFloat())
             idx[0] += 1
         })
         return res
@@ -8275,7 +7886,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns true if e is in Float32Array, false otherwise
      */
     public includes(searchElement: float, fromIndex: int): boolean {
-        return this.indexOf(searchElement as int, fromIndex) != -1
+        return this.indexOf(searchElement.toInt(), fromIndex) != -1
     }
 
     /**
@@ -8330,7 +7941,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: int, fromIndex: int): number {
-        return this.indexOfImpl(searchElement as long, fromIndex)
+        return this.indexOfImpl(searchElement.toLong(), fromIndex)
     }
 
     /**
@@ -8457,7 +8068,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: int, fromIndex: int): number {
-        return this.lastIndexOfImpl(searchElement as long, fromIndex)
+        return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
     }
 
     /**
@@ -8528,22 +8139,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): Float32Array {
-        return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a slice of current Float32Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Float32Array with elements of current Float32Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: number, end: number): Float32Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(asIntOrDefault(begin, 0), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -8558,7 +8154,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): Float32Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(begin.toInt(), end)
     }
 
     /**
@@ -8573,7 +8169,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): Float32Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(begin, end.toInt())
     }
 
     /**
@@ -8595,19 +8191,8 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        let buf = this.buffer.slice(relStart * Float32Array.BYTES_PER_ELEMENT as int, relEnd * Float32Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+        let buf = this.buffer.slice(relStart * Float32Array.BYTES_PER_ELEMENT.toInt(), relEnd * Float32Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
         return new Float32Array(buf)
-    }
-
-    /**
-     * Creates a slice of current Float32Array using range [begin, this.length).
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @returns a new Float32Array with elements of current Float32Array[begin, this.length)
-     */
-    public slice(begin: number): Float32Array {
-        return this.slice(begin as int)
     }
 
     /**
@@ -8643,21 +8228,8 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float32Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: number, end: number): Float32Array {
-        return this.subarray(begin as int, end as int)
-    }
-
-    /**
-     * Creates a Float32Array with the same underlying ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Float32Array with the same underlying ArrayBuffer
-     */
     public subarray(begin: number, end: int): Float32Array {
-        return this.subarray(begin as int, end as int)
+        return this.subarray(begin.toInt(), end)
     }
 
     /**
@@ -8670,7 +8242,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Float32Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: number): Float32Array {
-        return this.subarray(begin as int, end as int)
+        return this.subarray(begin, end.toInt())
     }
 
     /**
@@ -8690,7 +8262,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        return new Float32Array(this.buffer, relStart * Float32Array.BYTES_PER_ELEMENT as int, count)
+        return new Float32Array(this.buffer, relStart * Float32Array.BYTES_PER_ELEMENT.toInt(), count)
     }
 
     /**
@@ -8701,7 +8273,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Float32Array with the same ArrayBuffer
      */
     public subarray(begin: number): Float32Array {
-        return this.subarray(begin as int, this.lengthInt)
+        return this.subarray(begin.toInt(), this.lengthInt)
     }
 
     /**
@@ -8712,7 +8284,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Float32Array with the same ArrayBuffer
      */
     public subarray(begin: int): Float32Array {
-        return this.subarray(begin as int, this.lengthInt)
+        return this.subarray(begin, this.lengthInt)
     }
 
     /**
@@ -8747,11 +8319,11 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public toLocaleString(): string {
         let res: StringBuilder = new StringBuilder("")
         for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append((this.getUnsafe(i) as Number).toLocaleString())
+            res.append(new Number(this.getUnsafe(i)).toLocaleString())
             res.append(",")
         }
         if (this.lengthInt > 0) {
-            res.append((this.getUnsafe(this.lengthInt - 1) as Number).toLocaleString())
+            res.append(new Number(this.getUnsafe(this.lengthInt - 1))).toLocaleString()
         }
         return res.toString()
     }
@@ -8809,7 +8381,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Float32Array with replaced value on index
      */
     public with(index: number, value: number): Float32Array {
-        return this.with(index as int, value as float)
+        return this.with(index.toInt(), value.toFloat())
     }
 
     /**
@@ -8839,7 +8411,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public findLast(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Float32Array) => boolean =
             (val: number, index: number, array: Float32Array): boolean => { return fn(val) }
-        return this.findLast(newF) as number
+        return (this.findLast(newF)).toDouble()
     }
 
     /**
@@ -8869,8 +8441,13 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let cmp = (l: float, r: float): number => {
-            const result = compareFn!(l as number, r as number)
-            return result
+                return (l - r).toDouble()
+            }
+        if (compareFn != undefined) {
+            cmp = (l: float, r: float): number => {
+                const result = compareFn!((l).toDouble(), (r).toDouble())
+                return result
+            }
         }
         const MAX_SHORT_LENGTH = 24
         if (arr.length > MAX_SHORT_LENGTH) {
@@ -8896,7 +8473,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public some(predicate: (element: number, index: number, array: Float32Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
+            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
                 return true
             }
         }
@@ -8921,7 +8498,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -8943,9 +8520,9 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
-        let accumulatedValue = this.getUnsafe(0) as number
+        let accumulatedValue = (this.getUnsafe(0)).toDouble()
         for (let i = 1; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -8968,7 +8545,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -8991,9 +8568,9 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
-        let accumulatedValue: number = this.getUnsafe(this.lengthInt - 1) as number
+        let accumulatedValue: number = (this.getUnsafe(this.lengthInt - 1)).toDouble()
         for (let i = this.lengthInt - 2; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -9006,10 +8583,10 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     * @returns a new Float32Array where for each element from current Float32Array fn was applied
     */
     public map(fn: (val: number, index: number, array: Float32Array) => number): Float32Array {
-        let resBuf = new ArrayBuffer(this.lengthInt * Float32Array.BYTES_PER_ELEMENT as int)
-        let res = new Float32Array(resBuf, 0, resBuf.getByteLength() / Float32Array.BYTES_PER_ELEMENT as int)
+        let resBuf = new ArrayBuffer(this.lengthInt * Float32Array.BYTES_PER_ELEMENT)
+        let res = new Float32Array(resBuf, 0, (resBuf.getByteLength() / Float32Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn(this.getUnsafe(i) as number, i as number, this) as float)
+            res.set(i, fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this).toFloat())
         }
         return res
     }
@@ -9026,7 +8603,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public every(predicate: (element: number, index: number, array: Float32Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (!predicate(this.getUnsafe(i) as number, i as number, this)) {
+            if (!predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
                 return false
             }
         }
@@ -9044,12 +8621,12 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
-            markers[i] = fn(this.getUnsafe(i) as number, i as number, this)
+            markers[i] = fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * Float32Array.BYTES_PER_ELEMENT as int)
+        let resBuf = new ArrayBuffer(resLen * Float32Array.BYTES_PER_ELEMENT)
         let res = new Float32Array(resBuf, 0)
         for (let i = 0, j = 0; i < this.lengthInt; ++i) {
             if (markers[i]) {
@@ -9073,8 +8650,8 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public find(predicate: (value: number, index: number, obj: Float32Array) => boolean): number | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
             let val = this.getUnsafe(i)
-            if (predicate(val as number, i as number, this)) {
-                return val as number
+            if (predicate((val).toDouble(), i.toDouble(), this)) {
+                return (val).toDouble()
             }
         }
         return undefined
@@ -9092,11 +8669,11 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public findIndex(predicate: (value: number, index: number, obj: Float32Array) => boolean): number {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
-                return i as number
+            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
+                return i.toDouble()
             }
         }
-        return -1 as number
+        return (-1).toDouble()
     }
 
     /**
@@ -9109,7 +8686,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public findLast(fn: (val: number, index: number, array: Float32Array) => boolean): float {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (fn((val).toDouble(), i.toDouble(), this)) {
                 return val
             }
         }
@@ -9126,11 +8703,11 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public findLastIndex(fn: (val: number, index: number, array: Float32Array) => boolean): number {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (fn((val).toDouble(), i.toDouble(), this)) {
                 return i
             }
         }
-        return -1 as number
+        return (-1).toDouble()
     }
 
     /**
@@ -9143,7 +8720,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public forEach(callbackfn: (value: number, index: number, array: Float32Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
-            callbackfn(this.getUnsafe(i) as number, i as number, this)
+            callbackfn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
     }
 
@@ -9159,16 +8736,16 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     private final native getUnsafe(index: int): float
 
     internal setUnsafe(insertPos: int, val: float): void {
-        let startByte = insertPos * Float32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let startByte = insertPos * Float32Array.BYTES_PER_ELEMENT + this.byteOffset.toInt()
         let bits = Float.bitCastToInt(val)
         if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
-                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT.toInt(); ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
                 this.buffer.set(startByte + i, byteVal)
             }
         } else {
-            for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT as int; i++) {
-                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT.toInt(); i++) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
                 this.buffer.set(startByte + 3 - i, byteVal)
             }
         }
@@ -9192,7 +8769,7 @@ class Float64ArrayIteratorKeys implements IterableIterator<number> {
     private idx: int = 0
 
     constructor(parent: Float64Array) {
-        this.length = parent.length as int
+        this.length = parent.length.toInt()
     }
 
     public override $_iterator(): IterableIterator<number> {
@@ -9203,7 +8780,7 @@ class Float64ArrayIteratorKeys implements IterableIterator<number> {
         if (this.idx < 0 || this.idx >= this.length) {
             return new IteratorResult<number>()
         }
-        return new IteratorResult<number>(false, this.idx++ as number)
+        return new IteratorResult<number>(false, (this.idx++).toDouble())
     }
 }
 
@@ -9220,7 +8797,7 @@ class Float64ArrayIterator implements IterableIterator<Number> {
     }
 
     override next(): IteratorResult<Number> {
-        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+        if (this.idx < 0 || this.idx >= this.parent.length.toInt()) {
             return new IteratorResult<Number>()
         }
         return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
@@ -9240,7 +8817,7 @@ class Float64ArrayIteratorEntries implements IterableIterator<[Number, Number]> 
     }
 
     override next(): IteratorResult<[Number, Number]> {
-        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+        if (this.idx < 0 || this.idx >= this.parent.length.toInt()) {
             return new IteratorResult<[Number, Number]>()
         }
         return new IteratorResult<[Number, Number]>(
@@ -9254,15 +8831,15 @@ class Float64ArrayIteratorEntries implements IterableIterator<[Number, Number]> 
  * JS Float64Array API-compatible class
  */
 export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
-    public static readonly BYTES_PER_ELEMENT: number = 8
-    public readonly BYTES_PER_ELEMENT: number = Float64Array.BYTES_PER_ELEMENT
+    public static readonly BYTES_PER_ELEMENT: int = 8
+    public readonly BYTES_PER_ELEMENT: int = Float64Array.BYTES_PER_ELEMENT
     internal readonly lengthInt: int
 
     /**
      * Creates an empty Float64Array.
      */
     public constructor() {
-        this(0 as int)
+        this(0)
     }
 
     /**
@@ -9272,9 +8849,9 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
             const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
-            this.byteLength = arr.length as int * Float64Array.BYTES_PER_ELEMENT as int
-            this.lengthInt = arr.length as int
-            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteLength = arr.length.toInt() * Float64Array.BYTES_PER_ELEMENT
+            this.lengthInt = arr.length.toInt()
+            this.buffer = new ArrayBuffer(this.byteLength.toInt())
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toDouble())
@@ -9310,58 +8887,32 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 
-        if (intByteLength % Float64Array.BYTES_PER_ELEMENT as int != 0) {
+        if (intByteLength % Float64Array.BYTES_PER_ELEMENT.toInt() != 0) {
             throw new RangeError("ArrayBuffer.byteLength should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
         }
-        if (intByteOffset % Float64Array.BYTES_PER_ELEMENT as int != 0) {
+        if (intByteOffset % Float64Array.BYTES_PER_ELEMENT != 0) {
             throw new RangeError("byteOffset should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
         }
 
         let intLength: int
         if (length != undefined) {
             intLength = length.toInt()
-            if (intLength > intByteLength / Float64Array.BYTES_PER_ELEMENT as int) {
+            if (intLength > (intByteLength / Float64Array.BYTES_PER_ELEMENT).toInt()) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
         } else {
-            intLength = intByteLength / Float64Array.BYTES_PER_ELEMENT as int
+            intLength = (intByteLength / Float64Array.BYTES_PER_ELEMENT).toInt()
         }
         if (intLength < 0) {
             throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer")
         }
-        if (intLength < intByteLength / Float64Array.BYTES_PER_ELEMENT as int) {
-            intByteLength = intLength * Float64Array.BYTES_PER_ELEMENT as int
+        if (intLength < (intByteLength / Float64Array.BYTES_PER_ELEMENT).toInt()) {
+            intByteLength = intLength * Float64Array.BYTES_PER_ELEMENT
         }
         this.byteLength = intByteLength
         this.byteOffset = intByteOffset
         this.lengthInt = intLength
         this.buffer = buf
-    }
-
-    /**
-     * Creates an Float64Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type double in newly created Float64Array
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined) {
-        this(buf, byteOffset, undefined)
-    }
-
-    /**
-     * Creates an Float64Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type double in newly created Float64Array
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: number, length: number) {
-        this(buf, new Number(byteOffset), new Number(length))
     }
 
     /**
@@ -9409,19 +8960,19 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
             this.byteLength = (buf as ArrayBuffer).getByteLength()
-            if (this.byteLength % Float64Array.BYTES_PER_ELEMENT as int != 0) {
+            if (this.byteLength % Float64Array.BYTES_PER_ELEMENT.toInt() != 0) {
                throw new RangeError("ArrayBuffer.byteLength should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
             }
-            this.lengthInt = this.byteLength / Float64Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = (this.byteLength / Float64Array.BYTES_PER_ELEMENT).toInt()
             this.buffer = buf as ArrayBuffer
             this.byteOffset = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
             // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
             let arr = Array.from<Number>((buf as ArrayLike<Number>))
-            this.byteLength = arr.length as int * Float64Array.BYTES_PER_ELEMENT as int
-            this.lengthInt = arr.length as int
-            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteLength = arr.length.toInt() * Float64Array.BYTES_PER_ELEMENT.toInt()
+            this.lengthInt = arr.length.toInt()
+            this.buffer = new ArrayBuffer(this.byteLength.toInt())
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toDouble())
@@ -9437,7 +8988,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: int) {
-        this(length as number)
+        this(length.toDouble())
     }
 
     /**
@@ -9446,13 +8997,13 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @param length data initializer
      */
     public constructor(length: number) {
-        if (length < 0 || length > (Int.MAX_VALUE / Float64Array.BYTES_PER_ELEMENT)) {
+        if (length < 0 || length > (Int.MAX_VALUE / Float64Array.BYTES_PER_ELEMENT).toInt()) {
             throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
         }
-        this.lengthInt = length as int
-        this.byteLength = this.lengthInt * Float64Array.BYTES_PER_ELEMENT as int
+        this.lengthInt = length.toInt()
+        this.byteLength = this.lengthInt * Float64Array.BYTES_PER_ELEMENT
         this.byteOffset = 0
-        this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.buffer = new ArrayBuffer(this.byteLength.toInt())
     }
 
     /**
@@ -9461,9 +9012,9 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @param other data initializer
      */
     public constructor(other: Float64Array) {
-        this.buffer = other.buffer.slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
+        this.buffer = other.buffer.slice(other.byteOffset.toInt(), (other.byteOffset + other.byteLength).toInt()) as ArrayBuffer
         this.byteLength = other.byteLength
-        this.lengthInt = other.length as int
+        this.lengthInt = other.length.toInt()
         this.byteOffset = 0
     }
 
@@ -9473,7 +9024,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, numbers[i] as double)
+            this.setUnsafe(i, numbers[i].toDouble())
         }
     }
 
@@ -9483,7 +9034,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, numbers[i] as double)
+            this.setUnsafe(i, numbers[i].toDouble())
         }
     }
 
@@ -9495,7 +9046,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: number, val: double): void {
-        this.$_set(index as int, val)
+        this.$_set(index.toInt(), val)
     }
 
     /**
@@ -9520,7 +9071,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a primitive at index
      */
     public override $_get(index: number): Number {
-        return this.$_get(index as int) as Number
+        return this.$_get(index.toInt())
     }
 
     /**
@@ -9540,7 +9091,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a primitive at index
      */
     public at(index: number): Number | undefined {
-        return this.at(index as int)
+        return this.at(index.toInt())
     }
 
     /**
@@ -9575,7 +9126,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: number, start: number, end?: number): Float64Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -9590,7 +9141,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: number, end?: number): Float64Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target, start.toInt(), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -9605,7 +9156,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: number, start: int, end?: number): Float64Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target.toInt(), start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -9620,7 +9171,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: int, end?: number): Float64Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this.copyWithin(target, start, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -9645,7 +9196,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: number): Float64Array {
-        return this.copyWithin(target as int)
+        return this.copyWithin(target.toInt())
     }
 
     /**
@@ -9677,7 +9228,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Float64Array
      */
     public fill(value: number, start?: number, end?: number): this {
-        this.fill(value as double, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value.toDouble(), asIntOrDefault(start, 0), asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -9689,19 +9240,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Float64Array
      */
     public fill(value: number, start: int, end?: number): this {
-        this.fill(value as double, start as int, asIntOrDefault(end, this.lengthInt))
-        return this
-    }
-
-    /**
-     * Fills the Float64Array with specified value
-     *
-     * @param value new valuy
-     *
-     * @returns modified Float64Array
-     */
-    public fill(value: number, start: int, end: number): this {
-        this.fill(value as double, start as int, end as int)
+        this.fill(value.toDouble(), start, asIntOrDefault(end, this.lengthInt))
         return this
     }
 
@@ -9713,7 +9252,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns modified Float64Array
      */
     public fill(value: number, start: number, end: int): this {
-        this.fill(value as double, start as int, end as int)
+        this.fill(value.toDouble(), start.toInt(), end)
         return this
     }
 
@@ -9767,12 +9306,12 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: FixedArray<number>, insertPos: number): void {
-        const offset = insertPos as int
+        const offset = insertPos.toInt()
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < arr.length as int; ++i) {
-            this.$_set(offset + i, arr[i] as double)
+        for (let i = 0; i < arr.length.toInt(); ++i) {
+            this.$_set(offset + i, arr[i].toDouble())
         }
     }
 
@@ -9786,11 +9325,11 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: FixedArray<double>, insertPos: int): void {
-        const offset = insertPos as int
+        const offset = insertPos
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < arr.length as int; ++i) {
+        for (let i = 0; i < arr.length.toInt(); ++i) {
             this.$_set(offset + i, arr[i])
         }
     }
@@ -9801,7 +9340,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @param arr array to copy data from
      */
     public set(arr: FixedArray<double>): void {
-        this.set(arr, 0 as int)
+        this.set(arr, 0)
     }
 
     public native set(array: Float64Array): void
@@ -9816,12 +9355,12 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @param offset Optional. The offset into the target array at which to begin writing values from the source array
      */
     public set(array: ArrayLike<number>, offset: number = 0): void {
-        const insertPos = offset as int
+        const insertPos = offset.toInt()
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length - 1 as int; i >= 0; --i) {
-            this.$_set(insertPos + i, array[i] as double)
+        for (let i = array.length.toInt() - 1; i >= 0; --i) {
+            this.$_set(insertPos + i, array[i].toDouble())
         }
     }
 
@@ -9833,7 +9372,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Float64Array
      */
     public static of(...items: FixedArray<number>): Float64Array {
-        let res = new Float64Array(items.length as int)
+        let res = new Float64Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i])
         }
@@ -9848,9 +9387,9 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Float64Array
      */
     public static of(...items: FixedArray<int>): Float64Array {
-        let res = new Float64Array(items.length as int)
+        let res = new Float64Array(items.length.toInt())
         for (let i: int = 0; i < items.length; i++) {
-            res.setUnsafe(i, items[i] as double)
+            res.setUnsafe(i, items[i].toDouble())
         }
         return res
     }
@@ -9863,7 +9402,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Float64Array
      */
     public static of(): Float64Array {
-        return new Float64Array(0 as int)
+        return new Float64Array(0)
     }
 
     /**
@@ -9904,7 +9443,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
                 if (x.done) {
                     return new Float64Array(result.buffer, 0, i)
                 }
-                result.setUnsafe(i, (mapfn)!(x.value!, i) as double)
+                result.setUnsafe(i, (mapfn)!(x.value!, i).toDouble())
             }
             return result
         }
@@ -9924,7 +9463,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
                 }
                 temp = new Float64Array(tb)
             }
-            temp.setUnsafe(index[0], (mapfn)!(x, index[0]) as double)
+            temp.setUnsafe(index[0], (mapfn)!(x, index[0]).toDouble())
             index[0]++
         })
         return new Float64Array(temp.buffer, 0, index[0])
@@ -9946,7 +9485,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            res.setUnsafe(idx[0] as int, mapfn(x as T, idx[0] as number) as double)
+            res.setUnsafe(idx[0], mapfn(x as T, idx[0]).toDouble())
             idx[0] += 1
         })
         return res
@@ -10013,7 +9552,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: int, fromIndex: int): number {
-        return this.indexOfImpl(searchElement as long, fromIndex)
+        return this.indexOfImpl(searchElement.toLong(), fromIndex)
     }
 
     /**
@@ -10140,7 +9679,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: int, fromIndex: int): number {
-        return this.lastIndexOfImpl(searchElement as long, fromIndex)
+        return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
     }
 
     /**
@@ -10211,22 +9750,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): Float64Array {
-        return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
-    }
-
-    /**
-     * Creates a slice of current Float64Array using range [begin, end)
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @param end last index to be taken into slice
-     *
-     * @returns a new Float64Array with elements of current Float64Array[begin;end) where end index is excluded
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
-     */
-    public slice(begin: number, end: number): Float64Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(asIntOrDefault(begin, 0), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -10241,7 +9765,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: number, end: int): Float64Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(begin.toInt(), end)
     }
 
     /**
@@ -10256,7 +9780,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: number): Float64Array {
-        return this.slice(begin as int, end as int)
+        return this.slice(begin, end.toInt())
     }
 
     /**
@@ -10278,19 +9802,8 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        let buf = this.buffer.slice(relStart * Float64Array.BYTES_PER_ELEMENT as int, relEnd * Float64Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+        let buf = this.buffer.slice(relStart * Float64Array.BYTES_PER_ELEMENT.toInt(), relEnd * Float64Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
         return new Float64Array(buf)
-    }
-
-    /**
-     * Creates a slice of current Float64Array using range [begin, this.length).
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @returns a new Float64Array with elements of current Float64Array[begin, this.length)
-     */
-    public slice(begin: number): Float64Array {
-        return this.slice(begin as int)
     }
 
     /**
@@ -10326,21 +9839,8 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float64Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: number, end: number): Float64Array {
-        return this.subarray(begin as int, end as int)
-    }
-
-    /**
-     * Creates a Float64Array with the same underlying ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Float64Array with the same underlying ArrayBuffer
-     */
     public subarray(begin: number, end: int): Float64Array {
-        return this.subarray(begin as int, end as int)
+        return this.subarray(begin.toInt(), end)
     }
 
     /**
@@ -10353,7 +9853,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Float64Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: number): Float64Array {
-        return this.subarray(begin as int, end as int)
+        return this.subarray(begin, end.toInt())
     }
 
     /**
@@ -10373,7 +9873,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        return new Float64Array(this.buffer, relStart * Float64Array.BYTES_PER_ELEMENT as int, count)
+        return new Float64Array(this.buffer, relStart * Float64Array.BYTES_PER_ELEMENT.toInt(), count)
     }
 
     /**
@@ -10384,7 +9884,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Float64Array with the same ArrayBuffer
      */
     public subarray(begin: number): Float64Array {
-        return this.subarray(begin as int, this.lengthInt)
+        return this.subarray(begin.toInt(), this.lengthInt)
     }
 
     /**
@@ -10395,7 +9895,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Float64Array with the same ArrayBuffer
      */
     public subarray(begin: int): Float64Array {
-        return this.subarray(begin as int, this.lengthInt)
+        return this.subarray(begin, this.lengthInt)
     }
 
     /**
@@ -10430,11 +9930,11 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public toLocaleString(): string {
         let res: StringBuilder = new StringBuilder("")
         for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append((this.getUnsafe(i) as Number).toLocaleString())
+            res.append(new Number(this.getUnsafe(i)).toLocaleString())
             res.append(",")
         }
         if (this.lengthInt > 0) {
-            res.append((this.getUnsafe(this.lengthInt - 1) as Number).toLocaleString())
+            res.append(new Number(this.getUnsafe(this.lengthInt - 1))).toLocaleString()
         }
         return res.toString()
     }
@@ -10492,7 +9992,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Float64Array with replaced value on index
      */
     public with(index: number, value: number): Float64Array {
-        return this.with(index as int, value as double)
+        return this.with(index.toInt(), value.toDouble())
     }
 
     /**
@@ -10522,7 +10022,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public findLast(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Float64Array) => boolean =
             (val: number, index: number, array: Float64Array): boolean => { return fn(val) }
-        return this.findLast(newF) as number
+        return (this.findLast(newF)).toDouble()
     }
 
     /**
@@ -10552,8 +10052,13 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let cmp = (l: double, r: double): number => {
-            const result = compareFn!(l as number, r as number)
-            return result
+                return (l - r).toDouble()
+            }
+        if (compareFn != undefined) {
+            cmp = (l: double, r: double): number => {
+                const result = compareFn!((l).toDouble(), (r).toDouble())
+                return result
+            }
         }
         const MAX_SHORT_LENGTH = 24
         if (arr.length > MAX_SHORT_LENGTH) {
@@ -10579,7 +10084,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public some(predicate: (element: number, index: number, array: Float64Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
+            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
                 return true
             }
         }
@@ -10604,7 +10109,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -10626,9 +10131,9 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
-        let accumulatedValue = this.getUnsafe(0) as number
+        let accumulatedValue = (this.getUnsafe(0)).toDouble()
         for (let i = 1; i < this.lengthInt; ++i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -10651,7 +10156,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -10674,9 +10179,9 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
-        let accumulatedValue: number = this.getUnsafe(this.lengthInt - 1) as number
+        let accumulatedValue: number = (this.getUnsafe(this.lengthInt - 1)).toDouble()
         for (let i = this.lengthInt - 2; i >= 0; --i) {
-            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, (this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
         return accumulatedValue
     }
@@ -10689,10 +10194,10 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     * @returns a new Float64Array where for each element from current Float64Array fn was applied
     */
     public map(fn: (val: number, index: number, array: Float64Array) => number): Float64Array {
-        let resBuf = new ArrayBuffer(this.lengthInt * Float64Array.BYTES_PER_ELEMENT as int)
-        let res = new Float64Array(resBuf, 0, resBuf.getByteLength() / Float64Array.BYTES_PER_ELEMENT as int)
+        let resBuf = new ArrayBuffer(this.lengthInt * Float64Array.BYTES_PER_ELEMENT)
+        let res = new Float64Array(resBuf, 0, (resBuf.getByteLength() / Float64Array.BYTES_PER_ELEMENT).toInt())
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn(this.getUnsafe(i) as number, i as number, this) as double)
+            res.set(i, fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this).toDouble())
         }
         return res
     }
@@ -10709,7 +10214,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public every(predicate: (element: number, index: number, array: Float64Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (!predicate(this.getUnsafe(i) as number, i as number, this)) {
+            if (!predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
                 return false
             }
         }
@@ -10727,12 +10232,12 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
-            markers[i] = fn(this.getUnsafe(i) as number, i as number, this)
+            markers[i] = fn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
             if (markers[i]) {
                 ++resLen
             }
         }
-        let resBuf = new ArrayBuffer(resLen * Float64Array.BYTES_PER_ELEMENT as int)
+        let resBuf = new ArrayBuffer(resLen * Float64Array.BYTES_PER_ELEMENT)
         let res = new Float64Array(resBuf, 0)
         for (let i = 0, j = 0; i < this.lengthInt; ++i) {
             if (markers[i]) {
@@ -10756,8 +10261,8 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public find(predicate: (value: number, index: number, obj: Float64Array) => boolean): number | undefined {
         for (let i = 0; i < this.lengthInt; ++i) {
             let val = this.getUnsafe(i)
-            if (predicate(val as number, i as number, this)) {
-                return val as number
+            if (predicate((val).toDouble(), i.toDouble(), this)) {
+                return (val).toDouble()
             }
         }
         return undefined
@@ -10775,11 +10280,11 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public findIndex(predicate: (value: number, index: number, obj: Float64Array) => boolean): number {
         for (let i = 0; i < this.lengthInt; ++i) {
-            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
-                return i as number
+            if (predicate((this.getUnsafe(i)).toDouble(), i.toDouble(), this)) {
+                return i.toDouble()
             }
         }
-        return -1 as number
+        return (-1).toDouble()
     }
 
     /**
@@ -10792,7 +10297,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public findLast(fn: (val: number, index: number, array: Float64Array) => boolean): double {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (fn((val).toDouble(), i.toDouble(), this)) {
                 return val
             }
         }
@@ -10809,11 +10314,11 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public findLastIndex(fn: (val: number, index: number, array: Float64Array) => boolean): number {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (fn((val).toDouble(), i.toDouble(), this)) {
                 return i
             }
         }
-        return -1 as number
+        return (-1).toDouble()
     }
 
     /**
@@ -10826,7 +10331,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public forEach(callbackfn: (value: number, index: number, array: Float64Array) => void): void {
         for (let i = 0; i < this.lengthInt; ++i) {
-            callbackfn(this.getUnsafe(i) as number, i as number, this)
+            callbackfn((this.getUnsafe(i)).toDouble(), i.toDouble(), this)
         }
     }
 
@@ -10842,16 +10347,16 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     private final native getUnsafe(index: int): double
 
     internal setUnsafe(insertPos: int, val: double): void {
-        let startByte = insertPos * Float64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let startByte = insertPos * Float64Array.BYTES_PER_ELEMENT + this.byteOffset.toInt()
         let bits = Double.bitCastToLong(val)
         if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
-                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT.toInt(); ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
                 this.buffer.set(startByte + i, byteVal)
             }
         } else {
-            for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT as int; i++) {
-                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT.toInt(); i++) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
                 this.buffer.set(startByte + 7 - i, byteVal)
             }
         }

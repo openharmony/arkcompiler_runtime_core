@@ -72,6 +72,7 @@ cases:
           function foo(p: Int): int { return 1 }
           function foo(p: int): int { return 2 }
           function foo(p: number): int { return 3 }
+      tags: 'compile-only, negative'
       use: |-
           const b = cond ? 1 : 2  // type of b is int
           assertEQ(typeof b, "number")
@@ -82,6 +83,7 @@ cases:
           function foo(p: Int): int { return 1 }
           function foo(p: int): int { return 2 }
           function foo(p: number): int { return 3 }
+      tags: 'compile-only, negative'
       use: |-
           const b = cond ? 3 : 3.14  // type of b is double
           assertEQ(typeof b, "number")
@@ -101,6 +103,7 @@ cases:
           function foo(p: int): int { return 2 }
           function foo(p: "one"): int { return 3 }
           function foo(p: Int|"one"): int { return 4 }
+      tags: 'compile-only, negative'
       use: |-
           const b = cond ? 1 : "one"  // type of b is "one" | Int
           assertTrue(b instanceof Int|"one")
@@ -111,7 +114,7 @@ cases:
           let a = { name: "John" }  // CTE expected
 
     - tags: 'negative'
-      decl: |- 
+      decl: |-
           let arr = new (Object|undefined)[1];  // inferred array of Error|undefined
       use: |-
           assertEQ(arr[0], new Object[1])

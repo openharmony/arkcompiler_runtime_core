@@ -32,7 +32,7 @@ export let moduleL: char = c'G';
 export let moduleM: byte = 2;
 export let moduleN: short = 10;
 export let moduleO: long = 100;
-export let moduleP: float = 3.14;
+export let moduleP: float = 3.14f;
 export let moduleQ: double = 6.28;
 
 namespace ops {

@@ -25,13 +25,13 @@ class IsIntegerDoubleTest {
 
 function main(): int {
     let ft = new IsIntegerFloatTest();
-    ft.safeInteger = 1.0;
+    ft.safeInteger = 1.0f;
     ft.unsafeInteger = 1.0 as float + Float.MAX_SAFE_INTEGER;
 
     if (Float.isSafeInteger(Float.NaN) != false) return 1;
     if (Float.isSafeInteger(Float.POSITIVE_INFINITY) != false) return 2;
     if (Float.isSafeInteger(Float.NEGATIVE_INFINITY) != false) return 3;
-    if (Float.isSafeInteger(Float.MAX_SAFE_INTEGER as float) != true) return 4;
+    if (Float.isSafeInteger(Float.MAX_SAFE_INTEGER.toFloat()) != true) return 4;
     if (Float.isSafeInteger(ft.safeInteger) != true) return 5;
     if (Float.isSafeInteger(ft.unsafeInteger) != false) return 6;
 

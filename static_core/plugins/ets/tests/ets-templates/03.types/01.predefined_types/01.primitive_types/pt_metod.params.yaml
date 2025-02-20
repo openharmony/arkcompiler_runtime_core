@@ -13,15 +13,15 @@
 
 ---
 primitives:
-  - 'boolean'
-  - 'byte'
-  - 'char'
-  - 'double'
-  - 'float'
-  - 'int'
-  - 'long'
-  - 'number'
-  - 'short'
-  - 'undefined'
-  - 'null'
-  - 'void'
+  - { type: 'boolean' }
+  - { type: 'byte' }
+  - { type: 'char' }
+  - { type: 'double' }
+  - { type: 'float' }
+  - { type: 'int' }
+  - { type: 'long' }
+  - { type: 'number' }
+  - { type: 'short' }
+  - { type: 'undefined', tags: 'compile-only, negative' }
+  - { type: 'null', tags: 'compile-only, negative' }
+  - { type: 'void', tags: 'compile-only, negative' }

@@ -22,7 +22,7 @@ cases:
   - type: long
     use: 1
   - type: float
-    use: 1.0
+    use: 1.0f
   - type: double
     use: 1.0
   - type: char
@@ -38,7 +38,7 @@ cases:
   - type: Long
     use: 1
   - type: Float
-    use: 1.0
+    use: 1.0f
   - type: Double
     use: 1.0
   - type: Char

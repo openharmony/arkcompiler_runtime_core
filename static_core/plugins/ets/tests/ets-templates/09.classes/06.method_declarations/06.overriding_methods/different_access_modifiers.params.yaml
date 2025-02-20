@@ -21,7 +21,7 @@ cases:
         }
 
     - tags: |-
-        compile-only
+        compile-only, negative
       decl: |-
         class A {
             constructor(i: Int) { }

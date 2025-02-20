@@ -112,7 +112,7 @@ public:
 private:
     ObjectPointer<EtsObject> buffer_;
     ObjectPointer<EtsString> name_;
-    EtsDouble bytesPerElement_;
+    EtsInt bytesPerElement_;
     EtsInt byteOffset_;
     EtsInt byteLength_;
     EtsInt lengthInt_;

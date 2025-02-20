@@ -27,10 +27,6 @@ export interface I {
 }
 
 export interface I {
-  foo(a?: number):void;
-}
-
-export interface I {
   setAge(age: number): void;
 }
 

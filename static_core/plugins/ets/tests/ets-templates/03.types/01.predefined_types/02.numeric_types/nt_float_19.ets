@@ -18,8 +18,8 @@ desc: Test floating-point logical operators(false).
 ---*/
 
 function main(): void {
-  let a: float = 10.5;
-  let b = a < 5 ? true : false;
+  let a: float = 10.5f;
+  let b = a < 5f ? true : false;
 
   assertTrue(b === false);
 }

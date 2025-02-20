@@ -21,7 +21,7 @@ tags: [{{c.tags}}]
 
 function main(): int {
   let s: {{c.stype}} = {{c.sval|safe}};
-  let d: {{c.dtype}} = s as {{c.dtype}};
+  let d: {{c.dtype}} = s.to{{c.dtype}}();
   return 0;
 }
 {% endfor %}

@@ -43,7 +43,7 @@ class BuiltinArrayKeysIterator implements IterableIterator<number> {
             this.isDone = true
             return new IteratorResult<number>()
         }
-        return new IteratorResult<number>(this.idx++ as number)
+        return new IteratorResult<number>((this.idx++).toDouble())
     }
 
     override $_iterator(): IterableIterator<number> {
@@ -215,14 +215,14 @@ export function keys<%= ctx.this_generic %>(self: <%= ctx.this_type %>): Iterabl
 function builtin_insertion_sort<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
     for (let i = startIndex + 1; i < endIndex; i++) {
         const tmp = arr[i];
-        if (comp(tmp, arr[startIndex]) as int < 0) {
+        if ((comp(tmp, arr[startIndex]).toInt()) < 0) {
             for (let j = i; j > startIndex; j--) {
                 arr[j] = arr[j - 1]
             }
             arr[startIndex] = tmp
         } else {
             let j = i - 1;
-            while (comp(tmp, arr[j]) as int < 0) {
+            while ((comp(tmp, arr[j]).toInt()) < 0) {
                 arr[j + 1] = arr[j];
                 j--;
             }
@@ -246,7 +246,7 @@ function perform_merge<T>(arr: FixedArray<T>, startIndex: int, midIndex: int, en
     let j = 0;
     let k = startIndex;
     while (i < len1 && j < len2) {
-        if (comp(left[i]!, right[j]!) as int <= 0) {
+        if ((comp(left[i]!, right[j]!).toInt()) <= 0) {
             arr[k] = left[i]!;
             i++;
         } else {
@@ -407,7 +407,7 @@ export function sort_default<T>(arr: FixedArray<T>, arrStr: FixedArray<buffStr>,
 export function reduce<U, T>(self: Array<U>, callbackfn: (previousValue: T, currentValue: U, index: number, array: Array<U>) => T, initialValue: T): T {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }

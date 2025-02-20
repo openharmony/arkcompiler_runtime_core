@@ -27,19 +27,19 @@ vals:
     # 02. Widening to int happens
     - v1: c'\uFFFF'
       v2: c'\uFFFF'
-      exp: "(v1 + v2) as char"
+      exp: "v1 + v2"
       r: c'\uFFFE'
 
     # 03. Widening to int happens
     - v1: c'\uFFFF'
       v2: c'\u0001'
-      exp: "(v1 + v2) as char"
+      exp: "v1 + v2"
       r: c'\u0000'
 
     # 04. Widening to int happens
     - v1: c'\uFFFF'
       v2: c'\u000F'
-      exp: "(v1 + c'\\u000F') as char"
+      exp: "v1 + c'\\u000F'"
       r: c'\u000E'
 
     - v1: c'\u1010'

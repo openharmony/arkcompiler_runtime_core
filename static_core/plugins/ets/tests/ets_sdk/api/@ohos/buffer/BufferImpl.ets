@@ -207,7 +207,7 @@ function testFromArrayBuffer() {
     arktest.assertEQ(buf2.length, 4)
     arktest.assertEQ(buf2.toString('ascii'), "ello")
 
-    const buf3 = buffer.from(arrayBuffer, 1, 2)
+    const buf3 = buffer.from(arrayBuffer as Object, 1 as int, 2 as int)
     arktest.assertEQ(buf3.length, 2)
     arktest.assertEQ(buf3.toString('ascii'), "el")
 }

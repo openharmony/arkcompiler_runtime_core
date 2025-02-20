@@ -15,6 +15,7 @@ limitations under the License.
 
 /*---
 desc: check division by zero for long integer operand
+tags: [negative, compile-only]
 ---*/
 
 function main(): void {

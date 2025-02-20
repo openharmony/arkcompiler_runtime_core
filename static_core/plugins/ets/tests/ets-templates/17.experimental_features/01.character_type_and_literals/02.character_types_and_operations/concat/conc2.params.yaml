@@ -18,11 +18,11 @@ vals:
       res: '"abcd"'
     - expr: "c'a' + 'b' + 'c' + c'd'"
       res: '"abcd"'
-    - expr: "(c'a' + c'b' + c'c' + c'd') as char"
+    - expr: "(c'a' + c'b' + c'c' + c'd').toChar()"
       res: c'Ɗ'
-    - expr: "(c'a' + c'b' + c'c' ) as char + 'd'"
+    - expr: "(c'a' + c'b' + c'c' ).toChar() + 'd'"
       res: '"Ħd"'
-    - expr: "(c'a' + c'b') as char + 'c' + 'd'"
+    - expr: "(c'a' + c'b').toChar() + 'c' + 'd'"
       res: '"Ãcd"'
 
     - expr: "'a' + new Char(c'b') + 'c' + new Char(c'd')"
@@ -31,9 +31,9 @@ vals:
       res: '"abcd"'
     - expr: "new Char(c'a') + 'b' + 'c' + new Char(c'd')"
       res: '"abcd"'
-    - expr: "(new Char(c'a') + new Char(c'b') + new Char(c'c') + new Char(c'd')) as char"
+    - expr: "(new Char(c'a') + new Char(c'b') + new Char(c'c') + new Char(c'd')).toChar()"
       res: c'Ɗ'
-    - expr: "(new Char(c'a') + new Char(c'b') + new Char(c'c')) as char + 'd'"
+    - expr: "(new Char(c'a') + new Char(c'b') + new Char(c'c')).toChar() + 'd'"
       res: '"Ħd"'
-    - expr: "(new Char(c'a') + new Char(c'b')) as char + 'c' + 'd'"
+    - expr: "(new Char(c'a') + new Char(c'b')).toChar() + 'c' + 'd'"
       res: '"Ãcd"'

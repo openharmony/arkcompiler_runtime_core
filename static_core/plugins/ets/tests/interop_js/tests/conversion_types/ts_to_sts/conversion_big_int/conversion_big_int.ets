@@ -26,7 +26,7 @@ function checkConversionBigIntToInt(): boolean {
 }
 
 function checkConversionBigIntToNumber(): boolean {
-    const val = Number(tsBigInt);
+    const val = Number(tsBigInt).toDouble();
 
     return typeof val == 'number';
 }
@@ -56,7 +56,7 @@ function checkConversionBigIntToLong(): boolean {
 }
 
 function checkConversionBigIntToDouble(): boolean {
-    const val = Number(tsBigInt);
+    const val = Number(tsBigInt).toDouble();
 
     return typeof val == 'number';
 }

@@ -21,7 +21,7 @@ function asIntOrDefault(n: Number | undefined, def: int): int {
     if (n === undefined) {
         return def
     }
-    return (n! as Object as Number) as number as int;
+    return (n!).toInt();
 }
 
 function normalizeIndex(idx: int, len: int): int {
@@ -60,7 +60,7 @@ class BuiltinArrayKeysIterator implements IterableIterator<number> {
             this.isDone = true
             return new IteratorResult<number>()
         }
-        return new IteratorResult<number>(this.idx++ as number)
+        return new IteratorResult<number>((this.idx++).toDouble())
     }
 
     override $_iterator(): IterableIterator<number> {
@@ -88,7 +88,7 @@ function cloneArray(self: FixedArray<boolean>): FixedArray<boolean> {
  * Returns undefined if `index` < `-length()` or `index` >= `length()`.
  */
 export function at(self: FixedArray<boolean>, index: number): Boolean | undefined {
-    return at(self, index as int)
+    return at(self, index.toInt())
 }
 
 /**
@@ -105,7 +105,7 @@ export function at(self: FixedArray<boolean>, index: number): Boolean | undefine
 export function concat(self: FixedArray<boolean>, ...items: FixedArray<ConcatArray<boolean>>): FixedArray<boolean> {
     let totalAdd = self.length;
     for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length as int
+        totalAdd += items[i].length.toInt()
     }
 
     const buf : FixedArray<boolean> = new boolean[totalAdd];
@@ -117,7 +117,7 @@ export function concat(self: FixedArray<boolean>, ...items: FixedArray<ConcatArr
     let insertTo = self.length;
     for (let i = 0; i < items.length; i++) {
         const arr = items[i]
-        const len = arr.length as int
+        const len = arr.length.toInt()
         for (let j = 0; j < len; j++) {
             buf[insertTo++] = arr.$_get(j)
         }
@@ -165,7 +165,7 @@ export function at(self: FixedArray<boolean>, index: int): Boolean | undefined {
  * @returns this array after transformation
  */
 export function copyWithin(self: FixedArray<boolean>, target: number, start: number, end?: Number): FixedArray<boolean> {
-    copyWithin(self, target as int, start as int, asIntOrDefault(end, self.length));
+    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
     return self;
 }
 
@@ -287,7 +287,7 @@ export function find(self: FixedArray<boolean>, predicate: (value: boolean, inde
     if (res == -1) {
         return undefined
     }
-    return self[res as int];
+    return self[res.toInt()];
 }
 
 /**
@@ -302,7 +302,7 @@ export function find(self: FixedArray<boolean>, predicate: (value: boolean, inde
  */
 export function findIndex(self: FixedArray<boolean>, predicate: (value: boolean, index: number, array: FixedArray<boolean>) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return i;
         }
     }
@@ -320,7 +320,7 @@ export function findIndex(self: FixedArray<boolean>, predicate: (value: boolean,
 export function findLast(self: FixedArray<boolean>, predicate: (elem: boolean, index: number, array: FixedArray<boolean>) => boolean): Boolean | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (predicate(val, i as number, self)) {
+        if (predicate(val, i.toDouble(), self)) {
             return val;
         }
     }
@@ -338,7 +338,7 @@ export function findLast(self: FixedArray<boolean>, predicate: (elem: boolean, i
  */
 export function every(self: FixedArray<boolean>, predicate: (value: boolean, index: number, array: FixedArray<boolean>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!predicate(self[i], i as number, self)) {
+        if (!predicate(self[i], i.toDouble(), self)) {
             return false
         }
     }
@@ -356,7 +356,7 @@ export function every(self: FixedArray<boolean>, predicate: (value: boolean, ind
  */
 export function some(self: FixedArray<boolean>, predicate: (value: boolean, index: number, array: FixedArray<boolean>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return true
         }
     }
@@ -374,7 +374,7 @@ export function some(self: FixedArray<boolean>, predicate: (value: boolean, inde
  */
 export function findLastIndex(self: FixedArray<boolean>, predicate: (element: boolean, index: number, array: FixedArray<boolean>) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return i
         }
     }
@@ -394,7 +394,7 @@ export function reduce(self: FixedArray<boolean>, callbackfn: (previousValue: bo
     }
     let acc: boolean = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -411,7 +411,7 @@ export function reduce(self: FixedArray<boolean>, callbackfn: (previousValue: bo
 export function reduce<U = boolean>(self: FixedArray<boolean>, callbackfn: (previousValue: U, currentValue: boolean, index: number, array: FixedArray<boolean>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -428,7 +428,7 @@ export function reduce<U = boolean>(self: FixedArray<boolean>, callbackfn: (prev
 export function reduceRight<U>(self: FixedArray<boolean>, callbackfn: (previousValue: U, currentValue: boolean, index: number, array: FixedArray<boolean>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -441,7 +441,7 @@ export function reduceRight<U>(self: FixedArray<boolean>, callbackfn: (previousV
 export function forEach(self: FixedArray<boolean>, callbackfn: (value: boolean, index: number, array: FixedArray<boolean>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        callbackfn(self[i], i as number, self)
+        callbackfn(self[i], i.toDouble(), self)
     }
 }
 
@@ -496,7 +496,7 @@ export function slice(self: FixedArray<boolean>, start: int, end: int): FixedArr
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
 export function slice(self: FixedArray<boolean>, start: int): FixedArray<boolean> {
-    return slice(self, start, Int.MAX_VALUE as int);
+    return slice(self, start, Int.MAX_VALUE);
 }
 
 /**
@@ -650,7 +650,7 @@ export function toSpliced(self: FixedArray<boolean>, start?: Number, delete?: Nu
  */
 export function toSpliced(self: FixedArray<boolean>, start: number, delete: number, ...items: FixedArray<boolean>): FixedArray<boolean> {
     const len = self.length;
-    return toSpliced(self, start as int, delete as int, ...items)
+    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -820,7 +820,7 @@ export function toReversed(self: FixedArray<boolean>): FixedArray<boolean> {
  * @returns a new Array with the element at the given index replaced with the given value
  */
 export function with(self: FixedArray<boolean>, index: number, value: boolean): FixedArray<boolean> {
-    return with(self, index as int, value)
+    return with(self, index.toInt(), value)
 }
 
 /**
@@ -870,7 +870,7 @@ export function map(self: FixedArray<boolean>, callbackfn: (value: boolean, inde
     const len = self.length;
     let res : FixedArray<boolean> = new boolean[len];
     for (let i = 0; i < len; i++) {
-        res[i] = callbackfn(self[i], i as number, self);
+        res[i] = callbackfn(self[i], i.toDouble(), self);
     }
     return res;
 }
@@ -888,7 +888,7 @@ export function reduceRight(self: FixedArray<boolean>, callbackfn: (previousValu
     }
     let acc: boolean = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -996,7 +996,7 @@ class ArrayValuesIterator_boolean implements IterableIterator<boolean> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }
 
@@ -1015,7 +1015,7 @@ class ArrayEntriesIterator_boolean implements IterableIterator<[number, boolean]
             return new IteratorResult<[number, boolean]>()
         }
         const i = this.idx++;
-        const vl: [number, boolean] = [i as number, this.parent[i]]
+        const vl: [number, boolean] = [i.toDouble(), this.parent[i]]
         return new IteratorResult<[number, boolean]>(vl);
     }
 
@@ -1024,7 +1024,7 @@ class ArrayEntriesIterator_boolean implements IterableIterator<[number, boolean]
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }
 
@@ -1048,7 +1048,7 @@ function cloneArray(self: FixedArray<byte>): FixedArray<byte> {
  * Returns undefined if `index` < `-length()` or `index` >= `length()`.
  */
 export function at(self: FixedArray<byte>, index: number): Byte | undefined {
-    return at(self, index as int)
+    return at(self, index.toInt())
 }
 
 /**
@@ -1065,7 +1065,7 @@ export function at(self: FixedArray<byte>, index: number): Byte | undefined {
 export function concat(self: FixedArray<byte>, ...items: FixedArray<ConcatArray<byte>>): FixedArray<byte> {
     let totalAdd = self.length;
     for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length as int
+        totalAdd += items[i].length.toInt()
     }
 
     const buf : FixedArray<byte> = new byte[totalAdd];
@@ -1077,7 +1077,7 @@ export function concat(self: FixedArray<byte>, ...items: FixedArray<ConcatArray<
     let insertTo = self.length;
     for (let i = 0; i < items.length; i++) {
         const arr = items[i]
-        const len = arr.length as int
+        const len = arr.length.toInt()
         for (let j = 0; j < len; j++) {
             buf[insertTo++] = arr.$_get(j)
         }
@@ -1125,7 +1125,7 @@ export function at(self: FixedArray<byte>, index: int): Byte | undefined {
  * @returns this array after transformation
  */
 export function copyWithin(self: FixedArray<byte>, target: number, start: number, end?: Number): FixedArray<byte> {
-    copyWithin(self, target as int, start as int, asIntOrDefault(end, self.length));
+    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
     return self;
 }
 
@@ -1247,7 +1247,7 @@ export function find(self: FixedArray<byte>, predicate: (value: byte, index: num
     if (res == -1) {
         return undefined
     }
-    return self[res as int];
+    return self[res.toInt()];
 }
 
 /**
@@ -1262,7 +1262,7 @@ export function find(self: FixedArray<byte>, predicate: (value: byte, index: num
  */
 export function findIndex(self: FixedArray<byte>, predicate: (value: byte, index: number, array: FixedArray<byte>) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return i;
         }
     }
@@ -1280,7 +1280,7 @@ export function findIndex(self: FixedArray<byte>, predicate: (value: byte, index
 export function findLast(self: FixedArray<byte>, predicate: (elem: byte, index: number, array: FixedArray<byte>) => boolean): Byte | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (predicate(val, i as number, self)) {
+        if (predicate(val, i.toDouble(), self)) {
             return val;
         }
     }
@@ -1298,7 +1298,7 @@ export function findLast(self: FixedArray<byte>, predicate: (elem: byte, index: 
  */
 export function every(self: FixedArray<byte>, predicate: (value: byte, index: number, array: FixedArray<byte>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!predicate(self[i], i as number, self)) {
+        if (!predicate(self[i], i.toDouble(), self)) {
             return false
         }
     }
@@ -1316,7 +1316,7 @@ export function every(self: FixedArray<byte>, predicate: (value: byte, index: nu
  */
 export function some(self: FixedArray<byte>, predicate: (value: byte, index: number, array: FixedArray<byte>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return true
         }
     }
@@ -1334,7 +1334,7 @@ export function some(self: FixedArray<byte>, predicate: (value: byte, index: num
  */
 export function findLastIndex(self: FixedArray<byte>, predicate: (element: byte, index: number, array: FixedArray<byte>) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return i
         }
     }
@@ -1354,7 +1354,7 @@ export function reduce(self: FixedArray<byte>, callbackfn: (previousValue: byte,
     }
     let acc: byte = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -1371,7 +1371,7 @@ export function reduce(self: FixedArray<byte>, callbackfn: (previousValue: byte,
 export function reduce<U = byte>(self: FixedArray<byte>, callbackfn: (previousValue: U, currentValue: byte, index: number, array: FixedArray<byte>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -1388,7 +1388,7 @@ export function reduce<U = byte>(self: FixedArray<byte>, callbackfn: (previousVa
 export function reduceRight<U>(self: FixedArray<byte>, callbackfn: (previousValue: U, currentValue: byte, index: number, array: FixedArray<byte>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -1401,7 +1401,7 @@ export function reduceRight<U>(self: FixedArray<byte>, callbackfn: (previousValu
 export function forEach(self: FixedArray<byte>, callbackfn: (value: byte, index: number, array: FixedArray<byte>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        callbackfn(self[i], i as number, self)
+        callbackfn(self[i], i.toDouble(), self)
     }
 }
 
@@ -1456,7 +1456,7 @@ export function slice(self: FixedArray<byte>, start: int, end: int): FixedArray<
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
 export function slice(self: FixedArray<byte>, start: int): FixedArray<byte> {
-    return slice(self, start, Int.MAX_VALUE as int);
+    return slice(self, start, Int.MAX_VALUE);
 }
 
 /**
@@ -1610,7 +1610,7 @@ export function toSpliced(self: FixedArray<byte>, start?: Number, delete?: Numbe
  */
 export function toSpliced(self: FixedArray<byte>, start: number, delete: number, ...items: FixedArray<byte>): FixedArray<byte> {
     const len = self.length;
-    return toSpliced(self, start as int, delete as int, ...items)
+    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -1780,7 +1780,7 @@ export function toReversed(self: FixedArray<byte>): FixedArray<byte> {
  * @returns a new Array with the element at the given index replaced with the given value
  */
 export function with(self: FixedArray<byte>, index: number, value: byte): FixedArray<byte> {
-    return with(self, index as int, value)
+    return with(self, index.toInt(), value)
 }
 
 /**
@@ -1830,7 +1830,7 @@ export function map(self: FixedArray<byte>, callbackfn: (value: byte, index: num
     const len = self.length;
     let res : FixedArray<byte> = new byte[len];
     for (let i = 0; i < len; i++) {
-        res[i] = callbackfn(self[i], i as number, self);
+        res[i] = callbackfn(self[i], i.toDouble(), self);
     }
     return res;
 }
@@ -1848,7 +1848,7 @@ export function reduceRight(self: FixedArray<byte>, callbackfn: (previousValue: 
     }
     let acc: byte = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -1956,7 +1956,7 @@ class ArrayValuesIterator_byte implements IterableIterator<byte> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }
 
@@ -1975,7 +1975,7 @@ class ArrayEntriesIterator_byte implements IterableIterator<[number, byte]> {
             return new IteratorResult<[number, byte]>()
         }
         const i = this.idx++;
-        const vl: [number, byte] = [i as number, this.parent[i]]
+        const vl: [number, byte] = [i.toDouble(), this.parent[i]]
         return new IteratorResult<[number, byte]>(vl);
     }
 
@@ -1984,7 +1984,7 @@ class ArrayEntriesIterator_byte implements IterableIterator<[number, byte]> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }
 
@@ -2008,7 +2008,7 @@ function cloneArray(self: FixedArray<short>): FixedArray<short> {
  * Returns undefined if `index` < `-length()` or `index` >= `length()`.
  */
 export function at(self: FixedArray<short>, index: number): Short | undefined {
-    return at(self, index as int)
+    return at(self, index.toInt())
 }
 
 /**
@@ -2025,7 +2025,7 @@ export function at(self: FixedArray<short>, index: number): Short | undefined {
 export function concat(self: FixedArray<short>, ...items: FixedArray<ConcatArray<short>>): FixedArray<short> {
     let totalAdd = self.length;
     for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length as int
+        totalAdd += items[i].length.toInt()
     }
 
     const buf : FixedArray<short> = new short[totalAdd];
@@ -2037,7 +2037,7 @@ export function concat(self: FixedArray<short>, ...items: FixedArray<ConcatArray
     let insertTo = self.length;
     for (let i = 0; i < items.length; i++) {
         const arr = items[i]
-        const len = arr.length as int
+        const len = arr.length.toInt()
         for (let j = 0; j < len; j++) {
             buf[insertTo++] = arr.$_get(j)
         }
@@ -2085,7 +2085,7 @@ export function at(self: FixedArray<short>, index: int): Short | undefined {
  * @returns this array after transformation
  */
 export function copyWithin(self: FixedArray<short>, target: number, start: number, end?: Number): FixedArray<short> {
-    copyWithin(self, target as int, start as int, asIntOrDefault(end, self.length));
+    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
     return self;
 }
 
@@ -2207,7 +2207,7 @@ export function find(self: FixedArray<short>, predicate: (value: short, index: n
     if (res == -1) {
         return undefined
     }
-    return self[res as int];
+    return self[res.toInt()];
 }
 
 /**
@@ -2222,7 +2222,7 @@ export function find(self: FixedArray<short>, predicate: (value: short, index: n
  */
 export function findIndex(self: FixedArray<short>, predicate: (value: short, index: number, array: FixedArray<short>) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return i;
         }
     }
@@ -2240,7 +2240,7 @@ export function findIndex(self: FixedArray<short>, predicate: (value: short, ind
 export function findLast(self: FixedArray<short>, predicate: (elem: short, index: number, array: FixedArray<short>) => boolean): Short | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (predicate(val, i as number, self)) {
+        if (predicate(val, i.toDouble(), self)) {
             return val;
         }
     }
@@ -2258,7 +2258,7 @@ export function findLast(self: FixedArray<short>, predicate: (elem: short, index
  */
 export function every(self: FixedArray<short>, predicate: (value: short, index: number, array: FixedArray<short>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!predicate(self[i], i as number, self)) {
+        if (!predicate(self[i], i.toDouble(), self)) {
             return false
         }
     }
@@ -2276,7 +2276,7 @@ export function every(self: FixedArray<short>, predicate: (value: short, index: 
  */
 export function some(self: FixedArray<short>, predicate: (value: short, index: number, array: FixedArray<short>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return true
         }
     }
@@ -2294,7 +2294,7 @@ export function some(self: FixedArray<short>, predicate: (value: short, index: n
  */
 export function findLastIndex(self: FixedArray<short>, predicate: (element: short, index: number, array: FixedArray<short>) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return i
         }
     }
@@ -2314,7 +2314,7 @@ export function reduce(self: FixedArray<short>, callbackfn: (previousValue: shor
     }
     let acc: short = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -2331,7 +2331,7 @@ export function reduce(self: FixedArray<short>, callbackfn: (previousValue: shor
 export function reduce<U = short>(self: FixedArray<short>, callbackfn: (previousValue: U, currentValue: short, index: number, array: FixedArray<short>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -2348,7 +2348,7 @@ export function reduce<U = short>(self: FixedArray<short>, callbackfn: (previous
 export function reduceRight<U>(self: FixedArray<short>, callbackfn: (previousValue: U, currentValue: short, index: number, array: FixedArray<short>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -2361,7 +2361,7 @@ export function reduceRight<U>(self: FixedArray<short>, callbackfn: (previousVal
 export function forEach(self: FixedArray<short>, callbackfn: (value: short, index: number, array: FixedArray<short>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        callbackfn(self[i], i as number, self)
+        callbackfn(self[i], i.toDouble(), self)
     }
 }
 
@@ -2416,7 +2416,7 @@ export function slice(self: FixedArray<short>, start: int, end: int): FixedArray
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
 export function slice(self: FixedArray<short>, start: int): FixedArray<short> {
-    return slice(self, start, Int.MAX_VALUE as int);
+    return slice(self, start, Int.MAX_VALUE);
 }
 
 /**
@@ -2570,7 +2570,7 @@ export function toSpliced(self: FixedArray<short>, start?: Number, delete?: Numb
  */
 export function toSpliced(self: FixedArray<short>, start: number, delete: number, ...items: FixedArray<short>): FixedArray<short> {
     const len = self.length;
-    return toSpliced(self, start as int, delete as int, ...items)
+    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -2740,7 +2740,7 @@ export function toReversed(self: FixedArray<short>): FixedArray<short> {
  * @returns a new Array with the element at the given index replaced with the given value
  */
 export function with(self: FixedArray<short>, index: number, value: short): FixedArray<short> {
-    return with(self, index as int, value)
+    return with(self, index.toInt(), value)
 }
 
 /**
@@ -2790,7 +2790,7 @@ export function map(self: FixedArray<short>, callbackfn: (value: short, index: n
     const len = self.length;
     let res : FixedArray<short> = new short[len];
     for (let i = 0; i < len; i++) {
-        res[i] = callbackfn(self[i], i as number, self);
+        res[i] = callbackfn(self[i], i.toDouble(), self);
     }
     return res;
 }
@@ -2808,7 +2808,7 @@ export function reduceRight(self: FixedArray<short>, callbackfn: (previousValue:
     }
     let acc: short = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -2916,7 +2916,7 @@ class ArrayValuesIterator_short implements IterableIterator<short> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }
 
@@ -2935,7 +2935,7 @@ class ArrayEntriesIterator_short implements IterableIterator<[number, short]> {
             return new IteratorResult<[number, short]>()
         }
         const i = this.idx++;
-        const vl: [number, short] = [i as number, this.parent[i]]
+        const vl: [number, short] = [i.toDouble(), this.parent[i]]
         return new IteratorResult<[number, short]>(vl);
     }
 
@@ -2944,7 +2944,7 @@ class ArrayEntriesIterator_short implements IterableIterator<[number, short]> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }
 
@@ -2968,7 +2968,7 @@ function cloneArray(self: FixedArray<int>): FixedArray<int> {
  * Returns undefined if `index` < `-length()` or `index` >= `length()`.
  */
 export function at(self: FixedArray<int>, index: number): Int | undefined {
-    return at(self, index as int)
+    return at(self, index.toInt())
 }
 
 /**
@@ -2985,7 +2985,7 @@ export function at(self: FixedArray<int>, index: number): Int | undefined {
 export function concat(self: FixedArray<int>, ...items: FixedArray<ConcatArray<int>>): FixedArray<int> {
     let totalAdd = self.length;
     for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length as int
+        totalAdd += items[i].length.toInt()
     }
 
     const buf : FixedArray<int> = new int[totalAdd];
@@ -2997,7 +2997,7 @@ export function concat(self: FixedArray<int>, ...items: FixedArray<ConcatArray<i
     let insertTo = self.length;
     for (let i = 0; i < items.length; i++) {
         const arr = items[i]
-        const len = arr.length as int
+        const len = arr.length.toInt()
         for (let j = 0; j < len; j++) {
             buf[insertTo++] = arr.$_get(j)
         }
@@ -3045,7 +3045,7 @@ export function at(self: FixedArray<int>, index: int): Int | undefined {
  * @returns this array after transformation
  */
 export function copyWithin(self: FixedArray<int>, target: number, start: number, end?: Number): FixedArray<int> {
-    copyWithin(self, target as int, start as int, asIntOrDefault(end, self.length));
+    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
     return self;
 }
 
@@ -3167,7 +3167,7 @@ export function find(self: FixedArray<int>, predicate: (value: int, index: numbe
     if (res == -1) {
         return undefined
     }
-    return self[res as int];
+    return self[res.toInt()];
 }
 
 /**
@@ -3182,7 +3182,7 @@ export function find(self: FixedArray<int>, predicate: (value: int, index: numbe
  */
 export function findIndex(self: FixedArray<int>, predicate: (value: int, index: number, array: FixedArray<int>) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return i;
         }
     }
@@ -3200,7 +3200,7 @@ export function findIndex(self: FixedArray<int>, predicate: (value: int, index: 
 export function findLast(self: FixedArray<int>, predicate: (elem: int, index: number, array: FixedArray<int>) => boolean): Int | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (predicate(val, i as number, self)) {
+        if (predicate(val, i.toDouble(), self)) {
             return val;
         }
     }
@@ -3218,7 +3218,7 @@ export function findLast(self: FixedArray<int>, predicate: (elem: int, index: nu
  */
 export function every(self: FixedArray<int>, predicate: (value: int, index: number, array: FixedArray<int>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!predicate(self[i], i as number, self)) {
+        if (!predicate(self[i], i.toDouble(), self)) {
             return false
         }
     }
@@ -3236,7 +3236,7 @@ export function every(self: FixedArray<int>, predicate: (value: int, index: numb
  */
 export function some(self: FixedArray<int>, predicate: (value: int, index: number, array: FixedArray<int>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return true
         }
     }
@@ -3254,7 +3254,7 @@ export function some(self: FixedArray<int>, predicate: (value: int, index: numbe
  */
 export function findLastIndex(self: FixedArray<int>, predicate: (element: int, index: number, array: FixedArray<int>) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return i
         }
     }
@@ -3274,7 +3274,7 @@ export function reduce(self: FixedArray<int>, callbackfn: (previousValue: int, c
     }
     let acc: int = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -3291,7 +3291,7 @@ export function reduce(self: FixedArray<int>, callbackfn: (previousValue: int, c
 export function reduce<U = int>(self: FixedArray<int>, callbackfn: (previousValue: U, currentValue: int, index: number, array: FixedArray<int>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -3308,7 +3308,7 @@ export function reduce<U = int>(self: FixedArray<int>, callbackfn: (previousValu
 export function reduceRight<U>(self: FixedArray<int>, callbackfn: (previousValue: U, currentValue: int, index: number, array: FixedArray<int>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -3321,7 +3321,7 @@ export function reduceRight<U>(self: FixedArray<int>, callbackfn: (previousValue
 export function forEach(self: FixedArray<int>, callbackfn: (value: int, index: number, array: FixedArray<int>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        callbackfn(self[i], i as number, self)
+        callbackfn(self[i], i.toDouble(), self)
     }
 }
 
@@ -3376,7 +3376,7 @@ export function slice(self: FixedArray<int>, start: int, end: int): FixedArray<i
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
 export function slice(self: FixedArray<int>, start: int): FixedArray<int> {
-    return slice(self, start, Int.MAX_VALUE as int);
+    return slice(self, start, Int.MAX_VALUE);
 }
 
 /**
@@ -3530,7 +3530,7 @@ export function toSpliced(self: FixedArray<int>, start?: Number, delete?: Number
  */
 export function toSpliced(self: FixedArray<int>, start: number, delete: number, ...items: FixedArray<int>): FixedArray<int> {
     const len = self.length;
-    return toSpliced(self, start as int, delete as int, ...items)
+    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -3700,7 +3700,7 @@ export function toReversed(self: FixedArray<int>): FixedArray<int> {
  * @returns a new Array with the element at the given index replaced with the given value
  */
 export function with(self: FixedArray<int>, index: number, value: int): FixedArray<int> {
-    return with(self, index as int, value)
+    return with(self, index.toInt(), value)
 }
 
 /**
@@ -3750,7 +3750,7 @@ export function map(self: FixedArray<int>, callbackfn: (value: int, index: numbe
     const len = self.length;
     let res : FixedArray<int> = new int[len];
     for (let i = 0; i < len; i++) {
-        res[i] = callbackfn(self[i], i as number, self);
+        res[i] = callbackfn(self[i], i.toDouble(), self);
     }
     return res;
 }
@@ -3768,7 +3768,7 @@ export function reduceRight(self: FixedArray<int>, callbackfn: (previousValue: i
     }
     let acc: int = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -3876,7 +3876,7 @@ class ArrayValuesIterator_int implements IterableIterator<int> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }
 
@@ -3895,7 +3895,7 @@ class ArrayEntriesIterator_int implements IterableIterator<[number, int]> {
             return new IteratorResult<[number, int]>()
         }
         const i = this.idx++;
-        const vl: [number, int] = [i as number, this.parent[i]]
+        const vl: [number, int] = [i.toDouble(), this.parent[i]]
         return new IteratorResult<[number, int]>(vl);
     }
 
@@ -3904,7 +3904,7 @@ class ArrayEntriesIterator_int implements IterableIterator<[number, int]> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }
 
@@ -3928,7 +3928,7 @@ function cloneArray(self: FixedArray<long>): FixedArray<long> {
  * Returns undefined if `index` < `-length()` or `index` >= `length()`.
  */
 export function at(self: FixedArray<long>, index: number): Long | undefined {
-    return at(self, index as int)
+    return at(self, index.toInt())
 }
 
 /**
@@ -3945,7 +3945,7 @@ export function at(self: FixedArray<long>, index: number): Long | undefined {
 export function concat(self: FixedArray<long>, ...items: FixedArray<ConcatArray<long>>): FixedArray<long> {
     let totalAdd = self.length;
     for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length as int
+        totalAdd += items[i].length.toInt()
     }
 
     const buf : FixedArray<long> = new long[totalAdd];
@@ -3957,7 +3957,7 @@ export function concat(self: FixedArray<long>, ...items: FixedArray<ConcatArray<
     let insertTo = self.length;
     for (let i = 0; i < items.length; i++) {
         const arr = items[i]
-        const len = arr.length as int
+        const len = arr.length.toInt()
         for (let j = 0; j < len; j++) {
             buf[insertTo++] = arr.$_get(j)
         }
@@ -4005,7 +4005,7 @@ export function at(self: FixedArray<long>, index: int): Long | undefined {
  * @returns this array after transformation
  */
 export function copyWithin(self: FixedArray<long>, target: number, start: number, end?: Number): FixedArray<long> {
-    copyWithin(self, target as int, start as int, asIntOrDefault(end, self.length));
+    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
     return self;
 }
 
@@ -4127,7 +4127,7 @@ export function find(self: FixedArray<long>, predicate: (value: long, index: num
     if (res == -1) {
         return undefined
     }
-    return self[res as int];
+    return self[res.toInt()];
 }
 
 /**
@@ -4142,7 +4142,7 @@ export function find(self: FixedArray<long>, predicate: (value: long, index: num
  */
 export function findIndex(self: FixedArray<long>, predicate: (value: long, index: number, array: FixedArray<long>) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return i;
         }
     }
@@ -4160,7 +4160,7 @@ export function findIndex(self: FixedArray<long>, predicate: (value: long, index
 export function findLast(self: FixedArray<long>, predicate: (elem: long, index: number, array: FixedArray<long>) => boolean): Long | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (predicate(val, i as number, self)) {
+        if (predicate(val, i.toDouble(), self)) {
             return val;
         }
     }
@@ -4178,7 +4178,7 @@ export function findLast(self: FixedArray<long>, predicate: (elem: long, index: 
  */
 export function every(self: FixedArray<long>, predicate: (value: long, index: number, array: FixedArray<long>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!predicate(self[i], i as number, self)) {
+        if (!predicate(self[i], i.toDouble(), self)) {
             return false
         }
     }
@@ -4196,7 +4196,7 @@ export function every(self: FixedArray<long>, predicate: (value: long, index: nu
  */
 export function some(self: FixedArray<long>, predicate: (value: long, index: number, array: FixedArray<long>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return true
         }
     }
@@ -4214,7 +4214,7 @@ export function some(self: FixedArray<long>, predicate: (value: long, index: num
  */
 export function findLastIndex(self: FixedArray<long>, predicate: (element: long, index: number, array: FixedArray<long>) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return i
         }
     }
@@ -4234,7 +4234,7 @@ export function reduce(self: FixedArray<long>, callbackfn: (previousValue: long,
     }
     let acc: long = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -4251,7 +4251,7 @@ export function reduce(self: FixedArray<long>, callbackfn: (previousValue: long,
 export function reduce<U = long>(self: FixedArray<long>, callbackfn: (previousValue: U, currentValue: long, index: number, array: FixedArray<long>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -4268,7 +4268,7 @@ export function reduce<U = long>(self: FixedArray<long>, callbackfn: (previousVa
 export function reduceRight<U>(self: FixedArray<long>, callbackfn: (previousValue: U, currentValue: long, index: number, array: FixedArray<long>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -4281,7 +4281,7 @@ export function reduceRight<U>(self: FixedArray<long>, callbackfn: (previousValu
 export function forEach(self: FixedArray<long>, callbackfn: (value: long, index: number, array: FixedArray<long>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        callbackfn(self[i], i as number, self)
+        callbackfn(self[i], i.toDouble(), self)
     }
 }
 
@@ -4336,7 +4336,7 @@ export function slice(self: FixedArray<long>, start: int, end: int): FixedArray<
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
 export function slice(self: FixedArray<long>, start: int): FixedArray<long> {
-    return slice(self, start, Int.MAX_VALUE as int);
+    return slice(self, start, Int.MAX_VALUE);
 }
 
 /**
@@ -4490,7 +4490,7 @@ export function toSpliced(self: FixedArray<long>, start?: Number, delete?: Numbe
  */
 export function toSpliced(self: FixedArray<long>, start: number, delete: number, ...items: FixedArray<long>): FixedArray<long> {
     const len = self.length;
-    return toSpliced(self, start as int, delete as int, ...items)
+    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -4660,7 +4660,7 @@ export function toReversed(self: FixedArray<long>): FixedArray<long> {
  * @returns a new Array with the element at the given index replaced with the given value
  */
 export function with(self: FixedArray<long>, index: number, value: long): FixedArray<long> {
-    return with(self, index as int, value)
+    return with(self, index.toInt(), value)
 }
 
 /**
@@ -4710,7 +4710,7 @@ export function map(self: FixedArray<long>, callbackfn: (value: long, index: num
     const len = self.length;
     let res : FixedArray<long> = new long[len];
     for (let i = 0; i < len; i++) {
-        res[i] = callbackfn(self[i], i as number, self);
+        res[i] = callbackfn(self[i], i.toDouble(), self);
     }
     return res;
 }
@@ -4728,7 +4728,7 @@ export function reduceRight(self: FixedArray<long>, callbackfn: (previousValue: 
     }
     let acc: long = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -4836,7 +4836,7 @@ class ArrayValuesIterator_long implements IterableIterator<long> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }
 
@@ -4855,7 +4855,7 @@ class ArrayEntriesIterator_long implements IterableIterator<[number, long]> {
             return new IteratorResult<[number, long]>()
         }
         const i = this.idx++;
-        const vl: [number, long] = [i as number, this.parent[i]]
+        const vl: [number, long] = [i.toDouble(), this.parent[i]]
         return new IteratorResult<[number, long]>(vl);
     }
 
@@ -4864,7 +4864,7 @@ class ArrayEntriesIterator_long implements IterableIterator<[number, long]> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }
 
@@ -4888,7 +4888,7 @@ function cloneArray(self: FixedArray<float>): FixedArray<float> {
  * Returns undefined if `index` < `-length()` or `index` >= `length()`.
  */
 export function at(self: FixedArray<float>, index: number): Float | undefined {
-    return at(self, index as int)
+    return at(self, index.toInt())
 }
 
 /**
@@ -4905,7 +4905,7 @@ export function at(self: FixedArray<float>, index: number): Float | undefined {
 export function concat(self: FixedArray<float>, ...items: FixedArray<ConcatArray<float>>): FixedArray<float> {
     let totalAdd = self.length;
     for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length as int
+        totalAdd += items[i].length.toInt()
     }
 
     const buf : FixedArray<float> = new float[totalAdd];
@@ -4917,7 +4917,7 @@ export function concat(self: FixedArray<float>, ...items: FixedArray<ConcatArray
     let insertTo = self.length;
     for (let i = 0; i < items.length; i++) {
         const arr = items[i]
-        const len = arr.length as int
+        const len = arr.length.toInt()
         for (let j = 0; j < len; j++) {
             buf[insertTo++] = arr.$_get(j)
         }
@@ -4965,7 +4965,7 @@ export function at(self: FixedArray<float>, index: int): Float | undefined {
  * @returns this array after transformation
  */
 export function copyWithin(self: FixedArray<float>, target: number, start: number, end?: Number): FixedArray<float> {
-    copyWithin(self, target as int, start as int, asIntOrDefault(end, self.length));
+    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
     return self;
 }
 
@@ -5087,7 +5087,7 @@ export function find(self: FixedArray<float>, predicate: (value: float, index: n
     if (res == -1) {
         return undefined
     }
-    return self[res as int];
+    return self[res.toInt()];
 }
 
 /**
@@ -5102,7 +5102,7 @@ export function find(self: FixedArray<float>, predicate: (value: float, index: n
  */
 export function findIndex(self: FixedArray<float>, predicate: (value: float, index: number, array: FixedArray<float>) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return i;
         }
     }
@@ -5120,7 +5120,7 @@ export function findIndex(self: FixedArray<float>, predicate: (value: float, ind
 export function findLast(self: FixedArray<float>, predicate: (elem: float, index: number, array: FixedArray<float>) => boolean): Float | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (predicate(val, i as number, self)) {
+        if (predicate(val, i.toDouble(), self)) {
             return val;
         }
     }
@@ -5138,7 +5138,7 @@ export function findLast(self: FixedArray<float>, predicate: (elem: float, index
  */
 export function every(self: FixedArray<float>, predicate: (value: float, index: number, array: FixedArray<float>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!predicate(self[i], i as number, self)) {
+        if (!predicate(self[i], i.toDouble(), self)) {
             return false
         }
     }
@@ -5156,7 +5156,7 @@ export function every(self: FixedArray<float>, predicate: (value: float, index: 
  */
 export function some(self: FixedArray<float>, predicate: (value: float, index: number, array: FixedArray<float>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return true
         }
     }
@@ -5174,7 +5174,7 @@ export function some(self: FixedArray<float>, predicate: (value: float, index: n
  */
 export function findLastIndex(self: FixedArray<float>, predicate: (element: float, index: number, array: FixedArray<float>) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return i
         }
     }
@@ -5194,7 +5194,7 @@ export function reduce(self: FixedArray<float>, callbackfn: (previousValue: floa
     }
     let acc: float = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -5211,7 +5211,7 @@ export function reduce(self: FixedArray<float>, callbackfn: (previousValue: floa
 export function reduce<U = float>(self: FixedArray<float>, callbackfn: (previousValue: U, currentValue: float, index: number, array: FixedArray<float>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -5228,7 +5228,7 @@ export function reduce<U = float>(self: FixedArray<float>, callbackfn: (previous
 export function reduceRight<U>(self: FixedArray<float>, callbackfn: (previousValue: U, currentValue: float, index: number, array: FixedArray<float>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -5241,7 +5241,7 @@ export function reduceRight<U>(self: FixedArray<float>, callbackfn: (previousVal
 export function forEach(self: FixedArray<float>, callbackfn: (value: float, index: number, array: FixedArray<float>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        callbackfn(self[i], i as number, self)
+        callbackfn(self[i], i.toDouble(), self)
     }
 }
 
@@ -5296,7 +5296,7 @@ export function slice(self: FixedArray<float>, start: int, end: int): FixedArray
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
 export function slice(self: FixedArray<float>, start: int): FixedArray<float> {
-    return slice(self, start, Int.MAX_VALUE as int);
+    return slice(self, start, Int.MAX_VALUE);
 }
 
 /**
@@ -5450,7 +5450,7 @@ export function toSpliced(self: FixedArray<float>, start?: Number, delete?: Numb
  */
 export function toSpliced(self: FixedArray<float>, start: number, delete: number, ...items: FixedArray<float>): FixedArray<float> {
     const len = self.length;
-    return toSpliced(self, start as int, delete as int, ...items)
+    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -5628,7 +5628,7 @@ export function toReversed(self: FixedArray<float>): FixedArray<float> {
  * @returns a new Array with the element at the given index replaced with the given value
  */
 export function with(self: FixedArray<float>, index: number, value: float): FixedArray<float> {
-    return with(self, index as int, value)
+    return with(self, index.toInt(), value)
 }
 
 /**
@@ -5678,7 +5678,7 @@ export function map(self: FixedArray<float>, callbackfn: (value: float, index: n
     const len = self.length;
     let res : FixedArray<float> = new float[len];
     for (let i = 0; i < len; i++) {
-        res[i] = callbackfn(self[i], i as number, self);
+        res[i] = callbackfn(self[i], i.toDouble(), self);
     }
     return res;
 }
@@ -5696,7 +5696,7 @@ export function reduceRight(self: FixedArray<float>, callbackfn: (previousValue:
     }
     let acc: float = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -5804,7 +5804,7 @@ class ArrayValuesIterator_float implements IterableIterator<float> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }
 
@@ -5823,7 +5823,7 @@ class ArrayEntriesIterator_float implements IterableIterator<[number, float]> {
             return new IteratorResult<[number, float]>()
         }
         const i = this.idx++;
-        const vl: [number, float] = [i as number, this.parent[i]]
+        const vl: [number, float] = [i.toDouble(), this.parent[i]]
         return new IteratorResult<[number, float]>(vl);
     }
 
@@ -5832,7 +5832,7 @@ class ArrayEntriesIterator_float implements IterableIterator<[number, float]> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }
 
@@ -5856,7 +5856,7 @@ function cloneArray(self: FixedArray<double>): FixedArray<double> {
  * Returns undefined if `index` < `-length()` or `index` >= `length()`.
  */
 export function at(self: FixedArray<double>, index: number): Double | undefined {
-    return at(self, index as int)
+    return at(self, index.toInt())
 }
 
 /**
@@ -5873,7 +5873,7 @@ export function at(self: FixedArray<double>, index: number): Double | undefined 
 export function concat(self: FixedArray<double>, ...items: FixedArray<ConcatArray<double>>): FixedArray<double> {
     let totalAdd = self.length;
     for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length as int
+        totalAdd += items[i].length.toInt()
     }
 
     const buf : FixedArray<double> = new double[totalAdd];
@@ -5885,7 +5885,7 @@ export function concat(self: FixedArray<double>, ...items: FixedArray<ConcatArra
     let insertTo = self.length;
     for (let i = 0; i < items.length; i++) {
         const arr = items[i]
-        const len = arr.length as int
+        const len = arr.length.toInt()
         for (let j = 0; j < len; j++) {
             buf[insertTo++] = arr.$_get(j)
         }
@@ -5933,7 +5933,7 @@ export function at(self: FixedArray<double>, index: int): Double | undefined {
  * @returns this array after transformation
  */
 export function copyWithin(self: FixedArray<double>, target: number, start: number, end?: Number): FixedArray<double> {
-    copyWithin(self, target as int, start as int, asIntOrDefault(end, self.length));
+    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
     return self;
 }
 
@@ -6055,7 +6055,7 @@ export function find(self: FixedArray<double>, predicate: (value: double, index:
     if (res == -1) {
         return undefined
     }
-    return self[res as int];
+    return self[res.toInt()];
 }
 
 /**
@@ -6070,7 +6070,7 @@ export function find(self: FixedArray<double>, predicate: (value: double, index:
  */
 export function findIndex(self: FixedArray<double>, predicate: (value: double, index: number, array: FixedArray<double>) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return i;
         }
     }
@@ -6088,7 +6088,7 @@ export function findIndex(self: FixedArray<double>, predicate: (value: double, i
 export function findLast(self: FixedArray<double>, predicate: (elem: double, index: number, array: FixedArray<double>) => boolean): Double | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (predicate(val, i as number, self)) {
+        if (predicate(val, i.toDouble(), self)) {
             return val;
         }
     }
@@ -6106,7 +6106,7 @@ export function findLast(self: FixedArray<double>, predicate: (elem: double, ind
  */
 export function every(self: FixedArray<double>, predicate: (value: double, index: number, array: FixedArray<double>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!predicate(self[i], i as number, self)) {
+        if (!predicate(self[i], i.toDouble(), self)) {
             return false
         }
     }
@@ -6124,7 +6124,7 @@ export function every(self: FixedArray<double>, predicate: (value: double, index
  */
 export function some(self: FixedArray<double>, predicate: (value: double, index: number, array: FixedArray<double>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return true
         }
     }
@@ -6142,7 +6142,7 @@ export function some(self: FixedArray<double>, predicate: (value: double, index:
  */
 export function findLastIndex(self: FixedArray<double>, predicate: (element: double, index: number, array: FixedArray<double>) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return i
         }
     }
@@ -6162,7 +6162,7 @@ export function reduce(self: FixedArray<double>, callbackfn: (previousValue: dou
     }
     let acc: double = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -6179,7 +6179,7 @@ export function reduce(self: FixedArray<double>, callbackfn: (previousValue: dou
 export function reduce<U = double>(self: FixedArray<double>, callbackfn: (previousValue: U, currentValue: double, index: number, array: FixedArray<double>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -6196,7 +6196,7 @@ export function reduce<U = double>(self: FixedArray<double>, callbackfn: (previo
 export function reduceRight<U>(self: FixedArray<double>, callbackfn: (previousValue: U, currentValue: double, index: number, array: FixedArray<double>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -6209,7 +6209,7 @@ export function reduceRight<U>(self: FixedArray<double>, callbackfn: (previousVa
 export function forEach(self: FixedArray<double>, callbackfn: (value: double, index: number, array: FixedArray<double>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        callbackfn(self[i], i as number, self)
+        callbackfn(self[i], i.toDouble(), self)
     }
 }
 
@@ -6264,7 +6264,7 @@ export function slice(self: FixedArray<double>, start: int, end: int): FixedArra
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
 export function slice(self: FixedArray<double>, start: int): FixedArray<double> {
-    return slice(self, start, Int.MAX_VALUE as int);
+    return slice(self, start, Int.MAX_VALUE);
 }
 
 /**
@@ -6418,7 +6418,7 @@ export function toSpliced(self: FixedArray<double>, start?: Number, delete?: Num
  */
 export function toSpliced(self: FixedArray<double>, start: number, delete: number, ...items: FixedArray<double>): FixedArray<double> {
     const len = self.length;
-    return toSpliced(self, start as int, delete as int, ...items)
+    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -6596,7 +6596,7 @@ export function toReversed(self: FixedArray<double>): FixedArray<double> {
  * @returns a new Array with the element at the given index replaced with the given value
  */
 export function with(self: FixedArray<double>, index: number, value: double): FixedArray<double> {
-    return with(self, index as int, value)
+    return with(self, index.toInt(), value)
 }
 
 /**
@@ -6646,7 +6646,7 @@ export function map(self: FixedArray<double>, callbackfn: (value: double, index:
     const len = self.length;
     let res : FixedArray<double> = new double[len];
     for (let i = 0; i < len; i++) {
-        res[i] = callbackfn(self[i], i as number, self);
+        res[i] = callbackfn(self[i], i.toDouble(), self);
     }
     return res;
 }
@@ -6664,7 +6664,7 @@ export function reduceRight(self: FixedArray<double>, callbackfn: (previousValue
     }
     let acc: double = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -6772,7 +6772,7 @@ class ArrayValuesIterator_double implements IterableIterator<double> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }
 
@@ -6791,7 +6791,7 @@ class ArrayEntriesIterator_double implements IterableIterator<[number, double]> 
             return new IteratorResult<[number, double]>()
         }
         const i = this.idx++;
-        const vl: [number, double] = [i as number, this.parent[i]]
+        const vl: [number, double] = [i.toDouble(), this.parent[i]]
         return new IteratorResult<[number, double]>(vl);
     }
 
@@ -6800,7 +6800,7 @@ class ArrayEntriesIterator_double implements IterableIterator<[number, double]> 
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }
 
@@ -6824,7 +6824,7 @@ function cloneArray(self: FixedArray<char>): FixedArray<char> {
  * Returns undefined if `index` < `-length()` or `index` >= `length()`.
  */
 export function at(self: FixedArray<char>, index: number): Char | undefined {
-    return at(self, index as int)
+    return at(self, index.toInt())
 }
 
 /**
@@ -6841,7 +6841,7 @@ export function at(self: FixedArray<char>, index: number): Char | undefined {
 export function concat(self: FixedArray<char>, ...items: FixedArray<ConcatArray<char>>): FixedArray<char> {
     let totalAdd = self.length;
     for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length as int
+        totalAdd += items[i].length.toInt()
     }
 
     const buf : FixedArray<char> = new char[totalAdd];
@@ -6853,7 +6853,7 @@ export function concat(self: FixedArray<char>, ...items: FixedArray<ConcatArray<
     let insertTo = self.length;
     for (let i = 0; i < items.length; i++) {
         const arr = items[i]
-        const len = arr.length as int
+        const len = arr.length.toInt()
         for (let j = 0; j < len; j++) {
             buf[insertTo++] = arr.$_get(j)
         }
@@ -6901,7 +6901,7 @@ export function at(self: FixedArray<char>, index: int): Char | undefined {
  * @returns this array after transformation
  */
 export function copyWithin(self: FixedArray<char>, target: number, start: number, end?: Number): FixedArray<char> {
-    copyWithin(self, target as int, start as int, asIntOrDefault(end, self.length));
+    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
     return self;
 }
 
@@ -7023,7 +7023,7 @@ export function find(self: FixedArray<char>, predicate: (value: char, index: num
     if (res == -1) {
         return undefined
     }
-    return self[res as int];
+    return self[res.toInt()];
 }
 
 /**
@@ -7038,7 +7038,7 @@ export function find(self: FixedArray<char>, predicate: (value: char, index: num
  */
 export function findIndex(self: FixedArray<char>, predicate: (value: char, index: number, array: FixedArray<char>) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return i;
         }
     }
@@ -7056,7 +7056,7 @@ export function findIndex(self: FixedArray<char>, predicate: (value: char, index
 export function findLast(self: FixedArray<char>, predicate: (elem: char, index: number, array: FixedArray<char>) => boolean): Char | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (predicate(val, i as number, self)) {
+        if (predicate(val, i.toDouble(), self)) {
             return val;
         }
     }
@@ -7074,7 +7074,7 @@ export function findLast(self: FixedArray<char>, predicate: (elem: char, index: 
  */
 export function every(self: FixedArray<char>, predicate: (value: char, index: number, array: FixedArray<char>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!predicate(self[i], i as number, self)) {
+        if (!predicate(self[i], i.toDouble(), self)) {
             return false
         }
     }
@@ -7092,7 +7092,7 @@ export function every(self: FixedArray<char>, predicate: (value: char, index: nu
  */
 export function some(self: FixedArray<char>, predicate: (value: char, index: number, array: FixedArray<char>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return true
         }
     }
@@ -7110,7 +7110,7 @@ export function some(self: FixedArray<char>, predicate: (value: char, index: num
  */
 export function findLastIndex(self: FixedArray<char>, predicate: (element: char, index: number, array: FixedArray<char>) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (predicate(self[i], i as number, self)) {
+        if (predicate(self[i], i.toDouble(), self)) {
             return i
         }
     }
@@ -7130,7 +7130,7 @@ export function reduce(self: FixedArray<char>, callbackfn: (previousValue: char,
     }
     let acc: char = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -7147,7 +7147,7 @@ export function reduce(self: FixedArray<char>, callbackfn: (previousValue: char,
 export function reduce<U = char>(self: FixedArray<char>, callbackfn: (previousValue: U, currentValue: char, index: number, array: FixedArray<char>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -7164,7 +7164,7 @@ export function reduce<U = char>(self: FixedArray<char>, callbackfn: (previousVa
 export function reduceRight<U>(self: FixedArray<char>, callbackfn: (previousValue: U, currentValue: char, index: number, array: FixedArray<char>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -7177,7 +7177,7 @@ export function reduceRight<U>(self: FixedArray<char>, callbackfn: (previousValu
 export function forEach(self: FixedArray<char>, callbackfn: (value: char, index: number, array: FixedArray<char>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        callbackfn(self[i], i as number, self)
+        callbackfn(self[i], i.toDouble(), self)
     }
 }
 
@@ -7232,7 +7232,7 @@ export function slice(self: FixedArray<char>, start: int, end: int): FixedArray<
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
 export function slice(self: FixedArray<char>, start: int): FixedArray<char> {
-    return slice(self, start, Int.MAX_VALUE as int);
+    return slice(self, start, Int.MAX_VALUE);
 }
 
 /**
@@ -7386,7 +7386,7 @@ export function toSpliced(self: FixedArray<char>, start?: Number, delete?: Numbe
  */
 export function toSpliced(self: FixedArray<char>, start: number, delete: number, ...items: FixedArray<char>): FixedArray<char> {
     const len = self.length;
-    return toSpliced(self, start as int, delete as int, ...items)
+    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -7556,7 +7556,7 @@ export function toReversed(self: FixedArray<char>): FixedArray<char> {
  * @returns a new Array with the element at the given index replaced with the given value
  */
 export function with(self: FixedArray<char>, index: number, value: char): FixedArray<char> {
-    return with(self, index as int, value)
+    return with(self, index.toInt(), value)
 }
 
 /**
@@ -7606,7 +7606,7 @@ export function map(self: FixedArray<char>, callbackfn: (value: char, index: num
     const len = self.length;
     let res : FixedArray<char> = new char[len];
     for (let i = 0; i < len; i++) {
-        res[i] = callbackfn(self[i], i as number, self);
+        res[i] = callbackfn(self[i], i.toDouble(), self);
     }
     return res;
 }
@@ -7624,7 +7624,7 @@ export function reduceRight(self: FixedArray<char>, callbackfn: (previousValue: 
     }
     let acc: char = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }
@@ -7732,7 +7732,7 @@ class ArrayValuesIterator_char implements IterableIterator<char> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }
 
@@ -7751,7 +7751,7 @@ class ArrayEntriesIterator_char implements IterableIterator<[number, char]> {
             return new IteratorResult<[number, char]>()
         }
         const i = this.idx++;
-        const vl: [number, char] = [i as number, this.parent[i]]
+        const vl: [number, char] = [i.toDouble(), this.parent[i]]
         return new IteratorResult<[number, char]>(vl);
     }
 
@@ -7760,21 +7760,21 @@ class ArrayEntriesIterator_char implements IterableIterator<[number, char]> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length as int
+        return this.parent.length.toInt()
     }
 }
 
 function builtin_insertion_sort<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
     for (let i = startIndex + 1; i < endIndex; i++) {
         const tmp = arr[i];
-        if (comp(tmp, arr[startIndex]) as int < 0) {
+        if ((comp(tmp, arr[startIndex]).toInt()) < 0) {
             for (let j = i; j > startIndex; j--) {
                 arr[j] = arr[j - 1]
             }
             arr[startIndex] = tmp
         } else {
             let j = i - 1;
-            while (comp(tmp, arr[j]) as int < 0) {
+            while ((comp(tmp, arr[j]).toInt()) < 0) {
                 arr[j + 1] = arr[j];
                 j--;
             }
@@ -7798,7 +7798,7 @@ function perform_merge<T>(arr: FixedArray<T>, startIndex: int, midIndex: int, en
     let j = 0;
     let k = startIndex;
     while (i < len1 && j < len2) {
-        if (comp(left[i]!, right[j]!) as int <= 0) {
+        if ((comp(left[i]!, right[j]!).toInt()) <= 0) {
             arr[k] = left[i]!;
             i++;
         } else {
@@ -7959,7 +7959,7 @@ export function sort_default<T>(arr: FixedArray<T>, arrStr: FixedArray<buffStr>,
 export function reduce<U, T>(self: Array<U>, callbackfn: (previousValue: T, currentValue: U, index: number, array: Array<U>) => T, initialValue: T): T {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i.toDouble(), self)
     }
     return acc
 }

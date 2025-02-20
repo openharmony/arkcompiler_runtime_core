@@ -24,7 +24,7 @@ cases:
     - { type: number, val: -0.0000001 }
 
     - { type: Byte, val: new Byte(-128 as byte) }
-    - { type: Short, val: '(Short.MIN_VALUE + 1) as short' }
+    - { type: Short, val: '(Short.MIN_VALUE + 1).toShort()' }
     - { type: Int, val: '42 * 42' }
     - { type: Long, val: 'Long.MAX_VALUE - 1' }
     - { type: Boolean, val: 'true' }

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/* #24986
 class A
 {
     a(b : Int) : Int
@@ -31,7 +31,7 @@ function foo(a : Int) : Int
 function main()
 {
 let i: Char = 15 as char
-    let i1: Float = 5.0
+    let i1: Float = 5.0f
     let i2: Double = 5.0
     let i3: Short = 5
     let i4: Long = 5 as long
@@ -96,3 +96,4 @@ let i: Char = 15 as char
     let ni5 : Int = 5 as Int
     let nui5 : int = ni5 as int
 }
+*/

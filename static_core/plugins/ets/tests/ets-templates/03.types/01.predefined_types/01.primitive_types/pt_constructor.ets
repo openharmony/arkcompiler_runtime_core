@@ -19,11 +19,11 @@ desc: >-
     The predefined value types are called primitive types.
     Primitive types have no methods.
     They only have the operations as referred herein (see Value Types).
-tags: [negative, compile-only]
+tags: [compile-only, negative]
 ---*/
 
 function main() {
-    new {{p}}();
+    new {{p.type}}();
 }
 
 {%- endfor %}

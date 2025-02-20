@@ -17,12 +17,12 @@
     param_init_data_types: {"param1":"FixedArray<float>"} ,
     param_types: {"param1":Float},
     param_nature: {"param1": object},
-    param_list: {"param1": "[(-1) as float, 0 as float, 1 as float, Float.MAX_VALUE as float, Float.MIN_VALUE as float]"},
+    param_list: {"param1": "[-1f, 0f, 1f, Float.MAX_VALUE.toFloat(), Float.MIN_VALUE.toFloat()]"},
     method_return_type: Float,
     expected_data_item_type: Float,
     expected_data_type: "FixedArray<float>",
 
-    expected_test_data: "[(-1) as float, 0 as float, 1 as float, Float.MAX_VALUE as float, Float.MIN_VALUE as float]",
+    expected_test_data: "[-1f, 0f, 1f, Float.MAX_VALUE.toFloat(), Float.MIN_VALUE.toFloat()]",
     verify_test_result_function: compareWrapperObjectValue,
   }
 - {
@@ -31,7 +31,7 @@
     param_init_data_types: {"param1":"FixedArray<float>"},
     param_types: {"param1":Float},
     param_nature: {"param1": object},
-    param_list: {"param1": "[(-1) as float, 0 as float, 1 as float, Float.MAX_SAFE_INTEGER, Float.MAX_SAFE_INTEGER + 1, 12.5 as float, -Float.MAX_SAFE_INTEGER, (-Float.MAX_SAFE_INTEGER - 1)]"},
+    param_list: {"param1": "[-1f, 0f, 1f, Float.MAX_SAFE_INTEGER, Float.MAX_SAFE_INTEGER + 1, 12.5f, -Float.MAX_SAFE_INTEGER, (-Float.MAX_SAFE_INTEGER - 1)]"},
     method_return_type: boolean,
     expected_data_item_type: boolean,
     expected_data_type: "FixedArray<boolean>",

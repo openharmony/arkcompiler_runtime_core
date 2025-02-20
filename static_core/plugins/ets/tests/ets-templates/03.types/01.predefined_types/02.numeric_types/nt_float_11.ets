@@ -18,8 +18,8 @@ desc: Test floating-point number operators(% !=0).
 ---*/
 
 function main(): void {
-  let a: float = 12.5;
-  let b: float = 3.5;
+  let a: float = 12.5f;
+  let b: float = 3.5f;
   let c = a % b;
 
   assertTrue(c === 2.0);

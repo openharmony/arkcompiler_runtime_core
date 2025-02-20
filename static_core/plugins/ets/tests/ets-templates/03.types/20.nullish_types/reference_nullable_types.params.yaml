@@ -22,7 +22,7 @@ nullables:
   - {type: "Int|null", value: "null"}
   - {type: "Long|null", value: "5 as long"}
   - {type: "Long|null", value: "null"}
-  - {type: "Float|null", value: "5.0"}
+  - {type: "Float|null", value: "5.0f"}
   - {type: "Float|null", value: "null"}
   - {type: "Double|null", value: "5.0"}
   - {type: "Double|null", value: "null"}
@@ -40,7 +40,7 @@ nullables:
   - {type: "Int|undefined", value: "undefined"}
   - {type: "Long|undefined", value: "5 as long"}
   - {type: "Long|undefined", value: "undefined"}
-  - {type: "Float|undefined", value: "5.0"}
+  - {type: "Float|undefined", value: "5.0f"}
   - {type: "Float|undefined", value: "undefined"}
   - {type: "Double|undefined", value: "5.0"}
   - {type: "Double|undefined", value: "undefined"}
@@ -58,7 +58,7 @@ nullables:
   - {type: "Int|undefined|null", value: "undefined"}
   - {type: "Long|undefined|null", value: "5 as long"}
   - {type: "Long|undefined|null", value: "undefined"}
-  - {type: "Float|undefined|null", value: "5.0"}
+  - {type: "Float|undefined|null", value: "5.0f"}
   - {type: "Float|undefined|null", value: "undefined"}
   - {type: "Double|undefined|null", value: "5.0"}
   - {type: "Double|undefined|null", value: "undefined"}

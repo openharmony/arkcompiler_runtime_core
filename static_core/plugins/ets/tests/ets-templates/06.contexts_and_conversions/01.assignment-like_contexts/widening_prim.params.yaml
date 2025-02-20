@@ -68,13 +68,13 @@ cases:
   - { src_type: long, src_val: 9223372036854775807, dst_type: double, dst_val: 9.223372036854776e18 }
   - { src_type: long, src_val: -9223372036854775808, dst_type: double, dst_val: -9.223372036854776e18 }
 
-  - { src_type: float, src_val: -0.0, dst_type: double, dst_val: -0.0 }
-  - { src_type: float, src_val: +0.0, dst_type: double, dst_val: +0.0 }
+  - { src_type: float, src_val: -0.0f, dst_type: double, dst_val: -0.0 }
+  - { src_type: float, src_val: +0.0f, dst_type: double, dst_val: +0.0 }
     # +max
-  - { src_type: float, src_val: 3.4028234663852886e38, dst_type: double, dst_val: 3.4028234663852886e38 }
+  - { src_type: float, src_val: 3.4028234663852886e38f, dst_type: double, dst_val: 3.4028234663852886e38 }
     # +min
-  - { src_type: float, src_val: 1.401298464324817e-45, dst_type: double, dst_val: 1.401298464324817e-45 }
+  - { src_type: float, src_val: 1.401298464324817e-45f, dst_type: double, dst_val: 1.401298464324817e-45 }
     # -max
-  - { src_type: float, src_val: -3.4028234663852886e38, dst_type: double, dst_val: -3.4028234663852886e38 }
+  - { src_type: float, src_val: -3.4028234663852886e38f, dst_type: double, dst_val: -3.4028234663852886e38 }
     # -min
-  - { src_type: float, src_val: -1.401298464324817e-45, dst_type: double, dst_val: -1.401298464324817e-45 }
+  - { src_type: float, src_val: -1.401298464324817e-45f, dst_type: double, dst_val: -1.401298464324817e-45 }

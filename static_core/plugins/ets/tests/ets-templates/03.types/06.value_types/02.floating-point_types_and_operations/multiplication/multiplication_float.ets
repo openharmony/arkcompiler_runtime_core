@@ -19,9 +19,9 @@ desc: check addition of two floats
 ---*/
 
 function main(): void {
-    const a: float = {{v.left}} as float
-    const b: float = {{v.right}} as float
-    const v: float = {{v.result}} as float
+    const a: float = ( {{v.left}} ).toFloat()
+    const b: float = ( {{v.right}} ).toFloat()
+    const v: float = ( {{v.result}} ).toFloat()
     const r: float = a * b
     if (Float.isNaN(v)) {
         assertTrue(Float.isNaN(r))

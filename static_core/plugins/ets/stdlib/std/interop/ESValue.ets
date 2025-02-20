@@ -248,7 +248,7 @@ export final class ESValue {
 
     public getProperty(index: number): ESValue {
         if (Number.isInteger(index) && index >= 0) {
-            return new ESValue(JSRuntime.getElementJSValue(this.ev, index as int));
+            return new ESValue(JSRuntime.getElementJSValue(this.ev, index.toInt()));
         }
         let numObj = ESValue.wrapNumber(index);
         return this.getProperty(numObj);
@@ -266,7 +266,7 @@ export final class ESValue {
     }
 
     public getPropertySafe(index: number): ESValue {
-        if (JSRuntime.hasElement(this.ev, index as int)) {
+        if (JSRuntime.hasElement(this.ev, index.toInt())) {
             return this.getProperty(index);
         }
         return ESValue.Undefined;
@@ -289,10 +289,10 @@ export final class ESValue {
 
     public setProperty(index: number, value: StaticOrESValue): void {
         if (value instanceof ESValue) {
-            JSRuntime.setElementJSValue(this.ev, index as int, (value as ESValue).ev);
+            JSRuntime.setElementJSValue(this.ev, index.toInt(), (value as ESValue).ev);
             return;
         }
-        JSRuntime.setElementJSValue(this.ev, index as int, ESValue.wrap(value).ev);
+        JSRuntime.setElementJSValue(this.ev, index.toInt(), ESValue.wrap(value).ev);
     }
 
     public setProperty(property: ESValue, value: StaticOrESValue): void {

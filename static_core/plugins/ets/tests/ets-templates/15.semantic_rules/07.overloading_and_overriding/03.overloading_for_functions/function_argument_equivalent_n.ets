@@ -17,6 +17,7 @@ limitations under the License.
 desc: >-
     The correctness check for functions overloading is performed if two or more functions with the same name are acces-
     sible (see Accessible) in a scope (see Scopes).
+tags: [compile-only, negative]
 ---*/
 
 let res: number = 0;

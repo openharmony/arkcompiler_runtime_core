@@ -22,5 +22,5 @@ function getReferenceTuple(): [String, double[], String] {
 }
 
 function getTestPrimitiveTuple(): [boolean, char, byte, short, int, long, float, double] {
-    return [true, c'x', 127, 300, 500, 600, 100.0, 400.0];
+    return [true, c'x', 127, 300, 500, 600, 100.0f, 400.0];
 }

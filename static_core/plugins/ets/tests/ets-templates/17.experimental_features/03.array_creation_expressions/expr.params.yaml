@@ -49,7 +49,7 @@ cases:
             assertTrue( v[0] instanceof Byte && v[0] == 42 )
 
     - use: |-
-          let size: float = 1.0  // narrowing dimension conversion
+          let size: float = 1.0f  // narrowing dimension conversion
           let v: Byte[] = new Byte[size]
 
           v[0] = new Byte(42 as byte)
@@ -100,8 +100,8 @@ cases:
           assertEQ( v[size1 - 1][size2 - 1][size3 - 1], "abc" )
 
     - use: |-
-          let size: char = c'A'  // widening conversion
-          let v: char[] = new char[size]
+          let size: Char = c'A'  // widening conversion
+          let v: Char[] = new Char[size.toInt()]
 
           v[0] = c'X'
           assertEQ( v[0], c'X' )

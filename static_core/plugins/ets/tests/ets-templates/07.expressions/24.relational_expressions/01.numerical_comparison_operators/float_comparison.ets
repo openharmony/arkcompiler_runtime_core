@@ -20,9 +20,9 @@ desc: Integer comparison {{fc.xvalue}} {{fc.op}} {{fc.yvalue}}
 ---*/
 
 function main(): void {
-  let x: {{fc.xtype}} = {{fc.xvalue}} as {{fc.xtype}};
+  let x: {{fc.xtype}} = {{fc.xvalue}}.to{{fc.xboxed}}();
   let bx: {{fc.xboxed}} = new {{fc.xboxed}}(x);
-  let y: {{fc.ytype}} = {{fc.yvalue}} as {{fc.ytype}};
+  let y: {{fc.ytype}} = {{fc.yvalue}}.to{{fc.yboxed}}();
   let by: {{fc.yboxed}} = new {{fc.yboxed}}(y);
   assertEQ( (x {{fc.op}} y), {{fc.result}} )
   assertEQ( (bx {{fc.op}} by), {{fc.result}} )

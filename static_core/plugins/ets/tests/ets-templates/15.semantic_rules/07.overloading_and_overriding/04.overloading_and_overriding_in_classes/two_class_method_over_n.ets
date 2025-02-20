@@ -59,7 +59,7 @@ class Derived2<T,S> extends Base<T,S> {
 function main(): void {
   let a = new Derived<String, Number>();
   let b = new Derived2<String, Number>();
-  let c: TPL = [ false, 1.2];
+  let c: TPL = [ false, 1.2f];
   b.foo({{c.call}}); // base instance method call
   assertEQ( res, 100 + {{c.res}} );
   a.foo({{c.call}}); // derived instance method call

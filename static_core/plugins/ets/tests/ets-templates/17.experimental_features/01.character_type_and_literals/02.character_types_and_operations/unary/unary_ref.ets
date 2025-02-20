@@ -21,12 +21,12 @@ desc: >-
 
 function minus(p: Char): Char {
     // Widening to int happens
-    return -p as Char
+    return (-p).toChar()
 }
 
 function plus(p: Char): Char {
     // Widening to int happens
-    return +p as Char
+    return (+p).toChar()
 }
 
 function main() {

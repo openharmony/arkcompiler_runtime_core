@@ -22,14 +22,11 @@ params: from {{c.from_type}} to {{c.to_type}}
 let d{{loop.index}}: {{c.to_type}}
 {%- endfor %}
 
-function main(): int {
+function main() {
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
     d{{loop.index}} = s{{loop.index}}
-    if (d{{loop.index}} != {{t.val}}) {
-        return 1
-    }
+    assertEQ(d{{loop.index}}, {{t.val}}, "Assert fails on item {{loop.index}}")
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

@@ -16,7 +16,7 @@
 let r1 = Promise.reject<string>(new Error('rejected 0'))
 let r2 = Promise.reject<string>(new Error('rejected 1'));
 let r3 = Promise.reject<string>(new Error('rejected 2'));
-Promise.allSettled([r1, r2, r3]).then<void, void>((values: PromiseSettledResult<string>[]): void => {
+Promise.allSettled([r1, r2, r3]).then<void, void>((values): void => {
     if (values.length != 3) {
         console.log('Test failed. Expected a string array of length 3 but got length ' + values.length + '.');
         return;

@@ -34,7 +34,7 @@ function wait(): int {
 function pusherInt() {
     for (let i = 0; i < elementsNum; i++) {
         wait();
-        let el = (random() * 10000) as int;
+        let el = (random() * 10000).toInt();
         testArrayInt[i] = el;
         queueInt.push(el);
     }
@@ -136,7 +136,7 @@ function concurrentPushPopTestStr() {
 function simpleQueuePushPopFrontBackSizeEmptyTest() {
     let arr: Array<int> = new Array<int>(elementsNum);
     for (let i: int = 0; i < arr.length; ++i) {
-        let el = (random() * 10000) as int;
+        let el = (random() * 10000).toInt();
         arr[i] = el;
         queueInt.push(el);
         assertEQ(el, (queueInt as ArrayBlockingQueue<int>).getEnd());

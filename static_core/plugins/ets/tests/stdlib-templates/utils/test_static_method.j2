@@ -26,12 +26,12 @@ function main(): int {
   let max_test : int = {{.item.max_attempt}}
 {%- else %}
 {% if item.param_list | length > 0 %}
-   let max_step : int = TEST_DATA_{{.item.param_list.keys()|first|upper}}.length as int;
+   let max_step : int = TEST_DATA_{{.item.param_list.keys()|first|upper}}.length.toInt();
 {% else %}
-  let max_step : int = TEST_DATA_EXPECTED.length as int;
+  let max_step : int = TEST_DATA_EXPECTED.length.toInt();
 {%- endif %}
 {%- endif %}
-  let max_test : int = TEST_DATA_EXPECTED.length as int;
+  let max_test : int = TEST_DATA_EXPECTED.length.toInt();
   let passed_counter : int = 0;
   for (let i = 0; i < max_step; i++) {
 {%- for number, param in item.param_list.items() %}

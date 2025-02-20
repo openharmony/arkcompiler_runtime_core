@@ -104,3 +104,7 @@ cases:
           public constructor (a: Int[]) {}
           public constructor (b: T1) {}
       }
+
+  - decl: |-
+        function foo(a: int) {}
+        function foo(a: Int) {}

@@ -27,19 +27,18 @@ class C {
 
 function erasedM(recv: NullishType, args: FixedArray<NullishType>): NullishType {
 	assertEQ( args.length, 1)
-	return (args[0] as string) + "123" + (recv as C).dat
+	return (args[0]?.toString()) + "123" + (recv as C).dat
 }
 
 function erased(recv: NullishType, args: FixedArray<NullishType>): NullishType {
 	assertEQ( args.length, 3)
-	const a1: int = args[0] as Int
-	const a2: long = args[1] as Long
-	const c: boolean = args[2] as Boolean
+	const a1: int = args[0] as int
+	const a2: long = args[1] as long
+	const c: boolean = args[2] as boolean
 	if (c) {
-		const r = a1 as long
-		return r as Long
+		return a1.toLong()
 	} else {
-		return a2 as Long
+		return a2
 	}
 }
 

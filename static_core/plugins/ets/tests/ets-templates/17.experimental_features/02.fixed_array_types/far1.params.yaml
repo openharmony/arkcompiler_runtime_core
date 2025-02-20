@@ -90,7 +90,7 @@ cases:
           let obj: Object = toObj(x)
           let arr = obj as FixedArray<char>
           let v: char = arr[0]
-          arr[1] = (arr[1] + v) as char
+          arr[1] = (arr[1] + v).toChar()
           assertEQ(arr[1], 195)
 
     - decl: |-

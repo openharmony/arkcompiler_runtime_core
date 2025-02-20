@@ -58,18 +58,18 @@ function uber_reserve38(cond: boolean) : string
         switch (i) {
             case 0:
                 sb.append(i)
-                sb.append((i as Number).toString())
-                sb.append(i as number)
-                sb.append(i as long)
+                sb.append((i.toDouble()).toString())
+                sb.append(i.toDouble().toString())
+                sb.append(i.toLong().toString())
                 sb.append("-")
             break
             case 1:
                 sb.append(i)
                 if (cond)
-                    sb.append((i as Number).toString())
+                    sb.append((i.toDouble()).toString())
                 else
-                    sb.append(i as number)
-                sb.append(i as long)
+                    sb.append(i.toDouble().toString())
+                sb.append(i.toLong().toString())
                 sb.append("-")
             break
             case 2:

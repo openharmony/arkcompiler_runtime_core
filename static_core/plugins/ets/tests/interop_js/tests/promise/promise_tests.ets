@@ -478,7 +478,7 @@ async function testAsyncLong(): Promise<long> {
 }
 
 async function testAsyncFloat(): Promise<float> {
-    let x: float = 3.14;
+    let x: float = 3.14f;
     return x;
 }
 

@@ -32,7 +32,7 @@ function main(): int {
             assertEQ(el, queueInt.pop());
         }
         for (let i: int = 0; i < elementsNum; ++i) {
-            let el = (random() * 10000) as int;
+            let el = (random() * 10000).toInt();
             queueInt.push(el);
             assertEQ(el, queueInt.getEnd());
         }

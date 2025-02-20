@@ -25,7 +25,7 @@
  * Returns undefined if `index` < `-length()` or `index` >= `length()`.
  */
 <%= access_public %> <%= override %> at<%= this_generic %>(<%= this_arg %>index: number): <%= el_type_boxed %> | undefined {
-    return <%= this_call.('at') %>index as int)
+    return <%= this_call.('at') %>index.toInt())
 }
 
 /**
@@ -42,7 +42,7 @@
 <%= access_public %> concat<%= this_generic %>(<%= this_arg %>...items: FixedArray<ConcatArray<<%= el_type %>>>): <%= this_type %> {
     let totalAdd = <%= this_len_int %>;
     for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length as int
+        totalAdd += items[i].length.toInt()
     }
 
     const buf : <%= make_fixed_array %> = <%= make_buffer.('totalAdd') %>;
@@ -54,7 +54,7 @@
     let insertTo = <%= this_len_int %>;
     for (let i = 0; i < items.length; i++) {
         const arr = items[i]
-        const len = arr.length as int
+        const len = arr.length.toInt()
         for (let j = 0; j < len; j++) {
             buf[insertTo++] = arr.$_get(j)
         }
@@ -102,7 +102,7 @@
  * @returns this array after transformation
  */
 <%= access_public %> copyWithin<%= this_generic %>(<%= this_arg %>target: number, start: number, end?: Number): <%= this_return_type %> {
-    <%= this_call.('copyWithin') %>target as int, start as int, asIntOrDefault(end, <%= this_len_int %>));
+    <%= this_call.('copyWithin') %>target.toInt(), start.toInt(), asIntOrDefault(end, <%= this_len_int %>));
     return <%= this %>;
 }
 
@@ -231,7 +231,7 @@
     if (res == -1) {
         return undefined
     }
-    return <%= get_unsafe.(this, 'res as int') %>;
+    return <%= get_unsafe.(this, 'res.toInt()') %>;
 }
 
 /**
@@ -444,7 +444,7 @@
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
 <%= access_public %> slice<%= this_generic %>(<%= this_arg %>start: int): <%= this_type %> {
-    return <%= this_call.('slice') %>start, Int.MAX_VALUE as int);
+    return <%= this_call.('slice') %>start, Int.MAX_VALUE);
 }
 
 <% if access_public == "export function" %><% #generate code for BuiltinArray.ets %>
@@ -708,7 +708,7 @@ private joinObject(sep?: String): string {
  */
 <%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start: number, delete: number, ...items: FixedArray<<%= el_type %>>): <%= this_type %> {
     const len = <%= this_len_int %>;
-    return <%= this_call.('toSpliced') %>start as int, delete as int, ...items)
+    return <%= this_call.('toSpliced') %>start.toInt(), delete.toInt(), ...items)
 }
 
 /**
@@ -923,7 +923,7 @@ private joinObject(sep?: String): string {
  * @returns a new Array with the element at the given index replaced with the given value
  */
 <%= access_public %> with<%= this_generic %>(<%= this_arg %>index: number, value: <%= el_type %>): <%= this_type %> {
-    return <%= this_call.('with') %>index as int, value)
+    return <%= this_call.('with') %>index.toInt(), value)
 }
 
 /**

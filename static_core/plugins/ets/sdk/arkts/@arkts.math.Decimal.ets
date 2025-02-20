@@ -1310,7 +1310,7 @@ export class Decimal {
                 n += '0';
             }
             s = Math.sqrt(Utils.toNumber(n));
-            e = Math.floor((e + 1) / 2) - ((e < 0 ? 1 : 0) || e % 2 );
+            e = Math.floor((e + 1) / 2) - (e < 0 ? 1 : e % 2 );
             if (s == Infinity) {
                 n = '5e' + e;
             } else {
@@ -1365,10 +1365,10 @@ export class Decimal {
             return new Decimal(x);
         }
         external = false;
-        
+
         // Initial estimate.
         let s: number = x.s * Math.pow(x.s * x.toNumber(), 1 / 3);
-        
+
         // Math.cbrt underflow/overflow?
         // Pass x to Math.pow as integer, then adjust the exponent of the result.
         let n: string = '';
@@ -1377,31 +1377,31 @@ export class Decimal {
         if (!s || Math.abs(s) == Infinity) {
             n = Utils.digitsToString(x.d!);
             e = x.e;
-        
+
             // Adjust n exponent so it is a multiple of 3 away from x exponent.
             if (s = (e - n.length + 1) % 3) {
                 n += (s == 1 || s == -2 ? '0' : '00');
             }
             s = Math.pow(Utils.toNumber(n), 1 / 3);
-        
+
             // Rarely, e may be one less than the result exponent value.
             e = Math.floor((e + 1) / 3) - ((e % 3 == (e < 0 ? -1 : 2)) ? 1 : 0);
-        
+
             if (s == Infinity) {
                 n = '5e' + e;
             } else {
                 n = Utils.toExponential(s);
                 n = n.slice(0, n.indexOf('e') + 1) + e;
             }
-        
+
             r = new Decimal(n);
             r.sign = x.s;
         } else {
             r = new Decimal(s);
         }
-        
+
         let sd = (e = Decimal.precision) + 3;
-        
+
         // Halley's method. Compare Newton's method.
         let rep: number = 0;
         let m: boolean = false;
@@ -1587,7 +1587,7 @@ export class Decimal {
 
         k = Math.pow(+x.toNumber(), yn);
         e = k == 0 || !isFinite(k)
-            ? Math.floor(yn * (Math.log(Utils.toNumber('0.' + Utils.digitsToString(x.d!))) / Math.LN10 + x.e + 1))
+            ? Math.floor(yn * (Math.log(Utils.toNumber('0.' + Utils.digitsToString(x.d!))) / Utils.toNumber(LN10) + x.e + 1))
             : new Decimal(k + '').e;
 
         if (e > Decimal.maxE + 1 || e < Decimal.minE - 1) {
@@ -1735,20 +1735,20 @@ export class Decimal {
         if (!x.d) {
             return new Decimal(NaN);
         }
-    
+
         if (!x.d![0]) {
             return new Decimal(1);
         }
-    
+
         let pr = Decimal.precision;
         let rm = Decimal.rounding;
         Decimal.precision = pr + Math.max(this.e, x.precision()) + LOG_BASE;
         Decimal.rounding = 1;
-        
+
         x = this.cosine(this.toLessThanHalfPi(x));
         Decimal.precision = pr;
         Decimal.rounding = rm;
-        
+
         return Utils.finalise(Decimal.quadrant == 2 || Decimal.quadrant == 3 ? x.negate() : x, pr, rm, true);
     }
 
@@ -1765,17 +1765,17 @@ export class Decimal {
         if (x.isZero()) {
             return new Decimal(x);
         }
-        
+
         let pr = Decimal.precision;
         let rm = Decimal.rounding;
         Decimal.precision = pr + Math.max(x.e, x.precision()) + LOG_BASE;
         Decimal.rounding = 1;
-        
+
         x = this.sine(this.toLessThanHalfPi(x));
-        
+
         Decimal.precision = pr;
         Decimal.rounding = rm;
-        
+
         return Utils.finalise(Decimal.quadrant > 2 ? x.negate() : x, pr, rm, true);
     }
 
@@ -1792,19 +1792,19 @@ export class Decimal {
         if (x.isZero()) {
             return new Decimal(x);
         }
-        
+
         let pr = Decimal.precision;
         let rm = Decimal.rounding;
         Decimal.precision = pr + 10;
         Decimal.rounding = 1;
-        
+
         x = x.sin();
         x.sign = 1;
         x = Utils.divide(x, new Decimal(1).sub(x.mul(x)).sqrt(), pr + 10, 0);
-        
+
         Decimal.precision = pr;
         Decimal.rounding = rm;
-        
+
         return Utils.finalise(Decimal.quadrant == 2 || Decimal.quadrant == 4 ? x.negate() : x, pr, rm, true);
     }
 
@@ -1823,16 +1823,16 @@ export class Decimal {
         if (x.isZero()) {
             return one;
         }
-        
+
         let pr = Decimal.precision;
         let rm = Decimal.rounding;
         Decimal.precision = pr + Math.max(x.e, x.precision()) + 4;
         Decimal.rounding = 1;
         let len = x.d!.length;
-        
+
         // Argument reduction: cos(4x) = 1 - 8cos^2(x) + 8cos^4(x) + 1
         // i.e. cos(x) = 1 - cos^2(x/4)(8 - 8cos^2(x/4))
-        
+
         // Estimate the optimum number of times to use the argument reduction.
         let k: number = 0;
         let n: string = '';
@@ -1843,9 +1843,9 @@ export class Decimal {
             k = 16;
             n = '2.3283064365386962890625e-10';
         }
-        
+
         x = this.taylorSeries(1, x.mul(n), new Decimal(1), true);
-        
+
         // Reverse argument reduction
         let i = k;
         let d8 = new Decimal(8);
@@ -1853,7 +1853,7 @@ export class Decimal {
             let cosh2_x = x.mul(x);
             x = one.sub(cosh2_x.mul(d8.sub(cosh2_x.mul(d8))));
         }
-        
+
         return Utils.finalise(x, Decimal.precision = pr, Decimal.rounding = rm, true);
     }
 
@@ -1867,13 +1867,13 @@ export class Decimal {
         if (!x.isFinite() || x.isZero()) {
             return new Decimal(x);
         }
-        
+
         let pr = Decimal.precision;
         let rm = Decimal.rounding;
         Decimal.precision = pr + Math.max(x.e, x.precision()) + 4;
         Decimal.rounding = 1;
         let len = x.d!.length;
-        
+
         if (len < 3) {
             x = this.taylorSeries(2, x, x, true);
         } else {
@@ -1918,12 +1918,12 @@ export class Decimal {
         if (x.isZero()) {
             return new Decimal(x);
         }
-        
+
         let pr = Decimal.precision;
         let rm = Decimal.rounding;
         Decimal.precision = pr + 7;
         Decimal.rounding = 1;
-        
+
         return Utils.divide(x.sinh(), x.cosh(), Decimal.precision = pr, Decimal.rounding = rm);
     }
 
@@ -1980,7 +1980,7 @@ export class Decimal {
         let k = x.abs().comparedTo(1);
         let pr = Decimal.precision;
         let rm = Decimal.rounding;
-    
+
         if (k != -1) {
             return k == 0
                 // |x| is 1
@@ -1988,11 +1988,11 @@ export class Decimal {
                 // |x| > 1 or x is NaN
                 : new Decimal(NaN);
         }
-        
+
         if (x.isZero()) {
             return Utils.getPi(pr + 4, rm).mul(0.5);
         }
-        
+
         Decimal.precision = pr + 6;
         Decimal.rounding = 1;
 
@@ -2125,19 +2125,19 @@ export class Decimal {
         if (!x.isFinite()) {
             return new Decimal(x);
         }
-        
+
         let pr = Decimal.precision;
         let rm = Decimal.rounding;
         Decimal.precision = pr + Math.max(Math.abs(x.e), x.precision()) + 4;
         Decimal.rounding = 1;
         external = false;
-        
+
         x = x.mul(x).sub(1).sqrt().add(x);
-        
+
         external = true;
         Decimal.precision = pr;
         Decimal.rounding = rm;
-        
+
         return x.ln();
     }
 
@@ -2153,19 +2153,19 @@ export class Decimal {
         if (!x.isFinite() || x.isZero()) {
             return new Decimal(x);
         }
-        
+
         let pr = Decimal.precision;
         let rm = Decimal.rounding;
         Decimal.precision = pr + 2 * Math.max(Math.abs(x.e), x.precision()) + 6;
         Decimal.rounding = 1;
         external = false;
-        
+
         x = x.mul(x).add(1).sqrt().add(x);
-        
+
         external = true;
         Decimal.precision = pr;
         Decimal.rounding = rm;
-        
+
         return x.ln();
     }
 
@@ -2184,28 +2184,28 @@ export class Decimal {
         if (x.e >= 0) {
             return new Decimal(x.abs().equals(1) ? x.s * Infinity : x.isZero() ? x : NaN);
         }
-        
+
         let pr = Decimal.precision;
         let rm = Decimal.rounding;
         let xsd = x.precision();
-        
+
         if (Math.max(xsd, pr) < 2 * -x.e - 1) {
             return Utils.finalise(new Decimal(x), pr, rm, true);
         }
-        
+
         let wpr = xsd - x.e;
         Decimal.precision = wpr;
-        
+
         x = Utils.divide(x.add(1), new Decimal(1).sub(x), wpr + pr, 1);
-        
+
         Decimal.precision = pr + 4;
         Decimal.rounding = 1;
-        
+
         x = x.ln();
-        
+
         Decimal.precision = pr;
         Decimal.rounding = rm;
-        
+
         return x.mul(0.5);
     }
 
@@ -2837,7 +2837,7 @@ export class Decimal {
 
         // Use 2 * log10(2^k) + 5 (empirically derived) to estimate the increase in precision
         // necessary to ensure the first 4 rounding digits are correct.
-        let guard = Math.log(Math.pow(2, k)) / Math.LN10 * 2 + 5 | 0;
+        let guard = Math.log(Math.pow(2, k)) / Utils.toNumber(LN10) * 2 + 5 | 0;
         wpr += guard;
         let denominator = new Decimal(1);
         let pow = new Decimal(1);
@@ -3054,7 +3054,7 @@ export class Decimal {
         let x2 = x.mul(x);
         let u = new Decimal(y);
         let i: number = 1;
-        let t: Decimal;
+        let t: Decimal = new Decimal(0);
         let j: number = 0;
         while(true) {
             t = Utils.divide(u.mul(x2), new Decimal(n++ * n++), pr, 1);
@@ -3258,7 +3258,7 @@ export class Decimal {
                     e = x.e;
                     roundUp = inexact;
                 }
-          
+
                 i = sd! < xd.length ? xd[sd!] : -1;
                 let k = base / 2;
                 roundUp = roundUp || (sd! + 1 < xd.length ? xd[sd! + 1] != undefined : false);
@@ -3272,7 +3272,7 @@ export class Decimal {
                     xd.length = sd!;
                 } else {
                     xd.extendTo(sd!, 0);
-                }     
+                }
 
                 if (roundUp) {
                     sd!--;
@@ -3498,13 +3498,13 @@ class Utils {
     public static getPrecision(digits: Array<number>) {
         let w = digits.length - 1;
         let len = w * LOG_BASE + 1;
-      
+
         w = digits[w];
         if (w) {
             for (; w % 10 == 0; w /= 10) {
                 len--;
             }
-      
+
             for (w = digits[0]; w >= 10; w /= 10) {
                 len++;
             }
@@ -3882,7 +3882,7 @@ class Utils {
                 resultDigits[i] = (digitsValue / value | 0) * value;
             } else {
                 resultDigits.push((digitsValue / value | 0) * value);
-            } 
+            }
         }
 
         // Remove trailing words which are zero.

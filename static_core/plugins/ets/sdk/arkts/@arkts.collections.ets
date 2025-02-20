@@ -167,8 +167,8 @@ export namespace collections {
         public has(element: number, fromIndex: number, toIndex: number): boolean {
             this.checkRange(fromIndex, toIndex);
 
-            let fromElem = this.computeElementIdAndBitId(fromIndex);
-            let toElem =  this.computeElementIdAndBitId(toIndex);
+            let fromElem = this.computeElementIdAndBitId(fromIndex.toInt());
+            let toElem =  this.computeElementIdAndBitId(toIndex.toInt());
 
             if (fromElem.elementId === toElem.elementId) {
                 return this.checkBit(this.buffer[fromElem.elementId], fromElem.index, toElem.index - 1, element);
@@ -248,8 +248,8 @@ export namespace collections {
         public flipBitsByRange(fromIndex: number, toIndex: number): void {
             this.checkRange(fromIndex, toIndex);
 
-            let fromElem = this.computeElementIdAndBitId(fromIndex);
-            let toElem =  this.computeElementIdAndBitId(toIndex);
+            let fromElem = this.computeElementIdAndBitId(fromIndex.toInt());
+            let toElem =  this.computeElementIdAndBitId(toIndex.toInt());
 
             if (fromElem.elementId === toElem.elementId) {
                 this.buffer[fromElem.elementId] = this.flipBits(this.buffer[fromElem.elementId], fromElem.index, toElem.index - 1);
@@ -283,8 +283,8 @@ export namespace collections {
         public getBitsByRange(fromIndex: number, toIndex: number): BitVector {
             this.checkRange(fromIndex, toIndex);
 
-            let fromElem = this.computeElementIdAndBitId(fromIndex);
-            let toElem =  this.computeElementIdAndBitId(toIndex);
+            let fromElem = this.computeElementIdAndBitId(fromIndex.toInt());
+            let toElem =  this.computeElementIdAndBitId(toIndex.toInt());
 
             let newBitVector = new BitVector(toIndex - fromIndex);
 
@@ -314,8 +314,8 @@ export namespace collections {
         public setBitsByRange(element: number, fromIndex: number, toIndex: number): void {
             this.checkRange(fromIndex, toIndex);
 
-            let fromElem = this.computeElementIdAndBitId(fromIndex);
-            let toElem =  this.computeElementIdAndBitId(toIndex);
+            let fromElem = this.computeElementIdAndBitId(fromIndex.toInt());
+            let toElem =  this.computeElementIdAndBitId(toIndex.toInt());
 
             if (fromElem.elementId === toElem.elementId) {
                 this.buffer[fromElem.elementId] = this.setBits(this.buffer[fromElem.elementId], fromElem.index, toElem.index - 1, element);
@@ -406,8 +406,8 @@ export namespace collections {
         public getBitCountByRange(element: number, fromIndex: number, toIndex: number): number {
             this.checkRange(fromIndex, toIndex);
 
-            let fromElem = this.computeElementIdAndBitId(fromIndex);
-            let toElem =  this.computeElementIdAndBitId(toIndex);
+            let fromElem = this.computeElementIdAndBitId(fromIndex.toInt());
+            let toElem =  this.computeElementIdAndBitId(toIndex.toInt());
 
             if (fromElem.elementId === toElem.elementId) {
                 let count = this.countBit1InRange(this.buffer[fromElem.elementId], fromElem.index, toElem.index - 1);

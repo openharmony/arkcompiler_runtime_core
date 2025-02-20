@@ -15,12 +15,12 @@
 cases:
     # primitives
     - type: byte
-      vals: '0x80 as byte, 0x7f as byte'
-      val: '0x55 as byte'
+      vals: '(0x80).toByte(), (0x7f).toByte()'
+      val: '(0x55).toByte()'
 
     - type: short
-      vals: '0x8000 as short, 0x7fff as short'
-      val: '0x0505 as short'
+      vals: '(0x8000).toShort(), (0x7fff).toShort()'
+      val: '(0x0505).toShort()'
 
     - type: int
       vals: '0x80000000, 0x7fffffff'

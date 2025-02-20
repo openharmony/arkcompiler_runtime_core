@@ -20,7 +20,7 @@ function asyncLockQueryTest(): int {
     let lock = AsyncLock.request("asyncLockQueryTest");
     let promise = lock.lockAsync((): int => {
         let state = lock.query();
-        return state.held.length as int;
+        return state.held.length.toInt();
     });
 
     let result = await promise;

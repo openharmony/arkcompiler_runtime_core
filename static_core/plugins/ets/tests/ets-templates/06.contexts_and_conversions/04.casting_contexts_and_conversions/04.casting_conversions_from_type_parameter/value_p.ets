@@ -13,18 +13,15 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
 /*---
-desc: >-
-    A function with receiver declaration is a top-level declaration (see Top-Level Declarations) that looks almost the same
-    as Function Declarations, except that the first parameter is mandatory, and the keyword this is used as its name
-tags: [compile-only, negative]
+desc: Casting conversions from type parameter
+tags:
+- compile-only
 ---*/
 
-{{c.decl}}
-
-function main() {
-    {{c.use|indent}}
+class X<S, T> {
+    method (p: T): number {
+        let n = p as number // compile-time error, cast to value type
+        return n
+    }
 }
-
-{%- endfor %}

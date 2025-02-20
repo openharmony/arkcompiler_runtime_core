@@ -20,7 +20,7 @@ desc: >-
   - Next, the right hand operand is evaluated. If evaluation of the right hand expression completes abruptly, the assignment expression completes abruptly for the same reason.
   - Finally, the variable denoted by e.f is assigned the value of the right hand operand as computed above.
 params: abrupt completion, left-hand operand, static
-tags: [no-warmup]
+tags: [no-warmup, compile-only, negative]
 ---*/
 
 let result: string = ""

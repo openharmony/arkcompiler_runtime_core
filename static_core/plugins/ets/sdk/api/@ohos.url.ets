@@ -2507,7 +2507,7 @@ export namespace url {
         const UNICODE_0x10000 = 0x10000;
         outer:
         for (; i < len; i++) {
-            let c = str.charCodeAt(i as number);
+            let c = str.charCodeAt(i.toDouble());
 
             // ASCII
             while (c < UNICODE_0x80) {

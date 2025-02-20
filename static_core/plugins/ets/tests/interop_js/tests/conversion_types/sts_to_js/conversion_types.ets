@@ -51,7 +51,7 @@ class DeferentIntTypes {
     num: int = 1;
     numb: number = 1;
     bigInt: BigInt = 1n;
-    fl: float = 1.1;
+    fl: float = 1.1f;
     intString: string = '1';
     l: long = 1;
     doub: double = 1;

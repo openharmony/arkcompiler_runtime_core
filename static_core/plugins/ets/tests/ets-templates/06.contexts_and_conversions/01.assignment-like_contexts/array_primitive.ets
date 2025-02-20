@@ -17,9 +17,7 @@
 /*---
 desc: Assignment contexts does not allow the assignment for arrays if one has elements of a primitive types
 params: Assignment from '{{c.src_type}}' to '{{c.dst_type}}'
-tags:
-- negative
-- compile-only
+tags: [compile-only]
 ---*/
 
 function main() {

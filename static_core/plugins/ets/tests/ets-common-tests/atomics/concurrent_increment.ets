@@ -16,7 +16,7 @@
  import { launch } from "std/concurrency"
 
 let N = 200
-let RESULT = N as byte
+let RESULT = N.toByte()
 
 let arr: Int8Array = new Int8Array;
 let arr_u32: Int32Array = new Int32Array;

@@ -15,6 +15,7 @@ limitations under the License.
 
 /*---
 desc: check remainder of division by zero for char operands
+tags: [compile-only, negative]
 ---*/
 
 function main(): void {

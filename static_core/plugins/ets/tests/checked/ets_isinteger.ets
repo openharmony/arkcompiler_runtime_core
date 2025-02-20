@@ -95,7 +95,7 @@
 //! ASM_NEXT                                                                      arm32: /mov\s+r[0-9]+,\s+#0/
 
 function main(): int {
-    let trueInt: float = 1.0;
+    let trueInt: float = 1.0f;
     if (Float.isInteger(trueInt) != true)
         return 1;
 

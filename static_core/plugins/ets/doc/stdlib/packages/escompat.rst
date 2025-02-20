@@ -4592,7 +4592,7 @@ Properties
 
 .. rst-class:: doc-code-block
 
-  - static BYTES_PER_ELEMENT\: :kw:`number`
+  - static BYTES_PER_ELEMENT\: :kw:`int`
   - buffer\: :ref:`ArrayBuffer<LeLsLcLoLmLpLaLt.UALrLrLaLyUBLuLfLfLeLr>`
   - byteLength\: :kw:`number`
   - byteOffset\: :kw:`number`
@@ -6244,7 +6244,7 @@ Properties
 
 .. rst-class:: doc-code-block
 
-  - static BYTES_PER_ELEMENT\: :kw:`number`
+  - static BYTES_PER_ELEMENT\: :kw:`int`
   - buffer\: :ref:`ArrayBuffer<LeLsLcLoLmLpLaLt.UALrLrLaLyUBLuLfLfLeLr>`
   - byteLength\: :kw:`number`
   - byteOffset\: :kw:`number`
@@ -9899,7 +9899,7 @@ Properties
 
 .. rst-class:: doc-code-block
 
-  - static BYTES_PER_ELEMENT\: :kw:`number`
+  - static BYTES_PER_ELEMENT\: :kw:`int`
   - buffer\: :ref:`ArrayBuffer<LeLsLcLoLmLpLaLt.UALrLrLaLyUBLuLfLfLeLr>`
   - byteLength\: :kw:`number`
   - byteOffset\: :kw:`number`
@@ -11147,7 +11147,7 @@ Properties
 
 .. rst-class:: doc-code-block
 
-  - static BYTES_PER_ELEMENT\: :kw:`number`
+  - static BYTES_PER_ELEMENT\: :kw:`int`
   - buffer\: :ref:`ArrayBuffer<LeLsLcLoLmLpLaLt.UALrLrLaLyUBLuLfLfLeLr>`
   - byteLength\: :kw:`number`
   - byteOffset\: :kw:`number`
@@ -12423,7 +12423,7 @@ Properties
 
 .. rst-class:: doc-code-block
 
-  - static BYTES_PER_ELEMENT\: :kw:`number`
+  - static BYTES_PER_ELEMENT\: :kw:`int`
   - buffer\: :ref:`ArrayBuffer<LeLsLcLoLmLpLaLt.UALrLrLaLyUBLuLfLfLeLr>`
   - byteLength\: :kw:`number`
   - byteOffset\: :kw:`number`
@@ -13699,7 +13699,7 @@ Properties
 
 .. rst-class:: doc-code-block
 
-  - static BYTES_PER_ELEMENT\: :kw:`number`
+  - static BYTES_PER_ELEMENT\: :kw:`int`
   - buffer\: :ref:`ArrayBuffer<LeLsLcLoLmLpLaLt.UALrLrLaLyUBLuLfLfLeLr>`
   - byteLength\: :kw:`number`
   - byteOffset\: :kw:`number`
@@ -14975,7 +14975,7 @@ Properties
 
 .. rst-class:: doc-code-block
 
-  - static BYTES_PER_ELEMENT\: :kw:`number`
+  - static BYTES_PER_ELEMENT\: :kw:`int`
   - buffer\: :ref:`ArrayBuffer<LeLsLcLoLmLpLaLt.UALrLrLaLyUBLuLfLfLeLr>`
   - byteLength\: :kw:`number`
   - byteOffset\: :kw:`number`
@@ -19132,7 +19132,7 @@ Properties
 
 .. rst-class:: doc-code-block
 
-  - static BYTES_PER_ELEMENT\: :kw:`number`
+  - static BYTES_PER_ELEMENT\: :kw:`int`
   - buffer\: :ref:`ArrayBuffer<LeLsLcLoLmLpLaLt.UALrLrLaLyUBLuLfLfLeLr>`
   - byteLength\: :kw:`number`
   - byteOffset\: :kw:`number`
@@ -20784,7 +20784,7 @@ Properties
 
 .. rst-class:: doc-code-block
 
-  - static BYTES_PER_ELEMENT\: :kw:`number`
+  - static BYTES_PER_ELEMENT\: :kw:`int`
   - buffer\: :ref:`ArrayBuffer<LeLsLcLoLmLpLaLt.UALrLrLaLyUBLuLfLfLeLr>`
   - byteLength\: :kw:`number`
   - byteOffset\: :kw:`number`
@@ -22436,7 +22436,7 @@ Properties
 
 .. rst-class:: doc-code-block
 
-  - static BYTES_PER_ELEMENT\: :kw:`number`
+  - static BYTES_PER_ELEMENT\: :kw:`int`
   - buffer\: :ref:`ArrayBuffer<LeLsLcLoLmLpLaLt.UALrLrLaLyUBLuLfLfLeLr>`
   - byteLength\: :kw:`number`
   - byteOffset\: :kw:`number`
@@ -24088,7 +24088,7 @@ Properties
 
 .. rst-class:: doc-code-block
 
-  - static BYTES_PER_ELEMENT\: :kw:`number`
+  - static BYTES_PER_ELEMENT\: :kw:`int`
   - buffer\: :ref:`ArrayBuffer<LeLsLcLoLmLpLaLt.UALrLrLaLyUBLuLfLfLeLr>`
   - byteLength\: :kw:`number`
   - byteOffset\: :kw:`number`

@@ -36,9 +36,9 @@ function superMax<T>(items: FixedArray<T>, comparator: ((l: T, r: T) => int) | n
 
 function getNumber(param: Margin): int {
     if (param instanceof string) {
-        return (param as string).length as int
+        return param.length.toInt()
     }
-    return (param as number) as int
+    return param.toInt()
 }
 
 function compareMargin(left: Margin, right: Margin): int {
@@ -50,5 +50,5 @@ function compareMargin(left: Margin, right: Margin): int {
 function main(): void {
     let arr: FixedArray<Margin> = [5, "hello", "bye", 7]
     let maxx = superMax<Margin>(arr, compareMargin)
-    assertEQ( (maxx as number), 7)
+    assertEQ(maxx, 7)
 }

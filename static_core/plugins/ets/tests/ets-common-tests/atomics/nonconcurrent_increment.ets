@@ -14,7 +14,7 @@
  */
 
 let N = 200
-let RESULT = N as byte
+let RESULT = N.toByte()
 
 function main() {
     let buf = new ArrayBuffer(4);

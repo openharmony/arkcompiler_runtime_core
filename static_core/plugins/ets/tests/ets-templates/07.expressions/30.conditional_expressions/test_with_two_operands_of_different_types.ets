@@ -15,7 +15,7 @@
 
 /*---
 desc: Test with an object incompatible with the specified type
-tags: [compile-only, negative]
+tags: [compile-only]
 ---*/
 
 

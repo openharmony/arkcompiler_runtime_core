@@ -221,7 +221,7 @@ const testTypedArraySort = parametrize<ObjectTypeAndExpectations<number[]>>(
         array.sort()
 
         const isEqualToGold =
-            array.every((x: {{.item.type}}, index: number) => x == expected[index as int])
+            array.every((x: {{.item.type}}, index: number) => x == expected[index.toInt()])
 
         // descending
         array.sort(
@@ -344,7 +344,7 @@ const testTypedArrayOf = parametrize<FixedArray<{{.item.type}}>>(
        const viaCtor = new {{.item.objectType}}(args)
        const viaOf = {{.item.objectType}}.of(...args)
 
-       const isEqual = viaCtor.every((x: {{.item.type}}, index: number) => x == viaOf[index as int])
+       const isEqual = viaCtor.every((x: {{.item.type}}, index: number) => x == viaOf[index.toInt()])
 
        let failures = 0
        failures += check(boolToResult(isEqual), "result of .of method call is equal to ctor invoke")

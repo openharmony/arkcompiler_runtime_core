@@ -21,13 +21,10 @@ desc: >-
 params: {{c.type}}
 ---*/
 
-function main(): int {
+function main() {
   let v: {{c.type}} = {{c.val}};
   let arr: {{c.type}}[] = new {{c.type}}[{{c.len}} + 1];
   arr[v] = v;
-  if (arr[v] != {{c.len}}) {
-    return 1;
-  }
-  return 0;
+  assertEQ(arr[v], {{c.len}})
 }
 {% endfor %}

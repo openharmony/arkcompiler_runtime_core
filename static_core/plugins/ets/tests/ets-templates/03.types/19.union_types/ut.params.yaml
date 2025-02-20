@@ -201,9 +201,9 @@ cases:
 
     - decl: |-
           type UT = char | short
-          let v: UT = -32768
+          let v: UT = -32768 as short
       use: |-
-          v = -32768
+          v = -32768 as short
           assertEQ(v, -32768)
           v = c'\uFFFF'
           assertEQ(v, c'\uFFFF')

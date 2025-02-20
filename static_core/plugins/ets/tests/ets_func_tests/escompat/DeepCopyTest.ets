@@ -40,7 +40,7 @@ class Obj {
 	c: char = c'a'
 	s: short = 0
 	l: long = 0
-	f: float = 0.0
+	f: float = 0.0f
 	d: double = 0.0
 
 	constructor(id: int = 0, name: string | undefined = undefined) {
