@@ -14,19 +14,33 @@
 ---
 cases:
   - decl: |
-        class A {}
-        type T = (this: A) => int;
+      class A {}
+      type T = (this: A) => int;
     use: |
-        let a: A = new A()
-        let t: T = (this: A): int => { return 1 }
-        assertEQ(t(a), 1)
+      let a: A = new A()
+      let t: T = (this: A): int => { return 1 }
+      assertEQ(t(a), 1)
   - decl: |
-        interface I {}
-        type T = (this: I) => int;
+      class A {}
+      type T = (this: A) => int;
     use: |
-        let i: I = {}
-        let t: T = (this: I): int => { return 1 }
-        assertEQ(t(i), 1)
+      let a: A = new A()
+      let t: T = (this: A): int => { return 1 }
+      assertEQ(a.t(), 1)
+  - decl: |
+      interface I {}
+      type T = (this: I) => int;
+    use: |
+      let i: I = {}
+      let t: T = (this: I): int => { return 1 }
+      assertEQ(t(i), 1)
+  - decl: |
+      interface I {}
+      type T = (this: I) => int;
+    use: |
+      let i: I = {}
+      let t: T = (this: I): int => { return 1 }
+      assertEQ(i.t(), 1)
   - decl: |
       type T = (this: boolean[]) => boolean
     use: |
@@ -34,19 +48,11 @@ cases:
       let t: T = (this: boolean[]): boolean => { return true }
       assertEQ(t(b), true)
   - decl: |
-        class A {}
-        type T = (this: A) => int;
+      type T = (this: boolean[]) => boolean
     use: |
-        let a: A = new A()
-        let t: T = (this: A): int => { return 1 }
-        assertEQ(a.t(), 1)
-  - decl: |
-        interface I {}
-        type T = (this: I) => int;
-    use: |
-        let i: I = {}
-        let t: T = (this: I): int => { return 1 }
-        assertEQ(i.t(), 1)
+      let b: boolean[] = [true, false]
+      let t: T = (this: boolean[]): boolean => { return true }
+      assertEQ(b.t(), true)
   - decl: |
       type T = (this: boolean[]) => boolean
     use: |

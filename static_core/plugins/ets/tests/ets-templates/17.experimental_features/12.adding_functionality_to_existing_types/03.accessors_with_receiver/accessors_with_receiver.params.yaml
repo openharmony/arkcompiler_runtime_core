@@ -33,3 +33,211 @@ cases:
     use: |
       let a = new A()
       a.m = 1
+  - decl: |
+      class A {
+        member: int = 0
+      }
+      get m(this: A): int {
+        return this.member
+      }
+      set m(this: A, param: int) {
+        this.member = param
+      }
+    use: |
+      let a = new A()
+      a.m++
+  - decl: |
+      class A {
+        member: int = 0
+      }
+      get m(this: A): int {
+        return this.member
+      }
+      set m(this: A, param: int) {
+        this.member = param
+      }
+    use: |
+      let a = new A()
+      ++a.m
+  - decl: |
+      class A {
+        member: int = 0
+      }
+      get m(this: A): int {
+        return this.member
+      }
+      set m(this: A, param: int) {
+        this.member = param
+      }
+    use: |
+      let a = new A()
+      a.m--
+  - decl: |
+      class A {
+        member: int = 0
+      }
+      get m(this: A): int {
+        return this.member
+      }
+      set m(this: A, param: int) {
+        this.member = param
+      }
+    use: |
+      let a = new A()
+      --a.m
+  - decl: |
+      class A {
+        member: int = 0
+      }
+      get m(this: A): int {
+        return this.member
+      }
+      set m(this: A, param: int) {
+        this.member = param
+      }
+    use: |
+      let a = new A()
+      a.m += 1
+  - decl: |
+      class A {
+        member: int = 0
+      }
+      get m(this: A): int {
+        return this.member
+      }
+      set m(this: A, param: int) {
+        this.member = param
+      }
+    use: |
+      let a = new A()
+      a.m -= 1
+  - decl: |
+      class A {
+        member: int = 0
+      }
+      get m(this: A): int {
+        return this.member
+      }
+      set m(this: A, param: int) {
+        this.member = param
+      }
+    use: |
+      let a = new A()
+      a.m *= 1
+  - decl: |
+      class A {
+        member: int = 0
+      }
+      get m(this: A): int {
+        return this.member
+      }
+      set m(this: A, param: int) {
+        this.member = param
+      }
+    use: |
+      let a = new A()
+      a.m /= 1
+  - decl: |
+      class A {
+        member: int = 0
+        set m(param: int) {
+          this.member = param
+        }
+      }
+      get m(this: A): int {
+        return this.member
+      }
+    use: |
+      let a = new A()
+      a.m += 1
+  - decl: |
+      class A {
+        member: int = 0
+        set m(param: int) {
+          this.member = param
+        }
+      }
+      get m(this: A): int {
+        return this.member
+      }
+    use: |
+      let a = new A()
+      a.m -= 1
+  - decl: |
+      class A {
+        member: int = 0
+        set m(param: int) {
+          this.member = param
+        }
+      }
+      get m(this: A): int {
+        return this.member
+      }
+    use: |
+      let a = new A()
+      a.m *= 1
+  - decl: |
+      class A {
+        member: int = 0
+        set m(param: int) {
+          this.member = param
+        }
+      }
+      get m(this: A): int {
+        return this.member
+      }
+    use: |
+      let a = new A()
+      a.m /= 1
+  - decl: |
+      class A {
+        member: int = 0
+        get m(): int {
+          return this.member
+        }
+      }
+      set m(this: A, param: int) {
+        this.member = param
+      }
+    use: |
+      let a = new A()
+      a.m -= 1
+  - decl: |
+      class A {
+        member: int = 0
+        get m(): int {
+          return this.member
+        }
+      }
+      set m(this: A, param: int) {
+        this.member = param
+      }
+    use: |
+      let a = new A()
+      a.m += 1
+  - decl: |
+      class A {
+        member: int = 0
+        get m(): int {
+          return this.member
+        }
+      }
+      set m(this: A, param: int) {
+        this.member = param
+      }
+    use: |
+      let a = new A()
+      a.m /= 1
+  - decl: |
+      class A {
+        member: int = 0
+        get m(): int {
+          return this.member
+        }
+      }
+      set m(this: A, param: int) {
+        this.member = param
+      }
+    use: |
+      let a = new A()
+      a.m *= 1
