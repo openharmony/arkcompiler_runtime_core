@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -41,7 +41,7 @@ class Benchmark:
 
     def generate(self) -> List[str]:
         Log.all(_LOGGER, f"Generating test: {self.__name}")
-        name_without_ext, _ = self.__name.split(".")
+        name_without_ext = self.__input.stem
         params = Params(self.__input, name_without_ext).generate()
 
         template = Template(self.__input, params)

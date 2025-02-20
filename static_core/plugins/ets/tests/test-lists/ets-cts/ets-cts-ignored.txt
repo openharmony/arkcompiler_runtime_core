@@ -1635,7 +1635,7 @@
 # value was not initialized
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/02.constant_declarations/const_decl_5.sts
 
-# 21846 Annotation name coinciding with type name gets compiled but shouldn't
+# 21157
 18.annotations/01.declaring_annotations/declaration_coincide_name_n_1.sts
 
 # 21929 - should fail, but compiles
@@ -1734,3 +1734,5 @@
 17.experimental_features/12.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_3.sts
 17.experimental_features/12.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_4.sts
 17.experimental_features/12.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_6.sts
+
+
