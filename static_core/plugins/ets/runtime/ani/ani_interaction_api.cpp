@@ -460,6 +460,23 @@ static ani_status GetNamespaceFunction(ani_env *env, ani_namespace ns, const cha
     return DoGetClassMethod<true>(etsNs->AsClass(), name, signature, result);
 }
 
+template <typename ReturnType, EtsType EXPECT_TYPE, typename Args>
+static ani_status ClassCallMethodByName(ani_env *env, ani_class cls, const char *name, ReturnType *result, Args args)
+{
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    EtsMethod *method = nullptr;
+    ani_status status = GetClassMethod<true>(env, cls, name, nullptr, &method);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    ASSERT(method != nullptr);
+    ani_static_method staticMethod = ToAniStaticMethod(method);
+    CheckStaticMethodReturnType(staticMethod, EXPECT_TYPE);
+    return GeneralMethodCall<ReturnType>(env, nullptr, staticMethod, result, args);
+}
+
 NO_UB_SANITIZE static ani_status GetVersion(ani_env *env, uint32_t *result)
 {
     ANI_DEBUG_TRACE(env);
@@ -1934,6 +1951,335 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Ref_A(ani_env *env, ani_
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Void_V(ani_env *env, ani_class cls, ani_static_method method,
+                                                               va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(method);
+
+    CheckStaticMethodReturnType(method, EtsType::VOID);
+    ani_boolean result;
+    // Use any primitive type as template parameter and just ignore the result
+    return GeneralMethodCall<EtsBoolean>(env, nullptr, method, &result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Void(ani_env *env, ani_class cls, ani_static_method method, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, method);
+    ani_status status = Class_CallStaticMethod_Void_V(env, cls, method, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Void_A(ani_env *env, ani_class cls, ani_static_method method,
+                                                               const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(args);
+
+    CheckStaticMethodReturnType(method, EtsType::VOID);
+    ani_boolean result;
+    // Use any primitive type as template parameter and just ignore the result
+    return GeneralMethodCall<EtsBoolean>(env, nullptr, method, &result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean_V(ani_env *env, ani_class cls, const char *name,
+                                                                        ani_boolean *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassCallMethodByName<EtsBoolean, EtsType::BOOLEAN>(env, cls, name, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean(ani_env *env, ani_class cls, const char *name,
+                                                                      ani_boolean *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Class_CallStaticMethodByName_Boolean_V(env, cls, name, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean_A(ani_env *env, ani_class cls, const char *name,
+                                                                        ani_boolean *result, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    return ClassCallMethodByName<EtsBoolean, EtsType::BOOLEAN>(env, cls, name, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte_V(ani_env *env, ani_class cls, const char *name,
+                                                                     ani_byte *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassCallMethodByName<EtsByte, EtsType::BYTE>(env, cls, name, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte(ani_env *env, ani_class cls, const char *name,
+                                                                   ani_byte *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Class_CallStaticMethodByName_Byte_V(env, cls, name, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte_A(ani_env *env, ani_class cls, const char *name,
+                                                                     ani_byte *result, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    return ClassCallMethodByName<EtsByte, EtsType::BYTE>(env, cls, name, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short_V(ani_env *env, ani_class cls, const char *name,
+                                                                      ani_short *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassCallMethodByName<EtsShort, EtsType::SHORT>(env, cls, name, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short(ani_env *env, ani_class cls, const char *name,
+                                                                    ani_short *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Class_CallStaticMethodByName_Short_V(env, cls, name, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short_A(ani_env *env, ani_class cls, const char *name,
+                                                                      ani_short *result, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    return ClassCallMethodByName<EtsShort, EtsType::SHORT>(env, cls, name, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int_A(ani_env *env, ani_class cls, const char *name,
+                                                                    ani_int *result, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    return ClassCallMethodByName<EtsInt, EtsType::INT>(env, cls, name, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int_V(ani_env *env, ani_class cls, const char *name,
+                                                                    ani_int *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassCallMethodByName<EtsInt, EtsType::INT>(env, cls, name, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int(ani_env *env, ani_class cls, const char *name,
+                                                                  ani_int *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Class_CallStaticMethodByName_Int_V(env, cls, name, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long_A(ani_env *env, ani_class cls, const char *name,
+                                                                     ani_long *result, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    return ClassCallMethodByName<EtsLong, EtsType::LONG>(env, cls, name, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long_V(ani_env *env, ani_class cls, const char *name,
+                                                                     ani_long *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassCallMethodByName<EtsLong, EtsType::LONG>(env, cls, name, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long(ani_env *env, ani_class cls, const char *name,
+                                                                   ani_long *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Class_CallStaticMethodByName_Long_V(env, cls, name, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float_A(ani_env *env, ani_class cls, const char *name,
+                                                                      ani_float *result, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    return ClassCallMethodByName<EtsFloat, EtsType::FLOAT>(env, cls, name, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float_V(ani_env *env, ani_class cls, const char *name,
+                                                                      ani_float *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassCallMethodByName<EtsFloat, EtsType::FLOAT>(env, cls, name, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float(ani_env *env, ani_class cls, const char *name,
+                                                                    ani_float *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Class_CallStaticMethodByName_Float_V(env, cls, name, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double_A(ani_env *env, ani_class cls, const char *name,
+                                                                       ani_double *result, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    return ClassCallMethodByName<EtsDouble, EtsType::DOUBLE>(env, cls, name, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double_V(ani_env *env, ani_class cls, const char *name,
+                                                                       ani_double *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassCallMethodByName<EtsDouble, EtsType::DOUBLE>(env, cls, name, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double(ani_env *env, ani_class cls, const char *name,
+                                                                     ani_double *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Class_CallStaticMethodByName_Double_V(env, cls, name, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref_A(ani_env *env, ani_class cls, const char *name,
+                                                                    ani_ref *result, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    return ClassCallMethodByName<ani_ref, EtsType::OBJECT>(env, cls, name, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref_V(ani_env *env, ani_class cls, const char *name,
+                                                                    ani_ref *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassCallMethodByName<ani_ref, EtsType::OBJECT>(env, cls, name, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref(ani_env *env, ani_class cls, const char *name,
+                                                                  ani_ref *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Class_CallStaticMethodByName_Ref_V(env, cls, name, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void_A(ani_env *env, ani_class cls, const char *name,
+                                                                     const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    ani_boolean result;
+    return ClassCallMethodByName<EtsBoolean, EtsType::VOID>(env, cls, name, &result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void_V(ani_env *env, ani_class cls, const char *name,
+                                                                     va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    ani_boolean result;
+    return ClassCallMethodByName<EtsBoolean, EtsType::VOID>(env, cls, name, &result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void(ani_env *env, ani_class cls, const char *name, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, name);
+    ani_status status = Class_CallStaticMethodByName_Void_V(env, cls, name, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status String_NewUTF8(ani_env *env, const char *utf8_string, ani_size size,
                                                 ani_string *result)
 {
@@ -2370,6 +2716,273 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Void(ani_env *env, ani_object
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Short_A(ani_env *env, ani_function fn, ani_short *result,
+                                                       const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(args);
+
+    CheckFunctionReturnType(fn, EtsType::SHORT);
+    return GeneralFunctionCall<ani_short>(env, fn, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Short_V(ani_env *env, ani_function fn, ani_short *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    CHECK_PTR_ARG(result);
+
+    CheckFunctionReturnType(fn, EtsType::SHORT);
+    return GeneralFunctionCall<ani_short>(env, fn, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Short(ani_env *env, ani_function fn, ani_short *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Function_Call_Short_V(env, fn, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Int_A(ani_env *env, ani_function fn, ani_int *result,
+                                                     const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(args);
+
+    CheckFunctionReturnType(fn, EtsType::INT);
+    return GeneralFunctionCall<ani_int>(env, fn, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Int_V(ani_env *env, ani_function fn, ani_int *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    CHECK_PTR_ARG(result);
+
+    CheckFunctionReturnType(fn, EtsType::INT);
+    return GeneralFunctionCall<ani_int>(env, fn, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Int(ani_env *env, ani_function fn, ani_int *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Function_Call_Int_V(env, fn, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Long_A(ani_env *env, ani_function fn, ani_long *result,
+                                                      const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(args);
+
+    CheckFunctionReturnType(fn, EtsType::LONG);
+    return GeneralFunctionCall<ani_long>(env, fn, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Long_V(ani_env *env, ani_function fn, ani_long *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    CHECK_PTR_ARG(result);
+
+    CheckFunctionReturnType(fn, EtsType::LONG);
+    return GeneralFunctionCall<ani_long>(env, fn, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Long(ani_env *env, ani_function fn, ani_long *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Function_Call_Long_V(env, fn, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Float_A(ani_env *env, ani_function fn, ani_float *result,
+                                                       const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(args);
+
+    CheckFunctionReturnType(fn, EtsType::FLOAT);
+    return GeneralFunctionCall<EtsFloat>(env, fn, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Float_V(ani_env *env, ani_function fn, ani_float *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    CHECK_PTR_ARG(result);
+
+    CheckFunctionReturnType(fn, EtsType::FLOAT);
+    return GeneralFunctionCall<EtsFloat>(env, fn, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Float(ani_env *env, ani_function fn, ani_float *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Function_Call_Float_V(env, fn, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Boolean_A(ani_env *env, ani_function fn, ani_boolean *result,
+                                                         const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(args);
+
+    CheckFunctionReturnType(fn, EtsType::BOOLEAN);
+    return GeneralFunctionCall<EtsBoolean>(env, fn, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Boolean_V(ani_env *env, ani_function fn, ani_boolean *result,
+                                                         va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    CHECK_PTR_ARG(result);
+
+    CheckFunctionReturnType(fn, EtsType::BOOLEAN);
+    return GeneralFunctionCall<EtsBoolean>(env, fn, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Boolean(ani_env *env, ani_function fn, ani_boolean *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Function_Call_Boolean_V(env, fn, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Byte_A(ani_env *env, ani_function fn, ani_byte *result,
+                                                      const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(args);
+
+    CheckFunctionReturnType(fn, EtsType::BYTE);
+    return GeneralFunctionCall<EtsByte>(env, fn, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Byte_V(ani_env *env, ani_function fn, ani_byte *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    CHECK_PTR_ARG(result);
+
+    CheckFunctionReturnType(fn, EtsType::BYTE);
+    return GeneralFunctionCall<EtsByte>(env, fn, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Byte(ani_env *env, ani_function fn, ani_byte *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Function_Call_Byte_V(env, fn, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Double_A(ani_env *env, ani_function fn, ani_double *result,
+                                                        const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(args);
+
+    CheckFunctionReturnType(fn, EtsType::DOUBLE);
+    return GeneralFunctionCall<EtsDouble>(env, fn, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Double_V(ani_env *env, ani_function fn, ani_double *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    CHECK_PTR_ARG(result);
+
+    CheckFunctionReturnType(fn, EtsType::DOUBLE);
+    return GeneralFunctionCall<EtsDouble>(env, fn, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Double(ani_env *env, ani_function fn, ani_double *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Function_Call_Double_V(env, fn, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Function_Call_Ref_A(ani_env *env, ani_function fn, ani_ref *result,
                                                      const ani_value *args)
 {
@@ -2668,30 +3281,30 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<141>,
     NotImplementedAdapter<142>,
     NotImplementedAdapter<143>,
-    NotImplementedAdapterVargs<144>,
-    NotImplementedAdapter<145>,
-    NotImplementedAdapter<146>,
+    Function_Call_Boolean,
+    Function_Call_Boolean_A,
+    Function_Call_Boolean_V,
     NotImplementedAdapterVargs<147>,
     NotImplementedAdapter<148>,
     NotImplementedAdapter<149>,
-    NotImplementedAdapterVargs<150>,
-    NotImplementedAdapter<151>,
-    NotImplementedAdapter<152>,
-    NotImplementedAdapterVargs<153>,
-    NotImplementedAdapter<154>,
-    NotImplementedAdapter<155>,
-    NotImplementedAdapterVargs<156>,
-    NotImplementedAdapter<157>,
-    NotImplementedAdapter<158>,
-    NotImplementedAdapterVargs<159>,
-    NotImplementedAdapter<160>,
-    NotImplementedAdapter<161>,
-    NotImplementedAdapterVargs<162>,
-    NotImplementedAdapter<163>,
-    NotImplementedAdapter<164>,
-    NotImplementedAdapterVargs<165>,
-    NotImplementedAdapter<166>,
-    NotImplementedAdapter<167>,
+    Function_Call_Byte,
+    Function_Call_Byte_A,
+    Function_Call_Byte_V,
+    Function_Call_Short,
+    Function_Call_Short_A,
+    Function_Call_Short_V,
+    Function_Call_Int,
+    Function_Call_Int_A,
+    Function_Call_Int_V,
+    Function_Call_Long,
+    Function_Call_Long_A,
+    Function_Call_Long_V,
+    Function_Call_Float,
+    Function_Call_Float_A,
+    Function_Call_Float_V,
+    Function_Call_Double,
+    Function_Call_Double_A,
+    Function_Call_Double_V,
     Function_Call_Ref,
     Function_Call_Ref_A,
     Function_Call_Ref_V,
@@ -2773,39 +3386,39 @@ const __ani_interaction_api INTERACTION_API = {
     Class_CallStaticMethod_Ref,
     Class_CallStaticMethod_Ref_A,
     Class_CallStaticMethod_Ref_V,
-    NotImplementedAdapterVargs<249>,
-    NotImplementedAdapter<250>,
-    NotImplementedAdapter<251>,
-    NotImplementedAdapterVargs<252>,
-    NotImplementedAdapter<253>,
-    NotImplementedAdapter<254>,
+    Class_CallStaticMethod_Void,
+    Class_CallStaticMethod_Void_A,
+    Class_CallStaticMethod_Void_V,
+    Class_CallStaticMethodByName_Boolean,
+    Class_CallStaticMethodByName_Boolean_A,
+    Class_CallStaticMethodByName_Boolean_V,
     NotImplementedAdapterVargs<255>,
     NotImplementedAdapter<256>,
     NotImplementedAdapter<257>,
-    NotImplementedAdapterVargs<258>,
-    NotImplementedAdapter<259>,
-    NotImplementedAdapter<260>,
-    NotImplementedAdapterVargs<261>,
-    NotImplementedAdapter<262>,
-    NotImplementedAdapter<263>,
-    NotImplementedAdapterVargs<264>,
-    NotImplementedAdapter<265>,
-    NotImplementedAdapter<266>,
-    NotImplementedAdapterVargs<267>,
-    NotImplementedAdapter<268>,
-    NotImplementedAdapter<269>,
-    NotImplementedAdapterVargs<270>,
-    NotImplementedAdapter<271>,
-    NotImplementedAdapter<272>,
-    NotImplementedAdapterVargs<273>,
-    NotImplementedAdapter<274>,
-    NotImplementedAdapter<275>,
-    NotImplementedAdapterVargs<276>,
-    NotImplementedAdapter<277>,
-    NotImplementedAdapter<278>,
-    NotImplementedAdapterVargs<279>,
-    NotImplementedAdapter<280>,
-    NotImplementedAdapter<281>,
+    Class_CallStaticMethodByName_Byte,
+    Class_CallStaticMethodByName_Byte_A,
+    Class_CallStaticMethodByName_Byte_V,
+    Class_CallStaticMethodByName_Short,
+    Class_CallStaticMethodByName_Short_A,
+    Class_CallStaticMethodByName_Short_V,
+    Class_CallStaticMethodByName_Int,
+    Class_CallStaticMethodByName_Int_A,
+    Class_CallStaticMethodByName_Int_V,
+    Class_CallStaticMethodByName_Long,
+    Class_CallStaticMethodByName_Long_A,
+    Class_CallStaticMethodByName_Long_V,
+    Class_CallStaticMethodByName_Float,
+    Class_CallStaticMethodByName_Float_A,
+    Class_CallStaticMethodByName_Float_V,
+    Class_CallStaticMethodByName_Double,
+    Class_CallStaticMethodByName_Double_A,
+    Class_CallStaticMethodByName_Double_V,
+    Class_CallStaticMethodByName_Ref,
+    Class_CallStaticMethodByName_Ref_A,
+    Class_CallStaticMethodByName_Ref_V,
+    Class_CallStaticMethodByName_Void,
+    Class_CallStaticMethodByName_Void_A,
+    Class_CallStaticMethodByName_Void_V,
     Object_GetField_Boolean,
     NotImplementedAdapter<283>,
     Object_GetField_Byte,

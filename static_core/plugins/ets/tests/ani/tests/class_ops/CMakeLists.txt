@@ -70,3 +70,53 @@ ani_add_gtest(ani_test_class_ops_call_static_method_ref
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_ref_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_ref_test.sts
 )
+
+ani_add_gtest(ani_test_class_ops_call_static_method_void
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_void_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_void_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_static_method_by_name_bool
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_bool_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_bool_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_static_method_by_name_byte
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_byte_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_byte_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_static_method_by_name_short
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_short_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_short_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_static_method_by_name_int
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_int_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_int_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_static_method_by_name_long
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_long_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_long_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_static_method_by_name_float
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_float_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_float_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_static_method_by_name_double
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_double_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_double_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_static_method_by_name_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_ref_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_ref_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_static_method_by_name_void
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_void_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_by_name_void_test.sts
+)
