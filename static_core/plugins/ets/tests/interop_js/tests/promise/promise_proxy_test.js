@@ -30,13 +30,14 @@ function runTest(test) {
     console.log('Running test ' + test);
     let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
     const etsOpts = {
-		'panda-files': process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-		'boot-panda-files': `${process.env.ARK_ETS_STDLIB_PATH}:${process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH}`,
-		'gc-trigger-type': 'heap-trigger',
-		'load-runtimes': 'ets',
-		'compiler-enable-jit': 'false',
-		'coroutine-js-mode': 'true',
-	};
+        'panda-files': process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
+        'boot-panda-files': `${process.env.ARK_ETS_STDLIB_PATH}:${process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH}`,
+        'gc-trigger-type': 'heap-trigger',
+        'load-runtimes': 'ets',
+        'compiler-enable-jit': 'false',
+        'coroutine-js-mode': 'true',
+        // 'log-debug': 'coroutines',
+    };
     const createRes = etsVm.createRuntime(etsOpts);
     if (!createRes) {
         console.log('Cannot create ETS runtime');
@@ -44,9 +45,14 @@ function runTest(test) {
     }
 
     etsVm.call(test);
-    setTimeout(() => {
+    let checkFn = () => {
+        if (etsVm.call('.is_unset')) {
+            setTimeout(checkFn);
+            return;
+        }
         etsVm.call('.check');
-    }, 10);
+    };
+    setTimeout(checkFn);
 }
 
 
