@@ -1154,7 +1154,7 @@ void G1GC<LanguageConfig>::MarkObjectRecursively(ObjectHeader *object)
     if (concXMarker_.MarkIfNotMarked(object)) {
         GCMarkingStackType stack(this);
         stack.PushToStack(RootType::ROOT_VM, object);
-        this->MarkStack(&concMarker_, &stack, GC::EmptyMarkPreprocess);
+        this->MarkStack(&concXMarker_, &stack, GC::EmptyMarkPreprocess);
     } else {
         LOG_DEBUG_GC << "Skip object: " << object << " since it is already marked";
     }

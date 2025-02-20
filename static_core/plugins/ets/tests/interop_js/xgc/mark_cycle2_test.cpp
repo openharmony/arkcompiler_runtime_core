@@ -22,6 +22,7 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 
 namespace ark::ets::interop::js {
+
 class TestEcmaVMInterface : public arkplatform::EcmaVMInterface {
 public:
     bool StartXRefMarking() override
@@ -29,12 +30,15 @@ public:
         return true;
     }
 
-    void MarkFromObject([[maybe_unused]] void *obj) override {}
+    void MarkFromObject(void *obj) override {}
 
     std::vector<std::string> GetErrors()
     {
-        return std::vector<std::string>();
+        return errors_;
     }
+
+private:
+    std::vector<std::string> errors_;
 };
 
 static TestEcmaVMInterface g_ecmaVMIface;
@@ -51,15 +55,13 @@ public:
         }
 
         auto *xrefStorage = InteropCtx::Current()->GetSharedRefStorage();
-        if (xrefStorage->Size() != EXPECTED_XREFS_COUNT) {
+        if (xrefStorage->Size() != 2U) {
             std::stringstream err;
-            err << "Expected 3 xrefs, but got " << xrefStorage->Size();
+            err << "Expected xrefs count 2, but got " << xrefStorage->Size();
             errorMessages_.push_back(err.str());
             return;
         }
-
-        size_t idx = 0;
-        xrefStorage->VisitRoots([this, xrefStorage, &idx](const mem::GCRoot &root) {
+        xrefStorage->VisitRoots([this, xrefStorage](const mem::GCRoot &root) {
             auto *obj = EtsObject::FromCoreType(root.GetObjectHeader());
             if (!obj->HasInteropIndex()) {
                 std::stringstream err;
@@ -69,36 +71,22 @@ public:
             }
             auto *xref = xrefStorage->GetReference(obj);
             if (xref->HasETSFlag()) {
-                refs_[idx] = xref;
-                ++idx;
-            } else {
-                std::stringstream err;
-                err << "Found unexpected STS->JS xref";
-                errorMessages_.push_back(err.str());
+                js2Sts_ = xref;
+            }
+            if (xref->HasJSFlag()) {
+                sts2Js_ = xref;
             }
         });
-        if (idx != EXPECTED_XREFS_COUNT) {
+        if (js2Sts_ == nullptr) {
             std::stringstream err;
-            err << "Expected 3 JS-STS xrefs but got " << idx;
+            err << "No xref JS->STS found";
             errorMessages_.push_back(err.str());
-            return;
         }
-    }
-
-    void GCFinished(const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc,
-                    [[maybe_unused]] size_t heapSize) override
-    {
-        auto *xrefStorage = InteropCtx::Current()->GetSharedRefStorage();
-        xrefStorage->VisitRoots([this, xrefStorage](const mem::GCRoot &root) {
-            auto *obj = EtsObject::FromCoreType(root.GetObjectHeader());
-            auto *xref = xrefStorage->GetReference(obj);
-            if (!xref->IsMarked()) {
-                std::stringstream err;
-                err << "Found not marked xref";
-                errorMessages_.push_back(err.str());
-                return;
-            }
-        });
+        if (sts2Js_ == nullptr) {
+            std::stringstream err;
+            err << "No xref STS->JS found";
+            errorMessages_.push_back(err.str());
+        }
     }
 
     void GCPhaseStarted(mem::GCPhase phase) override
@@ -106,13 +94,19 @@ public:
         auto *stsIface = InteropCtx::Current()->GetSTSVMInterface();
         switch (phase) {
             case mem::GCPhase::GC_PHASE_INITIAL_MARK:
-                stsIface->MarkFromObject(refs_[0U]);
-                break;
-            case mem::GCPhase::GC_PHASE_MARK:
-                stsIface->MarkFromObject(refs_[1U]);
-                break;
-            case mem::GCPhase::GC_PHASE_REMARK:
-                stsIface->MarkFromObject(refs_[2U]);
+                if (sts2Js_->IsMarked()) {
+                    std::stringstream err;
+                    err << "Expected STS->JS xref is not marked";
+                    errorMessages_.push_back(err.str());
+                    return;
+                }
+                stsIface->MarkFromObject(js2Sts_);
+                if (!sts2Js_->IsMarked()) {
+                    std::stringstream err;
+                    err << "Expected STS->JS xref is marked";
+                    errorMessages_.push_back(err.str());
+                    return;
+                }
                 break;
             default:  // CC-OFF(G.FMT.13-CPP) project code style
                 break;
@@ -125,9 +119,8 @@ public:
     }
 
 private:
-    // CC-OFFNXT(G.FMT.13-CPP) project code style
-    static constexpr size_t EXPECTED_XREFS_COUNT = 3U;
-    std::array<ets_proxy::SharedReference *, EXPECTED_XREFS_COUNT> refs_;
+    ets_proxy::SharedReference *js2Sts_ = nullptr;
+    ets_proxy::SharedReference *sts2Js_ = nullptr;
     std::vector<std::string> errorMessages_;
 };
 
