@@ -680,6 +680,50 @@ NO_UB_SANITIZE static ani_status Object_New(ani_env *env, ani_class cls, ani_met
     return status;
 }
 
+// NOLINTNEXTLINE(readability-identifier-naming)
+ani_status Type_GetSuperClass(ani_env *env, ani_type type, ani_class *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(type);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    EtsClass *cls = s.ToInternalType(type);
+    ani_status status = DoGetInternalClass(s, cls, &cls);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
+    EtsClass *superCls = cls->GetSuperClass();
+    if (superCls != nullptr) {
+        ASSERT(superCls->IsClass());
+        return s.AddLocalRef(superCls->AsObject(), reinterpret_cast<ani_ref *>(result));
+    }
+    *result = nullptr;
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+ani_status Type_IsAssignableFrom(ani_env *env, ani_type fromType, ani_type toType, ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fromType);
+    CHECK_PTR_ARG(toType);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    EtsClass *toClass = s.ToInternalType(toType);
+    ani_status status = DoGetInternalClass(s, toClass, &toClass);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
+    EtsClass *fromClass = s.ToInternalType(fromType);
+    status = DoGetInternalClass(s, fromClass, &fromClass);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
+    *result = toClass->IsAssignableFrom(fromClass) ? ANI_TRUE : ANI_FALSE;
+    return ANI_OK;
+}
+
 NO_UB_SANITIZE static ani_status FindModule(ani_env *env, const char *moduleDescriptor, ani_module *result)
 {
     ANI_DEBUG_TRACE(env);
@@ -4444,8 +4488,8 @@ const __ani_interaction_api INTERACTION_API = {
     Object_New_V,
     Object_GetType,
     Object_InstanceOf,
-    NotImplementedAdapter<28>,
-    NotImplementedAdapter<29>,
+    Type_GetSuperClass,
+    Type_IsAssignableFrom,
     FindModule,
     FindNamespace,
     FindClass,
