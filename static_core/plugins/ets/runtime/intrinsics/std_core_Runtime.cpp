@@ -64,4 +64,9 @@ ObjectHeader *StdCoreRuntimeFailedTypeCastException(EtsObject *source, EtsString
         ->GetCoreType();
 }
 
+EtsClass *StdCoreRuntimeGetTypeInfo([[maybe_unused]] EtsObject *header)
+{
+    return nullptr;
+}
+
 }  // namespace ark::ets::intrinsics

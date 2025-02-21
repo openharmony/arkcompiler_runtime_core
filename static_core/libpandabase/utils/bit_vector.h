@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -281,6 +281,12 @@ public:
         static_assert(!FIXED_SIZE);
     }
 
+    BitVectorBase(size_t size, typename Allocator::template AdapterType<WordType> adapter)
+        : size_(size), storage_(GetWordIndex(size) + 1, adapter)
+    {
+        static_assert(!FIXED_SIZE);
+    }
+
     BitVectorBase(void *data, size_t bits)
         : size_(bits),
           storage_(reinterpret_cast<WordType *>(data), GetWordIndex(bits) + (((bits % WORD_BITS) != 0) ? 1 : 0))
@@ -414,6 +420,11 @@ public:
     Span<uint32_t> GetContainerDataSpan()
     {
         return Span<WordType>(storage_.data(), storage_.size());
+    }
+
+    Span<const uint32_t> GetContainerDataSpan() const
+    {
+        return Span<const WordType>(storage_.data(), storage_.size());
     }
 
     /// Set bit. If size of vector is less than bit, vector will be resized.

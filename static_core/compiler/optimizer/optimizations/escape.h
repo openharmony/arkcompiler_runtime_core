@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_visitor.h"
 #include "optimizer/pass.h"
+#include "optimizer/analysis/live_in_analysis.h"
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/ir/runtime_interface.h"
 #include "mem/arena_allocator.h"
@@ -40,7 +41,6 @@ using FieldPtr = RuntimeInterface::FieldPtr;
 using ClassPtr = RuntimeInterface::ClassPtr;
 
 class VirtualState;
-class BasicBlockState;
 class PhiState;
 class ScalarReplacement;
 class ZeroInst;
@@ -86,6 +86,8 @@ private:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class EscapeAnalysis : public Optimization, public GraphVisitor {
 public:
+    class BasicBlockState;
+
     static constexpr StateId MATERIALIZED_ID = 0;
 
     explicit EscapeAnalysis(Graph *graph)
@@ -117,10 +119,6 @@ public:
         return g_options.IsCompilerScalarReplacement();
     }
 
-    static bool IsAllocInst(Inst *inst)
-    {
-        return inst->GetOpcode() == Opcode::NewObject || inst->GetOpcode() == Opcode::NewArray;
-    }
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFINE_VISIT(InstName)                                   \
     static void Visit##InstName(GraphVisitor *v, Inst *inst)     \
@@ -237,61 +235,6 @@ private:
         void MaterializeObjectsAtTheBeginningOfBlock(BasicBlock *block);
         void CollectInstructionsToMerge(BasicBlock *block);
         void ProcessPhis(BasicBlock *block, BasicBlockState *newState);
-    };
-
-    class LiveInAnalysis {
-    public:
-        explicit LiveInAnalysis(Graph *graph)
-            : graph_(graph),
-              liveIn_(graph_->GetLocalAllocator()->Adapter()),
-              allInsts_(graph_->GetLocalAllocator()->Adapter())
-        {
-        }
-        ~LiveInAnalysis() = default;
-        NO_COPY_SEMANTIC(LiveInAnalysis);
-        NO_MOVE_SEMANTIC(LiveInAnalysis);
-
-        // Compute set of ref-typed instructions live at the beginning of each
-        // basic blocks. Return false if graph don't contain NewObject instructions.
-        bool Run();
-
-        template <typename Callback>
-        void VisitAlive(const BasicBlock *block, Callback &&cb)
-        {
-            auto &liveIns = liveIn_[block->GetId()];
-            auto span = liveIns.GetContainerDataSpan();
-            for (size_t maskIdx = 0; maskIdx < span.size(); ++maskIdx) {
-                auto mask = span[maskIdx];
-                size_t maskOffset = 0;
-                while (mask != 0) {
-                    auto offset = static_cast<size_t>(Ctz(mask));
-                    mask = (mask >> offset) >> 1U;
-                    maskOffset += offset;
-                    size_t liveIdx = maskIdx * sizeof(mask) * BITS_PER_BYTE + maskOffset;
-                    ++maskOffset;  // consume current bit
-                    ASSERT(liveIdx < allInsts_.size());
-                    ASSERT(allInsts_[liveIdx] != nullptr);
-                    cb(allInsts_[liveIdx]);
-                }
-            }
-        }
-
-    private:
-        Graph *graph_;
-        // Live ins evaluation requires union of successor's live ins,
-        // bit vector's union works faster than set's union.
-        ArenaVector<ArenaBitVector> liveIn_;
-        ArenaVector<Inst *> allInsts_;
-
-        void AddInst(Inst *inst)
-        {
-            if (inst->GetId() >= allInsts_.size()) {
-                allInsts_.resize(inst->GetId() + 1);
-            }
-            allInsts_[inst->GetId()] = inst;
-        }
-
-        void ProcessBlock(BasicBlock *block);
     };
 
     Marker visited_ {UNDEF_MARKER};

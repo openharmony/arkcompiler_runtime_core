@@ -395,6 +395,30 @@ bool Peepholes::PeepholeDoubleToString([[maybe_unused]] GraphVisitor *v, Intrins
     return true;
 }
 
+bool Peepholes::PeepholeGetTypeInfo([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    ASSERT(intrinsic->GetInputsCount() == 2U);
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
+#ifdef COMPILER_DEBUG_CHECKS
+    if (!graph->IsInliningComplete()) {
+        return false;
+    }
+#endif  // COMPILER_DEBUG_CHECKS
+    auto obj = intrinsic->GetInput(0).GetInst();
+    auto typeInfo = obj->GetObjectTypeInfo();
+    if (typeInfo) {
+        auto loadType = graph->CreateInstLoadType(DataType::REFERENCE, intrinsic->GetPc());
+        loadType->SetMethod(graph->GetMethod());
+        loadType->SetTypeId(graph->GetRuntime()->GetClassIdWithinFile(graph->GetMethod(), typeInfo.GetClass()));
+        loadType->SetSaveState(intrinsic->GetSaveState());
+        intrinsic->InsertAfter(loadType);
+        intrinsic->ReplaceUsers(loadType);
+    } else {
+        intrinsic->ReplaceUsers(graph->GetOrCreateNullPtr());
+    }
+    return true;
+}
+
 #ifdef PANDA_ETS_INTEROP_JS
 
 bool Peepholes::TryFuseGetPropertyAndCast(IntrinsicInst *intrinsic, RuntimeInterface::IntrinsicId newId)

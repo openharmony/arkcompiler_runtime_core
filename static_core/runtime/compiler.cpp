@@ -245,6 +245,9 @@ bool PandaRuntimeInterface::CheckStoreArray(ClassPtr arrayCls, ClassPtr strCls) 
 {
     ASSERT(arrayCls != nullptr);
     auto *elementClass = ClassCast(arrayCls)->GetComponentType();
+    if (elementClass == nullptr) {
+        return false;
+    }
     if (strCls == nullptr) {
         return elementClass->IsObjectClass();
     }

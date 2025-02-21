@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -6386,6 +6386,7 @@ TEST_F(PeepholesTest, GetInstanceClassTest)
             INST(4U, Opcode::Return).ref().Inputs(3U);
         }
     }
+    GetGraph()->RunPass<ObjectTypePropagation>();  // set analysis valid
     INS(2U).SetObjectTypeInfo(ObjectTypeInfo(klass, true));
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());

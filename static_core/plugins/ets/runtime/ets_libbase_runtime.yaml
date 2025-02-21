@@ -3305,6 +3305,18 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreRuntimeFailedTypeCastException
     clear_flags: [ ]
 
+  - name: StdCoreRuntimeGetTypeInfo
+    space: ets
+    class_name: std.core.Runtime
+    method_name: __getTypeInfo
+    static: true
+    signature:
+      ret: std.core.Class
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::StdCoreRuntimeGetTypeInfo
+    clear_flags: [ heap_inv, no_dce ]
+    peephole_func: PeepholeGetTypeInfo
+
 ##################
 # std.core.Class #
 ##################

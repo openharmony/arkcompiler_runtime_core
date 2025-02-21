@@ -855,6 +855,7 @@ Inst *InstBuilder::BuildLoadStaticInst(size_t pc, DataType::Type type, uint32_t 
     }
 
     ASSERT(field != nullptr);
+    ASSERT(classId != 0);
     auto initClass = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, saveState,
                                                         TypeIdMixin {classId, GetGraph()->GetMethod()},
                                                         GetRuntime()->GetClassForField(field));
@@ -930,6 +931,7 @@ Inst *InstBuilder::BuildStoreStaticInst(const BytecodeInstruction *bcInst, DataT
     }
 
     ASSERT(field != nullptr);
+    ASSERT(classId != 0);
     auto initClass = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, saveState,
                                                         TypeIdMixin {classId, GetGraph()->GetMethod()},
                                                         GetRuntime()->GetClassForField(field));
@@ -1306,6 +1308,7 @@ void InstBuilder::BuildInitObjectMultiDimensionalArray(const BytecodeInstruction
     auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), methodIndex);
     auto classId = GetRuntime()->GetClassIdForMethod(GetMethod(), methodId);
     auto saveState = CreateSaveState(Opcode::SaveState, pc);
+    ASSERT(classId != 0);
     auto initClass = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, saveState,
                                                         TypeIdMixin {classId, GetGraph()->GetMethod()},
                                                         GetRuntime()->ResolveType(GetGraph()->GetMethod(), classId));
