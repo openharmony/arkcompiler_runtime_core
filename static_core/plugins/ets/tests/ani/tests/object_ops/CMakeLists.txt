@@ -11,6 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+ani_add_gtest(ani_test_object_get_type
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_type_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_type_test.sts
+)
+
 ani_add_gtest(ani_test_object_ops_object_new
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_new_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_new_test.sts

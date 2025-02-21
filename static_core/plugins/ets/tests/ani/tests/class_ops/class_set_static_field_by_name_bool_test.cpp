@@ -1,0 +1,69 @@
+/**
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "ani_gtest.h"
+
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
+namespace ark::ets::ani::testing {
+
+class ClassSetStaticFieldByNameBoolTest : public AniTest {};
+
+TEST_F(ClassSetStaticFieldByNameBoolTest, set_static_field_by_name_bool_capi)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LBoolStatic;", &cls), ANI_OK);
+
+    ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Boolean(env_, cls, "bool_value", ANI_TRUE), ANI_OK);
+    ani_boolean resultValue = ANI_FALSE;
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_Boolean(env_, cls, "bool_value", &resultValue), ANI_OK);
+    ASSERT_EQ(resultValue, ANI_TRUE);
+}
+
+TEST_F(ClassSetStaticFieldByNameBoolTest, set_static_field_by_name_bool)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LBoolStatic;", &cls), ANI_OK);
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "bool_value", ANI_TRUE), ANI_OK);
+    ani_boolean resultValue = ANI_FALSE;
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Boolean(cls, "bool_value", &resultValue), ANI_OK);
+    ASSERT_EQ(resultValue, ANI_TRUE);
+}
+
+TEST_F(ClassSetStaticFieldByNameBoolTest, set_static_field_by_name_bool_invalid_field_type)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LBoolStatic;", &cls), ANI_OK);
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "string_value", ANI_TRUE), ANI_INVALID_TYPE);
+}
+
+TEST_F(ClassSetStaticFieldByNameBoolTest, set_static_field_by_name_bool_invalid_args_object)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LBoolStatic;", &cls), ANI_OK);
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(nullptr, "bool_value", ANI_TRUE), ANI_INVALID_ARGS);
+}
+
+TEST_F(ClassSetStaticFieldByNameBoolTest, set_static_field_by_name_bool_invalid_args_field)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LBoolStatic;", &cls), ANI_OK);
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, nullptr, ANI_TRUE), ANI_INVALID_ARGS);
+}
+}  // namespace ark::ets::ani::testing
+// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

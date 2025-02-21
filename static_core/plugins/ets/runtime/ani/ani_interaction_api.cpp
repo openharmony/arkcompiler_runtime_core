@@ -404,6 +404,70 @@ static inline ani_status SetPrimitiveTypeField(ani_env *env, ani_object object, 
 }
 
 template <typename T>
+static ani_status ClassGetStaticField(ani_env *env, ani_class cls, ani_static_field field, T *result)
+{
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(field);
+    CHECK_PTR_ARG(result);
+    EtsField *etsField = ToInternalField(field);
+    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+    ScopedManagedCodeFix s(env);
+    EtsClass *etsClass = s.ToInternalType(cls);
+    *result = etsClass->GetStaticFieldPrimitive<T>(etsField);
+    return ANI_OK;
+}
+
+template <typename T>
+static ani_status ClassSetStaticField(ani_env *env, ani_class cls, ani_static_field field, T value)
+{
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(field);
+    EtsField *etsField = ToInternalField(field);
+    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+    ScopedManagedCodeFix s(env);
+    EtsClass *etsClass = s.ToInternalType(cls);
+    etsClass->SetStaticFieldPrimitive(etsField, value);
+    return ANI_OK;
+}
+
+template <typename T>
+static ani_status ClassGetStaticFieldByName(ani_env *env, ani_class cls, const char *name, T *result)
+{
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+    ScopedManagedCodeFix s(env);
+    EtsClass *etsClass;
+    ani_status status = GetInternalClass(s, cls, &etsClass);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsField *etsField = etsClass->GetStaticFieldIDByName(name, nullptr);
+    ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
+    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+    *result = etsClass->GetStaticFieldPrimitive<T>(etsField);
+    return ANI_OK;
+}
+
+template <typename T>
+static ani_status ClassSetStaticFieldByName(ani_env *env, ani_class cls, const char *name, T value)
+{
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(name);
+    ScopedManagedCodeFix s(env);
+    EtsClass *etsClass;
+    ani_status status = GetInternalClass(s, cls, &etsClass);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsField *etsField = etsClass->GetStaticFieldIDByName(name, nullptr);
+    ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
+    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+    etsClass->SetStaticFieldPrimitive(etsField, value);
+    return ANI_OK;
+}
+
+template <typename T>
 static ani_status DoFind(ani_env *env, const char *name, T *result)
 {
     PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
@@ -557,6 +621,24 @@ NO_UB_SANITIZE static ani_status Object_New_V(ani_env *env, ani_class cls, ani_m
     CHECK_PTR_ARG(result);
 
     return DoNewObject(env, cls, method, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetType(ani_env *env, ani_object object, ani_type *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    EtsObject *etsObject = s.ToInternalType(object);
+    ASSERT(etsObject != nullptr);
+    EtsClass *etsClass = etsObject->GetClass();
+    ASSERT(etsClass != nullptr);
+
+    s.AddLocalRef(etsClass->AsObject(), reinterpret_cast<ani_ref *>(result));
+    return ANI_OK;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1124,6 +1206,341 @@ NO_UB_SANITIZE static ani_status Class_FindStaticMethod(ani_env *env, ani_class 
     ani_status status = GetClassMethod<true>(env, cls, name, signature, &method);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     *result = ToAniStaticMethod(method);
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetStaticField_Boolean(ani_env *env, ani_class cls, ani_static_field field,
+                                                              ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassGetStaticField<ani_boolean>(env, cls, field, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetStaticField_Byte(ani_env *env, ani_class cls, ani_static_field field,
+                                                           ani_byte *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassGetStaticField<ani_byte>(env, cls, field, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetStaticField_Short(ani_env *env, ani_class cls, ani_static_field field,
+                                                            ani_short *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassGetStaticField<ani_short>(env, cls, field, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetStaticField_Int(ani_env *env, ani_class cls, ani_static_field field,
+                                                          ani_int *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassGetStaticField<ani_int>(env, cls, field, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetStaticField_Long(ani_env *env, ani_class cls, ani_static_field field,
+                                                           ani_long *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassGetStaticField<ani_long>(env, cls, field, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetStaticField_Float(ani_env *env, ani_class cls, ani_static_field field,
+                                                            ani_float *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassGetStaticField<ani_float>(env, cls, field, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetStaticField_Double(ani_env *env, ani_class cls, ani_static_field field,
+                                                             ani_double *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassGetStaticField<ani_double>(env, cls, field, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetStaticField_Ref(ani_env *env, ani_class cls, ani_static_field field,
+                                                          ani_ref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(field);
+    CHECK_PTR_ARG(result);
+
+    EtsField *etsField = ToInternalField(field);
+    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<ani_ref>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+
+    ScopedManagedCodeFix s(env);
+    EtsClass *etsClass = s.ToInternalType(cls);
+    auto *etsRes = etsClass->GetStaticFieldObject(etsField);
+    return s.AddLocalRef(etsRes, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_SetStaticField_Boolean(ani_env *env, ani_class cls, ani_static_field field,
+                                                              ani_boolean value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassSetStaticField(env, cls, field, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_SetStaticField_Byte(ani_env *env, ani_class cls, ani_static_field field,
+                                                           ani_byte value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassSetStaticField(env, cls, field, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_SetStaticField_Short(ani_env *env, ani_class cls, ani_static_field field,
+                                                            ani_short value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassSetStaticField(env, cls, field, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_SetStaticField_Int(ani_env *env, ani_class cls, ani_static_field field,
+                                                          ani_int value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassSetStaticField(env, cls, field, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_SetStaticField_Long(ani_env *env, ani_class cls, ani_static_field field,
+                                                           ani_long value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassSetStaticField(env, cls, field, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_SetStaticField_Float(ani_env *env, ani_class cls, ani_static_field field,
+                                                            ani_float value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassSetStaticField(env, cls, field, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_SetStaticField_Double(ani_env *env, ani_class cls, ani_static_field field,
+                                                             ani_double value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassSetStaticField(env, cls, field, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_SetStaticField_Ref(ani_env *env, ani_class cls, ani_static_field field,
+                                                          ani_ref value)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(field);
+    CHECK_PTR_ARG(value);
+
+    EtsField *etsField = ToInternalField(field);
+    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<ani_ref>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+
+    ScopedManagedCodeFix s(env);
+    EtsClass *etsClass = s.ToInternalType(cls);
+    EtsObject *etsValue = s.ToInternalType(value);
+    etsClass->SetStaticFieldObject(etsField, etsValue);
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Boolean(ani_env *env, ani_class cls, const char *name,
+                                                                    ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassGetStaticFieldByName(env, cls, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Byte(ani_env *env, ani_class cls, const char *name,
+                                                                 ani_byte *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassGetStaticFieldByName(env, cls, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Short(ani_env *env, ani_class cls, const char *name,
+                                                                  ani_short *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassGetStaticFieldByName(env, cls, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Int(ani_env *env, ani_class cls, const char *name,
+                                                                ani_int *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassGetStaticFieldByName(env, cls, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Long(ani_env *env, ani_class cls, const char *name,
+                                                                 ani_long *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassGetStaticFieldByName(env, cls, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Float(ani_env *env, ani_class cls, const char *name,
+                                                                  ani_float *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassGetStaticFieldByName(env, cls, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Double(ani_env *env, ani_class cls, const char *name,
+                                                                   ani_double *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassGetStaticFieldByName(env, cls, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Ref(ani_env *env, ani_class cls, const char *name,
+                                                                ani_ref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    EtsClass *klass;
+    ani_status status = GetInternalClass(s, cls, &klass);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
+    EtsField *etsField = klass->GetStaticFieldIDByName(name, nullptr);
+    ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
+    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<ani_ref>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+    EtsObject *etsRes = klass->GetStaticFieldObject(etsField);
+    return s.AddLocalRef(etsRes, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Boolean(ani_env *env, ani_class cls, const char *name,
+                                                                    ani_boolean value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassSetStaticFieldByName(env, cls, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Byte(ani_env *env, ani_class cls, const char *name,
+                                                                 ani_byte value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassSetStaticFieldByName(env, cls, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Short(ani_env *env, ani_class cls, const char *name,
+                                                                  ani_short value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassSetStaticFieldByName(env, cls, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Int(ani_env *env, ani_class cls, const char *name,
+                                                                ani_int value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassSetStaticFieldByName(env, cls, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Long(ani_env *env, ani_class cls, const char *name,
+                                                                 ani_long value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassSetStaticFieldByName(env, cls, name, value);
+}
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Float(ani_env *env, ani_class cls, const char *name,
+                                                                  ani_float value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassSetStaticFieldByName(env, cls, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Double(ani_env *env, ani_class cls, const char *name,
+                                                                   ani_double value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ClassSetStaticFieldByName(env, cls, name, value);
+}
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Ref(ani_env *env, ani_class cls, const char *name,
+                                                                ani_ref value)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(value);
+
+    ScopedManagedCodeFix s(env);
+    EtsClass *klass;
+    ani_status status = GetInternalClass(s, cls, &klass);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
+    EtsField *etsField = klass->GetStaticFieldIDByName(name, nullptr);
+    ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
+    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<ani_ref>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+
+    EtsObject *etsValue = s.ToInternalType(value);
+    klass->SetStaticFieldObject(etsField, etsValue);
     return ANI_OK;
 }
 
@@ -1729,6 +2146,21 @@ NO_UB_SANITIZE static ani_status ResetError(ani_env *env)
     return ANI_OK;
 }
 
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status ThrowError(ani_env *env, ani_error err)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_PTR_ARG(err);
+
+    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
+    ANI_CHECK_RETURN_IF_EQ(pandaEnv, nullptr, ANI_ERROR);
+    ScopedManagedCodeFix s(pandaEnv);
+    EtsThrowable *exception = s.ToInternalType(err);
+    ANI_CHECK_RETURN_IF_EQ(exception, nullptr, ANI_ERROR);
+    PandaEnv::ToPandaEtsEnv(pandaEnv)->SetException(exception);
+    return ANI_OK;
+}
+
 NO_UB_SANITIZE static ani_status DescribeError(ani_env *env)
 {
     ANI_DEBUG_TRACE(env);
@@ -1740,6 +2172,27 @@ NO_UB_SANITIZE static ani_status DescribeError(ani_env *env)
 
     // NOTE: Implement when #21687 will be solved, #22008
     std::cerr << "DescribeError: method is not implemented" << std::endl;
+    return ANI_OK;
+}
+
+NO_UB_SANITIZE static ani_status GetUnhandledError(ani_env *env, ani_error *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(result);
+    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
+    ANI_CHECK_RETURN_IF_EQ(pandaEnv, nullptr, ANI_INVALID_ARGS);
+
+    ScopedManagedCodeFix s(pandaEnv);
+    EtsThrowable *throwable = pandaEnv->GetThrowable();
+    ANI_CHECK_RETURN_IF_EQ(throwable, nullptr, ANI_ERROR);
+    return s.AddLocalRef(throwable, reinterpret_cast<ani_ref *>(result));
+}
+
+NO_UB_SANITIZE static ani_status Abort([[maybe_unused]] ani_env *env, const char *message)
+{
+    ANI_DEBUG_TRACE(env);
+    LOG(FATAL, ANI) << "EtsAniError: " << message;
     return ANI_OK;
 }
 
@@ -3119,7 +3572,7 @@ const __ani_interaction_api INTERACTION_API = {
     Object_New,
     Object_New_A,
     Object_New_V,
-    NotImplementedAdapter<25>,
+    Object_GetType,
     Object_InstanceOf,
     NotImplementedAdapter<28>,
     NotImplementedAdapter<29>,
@@ -3146,12 +3599,12 @@ const __ani_interaction_api INTERACTION_API = {
     DestroyLocalScope,
     CreateEscapeLocalScope,
     DestroyEscapeLocalScope,
-    NotImplementedAdapter<56>,
+    ThrowError,
     ExistUnhandledError,
-    NotImplementedAdapter<58>,
+    GetUnhandledError,
     ResetError,
     DescribeError,
-    NotImplementedAdapter<61>,
+    Abort,
     GetNull,
     GetUndefined,
     Reference_IsNull,
@@ -3260,42 +3713,42 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<183>,
     NotImplementedAdapter<184>,
     NotImplementedAdapter<185>,
-    NotImplementedAdapter<186>,
+    Class_GetStaticField_Boolean,
     NotImplementedAdapter<187>,
-    NotImplementedAdapter<188>,
-    NotImplementedAdapter<189>,
-    NotImplementedAdapter<190>,
-    NotImplementedAdapter<191>,
-    NotImplementedAdapter<192>,
-    NotImplementedAdapter<193>,
-    NotImplementedAdapter<194>,
-    NotImplementedAdapter<195>,
+    Class_GetStaticField_Byte,
+    Class_GetStaticField_Short,
+    Class_GetStaticField_Int,
+    Class_GetStaticField_Long,
+    Class_GetStaticField_Float,
+    Class_GetStaticField_Double,
+    Class_GetStaticField_Ref,
+    Class_SetStaticField_Boolean,
     NotImplementedAdapter<196>,
-    NotImplementedAdapter<197>,
-    NotImplementedAdapter<198>,
-    NotImplementedAdapter<199>,
-    NotImplementedAdapter<200>,
-    NotImplementedAdapter<201>,
-    NotImplementedAdapter<202>,
-    NotImplementedAdapter<203>,
-    NotImplementedAdapter<204>,
+    Class_SetStaticField_Byte,
+    Class_SetStaticField_Short,
+    Class_SetStaticField_Int,
+    Class_SetStaticField_Long,
+    Class_SetStaticField_Float,
+    Class_SetStaticField_Double,
+    Class_SetStaticField_Ref,
+    Class_GetStaticFieldByName_Boolean,
     NotImplementedAdapter<205>,
-    NotImplementedAdapter<206>,
-    NotImplementedAdapter<207>,
-    NotImplementedAdapter<208>,
-    NotImplementedAdapter<209>,
-    NotImplementedAdapter<210>,
-    NotImplementedAdapter<211>,
-    NotImplementedAdapter<212>,
-    NotImplementedAdapter<213>,
+    Class_GetStaticFieldByName_Byte,
+    Class_GetStaticFieldByName_Short,
+    Class_GetStaticFieldByName_Int,
+    Class_GetStaticFieldByName_Long,
+    Class_GetStaticFieldByName_Float,
+    Class_GetStaticFieldByName_Double,
+    Class_GetStaticFieldByName_Ref,
+    Class_SetStaticFieldByName_Boolean,
     NotImplementedAdapter<214>,
-    NotImplementedAdapter<215>,
-    NotImplementedAdapter<216>,
-    NotImplementedAdapter<217>,
-    NotImplementedAdapter<218>,
-    NotImplementedAdapter<219>,
-    NotImplementedAdapter<220>,
-    NotImplementedAdapter<221>,
+    Class_SetStaticFieldByName_Byte,
+    Class_SetStaticFieldByName_Short,
+    Class_SetStaticFieldByName_Int,
+    Class_SetStaticFieldByName_Long,
+    Class_SetStaticFieldByName_Float,
+    Class_SetStaticFieldByName_Double,
+    Class_SetStaticFieldByName_Ref,
     Class_CallStaticMethod_Boolean,
     Class_CallStaticMethod_Boolean_A,
     Class_CallStaticMethod_Boolean_V,
