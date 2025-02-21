@@ -43,7 +43,7 @@ function cleanup(): void {
         let full_gc_id = GC.startGC(GC.FULL_CAUSE);
         GC.waitForFinishGC(full_gc_id);
     } catch (e) {
-        assert false : "Unexpected exception during GC";
+        assertTrue(false, "Unexpected exception during GC");
     }
 }
 

@@ -450,7 +450,7 @@ function gcJsruntimeCleanup(): void {
         Coroutine.Schedule();
         GC.waitForFinishGC(fullGcId);
     } catch (e) {
-        assert false : "Unexpected exception during GC";
+        assertTrue( false, "Unexpected exception during GC");
     }
 }
 
@@ -472,9 +472,9 @@ function testFinalizers(): boolean {
             JSRuntime.newJSValueDouble(1234);
         }
 
-        assert JSRuntime.getNumSharedJSValues() == numRefsPre + workload;
+        assertEQ( JSRuntime.getNumSharedJSValues(), numRefsPre + workload);
         gcJsruntimeCleanup();
-        assert JSRuntime.getNumSharedJSValues() == numRefsPre;
+        assertEQ( JSRuntime.getNumSharedJSValues(), numRefsPre);
     }
     return true;
 }
