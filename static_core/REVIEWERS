@@ -170,17 +170,17 @@ static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                @i
 static_core/plugins/ets/tests/interop_js/tests/promise/                       @udav
 static_core/plugins/ets/tests/sts_ts_subset/std/core/Promise*                 @anton-sysoev @aleksander-sotov @ivan-tyulyandin @dmitriitr @konstanting @udav
 
-/abc2program/ @ctw-ian
+/abc2program/ @ctw-ian @chenqy930
 /assembler/ @ctw-ian
 /bytecode_optimizer/ @ctw-ian
 /compiler/ @ctw-ian
 /disassembler/ @ctw-ian
-/isa/ @ctw-ian
+/isa/ @ctw-ian @chenqy930
 /ldscripts/ @gitee-dakeQI
 /libabckit/ @nazarovkonstantin
 /libark_defect_scan_aux/ @gitee-dakeQI
 /libpandabase/ @gitee-dakeQI
-/libpandafile/ @gitee-dakeQI
+/libpandafile/ @gitee-dakeQI @chenqy930
 /libziparchive/ @gitee-dakeQI
 /panda/ @gitee-dakeQI
 /pandastdlib/ @ctw-ian
