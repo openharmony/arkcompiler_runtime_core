@@ -29,33 +29,33 @@ public:
 TEST_F(ObjectSetFieldByNameBooleanTest, set_field)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, ani_boolean(true)), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, ANI_TRUE), ANI_TRUE);
 
-    ASSERT_EQ(env_->Object_SetFieldByName_Boolean(animal, "value", ani_boolean(false)), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, ani_boolean(false)), ANI_TRUE);
+    ASSERT_EQ(env_->Object_SetFieldByName_Boolean(animal, "value", ANI_FALSE), ANI_OK);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, ANI_FALSE), ANI_TRUE);
 }
 
 TEST_F(ObjectSetFieldByNameBooleanTest, not_found_name)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(env_->Object_SetFieldByName_Boolean(animal, "x", ani_boolean(true)), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_SetFieldByName_Boolean(animal, "x", ANI_TRUE), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectSetFieldByNameBooleanTest, invalid_type)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(env_->Object_SetFieldByName_Boolean(animal, "name", ani_boolean(true)), ANI_INVALID_TYPE);
+    ASSERT_EQ(env_->Object_SetFieldByName_Boolean(animal, "name", ANI_TRUE), ANI_INVALID_TYPE);
 }
 
 TEST_F(ObjectSetFieldByNameBooleanTest, invalid_object)
 {
-    ASSERT_EQ(env_->Object_SetFieldByName_Boolean(nullptr, "x", ani_boolean(true)), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_SetFieldByName_Boolean(nullptr, "x", ANI_TRUE), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectSetFieldByNameBooleanTest, invalid_name)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(env_->Object_SetFieldByName_Boolean(animal, nullptr, ani_boolean(true)), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_SetFieldByName_Boolean(animal, nullptr, ANI_TRUE), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing

@@ -32,10 +32,10 @@ public:
         ASSERT_EQ(env_->FindClass("LPack;", &cls), ANI_OK);
 
         ani_field fieldShort;
-        ASSERT_EQ(env_->Class_GetField(cls, "short_value", &fieldShort), ANI_OK);
+        ASSERT_EQ(env_->Class_FindField(cls, "short_value", &fieldShort), ANI_OK);
 
         ani_field fieldString;
-        ASSERT_EQ(env_->Class_GetField(cls, "string_value", &fieldString), ANI_OK);
+        ASSERT_EQ(env_->Class_FindField(cls, "string_value", &fieldString), ANI_OK);
 
         *packResult = static_cast<ani_object>(packRef);
         *fieldShortResult = fieldShort;

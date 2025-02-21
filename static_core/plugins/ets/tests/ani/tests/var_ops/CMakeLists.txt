@@ -16,11 +16,6 @@ ani_add_gtest(ani_test_var_ops_variable_get_value_boolean
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_boolean_test.sts
 )
 
-ani_add_gtest(ani_test_var_ops_variable_get_value_char
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_char_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_char_test.sts
-)
-
 ani_add_gtest(ani_test_var_ops_variable_get_value_byte
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_byte_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_byte_test.sts
