@@ -38,7 +38,9 @@ export class Declgen {
   private readonly rootFiles: readonly string[];
   private readonly compilerOptions: ts.CompilerOptions;
 
-  constructor(declgenOptions: DeclgenCLIOptions) {
+  constructor(
+    declgenOptions: DeclgenCLIOptions,
+    customResolveModuleNames?: (moduleName: string[], containingFile: string) => ts.ResolvedModuleFull[]) {
     const { rootNames, options } = Declgen.parseDeclgenOptions(declgenOptions);
 
     this.rootFiles = rootNames;
@@ -48,10 +50,14 @@ export class Declgen {
     this.compilerOptions = Object.assign(options, {
       declaration: true,
       emitDeclarationOnly: true,
-      outDir: declgenOptions.outDir
+      outDir: declgenOptions.outDir,
+      ...(declgenOptions.rootDir ? { rootDir: declgenOptions.rootDir } : {})
     });
 
     this.hookedHost = Declgen.createHookedCompilerHost(this.sourceFileMap, this.compilerOptions);
+    if (customResolveModuleNames) {
+      this.hookedHost.resolveModuleNames = customResolveModuleNames;
+    }
   }
 
   run(): DeclgenResult {
