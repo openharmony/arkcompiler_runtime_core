@@ -31,7 +31,8 @@ napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
     auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, jsArgs->data(), &athis, &data));
 
-    auto sharedRef = static_cast<ets_proxy::SharedReference *>(data);
+    // Atomic with acquire order reason: load visibility after shared reference initialization
+    auto *sharedRef = AtomicLoad(static_cast<ets_proxy::SharedReference **>(data), std::memory_order_acquire);
     ASSERT(sharedRef != nullptr);
 
     auto *etsThis = sharedRef->GetEtsObject();
@@ -60,8 +61,8 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
             jsValue = JSValue::CreateRefValue(coro, ctx, storage->GetJsObject(obj, env), napi_function);
         } else {
             napi_value jsFn;
-            auto preInitCallback = [&env, &jsFn](ets_proxy::SharedReference *uninitializedRef) {
-                ASSERT(uninitializedRef->IsEmpty());
+            auto preInitCallback = [&env, &jsFn](ets_proxy::SharedReference **uninitializedRef) {
+                ASSERT(uninitializedRef != nullptr);
                 NAPI_CHECK_FATAL(napi_create_function(env, ark::ets::LAMBDA_METHOD_NAME, NAPI_AUTO_LENGTH,
                                                       EtsLambdaProxyInvoke, uninitializedRef, &jsFn));
                 return jsFn;

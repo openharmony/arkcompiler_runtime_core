@@ -97,6 +97,8 @@ private:
 
     void MarkFromObject(void *obj);
 
+    void Remark();
+
     /// External specific fields ///
 
     PandaEtsVM *vm_ {nullptr};

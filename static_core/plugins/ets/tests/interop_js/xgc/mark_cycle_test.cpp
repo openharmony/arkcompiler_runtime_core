@@ -40,8 +40,7 @@ public:
             errors_.push_back(err.str());
             return;
         }
-        PandaUniquePtr<TestNativeReference> ref = MakePandaUnique<TestNativeReference>(refToMark_);
-        InteropCtx::Current()->GetSTSVMInterface()->MarkFromObject(ref.get());
+        InteropCtx::Current()->GetSTSVMInterface()->MarkFromObject(refToMark_->GetJsRef());
     }
 
     void SetExpectedJsObject(void *obj)

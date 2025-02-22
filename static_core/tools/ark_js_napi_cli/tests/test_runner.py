@@ -120,9 +120,11 @@ def judge_output(arguments):
             libs_path += f':{build_root}/thirdparty/libuv/'
             libs_path += f':{build_root}/thirdparty/bounds_checking_function/'
             os.environ['LD_LIBRARY_PATH'] = libs_path
-            check_cmd = f'{test_space}/bin/ark_js_napi_cli --stub-file \
-                          {test_space}/lib/stub.an --entry-point \
-                          {ts_test_name} {test_space}/{ts_test_name}.abc'
+            check_cmd = f'{test_space}/bin/ark_js_napi_cli \
+                          --stub-file {test_space}/lib/stub.an \
+                          --enable-force-gc=false \
+                          --entry-point {ts_test_name} \
+                          {test_space}/{ts_test_name}.abc'
             result &= check_command_result(check_cmd, f'{test_space}')
     return result
 

@@ -38,13 +38,13 @@ public:
     static constexpr size_t MAX_MARK_BITS = MarkWord::MarkWordRepresentation::HASH_SIZE;
 
     // Actual state of shared object is contained in ETS
-    bool InitETSObject(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx);
+    void InitETSObject(InteropCtx *ctx, EtsObject *etsObject, napi_ref jsRef, uint32_t refIdx);
 
     // Actual state of shared object is contained in JS
-    bool InitJSObject(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx);
+    void InitJSObject(InteropCtx *ctx, EtsObject *etsObject, napi_ref jsRef, uint32_t refIdx);
 
     // State of object is shared between ETS and JS
-    bool InitHybridObject(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx);
+    void InitHybridObject(InteropCtx *ctx, EtsObject *etsObject, napi_ref jsRef, uint32_t refIdx);
 
     using InitFn = decltype(&SharedReference::InitHybridObject);
 
@@ -63,29 +63,6 @@ public:
     {
         ASSERT(ctx_ != nullptr);
         return ctx_;
-    }
-
-#ifdef PANDA_JS_ETS_HYBRID_MODE
-    static void *ExtractMaybeReferenceHybrid(napi_env env, napi_value jsObject)
-    {
-        void *data = nullptr;
-        if (UNLIKELY(napi_xref_unwrap(env, jsObject, &data) != napi_ok)) {
-            return nullptr;
-        }
-        return data;
-    }
-#endif
-
-    static void *ExtractMaybeReference(napi_env env, napi_value jsObject)
-    {
-#ifdef PANDA_JS_ETS_HYBRID_MODE
-        return ExtractMaybeReferenceHybrid(env, jsObject);
-#endif
-        void *data = nullptr;
-        if (UNLIKELY(napi_unwrap(env, jsObject, &data) != napi_ok)) {
-            return nullptr;
-        }
-        return data;
     }
 
     static bool HasReference(EtsObject *etsObject)
@@ -205,8 +182,7 @@ private:
     friend class SharedReferenceSanity;
     friend class SharedReferenceStorage;
 
-    bool InitRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx,
-                 NapiXRefDirection refDirection);
+    void InitRef(InteropCtx *ctx, EtsObject *etsObject, napi_ref jsRef, uint32_t refIdx);
 
     void SetETSObject(EtsObject *obj)
     {

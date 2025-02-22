@@ -150,6 +150,7 @@ template("xgc_test") {
     cmd += " --stub-file " +
            rebase_path("${root_gen_dir}/arkcompiler/ets_runtime/stub.an")
     cmd += " --entry-point ${target_name}"
+    cmd += " --enable-force-gc=false"
     cmd += " " + rebase_path(jsabc_file)
     args += [ cmd ]
   }
@@ -232,13 +233,24 @@ xgc_test("sweep_sts2js_test") {
   sources = [ "sweep_sts2js_test.cpp" ]
 }
 
+xgc_test("remark_cycle_test") {
+  js = [
+    "remark_cycle_test.js",
+    "test_utils.js",
+  ]
+  sts = "xgc_tests.sts"
+  sources = [ "remark_cycle_test.cpp" ]
+}
+
 group("xgc_tests") {
   if (ark_ets_hybrid) {
     deps = [
       ":create_runtime_test",
+      ":mark_cycle2_test",
       ":mark_cycle_test",
       ":mark_js2sts_test",
       ":mark_sts2js_test",
+      ":remark_cycle_test",
       ":sweep_cycle_test",
       ":sweep_js2sts_test",
       ":sweep_sts2js_test",

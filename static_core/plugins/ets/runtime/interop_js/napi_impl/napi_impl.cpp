@@ -22,7 +22,7 @@
 
 #include <iostream>
 
-#ifdef PANDA_JS_ETS_HYBRID_MODE
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
 // NOLINTNEXTLINE(readability-identifier-naming)
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_xref_unwrap([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js_object, [[maybe_unused]] void **result)
@@ -39,9 +39,6 @@ napi_mark_from_object([[maybe_unused]] napi_env env, [[maybe_unused]] napi_ref r
                        << " is implemented in later versions of OHOS, please update." << std::endl;
     return napi_ok;
 }
-#endif
-
-#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
 // NOLINTNEXTLINE(readability-identifier-naming)
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 // NOLINT(readability-identifier-naming)
@@ -53,7 +50,7 @@ napi_xref_wrap([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js_obj
                        << " is implemented in later versions of OHOS, please update." << std::endl;
     return napi_ok;
 }
-#endif
+#endif  // PANDA_TARGET_OHOS || PANDA_JS_ETS_HYBRID_MODE
 
 namespace ark::ets::interop::js {
 
