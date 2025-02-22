@@ -20,3 +20,13 @@ ani_add_gtest(ani_test_namespace_find_variable
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_variable_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_variable_test.sts
 )
+
+ani_add_gtest(ani_test_namespace_find_namespace
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_namespace_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_namespace_test.sts
+)
+
+ani_add_gtest(ani_test_namespace_find_class
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_class_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_class_test.sts
+)
