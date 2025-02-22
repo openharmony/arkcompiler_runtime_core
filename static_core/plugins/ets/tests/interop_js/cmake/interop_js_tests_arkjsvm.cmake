@@ -113,11 +113,9 @@ function(panda_ets_interop_js_arkjsvm_gtest TARGET)
     )
     add_dependencies(${TARGET} ${TARGET_GTEST_PACKAGE})
 
-    set(JS_COMPILATION_OPTIONS)
-    if(DEFINED ARG_COMPILATION_JS_WITH_CJS_ON)
+    set(JS_COMPILATION_OPTIONS --module)
+    if(ARG_COMPILATION_JS_WITH_CJS_ON)
         set(JS_COMPILATION_OPTIONS --commonjs)
-    else()
-        set(JS_COMPILATION_OPTIONS --module)
     endif()
 
     set(ALL_SOURCES)
