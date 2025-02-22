@@ -10,11 +10,11 @@
                 "${PANDA_ROOT}/plugins/ets/stdlib/std"
             ],
             "promiseProxy": [
-                "${CMAKE_CURRENT_SOURCE_DIR}/promise_proxy_test.js"
+                "${CMAKE_CURRENT_BINARY_DIR}/promise_proxy_test.abc"
             ]
         },
         "dynamicPaths": {
-            "${CMAKE_CURRENT_SOURCE_DIR}/promise_proxy_test.js": {
+            "${CMAKE_CURRENT_BINARY_DIR}/promise_proxy_test.abc": {
                 "language": "js",
                 "hasDecl": false
             }

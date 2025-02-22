@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+const helper = requireNapiPreview('libinterop_test_helper.so', false);
+
 async function jsAsync() {
     return Promise.resolve('success');
 }
@@ -25,40 +27,38 @@ exports.jsAsync = jsAsync;
 exports.jsAsyncFailing = jsAsyncFailing;
 globalThis.require = require;
 
-
 function runTest(test) {
-    console.log('Running test ' + test);
-    let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
+    print('Running test ' + test);
+	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
     const etsOpts = {
-        'panda-files': process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-        'boot-panda-files': `${process.env.ARK_ETS_STDLIB_PATH}:${process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH}`,
-        'gc-trigger-type': 'heap-trigger',
-        'load-runtimes': 'ets',
-        'compiler-enable-jit': 'false',
-        'coroutine-js-mode': 'true',
-        // 'log-debug': 'coroutines',
-    };
-    const createRes = etsVm.createRuntime(etsOpts);
-    if (!createRes) {
-        console.log('Cannot create ETS runtime');
-        process.exit(1);
+		'panda-files': gtestAbcPath,
+		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
+		'gc-trigger-type': 'heap-trigger',
+		'load-runtimes': 'ets',
+		'compiler-enable-jit': 'false',
+		'coroutine-js-mode': 'true',
+		'coroutine-enable-external-scheduling': 'true',
+	};
+    if (!etsVm.createRuntime(etsOpts)) {
+        throw Error('Cannot create ETS runtime');
     }
 
     etsVm.call(test);
+    let tId = 0;
     let checkFn = () => {
         if (etsVm.call('.is_unset')) {
-            setTimeout(checkFn);
             return;
         }
+        helper.clearInterval(tId);
         etsVm.call('.check');
     };
-    setTimeout(checkFn);
+    tId = helper.setInterval(checkFn);
 }
 
-
-let args = process.argv;
-if (args.length !== 3) {
-    console.log('Expected test name');
-    process.exit(1);
+let args = helper.getArgv();
+if (args.length !== 5) {
+    throw Error('Expected test name');
 }
-runTest(args[2]);
+runTest(args[4]);

@@ -14,23 +14,26 @@
  */
 
 function runTest() {
+	const helper = requireNapiPreview('libinterop_test_helper.so', false);
+	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+
 	let test = 'toEtsAndBack';
-	console.log('Running test ' + test);
-	let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
-
-    let runtimeCreated = etsVm.createRuntime({
-        'boot-panda-files': process.env.ARK_ETS_STDLIB_PATH + ':' + process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH
-    });
-
-    if (!runtimeCreated) {
-		console.log('Cannot create ETS runtime');
-		process.exit(1);
+	print('Running test ' + test);
+	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+	const etsOpts = {
+		'panda-files': gtestAbcPath,
+		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
+		'coroutine-js-mode': true,
+		'coroutine-enable-external-scheduling': 'true',
+	};
+	if (!etsVm.createRuntime(etsOpts)) {
+		throw Error('Cannot create ETS runtime');
 	}
 	let jsPromise = Promise.resolve();
 	let etsPromise = etsVm.call('.getTheSamePromise', jsPromise);
 	if (jsPromise !== etsPromise) {
-		console.log('Test ' + test + ' failed: expected jsPromise and etsPromise are the same but actually they differs');
-		process.exit(1);
+		throw Error('Test ' + test + ' failed: expected jsPromise and etsPromise are the same but actually they differs');
 	}
 }
 

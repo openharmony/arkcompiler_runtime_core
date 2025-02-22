@@ -741,21 +741,19 @@ void StackfulCoroutineManager::TryResetCallbackPoster()
         // actually we need more complex logic here or
         // re-creation of the callbackPoster_ in js -> ets call
         if (IsNoActiveMutatorsExceptCurrent()) {
-            {
-                os::memory::LockHolder l(posterLock_);
-                callbackPoster_.reset();
-            }
-            os::memory::LockHolder lh(workersLock_);
-            for (auto *w : workers_) {
-                w->ResetCallbackPoster();
-            }
+            os::memory::LockHolder l(posterLock_);
+            callbackPoster_.reset();
         }
     });
 }
 
 void StackfulCoroutineManager::TriggerSchedulerExternally(StackfulCoroutineWorker *triggerOwner)
 {
-    if (!triggerOwner->IsMainWorker() && !triggerOwner->InExclusiveMode()) {
+    if (triggerOwner->IsMainWorker()) {
+        PostExternalCallback([this] { Schedule(); });
+        return;
+    }
+    if (!triggerOwner->InExclusiveMode()) {
         return;
     }
     auto schedule = [this, triggerOwner] {

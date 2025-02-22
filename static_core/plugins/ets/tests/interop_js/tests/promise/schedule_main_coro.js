@@ -13,35 +13,39 @@
  * limitations under the License.
  */
 
+const helper = requireNapiPreview('libinterop_test_helper.so', false);
+
 function init() {
-    let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
+	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
 
-    let runtimeCreated = etsVm.createRuntime({
-        'boot-panda-files': process.env.ARK_ETS_STDLIB_PATH + ':' + process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH
-    });
-
-    if (!runtimeCreated) {
-        process.exit(1);
+	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+	const etsOpts = {
+		'panda-files': gtestAbcPath,
+		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
+		'coroutine-js-mode': true,
+		'coroutine-enable-external-scheduling': 'true',
+	};
+	if (!etsVm.createRuntime(etsOpts)) {
+		throw Error('Cannot create ETS runtime');
     }
     return etsVm;
 }
 
 function runTest() {
     let etsVm = init();
+    let tId = 0;
 
     let waitForSchedule = () => {
-        queueMicrotask(() => {
-            let wasSchedulded = etsVm.call('.wasScheduled');
-            if (wasSchedulded) {
-                return;
-            }
-            setTimeout(waitForSchedule, 1);
-        });
+        let wasSchedulded = etsVm.call('.wasScheduled');
+        if (wasSchedulded) {
+            helper.clearInterval(tId);
+        }
     };
 
     etsVm.call('.waitUntillJsIsReady');
     etsVm.call('.jsIsReady');
-    setTimeout(waitForSchedule, 1);
+    tId = helper.setInterval(waitForSchedule, 0);
 }
 
 runTest();

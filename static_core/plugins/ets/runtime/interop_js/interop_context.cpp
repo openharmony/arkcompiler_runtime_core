@@ -548,6 +548,12 @@ void InteropCtx::Init(EtsCoroutine *coro, napi_env env)
     worker->GetLocalStorage().Set<CoroutineWorker::DataIdx::EXTERNAL_IFACES>(&ctx->interfaceTable_);
 #ifdef PANDA_JS_ETS_HYBRID_MODE
     Handshake::VmHandshake(env, coro, ctx->sharedEtsVmState_->stsVMInterface.get());
+    auto rType = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
+    if (Runtime::GetOptions().IsCoroutineEnableExternalScheduling(rType)) {
+        auto mainPoster = coro->GetPandaVM()->CreateCallbackPoster(coro);
+        ASSERT(mainPoster != nullptr);
+        worker->SetCallbackPoster(std::move(mainPoster));
+    }
 #endif
 }
 

@@ -70,7 +70,6 @@ void RunTaskOnEACoroutine(PandaEtsVM *etsVM, bool needInterop, Coroutine *exclus
         auto poster = etsVM->CreateCallbackPoster(exclusiveCoro);
         ASSERT(poster != nullptr);
         poster->Post(RunExclusiveTask, taskRef, refStorage);
-        exclusiveCoro->GetWorker()->SetCallbackPoster(std::move(poster));
         etsVM->RunEventLoop(exclusiveCoro);
     } else {
         ScopedManagedCodeThread ss(exclusiveCoro);

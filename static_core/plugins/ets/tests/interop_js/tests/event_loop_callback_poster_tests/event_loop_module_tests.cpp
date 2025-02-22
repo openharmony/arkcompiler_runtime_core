@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@ public:
 TEST_F(EventLoopCallbackPosterTest, ManyPostsTest)
 {
     std::string messageCollector;  // it's empty string
-    uv_loop_t *loop = uv_default_loop();
+    uv_loop_t *loop = EventLoop::GetEventLoop(Coroutine::GetCurrent());
     EventLoopCallbackPosterFactoryImpl factory;
     {
         auto poster = factory.CreatePoster(Coroutine::GetCurrent());
@@ -58,7 +58,7 @@ TEST_F(EventLoopCallbackPosterTest, ManyPostsTest)
 
 TEST_F(EventLoopCallbackPosterTest, DeletingInPostTest)
 {
-    uv_loop_t *loop = uv_default_loop();
+    uv_loop_t *loop = EventLoop::GetEventLoop(Coroutine::GetCurrent());
     EventLoopCallbackPosterFactoryImpl factory;
     auto poster = factory.CreatePoster(Coroutine::GetCurrent());
     // run loop only once to avoid deadlock due to mainPoster in runtime
