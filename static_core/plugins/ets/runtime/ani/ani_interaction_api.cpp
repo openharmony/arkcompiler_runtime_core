@@ -1463,9 +1463,8 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Ref(ani_env *env, ani_variabl
 }
 
 template <bool IS_STATIC_FIELD>
-static ani_status DoGetField(ani_env *env, ani_class cls, const char *name, EtsField **result)
+static ani_status DoGetField(ScopedManagedCodeFix &s, ani_class cls, const char *name, EtsField **result)
 {
-    ScopedManagedCodeFix s(env);
     EtsClass *klass;
     ani_status status = GetInternalClass(s, cls, &klass);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
@@ -1481,6 +1480,13 @@ static ani_status DoGetField(ani_env *env, ani_class cls, const char *name, EtsF
 
     *result = field;
     return ANI_OK;
+}
+
+template <bool IS_STATIC_FIELD>
+static ani_status DoGetField(ani_env *env, ani_class cls, const char *name, EtsField **result)
+{
+    ScopedManagedCodeFix s(env);
+    return DoGetField<IS_STATIC_FIELD>(s, cls, name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -4885,6 +4891,271 @@ NO_UB_SANITIZE static ani_status DestroyEscapeLocalScope(ani_env *env, ani_ref r
     return s.DestroyEscapeLocalScope(ref, result);
 }
 
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status FindEnum(ani_env *env, const char *enum_descriptor, ani_enum *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(enum_descriptor);
+    CHECK_PTR_ARG(result);
+
+    // NOTE: Check that result is enum, #22400
+    return DoFind(env, enum_descriptor, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Namespace_FindEnum(ani_env *env, ani_namespace ns, const char *enum_descriptor,
+                                                    ani_enum *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(ns);
+    CHECK_PTR_ARG(enum_descriptor);
+    CHECK_PTR_ARG(result);
+
+    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
+    ScopedManagedCodeFix s(env);
+    EtsNamespace *etsNs;
+    ani_status status = GetInternalNamespace(s, ns, &etsNs);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
+    const char *etsNsDescriptor = etsNs->AsClass()->GetDescriptor();
+    PandaString etsNsDescriptorPandStr(etsNsDescriptor);
+    PandaString enumDescriptorPandStr(enum_descriptor);
+
+    if (!enumDescriptorPandStr.empty() && enumDescriptorPandStr[0] == 'L') {
+        enumDescriptorPandStr[0] = '/';
+    } else {
+        return ANI_NOT_FOUND;
+    }
+
+    etsNsDescriptorPandStr.pop_back();
+    etsNsDescriptorPandStr += enumDescriptorPandStr;
+
+    return DoFind(pandaEnv, etsNsDescriptorPandStr.c_str(), s, result);
+}
+
+template <typename T>
+static ani_status ModuleDoFind(ani_env *env, ani_module module, const char *enumDescriptor, T *result)
+{
+    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
+    ScopedManagedCodeFix s(env);
+    EtsModule *etsModule;
+    ani_status status = GetInternalModule(s, module, &etsModule);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
+    const char *etsModuleDescriptor = etsModule->AsClass()->GetDescriptor();
+    PandaString etsModuleDescriptorPandStr(etsModuleDescriptor);
+    PandaString enumDescriptorPandStr(enumDescriptor);
+
+    if (!enumDescriptorPandStr.empty() && enumDescriptorPandStr[0] == 'L') {
+        enumDescriptorPandStr[0] = '/';
+    } else {
+        return ANI_NOT_FOUND;
+    }
+
+    PandaString global = "/ETSGLOBAL;";
+    etsModuleDescriptorPandStr.replace(etsModuleDescriptorPandStr.find(global), global.size(), "");
+    etsModuleDescriptorPandStr += enumDescriptorPandStr;
+
+    return DoFind(pandaEnv, etsModuleDescriptorPandStr.c_str(), s, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Module_FindEnum(ani_env *env, ani_module module, const char *enum_descriptor,
+                                                 ani_enum *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(module);
+    CHECK_PTR_ARG(enum_descriptor);
+    CHECK_PTR_ARG(result);
+
+    return ModuleDoFind(env, module, enum_descriptor, result);
+}
+
+static ani_status GetArrayFromEnum(ScopedManagedCodeFix &s, ani_enum enm, const char *name, EtsObjectArray **result)
+{
+    EtsField *field = nullptr;
+    ani_status status = DoGetField<true>(s, reinterpret_cast<ani_class>(enm), name, &field);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
+    EtsClass *cls = field->GetDeclaringClass();
+    EtsObject *etsObject = cls->GetStaticFieldObject(field);
+    *result = EtsObjectArray::FromCoreType(etsObject->GetCoreType());
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Enum_GetEnumItemByName(ani_env *env, ani_enum enm, const char *name,
+                                                        ani_enum_item *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(enm);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    // Get index, then call unified function for Enum_GetEnumItemByIndex
+    ScopedManagedCodeFix s(env);
+    EtsObjectArray *namesArr;
+    ani_status status = GetArrayFromEnum(s, enm, EnumArrayNames::NAMES.data(), &namesArr);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    size_t sz = namesArr->GetLength();
+
+    size_t index = 0;
+    for (; index < sz; ++index) {
+        EtsObject *etsElem = namesArr->Get(index);
+        EtsString *etsStr = EtsString::FromEtsObject(etsElem);
+        if (etsStr->IsEqual(name)) {
+            break;
+        }
+    }
+    if (index >= sz) {
+        return ANI_NOT_FOUND;
+    }
+
+    EtsObjectArray *itemsArr;
+    status = GetArrayFromEnum(s, enm, EnumArrayNames::BOXED_ITEMS.data(), &itemsArr);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsObject *res = itemsArr->Get(index);
+
+    return s.AddLocalRef(res, reinterpret_cast<ani_ref *>(result));
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Enum_GetEnumItemByIndex(ani_env *env, ani_enum enm, ani_size index,
+                                                         ani_enum_item *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(enm);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    EtsObjectArray *itemsArr;
+    ani_status status = GetArrayFromEnum(s, enm, EnumArrayNames::BOXED_ITEMS.data(), &itemsArr);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
+    if (index >= itemsArr->GetLength()) {
+        return ANI_NOT_FOUND;
+    }
+    EtsObject *res = itemsArr->Get(index);
+
+    return s.AddLocalRef(res, reinterpret_cast<ani_ref *>(result));
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status EnumItem_GetEnum(ani_env *env, ani_enum_item enum_item, ani_enum *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(enum_item);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    EtsObject *internalEnumItem = s.ToInternalType(enum_item);
+    EtsClass *enumClass = internalEnumItem->GetClass();
+
+    return s.AddLocalRef(reinterpret_cast<EtsObject *>(enumClass), reinterpret_cast<ani_ref *>(result));
+}
+
+template <typename T>
+static T *GetArrayFromInternalEnum(EtsHandle<EtsClass> enumClass, const char *name)
+{
+    EtsField *field = enumClass->GetStaticFieldIDByName(name, nullptr);
+    if (field == nullptr) {
+        return nullptr;
+    }
+
+    EtsClass *cls = field->GetDeclaringClass();
+    EtsObject *etsObject = cls->GetStaticFieldObject(field);
+    return reinterpret_cast<T *>(etsObject->GetCoreType());
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status EnumItem_GetValue_Int(ani_env *env, ani_enum_item enum_item, ani_int *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(enum_item);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    EtsCoroutine *coroutine = s.GetCoroutine();
+    EtsHandleScope scope(coroutine);
+    EtsHandle<EtsObject> internalEnumItem(coroutine, s.ToInternalType(enum_item));
+    EtsHandle<EtsClass> enumClass(coroutine, internalEnumItem->GetClass());
+    EtsField *etsField = enumClass->GetFieldIDByName("ordinal", nullptr);
+    auto ordinal = internalEnumItem->GetFieldPrimitive<int32_t>(etsField);
+
+    auto *itemsArr = GetArrayFromInternalEnum<EtsIntArray>(enumClass, EnumArrayNames::VALUES.data());
+    // If enum values are strings, there is no ValuesArray array, so incorrect call to method
+    if (itemsArr == nullptr) {
+        return ANI_INVALID_ARGS;
+    }
+    *result = itemsArr->Get(ordinal);
+    return ANI_OK;
+}
+
+static ani_status GetStringArrayFromEnumItem(ani_env *env, ani_enum_item enumItem, const char *arrayName,
+                                             ani_string *result)
+{
+    ScopedManagedCodeFix s(env);
+    EtsCoroutine *coroutine = s.GetCoroutine();
+    EtsHandleScope scope(coroutine);
+    EtsHandle<EtsObject> internalEnumItem(coroutine, s.ToInternalType(enumItem));
+    EtsHandle<EtsClass> enumClass(coroutine, internalEnumItem->GetClass());
+    EtsField *etsField = enumClass->GetFieldIDByName("ordinal", nullptr);
+    auto ordinal = internalEnumItem->GetFieldPrimitive<int32_t>(etsField);
+
+    auto *itemsArr = GetArrayFromInternalEnum<EtsObjectArray>(enumClass, arrayName);
+    EtsObject *stringObj = itemsArr->Get(ordinal);
+    return s.AddLocalRef(stringObj, reinterpret_cast<ani_ref *>(result));
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status EnumItem_GetValue_String(ani_env *env, ani_enum_item enum_item, ani_string *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(enum_item);
+    CHECK_PTR_ARG(result);
+
+    return GetStringArrayFromEnumItem(env, enum_item, EnumArrayNames::STRING_VALUES.data(), result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status EnumItem_GetName(ani_env *env, ani_enum_item enum_item, ani_string *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(enum_item);
+    CHECK_PTR_ARG(result);
+
+    return GetStringArrayFromEnumItem(env, enum_item, EnumArrayNames::NAMES.data(), result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status EnumItem_GetIndex(ani_env *env, ani_enum_item enum_item, ani_size *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(enum_item);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    EtsCoroutine *coroutine = s.GetCoroutine();
+    EtsHandleScope scope(coroutine);
+    EtsHandle<EtsObject> internalEnumItem(coroutine, s.ToInternalType(enum_item));
+    EtsHandle<EtsClass> enumClass(coroutine, internalEnumItem->GetClass());
+    EtsField *etsField = enumClass->GetFieldIDByName("ordinal", nullptr);
+    auto ordinal = internalEnumItem->GetFieldPrimitive<int32_t>(etsField);
+
+    *result = ordinal;
+    return ANI_OK;
+}
+
 [[noreturn]] static void NotImplementedAPI(int nr)
 {
     LOG(FATAL, ANI) << "Not implemented interaction_api, nr=" << nr;
@@ -4921,15 +5192,15 @@ const __ani_interaction_api INTERACTION_API = {
     FindModule,
     FindNamespace,
     FindClass,
-    NotImplementedAdapter<33>,
+    FindEnum,
     Module_FindNamespace,
     Module_FindClass,
-    NotImplementedAdapter<37>,
+    Module_FindEnum,
     Module_FindFunction,
     Module_FindVariable,
     Namespace_FindNamespace,
     Namespace_FindClass,
-    NotImplementedAdapter<42>,
+    Namespace_FindEnum,
     Namespace_FindFunction,
     Namespace_FindVariable,
     Module_BindNativeFunctions,
@@ -4990,13 +5261,13 @@ const __ani_interaction_api INTERACTION_API = {
     Array_New_Ref,
     Array_Set_Ref,
     Array_Get_Ref,
-    NotImplementedAdapter<118>,
-    NotImplementedAdapter<119>,
-    NotImplementedAdapter<120>,
-    NotImplementedAdapter<121>,
-    NotImplementedAdapter<122>,
-    NotImplementedAdapter<123>,
-    NotImplementedAdapter<124>,
+    Enum_GetEnumItemByName,
+    Enum_GetEnumItemByIndex,
+    EnumItem_GetEnum,
+    EnumItem_GetValue_Int,
+    EnumItem_GetValue_String,
+    EnumItem_GetName,
+    EnumItem_GetIndex,
     NotImplementedAdapter<125>,
     Variable_SetValue_Boolean,
     Variable_SetValue_Char,

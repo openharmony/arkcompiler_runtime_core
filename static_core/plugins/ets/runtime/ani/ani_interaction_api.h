@@ -17,12 +17,20 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_ANI_INTERACTION_API_H
 
 #include <cstdint>
+#include <string_view>
 
 struct __ani_interaction_api;  // CC-OFF(G.NAM.01) Interface from external header
 
 namespace ark::ets::ani {
 const __ani_interaction_api *GetInteractionAPI();
 bool IsVersionSupported(uint32_t version);
+
+struct EnumArrayNames {
+    static constexpr std::string_view NAMES = "NamesArray";
+    static constexpr std::string_view VALUES = "ValuesArray";
+    static constexpr std::string_view STRING_VALUES = "StringValuesArray";
+    static constexpr std::string_view BOXED_ITEMS = "BoxedItemsArray";
+};
 }  // namespace ark::ets::ani
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ANI_INTERACTION_API_H
