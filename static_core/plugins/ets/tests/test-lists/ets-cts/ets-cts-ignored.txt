@@ -1534,10 +1534,6 @@
 04.names_declarations_and_scopes/05.accesible/type_name_neg_2.sts
 # end es2panda
 
-# es2panda 19635: compilation segfault, enum
-04.names_declarations_and_scopes/05.accesible/type_name_interface_prop_20.sts
-# end es2panda
-
 # es2panda 19640: compilation segfault, custom type
 04.names_declarations_and_scopes/05.accesible/type_name_interface_prop_22.sts
 # end es2panda

@@ -238,6 +238,7 @@ cases:
     # Custom
   - decl: |-
       type T = int[]
+    tags: 'compile-only, negative'
     init: |-
       foo = [1, -2];
     check: |-
