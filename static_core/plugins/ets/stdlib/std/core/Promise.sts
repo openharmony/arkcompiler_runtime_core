@@ -53,16 +53,6 @@ export final class Promise<out T> implements PromiseLike<T> {
     private constructor() {
     }
 
-    constructor(callback: (resolve: (value: T|PromiseLike<T>) => void) => void) {
-        try {
-            callback((value: T|PromiseLike<T>): void => {
-                this.doResolve<T>(value);
-            });
-        } catch (error) {
-            this.rejectImpl(error);
-        }
-    }
-
     constructor(callback: (resolve: (value: T|PromiseLike<T>) => void,
             reject: (error: NullishType) => void) => void) {
         try {

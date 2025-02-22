@@ -46,27 +46,6 @@ export interface ReadonlyMap<K, V> extends Iterable<[K, V]> {
      *
      * @param callbackfn to apply
      */
-    forEach(callbackfn: () => void): void;
-
-    /**
-     * Executes a provided function once per each key/value pair in the Map, in insertion order
-     *
-     * @param callbackfn to apply
-     */
-    forEach(callbackfn: (value: V) => void): void;
-
-    /**
-     * Executes a provided function once per each key/value pair in the Map, in insertion order
-     *
-     * @param fn to apply
-     */
-    forEach(callbackfn: (value: V, key: K) => void): void;
-
-    /**
-     * Executes a provided function once per each key/value pair in the Map, in insertion order
-     *
-     * @param callbackfn to apply
-     */
     forEach(callbackfn: (value: V, key: K, map: ReadonlyMap<K, V>) => void): void;
 
     /**
@@ -517,36 +496,6 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         iteratorForEach<MapEntry<K, V>>(entriesIter, (e: MapEntry<K, V>): void => {
             callbackfn(e.val, e.key, this)
         })
-    }
-
-    /**
-     * Executes a provided function once per each key/value pair in the Map, in insertion order
-     *
-     * @param callbackfn to apply
-     */
-    override forEach(callbackfn: (v: V, k: K) => void): void {
-        const entriesIter = this.mappedIterator<MapEntry<K, V>>((e: MapEntry<K, V>): MapEntry<K, V> => e)
-        iteratorForEach<MapEntry<K, V>>(entriesIter, (e: MapEntry<K, V>): void => {
-            callbackfn(e.val, e.key)
-        })
-    }
-
-    /**
-     * Executes a provided function once per each key/value pair in the Map, in insertion order
-     *
-     * @param callbackfn to apply
-     */
-    override forEach(callbackfn: (v: V) => void): void {
-        iteratorForEach<V>(this.values(), callbackfn)
-    }
-
-    /**
-     * Executes a provided function once per each key/value pair in the Map, in insertion order
-     *
-     * @param callbackfn to apply
-     */
-    override forEach(callbackfn: () => void): void {
-        iteratorForEach<V>(this.values(), (v: V) => callbackfn())
     }
 }
 

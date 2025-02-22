@@ -81,7 +81,7 @@ ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
         return reinterpret_cast<ObjectHeader **>(VMHandle<ObjectHeader>(coro, val).GetAddress());
     };
 
-    ObjectHeader **thisObjRoot = IS_STATIC ? nullptr : createRoot(thisObj_->GetCoreType());
+    [[maybe_unused]] ObjectHeader **thisObjRoot = IS_STATIC ? nullptr : createRoot(thisObj_->GetCoreType());
 
     using ArgValueBox = std::variant<uint64_t, ObjectHeader **>;
     auto const numArgs = protoReader_.GetMethod()->GetNumArgs() - !IS_STATIC;

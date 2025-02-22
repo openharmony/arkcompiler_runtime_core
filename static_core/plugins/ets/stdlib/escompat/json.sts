@@ -1160,15 +1160,6 @@ class JSONValueParser {
         }
     }
 
-    private revivingClassFieldSetter(classVal: ClassValue, fieldName: string, fieldVal: NullishType): void {
-        const revivedVal = this.reviver!(fieldName, fieldVal)
-
-        // setFieldByName doesn't allow null/undefined values
-        if (revivedVal != null) {
-            classVal.setFieldByName(fieldName, Value.of(revivedVal))
-        }
-    }
-
     private classFieldSetter(classVal: ClassValue, fieldName: string, fieldVal: NullishType): void {
         classVal.setFieldByName(fieldName, Value.of(fieldVal))
     }
@@ -1177,7 +1168,14 @@ class JSONValueParser {
         let setClassFieldFn = (cv: ClassValue, fn: string, fv: NullishType) => { cv.setFieldByName(fn, Value.of(fv)) }
 
         if (this.reviver != undefined) {
-            setClassFieldFn = this.revivingClassFieldSetter
+            setClassFieldFn = (classVal: ClassValue, fieldName: string, fieldVal: NullishType): void => {
+                const revivedVal = this.reviver!(fieldName, fieldVal)
+        
+                // setFieldByName doesn't allow null/undefined values
+                if (revivedVal != null) {
+                    classVal.setFieldByName(fieldName, Value.of(revivedVal))
+                }
+            }
         }
 
         let object = classType.make()
@@ -1201,11 +1199,6 @@ class JSONValueParser {
         return object
     }
 
-    private revivingArrayElementSetter(array: NullishType[], index: int, elemVal: NullishType): void {
-        const revivedVal = this.reviver!(`${index}`, elemVal)
-        array[index] = revivedVal !== undefined ? revivedVal : null
-    }
-
     private parseArray(jVal: JSONArray, aType: ArrayType): Object | null {
         let len = jVal.values.length
         let arr = aType.make(len as int) as NullishType[]
@@ -1213,7 +1206,10 @@ class JSONValueParser {
         let setArrayElementFn = (a: NullishType[], i: int, v: NullishType) => { a[i] = v }
 
         if (this.reviver !== undefined) {
-            setArrayElementFn = this.revivingArrayElementSetter
+            setArrayElementFn = (array: NullishType[], index: int, elemVal: NullishType): void => {
+                const revivedVal = this.reviver!(`${index}`, elemVal)
+                array[index] = revivedVal !== undefined ? revivedVal : null
+            }
         }
 
         for (let i = 0; i < len; i++) {

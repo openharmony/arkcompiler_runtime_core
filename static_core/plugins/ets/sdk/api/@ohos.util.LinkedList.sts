@@ -131,45 +131,6 @@ export class LinkedList<T> implements Iterable<T> {
     }
 
     /**
-     * Executes a provided function once for each list element.
-     * @param callbackfn The function to execute for each element.
-     */
-    public forEach(callbackfn: () => void): void {
-        this.forEach((value: T, index: number): void => {
-            callbackfn();
-        });
-    }
-
-    /**
-     * Executes a provided function once for each element in the linked list.
-     *
-     * @param callbackfn - A function to execute on each element in the linked list.
-     * The function receives the current element as an argument.
-     */
-    public forEach(callbackfn: (value: T) => void): void {
-        this.forEach((value: T, index: number): void => {
-            callbackfn(value);
-        });
-    }
-
-    /**
-     * Iterates over each element in the linked list, executing the provided callback function for each element.
-     *
-     * @param callbackfn - A function that accepts up to two arguments. 
-     *      forEach calls the callbackfn function one time for each element in the linked list.
-     * @param callbackfn.value - The current element being processed in the linked list.
-     * @param callbackfn.index - The index of the current element being processed in the linked list.
-     */
-    public forEach(callbackfn: (value: T, index: number) => void): void {
-        let index: number = 0;
-        let currentNode: ListNode<T> | undefined = this.head;
-        while (currentNode !== undefined) {
-            callbackfn(currentNode!.element, index++);
-            currentNode = currentNode?.next;
-        }
-    }
-
-    /**
     * Iterates over each element in the linked list, executing the provided callback function for each element.
     *
     * @param callbackfn - A function that accepts up to two arguments. 

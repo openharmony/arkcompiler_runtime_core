@@ -2636,12 +2636,12 @@ export final class LambdaType extends FunctionType {
         }
         let l = (this)
         let r = other as LambdaType
-        if (l.getParametersNum() != r.getParametersNum()) {
+        if (l.getParametersNum() < r.getParametersNum()) {
             return false
         }
 
         // Parameter types are using contravariance
-        for (let i = 0; i < l.getParametersNum(); i++) {
+        for (let i = 0; i < r.getParametersNum(); i++) {
             let lt = l.getParameter(i).getType()
             let rt = r.getParameter(i).getType()
 

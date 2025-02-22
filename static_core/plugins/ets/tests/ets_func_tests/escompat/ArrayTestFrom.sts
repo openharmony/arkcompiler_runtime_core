@@ -30,7 +30,7 @@ function main(): int {
 type cbFn0<U> = () => U
 type cbFn1<T, U> = (v: T) => U
 type cbFn2<T, U> = (v: T, k: number) => U
-type cbFn<T, U> = cbFn0<U> | cbFn1<T, U> | cbFn2<T, U>
+type cbFn<T, U> = cbFn2<T, U>
 type NumberToStringFn = cbFn<Number, String>
 type NumberToStringCase = [Number[], NumberToStringFn, String[]]
 

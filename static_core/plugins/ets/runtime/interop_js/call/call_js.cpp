@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -218,7 +218,7 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::CallConverted(Span
 template <bool IS_NEWCALL>
 ALWAYS_INLINE inline std::optional<Value> CallJSHandler::ConvertRetval(napi_value jsRet)
 {
-    napi_env env = ctx_->GetJSEnv();
+    [[maybe_unused]] napi_env env = ctx_->GetJSEnv();
     Value etsRet;
     protoReader_.Reset();
 

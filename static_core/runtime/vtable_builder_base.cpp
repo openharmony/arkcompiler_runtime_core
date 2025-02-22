@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,31 +20,31 @@ namespace ark {
 void OnVTableConflict(ClassLinkerErrorHandler *errHandler, ClassLinker::Error error, std::string_view msg,
                       MethodInfo const *info1, MethodInfo const *info2)
 {
-    if (errHandler == nullptr) {
-        return;
-    }
     auto res = PandaString(msg) + " ";
     res += utf::Mutf8AsCString(info1->GetClassName());
     res += utf::Mutf8AsCString(info1->GetName().data);
     res += " ";
     res += utf::Mutf8AsCString(info2->GetClassName());
     res += utf::Mutf8AsCString(info2->GetName().data);
-    errHandler->OnError(error, res);
+    LOG(DEBUG, CLASS_LINKER) << "vtable conflict: " << res;
+    if (errHandler != nullptr) {
+        errHandler->OnError(error, res);
+    }
 }
 
 void OnVTableConflict(ClassLinkerErrorHandler *errHandler, ClassLinker::Error error, std::string_view msg,
                       Method const *info1, Method const *info2)
 {
-    if (errHandler == nullptr) {
-        return;
-    }
     auto res = PandaString(msg) + " ";
     res += utf::Mutf8AsCString(info1->GetClassName().data);
     res += utf::Mutf8AsCString(info1->GetName().data);
     res += " ";
     res += utf::Mutf8AsCString(info2->GetClassName().data);
     res += utf::Mutf8AsCString(info2->GetName().data);
-    errHandler->OnError(error, res);
+    LOG(DEBUG, CLASS_LINKER) << "vtable conflict: " << res;
+    if (errHandler != nullptr) {
+        errHandler->OnError(error, res);
+    }
 }
 
 void VTableInfo::DumpMappings()

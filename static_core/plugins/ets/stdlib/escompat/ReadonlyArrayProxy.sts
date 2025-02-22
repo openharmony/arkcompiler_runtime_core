@@ -56,31 +56,7 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     	return this.target.every(predicate)
     }
 
-    override every(predicate: (value: T, index: number) => boolean): boolean {
-    	return this.target.every(predicate)
-    }
-
-    override every(predicate: (value: T) => boolean): boolean {
-    	return this.target.every(predicate)
-    }
-
-    override every(predicate: () => boolean): boolean {
-    	return this.target.every(predicate)
-    }
-
     override filter(predicate: (value: T, index: number, array: ReadonlyArray<T>) => boolean): Array<T> {
-    	return this.target.filter(predicate)
-    }
-
-    override filter(predicate: (value: T, index: number) => boolean): Array<T> {
-    	return this.target.filter(predicate)
-    }
-
-    override filter(predicate: (value: T) => boolean): Array<T> {
-    	return this.target.filter(predicate)
-    }
-
-    override filter(predicate: () => boolean): Array<T> {
     	return this.target.filter(predicate)
     }
 
@@ -88,31 +64,7 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     	return this.target.find(predicate)
     } 
 
-    override find(predicate: (value: T, index: number) => boolean): T | undefined {
-    	return this.target.find(predicate)
-    }
-
-    override find(predicate: (value: T) => boolean): T | undefined {
-    	return this.target.find(predicate)
-    }
-
-    override find(predicate: () => boolean): T | undefined {
-    	return this.target.find(predicate)
-    }
-
     override findLast(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | undefined {
-    	return this.target.findLast(predicate)
-    }
-
-    override findLast(predicate: (value: T, index: number) => boolean): T | undefined {
-    	return this.target.findLast(predicate)
-    }
-
-    override findLast(predicate: (value: T) => boolean): T | undefined {
-    	return this.target.findLast(predicate)
-    }
-
-    override findLast(predicate: () => boolean): T | undefined {
     	return this.target.findLast(predicate)
     }
 
@@ -120,48 +72,12 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     	return this.target.findIndex(predicate)
     }
 
-    override findIndex(predicate: (value: T, index: number) => boolean): number {
-    	return this.target.findIndex(predicate)
-    }
-
-    override findIndex(predicate: (value: T) => boolean): number {
-    	return this.target.findIndex(predicate)
-    }
-
-    override findIndex(predicate: () => boolean): number {
-    	return this.target.findIndex(predicate)
-    }
-
     override findLastIndex(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): number {
-    	return this.target.findLastIndex(predicate)
-    }
-
-    override findLastIndex(predicate: (value: T, index: number) => boolean): number {
-    	return this.target.findLastIndex(predicate)
-    }
-
-    override findLastIndex(predicate: (value: T) => boolean): number {
-    	return this.target.findLastIndex(predicate)
-    }
-
-    override findLastIndex(predicate: () => boolean): number {
     	return this.target.findLastIndex(predicate)
     }
 
     override forEach(action: (value: T, index: number, array: ReadonlyArray<T>) => void): void {
     	return this.target.forEach(action)
-    }
-
-    override forEach(callbackfn: (value: T, index: number) => void): void {
-    	return this.target.forEach(callbackfn)
-    }
-
-    override forEach(callbackfn: (value: T) => void): void {
-    	return this.target.forEach(callbackfn)
-    }
-
-    override forEach(callbackfn: () => void): void {
-    	return this.target.forEach(callbackfn)
     }
 
     override join(separator?: string): string {
@@ -188,96 +104,20 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     	return this.target.map<U>(mapper)
     }
 
-    override map<U>(callbackfn: (value: T, index: number) => U): Array<U> {
-    	return this.target.map<U>(callbackfn)
-    }
-
-    override map<U>(callbackfn: (value: T) => U): Array<U> {
-    	return this.target.map<U>(callbackfn)
-    }
-
-    override map<U>(callbackfn: () => U): Array<U> {
-    	return this.target.map<U>(callbackfn)
-    }
-
     override reduce(reducer: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T): T {
     	return this.target.reduce(reducer)
-    }
-
-    override reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number) => T): T {
-    	return this.target.reduce(callbackfn)
-    }
-
-    override reduce(callbackfn: (previousValue: T, currentValue: T) => T): T {
-    	return this.target.reduce(callbackfn)
-    }
-
-    override reduce(callbackfn: (previousValue: T) => T): T {
-    	return this.target.reduce(callbackfn)
-    }
-
-    override reduce(callbackfn: () => T): T {
-    	return this.target.reduce(callbackfn)
     }
 
     override reduce<U>(reducer: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U {
     	return this.target.reduce<U>(reducer, initialValue)
     }
 
-    override reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U): U {
-    	return this.target.reduce<U>(callbackfn, initialValue)
-    }
-
-    override reduce<U>(callbackfn: (previousValue: U, currentValue: T) => U, initialValue: U): U {
-    	return this.target.reduce<U>(callbackfn, initialValue)
-    }
-
-    override reduce<U>(callbackfn: (previousValue: U) => U, initialValue: U): U {
-    	return this.target.reduce<U>(callbackfn, initialValue)
-    }
-
-    override reduce<U>(callbackfn: () => U, initialValue: U): U {
-    	return this.target.reduce<U>(callbackfn, initialValue)
-    }
-
     override reduceRight(reducer: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T): T {
     	return this.target.reduceRight(reducer)
     }
 
-    override reduceRight(callbackfn: (previousValue: T, currentValue: T, currentIndex: number) => T): T {
-    	return this.target.reduceRight(callbackfn)
-    }
-
-    override reduceRight(callbackfn: (previousValue: T, currentValue: T) => T): T {
-    	return this.target.reduceRight(callbackfn)
-    }
-
-    override reduceRight(callbackfn: (previousValue: T) => T): T {
-    	return this.target.reduceRight(callbackfn)
-    }
-
-    override reduceRight(callbackfn: () => T): T {
-    	return this.target.reduceRight(callbackfn)
-    }
-
     override reduceRight<U>(reducer: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U {
     	return this.target.reduceRight<U>(reducer, initialValue)
-    }
-
-    override reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U): U {
-    	return this.target.reduceRight<U>(callbackfn, initialValue)
-    }
-
-    override reduceRight<U>(callbackfn: (previousValue: U, currentValue: T) => U, initialValue: U): U {
-    	return this.target.reduceRight<U>(callbackfn, initialValue)
-    }
-
-    override reduceRight<U>(callbackfn: (previousValue: U) => U, initialValue: U): U {
-    	return this.target.reduceRight<U>(callbackfn, initialValue)
-    }
-
-    override reduceRight<U>(callbackfn: () => U, initialValue: U): U {
-    	return this.target.reduceRight<U>(callbackfn, initialValue)
     }
 
     override slice(start?: number, end?: number): Array<T> {
@@ -285,18 +125,6 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
     }
 
     override some(predicate: (value: T, index: number, array: ReadonlyArray<T>) => boolean): boolean {
-    	return this.target.some(predicate)
-    }
-
-    override some(predicate: (value: T, index: number) => boolean): boolean {
-    	return this.target.some(predicate)
-    }
-
-    override some(predicate: (value: T) => boolean): boolean {
-    	return this.target.some(predicate)
-    }
-
-    override some(predicate: () => boolean): boolean {
     	return this.target.some(predicate)
     }
 
