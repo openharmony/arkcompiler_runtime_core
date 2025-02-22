@@ -109,10 +109,8 @@ private:
     }
 
     template <SharedReference::InitFn REF_INIT>
-    PANDA_PUBLIC_API inline SharedReference *CreateReference(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject,
-                                                             NapiXRefDirection direction,
-                                                             const PreInitJSObjectCallback &preInitCallback = nullptr);
-
+    PANDA_PUBLIC_API inline SharedReference *CreateReference(InteropCtx *ctx, EtsObject *etsObject, napi_ref jsRef)
+        REQUIRES(storageLock_);
     PANDA_PUBLIC_API SharedReference *GetReference(void *data) const;
     PANDA_PUBLIC_API void RemoveReference(SharedReference *sharedRef);
     /**

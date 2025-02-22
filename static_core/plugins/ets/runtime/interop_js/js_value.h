@@ -19,6 +19,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "runtime/include/coretypes/class.h"
 #include "utils/small_vector.h"
@@ -118,8 +119,8 @@ public:
         if (UNLIKELY(jsvalue == nullptr)) {
             return nullptr;
         }
-        jsvalue->SetRefValue(ctx->GetJSEnv(), value, type);
-        return JSValue::AttachFinalizer(EtsCoroutine::GetCurrent(), jsvalue);
+        jsvalue->SetRefValue(ctx, value, type);
+        return jsvalue;
     }
 
     // prefer JSConvertJSValue::WrapWithNullCheck
@@ -218,17 +219,11 @@ private:
     // Returns moved jsValue
     [[nodiscard]] static JSValue *AttachFinalizer(EtsCoroutine *coro, JSValue *jsValue);
 
-    void SetNapiRef(napi_ref ref, napi_valuetype type)
-    {
-        ASSERT(IsRefType(type));
-        SetType(type);
-        SetData(ref);
-    }
-
     napi_ref GetNapiRef() const
     {
         ASSERT(IsRefType(GetType()));
-        return GetData<napi_ref>();
+        ets_proxy::SharedReference *sharedRef = GetData<ets_proxy::SharedReference *>();
+        return sharedRef->GetJsRef();
     }
 
     void SetUndefined()
@@ -266,12 +261,12 @@ private:
         // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     }
 
-    void SetRefValue(napi_env env, napi_value jsValue, napi_valuetype type)
+    void SetRefValue(InteropCtx *ctx, napi_value jsValue, napi_valuetype type)
     {
-        ASSERT(GetValueType(env, jsValue) == type);
-        napi_ref jsRef;
-        NAPI_ASSERT_OK(napi_create_reference(env, jsValue, 1, &jsRef));
-        SetNapiRef(jsRef, type);
+        ASSERT(GetValueType(ctx->GetJSEnv(), jsValue) == type);
+        ASSERT(IsRefType(type));
+        SetType(type);
+        SetData(ctx->GetSharedRefStorage()->CreateJSObjectRef(ctx, this, jsValue));
     }
 
     FIELD_UNUSED uint32_t type_;

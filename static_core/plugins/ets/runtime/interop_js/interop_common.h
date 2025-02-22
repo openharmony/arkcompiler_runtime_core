@@ -27,17 +27,14 @@
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
 #include "interfaces/inner_api/napi/native_node_api.h"
 #else
-using NapiXRefDirection = enum {
-    NAPI_DIRECTION_INVALID = 0,
-    NAPI_DIRECTION_DYNAMIC_TO_STATIC = 1,  // JS object references the STS object
-    NAPI_DIRECTION_STATIC_TO_DYNAMIC = 2,  // STS object references the JS object
-    NAPI_DIRECTION_HYBRID = 3,             // STS object and the JS object references each other
-};
 // NOLINTBEGIN(readability-identifier-naming)
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
-napi_xref_wrap(napi_env env, napi_value js_object, void *native_object, napi_finalize finalize_cb,
-               NapiXRefDirection ref_direction, napi_ref *result);
-napi_status __attribute__((weak)) napi_xref_unwrap(napi_env env, napi_value js_object, void **result);
+napi_wrap_with_xref(napi_env env, napi_value js_object, void *native_object, napi_finalize finalize_cb,
+                    napi_ref *result);
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_xref_unwrap(napi_env env, napi_value js_object, void **result);
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_create_xref(napi_env env, napi_value value, uint32_t initial_refcount, napi_ref *result);
 // NOLINTEND(readability-identifier-naming)
 #endif
 
