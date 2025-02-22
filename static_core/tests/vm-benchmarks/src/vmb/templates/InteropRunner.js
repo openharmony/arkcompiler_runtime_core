@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,7 +46,7 @@ class Benchmark {
 
     #__init() {
         const isOk = this.#ark.createRuntime({
-            'boot-panda-files': [ARK_ETS_STDLIB_PATH, ...this.#binaries].join(':'),
+            'boot-panda-files': ARK_ETS_STDLIB_PATH,
             'panda-files': this.#binaries.join(':'),
             'gc-trigger-type': 'heap-trigger',
             'compiler-enable-jit': 'false',

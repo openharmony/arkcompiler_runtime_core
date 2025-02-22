@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@ function main() {
     let stsVm = require(penv.MODULE_PATH + '/ets_interop_js_napi.node');
     console.log(penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH);
     const stsRT = stsVm.createRuntime({
-        'boot-panda-files': penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
+        'boot-panda-files': penv.ARK_ETS_STDLIB_PATH,
         'panda-files': penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
         'gc-trigger-type': 'heap-trigger',
         'compiler-enable-jit': 'false',
