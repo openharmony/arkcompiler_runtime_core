@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -200,7 +200,7 @@ function(common_add_gtest)
         )
 
         if(NOT DEFINED ARG_TEST_GROUP)
-            set(ARG_TEST_GROUP gtests)
+            set(ARG_TEST_GROUP ${DEFAULT_TEST_GROUP})
         endif()
         add_dependencies(${ARG_TEST_GROUP} ${ARG_NAME}_gtests)
     endif()

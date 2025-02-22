@@ -196,6 +196,7 @@ define_property(TARGET
                 FULL_DOCS  "Whether the target is a first-level dependency of tests")
 
 add_custom_target(core_tests COMMENT "Running core test suites")
+set(DEFAULT_TEST_GROUP core_tests)
 
 # NB! ADDING THIS PROPERTY IS ALLOWED ONLY IN SPECIAL CASES. DO NOT COPY-PASTE IT.
 set_target_properties(core_tests PROPERTIES first-level-tests-dependency TRUE)
