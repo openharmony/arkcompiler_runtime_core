@@ -22,11 +22,13 @@ function main(): int {
     failures += test(testDateChangeHour(), "Try to set new hour");
     failures += test(testDateChangeMinutes(), "Try to set new minutes");
     failures += test(testDateChangeSeconds(), "Try to set new seconds");
+    failures += test(testSetFromLeapYear(), "Set nonleap year from leap year");
+    failures += test(testSetToLeapYear(), "Set leap year from nonleap year");
 
 
     // next test raises assertTrue( "Invalid year/month pair")
     //failures += test(testDateChangeMonthBad(), "Try to change month to bad value");
-    return test(failures, "All tests run");
+    return failures;
 }
 
 function test(result: int, message: String ): int {
@@ -35,6 +37,20 @@ function test(result: int, message: String ): int {
     }
     console.println("FAILED: " + message);
     return 1;
+}
+
+function testSetFromLeapYear(): int {
+    let d = new Date(2024, 11, 31, 11, 59)
+    d.setFullYear(2023)
+    assertEQ(d.getFullYear(), 2023)
+    return 0
+}
+
+function testSetToLeapYear(): int {
+    let d = new Date(2023, 11, 31, 11, 59)
+    d.setFullYear(2024)
+    assertEQ(d.getFullYear(), 2024)
+    return 0
 }
 
 function testDateChangeYear():int {
