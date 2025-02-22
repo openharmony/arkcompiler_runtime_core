@@ -96,7 +96,7 @@ export class AsyncLockState {
     private toArray(set: Set<AsyncLockInfo>) : AsyncLockInfo[] {
         let array = new AsyncLockInfo[set.size as int]; // Statement "as int" to be removed after fixing issue 19773.
         let idx = 0;
-        set.forEach((val: AsyncLockInfo): void => { 
+        set.forEach((val: AsyncLockInfo): void => {
             array[idx++] = val;
         });
         return array;
@@ -117,14 +117,14 @@ export class AsyncLockState {
  * Information about a lock.
  */
 export class AsyncLockInfo {
-    
+
     constructor() {
         this.name = "";
-        this.mode = AsyncLock.MODE_EXCLUSIVE;
+        this.mode = AsyncLockMode.EXCLUSIVE;
         this.contextId = -1;
     }
 
-    constructor(name: string, mode: int, contextId: number) {
+    constructor(name: string, mode: AsyncLockMode, contextId: number) {
         this.name = name;
         this.mode = mode;
         this.contextId = contextId;
@@ -138,7 +138,7 @@ export class AsyncLockInfo {
     /**
     * Lock operation mode.
     */
-    mode: int;
+    mode: AsyncLockMode;
 
     /**
     * lockAsync caller's execution context identifier.
@@ -178,13 +178,13 @@ export class AsyncLockOptions<T = undefined> {
      */
     timeout: number;
 }
-  
+
 /**
  * Object used to abort an async operation.
  * An instance of this class must be accessed in the same thread where the instance is created.
  * Access to fields of this class from another thread is undefined behaviour.
  */
-class AbortSignal<T> {
+export class AbortSignal<T> {
     /**
      * Set to true to abort an operation.
      */
@@ -195,4 +195,3 @@ class AbortSignal<T> {
      */
     public reason: T
 }
-  

@@ -55,7 +55,7 @@ function asyncLockDeadLockTest(): int {
         try {
             await lock.lockAsync((): int => {
                 return 0;
-            }, AsyncLock.MODE_EXCLUSIVE, new AsyncLockOptions(false, null, 1));
+            }, AsyncLockMode.EXCLUSIVE, new AsyncLockOptions(false, null, 1));
         } catch (err: Error) {
             return 0;
         }
@@ -77,13 +77,13 @@ function asyncLockAvailableTest(): int {
         try {
             await lock.lockAsync((): int => {
                 return 0;
-            }, AsyncLock.MODE_EXCLUSIVE, options);
+            }, AsyncLockMode.EXCLUSIVE, options);
         } catch (err: Error) {
             return 0;
         }
         Logger.log("FAILED: AsyncLock isAvailable test");
         return 1;
-    }, AsyncLock.MODE_EXCLUSIVE, options);
+    }, AsyncLockMode.EXCLUSIVE, options);
 
     return await promise;
 }
@@ -93,7 +93,7 @@ function testCallbackExclusive(lock: AsyncLock): Promise<int> {
     let promise = lock.lockAsync((): int => {
         let status = lock.query();
         return status.held.length == 1 ? 0 : 1;
-    }, AsyncLock.MODE_EXCLUSIVE);
+    }, AsyncLockMode.EXCLUSIVE);
     return promise;
 }
 
@@ -114,14 +114,10 @@ function asyncLockExclusiveModeTest(): int {
     result += await promise3;
     result += await promise2;
     result += await promise1;
-    
+
     if (result != 0) {
         Logger.log("FAILED: AsyncLock EXCLUSIVE mode test");
     }
-    
-    return result;
-}
 
-function main() : void {
-    asyncLockTestsuite.run();
+    return result;
 }
