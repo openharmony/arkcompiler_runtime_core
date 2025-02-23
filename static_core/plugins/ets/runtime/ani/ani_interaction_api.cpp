@@ -450,6 +450,29 @@ static ani_status GetClassMethod(ani_env *env, ani_class cls, const char *name, 
     return DoGetClassMethod<IS_STATIC_METHOD>(klass, name, signature, result);
 }
 
+template <typename ReturnType, EtsType EXPECT_TYPE, typename Args>
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
+static ani_status ObjectCallMethodByName(ani_env *env, ani_object object, const char *name, const char *signature,
+                                         ReturnType *result, Args args)
+{
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(name);
+
+    ScopedManagedCodeFix s(env);
+    EtsObject *etsObject = s.ToInternalType(object);
+    ASSERT(etsObject != nullptr);
+    EtsClass *cls = etsObject->GetClass();
+    EtsMethod *method = nullptr;
+    ani_status status = DoGetClassMethod<false>(cls, name, signature, &method);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    ASSERT(method != nullptr);
+    ani_method aniMethod = ToAniMethod(method);
+    CheckMethodReturnType(aniMethod, EXPECT_TYPE);
+    return DoGeneralMethodCall<ReturnType>(s, object, aniMethod, result, args);
+}
+
 static ani_status GetNamespaceFunction(ani_env *env, ani_namespace ns, const char *name, const char *signature,
                                        EtsMethod **result)
 {
@@ -2689,6 +2712,297 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Void(ani_env *env, ani_object
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Boolean_A(ani_env *env, ani_object object, const char *name,
+                                                                   const char *signature, ani_boolean *result,
+                                                                   const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    return ObjectCallMethodByName<EtsBoolean, EtsType::BOOLEAN>(env, object, name, signature, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Boolean_V(ani_env *env, ani_object object, const char *name,
+                                                                   const char *signature, ani_boolean *result,
+                                                                   va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ObjectCallMethodByName<EtsBoolean, EtsType::BOOLEAN>(env, object, name, signature, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Boolean(ani_env *env, ani_object object, const char *name,
+                                                                 const char *signature, ani_boolean *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Object_CallMethodByName_Boolean_V(env, object, name, signature, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Byte_A(ani_env *env, ani_object object, const char *name,
+                                                                const char *signature, ani_byte *result,
+                                                                const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    return ObjectCallMethodByName<EtsByte, EtsType::BYTE>(env, object, name, signature, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Byte_V(ani_env *env, ani_object object, const char *name,
+                                                                const char *signature, ani_byte *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ObjectCallMethodByName<EtsByte, EtsType::BYTE>(env, object, name, signature, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Byte(ani_env *env, ani_object object, const char *name,
+                                                              const char *signature, ani_byte *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Object_CallMethodByName_Byte_V(env, object, name, signature, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Short_A(ani_env *env, ani_object object, const char *name,
+                                                                 const char *signature, ani_short *result,
+                                                                 const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    return ObjectCallMethodByName<EtsShort, EtsType::SHORT>(env, object, name, signature, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Short_V(ani_env *env, ani_object object, const char *name,
+                                                                 const char *signature, ani_short *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ObjectCallMethodByName<EtsShort, EtsType::SHORT>(env, object, name, signature, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Short(ani_env *env, ani_object object, const char *name,
+                                                               const char *signature, ani_short *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Object_CallMethodByName_Short_V(env, object, name, signature, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Int_A(ani_env *env, ani_object object, const char *name,
+                                                               const char *signature, ani_int *result,
+                                                               const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    return ObjectCallMethodByName<EtsInt, EtsType::INT>(env, object, name, signature, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Int_V(ani_env *env, ani_object object, const char *name,
+                                                               const char *signature, ani_int *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ObjectCallMethodByName<EtsInt, EtsType::INT>(env, object, name, signature, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Int(ani_env *env, ani_object object, const char *name,
+                                                             const char *signature, ani_int *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Object_CallMethodByName_Int_V(env, object, name, signature, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Long_A(ani_env *env, ani_object object, const char *name,
+                                                                const char *signature, ani_long *result,
+                                                                const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    return ObjectCallMethodByName<EtsLong, EtsType::LONG>(env, object, name, signature, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Long_V(ani_env *env, ani_object object, const char *name,
+                                                                const char *signature, ani_long *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ObjectCallMethodByName<EtsLong, EtsType::LONG>(env, object, name, signature, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Long(ani_env *env, ani_object object, const char *name,
+                                                              const char *signature, ani_long *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Object_CallMethodByName_Long_V(env, object, name, signature, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Float_A(ani_env *env, ani_object object, const char *name,
+                                                                 const char *signature, ani_float *result,
+                                                                 const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    return ObjectCallMethodByName<EtsFloat, EtsType::FLOAT>(env, object, name, signature, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Float_V(ani_env *env, ani_object object, const char *name,
+                                                                 const char *signature, ani_float *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ObjectCallMethodByName<EtsFloat, EtsType::FLOAT>(env, object, name, signature, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Float(ani_env *env, ani_object object, const char *name,
+                                                               const char *signature, ani_float *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Object_CallMethodByName_Float_V(env, object, name, signature, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Double_A(ani_env *env, ani_object object, const char *name,
+                                                                  const char *signature, ani_double *result,
+                                                                  const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    return ObjectCallMethodByName<EtsDouble, EtsType::DOUBLE>(env, object, name, signature, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Double_V(ani_env *env, ani_object object, const char *name,
+                                                                  const char *signature, ani_double *result,
+                                                                  va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ObjectCallMethodByName<EtsDouble, EtsType::DOUBLE>(env, object, name, signature, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Double(ani_env *env, ani_object object, const char *name,
+                                                                const char *signature, ani_double *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Object_CallMethodByName_Double_V(env, object, name, signature, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Ref_A(ani_env *env, ani_object object, const char *name,
+                                                               const char *signature, ani_ref *result,
+                                                               const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    return ObjectCallMethodByName<ani_ref, EtsType::OBJECT>(env, object, name, signature, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Ref_V(ani_env *env, ani_object object, const char *name,
+                                                               const char *signature, ani_ref *result, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ObjectCallMethodByName<ani_ref, EtsType::OBJECT>(env, object, name, signature, result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Ref(ani_env *env, ani_object object, const char *name,
+                                                             const char *signature, ani_ref *result, ...)
+{
+    ANI_DEBUG_TRACE(env);
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, result);
+    ani_status status = Object_CallMethodByName_Ref_V(env, object, name, signature, result, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Void_A(ani_env *env, ani_object object, const char *name,
+                                                                const char *signature, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    CHECK_PTR_ARG(args);
+    ani_boolean result;
+    return ObjectCallMethodByName<EtsBoolean, EtsType::VOID>(env, object, name, signature, &result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Void_V(ani_env *env, ani_object object, const char *name,
+                                                                const char *signature, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+
+    ani_boolean result;
+    return ObjectCallMethodByName<EtsBoolean, EtsType::VOID>(env, object, name, signature, &result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Void(ani_env *env, ani_object object, const char *name,
+                                                              const char *signature, ...)
+{
+    ANI_DEBUG_TRACE(env);
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, signature);
+    ani_status status = Object_CallMethodByName_Void_V(env, object, name, signature, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Function_Call_Short_A(ani_env *env, ani_function fn, ani_short *result,
                                                        const ani_value *args)
 {
@@ -3440,36 +3754,36 @@ const __ani_interaction_api INTERACTION_API = {
     Object_CallMethod_Void,
     Object_CallMethod_Void_A,
     Object_CallMethod_Void_V,
-    NotImplementedAdapterVargs<384>,
-    NotImplementedAdapter<385>,
-    NotImplementedAdapter<386>,
+    Object_CallMethodByName_Boolean,
+    Object_CallMethodByName_Boolean_A,
+    Object_CallMethodByName_Boolean_V,
     NotImplementedAdapterVargs<387>,
     NotImplementedAdapter<388>,
     NotImplementedAdapter<389>,
-    NotImplementedAdapterVargs<390>,
-    NotImplementedAdapter<391>,
-    NotImplementedAdapter<392>,
-    NotImplementedAdapterVargs<393>,
-    NotImplementedAdapter<394>,
-    NotImplementedAdapter<395>,
-    NotImplementedAdapterVargs<396>,
-    NotImplementedAdapter<397>,
-    NotImplementedAdapter<398>,
-    NotImplementedAdapterVargs<399>,
-    NotImplementedAdapter<400>,
-    NotImplementedAdapter<401>,
-    NotImplementedAdapterVargs<402>,
-    NotImplementedAdapter<403>,
-    NotImplementedAdapter<404>,
-    NotImplementedAdapterVargs<405>,
-    NotImplementedAdapter<406>,
-    NotImplementedAdapter<407>,
-    NotImplementedAdapterVargs<408>,
-    NotImplementedAdapter<409>,
-    NotImplementedAdapter<410>,
-    NotImplementedAdapterVargs<411>,
-    NotImplementedAdapter<412>,
-    NotImplementedAdapter<413>,
+    Object_CallMethodByName_Byte,
+    Object_CallMethodByName_Byte_A,
+    Object_CallMethodByName_Byte_V,
+    Object_CallMethodByName_Short,
+    Object_CallMethodByName_Short_A,
+    Object_CallMethodByName_Short_V,
+    Object_CallMethodByName_Int,
+    Object_CallMethodByName_Int_A,
+    Object_CallMethodByName_Int_V,
+    Object_CallMethodByName_Long,
+    Object_CallMethodByName_Long_A,
+    Object_CallMethodByName_Long_V,
+    Object_CallMethodByName_Float,
+    Object_CallMethodByName_Float_A,
+    Object_CallMethodByName_Float_V,
+    Object_CallMethodByName_Double,
+    Object_CallMethodByName_Double_A,
+    Object_CallMethodByName_Double_V,
+    Object_CallMethodByName_Ref,
+    Object_CallMethodByName_Ref_A,
+    Object_CallMethodByName_Ref_V,
+    Object_CallMethodByName_Void,
+    Object_CallMethodByName_Void_A,
+    Object_CallMethodByName_Void_V,
     NotImplementedAdapter<420>,
     NotImplementedAdapter<421>,
     NotImplementedAdapter<422>,
