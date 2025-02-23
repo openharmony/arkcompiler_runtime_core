@@ -139,9 +139,12 @@ export class LinkedList<T> implements Iterable<T> {
     * @param callbackfn.linkedList - The linked list that forEach is being applied to.
     */
     public forEach(callbackfn: (value: T, index: number, linkedList: LinkedList<T>) => void): void {
-        this.forEach((value: T, index: number): void => {
-            callbackfn(value, index, this);
-        });
+        let index: number = 0;
+        let currentNode: ListNode<T> | undefined = this.head;
+        while (currentNode !== undefined) {
+            callbackfn(currentNode!.element, index++, this);
+            currentNode = currentNode?.next;
+        }
     }
 
     /**
