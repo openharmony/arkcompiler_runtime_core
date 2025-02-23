@@ -24,7 +24,7 @@ import {
 //! RUN          force_jit: true, entry: "jscall<%= primitive.getName.capitalize %>", options: "--compiler-regex=ETSGLOBAL::jscall<%= primitive.getName.capitalize %>"
 //! METHOD       "jscall<%= primitive.getName.capitalize %>"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jscall::$_invoke/
+//! INST_NOT     /CallStatic.*jscall::\$_invoke/
 //! INST         "Intrinsic.JSRuntimeGetValueDouble"
 
 //! CHECKER      jsnewGetProperty<%= primitive.getName.capitalize %> JIT
@@ -50,7 +50,7 @@ import {
 //! METHOD       "jscallStaticMethod<%= primitive.getName.capitalize() %>"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::$_invoke/
-//! INST_NOT     /CallStatic.*jscall::$_invoke/
+//! INST_NOT     /CallStatic.*jscall::\$_invoke/
 //! INST         "Intrinsic.JSRuntimeGetValueDouble"
 
 % end

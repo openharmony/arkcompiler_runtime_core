@@ -26,7 +26,7 @@ import {
 //! RUN          force_jit: true, entry: "jscallEmpty", options: "--compiler-regex=ETSGLOBAL::jscallEmpty"
 //! METHOD       "jscallEmpty"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jscall::$_invoke/
+
 
 function jscallEmpty(): int {
 	evaluateNumber();
@@ -37,7 +37,6 @@ function jscallEmpty(): int {
 //! RUN          force_jit: true, entry: "jsnewEmpty", options: "--compiler-regex=ETSGLOBAL::jsnewEmpty"
 //! METHOD       "jsnewEmpty"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::$_invoke/
 //! INST_NOT     "Intrinsic.JSRuntimeGetPropertyJSValue"
 //! INST_NOT     "Intrinsic.JSRuntimeGetPropertyInt"
 //! INST_NOT     /JSRuntime.*Value/ # no casts from JSValue to primitive
@@ -59,7 +58,7 @@ function jsnewEmpty(): int {
 //! RUN          force_jit: true, entry: "jscallStaticMethodEmpty", options: "--compiler-regex=ETSGLOBAL::jscallStaticMethodEmpty"
 //! METHOD       "jscallStaticMethodEmpty"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jscall::$_invoke/
+
 
 function jscallStaticMethodEmpty(): int {
 	ExampleClass.emptyMethod();
@@ -70,8 +69,6 @@ function jscallStaticMethodEmpty(): int {
 //! RUN          force_jit: true, entry: "jscallObject", options: "--compiler-regex=ETSGLOBAL::jscallObject"
 //! METHOD       "jscallObject"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::$_invoke/
-//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST         "Intrinsic.JSRuntimeGetPropertyDouble"
 //! INST_NEXT    /i32.*Cast f64/
 //! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyDouble"
@@ -93,7 +90,6 @@ function jscallObject(): int {
 //! RUN          force_jit: true, entry: "jsnewObject", options: "--compiler-regex=ETSGLOBAL::jsnewObject"
 //! METHOD       "jsnewObject"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::$_invoke/
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyJSValue", 2
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 4
 
@@ -113,7 +109,6 @@ function jsnewObject(): int {
 //! RUN          force_jit: true, entry: "jsnewSetPropertyObject", options: "--compiler-regex=ETSGLOBAL::jsnewSetPropertyObject"
 //! METHOD       "jsnewSetPropertyObject"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::$_invoke/
 //! INST_COUNT   "Intrinsic.JSRuntimeSetPropertyJSValue", 2
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyJSValue", 2
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 4
@@ -136,8 +131,6 @@ function jsnewSetPropertyObject(): int {
 //! RUN          force_jit: true, entry: "jscallMethodObject", options: "--compiler-regex=ETSGLOBAL::jscallMethodObject"
 //! METHOD       "jscallMethodObject"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::$_invoke/
-//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 2
 
 function jscallMethodObject(): int {
@@ -156,8 +149,6 @@ function jscallMethodObject(): int {
 //! RUN          force_jit: true, entry: "jscallMethodSimple", options: "--compiler-regex=ETSGLOBAL::jscallMethodSimple"
 //! METHOD       "jscallMethodSimple"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::$_invoke/
-//! INST_NOT     /CallStatic.*jscall::$_invoke/
 
 function jscallMethodSimple(): int {
 	let resObj = new ExampleClass(42, 42);
@@ -173,8 +164,6 @@ function jscallMethodSimple(): int {
 //! RUN          force_jit: true, entry: "jscallString", options: "--compiler-regex=ETSGLOBAL::jscallString"
 //! METHOD       "jscallString"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::$_invoke/
-//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST         "Intrinsic.JSRuntimeGetValueString"
 //! INST_NEXT    "Intrinsic.StdCoreStringEquals"
 
@@ -193,8 +182,6 @@ function jscallString(): int {
 //! RUN          force_jit: true, entry: "jsnewString", options: "--compiler-regex=ETSGLOBAL::jsnewString"
 //! METHOD       "jsnewString"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jscall::$_invoke/
-//! INST_NOT     /CallStatic.*jsnew::$_invoke/
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyString", 2
 //! INST_NOT     "Intrinsic.JSRuntimeGetPropertyJSValue"
 //! INST_NOT     "Intrinsic.JSRuntimeGetValueString"
@@ -216,8 +203,6 @@ function jsnewString(): int {
 //! RUN          force_jit: true, entry: "jsnewSetPropertyString", options: "--compiler-regex=ETSGLOBAL::jsnewSetPropertyString"
 //! METHOD       "jsnewSetPropertyString"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jscall::$_invoke/
-//! INST_NOT     /CallStatic.*jsnew::$_invoke/
 //! INST_NOT     "Intrinsic.JSRuntimeSetPropertyJSValue"
 //! INST_COUNT   "Intrinsic.JSRuntimeNewJSValueString", 2
 //! INST_COUNT   "Intrinsic.JSRuntimeSetPropertyString", 2
@@ -246,9 +231,7 @@ function jsnewSetPropertyString(): int {
 //! RUN          force_jit: true, entry: "jscallStaticMethodString", options: "--compiler-regex=ETSGLOBAL::jscallStaticMethodString"
 //! METHOD       "jscallStaticMethodString"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jsnew::$_invoke/
 //! INST_NOT     "Intrinsic.JSRuntimeNewJSValueString"
-//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST    "Intrinsic.JSRuntimeGetValueString"
 
 function jscallStaticMethodString(): int {

@@ -23,6 +23,13 @@ panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/peepholes/peeph
 panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/qualified_call/qualified_call.sts)
 
 set(INTEROP_TESTS_GENERATED_DIR "${PANDA_BINARY_ROOT}/plugins/ets/tests/ets_interop_js/generated")
+
+gen_file(TARGET frontend_test_number_subtypes_gen_ets
+    TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/../number_subtypes/number_subtypes_frontend.sts.erb
+    OUTPUT ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes_frontend.sts
+    REQUIRES ${CMAKE_CURRENT_SOURCE_DIR}/../number_subtypes/number_subtypes.rb
+)
+
 panda_ets_interop_js_checked_test(FILE ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes_frontend.sts)
 
 gen_file(TARGET test_convert_gen_ets

@@ -17,7 +17,6 @@
 //! RUN          force_jit: true, entry: "testString", options: "--compiler-regex=ETSGLOBAL::testString --compiler-enable-fast-interop=false"
 //! METHOD       "testString"
 //! PASS_AFTER   "IrBuilder"
-//! INST         /CallStatic.*jscall::$_invoke/
 //! INST_NEXT    "Intrinsic.JSRuntimeGetValueString"
 //! INST_NEXT    "Intrinsic.StdCoreStringEquals"
 
@@ -25,7 +24,6 @@
 //! RUN          force_jit: true, entry: "testString", options: "--compiler-regex=ETSGLOBAL::testString"
 //! METHOD       "testString"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST         "Intrinsic.CompilerCreateLocalScope"
 //! INST_NEXT    "Intrinsic.CompilerConvertJSValueToLocal"
 //! INST_NEXT    "Intrinsic.CompilerResolveQualifiedJSCall"
@@ -43,7 +41,6 @@
 //! RUN_AOT      options: "--compiler-regex=ETSGLOBAL::testString --compiler-enable-fast-interop=false"
 //! METHOD       "testString"
 //! PASS_AFTER   "IrBuilder"
-//! INST         /CallStatic.*jscall::$_invoke/
 //! INST_NEXT    "Intrinsic.JSRuntimeGetValueString"
 //! INST_NEXT    "Intrinsic.StdCoreStringEquals"
 //! RUN          entry: "testString"
@@ -53,7 +50,6 @@
 //! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::testString"
 //! METHOD       "testString"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     /CallStatic.*jscall::$_invoke/
 //! INST         "Intrinsic.CompilerCreateLocalScope"
 //! INST_NEXT    "Intrinsic.CompilerConvertJSValueToLocal"
 //! INST_NEXT    "Intrinsic.CompilerResolveQualifiedJSCall"

@@ -91,6 +91,6 @@ function(panda_ets_interop_js_checked_test)
         DEPENDS ${JS_LAUNCHER} ${TARGET_TEST_PACKAGE} ets_interop_js_napi ${ETS_CONFIG})
 
     #TODO(vpukhov)
-    #add_dependencies(ets_interop_js_checked_tests ${TARGET})
-    #add_dependencies(ets_checked_tests ${TARGET})
+    add_dependencies(ets_interop_js_checked_tests ${TARGET})
+    add_dependencies(ets_checked_tests ${TARGET})
 endfunction(panda_ets_interop_js_checked_test)
