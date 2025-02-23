@@ -15,10 +15,181 @@
 
 package api;
 
+/**
+ * Namespace containing Buffer implementation and related utilities
+ * for handling binary data and various encoding operations.
+ */
 export namespace buffer {
+    
+    /**
+     * Supported character encodings for Buffer operations
+     */
+    export type BufferEncoding = 'ascii'
+        | 'utf8'
+        | 'utf-8'
+        | 'utf16le'
+        | 'ucs2'
+        | 'ucs-2'
+        | 'base64'
+        | 'base64url'
+        | 'latin1'
+        | 'binary'
+        | 'hex';
 
-export type BufferEncoding =
-    'ascii' | 'utf8' | 'utf-8' | 'utf16le' | 'ucs2' | 'ucs-2' |
-    'base64' |'base64url' | 'latin1' | 'binary' | 'hex';
+    type TypedArray = Int8Array;
 
+    /**
+     * Allocates a new Buffer using an array of bytes in the range 0 – 255. 
+     * Array entries outside that range will be truncated to fit into it.
+     *
+     * @param {number[]} array - An array of bytes in the range 0 – 255
+     * @returns {Buffer} A new allocated Buffer containing the array data
+     */
+    export function from(array: number[]): Buffer {
+        return new Buffer(ArrayBuffer.from(array))
+    }
+
+    /**
+     * Creates a view of the ArrayBuffer without copying the underlying memory.
+     *
+     * @param {ArrayBuffer} arrayBuffer - The source ArrayBuffer to create a view from
+     * @param {number} [byteOffset=0] - Index of first byte to expose
+     * @param {number} [length=arrayBuffer.byteLength - byteOffset] - Number of bytes to expose
+     * @returns {Buffer} A view of the ArrayBuffer
+     * @throws {Error} If byteOffset or length are out of valid range
+     */
+    export function from(arrayBuffer: ArrayBuffer, byteOffset?: number, length?: number): Buffer {
+        const resolvedByteOffset: number = byteOffset ?? 0;
+        const resolvedLength: number = length ?? arrayBuffer.byteLength - resolvedByteOffset;
+        return new Buffer(ArrayBuffer.from(arrayBuffer, resolvedByteOffset, resolvedLength));
+    }
+    
+    /**
+    * For the object whose value returned by valueof() function is strictly equal to object
+    * or supports symbol To primitive object, a new buffer instance is created.
+    *
+    * @param { Object } object - object object An object supporting Symbol.toPrimitive or valueOf()
+    * @param { number | string } offsetOrEncoding - offsetOrEncoding offsetOrEncoding A byte-offset or encoding
+    * @param { number } length - length length A length
+    * @returns { Buffer } Return a new allocated Buffer
+    */
+    function from(object: Object, offsetOrEncoding: number | string, length: number): Buffer {
+        return new Buffer(ArrayBuffer.fromObject(object, offsetOrEncoding, length))
+    }
+
+    /**
+     * Copies the passed buffer data onto a new Buffer instance.
+     *
+     * @param {Buffer | Uint8Array} buffer - An existing Buffer or Uint8Array from which to copy data
+     * @returns {Buffer} A new Buffer containing a copy of the provided buffer's data
+     */
+    export function from(buff: Buffer | Uint8Array): Buffer {
+        if (buff instanceof Buffer) {
+            const arrBuff: ArrayBuffer = (buff as Buffer).buffer;
+            return new Buffer(ArrayBuffer.from(arrBuff));
+        }
+        return new Buffer(ArrayBuffer.from(buff as Uint8Array));
+    }
+
+    /**
+     * Creates a new Buffer containing the provided string encoded using the specified encoding.
+     *
+     * @param {String} string - The string to encode into the buffer
+     * @param {BufferEncoding} [encoding='utf8'] - The character encoding to use
+     * @returns {Buffer} A new Buffer containing the encoded string
+     */
+    export function from(string: String, encoding?: BufferEncoding): Buffer {
+        const resolvedEncoding: string = (encoding ?? "utf8");
+        const byteLength: int = ArrayBuffer.bytesLength(string, resolvedEncoding);
+        return new Buffer(ArrayBuffer.from(string, resolvedEncoding, byteLength));
+    }
+
+    /**
+     * Returns the byte length of a string when encoded using `encoding`.
+     * This is not the same as String.prototype.length, which does not account
+     * for the encoding that is used to convert the string into bytes.
+     *
+     * @param {string | Buffer | TypedArray | DataView | ArrayBuffer} string - A value to calculate the length of
+     * @param {BufferEncoding} [encoding='utf8'] - If `string` is a string, this is its encoding
+     * @returns {number} The number of bytes contained within `string`
+     * @throws {Error} If the input type is not supported
+     */
+    export function byteLength(
+        doc: string | Buffer | TypedArray | DataView | ArrayBuffer,
+        encoding?: BufferEncoding
+    ): number {
+        if (doc instanceof string) {
+            let resolvedEncoding: string = encoding ?? "utf8";
+            return ArrayBuffer.bytesLength(doc, resolvedEncoding);
+        }
+        // NOTE (templin.konstantin): Can't completely use smart casts due internal issue #21021
+        //  now is used temporarily solution with reflection
+        const objType = Type.of(doc);
+        const parts: String[] = (objType as ClassType).getName().split('.');
+        const klass = parts[parts.length - 1];
+        switch (klass) {
+            case "Buffer":
+                return (doc as Buffer).length;
+            case "Int8Array":
+                return (doc as Int8Array).byteLength;
+            case "DataView":
+                return (doc as DataView).byteLength;
+            case "ArrayBuffer":
+                return (doc as ArrayBuffer).getByteLength();
+        }
+        throw new Error("Invalid type");
+    }
+
+    /**
+     * A class representing a fixed-length sequence of bytes.
+     * Provides methods for reading and manipulating binary data with various encodings.
+     */
+    export class Buffer {
+        /** The underlying ArrayBuffer storing the binary data */
+        public buffer: ArrayBuffer;
+        /** The offset into the buffer where this Buffer instance starts */
+        private byteOffset: number;
+
+        /**
+         * Gets the length of the buffer in bytes
+         * @returns {number} The number of bytes in the buffer
+         */
+        get length(): number { return this.buffer.getByteLength() }
+
+        /**
+         * Creates a new Buffer instance
+         * @param {ArrayBuffer} buffer - The underlying ArrayBuffer to use
+         * @param {number} [byteOffset=0] - The starting offset into the ArrayBuffer
+         */
+        public constructor(buffer: ArrayBuffer, byteOffset: number = 0)
+        {
+            this.buffer = buffer;
+            this.byteOffset = 0;
+        }
+    
+        /**
+         * Returns a string decoded from the buffer's contents.
+         * 
+         * @param {BufferEncoding} [encoding='utf8'] - Character encoding to use for decoding
+         * @param {number} [start=0] - Where to start decoding
+         * @param {number} [end=buffer.length] - Where to stop decoding
+         * @returns {string} The decoded string
+         */
+        public toString(encoding?: BufferEncoding, start?: number, end?: number): string {
+            let resolvedEncoding: string = encoding ?? "utf8";
+            let resolvedStart: int = (start ?? 0) as int;
+            let resolvedEnd: int = (end ?? buffer.byteLength(this.buffer)) as int;
+            return ArrayBuffer.stringify(this.buffer, resolvedEncoding, resolvedStart, resolvedEnd);
+        }
+
+        /**
+         * Returns the byte at the specified index
+         * 
+         * @param {int} index - Index of the byte to return
+         * @returns {byte} The byte at the specified position
+         */
+        public at(index: int): byte {
+            return this.buffer.at(index);
+        }
+    }
 }

@@ -1502,15 +1502,45 @@ intrinsics:
 ########################
 # escompat.ArrayBuffer #
 ########################
-  - name: EscompatArrayBufferFrom
+  - name: EscompatArrayBufferFromEncodedString
     space: ets
     class_name: escompat.ArrayBuffer
     method_name: from
     static: true
     signature:
       ret: escompat.ArrayBuffer
-      args: [std.core.Object]
-    impl: ark::ets::intrinsics::EtsArrayBufferFrom
+      args: [std.core.String, std.core.String, i32]
+    impl: ark::ets::intrinsics::EtsArrayBufferFromEncodedString
+
+  - name: EscompatArrayBufferFromBufferSlice
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: from
+    static: true
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [escompat.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsArrayBufferFromBufferSlice
+  
+  - name: EtsStringBytesLength
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: bytesLength
+    static: true
+    signature:
+      ret: i32
+      args: [std.core.String, std.core.String]
+    impl: ark::ets::intrinsics::EtsStringBytesLength
+  
+  - name: EtsArrayBufferToString
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: stringify
+    static: true
+    signature:
+      ret: std.core.String
+      args: [escompat.ArrayBuffer, std.core.String, i32, i32]
+    impl: ark::ets::intrinsics::EtsArrayBufferToString
 
 ########################
 # escompat.taskpool #
