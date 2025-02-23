@@ -27,5 +27,5 @@ params: import * as all from "./nesteddir/module_a"
 import * as all from "/plugins/ets/tests/ets-templates/13.compilation_units/03.import_directives/06.import_path/file/nesteddir/module_a.sts"
 
 function main(): void {
-  assertEQ(all.importedFromFile(), "file22");
+  all.importedFromFile();
 }

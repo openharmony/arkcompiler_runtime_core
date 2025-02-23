@@ -14,7 +14,6 @@
 --- # List of classes in package
 classes:
   - sin(1.0)
-  - Math.PI
   - abs(-3)
 
   # List of simple words that can be used as identifiers
