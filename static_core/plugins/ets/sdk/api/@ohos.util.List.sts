@@ -93,36 +93,6 @@ export class List<T> implements Iterable<T> {
     /**
      * Executes a provided function once for each list element.
      *
-     * @param callbackfn - The function to execute on each element.
-     *
-     */
-    public forEach(callbackfn: () => void): void {
-        this.buffer.forEach(callbackfn);
-    }
-
-    /**
-     * Executes a provided function once for each list element.
-     *
-     * @param callbackfn - The function to execute on each element, taking the value as arguments.
-     *
-     */
-    public forEach(callbackfn: (value: T) => void): void {
-        this.buffer.forEach(callbackfn);
-    }
-
-    /**
-     * Executes a provided function once for each list element.
-     *
-     * @param callbackfn - The function to execute on each element, taking the value, index as arguments.
-     *
-     */
-    public forEach(callbackfn: (value: T, index: number) => void): void {
-        this.buffer.forEach(callbackfn);
-    }
-
-    /**
-     * Executes a provided function once for each list element.
-     *
      * @param callbackfn - The function to execute on each element, taking the value, index, and List as arguments.
      *
      */
