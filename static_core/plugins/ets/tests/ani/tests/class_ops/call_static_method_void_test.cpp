@@ -27,11 +27,11 @@ public:
         ASSERT_NE(cls, nullptr);
 
         ani_static_method getMethod;
-        ASSERT_EQ(env_->Class_GetStaticMethod(cls, "getCount", nullptr, &getMethod), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "getCount", nullptr, &getMethod), ANI_OK);
         ASSERT_NE(getMethod, nullptr);
 
         ani_static_method voidMethod;
-        ASSERT_EQ(env_->Class_GetStaticMethod(cls, "voidMethod", nullptr, &voidMethod), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "voidMethod", nullptr, &voidMethod), ANI_OK);
         ASSERT_NE(voidMethod, nullptr);
 
         *clsResult = cls;

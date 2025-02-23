@@ -27,7 +27,7 @@ public:
 
         const char *signature = "Lstd/core/String;Lstd/core/String;:Lstd/core/String;";
         ani_method concat;
-        ASSERT_EQ(env_->Class_GetMethod(cls, "concat", signature, &concat), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls, "concat", signature, &concat), ANI_OK);
 
         auto ops = CallEtsFunction<ani_ref>("newStringOperations");
         ani_string s0;

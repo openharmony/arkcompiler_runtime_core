@@ -27,7 +27,7 @@ public:
         ASSERT_NE(cls, nullptr);
 
         ani_static_method method;
-        ASSERT_EQ(env_->Class_GetStaticMethod(cls, "get_button_names", nullptr, &method), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", nullptr, &method), ANI_OK);
         ASSERT_NE(method, nullptr);
 
         *clsResult = cls;
@@ -41,7 +41,7 @@ public:
         ASSERT_NE(cls, nullptr);
 
         ani_static_method method;
-        ASSERT_EQ(env_->Class_GetStaticMethod(cls, "get_num_string", "II:Lstd/core/String;", &method), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_num_string", "II:Lstd/core/String;", &method), ANI_OK);
         ASSERT_NE(method, nullptr);
 
         *clsResult = cls;

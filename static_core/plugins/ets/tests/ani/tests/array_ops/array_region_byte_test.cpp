@@ -33,49 +33,48 @@ constexpr ani_byte TEST_UPDATE_3 = 50U;
 constexpr ani_size TEST_ARRAY_SIZE = 5U;
 constexpr uint32_t TEST_BUFFER_SIZE = 10U;
 
-class FixedArraySetGetRegionByteTest : public AniTest {};
+class ArraySetGetRegionByteTest : public AniTest {};
 
-// ninja ani_test_byte_array_region_gtests
-TEST_F(FixedArraySetGetRegionByteTest, SetByteArrayRegionErrorTests)
+TEST_F(ArraySetGetRegionByteTest, SetByteArrayRegionErrorTests)
 {
-    ani_fixedarray_byte fixedarray;
-    ASSERT_EQ(env_->FixedArray_New_Byte(TEST_ARRAY_SIZE, &fixedarray), ANI_OK);
+    ani_array_byte array;
+    ASSERT_EQ(env_->Array_New_Byte(TEST_ARRAY_SIZE, &array), ANI_OK);
     ani_byte nativeBuffer[TEST_BUFFER_SIZE] = {0};
     const ani_size offset1 = -1;
     const ani_size len1 = 2;
-    ASSERT_EQ(env_->FixedArray_SetRegion_Byte(fixedarray, offset1, len1, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_SetRegion_Byte(array, offset1, len1, nativeBuffer), ANI_OUT_OF_RANGE);
 
     const ani_size offset2 = 5;
     const ani_size len2 = 10U;
-    ASSERT_EQ(env_->FixedArray_SetRegion_Byte(fixedarray, offset2, len2, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_SetRegion_Byte(array, offset2, len2, nativeBuffer), ANI_OUT_OF_RANGE);
     const ani_size offset3 = 0;
     const ani_size len3 = 5;
-    ASSERT_EQ(env_->FixedArray_SetRegion_Byte(fixedarray, offset3, len3, nativeBuffer), ANI_OK);
+    ASSERT_EQ(env_->Array_SetRegion_Byte(array, offset3, len3, nativeBuffer), ANI_OK);
 }
 
-TEST_F(FixedArraySetGetRegionByteTest, GetByteArrayRegionErrorTests)
+TEST_F(ArraySetGetRegionByteTest, GetByteArrayRegionErrorTests)
 {
-    ani_fixedarray_byte fixedarray;
-    ASSERT_EQ(env_->FixedArray_New_Byte(5U, &fixedarray), ANI_OK);
+    ani_array_byte array;
+    ASSERT_EQ(env_->Array_New_Byte(5U, &array), ANI_OK);
     const uint32_t bufferSize = 10U;
     ani_byte nativeBuffer[bufferSize] = {0};
     const ani_size offset1 = 0;
     const ani_size len1 = 1;
-    ASSERT_EQ(env_->FixedArray_GetRegion_Byte(fixedarray, offset1, len1, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Array_GetRegion_Byte(array, offset1, len1, nullptr), ANI_INVALID_ARGS);
     const ani_size offset2 = 5;
     const ani_size len2 = 10U;
-    ASSERT_EQ(env_->FixedArray_GetRegion_Byte(fixedarray, offset2, len2, nativeBuffer), ANI_OUT_OF_RANGE);
-    ASSERT_EQ(env_->FixedArray_GetRegion_Byte(fixedarray, offset1, len1, nativeBuffer), ANI_OK);
+    ASSERT_EQ(env_->Array_GetRegion_Byte(array, offset2, len2, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_GetRegion_Byte(array, offset1, len1, nativeBuffer), ANI_OK);
 }
 
-TEST_F(FixedArraySetGetRegionByteTest, GetRegionByteTest)
+TEST_F(ArraySetGetRegionByteTest, GetRegionByteTest)
 {
-    const auto array = static_cast<ani_fixedarray_byte>(CallEtsFunction<ani_ref>("GetArray"));
+    const auto array = static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("GetArray"));
 
     ani_byte nativeBuffer[TEST_ARRAY_SIZE] = {0};
     const ani_size offset3 = 0;
     const ani_size len3 = TEST_ARRAY_SIZE;
-    ASSERT_EQ(env_->FixedArray_GetRegion_Byte(array, offset3, len3, nativeBuffer), ANI_OK);
+    ASSERT_EQ(env_->Array_GetRegion_Byte(array, offset3, len3, nativeBuffer), ANI_OK);
     ASSERT_EQ(nativeBuffer[0U], TEST_VALUE_1);
     ASSERT_EQ(nativeBuffer[1U], TEST_VALUE_2);
     ASSERT_EQ(nativeBuffer[2U], TEST_VALUE_3);
@@ -83,13 +82,13 @@ TEST_F(FixedArraySetGetRegionByteTest, GetRegionByteTest)
     ASSERT_EQ(nativeBuffer[4U], TEST_VALUE_5);
 }
 
-TEST_F(FixedArraySetGetRegionByteTest, SetRegionByteTest)
+TEST_F(ArraySetGetRegionByteTest, SetRegionByteTest)
 {
-    const auto array = static_cast<ani_fixedarray_byte>(CallEtsFunction<ani_ref>("GetArray"));
+    const auto array = static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("GetArray"));
     ani_byte nativeBuffer1[TEST_ARRAY_SIZE] = {TEST_UPDATE_1, TEST_UPDATE_2, TEST_UPDATE_3};
     const ani_size offset4 = 2;
     const ani_size len4 = 3;
-    ASSERT_EQ(env_->FixedArray_SetRegion_Byte(array, offset4, len4, nativeBuffer1), ANI_OK);
+    ASSERT_EQ(env_->Array_SetRegion_Byte(array, offset4, len4, nativeBuffer1), ANI_OK);
     ASSERT_EQ(CallEtsFunction<ani_boolean>("CheckArray", array), ANI_TRUE);
 }
 

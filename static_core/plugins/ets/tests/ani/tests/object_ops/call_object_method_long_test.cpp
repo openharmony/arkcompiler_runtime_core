@@ -25,7 +25,7 @@ public:
     void NewObject(ani_class cls, ani_object *result)
     {
         ani_static_method newMethod;
-        ASSERT_EQ(env_->Class_GetStaticMethod(cls, "new_C", ":LC;", &newMethod), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_C", ":LC;", &newMethod), ANI_OK);
         ani_ref ref;
         ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
 
@@ -53,7 +53,7 @@ TEST_F(CallObjectMethodLongTest, CallMethodLongTestOK)
     this->NewObject(cls, &obj);
 
     ani_method method;
-    ASSERT_EQ(env_->Class_GetMethod(cls, "long_method", "JI:J", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "long_method", "JI:J", &method), ANI_OK);
 
     ani_long result;
     ani_value arg1;
@@ -87,7 +87,7 @@ TEST_F(CallObjectMethodLongTest, CallMethodLongTestError)
     this->NewObject(cls, &obj);
 
     ani_method method;
-    ASSERT_EQ(env_->Class_GetMethod(cls, "long_method", "JI:J", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "long_method", "JI:J", &method), ANI_OK);
 
     ani_long result;
     ani_value arg1;

@@ -17,43 +17,43 @@
 
 namespace ark::ets::ani::testing {
 
-class ClassGetFieldTest : public AniTest {};
+class ClassFindFieldTest : public AniTest {};
 
-TEST_F(ClassGetFieldTest, get_field)
+TEST_F(ClassFindFieldTest, get_field)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LPoint;", &cls), ANI_OK);
 
     ani_field fieldX;
-    ASSERT_EQ(env_->Class_GetField(cls, "x", &fieldX), ANI_OK);
+    ASSERT_EQ(env_->Class_FindField(cls, "x", &fieldX), ANI_OK);
     ASSERT_NE(fieldX, nullptr);
 
     ani_field fieldY;
-    ASSERT_EQ(env_->Class_GetField(cls, "y", &fieldY), ANI_OK);
+    ASSERT_EQ(env_->Class_FindField(cls, "y", &fieldY), ANI_OK);
     ASSERT_NE(fieldY, nullptr);
 }
 
-TEST_F(ClassGetFieldTest, invalid_argument1)
+TEST_F(ClassFindFieldTest, invalid_argument1)
 {
     ani_field field;
-    ASSERT_EQ(env_->Class_GetField(nullptr, "x", &field), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Class_FindField(nullptr, "x", &field), ANI_INVALID_ARGS);
 }
 
-TEST_F(ClassGetFieldTest, invalid_argument2)
+TEST_F(ClassFindFieldTest, invalid_argument2)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LPoint;", &cls), ANI_OK);
 
     ani_field field;
-    ASSERT_EQ(env_->Class_GetField(cls, nullptr, &field), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Class_FindField(cls, nullptr, &field), ANI_INVALID_ARGS);
 }
 
-TEST_F(ClassGetFieldTest, invalid_argument3)
+TEST_F(ClassFindFieldTest, invalid_argument3)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LPoint;", &cls), ANI_OK);
 
-    ASSERT_EQ(env_->Class_GetField(cls, "x", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Class_FindField(cls, "x", nullptr), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing

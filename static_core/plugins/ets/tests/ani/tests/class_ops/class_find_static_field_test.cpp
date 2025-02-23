@@ -17,39 +17,39 @@
 
 namespace ark::ets::ani::testing {
 
-class ClassGetStaticFieldTest : public AniTest {};
+class ClassFindStaticFieldTest : public AniTest {};
 
-TEST_F(ClassGetStaticFieldTest, get_field)
+TEST_F(ClassFindStaticFieldTest, get_field)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LSingleton;", &cls), ANI_OK);
 
     ani_static_field field;
-    ASSERT_EQ(env_->Class_GetStaticField(cls, "instance", &field), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "instance", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
 }
 
-TEST_F(ClassGetStaticFieldTest, invalid_argument1)
+TEST_F(ClassFindStaticFieldTest, invalid_argument1)
 {
     ani_static_field field;
-    ASSERT_EQ(env_->Class_GetStaticField(nullptr, "instance", &field), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Class_FindStaticField(nullptr, "instance", &field), ANI_INVALID_ARGS);
 }
 
-TEST_F(ClassGetStaticFieldTest, invalid_argument2)
+TEST_F(ClassFindStaticFieldTest, invalid_argument2)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LSingleton;", &cls), ANI_OK);
 
     ani_static_field field;
-    ASSERT_EQ(env_->Class_GetStaticField(cls, nullptr, &field), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Class_FindStaticField(cls, nullptr, &field), ANI_INVALID_ARGS);
 }
 
-TEST_F(ClassGetStaticFieldTest, invalid_argument3)
+TEST_F(ClassFindStaticFieldTest, invalid_argument3)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LSingleton;", &cls), ANI_OK);
 
-    ASSERT_EQ(env_->Class_GetStaticField(cls, "instance", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "instance", nullptr), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing

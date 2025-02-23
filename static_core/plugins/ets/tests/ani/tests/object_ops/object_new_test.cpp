@@ -29,7 +29,7 @@ public:
         ASSERT_EQ(env_->FindClass("LMobilePhone;", &cls), ANI_OK);
 
         ani_method ctor;
-        ASSERT_EQ(env_->Class_GetMethod(cls, "<ctor>", "Lstd/core/String;I:V", &ctor), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;I:V", &ctor), ANI_OK);
 
         ani_string model;
         ASSERT_EQ(env_->String_NewUTF8(m, strlen(m), &model), ANI_OK);
@@ -226,7 +226,7 @@ TEST_F(ObjectNewTest, DISABLED_object_new_string)
     ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
 
     ani_method ctor;
-    ASSERT_EQ(env_->Class_GetMethod(cls, "<ctor>", ":V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":V", &ctor), ANI_OK);
 
     ani_string str;
     ASSERT_EQ(env_->c_api->Object_New(env_, cls, ctor, reinterpret_cast<ani_object *>(&str)), ANI_OK);

@@ -17,53 +17,53 @@
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class GetMethodTest : public AniTest {};
+class ClassFindMethodTest : public AniTest {};
 
-TEST_F(GetMethodTest, has_method_1)
+TEST_F(ClassFindMethodTest, has_method_1)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LA;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method;
-    ASSERT_EQ(env_->Class_GetMethod(cls, "int_method", "II:I", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "int_method", "II:I", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 }
 
-TEST_F(GetMethodTest, has_method_2)
+TEST_F(ClassFindMethodTest, has_method_2)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LA;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method;
-    ASSERT_EQ(env_->Class_GetMethod(cls, "int_method", nullptr, &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "int_method", nullptr, &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 }
 
-TEST_F(GetMethodTest, has_method_3)
+TEST_F(ClassFindMethodTest, has_method_3)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LB;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method;
-    ASSERT_EQ(env_->Class_GetMethod(cls, "int_method", nullptr, &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "int_method", nullptr, &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 }
 
-TEST_F(GetMethodTest, has_method_4)
+TEST_F(ClassFindMethodTest, has_method_4)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LB;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method;
-    ASSERT_EQ(env_->Class_GetMethod(cls, "int_override_method", nullptr, &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "int_override_method", nullptr, &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     ani_static_method newMethod;
-    ASSERT_EQ(env_->Class_GetStaticMethod(cls, "new_B", ":LB;", &newMethod), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_B", ":LB;", &newMethod), ANI_OK);
     ani_ref ref;
     ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
 
@@ -74,48 +74,48 @@ TEST_F(GetMethodTest, has_method_4)
     ASSERT_EQ(res, arg1 * arg2);
 }
 
-TEST_F(GetMethodTest, method_not_found_1)
+TEST_F(ClassFindMethodTest, method_not_found_1)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LA;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method;
-    ASSERT_EQ(env_->Class_GetMethod(cls, "bla_bla_bla", nullptr, &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "bla_bla_bla", nullptr, &method), ANI_NOT_FOUND);
 }
 
-TEST_F(GetMethodTest, method_not_found_2)
+TEST_F(ClassFindMethodTest, method_not_found_2)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LA;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method;
-    ASSERT_EQ(env_->Class_GetMethod(cls, "int_method", "bla_bla_bla", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "int_method", "bla_bla_bla", &method), ANI_NOT_FOUND);
 }
 
-TEST_F(GetMethodTest, invalid_argument_name)
+TEST_F(ClassFindMethodTest, invalid_argument_name)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass(nullptr, &cls), ANI_INVALID_ARGS);
 
     ani_method method;
-    ASSERT_EQ(env_->Class_GetMethod(cls, nullptr, nullptr, &method), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Class_FindMethod(cls, nullptr, nullptr, &method), ANI_INVALID_ARGS);
 }
 
-TEST_F(GetMethodTest, invalid_argument_cls)
+TEST_F(ClassFindMethodTest, invalid_argument_cls)
 {
     ani_method method;
-    ASSERT_EQ(env_->Class_GetMethod(nullptr, "int_method", nullptr, &method), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Class_FindMethod(nullptr, "int_method", nullptr, &method), ANI_INVALID_ARGS);
 }
 
-TEST_F(GetMethodTest, invalid_argument_result)
+TEST_F(ClassFindMethodTest, invalid_argument_result)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LA;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
-    ASSERT_EQ(env_->Class_GetMethod(cls, "int_method", nullptr, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "int_method", nullptr, nullptr), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing

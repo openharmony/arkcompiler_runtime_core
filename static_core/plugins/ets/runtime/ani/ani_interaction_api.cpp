@@ -461,7 +461,9 @@ static ani_status GetNamespaceFunction(ani_env *env, ani_namespace ns, const cha
 }
 
 template <typename ReturnType, EtsType EXPECT_TYPE, typename Args>
-static ani_status ClassCallMethodByName(ani_env *env, ani_class cls, const char *name, ReturnType *result, Args args)
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
+static ani_status ClassCallMethodByName(ani_env *env, ani_class cls, const char *name, const char *signature,
+                                        ReturnType *result, Args args)
 {
     CHECK_ENV(env);
     CHECK_PTR_ARG(cls);
@@ -469,7 +471,7 @@ static ani_status ClassCallMethodByName(ani_env *env, ani_class cls, const char 
     CHECK_PTR_ARG(result);
 
     EtsMethod *method = nullptr;
-    ani_status status = GetClassMethod<true>(env, cls, name, nullptr, &method);
+    ani_status status = GetClassMethod<true>(env, cls, name, signature, &method);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     ASSERT(method != nullptr);
     ani_static_method staticMethod = ToAniStaticMethod(method);
@@ -645,38 +647,6 @@ NO_UB_SANITIZE static ani_status Namespace_FindVariable(ani_env *env, ani_namesp
     return ANI_OK;
 }
 
-static ani_status PinPrimitiveTypeArray(ani_env *env, ani_fixedarray primitiveArray, void **result)
-{
-    ASSERT(primitiveArray != nullptr);
-    auto pandaEnv = PandaEnv::FromAniEnv(env);
-    ScopedManagedCodeFix s(pandaEnv);
-
-    auto vm = pandaEnv->GetEtsVM();
-    if (!vm->GetGC()->IsPinningSupported()) {
-        LOG(WARNING, ANI) << "Pinning is not supported with " << mem::GCStringFromType(vm->GetGC()->GetType());
-        return ANI_ERROR;
-    }
-
-    auto coreArray = s.ToInternalType(primitiveArray)->GetCoreType();
-    vm->GetHeapManager()->PinObject(coreArray);
-
-    *result = coreArray->GetData();
-    return ANI_OK;
-}
-
-static ani_status UnpinPrimitiveTypeArray(ani_env *env, ani_fixedarray primitiveArray)
-{
-    ASSERT(primitiveArray != nullptr);
-
-    auto pandaEnv = PandaEtsNapiEnv::FromAniEnv(env);
-    ScopedManagedCodeFix s(pandaEnv);
-
-    auto coreArray = s.ToInternalType(primitiveArray)->GetCoreType();
-    auto vm = pandaEnv->GetEtsVM();
-    vm->GetHeapManager()->UnpinObject(coreArray);
-    return ANI_OK;
-}
-
 template <typename InternalType, typename AniFixedArrayType>
 static ani_status NewPrimitiveTypeArray(ani_env *env, ani_size length, AniFixedArrayType *result)
 {
@@ -729,29 +699,7 @@ static ani_status SetPrimitiveTypeArrayRegion(ani_env *env, ArrayType array, ani
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_Pin(ani_env *env, ani_fixedarray primitive_array, void **result)
-{
-    ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
-    CHECK_PTR_ARG(primitive_array);
-    CHECK_PTR_ARG(result);
-
-    return PinPrimitiveTypeArray(env, primitive_array, result);
-}
-
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_Unpin(ani_env *env, ani_fixedarray primitive_array,
-                                                  [[maybe_unused]] void *data)
-{
-    ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
-    CHECK_PTR_ARG(primitive_array);
-
-    return UnpinPrimitiveTypeArray(env, primitive_array);
-}
-
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetLength(ani_env *env, ani_fixedarray array, ani_size *result)
+NO_UB_SANITIZE static ani_status Array_GetLength(ani_env *env, ani_array array, ani_size *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -765,7 +713,7 @@ NO_UB_SANITIZE static ani_status FixedArray_GetLength(ani_env *env, ani_fixedarr
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Boolean(ani_env *env, ani_size length, ani_fixedarray_boolean *result)
+NO_UB_SANITIZE static ani_status Array_New_Boolean(ani_env *env, ani_size length, ani_array_boolean *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -774,7 +722,7 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Boolean(ani_env *env, ani_size l
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Byte(ani_env *env, ani_size length, ani_fixedarray_byte *result)
+NO_UB_SANITIZE static ani_status Array_New_Byte(ani_env *env, ani_size length, ani_array_byte *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -783,7 +731,7 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Byte(ani_env *env, ani_size leng
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Short(ani_env *env, ani_size length, ani_fixedarray_short *result)
+NO_UB_SANITIZE static ani_status Array_New_Short(ani_env *env, ani_size length, ani_array_short *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -792,7 +740,7 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Short(ani_env *env, ani_size len
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Int(ani_env *env, ani_size length, ani_fixedarray_int *result)
+NO_UB_SANITIZE static ani_status Array_New_Int(ani_env *env, ani_size length, ani_array_int *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -801,7 +749,7 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Int(ani_env *env, ani_size lengt
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Long(ani_env *env, ani_size length, ani_fixedarray_long *result)
+NO_UB_SANITIZE static ani_status Array_New_Long(ani_env *env, ani_size length, ani_array_long *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -810,7 +758,7 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Long(ani_env *env, ani_size leng
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Float(ani_env *env, ani_size length, ani_fixedarray_float *result)
+NO_UB_SANITIZE static ani_status Array_New_Float(ani_env *env, ani_size length, ani_array_float *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -819,7 +767,7 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Float(ani_env *env, ani_size len
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Double(ani_env *env, ani_size length, ani_fixedarray_double *result)
+NO_UB_SANITIZE static ani_status Array_New_Double(ani_env *env, ani_size length, ani_array_double *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -828,9 +776,8 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Double(ani_env *env, ani_size le
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Boolean(ani_env *env, ani_fixedarray_boolean array,
-                                                              ani_size offset, ani_size length,
-                                                              ani_boolean *nativeBuffer)
+NO_UB_SANITIZE static ani_status Array_GetRegion_Boolean(ani_env *env, ani_array_boolean array, ani_size offset,
+                                                         ani_size length, ani_boolean *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -840,8 +787,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Boolean(ani_env *env, ani_
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Byte(ani_env *env, ani_fixedarray_byte array, ani_size offset,
-                                                           ani_size length, ani_byte *nativeBuffer)
+NO_UB_SANITIZE static ani_status Array_GetRegion_Byte(ani_env *env, ani_array_byte array, ani_size offset,
+                                                      ani_size length, ani_byte *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -923,8 +870,8 @@ NO_UB_SANITIZE static ani_status Namespace_BindNativeFunctions(ani_env *env, ani
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Short(ani_env *env, ani_fixedarray_short array, ani_size offset,
-                                                            ani_size length, ani_short *nativeBuffer)
+NO_UB_SANITIZE static ani_status Array_GetRegion_Short(ani_env *env, ani_array_short array, ani_size offset,
+                                                       ani_size length, ani_short *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -934,8 +881,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Short(ani_env *env, ani_fi
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Int(ani_env *env, ani_fixedarray_int array, ani_size offset,
-                                                          ani_size length, ani_int *nativeBuffer)
+NO_UB_SANITIZE static ani_status Array_GetRegion_Int(ani_env *env, ani_array_int array, ani_size offset,
+                                                     ani_size length, ani_int *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -945,8 +892,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Int(ani_env *env, ani_fixe
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Long(ani_env *env, ani_fixedarray_long array, ani_size offset,
-                                                           ani_size length, ani_long *nativeBuffer)
+NO_UB_SANITIZE static ani_status Array_GetRegion_Long(ani_env *env, ani_array_long array, ani_size offset,
+                                                      ani_size length, ani_long *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -956,8 +903,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Long(ani_env *env, ani_fix
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Float(ani_env *env, ani_fixedarray_float array, ani_size offset,
-                                                            ani_size length, ani_float *nativeBuffer)
+NO_UB_SANITIZE static ani_status Array_GetRegion_Float(ani_env *env, ani_array_float array, ani_size offset,
+                                                       ani_size length, ani_float *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -967,8 +914,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Float(ani_env *env, ani_fi
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Double(ani_env *env, ani_fixedarray_double array, ani_size offset,
-                                                             ani_size length, ani_double *nativeBuffer)
+NO_UB_SANITIZE static ani_status Array_GetRegion_Double(ani_env *env, ani_array_double array, ani_size offset,
+                                                        ani_size length, ani_double *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -978,9 +925,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Double(ani_env *env, ani_f
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Boolean(ani_env *env, ani_fixedarray_boolean array,
-                                                              ani_size offset, ani_size length,
-                                                              const ani_boolean *nativeBuffer)
+NO_UB_SANITIZE static ani_status Array_SetRegion_Boolean(ani_env *env, ani_array_boolean array, ani_size offset,
+                                                         ani_size length, const ani_boolean *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -990,8 +936,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Boolean(ani_env *env, ani_
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Short(ani_env *env, ani_fixedarray_short array, ani_size offset,
-                                                            ani_size length, const ani_short *nativeBuffer)
+NO_UB_SANITIZE static ani_status Array_SetRegion_Short(ani_env *env, ani_array_short array, ani_size offset,
+                                                       ani_size length, const ani_short *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1001,8 +947,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Short(ani_env *env, ani_fi
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Int(ani_env *env, ani_fixedarray_int array, ani_size offset,
-                                                          ani_size length, const ani_int *nativeBuffer)
+NO_UB_SANITIZE static ani_status Array_SetRegion_Int(ani_env *env, ani_array_int array, ani_size offset,
+                                                     ani_size length, const ani_int *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1012,8 +958,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Int(ani_env *env, ani_fixe
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Long(ani_env *env, ani_fixedarray_long array, ani_size offset,
-                                                           ani_size length, const ani_long *nativeBuffer)
+NO_UB_SANITIZE static ani_status Array_SetRegion_Long(ani_env *env, ani_array_long array, ani_size offset,
+                                                      ani_size length, const ani_long *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1023,8 +969,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Long(ani_env *env, ani_fix
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Float(ani_env *env, ani_fixedarray_float array, ani_size offset,
-                                                            ani_size length, const ani_float *nativeBuffer)
+NO_UB_SANITIZE static ani_status Array_SetRegion_Float(ani_env *env, ani_array_float array, ani_size offset,
+                                                       ani_size length, const ani_float *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1034,8 +980,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Float(ani_env *env, ani_fi
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Double(ani_env *env, ani_fixedarray_double array, ani_size offset,
-                                                             ani_size length, const ani_double *nativeBuffer)
+NO_UB_SANITIZE static ani_status Array_SetRegion_Double(ani_env *env, ani_array_double array, ani_size offset,
+                                                        ani_size length, const ani_double *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1045,8 +991,8 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Double(ani_env *env, ani_f
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Byte(ani_env *env, ani_fixedarray_byte array, ani_size offset,
-                                                           ani_size length, const ani_byte *nativeBuffer)
+NO_UB_SANITIZE static ani_status Array_SetRegion_Byte(ani_env *env, ani_array_byte array, ani_size offset,
+                                                      ani_size length, const ani_byte *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1111,7 +1057,7 @@ static ani_status DoGetField(ani_env *env, ani_class cls, const char *name, EtsF
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_GetField(ani_env *env, ani_class cls, const char *name, ani_field *result)
+NO_UB_SANITIZE static ani_status Class_FindField(ani_env *env, ani_class cls, const char *name, ani_field *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1129,8 +1075,8 @@ NO_UB_SANITIZE static ani_status Class_GetField(ani_env *env, ani_class cls, con
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_GetStaticField(ani_env *env, ani_class cls, const char *name,
-                                                      ani_static_field *result)
+NO_UB_SANITIZE static ani_status Class_FindStaticField(ani_env *env, ani_class cls, const char *name,
+                                                       ani_static_field *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1148,8 +1094,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField(ani_env *env, ani_class cl
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_GetMethod(ani_env *env, ani_class cls, const char *name, const char *signature,
-                                                 ani_method *result)
+NO_UB_SANITIZE static ani_status Class_FindMethod(ani_env *env, ani_class cls, const char *name, const char *signature,
+                                                  ani_method *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1165,8 +1111,8 @@ NO_UB_SANITIZE static ani_status Class_GetMethod(ani_env *env, ani_class cls, co
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_GetStaticMethod(ani_env *env, ani_class cls, const char *name,
-                                                       const char *signature, ani_static_method *result)
+NO_UB_SANITIZE static ani_status Class_FindStaticMethod(ani_env *env, ani_class cls, const char *name,
+                                                        const char *signature, ani_static_method *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -2005,286 +1951,303 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Void_A(ani_env *env, ani
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean_V(ani_env *env, ani_class cls, const char *name,
-                                                                        ani_boolean *result, va_list args)
+                                                                        const char *signature, ani_boolean *result,
+                                                                        va_list args)
 {
     ANI_DEBUG_TRACE(env);
 
-    return ClassCallMethodByName<EtsBoolean, EtsType::BOOLEAN>(env, cls, name, result, args);
+    return ClassCallMethodByName<EtsBoolean, EtsType::BOOLEAN>(env, cls, name, signature, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean(ani_env *env, ani_class cls, const char *name,
-                                                                      ani_boolean *result, ...)
+                                                                      const char *signature, ani_boolean *result, ...)
 {
     ANI_DEBUG_TRACE(env);
     va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(args, result);
-    ani_status status = Class_CallStaticMethodByName_Boolean_V(env, cls, name, result, args);
+    ani_status status = Class_CallStaticMethodByName_Boolean_V(env, cls, name, signature, result, args);
     va_end(args);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Boolean_A(ani_env *env, ani_class cls, const char *name,
-                                                                        ani_boolean *result, const ani_value *args)
+                                                                        const char *signature, ani_boolean *result,
+                                                                        const ani_value *args)
 {
     ANI_DEBUG_TRACE(env);
 
     CHECK_PTR_ARG(args);
-    return ClassCallMethodByName<EtsBoolean, EtsType::BOOLEAN>(env, cls, name, result, args);
+    return ClassCallMethodByName<EtsBoolean, EtsType::BOOLEAN>(env, cls, name, signature, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte_V(ani_env *env, ani_class cls, const char *name,
-                                                                     ani_byte *result, va_list args)
+                                                                     const char *signature, ani_byte *result,
+                                                                     va_list args)
 {
     ANI_DEBUG_TRACE(env);
 
-    return ClassCallMethodByName<EtsByte, EtsType::BYTE>(env, cls, name, result, args);
+    return ClassCallMethodByName<EtsByte, EtsType::BYTE>(env, cls, name, signature, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte(ani_env *env, ani_class cls, const char *name,
-                                                                   ani_byte *result, ...)
+                                                                   const char *signature, ani_byte *result, ...)
 {
     ANI_DEBUG_TRACE(env);
     va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(args, result);
-    ani_status status = Class_CallStaticMethodByName_Byte_V(env, cls, name, result, args);
+    ani_status status = Class_CallStaticMethodByName_Byte_V(env, cls, name, signature, result, args);
     va_end(args);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Byte_A(ani_env *env, ani_class cls, const char *name,
-                                                                     ani_byte *result, const ani_value *args)
+                                                                     const char *signature, ani_byte *result,
+                                                                     const ani_value *args)
 {
     ANI_DEBUG_TRACE(env);
 
     CHECK_PTR_ARG(args);
-    return ClassCallMethodByName<EtsByte, EtsType::BYTE>(env, cls, name, result, args);
+    return ClassCallMethodByName<EtsByte, EtsType::BYTE>(env, cls, name, signature, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short_V(ani_env *env, ani_class cls, const char *name,
-                                                                      ani_short *result, va_list args)
+                                                                      const char *signature, ani_short *result,
+                                                                      va_list args)
 {
     ANI_DEBUG_TRACE(env);
 
-    return ClassCallMethodByName<EtsShort, EtsType::SHORT>(env, cls, name, result, args);
+    return ClassCallMethodByName<EtsShort, EtsType::SHORT>(env, cls, name, signature, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short(ani_env *env, ani_class cls, const char *name,
-                                                                    ani_short *result, ...)
+                                                                    const char *signature, ani_short *result, ...)
 {
     ANI_DEBUG_TRACE(env);
     va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(args, result);
-    ani_status status = Class_CallStaticMethodByName_Short_V(env, cls, name, result, args);
+    ani_status status = Class_CallStaticMethodByName_Short_V(env, cls, name, signature, result, args);
     va_end(args);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Short_A(ani_env *env, ani_class cls, const char *name,
-                                                                      ani_short *result, const ani_value *args)
+                                                                      const char *signature, ani_short *result,
+                                                                      const ani_value *args)
 {
     ANI_DEBUG_TRACE(env);
 
     CHECK_PTR_ARG(args);
-    return ClassCallMethodByName<EtsShort, EtsType::SHORT>(env, cls, name, result, args);
+    return ClassCallMethodByName<EtsShort, EtsType::SHORT>(env, cls, name, signature, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int_A(ani_env *env, ani_class cls, const char *name,
-                                                                    ani_int *result, const ani_value *args)
+                                                                    const char *signature, ani_int *result,
+                                                                    const ani_value *args)
 {
     ANI_DEBUG_TRACE(env);
 
     CHECK_PTR_ARG(args);
-    return ClassCallMethodByName<EtsInt, EtsType::INT>(env, cls, name, result, args);
+    return ClassCallMethodByName<EtsInt, EtsType::INT>(env, cls, name, signature, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int_V(ani_env *env, ani_class cls, const char *name,
-                                                                    ani_int *result, va_list args)
+                                                                    const char *signature, ani_int *result,
+                                                                    va_list args)
 {
     ANI_DEBUG_TRACE(env);
 
-    return ClassCallMethodByName<EtsInt, EtsType::INT>(env, cls, name, result, args);
+    return ClassCallMethodByName<EtsInt, EtsType::INT>(env, cls, name, signature, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Int(ani_env *env, ani_class cls, const char *name,
-                                                                  ani_int *result, ...)
+                                                                  const char *signature, ani_int *result, ...)
 {
     ANI_DEBUG_TRACE(env);
 
     va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(args, result);
-    ani_status status = Class_CallStaticMethodByName_Int_V(env, cls, name, result, args);
+    ani_status status = Class_CallStaticMethodByName_Int_V(env, cls, name, signature, result, args);
     va_end(args);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long_A(ani_env *env, ani_class cls, const char *name,
-                                                                     ani_long *result, const ani_value *args)
+                                                                     const char *signature, ani_long *result,
+                                                                     const ani_value *args)
 {
     ANI_DEBUG_TRACE(env);
 
     CHECK_PTR_ARG(args);
-    return ClassCallMethodByName<EtsLong, EtsType::LONG>(env, cls, name, result, args);
+    return ClassCallMethodByName<EtsLong, EtsType::LONG>(env, cls, name, signature, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long_V(ani_env *env, ani_class cls, const char *name,
-                                                                     ani_long *result, va_list args)
+                                                                     const char *signature, ani_long *result,
+                                                                     va_list args)
 {
     ANI_DEBUG_TRACE(env);
 
-    return ClassCallMethodByName<EtsLong, EtsType::LONG>(env, cls, name, result, args);
+    return ClassCallMethodByName<EtsLong, EtsType::LONG>(env, cls, name, signature, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Long(ani_env *env, ani_class cls, const char *name,
-                                                                   ani_long *result, ...)
+                                                                   const char *signature, ani_long *result, ...)
 {
     ANI_DEBUG_TRACE(env);
 
     va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(args, result);
-    ani_status status = Class_CallStaticMethodByName_Long_V(env, cls, name, result, args);
+    ani_status status = Class_CallStaticMethodByName_Long_V(env, cls, name, signature, result, args);
     va_end(args);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float_A(ani_env *env, ani_class cls, const char *name,
-                                                                      ani_float *result, const ani_value *args)
+                                                                      const char *signature, ani_float *result,
+                                                                      const ani_value *args)
 {
     ANI_DEBUG_TRACE(env);
 
     CHECK_PTR_ARG(args);
-    return ClassCallMethodByName<EtsFloat, EtsType::FLOAT>(env, cls, name, result, args);
+    return ClassCallMethodByName<EtsFloat, EtsType::FLOAT>(env, cls, name, signature, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float_V(ani_env *env, ani_class cls, const char *name,
-                                                                      ani_float *result, va_list args)
+                                                                      const char *signature, ani_float *result,
+                                                                      va_list args)
 {
     ANI_DEBUG_TRACE(env);
 
-    return ClassCallMethodByName<EtsFloat, EtsType::FLOAT>(env, cls, name, result, args);
+    return ClassCallMethodByName<EtsFloat, EtsType::FLOAT>(env, cls, name, signature, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Float(ani_env *env, ani_class cls, const char *name,
-                                                                    ani_float *result, ...)
+                                                                    const char *signature, ani_float *result, ...)
 {
     ANI_DEBUG_TRACE(env);
 
     va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(args, result);
-    ani_status status = Class_CallStaticMethodByName_Float_V(env, cls, name, result, args);
+    ani_status status = Class_CallStaticMethodByName_Float_V(env, cls, name, signature, result, args);
     va_end(args);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double_A(ani_env *env, ani_class cls, const char *name,
-                                                                       ani_double *result, const ani_value *args)
+                                                                       const char *signature, ani_double *result,
+                                                                       const ani_value *args)
 {
     ANI_DEBUG_TRACE(env);
 
     CHECK_PTR_ARG(args);
-    return ClassCallMethodByName<EtsDouble, EtsType::DOUBLE>(env, cls, name, result, args);
+    return ClassCallMethodByName<EtsDouble, EtsType::DOUBLE>(env, cls, name, signature, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double_V(ani_env *env, ani_class cls, const char *name,
-                                                                       ani_double *result, va_list args)
+                                                                       const char *signature, ani_double *result,
+                                                                       va_list args)
 {
     ANI_DEBUG_TRACE(env);
 
-    return ClassCallMethodByName<EtsDouble, EtsType::DOUBLE>(env, cls, name, result, args);
+    return ClassCallMethodByName<EtsDouble, EtsType::DOUBLE>(env, cls, name, signature, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Double(ani_env *env, ani_class cls, const char *name,
-                                                                     ani_double *result, ...)
+                                                                     const char *signature, ani_double *result, ...)
 {
     ANI_DEBUG_TRACE(env);
 
     va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(args, result);
-    ani_status status = Class_CallStaticMethodByName_Double_V(env, cls, name, result, args);
+    ani_status status = Class_CallStaticMethodByName_Double_V(env, cls, name, signature, result, args);
     va_end(args);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref_A(ani_env *env, ani_class cls, const char *name,
-                                                                    ani_ref *result, const ani_value *args)
+                                                                    const char *signature, ani_ref *result,
+                                                                    const ani_value *args)
 {
     ANI_DEBUG_TRACE(env);
 
     CHECK_PTR_ARG(args);
-    return ClassCallMethodByName<ani_ref, EtsType::OBJECT>(env, cls, name, result, args);
+    return ClassCallMethodByName<ani_ref, EtsType::OBJECT>(env, cls, name, signature, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref_V(ani_env *env, ani_class cls, const char *name,
-                                                                    ani_ref *result, va_list args)
+                                                                    const char *signature, ani_ref *result,
+                                                                    va_list args)
 {
     ANI_DEBUG_TRACE(env);
 
-    return ClassCallMethodByName<ani_ref, EtsType::OBJECT>(env, cls, name, result, args);
+    return ClassCallMethodByName<ani_ref, EtsType::OBJECT>(env, cls, name, signature, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Ref(ani_env *env, ani_class cls, const char *name,
-                                                                  ani_ref *result, ...)
+                                                                  const char *signature, ani_ref *result, ...)
 {
     ANI_DEBUG_TRACE(env);
 
     va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(args, result);
-    ani_status status = Class_CallStaticMethodByName_Ref_V(env, cls, name, result, args);
+    ani_status status = Class_CallStaticMethodByName_Ref_V(env, cls, name, signature, result, args);
     va_end(args);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void_A(ani_env *env, ani_class cls, const char *name,
-                                                                     const ani_value *args)
+                                                                     const char *signature, const ani_value *args)
 {
     ANI_DEBUG_TRACE(env);
 
     CHECK_PTR_ARG(args);
     ani_boolean result;
-    return ClassCallMethodByName<EtsBoolean, EtsType::VOID>(env, cls, name, &result, args);
+    return ClassCallMethodByName<EtsBoolean, EtsType::VOID>(env, cls, name, signature, &result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void_V(ani_env *env, ani_class cls, const char *name,
-                                                                     va_list args)
+                                                                     const char *signature, va_list args)
 {
     ANI_DEBUG_TRACE(env);
 
     ani_boolean result;
-    return ClassCallMethodByName<EtsBoolean, EtsType::VOID>(env, cls, name, &result, args);
+    return ClassCallMethodByName<EtsBoolean, EtsType::VOID>(env, cls, name, signature, &result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void(ani_env *env, ani_class cls, const char *name, ...)
+NO_UB_SANITIZE static ani_status Class_CallStaticMethodByName_Void(ani_env *env, ani_class cls, const char *name,
+                                                                   const char *signature, ...)
 {
     ANI_DEBUG_TRACE(env);
 
     va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, name);
-    ani_status status = Class_CallStaticMethodByName_Void_V(env, cls, name, args);
+    va_start(args, signature);
+    ani_status status = Class_CallStaticMethodByName_Void_V(env, cls, name, signature, args);
     va_end(args);
     return status;
 }
@@ -3153,35 +3116,17 @@ const __ani_interaction_api INTERACTION_API = {
     nullptr,
     GetVersion,
     GetVM,
-    NotImplementedAdapter<6>,
-    NotImplementedAdapter<7>,
-    NotImplementedAdapter<8>,
-    NotImplementedAdapter<9>,
-    NotImplementedAdapter<10>,
-    NotImplementedAdapter<11>,
-    NotImplementedAdapter<12>,
-    NotImplementedAdapter<13>,
-    NotImplementedAdapter<14>,
-    NotImplementedAdapter<15>,
-    NotImplementedAdapter<16>,
-    NotImplementedAdapter<17>,
-    NotImplementedAdapter<18>,
-    NotImplementedAdapter<19>,
-    NotImplementedAdapter<20>,
-    NotImplementedAdapter<21>,
     Object_New,
     Object_New_A,
     Object_New_V,
     NotImplementedAdapter<25>,
     Object_InstanceOf,
-    NotImplementedAdapter<27>,
     NotImplementedAdapter<28>,
     NotImplementedAdapter<29>,
     FindModule,
     FindNamespace,
     FindClass,
     NotImplementedAdapter<33>,
-    NotImplementedAdapter<34>,
     NotImplementedAdapter<35>,
     NotImplementedAdapter<36>,
     NotImplementedAdapter<37>,
@@ -3190,8 +3135,6 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<40>,
     NotImplementedAdapter<41>,
     NotImplementedAdapter<42>,
-    NotImplementedAdapter<43>,
-    NotImplementedAdapter<44>,
     Namespace_FindFunction,
     Namespace_FindVariable,
     Module_BindNativeFunctions,
@@ -3224,45 +3167,32 @@ const __ani_interaction_api INTERACTION_API = {
     String_GetUTF8Size,
     NotImplementedAdapter<75>,
     String_GetUTF8SubString,
-    NotImplementedAdapter<77>,
-    NotImplementedAdapter<78>,
-    NotImplementedAdapter<79>,
-    NotImplementedAdapter<80>,
-    NotImplementedAdapter<81>,
-    NotImplementedAdapter<82>,
-    NotImplementedAdapter<83>,
-    NotImplementedAdapter<84>,
-    NotImplementedAdapter<85>,
-    NotImplementedAdapter<86>,
-    NotImplementedAdapter<87>,
-    NotImplementedAdapter<88>,
-    FixedArray_GetLength,
-    FixedArray_New_Boolean,
+    Array_GetLength,
+    Array_New_Boolean,
     NotImplementedAdapter<91>,
-    FixedArray_New_Byte,
-    FixedArray_New_Short,
-    FixedArray_New_Int,
-    FixedArray_New_Long,
-    FixedArray_New_Float,
-    FixedArray_New_Double,
-    FixedArray_GetRegion_Boolean,
+    Array_New_Byte,
+    Array_New_Short,
+    Array_New_Int,
+    Array_New_Long,
+    Array_New_Float,
+    Array_New_Double,
+    Array_GetRegion_Boolean,
     NotImplementedAdapter<99>,
-    FixedArray_GetRegion_Byte,
-    FixedArray_GetRegion_Short,
-    FixedArray_GetRegion_Int,
-    FixedArray_GetRegion_Long,
-    FixedArray_GetRegion_Float,
-    FixedArray_GetRegion_Double,
-    FixedArray_SetRegion_Boolean,
+    Array_GetRegion_Byte,
+    Array_GetRegion_Short,
+    Array_GetRegion_Int,
+    Array_GetRegion_Long,
+    Array_GetRegion_Float,
+    Array_GetRegion_Double,
+    Array_SetRegion_Boolean,
     NotImplementedAdapter<107>,
-    FixedArray_SetRegion_Byte,
-    FixedArray_SetRegion_Short,
-    FixedArray_SetRegion_Int,
-    FixedArray_SetRegion_Long,
-    FixedArray_SetRegion_Float,
-    FixedArray_SetRegion_Double,
-    FixedArray_Pin,
-    FixedArray_Unpin,
+    Array_SetRegion_Byte,
+    Array_SetRegion_Short,
+    Array_SetRegion_Int,
+    Array_SetRegion_Long,
+    Array_SetRegion_Float,
+    Array_SetRegion_Double,
+    NotImplementedAdapter<115>,
     NotImplementedAdapter<116>,
     NotImplementedAdapter<117>,
     NotImplementedAdapter<118>,
@@ -3321,13 +3251,10 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapterVargs<171>,
     NotImplementedAdapter<172>,
     NotImplementedAdapter<173>,
-    NotImplementedAdapter<174>,
-    NotImplementedAdapter<175>,
-    Class_GetField,
-    Class_GetStaticField,
-    Class_GetMethod,
-    Class_GetStaticMethod,
-    NotImplementedAdapter<180>,
+    Class_FindField,
+    Class_FindStaticField,
+    Class_FindMethod,
+    Class_FindStaticMethod,
     NotImplementedAdapter<181>,
     NotImplementedAdapter<182>,
     NotImplementedAdapter<183>,
@@ -3465,24 +3392,6 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<315>,
     NotImplementedAdapter<316>,
     NotImplementedAdapter<317>,
-    NotImplementedAdapter<318>,
-    NotImplementedAdapter<319>,
-    NotImplementedAdapter<320>,
-    NotImplementedAdapter<321>,
-    NotImplementedAdapter<322>,
-    NotImplementedAdapter<323>,
-    NotImplementedAdapter<324>,
-    NotImplementedAdapter<325>,
-    NotImplementedAdapter<326>,
-    NotImplementedAdapter<327>,
-    NotImplementedAdapter<328>,
-    NotImplementedAdapter<329>,
-    NotImplementedAdapter<330>,
-    NotImplementedAdapter<331>,
-    NotImplementedAdapter<332>,
-    NotImplementedAdapter<333>,
-    NotImplementedAdapter<334>,
-    NotImplementedAdapter<335>,
     Object_GetPropertyByName_Boolean,
     NotImplementedAdapter<337>,
     Object_GetPropertyByName_Byte,
@@ -3561,12 +3470,6 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapterVargs<411>,
     NotImplementedAdapter<412>,
     NotImplementedAdapter<413>,
-    NotImplementedAdapterVargs<414>,
-    NotImplementedAdapter<415>,
-    NotImplementedAdapter<416>,
-    NotImplementedAdapter<417>,
-    NotImplementedAdapter<418>,
-    NotImplementedAdapter<419>,
     NotImplementedAdapter<420>,
     NotImplementedAdapter<421>,
     NotImplementedAdapter<422>,
@@ -3597,38 +3500,6 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<447>,
     NotImplementedAdapter<448>,
     NotImplementedAdapter<449>,
-    NotImplementedAdapter<450>,
-    NotImplementedAdapter<451>,
-    NotImplementedAdapter<452>,
-    NotImplementedAdapter<453>,
-    NotImplementedAdapter<454>,
-    NotImplementedAdapter<455>,
-    NotImplementedAdapter<456>,
-    NotImplementedAdapter<457>,
-    NotImplementedAdapter<458>,
-    NotImplementedAdapter<459>,
-    NotImplementedAdapter<460>,
-    NotImplementedAdapter<461>,
-    NotImplementedAdapter<462>,
-    NotImplementedAdapter<463>,
-    NotImplementedAdapterVargs<464>,
-    NotImplementedAdapter<465>,
-    NotImplementedAdapter<466>,
-    NotImplementedAdapterVargs<467>,
-    NotImplementedAdapter<468>,
-    NotImplementedAdapter<469>,
-    NotImplementedAdapterVargs<470>,
-    NotImplementedAdapter<471>,
-    NotImplementedAdapter<472>,
-    NotImplementedAdapter<473>,
-    NotImplementedAdapter<474>,
-    NotImplementedAdapter<475>,
-    NotImplementedAdapter<476>,
-    NotImplementedAdapter<477>,
-    NotImplementedAdapter<478>,
-    NotImplementedAdapter<479>,
-    NotImplementedAdapter<480>,
-    NotImplementedAdapter<481>,
 };
 // clang-format on
 

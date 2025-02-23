@@ -27,10 +27,10 @@ public:
         ASSERT_EQ(env_->FindClass("LPackage;", &cls), ANI_OK);
 
         ani_field fieldLong;
-        ASSERT_EQ(env_->Class_GetField(cls, "long_value", &fieldLong), ANI_OK);
+        ASSERT_EQ(env_->Class_FindField(cls, "long_value", &fieldLong), ANI_OK);
 
         ani_field fieldString;
-        ASSERT_EQ(env_->Class_GetField(cls, "string_value", &fieldString), ANI_OK);
+        ASSERT_EQ(env_->Class_FindField(cls, "string_value", &fieldString), ANI_OK);
 
         *packResult = static_cast<ani_object>(packRef);
         *fieldLongResult = fieldLong;
