@@ -14,9 +14,9 @@
  */
 
 /*---
-desc: No throws cause in overrided method.
+desc: No throws cause in in hidden method.
 assert: A method that overrides or hides another method, including methods that implement abstract methods defined in interfaces, may not change throw or rethrow clauses of overridden or hidden method.
-tags: [compile-only, negative]
+tags: [compile-only]
 ---*/
 
 class A {
@@ -25,8 +25,8 @@ class A {
   }
 }
 
-final class C extends A {
-  public override m(): int {
+class C extends A {
+  public m(): int {
     return 5;
   }
 }

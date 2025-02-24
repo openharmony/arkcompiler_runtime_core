@@ -25,5 +25,6 @@ class C {
 
 function main(): void {
     let x: C = new C()
-    x=x.foo()
+    let y: C = x.foo()
+    assertEQ(x, y)
 }

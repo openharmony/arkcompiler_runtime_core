@@ -15,7 +15,9 @@
 
 /*---
 desc: Overload two methods with different return types.
-assert: There is no required relationship between the return types or between the throws or rethrows clauses of two methods with the same name, unless their signatures are override-equivalent.
+assert: >-
+    There is no required relationship between the return types of two methods with the same name,
+    unless their signatures are override-equivalent.
 ---*/
 
 class A {

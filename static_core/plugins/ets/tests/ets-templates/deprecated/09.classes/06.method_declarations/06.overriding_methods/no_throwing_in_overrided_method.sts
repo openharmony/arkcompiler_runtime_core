@@ -11,37 +11,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*---
-desc: Getter throw error.
+desc: No throws cause in overridden method.
+assert: A method that overrides or hides another method, including methods that implement abstract methods defined in interfaces, may not change throw or rethrow clauses of overridden or hidden method.
+tags: [compile-only, negative]
 ---*/
 
-class TestException extends Exception {}
-
 class A {
-  private _age: int = 0;
-
-  get age(): int {
-    if (this._age == 0) { 
-      throw new TestException();
-    }
-
-    return this._age;
+  public m(): int throws{
+    return 5;
   }
 }
 
-function main(): void {
-  let instance: A = new A();
-  let catchCode = 0;
-
-  try {
-    let a = instance.age;
-  } catch (e: TestException) {
-    catchCode = 1;
-  } catch (any) {
-    assertTrue( false );
+final class C extends A {
+  public override m(): int {
+    return 5;
   }
-
-  assertEQ( catchCode, 1 );
 }

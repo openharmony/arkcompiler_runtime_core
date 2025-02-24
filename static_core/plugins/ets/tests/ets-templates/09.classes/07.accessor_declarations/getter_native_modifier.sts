@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,22 +11,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 
 /*---
-desc: Throws in hided method.
-assert: A method that overrides or hides another method, including methods that implement abstract methods defined in interfaces, may not change throw or rethrow clauses of overridden or hidden method.
+desc: Field getter can have native modifier
 tags: [compile-only]
 ---*/
 
 class A {
-  public static m(): int throws {
-    return 5;
-  }
-}
+  private _age: int = 5;
 
-class C extends A {
-  public static m(): int throws {
-    return 5;
-  }
+  native get age(): int;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,37 +11,29 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*---
-desc: Getter throw error.
+desc: >-
+    While extending a class or implementing interfaces, a field declared in a superclass or
+    a superintertafce can be overridden by field with the same name and the same static or
+    non-static status.
 ---*/
 
-class TestException extends Exception {}
+class Base1 {
+    field: Base1 = new Base1();
+}
 
-class A {
-  private _age: int = 0;
+interface Base2 {
+    field: Base1;
+}
 
-  get age(): int {
-    if (this._age == 0) { 
-      throw new TestException();
-    }
-
-    return this._age;
-  }
+class Derived extends Base1 implements Base2 {
+    field: Base1 = new Derived(); // overriding 'field' and providing new initial value
 }
 
 function main(): void {
-  let instance: A = new A();
-  let catchCode = 0;
+    let instance: Derived = new Derived();
 
-  try {
-    let a = instance.age;
-  } catch (e: TestException) {
-    catchCode = 1;
-  } catch (any) {
-    assertTrue( false );
-  }
-
-  assertEQ( catchCode, 1 );
+    assertTrue( instance.field instanceof Derived );
 }
