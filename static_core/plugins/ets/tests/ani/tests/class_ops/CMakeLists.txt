@@ -21,6 +21,86 @@ ani_add_gtest(ani_test_class_ops_class_find_static_field
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_static_field_test.sts
 )
 
+ani_add_gtest(ani_test_class_ops_class_get_static_field_boolean
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_boolean_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_boolean_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_class_get_static_field_byte
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_byte_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_byte_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_class_get_static_field_short
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_short_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_short_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_class_get_static_field_int
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_int_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_int_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_class_get_static_field_float
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_float_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_float_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_class_get_static_field_double
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_double_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_double_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_class_get_static_field_long
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_long_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_long_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_class_get_static_field_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_ref_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_ref_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_class_set_static_field_boolean
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_boolean_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_boolean_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_class_set_static_field_byte
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_byte_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_byte_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_class_set_static_field_short
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_short_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_short_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_class_set_static_field_int
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_int_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_int_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_class_set_static_field_long
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_long_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_long_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_class_set_static_field_float
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_float_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_float_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_class_set_static_field_double
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_double_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_double_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_class_set_static_field_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_ref_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_ref_test.sts
+)
+
 ani_add_gtest(ani_test_class_ops_class_find_static_method
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_static_method_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_static_method_test.sts
@@ -119,4 +199,84 @@ ani_add_gtest(ani_test_class_ops_class_call_static_method_by_name_ref
 ani_add_gtest(ani_test_class_ops_class_call_static_method_by_name_void
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_call_static_method_by_name_void_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_call_static_method_by_name_void_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_get_static_field_by_name_bool
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_by_name_bool_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_by_name_bool_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_get_static_field_by_name_byte
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_by_name_byte_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_by_name_byte_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_get_static_field_by_name_short
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_by_name_short_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_by_name_short_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_get_static_field_by_name_int
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_by_name_int_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_by_name_int_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_get_static_field_by_name_long
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_by_name_long_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_by_name_long_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_get_static_field_by_name_float
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_by_name_float_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_by_name_float_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_get_static_field_by_name_double
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_by_name_double_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_by_name_double_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_get_static_field_by_name_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_by_name_ref_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_get_static_field_by_name_ref_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_set_static_field_by_name_bool
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_by_name_bool_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_by_name_bool_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_set_static_field_by_name_byte
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_by_name_byte_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_by_name_byte_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_set_static_field_by_name_short
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_by_name_short_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_by_name_short_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_set_static_field_by_name_int
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_by_name_int_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_by_name_int_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_set_static_field_by_name_long
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_by_name_long_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_by_name_long_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_set_static_field_by_name_float
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_by_name_float_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_by_name_float_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_set_static_field_by_name_double
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_by_name_double_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_by_name_double_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_call_set_static_field_by_name_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_by_name_ref_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_set_static_field_by_name_ref_test.sts
 )

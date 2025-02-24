@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -66,6 +66,46 @@ TEST_F(ErrorHandlingTest, reset_error_test)
     ASSERT_EQ(env_->ResetError(), ANI_OK);
     ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
     ASSERT_EQ(result, ANI_FALSE);
+}
+
+TEST_F(ErrorHandlingTest, get_unhandled_error_test)
+{
+    ani_class cls;
+    ani_static_method method;
+    GetMethodData(&cls, &method);
+
+    ani_int errorResult;
+    ani_boolean result;
+    ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+    ASSERT_EQ(result, ANI_FALSE);
+    ASSERT_EQ(env_->Class_CallStaticMethod_Int(cls, method, &errorResult, 5U), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
+
+    ani_error error;
+    ASSERT_EQ(env_->GetUnhandledError(&error), ANI_OK);
+    ASSERT_NE(error, nullptr);
+}
+
+TEST_F(ErrorHandlingTest, throw_error_test)
+{
+    ani_class cls;
+    ani_static_method method;
+    ani_int errorResult;
+    ani_boolean result;
+
+    GetMethodData(&cls, &method);
+    ASSERT_EQ(env_->Class_CallStaticMethod_Int(cls, method, &errorResult, 5U), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
+
+    ani_error error;
+    ASSERT_EQ(env_->GetUnhandledError(&error), ANI_OK);
+
+    ASSERT_EQ(env_->ThrowError(error), ANI_OK);
+    ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
+    ASSERT_EQ(env_->ThrowError(nullptr), ANI_INVALID_ARGS);
 }
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
