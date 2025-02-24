@@ -2993,6 +2993,25 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsIstrue()
+    {
+        LOG_INST();
+        DBGBRK();
+        uint16_t v = inst_.GetVReg<FORMAT, 0x00>();
+        Sync();
+
+        if (!CheckRegType(v, refType_)) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        SetAcc(i32_);
+
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleReturnWide()
     {
         LOG_INST();

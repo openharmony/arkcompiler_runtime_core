@@ -51,6 +51,9 @@ static std::optional<T> GetBoxedNumericValue(EtsClassLinkerExtension *ext, EtsOb
     if (cls == ext->GetBoxFloatClass()) {
         return getValue(helpers::TypeIdentity<EtsFloat>());
     }
+    if (cls == ext->GetBoxCharClass()) {
+        return getValue(helpers::TypeIdentity<EtsChar>());
+    }
     return std::nullopt;
 }
 
@@ -157,6 +160,38 @@ EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
 
     ASSERT(IsBoxedNumericClass(rcls, ext));
     return EtsString::CreateFromMUtf8("number");
+}
+
+bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj)
+{
+    if (IsReferenceNullish(coro, obj)) {
+        return false;
+    }
+    auto ext = coro->GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
+    EtsClass *cls = obj->GetClass();
+
+    if (!cls->IsValueTyped()) {
+        return true;
+    }
+    if (obj->IsStringClass()) {
+        return !EtsString::FromEtsObject(obj)->IsEmpty();
+    }
+    if (cls->IsBigInt()) {
+        return EtsBigInt::FromEtsObject(obj)->GetSign() != 0;
+    }
+
+    ASSERT(cls->IsBoxed());
+
+    auto rcls = cls->GetRuntimeClass();
+    if (rcls == ext->GetBoxBooleanClass()) {
+        return EtsBoxPrimitive<EtsBoolean>::FromCoreType(obj)->GetValue() != 0;
+    }
+
+    ASSERT(IsBoxedNumericClass(rcls, ext));
+    if (auto num = GetBoxedNumericValue<EtsDouble>(ext, obj); num.has_value()) {
+        return num.value() != 0 && !std::isnan(num.value());
+    }
+    UNREACHABLE();
 }
 
 }  // namespace ark::ets

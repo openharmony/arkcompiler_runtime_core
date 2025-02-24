@@ -13,6 +13,7 @@
 
 set(stubs_tests
     typeof
+    istrue
 )
 
 set(stubs_tests_in_dir "${CMAKE_CURRENT_SOURCE_DIR}")

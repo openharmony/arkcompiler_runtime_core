@@ -42,6 +42,8 @@ inline EtsClass *GetMethodOwnerClassInFrames(EtsCoroutine *coro, uint32_t depth)
 // Compute typeof
 EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj);
 
+bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj);
+
 template <bool IS_GETTER>
 inline void LookUpException(ark::Class *klass, Field *rawField);
 

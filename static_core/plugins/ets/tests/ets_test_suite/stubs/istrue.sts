@@ -1,0 +1,129 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+function istrue(v: Object | null | undefined) { return !!v }
+
+function erase<T>(v: T): Object | null | undefined {
+    return v;
+}
+
+class Klass {
+    public f:number;
+
+    constructor(f:number) {
+        this.f= f;
+    }
+}
+
+function foo(n: number): Klass | undefined {
+    if(n == 0){
+        return undefined;
+    }
+    return new Klass(n);
+}
+
+enum Color { Red, Green, Blue }
+
+function testNormal() {
+    assert(!istrue(new Byte(0 as byte)));
+    assert(istrue(new Byte(1 as byte)));
+    assert(!istrue(new Short(0 as short)));
+    assert(istrue(new Short(1 as short)));
+    assert(!istrue(new Int(0)));
+    assert(istrue(new Int(1)));
+    assert(!istrue(new Long(0)));
+    assert(istrue(new Long(1)));
+    assert(!istrue(new Float(0.0)));
+    assert(istrue(new Float(0.5)));
+    assert(!istrue(new Double(0.0)));
+    assert(istrue(new Double(0.5)));
+    assert(!istrue(new Char(0 as char)));
+    assert(istrue(new Char('0')));
+    assert(!istrue(""));
+    assert(istrue("Hello"));
+    assert(!istrue(false));
+    assert(istrue(true));
+    assert(!istrue(null));
+    assert(!istrue(undefined));
+    assert(!istrue(NaN));
+    assert(!istrue(new bigint(0)));
+    assert(istrue(new bigint(1)));
+    assert(!istrue(foo(0)));
+    assert(istrue(foo(1)));
+    assert(istrue(Color.Red));
+    let a: bigint | null = 0n;
+    assert(istrue(!a));
+}
+
+function testErase() {
+    assert(!istrue(erase(new Byte(0 as byte))));
+    assert(istrue(erase(new Byte(1 as byte))));
+    assert(!istrue(erase(new Short(0 as short))));
+    assert(istrue(erase(new Short(1 as short))));
+    assert(!istrue(erase(new Int(0))));
+    assert(istrue(erase(new Int(1))));
+    assert(!istrue(erase(new Long(0))));
+    assert(istrue(erase(new Long(1))));
+    assert(!istrue(erase(new Float(0.0))));
+    assert(istrue(erase(new Float(0.5))));
+    assert(!istrue(erase(new Double(0.0))));
+    assert(istrue(erase(new Double(0.5))));
+    assert(!istrue(erase(new Char(0 as char))));
+    assert(istrue(erase(new Char('0'))));
+    assert(!istrue(erase("")));
+    assert(istrue(erase("Hello")));
+    assert(!istrue(erase(false)));
+    assert(istrue(erase(true)));
+    assert(!istrue(erase(null)));
+    assert(!istrue(erase(undefined)));
+    assert(!istrue(erase(NaN)));
+    assert(!istrue(erase(new bigint(0))));
+    assert(istrue(erase(new bigint(1))));
+    assert(!istrue(erase(foo(0))));
+    assert(istrue(erase(foo(1))));
+    assert(istrue(erase(Color.Red)));
+    let a: bigint | null = 0n;
+    assert(istrue(erase(!a)));
+}
+
+function testConditions() {
+    if (istrue(0)) {
+        assert(false);
+    } else {
+        assert(true);
+    }
+
+    if (istrue(1)) {
+        assert(true);
+    } else {
+        assert(false);
+    }
+}
+
+
+function testFunction() {
+    if (istrue((() => { let x: number = 0; return x })())) {
+        assert(false);
+    } else {
+        assert(true);
+    }
+}
+
+function main() {
+    testNormal();
+    testErase();
+    testConditions();
+    testFunction();
+}

@@ -82,3 +82,4 @@ cases:
     - { val: 'new Double(Double.NaN)', type: 'Double' }
     - { val: 'new Float(Float.NaN)', type: 'Float' }
     - { val: 'new Boolean(false)', type: 'Boolean' }
+    - { val: '0n', type: 'bigint' }

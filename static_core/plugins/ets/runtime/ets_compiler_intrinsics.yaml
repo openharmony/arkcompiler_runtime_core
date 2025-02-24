@@ -190,6 +190,18 @@ intrinsics:
     clear_flags: [ acc_read, no_dce, no_cse, no_hoist ]
     peephole_func: PeepholeTypeof
 
+  - name: CompilerEtsIstrue
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: u1
+      args: [ ref ]
+    impl: ark::ets::intrinsics::CompilerEtsIstrue
+    clear_flags: [ acc_read ]
+    safe_intrinsic: true
+    need_param_locations: true
+
   - name: CompilerEtsDoubleToStringDecimal
     space: ets
     compiler_only: true

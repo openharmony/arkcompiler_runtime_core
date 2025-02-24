@@ -51,3 +51,5 @@
     handle_ets_equals_strict(vreg_value(op[0]).ref, vreg_value(op[1]).ref)
   when "ETS_TYPEOF_PREF_V8"
     handle_ets_typeof(vreg_value(op[0]).ref)
+  when "ETS_ISTRUE_PREF_V8"
+    handle_ets_istrue(vreg_value(op[0]).ref)

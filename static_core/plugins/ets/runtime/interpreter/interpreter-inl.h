@@ -400,6 +400,20 @@ public:
         this->template MoveToNextInst<FORMAT, true>();
     }
 
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleEtsIstrue()
+    {
+        uint16_t v = this->GetInst().template GetVReg<FORMAT, 0>();
+
+        LOG_INST() << "ets.istrue v" << v;
+
+        ObjectHeader *obj = this->GetFrame()->GetVReg(v).GetReference();
+
+        bool res = EtsIstrue(GetCoro(), EtsObject::FromCoreType(obj));
+        this->GetAccAsVReg().SetPrimitive(res);
+        this->template MoveToNextInst<FORMAT, true>();
+    }
+
 private:
     ALWAYS_INLINE bool IsNull(ObjectHeader *obj)
     {
