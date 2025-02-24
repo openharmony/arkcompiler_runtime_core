@@ -3355,7 +3355,6 @@ NO_UB_SANITIZE static ani_status WeakReference_GetReference(ani_env *env, ani_wr
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
-    CHECK_PTR_ARG(wref);
     CHECK_PTR_ARG(wasReleasedResult);
     CHECK_PTR_ARG(refResult);
 

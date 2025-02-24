@@ -30,7 +30,7 @@ TEST_F(ReferenceDeleteTest, delete_null_local_ref)
 TEST_F(ReferenceDeleteTest, delete_undefined_local_ref)
 {
     ani_ref undefinedRef;
-    ASSERT_EQ(env_->GetNull(&undefinedRef), ANI_OK);
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
 
     ASSERT_EQ(env_->Reference_Delete(undefinedRef), ANI_OK);
 }

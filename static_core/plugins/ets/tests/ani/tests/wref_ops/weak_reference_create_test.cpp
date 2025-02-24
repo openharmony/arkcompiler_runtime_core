@@ -30,7 +30,7 @@ TEST_F(WeakReferenceCreateTest, from_null_ref)
 TEST_F(WeakReferenceCreateTest, from_undefined_ref)
 {
     ani_ref undefinedRef;
-    ASSERT_EQ(env_->GetNull(&undefinedRef), ANI_OK);
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
     ani_wref wref;
     ASSERT_EQ(env_->WeakReference_Create(undefinedRef, &wref), ANI_OK);
 }
