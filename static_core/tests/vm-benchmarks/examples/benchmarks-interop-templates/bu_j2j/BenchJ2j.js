@@ -19,13 +19,14 @@ const { jsNumber } = require('./test_import');
  * @State
  * @Tags interop, bu_j2j
  */
-function bench_j2j() {
+function benchJ2j() {
 
     /**
      * @Setup
      */
     this.setup = function () {
         console.log('Starting...');
+        return;
     };
 
     /**
@@ -33,9 +34,12 @@ function bench_j2j() {
      */
     this.test = function() {
         testFunction();
+        return;
     };
 
     function testFunction() {
         return jsNumber;
     };
+
+    return;
 }

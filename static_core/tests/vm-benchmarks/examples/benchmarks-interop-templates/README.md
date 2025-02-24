@@ -30,8 +30,8 @@ vmb all -p arkts_node_interop_host --aot-skip-libs -v debug $PANDA_ROOT/tests/vm
 
 Test           |   Time   | CodeSize |   RSS    | Status  |
 ===========================================================
-BenchA2a_test  | 2.70e-01 | 1.50e+05 | 6.03e+04 | Passed  |
-BenchA2j_test  | 5.73e+08 | 1.51e+05 | 1.17e+05 | Passed  |
-bench_j2a_test | 4.28e+04 | 1.44e+05 | 2.95e+05 | Passed  |
-bench_j2j_test | 4.57e-01 | 0.00e+00 | 4.49e+04 | Passed  |
+BenchA2a_test | 4.02e-01 | 1.52e+05 | 5.97e+04 | Passed  |
+BenchA2j_test | 4.92e+08 | 1.52e+05 | 1.14e+05 | Passed  |
+benchJ2a_test | 2.86e+04 | 1.46e+05 | 4.52e+05 | Passed  |
+benchJ2j_test | 4.58e-01 | 0.00e+00 | 4.71e+04 | Passed  |
 ```
