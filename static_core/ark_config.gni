@@ -50,7 +50,7 @@ declare_args() {
   }
 
   if (!defined(is_llvmbackend)) {
-    is_llvmbackend = false
+    is_llvmbackend = true
   }
 
   if ((is_ohos && is_standard_system) || ark_ets_hybrid) {

@@ -169,11 +169,12 @@ $ cd /path/to/panda/repository
 $ /path/to/gn/repository/out/gn --args=is_standard_system=true gen out
 $ ninja -C out <target name>
 ```
-To use LLVM Backend add the following arguments:
+
+By default gn build uses LLVM Backend, so one must provide `llvm_target_dir="/path/to/llvm-15-{type}-{arch}"` if it is not in default location. To build without llvm add the following arguments:
 ```
-$ /path/to/gn/repository/out/gn out is_llvmbackend=true llvm_target_dir="/opt/llvm-15-{type}-{arch}" ...
+$ /path/to/gn/repository/out/gn out is_llvmbackend=false ...
 ```
-Setting `is_llvmbackend=true` option enables the same scenarios as `-DPANDA_LLVM_BACKEND=true` option in cmake builds
+Option `is_llvmbackend=true` in gn is the same scenarios as `-DPANDA_LLVM_BACKEND=true` option in cmake builds
 
 ## Further reading
 
