@@ -147,6 +147,7 @@ template("xgc_test") {
     ]
     cmd =
         rebase_path("${root_out_dir}/arkcompiler/runtime_core/ark_js_napi_cli")
+    cmd += " --open-ark-tools true"
     cmd += " --stub-file " +
            rebase_path("${root_gen_dir}/arkcompiler/ets_runtime/stub.an")
     cmd += " --entry-point ${target_name}"
@@ -242,6 +243,78 @@ xgc_test("remark_cycle_test") {
   sources = [ "remark_cycle_test.cpp" ]
 }
 
+xgc_test("mark_test_create_proxy") {
+  js = [
+    "mark_test_create_proxy.js",
+    "mark_test_utils.js",
+  ]
+  sts = "mark_test_sts.sts"
+  sources = [ "mark_test_utils.cpp" ]
+}
+
+xgc_test("mark_test_cross") {
+  js = [
+    "mark_test_cross.js",
+    "mark_test_utils.js",
+  ]
+  sts = "mark_test_sts.sts"
+  sources = [ "mark_test_utils.cpp" ]
+}
+
+xgc_test("mark_test_cycle") {
+  js = [
+    "mark_test_cycle.js",
+    "mark_test_utils.js",
+  ]
+  sts = "mark_test_sts.sts"
+  sources = [ "mark_test_utils.cpp" ]
+}
+
+xgc_test("mark_test_gc") {
+  js = [
+    "mark_test_gc.js",
+    "mark_test_utils.js",
+  ]
+  sts = "mark_test_sts.sts"
+  sources = [ "mark_test_utils.cpp" ]
+}
+
+xgc_test("mark_test_js_ref_sts") {
+  js = [
+    "mark_test_js_ref_sts.js",
+    "mark_test_utils.js",
+  ]
+  sts = "mark_test_sts.sts"
+  sources = [ "mark_test_utils.cpp" ]
+}
+
+xgc_test("mark_test_mass_ref") {
+  js = [
+    "mark_test_mass_ref.js",
+    "mark_test_utils.js",
+  ]
+  sts = "mark_test_sts.sts"
+  sources = [ "mark_test_utils.cpp" ]
+}
+
+xgc_test("mark_test_passive_xgc") {
+  js = [
+    "mark_test_passive_xgc.js",
+    "mark_test_utils.js",
+  ]
+  sts = "mark_test_sts.sts"
+  sources = [ "mark_test_utils.cpp" ]
+}
+
+xgc_test("mark_test_sts_ref_js") {
+  js = [
+    "mark_test_sts_ref_js.js",
+    "mark_test_utils.js",
+  ]
+  sts = "mark_test_sts.sts"
+  sources = [ "mark_test_utils.cpp" ]
+}
+
 group("xgc_tests") {
   if (ark_ets_hybrid) {
     deps = [
@@ -250,6 +323,14 @@ group("xgc_tests") {
       ":mark_cycle_test",
       ":mark_js2sts_test",
       ":mark_sts2js_test",
+      ":mark_test_create_proxy",
+      ":mark_test_cross",
+      ":mark_test_cycle",
+      ":mark_test_gc",
+      ":mark_test_js_ref_sts",
+      ":mark_test_mass_ref",
+      ":mark_test_passive_xgc",
+      ":mark_test_sts_ref_js",
       ":remark_cycle_test",
       ":sweep_cycle_test",
       ":sweep_js2sts_test",
