@@ -52,6 +52,9 @@ class AsyncLockManager {
             if (lock == undefined) {
                 throw new Error("AsyncLock " + name + " not found");
             }
+            if (name.includes("__AnonymousLockName__")) {
+                throw new Error("Lock cannot be found");
+            }
             let state = lock.query();
             return state;
         } finally {

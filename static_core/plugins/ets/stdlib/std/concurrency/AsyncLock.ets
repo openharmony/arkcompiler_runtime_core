@@ -26,7 +26,7 @@ export enum AsyncLockMode {
 export final class AsyncLock {
 
     constructor() {
-        this("default_name");
+        this(AsyncLock.generateAnonymousLockName());
     }
 
     internal constructor(name: string) {
@@ -174,7 +174,11 @@ export final class AsyncLock {
     }
 
     public static query(name: string): AsyncLockState {
-        return asyncLockManager.query(name);
+        try {
+            return asyncLockManager.query(name);
+        } catch (e: Error) {
+            throw e;
+        }
     }
 
     public static queryAll(): AsyncLockState[] {
@@ -188,7 +192,12 @@ export final class AsyncLock {
         return state;
     }
 
+    private static generateAnonymousLockName() {
+        return "__AnonymousLockName__" + Number.toString(AsyncLock.LastAnonymousId++);
+    }
+
     public readonly name: string;
+    private static LastAnonymousId: int = 0;
     private holderCID: int = 0;
     private mode: AsyncLockMode = AsyncLockMode.UNLOCKED;
     private counter: int = 0;
