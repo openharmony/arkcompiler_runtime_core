@@ -81,7 +81,7 @@ static inline ani_variable ToAniVariable(EtsVariable *variable)
     return reinterpret_cast<ani_variable>(variable);
 }
 
-[[maybe_unused]] static inline EtsVariable *ToInternalVariable(ani_variable variable)
+static inline EtsVariable *ToInternalVariable(ani_variable variable)
 {
     return reinterpret_cast<EtsVariable *>(variable);
 }
@@ -1525,6 +1525,32 @@ NO_UB_SANITIZE static ani_status Object_GetField_Ref(ani_env *env, ani_object ob
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetField_Boolean(ani_env *env, ani_object object, ani_field field,
+                                                         ani_boolean value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return SetPrimitiveTypeField(env, object, field, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetField_Byte(ani_env *env, ani_object object, ani_field field, ani_byte value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return SetPrimitiveTypeField(env, object, field, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetField_Short(ani_env *env, ani_object object, ani_field field,
+                                                       ani_short value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return SetPrimitiveTypeField(env, object, field, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_SetField_Int(ani_env *env, ani_object object, ani_field field, ani_int value)
 {
     ANI_DEBUG_TRACE(env);
@@ -1534,6 +1560,24 @@ NO_UB_SANITIZE static ani_status Object_SetField_Int(ani_env *env, ani_object ob
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_SetField_Long(ani_env *env, ani_object object, ani_field field, ani_long value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return SetPrimitiveTypeField(env, object, field, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetField_Float(ani_env *env, ani_object object, ani_field field,
+                                                       ani_float value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return SetPrimitiveTypeField(env, object, field, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetField_Double(ani_env *env, ani_object object, ani_field field,
+                                                        ani_double value)
 {
     ANI_DEBUG_TRACE(env);
 
@@ -1559,15 +1603,17 @@ NO_UB_SANITIZE static ani_status Object_SetField_Ref(ani_env *env, ani_object ob
     return ANI_OK;
 }
 
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_GetFieldByName_Ref(ani_env *env, ani_object object, const char *name,
-                                                           ani_ref *result)
+template <typename R>
+static ani_status DoGetFieldByName(ani_env *env, ani_object object, const char *name, R *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(object);
     CHECK_PTR_ARG(name);
     CHECK_PTR_ARG(result);
+
+    static constexpr auto IS_REF = std::is_same_v<R, ani_ref>;
+    using Res = std::conditional_t<IS_REF, EtsObject *, R>;
 
     ScopedManagedCodeFix s(env);
     EtsCoroutine *coroutine = s.GetCoroutine();
@@ -1576,9 +1622,178 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Ref(ani_env *env, ani_obj
     ASSERT(etsObject.GetPtr() != nullptr);
     EtsField *etsField = etsObject->GetClass()->GetFieldIDByName(name, nullptr);
     ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
+    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<R>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+
+    Res etsRes {};
+    if constexpr (IS_REF) {
+        etsRes = etsObject->GetFieldObject(etsField);
+        return s.AddLocalRef(etsRes, result);
+    } else {
+        etsRes = etsObject->GetFieldPrimitive<R>(etsField);
+        *result = etsRes;
+        return ANI_OK;
+    }
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Boolean(ani_env *env, ani_object object, const char *name,
+                                                               ani_boolean *result)
+{
+    return DoGetFieldByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Byte(ani_env *env, ani_object object, const char *name,
+                                                            ani_byte *result)
+{
+    return DoGetFieldByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Short(ani_env *env, ani_object object, const char *name,
+                                                             ani_short *result)
+{
+    return DoGetFieldByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Int(ani_env *env, ani_object object, const char *name,
+                                                           ani_int *result)
+{
+    return DoGetFieldByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Long(ani_env *env, ani_object object, const char *name,
+                                                            ani_long *result)
+{
+    return DoGetFieldByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Float(ani_env *env, ani_object object, const char *name,
+                                                             ani_float *result)
+{
+    return DoGetFieldByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Double(ani_env *env, ani_object object, const char *name,
+                                                              ani_double *result)
+{
+    return DoGetFieldByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Ref(ani_env *env, ani_object object, const char *name,
+                                                           ani_ref *result)
+{
+    return DoGetFieldByName(env, object, name, result);
+}
+
+template <typename T>
+NO_UB_SANITIZE ani_status ObjectSetFieldByNamePrimitive(ani_env *env, ani_object object, const char *name, T value)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+
+    ScopedManagedCodeFix s(env);
+    EtsCoroutine *coroutine = s.GetCoroutine();
+    EtsHandleScope scope(coroutine);
+    EtsHandle<EtsObject> etsObject(coroutine, s.ToInternalType(object));
+    ASSERT(etsObject.GetPtr() != nullptr);
+    EtsField *etsField = etsObject->GetClass()->GetFieldIDByName(name, nullptr);
+    ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
+    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+
+    etsObject->SetFieldPrimitive(etsField, value);
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming,-warnings-as-errors)
+NO_UB_SANITIZE ani_status Object_SetFieldByName_Boolean(ani_env *env, ani_object object, const char *name,
+                                                        ani_boolean value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ObjectSetFieldByNamePrimitive(env, object, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming,-warnings-as-errors)
+NO_UB_SANITIZE ani_status Object_SetFieldByName_Byte(ani_env *env, ani_object object, const char *name, ani_byte value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ObjectSetFieldByNamePrimitive(env, object, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming,-warnings-as-errors)
+NO_UB_SANITIZE ani_status Object_SetFieldByName_Short(ani_env *env, ani_object object, const char *name,
+                                                      ani_short value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ObjectSetFieldByNamePrimitive(env, object, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming,-warnings-as-errors)
+NO_UB_SANITIZE ani_status Object_SetFieldByName_Int(ani_env *env, ani_object object, const char *name, ani_int value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ObjectSetFieldByNamePrimitive(env, object, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming,-warnings-as-errors)
+NO_UB_SANITIZE ani_status Object_SetFieldByName_Long(ani_env *env, ani_object object, const char *name, ani_long value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ObjectSetFieldByNamePrimitive(env, object, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming,-warnings-as-errors)
+NO_UB_SANITIZE ani_status Object_SetFieldByName_Float(ani_env *env, ani_object object, const char *name,
+                                                      ani_float value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ObjectSetFieldByNamePrimitive(env, object, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming,-warnings-as-errors)
+NO_UB_SANITIZE ani_status Object_SetFieldByName_Double(ani_env *env, ani_object object, const char *name,
+                                                       ani_double value)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return ObjectSetFieldByNamePrimitive(env, object, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetFieldByName_Ref(ani_env *env, ani_object object, const char *name,
+                                                           ani_ref value)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(value);
+
+    ScopedManagedCodeFix s(env);
+    EtsCoroutine *coroutine = s.GetCoroutine();
+    EtsHandleScope scope(coroutine);
+    EtsHandle<EtsObject> etsObject(coroutine, s.ToInternalType(object));
+    ASSERT(etsObject.GetPtr() != nullptr);
+    EtsField *etsField = etsObject->GetClass()->GetFieldIDByName(name, nullptr);
+    EtsObject *etsValue = s.ToInternalType(value);
+    ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<ani_ref>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
-    EtsObject *etsRes = etsObject->GetFieldObject(etsField);
-    return s.AddLocalRef(etsRes, result);
+
+    etsObject->SetFieldObject(etsField, etsValue);
+    return ANI_OK;
 }
 
 template <typename R>
@@ -2711,6 +2926,88 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Void(ani_env *env, ani_object
     return status;
 }
 
+template <typename R>
+static ani_status DoVariableGetValue(ani_env *env, ani_variable variable, R *result)
+{
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(variable);
+    CHECK_PTR_ARG(result);
+
+    static constexpr auto IS_REF = std::is_same_v<R, ani_ref>;
+    using Res = std::conditional_t<IS_REF, EtsObject *, R>;
+
+    ScopedManagedCodeFix s(env);
+    EtsVariable *internalVariable = ToInternalVariable(variable);
+    EtsField *field = internalVariable->AsField();
+    ANI_CHECK_RETURN_IF_NE(field->GetEtsType(), AniTypeInfo<R>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+    EtsClass *cls = field->GetDeclaringClass();
+    Res etsRes {};
+    if constexpr (IS_REF) {
+        etsRes = cls->GetStaticFieldObject(field);
+        return s.AddLocalRef(etsRes, result);
+    } else {
+        etsRes = cls->GetStaticFieldPrimitive<R>(field);
+        *result = etsRes;
+        return ANI_OK;
+    }
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Boolean(ani_env *env, ani_variable variable, ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Byte(ani_env *env, ani_variable variable, ani_byte *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Short(ani_env *env, ani_variable variable, ani_short *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Int(ani_env *env, ani_variable variable, ani_int *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Long(ani_env *env, ani_variable variable, ani_long *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Float(ani_env *env, ani_variable variable, ani_float *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Double(ani_env *env, ani_variable variable, ani_double *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Ref(ani_env *env, ani_variable variable, ani_ref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_CallMethodByName_Boolean_A(ani_env *env, ani_object object, const char *name,
                                                                    const char *signature, ani_boolean *result,
@@ -3526,15 +3823,15 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<132>,
     NotImplementedAdapter<133>,
     NotImplementedAdapter<134>,
-    NotImplementedAdapter<135>,
+    Variable_GetValue_Boolean,
     NotImplementedAdapter<136>,
-    NotImplementedAdapter<137>,
-    NotImplementedAdapter<138>,
-    NotImplementedAdapter<139>,
-    NotImplementedAdapter<140>,
-    NotImplementedAdapter<141>,
-    NotImplementedAdapter<142>,
-    NotImplementedAdapter<143>,
+    Variable_GetValue_Byte,
+    Variable_GetValue_Short,
+    Variable_GetValue_Int,
+    Variable_GetValue_Long,
+    Variable_GetValue_Float,
+    Variable_GetValue_Double,
+    Variable_GetValue_Ref,
     Function_Call_Boolean,
     Function_Call_Boolean_A,
     Function_Call_Boolean_V,
@@ -3679,33 +3976,33 @@ const __ani_interaction_api INTERACTION_API = {
     Object_GetField_Float,
     Object_GetField_Double,
     Object_GetField_Ref,
-    NotImplementedAdapter<291>,
+    Object_SetField_Boolean,
     NotImplementedAdapter<292>,
-    NotImplementedAdapter<293>,
-    NotImplementedAdapter<294>,
+    Object_SetField_Byte,
+    Object_SetField_Short,
     Object_SetField_Int,
     Object_SetField_Long,
-    NotImplementedAdapter<297>,
-    NotImplementedAdapter<298>,
+    Object_SetField_Float,
+    Object_SetField_Double,
     Object_SetField_Ref,
-    NotImplementedAdapter<300>,
+    Object_GetFieldByName_Boolean,
     NotImplementedAdapter<301>,
-    NotImplementedAdapter<302>,
-    NotImplementedAdapter<303>,
-    NotImplementedAdapter<304>,
-    NotImplementedAdapter<305>,
-    NotImplementedAdapter<306>,
-    NotImplementedAdapter<307>,
+    Object_GetFieldByName_Byte,
+    Object_GetFieldByName_Short,
+    Object_GetFieldByName_Int,
+    Object_GetFieldByName_Long,
+    Object_GetFieldByName_Float,
+    Object_GetFieldByName_Double,
     Object_GetFieldByName_Ref,
-    NotImplementedAdapter<309>,
+    Object_SetFieldByName_Boolean,
     NotImplementedAdapter<310>,
-    NotImplementedAdapter<311>,
-    NotImplementedAdapter<312>,
-    NotImplementedAdapter<313>,
-    NotImplementedAdapter<314>,
-    NotImplementedAdapter<315>,
-    NotImplementedAdapter<316>,
-    NotImplementedAdapter<317>,
+    Object_SetFieldByName_Byte,
+    Object_SetFieldByName_Short,
+    Object_SetFieldByName_Int,
+    Object_SetFieldByName_Long,
+    Object_SetFieldByName_Float,
+    Object_SetFieldByName_Double,
+    Object_SetFieldByName_Ref,
     Object_GetPropertyByName_Boolean,
     NotImplementedAdapter<337>,
     Object_GetPropertyByName_Byte,
