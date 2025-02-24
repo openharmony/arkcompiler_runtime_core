@@ -21,3 +21,5 @@ lib/libets_interop_js_napi.so
 lib/libhmicui18n.z.so
 lib/libhmicuuc.z.so
 lib/libinit_icu.a
+lib/libllvmbackend.so
+lib/libLLVM-15.so

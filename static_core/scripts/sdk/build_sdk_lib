@@ -39,7 +39,7 @@ function build_panda() {
         -DPANDA_WITH_TESTS_JAVA_ECMASCRIPT=OFF"
 
     # shellcheck disable=SC2086
-    cmake -B"$build_dir" ${COMMONS_CMAKE_ARGS[@]} $cmake_arguments
+    ${OHOS_SDK_NATIVE}/build-tools/cmake/bin/cmake -B"$build_dir" ${COMMONS_CMAKE_ARGS[@]} $cmake_arguments
     # shellcheck disable=SC2086
     ninja -C"$build_dir" -j"${CONCURRENCY}" $ninja_targets
 }
@@ -67,10 +67,25 @@ function copy_into_sdk() {
 
 function linux_arm64_tools() {
     echo "> Building linux arm64 tools..."
+    local extra_llvm_opts=""
+    if [[ "${PANDA_LLVM_BACKEND}" == "ON" ]]; then
+        local llvm_target="${LLVM_BIN_AARCH64_RELEASE}"
+        if [[ "${PANDA_SDK_BUILD_TYPE}" == "${BUILD_TYPE_DEBUG}" ]]; then
+            llvm_target="${LLVM_BIN_AARCH64_DEBUG}"
+        fi
+        if [[ "${PANDA_SDK_BUILD_TYPE}" == "FastVerify" ]]; then
+            llvm_target="${LLVM_BIN_AARCH64_FASTVERIFY}"
+        fi
+        extra_llvm_opts="\
+        -DLLVM_TARGET_PATH=${llvm_target} \
+        -DLLVM_HOST_PATH=${LLVM_BIN_X86_64_RELEASE} \
+        "
+    fi
     local linux_arm64_build_dir="$SDK_BUILD_ROOT/linux_arm64_host_tools"
     local linux_arm64_cmake_args=" \
         -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/cross-clang-14-qemu-aarch64.cmake \
         -DPANDA_LLVM_BACKEND=${PANDA_LLVM_BACKEND} \
+        ${extra_llvm_opts} \
         -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
         -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${SDK_BUILD_ROOT}/llvm_binaries"
     local linux_arm64_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin etsnative verifier"
@@ -80,12 +95,27 @@ function linux_arm64_tools() {
 
 function linux_tools() {
     echo "> Building linux tools..."
+
+    local extra_llvm_opts=""
+    if [[ "${PANDA_LLVM_BACKEND}" == "ON" ]]; then
+        # HOST = TARGET
+        local llvm_target="${LLVM_BIN_X86_64_RELEASE}"
+        if [[ "${PANDA_SDK_BUILD_TYPE}" == "${BUILD_TYPE_DEBUG}" ]]; then
+            llvm_target="${LLVM_BIN_X86_64_DEBUG}"
+        fi
+        extra_llvm_opts="\
+            -DLLVM_TARGET_PATH=${llvm_target} \
+            -DLLVM_HOST_PATH=${llvm_target}\
+            "
+    fi
+
     local linux_build_dir="$SDK_BUILD_ROOT/linux_host_tools"
     local linux_cmake_args=" \
         -DPANDA_CROSS_AARCH64_TOOLCHAIN_FILE=cmake/toolchain/cross-ohos-musl-aarch64.cmake \
         -DTOOLCHAIN_SYSROOT=$OHOS_SDK_NATIVE/sysroot \
         -DTOOLCHAIN_CLANG_ROOT=$OHOS_SDK_NATIVE/llvm \
         -DPANDA_LLVM_BACKEND=${PANDA_LLVM_BACKEND} \
+        ${extra_llvm_opts} \
         -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
         -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${SDK_BUILD_ROOT}/llvm_binaries"
     local linux_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin etsnative verifier"
@@ -106,12 +136,27 @@ function ohos_arm64() {
     echo "> Building runtime for OHOS ARM64..."
     local ohos_build_dir="$SDK_BUILD_ROOT/ohos_arm64"
     local taget_sdk_dir="$PANDA_SDK_PATH/ohos_arm64"
+    local extra_llvm_opts=""
+    if [[ "${PANDA_LLVM_BACKEND}" == "ON" ]]; then
+        if [[ "${PANDA_SDK_BUILD_TYPE}" == "FastVerify" ]]; then
+            extra_llvm_opts="\
+            -DLLVM_TARGET_PATH=${LLVM_BIN_OHOS_FASTVERIFY} \
+            -DLLVM_HOST_PATH=${LLVM_BIN_X86_64_RELEASE} \
+            "
+        else
+            extra_llvm_opts="\
+            -DLLVM_TARGET_PATH=${LLVM_BIN_OHOS_RELEASE} \
+            -DLLVM_HOST_PATH=${LLVM_BIN_X86_64_RELEASE} \
+            "
+        fi
+    fi
     local target_cmake_args=" \
         -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/cross-ohos-musl-aarch64.cmake \
         -DTOOLCHAIN_SYSROOT=$OHOS_SDK_NATIVE/sysroot \
         -DTOOLCHAIN_CLANG_ROOT=$OHOS_SDK_NATIVE/llvm \
         -DPANDA_ETS_INTEROP_JS=ON \
         -DPANDA_LLVM_BACKEND=${PANDA_LLVM_BACKEND} \
+        ${extra_llvm_opts} \
         -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
         -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${SDK_BUILD_ROOT}/llvm_binaries"
     local ohos_build_targets="ark ark_aot arkruntime arkassembler ets_interop_js_napi e2p_test_plugin etsnative"
@@ -209,7 +254,30 @@ function print_help() {
 
     --icu_dat_file          Copy icu data file into SDK
 
-    --panda_llvm_backend    Run building LLVM backend
+    --panda_llvm_backend    Run building LLVM backend (default)
+
+    --no_panda_llvm_backend Run build without LLVM backend
+
+    --llvm_prebuilts_aarch64_debug=..
+                            Path to debug llvm prebuilts for aarch64
+
+    --llvm_prebuilts_aarch64_release=..
+                            Path to release llvm prebuilts for aarch64
+
+    --llvm_prebuilts_aarch64_fastverify=..
+                            Path to fastverify llvm prebuilts for aarch64
+
+    --llvm_prebuilts_x86_64_debug=..
+                            Path to debug llvm prebuilts for x86_64
+
+    --llvm_prebuilts_x86_64_release=..
+                            Path to release llvm prebuilts for x86_64
+
+    --llvm_prebuilts_ohos_release=..
+                            Path to release llvm prebuilts for ohos (aarch64)
+
+    --llvm_prebuilts_ohos_fastverify=..
+                            Path to fastverify llvm prebuilts for ohos (aarch64)
 
     --panda_build_llvm_bin  Run building LLVM-binaries
     "
@@ -324,6 +392,31 @@ function parse_options() {
             PANDA_LLVM_BACKEND="ON"
             shift
             ;;
+        --no_panda_llvm_backend)
+            PANDA_LLVM_BACKEND="OFF"
+            shift
+            ;;
+        --llvm_prebuilts_aarch64_debug=*)
+            LLVM_BIN_AARCH64_DEBUG="${i#"--llvm_prebuilts_aarch64_debug"}"
+            shift;;
+        --llvm_prebuilts_aarch64_release=*)
+            LLVM_BIN_AARCH64_RELEASE="${i#"--llvm_prebuilts_aarch64_release="}"
+            shift;;
+        --llvm_prebuilts_aarch64_fastverify=*)
+            LLVM_BIN_AARCH64_FASTVERIFY="${i#"--llvm_prebuilts_aarch64_fastverify="}"
+            shift;;
+        --llvm_prebuilts_x86_64_debug=*)
+            LLVM_BIN_X86_64_DEBUG="${i#"--llvm_prebuilts_x86_64_debug="}"
+            shift;;
+        --llvm_prebuilts_x86_64_release=*)
+            LLVM_BIN_X86_64_RELEASE="${i#"--llvm_prebuilts_x86_64_release="}"
+            shift;;
+        --llvm_prebuilts_ohos_release=*)
+            LLVM_BIN_OHOS_RELEASE="${i#"--llvm_prebuilts_ohos_release="}"
+            shift;;
+        --llvm_prebuilts_ohos_fastverify=*)
+            LLVM_BIN_OHOS_FASTVERIFY="${i#"--llvm_prebuilts_ohos_fastverify="}"
+            shift;;
         --panda_build_llvm_bin)
             PANDA_BUILD_LLVM_BINARIES="ON"
             shift

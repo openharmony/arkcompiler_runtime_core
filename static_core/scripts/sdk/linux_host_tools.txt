@@ -24,3 +24,5 @@ lib/libhmicui18n.z.so
 lib/libhmicuuc.z.so
 lib/libinit_icu.so
 lib/libirtoc.so
+lib/libllvmbackend.so
+lib/libLLVM-15.so
