@@ -27,9 +27,9 @@ TEST_F(ClassSetStaticFieldFloatTest, set_float)
     ASSERT_NE(field, nullptr);
     ani_float result = 0.0F;
     ASSERT_EQ(env_->Class_GetStaticField_Float(cls, field, &result), ANI_OK);
-    const ani_double target = 18.0F;
+    const ani_float target = 18.0F;
     ASSERT_EQ(result, target);
-    const ani_double setTar = 28.0F;
+    const ani_float setTar = 28.0F;
     ASSERT_EQ(env_->Class_SetStaticField_Float(cls, field, setTar), ANI_OK);
     ASSERT_EQ(env_->Class_GetStaticField_Float(cls, field, &result), ANI_OK);
     ASSERT_EQ(result, setTar);
@@ -44,9 +44,9 @@ TEST_F(ClassSetStaticFieldFloatTest, set_float_c_api)
     ASSERT_NE(field, nullptr);
     ani_float result = 0.0F;
     ASSERT_EQ(env_->c_api->Class_GetStaticField_Float(env_, cls, field, &result), ANI_OK);
-    const ani_double target = 18.0F;
+    const ani_float target = 18.0F;
     ASSERT_EQ(result, target);
-    const ani_double setTar = 28.0F;
+    const ani_float setTar = 28.0F;
     ASSERT_EQ(env_->c_api->Class_SetStaticField_Float(env_, cls, field, setTar), ANI_OK);
     ASSERT_EQ(env_->c_api->Class_GetStaticField_Float(env_, cls, field, &result), ANI_OK);
     ASSERT_EQ(result, setTar);
@@ -58,7 +58,7 @@ TEST_F(ClassSetStaticFieldFloatTest, set_invalid_field_type)
     ASSERT_EQ(env_->FindClass("LTestSetFloat;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
-    const ani_double setTar = 28.0F;
+    const ani_float setTar = 28.0F;
     ASSERT_EQ(env_->Class_SetStaticField_Float(cls, field, setTar), ANI_INVALID_TYPE);
 }
 
@@ -71,9 +71,9 @@ TEST_F(ClassSetStaticFieldFloatTest, invalid_argument2)
     ASSERT_NE(field, nullptr);
     ani_float result = 0.0F;
     ASSERT_EQ(env_->Class_GetStaticField_Float(cls, field, &result), ANI_OK);
-    const ani_double target = 18.0F;
+    const ani_float target = 18.0F;
     ASSERT_EQ(result, target);
-    const ani_double setTar = 28.0F;
+    const ani_float setTar = 28.0F;
     ASSERT_EQ(env_->Class_SetStaticField_Float(nullptr, field, setTar), ANI_INVALID_ARGS);
 }
 
@@ -81,7 +81,7 @@ TEST_F(ClassSetStaticFieldFloatTest, invalid_argument3)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LTestSetFloat;", &cls), ANI_OK);
-    const ani_double setTar = 28.0F;
+    const ani_float setTar = 28.0F;
     ASSERT_EQ(env_->Class_SetStaticField_Float(cls, nullptr, setTar), ANI_INVALID_ARGS);
 }
 }  // namespace ark::ets::ani::testing

@@ -55,3 +55,8 @@ ani_add_gtest(ani_test_function_call_void
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_void_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_void_test.sts
 )
+
+ani_add_gtest(ani_test_function_call_char
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_char_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_char_test.sts
+)

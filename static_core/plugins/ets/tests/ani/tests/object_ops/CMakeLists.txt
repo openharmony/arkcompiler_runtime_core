@@ -81,6 +81,11 @@ ani_add_gtest(ani_test_object_ops_object_get_field_int
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_int_test.sts
 )
 
+ani_add_gtest(ani_test_object_ops_object_get_field_char
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_char_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_char_test.sts
+)
+
 ani_add_gtest(ani_test_object_set_field_by_name_boolean
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_set_field_by_name_boolean_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_set_field_by_name_boolean_test.sts
@@ -121,6 +126,11 @@ ani_add_gtest(ani_test_object_set_field_by_name_ref
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_set_field_by_name_ref_test.sts
 )
 
+ani_add_gtest(ani_test_object_set_field_by_name_char
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_set_field_by_name_char_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_set_field_by_name_char_test.sts
+)
+
 ani_add_gtest(ani_test_object_ops_object_get_field_long
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_long_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_long_test.sts
@@ -144,6 +154,11 @@ ani_add_gtest(ani_test_object_ops_object_get_field_ref
 ani_add_gtest(ani_test_object_ops_object_set_field_boolean
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_set_field_boolean_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_set_field_boolean_test.sts
+)
+
+ani_add_gtest(ani_test_object_ops_object_set_field_char
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_set_field_char_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_set_field_char_test.sts
 )
 
 ani_add_gtest(ani_test_object_ops_object_set_field_byte
@@ -227,6 +242,11 @@ ani_add_gtest(ani_test_object_ops_call_object_method_boolean
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_object_method_boolean_test.sts
 )
 
+ani_add_gtest(ani_test_object_ops_call_object_method_char
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_object_method_char_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_object_method_char_test.sts
+)
+
 ani_add_gtest(ani_test_object_ops_call_object_method_byte
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_object_method_byte_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_object_method_byte_test.sts
@@ -275,6 +295,11 @@ ani_add_gtest(ani_test_object_instance_of
 ani_add_gtest(ani_test_object_ops_object_call_method_by_name_boolean
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_call_method_by_name_boolean_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_call_method_by_name_boolean_test.sts
+)
+
+ani_add_gtest(ani_test_object_ops_object_call_method_by_name_char
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_call_method_by_name_char_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_call_method_by_name_char_test.sts
 )
 
 ani_add_gtest(ani_test_object_ops_object_call_method_by_name_byte
