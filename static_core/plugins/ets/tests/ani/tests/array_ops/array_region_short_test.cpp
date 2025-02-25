@@ -219,6 +219,45 @@ TEST_F(ArraySetGetRegionShortTest, SetGetStabilityToArrayTest)
     }
 }
 
+TEST_F(ArraySetGetRegionShortTest, EscompatGetRegionShortTest)
+{
+    const auto array =
+        static_cast<ani_array_short>(CallEtsFunction<ani_ref>("array_region_short_test", "GetEscompatArray"));
+
+    ani_short nativeBuffer[5U] = {0};
+    const ani_size offset3 = 0;
+    const ani_size len3 = 5;
+    ASSERT_EQ(env_->Array_GetRegion_Short(array, offset3, len3, nativeBuffer), ANI_OK);
+    ASSERT_EQ(nativeBuffer[0U], TEST_VALUE1);
+    ASSERT_EQ(nativeBuffer[1U], TEST_VALUE2);
+    ASSERT_EQ(nativeBuffer[2U], TEST_VALUE3);
+    ASSERT_EQ(nativeBuffer[3U], TEST_VALUE4);
+    ASSERT_EQ(nativeBuffer[4U], TEST_VALUE5);
+}
+
+TEST_F(ArraySetGetRegionShortTest, EscompatSetRegionShortTest)
+{
+    const auto array =
+        static_cast<ani_array_short>(CallEtsFunction<ani_ref>("array_region_short_test", "GetEscompatArray"));
+    ani_short nativeBuffer1[5U] = {TEST_UPDATE1, TEST_UPDATE2, TEST_UPDATE3};
+    const ani_size offset4 = 2;
+    const ani_size len4 = 3;
+    ASSERT_EQ(env_->Array_SetRegion_Short(array, offset4, len4, nativeBuffer1), ANI_OK);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_short_test", "CheckEscompatArray", array), ANI_TRUE);
+}
+
+TEST_F(ArraySetGetRegionShortTest, EscompatInvalidShortTest)
+{
+    const auto array =
+        static_cast<ani_array_short>(CallEtsFunction<ani_ref>("array_region_short_test", "GetEscompatArray"));
+    ani_short nativeBuffer1[5U] = {TEST_UPDATE1, TEST_UPDATE2, TEST_UPDATE3};
+    const ani_size offset4 = 3;
+    const ani_size len4 = 3;
+    ASSERT_EQ(env_->Array_SetRegion_Short(array, offset4, len4, nativeBuffer1), ANI_OUT_OF_RANGE);
+    ani_short nativeBuffer[5U] = {0};
+    ASSERT_EQ(env_->Array_GetRegion_Short(array, offset4, len4, nativeBuffer), ANI_OUT_OF_RANGE);
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

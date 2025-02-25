@@ -37,6 +37,16 @@ function GetArray(): short[] {
     return a
 }
 
+function GetEscompatArray(): Array<short> {
+    let a : Array<short> = new Array<short>(5)
+    a[0] = 1 as short
+    a[1] = 2 as short
+    a[2] = 3 as short
+    a[3] = 4 as short
+    a[4] = 5 as short
+    return a
+}
+
 function CheckArray(a: short[]): boolean {
     return a[0] == 1 && a[1] == 2 && a[2] == 30 && a[3] == 40 && a[4] == 50
 }
@@ -46,4 +56,12 @@ function GetSpecialArray(): short[] {
 	let max: short = 32767
     let a : short[] = [min, max, 0, 0, 0]
     return a
+}
+
+function CheckEscompatArray(a: Array<short>): boolean {
+    return a[0] == 1 &&
+           a[1] == 2 &&
+           a[2] == 30 &&
+           a[3] == 40 &&
+           a[4] == 50
 }

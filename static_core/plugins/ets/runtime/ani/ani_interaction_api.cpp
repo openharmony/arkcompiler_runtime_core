@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <limits>
 #include "ani.h"
 #include "macros.h"
 #include "libpandabase/utils/logger.h"
@@ -27,7 +28,10 @@
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_napi_env.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
-#include "types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_array.h"
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/ets_handle_scope.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
@@ -988,6 +992,57 @@ static ani_status NewPrimitiveTypeArray(ani_env *env, ani_size length, AniFixedA
     return s.AddLocalRef(reinterpret_cast<EtsObject *>(array), reinterpret_cast<ani_ref *>(result));
 }
 
+template <typename T>
+static ani_status GetArrayRegion(EtsArrayObject<EtsBoxPrimitive<T>> *objectArray, size_t start, size_t offset, T *buff)
+{
+    ASSERT(buff != nullptr);
+    ANI_CHECK_RETURN_IF_GT(offset, std::numeric_limits<size_t>::max() - start, ANI_OUT_OF_RANGE);
+    size_t end = start + offset;
+    ANI_CHECK_RETURN_IF_GT(end, objectArray->GetActualLength(), ANI_OUT_OF_RANGE);
+
+    Class *boxPrimitiveClass = EtsBoxPrimitive<T>::GetBoxClass(EtsCoroutine::GetCurrent());
+    for (size_t posArr = start, posBuff = 0; posArr < end; ++posArr, ++posBuff) {
+        EtsBoxPrimitive<T> *boxedVal = nullptr;
+        [[maybe_unused]] auto getRes = objectArray->GetRef(posArr, &boxedVal);
+        ASSERT(getRes);
+        ANI_CHECK_RETURN_IF_EQ(boxedVal, nullptr, ANI_ERROR);
+        if (boxPrimitiveClass != boxedVal->GetClass()->GetRuntimeClass()) {
+            return ANI_INVALID_TYPE;
+        }
+
+        auto primitiveValue = boxedVal->GetValue();
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        buff[posBuff] = primitiveValue;
+    }
+    return ANI_OK;
+}
+
+template <typename T>
+static ani_status SetArrayRegion(ScopedManagedCodeFix &s,
+                                 EtsArrayObject<EtsBoxPrimitive<std::remove_const_t<T>>> *objectArray, size_t start,
+                                 size_t offset, T *buff)
+{
+    ASSERT(buff != nullptr);
+    auto *coro = EtsCoroutine::GetCurrent();
+
+    ANI_CHECK_RETURN_IF_GT(offset, std::numeric_limits<size_t>::max() - start, ANI_OUT_OF_RANGE);
+    size_t end = start + offset;
+    ANI_CHECK_RETURN_IF_GT(end, objectArray->GetActualLength(), ANI_OUT_OF_RANGE);
+
+    EtsCoroutine *coroutine = s.GetCoroutine();
+    EtsHandleScope scope(coroutine);
+    EtsHandle objectArrayHandle(coroutine, objectArray);
+    for (size_t posArr = start, posBuff = 0; posArr < end; ++posArr, ++posBuff) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        T value = buff[posBuff];
+        auto boxedValue = EtsBoxPrimitive<std::remove_const_t<T>>::Create(coro, value);
+        ANI_CHECK_RETURN_IF_EQ(boxedValue, nullptr, ANI_OUT_OF_MEMORY);
+        [[maybe_unused]] auto setRes = objectArrayHandle->SetRef(posArr, boxedValue);
+        ASSERT(setRes);
+    }
+    return ANI_OK;
+}
+
 template <typename T, typename ArrayType>
 static ani_status GetPrimitiveTypeArrayRegion(ani_env *env, ArrayType array, ani_size start, ani_size len, T *buf)
 {
@@ -995,7 +1050,17 @@ static ani_status GetPrimitiveTypeArrayRegion(ani_env *env, ArrayType array, ani
     ANI_CHECK_RETURN_IF_EQ(len != 0 && buf == nullptr, true, ANI_INVALID_ARGS);
 
     ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
-    EtsArray *internalArray = s.ToInternalType(array);
+    EtsObject *objArray = s.ToInternalType(static_cast<ani_object>(array));
+    if (!objArray->IsArrayClass()) {
+        EtsArrayObject<EtsBoxPrimitive<T>> *escompatArray = EtsArrayObject<EtsBoxPrimitive<T>>::FromEtsObject(objArray);
+        auto length = escompatArray->GetActualLength();
+        if (UNLIKELY(start > length || len > (length - start))) {
+            return ANI_OUT_OF_RANGE;
+        }
+        return GetArrayRegion(escompatArray, start, len, buf);
+    }
+
+    EtsArray *internalArray = EtsArray::FromEtsObject(objArray);
     auto length = internalArray->GetLength();
     if (UNLIKELY(start > length || len > (length - start))) {
         return ANI_OUT_OF_RANGE;
@@ -1014,7 +1079,18 @@ static ani_status SetPrimitiveTypeArrayRegion(ani_env *env, ArrayType array, ani
     ASSERT(array != nullptr);
     ANI_CHECK_RETURN_IF_EQ(len != 0 && buf == nullptr, true, ANI_INVALID_ARGS);
     ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
-    EtsArray *internalArray = s.ToInternalType(array);
+    EtsObject *objArray = s.ToInternalType(static_cast<ani_object>(array));
+    if (!objArray->IsArrayClass()) {
+        EtsArrayObject<EtsBoxPrimitive<std::remove_const_t<T>>> *escompatArray =
+            EtsArrayObject<EtsBoxPrimitive<std::remove_const_t<T>>>::FromEtsObject(objArray);
+        auto length = escompatArray->GetActualLength();
+        if (UNLIKELY(start > length || len > (length - start))) {
+            return ANI_OUT_OF_RANGE;
+        }
+        return SetArrayRegion(s, escompatArray, start, len, buf);
+    }
+
+    EtsArray *internalArray = EtsArray::FromEtsObject(objArray);
     auto length = internalArray->GetLength();
     if (UNLIKELY(start > length || len > (length - start))) {
         return ANI_OUT_OF_RANGE;
@@ -1038,8 +1114,15 @@ NO_UB_SANITIZE static ani_status Array_GetLength(ani_env *env, ani_array array, 
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    EtsArray *internalArray = s.ToInternalType(array);
-    *result = internalArray->GetLength();
+    EtsObject *objArray = s.ToInternalType(static_cast<ani_object>(array));
+    if (!objArray->IsArrayClass()) {
+        auto escompatArray = EtsArrayObject<EtsObject>::FromEtsObject(objArray);
+        *result = escompatArray->GetActualLength();
+    } else {
+        auto etsArray = reinterpret_cast<EtsArray *>(objArray);
+        *result = etsArray->GetLength();
+    }
+
     return ANI_OK;
 }
 
@@ -1179,18 +1262,28 @@ NO_UB_SANITIZE static ani_status Array_Set_Ref(ani_env *env, ani_array_ref array
     CHECK_PTR_ARG(array);
 
     ScopedManagedCodeFix s(env);
-    EtsObjectArray *internalArray = s.ToInternalType(array);
-    const auto length = internalArray->GetLength();
-    ANI_CHECK_RETURN_IF_GE(index, length, ANI_OUT_OF_RANGE);
-
+    EtsObject *objArray = s.ToInternalType(reinterpret_cast<ani_object>(array));
     EtsObject *obj = s.ToInternalType(ref);
-    if (obj != nullptr) {
-        auto componentClass = internalArray->GetClass()->GetComponentType();
-        if (!obj->IsInstanceOf(componentClass)) {
-            return ANI_INVALID_TYPE;
+    if (!objArray->IsArrayClass()) {
+        EtsArrayObject<EtsObject> *escompatArray = EtsArrayObject<EtsObject>::FromEtsObject(objArray);
+        const auto length = escompatArray->GetActualLength();
+        ANI_CHECK_RETURN_IF_GE(index, length, ANI_OUT_OF_RANGE);
+        if (!escompatArray->SetRef(index, obj)) {
+            return ANI_ERROR;
         }
+    } else {
+        EtsObjectArray *internalArray = EtsObjectArray::FromEtsObject(objArray);
+        const auto length = internalArray->GetLength();
+        ANI_CHECK_RETURN_IF_GE(index, length, ANI_OUT_OF_RANGE);
+
+        if (obj != nullptr) {
+            auto componentClass = internalArray->GetClass()->GetComponentType();
+            if (!obj->IsInstanceOf(componentClass)) {
+                return ANI_INVALID_TYPE;
+            }
+        }
+        internalArray->Set(static_cast<uint32_t>(index), obj);
     }
-    internalArray->Set(static_cast<uint32_t>(index), obj);
     return ANI_OK;
 }
 
@@ -1203,11 +1296,23 @@ NO_UB_SANITIZE static ani_status Array_Get_Ref(ani_env *env, ani_array_ref array
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    EtsObjectArray *internalArray = s.ToInternalType(array);
-    const auto length = internalArray->GetLength();
-    ANI_CHECK_RETURN_IF_GE(index, length, ANI_OUT_OF_RANGE);
+    EtsObject *objArray = s.ToInternalType(reinterpret_cast<ani_object>(array));
+    EtsObject *obj = nullptr;
+    if (!objArray->IsArrayClass()) {
+        EtsArrayObject<EtsObject> *escompatArray = EtsArrayObject<EtsObject>::FromEtsObject(objArray);
+        const auto length = escompatArray->GetActualLength();
+        ANI_CHECK_RETURN_IF_GE(index, length, ANI_OUT_OF_RANGE);
+        if (!escompatArray->GetRef(index, &obj)) {
+            return ANI_ERROR;
+        }
+    } else {
+        EtsObjectArray *internalArray = EtsObjectArray::FromEtsObject(objArray);
+        const auto length = internalArray->GetLength();
+        ANI_CHECK_RETURN_IF_GE(index, length, ANI_OUT_OF_RANGE);
 
-    return s.AddLocalRef(internalArray->Get(static_cast<uint32_t>(index)), result);
+        obj = internalArray->Get(static_cast<uint32_t>(index));
+    }
+    return s.AddLocalRef(obj, result);
 }
 
 template <bool IS_FUNCTION>

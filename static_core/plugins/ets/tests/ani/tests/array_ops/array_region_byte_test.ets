@@ -37,6 +37,16 @@ function GetArray(): byte[] {
     return a
 }
 
+function GetEscompatArray(): Array<byte> {
+    let a : Array<byte> = new Array<byte>(5)
+    a[0] = 1 as byte
+    a[1] = 2 as byte
+    a[2] = 3 as byte
+    a[3] = 4 as byte
+    a[4] = 5 as byte
+    return a
+}
+
 function CheckArray(a: byte[]): boolean {
     return a[0] == 1 && a[1] == 2 && a[2] == 30 && a[3] == 40 && a[4] == 50
 }
@@ -46,4 +56,12 @@ function GetSpecialArray(): byte[] {
 	let max: byte = 127
     let a : byte[] = [min, max, 0, 0, 0]
     return a
+}
+
+function CheckEscompatArray(a: Array<byte>): boolean {
+    return a[0] == 1 &&
+           a[1] == 2 &&
+           a[2] == 30 &&
+           a[3] == 40 &&
+           a[4] == 50
 }

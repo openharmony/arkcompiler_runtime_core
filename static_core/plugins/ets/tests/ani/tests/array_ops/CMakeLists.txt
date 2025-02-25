@@ -68,3 +68,8 @@ ani_add_gtest(ani_test_array_region_char
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_char_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_char_test.ets
 )
+
+ani_add_gtest(ani_test_array_compatibility
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_compatibility_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_compatibility_test.ets
+)

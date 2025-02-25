@@ -174,6 +174,45 @@ TEST_F(ArraySetGetRegionBooleanTest, SetGetStabilityToArrayTest)
     }
 }
 
+TEST_F(ArraySetGetRegionBooleanTest, EscompatGetRegionBooleanTest)
+{
+    const auto array =
+        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "GetEscompatArray"));
+
+    ani_boolean nativeBuffer[5U] = {ANI_FALSE};
+    const ani_size offset3 = 0;
+    const ani_size len3 = 5;
+    ASSERT_EQ(env_->Array_GetRegion_Boolean(array, offset3, len3, nativeBuffer), ANI_OK);
+    ASSERT_EQ(nativeBuffer[0U], ANI_TRUE);
+    ASSERT_EQ(nativeBuffer[1U], ANI_TRUE);
+    ASSERT_EQ(nativeBuffer[2U], ANI_TRUE);
+    ASSERT_EQ(nativeBuffer[3U], ANI_TRUE);
+    ASSERT_EQ(nativeBuffer[4U], ANI_TRUE);
+}
+
+TEST_F(ArraySetGetRegionBooleanTest, EscompatSetRegionBooleanTest)
+{
+    const auto array =
+        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "GetEscompatArray"));
+    const ani_boolean nativeBuffer1[5U] = {ANI_TRUE, ANI_FALSE, ANI_TRUE};
+    const ani_size offset4 = 2;
+    const ani_size len4 = 3;
+    ASSERT_EQ(env_->Array_SetRegion_Boolean(array, offset4, len4, nativeBuffer1), ANI_OK);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_boolean_test", "CheckEscompatArray", array), ANI_TRUE);
+}
+
+TEST_F(ArraySetGetRegionBooleanTest, EscompatInvalidBooleanTest)
+{
+    const auto array =
+        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "GetEscompatArray"));
+    ani_boolean nativeBuffer1[5U] = {ANI_TRUE, ANI_FALSE, ANI_TRUE};
+    const ani_size offset4 = 3;
+    const ani_size len4 = 3;
+    ASSERT_EQ(env_->Array_SetRegion_Boolean(array, offset4, len4, nativeBuffer1), ANI_OUT_OF_RANGE);
+    ani_boolean nativeBuffer[5U] = {0};
+    ASSERT_EQ(env_->Array_GetRegion_Boolean(array, offset4, len4, nativeBuffer), ANI_OUT_OF_RANGE);
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

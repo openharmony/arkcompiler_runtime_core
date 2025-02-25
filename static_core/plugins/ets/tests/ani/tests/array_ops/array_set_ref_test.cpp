@@ -150,6 +150,49 @@ TEST_F(ArraySetRefTest, SetGetStabilityToArrayTest)
     ASSERT_STREQ(result.c_str(), "New String 1!");
 }
 
+TEST_F(ArraySetRefTest, EscompatGetRegionRefTest)
+{
+    auto array = static_cast<ani_array_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetEscompatArray"));
+    const ani_size index1 = 1;
+    const ani_size index2 = 2;
+    ani_ref ref1 = nullptr;
+    ani_ref ref2 = nullptr;
+    ani_boolean isNull;
+    ASSERT_EQ(env_->Array_Get_Ref(array, index1, &ref1), ANI_OK);
+    ASSERT_EQ(env_->Array_Get_Ref(array, index2, &ref2), ANI_OK);
+    ASSERT_EQ(env_->Reference_IsNull(ref1, &isNull), ANI_OK);
+    ASSERT_EQ(isNull, ANI_TRUE);
+    ASSERT_EQ(env_->Reference_IsNull(ref2, &isNull), ANI_OK);
+    ASSERT_EQ(isNull, ANI_FALSE);
+}
+
+TEST_F(ArraySetRefTest, EscompatSetRegionRefTest)
+{
+    auto array = static_cast<ani_array_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetEscompatArray"));
+
+    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString1"));
+    const ani_size index1 = 0;
+    ASSERT_EQ(env_->Array_Set_Ref(array, index1, newValue1), ANI_OK);
+
+    auto newValue2 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString2"));
+    const ani_size index2 = 2;
+    ASSERT_EQ(env_->Array_Set_Ref(array, index2, newValue2), ANI_OK);
+
+    ani_boolean result =
+        static_cast<ani_boolean>(CallEtsFunction<ani_boolean>("array_set_ref_test", "CheckEscompatArray", array));
+    ASSERT_EQ(result, ANI_TRUE);
+}
+
+TEST_F(ArraySetRefTest, EscompatInvalidRefTest)
+{
+    auto array = static_cast<ani_array_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetEscompatArray"));
+
+    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString1"));
+    const ani_size index1 = 5;
+    ASSERT_EQ(env_->Array_Set_Ref(array, index1, newValue1), ANI_OUT_OF_RANGE);
+    ani_ref res;
+    ASSERT_EQ(env_->Array_Get_Ref(array, index1, &res), ANI_OUT_OF_RANGE);
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
