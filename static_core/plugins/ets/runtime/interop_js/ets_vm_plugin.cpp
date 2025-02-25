@@ -46,7 +46,6 @@ static napi_value Version(napi_env env, [[maybe_unused]] napi_callback_info info
 
 static napi_value Fatal([[maybe_unused]] napi_env env, [[maybe_unused]] napi_callback_info info)
 {
-    [[maybe_unused]] JSNapiEnvScope napiScope(InteropCtx::Current(), env);
     InteropCtx::Fatal("etsVm.Fatal");
 }
 
@@ -139,7 +138,7 @@ static napi_value Call(napi_env env, napi_callback_info info)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS(coro, env);
+    INTEROP_CODE_SCOPE_JS(coro);
 
     size_t argc = 0;
     [[maybe_unused]] napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);

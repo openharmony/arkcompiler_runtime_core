@@ -72,7 +72,7 @@ static napi_value EtsFieldGetter(napi_env env, napi_callback_info cinfo)
     auto etsFieldWrapper = reinterpret_cast<EtsFieldWrapper *>(data);
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS(coro, env);
+    INTEROP_CODE_SCOPE_JS(coro);
 
     EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, coro, ctx, env, jsThis);
     if (UNLIKELY(etsThis == nullptr)) {
@@ -101,7 +101,7 @@ static napi_value EtsFieldSetter(napi_env env, napi_callback_info cinfo)
     auto etsFieldWrapper = reinterpret_cast<EtsFieldWrapper *>(data);
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS(coro, env);
+    INTEROP_CODE_SCOPE_JS(coro);
 
     EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, coro, ctx, env, jsThis);
     if (UNLIKELY(etsThis == nullptr)) {

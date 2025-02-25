@@ -60,47 +60,27 @@ private:
 
 using InteropCodeScopeETS = InteropCodeScope<true>;
 
-class JSNapiEnvScope {
-public:
-    explicit JSNapiEnvScope(InteropCtx *ctx, napi_env newEnv) : ctx_(ctx)
-    {
-        saved_ = ctx_->jsEnv_;
-        ctx_->SetJSEnv(newEnv);
-    }
-
-    ~JSNapiEnvScope()
-    {
-        ctx_->UpdateInteropStackInfoIfNeeded();
-        ctx_->SetJSEnv(saved_);
-    }
-
-private:
-    NO_COPY_SEMANTIC(JSNapiEnvScope);
-    NO_MOVE_SEMANTIC(JSNapiEnvScope);
-
-    InteropCtx *ctx_ {};
-    napi_env saved_ {};
-};
-
 class InteropCodeScopeJS {
 public:
-    InteropCodeScopeJS(EtsCoroutine *coro, napi_env env, char const *descr = nullptr)
-        : codeScope_(coro, descr), jsEnvScope_(InteropCtx::Current(coro), env)
-    {
-    }
+    explicit InteropCodeScopeJS(EtsCoroutine *coro, char const *descr = nullptr) : codeScope_(coro, descr) {}
 
-    ~InteropCodeScopeJS() = default;
+    ~InteropCodeScopeJS()
+    {
+        auto ctx = InteropCtx::Current();
+        ctx->UpdateInteropStackInfoIfNeeded();
+    }
 
 private:
     NO_COPY_SEMANTIC(InteropCodeScopeJS);
     NO_MOVE_SEMANTIC(InteropCodeScopeJS);
 
     InteropCodeScope<false> codeScope_;
-    JSNapiEnvScope jsEnvScope_;
 };
 
+// CC-OFFNXT(G.PRE.02-CPP) for readability and ease of use
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INTEROP_CODE_SCOPE_JS(coro, env) InteropCodeScopeJS codeScope(coro, env, __PRETTY_FUNCTION__)
+#define INTEROP_CODE_SCOPE_JS(coro) InteropCodeScopeJS codeScope(coro, __PRETTY_FUNCTION__)
+// CC-OFFNXT(G.PRE.02-CPP) for readability and ease of use
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define INTEROP_CODE_SCOPE_ETS(coro) InteropCodeScopeETS codeScope(coro, __PRETTY_FUNCTION__)
 

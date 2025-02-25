@@ -49,6 +49,10 @@ class Reference;
 
 namespace ark::ets::interop::js {
 
+namespace testing {
+class SharedReferenceStorage1GTest;
+}  // namespace testing
+
 class JSValue;
 
 // Work-around for String JSValue and node_api
@@ -166,16 +170,6 @@ public:
     {
         ASSERT(jsEnv_ != nullptr);
         return jsEnv_;
-    }
-
-    void SetJSEnv(napi_env env)
-    {
-        jsEnv_ = env;
-    }
-
-    napi_env GetJsEnvForEventLoopCallbacks() const
-    {
-        return jsEnvForEventLoopCallbacks_;
     }
 
     mem::GlobalObjectStorage *Refstor() const
@@ -501,6 +495,11 @@ private:
 
     void VmHandshake(napi_env env, EtsCoroutine *coro, arkplatform::STSVMInterface *stsVmIface);
 
+    void SetJSEnv(napi_env env)
+    {
+        jsEnv_ = env;
+    }
+
     // per-EtsVM data, should be shared between contexts.
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     struct SharedEtsVmState {
@@ -559,7 +558,6 @@ private:
 
     // JSVM context
     napi_env jsEnv_ {};
-    napi_env jsEnvForEventLoopCallbacks_ {};
 
     // various per-JSVM interfaces
     ExternalIfaceTable interfaceTable_;
@@ -586,10 +584,10 @@ private:
 
     arkplatform::EcmaVMInterface *ecmaVMInterface_ = nullptr;
 
-    // needs to access the jsEnv_ without the nullptr assert
-    friend class JSNapiEnvScope;
     // Allocator calls our protected ctor
     friend class mem::Allocator;
+
+    friend class testing::SharedReferenceStorage1GTest;
 };
 
 inline JSRefConvertCache *RefConvertCacheFromInteropCtx(InteropCtx *ctx)

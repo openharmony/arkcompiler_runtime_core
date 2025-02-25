@@ -239,21 +239,16 @@ void InteropCtx::InitExternalInterfaces()
         auto env = static_cast<napi_env>(jsEnv);
         auto *etsCoro = static_cast<EtsCoroutine *>(coro);
         InteropCtx::Init(etsCoro, env);
-        // It's a hack and we should use INTEROP_CODE_SCOPE to set napi_env and allocate records.
+        // It's a hack and we should use INTEROP_CODE_SCOPE to allocate records.
         // Will be fixed in near future.
-        InteropCtx::Current()->SetJSEnv(env);
         InteropCtx::Current()->CallStack().AllocRecord(etsCoro->GetCurrentFrame(), nullptr);
     });
 }
 
-// Workaround for calling interop without a scope (e.g., calling from native)
-// Use the creation-time napi_env as default jsEnv.
-// This should be removed ASAP, issue: #21429
 InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
     : jsEnv_(env), constStringStorage_(this), stackInfoManager_(this, coro)
 {
-    JSNapiEnvScope envscope(this, env);
-    jsEnvForEventLoopCallbacks_ = env;
+    jsEnv_ = env;
     stackInfoManager_.InitStackInfoIfNeeded();
 
     // the per-EtsVM part has to be initialized first
