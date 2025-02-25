@@ -2974,19 +2974,138 @@ NO_UB_SANITIZE static ani_status ThrowError(ani_env *env, ani_error err)
     return ANI_OK;
 }
 
+class ClearExceptionScope {
+public:
+    explicit ClearExceptionScope(ani_env *env) : env_(env)
+    {
+        [[maybe_unused]] ani_status status = env_->GetUnhandledError(&error_);
+        ASSERT(status == ANI_OK);
+        ASSERT(error_ != nullptr);
+
+        status = env_->ResetError();
+        ASSERT(status == ANI_OK);
+    }
+
+    NO_COPY_SEMANTIC(ClearExceptionScope);
+    NO_MOVE_SEMANTIC(ClearExceptionScope);
+
+    ~ClearExceptionScope()
+    {
+        [[maybe_unused]] ani_status status = ANI_OK;
+#ifndef NDEBUG
+        ani_boolean exists = ANI_FALSE;
+        status = env_->ExistUnhandledError(&exists);
+        ASSERT(status == ANI_OK);
+        ASSERT(exists == ANI_FALSE);
+#endif  // NDEBUG
+        status = env_->ThrowError(error_);
+        ASSERT(status == ANI_OK);
+    }
+
+    ani_error GetError()
+    {
+        return error_;
+    }
+
+private:
+    ani_env *env_ {nullptr};
+    ani_error error_ {nullptr};
+};
+
+// NOLINTBEGIN(clang-analyzer-deadcode.DeadStores)
+static ani_status GetErrorDescription(ani_env *env, ani_error error, ani_array_ref *errorDescription)
+{
+    // Create `console.error` arguments array
+    ani_class objectClass = nullptr;
+    // NOTE(dslynko, #23447): use cache of well-known classes
+    auto status = env->FindClass("Lstd/core/Object;", &objectClass);
+    ASSERT(status == ANI_OK);
+
+    ani_ref undefinedRef = nullptr;
+    status = env->GetUndefined(&undefinedRef);
+    ASSERT(status == ANI_OK);
+    ani_array_ref descriptionLinesArray = nullptr;
+    status = env->Array_New_Ref(objectClass, static_cast<ani_size>(3U), undefinedRef, &descriptionLinesArray);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
+    ani_type errorType = nullptr;
+    status = env->Object_GetType(error, &errorType);
+    ASSERT(status == ANI_OK);
+
+    // Get error message
+    ani_ref errorMessage = nullptr;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    status = env->Object_CallMethodByName_Ref(error, "toString", ":Lstd/core/String;", &errorMessage);
+    ASSERT(status == ANI_OK);
+    status = env->Array_Set_Ref(descriptionLinesArray, static_cast<ani_size>(0U), errorMessage);
+    ASSERT(status == ANI_OK);
+
+    // Set newline between error message and stack trace
+    ani_string newlineString = nullptr;
+    std::string_view newline = "\n";
+    status = env->String_NewUTF8(newline.data(), newline.size(), &newlineString);
+    ASSERT(status == ANI_OK);
+    status = env->Array_Set_Ref(descriptionLinesArray, static_cast<ani_size>(1U), newlineString);
+    ASSERT(status == ANI_OK);
+
+    // Get stack trace
+    ani_method getterMethod = nullptr;
+    status = env->Class_FindGetter(static_cast<ani_class>(errorType), "stack", &getterMethod);
+    ASSERT(status == ANI_OK);
+    ani_ref stackTrace = nullptr;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    status = env->Object_CallMethod_Ref(error, getterMethod, &stackTrace);
+    ASSERT(status == ANI_OK);
+
+    ani_boolean isUndefined = ANI_FALSE;
+    status = env->Reference_IsUndefined(stackTrace, &isUndefined);
+    ASSERT(status == ANI_OK);
+    if (isUndefined == ANI_TRUE) {
+        std::string_view errorInfo = "unable to get stack trace";
+        ani_string createdString;
+        status = env->String_NewUTF8(errorInfo.data(), errorInfo.size(), &createdString);
+        ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+        stackTrace = createdString;
+    }
+    status = env->Array_Set_Ref(descriptionLinesArray, static_cast<ani_size>(2U), stackTrace);
+    ASSERT(status == ANI_OK);
+
+    *errorDescription = descriptionLinesArray;
+    return ANI_OK;
+}
+
 NO_UB_SANITIZE static ani_status DescribeError(ani_env *env)
 {
     ANI_DEBUG_TRACE(env);
 
-    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
-    if (!pandaEnv->HasPendingException()) {
+    ani_boolean errorExists = ANI_FALSE;
+    auto status = env->ExistUnhandledError(&errorExists);
+    ASSERT(status == ANI_OK);
+    if (errorExists == ANI_FALSE) {
         return ANI_OK;
     }
+    ClearExceptionScope s(env);
 
-    // NOTE: Implement when #21687 will be solved, #22008
-    std::cerr << "DescribeError: method is not implemented" << std::endl;
-    return ANI_OK;
+    ani_array_ref errorDescription = nullptr;
+    status = GetErrorDescription(env, s.GetError(), &errorDescription);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
+    // Get `std.core.console` global variable
+    ani_module stdCoreModule = nullptr;
+    status = env->FindModule("Lstd/core;", &stdCoreModule);
+    ASSERT(status == ANI_OK);
+    ani_variable consoleVar = nullptr;
+    status = env->Module_FindVariable(stdCoreModule, "console", &consoleVar);
+    ASSERT(status == ANI_OK);
+    ani_ref console = nullptr;
+    status = env->Variable_GetValue_Ref(consoleVar, &console);
+    ASSERT(status == ANI_OK);
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    return env->Object_CallMethodByName_Void(static_cast<ani_object>(console), "error", "[Lstd/core/Object;:V",
+                                             errorDescription);
 }
+// NOLINTEND(clang-analyzer-deadcode.DeadStores)
 
 NO_UB_SANITIZE static ani_status GetUnhandledError(ani_env *env, ani_error *result)
 {
