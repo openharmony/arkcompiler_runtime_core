@@ -78,6 +78,11 @@ extern "C" void StdCorePrintStackTrace()
     ark::PrintStackTrace();
 }
 
+extern "C" void StdCoreEtsStepArkTest()
+{
+    ark::EtsStepArkTest();
+}
+
 static PandaString ResolveLibraryName(const PandaString &name)
 {
 #ifdef PANDA_TARGET_UNIX

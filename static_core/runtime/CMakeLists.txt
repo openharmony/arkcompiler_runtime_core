@@ -159,6 +159,7 @@ set(SOURCES
     fibers/fiber_context.cpp
     compiler_thread_pool_worker.cpp
     compiler_task_manager_worker.cpp
+    jsbacktrace/backtrace.cpp
 )
 
 if(PANDA_TARGET_ARM32_ABI_SOFT OR PANDA_TARGET_ARM32_ABI_SOFTFP)

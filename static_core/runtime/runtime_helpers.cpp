@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "runtime/runtime_helpers.h"
+#include "runtime/jsbacktrace/backtrace.h"
 #include "runtime/include/object_header-inl.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/stack_walker.h"
@@ -36,4 +37,50 @@ void PrintStackTrace()
     LOG(ERROR, RUNTIME) << "====================== Stack trace end ======================";
 }
 
+// NOLINTNEXTLINE(google-build-using-namespace)
+using namespace panda::ecmascript;
+bool ReadMemTestFunc([[maybe_unused]] void *ctx, uintptr_t addr, uintptr_t *value, bool isRead32)
+{
+    if (addr == 0) {
+        return false;
+    }
+    if (isRead32) {
+        *value = *(reinterpret_cast<uint32_t *>(addr));
+    } else {
+        *value = *(reinterpret_cast<uintptr_t *>(addr));
+    }
+    return true;
+}
+
+void EtsStepArkTest()
+{
+    auto thread = ManagedThread::GetCurrent();
+    LOG(INFO, RUNTIME) << "====================== standard step begin ======================";
+    auto depth = 0;
+    for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
+        LOG(INFO, RUNTIME) << "======= depth is " << depth++ << " =======";
+        auto fp = reinterpret_cast<uint64_t>(stack.GetIFrame()->GetPrevFrame());
+        auto pc = reinterpret_cast<uint64_t>(stack.GetIFrame()->GetInstruction());
+        uint32_t bcCode = stack.GetIFrame()->GetBytecodeOffset();
+        LOG(INFO, RUNTIME) << "standard fp is : " << fp;
+        LOG(INFO, RUNTIME) << "standard pc is : " << pc;
+        LOG(INFO, RUNTIME) << "standard bcCode is : " << bcCode;
+    }
+    LOG(INFO, RUNTIME) << "====================== standard step  end ======================";
+
+    uintptr_t fp = 0;
+    uintptr_t sp = 0;
+    uintptr_t pc = 0;
+    uintptr_t bcCode = 0;
+    fp = reinterpret_cast<uintptr_t>(thread->GetCurrentFrame());
+    depth = 0;
+    LOG(INFO, RUNTIME) << "====================== result step begin =======================";
+    while (fp != 0 && Backtrace::EtsStepArk(nullptr, &ReadMemTestFunc, &fp, &sp, &pc, &bcCode) != 0) {
+        LOG(INFO, RUNTIME) << "======= depth is " << depth++ << " =======";
+        LOG(INFO, RUNTIME) << "result fp is " << fp;
+        LOG(INFO, RUNTIME) << "result pc is" << pc;
+        LOG(INFO, RUNTIME) << "result bcCode is " << bcCode;
+    }
+    LOG(INFO, RUNTIME) << "====================== result step end   =======================";
+}
 }  // namespace ark

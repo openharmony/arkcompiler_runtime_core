@@ -1,0 +1,101 @@
+/**
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+interface DataValue {
+  a: number;
+  b: string;
+  c: string;
+  d: number;
+}
+
+let currentValue: DataValue = {
+  a: 12,
+  b: 'da',
+  c: 'vk',
+  d: 1111
+};
+
+let result: number = 0;
+
+let resultStr: number = 0;
+
+let resultValue: number  = -1;
+
+let mathRandom: number = 14;
+
+function getPath(c: number, d: number): number {
+  return c * d;
+}
+
+function getPathDate(c: number): number {
+  return c * 2 + 6;
+}
+
+function getCurrentValue(): DataValue {
+  let currentValue: DataValue = {
+    a: 12,
+    b: 'da',
+    c: 'vk',
+    d: 1111
+  };
+  currentValue.a = getFirstValue();
+  currentValue.d = getSecondValue();
+  currentValue.c = getThridValue() + getSecondValue() + getFirstValue();
+  currentValue.b = getThridValue() + getSecondValue() + getFirstValue() + resultValue;
+  EtsStepArkTest()
+  while(currentValue.a < 12) {
+    if (resultValue % 2 === 0) {
+      currentValue.a = currentValue.a++;
+    } else {
+      currentValue.d = currentValue.d--;
+    }
+  }
+  return currentValue;
+}
+
+function getFirstValue(): number {
+  let currentFirstValue: DataValue = {
+    a: 23,
+    b: '124f',
+    c: 'gfr',
+    d: 767
+  };
+  EtsStepArkTest()
+  return getPath(currentFirstValue.a, currentFirstValue.d);
+}
+
+function getSecondValue(): number {
+  for(let index = 0; index < 2; index++) {
+	result = getPathDate(index);
+  }
+  return result;
+}
+
+
+function getThridValue(): string {
+ let dd: string = '';
+  for(let index = 0; index< 2; index++) {
+	dd = resultStr + getPathDate(index) + 'abc';
+  }
+  EtsStepArkTest()
+  return dd;
+}
+
+
+function getValueStr(): string {
+  return getCurrentValue().b + currentValue;
+}
+
+getValueStr();
