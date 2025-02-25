@@ -26,6 +26,11 @@ ani_add_gtest(ani_test_object_get_field_by_name_boolean
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_boolean_test.sts
 )
 
+ani_add_gtest(ani_test_object_get_field_by_name_char
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_char_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_char_test.sts
+)
+
 ani_add_gtest(ani_test_object_get_field_by_name_byte
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_byte_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_field_by_name_byte_test.sts
@@ -185,6 +190,11 @@ ani_add_gtest(ani_test_object_ops_object_set_field_ref
 ani_add_gtest(ani_test_object_ops_object_get_property_by_name_boolean
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_property_by_name_boolean_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_property_by_name_boolean_test.sts
+)
+
+ani_add_gtest(ani_test_object_ops_object_get_property_by_name_char
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_property_by_name_char_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/object_get_property_by_name_char_test.sts
 )
 
 ani_add_gtest(ani_test_object_ops_object_get_property_by_name_byte

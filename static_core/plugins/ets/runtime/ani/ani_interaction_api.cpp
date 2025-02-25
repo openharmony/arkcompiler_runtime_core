@@ -2213,6 +2213,13 @@ NO_UB_SANITIZE static ani_status Object_GetFieldByName_Boolean(ani_env *env, ani
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetFieldByName_Char(ani_env *env, ani_object object, const char *name,
+                                                            ani_char *result)
+{
+    return DoGetFieldByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_GetFieldByName_Byte(ani_env *env, ani_object object, const char *name,
                                                             ani_byte *result)
 {
@@ -2417,6 +2424,19 @@ static ani_status DoGetPropertyByName(ani_env *env, ani_object object, const cha
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Boolean(ani_env *env, ani_object object, const char *name,
                                                                   ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    return DoGetPropertyByName(env, object, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Char(ani_env *env, ani_object object, const char *name,
+                                                               ani_char *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -3633,6 +3653,13 @@ NO_UB_SANITIZE static ani_status Variable_GetValue_Boolean(ani_env *env, ani_var
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_GetValue_Char(ani_env *env, ani_variable variable, ani_char *result)
+{
+    ANI_DEBUG_TRACE(env);
+    return DoVariableGetValue(env, variable, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Variable_GetValue_Byte(ani_env *env, ani_variable variable, ani_byte *result)
 {
     ANI_DEBUG_TRACE(env);
@@ -4536,7 +4563,7 @@ const __ani_interaction_api INTERACTION_API = {
     Variable_SetValue_Double,
     Variable_SetValue_Ref,
     Variable_GetValue_Boolean,
-    NotImplementedAdapter<136>,
+    Variable_GetValue_Char,
     Variable_GetValue_Byte,
     Variable_GetValue_Short,
     Variable_GetValue_Int,
@@ -4698,7 +4725,7 @@ const __ani_interaction_api INTERACTION_API = {
     Object_SetField_Double,
     Object_SetField_Ref,
     Object_GetFieldByName_Boolean,
-    NotImplementedAdapter<301>,
+    Object_GetFieldByName_Char,
     Object_GetFieldByName_Byte,
     Object_GetFieldByName_Short,
     Object_GetFieldByName_Int,
@@ -4716,7 +4743,7 @@ const __ani_interaction_api INTERACTION_API = {
     Object_SetFieldByName_Double,
     Object_SetFieldByName_Ref,
     Object_GetPropertyByName_Boolean,
-    NotImplementedAdapter<337>,
+    Object_GetPropertyByName_Char,
     Object_GetPropertyByName_Byte,
     Object_GetPropertyByName_Short,
     Object_GetPropertyByName_Int,
