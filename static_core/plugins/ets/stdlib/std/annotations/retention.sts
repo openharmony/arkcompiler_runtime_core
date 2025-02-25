@@ -15,9 +15,6 @@
 
 package std.annotations;
 
-export namespace ani.unsafe {
-    @Retention("BYTECODE")
-    export @interface Quick {};
-    @Retention("BYTECODE")
-    export @interface Direct {};
-}
+export @interface Retention {
+    policy: string
+};
