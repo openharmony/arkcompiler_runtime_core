@@ -1599,7 +1599,13 @@ static ani_status DoGetField(ScopedManagedCodeFix &s, ani_class cls, const char 
         if constexpr (IS_STATIC_FIELD) {
             return klass->GetStaticFieldIDByName(name, nullptr);
         } else {
-            return klass->GetFieldIDByName(name, nullptr);
+            EtsField *foundField = klass->GetFieldIDByName(name, nullptr);
+            if (UNLIKELY(foundField == nullptr)) {
+                // NOTE: Need to look for class property implemented from interface
+                auto interfaceFieldName = PandaString("<property>") + name;
+                foundField = klass->GetFieldIDByName(interfaceFieldName.c_str(), nullptr);
+            }
+            return foundField;
         }
     }();
     ANI_CHECK_RETURN_IF_EQ(field, nullptr, ANI_NOT_FOUND);
