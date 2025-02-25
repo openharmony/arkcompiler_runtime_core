@@ -158,7 +158,7 @@ function testUnion() {
     assertEQ(typeof erase(v2), "number");
 }
 
-class A implements Function<string> { }
+class A implements Function { }
 class B extends Numeric {
     public byteValue(): byte { return 1 };
     public intValue(): int { return 1 };

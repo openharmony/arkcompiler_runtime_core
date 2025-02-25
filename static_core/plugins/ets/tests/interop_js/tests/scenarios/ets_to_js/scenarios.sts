@@ -513,7 +513,7 @@ function functionOverload(): number {
     return 1;
 }
 
-function functionCallableReturnValue(): Function<int> {
+function functionCallableReturnValue(): () => int {
     const value = () => 1;
     return value;
 }

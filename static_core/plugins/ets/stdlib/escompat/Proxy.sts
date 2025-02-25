@@ -327,16 +327,6 @@ export final class Proxy {
             return this.wrapFn3(lambdaObj)
         } else if (lambdaObj instanceof Function4) {
             return this.wrapFn4(lambdaObj)
-        } else if (lambdaObj instanceof ThrowingFunction0) {
-            return this.wrapThrowFn0(lambdaObj)
-        } else if (lambdaObj instanceof ThrowingFunction1) {
-            return this.wrapThrowFn1(lambdaObj)
-        } else if (lambdaObj instanceof ThrowingFunction2) {
-            return this.wrapThrowFn2(lambdaObj)
-        } else if (lambdaObj instanceof ThrowingFunction3) {
-            return this.wrapThrowFn3(lambdaObj)
-        } else if (lambdaObj instanceof ThrowingFunction4) {
-            return this.wrapThrowFn4(lambdaObj)
         } else {
             throw new TypeError("unsuppored function arity: " + lambdaType.getParametersNum())
         }
@@ -346,40 +336,20 @@ export final class Proxy {
         return (): R => fn.invoke0()
     }
 
-    private wrapThrowFn0<R>(fn: ThrowingFunction0<R>): ThrowingFunction0<R> {
-        return (): R throws => fn.invoke0()
-    }
-
     private wrapFn1<P1, R>(fn: Function1<P1, R>): Function1<P1, R> {
-        return (p1: P1): R => fn.invoke0(p1)
-    }
-
-    private wrapThrowFn1<P1, R>(fn: ThrowingFunction1<P1, R>): ThrowingFunction1<P1, R> {
-        return (p1: P1): R throws => fn.invoke0(p1)
+        return (p1: P1): R => fn.invoke1(p1)
     }
 
     private wrapFn2<P1, P2, R>(fn: Function2<P1, P2, R>): Function2<P1, P2, R> {
-        return (p1: P1, p2: P2): R => fn.invoke0(p1, p2)
-    }
-
-    private wrapThrowFn2<P1, P2, R>(fn: ThrowingFunction2<P1, P2, R>): ThrowingFunction2<P1, P2, R> {
-        return (p1: P1, p2: P2): R throws => fn.invoke0(p1, p2)
+        return (p1: P1, p2: P2): R => fn.invoke2(p1, p2)
     }
 
     private wrapFn3<P1, P2, P3, R>(fn: Function3<P1, P2, P3, R>): Function3<P1, P2, P3, R> {
-        return (p1: P1, p2: P2, p3: P3): R => fn.invoke0(p1, p2, p3)
-    }
-
-    private wrapThrowFn3<P1, P2, P3, R>(fn: ThrowingFunction3<P1, P2, P3, R>): ThrowingFunction3<P1, P2, P3, R> {
-        return (p1: P1, p2: P2, p3: P3): R throws => fn.invoke0(p1, p2, p3)
+        return (p1: P1, p2: P2, p3: P3): R => fn.invoke3(p1, p2, p3)
     }
 
     private wrapFn4<P1, P2, P3, P4, R>(fn: Function4<P1, P2, P3, P4, R>): Function4<P1, P2, P3, P4, R> {
-        return (p1: P1, p2: P2, p3: P3, p4: P4): R => fn.invoke0(p1, p2, p3, p4)
-    }
-
-    private wrapThrowFn4<P1, P2, P3, P4, R>(fn: ThrowingFunction4<P1, P2, P3, P4, R>): ThrowingFunction4<P1, P2, P3, P4, R> {
-        return (p1: P1, p2: P2, p3: P3, p4: P4): R throws => fn.invoke0(p1, p2, p3, p4)
+        return (p1: P1, p2: P2, p3: P3, p4: P4): R => fn.invoke4(p1, p2, p3, p4)
     }
 
     private arrayHandlerInvoke<T>(arrayProxy: ArrayProxy<T>, method: Method, args: NullishType[]): NullishType {

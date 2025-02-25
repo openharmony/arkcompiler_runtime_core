@@ -59,7 +59,7 @@ export namespace taskpool {
          * @param name The name of task
          * @param func Concurrent function to execute in the taskpool
          */
-        constructor(name: string, func: Function0<NullishType>) {
+        constructor(name: string, func: () => NullishType) {
             this.name = name;
             this.func = func;
             this.totalDuration = 0;
@@ -77,7 +77,7 @@ export namespace taskpool {
          *
          * @param func Concurrent function to execute in the taskpool
          */
-        constructor(func: Function0<NullishType>) {
+        constructor(func: () => NullishType) {
             this("", func);
         }
 
@@ -265,12 +265,12 @@ export namespace taskpool {
         /**
          * Register a callback for this task to receive and handle data from the taskpool task 
          */
-        onReceiveData(callback?: Function0<NullishType>): void {
+        onReceiveData(callback?: () => NullishType): void {
             this.onReceiveCallback = callback;
         }
 
         /// Concurrent function to execute in taskpool
-        func: Function0<NullishType>;
+        func: () => NullishType;
 
         /// The concurrent function arguments
         arguments?: NullishType[];
@@ -347,7 +347,7 @@ export namespace taskpool {
             this.startTime = Chrono.nanoNow();
             const startCpuTime: long = Chrono.getCpuTime();
             try {
-                result = this.func.invoke0();
+                result = this.func();
                 this.callUserCallback(this.onSuccessCallback);
             } catch (e: Error) {
                 try {
@@ -410,7 +410,7 @@ export namespace taskpool {
                 const argsArray: Array<Object[]> = this.extractDataArgs();
                 argsArray.forEach((args: Object[]) => {
                     try {
-                        this.onReceiveCallback!.invoke0();
+                        this.onReceiveCallback!();
                     } catch(e) {}
                 });
                 return value;
@@ -475,7 +475,7 @@ export namespace taskpool {
         private transferList?: ArrayBuffer[];
         private cloneList?: Object[] | ArrayBuffer[];
 
-        private onReceiveCallback?: Function0<NullishType>;
+        private onReceiveCallback?: () => NullishType;
         private dataMutex: Object = ConcurrencyHelpers.mutexCreate();
         private argsArray: Array<Object[]> = new Array<Object[]>();
 
@@ -496,7 +496,7 @@ export namespace taskpool {
          * @param name The name of long task
          * @param func Concurrent function to execute in the taskpool
          */
-        constructor(name: string, func: Function0<NullishType>) {
+        constructor(name: string, func: () => NullishType) {
             super(name, func);
         }
 
@@ -504,7 +504,7 @@ export namespace taskpool {
          * Create a LongTask instance
          * @param func Concurrent function to execute in the taskpool
          */
-        constructor(func: Function0<NullishType>) {
+        constructor(func: () => NullishType) {
             super("", func);
         }
 
@@ -542,7 +542,7 @@ export namespace taskpool {
          *
          * @param func the concurrent function to add to the task group
          */
-        addTask(func: Function0<NullishType>): void {
+        addTask(func: () => NullishType): void {
             this.addTask(new Task(func));
         }
 
@@ -704,56 +704,90 @@ export namespace taskpool {
 
     // NOTE(ipetrov, #16281): Temporary solution, make as namespace when namespaces will be supported
 
-    export function execute(func: Function0<NullishType>): Promise<NullishType> {
-        return launch func.invoke0();
+    export function execute(
+        func: () => NullishType
+        ): Promise<NullishType> {
+        return launch func();
     }
-    export function execute<A1>(func: Function1<A1, NullishType>, a1: A1): Promise<NullishType> {
-        return launch func.invoke0(a1);
+    export function execute<A1>(
+        func: (p1: A1) => NullishType,
+        a1: A1): Promise<NullishType> {
+        return launch func(a1);
     }
-    export function execute<A1, A2>(func: Function2<A1, A2, NullishType>, a1: A1, a2: A2): Promise<NullishType> {
-        return launch func.invoke0(a1, a2);
+    export function execute<A1, A2>(
+        func: (p1: A1, p2: A2) => NullishType,
+        a1: A1, a2: A2): Promise<NullishType> {
+        return launch func(a1, a2);
     }
-    export function execute<A1, A2, A3>(func: Function3<A1, A2, A3, NullishType>, a1: A1, a2: A2, a3: A3): Promise<NullishType> {
-        return launch func.invoke0(a1, a2, a3);
+    export function execute<A1, A2, A3>(
+        func: (p1: A1, p2: A2, p3: A3) => NullishType,
+        a1: A1, a2: A2, a3: A3): Promise<NullishType> {
+        return launch func(a1, a2, a3);
     }
-    export function execute<A1, A2, A3, A4>(func: Function4<A1, A2, A3, A4, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4): Promise<NullishType> {
-        return launch func.invoke0(a1, a2, a3, a4);
+    export function execute<A1, A2, A3, A4>(
+        func: (p1: A1, p2: A2, p3: A3, p4: A4) => NullishType,
+        a1: A1, a2: A2, a3: A3, a4: A4): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4);
     }
-    export function execute<A1, A2, A3, A4, A5>(func: Function5<A1, A2, A3, A4, A5, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5): Promise<NullishType> {
-        return launch func.invoke0(a1, a2, a3, a4, a5);
+    export function execute<A1, A2, A3, A4, A5>(
+        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5) => NullishType,
+        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5);
     }
-    export function execute<A1, A2, A3, A4, A5, A6>(func: Function6<A1, A2, A3, A4, A5, A6, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6): Promise<NullishType> {
-        return launch func.invoke0(a1, a2, a3, a4, a5, a6);
+    export function execute<A1, A2, A3, A4, A5, A6>(
+        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6) => NullishType,
+        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6);
     }
-    export function execute<A1, A2, A3, A4, A5, A6, A7>(func: Function7<A1, A2, A3, A4, A5, A6, A7, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7): Promise<NullishType> {
-        return launch func.invoke0(a1, a2, a3, a4, a5, a6, a7);
+    export function execute<A1, A2, A3, A4, A5, A6, A7>(
+        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7) => NullishType,
+        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7);
     }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8>(func: Function8<A1, A2, A3, A4, A5, A6, A7, A8, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8): Promise<NullishType> {
-        return launch func.invoke0(a1, a2, a3, a4, a5, a6, a7, a8);
+    export function execute<A1, A2, A3, A4, A5, A6, A7, A8>(
+        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8) => NullishType,
+        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8);
     }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9>(func: Function9<A1, A2, A3, A4, A5, A6, A7, A8, A9, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9): Promise<NullishType> {
-        return launch func.invoke0(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9>(
+        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8, p9: A9) => NullishType,
+        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(func: Function10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10): Promise<NullishType> {
-        return launch func.invoke0(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(
+        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8, p9: A9, p10: A10) => NullishType,
+        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>(func: Function11<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11): Promise<NullishType> {
-        return launch func.invoke0(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
+    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>(
+        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8, p9: A9, p10: A10, p11: A11) => NullishType,
+        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
     }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>(func: Function12<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12): Promise<NullishType> {
-        return launch func.invoke0(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
+    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>(
+        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8, p9: A9, p10: A10, p11: A11, p12: A12) => NullishType,
+        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
     }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(func: Function13<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13): Promise<NullishType> {
-        return launch func.invoke0(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
+    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(
+        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8, p9: A9, p10: A10, p11: A11, p12: A12, p13: A13) => NullishType,
+        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
     }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(func: Function14<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14): Promise<NullishType> {
-        return launch func.invoke0(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(
+        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8, p9: A9, p10: A10, p11: A11, p12: A12, p13: A13, p14: A14) => NullishType,
+        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
     }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(func: Function15<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15): Promise<NullishType> {
-        return launch func.invoke0(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(
+        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8, p9: A9, p10: A10, p11: A11, p12: A12, p13: A13, p14: A14, p15: A15) => NullishType,
+        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
     }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16>(func: Function16<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16): Promise<NullishType> {
-        return launch func.invoke0(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16);
+    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16>(
+        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8, p9: A9, p10: A10, p11: A11, p12: A12, p13: A13, p14: A14, p15: A15, p16: A16) => NullishType,
+        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16);
     }
 
     /**

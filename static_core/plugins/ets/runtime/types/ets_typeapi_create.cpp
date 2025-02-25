@@ -265,17 +265,18 @@ void LambdaTypeCreator::Create()
         GetCtx()->AddError("Function types with more than 16 parameters are not supported");
         return;
     }
-    name_ += std::to_string(fn_.params.size());
+    auto aritySuffix = std::to_string(fn_.params.size());
+    name_ += aritySuffix;
 
     rec_.name = name_;
-    fnName_ = fn_.name = name_ + ".invoke0";
+    fnName_ = fn_.name = name_ + "." + STD_CORE_FUNCTION_INVOKE_PREFIX + aritySuffix;
     fn_.params.insert(fn_.params.begin(), pandasm::Function::Parameter(pandasm::Type(name_, 0), SourceLanguage::ETS));
     for (const auto &attr : typeapi_create_consts::ATTR_ABSTRACT_METHOD) {
         fn_.metadata->SetAttribute(attr);
     }
     fn_.metadata->SetAttributeValue(typeapi_create_consts::ATTR_ACCESS, typeapi_create_consts::ATTR_ACCESS_VAL_PUBLIC);
 
-    // Register `std.core.Function` type and its `invoke0` method as external,
+    // Register `std.core.Function` type and its `FN_INVOKE_METHOD_PREFIX+N` method as external,
     // as they are already defined in standard library
     GetCtx()->AddRefTypeAsExternal(name_);
     fn_.metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);

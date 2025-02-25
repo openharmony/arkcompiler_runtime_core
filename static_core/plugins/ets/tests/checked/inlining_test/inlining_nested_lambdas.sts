@@ -17,24 +17,24 @@
 //! RUN          force_jit: true, options: "--compiler-regex='.*test.*'", entry: "ETSGLOBAL::main"
 //! EVENT        /Inline,ETSGLOBAL::test,LambdaObject-ETSGLOBAL\$lambda\$invoke\$0::<ctor>,.*,STATIC,SUCCESS/
 //! EVENT_NEXT   /Inline,ETSGLOBAL::test,LambdaObject-ETSGLOBAL\$lambda\$invoke\$1::<ctor>,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,ETSGLOBAL::test,LambdaObject-ETSGLOBAL\$lambda\$invoke\$1::invoke0,.*,VIRTUAL,SUCCESS/
+//! EVENT_NEXT   /Inline,ETSGLOBAL::test,LambdaObject-ETSGLOBAL\$lambda\$invoke\$1::invoke1,.*,VIRTUAL,SUCCESS/
 //! METHOD       "ETSGLOBAL::test"
 //! PASS_AFTER   "Inline"
-//! INST         /CallResolvedVirtual.Inlined .* LambdaObject-ETSGLOBAL\$lambda\$invoke\$1::invoke0/
-//! INST_NEXT    /CallResolvedVirtual .* std.core.Function1::invoke0/
+//! INST         /CallResolvedVirtual.Inlined .* LambdaObject-ETSGLOBAL\$lambda\$invoke\$1::invoke1/
+//! INST_NEXT    /CallResolvedVirtual .* std.core.Function1::invoke1/
 
-// NOTE(compiler): lambda$invoke$0::invoke0 can be also inlined (now only `F2` is inlined into `test`)
+// NOTE(compiler): lambda$invoke$0::invoke1 can be also inlined (now only `F2` is inlined into `test`)
 
 //! CHECKER      Check inlining of nested lambda calls (AOT)
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC     options: "--compiler-regex='.*test.*'"
 //! EVENT        /Inline,ETSGLOBAL::test,LambdaObject-ETSGLOBAL\$lambda\$invoke\$0::<ctor>,.*,STATIC,SUCCESS/
 //! EVENT_NEXT   /Inline,ETSGLOBAL::test,LambdaObject-ETSGLOBAL\$lambda\$invoke\$1::<ctor>,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,ETSGLOBAL::test,LambdaObject-ETSGLOBAL\$lambda\$invoke\$1::invoke0,.*,VIRTUAL,SUCCESS/
+//! EVENT_NEXT   /Inline,ETSGLOBAL::test,LambdaObject-ETSGLOBAL\$lambda\$invoke\$1::invoke1,.*,VIRTUAL,SUCCESS/
 //! METHOD       "ETSGLOBAL::test"
 //! PASS_AFTER   "Inline"
-//! INST         /CallResolvedVirtual.Inlined .* LambdaObject-ETSGLOBAL\$lambda\$invoke\$1::invoke0/
-//! INST_NEXT    /CallResolvedVirtual .* std.core.Function1::invoke0/
+//! INST         /CallResolvedVirtual.Inlined .* LambdaObject-ETSGLOBAL\$lambda\$invoke\$1::invoke1/
+//! INST_NEXT    /CallResolvedVirtual .* std.core.Function1::invoke1/
 //! RUN          options: "", entry: "ETSGLOBAL::main"
 
 function test(y: int): int {
