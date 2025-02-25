@@ -26,3 +26,15 @@ ani_add_gtest(ani_test_string_ops_get_utf16_size
 ani_add_gtest(ani_test_string_ops_get_utf8_substr
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/string_get_utf8_substr.cpp
 )
+
+ani_add_gtest(ani_test_string_ops_new_utf16
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/string_new_utf16_test.cpp
+)
+
+ani_add_gtest(ani_test_string_ops_get_utf16
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/string_get_utf16_test.cpp
+)
+
+ani_add_gtest(ani_test_string_ops_get_utf16_substr
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/string_get_utf16_substr_test.cpp
+)

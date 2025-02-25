@@ -468,10 +468,8 @@ static ani_status ClassSetStaticFieldByName(ani_env *env, ani_class cls, const c
 }
 
 template <typename T>
-static ani_status DoFind(ani_env *env, const char *name, T *result)
+static ani_status DoFind(PandaEnv *pandaEnv, const char *name, ScopedManagedCodeFix &s, T *result)
 {
-    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
-    ScopedManagedCodeFix s(pandaEnv);
     EtsClassLinker *classLinker = pandaEnv->GetEtsVM()->GetClassLinker();
     EtsClass *klass = classLinker->GetClass(name, true, GetClassLinkerContext(s.GetCoroutine()));
     if (UNLIKELY(pandaEnv->HasPendingException())) {
@@ -489,6 +487,14 @@ static ani_status DoFind(ani_env *env, const char *name, T *result)
 
     ASSERT_MANAGED_CODE();
     return s.AddLocalRef(reinterpret_cast<EtsObject *>(klass), reinterpret_cast<ani_ref *>(result));
+}
+
+template <typename T>
+static ani_status DoFind(ani_env *env, const char *name, T *result)
+{
+    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
+    ScopedManagedCodeFix s(pandaEnv);
+    return DoFind(pandaEnv, name, s, result);
 }
 
 template <bool IS_STATIC_METHOD>
@@ -729,6 +735,74 @@ NO_UB_SANITIZE static ani_status Namespace_FindFunction(ani_env *env, ani_namesp
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     *result = ToAniFunction(method);
     return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Namespace_FindNamespace(ani_env *env, ani_namespace ns,
+                                                         const char *namespaceDescriptor, ani_namespace *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(ns);
+    CHECK_PTR_ARG(namespaceDescriptor);
+    CHECK_PTR_ARG(result);
+
+    auto pandaEnv = PandaEtsNapiEnv::FromAniEnv(env);
+    ScopedManagedCodeFix s(pandaEnv);
+    EtsNamespace *etsNs {};
+    ani_status status = GetInternalNamespace(s, ns, &etsNs);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    const char *nsDescriptor = etsNs->AsClass()->GetDescriptor();
+    size_t len = strlen(nsDescriptor);
+    size_t nameLen = strlen(namespaceDescriptor);
+    ASSERT(len > 2U);
+    PandaString descriptor(nsDescriptor, len - 1);
+    PandaString nameDescriptor(namespaceDescriptor, nameLen);
+
+    if (nameDescriptor[0] == 'L') {
+        nameDescriptor[0] = '/';
+    } else {
+        return ANI_NOT_FOUND;
+    }
+
+    descriptor += nameDescriptor;
+
+    // NOTE: Check that results is namespace, #22400
+    return DoFind(pandaEnv, descriptor.c_str(), s, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Namespace_FindClass(ani_env *env, ani_namespace ns, const char *classDescriptor,
+                                                     ani_class *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(ns);
+    CHECK_PTR_ARG(classDescriptor);
+    CHECK_PTR_ARG(result);
+
+    auto pandaEnv = PandaEtsNapiEnv::FromAniEnv(env);
+    ScopedManagedCodeFix s(pandaEnv);
+    EtsNamespace *etsNs {};
+    ani_status status = GetInternalNamespace(s, ns, &etsNs);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    const char *nsDescriptor = etsNs->AsClass()->GetDescriptor();
+    size_t len = strlen(nsDescriptor);
+    size_t classLen = strlen(classDescriptor);
+    ASSERT(len > 2U);
+    PandaString descriptor(nsDescriptor, len - 1);
+    PandaString clDescriptor(classDescriptor, classLen);
+
+    if (clDescriptor[0] == 'L') {
+        clDescriptor[0] = '/';
+    } else {
+        return ANI_NOT_FOUND;
+    }
+
+    descriptor += clDescriptor;
+
+    // NOTE: Check that results is class, #22400
+    return DoFind(pandaEnv, descriptor.c_str(), s, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1138,6 +1212,85 @@ NO_UB_SANITIZE static ani_status Reference_Delete(ani_env *env, ani_ref ref)
 
     ScopedManagedCodeFix s(env);
     return s.DelLocalRef(ref);
+}
+
+template <typename T>
+static ani_status SetVariableValue(ani_env *env, ani_variable variable, T value)
+{
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(variable);
+
+    EtsVariable *etsVariable = ToInternalVariable(variable);
+    EtsField *etsField = etsVariable->AsField();
+    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+    EtsClass *cls = etsField->GetDeclaringClass();
+
+    static constexpr auto IS_REF = std::is_same_v<T, ani_ref>;
+    ScopedManagedCodeFix s(env);
+    if constexpr (IS_REF) {
+        EtsObject *object = s.ToInternalType(value);
+        cls->SetStaticFieldObject(etsField, object);
+    } else {
+        cls->SetStaticFieldPrimitive<T>(etsField, value);
+    }
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_SetValue_Boolean(ani_env *env, ani_variable variable, ani_boolean value)
+{
+    ANI_DEBUG_TRACE(env);
+    return SetVariableValue<ani_boolean>(env, variable, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_SetValue_Byte(ani_env *env, ani_variable variable, ani_byte value)
+{
+    ANI_DEBUG_TRACE(env);
+    return SetVariableValue<ani_byte>(env, variable, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_SetValue_Short(ani_env *env, ani_variable variable, ani_short value)
+{
+    ANI_DEBUG_TRACE(env);
+    return SetVariableValue<EtsShort>(env, variable, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_SetValue_Int(ani_env *env, ani_variable variable, ani_int value)
+{
+    ANI_DEBUG_TRACE(env);
+    return SetVariableValue<EtsInt>(env, variable, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_SetValue_Long(ani_env *env, ani_variable variable, ani_long value)
+{
+    ANI_DEBUG_TRACE(env);
+    return SetVariableValue<EtsLong>(env, variable, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_SetValue_Float(ani_env *env, ani_variable variable, ani_float value)
+{
+    ANI_DEBUG_TRACE(env);
+    return SetVariableValue<EtsFloat>(env, variable, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_SetValue_Double(ani_env *env, ani_variable variable, ani_double value)
+{
+    ANI_DEBUG_TRACE(env);
+    return SetVariableValue<ani_double>(env, variable, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Variable_SetValue_Ref(ani_env *env, ani_variable variable, ani_ref value)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_PTR_ARG(value);
+    return SetVariableValue<ani_ref>(env, variable, value);
 }
 
 template <bool IS_STATIC_FIELD>
@@ -3000,6 +3153,21 @@ NO_UB_SANITIZE static ani_status String_GetUTF8SubString(ani_env *env, ani_strin
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status String_NewUTF16(ani_env *env, const uint16_t *utf16_string, ani_size utf16_size,
+                                                 ani_string *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(utf16_string);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    auto internalString = EtsString::CreateFromUtf16(utf16_string, utf16_size);
+    ANI_CHECK_RETURN_IF_EQ(internalString, nullptr, ANI_OUT_OF_MEMORY);
+    return s.AddLocalRef(internalString->AsObject(), reinterpret_cast<ani_ref *>(result));
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status String_GetUTF16Size(ani_env *env, ani_string string, ani_size *result)
 {
     ANI_DEBUG_TRACE(env);
@@ -3010,6 +3178,58 @@ NO_UB_SANITIZE static ani_status String_GetUTF16Size(ani_env *env, ani_string st
     ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
     auto internalString = s.ToInternalType(string);
     *result = internalString->GetUtf16Length();
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status String_GetUTF16(ani_env *env, ani_string string, uint16_t *utf16Buffer,
+                                                 ani_size utf16BufferSize, ani_size *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(string);
+    CHECK_PTR_ARG(utf16Buffer);
+    CHECK_PTR_ARG(result);
+
+    if (UNLIKELY(utf16BufferSize < 1)) {
+        return ANI_BUFFER_TO_SMALL;
+    }
+    ScopedManagedCodeFix s(env);
+    EtsString *internalString = s.ToInternalType(string);
+    auto utf16Length = internalString->GetUtf16Length();
+    if (UNLIKELY(utf16BufferSize < utf16Length)) {
+        return ANI_BUFFER_TO_SMALL;
+    }
+    ani_size actualCopiedSize = internalString->CopyDataRegionUtf16(utf16Buffer, 0, utf16Length, utf16BufferSize);
+    ANI_CHECK_RETURN_IF_NE(actualCopiedSize, utf16Length, ANI_ERROR);
+    utf16Buffer[actualCopiedSize] = 0;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    *result = actualCopiedSize;
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status String_GetUTF16SubString(ani_env *env, ani_string string, ani_size substr_offset,
+                                                          ani_size substrSize, uint16_t *utf16Buffer,
+                                                          ani_size utf16BufferSize, ani_size *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(string);
+    CHECK_PTR_ARG(utf16Buffer);
+    CHECK_PTR_ARG(result);
+    if (UNLIKELY(utf16BufferSize < substrSize) || (utf16BufferSize - substrSize) < 1) {
+        return ANI_BUFFER_TO_SMALL;
+    }
+    ScopedManagedCodeFix s(env);
+    EtsString *internalString = s.ToInternalType(string);
+    auto utf16Length = internalString->GetUtf16Length();
+    if (UNLIKELY(substr_offset > utf16Length || substrSize > (utf16Length - substr_offset))) {
+        return ANI_OUT_OF_RANGE;
+    }
+    ani_size actualCopiedSize = internalString->CopyDataRegionUtf16(utf16Buffer, substr_offset, substrSize, substrSize);
+    ANI_CHECK_RETURN_IF_NE(actualCopiedSize, substrSize, ANI_ERROR);
+    utf16Buffer[actualCopiedSize] = 0;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    *result = actualCopiedSize;
     return ANI_OK;
 }
 
@@ -4058,6 +4278,45 @@ NO_UB_SANITIZE static ani_status Function_Call_Ref(ani_env *env, ani_function fn
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Void_A(ani_env *env, ani_function fn, const ani_value *args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    CHECK_PTR_ARG(args);
+
+    CheckFunctionReturnType(fn, EtsType::VOID);
+    ani_boolean result;
+    // Use any primitive type as template parameter and just ignore the result
+    return GeneralFunctionCall<EtsBoolean>(env, fn, &result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Void_V(ani_env *env, ani_function fn, va_list args)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+
+    CheckFunctionReturnType(fn, EtsType::VOID);
+    ani_boolean result;
+    // Use any primitive type as template parameter and just ignore the result
+    return GeneralFunctionCall<EtsBoolean>(env, fn, &result, args);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Function_Call_Void(ani_env *env, ani_function fn, ...)
+{
+    ANI_DEBUG_TRACE(env);
+
+    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(args, fn);
+    ani_status status = Function_Call_Void_V(env, fn, args);
+    va_end(args);
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status GlobalReference_Create(ani_env *env, ani_ref ref, ani_ref *result)
 {
     ANI_DEBUG_TRACE(env);
@@ -4196,8 +4455,8 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<37>,
     NotImplementedAdapter<38>,
     NotImplementedAdapter<39>,
-    NotImplementedAdapter<40>,
-    NotImplementedAdapter<41>,
+    Namespace_FindNamespace,
+    Namespace_FindClass,
     NotImplementedAdapter<42>,
     Namespace_FindFunction,
     Namespace_FindVariable,
@@ -4223,10 +4482,10 @@ const __ani_interaction_api INTERACTION_API = {
     Reference_IsNullishValue,
     Reference_Equals,
     Reference_StrictEquals,
-    NotImplementedAdapter<69>,
+    String_NewUTF16,
     String_GetUTF16Size,
-    NotImplementedAdapter<71>,
-    NotImplementedAdapter<72>,
+    String_GetUTF16,
+    String_GetUTF16SubString,
     String_NewUTF8,
     String_GetUTF8Size,
     NotImplementedAdapter<75>,
@@ -4267,15 +4526,15 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<123>,
     NotImplementedAdapter<124>,
     NotImplementedAdapter<125>,
-    NotImplementedAdapter<126>,
+    Variable_SetValue_Boolean,
     NotImplementedAdapter<127>,
-    NotImplementedAdapter<128>,
-    NotImplementedAdapter<129>,
-    NotImplementedAdapter<130>,
-    NotImplementedAdapter<131>,
-    NotImplementedAdapter<132>,
-    NotImplementedAdapter<133>,
-    NotImplementedAdapter<134>,
+    Variable_SetValue_Byte,
+    Variable_SetValue_Short,
+    Variable_SetValue_Int,
+    Variable_SetValue_Long,
+    Variable_SetValue_Float,
+    Variable_SetValue_Double,
+    Variable_SetValue_Ref,
     Variable_GetValue_Boolean,
     NotImplementedAdapter<136>,
     Variable_GetValue_Byte,
@@ -4312,9 +4571,9 @@ const __ani_interaction_api INTERACTION_API = {
     Function_Call_Ref,
     Function_Call_Ref_A,
     Function_Call_Ref_V,
-    NotImplementedAdapterVargs<171>,
-    NotImplementedAdapter<172>,
-    NotImplementedAdapter<173>,
+    Function_Call_Void,
+    Function_Call_Void_A,
+    Function_Call_Void_V,
     Class_FindField,
     Class_FindStaticField,
     Class_FindMethod,
