@@ -59,7 +59,7 @@ if (ark_ets_interop_js) {
 
 option_yaml_path = "ets_plugin_options.yaml"
 
-runtime_option_yaml_path = "runtime_options.yaml"
+runtime_option_yaml_path = [ "runtime_options.yaml" ]
 
 inst_templates_yaml_path =
     "compiler/optimizer/ir_builder/ets_inst_templates.yaml"
@@ -191,6 +191,7 @@ srcs_runtime = [
 configs_runtime = []
 
 if (ark_ets_interop_js) {
+  runtime_option_yaml_path += [ "runtime/interop_js/runtime_options.yaml" ]
   srcs_runtime += [
     "runtime/interop_js/call/call_ets.cpp",
     "runtime/interop_js/call/call_js.cpp",

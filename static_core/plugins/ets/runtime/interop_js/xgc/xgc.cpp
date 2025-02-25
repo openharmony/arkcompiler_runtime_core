@@ -53,16 +53,18 @@ private:
 
 XGC *XGC::instance_ = nullptr;
 
-// NOTE(ipetrov, XGC): Maybe pass as a runtime option?
-static constexpr size_t MINIMAL_THRESHOLD_SIZE = 2048;
-
 XGC::XGC(PandaEtsVM *vm, STSVMInterfaceImpl *stsVmIface, ets_proxy::SharedReferenceStorage *storage)
-    : vm_(vm), storage_(storage), stsVmIface_(stsVmIface), minimalThreasholdSize_(MINIMAL_THRESHOLD_SIZE)
+    : vm_(vm),
+      storage_(storage),
+      stsVmIface_(stsVmIface),
+      minimalThresholdSize_(Runtime::GetCurrent()->GetOptions().GetXgcMinTriggerThreshold()),
+      increaseThresholdPercent_(
+          std::min(PERCENT_100_U32, Runtime::GetCurrent()->GetOptions().GetXgcTriggerPercentThreshold()))
 {
-    ASSERT(MINIMAL_THRESHOLD_SIZE <= storage->MaxSize());
+    ASSERT(minimalThresholdSize_ <= storage->MaxSize());
     // Atomic with relaxed order reason: data race with targetThreasholdSize_ with no synchronization or ordering
     // constraints imposed on other reads or writes
-    targetThreasholdSize_.store(minimalThreasholdSize_, std::memory_order_relaxed);
+    targetThreasholdSize_.store(minimalThresholdSize_, std::memory_order_relaxed);
 }
 
 ALWAYS_INLINE static void MarkJsObject(ets_proxy::SharedReference *ref, STSVMInterfaceImpl *stsVmIface)
@@ -339,16 +341,15 @@ void XGC::Finish()
 
 size_t XGC::ComputeNewSize()
 {
-    // NOTE(ipetrov, XGC): Maybe pass as a runtime option?
-    static constexpr size_t INCREASE_PERCENT = 20;
     size_t currentStorageSize = storage_->Size();
-    size_t delta = (currentStorageSize / PERCENT_100_D) * INCREASE_PERCENT;
+    size_t delta = (currentStorageSize / PERCENT_100_D) * increaseThresholdPercent_;
 
+    // NOTE(ipetrov, 20146): maybe use an adaptive trigger?
     if (beforeGCStorageSize_ > currentStorageSize) {
         delta = std::max(delta, static_cast<size_t>((beforeGCStorageSize_ - currentStorageSize) *
-                                                    ((PERCENT_100_D - INCREASE_PERCENT) / PERCENT_100_D)));
+                                                    (increaseThresholdPercent_ / PERCENT_100_D)));
     }
-    return std::min(std::max(currentStorageSize + delta, minimalThreasholdSize_), storage_->MaxSize());
+    return std::min(std::max(currentStorageSize + delta, minimalThresholdSize_), storage_->MaxSize());
 }
 
 bool XGC::Trigger(mem::GC *gc, PandaUniquePtr<GCTask> task)
