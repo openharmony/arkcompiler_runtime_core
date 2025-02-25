@@ -61,7 +61,10 @@ napi_value EtsClassWrapper::Wrap(InteropCtx *ctx, EtsObject *etsObject)
 
     napi_value jsValue;
     // etsObject will be wrapped in jsValue in responce to jsCtor call
-    ctx->SetPendingNewInstance(etsObject);
+    auto *coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coro);
+    EtsHandle<EtsObject> handle(coro, etsObject);
+    ctx->SetPendingNewInstance(handle);
     NAPI_CHECK_FATAL(napi_new_instance(env, GetJsCtor(env), 0, nullptr, &jsValue));
     return jsValue;
 }
