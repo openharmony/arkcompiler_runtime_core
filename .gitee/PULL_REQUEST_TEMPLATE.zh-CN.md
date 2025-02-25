@@ -71,6 +71,7 @@ debug模式：
 2. 测试脚本
 
 ##### **八、指令/abc格式修改自检，需联系下方邮箱，同步至相关领域**
+**重要：涉及runtime_core仓abc2program、libpandafile、isa目录下的修改，必须提供一个编译helloworld项目的hap包给对应领域，并联系下方邮箱**
 - [ ] 涉及，已同步
 - [ ] 不涉及
 
