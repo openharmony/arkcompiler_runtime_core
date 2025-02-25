@@ -72,7 +72,7 @@ function(prepare_spawn TARGET ABC_FILES WORK_DIR)
     add_custom_target(${TARGET} DEPENDS ${TARGET_LIB} ${TARGET_ABC})
 endfunction()
 
-function(run_sts_app_mode TARGET WORK_DIR APP_MAIN_ABILITY_CLASS APP_ABC_FILES)
+function(run_sts_app_mode_with_special_option TARGET WORK_DIR APP_MAIN_ABILITY_CLASS APP_ABC_FILES)
     set(oneValueArgs STDOUT_FILE SPAWN_ENTRYPOINT_FUNCTION)
     set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -93,10 +93,6 @@ function(run_sts_app_mode TARGET WORK_DIR APP_MAIN_ABILITY_CLASS APP_ABC_FILES)
 
     set(RUNTIME_ARGUMENTS
         --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc:${SPAWN_ABC_FILES}
-        --load-runtimes=ets
-        --verification-enabled=true
-        --verification-mode=on-the-fly
-        --gc-type=g1-gc
         ${ARG_RUNTIME_EXTRA_OPTIONS}
         ${SPAWN_ENTRY_ABC}
         "@spawn.spawn.ETSGLOBAL::${ARG_SPAWN_ENTRYPOINT_FUNCTION}"
@@ -112,6 +108,22 @@ function(run_sts_app_mode TARGET WORK_DIR APP_MAIN_ABILITY_CLASS APP_ABC_FILES)
     )
 endfunction()
 
+
+function(run_sts_app_mode TARGET WORK_DIR APP_MAIN_ABILITY_CLASS APP_ABC_FILES)
+    set(oneValueArgs STDOUT_FILE SPAWN_ENTRYPOINT_FUNCTION)
+    cmake_parse_arguments(ARG "" "${oneValueArgs}" "" ${ARGN})
+    set(RUNTIME_EXTRA_OPTIONS
+        "--load-runtimes=ets"
+        "--verification-enabled=true"
+        "--verification-mode=on-the-fly"
+        "--gc-type=g1-gc"
+    )
+    run_sts_app_mode_with_special_option(${TARGET} ${WORK_DIR} ${APP_MAIN_ABILITY_CLASS} "${ABC_FILES}"
+                STDOUT_FILE ${ARG_STDOUT_FILE}
+                SPAWN_ENTRYPOINT_FUNCTION ${ARG_SPAWN_ENTRYPOINT_FUNCTION}
+                RUNTIME_EXTRA_OPTIONS ${RUNTIME_EXTRA_OPTIONS})
+endfunction()
+
 function(prepare_app TARGET ABC_FILES WORK_DIR SOURCE_DIR)
     # All application files
     set(RESULT "")
@@ -122,9 +134,6 @@ function(prepare_app TARGET ABC_FILES WORK_DIR SOURCE_DIR)
         ${SOURCES_APP_DIR}/module1.sts
         ${SOURCES_APP_DIR}/module2.sts
         ${SOURCES_APP_DIR}/module3.sts
-        ${SOURCES_APP_DIR}/module4.sts
-        ${SOURCES_APP_DIR}/module5.sts
-        ${SOURCES_APP_DIR}/module6.sts
     )
     set(TARGET_APP ${TARGET}-app-abc)
     compile_arktsconfig_unit(${TARGET_APP} ABCS_MODULES ${WORK_DIR} ${SOURCES_APP_DIR}/arktsconfig.json
@@ -149,34 +158,68 @@ function(prepare_app TARGET ABC_FILES WORK_DIR SOURCE_DIR)
                              ${SOURCE_DIR}/bar/bar.sts
     )
     set(RESULT ${RESULT} ${ABCS_BAR})
-
-    # `mismatched` package
-    set(TARGET_MIS_MATCHED ${TARGET}-mismatched-abc)
-    set(SOURCES_MIS_MATCHED
-        ${SOURCE_DIR}/mismatched/src/extends_final.sts
-        ${SOURCE_DIR}/mismatched/src/final.sts
-        ${SOURCE_DIR}/mismatched/src/override_final.sts
-        ${SOURCE_DIR}/mismatched/src/final_method.sts
-    )
-    compile_arktsconfig_unit(${TARGET_MIS_MATCHED} ABCS_MIS_MATCHED ${WORK_DIR} ${SOURCE_DIR}/mismatched/src/arktsconfig.json
-                             "${SOURCES_MIS_MATCHED}"
-    )
-    set(RESULT ${RESULT} ${ABCS_MIS_MATCHED})
-
-    # `loop_inheritance` package
-    set(TARGET_LOOP ${TARGET}-loop_inheritance-abc)
-    set(SOURCES_LOOP
-        ${SOURCE_DIR}/loop_inheritance/src/level_one.sts
-        ${SOURCE_DIR}/loop_inheritance/src/level_two.sts
-    )
-    compile_arktsconfig_unit(${TARGET_LOOP} ABCS_LOOP ${WORK_DIR} ${SOURCE_DIR}/loop_inheritance/src/arktsconfig.json
-                             "${SOURCES_LOOP}"
-    )
-    set(RESULT ${RESULT} ${ABCS_LOOP})
-
     set(${ABC_FILES} "${RESULT}" PARENT_SCOPE)
-    add_custom_target(${TARGET} DEPENDS ${TARGET_APP} ${TARGET_FOO} ${TARGET_BAR} ${TARGET_MIS_MATCHED} ${TARGET_LOOP})
+    add_custom_target(${TARGET} DEPENDS ${TARGET_APP} ${TARGET_FOO} ${TARGET_BAR})
 endfunction()
+
+# prepare_incompatible_app compile the specific case and replace the original abc files with incompatiable
+# the src dir contains original sts file
+# the incompatible dir contains incompatiable sts file
+# the app dir contains main entry to run the case
+function(prepare_incompatible_app TARGET ABC_FILES WORK_DIR SOURCE_DIR MODULE_NAME)
+    set(RESULT "")
+    set(oneValueArgs )
+    set(multiValueArgs IGNORE_REPLACE_FILES)
+    cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    # src package
+    set(TARGET_SRC ${TARGET}-${MODULE_NAME}-src-abc)
+    file(GLOB SOURCES_SRC "${SOURCE_DIR}/${MODULE_NAME}/src/*.sts")
+    compile_arktsconfig_unit(${TARGET_SRC} ABCS_SRC ${WORK_DIR} ${SOURCE_DIR}/${MODULE_NAME}/src/arktsconfig.json
+                             "${SOURCES_SRC}"
+    )
+    # incompatible package
+    set(TARGET_INCOMPATIABLE ${TARGET}-${MODULE_NAME}-incompatible-abc)
+    file(GLOB SOURCES_INCOMPATIABLE "${SOURCE_DIR}/${MODULE_NAME}/incompatible/*.sts")
+    compile_arktsconfig_unit(${TARGET_INCOMPATIABLE} ABCS_INCOMPATIABLE ${WORK_DIR} ${SOURCE_DIR}/${MODULE_NAME}/incompatible/arktsconfig.json
+                             "${SOURCES_INCOMPATIABLE}"
+    )
+
+    # replace the same name with incompatiable file, but do not replace files set by the IGNORE_REPLACE_FILES parameter
+    foreach(SRC ${ABCS_SRC})
+        get_filename_component(SRC_NAME ${SRC} NAME)
+        string(REPLACE "${TARGET_SRC}-" "" SRC_NAME ${SRC_NAME})
+        set(REPLACEMENT ${SRC})
+        foreach(INCOMPATIABLE ${ABCS_INCOMPATIABLE})
+            get_filename_component(INCOMPATIABLE_NAME ${INCOMPATIABLE} NAME)
+            string(REPLACE "${TARGET_INCOMPATIABLE}-" "" INCOMPATIABLE_NAME ${INCOMPATIABLE_NAME})
+            if(SRC_NAME STREQUAL INCOMPATIABLE_NAME)
+                if (DEFINED ARG_IGNORE_REPLACE_FILES)
+                    list_find_by_regex("${ARG_IGNORE_REPLACE_FILES}" "${SRC_NAME}" BASE_ABC_IDX)
+                    if (BASE_ABC_IDX EQUAL -1)
+                        set(REPLACEMENT ${INCOMPATIABLE})
+                    endif()
+                else()
+                    set(REPLACEMENT ${INCOMPATIABLE})
+                endif()
+                break()
+            endif()
+        endforeach()
+        set(RESULT ${RESULT} ${REPLACEMENT})
+    endforeach()
+    
+    # `app` package
+    set(TARGET_APP ${TARGET}-${MODULE_NAME}-app-abc)
+    file(GLOB SOURCES_APP "${SOURCE_DIR}/${MODULE_NAME}/app/*.sts")
+    compile_arktsconfig_unit(${TARGET_APP} ABCS_APP ${WORK_DIR} ${SOURCE_DIR}/${MODULE_NAME}/app/arktsconfig.json
+                             "${SOURCES_APP}"
+    )
+    set(RESULT ${RESULT} ${ABCS_APP})
+    set(${ABC_FILES} "${RESULT}" PARENT_SCOPE)
+
+
+    add_custom_target(${TARGET} DEPENDS ${TARGET_SRC} ${TARGET_APP} ${TARGET_INCOMPATIABLE})
+endfunction()
+
 
 function(create_modules_test TARGET WORK_DIR SOURCE_DIR)
     prepare_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR})
@@ -250,71 +293,43 @@ endfunction()
 
 create_incompatible_class_change_test(ets_modules_incompatible_class_change_test ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
-function(create_mismatched_extends_final_class_test TARGET WORK_DIR SOURCE_DIR)
-    prepare_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR})
+function(create_mismatched_test TARGET WORK_DIR SOURCE_DIR)
+    prepare_incompatible_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR} "mismatched" )
 
-    # replace `Final` class with incompatible `Final` class
-    list_find_by_regex("${ABC_FILES}" "(.*)-final.abc" BASE_ABC_IDX)
-    list(REMOVE_AT ABC_FILES ${BASE_ABC_IDX})
-    set(TARGET_MIS_MATCHED ${TARGET}-incompatible-extends-final-abc)
-    compile_arktsconfig_unit(${TARGET_MIS_MATCHED} ABCS_MIS_MATCHED ${WORK_DIR} ${SOURCE_DIR}/mismatched/incompatible/arktsconfig.json
-                             ${SOURCE_DIR}/mismatched/incompatible/final.sts
-    )
-
-    set(ABC_FILES ${ABC_FILES} ${ABCS_MIS_MATCHED})
-    run_sts_app_mode(${TARGET}-run-sts-app-mode ${WORK_DIR} "@app.module4.MainAbility" "${ABC_FILES}"
+    # test extends final class
+    run_sts_app_mode(${TARGET}-extends-final-run-sts-app-mode ${WORK_DIR} "@app.module4.MainAbility" "${ABC_FILES}"
                      SPAWN_ENTRYPOINT_FUNCTION "mainMisatchedExtendsFinal")
-    add_dependencies(${TARGET}-run-sts-app-mode ${TARGET}-app ${TARGET_MIS_MATCHED})
-
-    add_custom_target(${TARGET}
+    add_dependencies(${TARGET}-extends-final-run-sts-app-mode ${TARGET}-app)
+    add_custom_target(${TARGET}-extends
         COMMENT "Check class extends final class mainMisatchedExtendsFinal"
-        DEPENDS ${TARGET}-run-sts-app-mode
+        DEPENDS ${TARGET}-extends-final-run-sts-app-mode
     )
 
-endfunction()
-
-create_mismatched_extends_final_class_test(ets_modules_mismatched_extends_final_class_test ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-
-function(create_mismatched_override_final_class_test TARGET WORK_DIR SOURCE_DIR)
-    prepare_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR})
-
-    # replace `FinalMethod` class with incompatible `FinalMethod` class
-    list_find_by_regex("${ABC_FILES}" "(.*)-final_method.abc" BASE_ABC_IDX)
-    list(REMOVE_AT ABC_FILES ${BASE_ABC_IDX})
-    set(TARGET_MIS_MATCHED ${TARGET}-incompatible-override-final-abc)
-    compile_arktsconfig_unit(${TARGET_MIS_MATCHED} ABCS_MIS_MATCHED ${WORK_DIR} ${SOURCE_DIR}/mismatched/incompatible/arktsconfig.json
-                             ${SOURCE_DIR}/mismatched/incompatible/final_method.sts
-    )
-
-    set(ABC_FILES ${ABC_FILES} ${ABCS_MIS_MATCHED})
-    run_sts_app_mode(${TARGET}-run-sts-app-mode ${WORK_DIR} "@app.module5.MainAbility" "${ABC_FILES}"
+    # test override final method
+    run_sts_app_mode(${TARGET}-override-final-run-sts-app-mode ${WORK_DIR} "@app.module5.MainAbility" "${ABC_FILES}"
                      SPAWN_ENTRYPOINT_FUNCTION "mainMisatchedOverrideFinal")
-    add_dependencies(${TARGET}-run-sts-app-mode ${TARGET}-app ${TARGET_MIS_MATCHED})
+    add_dependencies(${TARGET}-override-final-run-sts-app-mode ${TARGET}-app)
+    add_custom_target(${TARGET}-override
+        COMMENT "Check class override final method mainMisatchedOverrideFinal"
+        DEPENDS ${TARGET}-override-final-run-sts-app-mode
+    )
 
     add_custom_target(${TARGET}
-        COMMENT "Check class override final method mainMisatchedOverrideFinal"
-        DEPENDS ${TARGET}-run-sts-app-mode
+            DEPENDS ${TARGET}-extends ${TARGET}-override
     )
 
 endfunction()
 
-create_mismatched_override_final_class_test(ets_modules_mismatched_override_final_class_test ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+create_mismatched_test(ets_modules_mismatched_test ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 function(create_loop_inheritance_class_test TARGET WORK_DIR SOURCE_DIR)
-    prepare_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR})
+    prepare_incompatible_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR} "loop_inheritance"
+                             IGNORE_REPLACE_FILES "level_two.abc")
 
-    # replace `LevelOne` class with incompatible `LevelOne` class
-    list_find_by_regex("${ABC_FILES}" "(.*)-level_one.abc" BASE_ABC_IDX)
-    list(REMOVE_AT ABC_FILES ${BASE_ABC_IDX})
-    set(TARGET_LOOP ${TARGET}-incompatible-loop-abc)
-    compile_arktsconfig_unit(${TARGET_LOOP} ABCS_LOOP ${WORK_DIR} ${SOURCE_DIR}/loop_inheritance/incompatible/arktsconfig.json
-                             ${SOURCE_DIR}/loop_inheritance/incompatible/level_one.sts
-    )
-
-    set(ABC_FILES ${ABC_FILES} ${ABCS_LOOP})
+    # test extends final class
     run_sts_app_mode(${TARGET}-run-sts-app-mode ${WORK_DIR} "@app.module6.MainAbility" "${ABC_FILES}"
                      SPAWN_ENTRYPOINT_FUNCTION "mainCircularityExtends")
-    add_dependencies(${TARGET}-run-sts-app-mode ${TARGET}-app ${TARGET_LOOP})
+    add_dependencies(${TARGET}-run-sts-app-mode ${TARGET}-app)
 
     add_custom_target(${TARGET}
         COMMENT "Check class loop inheritance class mainCircularityExtends"
@@ -325,12 +340,111 @@ endfunction()
 
 create_loop_inheritance_class_test(ets_modules_loop_inheritance_class_test ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
+function(create_multiple_override_test TARGET WORK_DIR SOURCE_DIR)
+    prepare_incompatible_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR} "multiple_override")
+
+    # test override_base.sts multiple override method 
+    run_sts_app_mode(${TARGET}-multiple_override-run-sts-app-mode ${WORK_DIR} "@app.module.MainAbility" "${ABC_FILES}"
+                     SPAWN_ENTRYPOINT_FUNCTION "mainMultipleOverrideBase")
+    add_dependencies(${TARGET}-multiple_override-run-sts-app-mode ${TARGET}-app)
+    add_custom_target(${TARGET}-multiple_override
+        COMMENT "Check class multiple override method mainMultipleOverrideBase"
+        DEPENDS ${TARGET}-multiple_override-run-sts-app-mode
+    )
+
+    # test override_base1.sts multiple override method 
+    run_sts_app_mode(${TARGET}-multiple_override1-run-sts-app-mode ${WORK_DIR} "@app.module1.MainAbility" "${ABC_FILES}"
+                     SPAWN_ENTRYPOINT_FUNCTION "mainMultipleOverrideBase1")
+    add_dependencies(${TARGET}-multiple_override1-run-sts-app-mode ${TARGET}-app)
+    add_custom_target(${TARGET}-multiple_override1
+        COMMENT "Check class multiple override method mainMultipleOverrideBase1"
+        DEPENDS ${TARGET}-multiple_override1-run-sts-app-mode
+    )
+
+    add_custom_target(${TARGET}
+            DEPENDS ${TARGET}-multiple_override ${TARGET}-multiple_override1
+    )
+
+endfunction()
+
+create_multiple_override_test(ets_modules_multiple_override_test ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+
+function(create_multiple_implement_test TARGET WORK_DIR SOURCE_DIR)
+    prepare_incompatible_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR} "multiple_implement")
+    # test a2_extends_a1_i1.sts multiple implement method 
+    run_sts_app_mode(${TARGET}-multiple_implement-run-sts-app-mode ${WORK_DIR} "@app.module.MainAbility" "${ABC_FILES}"
+                     SPAWN_ENTRYPOINT_FUNCTION "mainMultipleImplement")
+    add_dependencies(${TARGET}-multiple_implement-run-sts-app-mode ${TARGET}-app)
+    add_custom_target(${TARGET}-multiple_implement
+        COMMENT "Check class multiple implement method mainMultipleImplement"
+        DEPENDS ${TARGET}-multiple_implement-run-sts-app-mode
+    )
+
+    # test a2_extends_a1_i2.sts multiple implement method 
+    run_sts_app_mode(${TARGET}-multiple_implement1-run-sts-app-mode ${WORK_DIR} "@app.module1.MainAbility" "${ABC_FILES}"
+                     SPAWN_ENTRYPOINT_FUNCTION "mainMultipleImplement1")
+    add_dependencies(${TARGET}-multiple_implement1-run-sts-app-mode ${TARGET}-app)
+    add_custom_target(${TARGET}-multiple_implement1
+        COMMENT "Check class multiple implement method mainMultipleImplement1"
+        DEPENDS ${TARGET}-multiple_implement1-run-sts-app-mode
+    )
+
+    add_custom_target(${TARGET}
+            DEPENDS ${TARGET}-multiple_implement ${TARGET}-multiple_implement1
+    )
+
+endfunction()
+
+create_multiple_implement_test(ets_modules_multiple_implement_test ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+
+function(create_verification_mode_test TARGET WORK_DIR SOURCE_DIR)
+    prepare_incompatible_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR} "verification_mode")
+    # test --verification-mode on-the-fly mode
+    set(RUNTIME_EXTRA_OPTIONS
+        "--load-runtimes=ets"
+        "--verification-enabled=true"
+        "--verification-mode=on-the-fly"
+        "--gc-type=g1-gc"
+    )
+    run_sts_app_mode_with_special_option(${TARGET}-on-the-fly-run-sts-app-mode ${WORK_DIR} "@app.module.MainAbility" "${ABC_FILES}"
+                     SPAWN_ENTRYPOINT_FUNCTION "mainVerificationModeOnTheFly" RUNTIME_EXTRA_OPTIONS ${RUNTIME_EXTRA_OPTIONS})
+    add_dependencies(${TARGET}-on-the-fly-run-sts-app-mode ${TARGET}-app)
+    add_custom_target(${TARGET}-on-the-fly
+        COMMENT "Check --verification-mode on-the-fly mode mainVerificationModeOnTheFly"
+        DEPENDS ${TARGET}-on-the-fly-run-sts-app-mode
+    )
+
+    # test --verification-mode ahead-of-time mode
+    set(RUNTIME_EXTRA_OPTIONS
+        "--load-runtimes=ets"
+        "--verification-enabled=true"
+        "--verification-mode=ahead-of-time"
+        "--gc-type=g1-gc"
+    )
+    run_sts_app_mode_with_special_option(${TARGET}-ahead-of-time-run-sts-app-mode ${WORK_DIR} "@app.module.MainAbility" "${ABC_FILES}"
+                     SPAWN_ENTRYPOINT_FUNCTION "mainVerificationModeAheadOfTime" RUNTIME_EXTRA_OPTIONS ${RUNTIME_EXTRA_OPTIONS})
+    add_dependencies(${TARGET}-ahead-of-time-run-sts-app-mode ${TARGET}-app)
+    add_custom_target(${TARGET}-ahead-of-time
+        COMMENT "Check --verification-mode ahead-of-time mode mainVerificationModeAheadOfTime"
+        DEPENDS ${TARGET}-ahead-of-time-run-sts-app-mode
+    )
+    add_custom_target(${TARGET}
+            DEPENDS ${TARGET}-on-the-fly ${TARGET}-ahead-of-time
+    )
+endfunction()
+
+create_verification_mode_test(ets_modules_verification_mode_test ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+
 add_custom_target(ets_modules_tests
                   DEPENDS
                     ets_modules_app_mode_test
                     ets_modules_no_class_def_found_test
                     ets_modules_incompatible_class_change_test
-                    ets_modules_mismatched_extends_final_class_test
-                    ets_modules_mismatched_override_final_class_test
-                    ets_modules_loop_inheritance_class_test)
+                    ets_modules_mismatched_test
+                    ets_modules_loop_inheritance_class_test
+                    ets_modules_multiple_override_test
+                    # 22978 case a memory leak
+                    #ets_modules_multiple_implement_test
+                    # 22978 end
+                    ets_modules_verification_mode_test)
 add_dependencies(ets_tests ets_modules_tests)
