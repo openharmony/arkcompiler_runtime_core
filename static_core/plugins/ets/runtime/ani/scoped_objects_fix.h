@@ -23,6 +23,7 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_module.h"
 #include "plugins/ets/runtime/types/ets_namespace.h"
+#include "plugins/ets/runtime/types/ets_promise.h"
 
 namespace ark::ets::ani {
 
@@ -145,6 +146,13 @@ public:
         return reinterpret_cast<EtsClass *>(GetInternalType(type));
     }
 
+    EtsPromise *ToInternalType(ani_resolver resolver)
+    {
+        auto resolverRef = reinterpret_cast<ani_ref>(resolver);
+        EtsObject *obj = IsUndefined(resolverRef) ? GetUndefinedObject() : GetInternalType(resolverRef);
+        return reinterpret_cast<EtsPromise *>(obj);
+    }
+
     ani_status AddGlobalRef(ani_ref ref, ani_ref *result)
     {
         if (IsUndefined(ref)) {
@@ -207,6 +215,17 @@ public:
         }
         *wasReleasedResult = ANI_FALSE;
         return AddLocalRef(obj, result);
+    }
+
+    ani_status AddGlobalRef(EtsObject *obj, ani_ref *result)
+    {
+        if (IsUndefined(obj)) {
+            return GetUndefinedRef(result);
+        }
+        EtsReference *gref = GetRefStorage()->NewEtsRef(obj, EtsReference::EtsObjectType::GLOBAL);
+        ANI_CHECK_RETURN_IF_EQ(gref, nullptr, ANI_OUT_OF_REF);
+        *result = EtsRefToAniRef(gref);
+        return ANI_OK;
     }
 
     ani_status AddLocalRef(EtsObject *obj, ani_ref *result)

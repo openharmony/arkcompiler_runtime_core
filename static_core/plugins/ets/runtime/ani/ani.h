@@ -5599,7 +5599,8 @@ struct __ani_interaction_api {
     /**
      * @brief Resolves a promise.
      *
-     * This function resolves a promise by way of the resolver with which it is associated.
+     * This function resolves a promise by way of the resolver with which it is associated
+     * and queues promise `then` callbacks.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] resolver A resolver whose associated promise to resolve.
@@ -5612,7 +5613,8 @@ struct __ani_interaction_api {
     /**
      * @brief Rejects a promise.
      *
-     * This function rejects a promise by way of the resolver with which it is associated.
+     * This function rejects a promise by way of the resolver with which it is associated
+     * and queues promise `catch` callbacks.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] resolver A resolver whose associated promise to resolve.
