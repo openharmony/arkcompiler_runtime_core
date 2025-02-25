@@ -101,6 +101,12 @@ public:
         return reinterpret_cast<EtsObjectArray *>(GetInternalType(array));
     }
 
+    EtsArray *ToInternalType(ani_tuple_value tuple)
+    {
+        ASSERT(!IsNullishValue(tuple));
+        return reinterpret_cast<EtsArray *>(GetInternalType(tuple));
+    }
+
     EtsObject *ToInternalType(ani_ref ref)
     {
         if (IsUndefined(ref)) {

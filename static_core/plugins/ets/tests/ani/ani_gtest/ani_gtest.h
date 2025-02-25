@@ -209,7 +209,8 @@ private:
         } else if constexpr (std::is_same_v<R, void>) {
             etsEnv_->CallStaticVoidMethod(cls, mtd, args...);
             return std::nullopt;
-        } else if constexpr (std::is_same_v<R, ani_ref>) {
+        } else if constexpr (std::is_same_v<R, ani_ref> || std::is_same_v<R, ani_tuple_value> ||
+                             std::is_same_v<R, ani_object>) {
             return reinterpret_cast<R>(etsEnv_->CallStaticObjectMethod(cls, mtd, std::forward<Args>(args)...));
         } else {
             enum { INCORRECT_TEMPLATE_TYPE = false };
