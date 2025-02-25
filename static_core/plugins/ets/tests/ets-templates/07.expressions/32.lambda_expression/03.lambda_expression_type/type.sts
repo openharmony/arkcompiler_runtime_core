@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,21 +14,13 @@
  */
 
 /*---
-desc: lambda evaluation
+desc: Return type can be inferred from the lambda body
+tags:
+- compile-only
 ---*/
 
-class TestException extends Exception {}
+let f1 = (a:int, b: int) => a + b
+let x: int = f1(1, 2)
 
-type func = () => void;
-
-function main(): void {
-  let bar: func = (): void throws => { throw new TestException(); }
-
-  try {
-    bar();
-  } catch (e: TestException) {
-    assertTrue( true );
-  } catch {
-    assertTrue( false);
-  }
-}
+let f2 = (a:String, b: String) => a + b
+let y: String = f2("Hello", "World")

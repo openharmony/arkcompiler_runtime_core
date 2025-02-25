@@ -1428,7 +1428,15 @@
 07.expressions/31.string_interpolation_expressions/siexp_n_0.sts
 07.expressions/31.string_interpolation_expressions/siexp_n_2.sts
 07.expressions/31.string_interpolation_expressions/siexp_n_3.sts
-07.expressions/32.lambda_expression/lambda_evaluation.sts
+07.expressions/32.lambda_expression/01.lambda_signature/negative_0.sts
+07.expressions/32.lambda_expression/01.lambda_signature/negative_1.sts
+07.expressions/32.lambda_expression/02.lambda_body/body_3.sts
+07.expressions/32.lambda_expression/callback_3.sts
+07.expressions/32.lambda_expression/callback_4.sts
+07.expressions/32.lambda_expression/decl_full_ref_4.sts
+07.expressions/32.lambda_expression/decl_short_ref_4.sts
+07.expressions/32.lambda_expression/decl_short_ref_4.sts
+07.expressions/32.lambda_expression/generic.sts
 08.statements/03.block/block_statements_negative_0.sts
 08.statements/03.block/block_statements_negative_1.sts
 08.statements/05.if_statements/if_neg_0.sts
@@ -2148,8 +2156,6 @@ deprecated/15.exceptions/03.rethrowing_functions/rethrowing_function_without_cat
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/eq_8.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/ne_15.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/ne_17.sts
-07.expressions/32.lambda_expression/lambda_declaration_with_type.sts
-07.expressions/32.lambda_expression/lambda_declaration_without_type.sts
 08.statements/13.switch_statements/switch_negative_3.sts
 08.statements/13.switch_statements/switch_negative_4.sts
 09.classes/01.class_declaration/01.abstract_classes/abstract_method_2.sts
@@ -4140,7 +4146,6 @@ deprecated/15.exceptions/03.rethrowing_functions/rethrowing_function_without_cat
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkg_a/pkg_5.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkg_a/pkg_6.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_0_10.sts
-07.expressions/32.lambda_expression/01.lambda_signature/same_parameters_name.sts
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_11.sts
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_5.sts
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_n_3.sts

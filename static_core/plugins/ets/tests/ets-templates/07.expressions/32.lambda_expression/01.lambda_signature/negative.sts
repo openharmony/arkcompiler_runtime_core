@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,16 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: lambda captured local not assigned variable.
-assert: Any local variable used but not declared in a lambda body must be assigned before the lambda body, or a compile-time error occurs.
-tags: [negative]
+desc: |-
+ Signature negative case
+ {{c.desc}}
+tags:
+- compile-only
+- negative
 ---*/
 
-type func = (y: int) => int;
+{{c.impl}}
 
-function main(): void {
-  let i: int;
-
-  let bar: func = (y: int): int => { return y + i; }
-
-  assertEQ( bar(5), 12 )
-}
+{% endfor %}

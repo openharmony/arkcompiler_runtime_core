@@ -409,11 +409,7 @@
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_18.sts
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_19.sts
 
-# 22990
-07.expressions/32.lambda_expression/02.lambda_body/lambda_captured_value_type_2.sts
-07.expressions/32.lambda_expression/lambda_evaluation.sts
-
-# 19950
+# es2panda fails: panda#14067
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_10.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_11.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_12.sts
@@ -1899,6 +1895,22 @@
 15.semantic_rules/05.type_compatibility/functions_compatibility_opt_3.sts
 15.semantic_rules/08.overloading_and_overriding/04.overloading_and_overriding_in_classes/instance_method_over_n2_20.sts
 15.semantic_rules/08.overloading_and_overriding/04.overloading_and_overriding_in_classes/static_method_over_n2_19.sts
+
+# 23197 Lambda doesn't support "super" keyword
+07.expressions/32.lambda_expression/02.lambda_body/body_3.sts
+
+# 23198 Lambda doesn't support simple notation
+07.expressions/32.lambda_expression/callback_3.sts
+07.expressions/32.lambda_expression/callback_4.sts
+
+# 23199 Lambda doesn't support rest parameter
+07.expressions/32.lambda_expression/decl_full_ref_4.sts
+07.expressions/32.lambda_expression/decl_full_value_4.sts
+07.expressions/32.lambda_expression/decl_short_ref_4.sts
+07.expressions/32.lambda_expression/decl_short_value_4.sts
+
+# 20214 Generic lambda is not supported by compiler
+07.expressions/32.lambda_expression/generic.sts
 
 # not yet implemented
 17.experimental_features/20.non_nullish_type_parameter/ex1.sts
