@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,21 +33,8 @@ void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *inte
 {
     PandaVector<Value> args {Value(outsidePromise), Value(internalPromise)};
 
-    auto subscribeOnAnotherPromise = [&args]() {
-        EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetSubscribeOnAnotherPromiseMethod()->Invoke(
-            EtsCoroutine::GetCurrent(), args.data());
-    };
-
-    auto *mainT = EtsCoroutine::GetCurrent()->GetPandaVM()->GetCoroutineManager()->GetMainThread();
-    Coroutine *mainCoro = Coroutine::CastFromThread(mainT);
-    Coroutine *current = Coroutine::GetCurrent();
-    if (current != mainCoro && mainCoro->GetId() == current->GetId()) {
-        // Call ExecuteOnThisContext is possible only in the same thread.
-        mainCoro->GetContext<StackfulCoroutineContext>()->ExecuteOnThisContext(
-            &subscribeOnAnotherPromise, EtsCoroutine::GetCurrent()->GetContext<StackfulCoroutineContext>());
-    } else {
-        subscribeOnAnotherPromise();
-    }
+    EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetSubscribeOnAnotherPromiseMethod()->Invoke(
+        EtsCoroutine::GetCurrent(), args.data());
 }
 
 static void EnsureCapacity(EtsCoroutine *coro, EtsHandle<EtsPromise> &hpromise)

@@ -55,47 +55,38 @@ static napi_value ThenCallback(napi_env env, napi_callback_info info)
 
 void JsJobQueue::Post(EtsObject *callback)
 {
-    auto postProc = [callback] {
-        EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-        napi_env env = InteropCtx::Current(coro)->GetJSEnv();
-        napi_deferred deferred;
-        napi_value undefined;
-        napi_value jsPromise;
-        napi_value thenFn;
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    INTEROP_CODE_SCOPE_ETS(coro);
 
-        napi_get_undefined(env, &undefined);
-        napi_status status = napi_create_promise(env, &deferred, &jsPromise);
-        if (status != napi_ok) {
-            InteropCtx::Fatal("Cannot allocate a Promise instance");
-        }
-        status = napi_get_named_property(env, jsPromise, "then", &thenFn);
-        ASSERT(status == napi_ok);
-        (void)status;
+    napi_env env = InteropCtx::Current(coro)->GetJSEnv();
 
-        auto *jsCallback = JsCallback::Create(coro, callback);
-        napi_value thenCallback;
-        status = napi_create_function(env, nullptr, 0, ThenCallback, jsCallback, &thenCallback);
-        if (status != napi_ok) {
-            InteropCtx::Fatal("Cannot create a function");
-        }
+    napi_deferred deferred;
+    napi_value undefined;
+    napi_value jsPromise;
+    napi_value thenFn;
 
-        napi_value thenPromise;
-        status = napi_call_function(env, jsPromise, thenFn, 1, &thenCallback, &thenPromise);
-        ASSERT(status == napi_ok);
-        (void)status;
-
-        napi_resolve_deferred(env, deferred, undefined);
-    };
-
-    auto *mainT = EtsCoroutine::GetCurrent()->GetPandaVM()->GetCoroutineManager()->GetMainThread();
-    Coroutine *mainCoro = Coroutine::CastFromThread(mainT);
-    if (Coroutine::GetCurrent() != mainCoro) {
-        // NOTE(konstanting, #IAD5MH): figure out if we need to ExecuteOnThisContext() for OHOS
-        mainCoro->GetContext<StackfulCoroutineContext>()->ExecuteOnThisContext(
-            &postProc, EtsCoroutine::GetCurrent()->GetContext<StackfulCoroutineContext>());
-    } else {
-        postProc();
+    napi_get_undefined(env, &undefined);
+    napi_status status = napi_create_promise(env, &deferred, &jsPromise);
+    if (status != napi_ok) {
+        InteropCtx::Fatal("Cannot allocate a Promise instance");
     }
+    status = napi_get_named_property(env, jsPromise, "then", &thenFn);
+    ASSERT(status == napi_ok);
+    (void)status;
+
+    auto *jsCallback = JsCallback::Create(coro, callback);
+    napi_value thenCallback;
+    status = napi_create_function(env, nullptr, 0, ThenCallback, jsCallback, &thenCallback);
+    if (status != napi_ok) {
+        InteropCtx::Fatal("Cannot create a function");
+    }
+
+    napi_value thenPromise;
+    status = napi_call_function(env, jsPromise, thenFn, 1, &thenCallback, &thenPromise);
+    ASSERT(status == napi_ok);
+    (void)status;
+
+    napi_resolve_deferred(env, deferred, undefined);
 }
 
 static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callback_info info, bool isResolved)
@@ -181,17 +172,9 @@ void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
 
 void JsJobQueue::CreateLink(EtsObject *source, EtsObject *target)
 {
-    auto addLinkProc = [&]() { CreatePromiseLink(source, EtsPromise::FromEtsObject(target)); };
-
-    auto *mainT = EtsCoroutine::GetCurrent()->GetPandaVM()->GetCoroutineManager()->GetMainThread();
-    Coroutine *mainCoro = Coroutine::CastFromThread(mainT);
-    if (Coroutine::GetCurrent() != mainCoro) {
-        // NOTE(konstanting, #IAD5MH): figure out if we need to ExecuteOnThisContext() for OHOS
-        mainCoro->GetContext<StackfulCoroutineContext>()->ExecuteOnThisContext(
-            &addLinkProc, EtsCoroutine::GetCurrent()->GetContext<StackfulCoroutineContext>());
-    } else {
-        addLinkProc();
-    }
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    INTEROP_CODE_SCOPE_ETS(coro);
+    CreatePromiseLink(source, EtsPromise::FromEtsObject(target));
 }
 
 /* static */
