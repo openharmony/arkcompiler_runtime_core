@@ -273,7 +273,13 @@ void InteropCtx::InitJsValueFinalizationRegistry(EtsCoroutine *coro)
     auto *method =
         EtsClass::FromRuntimeClass(sharedEtsVmState_->jsRuntimeClass)->GetMethod("createFinalizationRegistry");
     ASSERT(method != nullptr);
-    auto res = method->GetPandaMethod()->Invoke(coro, nullptr);
+    Value res;
+    if (coro->IsManagedCode()) {
+        res = method->GetPandaMethod()->Invoke(coro, nullptr);
+    } else {
+        ScopedManagedCodeThread threadScope {coro};
+        res = method->GetPandaMethod()->Invoke(coro, nullptr);
+    }
     ASSERT(!coro->HasPendingException());
     auto queue = EtsObject::FromCoreType(res.GetAs<ObjectHeader *>());
     jsvalueFregistryRef_ = Refstor()->Add(queue->GetCoreType(), mem::Reference::ObjectType::GLOBAL);

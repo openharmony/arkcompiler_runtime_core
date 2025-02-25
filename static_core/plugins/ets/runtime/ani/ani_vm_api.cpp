@@ -64,6 +64,69 @@ NO_UB_SANITIZE static ani_status GetEnv(ani_vm *vm, uint32_t version, ani_env **
     return ANI_OK;
 }
 
+static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, uint32_t version, ani_env **result)
+{
+    ANI_DEBUG_TRACE(vm);
+    ANI_CHECK_RETURN_IF_EQ(vm, nullptr, ANI_INVALID_ARGS);
+
+    ANI_CHECK_RETURN_IF_EQ(IsVersionSupported(version), false, ANI_INVALID_VERSION);
+
+    bool interopEnabled = false;
+    if (options != nullptr) {
+        for (size_t i = 0; i < options->nr_options; ++i) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            PandaString opt(options->options[i].option);
+            if (opt == "--interop=enable") {
+                interopEnabled = true;
+            } else if (opt == "--interop=disable") {
+                interopEnabled = false;
+            }
+        }
+    }
+
+    if (Thread::GetCurrent() != nullptr) {
+        LOG(ERROR, ANI) << "Cannot attach current thread, thread has already been attached";
+        return ANI_ERROR;
+    }
+    auto *runtime = Runtime::GetCurrent();
+    auto *etsVM = PandaEtsVM::FromAniVM(vm);
+    auto *coroMan = etsVM->GetCoroutineManager();
+    auto *exclusiveCoro = coroMan->CreateExclusiveWorkerForThread(runtime, etsVM);
+    if (exclusiveCoro == nullptr) {
+        LOG(ERROR, ANI) << "Cannot attach current thread, reached the limit of EAWorkers";
+        return ANI_ERROR;
+    }
+
+    ASSERT(exclusiveCoro == Coroutine::GetCurrent());
+
+    if (interopEnabled) {
+        auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
+        auto *jsEnv = ifaceTable->CreateJSRuntime();
+        ASSERT(jsEnv != nullptr);
+        ifaceTable->CreateInteropCtx(exclusiveCoro, jsEnv);
+        auto poster = etsVM->CreateCallbackPoster(exclusiveCoro);
+        exclusiveCoro->GetWorker()->SetCallbackPoster(std::move(poster));
+    }
+    *result = PandaEtsNapiEnv::GetCurrent();
+    return ANI_OK;
+}
+
+static ani_status DetachCurrentThread(ani_vm *vm)
+{
+    ANI_DEBUG_TRACE(vm);
+    ANI_CHECK_RETURN_IF_EQ(vm, nullptr, ANI_INVALID_ARGS);
+
+    auto *etsVM = PandaEtsVM::FromAniVM(vm);
+    auto *coroMan = etsVM->GetCoroutineManager();
+    auto result = coroMan->DestroyExclusiveWorker();
+    if (!result) {
+        LOG(ERROR, ANI) << "Cannot DetachThread, thread was not attached";
+        return ANI_ERROR;
+    }
+    ASSERT(Thread::GetCurrent() == nullptr);
+    return ANI_OK;
+}
+
 [[noreturn]] static void NotImplementedAPI(int nr)
 {
     LOG(FATAL, ANI) << "Not implemented vm_api, nr=" << nr;
@@ -84,8 +147,8 @@ const __ani_vm_api VM_API = {
     nullptr,
     NotImplementedAdapter<4>,
     GetEnv,
-    NotImplementedAdapter<6>,
-    NotImplementedAdapter<7>,
+    AttachCurrentThread,
+    DetachCurrentThread,
 };
 // clang-format on
 

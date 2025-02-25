@@ -188,6 +188,7 @@ typedef enum {
     ANI_OUT_OF_MEMORY,
     ANI_OUT_OF_RANGE,
     ANI_BUFFER_TO_SMALL,
+    ANI_INVALID_VERSION,
     // NOTE: Add necessary status codes
 } ani_status;
 
