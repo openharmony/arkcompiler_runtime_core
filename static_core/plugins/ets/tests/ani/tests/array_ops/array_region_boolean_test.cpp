@@ -79,6 +79,59 @@ TEST_F(ArraySetGetRegionBooleanTest, SetRegionBooleanTest)
     ASSERT_EQ(CallEtsFunction<ani_boolean>("CheckArray", array), ANI_TRUE);
 }
 
+TEST_F(ArraySetGetRegionBooleanTest, CheckChangeFromManagedRegionBooleanTest)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LArrayClass;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_ref ref;
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "array", &ref), ANI_OK);
+    ASSERT_NE(ref, nullptr);
+
+    auto array = reinterpret_cast<ani_array_boolean>(ref);
+    ani_boolean nativeBuffer[5U] = {ANI_FALSE};
+    const ani_size offset5 = 0;
+    const ani_size len5 = 5;
+
+    ASSERT_EQ(env_->Array_GetRegion_Boolean(array, offset5, len5, nativeBuffer), ANI_OK);
+    ASSERT_EQ(nativeBuffer[0U], ANI_TRUE);
+    ASSERT_EQ(nativeBuffer[1U], ANI_TRUE);
+    ASSERT_EQ(nativeBuffer[2U], ANI_TRUE);
+    ASSERT_EQ(nativeBuffer[3U], ANI_TRUE);
+    ASSERT_EQ(nativeBuffer[4U], ANI_TRUE);
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "ChangeStaticArray", nullptr), ANI_OK);
+    ASSERT_EQ(env_->Array_GetRegion_Boolean(array, offset5, len5, nativeBuffer), ANI_OK);
+    ASSERT_EQ(nativeBuffer[0U], ANI_TRUE);
+    ASSERT_EQ(nativeBuffer[1U], ANI_TRUE);
+    ASSERT_EQ(nativeBuffer[2U], ANI_FALSE);
+    ASSERT_EQ(nativeBuffer[3U], ANI_TRUE);
+    ASSERT_EQ(nativeBuffer[4U], ANI_FALSE);
+}
+
+TEST_F(ArraySetGetRegionBooleanTest, CheckChangeFromApiRegionBooleanTest)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LArrayClass;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_ref ref;
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "array", &ref), ANI_OK);
+    ASSERT_NE(ref, nullptr);
+
+    auto array = reinterpret_cast<ani_array_boolean>(ref);
+    ani_boolean nativeBuffer[3U] = {ANI_FALSE, ANI_FALSE, ANI_FALSE};
+    const ani_size offset6 = 2;
+    const ani_size len6 = 3;
+
+    ASSERT_EQ(env_->Array_SetRegion_Boolean(array, offset6, len6, nativeBuffer), ANI_OK);
+
+    ani_boolean result;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "CheckStaticArray", nullptr, &result), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

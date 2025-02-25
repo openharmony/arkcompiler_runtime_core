@@ -13,6 +13,25 @@
  * limitations under the License.
  */
 
+class ArrayClass {
+    public static array: long[] = [1, 2, 3, 4, 5];
+
+    public static ChangeStaticArray() {
+        ArrayClass.array[2] = 222;
+        ArrayClass.array[4] = 444;
+    }
+
+    public static CheckStaticArray(): boolean {
+        return (
+            ArrayClass.array[0] == 1 &&
+            ArrayClass.array[1] == 2 &&
+            ArrayClass.array[2] == 222 &&
+            ArrayClass.array[3] == 333 &&
+            ArrayClass.array[4] == 444
+        )
+    }
+}
+
 function GetArray(): long[] {
     let a : long[] = [1, 2, 3, 4, 5]
     return a

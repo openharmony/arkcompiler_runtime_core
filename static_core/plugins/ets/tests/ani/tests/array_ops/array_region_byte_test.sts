@@ -13,6 +13,25 @@
  * limitations under the License.
  */
 
+class ArrayClass {
+    public static array: byte[] = [1, 2, 3, 4, 5];
+
+    public static ChangeStaticArray() {
+        ArrayClass.array[2] = 22;
+        ArrayClass.array[4] = 44;
+    }
+
+    public static CheckStaticArray(): boolean {
+        return (
+            ArrayClass.array[0] == 1 &&
+            ArrayClass.array[1] == 2 &&
+            ArrayClass.array[2] == 22 &&
+            ArrayClass.array[3] == 33 &&
+            ArrayClass.array[4] == 44
+        )
+    }
+}
+
 function GetArray(): byte[] {
     let a : byte[] = [1, 2, 3, 4, 5]
     return a
