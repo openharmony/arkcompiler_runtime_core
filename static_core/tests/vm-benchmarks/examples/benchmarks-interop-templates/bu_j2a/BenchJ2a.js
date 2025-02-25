@@ -17,7 +17,7 @@
  * @State
  * @Tags interop, bu_j2a
  */
-function bench_j2a() {
+function benchJ2a() {
 
     this.bench = null;
 
@@ -41,6 +41,7 @@ function bench_j2a() {
         const State = stsVm.getClass('LTestImport;');
         this.bench = new State();
         this.bench.setup();
+        return 0;
     };
 
     /**
@@ -48,5 +49,8 @@ function bench_j2a() {
      */
     this.test = function() {
         this.bench.testFunction();
+        return;
     };
+
+    return;
 }

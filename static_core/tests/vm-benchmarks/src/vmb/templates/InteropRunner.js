@@ -46,7 +46,7 @@ class Benchmark {
 
     #__init() {
         const isOk = this.#ark.createRuntime({
-            'boot-panda-files': ARK_ETS_STDLIB_PATH,
+            'boot-panda-files': [ARK_ETS_STDLIB_PATH, ...this.#binaries].join(':'),
             'panda-files': this.#binaries.join(':'),
             'gc-trigger-type': 'heap-trigger',
             'compiler-enable-jit': 'false',
