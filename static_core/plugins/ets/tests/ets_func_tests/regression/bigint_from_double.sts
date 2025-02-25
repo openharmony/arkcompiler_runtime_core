@@ -28,7 +28,7 @@ function test(s: string): String {
 
 function positiveTest(s: string, expected: string): void {
     let result = test(s);
-    assertEQ( result ,  expected,  result + " [" + s + "] != " + expected)
+    assertEQ( result, expected,  result + " [" + s + "] != " + expected)
 }
 
 function negativeTest(s: string, expected: string): void {

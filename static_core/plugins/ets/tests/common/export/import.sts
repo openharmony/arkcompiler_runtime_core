@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,6 @@ function main() : void
 {
     let sum: int = a + foo() + bar();
     const result: int = 7;
-    assert sum == result : "expected: " + result + " actual: " + sum;
-    assert( foo( {i: 1.9, j: "some str"} ) == 3 )
+    assertEQ(sum, result)
+    assertEQ( foo( {i: 1.9, j: "some str"} ), 3 )
 }

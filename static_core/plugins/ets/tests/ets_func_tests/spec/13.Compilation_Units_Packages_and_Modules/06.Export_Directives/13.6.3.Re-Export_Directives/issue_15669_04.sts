@@ -23,5 +23,5 @@ files: ['./issue_15669_01.sts', './issue_15669_02.sts', './issue_15669_03.sts']
 import { foo } from './issue_15669_03'
 
 function main(): void {
-  assertEQ( foo(2) ,  2)
+  assertEQ( foo(2), 2)
 }

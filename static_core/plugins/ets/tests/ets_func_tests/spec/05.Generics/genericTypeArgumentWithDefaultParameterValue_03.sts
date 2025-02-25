@@ -43,7 +43,7 @@ function main(): void {
     let b = new B<String>("hello")
     let a = b.foo<Helper>(true);
     assertTrue( a instanceof A)
-    assertEQ( a.isData ,  true)
+    assertEQ( a.isData, true)
     a.data = new Helper()
     assertTrue( a.data instanceof Helper)
 }

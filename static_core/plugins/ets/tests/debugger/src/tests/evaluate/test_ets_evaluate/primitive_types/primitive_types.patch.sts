@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-assert(boolean_foo(true) == true);
-assert(byte_foo(127 as byte) == 127);
-assert(short_foo(32767 as short) == 32767);
-assert(int_foo(50000 as int) == 50000);
-assert(long_foo(50000000 as long) == 50000000);
-assert(double_foo(12345.54321 as double) == 12345.54321);
-assert(float_foo(12345.5 as float) == 12345.5 as float);
+assertEQ(boolean_foo(true), true);
+assertEQ(byte_foo(127 as byte), 127);
+assertEQ(short_foo(32767 as short), 32767);
+assertEQ(int_foo(50000 as int), 50000);
+assertEQ(long_foo(50000000 as long), 50000000);
+assertEQ(double_foo(12345.54321 as double), 12345.54321);
+assertEQ(float_foo(12345.5 as float), 12345.5 as float);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,14 +28,14 @@ function RegisterNativeAllocation(): void {
     } catch(error: NegativeArraySizeError) {
         exception_catched = true;
     }
-    assert exception_catched : "Didn't catch the exception";
+    assertTrue(exception_catched, "Didn't catch the exception");
     exception_catched = false;
     try {
         GC.registerNativeFree(-size);
     } catch(error: NegativeArraySizeError) {
         exception_catched = true;
     }
-    assert exception_catched : "Didn't catch the exception";
+    assertTrue(exception_catched, "Didn't catch the exception");
 
     for (let i = 0; i < 2048; i++) {
         GC.registerNativeAllocation(size);
@@ -55,9 +55,9 @@ function main(): int {
         // Calling RegisterNativeAllocation to trigger GC
         RegisterNativeAllocation();
     } catch(e) {
-        assert false : "Unexpected exception";
+        assertTrue(false, "Unexpected exception");
     }
 
-    assert weak_ref_string.deref() === undefined : "String referent must be collected after GC was triggered";
+    assertTrue(weak_ref_string.deref() === undefined, "String referent must be collected after GC was triggered");
     return 0;
 }

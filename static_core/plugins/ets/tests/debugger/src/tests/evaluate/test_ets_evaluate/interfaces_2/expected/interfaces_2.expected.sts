@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,9 @@ import { E } from "../interfaces_2.base"
 class evalPatchFunction {
     private static evalPatchFunction() {
         let e = new E();
-        assert(e.a_foo(42) == 42);
-        assert(e.b_foo(12345.54321) == 12345.54321);
-        assert(e.c_foo(c'a') == c'a');
-        assert(e.d_foo(123.321 as float) == 123.321 as float);
+        assertEQ(e.a_foo(42) ,42);
+        assertEQ(e.b_foo(12345.54321), 12345.54321);
+        assertEQ(e.c_foo(c'a'), c'a');
+        assertEQ(e.d_foo(123.321 as float), 123.321 as float);
     }
 }

@@ -19,7 +19,7 @@ cases:
       use: |-
           // assignment-like context, constant declaration
           const c4: char = r + s + ""
-          asserEQ( c4, c' ' )
+          assertEQ( c4, c' ' )
 
     - decl: |-
           const s: string = ""
@@ -30,7 +30,7 @@ cases:
           }
       use: |-
           let a: A = new A()
-          asserEQ( a.c, c' ' )
+          assertEQ( a.c, c' ' )
 
     - decl: |-
           const s: string = ""
@@ -38,7 +38,7 @@ cases:
       use: |-
           // assignment-like context, variable assignment
           v1 = s + ""
-          asserEQ( v1, c' ' )
+          assertEQ( v1, c' ' )
 
     - decl: |-
           const s: string = ""
@@ -50,7 +50,7 @@ cases:
       use: |-
           let a: A = new A()
           a.c1 = r + s
-          asserEQ( a.c1, c' ' )
+          assertEQ( a.c1, c' ' )
 
 
     - decl: |-
@@ -61,7 +61,7 @@ cases:
           const s: string = ""
           const r: string = ""
       use: |-
-          asserEQ( foo(r + s + ""), c' ' )
+          assertEQ( foo(r + s + ""), c' ' )
 
     - decl: |-
           // call context, method
@@ -73,7 +73,7 @@ cases:
           const r: string = ""
       use: |-
           let a: A = new A()
-          asserEQ( a.meth(r), c' ' )
+          assertEQ( a.meth(r), c' ' )
 
     - decl: |-
           // call context, constructor
@@ -86,21 +86,21 @@ cases:
           const s: string = ""
           const r: string = ""
       use: |-
-          asserEQ( new A(r + s + "").fld, c' ' )
+          assertEQ( new A(r + s + "").fld, c' ' )
 
     - decl: |-
           // call context, lambda
           const s: string = ""
           const r: string = ""
       use: |-
-          asserEQ( ((p: char): char => { return p })(r + s), c' ' )
+          assertEQ( ((p: char): char => { return p })(r + s), c' ' )
 
     - decl: |-
           // array composite
           const s: string = ""
       use: |-
           let v1: char[] = [c'X', "\uFFFF", s]
-          asserEQ( v1[0], c'X' )
+          assertEQ( v1[0], c'X' )
 
     - decl: |-
           // object composite
@@ -110,4 +110,4 @@ cases:
           }
       use: |-
           let a: A = { fld: s }
-          asserEQ( a.fld, c' ' )
+          assertEQ( a.fld, c' ' )

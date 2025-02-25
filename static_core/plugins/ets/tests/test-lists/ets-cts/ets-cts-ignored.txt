@@ -910,6 +910,9 @@
 07.expressions/18.ensure-not-nullish_expression/undefined_4.sts
 # end of es2panda failure
 
+# 23051 Reference comparison
+07.expressions/25.equality_expressions/07.reference_equality/type_conversion_of_one_operand_to_another_type.sts
+
 # 18445 No CTE when compared union types have no overlapping values
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/cte_3.sts
 

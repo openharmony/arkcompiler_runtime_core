@@ -31,8 +31,8 @@ tags: []
 
  function main(): void {
     let b = new Derive();
-    assertEQ( b.name ,  null)
+    assertEQ( b.name, null)
 
     b = new Derive("Hello");
-    assertEQ( b.name ,  "Hello")
+    assertEQ( b.name, "Hello")
  }

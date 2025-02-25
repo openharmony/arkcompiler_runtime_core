@@ -24,18 +24,18 @@ function main() : int {
         x.push("Good")
     }
 
-    assertEQ( x.length ,  10)
+    assertEQ( x.length, 10)
     for (let i = 0; i < 10; i++) {
         x.push("Bad")
     }
 
-    assertEQ( x.length ,  20)
+    assertEQ( x.length, 20)
     for (let i = 0; i < 10; i++) {
-        assertEQ( x[i] ,  "Good")
+        assertEQ( x[i], "Good")
     }
 
     for (let i = 10; i < 20; i++) {
-        assertEQ( x[i] ,  "Bad")
+        assertEQ( x[i], "Bad")
     }
 
     return 0;

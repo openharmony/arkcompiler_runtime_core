@@ -178,6 +178,6 @@ function test(testAction: () => int, testName: string): int {
 
 class Assertions {
     static assertEquals(expected: string, actual: string): void {
-        assertEQ( expected ,  actual ,  `expected "${expected}" but was "${actual}"`)
+        assertEQ(expected,  actual,  `expected "${expected}" but was "${actual}"`)
     }
 }

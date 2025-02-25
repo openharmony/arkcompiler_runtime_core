@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,11 +19,11 @@ function main() {
     let arr = new Int8Array(buf, 0, 1);
 
     Atomics.store(arr, 0, 10);
-    assert(Atomics.load(arr, 0) == 10)
+    assertEQ(Atomics.load(arr, 0), 10)
 
     // isLockFree testing
-    assert(Atomics.isLockFree(1) && Atomics.isLockFree(2))
-    assert(Atomics.isLockFree(4) && Atomics.isLockFree(8))
-    assert(!Atomics.isLockFree(3) && !Atomics.isLockFree(5))
-    assert(!Atomics.isLockFree(6) && !Atomics.isLockFree(7))
+    assertTrue(Atomics.isLockFree(1) && Atomics.isLockFree(2))
+    assertTrue(Atomics.isLockFree(4) && Atomics.isLockFree(8))
+    assertTrue(!Atomics.isLockFree(3) && !Atomics.isLockFree(5))
+    assertTrue(!Atomics.isLockFree(6) && !Atomics.isLockFree(7))
 }

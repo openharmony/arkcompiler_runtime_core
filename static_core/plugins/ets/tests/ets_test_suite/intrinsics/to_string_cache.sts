@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,7 +116,7 @@ class Worker<T> {
             let value = this.values[index]!;
             let str = value.toString();
             if (check) {
-                // assert isEqual(str, value): `not equal: string ${str}, number ${value}`
+                // assertTrue(isEqual(str, value), `not equal: string ${str}, number ${value}`)
                 strings.push(str);
                 numbers.push(value);
             }
@@ -125,8 +125,8 @@ class Worker<T> {
         if (check) {
             for (let i = 0; i < iters; i++) {
                 let expected = numbers[i]!.toString();
-                assert strings[i] == expected: `results of toString differ: expected ${expected}, got ${strings[i]}`;
-                assert isEqual(strings[i], numbers[i]): `not equal: string ${strings[i]}, number ${numbers[i]}`
+                assertEQ(strings[i], expected, `results of toString differ: expected ${expected}, got ${strings[i]}`);
+                assertTrue(isEqual(strings[i], numbers[i]), `not equal: string ${strings[i]}, number ${numbers[i]}`)
             }
         }
         return "OK";
@@ -148,7 +148,7 @@ function doTest<T>(values: T[], workers: int) {
     }
     for (let i = 0; i < workers; i++) {
         let res = await promises[i]!;
-        assert res == "OK";
+        assertEQ(res, "OK");
     }
 }
 

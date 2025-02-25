@@ -41,5 +41,5 @@ function main(): void {
     let a = b.foo();
     assertTrue( a instanceof A)
     assertTrue( a.data instanceof String)
-    assertEQ( a.data ,  "hello")
+    assertEQ( a.data, "hello")
 }

@@ -23,7 +23,7 @@ type TEmpty = [One];
 
 function main(): void {
     let t: TEmpty = [[]];
-    assertEQ( t.length ,  1)
+    assertEQ( t.length, 1)
     assertTrue( t[0] != undefined)
-    assertEQ( t[0].length ,  0)
+    assertEQ( t[0].length, 0)
 }

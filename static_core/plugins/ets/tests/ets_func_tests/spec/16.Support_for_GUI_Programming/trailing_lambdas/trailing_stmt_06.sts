@@ -38,7 +38,7 @@ function main(): void {
                 break
             case 2:
             default:
-                assertEQ( a ,  4)
+                assertEQ( a, 4)
         }
     }
 }

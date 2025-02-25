@@ -23,7 +23,7 @@ type Margin = number | string
 
 function format(margin: Margin){
     assertTrue( margin instanceof string)
-    assertEQ( margin as string ,  "5 px")
+    assertEQ( margin as string, "5 px")
 }
 
 function main(): void {

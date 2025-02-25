@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+* Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -40,13 +40,13 @@ function consumer(): Int {
         c.println("receiving")
         let x = read()
         c.println("received " + x)
-        assert(x == i)
+        assertEQ(x, i)
     }
     return 1
 }
 
 function send(x: int) {
-    assert(x != 0)
+    assertNE(x, 0)
     try {
         while (true) {
             let oldValue = Atomics.compareExchange(arr, 0, 0, x)
@@ -57,7 +57,7 @@ function send(x: int) {
             Atomics.wait(arr, 0, oldValue)
         }
     } catch (e) {
-        assert(false)
+        assertTrue(false)
     }
 }
 
@@ -73,7 +73,7 @@ function read(): int {
             Atomics.wait(arr, 0, 0)
         }
     } catch (e) {
-        assert(false)
+        assertTrue(false)
     }
     return -1
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,64 +78,64 @@ function main(): int {
         let c = i as char;
         if (Char.isWhiteSpace(c)) {
             ++wssCount;
-            assert Wss.indexOf(c) != -1: 'Bad char code is encountered: ' + i;
+            assertNE(Wss.indexOf(c), -1, 'Bad char code is encountered: ' + i);
         }
     }
-    assert wssCount == Wss.length: 'Wrong number of u16 whitespaces: ' + wssCount;
+    assertEQ(wssCount, Wss.length, 'Wrong number of u16 whitespaces: ' + wssCount);
 
     // trim
-    assert Empty.trim() == "";
-    assert Ws.trim() == Empty;
-    assert Wss.trim() == Empty;
-    assert Xy.trim() == Xy;
-    assert WsXy.trim() == Xy;
-    assert XyWs.trim() == Xy;
-    assert WsXyWs.trim() == Xy;
-    assert Abc.trim() == Abc;
-    assert WsAbc.trim() == Abc;
-    assert AbcWs.trim() == Abc;
-    assert WsAbcWs.trim() == Abc;
-    assert AwsBwsC.trim() == AwsBwsC;
-    assert WssAbc.trim() == Abc;
-    assert AbcWss.trim() == Abc;
-    assert WssAbcWss.trim() == Abc;
-    assert AbcWssAbc.trim() == AbcWssAbc;
-    assert X.trim() == X;
-    assert WsX.trim() == X;
-    assert XWs.trim() == X;
-    assert Z.trim() == Z;
-    assert WsZ.trim() == Z;
-    assert ZWs.trim() == Z;
-    assert Esc.trim() == Empty;
-    assert RusChars.trim() == RusChars;
+    assertEQ(Empty.trim(), "")
+    assertEQ(Ws.trim(), Empty)
+    assertEQ(Wss.trim(), Empty)
+    assertEQ(Xy.trim(), Xy)
+    assertEQ(WsXy.trim(), Xy)
+    assertEQ(XyWs.trim(), Xy)
+    assertEQ(WsXyWs.trim(), Xy)
+    assertEQ(Abc.trim(), Abc)
+    assertEQ(WsAbc.trim(), Abc)
+    assertEQ(AbcWs.trim(), Abc)
+    assertEQ(WsAbcWs.trim(), Abc)
+    assertEQ(AwsBwsC.trim(), AwsBwsC)
+    assertEQ(WssAbc.trim(), Abc)
+    assertEQ(AbcWss.trim(), Abc)
+    assertEQ(WssAbcWss.trim(), Abc)
+    assertEQ(AbcWssAbc.trim(), AbcWssAbc)
+    assertEQ(X.trim(), X)
+    assertEQ(WsX.trim(), X)
+    assertEQ(XWs.trim(), X)
+    assertEQ(Z.trim(), Z)
+    assertEQ(WsZ.trim(), Z)
+    assertEQ(ZWs.trim(), Z)
+    assertEQ(Esc.trim(), Empty)
+    assertEQ(RusChars.trim(), RusChars)
     // trimLeft
-    assert Ws.trimLeft() == Empty;
-    assert Wss.trimLeft() == Empty;
-    assert WsAbcWs.trimLeft() == AbcWs;
-    assert AwsBwsC.trimLeft() == AwsBwsC;
-    assert WssAbcWss.trimLeft() == AbcWss;
-    assert X.trimLeft() == X;
-    assert WsX.trimLeft() == X;
-    assert XWs.trimLeft() == XWs;
-    assert Z.trimLeft() == Z;
-    assert WsZ.trimLeft() == Z;
-    assert ZWs.trimLeft() == ZWs;
-    assert Esc.trimLeft() == Empty;
-    assert RusChars.trimLeft() == RusChars;
+    assertEQ(Ws.trimLeft(), Empty)
+    assertEQ(Wss.trimLeft(), Empty)
+    assertEQ(WsAbcWs.trimLeft(), AbcWs)
+    assertEQ(AwsBwsC.trimLeft(), AwsBwsC)
+    assertEQ(WssAbcWss.trimLeft(), AbcWss)
+    assertEQ(X.trimLeft(), X)
+    assertEQ(WsX.trimLeft(), X)
+    assertEQ(XWs.trimLeft(), XWs)
+    assertEQ(Z.trimLeft(), Z)
+    assertEQ(WsZ.trimLeft(), Z)
+    assertEQ(ZWs.trimLeft(), ZWs)
+    assertEQ(Esc.trimLeft(), Empty)
+    assertEQ(RusChars.trimLeft(), RusChars)
     // trimRight
-    assert Ws.trimRight() == Empty;
-    assert Wss.trimRight() == Empty;
-    assert WsAbcWs.trimRight() == WsAbc;
-    assert AwsBwsC.trimRight() == AwsBwsC;
-    assert WssAbcWss.trimRight() == WssAbc;
-    assert X.trimRight() == X;
-    assert WsX.trimRight() == WsX;
-    assert XWs.trimRight() == X;
-    assert Z.trimRight() == Z;
-    assert WsZ.trimRight() == WsZ;
-    assert ZWs.trimRight() == Z;
-    assert Esc.trimRight() == Empty;
-    assert RusChars.trimRight() == RusChars;
+    assertEQ(Ws.trimRight(), Empty)
+    assertEQ(Wss.trimRight(), Empty)
+    assertEQ(WsAbcWs.trimRight(), WsAbc)
+    assertEQ(AwsBwsC.trimRight(), AwsBwsC)
+    assertEQ(WssAbcWss.trimRight(), WssAbc)
+    assertEQ(X.trimRight(), X)
+    assertEQ(WsX.trimRight(), WsX)
+    assertEQ(XWs.trimRight(), X)
+    assertEQ(Z.trimRight(), Z)
+    assertEQ(WsZ.trimRight(), WsZ)
+    assertEQ(ZWs.trimRight(), Z)
+    assertEQ(Esc.trimRight(), Empty)
+    assertEQ(RusChars.trimRight(), RusChars)
 
     return 0;
 }

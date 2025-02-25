@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 
 let b = new B(10, 123.456);
 
-assert(b.a == 10);
-assert(b.b == 123.456);
+assertEQ(b.a, 10);
+assertEQ(b.b, 123.456);
 
-assert(b.foo(10) == 100 * 10);
-assert(b.goo(10.11) == 200 * 10.11);
+assertEQ(b.foo(10), 100 * 10);
+assertEQ(b.goo(10.11), 200 * 10.11);

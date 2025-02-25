@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,7 +67,7 @@ function popperInt(): Array<int> {
     for (let i = 0; i < elementsNum; i++) {
         let el = queueInt.front();
         arr[i] = queueInt.pop();
-        assert el == arr[i];
+        assertEQ(el, arr[i]);
     }
     return arr;
 }
@@ -77,7 +77,7 @@ function popperObj(): Array<Object> {
     for (let i = 0; i < elementsNum; i++) {
         let el = queueObj.front();
         arr[i] = queueObj.pop();
-        assert el == arr[i];
+        assertEQ(el, arr[i]);
     }
     return arr;
 }
@@ -87,7 +87,7 @@ function popperStr(): Array<String> {
     for (let i = 0; i < elementsNum; i++) {
         let el = queueStr.front();
         arr[i] = queueStr.pop();
-        assert el == arr[i];
+        assertEQ(el, arr[i]);
     }
     return arr;
 }
@@ -96,27 +96,27 @@ function concurrentPushPopTestInt() {
     launch pusherInt();
     let arrayToCheck = popperInt();
     for (let i = 0; i < elementsNum; i++) {
-        assert testArrayInt[i] == arrayToCheck[i];
+        assertEQ(testArrayInt[i], arrayToCheck[i]);
     }
-    assert queueInt.size() == 0;
+    assertEQ(queueInt.size(), 0);
 }
 
 function concurrentPushPopTestObj() {
     launch pusherObj();
     let arrayToCheck = popperObj();
     for (let i = 0; i < elementsNum; i++) {
-        assert testArrayObj[i] == arrayToCheck[i];
+        assertEQ(testArrayObj[i], arrayToCheck[i]);
     }
-    assert queueObj.size() == 0;
+    assertEQ(queueObj.size(), 0);
 }
 
 function concurrentPushPopTestStr() {
     launch pusherStr();
     let arrayToCheck = popperStr();
     for (let i = 0; i < elementsNum; i++) {
-        assert testArrayStr[i] == arrayToCheck[i];
+        assertEQ(testArrayStr[i], arrayToCheck[i]);
     }
-    assert queueStr.size() == 0;
+    assertEQ(queueStr.size(), 0);
 }
 
 function simpleQueuePushPopFrontBackSizeEmptyTest() {
@@ -125,16 +125,16 @@ function simpleQueuePushPopFrontBackSizeEmptyTest() {
         let el = (random() * 10000) as int;
         arr[i] = el;
         queueInt.push(el);
-        assert el == queueInt.back();
+        assertEQ(el, queueInt.back());
     }
     let ind: int = 0;
     while (!queueInt.empty()) {
         let el = queueInt.front();
-        assert el == queueInt.pop();
-        assert el == arr[ind++];
+        assertEQ(el, queueInt.pop());
+        assertEQ(el, arr[ind++]);
     }
-    assert ind == arr.length;
-    assert queueInt.size() == 0;
+    assertEQ(ind, arr.length);
+    assertEQ(queueInt.size(), 0);
 }
 
 function main() {

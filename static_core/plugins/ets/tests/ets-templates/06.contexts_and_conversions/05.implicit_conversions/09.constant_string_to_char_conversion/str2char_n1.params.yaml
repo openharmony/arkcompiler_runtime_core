@@ -19,7 +19,7 @@ cases:
       use: |-
           // assignment-like context, variable declaration
           let v: char = r + s + ""
-          asserEQ( v, c'Z' )
+          assertEQ( v, c'Z' )
 
     - decl: |-
           let s: string = "Z"
@@ -27,7 +27,7 @@ cases:
       use: |-
           // assignment-like context, constant declaration
           const v: char = r + s + ""
-          asserEQ( v, c'Z' )
+          assertEQ( v, c'Z' )
 
     - decl: |-
           const s: string = "Z"
@@ -38,7 +38,7 @@ cases:
           }
       use: |-
           let a: A = new A()
-          asserEQ( a.c, c'Z' )
+          assertEQ( a.c, c'Z' )
 
     - decl: |-
           let s: string = "Z"
@@ -47,7 +47,7 @@ cases:
       use: |-
           // assignment-like context, variable assignment
           v = r + s + ""
-          asserEQ( v, c'Z' )
+          assertEQ( v, c'Z' )
 
     - decl: |-
           const s: string = "Z"
@@ -59,7 +59,7 @@ cases:
       use: |-
           let a: A = new A()
           a.c = r + s + ""
-          asserEQ( a.c, c'Z' )
+          assertEQ( a.c, c'Z' )
 
     - decl: |-
           // call context, function
@@ -69,7 +69,7 @@ cases:
           let s: string = "W"
           const r: string = ""
       use: |-
-          asserEQ( foo(r + s + ""), c'W' )
+          assertEQ( foo(r + s + ""), c'W' )
 
     - decl: |-
           // call context, method
@@ -82,7 +82,7 @@ cases:
           let r: string = ""
       use: |-
           let a: A = new A()
-          asserEQ( a.meth(r + s + ""), c'W' )
+          assertEQ( a.meth(r + s + ""), c'W' )
 
     - decl: |-
           // call context, constructor
@@ -95,14 +95,14 @@ cases:
           const s: string = "W"
           let r: string = ""
       use: |-
-          asserEQ( new A(r + s + "").fld, c'W' )
+          assertEQ( new A(r + s + "").fld, c'W' )
 
     - decl: |-
           // call context, lambda
           let s: string = "W"
           const r: string = ""
       use: |-
-          asserEQ( ((p: char): char => { return p })(r + s + ""), c'W' )
+          assertEQ( ((p: char): char => { return p })(r + s + ""), c'W' )
 
     - decl: |-
           // array composite
@@ -110,7 +110,7 @@ cases:
           const r: string = ""
       use: |-
           let v1: char[] = [c'X', s, s + r, "" + s]
-          asserEQ( v1[0], c'X' )
+          assertEQ( v1[0], c'X' )
 
     - decl: |-
           // object composite
@@ -122,4 +122,4 @@ cases:
       use: |-
           let a: A = { fld: "\u8000" }
           a = { fld: "" + s + r }
-          asserEQ( a.fld, c'W' )
+          assertEQ( a.fld, c'W' )

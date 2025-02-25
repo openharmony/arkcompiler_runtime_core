@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,13 +26,13 @@ function foo2(v: int | object) {
 };
 
 function testNumerics() {
-    assert(typeof (() => { let v: byte = 1; return v })() == "number");
-    assert(typeof (() => { let v: short = 1; return v })() == "number");
-    assert(typeof (() => { let v: int = 1; return v })() == "number");
-    assert(typeof (() => { let v: long = 123456789123; return v })() == "number");
-    assert(typeof (() => { let v: float = 1.1f; return v })() == "number");
-    assert(typeof (() => { let v: double = 1.1; return v })() == "number");
-    assert(typeof (() => { let v: char = 'a'; return v })() == "number");
+    assertEQ(typeof (() => { let v: byte = 1; return v })(), "number");
+    assertEQ(typeof (() => { let v: short = 1; return v })(), "number");
+    assertEQ(typeof (() => { let v: int = 1; return v })(), "number");
+    assertEQ(typeof (() => { let v: long = 123456789123; return v })(), "number");
+    assertEQ(typeof (() => { let v: float = 1.1f; return v })(), "number");
+    assertEQ(typeof (() => { let v: double = 1.1; return v })(), "number");
+    assertEQ(typeof (() => { let v: char = 'a'; return v })(), "number");
 }
 
 function testNumerics2() {
@@ -43,34 +43,34 @@ function testNumerics2() {
     let a5: float = 1.1f;
     let a6: double = 1.1;
     let a7: char = 'a';
-    assert(typeof erase(a1) == "number");
-    assert(typeof erase(a2) == "number");
-    assert(typeof erase(a3) == "number");
-    assert(typeof erase(a4) == "number");
-    assert(typeof erase(a5) == "number");
-    assert(typeof erase(a6) == "number");
-    assert(typeof erase(a7) == "number");
+    assertEQ(typeof erase(a1), "number");
+    assertEQ(typeof erase(a2), "number");
+    assertEQ(typeof erase(a3), "number");
+    assertEQ(typeof erase(a4), "number");
+    assertEQ(typeof erase(a5), "number");
+    assertEQ(typeof erase(a6), "number");
+    assertEQ(typeof erase(a7), "number");
 }
 
 function testString() {
-    assert(typeof (() => { let v: string = "Hello World"; return v })() == "string");
-    assert(typeof (() => { let v: String = "Hello World"; return v })() == "string");
-    assert(typeof erase(new string("Hello World")) == "string");
-    assert(typeof erase(new String("Hello World")) == "string");
+    assertEQ(typeof (() => { let v: string = "Hello World"; return v })(), "string");
+    assertEQ(typeof (() => { let v: String = "Hello World"; return v })(), "string");
+    assertEQ(typeof erase(new string("Hello World")), "string");
+    assertEQ(typeof erase(new String("Hello World")), "string");
 }
 
 function testBoolean() {
-    assert(typeof (() => { let v: boolean = true; return v })() == "boolean");
-    assert(typeof (() => { let v: Boolean = false; return v })() == "boolean");
-    assert(typeof erase(true) == "boolean");
-    assert(typeof erase(false) == "boolean");
+    assertEQ(typeof (() => { let v: boolean = true; return v })(), "boolean");
+    assertEQ(typeof (() => { let v: Boolean = false; return v })(), "boolean");
+    assertEQ(typeof erase(true), "boolean");
+    assertEQ(typeof erase(false), "boolean");
 }
 
 function testBigInt() {
-    assert(typeof (() => { let v: BigInt = new BigInt(10000000000000); return v })() == "bigint");
-    assert(typeof (() => { let v: bigint = new bigint(99999999999999); return v })() == "bigint");
-    assert(typeof erase(new BigInt(10000000000000)) == "bigint");
-    assert(typeof erase(new bigint(99999999999999)) == "bigint");
+    assertEQ(typeof (() => { let v: BigInt = new BigInt(10000000000000); return v })(), "bigint");
+    assertEQ(typeof (() => { let v: bigint = new bigint(99999999999999); return v })(), "bigint");
+    assertEQ(typeof erase(new BigInt(10000000000000)), "bigint");
+    assertEQ(typeof erase(new bigint(99999999999999)), "bigint");
 }
 
 function testObject() {
@@ -80,17 +80,17 @@ function testObject() {
     let obj4: Object = new Date();
     let obj5: Object = 123;
 
-    assert(typeof obj1 == "object");
-    assert(typeof obj2 == "object");
-    assert(typeof obj3 == "function");
-    assert(typeof obj4 == "object");
-    assert(typeof obj5 == "number");
+    assertEQ(typeof obj1, "object");
+    assertEQ(typeof obj2, "object");
+    assertEQ(typeof obj3, "function");
+    assertEQ(typeof obj4, "object");
+    assertEQ(typeof obj5, "number");
 
-    assert(typeof erase(obj1) == "object");
-    assert(typeof erase(obj2) == "object");
-    assert(typeof erase(obj3) == "function");
-    assert(typeof erase(obj4) == "object");
-    assert(typeof erase(obj5) == "number");
+    assertEQ(typeof erase(obj1), "object");
+    assertEQ(typeof erase(obj2), "object");
+    assertEQ(typeof erase(obj3), "function");
+    assertEQ(typeof erase(obj4), "object");
+    assertEQ(typeof erase(obj5), "number");
 }
 
 let f1: () => void = () => {
@@ -103,23 +103,23 @@ function normalFuction() {
 
 function testFunction() {
     let f2 = normalFuction;
-    assert(typeof f1 == "function");
-    assert(typeof f2 == "function");
+    assertEQ(typeof f1, "function");
+    assertEQ(typeof f2, "function");
 
-    assert(typeof erase(f1) == "function");
-    assert(typeof erase(f2) == "function");
+    assertEQ(typeof erase(f1), "function");
+    assertEQ(typeof erase(f2), "function");
 }
 
 function testUndefined() {
     let v = undefined;
-    assert(typeof v == "undefined");
-    assert(typeof erase(v) == "undefined");
+    assertEQ(typeof v, "undefined");
+    assertEQ(typeof erase(v), "undefined");
 }
 
 function testNull() {
     let v = null;
-    assert(typeof v == "object");
-    assert(typeof erase(v) == "object");
+    assertEQ(typeof v, "object");
+    assertEQ(typeof erase(v), "object");
 }
 
 enum Direction {
@@ -138,24 +138,24 @@ enum Status {
 function testEnum() {
     let dir: Direction = Direction.Up;
     let status: Status = Status.Active;
-    assert(typeof dir == "number");
-    assert(typeof status == "string");
+    assertEQ(typeof dir, "number");
+    assertEQ(typeof status, "string");
     // The enum is wrapped as an object type when calling erase
-    assert(typeof erase(dir) == "object");
-    assert(typeof erase(status) == "object");
-    assert(typeof foo(dir) == "number");
+    assertEQ(typeof erase(dir), "object");
+    assertEQ(typeof erase(status), "object");
+    assertEQ(typeof foo(dir), "number");
     // The union type will convert all its members into object
-    assert(typeof foo2(dir) == "object");
+    assertEQ(typeof foo2(dir), "object");
 }
 
 let v1: string | number | boolean = "abc";
 let v2: string | number | null | undefined = 123;
 
 function testUnion() {
-    assert(typeof v1 == "string");
-    assert(typeof v2 == "number");
-    assert(typeof erase(v1) == "string");
-    assert(typeof erase(v2) == "number");
+    assertEQ(typeof v1, "string");
+    assertEQ(typeof v2, "number");
+    assertEQ(typeof erase(v1), "string");
+    assertEQ(typeof erase(v2), "number");
 }
 
 class A implements Function<string> { }
@@ -171,10 +171,10 @@ class B extends Numeric {
 function testClass() {
     let a = new A();
     let b = new B();
-    assert(typeof a == "function");
-    assert(typeof b == "object");
-    assert(typeof erase(a) == "function");
-    assert(typeof erase(b) == "object");
+    assertEQ(typeof a, "function");
+    assertEQ(typeof b, "object");
+    assertEQ(typeof erase(a), "function");
+    assertEQ(typeof erase(b), "object");
 }
 
 interface User {
@@ -185,8 +185,8 @@ function testInterface() {
     let u: User = {
         id: 1
     }
-    assert(typeof u == "object");
-    assert(typeof erase(u) == "object");
+    assertEQ(typeof u, "object");
+    assertEQ(typeof erase(u), "object");
 }
 
 function main() {

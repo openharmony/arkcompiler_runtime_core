@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,22 +40,22 @@ function test_parameter(x : C0) {
 
 function main() : void {
    let x0: C0 = ([{x0: true}])[0];
-   assert (x0.x0 == true) : "Incorrect class composite property #1!";
+   assertTrue(x0.x0, "Incorrect class composite property #1!");
 
    let x1: C0 = (([[{x0: true}]])[0])[0];
-   assert (x1.x0 == true) : "Incorrect class composite property #2!";
+   assertTrue(x1.x0, "Incorrect class composite property #2!");
 
    let x2: C0 = ((([[[{x0: true}]]])[0])[0])[0];
-   assert (x2.x0 == true) : "Incorrect class composite property #3!";
+   assertTrue(x2.x0, "Incorrect class composite property #3!");
 
    let f1: C0 = test_1();
-   assert (f1.x0 == true) : "Incorrect class composite property #4!";
+   assertTrue(f1.x0, "Incorrect class composite property #4!");
 
    let f2: C0 = test_2();
-   assert (f2.x0 == true) : "Incorrect class composite property #5!";
+   assertTrue(f2.x0, "Incorrect class composite property #5!");
 
    let f3: C0 = test_3();
-   assert (f3.x0 == true) : "Incorrect class composite property #6!";
+   assertTrue(f3.x0, "Incorrect class composite property #6!");
 
    test_parameter(([{x0: true}])[0]);
    test_parameter((([[{x0: true}]])[0])[0]);

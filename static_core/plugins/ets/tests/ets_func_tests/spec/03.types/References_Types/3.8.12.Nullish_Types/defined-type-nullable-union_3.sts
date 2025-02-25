@@ -26,6 +26,6 @@ function main(): void{
     assertTrue( ss === null)
     ss = (): int => { return 42; }
     let rs: int = ss!();
-    assertEQ( rs ,  42)
+    assertEQ( rs, 42)
 
 }

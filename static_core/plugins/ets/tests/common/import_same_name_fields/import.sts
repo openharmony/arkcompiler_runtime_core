@@ -26,16 +26,16 @@ class ThisDiff {
 }
 
 function main() : void {
-    assert A.BothInt.a == 24;
+    assertEQ(A.BothInt.a, 24);
     let bothInst = new A.BothInt;
-    assert bothInst.a == 42;
-    assert A.IntAndString.a == 23;
+    assertEQ(bothInst.a, 42);
+    assertEQ(A.IntAndString.a, 23);
     let inst = new A.IntAndString;
-    assert inst.a == "42";
-    assert ThisFile.b == 56;
+    assertEQ(inst.a, "42");
+    assertEQ(ThisFile.b, 56);
     let fileInst = new ThisFile;
-    assert fileInst.b == 32;
-    assert ThisDiff.c == "s";
+    assertEQ(fileInst.b, 32);
+    assertEQ(ThisDiff.c, "s");
     let diffInst = new ThisDiff;
-    assert diffInst.c == 6;
+    assertEQ(diffInst.c, 6);
 }

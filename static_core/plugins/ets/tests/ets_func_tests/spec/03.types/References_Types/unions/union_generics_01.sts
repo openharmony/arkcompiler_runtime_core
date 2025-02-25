@@ -50,5 +50,5 @@ function compareMargin(left: Margin, right: Margin): int {
 function main(): void {
     let arr: Margin[] = [5, "hello", "bye", 7]
     let maxx = superMax<Margin>(arr, compareMargin)
-    assertEQ( (maxx as number) ,  7)
+    assertEQ( (maxx as number), 7)
 }

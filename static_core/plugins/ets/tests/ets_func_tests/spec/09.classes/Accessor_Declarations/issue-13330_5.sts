@@ -44,10 +44,10 @@ function main(): void {
     accessCounter = 0;
     let vv: Derive = new Derive();
 
-    assertEQ( vv.base ,  41)
-    assertEQ( accessCounter ,  1)
-    assertEQ( vv.derive ,  42)
-    assertEQ( accessCounter ,  3)
+    assertEQ( vv.base, 41)
+    assertEQ( accessCounter, 1)
+    assertEQ( vv.derive, 42)
+    assertEQ( accessCounter, 3)
 
 
 

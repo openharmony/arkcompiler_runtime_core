@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,84 +18,83 @@ const Hello: String = 'Hello';
 const Nature: String = '自然界';
 
 function main(): int {
+    assertTrue(Empty.endsWith(''));
+    assertTrue(Empty.endsWith('', -1));
+    assertTrue(Empty.endsWith('', 0));
+    assertTrue(Empty.endsWith('', 1));
+    assertFalse(Empty.endsWith('x'));
+    assertFalse(Empty.endsWith('x', -1));
+    assertFalse(Empty.endsWith('x', 0));
+    assertFalse(Empty.endsWith('x', 1));
+    assertFalse(Empty.endsWith('x', 100));
 
-    assert Empty.endsWith('') == true;
-    assert Empty.endsWith('', -1) == true;
-    assert Empty.endsWith('', 0) == true;
-    assert Empty.endsWith('', 1) == true;
-    assert Empty.endsWith('x') == false;
-    assert Empty.endsWith('x', -1) == false;
-    assert Empty.endsWith('x', 0) == false;
-    assert Empty.endsWith('x', 1) == false;
-    assert Empty.endsWith('x', 100) == false;
+    assertTrue(Hello.endsWith(''));
+    assertTrue(Hello.endsWith('',-1));
+    assertTrue(Hello.endsWith('', 0));
+    assertTrue(Hello.endsWith('', 1));
+    assertTrue(Hello.endsWith('', 5));
+    assertTrue(Hello.endsWith('', 100));
 
-    assert Hello.endsWith('') == true;
-    assert Hello.endsWith('',-1) == true;
-    assert Hello.endsWith('', 0) == true;
-    assert Hello.endsWith('', 1) == true;
-    assert Hello.endsWith('', 5) == true;
-    assert Hello.endsWith('', 100) == true;
+    assertTrue(Hello.endsWith('o'));
+    assertFalse(Hello.endsWith('o', -1));
+    assertFalse(Hello.endsWith('o', 0));
+    assertFalse(Hello.endsWith('o', 1));
+    assertFalse(Hello.endsWith('o', 2));
+    assertFalse(Hello.endsWith('o', 3));
+    assertFalse(Hello.endsWith('o', 4));
+    assertTrue(Hello.endsWith('o', 5));
+    assertTrue(Hello.endsWith('o', 100));
 
-    assert Hello.endsWith('o') == true;
-    assert Hello.endsWith('o', -1) == false;
-    assert Hello.endsWith('o', 0) == false;
-    assert Hello.endsWith('o', 1) == false;
-    assert Hello.endsWith('o', 2) == false;
-    assert Hello.endsWith('o', 3) == false;
-    assert Hello.endsWith('o', 4) == false;
-    assert Hello.endsWith('o', 5) == true;
-    assert Hello.endsWith('o', 100) == true;
+    assertTrue(Hello.endsWith('ello'));
+    assertFalse(Hello.endsWith('ello', -1));
+    assertFalse(Hello.endsWith('ello', 0));
+    assertFalse(Hello.endsWith('ello', 1));
+    assertFalse(Hello.endsWith('ello', 2));
+    assertFalse(Hello.endsWith('ello', 3));
+    assertFalse(Hello.endsWith('ello', 4));
+    assertTrue(Hello.endsWith('ello', 5));
+    assertTrue(Hello.endsWith('ello', 100));
 
-    assert Hello.endsWith('ello') == true;
-    assert Hello.endsWith('ello', -1) == false;
-    assert Hello.endsWith('ello', 0) == false;
-    assert Hello.endsWith('ello', 1) == false;
-    assert Hello.endsWith('ello', 2) == false;
-    assert Hello.endsWith('ello', 3) == false;
-    assert Hello.endsWith('ello', 4) == false;
-    assert Hello.endsWith('ello', 5) == true;
-    assert Hello.endsWith('ello', 100) == true;
+    assertTrue(Hello.endsWith('Hello'));
+    assertFalse(Hello.endsWith('Hello', -1));
+    assertFalse(Hello.endsWith('Hello', 0));
+    assertFalse(Hello.endsWith('Hello', 1));
+    assertFalse(Hello.endsWith('Hello', 2));
+    assertFalse(Hello.endsWith('Hello', 3));
+    assertFalse(Hello.endsWith('Hello', 4));
+    assertFalse(Hello.endsWith('Hello', 4.0));
+    assertFalse(Hello.endsWith('Hello', 4.5));
+    assertTrue(Hello.endsWith('Hello', 5));
+    assertTrue(Hello.endsWith('Hello', 5.0));
+    assertTrue(Hello.endsWith('Hello', 5.5));
+    assertTrue(Hello.endsWith('Hello', 100));
+    assertTrue(Hello.endsWith('Hello', 100.5));
 
-    assert Hello.endsWith('Hello') == true;
-    assert Hello.endsWith('Hello', -1) == false;
-    assert Hello.endsWith('Hello', 0) == false;
-    assert Hello.endsWith('Hello', 1) == false;
-    assert Hello.endsWith('Hello', 2) == false;
-    assert Hello.endsWith('Hello', 3) == false;
-    assert Hello.endsWith('Hello', 4) == false;
-    assert Hello.endsWith('Hello', 4.0) == false;
-    assert Hello.endsWith('Hello', 4.5) == false;
-    assert Hello.endsWith('Hello', 5) == true;
-    assert Hello.endsWith('Hello', 5.0) == true;
-    assert Hello.endsWith('Hello', 5.5) == true;
-    assert Hello.endsWith('Hello', 100) == true;
-    assert Hello.endsWith('Hello', 100.5) == true;
+    assertTrue(Nature.endsWith(''));
+    assertTrue(Nature.endsWith('', -1));
+    assertTrue(Nature.endsWith('', 0));
+    assertTrue(Nature.endsWith('', 1));
+    assertTrue(Nature.endsWith('', 2));
+    assertTrue(Nature.endsWith('', 3));
+    assertTrue(Nature.endsWith('', 100));
 
-    assert Nature.endsWith('') == true;
-    assert Nature.endsWith('', -1) == true;
-    assert Nature.endsWith('', 0) == true;
-    assert Nature.endsWith('', 1) == true;
-    assert Nature.endsWith('', 2) == true;
-    assert Nature.endsWith('', 3) == true;
-    assert Nature.endsWith('', 100) == true;
+    assertTrue(Nature.endsWith('然界'));
+    assertFalse(Nature.endsWith('然界', -1));
+    assertFalse(Nature.endsWith('然界', 0));
+    assertFalse(Nature.endsWith('然界', 1));
+    assertFalse(Nature.endsWith('然界', 2));
+    assertTrue(Nature.endsWith('然界', 3));
+    assertTrue(Nature.endsWith('然界', 3.0));
+    assertTrue(Nature.endsWith('然界', 3.5));
+    assertTrue(Nature.endsWith('然界', 100));
+    assertTrue(Nature.endsWith('然界', 100.5));
 
-    assert Nature.endsWith('然界') == true;
-    assert Nature.endsWith('然界', -1) == false;
-    assert Nature.endsWith('然界', 0) == false;
-    assert Nature.endsWith('然界', 1) == false;
-    assert Nature.endsWith('然界', 2) == false;
-    assert Nature.endsWith('然界', 3) == true;
-    assert Nature.endsWith('然界', 3.0) == true;
-    assert Nature.endsWith('然界', 3.5) == true;
-    assert Nature.endsWith('然界', 100) == true;
-    assert Nature.endsWith('然界', 100.5) == true;
-
-    assert Nature.endsWith('自然界') == true;
-    assert Nature.endsWith('自然界', -1) == false;
-    assert Nature.endsWith('自然界', 0) == false;
-    assert Nature.endsWith('自然界', 1) == false;
-    assert Nature.endsWith('自然界', 2) == false;
-    assert Nature.endsWith('自然界', 100) == true;
+    assertTrue(Nature.endsWith('自然界'));
+    assertFalse(Nature.endsWith('自然界', -1));
+    assertFalse(Nature.endsWith('自然界', 0));
+    assertFalse(Nature.endsWith('自然界', 1));
+    assertFalse(Nature.endsWith('自然界', 2));
+    assertTrue(Nature.endsWith('自然界', 100));
 
     return 0;
 }

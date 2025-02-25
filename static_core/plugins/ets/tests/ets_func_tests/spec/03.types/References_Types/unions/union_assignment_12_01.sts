@@ -23,5 +23,5 @@ type Dimension = "px" | "em" | number | Number
 
 function main(): void {
     let a: Dimension = "px"
-    assertEQ( a ,  "px")
+    assertEQ( a, "px")
 }

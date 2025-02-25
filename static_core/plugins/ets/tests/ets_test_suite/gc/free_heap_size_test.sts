@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,8 +29,8 @@ function main(): void throws {
     GC.startGC(GC.FULL_CAUSE);
     let free_size_after_gc = GC.getFreeHeapSize();
 
-    assert free_size_in_start > 0;
-    assert free_size_after_new < free_size_in_start: "After allocation free memory value should decrease";
-    assert free_size_after_gc > free_size_after_new: "After in place gc free memory value should increase";
-    assert free_size_after_gc <= free_size_in_start;
+    assertLT(0, free_size_in_start);
+    assertLT(free_size_after_new, free_size_in_start, "After allocation free memory value should decrease");
+    assertLT(free_size_after_new, free_size_after_gc, "After in place gc free memory value should increase");
+    assertLE(free_size_after_gc, free_size_in_start);
 }
