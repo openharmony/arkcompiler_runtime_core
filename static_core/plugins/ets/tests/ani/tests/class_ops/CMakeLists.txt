@@ -111,6 +111,16 @@ ani_add_gtest(ani_test_class_ops_class_find_method
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_method_test.sts
 )
 
+ani_add_gtest(ani_test_class_ops_find_setter_getter
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_setter_getter_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_setter_getter_test.sts
+)
+
+ani_add_gtest(ani_test_class_ops_find_indexable_getter_setter
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_indexable_getter_setter_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_indexable_getter_setter_test.sts
+)
+
 ani_add_gtest(ani_test_class_ops_call_static_method_bool
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_bool_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_static_method_bool_test.sts
