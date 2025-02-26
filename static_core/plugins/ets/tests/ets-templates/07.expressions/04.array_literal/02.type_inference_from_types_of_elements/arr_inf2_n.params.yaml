@@ -13,21 +13,31 @@
 
 ---
 cases:
-    - use: |-
-          let a: number[] = ["a", "b"]  // wrong types
-
-    - use: |-
-          let a: int[] = [true]  // wrong type
-
-    - use: |-
-          let a: string[] = ["a", null]  // wrong type
+    - decl: |-
+          const a = []  // CTE, type cannot be determined
+      use: ''
 
     - decl: |-
-          class A {}
-          class B extends A {}
-          class C extends B {}
-          function foo(p: B[]): int {
-              return p.length
+          let a = []    // CTE, type cannot be determined
+      use: ''
+
+    - use: |-
+          const a = []  // CTE, type cannot be determined
+
+    - use: |-
+          let a = []  // CTE, type cannot be determined
+
+    - use: |-
+          let a = [[]]  // CTE, type cannot be determined
+
+    - use: |-
+          let a = [{}, {},]  // CTE, type cannot be determined
+
+    - decl: |-
+          class A<T> {
+              dup(): T[] {
+                  return [new T(), new T()]
+              }
           }
       use: |-
-          assertEQ( foo([new B(), new C()] as A[]), 2 ) // A[] is super type of B[]
+          let a: Number[] = new A<Number>().dup()

@@ -13,8 +13,17 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-{description}
+desc: >-
+  If the type of an array literal [ expr1, ... , exprN ] cannot be inferred from the context,
+  then it is inferred from the initialization expressions by using the following algorithm.
+  The array literal type is an array of elements of the union type.
 ---*/
 
-{code}
+{{c.decl}}
+
+function main() {
+    {{c.use|indent}}
+}
+{% endfor %}

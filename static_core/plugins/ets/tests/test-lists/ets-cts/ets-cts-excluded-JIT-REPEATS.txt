@@ -38,7 +38,7 @@ escompat/ArrayTest.sts
 08.statements/08.for_statements/for_loop_parameters_12.sts
 
 # 17053 Cannot create array of nullish tuples
-07.expressions/04.array_literal/array_literal_13.sts
+#07.expressions/04.array_literal/array_literal_13.sts
 
 # 17964 Segmentation fault with too many repeated calls
 17.experimental_features/16.coroutines/02.awaiting_coroutine/a_2.sts

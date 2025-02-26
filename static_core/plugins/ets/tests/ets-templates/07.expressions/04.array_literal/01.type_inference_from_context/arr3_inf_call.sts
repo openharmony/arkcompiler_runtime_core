@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,7 @@
 {% for c in cases %}
 /*---
 desc: >-
-  If the type of an array literal [ expr1, ... , exprN ] cannot be inferred from the context,
-  then it is inferred from the initialization expressions by using the following algorithm.
+  The type of an array literal can be inferred from the call context.
 ---*/
 
 {{c.decl}}

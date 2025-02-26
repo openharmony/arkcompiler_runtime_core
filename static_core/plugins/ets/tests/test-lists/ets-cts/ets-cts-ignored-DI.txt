@@ -22,5 +22,5 @@
 
 07.expressions/03.qualified_name/qualified_name_0.sts
 07.expressions/03.qualified_name/qualified_name_1.sts
-07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_6.sts
+#07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_6.sts
 07.expressions/25.equality_expressions/eq_19.sts
