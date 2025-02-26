@@ -126,7 +126,7 @@
   "plugins/ets/tests/runtime/CMakeLists.txt": "*",
   "plugins/ets/tests/runtime/ets_vm_init_prealloc_test.cpp": "*",
   "plugins/ets/tests/runtime/ets_vm_test.cpp": "*",
-  "plugins/ets/tests/runtime/tooling/sampler/CMakeLists.txt": {"bc-40001": "*"},
+  "plugins/ets/tests/runtime/tooling/sampler/managed/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/runtime/types/CMakeLists.txt": "*",
   "plugins/ets/tests/runtime/types/ets_array_test.cpp": "*",
   "plugins/ets/tests/runtime/types/ets_arraybuf_test.cpp": "*",

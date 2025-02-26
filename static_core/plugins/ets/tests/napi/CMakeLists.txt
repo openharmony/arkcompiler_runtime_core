@@ -13,8 +13,6 @@
 
 add_subdirectory(bridges)
 add_subdirectory(etsnative)
-add_subdirectory(sampler)
-add_subdirectory(sampler_sig_stack)
 
 if (PANDA_TARGET_ARM32)
     return()
