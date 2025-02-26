@@ -1,4 +1,4 @@
-#FailKind.SEGFAULT_FAIL - 1942 tests:
+#FailKind.SEGFAULT_FAIL - 1965 tests:
 02.lexical_elements/06.identifiers/identifiers_n_0.sts
 02.lexical_elements/06.identifiers/identifiers_n_1.sts
 02.lexical_elements/06.identifiers/identifiers_n_11.sts
@@ -75,6 +75,13 @@
 02.lexical_elements/07.keywords/types_n_7.sts
 02.lexical_elements/07.keywords/types_n_8.sts
 02.lexical_elements/07.keywords/types_n_9.sts
+02.lexical_elements/09.literals/02.integer_literals/incorrect_int_literals_10.sts
+02.lexical_elements/09.literals/02.integer_literals/incorrect_int_literals_17.sts
+02.lexical_elements/09.literals/02.integer_literals/incorrect_int_literals_18.sts
+02.lexical_elements/09.literals/02.integer_literals/incorrect_int_literals_19.sts
+02.lexical_elements/09.literals/02.integer_literals/incorrect_int_literals_20.sts
+02.lexical_elements/09.literals/02.integer_literals/incorrect_int_literals_21.sts
+02.lexical_elements/09.literals/02.integer_literals/incorrect_int_literals_22.sts
 02.lexical_elements/09.literals/02.integer_literals/incorrect_int_literals_0.sts
 02.lexical_elements/09.literals/02.integer_literals/incorrect_int_literals_1.sts
 02.lexical_elements/09.literals/02.integer_literals/incorrect_int_literals_11.sts
@@ -1976,12 +1983,14 @@ deprecated/15.exceptions/03.rethrowing_functions/rethrowing_function_with_non_th
 deprecated/15.exceptions/03.rethrowing_functions/rethrowing_function_with_throw.sts
 deprecated/15.exceptions/03.rethrowing_functions/rethrowing_function_without_catch.sts
 
-#FailKind.ABORT_FAIL - 442 tests:
+#FailKind.ABORT_FAIL - 448 tests:
 03.types/08.reference_types/12.union_types/ut_25.sts
 03.types/08.reference_types/12.union_types/ut_27.sts
 03.types/08.reference_types/12.union_types/ut_n_13.sts
 03.types/08.reference_types/12.union_types/ut_n_7.sts
 03.types/08.reference_types/12.union_types/ut_n_8.sts
+04.names_declarations_and_scopes/03.distinguishable_declarations/spec_decl_n8.sts
+04.names_declarations_and_scopes/03.distinguishable_declarations/spec_decl_n10.sts
 04.names_declarations_and_scopes/04.scopes/unique_class_decl.sts
 04.names_declarations_and_scopes/04.scopes/unique_decl_name_0.sts
 04.names_declarations_and_scopes/04.scopes/unique_decl_name_1.sts
