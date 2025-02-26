@@ -1,0 +1,151 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package api;
+ 
+export namespace util {
+    export enum Type {
+        BASIC,
+        MIME,
+        BASIC_URL_SAFE,
+        MIME_URL_SAFE,
+    }
+
+    export interface DecodeToStringOptions {
+        stream?: boolean;
+    }
+
+    export class Base64Helper {
+        private static BASE64_CHARS: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        private static BASE64_URL_SAFE_CHARS: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+
+        private static readonly BYTE_SIZE = 8;
+        private static readonly BASE64_GROUP_SIZE = 6;
+        private static readonly BASE64_MASK = 0x3F;
+        private static readonly LINE_BREAK_FREQUENCY = 76;
+
+        constructor() {}
+
+        private static encodeBase64(bytes: Uint8Array, urlSafe: boolean, mime: boolean): string {
+            let table = urlSafe ? Base64Helper.BASE64_URL_SAFE_CHARS : Base64Helper.BASE64_CHARS;
+            let binaryString: string = "";
+            for (let i = 0; i < bytes.length; i++) {
+                binaryString += String.fromCharCode(bytes[i]);
+            }
+            let encoded: string = "";
+            let buffer: int = 0;
+            let bufferLength: int = 0;
+
+            for (let i = 0; i < binaryString.length; i++) {
+                buffer = (buffer << Base64Helper.BYTE_SIZE) | binaryString.charCodeAt(i);
+                bufferLength += Base64Helper.BYTE_SIZE;
+                while (bufferLength >= Base64Helper.BASE64_GROUP_SIZE) {
+                    bufferLength -= Base64Helper.BASE64_GROUP_SIZE;
+                    encoded += table[(buffer >> bufferLength) & Base64Helper.BASE64_MASK];
+                }
+            }
+
+            if (bufferLength > 0) {
+                encoded += table[(buffer << (Base64Helper.BASE64_GROUP_SIZE - bufferLength)) & Base64Helper.BASE64_MASK];
+            }
+
+            while (encoded.length % 4 !== 0 && !urlSafe) {
+                encoded += "=";
+            }
+
+            if (mime) {
+                encoded = encoded.replace(new RegExp(`(.{${Base64Helper.LINE_BREAK_FREQUENCY}})`, "g"), "$1\r\n");
+            }
+            return encoded;
+        }
+
+        private static decodeBase64(base64: string, urlSafe: boolean): Uint8Array {
+            let table = urlSafe ? Base64Helper.BASE64_URL_SAFE_CHARS : Base64Helper.BASE64_CHARS;
+            let allowedPattern = urlSafe ? "[^A-Za-z0-9\\-_=]" : "[^A-Za-z0-9+/=]";
+            let cleaned: string = base64.replace(new RegExp(allowedPattern, "g"), "");
+            let buffer: int = 0;
+            let bufferLength: int = 0;
+            let bytes: Array<number> = new Array<number>();
+
+            for (let i = 0; i < cleaned.length; i++) {
+                let char: string = cleaned[i];
+                if (char == "=") {
+                    break;
+                }
+                let index: int = table.indexOf(char) as int;
+                if (index == -1) {
+                    continue;
+                }
+                buffer = (buffer << Base64Helper.BASE64_GROUP_SIZE) | index;
+                bufferLength += Base64Helper.BASE64_GROUP_SIZE;
+                if (bufferLength >= Base64Helper.BYTE_SIZE) {
+                    bufferLength -= Base64Helper.BYTE_SIZE;
+                    bytes.push((buffer >> bufferLength) & 0xFF);
+                }
+            }
+            return new Uint8Array(bytes);
+        }
+
+        encodeSync(src: Uint8Array, options: Type = Type.BASIC): Uint8Array {
+            let encoded: string = Base64Helper.encodeBase64(src, options === Type.BASIC_URL_SAFE || options === Type.MIME_URL_SAFE, options === Type.MIME);
+            let result: Uint8Array = new Uint8Array(encoded.length);
+            for (let i: int = 0; i < encoded.length; i++) {
+                result[i] = encoded.charCodeAt(i);
+            }
+            return result;
+        }
+
+        encodeToStringSync(src: Uint8Array, options: Type = Type.BASIC): string {
+            return Base64Helper.encodeBase64(src, options === Type.BASIC_URL_SAFE || options === Type.MIME_URL_SAFE, options === Type.MIME);
+        }
+
+        decodeSync(src: Uint8Array, options: Type = Type.BASIC): Uint8Array {
+            let base64String: string;
+            let charArray: Array<string> = new Array<string>();
+            for (let i: int = 0; i < src.length; i++) {
+                charArray.push(String.fromCharCode(src[i]));
+            }
+            base64String = charArray.join("");
+            if (options === Type.MIME || options === Type.MIME_URL_SAFE) {
+                base64String = base64String.replace(new RegExp("[\\r\\n]", "g"), "");
+            }
+            return Base64Helper.decodeBase64(base64String, options === Type.BASIC_URL_SAFE || options === Type.MIME_URL_SAFE);
+        }
+        
+        decodeSync(src: string, options: Type = Type.BASIC): Uint8Array {
+            let newString: string = src;
+            if (options === Type.MIME || options === Type.MIME_URL_SAFE) {
+                newString = src.replace(new RegExp("[\\r\\n]", "g"), "");
+            }
+            return Base64Helper.decodeBase64(newString, options === Type.BASIC_URL_SAFE || options === Type.MIME_URL_SAFE);
+        }
+
+        encode(src: Uint8Array, options: Type = Type.BASIC): Promise<Uint8Array> {
+            return Promise.resolve(this.encodeSync(src, options));
+        }
+
+        decode(src: string, options: Type = Type.BASIC): Promise<Uint8Array> {
+            return Promise.resolve(this.decodeSync(src, options));
+        }
+
+        decode(src: Uint8Array, options: Type = Type.BASIC): Promise<Uint8Array> {
+            return Promise.resolve(this.decodeSync(src, options));
+        }
+
+        encodeToString(src: Uint8Array, options: Type = Type.BASIC): Promise<string> {
+            return Promise.resolve(this.encodeToStringSync(src, options));
+        }
+    }
+}
