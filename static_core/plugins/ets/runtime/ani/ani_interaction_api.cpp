@@ -4373,6 +4373,16 @@ NO_UB_SANITIZE static ani_status WeakReference_GetReference(ani_env *env, ani_wr
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status EnsureEnoughReferences(ani_env *env, ani_size nrRefs)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+
+    ScopedManagedCodeFix s(env);
+    return s.EnsureLocalEnoughRefs(nrRefs);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status CreateLocalScope(ani_env *env, ani_size nrRefs)
 {
     ANI_DEBUG_TRACE(env);
@@ -4464,7 +4474,7 @@ const __ani_interaction_api INTERACTION_API = {
     Namespace_BindNativeFunctions,
     Class_BindNativeMethods,
     Reference_Delete,
-    NotImplementedAdapter<51>,
+    EnsureEnoughReferences,
     CreateLocalScope,
     DestroyLocalScope,
     CreateEscapeLocalScope,

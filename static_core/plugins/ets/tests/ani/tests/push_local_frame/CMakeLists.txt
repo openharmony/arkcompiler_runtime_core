@@ -14,3 +14,7 @@
 ani_add_gtest(ani_test_create_local_scope_test
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/create_local_scope.cpp
 )
+
+ani_add_gtest(ani_test_ensure_enough_references_test
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ensure_enough_references.cpp
+)
