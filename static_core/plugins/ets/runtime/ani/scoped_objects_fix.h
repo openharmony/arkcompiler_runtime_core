@@ -21,6 +21,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_napi_env.h"
 #include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_module.h"
 #include "plugins/ets/runtime/types/ets_namespace.h"
 
 namespace ark::ets::ani {
@@ -118,6 +119,12 @@ public:
     {
         ASSERT(!IsNullishValue(ns));
         return reinterpret_cast<EtsNamespace *>(GetInternalType(ns));
+    }
+
+    EtsModule *ToInternalType(ani_module module)
+    {
+        ASSERT(!IsNullishValue(module));
+        return reinterpret_cast<EtsModule *>(GetInternalType(module));
     }
 
     EtsString *ToInternalType(ani_string str)
