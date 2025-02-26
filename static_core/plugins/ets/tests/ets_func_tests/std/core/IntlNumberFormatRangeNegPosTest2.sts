@@ -169,11 +169,11 @@ function negativeBigIntsAsStrings(): Array<string> {
 }
 
 function CheckFormatRangeUnion(locale: string, funcName: string, start: number | bigint, end: number | bigint, expected: string): int {
-    let nf: NumberFormat;
+    let nf: Intl.NumberFormat;
     try {
-        nf = new NumberFormat(locale);
+        nf = new Intl.NumberFormat(locale);
     } catch(e) {
-        console.log(funcName + ". Crashed call \"nf = new NumberFormat(" + locale + ")\"");
+        console.log(funcName + ". Crashed call \"nf = new Intl.NumberFormat(" + locale + ")\"");
         return fail;
     }
 

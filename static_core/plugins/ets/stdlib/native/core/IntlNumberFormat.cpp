@@ -168,7 +168,7 @@ ets_int RegisterIntlNumberFormatNativeMethods(EtsEnv *env)
                     EtsNativeMethod {"formatRangeDecStrDecStr", nullptr,
                                      reinterpret_cast<ets_string *>(IcuFormatRangeDecStrDecStr)}};
 
-    ets_class numberFormatClass = env->FindClass("std/core/NumberFormat");
+    ets_class numberFormatClass = env->FindClass("std/core/Intl/NumberFormat");
     return env->RegisterNatives(numberFormatClass, methods.data(), methods.size());
 }
 

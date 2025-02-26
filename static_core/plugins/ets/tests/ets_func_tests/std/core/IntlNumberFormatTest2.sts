@@ -167,11 +167,11 @@ function separatorsBetweenNegAndPosAsStrings(): Array<string> {
 }
 
 function CheckFormatNumber(locale: string, funcName: string, value: number, expected: string): int {
-    let nf: NumberFormat;
+    let nf: Intl.NumberFormat;
     try {
-        nf = new NumberFormat(locale);
+        nf = new Intl.NumberFormat(locale);
     } catch(e) {
-        console.log(funcName + ". Crashed call \"nf = new NumberFormat(" + locale + ")\"");
+        console.log(funcName + ". Crashed call \"nf = new Intl.NumberFormat(" + locale + ")\"");
         return fail;
     }
 
@@ -206,11 +206,11 @@ function CheckFormatNumber(locale: string, funcName: string, value: number, expe
 }
 
 function CheckFormatUnion(locale: string, funcName: string, value: number | bigint, expected: string): int {
-    let nf: NumberFormat;
+    let nf: Intl.NumberFormat;
     try {
-        nf = new NumberFormat(locale);
+        nf = new Intl.NumberFormat(locale);
     } catch(e) {
-        console.log(funcName + ". Crashed call \"nf = new NumberFormat(" + locale + ")\"");
+        console.log(funcName + ". Crashed call \"nf = new Intl.NumberFormat(" + locale + ")\"");
         return fail;
     }
 

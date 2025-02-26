@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@
 #include <iterator>
 #include <random>
 
-namespace ark::ets::stdlib {
+namespace ark::ets::stdlib::intl {
 
 /// Contains information about cache with LocalizedNumberFormatter and LocalizedNumberRangeFormatter
 class IntlFormattersCache final {
@@ -67,6 +67,6 @@ private:
     void EraseRandFmtsGroupByEraseRatio();
 };
 
-}  // namespace ark::ets::stdlib
+}  // namespace ark::ets::stdlib::intl
 
 #endif  //  PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLFORMATTERSCACHE_H

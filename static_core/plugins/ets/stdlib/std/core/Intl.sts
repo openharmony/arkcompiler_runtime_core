@@ -15,27 +15,27 @@
 
 package std.core;
 
-// NOTE(aleksander-sotov) Move all code below into namespace (#20417)
-export type BCP47LanguageTag = string
-export type DisplayNamesFallback = "code" | "none"
-export type DisplayNamesLanguageDisplay = "dialect" | "standard"
-export type DisplayNamesType = "language" | "region" | "script" | "calendar" | "dateTimeField" | "currency"
-export type ES2018NumberFormatPartType = "literal" | "nan" | "infinity" | "percent" | "integer" | "group" | "decimal" | "fraction" | "plusSign" | "minusSign" | "percentSign" | "currency" | "code" | "symbol" | "name"
-export type ES2020NumberFormatPartType = "compact" | "exponentInteger" | "exponentMinusSign" | "exponentSeparator" | "unit" | "unknown"
-export type LDMLPluralRule = "zero" | "one" | "two" | "few" | "many" | "other"
-export type ListFormatLocaleMatcher = "lookup" | "best fit"
-export type ListFormatStyle = "long" | "short" | "narrow"
-export type ListFormatType = "conjunction" | "disjunction" | "unit"
-export type LocaleCollationCaseFirst = "upper" | "lower" | "false"
-export type LocaleHourCycleKey = "h12" | "h23" | "h11" | "h24"
-export type NumberFormatPartTypes = ES2018NumberFormatPartType | ES2020NumberFormatPartType;
-export type PluralRuleType = "cardinal" | "ordinal"
-export type RelativeTimeFormatLocaleMatcher = "lookup" | "best fit"
-export type RelativeTimeFormatNumeric = "always" | "auto"
-export type RelativeTimeFormatStyle = "long" | "short" | "narrow";
-export type RelativeTimeFormatUnit = "year" | "years" | "quarter" | "quarters" | "month" | "months" | "week" | "weeks" | "day" | "days" | "hour" | "hours" | "minute" | "minutes"| "second" | "seconds"
-export type RelativeTimeFormatUnitSingular =  "year" | "quarter" | "month" | "week" | "day" | "hour" | "minute" | "second"
-export type UnicodeBCP47LocaleIdentifier = string;
+export namespace Intl {
+    export type BCP47LanguageTag = string
+    export type DisplayNamesFallback = "code" | "none"
+    export type DisplayNamesLanguageDisplay = "dialect" | "standard"
+    export type DisplayNamesType = "language" | "region" | "script" | "calendar" | "dateTimeField" | "currency"
+    export type ES2018NumberFormatPartType = "literal" | "nan" | "infinity" | "percent" | "integer" | "group" | "decimal" | "fraction" | "plusSign" | "minusSign" | "percentSign" | "currency" | "code" | "symbol" | "name"
+    export type ES2020NumberFormatPartType = "compact" | "exponentInteger" | "exponentMinusSign" | "exponentSeparator" | "unit" | "unknown"
+    export type LDMLPluralRule = "zero" | "one" | "two" | "few" | "many" | "other"
+    export type ListFormatLocaleMatcher = "lookup" | "best fit"
+    export type ListFormatStyle = "long" | "short" | "narrow"
+    export type ListFormatType = "conjunction" | "disjunction" | "unit"
+    export type LocaleCollationCaseFirst = "upper" | "lower" | "false"
+    export type LocaleHourCycleKey = "h12" | "h23" | "h11" | "h24"
+    export type NumberFormatPartTypes = ES2018NumberFormatPartType | ES2020NumberFormatPartType;
+    export type PluralRuleType = "cardinal" | "ordinal"
+    export type RelativeTimeFormatLocaleMatcher = "lookup" | "best fit"
+    export type RelativeTimeFormatNumeric = "always" | "auto"
+    export type RelativeTimeFormatStyle = "long" | "short" | "narrow";
+    export type RelativeTimeFormatUnit = "year" | "years" | "quarter" | "quarters" | "month" | "months" | "week" | "weeks" | "day" | "days" | "hour" | "hours" | "minute" | "minutes"| "second" | "seconds"
+    export type RelativeTimeFormatUnitSingular =  "year" | "quarter" | "month" | "week" | "day" | "hour" | "minute" | "second"
+    export type UnicodeBCP47LocaleIdentifier = string;
 
 
 export class RelativeTimeFormatPart {
@@ -43,5 +43,6 @@ export class RelativeTimeFormatPart {
     value: string = ""
     unit?: RelativeTimeFormatUnitSingular
 
-    public constructor() {}
+        public constructor() {}
+    }
 }
