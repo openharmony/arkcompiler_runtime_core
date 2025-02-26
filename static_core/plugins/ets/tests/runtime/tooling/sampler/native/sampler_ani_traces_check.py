@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 #
-# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");i
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -16,25 +16,29 @@
 # limitations under the License.
 #
 import argparse
+import logging
 
-parser = argparse.ArgumentParser(description="Napi trace test")
+parser = argparse.ArgumentParser(description="Ani trace test")
 parser.add_argument("--file", type=str)
 args = parser.parse_args()
 file_name = args.file
 
-trace_list = ["LSamplerNapiTest/ETSGLOBAL::CallNativeSlowFunction; LSamplerNapiTest/ETSGLOBAL::NativeSlowFunction;",
-    "LSamplerNapiTest/ETSGLOBAL::CallNativeFastFunction; LSamplerNapiTest/ETSGLOBAL::NativeFastFunction;",
-    "LSamplerNapiTest/ETSGLOBAL::CallNativeNAPIFastFunction; LSamplerNapiTest/ETSGLOBAL::NativeNAPIFastFunction;",
-    "LSamplerNapiTest/ETSGLOBAL::CallNativeNAPISlowFunction; LSamplerNapiTest/ETSGLOBAL::NativeNAPISlowFunction; LSamplerNapiTest/ETSGLOBAL::SlowETSFunction;"]
+trace_list = [
+    "LSamplerAniTest/ETSGLOBAL::CallNativeSlowFunction; LSamplerAniTest/ETSGLOBAL::NativeSlowFunction;",
+    "LSamplerAniTest/ETSGLOBAL::CallNativeFastFunction; LSamplerAniTest/ETSGLOBAL::NativeFastFunction;",
+    "LSamplerAniTest/ETSGLOBAL::CallNativeANIFastFunction; LSamplerAniTest/ETSGLOBAL::NativeANIFastFunction;",
+    "LSamplerAniTest/ETSGLOBAL::CallNativeANISlowFunction; LSamplerAniTest/ETSGLOBAL::NativeANISlowFunction; "
+    "LSamplerAniTest/ETSGLOBAL::SlowETSFunction;",
+]
 
 ALL_TRACES_FOUND = True
 
-with open(file_name, 'r') as my_file:
+with open(file_name, "r") as my_file:
     content = my_file.read()
     for string in trace_list:
-        if not string in content:
+        if string not in content:
             ALL_TRACES_FOUND = False
     if not ALL_TRACES_FOUND:
-        print("Actual stack trace")
-        print(content)
+        logging.error("Actual stack trace")
+        logging.error(content)
         raise Exception("Not all native traces found")
