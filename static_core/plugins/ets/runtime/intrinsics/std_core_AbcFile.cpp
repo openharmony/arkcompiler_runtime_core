@@ -17,6 +17,8 @@
 #include "include/thread_scopes.h"
 #include "intrinsics.h"
 #include "libpandabase/utils/logger.h"
+#include "libpandabase/utils/utf.h"
+#include "libziparchive/extractortool/extractor.h"
 #include "runtime/handle_scope-inl.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
@@ -45,6 +47,28 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
         ScopedNativeCodeThread etsNativeScope(coro);
         pf = panda_file::OpenPandaFileOrZip(path);
     }
+    if (pf == nullptr) {
+        // get hap path
+        auto pathStr = std::string(path.begin(), path.end());
+        size_t pos = pathStr.rfind("/ets/");
+        if (pos == std::string::npos) {
+            ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR,
+                                   PandaString("Open failed, file: ") + path);
+            return nullptr;
+        }
+        std::string hapPath = pathStr.substr(0, pos);
+        hapPath += ".hap";
+
+        std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(hapPath);
+        if (!extractor || !extractor->Init()) {
+            ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR,
+                                   PandaString("Open failed, file: ") + path);
+            return nullptr;
+        }
+        auto safeData = extractor->GetSafeData(pathStr);
+        pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen());
+    }
+
     if (pf == nullptr) {
         ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR,
                                PandaString("Panda file not found: ") + path);
