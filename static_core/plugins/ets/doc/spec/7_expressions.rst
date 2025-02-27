@@ -577,6 +577,9 @@ A :index:`compile-time error` also occurs in the following situations:
 
 Type of a *named reference* is the type of an expression.
 
+Note: when a *named reference* is of a function type then the function object
+is a new object as specified here (see :ref:`Uniqueness of Functional Objects`).
+
 .. index::
    named reference
    expression
@@ -615,9 +618,9 @@ Type of a *named reference* is the type of an expression.
           refers to a variable imported from a compilation unit */
       let func = foo /* foo is a simple name of the function declared in this
           module, type of 'func' is the function type derived from the function
-          'foo()' signature */
+          'foo()' signature. func itself is a new function object */
 
-      goo() // goo is a undefined name - compile-time error
+      goo() // goo is an undefined name - compile-time error
       let bar_ref = bar // bar is an ambiguous reference - compile-time error
     }
 
@@ -738,10 +741,10 @@ More details of both cases are presented below.
 
 |
 
-.. _Array Type Inference from Context:
+.. _Array Literal Type Inference from Context:
 
-Array Type Inference from Context
-=================================
+Array Literal Type Inference from Context
+=========================================
 
 .. meta:
     frontend_status: Done
@@ -784,8 +787,9 @@ of an assignment, call parameter type, or type of a cast expression:
     class aClass {}
     let b1: Array <aClass> = [new aClass, new aClass]
     let b2: Array <Number> = [ 1, 2, 3]
+    let b3: FixedArray<number> = [1, 2]
       /* Type of literal is inferred from the context
-         taken from b1 and b2 declarations */
+         taken from b1, b2 and b3 declarations */
 
 All valid conversions are applied to the initializer expression, i.e., each
 initializer expression type must be compatible (see :ref:`Type Compatibility`)
@@ -874,6 +878,15 @@ union type. Otherwise, a :index:`compile-time error` occurs:
    array literal
    union type
    inference
+
+If the type used in the context is a *fixed array type* (see :ref:`Fixed Array Types`),
+and each initializer expression type compatible with the array element type,
+then an array literal is of the fixed array type.
+
+.. code-block:: typescript
+   :linenos:
+
+    let farray: FixedArray<number> = [1, 2]
 
 |
 
@@ -1942,7 +1955,7 @@ Type of a *method call expression* is the return type of the method.
 
     class A {
        static method() { console.log ("Static method() is called") }
-       method() { console.log ("Instance method() is called") }
+       method()        { console.log ("Instance method() is called") }
     }
 
 
@@ -2164,7 +2177,7 @@ Otherwise, a :index:`compile-time error` occurs.
 
 If the chaining operator '``?.``' (see :ref:`Chaining Operator`) is present,
 and after its application the type of *object reference expression* is an array
-type ``T[]``, then it makes a valid *array reference expression*, and the type
+type ``T[]`` or fixed array type ``FixedArray<T>``, then it makes a valid *array reference expression*, and the type
 of the array indexing expression is ``T``.
 
 The result of an array indexing expression is a variable of type ``T`` (i.e., an
@@ -2183,6 +2196,7 @@ array elements can be modified by changing the resultant variable fields:
    object reference expression
    chaining operator
    array type
+   fixed array type
    conversion
    predefined numeric type
    compile-time error
@@ -2973,8 +2987,6 @@ Type of any *unary Expression* is the type of the ``expression`` provided.
    increment operator
    decrement operator
 
-|
-
 .. _Postfix Increment:
 
 Postfix Increment
@@ -2983,17 +2995,21 @@ Postfix Increment
 .. meta:
     frontend_status: Done
 
-*Postfix increment expression* is an expression followed by the increment
+*Postfix increment expression* is an *expression* followed by the increment
 operator '``++``'.
 
-A :index:`compile-time error` occurs if type of the variable resultant from
+The *expression* must be *left-hand-side expression*
+(see :ref:`Left-Hand-Side Expressions`), so it denotes a variable.
+
+A :index:`compile-time error` occurs if type of the
 the *expression* is not convertible (see :ref:`Implicit Conversions`) to a
 numeric type (see :ref:`Numeric Types`).
 
-Type of a postfix increment expression is the type of the variable. The
-result of a postfix increment expression is a value, not a variable.
+Type of a *postfix increment expression* is the type of the variable. The
+result of a *postfix increment expression* is a value, not a variable.
 
-If the evaluation of the operand expression completes normally at runtime, then:
+If the evaluation of the operand *expression* completes normally at runtime,
+then:
 
 -  The value *1* is added to the value of the variable by using necessary
    conversions (see :ref:`Primitive Types Conversions`); and
@@ -3013,10 +3029,10 @@ If the evaluation of the operand expression completes normally at runtime, then:
    normal completion
    runtime
 
-Otherwise, the postfix increment expression completes abruptly, and no
+Otherwise, the *postfix increment expression* completes abruptly, and no
 incrementation occurs.
 
-The  value of the postfix increment expression is the value of the variable
+The  value of the *postfix increment expression* is the value of the variable
 *before* the new value is stored.
 
 .. index::
@@ -3045,7 +3061,10 @@ Postfix Decrement
 *Postfix decrement expression* is an expression followed by the decrement
 operator '``--``'.
 
-A :index:`compile-time error` occurs if type of the variable resultant from
+The *expression* must be *left-hand-side expression*
+(see :ref:`Left-Hand-Side Expressions`), so it denotes a variable.
+
+A :index:`compile-time error` occurs if type of
 the *expression* is not convertible (see :ref:`Implicit Conversions`) to a
 numeric type (see :ref:`Numeric Types`).
 
@@ -3072,10 +3091,10 @@ If evaluation of the operand expression completes at runtime, then:
    necessary conversions (see :ref:`Primitive Types Conversions`); and
 -  The sum is stored back into the variable.
 
-Otherwise, the postfix decrement expression completes abruptly, and
+Otherwise, the *postfix decrement expression* completes abruptly, and
 no decrementation occurs.
 
-The value of the postfix decrement expression is the value of the variable
+The value of the *postfix decrement expression* is the value of the variable
 *before* the new value is stored.
 
 .. index::
@@ -3106,14 +3125,17 @@ Prefix Increment
 *Prefix increment expression* is an expression preceded by the operator
 '``++``'.
 
-A :index:`compile-time error` occurs if the type of the variable resultant from
+The *expression* must be *left-hand-side expression*
+(see :ref:`Left-Hand-Side Expressions`), so it denotes a variable.
+
+A :index:`compile-time error` occurs if the type of
 the *expression* is not convertible (see :ref:`Implicit Conversions`) to a
 numeric type (see :ref:`Numeric Types`).
 
 Type of a prefix increment expression is the type of the variable. The
 result of a prefix increment expression is a value, not a variable.
 
-If evaluation of the operand expression completes normally at runtime, then:
+If evaluation of the operand *expression* completes normally at runtime, then:
 
 .. index::
    prefix operator
@@ -3133,10 +3155,10 @@ If evaluation of the operand expression completes normally at runtime, then:
    conversions (see :ref:`Primitive Types Conversions`); and
 -  The sum is stored back into the variable.
 
-Otherwise, the prefix increment expression completes abruptly, and no
+Otherwise, the *prefix increment expression* completes abruptly, and no
 incrementation occurs.
 
-The  value of the  prefix increment expression is the value of the variable
+The  value of the *prefix increment expression* is the value of the variable
 *before* the new value is stored.
 
 .. index::
@@ -3164,7 +3186,10 @@ Prefix Decrement
 *Prefix decrement expression* is an expression preceded by the operator
 '``--``'.
 
-A :index:`compile-time error` occurs if type of the variable resultant from
+The *expression* must be *left-hand-side expression*
+(see :ref:`Left-Hand-Side Expressions`), so it denotes a variable.
+
+A :index:`compile-time error` occurs if type of
 the *expression* is not convertible (see :ref:`Implicit Conversions`) to a
 numeric type (see :ref:`Numeric Types`).
 
@@ -3183,14 +3208,14 @@ result of a prefix decrement expression is a value, not a variable.
    expression
    value
 
-If evaluation of the operand expression completes normally at runtime, then:
+If evaluation of the operand *expression* completes normally at runtime, then:
 
 -  The value *1* is subtracted from the value of the variable by using
    necessary conversions (see :ref:`Primitive Types Conversions`); and
 -  The sum is stored back into the variable.
 
-Otherwise, the prefix decrement expression completes abruptly, and no
-decrementation occurs. The value of the prefix decrement expression remains
+Otherwise, the *prefix decrement expression* completes abruptly, and no
+decrementation occurs. The value of the *prefix decrement expression* remains
 the value of the variable *before* a new value is stored.
 
 .. index::
@@ -3230,6 +3255,8 @@ The numeric types conversion (see :ref:`Primitive Types Conversions`) is
 performed on the operand to ensure that the resultant type is that of the
 unary plus expression. The result of a unary plus expression is always a value,
 not a variable (even if the result of the operand expression is a variable).
+
+Type of the *unary plus expression* is the type of the expression provided.
 
 .. index::
    unary plus operator
@@ -3276,6 +3303,9 @@ A unary numeric promotion performs the value set conversion (see
 
 The unary negation operation is always performed on, and the result is drawn
 from the same value set as the promoted operand value.
+
+Type of the *unary minus expression* is the type of the expression provided.
+
 
 .. index::
    unary minus operation
@@ -3355,6 +3385,8 @@ Bitwise Complement
 Type of the operand *expression* with the unary operator '``~``' must be
 convertible (see :ref:`Implicit Conversions`) to a primitive integer type.
 Otherwise, a :index:`compile-time error` occurs.
+
+Thus the type of the *Bitwise complement expression* is a primitive integer.
 
 The numeric types conversion (see :ref:`Primitive Types Conversions`)
 is performed on the operand to ensure that the resultant type is that of the
@@ -3458,6 +3490,7 @@ the multiplicative expression.
 
 The result of a unary bitwise complement expression is a value, not a
 variable (even if the operand expression is a variable).
+
 
 .. index::
    multiplicative expression
@@ -3683,6 +3716,9 @@ The evaluation of a floating-point division operator '``/``' never throws an
 error despite possible overflow, underflow, division by zero, or loss of
 information.
 
+The type of the *division expression* is an integer or floating-point number.
+
+
 .. index::
    infinity
    NaN
@@ -3817,6 +3853,9 @@ with the IEEE 754 arithmetic:
 The evaluation of the floating-point remainder operator '``%``' never throws
 an error, even if the right-hand operand is zero. Overflow, underflow, or
 loss of precision cannot occur.
+
+The type of the *remainder expression* is an integer or floating-point number.
+
 
 .. index::
    infinity
@@ -4100,6 +4139,8 @@ Shift operators group left-to-right.
 Numeric types conversion (see :ref:`Primitive Types Conversions`) is performed
 separately on each operand to ensure that both operands are of primitive
 integer type.
+
+Thus the type of *shift expression* is one of primitive integer type.
 
 **Note**. If the initial type of one or both operands is ``double`` or
 ``float``, then such operand or operands are  first truncated to the appropriate
@@ -4465,9 +4506,9 @@ operands used as follows:
 -  *Value equality* is applied to entities of primitive types
    (see :ref:`Value Types`), their boxed versions (see :ref:`Boxed Types`),
    type ``string`` (see :ref:`Type string`), type ``bigint`` (see
-   :ref:`BigInt Type`), and enumeration types (see :ref:`Enumerations`).
+   :ref:`Type bigint`), and enumeration types (see :ref:`Enumerations`).
 -  *Reference Equality based on actual (dynamic) type* is applied to values of
-   type ``Object`` (:ref:`Object Class Type`), values of union types
+   type ``Object`` (:ref:`Type Object`), values of union types
    (:ref:`Union Types`), and type parameters (:ref:`Type Parameters`).
 -  *Reference equality* is applied to entities of all other reference types
    (see :ref:`Reference Types`).
@@ -5137,6 +5178,9 @@ The resultant value of '``^``' is the bitwise exclusive OR of the operand values
 
 The resultant value of '``|``' is the bitwise inclusive OR of the operand values.
 
+Thus the type of *integer bitwise expression* is one of primitive integer type.
+
+
 .. index::
    integer operator
    bitwise operator
@@ -5175,6 +5219,8 @@ If the operand values are different, then the resultant value of ‘``^``’ is
 
 If both operand values are ``false``, then the resultant value of ‘``|``’ is
 ``false``. Otherwise, the result is ``true``.
+
+Thus the type of *boolean logical expression* is of boolean type.
 
 .. index::
    boolean operator
@@ -5229,7 +5275,9 @@ result, and the same side effects occur in the same order for any *a*, *b*, and
    evaluation
    expression
 
-A *conditional-and* expression is always of type ``boolean``.
+A *conditional-and* expression is always of type ``boolean`` except the
+extended semantics (see :ref:`Extended Conditional Expressions`) when it can be
+of the first expression type.
 
 Each operand of the *conditional-and* operator must be of type ``boolean``,
 ``Boolean``, or of a type mentioned in :ref:`Extended Conditional Expressions`.
@@ -5289,7 +5337,9 @@ value and side effects (i.e., the evaluations of the expressions *((a)* ``||``
 result, and the same side effects occur in the same order for any *a*, *b*,
 and *c*).
 
-A *conditional-or* expression is always of type ``boolean``.
+A *conditional-or* expression is always of type ``boolean``  except the
+extended semantics (see :ref:`Extended Conditional Expressions`) when it can be
+of the first expression type.
 
 .. index::
    conditional-or expression
@@ -5372,14 +5422,9 @@ of *b* to *a*).
         expression
         ;
 
-The result of the first operand in an assignment operator (represented by
-*lhsExpression*) must be one of the following:
-
--  Named variable, such as a local variable, or a field of the current
-   object or class;
--  Computed variable resultant from a field access (see
-   :ref:`Field Access Expression`); or
--  Array or record component access (see :ref:`Indexing Expressions`).
+The first operand in an assignment operator (represented by *lhsExpression*)
+must be *left-hand-side expression*
+(see :ref:`Left-Hand-Side Expressions`), so it denotes a variable.
 
 .. index::
    assignment
@@ -5396,15 +5441,9 @@ The result of the first operand in an assignment operator (represented by
    indexing expression
    record component access
 
-A :index:`compile-time error` occurs if:
-
--  *lhsExpression* contains the chaining operator '``?.``' (see
-   :ref:`Chaining Operator`);
--  the result of *lhsExpression* is not a variable.
-
 Type of the variable is the type of the assignment expression.
 
-The result of the assignment expression at runtime is not a variable itself
+The result of the *assignment expression* at runtime is not a variable itself
 but the value of a variable after the assignment.
 
 .. index::
@@ -5459,7 +5498,7 @@ one of the following ways:
    assignment expression
    variable
 
-2. If the left-hand-side operand is an array access expression (see
+2. If the left-hand-side operand is an array reference expression (see
    :ref:`Array Indexing Expression`), possibly enclosed in parentheses, then:
 
    #. Array reference subexpression of the left-hand-side operand is evaluated.
@@ -5659,7 +5698,7 @@ of the following ways:
    binary operation
    conversion
 
-2. If the left-hand-side operand expression is an array access expression (see
+2. If the left-hand-side operand expression is an array reference expression (see
    :ref:`Array Indexing Expression`), then:
 
    -  Array reference subexpression of the left-hand-side operand is evaluated.
@@ -5798,6 +5837,30 @@ of the following ways:
    binary operation
 
 |
+
+.. _Left-Hand-Side Expressions:
+
+Left-Hand-Side Expressions
+==========================
+
+.. meta:
+    frontend_status: Done
+
+An *expression* is a *left-hand-side expression* if it is one of the following:
+
+-  Named variable;
+-  Field or setter resultant from a field access (see
+   :ref:`Field Access Expression`); or
+-  Array or record element access (see :ref:`Indexing Expressions`).
+
+A :index:`compile-time error` occurs if:
+
+-  *expression* contains the chaining operator '``?.``' (see
+   :ref:`Chaining Operator`);
+-  the result of *expression* is not a variable.
+
+|
+
 
 .. _Conditional Expressions:
 
@@ -5972,7 +6035,8 @@ has no function name specified, and can have types of parameters omitted:
 .. code-block:: abnf
 
     lambdaExpression:
-        annotationUsage? ('async'|typeParameters)? lambdaSignature '=>' lambdaBody
+        annotationUsage?
+        ('async'|typeParameters)? lambdaSignature '=>' lambdaBody
         ;
 
     lambdaBody:
@@ -5980,35 +6044,29 @@ has no function name specified, and can have types of parameters omitted:
         ;
 
     lambdaSignature:
-        lambdaParameters returnType?
-        ;
-
-    lambdaParameters:
-        '(' lambdaParameterList? ')'
+        '(' lambdaParameterList? ')' returnType?
         | identifier
         ;
 
     lambdaParameterList:
-        lambdaParameter (',' lambdaParameter)*
-               (',' lambdaOptionalParameters|lambdaRestParameter)?
-        | lambdaRestParameter
-        | optionalParameters
+        lambdaParameter (',' lambdaParameter)* (',' restParameter)? ','?
+        | restParameter ','?
         ;
 
     lambdaParameter:
+        annotationUsage? (lambdaRequiredParameter | lambdaOptionalParameter)
+        ;
+
+    lambdaRequiredParameter:
         identifier (':' type)?
-        ;
-
-    lambdaRestParameter:
-        '...' lambdaParameter
-        ;
-
-    lambdaOptionalParameters:
-        lambdaOptionalParameter (',' lambdaOptionalParameter)
         ;
 
     lambdaOptionalParameter:
         identifier '?' (':' type)?
+        ;
+
+    lambdaRestParameter:
+        '...' lambdaRequiredParameter
         ;
 
 The usage of annotations is discussed in :ref:`Using Annotations`.
@@ -6031,26 +6089,6 @@ The examples of usage are presented below:
     (x: number) => Math.sin(x)                    // expression as lambda body
     <T> (x: T, y: T) => { let local = x }         // generic lambda
     e => e                                        // shortest form of lambda
-    p1, p2 => p1 + p2
-
-    function foo<T> (a: (p1: T, ...p2: T[]) => T) {}
-    // All calls to foo pass valid lambda expressions in different forms
-    foo (e => e)
-    foo ((e1, e2) => e1)
-    foo ((e1, e2: Object) => e1)
-    foo ((e1: Object, e2) => e1)
-    foo ((e1: Object, e2, e3) => e1)
-    foo ((e1: Object, ...e2) => e1)
-
-    foo (<Object>(e1: Object, e2: Object) => e1)
-
-    function bar<T> (a: (...p: T[]) => T) {}
-    // Type can be omitted for the rest parameter
-    bar ((...e) => e)
-
-    function goo<T> (a: (p?: T) => T) {}
-    // Type can be omitted for the optional parameter
-    goo ((e?) => e)
 
 A *lambda expression* evaluation creates an instance of a function type (see
 :ref:`Function Types`) as described in detail in
@@ -6072,8 +6110,32 @@ Lambda Signature
     frontend_status: Done
 
 Similarly to function declarations (see :ref:`Function Declarations`),
-*lambda signatures* are composed of formal parameters with optional types,
-and optional return types as defined in a lambda expression.
+a *lambda signature* is composed of formal parameters and
+and optional return types. Unlike function declarations,
+type annotations of formal parameters can be omitted.
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo<T> (a: (p1: T, ...p2: T[]) => T) {}
+    // All calls to foo pass valid lambda expressions in different forms
+    foo (e => e)
+    foo ((e1, e2) => e1)
+    foo ((e1, e2: Object) => e1)
+    foo ((e1: Object, e2) => e1)
+    foo ((e1: Object, e2, e3) => e1)
+    foo ((e1: Object, ...e2) => e1)
+
+    foo (<Object>(e1: Object, e2: Object) => e1)
+
+    function bar<T> (a: (...p: T[]) => T) {}
+    // Type can be omitted for the rest parameter
+    bar ((...e) => e)
+
+    function goo<T> (a: (p?: T) => T) {}
+    // Type can be omitted for the optional parameter
+    goo ((e?) => e)
+
 
 The specification of scope is discussed in :ref:`Scopes`, and shadowing details
 of formal parameter declarations in :ref:`Shadowing by Parameter`.
@@ -6134,6 +6196,11 @@ defined in a method, then ``this`` is *captured* by the lambda.
 
 A :index:`compile-time error` occurs if a local variable is used in a lambda
 body but is neither declared in nor assigned before it.
+
+If *lambda signature* return type is not ``void`` (see :ref:`Type void`), and
+the execution path of the lambda body has no return statement (see
+:ref:`Return Statements`) or no single expression as a body, then a
+:index:`compile-time error` occurs.
 
 .. index::
    lambda body

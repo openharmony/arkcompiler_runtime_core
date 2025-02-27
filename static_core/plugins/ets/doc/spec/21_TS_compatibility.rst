@@ -202,9 +202,9 @@ by compiler-generated compile-time errors:
 
 |
 
-.. _Function types compatibility:
+.. _Function Types Compatibility:
 
-Function types compatibility
+Function Types Compatibility
 ****************************
 
 .. meta:
@@ -392,8 +392,8 @@ illustrated by the example below:
 
 .. _Type void Compatibility:
 
-Type void Compatibility
-***********************
+Type ``void`` Compatibility
+***************************
 
 .. meta:
     frontend_status: Done
@@ -409,17 +409,16 @@ Type void Compatibility
 
 |
 
-.. _Built-in Arrays Compatibility:
+.. _Invariant Array Assignment:
 
-Built-in Arrays Compatibility
-*****************************
+Invariant Array Assignment
+**************************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: None
 
-|TS| allows covariant array assignment as in |TS| all types are of the
-reference kind. |LANG| has value types, and the array of elements of a value
-type cannot be assigned into an array of a reference type:
+|TS| allows covariant array assignment,
+while |LANG| allows invariant array assignment only:
 
 .. code-block:: typescript
    :linenos:
@@ -429,24 +428,20 @@ type cannot be assigned into an array of a reference type:
     let b = [1, 2, 3] // type of 'b' is inferred as number[]
     a = b // That works well for the Typescript
 
-
     // ArkTS
     let a: Object[] = [1, 2, 3]
     let b = [1, 2, 3] // type of 'b' is inferred as double[]
-    a = b // That leads to the type error as double[] is not compatible with Object[]
-    // Array of primitive values is not compatible with array of references to objects
+    a = b // compile-time error
 
-    // ArkTS
-    let a: Object[] = [1, 2, 3]
-    let b: Number[] = [1, 2, 3]
-    a = b // That works fine
+    let a: Object[] = ["a", "b", "c"]
+    let b: string[] = ["a", "b", "c"]
+    a = b // compile-time error
 
 .. index::
-   built-in array compatibility
-   covariant
+   covariant array assignment
+   invariant array assignment
    array
    assignment
-   reference type
 
 |
 
@@ -503,6 +498,60 @@ explicitly listed in the ``extends`` clause of a class. |LANG| allows this as
 .. index::
    class object
    extends clause
+
+|
+
+.. _Syntax of extends and implements Clauses:
+
+Syntax of ``extends`` and ``implements`` Clauses
+************************************************
+
+.. meta:
+    frontend_status: Done
+
+|TS| considers enities listed in ``extends`` and ``implements``
+clauses as an expression. 
+|LANG| handles such clauses at compile time, and allows no expressions
+but *type references*:
+
+.. code-block:: typescript
+   :linenos:
+
+    class B {}
+    class A extends (B) {} // compile-time error for ArkTS while accepted by TypeScript
+
+
+.. index::
+   extends clause
+   implements clause
+
+|
+
+.. _Uniqueness of Functional Objects:
+
+Uniqueness of Functional Objects
+********************************
+
+.. meta:
+    frontend_status: Done
+
+|TS| and |LANG| handle function objects differently and thus equality test can
+perform differently. This difference may be elimiated in the future |LANG|
+versions.
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo() {}
+    foo == foo  // true in Typescript while may be false in ArkTS
+    const f1 = foo
+    const f2 = foo
+    f1 == f2 // true in Typescript while may be false in ArkTS
+
+
+.. index::
+   function object
+   equality test
 
 |
 
