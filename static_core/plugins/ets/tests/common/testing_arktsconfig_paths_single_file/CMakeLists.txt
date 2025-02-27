@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-run_int_ets_code(testing_arktsconfig ${CMAKE_CURRENT_BINARY_DIR}
+run_int_ets_code(testing_arktsconfig_paths_single_file ${CMAKE_CURRENT_BINARY_DIR}
                  ENTRYPOINT "@TestA.a"
                  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dirA/a.sts ${CMAKE_CURRENT_SOURCE_DIR}/dirB/foo.sts
                  ARKTS_CONFIGS ${CMAKE_CURRENT_SOURCE_DIR}/dirA/arktsconfig.json ${CMAKE_CURRENT_SOURCE_DIR}/dirB/arktsconfig.json
