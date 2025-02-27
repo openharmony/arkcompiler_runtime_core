@@ -94,6 +94,7 @@ static_core/plugins/ets/isa/                             @mbolshov
 static_core/plugins/ets/libllvmbackend/                  ^Prof1983 ^kosovpavel @asidorov
 static_core/plugins/ets/runtime/                         @vpukhov
 static_core/plugins/ets/runtime/*coroutine*              ^dmitriitr @konstanting
+static_core/plugins/ets/runtime/ani                      @liwentao_uiw @v-cherkashin ^slynkodenis
 static_core/plugins/ets/runtime/ets_entrypoints*         @Prof1983 @mbolshov
 static_core/plugins/ets/runtime/ets_handle*              ^dmitriitr @udav
 static_core/plugins/ets/runtime/ets_libbase_runtime.yaml @Prof1983
@@ -101,6 +102,7 @@ static_core/plugins/ets/runtime/ets_runtime_interface*   @Prof1983
 static_core/plugins/ets/runtime/job_queue.h              @dmitriitr
 static_core/plugins/ets/sdk/                             ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
 static_core/plugins/ets/stdlib/                          ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
+static_core/plugins/ets/tests/ani                        @liwentao_uiw @v-cherkashin ^slynkodenis
 static_core/plugins/ets/verification/                    @igelhaus
 static_core/runtime/include/mem/                         ^dmitriitr @udav
 static_core/runtime/include/tooling/                     @ragnvald
