@@ -23,7 +23,7 @@ function GCJSRuntimeCleanup(): void {
         let full_gc_id = GC.startGC(GC.FULL_CAUSE);
         GC.waitForFinishGC(full_gc_id);
     } catch (e) {
-        assert false : "Unexpected exception during GC";
+        assertTrue( false, "Unexpected exception during GC");
     }
 }
 
@@ -40,16 +40,16 @@ class FooClass {
 /********** Array **********/
 
 function Array_TestJSSample(arr: Array<FooClass>): void {
-    assert (arr as Object) instanceof Array;
-    assert (arr.at(0)! as FooClass).name == "zero";
-    assert arr.at(1)!.toString() == "{Foo named one}";
+    assertTrue( (arr as Object) instanceof Array);
+    assertEQ( (arr.at(0)! as FooClass).name, "zero");
+    assertEQ( arr.at(1)!.toString(), "{Foo named one}");
 
     let idx: number = 0;
-    assert (arr.at(idx)! as FooClass).name == "zero";
+    assertEQ( (arr.at(idx)! as FooClass).name, "zero");
 
     arr.push(new FooClass("two"));
-    assert arr.at(2)!.toString() == "{Foo named two}";
-    assert arr.toString() == "{Foo named zero},{Foo named one},{Foo named two}";
+    assertEQ( arr.at(2)!.toString(), "{Foo named two}");
+    assertEQ( arr.toString(), "{Foo named zero},{Foo named one},{Foo named two}");
 }
 
 function Array_TestJSLength(arr: Array<FooClass>): void {
@@ -63,7 +63,7 @@ function Array_TestJSLength(arr: Array<FooClass>): void {
 function Array_TestJSPop(arr: Array<FooClass>): void {
     arr.push(new FooClass("two"));
     let popped: FooClass = arr.pop() as FooClass;
-    assert popped.toString() == "{Foo named two}";
+    assertEQ( popped.toString(), "{Foo named two}");
 }
 
 function Array_TestJSSort(arr: Array<FooClass>): void {
@@ -71,7 +71,7 @@ function Array_TestJSSort(arr: Array<FooClass>): void {
         return a.toString().compareTo(b.toString()) as number;
     }
     arr.sort(comparator);
-    assert arr.at(1)!.toString() == "{Foo named zero}";
+    assertEQ( arr.at(1)!.toString(), "{Foo named zero}");
 }
 
 function Array_TestJSToSorted(arr: Array<FooClass>): void {
@@ -79,39 +79,39 @@ function Array_TestJSToSorted(arr: Array<FooClass>): void {
         return a.toString().compareTo(b.toString()) as number;
     }
     let toSorted = arr.toSorted(comparator);
-    assert toSorted.at(1)!.toString() == "{Foo named zero}";
+    assertEQ( toSorted.at(1)!.toString(), "{Foo named zero}");
 }
 
 function Array_TestJSFill(arr: Array<FooClass>): void {
     arr.fill(arr.at(0)! as FooClass, undefined, undefined);
-    assert arr.at(1)!.toString() == "{Foo named zero}";
+    assertEQ( arr.at(1)!.toString(), "{Foo named zero}");
 }
 
 function Array_TestJSJoin(arr: Array<FooClass>): void {
     let joined: String = arr.join(",");
-    assert arr.toString() == "{Foo named zero},{Foo named one}"
+    assertEQ( arr.toString(), "{Foo named zero},{Foo named one}");
 }
 
 function Array_TestJSSome(arr: Array<FooClass>): void {
     let fnTrue: (v: FooClass) => boolean = (v: FooClass): boolean => { return true; }
     let fn1True: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return true; }
-    assert arr.some(fnTrue);
-    assert arr.some(fn1True);
+    assertEQ( arr.some(fnTrue), true);
+    assertEQ( arr.some(fn1True), true);
     let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
     let fn1False: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return k < 0; }
-    assert !arr.some(fnFalse);
-    assert !arr.some(fn1False);
+    assertEQ( !arr.some(fnFalse), true);
+    assertEQ( !arr.some(fn1False), true);
 }
 
 function Array_TestJSEvery(arr: Array<FooClass>): void {
     let fnTrue: (v: FooClass) => boolean = (v: FooClass): boolean => { return true; }
     let fn1True: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return true; }
-    assert arr.every(fnTrue);
-    assert arr.every(fn1True);
+    assertEQ( arr.every(fnTrue), true);
+    assertEQ( arr.every(fn1True), true);
     let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
     let fn1False: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return k < 0; }
-    assert !arr.every(fnFalse);
-    assert !arr.every(fn1False);
+    assertEQ( !arr.every(fnFalse), true);
+    assertEQ( !arr.every(fn1False), true);
 }
 
 function Array_TestJSFilter(arr: Array<FooClass>): void {
@@ -119,29 +119,29 @@ function Array_TestJSFilter(arr: Array<FooClass>): void {
     let fn1True: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return true; }
     let filter = arr.filter(fnTrue);
     let filter1 = arr.filter(fn1True);
-    assert arr.at(0) == filter.at(0);
-    assert arr.at(0) == filter1.at(0);
+    assertEQ( arr.at(0), filter.at(0));
+    assertEQ( arr.at(0), filter1.at(0));
     let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
     let fn1False: (v: FooClass, k: number) => boolean = (v: FooClass, k: number): boolean => { return k < 0; }
     let filterFalse = arr.filter(fnFalse);
     let filter1False = arr.filter(fn1False);
-    assert arr.at(0) != filterFalse.at(0);
-    assert arr.at(0) != filter1False.at(0);
+    assertNE( arr.at(0), filterFalse.at(0));
+    assertNE( arr.at(0), filter1False.at(0));
 }
 
 function Array_TestJSFilterArray(arr: Array<FooClass>): void {
     let fnTrue: (v: FooClass) => boolean = (v: FooClass): boolean => { return true; }
     let filter: Array<FooClass> = arr.filter(fnTrue);
-    assert arr.at(0) == filter.at(0);
+    assertEQ( arr.at(0), filter.at(0));
     let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
     let filterFalse: Array<FooClass> = arr.filter(fnFalse);
-    assert arr.at(0) != filterFalse.at(0);
+    assertNE( arr.at(0), filterFalse.at(0));
 }
 
 function Array_TestJSShift(arr: Array<FooClass>): void {
     let shifted: FooClass = arr.shift() as FooClass;
-    assert shifted.toString() == "{Foo named zero}";
-    assert arr.at(0)!.toString() == "{Foo named one}";
+    assertEQ( shifted.toString(), "{Foo named zero}");
+    assertEQ( arr.at(0)!.toString(), "{Foo named one}");
 }
 
 function Array_TestJSWith(arr: Array<FooClass>): void {
@@ -176,9 +176,9 @@ function Array_TestJSToSpliced(arr: Array<FooClass>): void {
 
 function Array_TestJSCopyWithin(arr: Array<FooClass>): void {
     arr.push(new FooClass("two"));
-    assert arr.toString() == "{Foo named zero},{Foo named one},{Foo named two}";
+    assertEQ( arr.toString(), "{Foo named zero},{Foo named one},{Foo named two}");
     arr.copyWithin(2, 0);
-    assert arr.toString() == "{Foo named zero},{Foo named one},{Foo named zero}";
+    assertEQ( arr.toString(), "{Foo named zero},{Foo named one},{Foo named zero}");
 
     // NOTE (oignatenko) uncomment below after interop will be supported for this method signature
     // arr.copyWithin(1);
@@ -188,8 +188,8 @@ function Array_TestJSCopyWithin(arr: Array<FooClass>): void {
 function Array_TestJSLastIndexOf(arr: Array<FooClass>): void {
     arr.push(arr.at(1) as FooClass);
 
-    assert arr.lastIndexOf(arr.at(1) as FooClass, 2.0) == 2;
-    assert arr.lastIndexOf(new FooClass("not in array"), 2.0) == -1;
+    assertEQ( arr.lastIndexOf(arr.at(1) as FooClass, 2.0), 2);
+    assertEQ( arr.lastIndexOf(new FooClass("not in array"), 2.0), -1);
 
     // NOTE (oignatenko) uncomment below after interop will be supported for this method signature
     // assert arr.lastIndexOf(arr.at(1) as FooClass) == 2;
@@ -229,21 +229,21 @@ function Array_TestJSFlatMap(arr: Array<FooClass>): void {
 function Array_TestJSReduce(arr: Array<FooClass>): void {
     let fn_reduce: (a: FooClass, b: FooClass) => FooClass = (a: FooClass, b: FooClass): FooClass => { return a; }
     let reduced: FooClass = arr.reduce(fn_reduce) as FooClass;
-    assert reduced.toString() == "{Foo named zero}";
+    assertEQ( reduced.toString(), "{Foo named zero}");
 
     let fn_reduce2: (a: FooClass, b: FooClass) => FooClass = (a: FooClass, b: FooClass): FooClass => { return b; }
     let reduced2: FooClass = arr.reduce(fn_reduce2, new FooClass("initVal")) as FooClass;
-    assert reduced2.toString() == "{Foo named initVal}";
+    assertEQ( reduced2.toString(), "{Foo named initVal}");
 }
 
 function Array_TestJSReduceRight(arr: Array<FooClass>): void {
     let fn_reduce: (a: FooClass, b: FooClass) => FooClass = (a: FooClass, b: FooClass): FooClass => { return a; }
     let reduced: FooClass = arr.reduceRight(fn_reduce) as FooClass;
-    assert reduced.toString() == "{Foo named zero}";
+    assertEQ( reduced.toString(), "{Foo named zero}");
 
     let fn_reduce2: (a: FooClass, b: FooClass) => FooClass = (a: FooClass, b: FooClass): FooClass => { return b; }
     let reduced2: FooClass = arr.reduceRight(fn_reduce2, new FooClass("initVal")) as FooClass;
-    assert reduced2.toString() == "{Foo named initVal}";
+    assertEQ( reduced2.toString(), "{Foo named initVal}");
 }
 
 function Array_TestJSFindLast(arr: Array<FooClass>): void {
@@ -251,10 +251,10 @@ function Array_TestJSFindLast(arr: Array<FooClass>): void {
     let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
 
     let last: FooClass = arr.findLast(fnTrue) as FooClass;
-    assert last.toString() == "{Foo named one}";
+    assertEQ( last.toString(), "{Foo named one}" );
 
     let last_null = arr.findLast(fnFalse);
-    assert last_null === undefined;
+    assertTrue( last_null === undefined );
 }
 
 function Array_TestJSFindIndex(arr: Array<FooClass>): void {
@@ -262,10 +262,10 @@ function Array_TestJSFindIndex(arr: Array<FooClass>): void {
     let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
 
     let found: int = arr.findIndex(fnTrue) as int;
-    assert found == 0;
+    assertEQ( found, 0) ;
 
     let not_found: int = arr.findIndex(fnFalse) as int;
-    assert not_found == -1;
+    assertEQ( not_found, -1 );
 }
 
 function Array_TestJSFind(arr: Array<FooClass>): void {
@@ -273,14 +273,14 @@ function Array_TestJSFind(arr: Array<FooClass>): void {
     let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
 
     let found: FooClass = arr.find(fnTrue) as FooClass;
-    assert found.toString() == "{Foo named zero}";
+    assertEQ( found.toString(), "{Foo named zero}" );
 
     let found_null = arr.find(fnFalse);
-    assert found_null === undefined;
+    assertTrue( found_null === undefined );
 }
 
 function Array_TestJSIsArray(arr: Array<FooClass>): void {
-    assert Array.isArray(arr);
+    assertTrue( Array.isArray(arr));
 }
 
 function Array_TestJSFromAsync(arr: Array<FooClass>): void {
@@ -302,8 +302,8 @@ function Array_CreateEtsSample(): Array<Object> {
 /********** Boolean **********/
 
 function Boolean_TestJSSample(v: Boolean): void {
-    assert(v as Object) instanceof Boolean;
-    assert v.toString() == "false";
+    assertTrue( (v as Object) instanceof Boolean );
+    assertEQ( v.toString(), "false" );
 }
 
 function Boolean_CreateEtsSample(): Boolean {
@@ -313,7 +313,7 @@ function Boolean_CreateEtsSample(): Boolean {
 /********** Error **********/
 
 function Error_TestJSSample(v: Error): void {
-    assert(v as Object) instanceof Error;
+    assertTrue((v as Object) instanceof Error);
     // NOTE (oignatenko) uncomment this after interop will be supported in this direction
     // assert v.message.toString() == "foo";
     // assert v.cause == v;
@@ -321,7 +321,7 @@ function Error_TestJSSample(v: Error): void {
 }
 
 function Error_TestJSWithCause(v: Error): void {
-    assert(v as Object) instanceof Error;
+    assertTrue((v as Object) instanceof Error);
     // NOTE (oignatenko) uncomment this after interop will be supported in this direction
     // assert v.message.toString() == "message";
     // assert v.cause.toString() == "cause";
@@ -342,18 +342,18 @@ function Error_CreateEtsSampleWithCause(): Error {
 }
 
 function ArrayBuffer_TestJSLength(arr: ArrayBuffer): void {
-    assert (arr as Object) instanceof ArrayBuffer;
-    assert arr.byteLength == 32;
+    assertTrue( (arr as Object) instanceof ArrayBuffer);
+    assertEQ( arr.byteLength, 32 );
 }
 
 function ArrayBuffer_TestJSIsView(arr: ArrayBuffer): void {
-    assert !ArrayBuffer.isView(arr);
-    assert ArrayBuffer.isView(new Int8Array(arr));
+    assertTrue( !ArrayBuffer.isView(arr) );
+    assertTrue( ArrayBuffer.isView(new Int8Array(arr)) );
 }
 
 function ArrayBuffer_TestJSSlice(arr: ArrayBuffer): void {
     let sliced = arr.slice(8, 24);
-    assert sliced.byteLength == 16;
+    assertEQ( sliced.byteLength, 16 );
 }
 
 function ArrayBuffer_TestJSResize(arr: ArrayBuffer): void {

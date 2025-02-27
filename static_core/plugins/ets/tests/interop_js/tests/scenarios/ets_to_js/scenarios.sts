@@ -340,7 +340,7 @@ function GCJSRuntimeCleanup(): void {
         let fullGcId = GC.startGC(GC.FULL_CAUSE);
         GC.waitForFinishGC(fullGcId);
     } catch (e) {
-        assert false : "Unexpected exception during GC";
+        assertTrue(false, "Unexpected exception during GC");
     }
 }
 

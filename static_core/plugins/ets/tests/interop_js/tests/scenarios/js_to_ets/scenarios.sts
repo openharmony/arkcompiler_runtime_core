@@ -177,11 +177,11 @@ function TestFunctionReturnTypePrimitive(): boolean {
 
 function TestRestParams() {
     // NOTE: casts due to bug in frontend
-    assert js.jsSumRestParams(1, 2, 3) as Int == (1 + 2 + 3)
-    assert js.jsMultiplyArgBySumRestParams(1, 2, 3, 4) as Int == (1) * (2 + 3 + 4)
-    assert js.jsMultiplySumArgsBySumRestParams(1, 2, 3, 4, 5) as Int == (1 + 2) * (3 + 4 + 5);
-    assert js.jsConcatStringsRestParams() as String == "";
-    assert js.jsConcatStringsRestParams("a", "b", "c") as String == "abc";
+    assertEQ( js.jsSumRestParams(1, 2, 3) as Int, (1 + 2 + 3) );
+    assertEQ( js.jsMultiplyArgBySumRestParams(1, 2, 3, 4) as Int, (1) * (2 + 3 + 4));
+    assertEQ( js.jsMultiplySumArgsBySumRestParams(1, 2, 3, 4, 5) as Int, (1 + 2) * (3 + 4 + 5));
+    assertEQ( js.jsConcatStringsRestParams() as String, "");
+    assertEQ( js.jsConcatStringsRestParams("a", "b", "c") as String, "abc");
     return true;
 }
 
