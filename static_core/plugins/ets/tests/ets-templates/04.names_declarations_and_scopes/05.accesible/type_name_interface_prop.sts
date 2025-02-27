@@ -22,6 +22,7 @@ desc: >-
     - Type name is used to declare interface properties
     - Function or method name is used to call the function or method
     - Variable name is used to read or change the value of the variable
+tags: [{{c.tags}}]
 ---*/
 
 {{c.decl}}
