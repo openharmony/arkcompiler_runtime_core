@@ -1926,6 +1926,34 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Ref(ani_env *env, an
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
+ani_status Class_FindSetter(ani_env *env, ani_class cls, const char *name, ani_method *result)
+{
+    PandaString setterName("<set>");
+    setterName += name;
+    return Class_FindMethod(env, cls, setterName.c_str(), nullptr, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+ani_status Class_FindGetter(ani_env *env, ani_class cls, const char *name, ani_method *result)
+{
+    PandaString getterName("<get>");
+    getterName += name;
+    return Class_FindMethod(env, cls, getterName.c_str(), nullptr, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+ani_status Class_FindIndexableSetter(ani_env *env, ani_class cls, const char *signature, ani_method *result)
+{
+    return Class_FindMethod(env, cls, "$_set", signature, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+ani_status Class_FindIndexableGetter(ani_env *env, ani_class cls, const char *signature, ani_method *result)
+{
+    return Class_FindMethod(env, cls, "$_get", signature, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Boolean_V(ani_env *env, ani_class cls, ani_static_method method,
                                                                   ani_boolean *result, va_list args)
 {
@@ -5050,10 +5078,10 @@ const __ani_interaction_api INTERACTION_API = {
     Class_FindStaticField,
     Class_FindMethod,
     Class_FindStaticMethod,
-    NotImplementedAdapter<181>,
-    NotImplementedAdapter<182>,
-    NotImplementedAdapter<183>,
-    NotImplementedAdapter<184>,
+    Class_FindSetter,
+    Class_FindGetter,
+    Class_FindIndexableGetter,
+    Class_FindIndexableSetter,
     NotImplementedAdapter<185>,
     Class_GetStaticField_Boolean,
     Class_GetStaticField_Char,
