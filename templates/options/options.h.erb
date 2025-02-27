@@ -158,6 +158,9 @@ private:
 
     static std::string GetExeDir(const std::string &exe_path) {
         auto pos = exe_path.find_last_of('/');
+        if (pos == std::string::npos) {
+            return ".";
+        }
         return exe_path.substr(0, pos);
     }
 
