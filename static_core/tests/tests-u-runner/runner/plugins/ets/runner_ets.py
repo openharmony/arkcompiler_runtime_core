@@ -61,13 +61,15 @@ class RunnerETS(RunnerFileBased):
             self.test_env.es2panda_args.append("--debug-info")
         self.test_env.es2panda_args.extend(self.config.es2panda.es2panda_args)
 
-        boot_files = f"--boot-panda-files={self.stdlib_path}"
+        if self.__ets_suite_name == EtsSuites.SDK.value:
+            boot_files = f"--boot-panda-files={self.stdlib_path}:{self.sdk_path}"
+        else:
+            boot_files = f"--boot-panda-files={self.stdlib_path}"
         load_runtime_ets = [boot_files, "--load-runtimes=ets"]
         self.test_env.runtime_args.extend(load_runtime_ets)
         if self.__ets_suite_name == EtsSuites.SDK.value:
             self.test_env.runtime_args.append(f"--panda-files={self.sdk_path}")
             self.test_env.verifier_args.append(f"--panda-files={self.sdk_path}")
-
         self.test_env.verifier_args.extend(load_runtime_ets)
         if self.conf_kind in [ConfigurationKind.AOT, ConfigurationKind.AOT_FULL]:
             self.aot_args.extend(load_runtime_ets)

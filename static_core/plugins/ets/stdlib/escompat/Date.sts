@@ -404,7 +404,7 @@ function ecmaInLeapYear(year: int): byte {
 /**
  * Date JS API-compatible class
  */
-export final class Date {
+export class Date {
     /** Stored value of Date, milliseconds */
     private ms: long;
     private TZOffset: long;

@@ -11,10 +11,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required(VERSION 3.5.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.14.1 FATAL_ERROR)
 project(plugin_ets_sdk)
 
+message(STATUS "Building ArkTS SDK")
+
 add_custom_target(ets_sdk_prereqs)
+
+file(GLOB_RECURSE SDK_SOURCES CONFIGURE_DEPENDS "**/*.sts")
+panda_target_sources(ets_sdk_prereqs PRIVATE ${SDK_SOURCES})
+
 add_dependencies(ets_sdk_prereqs etsstdlib)
 # Note(ivan-tyulyandin): use of ark_link is a workaround for internal issue #21462
 add_dependencies(ets_sdk_prereqs ark_link)
@@ -22,10 +28,10 @@ add_dependencies(ets_sdk_prereqs ark_link)
 # Note(ivan-tyulyandin): provide script to collect all sts files in build time on each rerun, issue #21800
 set(SDK_SRCS
     "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.buffer.sts"
+    "${CMAKE_CURRENT_SOURCE_DIR}/arkts/@arkts.math.Decimal.sts"
     "${CMAKE_CURRENT_SOURCE_DIR}/url/@ohos.url.sts"
     "${CMAKE_CURRENT_SOURCE_DIR}/uri/@ohos.uri.sts"
     "${CMAKE_CURRENT_SOURCE_DIR}/util/@ohos.util.LRUCache.sts"
-    "${CMAKE_CURRENT_SOURCE_DIR}/arkts/@arkts.math.Decimal.sts"
 )
 
 set(ABCS_TO_LINK "")
@@ -45,6 +51,8 @@ foreach(FILE ${SDK_SRCS})
 endforeach()
 
 set(SDK_ABC "${CMAKE_CURRENT_BINARY_DIR}/etssdk.abc")
+
+add_subdirectory(native)
 
 add_custom_target(
     link_ets_sdk

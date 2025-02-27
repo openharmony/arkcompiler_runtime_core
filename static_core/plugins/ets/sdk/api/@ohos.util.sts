@@ -14,7 +14,7 @@
  */
 
 package api;
- 
+
 export namespace util {
     export enum Type {
         BASIC,
@@ -123,7 +123,7 @@ export namespace util {
             }
             return Base64Helper.decodeBase64(base64String, options === Type.BASIC_URL_SAFE || options === Type.MIME_URL_SAFE);
         }
-        
+
         decodeSync(src: string, options: Type = Type.BASIC): Uint8Array {
             let newString: string = src;
             if (options === Type.MIME || options === Type.MIME_URL_SAFE) {
@@ -148,4 +148,72 @@ export namespace util {
             return Promise.resolve(this.encodeToStringSync(src, options));
         }
     }
-}
+
+    /**
+    * The util.format() method returns a formatted string using the first argument as a printf-like
+    * format string which can contain zero or more format specifiers.
+    * Each specifier is replaced with the converted value from the corresponding argument.
+    * Supported specifiers are:
+    * %s: String will be used to convert all values except BigInt, Object and -0. BigInt values will be represented
+    *     with an n and Objects that have no user defined toString function are inspected using util.inspect()
+    *     with options { depth: 0, colors: false, compact: 3 }.
+    * %d: Number will be used to convert all values except BigInt and Char.
+    * %i: parseInt(value, 10) is used for all values except BigInt and Char.
+    * %f: parseFloat(value) is used for all values expect Char.
+    * %j: JSON. Replaced with the string '[Circular]' if the argument contains circular references.
+    * %o: Object. A string representation of an object with generic JavaScript object formatting.
+    *     Similar to util.inspect() with options { showHidden: true, showProxy: true }.
+    *     This will show the full object including non-enumerable properties and proxies.
+    * %O: Object. A string representation of an object with generic JavaScript object formatting.
+    *     Similar to util.inspect() without options. This will show the full object not including non-enumerable
+    *     properties and proxies.
+    * %c: CSS. This specifier is ignored and will skip any CSS passed in.
+    * %%: single percent sign ('%'). This does not consume an argument.
+    *
+    * @param s: <string> A printf-like format string.
+    *
+    * @param args: <Object[]> format params
+    *
+    * @returns Returns: <string> The formatted string
+    */
+    export function format(s: string, ...args: Object[]): string {
+        let preI: int = 0
+        let i: int = 0
+        let argCounter = 0
+        const flags: string = "cdfijoOs"
+        let res = new StringBuilder
+        let ss = ""
+        if (args.length == 0) {
+            return s.replaceAll("%%", "%")
+        }
+
+        while((i = (ss = s.substring(preI, s.length)).search("%") as int) != -1 && (preI + i < s.length - 1) && (argCounter < args.length)) {
+            res.append(s.substring(preI, preI + i))
+            let flagIndex = preI + i + 1
+            //NOTE(ivan-tyulyandin): has to be string due to internal issue 21459
+            let flag: string = s[flagIndex]
+            if (flags.includes(flag)) {
+                res.append(UtilHelper.processArg(flag, args[argCounter]))
+                ++argCounter
+            } else if (flag == "%") {
+                res.append("%")
+            } else {
+                res.append("%" + flag)
+            }
+            preI += i + 2
+        }
+        if (preI < s.length) {
+            res.append(s.substring(preI,s.length))
+        }
+        let strArgsList = UtilHelper.joinLastArgs(argCounter, ...args)
+        let resStr = res.toString()
+        return resStr.length == 0 ? res + strArgsList.slice(1) : res + strArgsList
+    }
+
+    export function generateRandomUUID(entropyCache?: boolean): string {
+        let s = UtilHelper.generateRandomUUID((entropyCache == undefined) ? false : entropyCache)
+        return s
+    }
+
+} // namespace Util
+

@@ -125,11 +125,13 @@ function(test_app_linker_context_exception TARGET WORK_DIR)
     # Provide non-existing abc file on which application linker context will fail
     set(NON_EXISTING_ABC_FILE "${WORK_DIR}/${TARGET}-non-existing.abc")
 
+    set(BOOT_PANDA_FILES ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc)
+
     add_custom_target(${TARGET}
         COMMAND ${linker_tests_in_dir}/test_app_linker_context_exception.sh
             --run-prefix="${PANDA_RUN_PREFIX}"
             --ark-binary=$<TARGET_FILE:ark>
-            --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
+            --boot-panda-files=${BOOT_PANDA_FILES}
             --non-existing-abc=${NON_EXISTING_ABC_FILE}
             --entry-abc=${EXISTING_ABC}
             --entrypoint=additional1.ETSGLOBAL::main

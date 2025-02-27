@@ -22,6 +22,8 @@ add_dependencies(ets_tests ets_gtests ets_panda_gtests)
 
 include(cmake/native_gtest.cmake)
 
+set(BOOT_PANDA_FILES ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc)
+
 add_panda_assembly(TARGET mock_stdlib SOURCE integrational/mock_stdlib.pa)
 
 function(panda_ets_add_gtest)
@@ -117,7 +119,7 @@ function(run_ets_code_verifier ETS_SRC WORK_DIR TARGET)
     compile_ets_code(${ETS_SRC} ${OUTPUT_ABC} ${ABC_TARGET} OPT_LEVEL ${ARG_OPT_LEVEL})
 
     set(VERIFIER_ARGUMENTS
-        --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
+        --boot-panda-files=${BOOT_PANDA_FILES}
         --load-runtimes=ets
         ${OUTPUT_ABC}
     )
@@ -158,7 +160,7 @@ function(run_ets_code_impl TARGET WORK_DIR ETS_SOURCES)
     endif()
 
     set(RUNTIME_ARGUMENTS
-        --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
+        --boot-panda-files=${BOOT_PANDA_FILES}
         --panda-files=${ABC_FILES}
         --load-runtimes=ets
         ${ARG_RUNTIME_EXTRA_OPTIONS}
@@ -287,7 +289,7 @@ function(compile_aot_ets_code PAOC_MODE ETS_ABC OUTPUT_AN TARGET ABC_TARGET)
     cmake_parse_arguments(ARG "" "" "${multiValueArgs}" ${ARGN})
 
     set(AOT_RUNTIME_ARGUMENTS
-        --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
+        --boot-panda-files=${BOOT_PANDA_FILES}
         --load-runtimes=ets
         --compiler-ignore-failures=false
         --paoc-panda-files=${ETS_ABC}
@@ -328,7 +330,7 @@ function(run_aot_ets_code PAOC_MODE ETS_SRC WORK_DIR TARGET)
     endif()
 
     set(RUNTIME_ARGUMENTS
-        --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
+        --boot-panda-files=${BOOT_PANDA_FILES}
         --load-runtimes=ets
         --aot-file=${OUTPUT_AN}
         ${ARG_RUNTIME_EXTRA_OPTIONS}

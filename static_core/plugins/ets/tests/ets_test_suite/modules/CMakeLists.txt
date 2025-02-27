@@ -91,8 +91,10 @@ function(run_sts_app_mode_with_special_option TARGET WORK_DIR APP_MAIN_ABILITY_C
         set(ARG_SPAWN_ENTRYPOINT_FUNCTION "main")
     endif()
 
+    set(BOOT_PANDA_FILES ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc:${SPAWN_ABC_FILES})
+
     set(RUNTIME_ARGUMENTS
-        --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc:${SPAWN_ABC_FILES}
+        --boot-panda-files=${BOOT_PANDA_FILES}
         ${ARG_RUNTIME_EXTRA_OPTIONS}
         ${SPAWN_ENTRY_ABC}
         "@spawn.spawn.ETSGLOBAL::${ARG_SPAWN_ENTRYPOINT_FUNCTION}"
@@ -206,7 +208,7 @@ function(prepare_incompatible_app TARGET ABC_FILES WORK_DIR SOURCE_DIR MODULE_NA
         endforeach()
         set(RESULT ${RESULT} ${REPLACEMENT})
     endforeach()
-    
+
     # `app` package
     set(TARGET_APP ${TARGET}-${MODULE_NAME}-app-abc)
     file(GLOB SOURCES_APP "${SOURCE_DIR}/${MODULE_NAME}/app/*.sts")
@@ -343,7 +345,7 @@ create_loop_inheritance_class_test(ets_modules_loop_inheritance_class_test ${CMA
 function(create_multiple_override_test TARGET WORK_DIR SOURCE_DIR)
     prepare_incompatible_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR} "multiple_override")
 
-    # test override_base.sts multiple override method 
+    # test override_base.sts multiple override method
     run_sts_app_mode(${TARGET}-multiple_override-run-sts-app-mode ${WORK_DIR} "@app.module.MainAbility" "${ABC_FILES}"
                      SPAWN_ENTRYPOINT_FUNCTION "mainMultipleOverrideBase")
     add_dependencies(${TARGET}-multiple_override-run-sts-app-mode ${TARGET}-app)
@@ -352,7 +354,7 @@ function(create_multiple_override_test TARGET WORK_DIR SOURCE_DIR)
         DEPENDS ${TARGET}-multiple_override-run-sts-app-mode
     )
 
-    # test override_base1.sts multiple override method 
+    # test override_base1.sts multiple override method
     run_sts_app_mode(${TARGET}-multiple_override1-run-sts-app-mode ${WORK_DIR} "@app.module1.MainAbility" "${ABC_FILES}"
                      SPAWN_ENTRYPOINT_FUNCTION "mainMultipleOverrideBase1")
     add_dependencies(${TARGET}-multiple_override1-run-sts-app-mode ${TARGET}-app)
@@ -371,7 +373,7 @@ create_multiple_override_test(ets_modules_multiple_override_test ${CMAKE_CURRENT
 
 function(create_multiple_implement_test TARGET WORK_DIR SOURCE_DIR)
     prepare_incompatible_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR} "multiple_implement")
-    # test a2_extends_a1_i1.sts multiple implement method 
+    # test a2_extends_a1_i1.sts multiple implement method
     run_sts_app_mode(${TARGET}-multiple_implement-run-sts-app-mode ${WORK_DIR} "@app.module.MainAbility" "${ABC_FILES}"
                      SPAWN_ENTRYPOINT_FUNCTION "mainMultipleImplement")
     add_dependencies(${TARGET}-multiple_implement-run-sts-app-mode ${TARGET}-app)
@@ -380,7 +382,7 @@ function(create_multiple_implement_test TARGET WORK_DIR SOURCE_DIR)
         DEPENDS ${TARGET}-multiple_implement-run-sts-app-mode
     )
 
-    # test a2_extends_a1_i2.sts multiple implement method 
+    # test a2_extends_a1_i2.sts multiple implement method
     run_sts_app_mode(${TARGET}-multiple_implement1-run-sts-app-mode ${WORK_DIR} "@app.module1.MainAbility" "${ABC_FILES}"
                      SPAWN_ENTRYPOINT_FUNCTION "mainMultipleImplement1")
     add_dependencies(${TARGET}-multiple_implement1-run-sts-app-mode ${TARGET}-app)
