@@ -1550,10 +1550,6 @@
 15.semantic_rules/07.type_inference/01.smart_types/while_stmt_7.sts
 15.semantic_rules/07.type_inference/01.smart_types/while_stmt_9.sts
 
-#18337 Smart cast doesn't work in for-of statement
-15.semantic_rules/07.type_inference/01.smart_types/for_of_stmt_0.sts
-15.semantic_rules/07.type_inference/01.smart_types/for_of_stmt_1.sts
-
 #18272 Smart cast fails on lambda expression
 15.semantic_rules/07.type_inference/01.smart_types/un1_15.sts
 15.semantic_rules/07.type_inference/01.smart_types/un1_17.sts
