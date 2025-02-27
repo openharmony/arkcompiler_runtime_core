@@ -82,6 +82,7 @@
 03.types/08.reference_types/12.union_types/union_types_normalization/norm_30.sts
 03.types/08.reference_types/12.union_types/union_types_normalization/norm_34.sts
 03.types/08.reference_types/12.union_types/union_types_normalization/norm_35.sts
+03.types/08.reference_types/11.tuple_types/tt_17.sts
 
 # 20936 Access to common union method doesn't work
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_spec_0.sts
@@ -172,18 +173,13 @@
 17.experimental_features/03.array_creation_expressions/expr_3.sts
 # end of es2panda fails
 
-# es2panda fails: panda#14451 Array with reference type elements is not initialized
-17.experimental_features/03.array_creation_expressions/expr_n_12.sts
-17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_7.sts
-# end of es2panda fails
-
-# 16343 Improve typeof result inference, move it to ETSAnalyzer
+# 22989
 07.expressions/17.typeof_expression/tof_obj_21.sts
-07.expressions/01.evaluation_of_expressions/03.operator_precedence/typeof.sts
 
 # es2panda fails: panda Not implemented
 17.experimental_features/03.array_creation_expressions/expr_n_10.sts
 17.experimental_features/03.array_creation_expressions/expr_n_11.sts
+17.experimental_features/03.array_creation_expressions/expr_n_12.sts
 # end of es2panda fails
 
 # not implemented
@@ -203,13 +199,13 @@
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe1.sts
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe2.sts
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe3.sts
+07.expressions/01.evaluation_of_expressions/03.operator_precedence/typeof.sts
 07.expressions/01.evaluation_of_expressions/eval_decl.sts
 07.expressions/08.this_expression/this_in_interface_method.sts
 07.expressions/08.this_expression/this_in_lambda.sts
 07.expressions/08.this_expression/this_in_lambda_negative.sts
 07.expressions/08.this_expression/this_primary_expression_in_lambda.sts
-#19909
-07.expressions/09.field_access_expressions/01.accessing_current_object_fields/nullable_reference_type.sts
+
 #19956
 07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_by_super_of_generic.sts
 07.expressions/09.field_access_expressions/02.accessing_superclass_fields/super_in_object.sts
@@ -269,7 +265,7 @@
 17.experimental_features/15.exceptions/02.non_throwing_functions/lambda_without_default_catch.sts
 17.experimental_features/15.exceptions/03.rethrowing_functions/rethrowing_function_declaration.sts
 17.experimental_features/15.exceptions/03.rethrowing_functions/rethrowing_function_with_non_throwing_function.sts
-# Verifier failures: panda#11531 panda#11972
+# 12250
 07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_1.sts
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/ase1.sts
 # end of verifier problems
@@ -306,7 +302,7 @@
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_79.sts
 #end of #19909
 
-# 19135 Cannot infer array type from context
+# 19720
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_9.sts
 
 #FailKind.ES2PANDA_FAIL #19926 not implemented yet
@@ -342,7 +338,7 @@
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oome1.sts
 # end of es2panda fails
 
-# 20051 Wrong type inferred from a conditional expression with enums
+# 22986
 07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_2.sts
 
 # 20483 es2panda aborts on literal type conversion in field initialization expression
@@ -368,7 +364,7 @@
 06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_41.sts
 # end of es2panda fails
 
-# es2panda fails: panda#14759 Widening + unboxing conversion for compatible types is not provided
+# 22699
 06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_2.sts
 06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_0.sts
 06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_1.sts
@@ -380,7 +376,7 @@
 06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_7.sts
 06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_8.sts
 
-##19809
+# 22700 #19809
 06.contexts_and_conversions/03.numeric_operator_contexts/conv_4.sts
 06.contexts_and_conversions/03.numeric_operator_contexts/conv_5.sts
 06.contexts_and_conversions/03.numeric_operator_contexts/conv_6.sts
@@ -397,25 +393,24 @@
 
 # 17053 Cannot create array of nullish tuples
 
-# 17051 Promise<void> should resolve as undefined
+# 22986 Promise<void> should resolve as undefined
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_func_0.sts
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_0.sts
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_lamb_0.sts
 17.experimental_features/17.async_functions_and_methods/01.async_functions/afunc_0.sts
 17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_0.sts
 
-# 17057, 17360 Cannot launch function returning enum
+# 19930
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_func_19.sts
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_func_20.sts
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_18.sts
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_19.sts
 
-# es2panda fails: panda#11660 panda#11541
+# 22990
 07.expressions/32.lambda_expression/02.lambda_body/lambda_captured_value_type_2.sts
 07.expressions/32.lambda_expression/lambda_evaluation.sts
-# end of es2panda fails
 
-# es2panda fails: panda#14067
+# 19950
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_10.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_11.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_12.sts
@@ -429,33 +424,26 @@
 #19096
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_8.sts
 
-# es2panda fails: panda#12853 es2panda fails on private interface method
+# 23049
 17.experimental_features/11.default_interface_method_declarations/private_interface_methods1.sts
 17.experimental_features/11.default_interface_method_declarations/private_interface_methods2.sts
-# end of es2panda fails
-
-# es2panda fails: panda#12623
-04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_3.sts
-04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_7.sts
-04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.type_compatibility_with_initializer/initializer_compatibility_n_8.sts
-# end of es2panda fails
 
 # es2panda fails: panda#19956
 02.lexical_elements/07.keywords/types_11.sts
 # end of es2panda fails
 
-# es2panda fails: panda#12868
+# es2panda fails: panda#19809
 04.names_declarations_and_scopes/04.scopes/type_param_interface.sts
 # end of es2panda fails
 
 # 15475 Cannot use enum array in for-of statement
 17.experimental_features/07.statements/01.for-of_type_annotation/for_of_10.sts
 
-# 15477 Type conversions are not supported in for-of statement
+# 15484 Type conversions are not supported in for-of statement
 17.experimental_features/07.statements/01.for-of_type_annotation/for_of_15.sts
 17.experimental_features/07.statements/01.for-of_type_annotation/for_of_25.sts
 
-# 20309 Cannot infer Record value type in spec example
+# 20159
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_7.sts
 
 # 20328 Unexpected CTE in Record indexing expression: Value is possibly nullish
@@ -467,14 +455,20 @@
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_8.sts
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_9.sts
 
-# 22219 Cannot use Enum in the Record value
+# 20547 Cannot use Enum in the Record value
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_10.sts
 
 # 20330 Compiler doesn't respect type argument for Array<T>
 05.generics/03.utility_types/04.record_utility_type/rec_3.sts
 05.generics/03.utility_types/04.record_utility_type/rec_4.sts
 
-# es2panda fails: panda#14140
+# ES2PANDA_NEG_FAIL
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_3.sts
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_7.sts
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.type_compatibility_with_initializer/initializer_compatibility_n_8.sts
+06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/spec2.sts
+06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/spec5b.sts
+15.semantic_rules/08.overloading_and_overriding/03.overloading_for_functions/function_import_neg_18.sts
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_0.sts
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_1.sts
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_2.sts
@@ -484,7 +478,7 @@
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_6.sts
 # end of es2panda fails
 
-# es2panda fails: panda#14110
+# es2panda fails: panda#22986
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_ref_8.sts
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_val_6.sts
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_val_7.sts
@@ -500,7 +494,7 @@
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_func_val_9.sts
 # end of es2panda fails
 
-# es2panda fails: panda#14105
+# es2panda fails: panda#15704
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/addition/add_arr_val_2.sts
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/addition/add_arr_val_3.sts
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/addition/add_arr_val_4.sts
@@ -546,7 +540,7 @@
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc2.sts
 # end of es2panda fails
 
-# es2panda fails: panda#13203
+# es2panda fails: panda#23058
 10.interfaces/05.interface_properties/getter_setter_form.sts
 10.interfaces/05.interface_properties/readonly_simple_form_0.sts
 10.interfaces/05.interface_properties/simple_form.sts
@@ -556,6 +550,7 @@
 17.experimental_features/03.array_creation_expressions/expr_1.sts
 17.experimental_features/03.array_creation_expressions/expr_11.sts
 17.experimental_features/03.array_creation_expressions/expr_9.sts
+17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_7.sts
 # end of es2panda fails
 
 # 20289 es2panda aborts on extended conditional expression
@@ -642,7 +637,7 @@
 15.semantic_rules/08.overloading_and_overriding/01.overload-equivalent_signatures/pos_6.sts
 # end of es2panda fails
 
-# es2panda fails: panda:14380 Floating-point type array indexes are not allowed
+# es2panda fails: panda:#14001 Type number cannot be used as an index type
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_access6.sts
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_access7.sts
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_0.sts
@@ -652,13 +647,6 @@
 # 13917 Casting of enum doesn't work as expected
 11.enumerations/02.enumeration_string_values/enum_str_4.sts
 
-# es2panda fails: panda:14545 es2panda aborts on casting union type value with unboxing
-# es2panda fails: panda#14496 Compiler takes two methods with different rest parameters as the same
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_20.sts
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_21.sts
-07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_5.sts
-07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_6.sts
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_28.sts
 #19951
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_0.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_17.sts
@@ -668,6 +656,7 @@
 07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_5.sts
 07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_6.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_27.sts
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1_28.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_6.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_8.sts
 
@@ -686,7 +675,7 @@
 07.expressions/10.method_call_expression/03.step_3_checking_method_modifiers/step3b_n_0.sts
 # end of es2panda fails
 
-# es2panda fails: panda#14578 es2panda fails to pick the most-specific function
+# es2panda fails: panda#23062
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_22.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_23.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_24.sts
@@ -694,7 +683,7 @@
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_26.sts
 # end of es2panda fails
 
-# es2panda fails: panda:#18918 No CTE on using primitive types as alias names
+# 20367
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_4.sts
 03.types/01.predefined_types/01.primitive_types/pt_type_1.sts
 03.types/01.predefined_types/01.primitive_types/pt_type_2.sts
@@ -703,9 +692,8 @@
 03.types/01.predefined_types/01.primitive_types/pt_type_5.sts
 03.types/01.predefined_types/01.primitive_types/pt_type_6.sts
 03.types/01.predefined_types/01.primitive_types/pt_type_8.sts
-# end of es2panda fails
 
-# es2panda fails: panda:14622 Following function call block is always taken as trailing lambda
+# es2panda fails: panda:23063
 17.experimental_features/13.trailing_lambda/trlambda_func_8.sts
 17.experimental_features/13.trailing_lambda/trlambda_met_8.sts
 17.experimental_features/13.trailing_lambda/trlambda_static_met_8.sts
@@ -723,10 +711,7 @@
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/neg_gen1.sts
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/neg_gen2.sts
 
-# 15242 Ensure-Not-Nullish expression for nullish tuple not recognized
-03.types/08.reference_types/11.tuple_types/tt_17.sts
-
-# es2panda fails: panda#15191 es2panda complains on tuple type value in function call argument
+# 20715
 03.types/08.reference_types/11.tuple_types/tt_7.sts
 # 19950
 03.types/08.reference_types/11.tuple_types/tt_10.sts
@@ -734,25 +719,19 @@
 # es2panda fails: panda#15188 es2panda aborts on union in tuple type
 03.types/08.reference_types/11.tuple_types/tt2_31.sts
 
-# es2panda fails: panda:14623 Cannot reference 'this' in this context
+# 19807
 17.experimental_features/13.trailing_lambda/trlambda_met_1.sts
 17.experimental_features/13.trailing_lambda/trlambda_met_3.sts
 17.experimental_features/13.trailing_lambda/trlambda_met_5.sts
 17.experimental_features/13.trailing_lambda/trlambda_static_met_1.sts
 17.experimental_features/13.trailing_lambda/trlambda_static_met_3.sts
 17.experimental_features/13.trailing_lambda/trlambda_static_met_5.sts
-# end of es2panda fails
-
-# es2panda fails: panda:14653 es2panda segfault when optional lambda is omitted
 17.experimental_features/13.trailing_lambda/trlambda_func_15.sts
 # end of es2panda fails
 
 # 15095
 09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/hiding_methods_with_different_access_modifiers_2.sts
 # end 15095
-
-# es2panda: panda#13442 Reworking the equality expression so it aligns with the specification changes
-# end of es2panda fails
 
 # Throwing function types
 17.experimental_features/15.exceptions/01.throwing_functions/lambda.sts
@@ -832,7 +811,7 @@
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_9.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_10.sts
 
-# 14673 Method Overload is not supported
+# 14338
 # enum
 04.names_declarations_and_scopes/05.accesible/type_name_const_enum.sts
 04.names_declarations_and_scopes/05.accesible/type_name_variable_enum.sts
@@ -862,10 +841,10 @@
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_22.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_23.sts
 
-# 15599 cyclic inheritance
+# 14338
 15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_9.sts
 
-# 15605 wrong inherited method selected from abstract class
+# 15185
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_7.sts
 
 # 15767 Cannot select the right method among overloaded ones
@@ -881,16 +860,11 @@
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_11.sts
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_8.sts
 
-# 16022 Failed compilation of Enumeration-Operations
-# Null type annotation is allowed now, these test are incorrect
-# End of tests that are wrong because of null type annotation is allowed now
 
 # Not implemented yet: SyntaxError: #19956 Local type declaration (class, struct, interface and enum) support is not yet implemented.
 09.classes/11.local_classes_and_interfaces/local_class_and_interface_declaration_10.sts
 09.classes/11.local_classes_and_interfaces/local_class_and_interface_declaration_11.sts
 09.classes/11.local_classes_and_interfaces/local_class_and_interface_declaration_12.sts
-09.classes/11.local_classes_and_interfaces/local_class_and_interface_declaration_14.sts
-09.classes/11.local_classes_and_interfaces/local_class_and_interface_declaration_16.sts
 09.classes/11.local_classes_and_interfaces/local_class_and_interface_declaration_17.sts
 #19956
 09.classes/11.local_classes_and_interfaces/local_class_refer_on_constant_0.sts
@@ -1020,7 +994,7 @@
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_var/decl-var_5.sts
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_var/decl-var_8.sts
 
-# 13947 Object Literal of Interface Type is not implemented
+# 19809
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_20.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_21.sts
 
@@ -1118,7 +1092,7 @@
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_cons/call-cons-lit_7.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/spec8.sts
 
-# 16482 Const tuple is not initialized
+# 22339
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_2.sts
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_3.sts
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_4.sts
@@ -1142,10 +1116,6 @@
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_8.sts
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_9.sts
 
-# 20073 es2panda endlessly outputs identical errors in the console until gets killed by timeout
-07.expressions/06.spread_expression/spex_const_44.sts
-07.expressions/06.spread_expression/spex_const_45.sts
-
 # 20774 Fails on spread expression with tuple, tuples in rest parameters not supported
 07.expressions/06.spread_expression/spex_42.sts
 07.expressions/06.spread_expression/spex_46.sts
@@ -1160,6 +1130,8 @@
 07.expressions/06.spread_expression/spex_const_41.sts
 07.expressions/06.spread_expression/spex_const_42.sts
 07.expressions/06.spread_expression/spex_const_43.sts
+07.expressions/06.spread_expression/spex_const_44.sts
+07.expressions/06.spread_expression/spex_const_45.sts
 07.expressions/06.spread_expression/spex_const_46.sts
 07.expressions/06.spread_expression/spex_const_47.sts
 07.expressions/06.spread_expression/spex_func_32.sts
@@ -1261,11 +1233,7 @@
 # 18767 Cannot use $_iterator from superclass
 17.experimental_features/05.iterable_types/it_4.sts
 
-# 16518 CTE expected on assignment of incompatible union types
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/spec2.sts
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/spec5b.sts
-
-# 15667 Function interfaces for throwing and rethrowing functions
+# 23113
 06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/decl_var/decl-var_6.sts
 06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/assn_var/assn-var_6.sts
 06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/decl_field/decl-field_6.sts
@@ -1290,10 +1258,10 @@
 15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_3.sts
 15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_4.sts
 15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_5.sts
-# es2panda fails: 14691 Abstract classes and interfaces cannot be instantied with array creation expression
+# 14962
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/interface_args_12.sts
 07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_2.sts
-# end of 14691 fails
+
 
 # 20213 Generic instantiation depends on arguments order
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_n_3.sts
@@ -1316,7 +1284,7 @@
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_1.sts
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_1.sts
 
-# 17453 keyof if not implemented yet
+# 23069
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_6.sts
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_6.sts
 
@@ -1328,7 +1296,7 @@
 14.ambient_declarations/03.class_declarations/class_declarations_neg_8.sts
 14.ambient_declarations/03.class_declarations/class_declarations_neg_9.sts
 
-# 17358: Avoid variable and type alias name collisions
+# 23067
 02.lexical_elements/07.keywords/types_8.sts
 02.lexical_elements/07.keywords/types_10.sts
 02.lexical_elements/07.keywords/types_2.sts
@@ -1368,11 +1336,12 @@
 # 18272 Smart cast fails on lambda expression
 15.semantic_rules/07.type_inference/01.smart_types/un1_15.sts
 15.semantic_rules/07.type_inference/01.smart_types/un1_17.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_1.sts
 
 10.interfaces/05.interface_properties/external_interface_with_property_0.sts
 10.interfaces/05.interface_properties/external_interface_with_property_1.sts
 
-# 14673,16369, 14338 Function, method, constructor overload signatures
+# 14338 Function, method, constructor overload signatures
 15.semantic_rules/05.type_compatibility/classes_compatibility_2.sts
 15.semantic_rules/08.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_tuple_0.sts
 15.semantic_rules/08.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_tuple_1.sts
@@ -1432,7 +1401,6 @@
 15.semantic_rules/08.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_18.sts
 15.semantic_rules/08.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_19.sts
 15.semantic_rules/08.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_2.sts
-15.semantic_rules/08.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_20.sts
 15.semantic_rules/08.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_21.sts
 15.semantic_rules/08.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_22.sts
 15.semantic_rules/08.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_23.sts
@@ -1457,6 +1425,7 @@
 # end of es2panda fails
 
 #19909
+07.expressions/09.field_access_expressions/01.accessing_current_object_fields/nullable_reference_type.sts
 15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/two_interfaces_0.sts
 15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/two_interfaces_1.sts
 15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/two_interfaces_10.sts
@@ -1484,9 +1453,6 @@
 15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/two_interfaces_8.sts
 15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/two_interfaces_9.sts
 
-# es2panda: #17984
-15.semantic_rules/08.overloading_and_overriding/03.overloading_for_functions/function_import_neg_18.sts
-
 # 18550 es2panda aborts on implicit number conversion
 17.experimental_features/04.indexable_types/ind_interface_7.sts
 17.experimental_features/04.indexable_types/ind_class_6.sts
@@ -1496,16 +1462,13 @@
 17.experimental_features/04.indexable_types/ind_class_13.sts
 17.experimental_features/04.indexable_types/ind_class_16.sts
 
-# es2panda: #17635: Smart cast problem
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_1.sts
-
 # es2panda: #17766 Order of initialization of global const and let
 07.expressions/17.typeof_expression/tof_const_11.sts
 
 # es2panda: #18344 Invalid test, ArkTS doesn't have intersection type
 06.contexts_and_conversions/01.assignment-like_contexts/identity2_10.sts
 
-# es2panda: #18598 import type with the same name as not imported module entity
+# es2panda: #21157
 13.compilation_units/03.import_directives/05.type_binding/type_binding_class_same_name_2.sts
 
 # es2panda: #18843 type compatability
@@ -1513,7 +1476,7 @@
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/ne_0.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/ne_3.sts
 
-# es2panda: 14468 Implement readonly parameters
+# 23065
 04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_0.sts
 04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_1.sts
 04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_10.sts
@@ -1537,7 +1500,7 @@
 04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_context_and_conversion_4.sts
 04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_context_and_conversion_6.sts
 04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_context_and_conversion_8.sts
-# end es2panda
+# end
 
 # es2panda: 19602
 04.names_declarations_and_scopes/05.accesible/type_name_neg_1.sts
@@ -1570,11 +1533,7 @@
 05.generics/03.utility_types/incorrect_utility_type_usage_1.sts
 05.generics/03.utility_types/incorrect_utility_type_usage_2.sts
 
-# 20359 interface T should not be compatible to Partial<T>/Required<T>
-05.generics/03.utility_types/02.required_utility_type/required_compatibility_1.sts
-05.generics/03.utility_types/02.required_utility_type/required_compatibility_0.sts
-
-# 20365: readonly in interface doesn`t work
+# 20907
 05.generics/03.utility_types/03.readonly_utility_type/readonly_type_reassignment_0.sts
 05.generics/03.utility_types/03.readonly_utility_type/readonly_type_reassignment_1.sts
 
@@ -1585,23 +1544,21 @@
 # 20377 getter/setter for class with required segfault/trap
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_0.sts
 
-# 20379 Abstract class is not compatible with Partial<T>/Required<T>
+# 20379
+05.generics/03.utility_types/02.required_utility_type/required_compatibility_1.sts
+05.generics/03.utility_types/02.required_utility_type/required_compatibility_0.sts
 05.generics/03.utility_types/02.required_utility_type/required_abstract.sts
-
-# 20380 multiple optional parameters in class
 05.generics/03.utility_types/01.partial_utility_type/partial_generic.sts
-
-# 20383 missing CTE for incorrect variable initialization
-05.generics/03.utility_types/02.required_utility_type/required_method_1.sts
-
-# 20387 custom getter/setter for interfaces is not working
 05.generics/03.utility_types/02.required_utility_type/required_module_implements_0.sts
+
+# 19809 missing CTE for incorrect variable initialization
+05.generics/03.utility_types/02.required_utility_type/required_method_1.sts
 
 # 20774 rest parameter doesn`t work with tuples
 03.types/08.reference_types/04.literal_types/function_literal_type_18.sts
 # end of 20774
 
-# 20761 no support for package initializer
+# 21888 no support for package initializer
 13.compilation_units/06.compilation_unit_initialization/package/init_once/test.sts
 
 # 20763 cyclic dependencies don't cause compile-time error
@@ -1633,11 +1590,9 @@
 # null stored to the Int[]
 03.types/08.reference_types/13.nullish_types/array_nullable_types_5.sts
 # value was not initialized
-03.types/08.reference_types/07.array_types/object_12.sts
-# value was not initialized
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/02.constant_declarations/const_decl_5.sts
 
-# 21157
+# 21157 Annotation name coinciding with type name gets compiled but shouldn't
 18.annotations/01.declaring_annotations/declaration_coincide_name_n_1.sts
 
 # 21929 - should fail, but compiles

@@ -2,9 +2,6 @@
 13.compilation_units/03.import_directives/05.type_import_binding/type_binding_class.sts
 13.compilation_units/03.import_directives/05.type_import_binding/type_binding_class_alias.sts
 13.compilation_units/03.import_directives/05.type_import_binding/type_binding_interface.sts
-13.compilation_units/03.import_directives/04.default_import_binding/default_import_class.sts
-13.compilation_units/03.import_directives/04.default_import_binding/default_import_function.sts
-13.compilation_units/03.import_directives/04.default_import_binding/default_import_variable.sts
 
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_4.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_5.sts
@@ -13,7 +10,6 @@
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_8.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_9.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_10.sts
-17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_13.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_18.sts
 
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_0.sts
@@ -52,17 +48,6 @@
 17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_47.sts
 17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_48.sts
 
-# Separate module initializer not implemented yet for AOT
-13.compilation_units/03.import_directives/04.default_import_binding/default_import_enum.sts
-13.compilation_units/03.import_directives/04.default_import_binding/default_import_function_gen.sts
-13.compilation_units/03.import_directives/04.default_import_binding/default_import_generic_class.sts
-13.compilation_units/03.import_directives/04.default_import_binding/default_import_interface.sts
-13.compilation_units/03.import_directives/04.default_import_binding/default_import_tuple.sts
-13.compilation_units/03.import_directives/04.default_import_binding/default_import_type.sts
-13.compilation_units/03.import_directives/04.default_import_binding/default_import_union.sts
-13.compilation_units/03.import_directives/04.default_import_binding/multiple_default_export.sts
-13.compilation_units/03.import_directives/04.default_import_binding/multiple_export.sts
-
 ### literal types not supported yet #19926
 spec/03.types/References_Types/unions/union_assignment_12_02.sts
 
@@ -71,31 +56,6 @@ std/core/std_core_typeduarrays__Uint16Array.sts
 ### Issue I8PRJS end
 
 #18046 Update compilation process with modules for AOT mode
-05.generics/03.utility_types/01.partial_utility_type/module_class_0.sts
-05.generics/03.utility_types/01.partial_utility_type/module_class_1.sts
-05.generics/03.utility_types/01.partial_utility_type/module_class_2.sts
-05.generics/03.utility_types/01.partial_utility_type/module_class_3.sts
 05.generics/03.utility_types/01.partial_utility_type/module_extends_0.sts
 05.generics/03.utility_types/01.partial_utility_type/module_extends_1.sts
 05.generics/03.utility_types/01.partial_utility_type/module_extends_2.sts
-05.generics/03.utility_types/01.partial_utility_type/module_extends_3.sts
-05.generics/03.utility_types/01.partial_utility_type/module_implements_0.sts
-05.generics/03.utility_types/01.partial_utility_type/module_implements_1.sts
-05.generics/03.utility_types/01.partial_utility_type/module_implements_2.sts
-05.generics/03.utility_types/01.partial_utility_type/module_implements_3.sts
-05.generics/03.utility_types/01.partial_utility_type/module_interface_0.sts
-05.generics/03.utility_types/01.partial_utility_type/module_interface_1.sts
-05.generics/03.utility_types/01.partial_utility_type/module_interface_2.sts
-05.generics/03.utility_types/01.partial_utility_type/module_interface_3.sts
-05.generics/03.utility_types/02.required_utility_type/required_module_abstract.sts
-05.generics/03.utility_types/02.required_utility_type/required_module_class_0.sts
-05.generics/03.utility_types/02.required_utility_type/required_module_extends.sts
-05.generics/03.utility_types/02.required_utility_type/required_module_interface_0.sts
-13.compilation_units/03.import_directives/05.type_binding/type_binding_abstract_class.sts
-13.compilation_units/03.import_directives/05.type_binding/type_binding_class.sts
-13.compilation_units/03.import_directives/05.type_binding/type_binding_class_alias.sts
-13.compilation_units/03.import_directives/05.type_binding/type_binding_class_same_name.sts
-13.compilation_units/03.import_directives/05.type_binding/type_binding_interface.sts
-13.compilation_units/03.import_directives/05.type_binding/type_binding_var_boxed.sts
-13.compilation_units/03.import_directives/05.type_binding/type_binding_var_default.sts
-13.compilation_units/03.import_directives/05.type_binding/type_binding_var_primitive.sts

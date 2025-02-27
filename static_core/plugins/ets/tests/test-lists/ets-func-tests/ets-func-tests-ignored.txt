@@ -61,6 +61,7 @@ spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Param
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/nullish_expr/loop/undefined-expression-loop-while.sts
 ### issue 19953
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/numeric/expr/numeric-double-object-zero-expression.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/numeric/expr/numeric-short-nonzero-expres
 ### Trailing lambda issues
 ### Valid cases but not supported features
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_03.sts
