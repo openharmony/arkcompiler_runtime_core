@@ -14,12 +14,72 @@
  */
 
 #include "ani.h"
+#include "ani_options_parser.h"
+#include "ani_options.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
+#include "utils/pandargs.h"
 
 namespace ark::ets::ani {
+
+extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version, ani_vm **result)
+{
+    ANI_DEBUG_TRACE(env);
+    ANI_CHECK_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
+
+    if (!IsVersionSupported(version)) {
+        return ANI_ERROR;  // NOTE: Unsupported version?
+    }
+
+    size_t optionsSize = options->nr_options;
+    const ani_option *optionsArr = options->options;
+
+    ANIOptionsParser aniParser(optionsSize, optionsArr);
+
+    ANIOptions aniOptions;
+    PandArgParser paParser;
+
+    // Add runtime options
+    aniOptions.AddOptions(&paParser);
+    paParser.Parse(aniParser.GetRuntimeOptions());
+
+    if (!Runtime::Create(aniOptions)) {
+        LOG(ERROR, RUNTIME) << "Cannot create runtime";
+        return ANI_ERROR;
+    }
+
+    auto coroutine = EtsCoroutine::GetCurrent();
+    ASSERT(coroutine != nullptr);
+
+    *result = coroutine->GetPandaVM();
+    ASSERT(*result != nullptr);
+
+    return ANI_OK;
+}
+
+static ani_status DestroyVM(ani_vm *vm)
+{
+    ANI_DEBUG_TRACE(env);
+    ANI_CHECK_RETURN_IF_EQ(vm, nullptr, ANI_INVALID_ARGS);
+
+    auto runtime = Runtime::GetCurrent();
+    if (runtime == nullptr) {
+        LOG(ERROR, RUNTIME) << "Cannot destroy ANI VM, there is no current runtime";
+        return ANI_ERROR;
+    }
+
+    auto pandaVm = PandaEtsVM::FromAniVM(vm);
+    auto mainVm = runtime->GetPandaVM();
+    if (pandaVm == mainVm) {
+        Runtime::Destroy();
+    } else {
+        PandaEtsVM::Destroy(pandaVm);
+    }
+
+    return ANI_OK;
+}
 
 extern "C" ani_status ANI_GetCreatedVMs(ani_vm **vmsBuffer, ani_size vmsBufferLength, ani_size *result)
 {
@@ -51,14 +111,15 @@ NO_UB_SANITIZE static ani_status GetEnv(ani_vm *vm, uint32_t version, ani_env **
     ANI_DEBUG_TRACE(env);
     ANI_CHECK_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
 
+    if (!IsVersionSupported(version)) {
+        return ANI_ERROR;  // NOTE: Unsupported version?
+    }
+
     PandaEtsVM *pandaVM = PandaEtsVM::FromAniVM(vm);
     EtsCoroutine *coroutine = EtsCoroutine::CastFromThread(pandaVM->GetAssociatedThread());
     if (coroutine == nullptr) {
         LOG(ERROR, ANI) << "Cannot get environment";
         return ANI_ERROR;
-    }
-    if (version != ANI_VERSION_1) {
-        return ANI_ERROR;  // NOTE: Unsupported version?
     }
     *result = coroutine->GetEtsNapiEnv();
     return ANI_OK;
@@ -127,25 +188,13 @@ static ani_status DetachCurrentThread(ani_vm *vm)
     return ANI_OK;
 }
 
-[[noreturn]] static void NotImplementedAPI(int nr)
-{
-    LOG(FATAL, ANI) << "Not implemented vm_api, nr=" << nr;
-    UNREACHABLE();
-}
-
-template <int NR, typename R, typename... Args>
-static R NotImplementedAdapter([[maybe_unused]] Args... args)
-{
-    NotImplementedAPI(NR);
-}
-
 // clang-format off
 const __ani_vm_api VM_API = {
     nullptr,
     nullptr,
     nullptr,
     nullptr,
-    NotImplementedAdapter<4>,
+    DestroyVM,
     GetEnv,
     AttachCurrentThread,
     DetachCurrentThread,

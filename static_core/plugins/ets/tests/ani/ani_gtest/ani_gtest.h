@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 #include <cstdlib>
+#include <vector>
 
 #include "libpandabase/macros.h"
 #include "plugins/ets/runtime/ani/ani.h"
@@ -32,32 +33,39 @@ public:
         const char *stdlib = std::getenv("ARK_ETS_STDLIB_PATH");
         ASSERT_NE(stdlib, nullptr);
 
-        std::vector<EtsVMOption> optionsVector {{EtsOptionType::ETS_BOOT_FILE, stdlib}};
+        const std::string optionPrefix = "--ext:";
 
+        // Create boot-panda-files options
+        std::string bootFileString = optionPrefix + "--boot-panda-files=" + stdlib;
         const char *abcPath = std::getenv("ANI_GTEST_ABC_PATH");
         if (abcPath != nullptr) {
-            optionsVector.push_back({EtsOptionType::ETS_BOOT_FILE, abcPath});
+            bootFileString += ":";
+            bootFileString += abcPath;
         }
 
-        EtsVMInitArgs vmArgs;
-        vmArgs.version = ETS_NAPI_VERSION_1_0;
-        vmArgs.options = optionsVector.data();
-        vmArgs.nOptions = static_cast<ets_int>(optionsVector.size());
+        ani_option bootFileOption = {bootFileString.data(), nullptr};
 
-        ASSERT_TRUE(ETS_CreateVM(&etsVm_, &etsEnv_, &vmArgs) == ETS_OK) << "Cannot create ETS VM";
+        std::vector<ani_option> options;
+        options.push_back(bootFileOption);
+
+        ani_options optionsPtr = {options.size(), options.data()};
+        ASSERT_TRUE(ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vm_) == ANI_OK);
 
         // Get ANI API
-        ani_size nrVMs;
-        ASSERT_TRUE(ANI_GetCreatedVMs(&vm_, 1, &nrVMs) == ANI_OK) << "Cannot get ani vm";
         ASSERT_TRUE(vm_->GetEnv(ANI_VERSION_1, &env_) == ANI_OK) << "Cannot get ani env";
-        uint32_t aniVersin;
-        ASSERT_TRUE(env_->GetVersion(&aniVersin) == ANI_OK) << "Cannot get ani version";
-        ASSERT_TRUE(aniVersin == ANI_VERSION_1) << "Incorrect ani version";
+        uint32_t aniVersion;
+        ASSERT_TRUE(env_->GetVersion(&aniVersion) == ANI_OK) << "Cannot get ani version";
+        ASSERT_TRUE(aniVersion == ANI_VERSION_1) << "Incorrect ani version";
+
+        // Get ETS Env
+        ets_size nVms = 0;
+        ASSERT_TRUE(ETS_GetCreatedVMs(&etsVm_, 1, &nVms) == ETS_OK) << "Cannot get ETS napi vm";
+        ASSERT_TRUE(etsVm_->GetEnv(&etsEnv_, ETS_NAPI_VERSION_1_0) == ETS_OK) << "Cannot get ETS napi env";
     }
 
     void TearDown() override
     {
-        ASSERT_TRUE(etsVm_->DestroyEtsVM() == ETS_OK) << "Cannot destroy ETS VM";
+        ASSERT_TRUE(vm_->DestroyVM() == ANI_OK) << "Cannot destroy ANI VM";
     }
 
     template <typename R, typename... Args>
