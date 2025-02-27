@@ -1076,6 +1076,68 @@ NO_UB_SANITIZE static ani_status Array_GetRegion_Byte(ani_env *env, ani_array_by
     return GetPrimitiveTypeArrayRegion(env, array, offset, length, nativeBuffer);
 }
 
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Array_New_Ref(ani_env *env, ani_type type, ani_size length, ani_ref initialElement,
+                                               ani_array_ref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    ANI_CHECK_RETURN_IF_GT(length, std::numeric_limits<uint32_t>::max(), ANI_INVALID_ARGS);
+    CHECK_PTR_ARG(type);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    EtsClass *internalClass = s.ToInternalType(type);
+    EtsObjectArray *internalArray = EtsObjectArray::Create(internalClass, static_cast<uint32_t>(length));
+    ANI_CHECK_RETURN_IF_EQ(internalArray, nullptr, ANI_OUT_OF_MEMORY);
+    if (initialElement != nullptr) {
+        EtsObject *obj = s.ToInternalType(initialElement);
+        for (ani_size i = 0; i < length; i++) {
+            internalArray->Set(static_cast<uint32_t>(i), obj);
+        }
+    }
+    return s.AddLocalRef(reinterpret_cast<EtsObject *>(internalArray), reinterpret_cast<ani_ref *>(result));
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Array_Set_Ref(ani_env *env, ani_array_ref array, ani_size index, ani_ref ref)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(array);
+
+    ScopedManagedCodeFix s(env);
+    EtsObjectArray *internalArray = s.ToInternalType(array);
+    const auto length = internalArray->GetLength();
+    ANI_CHECK_RETURN_IF_GE(index, length, ANI_OUT_OF_RANGE);
+
+    EtsObject *obj = s.ToInternalType(ref);
+    if (obj != nullptr) {
+        auto componentClass = internalArray->GetClass()->GetComponentType();
+        if (!obj->IsInstanceOf(componentClass)) {
+            return ANI_INVALID_TYPE;
+        }
+    }
+    internalArray->Set(static_cast<uint32_t>(index), obj);
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Array_Get_Ref(ani_env *env, ani_array_ref array, ani_size index, ani_ref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(array);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    EtsObjectArray *internalArray = s.ToInternalType(array);
+    const auto length = internalArray->GetLength();
+    ANI_CHECK_RETURN_IF_GE(index, length, ANI_OUT_OF_RANGE);
+
+    return s.AddLocalRef(internalArray->Get(static_cast<uint32_t>(index)), result);
+}
+
 template <bool IS_FUNCTION>
 static ani_status DoBindNative(ScopedManagedCodeFix &s, const PandaVector<EtsMethod *> &etsMethods,
                                const ani_native_function *functions, ani_size nrFunctions)
@@ -4877,9 +4939,9 @@ const __ani_interaction_api INTERACTION_API = {
     Array_SetRegion_Long,
     Array_SetRegion_Float,
     Array_SetRegion_Double,
-    NotImplementedAdapter<115>,
-    NotImplementedAdapter<116>,
-    NotImplementedAdapter<117>,
+    Array_New_Ref,
+    Array_Set_Ref,
+    Array_Get_Ref,
     NotImplementedAdapter<118>,
     NotImplementedAdapter<119>,
     NotImplementedAdapter<120>,

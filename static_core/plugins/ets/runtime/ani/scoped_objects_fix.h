@@ -95,6 +95,12 @@ public:
         return reinterpret_cast<EtsArray *>(GetInternalType(array));
     }
 
+    EtsObjectArray *ToInternalType(ani_array_ref array)
+    {
+        ASSERT(!IsNullishValue(array));
+        return reinterpret_cast<EtsObjectArray *>(GetInternalType(array));
+    }
+
     EtsObject *ToInternalType(ani_ref ref)
     {
         if (IsUndefined(ref)) {

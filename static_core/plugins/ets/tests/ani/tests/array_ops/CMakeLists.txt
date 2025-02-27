@@ -49,3 +49,20 @@ ani_add_gtest(ani_test_array_region_double
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_double_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_double_test.sts
 )
+
+ani_add_gtest(ani_test_array_new_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_new_ref_test.cpp
+)
+
+ani_add_gtest(ani_test_array_get_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_get_ref_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_get_ref_test.sts
+)
+
+ani_add_gtest(ani_test_array_set_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_set_ref_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_set_ref_test.sts
+)
+
+
+
