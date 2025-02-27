@@ -14,9 +14,9 @@
  */
 
 import {
-  value,
+  destructuredImport,
 } from 'destructured_import_js';
 
 function checkDestructuredImport(): boolean {
-  return value ? true : false;
+  return destructuredImport ? true : false;
 }

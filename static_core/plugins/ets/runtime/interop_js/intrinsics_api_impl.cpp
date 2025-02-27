@@ -24,11 +24,9 @@
 #include "runtime/coroutines/stackful_coroutine.h"
 
 // NOLINTBEGIN(readability-identifier-naming)
-extern "C" {
 // CC-OFFNXT(G.FMT.10-CPP) project code style
 napi_status __attribute__((weak))
-napi_load_module_with_info(napi_env env, const char *path, const char *module_info, napi_value *result);
-}
+napi_load_module_with_module_request(napi_env env, const char *request_name, napi_value *result);
 // NOLINTEND(readability-identifier-naming)
 
 static bool StringStartWith(std::string_view str, std::string_view startStr)
@@ -39,45 +37,24 @@ static bool StringStartWith(std::string_view str, std::string_view startStr)
 
 namespace ark::ets::interop::js {
 
-static bool IsNoNativeOhmUrl(std::string_view url)
+[[maybe_unused]] static bool NotNativeOhmUrl(std::string_view url)
 {
     constexpr std::string_view PREFIX_BUNDLE = "@bundle:";
     constexpr std::string_view PREFIX_NORMALIZED = "@normalized:";
     constexpr std::string_view PREFIX_PACKAGE = "@package:";
-    if (StringStartWith(url, PREFIX_BUNDLE)) {
-        return true;
-    }
-    // Not final solution, should have unified way to support all ohmurl later
-    if (StringStartWith(url, PREFIX_NORMALIZED) || StringStartWith(url, PREFIX_PACKAGE)) {
-        INTEROP_LOG(FATAL) << "These formats are not supported now";
-        UNREACHABLE();
-    }
-    return false;
+    return StringStartWith(url, PREFIX_BUNDLE) || StringStartWith(url, PREFIX_NORMALIZED) ||
+           StringStartWith(url, PREFIX_PACKAGE) || (url[0] != '@');
 }
 
-static std::pair<std::string, std::string> ResolveOhmUrlStartWithBundle(std::string_view url)
-{
-    constexpr std::string_view PREFIX_BUNDLE = "@bundle:";
-    std::string moduleRequestName(url.substr(PREFIX_BUNDLE.size()));
-    size_t index = moduleRequestName.find('/');
-    index = moduleRequestName.find('/', index + 1);
-    if (index == std::string::npos) {
-        INTEROP_LOG(FATAL) << "The OhmUrl is invalid";
-    }
-    std::string bundleAndModuleName = moduleRequestName.substr(0, index);
-    std::string filePath = moduleRequestName.substr(index + 1);
-    return {bundleAndModuleName, filePath};
-}
-
-static JSValue *LoadJSModule(std::string_view moduleName)
+[[maybe_unused]] static JSValue *LoadJSModule(const PandaString &moduleName)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
     auto env = ctx->GetJSEnv();
-    auto [bundleAndModuleName, filePath] = ResolveOhmUrlStartWithBundle(moduleName);
+    INTEROP_CODE_SCOPE_ETS(coro);
+    NapiScope jsHandleScope(env);
     napi_value result;
-    auto status = napi_load_module_with_info(env, filePath.c_str(), bundleAndModuleName.c_str(), &result);
+    auto status = napi_load_module_with_module_request(env, moduleName.c_str(), &result);
     if (status == napi_pending_exception) {
         napi_value exp;
         NAPI_CHECK_FATAL(napi_get_and_clear_last_exception(env, &exp));
@@ -344,16 +321,17 @@ JSValue *JSRuntimeLoadModule(EtsString *module)
     auto env = ctx->GetJSEnv();
 
     PandaString moduleName = module->GetMutf8();
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
+    if (NotNativeOhmUrl(moduleName)) {
+        return LoadJSModule(moduleName);
+    }
+#endif
     auto [mod, func] = ResolveModuleName(moduleName);
 
     napi_value modObj;
     {
         ScopedNativeCodeThread etsNativeScope(coro);
         NapiEscapableScope jsHandleScope(env);
-        if (IsNoNativeOhmUrl(moduleName)) {
-            return LoadJSModule(moduleName);
-        }
-
         napi_value requireFn;
         NAPI_CHECK_FATAL(napi_get_named_property(env, GetGlobal(env), func.data(), &requireFn));
 

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,24 +43,7 @@ let __extends =
 			d.prototype = b === null ? Object.create(b) : ((Ctor.prototype = b.prototype), new Ctor());
 		};
 	})();
-exports.__esModule = true;
-exports.updateObjectId =
-	exports.getOuterObj =
-	exports.testOuterObject =
-	exports.testSecondObjCls =
-	exports.testObjCls =
-	exports.getObjectId =
-	exports.getObjectName =
-	exports.getId =
-	exports.getEdu =
-	exports.changeName =
-	exports.getDetails =
-	exports.getName =
-	exports.testObject =
-	exports.TestSecondClass =
-	exports.TestUserClass =
-		void 0;
-let TestUserClass = /** @class */ (function () {
+export let TestUserClass = /** @class */ (function () {
 	function TestUserClass(name, age, id, education, description) {
 		this.name = name;
 		this.age = age;
@@ -76,8 +59,7 @@ let TestUserClass = /** @class */ (function () {
 	};
 	return TestUserClass;
 })();
-exports.TestUserClass = TestUserClass;
-let TestSecondClass = /** @class */ (function (_super) {
+export let TestSecondClass = /** @class */ (function (_super) {
 	__extends(TestSecondClass, _super);
 	function TestSecondClass(...args) {
 		return (_super !== null && _super.apply(this, args)) || this;
@@ -90,49 +72,39 @@ let TestSecondClass = /** @class */ (function (_super) {
 	};
 	return TestSecondClass;
 })(TestUserClass);
-exports.TestSecondClass = TestSecondClass;
-exports.testObject = {
+export let testObject = {
 	name: 'TestName',
 	id: 555,
 };
-function getName(obj) {
+export function getName(obj) {
 	return obj.name;
 }
-exports.getName = getName;
-function getDetails(obj) {
+export function getDetails(obj) {
 	return obj.getDetails();
 }
-exports.getDetails = getDetails;
-function changeName(obj, name) {
+export function changeName(obj, name) {
 	obj.name = name;
 	return obj.name;
 }
-exports.changeName = changeName;
-function getEdu(obj) {
+export function getEdu(obj) {
 	return obj.education;
 }
-exports.getEdu = getEdu;
-function getId(obj) {
+export function getId(obj) {
 	return obj.getProtectedId();
 }
-exports.getId = getId;
-function getObjectName(obj) {
+export function getObjectName(obj) {
 	return obj.name;
 }
-exports.getObjectName = getObjectName;
-function getObjectId(obj) {
+export function getObjectId(obj) {
 	return obj.getProtectedId();
 }
-exports.getObjectId = getObjectId;
-exports.testObjCls = new TestUserClass('TestName', 30, 456, 'testEdu', 'testDescription');
-exports.testSecondObjCls = new TestSecondClass('TestNameTwo', 40, 789, 'testEdu1', 'testDescription1');
+export let testObjCls = new TestUserClass('TestName', 30, 456, 'testEdu', 'testDescription');
+export let testSecondObjCls = new TestSecondClass('TestNameTwo', 40, 789, 'testEdu1', 'testDescription1');
 let testInnerObject = { id: 123 };
-exports.testOuterObject = { id: 456, testInnerObject: testInnerObject };
-function getOuterObj(obj) {
+export let testOuterObject = { id: 456, testInnerObject: testInnerObject };
+export function getOuterObj(obj) {
 	return obj.testInnerObject.id;
 }
-exports.getOuterObj = getOuterObj;
-function updateObjectId(obj, newId) {
+export function updateObjectId(obj, newId) {
 	obj.id = newId;
 }
-exports.updateObjectId = updateObjectId;

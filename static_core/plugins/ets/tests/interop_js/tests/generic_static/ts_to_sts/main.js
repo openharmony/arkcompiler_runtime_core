@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,31 +28,16 @@ let __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (ConstrFoo.prototype = b.prototype, new ConstrFoo());
     };
 })();
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.InterfaceStatic = exports.checkInstance = exports.UserClassStatic = exports.User = 
-exports.UnionStatic = exports.SubsetByValueStatic = exports.SubsetByRefStatic = 
-exports.ExtraSetStatic = exports.LiteralStatic = exports.GenericExtends = exports.GenericStatic = 
-exports.user = exports.BaseObj = exports.tsTuple = exports.tsLiteralStop = exports.tsLiteralStart = 
-exports.tsArr = exports.tsBool = exports.tsString = exports.tsInt = void 0;
-exports.genericStaticMethodCallFromTs = genericStaticMethodCallFromTs;
-exports.genericClassExtendsCallFromTs = genericClassExtendsCallFromTs;
-exports.genericLiteralCallFromTs = genericLiteralCallFromTs;
-exports.genericExtraSetCallFromTs = genericExtraSetCallFromTs;
-exports.genericSubsetByRefStaticCallFromTs = genericSubsetByRefStaticCallFromTs;
-exports.genericSubsetByValueStaticCallFromTs = genericSubsetByValueStaticCallFromTs;
-exports.genericUnionStaticCallFromTs = genericUnionStaticCallFromTs;
-exports.userClassFromTs = userClassFromTs;
-exports.userInterfaceFromTs = userInterfaceFromTs;
-exports.tsInt = 1;
-exports.tsString = 'str';
-exports.tsBool = true;
-exports.tsArr = [exports.tsInt];
-exports.tsLiteralStart = 'start';
-exports.tsLiteralStop = 'stop';
-exports.tsTuple = [exports.tsInt, exports.tsBool];
-exports.BaseObj = { a: exports.tsInt };
-exports.user = { tsInt: exports.tsInt };
-let GenericStatic = /** @class */ (function () {
+export let tsInt = 1;
+export let tsString = 'str';
+export let tsBool = true;
+export let tsArr = [tsInt];
+export let tsLiteralStart = 'start';
+export let tsLiteralStop = 'stop';
+export let tsTuple = [tsInt, tsBool];
+export let BaseObj = { a: tsInt };
+export let user = { tsInt: tsInt };
+export let GenericStatic = /** @class */ (function () {
     function genericStatic() {
     }
     genericStatic.get = function (value) {
@@ -60,23 +45,21 @@ let GenericStatic = /** @class */ (function () {
     };
     return genericStatic;
 }());
-exports.GenericStatic = GenericStatic;
-function genericStaticMethodCallFromTs(arg) {
+export function genericStaticMethodCallFromTs(arg) {
     return GenericStatic.get(arg);
 }
-let GenericExtends = /** @class */ (function (_super) {
+export let GenericExtends = /** @class */ (function (_super) {
     __extends(genericExtends, _super);
     function genericExtends(...args) {
         return _super !== null && _super.apply(this, args) || this;
     }
     return genericExtends;
 }(GenericStatic));
-exports.GenericExtends = GenericExtends;
-;
-function genericClassExtendsCallFromTs(arg) {
+
+export function genericClassExtendsCallFromTs(arg) {
     return GenericExtends.get(arg);
 }
-let LiteralStatic = /** @class */ (function () {
+export let LiteralStatic = /** @class */ (function () {
     function literalStatic() {
     }
     literalStatic.get = function (value) {
@@ -84,11 +67,10 @@ let LiteralStatic = /** @class */ (function () {
     };
     return literalStatic;
 }());
-exports.LiteralStatic = LiteralStatic;
-function genericLiteralCallFromTs(arg) {
+export function genericLiteralCallFromTs(arg) {
     return LiteralStatic.get(arg);
 }
-let ExtraSetStatic = /** @class */ (function () {
+export let ExtraSetStatic = /** @class */ (function () {
     function extraSetStatic() {
     }
     extraSetStatic.get = function (value) {
@@ -96,11 +78,10 @@ let ExtraSetStatic = /** @class */ (function () {
     };
     return extraSetStatic;
 }());
-exports.ExtraSetStatic = ExtraSetStatic;
-function genericExtraSetCallFromTs(arg) {
+export function genericExtraSetCallFromTs(arg) {
     return ExtraSetStatic.get(arg);
 }
-let SubsetByRefStatic = /** @class */ (function () {
+export let SubsetByRefStatic = /** @class */ (function () {
     function subsetByRefStatic() {
     }
     subsetByRefStatic.get = function (value) {
@@ -108,11 +89,10 @@ let SubsetByRefStatic = /** @class */ (function () {
     };
     return subsetByRefStatic;
 }());
-exports.SubsetByRefStatic = SubsetByRefStatic;
-function genericSubsetByRefStaticCallFromTs(arg) {
+export function genericSubsetByRefStaticCallFromTs(arg) {
     return SubsetByRefStatic.get(arg);
 }
-let SubsetByValueStatic = /** @class */ (function () {
+export let SubsetByValueStatic = /** @class */ (function () {
     function subsetByValueStatic() {
     }
     subsetByValueStatic.get = function (value) {
@@ -120,11 +100,10 @@ let SubsetByValueStatic = /** @class */ (function () {
     };
     return subsetByValueStatic;
 }());
-exports.SubsetByValueStatic = SubsetByValueStatic;
-function genericSubsetByValueStaticCallFromTs(arg) {
+export function genericSubsetByValueStaticCallFromTs(arg) {
     return SubsetByValueStatic.get(arg);
 }
-let UnionStatic = /** @class */ (function () {
+export let UnionStatic = /** @class */ (function () {
     function unionStatic() {
     }
     unionStatic.get = function (value) {
@@ -132,18 +111,16 @@ let UnionStatic = /** @class */ (function () {
     };
     return unionStatic;
 }());
-exports.UnionStatic = UnionStatic;
-function genericUnionStaticCallFromTs(arg) {
+export function genericUnionStaticCallFromTs(arg) {
     return UnionStatic.get(arg);
 }
-let User = /** @class */ (function () {
+export let User = /** @class */ (function () {
     function user(value) {
         this.value = value;
     }
     return user;
 }());
-exports.User = User;
-let UserClassStatic = /** @class */ (function () {
+export let UserClassStatic = /** @class */ (function () {
     function userClassStatic() {
     }
     userClassStatic.get = function (value) {
@@ -151,15 +128,13 @@ let UserClassStatic = /** @class */ (function () {
     };
     return userClassStatic;
 }());
-exports.UserClassStatic = UserClassStatic;
-let checkInstance = function (a, b) {
+export let checkInstance = function (a, b) {
     return a instanceof b;
 };
-exports.checkInstance = checkInstance;
-function userClassFromTs(arg) {
+export function userClassFromTs(arg) {
     return UserClassStatic.get(arg);
 }
-let InterfaceStatic = /** @class */ (function () {
+export let InterfaceStatic = /** @class */ (function () {
     function interfaceStatic() {
     }
     interfaceStatic.get = function (value) {
@@ -167,7 +142,6 @@ let InterfaceStatic = /** @class */ (function () {
     };
     return interfaceStatic;
 }());
-exports.InterfaceStatic = InterfaceStatic;
-function userInterfaceFromTs(arg) {
+export function userInterfaceFromTs(arg) {
     return InterfaceStatic.get(arg);
 }

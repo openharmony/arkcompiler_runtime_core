@@ -113,7 +113,7 @@ function(panda_ets_interop_js_arkjsvm_gtest TARGET)
     )
     add_dependencies(${TARGET} ${TARGET_GTEST_PACKAGE})
 
-    set(JS_COMPILATION_OPTIONS --module)
+    set(JS_COMPILATION_OPTIONS --module --merge-abc)
     if(ARG_COMPILATION_JS_WITH_CJS_ON)
         set(JS_COMPILATION_OPTIONS --commonjs)
     endif()

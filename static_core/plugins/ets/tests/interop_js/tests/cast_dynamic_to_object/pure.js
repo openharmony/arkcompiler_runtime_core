@@ -14,18 +14,14 @@
  */
 'use strict';
 
-function funcReturnTypeNull() {
+export function funcReturnTypeNull() {
     return null;
 }
 
-function funcReturnTypeUndefined() {
+export function funcReturnTypeUndefined() {
     return undefined;
 }
 
-function funcArgType(arg) {
+export function funcArgType(arg) {
     return arg;
 }
-
-exports.funcReturnTypeNull = funcReturnTypeNull;
-exports.funcReturnTypeUndefined = funcReturnTypeUndefined;
-exports.funcArgType = funcArgType;

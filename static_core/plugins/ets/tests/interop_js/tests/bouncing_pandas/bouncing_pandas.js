@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@ class SBody {
 	m = 0;
 }
 
-function bouncingPandas() {
+export function bouncingPandas() {
 	const vec = new Vec2(1200, 800);
 	const countSB = 512;
 	const arrSBody = [];
@@ -59,5 +59,3 @@ function bouncingPandas() {
 		return 0;
 	}
 }
-
-exports.bouncingPandas = bouncingPandas;

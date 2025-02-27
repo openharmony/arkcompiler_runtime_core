@@ -19,7 +19,6 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__user_class_method_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/user_class/user_class.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__child_class_method_ts_to_sts
@@ -27,7 +26,6 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__child_class_method_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/child_class/child_class.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__interface_class_method_ts_to_sts
@@ -35,7 +33,6 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__interface_class_method_ts_to_
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/interface_class/interface_class.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__put_another_instance_class_ts_to_sts
@@ -43,7 +40,6 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__put_another_instance_class_ts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/put_another_instance_class/put_another_instance_class.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__static_class_ts_to_sts
@@ -51,7 +47,6 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__static_class_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/static_class/static_class.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__private_class_ts_to_sts
@@ -59,7 +54,6 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__private_class_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/private_class/private_class.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__protected_class_ts_to_sts
@@ -67,7 +61,6 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__protected_class_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/protected_class/protected_class.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__child_protected_class_ts_to_sts
@@ -75,7 +68,6 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__child_protected_class_ts_to_s
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/child_protected_class/child_protected_class.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__abstract_class_ts_to_sts
@@ -83,5 +75,4 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__abstract_class_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/abstract_class/abstract_class.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
-    COMPILATION_JS_WITH_CJS_ON
 )

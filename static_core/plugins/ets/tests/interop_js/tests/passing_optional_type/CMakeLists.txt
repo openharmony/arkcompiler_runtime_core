@@ -19,5 +19,4 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_passing_optional_type
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/passing_optional_type.sts
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/passing_optional_type.js
     ETS_CONFIG ${ETS_CONFIG}
-    COMPILATION_JS_WITH_CJS_ON
 )

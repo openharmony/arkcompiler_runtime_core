@@ -13,15 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.returnThisTestClassInstance = 
-    exports.ReturnThisTestClass = 
-    exports.testFuncReturnStr = 
-    exports.getThisAsAsyncFunction = 
-    exports.getThisAsFunction = 
-    exports.getThis = 
-    exports.TestClass = 
-        void 0;
 const TEST_ARRAY = [1, 2, 3, 4, 5];
 const TEST_STRING = 'Test';
 const TEST_NUMBER = 100;
@@ -29,7 +20,7 @@ const TEST_NULL = null;
 const TEST_MAP = new Map([['TEST', 'test']]);
 const TEST_TUPLE = ['Test', 1];
 const TEST_OBJ = true;
-class TestClass {
+export class TestClass {
     constructor() {
         this.testString = TEST_STRING;
         this.testNumber = TEST_NUMBER;
@@ -38,32 +29,26 @@ class TestClass {
         return this;
     }
 }
-exports.TestClass = TestClass;
-function getThis() {
+export function getThis() {
     return this;
 }
-exports.getThis = getThis;
-function getThisAsFunction() {
+export function getThisAsFunction() {
     return this;
 }
-exports.getThisAsFunction = getThisAsFunction;
-async function getThisAsAsyncFunction() {
+export async function getThisAsAsyncFunction() {
     return this;
 }
-exports.getThisAsAsyncFunction = getThisAsAsyncFunction;
-function testFuncReturnStr() {
+export function testFuncReturnStr() {
     return TEST_STRING;
 }
-exports.testFuncReturnStr = testFuncReturnStr;
-class ReturnThisTestClass {
+export class ReturnThisTestClass {
     constructor() {
         this.getThis = getThis.bind(this);
         this.getThisAsFunction = getThisAsFunction.bind(this);
         this.getThisAsAsyncFunction = getThisAsAsyncFunction.bind(this);
     }
 }
-exports.ReturnThisTestClass = ReturnThisTestClass;
-exports.returnThisTestClassInstance = new ReturnThisTestClass();
+export let returnThisTestClassInstance = new ReturnThisTestClass();
 const testClass = () => {
     let testClass = new TestClass();
     let testVal = testClass.getThis();

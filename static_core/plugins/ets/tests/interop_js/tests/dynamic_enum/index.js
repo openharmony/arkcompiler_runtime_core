@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 'use strict';
 
-function makeEnum(arr) {
+export function makeEnum(arr) {
 	let obj = Object.create(null);
 	for (let val of arr) {
 		obj[val] = Symbol(val);
@@ -22,7 +22,7 @@ function makeEnum(arr) {
 	return Object.freeze(obj);
 }
 
-function jsEnum() {
+export function jsEnum() {
 	const Direction = {
 		Up: 'Up',
 		Down: 'Down',
@@ -32,13 +32,9 @@ function jsEnum() {
 	return Direction;
 }
 
-function isEq(val1, val2) {
+export function isEq(val1, val2) {
 	if (val1 === val2) {
 		return true;
 	}
 	return false;
 }
-
-exports.makeEnum = makeEnum;
-exports.jsEnum = jsEnum;
-exports.isEq = isEq;

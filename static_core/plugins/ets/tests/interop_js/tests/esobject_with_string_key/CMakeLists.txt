@@ -19,5 +19,4 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__esobject_with_string_key_js_t
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esobjectwithstringkey.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esobjectwithstringkey.js
-    COMPILATION_JS_WITH_CJS_ON
 )

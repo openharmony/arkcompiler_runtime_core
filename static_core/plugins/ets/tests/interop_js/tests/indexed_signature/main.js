@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.SimpleObject = exports.handler = exports.notFound = exports.tsInt = void 0;
-exports.tsInt = 1;
-exports.notFound = 'Not found';
-exports.handler = {
+export let tsInt = 1;
+export let notFound = 'Not found';
+export let handler = {
     get: function (target, property) {
         if (!isNaN(property)) {
             return target.items[property];
@@ -28,7 +26,7 @@ exports.handler = {
         if (target[property]) {
             return target[property];
         }
-        return exports.notFound;
+        return notFound;
     },
     set: function (target, property, value) {
         if (!isNaN(property)) {
@@ -39,8 +37,8 @@ exports.handler = {
         return true;
     }
 };
-exports.SimpleObject = {
-    int: exports.tsInt,
+export let SimpleObject = {
+    int: tsInt,
     items: [],
-    add: function () { return exports.tsInt + exports.tsInt; },
+    add: function () { return tsInt + tsInt; },
 };
