@@ -87,6 +87,8 @@ public:
      * the active->non_active transition (see the state diagram in coroutine.h)
      */
     void OnCoroBecameNonActive(Coroutine *co) override;
+    /// Should be called at the end of the VM native interface call
+    void OnNativeCallExit(Coroutine *co) override;
 
     /* debugging tools */
     /**
@@ -97,6 +99,10 @@ public:
     void EnableCoroutineSwitch() override;
     bool IsCoroutineSwitchDisabled() override;
     bool IsJsMode() override;
+    bool IsDrainQueueInterfaceEnabled()
+    {
+        return enableDrainQueueIface_;
+    }
 
     /* profiling tools */
     CoroutineStats &GetPerfStats()
@@ -209,6 +215,10 @@ private:
     CoroutineStats stats_;
 
     os::memory::Mutex eWorkerCreationLock_;
+
+    // Feature flags, eventually will be refactored into some structure.
+    // Should we just store the initial CoroutineConfig?..
+    bool enableDrainQueueIface_ = false;
 };
 
 }  // namespace ark

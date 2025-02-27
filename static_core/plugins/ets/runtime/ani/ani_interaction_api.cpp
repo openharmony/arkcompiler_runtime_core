@@ -16,6 +16,7 @@
 #include "ani.h"
 #include "macros.h"
 #include "libpandabase/utils/logger.h"
+#include "runtime/coroutines/coroutine_scopes.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ani/ani_type_info.h"
@@ -343,6 +344,9 @@ template <typename EtsValueType, typename AniType, typename MethodType, typename
 static ani_status DoGeneralMethodCall(ScopedManagedCodeFix &s, ani_object obj, MethodType method, AniType *result,
                                       Args args)
 {
+    // Trigger coroutine manager native call events
+    ScopedCoroutineNativeCall c(s.GetCoroutine());
+
     EtsMethod *m = nullptr;
     if constexpr (std::is_same_v<MethodType, ani_method>) {
         m = ResolveVirtualMethod(&s, obj, method);

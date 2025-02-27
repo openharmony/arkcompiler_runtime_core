@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -145,6 +145,18 @@ public:
 #ifndef NDEBUG
     void PrintRunnables(const PandaString &requester);
 #endif
+    /**
+     * @brief Returns the number of coroutines in the runnables queue that belong to a certain type.
+     * Since another worker can concurrently add more coroutines before or after the call, the returned value
+     * should be used only for debugging purposes AND ONLY IF YOU KNOW WHAT EXACTLY ARE YOU DOING.
+     * @param type the type of coroutines to count
+     */
+    size_t GetRunnablesCount(Coroutine::Type type)
+    {
+        os::memory::LockHolder lock(runnablesLock_);
+        return std::count_if(runnables_.begin(), runnables_.end(),
+                             [type](Coroutine *c) { return (c->GetType() == type); });
+    }
 
     /* profiling tools */
     CoroutineWorkerStats &GetPerfStats()
