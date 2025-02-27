@@ -31,6 +31,7 @@
 #include "debuggable_thread.h"
 #include "inspector_server.h"
 #include "object_repository.h"
+#include "types/evaluation_result.h"
 #include "types/numeric_id.h"
 #include "types/pause_on_exceptions_state.h"
 #include "types/property_descriptor.h"
@@ -100,7 +101,8 @@ private:
 
     void NotifyExecutionEnded();
 
-    InspectorServer::EvaluationResult Evaluate(PtThread thread, const std::string &bytecodeBase64);
+    Expected<EvaluationResult, std::string> Evaluate(PtThread thread, const std::string &bytecodeBase64,
+                                                     size_t frameNumber);
 
     ALWAYS_INLINE bool CheckVmDead() REQUIRES_SHARED(vmDeathLock_)
     {
@@ -118,6 +120,8 @@ private:
     size_t GetNewExceptionId();
 
     DebuggableThread *GetDebuggableThread(PtThread thread);
+
+    void RegisterMethodHandlers();
 
 private:
     bool breakOnStart_;

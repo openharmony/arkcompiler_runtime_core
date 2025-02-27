@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,11 +19,14 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
+#include <utility>
 
-#include "macros.h"
 #include "utils/json_builder.h"
 #include "utils/logger.h"
+
+#include "json_serialization/jrpc_error.h"
 
 namespace ark {
 class JsonObject;
@@ -70,6 +73,18 @@ protected:
         Send([&sessionId, id, &result](JsonObjectBuilder &reply) {
             reply.AddProperty("id", id);
             reply.AddProperty("result", std::forward<Result>(result));
+
+            if (!sessionId.empty()) {
+                reply.AddProperty("sessionId", sessionId);
+            }
+        });
+    }
+
+    void ReplyError(const std::string &sessionId, Id id, JRPCError &&error)
+    {
+        Send([&sessionId, id, &error](JsonObjectBuilder &reply) {
+            reply.AddProperty("id", id);
+            reply.AddProperty("error", std::move(error));
 
             if (!sessionId.empty()) {
                 reply.AddProperty("sessionId", sessionId);

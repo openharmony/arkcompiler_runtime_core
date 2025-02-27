@@ -29,7 +29,7 @@
 
 #include "session_manager.h"
 #include "source_manager.h"
-#include "types/exception_details.h"
+#include "types/evaluation_result.h"
 #include "types/numeric_id.h"
 #include "types/pause_on_exceptions_state.h"
 #include "types/property_descriptor.h"
@@ -48,7 +48,6 @@ public:
                                                              std::set<std::string_view> &, const std::string *);
     using FrameInfoHandler = std::function<void(FrameId, std::string_view, std::string_view, size_t,
                                                 const std::vector<Scope> &, const std::optional<RemoteObject> &)>;
-    using EvaluationResult = std::optional<std::pair<RemoteObject, std::optional<ExceptionDetails>>>;
 
 public:
     explicit InspectorServer(Server &server);
@@ -94,12 +93,15 @@ public:
     void OnCallDebuggerStepInto(std::function<void(PtThread)> &&handler);
     void OnCallDebuggerStepOut(std::function<void(PtThread)> &&handler);
     void OnCallDebuggerStepOver(std::function<void(PtThread)> &&handler);
+    void OnCallDebuggerEvaluateOnCallFrame(
+        std::function<Expected<EvaluationResult, std::string>(PtThread, const std::string &, size_t)> &&handler);
 
     void OnCallRuntimeEnable(std::function<void(PtThread)> &&handler);
     void OnCallRuntimeGetProperties(
         std::function<std::vector<PropertyDescriptor>(PtThread, RemoteObjectId, bool)> &&handler);
     void OnCallRuntimeRunIfWaitingForDebugger(std::function<void(PtThread)> &&handler);
-    void OnCallRuntimeEvaluate(std::function<EvaluationResult(PtThread, const std::string &)> &&handler);
+    void OnCallRuntimeEvaluate(
+        std::function<Expected<EvaluationResult, std::string>(PtThread, const std::string &)> &&handler);
 
 private:
     struct CallFrameInfo {
@@ -116,9 +118,9 @@ private:
     void AddCallFrameInfo(JsonArrayBuilder &callFrames, const CallFrameInfo &callFrameInfo,
                           const std::vector<Scope> &scopeChain, PtThread thread,
                           const std::optional<RemoteObject> &objThis);
-    std::unique_ptr<UrlBreakpointResponse> SetBreakpointByUrl(const std::string &sessionId,
-                                                              const UrlBreakpointRequest &breakpointRequest,
-                                                              const std::function<SetBreakpointHandler> &handler);
+    Expected<std::unique_ptr<UrlBreakpointResponse>, std::string> SetBreakpointByUrl(
+        const std::string &sessionId, const UrlBreakpointRequest &breakpointRequest,
+        const std::function<SetBreakpointHandler> &handler);
     void AddLocations(UrlBreakpointResponse &response, const std::set<std::string_view> &sourceFiles, size_t lineNumber,
                       PtThread thread);
     static void AddHitBreakpoints(JsonArrayBuilder &hitBreakpointsBuilder,
