@@ -21,6 +21,7 @@
 #include "plugins/ets/runtime/types/ets_atomic_flag.h"
 #include "plugins/ets/runtime/types/ets_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_shared_memory.h"
+#include "plugins/ets/runtime/types/ets_arraybuffer.h"
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"
 #include "plugins/ets/runtime/types/ets_typeapi_type.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_declaration.h"

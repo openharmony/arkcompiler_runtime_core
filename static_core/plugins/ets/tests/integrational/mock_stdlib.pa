@@ -53,3 +53,7 @@
     ldobj.obj a0, std.core.OutOfMemoryError.cause
     return.obj
 }
+
+
+## escompat.ArrayBuffer ##
+.record escompat.ArrayBuffer

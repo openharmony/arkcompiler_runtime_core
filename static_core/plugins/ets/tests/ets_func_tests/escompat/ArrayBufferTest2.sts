@@ -20,9 +20,8 @@ function main(): int {
   failures += test(sliceArrayBufferInt(), "Slice ArrayBuffer with various int parameters");
   failures += test(sliceArrayBufferNumberNegativeEnd, "Slice ArrayBuffer with negative end number parameters"); 
   failures += test(sliceArrayBufferNumberNegativeStart, "Slice ArrayBuffer with negative start number parameters");
-  failures += test(sliceArrayBufferNumberStartExceedsLength(), "Slice ArrayBuffer with start number parameter exceeds length"); 
-  failures += test(sliceArrayBufferNumberEndExceedsLength(), "Slice ArrayBuffer with end number parameter exceeds length"); 
-  failures += test(resizeArrayBufferInt, "Resize ArrayBuffer with various int parameters");
+  failures += test(sliceArrayBufferNumberStartExceedsLength(), "Slice ArrayBuffer with start number parameter exceeds length");
+  failures += test(sliceArrayBufferNumberEndExceedsLength(), "Slice ArrayBuffer with end number parameter exceeds length");
   failures += test(isViewArrayBuffer, "isView ArrayBuffer with various parameters");
   return failures == 0 ? 0 : 1;
 }
@@ -63,7 +62,7 @@ function createArrayBufferOfVariousLengths(): int {
     new ArrayBuffer(-1)
     return 1
   } catch (e) {
-    if (!(e instanceof NegativeArraySizeError)) return 1
+    if (!(e instanceof RangeError)) return 1
     // expected
   }
 
@@ -151,27 +150,6 @@ function sliceArrayBufferNumberEndExceedsLength(): int {
   end = Number.POSITIVE_INFINITY;
   if (a.slice(start, end).byteLength != 5)
     return 1;
-  
-  return 0;
-}
-
-/**
-* Check that resize() method of ArrayBuffer increase buffer and byteLength correspondingly
-*/
-function resizeArrayBufferInt(): int {
-  let a = new ArrayBuffer(8);
-  
-  a.resize(12);
-  Assertions.assertEquals(12, a.byteLength)
-
-  try {
-    a.resize(0);
-    if (a.byteLength != 0)
-      return 1;
-  }
-  catch(e) {
-    return 1;
-  }
   
   return 0;
 }

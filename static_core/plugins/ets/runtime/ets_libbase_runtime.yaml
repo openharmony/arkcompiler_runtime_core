@@ -69,6 +69,9 @@ coretypes:
 - managed_class: std.core.CondVar
   mirror_class: ark::ets::EtsCondVar
 
+- managed_class: escompat.ArrayBuffer
+  mirror_class: ark::ets::EtsEscompatArrayBuffer
+
 intrinsics_namespace: ark::ets::intrinsics
 
 intrinsics:
@@ -1502,6 +1505,46 @@ intrinsics:
 ########################
 # escompat.ArrayBuffer #
 ########################
+  - name: EscompatArrayBufferAt
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: at
+    static: false
+    signature:
+      ret: i8
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatArrayBufferAt
+
+  - name: EscompatArrayBufferSet
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i8]
+    impl: ark::ets::intrinsics::EtsEscompatArrayBufferSet
+
+  - name: EscompatArrayBufferSetValues
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: setValues
+    static: false
+    signature:
+      ret: void
+      args: [escompat.ArrayBuffer, i32]
+    impl: ark::ets::intrinsics::EtsEscompatArrayBufferSetValues
+
+  - name: EscompatArrayBufferAllocateNonMovable
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: allocateNonMovable
+    static: true
+    signature:
+      ret: i8[]
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsEscompatArrayBufferAllocateNonMovable
+
   - name: EscompatArrayBufferFromEncodedString
     space: ets
     class_name: escompat.ArrayBuffer

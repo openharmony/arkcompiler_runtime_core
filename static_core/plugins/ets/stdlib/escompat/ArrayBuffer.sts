@@ -56,8 +56,15 @@ export class ArrayBuffer extends Buffer
      */
     public constructor(length: int)
     {
-        this.data = new byte[length]
+        super()
+        if (length < 0) {
+            throw new RangeError("length can't be less than 0")
+        }
+        this.data = ArrayBuffer.allocateNonMovable(length)
         this._byteLength = length
+        this.dataExternal = 0
+        this.isExternal = false
+        this.wasDetached = false
     }
 
     /**
@@ -107,10 +114,8 @@ export class ArrayBuffer extends Buffer
         let result = new ArrayBuffer(resultLength);
 
         if (resultLength == 0) return result
-        for (let i = 0; i < resultLength; ++i) {
-            result.set(i, this.data[startIndex + i])
-        }
-
+        result.setValues(this, startIndex)
+        
         return result
     }
 
@@ -150,9 +155,7 @@ export class ArrayBuffer extends Buffer
      *
      * @returns byte at index
      */
-    public override at(i: int): byte {
-        return this.data[i]
-    }
+    public native override at(pos: int): byte
 
     /**
      * Sets data at specified index.
@@ -162,9 +165,7 @@ export class ArrayBuffer extends Buffer
      *
      * @param i index
      */
-    internal override set(i: int, b: byte) {
-        this.data[i] = b
-    }
+    public native override set(pos: int, val: byte): void
 
     public override getByteLength(): int {
         return this._byteLength;
@@ -174,14 +175,7 @@ export class ArrayBuffer extends Buffer
         return this._byteLength
     }
 
-    /**
-     * Resizes the ArrayBuffer
-     *
-     * @param newLen new length
-     */
-    public resize(newLen : number): void {
-        /* return */ this.resize(newLen as int)
-    }
+    private native setValues(other: ArrayBuffer, begin: int): void
 
     /**
      * Resizes the ArrayBuffer
@@ -190,14 +184,17 @@ export class ArrayBuffer extends Buffer
      */
     //NOTE: return undefined
     public resize(newLen : int): void {
-        let newData = new byte[newLen]
-        let size = min(newLen, this.data.length)
-        for (let i = 0; i < size; ++i) {
-            newData[i] = this.data[i]
+        let resizable = !this.wasDetached && !this.isExternal
+        if (!resizable) {
+            throw new Error("ArrayBuffer is not resizable")
         }
-        this.data = newData
+        if (newLen > this._byteLength) {
+            throw new Error("resize only supports shrinking")
+        }
         this._byteLength = newLen
     }
+
+    private native static allocateNonMovable(length: int): byte[]
 
     /**
     * Creates a new ArrayBuffer from an array of bytes.
@@ -328,9 +325,13 @@ export class ArrayBuffer extends Buffer
     }
 
     
+    // Fields' order is important due to alignment
     private data: byte[]
     /** Length in bytes */
     private _byteLength: int
+    private dataExternal: long
+    private isExternal: boolean
+    private wasDetached: boolean
 
 
     /**
