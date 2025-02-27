@@ -63,6 +63,7 @@
   "plugins/ets/tests/ets-templates": "*",
   "plugins/ets/tests/ets_test_suite/arrays": "*",
   "plugins/ets/tests/ets_test_suite/atomics/CMakeLists.txt": {"bc-40001": "*"},
+  "plugins/ets/tests/ets_test_suite/backtrace/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/ets_test_suite/CMakeLists.txt": "*",
   "plugins/ets/tests/ets_test_suite/containers/CMakeLists.txt": "*",
   "plugins/ets/tests/ets_test_suite/coroutines/CMakeLists.txt": {"bc-40001": "*"},

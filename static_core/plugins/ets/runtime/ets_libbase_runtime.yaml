@@ -2065,6 +2065,16 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::StdCorePrintStackTrace
 
+  - name: StdCoreEtsStepArkTest
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: EtsStepArkTest
+    static: true
+    signature:
+      ret: void
+      args: []
+    impl: ark::ets::intrinsics::StdCoreEtsStepArkTest
+
   - name: StdCoreStackTraceLines
     space: ets
     class_name: std.core.ETSGLOBAL

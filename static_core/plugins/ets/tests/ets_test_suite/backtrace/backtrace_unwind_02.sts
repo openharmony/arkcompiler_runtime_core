@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef RUNTIME_RUNTIME_HELPERS_H_
-#define RUNTIME_RUNTIME_HELPERS_H_
+let c: number = 5;
 
-namespace ark {
+let d: number = 2;
 
-void PrintStackTrace();
-void EtsStepArkTest();
+let result: number = 6;
 
-}  // namespace ark
+function isPath(): number {
+  return c * d;
+}
 
-#endif
+function getMathData(): number {
+  for(let index = 0; index< 2; index++) {
+        c = c + index;
+        result = isPath();
+        EtsStepArkTest()
+  }
+  return c * d;
+}
+
+getMathData();
