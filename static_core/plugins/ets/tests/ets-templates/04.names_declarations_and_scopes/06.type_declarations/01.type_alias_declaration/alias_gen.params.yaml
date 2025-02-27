@@ -252,7 +252,7 @@ cases:
 
     - defs: |-
           class C<out T> {
-            fld: T
+            readonly fld: T
             constructor(p: T) {
                 this.fld = p
             }
