@@ -428,9 +428,13 @@ static ALWAYS_INLINE inline std::optional<typename T::cpptype> JSValueGetByName(
 {
     auto env = ctx->GetJSEnv();
     napi_value jsVal = jsvalue->GetNapiValue(env);
-    napi_status rc = napi_get_named_property(env, jsVal, name, &jsVal);
-    if (UNLIKELY(NapiThrownGeneric(rc))) {
-        return {};
+    {
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        // No access to jsvalue after this line
+        napi_status rc = napi_get_named_property(env, jsVal, name, &jsVal);
+        if (UNLIKELY(NapiThrownGeneric(rc))) {
+            return {};
+        }
     }
     return T::UnwrapWithNullCheck(ctx, env, jsVal);
 }
@@ -445,6 +449,8 @@ template <typename T>
     if (UNLIKELY(jsPropVal == nullptr)) {
         return false;
     }
+    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+    // No access to jsvalue after this line
     napi_status rc = napi_set_named_property(env, jsVal, name, jsPropVal);
     return !NapiThrownGeneric(rc);
 }

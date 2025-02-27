@@ -200,6 +200,7 @@ napi_value CallETSStatic(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Sp
 
 Expected<Method *, PandaString> ResolveEntryPoint(InteropCtx *ctx, std::string_view entryPoint)
 {
+    ASSERT_MANAGED_CODE();
     auto const packageSep = entryPoint.rfind('.');
     if (UNLIKELY(packageSep == PandaString::npos)) {
         return Unexpected(PandaString("Bad entrypoint format: ") + PandaString(entryPoint));

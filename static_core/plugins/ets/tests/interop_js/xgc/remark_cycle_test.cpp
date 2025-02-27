@@ -67,6 +67,7 @@ public:
         {
             // Create 2 shared references on Concurrent phase, should be processed on Remark phase
             os::memory::ReadLockHolder lock(*coro->GetPandaVM()->GetRendezvous()->GetMutatorLock());
+            ScopedNativeCodeThread nativeCode(coro);
             NAPI_CHECK_FATAL(napi_call_function(env, global, createRefsFunction, 1U, &etsVm, nullptr));
         }
         auto *xrefStorage = ctx->GetSharedRefStorage();

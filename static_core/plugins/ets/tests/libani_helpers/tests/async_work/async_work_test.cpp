@@ -46,7 +46,6 @@ public:
 
     void Wait()
     {
-        ScopedManagedCodeThread scopedCode(Coroutine::GetCurrent());
         event_.Lock();
         Coroutine::GetCurrent()->GetManager()->Await(&event_);
     }

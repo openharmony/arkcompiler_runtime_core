@@ -360,7 +360,6 @@ bool XGC::Trigger(mem::GC *gc, PandaUniquePtr<GCTask> task)
     auto *coro = EtsCoroutine::GetCurrent();
     auto *ctx = InteropCtx::Current(coro);
     ASSERT(ctx != nullptr);
-    // NOTE(audovichenko): Need a way to wait for the gc. May be Promise? :) // NOTE(ipetrov): Please, no!
     // NOTE(audovichenko): Handle the situation when the function create several equal tasks
     // NOTE(audovichenko): Handle the situation when GC is triggered in one VM but cannot be triggered in another VM.
     if (!ctx->GetXGCVmAdaptor()->StartXRefMarking()) {

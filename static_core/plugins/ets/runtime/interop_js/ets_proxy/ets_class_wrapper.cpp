@@ -65,8 +65,10 @@ napi_value EtsClassWrapper::Wrap(InteropCtx *ctx, EtsObject *etsObject)
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsObject> handle(coro, etsObject);
     ctx->SetPendingNewInstance(handle);
-    NAPI_CHECK_FATAL(napi_new_instance(env, GetJsCtor(env), 0, nullptr, &jsValue));
-
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        NAPI_CHECK_FATAL(napi_new_instance(env, GetJsCtor(env), 0, nullptr, &jsValue));
+    }
     if (this->needProxy_) {
         jsValue = CreateProxy(env, jsValue, this);
     }
@@ -749,6 +751,7 @@ napi_value EtsClassWrapper::CreateProxy(napi_env env, napi_value jsCtor, EtsClas
 /*static*/
 napi_value EtsClassWrapper::MimicGetHandler(napi_env env, napi_callback_info info)
 {
+    ASSERT_SCOPED_NATIVE_CODE();
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_JS(coro);
@@ -762,6 +765,7 @@ napi_value EtsClassWrapper::MimicGetHandler(napi_env env, napi_callback_info inf
     napi_value property = jsArgs[1];
 
     if (GetValueType(env, property) == napi_number) {
+        ScopedManagedCodeThread managedCode(coro);
         ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
         ASSERT(storage != nullptr);
         ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsArgs[0]);
@@ -788,6 +792,7 @@ napi_value EtsClassWrapper::MimicGetHandler(napi_env env, napi_callback_info inf
 /*static*/
 napi_value EtsClassWrapper::MimicSetHandler(napi_env env, napi_callback_info info)
 {
+    ASSERT_SCOPED_NATIVE_CODE();
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_JS(coro);
@@ -797,6 +802,7 @@ napi_value EtsClassWrapper::MimicSetHandler(napi_env env, napi_callback_info inf
     auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &argc, jsArgs->data(), nullptr, nullptr));
 
+    ScopedManagedCodeThread managedCode(coro);
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
     ASSERT(storage != nullptr);
     ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsArgs[0]);
@@ -833,6 +839,7 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, nullptr, &jsThis, &data));
     auto etsClassWrapper = reinterpret_cast<EtsClassWrapper *>(data);
 
+    ScopedManagedCodeThread managedScope(coro);
     EtsObject *etsObject = ctx->AcquirePendingNewInstance();
 
     if (LIKELY(etsObject != nullptr)) {

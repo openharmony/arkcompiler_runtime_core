@@ -29,11 +29,7 @@ public:
         auto ctx = InteropCtx::Current(coro_);
 
         if constexpr (IN_ETS_MANAGED) {
-            ASSERT(coro_->IsManagedCode());
             ctx->UpdateInteropStackInfoIfNeeded();
-        } else if (UNLIKELY(!coro_->IsManagedCode())) {
-            coro_->ManagedCodeBegin();
-            switched_ = true;
         }
         ctx->CallStack().AllocRecord(coro_->GetCurrentFrame(), descr);
     }
@@ -43,16 +39,10 @@ public:
         auto ctx = InteropCtx::Current(EtsCoroutine::CastFromThread(coro_));
 
         ctx->CallStack().PopRecord();
-        if constexpr (IN_ETS_MANAGED) {
-            ASSERT(coro_->IsManagedCode());
-        } else if (UNLIKELY(switched_)) {
-            coro_->ManagedCodeEnd();
-        }
     }
 
 private:
     EtsCoroutine *coro_;
-    bool switched_ = false;
 
     NO_COPY_SEMANTIC(InteropCodeScope);
     NO_MOVE_SEMANTIC(InteropCodeScope);

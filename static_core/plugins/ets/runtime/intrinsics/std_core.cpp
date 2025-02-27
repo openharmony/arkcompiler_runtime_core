@@ -121,6 +121,7 @@ extern "C" void LoadLibrary(ark::ets::EtsString *name)
 
 extern "C" void StdSystemScheduleCoroutine()
 {
+    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
     auto *cm = static_cast<CoroutineManager *>(Coroutine::GetCurrent()->GetVM()->GetThreadManager());
     cm->Schedule();
 }

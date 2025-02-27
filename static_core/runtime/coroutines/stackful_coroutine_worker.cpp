@@ -87,6 +87,7 @@ void StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
     ASSERT(GetCurrentContext()->GetWorker() == this);
     ASSERT(awaitee != nullptr);
     ASSERT(!awaitee->Happened());
+    ASSERT(waiter->IsInNativeCode());
 
     waitersLock_.Lock();
     awaitee->Unlock();
@@ -95,7 +96,6 @@ void StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
 
     runnablesLock_.Lock();
     ASSERT(RunnableCoroutinesExist());
-    ScopedNativeCodeThread n(Coroutine::GetCurrent());
     // will unlock waiters_lock_ and switch ctx.
     // NB! If migration on await is enabled, current coro can migrate to another worker, so
     // IsCrossWorkerCall() will become true after resume!
@@ -165,6 +165,7 @@ void StackfulCoroutineWorker::FinalizeFiberScheduleLoop()
 
 void StackfulCoroutineWorker::CompleteAllAffinedCoroutines()
 {
+    ASSERT_NATIVE_CODE();
     ASSERT(GetCurrentContext()->GetWorker() == this);
     ASSERT(IsDisabledForCrossWorkersLaunch());
 
@@ -172,8 +173,6 @@ void StackfulCoroutineWorker::CompleteAllAffinedCoroutines()
     auto lock = [](auto &&...locks) { ([&]() NO_THREAD_SAFETY_ANALYSIS { locks.Lock(); }(), ...); };
     // CC-OFFNXT(G.FMT.04-CPP): project code style
     auto unlock = [](auto &&...locks) { ([&]() NO_THREAD_SAFETY_ANALYSIS { locks.Unlock(); }(), ...); };
-
-    ScopedManagedCodeThread n(Coroutine::GetCurrent());
 
     // CC-OFFNXT(G.CTL.03): false positive
     while (true) {
@@ -253,7 +252,6 @@ void StackfulCoroutineWorker::ScheduleLoop()
 
 void StackfulCoroutineWorker::ScheduleLoopBody()
 {
-    ScopedManagedCodeThread s(scheduleLoopCtx_);
     while (IsActive()) {
         RequestScheduleImpl();
         os::memory::LockHolder lkRunnables(runnablesLock_);
@@ -317,10 +315,10 @@ void StackfulCoroutineWorker::RequestScheduleImpl()
 {
     // precondition: called within the current worker, no cross-worker calls allowed
     ASSERT(GetCurrentContext()->GetWorker() == this);
+    ASSERT_NATIVE_CODE();
     runnablesLock_.Lock();
 
     // NOTE(konstanting): implement coro migration, work stealing, etc.
-    ScopedNativeCodeThread n(Coroutine::GetCurrent());
     if (RunnableCoroutinesExist()) {
         SuspendCurrentCoroAndScheduleNext();
         ASSERT(!IsCrossWorkerCall() || (Coroutine::GetCurrent()->GetType() == Coroutine::Type::MUTATOR));

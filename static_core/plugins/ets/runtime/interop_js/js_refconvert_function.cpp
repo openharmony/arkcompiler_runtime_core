@@ -39,6 +39,7 @@ napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
     auto *sharedRef = AtomicLoad(static_cast<ets_proxy::SharedReference **>(data), std::memory_order_acquire);
     ASSERT(sharedRef != nullptr);
 
+    ScopedManagedCodeThread managedScope(coro);
     auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr);
     auto method = etsThis->GetClass()->GetMethod(ark::ets::INVOKE_METHOD_NAME);

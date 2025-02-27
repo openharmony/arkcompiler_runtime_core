@@ -28,6 +28,7 @@ namespace ark::ets::intrinsics {
 
 static void RunExclusiveTask(mem::Reference *taskRef, mem::GlobalObjectStorage *refStorage)
 {
+    ScopedManagedCodeThread managedCode(EtsCoroutine::GetCurrent());
     auto *taskObj = EtsObject::FromCoreType(refStorage->Get(taskRef));
     refStorage->Remove(taskRef);
     LambdaUtils::InvokeVoid(EtsCoroutine::GetCurrent(), taskObj);
@@ -61,7 +62,7 @@ Coroutine *TryCreateEACoroutine(PandaEtsVM *etsVM, bool needInterop, bool &limit
     return exclusiveCoro;
 }
 
-void RunTaskOnEACoroutine(PandaEtsVM *etsVM, bool needInterop, Coroutine *exclusiveCoro, mem::Reference *taskRef)
+void RunTaskOnEACoroutine(PandaEtsVM *etsVM, bool needInterop, mem::Reference *taskRef)
 {
     auto *refStorage = etsVM->GetGlobalObjectStorage();
     auto *coroMan = etsVM->GetCoroutineManager();
@@ -72,7 +73,6 @@ void RunTaskOnEACoroutine(PandaEtsVM *etsVM, bool needInterop, Coroutine *exclus
         poster->Post(RunExclusiveTask, taskRef, refStorage);
         etsVM->RunEventLoop();
     } else {
-        ScopedManagedCodeThread ss(exclusiveCoro);
         RunExclusiveTask(taskRef, refStorage);
     }
     coroMan->DestroyExclusiveWorker();
@@ -107,7 +107,7 @@ void ExclusiveLaunch(EtsObject *task, uint8_t needInterop)
             if (eaCoro == nullptr) {
                 return;
             }
-            RunTaskOnEACoroutine(etsVM, supportInterop, eaCoro, taskRef);
+            RunTaskOnEACoroutine(etsVM, supportInterop, taskRef);
         });
         event.Wait();
         t.detach();

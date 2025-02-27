@@ -1099,6 +1099,7 @@ void SettleJsPromise(EtsObject *value, napi_deferred deferred, EtsInt state)
         auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
         completionValue = refconv->Wrap(ctx, value);
     }
+    ScopedNativeCodeThread nativeScope(coro);
     napi_status status = state == EtsPromise::STATE_RESOLVED ? napi_resolve_deferred(env, deferred, completionValue)
                                                              : napi_reject_deferred(env, deferred, completionValue);
     if (status != napi_ok) {
