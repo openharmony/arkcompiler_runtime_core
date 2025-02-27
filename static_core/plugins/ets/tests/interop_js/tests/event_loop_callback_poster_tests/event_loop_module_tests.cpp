@@ -42,10 +42,10 @@ public:
 TEST_F(EventLoopCallbackPosterTest, ManyPostsTest)
 {
     std::string messageCollector;  // it's empty string
-    uv_loop_t *loop = EventLoop::GetEventLoop(Coroutine::GetCurrent());
+    uv_loop_t *loop = EventLoop::GetEventLoop();
     EventLoopCallbackPosterFactoryImpl factory;
     {
-        auto poster = factory.CreatePoster(Coroutine::GetCurrent());
+        auto poster = factory.CreatePoster();
         poster->Post([&messageCollector] { messageCollector += GetFirstWord(); });
         poster->Post([&messageCollector] { messageCollector += GetSecondWord(); });
         // after 2 posts poster will be deleted with final post of deleter
@@ -58,9 +58,9 @@ TEST_F(EventLoopCallbackPosterTest, ManyPostsTest)
 
 TEST_F(EventLoopCallbackPosterTest, DeletingInPostTest)
 {
-    uv_loop_t *loop = EventLoop::GetEventLoop(Coroutine::GetCurrent());
+    uv_loop_t *loop = EventLoop::GetEventLoop();
     EventLoopCallbackPosterFactoryImpl factory;
-    auto poster = factory.CreatePoster(Coroutine::GetCurrent());
+    auto poster = factory.CreatePoster();
     // run loop only once to avoid deadlock due to mainPoster in runtime
     poster->Post([&poster] { poster = nullptr; });
     ASSERT_NE(poster.get(), nullptr);

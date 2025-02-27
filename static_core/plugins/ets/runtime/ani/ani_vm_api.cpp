@@ -165,8 +165,6 @@ static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, ui
         auto *jsEnv = ifaceTable->CreateJSRuntime();
         ASSERT(jsEnv != nullptr);
         ifaceTable->CreateInteropCtx(exclusiveCoro, jsEnv);
-        auto poster = etsVM->CreateCallbackPoster(exclusiveCoro);
-        exclusiveCoro->GetWorker()->SetCallbackPoster(std::move(poster));
     }
     *result = PandaEtsNapiEnv::GetCurrent();
     return ANI_OK;

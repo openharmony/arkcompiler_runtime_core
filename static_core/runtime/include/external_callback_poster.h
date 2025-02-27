@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,10 +43,23 @@ public:
         });
     }
 
+    void SetDestroyInPlace()
+    {
+        destroyInPlace_ = true;
+    }
+
+    bool NeedDestroyInPlace() const
+    {
+        return destroyInPlace_;
+    }
+
 protected:
     using WrappedCallback = std::function<void()>;
 
     virtual void PostImpl(WrappedCallback &&callback) = 0;
+
+private:
+    bool destroyInPlace_ = false;
 };
 
 class CallbackPosterFactoryIface {
@@ -56,7 +69,7 @@ public:
     NO_COPY_SEMANTIC(CallbackPosterFactoryIface);
     NO_MOVE_SEMANTIC(CallbackPosterFactoryIface);
 
-    virtual PandaUniquePtr<CallbackPoster> CreatePoster(Coroutine *target) = 0;
+    virtual PandaUniquePtr<CallbackPoster> CreatePoster() = 0;
 };
 
 }  // namespace ark

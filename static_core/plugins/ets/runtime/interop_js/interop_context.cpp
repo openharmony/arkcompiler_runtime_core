@@ -556,9 +556,10 @@ void InteropCtx::Init(EtsCoroutine *coro, napi_env env)
     Handshake::VmHandshake(env, coro, ctx->sharedEtsVmState_->stsVMInterface.get());
     auto rType = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
     if (Runtime::GetOptions().IsCoroutineEnableExternalScheduling(rType)) {
-        auto mainPoster = coro->GetPandaVM()->CreateCallbackPoster(coro);
-        ASSERT(mainPoster != nullptr);
-        worker->SetCallbackPoster(std::move(mainPoster));
+        auto workerPoster = coro->GetPandaVM()->CreateCallbackPoster();
+        ASSERT(workerPoster != nullptr);
+        worker->SetCallbackPoster(std::move(workerPoster));
+        worker->SetExternalSchedulingEnabled();
     }
 #endif
 }

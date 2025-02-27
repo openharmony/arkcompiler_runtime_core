@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,13 @@ public:
     NO_MOVE_SEMANTIC(CoroutineWorker);
 
     CoroutineWorker(Runtime *runtime, PandaVM *vm) : runtime_(runtime), vm_(vm) {}
-    virtual ~CoroutineWorker() = default;
+    virtual ~CoroutineWorker()
+    {
+        os::memory::LockHolder l(posterLock_);
+        if (callbackPoster_ != nullptr) {
+            callbackPoster_->SetDestroyInPlace();
+        }
+    }
 
     Runtime *GetRuntime()
     {
@@ -55,21 +61,35 @@ public:
         callbackPoster_ = std::move(poster);
     }
 
-    void ResetCallbackPoster()
+    void SetExternalSchedulingEnabled()
     {
-        callbackPoster_.reset();
+        externalSchedulingEnabled_ = true;
     }
 
-    CallbackPoster *GetCallbackPoster()
+    bool IsExternalSchedulingEnabled() const
     {
-        return callbackPoster_.get();
+        return externalSchedulingEnabled_;
     }
+
+    template <typename PosterCallback>
+    void PostExternalCallback(PosterCallback cb)
+    {
+        os::memory::LockHolder l(posterLock_);
+        if (callbackPoster_ != nullptr) {
+            callbackPoster_->Post(std::move(cb));
+        }
+    }
+
+    void OnCoroBecameActive(Coroutine *co);
 
 private:
     Runtime *runtime_ = nullptr;
     PandaVM *vm_ = nullptr;
     LocalStorage localStorage_;
+    // event loop poster
+    os::memory::Mutex posterLock_;
     PandaUniquePtr<CallbackPoster> callbackPoster_;
+    bool externalSchedulingEnabled_ = false;
 };
 
 }  // namespace ark

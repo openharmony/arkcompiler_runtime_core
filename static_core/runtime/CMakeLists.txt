@@ -151,6 +151,7 @@ set(SOURCES
     coroutines/threaded_coroutine.cpp
     coroutines/stackful_coroutine.cpp
     coroutines/coroutine_manager.cpp
+    coroutines/coroutine_worker.cpp
     coroutines/threaded_coroutine_manager.cpp
     coroutines/stackful_coroutine_manager.cpp
     coroutines/stackful_coroutine_worker.cpp

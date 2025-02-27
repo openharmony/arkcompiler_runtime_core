@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,7 @@ class EventLoopCallbackPoster : public CallbackPoster {
 
 public:
     static_assert(PANDA_ETS_INTEROP_JS);
-    explicit EventLoopCallbackPoster(Coroutine *target);
+    explicit EventLoopCallbackPoster();
     ~EventLoopCallbackPoster() override;
     NO_COPY_SEMANTIC(EventLoopCallbackPoster);
     NO_MOVE_SEMANTIC(EventLoopCallbackPoster);
@@ -73,17 +73,20 @@ public:
     NO_COPY_SEMANTIC(EventLoopCallbackPosterFactoryImpl);
     NO_MOVE_SEMANTIC(EventLoopCallbackPosterFactoryImpl);
 
-    /// @brief Method should create a unique instance of CallbackPoster with inputted strategy of posting
-    PandaUniquePtr<CallbackPoster> CreatePoster(Coroutine *target) override;
+    /**
+     * @brief Creates callback poster to perform async work in EventLoop.
+     * NOTE: This method can only be called from threads that have napi_env (e.g. Main, Exclusive Workers).
+     */
+    PandaUniquePtr<CallbackPoster> CreatePoster() override;
 };
 
 class EventLoop {
 public:
     enum RunMode { RUN_DEFAULT = 0, RUN_ONCE, RUN_NOWAIT };
 
-    static uv_loop_t *GetEventLoop(Coroutine *coro);
+    static uv_loop_t *GetEventLoop();
 
-    static void RunEventLoop(Coroutine *coro, RunMode mode = RunMode::RUN_DEFAULT);
+    static void RunEventLoop(RunMode mode = RunMode::RUN_DEFAULT);
 };
 
 }  // namespace ark::ets::interop::js
