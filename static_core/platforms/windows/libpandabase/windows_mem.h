@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,10 +27,6 @@ static constexpr uint32_t MMAP_FLAG_SHARED = 1;
 static constexpr uint32_t MMAP_FLAG_PRIVATE = 2;
 static constexpr uint32_t MMAP_FLAG_FIXED = 0x10;
 static constexpr uint32_t MMAP_FLAG_ANONYMOUS = 0x20;
-
-void *mmap([[maybe_unused]] void *addr, size_t len, uint32_t prot, int flags, int fildes, off_t off);
-
-int munmap(void *addr, [[maybe_unused]] size_t len);
 
 }  // namespace ark::os::mem
 
