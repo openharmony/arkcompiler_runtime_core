@@ -17,6 +17,15 @@ function sumFunc(): int {
     return (() => 10)() + (() => 20)();
 }
 
+function sum(a: int, b: int): int {
+    let t = Date.now();
+    // mock time-consuming operation
+    while ((Date.now() - t) < 500) {
+        continue;
+    }
+    return a + b;
+}
+
 function main(): int {
     let longTaskTestsuite = new ArkTestsuite("taskpool.LongTask");
     longTaskTestsuite.addTest("ExecuteTest", () =>
@@ -31,6 +40,12 @@ function main(): int {
         taskpool.execute(task);
         expectError(() => { taskpool.execute(task) },
                     new Error("taskpool:: The long task can only be executed once"));
+    });
+    longTaskTestsuite.addTest("LongTaskWithParamsTest", (): void throws =>
+    {
+        let task = new taskpool.LongTask(sum, 100, 200);
+        let res = await taskpool.execute(task);
+        assertEQ(res, 300);
     });
     return longTaskTestsuite.run();
 }

@@ -52,16 +52,25 @@ export namespace taskpool {
      * @class Task provides an interface to create a task to execute in the taskpool
      */
     export class Task {
-        // NOTE(ipetrov, #17246, #17339): support arguments after es2apnda support spread expressions and common function super-type
         /**
          * Create a Task instance
          *
          * @param name The name of task
          * @param func Concurrent function to execute in the taskpool
          */
-        constructor(name: string, func: () => NullishType) {
+        constructor(name: string, func: (p1: never, p2: never, p3: never, p4: never, p5: never, p6: never, p7: never,
+                    p8: never, p9: never, p10: never, p11: never, p12: never, p13: never, p14: never, p15: never,
+                    p16: never) => NullishType, p1?: NullishType, p2?: NullishType, p3?: NullishType, p4?: NullishType,
+                    p5?: NullishType, p6?: NullishType, p7?: NullishType, p8?: NullishType , p9?: NullishType,
+                    p10?: NullishType, p11?: NullishType, p12?: NullishType, p13?: NullishType, p14?: NullishType,
+                    p15?: NullishType, p16?: NullishType) {
             this.name = name;
-            this.func = func;
+            this.func = ():NullishType => {
+                return (func as (p1: NullishType, p2: NullishType, p3: NullishType, p4: NullishType, p5: NullishType,
+                                 p6: NullishType, p7: NullishType, p8: NullishType, p9: NullishType, p10: NullishType,
+                                 p11: NullishType, p12: NullishType, p13: NullishType, p14: NullishType, p15: NullishType,
+                                 p16: NullishType) => NullishType)(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16);
+            };
             this.totalDuration = 0;
             this.ioDuration = 0;
             this.cpuDuration = 0;
@@ -77,8 +86,12 @@ export namespace taskpool {
          *
          * @param func Concurrent function to execute in the taskpool
          */
-        constructor(func: () => NullishType) {
-            this("", func);
+        constructor(func: (p1: never, p2: never, p3: never, p4: never, p5: never, p6: never, p7: never, p8: never,
+                    p9: never, p10: never, p11: never, p12: never, p13: never, p14: never, p15: never, p16: never) => NullishType,
+                    p1?: NullishType, p2?: NullishType, p3?: NullishType, p4?: NullishType, p5?: NullishType,
+                    p6?: NullishType, p7?: NullishType, p8?: NullishType , p9?: NullishType, p10?: NullishType,
+                    p11?: NullishType, p12?: NullishType, p13?: NullishType, p14?: NullishType, p15?: NullishType, p16?: NullishType) {
+            this("", func, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16);
         }
 
         /**
@@ -265,6 +278,7 @@ export namespace taskpool {
         /**
          * Register a callback for this task to receive and handle data from the taskpool task 
          */
+        // NOTE(wang_zhaoyong, #23678): callback with params still has questions, also affects sendData.
         onReceiveData(callback?: () => NullishType): void {
             this.onReceiveCallback = callback;
         }
@@ -496,16 +510,26 @@ export namespace taskpool {
          * @param name The name of long task
          * @param func Concurrent function to execute in the taskpool
          */
-        constructor(name: string, func: () => NullishType) {
-            super(name, func);
+        constructor(name: string, func: (p1: never, p2: never, p3: never, p4: never, p5: never, p6: never, p7: never,
+                    p8: never, p9: never, p10: never, p11: never, p12: never, p13: never, p14: never, p15: never,
+                    p16: never) => NullishType, p1?: NullishType, p2?: NullishType, p3?: NullishType, p4?: NullishType,
+                    p5?: NullishType, p6?: NullishType, p7?: NullishType, p8?: NullishType , p9?: NullishType,
+                    p10?: NullishType, p11?: NullishType, p12?: NullishType, p13?: NullishType, p14?: NullishType,
+                    p15?: NullishType, p16?: NullishType) {
+            super(name, func, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16);
         }
 
         /**
          * Create a LongTask instance
          * @param func Concurrent function to execute in the taskpool
          */
-        constructor(func: () => NullishType) {
-            super("", func);
+        constructor(func: (p1: never, p2: never, p3: never, p4: never, p5: never, p6: never, p7: never,
+                    p8: never, p9: never, p10: never, p11: never, p12: never, p13: never, p14: never, p15: never,
+                    p16: never) => NullishType, p1?: NullishType, p2?: NullishType, p3?: NullishType, p4?: NullishType,
+                    p5?: NullishType, p6?: NullishType, p7?: NullishType, p8?: NullishType , p9?: NullishType,
+                    p10?: NullishType, p11?: NullishType, p12?: NullishType, p13?: NullishType, p14?: NullishType,
+                    p15?: NullishType, p16?: NullishType) {
+            super("", func, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16);
         }
 
         internal override checkExecution(): void {
@@ -542,8 +566,13 @@ export namespace taskpool {
          *
          * @param func the concurrent function to add to the task group
          */
-        addTask(func: () => NullishType): void {
-            this.addTask(new Task(func));
+        addTask(func: (p1: never, p2: never, p3: never, p4: never, p5: never, p6: never, p7: never, p8: never,
+                       p9: never, p10: never, p11: never, p12: never, p13: never, p14: never, p15: never, p16: never) => NullishType,
+                       p1?: NullishType, p2?: NullishType, p3?: NullishType, p4?: NullishType, p5?: NullishType,
+                       p6?: NullishType, p7?: NullishType, p8?: NullishType , p9?: NullishType, p10?: NullishType,
+                       p11?: NullishType, p12?: NullishType, p13?: NullishType, p14?: NullishType, p15?: NullishType,
+                       p16?: NullishType): void {
+            this.addTask(new Task(func, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16));
         }
 
         /**
@@ -1120,4 +1149,3 @@ export namespace taskpool {
     // value is set of executing tasks on this worker
     const workerToTasks: Map<WorkerId, Set<Task>> = new Map<WorkerId, Set<Task>>();
 }
-
