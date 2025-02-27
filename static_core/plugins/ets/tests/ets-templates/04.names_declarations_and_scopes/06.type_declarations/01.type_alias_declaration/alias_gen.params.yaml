@@ -103,11 +103,9 @@ cases:
 
     - defs: |-
           class Outer {
-              class Inner {
-                  public ok = true;
-              }
+              public ok = true;
           }
-          type Shortcut = Outer.Inner;
+          type Shortcut = Outer
       use: |-
           let v: Shortcut = new Shortcut();
           let ok: boolean = v.ok;
