@@ -31,6 +31,9 @@ escompat/ArrayTest.sts
 03.types/08.reference_types/14.type_bigint/bint_tup_8.sts
 03.types/08.reference_types/14.type_bigint/bint_un_8.sts
 
+# Aborts with ERRNO: 11 (Resource temporarily unavailable)
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_23.sts
+
 # 22848
 08.statements/08.for_statements/for_loop_parameters_12.sts
 

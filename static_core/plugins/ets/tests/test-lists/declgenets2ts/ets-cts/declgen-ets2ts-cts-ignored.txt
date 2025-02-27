@@ -1563,6 +1563,9 @@
 09.classes/06.method_declarations/03.abstract_methods/abstract_method_declaration_with_keywords_6.sts
 09.classes/06.method_declarations/06.overriding_methods/override_method_declaration_with_keywords_1.sts
 09.classes/06.method_declarations/06.overriding_methods/override_method_declaration_with_keywords_2.sts
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_n_0.sts
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_n_11.sts
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_n_2.sts
 09.classes/06.method_declarations/09.methods_returning_this/methods_returning_this_09.sts
 09.classes/06.method_declarations/09.methods_returning_this/methods_returning_this_11.sts
 09.classes/06.method_declarations/09.methods_returning_this/methods_returning_this_function.sts
@@ -3166,6 +3169,15 @@ deprecated/15.exceptions/03.rethrowing_functions/rethrowing_function_without_cat
 09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_1.sts
 09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_4.sts
 09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_5.sts
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_1.sts
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_10.sts
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_14.sts
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_16.sts
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_18.sts
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_20.sts
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_22.sts
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_24.sts
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_4.sts
 09.classes/06.method_declarations/09.methods_returning_this/methods_returning_this_interface_02.sts
 09.classes/06.method_declarations/09.methods_returning_this/methods_returning_this_interface_03.sts
 09.classes/06.method_declarations/09.methods_returning_this/methods_returning_this_interface_04.sts
