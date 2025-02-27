@@ -16,6 +16,11 @@ ani_add_gtest(ani_test_class_ops_class_find_field
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_field_test.sts
 )
 
+ani_add_gtest(ani_test_class_ops_class_get_iterator
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_iterator_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_iterator_test.sts
+)
+
 ani_add_gtest(ani_test_class_ops_class_find_static_field
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_static_field_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_static_field_test.sts
