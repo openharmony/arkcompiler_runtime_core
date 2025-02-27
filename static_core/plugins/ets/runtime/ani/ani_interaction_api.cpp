@@ -3429,6 +3429,27 @@ NO_UB_SANITIZE static ani_status String_GetUTF8Size(ani_env *env, ani_string str
     *result = internalString->GetUtf8Length();
     return ANI_OK;
 }
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status String_GetUTF8(ani_env *env, ani_string string, char *utf8Buffer,
+                                                ani_size utf8BufferSize, ani_size *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(string);
+    CHECK_PTR_ARG(utf8Buffer);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    auto internalString = s.ToInternalType(string);
+    auto utf8Length = internalString->GetUtf8Length();
+    if (UNLIKELY(utf8BufferSize < utf8Length || (utf8BufferSize - utf8Length) < 1)) {
+        return ANI_BUFFER_TO_SMALL;
+    }
+    ani_size actualCopiedSize = internalString->CopyDataRegionUtf8(utf8Buffer, 0, utf8Length, utf8Length);
+    utf8Buffer[actualCopiedSize] = '\0';  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    *result = actualCopiedSize;
+    return ANI_OK;
+}
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status String_GetUTF8SubString(ani_env *env, ani_string string, ani_size substr_offset,
@@ -4912,7 +4933,7 @@ const __ani_interaction_api INTERACTION_API = {
     String_GetUTF16SubString,
     String_NewUTF8,
     String_GetUTF8Size,
-    NotImplementedAdapter<75>,
+    String_GetUTF8,
     String_GetUTF8SubString,
     Array_GetLength,
     Array_New_Boolean,
