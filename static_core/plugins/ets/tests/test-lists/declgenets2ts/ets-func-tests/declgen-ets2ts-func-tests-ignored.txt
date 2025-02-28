@@ -1092,3 +1092,8 @@ spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Ex
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue_15669_03.sts
 spec/13.Compilation_Units_Packages_and_Modules/import_export/issue15393/module1/src/issue15393_02.sts
 spec/13.Compilation_Units_Packages_and_Modules/import_export/issue15393/module2/src/issue15393_04.sts
+
+spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/import_interface_with_binding_alias/test0.sts
+spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/import_reexported_namespace/import.sts
+spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/import_reexported_namespace/export.sts
+spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/import_reexported_namespace/reexport.sts

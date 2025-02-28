@@ -295,10 +295,6 @@
 03.types/07.value_types/01.integer_types_and_operations/remainder/remainder_by_zero_short.sts
 # end of es2panda fails
 
-#22786
-13.compilation_units/08.namespace_declarations/simple_spec_pos4.sts
-#end of #22786
-
 #22846
 13.compilation_units/08.namespace_declarations/pack1/namespace_package3.sts
 #end of 22846
