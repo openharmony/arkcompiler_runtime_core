@@ -148,10 +148,18 @@ class StaticWorker implements InternalWorker {
 
     public run<T>(task: () => T): Promise<T> {
         let resolveFn: (val: T) => void;
-        let p = new Promise<T>((resolve: (val: T) => void) => {
+        let rejectFn: (error: NullishType) => void;
+        let p = new Promise<T>((resolve: (val: T) => void, reject: (error: NullishType) => void) => {
             resolveFn = resolve;
+            rejectFn = reject;
         });
-        this.tasks.push((): void => { resolveFn(task()); });
+        this.tasks.push((): void => {
+            try {
+                resolveFn(task());
+            } catch(e){
+                rejectFn(e);
+            }
+        });
         return p;
     }
 
