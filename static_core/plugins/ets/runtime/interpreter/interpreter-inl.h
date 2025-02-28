@@ -326,6 +326,41 @@ public:
     }
 
     template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleEtsCallNameShort()
+    {
+        auto id = this->GetInst().template GetId<FORMAT>();
+        LOG_INST() << "ets.call.name.short v" << this->GetInst().template GetVReg<FORMAT, 0>() << ", v"
+                   << this->GetInst().template GetVReg<FORMAT, 1>() << ", " << std::hex << "0x" << id;
+        // NOTE issue(21892) support callbyname
+        // This stub should be replaced with appropriate handler
+        this->MoveToExceptionHandler();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleEtsCallName()
+    {
+        auto id = this->GetInst().template GetId<FORMAT>();
+        LOG_INST() << "ets.call.name v" << this->GetInst().template GetVReg<FORMAT, 0>() << ", v"
+                   << this->GetInst().template GetVReg<FORMAT, 1>() << ", v"
+                   << this->GetInst().template GetVReg<FORMAT, 2>() << ", v"
+                   << this->GetInst().template GetVReg<FORMAT, 3>() << ", " << std::hex << "0x" << id;
+        // NOTE issue(21892) support callbyname
+        // This stub should be replaced with appropriate handler
+        this->MoveToExceptionHandler();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleEtsCallNameRange()
+    {
+        auto id = this->GetInst().template GetId<FORMAT>();
+        LOG_INST() << "ets.call.name.range v" << this->GetInst().template GetVReg<FORMAT, 0>() << ", " << std::hex
+                   << "0x" << id;
+        // NOTE issue(21892) support callbyname
+        // This stub should be replaced with appropriate handler
+        this->MoveToExceptionHandler();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleEtsLdnullvalue()
     {
         LOG_INST() << "ets.ldnullvalue";

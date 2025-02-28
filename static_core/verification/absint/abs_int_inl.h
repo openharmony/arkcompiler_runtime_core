@@ -2890,6 +2890,36 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsCallNameShort()
+    {
+        LOG_INST();
+        DBGBRK();
+        // NOTE issue(21892) support callbyname
+        // This stub should be replaced with appropriate handler
+        return false;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsCallName()
+    {
+        LOG_INST();
+        DBGBRK();
+        // NOTE issue(21892) support callbyname
+        // This stub should be replaced with appropriate handler
+        return false;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsCallNameRange()
+    {
+        LOG_INST();
+        DBGBRK();
+        // NOTE issue(21892) support callbyname
+        // This stub should be replaced with appropriate handler
+        return false;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleEtsLdnullvalue()
     {
         LOG_INST();

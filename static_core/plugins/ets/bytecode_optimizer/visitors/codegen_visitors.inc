@@ -157,6 +157,12 @@ static void VisitEtsStObjByName(BytecodeGen *enc, compiler::IntrinsicInst *inst)
     }
 }
 
+static void VisitEtsCallByName([[maybe_unused]] BytecodeGen *enc, [[maybe_unused]] compiler::IntrinsicInst *inst)
+{
+    // NOTE issue(21892) support callbyname
+    UNREACHABLE();
+}
+
 static void VisitLoadUniqueObject(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<BytecodeGen *>(visitor);
