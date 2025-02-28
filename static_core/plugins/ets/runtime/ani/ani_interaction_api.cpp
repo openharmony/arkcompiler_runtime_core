@@ -1045,6 +1045,15 @@ NO_UB_SANITIZE static ani_status Array_New_Boolean(ani_env *env, ani_size length
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Array_New_Char(ani_env *env, ani_size length, ani_array_char *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(result);
+    return NewPrimitiveTypeArray<EtsCharArray>(env, length, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Array_New_Byte(ani_env *env, ani_size length, ani_array_byte *result)
 {
     ANI_DEBUG_TRACE(env);
@@ -1101,6 +1110,17 @@ NO_UB_SANITIZE static ani_status Array_New_Double(ani_env *env, ani_size length,
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Array_GetRegion_Boolean(ani_env *env, ani_array_boolean array, ani_size offset,
                                                          ani_size length, ani_boolean *nativeBuffer)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(array);
+    CHECK_PTR_ARG(nativeBuffer);
+    return GetPrimitiveTypeArrayRegion(env, array, offset, length, nativeBuffer);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Array_GetRegion_Char(ani_env *env, ani_array_char array, ani_size offset,
+                                                      ani_size length, ani_char *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1307,6 +1327,17 @@ NO_UB_SANITIZE static ani_status Array_GetRegion_Double(ani_env *env, ani_array_
     CHECK_PTR_ARG(array);
     CHECK_PTR_ARG(nativeBuffer);
     return GetPrimitiveTypeArrayRegion(env, array, offset, length, nativeBuffer);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Array_SetRegion_Char(ani_env *env, ani_array_char array, ani_size offset,
+                                                      ani_size length, const ani_char *nativeBuffer)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(array);
+    CHECK_PTR_ARG(nativeBuffer);
+    return SetPrimitiveTypeArrayRegion(env, array, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1601,6 +1632,21 @@ NO_UB_SANITIZE static ani_status Class_FindStaticMethod(ani_env *env, ani_class 
     ani_status status = GetClassMethod<true>(env, cls, name, signature, &method);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     *result = ToAniStaticMethod(method);
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Class_FindIterator(ani_env *env, ani_class cls, ani_method *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(cls);
+    CHECK_PTR_ARG(result);
+
+    EtsMethod *method = nullptr;
+    ani_status status = GetClassMethod<false>(env, cls, "$_iterator", nullptr, &method);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    *result = ToAniMethod(method);
     return ANI_OK;
 }
 
@@ -5307,7 +5353,7 @@ const __ani_interaction_api INTERACTION_API = {
     String_GetUTF8SubString,
     Array_GetLength,
     Array_New_Boolean,
-    NotImplementedAdapter<91>,
+    Array_New_Char,
     Array_New_Byte,
     Array_New_Short,
     Array_New_Int,
@@ -5315,7 +5361,7 @@ const __ani_interaction_api INTERACTION_API = {
     Array_New_Float,
     Array_New_Double,
     Array_GetRegion_Boolean,
-    NotImplementedAdapter<99>,
+    Array_GetRegion_Char,
     Array_GetRegion_Byte,
     Array_GetRegion_Short,
     Array_GetRegion_Int,
@@ -5323,7 +5369,7 @@ const __ani_interaction_api INTERACTION_API = {
     Array_GetRegion_Float,
     Array_GetRegion_Double,
     Array_SetRegion_Boolean,
-    NotImplementedAdapter<107>,
+    Array_SetRegion_Char,
     Array_SetRegion_Byte,
     Array_SetRegion_Short,
     Array_SetRegion_Int,
@@ -5397,7 +5443,7 @@ const __ani_interaction_api INTERACTION_API = {
     Class_FindGetter,
     Class_FindIndexableGetter,
     Class_FindIndexableSetter,
-    NotImplementedAdapter<185>,
+    Class_FindIterator,
     Class_GetStaticField_Boolean,
     Class_GetStaticField_Char,
     Class_GetStaticField_Byte,

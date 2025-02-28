@@ -64,5 +64,7 @@ ani_add_gtest(ani_test_array_set_ref
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_set_ref_test.sts
 )
 
-
-
+ani_add_gtest(ani_test_array_region_char
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_char_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_char_test.sts
+)
