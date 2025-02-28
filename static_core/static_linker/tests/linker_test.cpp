@@ -280,17 +280,18 @@ void TestMultiple(const std::string &path, std::vector<std::string> perms, bool 
 #ifdef TEST_STATIC_LINKER_WITH_STS
 void TestSts(const std::string &path, const std::vector<std::string> &files, bool isGood = true)
 {
-    const auto pathPrefix = "data/sts/" + path + "/";
+    const auto sourcePathPrefix = "data/sts/" + path + "/";
+    const auto targetPathPrefix = "data/output/" + path + "/";
 
     std::string linkerCommand = "../../bin/ark_link";
-    linkerCommand.append(" --output " + pathPrefix + "linked.abc");
+    linkerCommand.append(" --output " + targetPathPrefix + "linked.abc");
     linkerCommand.append(" -- ");
     for (const auto &f : files) {
         if (f.length() < ABC_FILE_EXTENSION_LENGTH ||
             f.substr(f.length() - ABC_FILE_EXTENSION_LENGTH) != ABC_FILE_EXTENSION) {
             linkerCommand.push_back('@');  // test filesinfo
         }
-        linkerCommand.append(pathPrefix + f);
+        linkerCommand.append(sourcePathPrefix + f);
         linkerCommand.push_back(' ');
     }
     // NOLINTNEXTLINE(cert-env33-c)
@@ -299,9 +300,9 @@ void TestSts(const std::string &path, const std::vector<std::string> &files, boo
     if (isGood) {
         ASSERT_EQ(linkRes, 0);
         auto gold = std::string {};
-        ASSERT_TRUE(ReadFile<false>(pathPrefix + "out.gold", gold));
+        ASSERT_TRUE(ReadFile<false>(sourcePathPrefix + "out.gold", gold));
         NormalizeGold(gold);
-        auto ret = ExecPanda(pathPrefix + "linked.abc", "ets", "1/ETSGLOBAL::main");
+        auto ret = ExecPanda(targetPathPrefix + "linked.abc", "ets", "1/ETSGLOBAL::main");
         ASSERT_EQ(ret.first, 0);
         ASSERT_EQ(ret.second, gold);
     } else {

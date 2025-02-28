@@ -83,6 +83,25 @@ add_dependencies(static_linker_tests static_linker_tests_gen_abc arkruntime)
 if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSCOMPILING)
     add_definitions(-DTEST_STATIC_LINKER_WITH_STS)
     set(STS_TESTS_DIR ${CMAKE_CURRENT_BINARY_DIR}/data/sts)
+    set(STS_TESTS_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/data/output)
+
+    set(STS_TESTS
+        fclass
+        filesinfo
+        fmethod
+        fmethod_overloaded
+        fmethod_overloaded_2
+        hello_world
+    )
+    set(STS_TESTS_OUTPUT_SUBDIRS "")
+    foreach(STS_TEST ${STS_TESTS})
+        set(STS_TESTS_OUTPUT_SUBDIR "${STS_TESTS_OUTPUT_DIR}/${STS_TEST}")
+        if(EXISTS "${STS_TESTS_OUTPUT_SUBDIR}")
+            file(REMOVE_RECURSE "${STS_TESTS_OUTPUT_SUBDIR}")
+        endif()
+        file(MAKE_DIRECTORY "${STS_TESTS_OUTPUT_SUBDIR}")
+        list(APPEND STS_TESTS_OUTPUT_SUBDIRS "${STS_TESTS_OUTPUT_SUBDIR}")
+    endforeach()
 
     set(STS_TESTS_SOURCES
         fclass/1.sts
@@ -124,7 +143,7 @@ if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSC
     list(APPEND STS_TESTS_TARGETS "${STS_TESTS_DIR}/filesinfo/filesinfo.txt")
 
     add_custom_target(static_linker_tests_sts
-        DEPENDS "${STS_TESTS_TARGETS}"
+        DEPENDS "${STS_TESTS_TARGETS}" "${STS_TESTS_OUTPUT_SUBDIRS}"
     )
 
     # internal issue #15674
