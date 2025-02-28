@@ -1795,6 +1795,13 @@
 17.experimental_features/12.adding_functionality_to_existing_types/03.accessors_with_receiver/accessors_with_receiver_8.sts
 17.experimental_features/12.adding_functionality_to_existing_types/03.accessors_with_receiver/accessors_with_receiver_9.sts
 
+# 23111
+20.implementation_details/06.keyword_struct_and_arkui/struct_class_test.sts
+20.implementation_details/06.keyword_struct_and_arkui/struct_empty_class.sts
+20.implementation_details/06.keyword_struct_and_arkui/struct_extends_class.sts
+20.implementation_details/06.keyword_struct_and_arkui/struct_implements_interface.sts
+20.implementation_details/06.keyword_struct_and_arkui/struct_simple_class.sts
+
 # 23134
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_16.sts
 04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_neg_7.sts
