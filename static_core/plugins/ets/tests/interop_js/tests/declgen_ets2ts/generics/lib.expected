@@ -19,18 +19,14 @@ export declare class GenericClass<T extends Object> {
     public identity(x: T): T;
     constructor();
 }
-
 export declare interface IGeneric0<T> {
     I0Method(a: T): T;
 }
-
 export declare interface IGeneric1<T> {
     I1Method(a: T): T;
 }
-
 export declare class BaseGeneric<T, U> {
     public c: T;
     public d: U;
     public constructor(c: T, d: U);
 }
-

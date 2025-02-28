@@ -1,10 +1,10 @@
-/*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,9 +13,20 @@
  * limitations under the License.
  */
 
-export declare function AsyncIdentity(param: number): Promise<number>;
-export declare function AsyncIdentity$asyncimpl(param: number): any;
-export declare class PromiseWrapper {
-    public promise_: Promise<string>;
-    constructor();
+import { Foo1, Foo2 } from './lib1';
+
+function assertEq<T>(a: T, b: T): void {
+	console.log(`assertEq: '${a}' === '${b}'`);
+	if (a !== b) {
+		throw new Error(`assertEq failed: '${a}' === '${b}'`);
+	}
+}
+
+export function main(): void {
+	testImports();
+}
+
+function testImports(): void {
+	assertEq(Foo1(), "export Foo1");
+	assertEq(Foo2(), "export Foo2");
 }

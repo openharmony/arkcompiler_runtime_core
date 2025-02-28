@@ -18,9 +18,7 @@ export declare class Lib2Class {
     public val: number;
     constructor();
 }
-
 export declare class Lib2Class2 {
     public val: number;
     constructor();
 }
-

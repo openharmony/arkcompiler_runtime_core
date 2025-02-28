@@ -1078,3 +1078,17 @@ spec/10.Interfaces/Interface_Methods_Declarations/method_overload6.sts
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload7.sts
 spec/10.Interfaces/method_overload6.sts
 spec/10.Interfaces/method_overload7.sts
+# FailKind.TSC_FAIL
+spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_static_instance_0001.sts
+escompat/DataViewBigIntTest.sts
+spec/07.expressions/7.32.Lambda_Expressions/issue15579_0.sts
+spec/07.expressions/7.32.Lambda_Expressions/issue15579_2.sts
+spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/issue15182/issue_15182_03.sts
+spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re-export_all.sts
+spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re-export_not_all.sts
+spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/reexport_scope_change_1.sts
+spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/reexport_scope_change_2.sts
+spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue15371/issue15371_03.sts
+spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue_15669_03.sts
+spec/13.Compilation_Units_Packages_and_Modules/import_export/issue15393/module1/src/issue15393_02.sts
+spec/13.Compilation_Units_Packages_and_Modules/import_export/issue15393/module2/src/issue15393_04.sts
