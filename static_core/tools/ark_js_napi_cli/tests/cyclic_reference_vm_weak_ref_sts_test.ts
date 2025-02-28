@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,18 @@
  * limitations under the License.
  */
 
-import { interop } from './gc_test_common_ts';
+import { interop } from './gc_test_common';
 
 function sendArrayToSTS() {
     let arr: Object[] = [];
     arr.push(interop.GetSTSObjectWithWeakRef());
-    let gcId = globalThis.ArkTools.GC.startGC("full");
-    globalThis.ArkTools.GC.waitForFinishGC(gcId);
+    globalThis.test.RunJsGC();
     interop.AddPandaArray(arr);
     }
 
 function main(): void {
     sendArrayToSTS();
-    let gcId = globalThis.ArkTools.GC.startGC("full");
-    globalThis.ArkTools.GC.waitForFinishGC(gcId);
+    globalThis.test.RunJsGC();
     interop.RunInteropGC();
     interop.RunPandaGC();
     if (!interop.isSTSObjectCollected()) {

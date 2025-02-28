@@ -1,1 +1,12 @@
 normal_gc_test.ts, gc_test_sts_common.sts
+basic_interop_object_collect_weak_ref_test.ts, gc_test_sts_common.sts
+cyclic_reference_between_vm_array_test.ts, gc_test_sts_common.sts
+cyclic_reference_between_vm_string_test.ts, gc_test_sts_common.sts
+cyclic_reference_between_vm_test.ts, gc_test_sts_common.sts
+cyclic_reference_vm_weak_ref_sts_test.ts, gc_test_sts_common.sts
+cyclic_reference_vm_weak_ref_test.ts, gc_test_sts_common.sts
+#js_2_sts_obj_pass_check_mem_test.ts, gc_test_sts_common.sts
+# Hybrid refs does not support yet
+#extend_class_imported_and_weak_ref_sts_test.ts, gc_test_sts_common.sts
+#extend_class_imported_and_weak_ref_test.ts, gc_test_sts_common.sts
+#extend_class_imported_from_panda_vm_test.ts, gc_test_sts_common.sts

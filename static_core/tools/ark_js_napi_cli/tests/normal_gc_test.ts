@@ -16,7 +16,7 @@
 // This test check basic cases of interop objects
 // are not collected by normal GC
 
-import { interop } from './gc_test_common_ts';
+import { interop } from './gc_test_common';
 
 function getSTSWeakRef(): WeakRef<Object> {
     return new WeakRef(interop.GetSTSObjectWithWeakRef())

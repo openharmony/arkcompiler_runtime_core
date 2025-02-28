@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 // that is derived from STS class and transferred from STS -> JS
 // creating cyclic reference - can be collected by GC
 
-import { interop } from './gc_test_common_ts';
+import { interop } from './gc_test_common';
 
 function main(): void {
     class JsDerivedClass extends interop.PandaBaseClass {
@@ -37,8 +37,7 @@ function main(): void {
         if (i % 10000 === 0) {
             interop.RunInteropGC();
             interop.RunPandaGC();
-            let gcId = globalThis.ArkTools.GC.startGC("full");
-            globalThis.ArkTools.GC.waitForFinishGC(gcId);
+            globalThis.test.RunJsGC();
         }
     }
 }
