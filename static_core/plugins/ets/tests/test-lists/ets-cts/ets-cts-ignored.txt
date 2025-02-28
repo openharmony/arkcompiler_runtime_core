@@ -386,13 +386,6 @@
 06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_7.sts
 06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_8.sts
 
-# 22700 #19809
-06.contexts_and_conversions/03.numeric_operator_contexts/conv_4.sts
-06.contexts_and_conversions/03.numeric_operator_contexts/conv_5.sts
-06.contexts_and_conversions/03.numeric_operator_contexts/conv_6.sts
-06.contexts_and_conversions/03.numeric_operator_contexts/conv_7.sts
-# end of es2panda fails
-
 # 19583 es2panda segfault on launching a coroutine in trailing lambda
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_func_24.sts
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_23.sts
