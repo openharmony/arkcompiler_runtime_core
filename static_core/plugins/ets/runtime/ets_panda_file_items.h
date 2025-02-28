@@ -31,6 +31,7 @@ static constexpr std::string_view ASYNC                                = "Lets/c
 static constexpr std::string_view EXCEPTION                            = "Lstd/core/Exception;";
 static constexpr std::string_view OBJECT                               = "Lstd/core/Object;";
 static constexpr std::string_view PROMISE                              = "Lstd/core/Promise;";
+static constexpr std::string_view JOB                                  = "Lstd/core/Job;";
 static constexpr std::string_view PROMISE_REF                          = "Lstd/core/PromiseRef;";
 static constexpr std::string_view WAITERS_LIST                         = "Lstd/core/WaitersList;";
 static constexpr std::string_view MUTEX                                = "Lstd/core/Mutex;";

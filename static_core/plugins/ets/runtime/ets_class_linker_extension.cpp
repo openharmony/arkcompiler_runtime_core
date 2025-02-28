@@ -592,6 +592,7 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
         ASSERT(subscribeOnAnotherPromiseMethod_ != nullptr);
     }
     promiseRefClass_ = CacheClass(PROMISE_REF);
+    jobClass_ = CacheClass(JOB);
     waiterListClass_ = CacheClass(WAITERS_LIST);
     mutexClass_ = CacheClass(MUTEX);
     eventClass_ = CacheClass(EVENT);
@@ -621,6 +622,7 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
 
     auto coro = EtsCoroutine::GetCurrent();
     coro->SetPromiseClass(promiseClass_);
+    coro->SetJobClass(jobClass_);
     // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields
     // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
     coro->SetStringClassPtr(GetClassRoot(ClassRoot::STRING));

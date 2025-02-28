@@ -58,6 +58,8 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Method.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Value.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Arrays.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_Job.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_Launch.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Atomics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_math.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/dtoa_helper.cpp
@@ -88,6 +90,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_waiters_list.cpp
     ${ETS_EXT_SOURCES}/types/ets_weak_reference.cpp
     ${ETS_EXT_SOURCES}/types/ets_finalizable_weak_ref.cpp
+    ${ETS_EXT_SOURCES}/types/ets_job.cpp
     ${ETS_EXT_SOURCES}/ets_vm_api.cpp
     ${ETS_EXT_SOURCES}/ets_utils.cpp
     ${ETS_EXT_SOURCES}/ets_object_state_info.cpp

@@ -97,6 +97,11 @@ public:
         return promiseClass_;
     }
 
+    Class *GetJobClass()
+    {
+        return jobClass_;
+    }
+
     Class *GetPromiseRefClass()
     {
         return promiseRefClass_;
@@ -320,6 +325,7 @@ private:
     Class *exceptionClass_ = nullptr;
     Class *errorClass_ = nullptr;
     Class *promiseClass_ = nullptr;
+    Class *jobClass_ = nullptr;
     Method *subscribeOnAnotherPromiseMethod_ = nullptr;
     Class *promiseRefClass_ = nullptr;
     Class *waiterListClass_ = nullptr;

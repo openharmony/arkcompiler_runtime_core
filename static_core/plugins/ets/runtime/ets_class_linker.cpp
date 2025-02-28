@@ -100,6 +100,11 @@ EtsClass *EtsClassLinker::GetPromiseClass()
     return EtsClass::FromRuntimeClass(ext_->GetPromiseClass());
 }
 
+EtsClass *EtsClassLinker::GetJobClass()
+{
+    return EtsClass::FromRuntimeClass(ext_->GetJobClass());
+}
+
 EtsClass *EtsClassLinker::GetPromiseRefClass()
 {
     return EtsClass::FromRuntimeClass(ext_->GetPromiseRefClass());
