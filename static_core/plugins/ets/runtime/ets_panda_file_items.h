@@ -92,6 +92,7 @@ static constexpr std::string_view FUNCTION16                           = "Lstd/c
 static constexpr std::string_view FUNCTIONN                            = "Lstd/core/FunctionN;";
 
 // core-defined error classes
+static constexpr std::string_view ABC_FILE_NOT_FOUND_ERROR             = "Lstd/core/AbcFileNotFoundError;";
 static constexpr std::string_view ARITHMETIC_ERROR                     = "Lstd/core/ArithmeticError;";
 static constexpr std::string_view ARRAY_INDEX_OUT_OF_BOUNDS_ERROR      = "Lstd/core/ArrayIndexOutOfBoundsError;";
 static constexpr std::string_view ARRAY_STORE_ERROR                    = "Lstd/core/ArrayStoreError;";

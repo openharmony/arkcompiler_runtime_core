@@ -52,7 +52,7 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
         auto pathStr = std::string(path.begin(), path.end());
         size_t pos = pathStr.rfind("/ets/");
         if (pos == std::string::npos) {
-            ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR,
+            ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ABC_FILE_NOT_FOUND_ERROR,
                                    PandaString("Open failed, file: ") + path);
             return nullptr;
         }
@@ -61,7 +61,7 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
 
         std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(hapPath);
         if (!extractor || !extractor->Init()) {
-            ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR,
+            ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ABC_FILE_NOT_FOUND_ERROR,
                                    PandaString("Open failed, file: ") + path);
             return nullptr;
         }
@@ -70,7 +70,7 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
     }
 
     if (pf == nullptr) {
-        ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR,
+        ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ABC_FILE_NOT_FOUND_ERROR,
                                PandaString("Panda file not found: ") + path);
         return nullptr;
     }

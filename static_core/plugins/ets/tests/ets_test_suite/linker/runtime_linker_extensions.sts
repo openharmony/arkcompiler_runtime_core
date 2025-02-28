@@ -179,12 +179,20 @@ class Test {
         assertEQ(abcLinkerRef.deref(), undefined);
     }
 
+    static testAbcRuntimeLinkerLoadErrorPath() {
+        const path: string[] = ["null"];
+        expectThrow(() => { new AbcRuntimeLinker(undefined, path) },
+            (e) => e instanceof AbcFileNotFoundError
+        );
+    }
+
     static test() {
         Test.testDummyLinker();
         Test.testEmptyAbcRuntimeLinker();
         Test.testAbcRuntimeLinker();
         Test.testClassInitializationFail();
         Test.testAbcRuntimeLinkerUnload();
+        Test.testAbcRuntimeLinkerLoadErrorPath();
     }
 }
 
