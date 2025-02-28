@@ -215,5 +215,178 @@ export namespace util {
         return s
     }
 
-} // namespace Util
+    export interface ScopeComparable<T> {
+        
+        /**
+        * The comparison function is used by the scope.
+        *
+        * @param { ScopeComparable } other - Other
+        * @returns { boolean } Returns whether the current object is greater than or equal to the input object.
+        */
+        compareTo(other: T): boolean;
+    }
+
+    /**
+    * A type used to denote ScopeComparable or number.
+    *
+    * @typedef { ScopeComparable }
+    */
+    export type ScopeType<T> = ScopeComparable<T>;
+
+    export class ScopeHelper<T extends ScopeComparable<T>> {
+        private readonly _lowerLimit: T
+        private readonly _upperLimit: T
+
+        /**
+        * A constructor used to create a Scope instance with the lower and upper bounds specified.
+        *
+        * @param { ScopeType } lowerObj - A ScopeType value
+        * @param { ScopeType } upperObj - A ScopeType value
+        */
+        constructor(lowerObj: T, upperObj: T) {
+            if (lowerObj.compareTo(upperObj)) {
+                throw new Error('lower limit must be less than upper limit');
+            }
+            this._lowerLimit = lowerObj
+            this._upperLimit = upperObj
+        }
+
+        /**
+        * Obtains a string representation of the current range.
+        *
+        * @returns { string } Returns a string representation of the current range object.
+        */
+        toString(): string {
+            let strLower: string = this._lowerLimit.toString()
+            let strUpper: string = this._upperLimit.toString()
+            return '[' + strLower + ', ' + strUpper + ']'
+        }
+
+        /**
+        * Returns the intersection of a given range and the current range.
+        *
+        * @param { ScopeHelper } range - A Scope range object
+        * @returns { ScopeHelper } Returns the intersection of a given range and the current range.
+        */
+        intersect(range: ScopeHelper<T>): ScopeHelper<T> {
+            let lowerLimit = this._lowerLimit.compareTo(range.getLower()) ? this._lowerLimit : range.getLower()
+            let upperLimit = this._upperLimit.compareTo(range.getUpper()) ? range.getUpper() : this._upperLimit
+            return new ScopeHelper<T>(lowerLimit, upperLimit)
+        }
+
+        /**
+        * Returns the intersection of the current range and the range specified by the given lower and upper bounds.
+        *
+        * @param { ScopeType } lowerObj - A ScopeType value
+        * @param { ScopeType } upperObj - A ScopeType value
+        * @returns { ScopeHelper } Returns the intersection of the current range and the range specified by the given lower and upper bounds.
+        */
+        intersect(lowerObj: T, upperObj: T): ScopeHelper<T> {
+            let lowerLimit = this._lowerLimit.compareTo(lowerObj) ? this._lowerLimit : lowerObj
+            let upperLimit = this._upperLimit.compareTo(upperObj) ? upperObj : this._upperLimit
+            return new ScopeHelper<T>(lowerLimit, upperLimit)
+        }
+
+        /**
+        * Obtains the upper bound of the current range.
+        *
+        * @returns { ScopeType } Returns the upper bound of the current range.
+        */
+        getUpper(): T {
+            return this._upperLimit
+        }
+
+        /**
+        * Obtains the lower bound of the current range.
+        *
+        * @returns { ScopeType } Returns the lower bound of the current range.
+        */
+        getLower(): T {
+            return this._lowerLimit
+        }
+
+        /**
+        * Creates the smallest range that includes the current range and the given lower and upper bounds.
+        *
+        * @param { ScopeType } lowerObj - A ScopeType value
+        * @param { ScopeType } upperObj - A ScopeType value
+        * @returns { ScopeHelper } Returns the smallest range that includes the current range and the given lower and upper bounds.
+        */
+        expand(lowerObj: T, upperObj: T): ScopeHelper<T> {
+            let lowerLimit = this._lowerLimit.compareTo(lowerObj) ? lowerObj : this._lowerLimit 
+            let upperLimit = this._upperLimit.compareTo(upperObj) ? this._upperLimit : upperObj
+            return new ScopeHelper<T>(lowerLimit, upperLimit)
+        }
+
+        /**
+        * Creates the smallest range that includes the current range and a given range.
+        *
+        * @param { ScopeHelper } range - A Scope range object
+        * @returns { ScopeHelper } Returns the smallest range that includes the current range and a given range.
+        */
+        /**
+        * Creates the smallest range that includes the current range and a given range.
+        *
+        * @param { ScopeHelper } range - A Scope range object
+        * @returns { ScopeHelper } Returns the smallest range that includes the current range and a given range.
+        */
+        expand(range: ScopeHelper<T>): ScopeHelper<T> {
+            let lowerLimit = this._lowerLimit.compareTo(range.getLower()) ? range.getLower() : this._lowerLimit
+            let upperLimit = this._upperLimit.compareTo(range.getUpper()) ? this._upperLimit : range.getUpper()
+            return new ScopeHelper<T>(lowerLimit, upperLimit)
+        }
+
+        /**
+        * Creates the smallest range that includes the current range and a given value.
+        *
+        * @param { ScopeType } value - A ScopeType value
+        * @returns { ScopeHelper } Returns the smallest range that includes the current range and a given value.
+        */
+        expand(value: T): ScopeHelper<T> {
+            let lowerLimit = this._lowerLimit.compareTo(value) ? value : this._lowerLimit
+            let upperLimit = this._upperLimit.compareTo(value) ? this._upperLimit : value
+            return new ScopeHelper<T>(lowerLimit, upperLimit)
+        }
+
+        /**
+        * Checks whether a given value is within the current range.
+        *
+        * @param { ScopeType } value - A ScopeType value
+        * @returns { boolean } If the value is within the current range return true,otherwise return false.
+        */
+        contains(value: T): boolean {
+            let lowerRes = value.compareTo(this._lowerLimit)
+            let upperRes = this._upperLimit.compareTo(value)
+            return lowerRes && upperRes
+        }
+
+        /**
+        * Checks whether a given range is within the current range.
+        *
+        * @param { ScopeHelper } range - A Scope range
+        * @returns { boolean } If the current range is within the given range return true,otherwise return false.
+        */
+        contains(range: ScopeHelper<T>): boolean {
+            let lowerRes = range.getLower().compareTo(this._lowerLimit)
+            let upperRes = this._upperLimit.compareTo(range.getUpper())
+            return lowerRes && upperRes
+        }
+
+        /**
+        * Clamps a given value to the current range.
+        *
+        * @param { ScopeType } value - A ScopeType value
+        * @returns { ScopeType } Returns a ScopeType object that a given value is clamped to the current range.
+        */
+        clamp(value: T): T {
+            if (!value.compareTo(this._lowerLimit)) {
+                return this._lowerLimit
+            } else if (value.compareTo(this._upperLimit)) {
+                return this._upperLimit
+            } else {
+                return value
+            }
+        }
+    }
+}
 
