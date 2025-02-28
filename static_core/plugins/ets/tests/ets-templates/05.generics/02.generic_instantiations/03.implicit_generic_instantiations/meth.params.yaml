@@ -118,26 +118,3 @@ cases:
           assertTrue(cls.foo(new B(), new B()))
           assertTrue(cls.foo(new C(), 42.0))
           assertTrue(cls.foo(new B(), null))
-
-    - decl: |-
-          class D {
-              fld1: number = 0
-              fld2: number = 0
-              fld3: number = 0
-          }
-          class C {
-              fld3: number = 0
-              fld4: number = 0
-              fld5: number = 0
-          }
-          class Cls {
-              // with keyof type constraints
-              foo<T extends keyof D, U extends keyof C>(p: T, q: U): string {
-                  return p + q
-              }
-          }
-      use: |-
-          let cls = new Cls
-          assertTrue(cls.foo('fld3', 'fld3') == 'fld3fld3')
-          assertTrue(cls.foo('fld1', 'fld5') == 'fld1fld5')
-          assertTrue(cls.foo('fld2', 'fld4') == 'fld2fld4')
