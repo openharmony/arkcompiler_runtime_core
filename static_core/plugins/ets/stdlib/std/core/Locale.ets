@@ -39,7 +39,7 @@
         "islamicc"
     )
 
-    const extensionValues = [ 
+    const extensionValues = [
         "ca",   // calendar
         "kf",   // caseFirst
         "co",   // collation
@@ -136,7 +136,7 @@
                 this.caseFirst = (options.caseFirst != undefined) ? options.caseFirst : undefined
                 this.numeric = (options.numeric != undefined) ? options.numeric : false
                 this.collation = (options.collation != undefined) ? options.collation : this.collation
-                this.hourCycle = (options.hourCycle != undefined) ? options.hourCycle : this.hourCycle 
+                this.hourCycle = (options.hourCycle != undefined) ? options.hourCycle : this.hourCycle
                 this.numberingSystem = (options.numberingSystem != undefined) ? options.numberingSystem : this.numberingSystem
                 this.region = (options.region != undefined) ? (options.region as string).toUpperCase() : this.region
                 this.script = (options.script != undefined) ? options.script : this.script
@@ -149,7 +149,7 @@
             if (this.script != undefined && !this.scriptList().includes(this.script as string)) {
                 throw new RangeError(this.errMsg)
             }
-            
+
             this.tag = this.createTag()
         }
 
@@ -178,11 +178,11 @@
         }
 
         /**
-        * The maximize() method of Intl.Locale instances gets the most likely values for the language, 
+        * The maximize() method of Intl.Locale instances gets the most likely values for the language,
         * script, and region of this locale based on existing values.
-        * @return A Intl.Locale instance whose baseName property returns the result of the 
+        * @return A Intl.Locale instance whose baseName property returns the result of the
         * Add Likely Subtags algorithm executed against locale.baseName.
-        */ 
+        */
         public maximize() : Locale {
             let res = new Locale(this)
             let info = this.maximizeInfo(this.language as string).split(",")
@@ -195,7 +195,7 @@
 
         /**
         * The minimize() attempts to remove information about this locale that would be added by calling maximize().
-        * @return A Intl.Locale instance whose baseName property returns the result of the 
+        * @return A Intl.Locale instance whose baseName property returns the result of the
         * Remove Likely Subtags algorithm executed against locale.baseName.
         */
         public minimize() : Locale {
@@ -208,7 +208,7 @@
         }
 
         /**
-        * The toString() method of Intl.Locale instances returns this Locale's full locale identifier string.  
+        * The toString() method of Intl.Locale instances returns this Locale's full locale identifier string.
         * @return The locale's Unicode locale identifier string.
         */
         public toString() : BCP47LanguageTag {
@@ -258,7 +258,7 @@
                 (options.caseFirst != undefined && !caseFirstValues.includes(options.caseFirst!)) ||
                 (options.collation != undefined && !collationValues.includes(options.collation!)) ||
                 (options.hourCycle != undefined && !hourCycleValues.includes(options.hourCycle!)) ||
-                (options.numberingSystem != undefined && (options.numberingSystem! == "" || 
+                (options.numberingSystem != undefined && (options.numberingSystem! == "" ||
                                 !this.numberingSystemList().includes(options.numberingSystem!))) ||
                 (options.region != undefined && (options.region! == "" || !this.regionList().includes((options.region! as String).toUpperCase()))) ||
                 (options.script != undefined && (options.script! == "" || !this.scriptList().includes(options.script!)))

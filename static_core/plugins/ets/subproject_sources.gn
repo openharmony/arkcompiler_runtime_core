@@ -179,6 +179,7 @@ srcs_runtime = [
   "stdlib/native/core/IntlLocale.cpp",
   "stdlib/native/core/IntlLocaleMatch.cpp",
   "stdlib/native/core/IntlCollator.cpp",
+  "stdlib/native/core/stdlib_ani_helpers.cpp",
   "stdlib/native/etsstdlib.cpp",
 ]
 

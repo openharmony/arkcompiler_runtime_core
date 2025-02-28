@@ -15,7 +15,7 @@
 
 function main(): int {
     loadLibrary("sampler_etsnapi_lib");
-    
+
     let res: int = 0;
     res = CallNativeSlowFunction(20000000);
     if (res != 20000000) {
@@ -46,7 +46,7 @@ function main(): int {
 
 function release_main(): int {
     loadLibrary("sampler_etsnapi_lib");
-    
+
     let res: int = 0;
     res = CallNativeSlowFunction(2000000000);
     // res = 2 billion

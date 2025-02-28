@@ -39,7 +39,7 @@ endif()
 panda_add_library(sampler_asm_test SHARED ${SAMPLER_ASM_TEST_SOURCES})
 set_target_properties(sampler_asm_test PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${SAMPLER_GEN_ASM_LIB_DIR})
 panda_target_link_libraries(sampler_asm_test arkruntime)
-panda_target_include_directories(sampler_asm_test PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/napi)
+panda_target_include_directories(sampler_asm_test PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani/)
 add_custom_target(sampler_asm_test_suite COMMENT "Running signal alternate stack sampler test")
 
 set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=ets --ets-unnamed --opt-level=0)

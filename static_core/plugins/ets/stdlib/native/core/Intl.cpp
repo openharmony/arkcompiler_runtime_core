@@ -14,7 +14,6 @@
  */
 
 #include "plugins/ets/stdlib/native/core/Intl.h"
-#include "napi/ets_napi.h"
 #include "plugins/ets/stdlib/native/core/IntlState.h"
 #include "plugins/ets/stdlib/native/core/IntlNumberFormat.h"
 #include "plugins/ets/stdlib/native/core/IntlLocaleMatch.h"
@@ -24,16 +23,16 @@
 
 namespace ark::ets::stdlib::intl {
 
-ets_int InitCoreIntl(EtsEnv *env)
+ani_status InitCoreIntl(ani_env *env)
 {
     // Create internal data
     CreateIntlState();
 
     // Register Native methods. Stop if an error occurred
-    ets_int err = RegisterIntlNumberFormatNativeMethods(env);
-    err = err == ETS_OK ? RegisterIntlLocaleMatch(env) : err;
-    err = err == ETS_OK ? RegisterIntlCollator(env) : err;
-    err = err == ETS_OK ? RegisterIntlLocaleNativeMethods(env) : err;
+    ani_status err = RegisterIntlNumberFormatNativeMethods(env);
+    err = err == ANI_OK ? RegisterIntlLocaleMatch(env) : err;
+    err = err == ANI_OK ? RegisterIntlCollator(env) : err;
+    err = err == ANI_OK ? RegisterIntlLocaleNativeMethods(env) : err;
     return err;
 }
 

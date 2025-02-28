@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
-#include <iostream>
 #include "SamplerAsmTest.h"
+#include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
+
+#include <iostream>
+#include <array>
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,12 +25,13 @@ extern "C" {
 
 // This function have 8 arguments in order to check the case
 // when some arguments are put not into registers but on stack.
-extern "C" int SumEightElements(int, int, int, int, int, int, int, int);
+// CC-OFFNXT(G.FUN.01) test logic
+int SumEightElements(int, int, int, int, int, int, int, int);
 
 // NOLINTBEGIN(readability-magic-numbers, readability-named-parameter, cppcoreguidelines-pro-type-vararg,
 // hicpp-signed-bitwice)
 
-ETS_EXPORT ets_int ETS_CALL ETS_ETSGLOBAL_NativeSumEightElements([[maybe_unused]] EtsEnv *, [[maybe_unused]] ets_class)
+ANI_EXPORT ani_int NativeSumEightElements([[maybe_unused]] ani_env *, [[maybe_unused]] ani_class)
 {
     constexpr int MULT = 8;
     constexpr int OFF = 28;
@@ -45,9 +49,38 @@ ETS_EXPORT ets_int ETS_CALL ETS_ETSGLOBAL_NativeSumEightElements([[maybe_unused]
     return 0;
 }
 
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+{
+    ani_env *env;
+    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+        std::cerr << "Unsupported ANI_VERSION_1" << std::endl;
+        return ANI_ERROR;
+    }
+
+    static const char *className = "LETSGLOBAL;";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        auto msg = std::string("Cannot find \"") + className + std::string("\" class!");
+        ark::ets::stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", msg.data(), "Lstd/core/String;:V");
+        return ANI_ERROR;
+    }
+
+    const auto methods = std::array {
+        ani_native_function {"NativeSumEightElements", ":I", reinterpret_cast<void *>(NativeSumEightElements)}};
+
+    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+        auto msg = std::string("Cannot bind native methods to '") + className + std::string("'");
+        ark::ets::stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", msg.data(), "Lstd/core/String;:V");
+        return ANI_ERROR;
+    };
+
+    *result = ANI_VERSION_1;
+    return ANI_OK;
+}
+
 // NOLINTEND(readability-magic-numbers, readability-named-parameter, cppcoreguidelines-pro-type-vararg,
 // hicpp-signed-bitwice)
 
 #ifdef __cplusplus
-}
+}  // extern "C"
 #endif

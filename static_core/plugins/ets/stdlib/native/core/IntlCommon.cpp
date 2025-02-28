@@ -15,28 +15,23 @@
 #include "IntlCommon.h"
 #include "libpandabase/macros.h"
 #include <cassert>
+#include "stdlib_ani_helpers.h"
 
 namespace ark::ets::stdlib::intl {
 
-std::string EtsToStdStr(EtsEnv *env, ets_string etsStr)
+ani_string StdStrToAni(ani_env *env, const std::string &str)
 {
-    const char *charString = env->GetStringUTFChars(etsStr, nullptr);
-    std::string stdStr {charString};
-    env->ReleaseStringUTFChars(etsStr, charString);
-    return stdStr;
+    return CreateUtf8String(env, str.data(), str.size());
 }
 
-ets_string StdStrToEts(EtsEnv *env, const std::string &str)
+ani_string UnicodeToAniStr(ani_env *env, icu::UnicodeString &ustr)
 {
-    auto res =
-        env->NewString(reinterpret_cast<const uint16_t *>(icu::UnicodeString::fromUTF8(str).getBuffer()), str.length());
-    ASSERT(res != nullptr);
-    return res;
+    return CreateUtf16String(env, reinterpret_cast<const uint16_t *>(ustr.getBuffer()), ustr.length());
 }
 
-icu::UnicodeString EtsToUnicodeStr(EtsEnv *env, ets_string etsStr)
+icu::UnicodeString AniToUnicodeStr(ani_env *env, ani_string aniStr)
 {
-    auto str = icu::StringPiece(EtsToStdStr(env, etsStr).c_str());
+    auto str = icu::StringPiece(ConvertFromAniString(env, aniStr));
     return icu::UnicodeString::fromUTF8(str);
 }
 

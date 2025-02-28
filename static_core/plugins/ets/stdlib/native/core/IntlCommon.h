@@ -16,15 +16,16 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_STD_CORE_INTL_COMMON_H
 #define PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_STD_CORE_INTL_COMMON_H
 
-#include "plugins/ets/runtime/napi/ets_napi.h"
+#include <ani.h>
 #include "unicode/unistr.h"
 #include <string>
 
 namespace ark::ets::stdlib::intl {
 
-std::string EtsToStdStr(EtsEnv *env, ets_string etsStr);
-icu::UnicodeString EtsToUnicodeStr(EtsEnv *env, ets_string etsStr);
-ets_string StdStrToEts(EtsEnv *env, const std::string &str);
+icu::UnicodeString AniToUnicodeStr(ani_env *env, ani_string aniStr);
+ani_string StdStrToAni(ani_env *env, const std::string &str);
+ani_string UnicodeToAniStr(ani_env *env, icu::UnicodeString &ustr);
+
 }  // namespace ark::ets::stdlib::intl
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_STD_CORE_INTL_COMMON_H

@@ -30,6 +30,9 @@ runtime_yaml += plugin_runtime_yamls
 config("arkruntime_public_config") {
   include_dirs = [
     "$ark_root/runtime",
+
+    # The line below needed only for stdlib. It must be removed after stdlib separation from runtime is implemented(#18135).
+    "$ark_root/plugins/ets/runtime/ani/",
     get_label_info(
         "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
         "target_gen_dir"),

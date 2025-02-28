@@ -108,6 +108,7 @@ set(ETS_RUNTIME_SOURCES
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLocaleMatch.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlCollator.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLocale.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/stdlib_ani_helpers.cpp
 )
 
 get_directory_property(CURRENT_DEFS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPILE_DEFINITIONS)
@@ -135,6 +136,8 @@ panda_target_include_directories(arkruntime_obj PUBLIC
     ${PANDA_BINARY_ROOT}/cross_values
     ${PANDA_ETS_PLUGIN_SOURCE}/runtime/
     ${PANDA_BINARY_ROOT}/
+    # The line below needed only for stdlib. It must be removed after stdlib separation from runtime is implemented(#18135).
+    ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani/
 )
 add_dependencies(arkruntime_obj es2panda-public)
 panda_target_link_libraries(arkruntime_obj es2panda-public arkassembler)

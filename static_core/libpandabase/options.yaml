@@ -79,6 +79,7 @@ options:
   - scheduler
   - coroutines
   - task_manager
+  - stdlib
   description: Enable logs from specified components
   delimiter: ":"
 
