@@ -13,6 +13,6 @@
  * limitations under the License.
  */
 
-export interface I1 {}
-
-export class C1 {}
+export type greet="hello"
+export let a:"hello"="hello"
+export let b :greet="hello"

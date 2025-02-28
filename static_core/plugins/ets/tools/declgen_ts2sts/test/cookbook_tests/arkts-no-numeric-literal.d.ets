@@ -12,7 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export interface I1 {}
-
-export class C1 {}
+declare let intNum: number;
+declare let intNum2: number;
+declare let floatNum: number;
+declare let binaryNum: number;
+declare let octalNum: number;
+declare let hexNum: number;
+declare let specificNum: number;
+declare function add(a: number, b: number): number;
+declare const result: number;
+declare const numbers: number[];
+declare const tuple: [number, number, number];
+declare const person: JSValue;

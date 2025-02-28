@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export interface I1 {}
-
-export class C1 {}
+interface Animal {
+    live(): void;
+}
+interface Dog extends Animal {
+    woof(): void;
+}
+type Example1 = Dog extends Animal ? number : string; 

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 var a = 1
 const b = "str"
 let c = new Map<string, number>()

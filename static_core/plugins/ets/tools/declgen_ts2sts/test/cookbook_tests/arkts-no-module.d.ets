@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export interface I1 {}
-
-export class C1 {}
+declare namespace A {
+    export function C<T>(x: T): T;
+    export namespace B {
+        export let x: number;
+    }
+}
+declare const result = 10;

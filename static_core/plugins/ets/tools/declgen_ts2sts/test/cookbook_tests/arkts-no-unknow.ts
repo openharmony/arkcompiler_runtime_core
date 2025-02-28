@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
-export interface I1 {}
+export var cab: unknown = { legs: 4 };
 
-export class C1 {}
+export const doc: unknown = [1, 2, 3];
+
+export function f(d:unknown): unknown {
+    return cab; 
+}

@@ -52,8 +52,8 @@ export class Declgen {
       declaration: true,
       emitDeclarationOnly: true,
       outDir: declgenOptions.outDir,
-      ...declgenOptions.rootDir ? { rootDir: declgenOptions.rootDir } : {},
-      ...compilerOptions ?? {}
+      ...(declgenOptions.rootDir ? { rootDir: declgenOptions.rootDir } : {}),
+      ...(compilerOptions ?? {})
     });
     // Prevent the noemit of the passed compilerOptions from being true
     this.compilerOptions.noEmit = false;
@@ -64,7 +64,6 @@ export class Declgen {
   }
 
   run(): DeclgenResult {
-
     /**
      * First compilation with the hooked CompilerHost:
      * collect the SourceFiles after transformation to the hooked Map
@@ -85,18 +84,9 @@ export class Declgen {
       ]
     });
 
-    /**
-     * Second compilation with the hooked CompilerHost:
-     * use transformed source files and perform type check upon them
-     */
-    program = this.recompile();
-
-    const checkResult = this.checkProgram(program);
-
     return {
-      emitResult: emitResult,
-      checkResult: checkResult
-    };
+      emitResult: emitResult
+    } as DeclgenResult;
   }
 
   private recompile(): ts.Program {
@@ -146,7 +136,6 @@ export class Declgen {
         }
         const parsedPath = path.parse(fileName);
         fallbackWriteFile(
-
           /*
            * Since `.d` part of `.d.ts` extension is a part of the parsedPath.name,
            * use `Extension.Ets` for output file name generation.

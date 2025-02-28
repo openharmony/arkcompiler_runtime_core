@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export interface I1 {}
-
-export class C1 {}
+export declare let a: number;
+export declare let b: number;
+export declare let b1: bigint;
+export declare let c: JSValue;
+export declare let d: string;
+export declare let e: boolean;
+export declare let sym: JSValue;

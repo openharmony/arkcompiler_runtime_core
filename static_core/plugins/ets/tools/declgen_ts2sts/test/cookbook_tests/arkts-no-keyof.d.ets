@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export interface I1 {}
-
-export class C1 {}
+type N = JSValue;
+declare const test11: JSValue;
+declare const key: JSValue;
+declare class A {
+    x: number;
+    y: number;
+}

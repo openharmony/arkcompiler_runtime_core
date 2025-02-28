@@ -13,6 +13,6 @@
  * limitations under the License.
  */
 
-export interface I1 {}
-
-export class C1 {}
+export function fooo(d:symbol){
+    return d; 
+}

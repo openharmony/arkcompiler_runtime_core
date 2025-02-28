@@ -13,6 +13,30 @@
  * limitations under the License.
  */
 
-export interface I1 {}
+let b = false; 
+let b45 = true;
+let b1 = true;
+const b2 = false; 
+let b451 = 1;
 
-export class C1 {}
+const b3 = b1 || b2;
+const b6 = b1 && b2;
+const b5 = !b1 && b2;
+let b4 = b1 || b2;
+let b8 = !b1 && b2;
+
+const b9 = '';
+const b10 = 0;
+
+let b12 = '';
+let b13 = 0;
+
+let b15 = '';
+let b16 = 0;
+let b18 = b1 || b2;
+let b19 = !b1 && b2;
+
+let b20 = b1 && b2;
+let b21 = b1 && b2;
+let a: "hello" = "hello";
+let a2: 1 = 1;

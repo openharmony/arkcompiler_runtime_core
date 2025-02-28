@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
-export interface I1 {}
+export var cat: any = { legs: 4 };
 
-export class C1 {}
+export const dog: any = [1, 2, 3];
+
+export function foo(d:any){
+    return cat; 
+}

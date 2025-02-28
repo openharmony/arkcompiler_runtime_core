@@ -12,7 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export interface I1 {}
-
-export class C1 {}
+export declare namespace A {
+    export namespace B {
+        export namespace C {
+            export namespace D {
+                export interface User {
+                    id: number;
+                    name: string;
+                }
+            }
+        }
+    }
+}
+export declare class Foo {
+    f(user: A.B.C.D.User): void;
+}

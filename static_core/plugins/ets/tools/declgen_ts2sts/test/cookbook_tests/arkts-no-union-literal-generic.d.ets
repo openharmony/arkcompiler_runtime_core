@@ -12,7 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export interface I1 {}
-
-export class C1 {}
+declare class SomeType1 {
+}
+declare class Base<T = number> {
+}
+declare class Base1<T = boolean> {
+}
+declare class Point1<T extends boolean> {
+}
+declare class Point2<T extends number | 'a'> {
+}
+declare class Point3<T extends boolean | 'a'> {
+}
+declare class Point4<T extends boolean | 'a'> {
+}
+declare class Point5<T extends boolean | boolean, D extends SomeType1> {
+}
+declare class Point6<T extends boolean | boolean, D = number> {
+}

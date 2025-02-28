@@ -12,7 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export interface I1 {}
-
-export class C1 {}
+export declare let x: JSValue;
+export declare let a: JSValue;
+export declare let person: JSValue;
+export type Point = JSValue;
+export declare let myPoint: Point;
+export declare function printPerson(person: JSValue): void;
+export declare let newPerson: JSValue;
+export type Config = JSValue;
+export declare let config: Config;
+export type Calculator = JSValue;
+export declare let myCalculator: Calculator;
+export type User = JSValue;
+export declare let user: User;

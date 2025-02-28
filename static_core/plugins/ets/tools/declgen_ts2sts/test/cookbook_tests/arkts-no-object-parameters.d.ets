@@ -12,7 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export interface I1 {}
-
-export class C1 {}
+export declare function foo1(arg: JSValue): void;
+export declare function foo2(obj: JSValue): void;
+export declare let a: JSValue;
+export declare function foo3(): JSValue;
+export declare function foo4(arg: JSValue): boolean;
+export declare function foo5(arg: JSValue): void;
+export declare function foo6(arg: JSValue): "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function";
+export declare function foo7(arg: JSValue): "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function";
+export declare let b: JSValue;
