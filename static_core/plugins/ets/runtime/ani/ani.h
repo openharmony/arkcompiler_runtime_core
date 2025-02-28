@@ -5562,8 +5562,8 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] external_data A pointer to the external data to be used by the array buffer.
      * @param[in] length The length of the external data in bytes.
-     * @param[in] finalizer A callback function to be called when the array buffer is finalized.
-     * @param[in] hint A user-defined hint to be passed to the finalizer.
+     * @param[in] finalizer A callback function to be called when the array buffer is finalized. Can be nullptr.
+     * @param[in] hint A user-defined hint to be passed to the finalizer. Can be nullptr.
      * @param[out] result A pointer to store the created array buffer object.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */

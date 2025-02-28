@@ -36,7 +36,7 @@ constexpr int HUNDRED = 100;
 constexpr int HUNDRED_ELEVEN = 111;
 constexpr int HUNDRED_TWENTY_FOUR = 124;
 
-void TestFinalizer([[maybe_unused]] EtsEnv *env, void *data, [[maybe_unused]] void *finalizerHint)
+void TestFinalizer(void *data, [[maybe_unused]] void *finalizerHint)
 {
     delete[] reinterpret_cast<int8_t *>(data);
 }

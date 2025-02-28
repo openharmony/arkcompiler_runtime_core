@@ -166,7 +166,7 @@ typedef const struct ETS_NativeInterface *ets_env;
 // Deprecated types:
 typedef ets_env EtsEnv;
 
-typedef void (*EtsFinalize)(EtsEnv *env, void *finalizeData, void *finalizeHint);
+typedef void (*EtsFinalize)(void *finalizeData, void *finalizeHint);
 
 typedef enum {
     ETS_OKAY,

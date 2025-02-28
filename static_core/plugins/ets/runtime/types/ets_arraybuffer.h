@@ -187,6 +187,10 @@ private:
     static void RegisterFinalizationInfo(EtsCoroutine *coro, const EtsHandle<EtsEscompatArrayBuffer> &arrayBufferHandle,
                                          EtsFinalize finalizerFunction, void *finalizerHint)
     {
+        if (finalizerFunction == nullptr) {
+            return;
+        }
+
         auto *allocator = static_cast<mem::Allocator *>(Runtime::GetCurrent()->GetInternalAllocator());
         auto *pandaVm = coro->GetPandaVM();
 
@@ -203,10 +207,11 @@ private:
     {
         ASSERT(arg);
         auto *info = reinterpret_cast<FinalizationInfo *>(arg);
+
         ASSERT(info->function != nullptr);
         auto *allocator = static_cast<mem::Allocator *>(Runtime::GetCurrent()->GetInternalAllocator());
 
-        info->function(EtsCoroutine::GetCurrent()->GetEtsNapiEnv(), info->data, info->hint);
+        info->function(info->data, info->hint);
 
         auto *vm = Runtime::GetCurrent()->GetPandaVM();
         vm->GetGC()->RegisterNativeFree(sizeof(FinalizationInfo));
