@@ -116,7 +116,7 @@ function testUrlTest113() {
 	result.next();
 	result.next();
 	result.next();
-	assertEQ(result.next().value, null);
+	assertTrue(result.next().value == null);
 	console.log('-------------------------113 done')
 }
 
