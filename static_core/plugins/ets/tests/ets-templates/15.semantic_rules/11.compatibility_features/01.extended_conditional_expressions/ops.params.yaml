@@ -55,9 +55,9 @@ cases:
     - { val: '{} as Object', type: 'Object|null', truthy: true }
 
     - { val: 'null', type: 'Object|null', truthy: false }
-    - { val: 'undefined', type: 'Error|undefined', truthy: false }
+    - { val: 'undefined', type: 'Object|undefined', truthy: false }
 
-    - { val: '0n', type: 'bigint', truthy: true }
+    - { val: '0n', type: 'bigint', truthy: false }
 
     - { type: 'Color', val: 'Color.Red', truthy: false }
     - { type: 'Size', val: 'Size.L', truthy: true }

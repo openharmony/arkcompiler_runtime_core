@@ -36,7 +36,7 @@ function main() {
         assertTrue((a && b) ? {% if b.truthy %}true : false{% else %}false : true{% endif %});
         assertTrue((a || b) ? true : false);
 {%- else %}
-        assertTrue(!(a && b) ? false : true);
+        assertTrue((a && b) ? false : true);
         assertTrue((a || b) ? {% if b.truthy %}true : false{% else %}false : true{% endif %});
 {%- endif %}
     }
