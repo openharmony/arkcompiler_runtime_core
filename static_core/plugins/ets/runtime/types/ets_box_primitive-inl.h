@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,8 +23,17 @@ namespace ark::ets {
 template <typename T>
 EtsBoxPrimitive<T> *EtsBoxPrimitive<T>::Create(EtsCoroutine *coro, T value)
 {
+    auto *instance = reinterpret_cast<EtsBoxPrimitive<T> *>(ObjectHeader::Create(coro, GetBoxClass(coro)));
+    instance->SetValue(value);
+    return instance;
+}
+
+template <typename T>
+Class *EtsBoxPrimitive<T>::GetBoxClass(EtsCoroutine *coro)
+{
     auto *ext = coro->GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
     Class *boxClass = nullptr;
+
     if constexpr (std::is_same<T, EtsBoolean>::value) {
         boxClass = ext->GetBoxBooleanClass();
     } else if constexpr (std::is_same<T, EtsByte>::value) {
@@ -43,10 +52,9 @@ EtsBoxPrimitive<T> *EtsBoxPrimitive<T>::Create(EtsCoroutine *coro, T value)
         boxClass = ext->GetBoxDoubleClass();
     }
     ASSERT(EtsClass::FromRuntimeClass(boxClass)->IsBoxed());
-    auto *instance = reinterpret_cast<EtsBoxPrimitive<T> *>(ObjectHeader::Create(coro, boxClass));
-    instance->SetValue(value);
-    return instance;
+    return boxClass;
 }
+
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_BOX_PRIMITIVE_INL_H
