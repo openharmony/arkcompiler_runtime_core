@@ -27,6 +27,8 @@ namespace ark {
 struct CoroutineManagerConfig {
     static constexpr uint32_t WORKERS_COUNT_AUTO = 0;
 
+    /// enable the experimental task execution interface
+    bool enableDrainQueueIface = false;
     /// JS-compatible mode, affects async functions, await() and other things
     bool emulateJs = false;
     /// Number of coroutine workers for the N:M mode
@@ -208,6 +210,10 @@ public:
      * the active->non_active transition (see the state diagram in coroutine.h)
      */
     virtual void OnCoroBecameNonActive([[maybe_unused]] Coroutine *co) {};
+    /// Should be called at the beginning of the VM native interface call
+    virtual void OnNativeCallEnter([[maybe_unused]] Coroutine *co) {};
+    /// Should be called at the end of the VM native interface call
+    virtual void OnNativeCallExit([[maybe_unused]] Coroutine *co) {};
 
     /* debugging tools */
     /**

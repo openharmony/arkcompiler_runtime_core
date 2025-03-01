@@ -200,6 +200,14 @@ options:
   default: 3
   description: Limit on the number of exclusive coroutines workers
 
+- name: coroutine-enable-features
+  description: Specify a list of experimental features
+  sub_options:
+  - name: ani-drain-queue
+    type: bool
+    default: false
+    description: "Drain the coroutine queue after native interface calls"
+
 - name: coroutine-js-mode
   lang:
     - ets

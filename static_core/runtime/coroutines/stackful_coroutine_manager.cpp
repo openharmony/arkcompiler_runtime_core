@@ -128,6 +128,8 @@ void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
         stats_.Enable();
     }
     ScopedCoroutineStats s(&stats_, CoroutineTimeStats::INIT);
+    // set feature flags
+    enableDrainQueueIface_ = config.enableDrainQueueIface;
     // set limits
     coroStackSizeBytes_ = Runtime::GetCurrent()->GetOptions().GetCoroutineStackSizePages() * os::mem::GetPageSize();
     if (coroStackSizeBytes_ != AlignUp(coroStackSizeBytes_, PANDA_POOL_ALIGNMENT_IN_BYTES)) {
@@ -730,6 +732,28 @@ void StackfulCoroutineManager::OnCoroBecameNonActive([[maybe_unused]] Coroutine 
 {
     ASSERT(!co->IsActive());
     DecrementActiveCoroutines();
+}
+
+void StackfulCoroutineManager::OnNativeCallExit([[maybe_unused]] Coroutine *co)
+{
+    if (IsDrainQueueInterfaceEnabled()) {
+        // A temporary hack for draining the coroutine queue on the current worker.
+        // Will stay there until we have the proper design for the execution model and
+        // the rules for interaction with the app framework.
+        LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::OnNativeCallExit(): START DRAINING COROQUEUE";
+
+        // precondition: the event is handled for the current coroutine
+        ASSERT(co == Coroutine::GetCurrent());
+        auto *worker = GetCurrentWorker();
+        if (!worker->IsMainWorker() && !worker->InExclusiveMode()) {
+            return;
+        }
+        while (worker->GetRunnablesCount(Coroutine::Type::MUTATOR) > 0) {
+            GetCurrentWorker()->RequestSchedule();
+        }
+
+        LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::OnNativeCallExit(): STOP DRAINING COROQUEUE";
+    }
 }
 
 void StackfulCoroutineManager::IncrementActiveCoroutines()

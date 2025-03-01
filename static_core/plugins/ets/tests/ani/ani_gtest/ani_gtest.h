@@ -48,6 +48,16 @@ public:
         std::vector<ani_option> options;
         options.push_back(bootFileOption);
 
+        // add extra test-specific VM options
+        std::vector<std::string> extraVmAniStrings;
+        for (auto &opt : GetExtraVmOptions()) {
+            extraVmAniStrings.push_back(optionPrefix + opt);
+        }
+        for (auto &aniOptStr : extraVmAniStrings) {
+            ani_option aniOpt = {aniOptStr.data(), nullptr};
+            options.push_back(aniOpt);
+        }
+
         ani_options optionsPtr = {options.size(), options.data()};
         ASSERT_TRUE(ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vm_) == ANI_OK);
 
@@ -133,6 +143,12 @@ public:
         result.resize(sz + 1);
         ASSERT_EQ(env->String_GetUTF8SubString(str, 0, sz, result.data(), result.size(), &sz), ANI_OK);
         result.resize(sz);
+    }
+
+protected:
+    virtual std::vector<std::string> GetExtraVmOptions()
+    {
+        return {};
     }
 
 private:
