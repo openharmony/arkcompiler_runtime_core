@@ -768,10 +768,9 @@ bool File::ValidateChecksum() const
     if (UNLIKELY(GetHeader() == nullptr)) {
         LOG(FATAL, PANDAFILE) << "Header pointer is nullptr. Abc file is corrupted";
     }
-    constexpr uint32_t MAGIC_SIZE = 8U;
     constexpr uint32_t CHECKSUM_SIZE = 4U;
     // The checksum calculation does not include magic or checksum, so the offset needs to be added
-    constexpr uint32_t FILE_CONTENT_OFFSET = MAGIC_SIZE + CHECKSUM_SIZE;
+    constexpr uint32_t FILE_CONTENT_OFFSET = File::MAGIC_SIZE + CHECKSUM_SIZE;
     uint32_t file_size = GetHeader()->file_size;
     uint32_t cal_checksum = adler32(1, GetBase() + FILE_CONTENT_OFFSET, file_size - FILE_CONTENT_OFFSET);
     return GetHeader()->checksum == cal_checksum;
