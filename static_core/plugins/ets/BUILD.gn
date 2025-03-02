@@ -52,7 +52,10 @@ group("ark_packages") {
   }
   if (!(ark_standalone_build ||
         (defined(ark_static_standalone_build) && ark_static_standalone_build))) {
-    deps += [ ":etsstdlib_bootabc" ]
+    deps += [
+      ":commonsdk_packages",
+      ":etsstdlib_bootabc",
+    ]
   }
 }
 
@@ -77,6 +80,27 @@ if (!(ark_standalone_build ||
 
   group("etsstdlib_bootabc") {
     deps = [ ":etsstdlib_bootabc_etc" ]
+  }
+
+  ohos_prebuilt_etc("ets2abc_commonsdk_etc") {
+    source = "$target_out_dir/etssdk.abc"
+    module_install_dir = "framework"
+    subsystem_name = "arkcompiler"
+    part_name = "runtime_core"
+    deps = [ ":ets2abc_commonsdk" ]
+  }
+
+  generate_static_abc("ets2abc_commonsdk") {
+    arktsconfig = "$ark_root/plugins/ets/sdk/arktsconfig.json"
+    dst_file = "$target_out_dir/etssdk.abc"
+    out_puts = [ "$target_out_dir/etssdk.abc" ]
+    cache_path = "$target_out_dir/cache"
+    is_boot_abc = "True"
+    device_dst_file = "/system/framework/etssdk.abc"
+  }
+
+  group("commonsdk_packages") {
+    deps = [ ":ets2abc_commonsdk_etc" ]
   }
 }
 
