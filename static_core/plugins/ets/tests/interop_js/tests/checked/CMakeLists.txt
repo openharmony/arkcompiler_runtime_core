@@ -25,7 +25,7 @@ panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/qualified_call/
 set(INTEROP_TESTS_GENERATED_DIR "${PANDA_BINARY_ROOT}/plugins/ets/tests/ets_interop_js/generated")
 
 gen_file(TARGET frontend_test_number_subtypes_gen_ets
-    TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/../number_subtypes/number_subtypes_frontend.sts.erb
+    TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/../number_subtypes/ts_to_sts_frontend/number_subtypes_frontend.sts.erb
     OUTPUT ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes_frontend.sts
     REQUIRES ${CMAKE_CURRENT_SOURCE_DIR}/../number_subtypes/number_subtypes.rb
 )

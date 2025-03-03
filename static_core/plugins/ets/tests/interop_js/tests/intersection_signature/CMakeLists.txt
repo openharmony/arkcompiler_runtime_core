@@ -19,7 +19,6 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__intersection_arg_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_interface/arg_interface.sts
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
     ETS_CONFIG ${ETS_CONFIG}
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__intersection_arg_negative_result_ts_to_sts
@@ -27,7 +26,6 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__intersection_arg_negative_res
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_interface_negative_result/arg_interface_negative_result.sts
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
     ETS_CONFIG ${ETS_CONFIG}
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__arg_generic_ts_to_sts
@@ -35,7 +33,6 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__arg_generic_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_generic/arg_generic.sts
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
     ETS_CONFIG ${ETS_CONFIG}
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__intersection_arg_generic_negative_result_ts_to_sts
@@ -43,7 +40,6 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__intersection_arg_generic_nega
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_generic_negative_result/arg_generic_negative_result.sts
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
     ETS_CONFIG ${ETS_CONFIG}
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__arg_union_ts_to_sts
@@ -51,7 +47,6 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__arg_union_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_union/arg_union.sts
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
     ETS_CONFIG ${ETS_CONFIG}
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__intersection_arg_union_negative_result_ts_to_sts
@@ -59,7 +54,6 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__intersection_arg_union_negati
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_union_negative_result/arg_union_negative_result.sts
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
     ETS_CONFIG ${ETS_CONFIG}
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__arg_literal_ts_to_sts
@@ -67,7 +61,6 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__arg_literal_ts_to_sts
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_literal/arg_literal.sts
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
     ETS_CONFIG ${ETS_CONFIG}
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__intersection_arg_literal_negative_result_ts_to_sts
@@ -75,5 +68,4 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__intersection_arg_literal_nega
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_literal_negative_result/arg_literal_negative_result.sts
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
     ETS_CONFIG ${ETS_CONFIG}
-    COMPILATION_JS_WITH_CJS_ON
 )

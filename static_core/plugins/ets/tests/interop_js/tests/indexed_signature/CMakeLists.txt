@@ -21,5 +21,4 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__indexed_signature_ts_to_sts
         ${CMAKE_CURRENT_SOURCE_DIR}/main.js
         ${CMAKE_CURRENT_SOURCE_DIR}/utils.js
     ETS_CONFIG ${ETS_CONFIG}
-    COMPILATION_JS_WITH_CJS_ON
 )

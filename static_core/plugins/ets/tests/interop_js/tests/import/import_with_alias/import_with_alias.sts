@@ -14,7 +14,7 @@
  */
 
 import * as js from "main_js";
-import { value as val } from "destructured_import_js";
+import { destructuredImport as val } from "destructured_import_js";
 
 function checkAlias(): boolean {
   const oldValue = js.tsNumber;

@@ -19,5 +19,4 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_strict_equality
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/strict_equality.sts
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/strict_equality.js
     ETS_CONFIG ${ETS_CONFIG}
-    COMPILATION_JS_WITH_CJS_ON
 )

@@ -18,14 +18,7 @@
 
 namespace ark::ets::interop::js::testing {
 
-class EtsInteropJsTestFrontend : public EtsInteropTest {
-public:
-    void SetUp() override
-    {
-        EtsInteropTest::SetUp();
-        LoadModuleAs("test_frontend", "index.js");
-    }
-};
+class EtsInteropJsTestFrontend : public EtsInteropTest {};
 
 TEST_F(EtsInteropJsTestFrontend, test_newcall)
 {

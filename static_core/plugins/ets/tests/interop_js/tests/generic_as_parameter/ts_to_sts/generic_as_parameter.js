@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,165 +13,105 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.DataClass = exports.userClassInstance = exports.UserClass = 
-exports.GTypeClass = exports.GInterfaceClass = 
-exports.extendGenericLiteral = exports.extendGenericTuple = 
-exports.extendGenericUnion = exports.extendGenericObj = 
-exports.extendGenericArr = exports.extendGenericBool = 
-exports.extendGenericString = exports.extendGenericNumber = 
-exports.genericTypeFunctionReturnAny = exports.tsLiteral = exports.tsTuple = 
-exports.tsUnion = exports.tsObj = exports.tsArr = exports.tsBool = 
-exports.tsString = exports.tsNumber = void 0;
-exports.anyTypeParameter = anyTypeParameter;
-exports.anyTypeParameterExplicitCallFromTsInt = anyTypeParameterExplicitCallFromTsInt;
-exports.anyTypeParameterExplicitCallFromTsString = anyTypeParameterExplicitCallFromTsString;
-exports.anyTypeParameterExplicitCallFromTsBool = anyTypeParameterExplicitCallFromTsBool;
-exports.anyTypeParameterExplicitCallFromTsArr = anyTypeParameterExplicitCallFromTsArr;
-exports.anyTypeParameterExplicitCallFromTsObj = anyTypeParameterExplicitCallFromTsObj;
-exports.anyTypeParameterExplicitCallFromTsUnion = anyTypeParameterExplicitCallFromTsUnion;
-exports.anyTypeParameterExplicitCallFromTsTuple = anyTypeParameterExplicitCallFromTsTuple;
-exports.anyTypeParameterExplicitCallFromTsLiteral = anyTypeParameterExplicitCallFromTsLiteral;
-exports.genericTypeFunctionExplicitCallFromTsInt = genericTypeFunctionExplicitCallFromTsInt;
-exports.genericTypeFunctionExplicitCallFromTsString = genericTypeFunctionExplicitCallFromTsString;
-exports.genericTypeFunctionExplicitCallFromTsBool = genericTypeFunctionExplicitCallFromTsBool;
-exports.genericTypeFunctionExplicitCallFromTsArr = genericTypeFunctionExplicitCallFromTsArr;
-exports.genericTypeFunctionExplicitCallFromTsObj = genericTypeFunctionExplicitCallFromTsObj;
-exports.genericTypeFunctionExplicitCallFromTsUnion = genericTypeFunctionExplicitCallFromTsUnion;
-exports.genericTypeFunctionExplicitCallFromTsTuple = genericTypeFunctionExplicitCallFromTsTuple;
-exports.genericTypeFunctionExplicitCallFromTsLiteral = genericTypeFunctionExplicitCallFromTsLiteral;
-exports.genericExtendInterface = genericExtendInterface;
-exports.genericExtendType = genericExtendType;
-exports.tupleGeneric = tupleGeneric;
-exports.collectGeneric = collectGeneric;
-exports.createClassFromTs = createClassFromTs;
-exports.genericDefaultInt = genericDefaultInt;
-exports.genericDefaultString = genericDefaultString;
-exports.genericDefaultBool = genericDefaultBool;
-exports.genericDefaultArr = genericDefaultArr;
-exports.genericDefaultObj = genericDefaultObj;
-exports.genericDefaultUnion = genericDefaultUnion;
-exports.genericDefaultTuple = genericDefaultTuple;
-exports.genericDefaultLiteral = genericDefaultLiteral;
-exports.genericDefaultIntCallFromTs = genericDefaultIntCallFromTs;
-exports.genericDefaultStringCallFromTs = genericDefaultStringCallFromTs;
-exports.genericDefaultBoolCallFromTs = genericDefaultBoolCallFromTs;
-exports.genericDefaultArrCallFromTs = genericDefaultArrCallFromTs;
-exports.genericDefaultObjCallFromTs = genericDefaultObjCallFromTs;
-exports.genericDefaultUnionCallFromTs = genericDefaultUnionCallFromTs;
-exports.genericDefaultTupleCallFromTs = genericDefaultTupleCallFromTs;
-exports.genericDefaultLiteralCallFromTs = genericDefaultLiteralCallFromTs;
-exports.genericExtendClass = genericExtendClass;
-exports.tsNumber = 1;
-exports.tsString = 'string';
-exports.tsBool = true;
-exports.tsArr = [exports.tsNumber];
-exports.tsObj = {};
-exports.tsUnion = exports.tsNumber;
-exports.tsTuple = [exports.tsNumber, exports.tsBool];
-exports.tsLiteral = exports.tsNumber;
-function anyTypeParameter(arg) {
+export let tsNumber = 1;
+export let tsString = 'string';
+export let tsBool = true;
+export let tsArr = [tsNumber];
+export let tsObj = {};
+export let tsUnion = tsNumber;
+export let tsTuple = [tsNumber, tsBool];
+export let tsLiteral = tsNumber;
+export function anyTypeParameter(arg) {
     return arg;
 }
-function anyTypeParameterExplicitCallFromTsInt() {
-    return anyTypeParameter(exports.tsNumber);
+export function anyTypeParameterExplicitCallFromTsInt() {
+    return anyTypeParameter(tsNumber);
 }
-function anyTypeParameterExplicitCallFromTsString() {
-    return anyTypeParameter(exports.tsString);
+export function anyTypeParameterExplicitCallFromTsString() {
+    return anyTypeParameter(tsString);
 }
-function anyTypeParameterExplicitCallFromTsBool() {
-    return anyTypeParameter(exports.tsBool);
+export function anyTypeParameterExplicitCallFromTsBool() {
+    return anyTypeParameter(tsBool);
 }
-function anyTypeParameterExplicitCallFromTsArr() {
-    return anyTypeParameter(exports.tsArr);
+export function anyTypeParameterExplicitCallFromTsArr() {
+    return anyTypeParameter(tsArr);
 }
-function anyTypeParameterExplicitCallFromTsObj() {
-    return anyTypeParameter(exports.tsObj);
+export function anyTypeParameterExplicitCallFromTsObj() {
+    return anyTypeParameter(tsObj);
 }
-function anyTypeParameterExplicitCallFromTsUnion() {
-    return anyTypeParameter(exports.tsUnion);
+export function anyTypeParameterExplicitCallFromTsUnion() {
+    return anyTypeParameter(tsUnion);
 }
-function anyTypeParameterExplicitCallFromTsTuple() {
-    return anyTypeParameter(exports.tsTuple);
+export function anyTypeParameterExplicitCallFromTsTuple() {
+    return anyTypeParameter(tsTuple);
 }
-function anyTypeParameterExplicitCallFromTsLiteral() {
-    return anyTypeParameter(exports.tsLiteral);
+export function anyTypeParameterExplicitCallFromTsLiteral() {
+    return anyTypeParameter(tsLiteral);
 }
-let genericTypeFunctionReturnAny = function (arg) {
+export let genericTypeFunctionReturnAny = function (arg) {
     return arg;
 };
-exports.genericTypeFunctionReturnAny = genericTypeFunctionReturnAny;
-function genericTypeFunctionExplicitCallFromTsInt() {
-    return (0, exports.genericTypeFunctionReturnAny)(exports.tsNumber);
+export function genericTypeFunctionExplicitCallFromTsInt() {
+    return (0, genericTypeFunctionReturnAny)(tsNumber);
 }
-function genericTypeFunctionExplicitCallFromTsString() {
-    return (0, exports.genericTypeFunctionReturnAny)(exports.tsString);
+export function genericTypeFunctionExplicitCallFromTsString() {
+    return (0, genericTypeFunctionReturnAny)(tsString);
 }
-function genericTypeFunctionExplicitCallFromTsBool() {
-    return (0, exports.genericTypeFunctionReturnAny)(exports.tsBool);
+export function genericTypeFunctionExplicitCallFromTsBool() {
+    return (0, genericTypeFunctionReturnAny)(tsBool);
 }
-function genericTypeFunctionExplicitCallFromTsArr() {
-    return (0, exports.genericTypeFunctionReturnAny)(exports.tsArr);
+export function genericTypeFunctionExplicitCallFromTsArr() {
+    return (0, genericTypeFunctionReturnAny)(tsArr);
 }
-function genericTypeFunctionExplicitCallFromTsObj() {
-    return (0, exports.genericTypeFunctionReturnAny)(exports.tsObj);
+export function genericTypeFunctionExplicitCallFromTsObj() {
+    return (0, genericTypeFunctionReturnAny)(tsObj);
 }
-function genericTypeFunctionExplicitCallFromTsUnion() {
-    return (0, exports.genericTypeFunctionReturnAny)(exports.tsUnion);
+export function genericTypeFunctionExplicitCallFromTsUnion() {
+    return (0, genericTypeFunctionReturnAny)(tsUnion);
 }
-function genericTypeFunctionExplicitCallFromTsTuple() {
-    return (0, exports.genericTypeFunctionReturnAny)(exports.tsTuple);
+export function genericTypeFunctionExplicitCallFromTsTuple() {
+    return (0, genericTypeFunctionReturnAny)(tsTuple);
 }
-function genericTypeFunctionExplicitCallFromTsLiteral() {
-    return (0, exports.genericTypeFunctionReturnAny)(exports.tsLiteral);
+export function genericTypeFunctionExplicitCallFromTsLiteral() {
+    return (0, genericTypeFunctionReturnAny)(tsLiteral);
 }
-let extendGenericNumber = function (arg) { return arg; };
-exports.extendGenericNumber = extendGenericNumber;
-let extendGenericString = function (arg) { return arg; };
-exports.extendGenericString = extendGenericString;
-let extendGenericBool = function (arg) { return arg; };
-exports.extendGenericBool = extendGenericBool;
-let extendGenericArr = function (arg) { return arg; };
-exports.extendGenericArr = extendGenericArr;
-let extendGenericObj = function (arg) { return arg; };
-exports.extendGenericObj = extendGenericObj;
-let extendGenericUnion = function (arg) { return arg; };
-exports.extendGenericUnion = extendGenericUnion;
-let extendGenericTuple = function (arg) { return arg; };
-exports.extendGenericTuple = extendGenericTuple;
-let extendGenericLiteral = function (arg) { return arg; };
-exports.extendGenericLiteral = extendGenericLiteral;
-let GInterfaceClass = /** @class */ (function () {
+export let extendGenericNumber = function (arg) { return arg; };
+export let extendGenericString = function (arg) { return arg; };
+export let extendGenericBool = function (arg) { return arg; };
+export let extendGenericArr = function (arg) { return arg; };
+export let extendGenericObj = function (arg) { return arg; };
+export let extendGenericUnion = function (arg) { return arg; };
+export let extendGenericTuple = function (arg) { return arg; };
+export let extendGenericLiteral = function (arg) { return arg; };
+export let GInterfaceClass = /** @class */ (function () {
     function gInterfaceClass() {
         this.data = 'string';
     }
     return gInterfaceClass;
 }());
-exports.GInterfaceClass = GInterfaceClass;
-let GTypeClass = /** @class */ (function () {
+export let GTypeClass = /** @class */ (function () {
     function gTypeClass() {
         this.data = 'string';
     }
     return gTypeClass;
 }());
-exports.GTypeClass = GTypeClass;
-function genericExtendInterface(arg) {
+export function genericExtendInterface(arg) {
     return arg;
 }
-function genericExtendType(arg) {
+export function genericExtendType(arg) {
     return arg;
 }
-function tupleGeneric(arg) {
+export function tupleGeneric(arg) {
     return [arg[1], arg[0]];
 }
-function collectGeneric(...arg) {
+export function collectGeneric(...arg) {
     let args = [];
     for (let _i = 0; _i < arg.length; _i++) {
         args[_i] = arg[_i];
     }
     return args;
 }
-let UserClass = /** @class */ (function () {
+export let UserClass = /** @class */ (function () {
     function userClass(name, age) {
         this.name = name;
         this.age = age;
@@ -184,66 +124,64 @@ let UserClass = /** @class */ (function () {
     };
     return userClass;
 }());
-exports.UserClass = UserClass;
-function createClassFromTs() {
-    return new UserClass(exports.tsString, exports.tsNumber);
+export function createClassFromTs() {
+    return new UserClass(tsString, tsNumber);
 }
-exports.userClassInstance = new UserClass(exports.tsString, exports.tsNumber);
-function genericDefaultInt(arg) {
+export let userClassInstance = new UserClass(tsString, tsNumber);
+export function genericDefaultInt(arg) {
     return arg;
 }
-function genericDefaultString(arg) {
+export function genericDefaultString(arg) {
     return arg;
 }
-function genericDefaultBool(arg) {
+export function genericDefaultBool(arg) {
     return arg;
 }
-function genericDefaultArr(arg) {
+export function genericDefaultArr(arg) {
     return arg;
 }
-function genericDefaultObj(arg) {
+export function genericDefaultObj(arg) {
     return arg;
 }
-function genericDefaultUnion(arg) {
+export function genericDefaultUnion(arg) {
     return arg;
 }
-function genericDefaultTuple(arg) {
+export function genericDefaultTuple(arg) {
     return arg;
 }
-function genericDefaultLiteral(arg) {
+export function genericDefaultLiteral(arg) {
     return arg;
 }
-function genericDefaultIntCallFromTs() {
-    return genericDefaultInt(exports.tsNumber);
+export function genericDefaultIntCallFromTs() {
+    return genericDefaultInt(tsNumber);
 }
-function genericDefaultStringCallFromTs() {
-    return genericDefaultString(exports.tsString);
+export function genericDefaultStringCallFromTs() {
+    return genericDefaultString(tsString);
 }
-function genericDefaultBoolCallFromTs() {
-    return genericDefaultBool(exports.tsBool);
+export function genericDefaultBoolCallFromTs() {
+    return genericDefaultBool(tsBool);
 }
-function genericDefaultArrCallFromTs() {
-    return genericDefaultArr(exports.tsArr);
+export function genericDefaultArrCallFromTs() {
+    return genericDefaultArr(tsArr);
 }
-function genericDefaultObjCallFromTs() {
-    return genericDefaultObj(exports.tsObj);
+export function genericDefaultObjCallFromTs() {
+    return genericDefaultObj(tsObj);
 }
-function genericDefaultUnionCallFromTs() {
-    return genericDefaultUnion(exports.tsUnion);
+export function genericDefaultUnionCallFromTs() {
+    return genericDefaultUnion(tsUnion);
 }
-function genericDefaultTupleCallFromTs() {
-    return genericDefaultTuple(exports.tsTuple);
+export function genericDefaultTupleCallFromTs() {
+    return genericDefaultTuple(tsTuple);
 }
-function genericDefaultLiteralCallFromTs() {
-    return genericDefaultLiteral(exports.tsLiteral);
+export function genericDefaultLiteralCallFromTs() {
+    return genericDefaultLiteral(tsLiteral);
 }
-let DataClass = /** @class */ (function () {
+export let DataClass = /** @class */ (function () {
     function dataClass() {
         this.data = 'string';
     }
     return dataClass;
 }());
-exports.DataClass = DataClass;
-function genericExtendClass(arg) {
+export function genericExtendClass(arg) {
     return arg;
 }

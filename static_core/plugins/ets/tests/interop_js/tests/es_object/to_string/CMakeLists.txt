@@ -19,5 +19,4 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test_to_string
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_to_string_method.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_to_string_method.js
-    COMPILATION_JS_WITH_CJS_ON
 )

@@ -19,5 +19,4 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_frontend_test_frontend_package
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_frontend_package.sts
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/index.js
     ETS_CONFIG ${ETS_CONFIG}
-    COMPILATION_JS_WITH_CJS_ON
 )

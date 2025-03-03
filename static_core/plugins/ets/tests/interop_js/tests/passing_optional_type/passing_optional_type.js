@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,50 +12,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-function fnWithAnyParams(name, surname) {
+export function fnWithAnyParams(name, surname) {
     return surname ? `${name}; ${surname}` : name;
 }
-function fnWithAnyParamsObject(obj) {
+export function fnWithAnyParamsObject(obj) {
     return obj.surname ? `${obj.name}; ${obj.surname}` : obj.name;
 }
-function fnWithLiteralParam(name, surname) {
+export function fnWithLiteralParam(name, surname) {
     return surname ? `${name}; ${surname}` : name;
 }
-function fnWithLiteralObjectParam(obj) {
+export function fnWithLiteralObjectParam(obj) {
     return obj.surname ? `${obj.name}; ${obj.surname}` : obj.name;
 }
-function fnWithExtraSetParam(name, surname) {
+export function fnWithExtraSetParam(name, surname) {
     return surname ? `${name}; ${surname}` : name;
 }
-function fnWithExtraSetObjectParam(obj) {
+export function fnWithExtraSetObjectParam(obj) {
     return obj.surname ? `${obj.name}; ${obj.surname}` : obj.name;
 }
-function fnWithSubSetParam(obj) {
+export function fnWithSubSetParam(obj) {
     return obj.city ? `${obj.name}; ${obj.city}` : obj.name;
 }
-function fnWithUnionParam(id) {
+export function fnWithUnionParam(id) {
     return id ? id : 'id not found';
 }
-function fnWithUnionObjectParam(obj) {
+export function fnWithUnionObjectParam(obj) {
     return obj.id ? obj.id : 'id not found';
 }
-function fnWithSubSetReduseParam(obj) {
+export function fnWithSubSetReduseParam(obj) {
     return obj.surname ? `${obj.name}; ${obj.surname}` : obj.name;
 }
-function fnWithSubSetPartialParam(obj) {
+export function fnWithSubSetPartialParam(obj) {
     return obj.surname ? `${obj.name}; ${obj.surname}` : obj.name;
 }
-
-module.exports = {
-    fnWithAnyParams,
-    fnWithAnyParamsObject,
-    fnWithLiteralParam,
-    fnWithLiteralObjectParam,
-    fnWithExtraSetParam,
-    fnWithExtraSetObjectParam,
-    fnWithSubSetParam,
-    fnWithUnionParam,
-    fnWithUnionObjectParam,
-    fnWithSubSetReduseParam,
-    fnWithSubSetPartialParam,
-};

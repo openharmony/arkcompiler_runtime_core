@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,8 +14,8 @@
  */
 'use strict';
 
-exports.etsUndefinedConsume = (x) => x === undefined && x !== null;
-exports.etsUndefinedProduce = () => undefined;
+export let etsUndefinedConsume = (x) => x === undefined && x !== null;
+export let etsUndefinedProduce = () => undefined;
 
-exports.etsNullConsume = (x) => x === null && x !== undefined;
-exports.etsNullProduce = () => null;
+export let etsNullConsume = (x) => x === null && x !== undefined;
+export let etsNullProduce = () => null;

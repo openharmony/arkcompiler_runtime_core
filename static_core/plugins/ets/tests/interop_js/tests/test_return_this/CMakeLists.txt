@@ -19,5 +19,4 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test_return_this
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_return_this.sts
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_return_this.js
     ETS_CONFIG ${ETS_CONFIG}
-    COMPILATION_JS_WITH_CJS_ON
 )

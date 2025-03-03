@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 'use strict';
-function funcArgType(arg) {
+export function funcArgType(arg) {
 	return arg;
 }
-exports.funcArgType = funcArgType;
