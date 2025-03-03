@@ -267,7 +267,7 @@ class BenchGenerator:
 
     def add_bu(self, bus: List[BenchUnit], template: Template,
                lang_impl: LangBase, src: SrcPath, variant: TemplateVars,
-               settings: Optional[GenSettings], out_ext: str) -> None:
+               settings: Optional[GenSettings], out_ext: str) -> BenchUnit:
         try:
             bu = BenchGenerator.emit_bench_variant(
                 variant, template, lang_impl, src, self.out_dir, out_ext)
@@ -280,6 +280,7 @@ class BenchGenerator:
         except Exception as e:
             log.error(e)
             die(self.abort, 'Aborting on first fail...')
+        return bu
 
     def generate(self, lang: str,
                  settings: Optional[GenSettings] = None) -> List[BenchUnit]:
@@ -334,9 +335,22 @@ def generate_mode(mode: str, lang: str,
     template = generator.get_template(template_name)
     for src in BenchGenerator.search_test_files(generator.paths, ext=src_ext, allowed_dir_name=mode):
         for variant in generator.process_source_file(src.full, lang_impl):
-            generator.add_bu(bus, template, lang_impl, src,
-                             variant, settings, out_ext)
+            bu = generator.add_bu(bus, template, lang_impl, src,
+                                  variant, settings, out_ext)
+            if mode == 'bu_a2j' and lang == 'sts':
+                create_interop_runner(generator, variant, bu)
     return tags_workaround(bus, mode)
+
+
+def create_interop_runner(generator: BenchGenerator, variant: TemplateVars, bu: BenchUnit):
+    runner_template = generator.get_template('TemplateInteropA2J.js')
+    runner_js = runner_template.substitute({'METHOD': variant.method_name,
+                                            'STATE': variant.state_name,
+                                            'NAME': variant.bench_name})
+    runner_file = bu.path.joinpath('InteropRunner.js')
+    log.trace("Generating %s", str(runner_file))
+    with create_file(runner_file) as f:
+        f.write(runner_js)
 
 
 def tags_workaround(bus: List[BenchUnit], mode: str) -> List[BenchUnit]:

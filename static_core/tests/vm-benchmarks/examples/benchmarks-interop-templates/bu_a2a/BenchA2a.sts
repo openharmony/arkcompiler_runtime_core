@@ -31,8 +31,15 @@ class BenchA2a {
     /**
      * @Benchmark
      */
-    public test(): void {
+    public test1(): void {
         this.test_function();
+    }
+
+    /**
+     * @Benchmark
+     */
+    public test2(): number {
+        return this.test_function();
     }
 
     test_function(): number {
