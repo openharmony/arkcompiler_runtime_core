@@ -1846,6 +1846,9 @@
 14.ambient_declarations/03.class_declarations/class_declarations_neg_4.sts
 14.ambient_declarations/03.class_declarations/class_declarations_neg_5.sts
 14.ambient_declarations/03.class_declarations/class_declarations_neg_6.sts
+14.ambient_declarations/03.class_declarations/class_declarations_neg_7.sts
+14.ambient_declarations/03.class_declarations/class_declarations_neg_8.sts
+14.ambient_declarations/03.class_declarations/class_declarations_neg_9.sts
 14.ambient_declarations/bad_ambient_declarations_0.sts
 14.ambient_declarations/bad_ambient_declarations_1.sts
 14.ambient_declarations/bad_ambient_declarations_10.sts

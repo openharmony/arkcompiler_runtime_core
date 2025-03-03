@@ -1254,11 +1254,6 @@
 #22462: Ambient declaration with multiline string is not work
 14.ambient_declarations/01.constant_declarations/constant_declarations_15.sts
 
-#22505: Ambient declaration allows class with private members
-14.ambient_declarations/03.class_declarations/class_declarations_neg_7.sts
-14.ambient_declarations/03.class_declarations/class_declarations_neg_8.sts
-14.ambient_declarations/03.class_declarations/class_declarations_neg_9.sts
-
 # 23067
 02.lexical_elements/07.keywords/types_8.sts
 02.lexical_elements/07.keywords/types_10.sts
