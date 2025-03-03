@@ -18,3 +18,37 @@ class Operations {
         return a0 + a1 as byte;
     }
 };
+
+namespace na {
+class A {
+    static funcA(a0: byte, a1: byte): byte {
+        return a0 + a1 as byte;
+    }
+    static funcA(a0: int, a1: int): int {
+        return a1 - a0 as int;
+    }
+};
+}
+
+namespace nb {
+namespace nc {
+class A {
+    static funcA(a0: byte, a1: byte): byte {
+        return a0 + a1 as byte;
+    }
+};
+}
+}
+
+namespace nd {
+class A {
+    static funcA(a0: byte, a1: byte): byte {
+        return a0 + a1 as byte;
+    }
+};
+class B extends A{
+    static funcA(a0: byte, a1: byte): byte {
+        return a1 - a0 as byte;
+    }
+};
+}

@@ -25,3 +25,49 @@ class Phone {
         return "NO1";
     }
 };
+
+namespace na {
+class A {
+    static funcA(a0: int, a1: int): string {
+        if (a0 == 5 && a1 == 6) {
+            return "INT5"
+        }
+        return "NO1";
+    }
+    static funcA(a0: double, a1: double): double {
+        return a1 - a0 as double;
+    }
+};
+}
+
+namespace nb {
+namespace nc {
+class A {
+    static funcA(a0: int, a1: int): string {
+        if (a0 == 5 && a1 == 6) {
+            return "INT5"
+        }
+        return "NO1";
+    }
+};
+}
+}
+
+namespace nd {
+class A {
+    static funcA(a0: int, a1: int): string {
+        if (a0 == 5 && a1 == 6) {
+            return "INT5"
+        }
+        return "NO1";
+    }
+};
+class B extends A{
+    static funcA(a0: int, a1: int): string {
+        if (a0 == 5 && a1 == 6) {
+            return "up"
+        }
+        return "NO1";
+    }
+};
+}
