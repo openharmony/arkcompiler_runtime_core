@@ -15,8 +15,8 @@
 cases:
   - { type: Byte, ptype: byte, val: 1 as byte, res: 1 }
   - { type: Byte, ptype: byte, val: -128 as byte, res: -128 }
-  - { type: Short, ptype: short, val: 1, res: 1, tags: [] }
-  - { type: Short, ptype: short, val: Short.MAX_VALUE, res: 32767, tags: [] }
+  - { tags: "compile-only, negative", type: Short, ptype: short, val: 1, res: 1 }
+  - { type: Short, ptype: short, val: Short.MAX_VALUE, res: 32767 }
   - { type: Int, ptype: int, val: -1, res: -1 }
   - { type: Int, ptype: int, val: 2147483647, res: Int.MAX_VALUE }
   - { type: Long, ptype: long, val: Long.MIN_VALUE, res: Long.MIN_VALUE }

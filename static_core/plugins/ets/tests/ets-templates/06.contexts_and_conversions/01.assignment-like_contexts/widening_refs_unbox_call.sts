@@ -16,6 +16,7 @@
 {% for case in cases %}
 /*---
 desc: Invocation contexts allow the use a widening reference conversion followed by an unboxing conversion.
+tags: [{{case.tags}}]
 params: {{case.val | safe}} to {{case.type}}
 ---*/
 

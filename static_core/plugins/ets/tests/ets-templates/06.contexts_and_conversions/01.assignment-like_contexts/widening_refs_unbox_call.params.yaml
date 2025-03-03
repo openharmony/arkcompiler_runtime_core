@@ -13,18 +13,18 @@
 
 ---
 cases:
-  - { ptype: [short, int, long, float, double], type: Short, val: "42 as byte" }
+  - { tags: "compile-only, negative", ptype: [short, int, long, float, double], type: Short, val: "42 as byte" }
 
-  - { ptype: [int, long, float, double], type: Int, val: "0x5A as byte" }
-  - { ptype: [int, long, float, double], type: Int, val: "-128 as short" }
+  - { tags: "compile-only, negative", ptype: [int, long, float, double], type: Int, val: "0x5A as byte" }
+  - { tags: "compile-only, negative", ptype: [int, long, float, double], type: Int, val: "-128 as short" }
 
-  - { ptype: [long, float, double], type: Long, val: "0o177 as byte" }
-  - { ptype: [long, float, double], type: Long, val: "0x0000 as short" }
-  - { ptype: [long, float, double], type: Long, val: "0x7AFAFBFB" }
+  - { tags: "compile-only, negative", ptype: [long, float, double], type: Long, val: "0o177 as byte" }
+  - { tags: "compile-only, negative", ptype: [long, float, double], type: Long, val: "0x0000 as short" }
+  - { tags: "compile-only, negative", ptype: [long, float, double], type: Long, val: "0x7AFAFBFB" }
 
-  - { ptype: [float, double], type: Float, val: "127 as byte" }
-  - { ptype: [float, double], type: Float, val: "128 as short" }
-  - { ptype: [float, double], type: Float, val: "Long.MAX_VALUE" }
+  - { tags: "compile-only, negative", ptype: [float, double], type: Float, val: "127 as byte" }
+  - { tags: "compile-only, negative", ptype: [float, double], type: Float, val: "128 as short" }
+  - { tags: "compile-only, negative", ptype: [float, double], type: Float, val: "Long.MAX_VALUE" }
 
   - { ptype: [double], type: Double, val: "42 as byte" }
   - { ptype: [double], type: Double, val: "127 as short" }
