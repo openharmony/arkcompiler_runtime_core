@@ -1674,7 +1674,7 @@
 17.experimental_features/12.adding_functionality_to_existing_types/03.accessors_with_receiver/accessors_with_receiver_negative_16.sts
 17.experimental_features/12.adding_functionality_to_existing_types/03.accessors_with_receiver/accessors_with_receiver_negative_17.sts
 
-# 22853
+# 23194
 17.experimental_features/12.adding_functionality_to_existing_types/03.accessors_with_receiver/accessors_with_receiver_negative_9.sts
 
 # 22854
