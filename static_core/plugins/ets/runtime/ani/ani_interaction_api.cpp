@@ -5518,6 +5518,54 @@ NO_UB_SANITIZE static ani_status EnumItem_GetIndex(ani_env *env, ani_enum_item e
     return ANI_OK;
 }
 
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Promise_New(ani_env *env, ani_resolver *resultResolver, ani_object *resultPromise)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(resultResolver);
+    CHECK_PTR_ARG(resultPromise);
+
+    ScopedManagedCodeFix s(env);
+    EtsPromise *promise = EtsPromise::Create(s.GetCoroutine());
+    ANI_CHECK_RETURN_IF_EQ(promise, nullptr, ANI_OUT_OF_MEMORY);
+    ani_status status = s.AddLocalRef(promise->AsObject(), reinterpret_cast<ani_ref *>(resultPromise));
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    return s.AddGlobalRef(promise->AsObject(), reinterpret_cast<ani_ref *>(resultResolver));
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status PromiseResolver_Resolve(ani_env *env, ani_resolver resolver, ani_ref resolution)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+
+    ScopedManagedCodeFix s(env);
+    EtsPromise *promise = s.ToInternalType(resolver);
+    ANI_CHECK_RETURN_IF_EQ(promise, nullptr, ANI_INVALID_ARGS);
+    ani_status status = s.DelGlobalRef(reinterpret_cast<ani_ref>(resolver));
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsObject *value = s.ToInternalType(resolution);
+    promise->Resolve(s.GetCoroutine(), value);
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status PromiseResolver_Reject(ani_env *env, ani_resolver resolver, ani_error rejection)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+
+    ScopedManagedCodeFix s(env);
+    EtsPromise *promise = s.ToInternalType(resolver);
+    ANI_CHECK_RETURN_IF_EQ(promise, nullptr, ANI_INVALID_ARGS);
+    ani_status status = s.DelGlobalRef(reinterpret_cast<ani_ref>(resolver));
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsObject *error = s.ToInternalType(rejection);
+    promise->Reject(s.GetCoroutine(), error);
+    return ANI_OK;
+}
+
 [[noreturn]] static void NotImplementedAPI(int nr)
 {
     LOG(FATAL, ANI) << "Not implemented interaction_api, nr=" << nr;
@@ -5925,9 +5973,9 @@ const __ani_interaction_api INTERACTION_API = {
     NotImplementedAdapter<444>,
     NotImplementedAdapter<445>,
     NotImplementedAdapter<446>,
-    NotImplementedAdapter<447>,
-    NotImplementedAdapter<448>,
-    NotImplementedAdapter<449>,
+    Promise_New,
+    PromiseResolver_Resolve,
+    PromiseResolver_Reject
 };
 // clang-format on
 
