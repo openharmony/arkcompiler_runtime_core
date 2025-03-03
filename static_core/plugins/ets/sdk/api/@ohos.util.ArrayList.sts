@@ -28,7 +28,7 @@ export class ArrayList<T> implements Iterable<T> {
         return this.buffer.length;
     }
 
-    set length(newLen: number): void {
+    set length(newLen: number) {
         if (newLen > Int.MAX_VALUE) {
             throw new RangeError("The value of index is out of range.");
         }

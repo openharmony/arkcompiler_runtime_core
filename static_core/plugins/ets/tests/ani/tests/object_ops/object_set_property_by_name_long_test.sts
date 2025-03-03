@@ -21,7 +21,7 @@ class Car {
         this.highPerformance = highPerformance;
     }
 
-    set model(model: String): void {
+    set model(model: String) {
         this.__model = model;
     }
 
@@ -29,7 +29,7 @@ class Car {
         return this.__ecoFriendly;
     }
 
-    set ecoFriendly(ecoFriendly: long): void {
+    set ecoFriendly(ecoFriendly: long) {
         this.__ecoFriendly = ecoFriendly;
     }
 
@@ -60,7 +60,7 @@ class C2 implements Iface {
         return this.classprop
     }
 
-    public set prop(p: long): void {
+    public set prop(p: long) {
         this.classprop = p
     }
 }

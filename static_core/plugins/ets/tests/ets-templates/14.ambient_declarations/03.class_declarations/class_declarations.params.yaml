@@ -117,33 +117,33 @@ declarations:
   - >
     declare class A {
       get foo(): int
-      set foo(x: int): void
+      set foo(x: int)
     }
   - >
     declare abstract class A {
       abstract get foo(): int
-      abstract set foo(x: int): void
+      abstract set foo(x: int)
     }
   - >
     declare class A {
       final get foo(): int
-      final set foo(x: int): void
+      final set foo(x: int)
     }
   - >
     declare class A {
       static get foo(): int
-      static set foo(x: int): void
+      static set foo(x: int)
     }
   - >
     class A {
       private x: int
       get foo() { return this.x }
-      set foo(x: int): void { this.x = x }
+      set foo(x: int) { this.x = x }
     }
 
     declare class B extends A {
       override get foo(): int
-      override set foo(x: int): void
+      override set foo(x: int)
     }
   - >
     declare class MyIndexable {

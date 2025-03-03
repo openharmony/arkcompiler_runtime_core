@@ -573,7 +573,7 @@ abstract class ArrayProxy<T> extends Array<T> {
         }
     }
 
-    override set length(length: number): void {
+    override set length(length: number) {
         this.handlerSet(this.target, this.handler, ArrayProxy.LENGTH_PROP_NAME, length)
     }
 

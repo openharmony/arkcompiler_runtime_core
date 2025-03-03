@@ -43,5 +43,5 @@ declarations:
   - >
     declare interface A {
       get foo(): int
-      set foo(v: int): void
+      set foo(v: int)
     }
