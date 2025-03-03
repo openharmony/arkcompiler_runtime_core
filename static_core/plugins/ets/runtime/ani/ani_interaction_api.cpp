@@ -27,6 +27,7 @@
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_napi_env.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
+#include "types/ets_object.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
@@ -2938,6 +2939,159 @@ NO_UB_SANITIZE static ani_status Object_GetPropertyByName_Ref(ani_env *env, ani_
     CHECK_PTR_ARG(result);
 
     return DoGetPropertyByName(env, object, name, result);
+}
+
+template <typename R>
+static ani_status DoSetPropertyByName(ani_env *env, ani_object object, const char *name, R value)
+{
+    static constexpr auto IS_REF = std::is_same_v<R, ani_ref>;
+
+    ScopedManagedCodeFix s(env);
+    EtsCoroutine *coroutine = s.GetCoroutine();
+    EtsHandleScope scope(coroutine);
+    EtsHandle<EtsObject> etsObject(coroutine, s.ToInternalType(object));
+    EtsHandle<EtsClass> klass(coroutine, etsObject->GetClass());
+    EtsField *field = klass->GetFieldIDByName(name, nullptr);
+    if (field != nullptr) {
+        // Property as field
+        ANI_CHECK_RETURN_IF_NE(field->GetEtsType(), AniTypeInfo<R>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+        if constexpr (IS_REF) {
+            EtsObject *etsValue = s.ToInternalType(value);
+            etsObject->SetFieldObject(field, etsValue);
+        } else {
+            etsObject->SetFieldPrimitive<R>(field, value);
+        }
+    } else {
+        // Property as setter
+        EtsMethod *method = klass->GetMethod((PandaString(SETTER_BEGIN) + name).c_str());
+        ANI_CHECK_RETURN_IF_EQ(method, nullptr, ANI_NOT_FOUND);
+        ANI_CHECK_RETURN_IF_EQ(method->IsStatic(), true, ANI_NOT_FOUND);
+        ANI_CHECK_RETURN_IF_NE(method->GetNumArgs(), 2U, ANI_NOT_FOUND);
+        ANI_CHECK_RETURN_IF_NE(method->GetArgType(0), EtsType::OBJECT, ANI_NOT_FOUND);
+        ANI_CHECK_RETURN_IF_NE(method->GetArgType(1U), AniTypeInfo<R>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+        ANI_CHECK_RETURN_IF_NE(method->GetReturnValueType(), EtsType::VOID, ANI_INVALID_TYPE);
+
+        std::array<Value, 2U> args;
+        args.at(0) = Value {etsObject->GetCoreType()};
+        if constexpr (IS_REF) {
+            EtsObject *etsValue = s.ToInternalType(value);
+            args.at(1U) = Value {etsValue->GetCoreType()};
+        } else {
+            args.at(1U) = Value {value};
+        }
+
+        method->GetPandaMethod()->Invoke(coroutine, args.data());
+        ANI_CHECK_RETURN_IF_EQ(coroutine->HasPendingException(), true, ANI_PENDING_ERROR);
+    }
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Boolean(ani_env *env, ani_object object, const char *name,
+                                                                  ani_boolean value)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+
+    return DoSetPropertyByName(env, object, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Char(ani_env *env, ani_object object, const char *name,
+                                                               ani_char value)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+
+    return DoSetPropertyByName(env, object, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Byte(ani_env *env, ani_object object, const char *name,
+                                                               ani_byte value)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+
+    return DoSetPropertyByName(env, object, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Short(ani_env *env, ani_object object, const char *name,
+                                                                ani_short value)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+
+    return DoSetPropertyByName(env, object, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Int(ani_env *env, ani_object object, const char *name,
+                                                              ani_int value)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+
+    return DoSetPropertyByName(env, object, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Long(ani_env *env, ani_object object, const char *name,
+                                                               ani_long value)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+
+    return DoSetPropertyByName(env, object, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Float(ani_env *env, ani_object object, const char *name,
+                                                                ani_float value)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+
+    return DoSetPropertyByName(env, object, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Double(ani_env *env, ani_object object, const char *name,
+                                                                 ani_double value)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+
+    return DoSetPropertyByName(env, object, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Ref(ani_env *env, ani_object object, const char *name,
+                                                              ani_ref value)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(name);
+
+    return DoSetPropertyByName(env, object, name, value);
 }
 
 NO_UB_SANITIZE static ani_status ExistUnhandledError(ani_env *env, ani_boolean *result)
@@ -5877,15 +6031,15 @@ const __ani_interaction_api INTERACTION_API = {
     Object_GetPropertyByName_Float,
     Object_GetPropertyByName_Double,
     Object_GetPropertyByName_Ref,
-    NotImplementedAdapter<345>,
-    NotImplementedAdapter<346>,
-    NotImplementedAdapter<347>,
-    NotImplementedAdapter<348>,
-    NotImplementedAdapter<349>,
-    NotImplementedAdapter<350>,
-    NotImplementedAdapter<351>,
-    NotImplementedAdapter<352>,
-    NotImplementedAdapter<353>,
+    Object_SetPropertyByName_Boolean,
+    Object_SetPropertyByName_Char,
+    Object_SetPropertyByName_Byte,
+    Object_SetPropertyByName_Short,
+    Object_SetPropertyByName_Int,
+    Object_SetPropertyByName_Long,
+    Object_SetPropertyByName_Float,
+    Object_SetPropertyByName_Double,
+    Object_SetPropertyByName_Ref,
     Object_CallMethod_Boolean,
     Object_CallMethod_Boolean_A,
     Object_CallMethod_Boolean_V,
