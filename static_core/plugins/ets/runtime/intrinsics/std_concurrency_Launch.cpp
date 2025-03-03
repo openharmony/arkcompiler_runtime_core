@@ -23,9 +23,12 @@
 #include "types/ets_method.h"
 #include "types/ets_type.h"
 #include "types/ets_job.h"
+#include "types/ets_promise.h"
 #include "types/ets_typeapi_create.h"
 #include "types/ets_type_comptime_traits.h"
 #include "mem/vm_handle.h"
+
+#include <type_traits>
 
 namespace ark::ets::intrinsics {
 static EtsMethod *ResolveInvokeMethod(EtsCoroutine *coro, VMHandle<EtsObject> func)
@@ -85,9 +88,11 @@ static PandaVector<Value> CreateArgsVector(VMHandle<EtsObject> func, EtsMethod *
     return realArgs;
 }
 
-extern "C" {
-EtsJob *EtsMlaunchInternalNative(EtsObject *func, EtsArray *arr)
+template <typename CoroResult>
+ObjectHeader *Launch(EtsObject *func, EtsArray *arr)
 {
+    static_assert(std::is_same<CoroResult, EtsJob>::value || std::is_same<CoroResult, EtsPromise>::value);
+
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     if (func == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
@@ -116,16 +121,16 @@ EtsJob *EtsMlaunchInternalNative(EtsObject *func, EtsArray *arr)
     }
 
     // create the coro and put it to the ready queue
-    EtsJob *job = EtsJob::Create(coro);
-    if (UNLIKELY(job == nullptr)) {
+    CoroResult *coroResult = CoroResult::Create(coro);
+    if (UNLIKELY(coroResult == nullptr)) {
         return nullptr;
     }
-    EtsHandle<EtsJob> jobHandle(coro, job);
+    EtsHandle<CoroResult> coroResultHandle(coro, coroResult);
 
     PandaEtsVM *etsVm = coro->GetPandaVM();
     auto *coroManager = coro->GetCoroutineManager();
-    auto jobRef = etsVm->GetGlobalObjectStorage()->Add(job, mem::Reference::ObjectType::GLOBAL);
-    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(jobRef, coroManager);
+    auto ref = etsVm->GetGlobalObjectStorage()->Add(coroResultHandle.GetPtr(), mem::Reference::ObjectType::GLOBAL);
+    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(ref, coroManager);
 
     // since transferring arguments from frame registers (which are local roots for GC) to a C++ vector
     // introduces the potential risk of pointer invalidation in case GC moves the referenced objects,
@@ -140,7 +145,18 @@ EtsJob *EtsMlaunchInternalNative(EtsObject *func, EtsArray *arr)
         return nullptr;
     }
 
-    return jobHandle.GetPtr();
+    return coroResultHandle.GetPtr();
+}
+
+extern "C" {
+EtsJob *EtsLaunchInternalJobNative(EtsObject *func, EtsArray *arr)
+{
+    return static_cast<EtsJob *>(Launch<EtsJob>(func, arr));
+}
+
+EtsPromise *EtsLaunchInternalPromiseNative(EtsObject *func, EtsArray *arr)
+{
+    return static_cast<EtsPromise *>(Launch<EtsPromise>(func, arr));
 }
 }
 }  // namespace ark::ets::intrinsics

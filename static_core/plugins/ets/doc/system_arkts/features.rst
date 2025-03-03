@@ -172,7 +172,7 @@ using Coroutines instead.
     }
 
     function main(): void {
-        let promise = launch foo(); // Changed to coroutine way - begin
+        let promise = foo(); // Changed to coroutine way - begin
         let i = await promise; // Changed to coroutine way - end
     }
 

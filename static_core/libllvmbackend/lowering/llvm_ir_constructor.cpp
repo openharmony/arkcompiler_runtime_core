@@ -2215,79 +2215,6 @@ llvm::Value *LLVMIrConstructor::CreateNewStringFromStringTlab(Inst *inst, llvm::
     return result;
 }
 
-llvm::Value *LLVMIrConstructor::CreateLaunchArgsArray(CallInst *callInst, uint32_t argStart)
-{
-    auto callArgsCount = callInst->GetInputsCount() - argStart - 1U;  // last arg is a SaveState
-    auto callArgs = CreateAllocaForArgs(builder_.getInt64Ty(), callArgsCount);
-
-    // Store actual call arguments
-    for (size_t i = 0; i < callArgsCount; i++) {
-        auto arg = GetInputValue(callInst, argStart + i);
-
-        auto type = callInst->GetInputType(argStart + i);
-        auto typeSize = DataType::GetTypeSize(type, GetGraph()->GetArch());
-        if (typeSize < DataType::GetTypeSize(DataType::INT32, GetGraph()->GetArch())) {
-            arg = CoerceValue(arg, type, DataType::INT32);
-        }
-
-        auto gep = builder_.CreateConstInBoundsGEP1_32(builder_.getInt64Ty(), callArgs, i);
-        builder_.CreateStore(arg, gep);
-    }
-    return callArgs;
-}
-
-void LLVMIrConstructor::CreateLaunchCall([[maybe_unused]] CallInst *callInst)
-{
-#ifdef PANDA_WITH_ETS
-    ArenaVector<llvm::Value *> args(GetGraph()->GetLocalAllocator()->Adapter());
-
-    if (callInst->GetOpcode() == Opcode::CallResolvedLaunchStatic ||
-        callInst->GetOpcode() == Opcode::CallResolvedLaunchVirtual) {
-        args.push_back(GetInputValue(callInst, 0));
-        args.push_back(GetInputValue(callInst, 1));
-
-        auto argStart = callInst->GetOpcode() == Opcode::CallResolvedLaunchVirtual ? 3U : 2U;
-        auto callArgs = CreateLaunchArgsArray(callInst, argStart);
-
-        args.push_back(callArgs);
-
-        if (callInst->GetOpcode() == Opcode::CallResolvedLaunchVirtual) {
-            args.push_back(GetInputValue(callInst, 2U));
-        }
-    } else {
-        if (callInst->GetOpcode() != Opcode::CallLaunchVirtual) {
-            ASSERT_DO(false, (std::cerr << "Unexpected Launch Call: \n", callInst->Dump(&std::cerr, true)));
-            UNREACHABLE();
-        }
-
-        ASSERT(GetGraph()->GetAotData()->GetUseCha());
-
-        auto method = ark::llvmbackend::utils::CreateLoadMethodUsingVTable(
-            GetInputValue(callInst, 1), func_, callInst->GetCallMethodId(), &builder_, arkInterface_);
-        args.push_back(method);
-        args.push_back(GetInputValue(callInst, 0));
-
-        auto callArgs = CreateLaunchArgsArray(callInst, 2U);
-        args.push_back(callArgs);
-        args.push_back(GetInputValue(callInst, 1));
-    }
-
-    auto eid = callInst->IsStaticLaunchCall() ? RuntimeInterface::EntrypointId::CREATE_LAUNCH_STATIC_COROUTINE
-                                              : RuntimeInterface::EntrypointId::CREATE_LAUNCH_VIRTUAL_COROUTINE;
-    auto entryCall = CreateEntrypointCall(eid, callInst, args);
-    if (callInst->GetOpcode() == Opcode::CallResolvedLaunchVirtual) {
-        entryCall->addFnAttr(llvm::Attribute::get(entryCall->getContext(), "original-method-id",
-                                                  std::to_string(callInst->GetCallMethodId())));
-        entryCall->addFnAttr(llvm::Attribute::get(entryCall->getContext(), "is-launch-call"));
-    }
-    if (callInst->GetFlag(inst_flags::MEM_BARRIER)) {
-        entryCall->addFnAttr(llvm::Attribute::get(entryCall->getContext(), "needs-mem-barrier"));
-    }
-#else
-    UNREACHABLE();
-#endif
-}
-
 void LLVMIrConstructor::CreateDeoptimizationBranch(Inst *inst, llvm::Value *deoptimize,
                                                    RuntimeInterface::EntrypointId exception,
                                                    llvm::ArrayRef<llvm::Value *> arguments)
@@ -5078,24 +5005,6 @@ void LLVMIrConstructor::VisitLoadUniqueObject(GraphVisitor *v, Inst *inst)
     auto result = llvmbackend::runtime_calls::LoadTLSValue(&ctor->builder_, ctor->arkInterface_, offset,
                                                            ctor->builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
     ctor->ValueMapAdd(inst, result);
-}
-
-void LLVMIrConstructor::VisitCallLaunchVirtual(GraphVisitor *v, Inst *inst)
-{
-    auto ctor = static_cast<LLVMIrConstructor *>(v);
-    ctor->CreateLaunchCall(inst->CastToCallLaunchVirtual());
-}
-
-void LLVMIrConstructor::VisitCallResolvedLaunchStatic(GraphVisitor *v, Inst *inst)
-{
-    auto ctor = static_cast<LLVMIrConstructor *>(v);
-    ctor->CreateLaunchCall(inst->CastToCallResolvedLaunchStatic());
-}
-
-void LLVMIrConstructor::VisitCallResolvedLaunchVirtual(GraphVisitor *v, Inst *inst)
-{
-    auto ctor = static_cast<LLVMIrConstructor *>(v);
-    ctor->CreateLaunchCall(inst->CastToCallResolvedLaunchVirtual());
 }
 
 void LLVMIrConstructor::VisitLoadImmediate(GraphVisitor *v, Inst *inst)

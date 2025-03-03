@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 type Test = () => void;
 
 let tests = new Array<Test>(
@@ -67,7 +69,7 @@ function clearIntervalFromAnotherTimer() {
 
 function clearTimeoutFromAnotherWorkerTest() {
     let id = setTimeout(() => { assertTrue(false); }, longTimeout);
-    launch clearTimeout(id);
+    launch<void, (i: int) => void>(clearTimeout, id);
 }
 
 function sameWorkerIdTest() {
@@ -78,6 +80,6 @@ function sameWorkerIdTest() {
 function main() {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     for (let test of tests) {
-        launch test();
+        launch<void, () => void>(test);
     }
 }

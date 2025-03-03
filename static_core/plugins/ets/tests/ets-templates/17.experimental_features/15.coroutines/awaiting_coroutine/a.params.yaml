@@ -18,18 +18,18 @@ cases:
           function foo(r: Promise<int>): int {
               return await r
           }
-          function bar(p: int): int {
+          async function bar(p: int): Promise<int> {
               return p + 1
           }
       use: |-
-          assertTrue(foo(launch bar(1)) == 2)
+          assertTrue(foo(bar(1)) == 2)
 
     - decl: |-
           // Error in launch function propagates outside
           function foo(r: Promise<int>): int {
               return await r
           }
-          function bar(p: int): int {
+          async function bar(p: int): Promise<int> {
               if (p == 1) {
                   throw new Error('ABC')
               }
@@ -37,7 +37,7 @@ cases:
           }
       use: |-
           try {
-              foo(launch bar(1))
+              foo(bar(1))
               assertTrue(false)
           } catch (e: Error) {
               assertTrue(e.message == 'ABC')  // expected
@@ -53,12 +53,12 @@ cases:
               }
               return await r
           }
-          function bar(p: int): int {
+          async function bar(p: int): Promise<int> {
               return p + 1
           }
       use: |-
           try {
-              foo(launch bar(1), 1)
+              foo(bar(1), 1)
               assertTrue(false)
           } catch (e: Error) {
               assertTrue(e.message == 'ABC')  // expected
@@ -71,7 +71,7 @@ cases:
           function foo(r: Promise<int>): int throws {
               return await r
           }
-          function bar(p: int): int throws {
+          async function bar(p: int): Promise<int> throws {
               if (p == 1) {
                   throw new Exception('ABC')
               }
@@ -79,7 +79,7 @@ cases:
           }
       use: |-
           try {
-              foo(launch bar(1))
+              foo(bar(1))
               assertTrue(false)
           } catch (e: Exception) {
               assertTrue(e.message == 'ABC')  // expected
@@ -95,12 +95,12 @@ cases:
               }
               return await r
           }
-          function bar(p: int): int throws {
+          async function bar(p: int): Promise<int> throws {
               return p + 1
           }
       use: |-
           try {
-              foo(1, launch bar(1))
+              foo(1, bar(1))
               assertTrue(false)
           } catch (e: Exception) {
               assertTrue(e.message == 'ABC')  // expected
@@ -116,7 +116,7 @@ cases:
           function foo(r: Promise<int>): int {
               return await r
           }
-          function bar(p: int): int throws {
+          async function bar(p: int): Promise<int> throws {
               if (p == 1) {
                   throw new Exception('ABC')
               }
@@ -124,7 +124,7 @@ cases:
           }
       use: |-
           try {
-              baz(launch bar(1), foo)
+              baz(bar(1), foo)
               assertTrue(false)
           } catch (e: Exception) {
               assertTrue(e.message == 'ABC')  // expected
@@ -134,7 +134,7 @@ cases:
 
     - decl: |-
           // Error in one promise should not affect other running promises
-          function foo(p: int): string {
+          async function foo(p: int): Promise<string> {
               if (p == 2) {
                   throw new Error('X')
               }
@@ -152,13 +152,13 @@ cases:
           let arr: Promise<string>[]
       use: |-
           let res = ''
-          arr = [launch foo(1), launch foo(2), launch foo(3)]
+          arr = [foo(1), foo(2), foo(3)]
           for (let v of arr) res += bar(v)
           assertTrue(res == '1X3')
 
     - decl: |-
           // Exception in one promise should not affect other running promises
-          function foo(p: int): string throws {
+          async function foo(p: int): Promise<string> throws {
               if (p == 2) {
                   throw new Exception('X')
               }
@@ -179,7 +179,7 @@ cases:
       use: |-
           try {
               let res = ''
-              arr = [launch foo(1), launch foo(2), launch foo(3)]
+              arr = [foo(1), foo(2), foo(3)]
               for (let v of arr) res += bar(v)
               assertTrue(res == '1X3')
           } catch (e) {
@@ -187,13 +187,13 @@ cases:
           }
 
     - decl: |-
-          function foo(p: string): string {
+          async function foo(p: string): Promise<string> {
               return p + p
           }
           class A {
               fld: Promise<string>
               constructor() {
-                  this.fld = launch foo('')
+                  this.fld = foo('')
                   await this.fld
               }
               constructor(p: Promise<string>) {
@@ -203,19 +203,19 @@ cases:
                   return this.fld
               }
           }
-          function p1(): Promise<string>|null|undefined { return launch foo('A') }
+          function p1(): Promise<string>|null|undefined { return foo('A') }
           function p2(): Promise<string>|null|undefined { return null }
       use: |-
           // array element
-          let arr: Promise<string>[] = [launch foo('A')]
+          let arr: Promise<string>[] = [foo('A')]
           assertTrue((await arr[0]) == 'AA')
 
           // tuple element
-          let tup: [boolean, Promise<string>] = [false, launch foo('A')]
+          let tup: [boolean, Promise<string>] = [false, foo('A')]
           assertTrue((await tup[1]) == 'AA')
 
           // union type
-          let ut: boolean|number|Promise<string> = launch foo('A')
+          let ut: boolean|number|Promise<string> = foo('A')
           assertTrue((await (ut as Promise<string>)) == 'AA')
 
           // nullish type
@@ -232,18 +232,18 @@ cases:
 
           // function call
           let f: (p: Promise<string>) => Promise<string> = (p: Promise<string>): Promise<string> => p
-          assertTrue((await f(launch foo('A'))) == 'AA')
+          assertTrue((await f(foo('A'))) == 'AA')
 
           // instance field
-          let a: A = { fld: launch foo('A') }
+          let a: A = { fld: foo('A') }
           assertTrue((await a.fld) == 'AA')
 
           // method call
-          let b: A = new A(launch foo('A'))
+          let b: A = new A(foo('A'))
           assertTrue((await b.meth()) == 'AA')
 
           // conditional expression
-          let expr1 = launch foo('A')
-          let expr2 = launch foo('B')
+          let expr1 = foo('A')
+          let expr2 = foo('B')
           assertTrue((await a instanceof A ? expr1 : expr2) == 'AA')
           assertTrue((await ! (a instanceof A) ? expr1 : expr2) == 'BB')

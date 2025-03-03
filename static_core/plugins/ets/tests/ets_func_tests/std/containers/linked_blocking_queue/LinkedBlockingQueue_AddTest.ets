@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
 const elementsNum: int = 10;
 const testNum: int = 20;
 const stressNum: int = 100;
@@ -48,12 +51,12 @@ function main(): int {
         while (!mQueueInt.isEmpty()) {
             mQueueInt.pop();
         }
-        let promises = new Array<Promise<void>>(5);
+        let jobs = new Array<Job<void>>(5);
         for (let i = 0; i < 5; i++) {
-            promises[i] = launch queueAddData();
+            jobs[i] = launch<void, () => void>(queueAddData);
         }
         for (let i: int = 0; i < 5; i++) {
-            await promises[i];
+            jobs[i].Await();
         }
         assertEQ(mQueueInt.getFirst(), testNum);
     });
@@ -62,14 +65,14 @@ function main(): int {
         while (!mQueueInt.isEmpty()) {
             mQueueInt.pop();
         }
-        let promises = new Array<Promise<void>>(6);
+        let jobs = new Array<Job<void>>(6);
         let p = 0;
         for (let i = 0; i < 3; i++) {
-            promises[p++] = launch queueAddData();
-            promises[p++] = launch queuePopData();
+            jobs[p++] = launch<void, () => void>(queueAddData);
+            jobs[p++] = launch<void, () => void>(queuePopData);
         }
         for (let i: int = 0; i < 6; i++) {
-            await promises[i];
+            jobs[i].Await();
         }
         assertTrue(mQueueInt.size <= 3);
     });
@@ -78,16 +81,16 @@ function main(): int {
         while (!mQueueInt.isEmpty()) {
             mQueueInt.pop();
         }
-        let promises = new Array<Promise<void>>(10);
+        let jobs = new Array<Job<void>>(10);
         let p = 0;
         for (let i = 0; i < 5; i++) {
-            promises[p++] = launch queueAddData();
+            jobs[p++] = launch<void, () => void>(queueAddData);
         }
         for (let i = 5; i < 10; i++) {
-            promises[p++] = launch queueGetFirstData();
+            jobs[p++] = launch<void, () => void>(queueGetFirstData);
         }
         for (let i: int = 0; i < 10; i++) {
-            await promises[i];
+            jobs[i].Await();
         }
         assertEQ(mQueueInt.getFirst(), testNum);
     });

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+ import { launch } from "std/concurrency"
+
 let N = 200
 let RESULT = N as byte
 
@@ -26,12 +28,12 @@ function main() {
     arr_u32 = new Int32Array(buf_2, 0, 1);
     arr_u32[0] = N
 
-    launch incrementer()
+    launch<Int, () => Int>(incrementer)
     while (Atomics.load(arr, 0) != RESULT) {
         wait()
     }
 
-    launch decrementer()
+    launch<Int, () => Int>(decrementer)
     while (Atomics.load(arr_u32, 0) != 0) {
         wait()
     }

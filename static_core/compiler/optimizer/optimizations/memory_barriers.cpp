@@ -105,38 +105,6 @@ void OptimizeMemoryBarriers::VisitCallResolvedVirtual(GraphVisitor *v, Inst *ins
     static_cast<OptimizeMemoryBarriers *>(v)->CheckAllInputs(inst);
 }
 
-void OptimizeMemoryBarriers::VisitCallLaunchStatic(GraphVisitor *v, Inst *inst)
-{
-    if (inst->CastToCallLaunchStatic()->IsInlined()) {
-        return;
-    }
-    static_cast<OptimizeMemoryBarriers *>(v)->CheckAllInputs(inst);
-}
-
-void OptimizeMemoryBarriers::VisitCallResolvedLaunchStatic(GraphVisitor *v, Inst *inst)
-{
-    if (inst->CastToCallResolvedLaunchStatic()->IsInlined()) {
-        return;
-    }
-    static_cast<OptimizeMemoryBarriers *>(v)->CheckAllInputs(inst);
-}
-
-void OptimizeMemoryBarriers::VisitCallLaunchVirtual(GraphVisitor *v, Inst *inst)
-{
-    if (inst->CastToCallLaunchVirtual()->IsInlined()) {
-        return;
-    }
-    static_cast<OptimizeMemoryBarriers *>(v)->CheckAllInputs(inst);
-}
-
-void OptimizeMemoryBarriers::VisitCallResolvedLaunchVirtual(GraphVisitor *v, Inst *inst)
-{
-    if (inst->CastToCallResolvedLaunchVirtual()->IsInlined()) {
-        return;
-    }
-    static_cast<OptimizeMemoryBarriers *>(v)->CheckAllInputs(inst);
-}
-
 void OptimizeMemoryBarriers::VisitCallDynamic(GraphVisitor *v, Inst *inst)
 {
     static_cast<OptimizeMemoryBarriers *>(v)->CheckAllInputs(inst);

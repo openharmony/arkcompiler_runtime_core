@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 class Key {
     readonly id: int
 
@@ -73,8 +75,8 @@ function weakMapKeyGarbageCollection(): void {
     reclaimedKeyId = NULL_ID
 
     // using coroutine to avoid WeakMap creation function inlining
-    const weakMapCreator = launch createTestWeakMap(KEY_ID)
-    const weakMap = await weakMapCreator
+    const weakMapCreator = launch< WeakMap<Key, Val>, (keyId: int) => WeakMap<Key, Val>>(createTestWeakMap, KEY_ID)
+    const weakMap = weakMapCreator.Await()
 
     while (reclaimedKeyId != KEY_ID) {
         try {

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 
@@ -96,10 +98,10 @@ function main(): int {
         assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
         assertEQ(ConcurrentSetTestOne.has(3), true);
-        let p1 = launch hasOne(0);
-        let p2 = launch clearTest();
-        await p1;
-        await p2;
+        let p1 = launch<void, (i: int) => void>(hasOne, 0);
+        let p2 = launch<void, () => void>(clearTest);
+        p1.Await();
+        p2.Await();
         assertEQ(ConcurrentSetTestOne.has(0), false);
     });
 

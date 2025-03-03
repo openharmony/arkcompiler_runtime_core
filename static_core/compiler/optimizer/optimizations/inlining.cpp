@@ -206,7 +206,7 @@ bool Inlining::IsInstSuitableForInline(Inst *inst) const
     }
     auto callInst = static_cast<CallInst *>(inst);
     ASSERT(!callInst->IsDynamicCall());
-    if (callInst->IsInlined() || callInst->IsLaunchCall()) {
+    if (callInst->IsInlined()) {
         return false;
     }
     if (callInst->IsUnresolved() || callInst->GetCallMethod() == nullptr) {

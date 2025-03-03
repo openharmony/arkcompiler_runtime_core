@@ -80,7 +80,6 @@
       compiler_extensions:
         header_path_compiler_inst_builder_extension: plugins/ets/compiler/optimizer/ir_builder/ets_inst_builder.h
         header_path_implementation_codegen: plugins/ets/compiler/optimizer/ets_codegen_extensions.h
-        launch_call_codegen: LaunchCallCodegen
         load_immediate_codegen: LoadImmediateCodegen
         get_native_method_codegen: EtsGetNativeMethod
         get_native_method_managed_class_codegen: EtsGetNativeMethodManagedClass

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 let strAllOne: string = "ConcurrentSet[0,1,2,3,4,5,6,7,8,9]";
@@ -71,10 +73,10 @@ function main(): int {
     {
         ConcurrentSetTestOne.clear();
         assertEQ(ConcurrentSetTestOne.size, 0);
-        let p1 = launch addAll();
-        let p2 = launch toStringTest();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(addAll);
+        let p2 = launch<void, () => void>(toStringTest);
+        p1.Await();
+        p2.Await();
         let str: string = ConcurrentSetTestOne.toString();
         assertTrue(str != strAllOne || str == strAllOne);
     });
@@ -82,18 +84,18 @@ function main(): int {
     {
         ConcurrentSetTestOne.clear();
         assertEQ(ConcurrentSetTestOne.size, 0);
-        let p = launch addAll();
-        await p;
+        let p = launch<void, () => void>(addAll);
+        p.Await();
         assertEQ(ConcurrentSetTestOne.size, 10);
     });
     ConcurrentSetTestsuite.addTest("Add&HasTest001", () =>
     {
         ConcurrentSetTestOne.clear();
         assertEQ(ConcurrentSetTestOne.size, 0);
-        let p1 = launch addAll();
-        let p2 = launch hasAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(addAll);
+        let p2 = launch<void, () => void>(hasAll);
+        p1.Await();
+        p2.Await();
         for (let i: int = 0; i < 10; i++) {
             assertEQ(ConcurrentSetTestOne.has(i), true);
         }
@@ -102,10 +104,10 @@ function main(): int {
     {
         ConcurrentSetTestOne.clear();
         assertEQ(ConcurrentSetTestOne.size, 0);
-        let p1 = launch addAll();
-        let p2 = launch getSize();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(addAll);
+        let p2 = launch<void, () => void>(getSize);
+        p1.Await();
+        p2.Await();
         assertEQ(ConcurrentSetTestOne.size, 10);
     });
     ConcurrentSetTestsuite.addTest("Add&DeteleTest001", () =>
@@ -113,20 +115,20 @@ function main(): int {
         ConcurrentSetTestOne.clear();
         assertEQ(ConcurrentSetTestOne.size, 0);
         addFront();
-        let p1 = launch addBack();
-        let p2 = launch deleteAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(addBack);
+        let p2 = launch<void, () => void>(deleteAll);
+        p1.Await();
+        p2.Await();
         assertTrue(ConcurrentSetTestOne.size < 6);
     });
     ConcurrentSetTestsuite.addTest("Add&ClearTest001", () =>
     {
         ConcurrentSetTestOne.clear();
         assertEQ(ConcurrentSetTestOne.size, 0);
-        let p1 = launch addOneTest(2);
-        let p2 = launch clearTest();
-        await p1;
-        await p2;
+        let p1 = launch<void, (i: int) => void>(addOneTest, 2);
+        let p2 = launch<void, () => void>(clearTest);
+        p1.Await();
+        p2.Await();
         assertTrue(ConcurrentSetTestOne.size < 2);
     });
 

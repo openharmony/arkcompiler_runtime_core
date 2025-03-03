@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
 const elementsNum: int = 100;
 let f1: int | null = 0;
 
@@ -29,9 +32,9 @@ function main(): int {
 
     ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestStr", () =>
     {
-        let p1 = launch pusherStr();
+        let p1 = launch<void, () => void>(pusherStr);
         let arrayToCheck = popperStr();
-        await p1;
+        p1.Await();
         for (let i = 0; i < elementsNum; i++) {
             assertEQ(testArrayStr[i], arrayToCheck[i]);
         }
@@ -62,18 +65,18 @@ function main(): int {
             let el = queueIntPop2.getFirst();
             assertEQ(el, queueIntPop2.pop());
         }
-        let p1 = launch ArrayBlockingQueuePop(queueIntPop2);
+        let p1 = launch<void, (queueIntPop2: ArrayBlockingQueue<int>) => void>(ArrayBlockingQueuePop, queueIntPop2);
         let i = queueIntPop2.pop();
-        await p1;
+        p1.Await();
         assertEQ(i, 10);
     });
     ArrayBlockingQueueTestsuite.addTest("PopTestInt003", () =>
     {
-        let p1 = launch queueIntPopNdata();
+        let p1 = launch<void, () => void>(queueIntPopNdata);
         for (let i: int = 0; i < elementsNum; ++i) {
             queueIntPopN.push(i);
         }
-        await p1;
+        p1.Await();
         assertEQ(queueIntPopN.size, 0);
     });
     ArrayBlockingQueueTestsuite.addTest("PopTestInt004", () =>
@@ -97,15 +100,15 @@ function main(): int {
         while (!queueIntPopN.isEmpty()) {
             queueIntPopN.pop();
         }
-        let promises = new Array<Promise<void>>(100);
+        let jobs = new Array<Job<void>>(100);
         for (let i: int = 0; i < elementsNum; ++i) {
-           promises[i] = launch queueIntPopdata(); 
+           jobs[i] = launch<void, () => void>(queueIntPopdata); 
         }
         for (let i: int = 0; i < elementsNum; ++i) {
             queueIntPopN.push(i);
         }
         for (let i: int = 0; i < 100; i++) {
-            await promises[i];
+            jobs[i].Await();
         }
         assertEQ(queueIntPopN.size, 0);
     });
@@ -117,10 +120,10 @@ function main(): int {
         for (let i: int = 0; i < elementsNum; ++i) {
             queueInt.push(i);
         }
-        let p1 = launch queueIntFrontF1data();
-        let p2 = launch queueIntPopFdata();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(queueIntFrontF1data);
+        let p2 = launch<void, () => void>(queueIntPopFdata);
+        p1.Await();
+        p2.Await();
         assertEQ(queueInt.size, elementsNum - 1);
     });
 

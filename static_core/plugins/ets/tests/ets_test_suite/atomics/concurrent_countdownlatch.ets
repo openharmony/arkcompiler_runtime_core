@@ -14,6 +14,7 @@
 */
 
 import {StdDebug} from "std/debug"
+import { launch } from "std/concurrency"
 
 type L = StdDebug.Logger
 
@@ -35,7 +36,7 @@ function main() {
     bytearr_i64 = new BigInt64Array(buf_2, 0, 1)
 
     for (let i = 0; i < N; i++) {
-        launch task_1()
+        launch<Int, () => Int>(task_1)
     }
     let cur: byte = Atomics.load(bytearr_i8, 0) as byte
     while (cur != N) {
@@ -45,7 +46,7 @@ function main() {
     }
 
     for (let i = 0; i < N; i++) {
-        launch task_2()
+        launch<Int, () => Int>(task_2)
     }
     let cur_64: long = Atomics.load(bytearr_i64, 0) as long
     while (cur_64 != N) {

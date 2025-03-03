@@ -13,19 +13,23 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
 let s = new SharedArrayBuffer(4);
 let arr = new Int32Array(s, 0, 1);
 
 let N = 5
 
 function main() {
-    let corArrayTmp = new Array<Promise<int>>();
+    let corArrayTmp = new Array<Job<int>>>();
     setUpBarrier(N)
     for (let i = 0; i < N; i++) {
-        corArrayTmp.push(launch task());
+        let job = launch<Int, () => Int>(task)
+        corArrayTmp.push(job);
     }
     for (let i = 0; i < N; i++) {
-        await corArrayTmp[i];
+        corArrayTmp[i].Await();
     }
 }
 
@@ -71,4 +75,3 @@ function heavyComputation(): Int {
     }
     return i
 }
-

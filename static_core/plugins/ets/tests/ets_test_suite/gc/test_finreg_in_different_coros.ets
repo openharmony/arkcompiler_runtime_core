@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let registry: FinalizationRegistry<int> | null = null;
 let registry2: FinalizationRegistry<int> | null = null;
 
@@ -48,15 +50,16 @@ function InitFinRegAndFill(callback: (value: int) => void, isMainCoro: boolean =
 
 function runGCInDiffThreads() {
     doFullGC();
-    await launch doFullGC();
+    launch<void, () => void>(doFullGC).Await();
 }
 
 function testFinRegOnMainAndDiffCoro() {
     let result_finreg_main : int = 0;
     let result_finreg_not_main : int = 0;
-    let p = await launch InitFinRegAndFill((value: int) => {
+    let cb = (value: int) => {
         result_finreg_not_main = value;
-    }, false);
+    }
+    launch<void, (cb: (v: int) => void, f: boolean) => void>(InitFinRegAndFill, cb, false).Await();
     InitFinRegAndFill((value: int) => {
         result_finreg_main = value;
     }, true);

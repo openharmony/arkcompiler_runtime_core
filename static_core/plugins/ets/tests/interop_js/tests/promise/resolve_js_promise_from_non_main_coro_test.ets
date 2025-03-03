@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {CoroutineExtras, AtomicFlag} from "std/debug/concurrency"
+import {CoroutineExtras, AtomicFlag, launch} from "std/debug/concurrency"
 
 class Test {
     checkIfPromiseInJs(): boolean {
@@ -48,7 +48,7 @@ function signalPromiseInJs(): void {
     globalTest!.signalPromiseInJs();
 }
 
-async function resolverFunction(value: int): Promise<int> {
+function resolverFunction(value: int): int {
     while(!(globalTest!.checkIfPromiseInJs())) {}
     globalResolver!(value);
     return 0;
@@ -62,6 +62,6 @@ function testPromiseResolve(value: int): Promise<int> {
         globalResolver = resolve;
     });
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
-    launch resolverFunction(value);
+    launch<int, (i: int) => int>(resolverFunction, value);
     return p;
 }

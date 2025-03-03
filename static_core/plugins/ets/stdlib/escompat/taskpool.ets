@@ -15,6 +15,8 @@
 
 package escompat;
 
+import {launch} from "std/concurrency"
+
 export namespace taskpool {
     export enum Priority {
         HIGH = 0,
@@ -707,7 +709,7 @@ export namespace taskpool {
     // NOTE(ipetrov, #16281): Temporary solution, make as namespace when namespaces will be supported
 
     export function execute(func: Function, ...args: NullishType[]): Promise<NullishType> {
-        return launch func.unsafeCall(args);
+        return launchPromise(func, ...args);
     }
 
     /**
@@ -720,7 +722,7 @@ export namespace taskpool {
         task.checkExecution();
         taskSubmitted(task);
         task.enqueue();
-        return task.getOnReceivePromise(launch task.execute());
+        return task.getOnReceivePromise(launchPromise(task.execute));
     }
 
     /**
@@ -739,7 +741,7 @@ export namespace taskpool {
         group.tasks.forEach((task: Task) => {
             taskSubmitted(task);
             task.enqueue();
-            promises.push(task.getOnReceivePromise(launch task.execute()));
+            promises.push(task.getOnReceivePromise(launchPromise(task.execute)));
         });
         return Promise.all<NullishType>(promises);
     }
@@ -1040,3 +1042,24 @@ export namespace taskpool {
     // value is set of executing tasks on this worker
     const workerToTasks: Map<WorkerId, Set<Task>> = new Map<WorkerId, Set<Task>>();
 }
+
+function launchPromise(f: Function, ...args: NullishType[]): Promise<NullishType> {
+    let resolver: (((v: NullishType | PromiseLike<NullishType>) => void) | undefined) = undefined;
+    let rejecter: (((error: NullishType) => void) | undefined) = undefined;
+    let p = new Promise<NullishType>((res, rej) => {
+        resolver = res
+        rejecter = rej;
+    })
+    let cb = () => {
+        try {
+            let v = f.unsafeCall(...args)
+            resolver!(v)
+        } catch (e: Error) {
+            rejecter!(e)
+        }
+    }
+    launch<void, () => void>(cb)
+    return p;
+}
+
+native function launchInternalPromiseNative<F>(func: F, args: NullishType[]): Promise<NullishType>;

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 let strAll: string = "zero,zero,one,one,two,two,three,three,four,four,five,five,six,six,seven,seven,eight,eight,nine,nine";
@@ -38,10 +40,10 @@ function main(): int {
         ConcurrentSetTestOne.clear();
         assertEQ(ConcurrentSetTestOne.size, 0);
         addFront();
-        let p1 = launch addBack();
-        let p2 = launch entriesAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(addBack);
+        let p2 = launch<void, () => void>(entriesAll);
+        p1.Await();
+        p2.Await();
         assertEQ(ConcurrentSetTestOne.size, 10);
     });
     ConcurrentSetTestsuite.addTest("Entries&DeteleTest001", () =>
@@ -49,10 +51,10 @@ function main(): int {
         ConcurrentSetTestOne.clear();
         assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
-        let p1 = launch deleteAll();
-        let p2 = launch entriesAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(deleteAll);
+        let p2 = launch<void, () => void>(entriesAll);
+        p1.Await();
+        p2.Await();
         assertTrue(ConcurrentSetTestOne.size < 10);
     });
     ConcurrentSetTestsuite.addTest("Entries&ClearTest001", () =>
@@ -60,10 +62,10 @@ function main(): int {
         ConcurrentSetTestOne.clear();
         assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
-        let p1 = launch entriesAll();
-        let p2 = launch clearTest();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(entriesAll);
+        let p2 = launch<void, () => void>(clearTest);
+        p1.Await();
+        p2.Await();
         assertTrue(ConcurrentSetTestOne.size < 10);
     });
     */

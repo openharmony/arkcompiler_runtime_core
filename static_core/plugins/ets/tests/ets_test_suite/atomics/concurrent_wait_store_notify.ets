@@ -17,6 +17,8 @@
 // 2. "0 not-equal": store -> wait -> notify, or store -> notify -> wait
 // All other outputs are invalid
 
+import { launch } from "std/concurrency"
+
 let buf: SharedArrayBuffer;
 let arr: Int32Array;
 let bytearr: Int8Array;
@@ -28,7 +30,7 @@ function main() {
     arr = new Int32Array(buf, 0, 1);
     bytearr = new Int8Array(buf, 0, 4)
 
-    launch writer()
+    launch<Int, () => Int>(writer)
 
     let res = Atomics.wait(arr, 0, 0) as string
     c.println(res)

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 class Key {
     readonly id: int
 
@@ -65,8 +67,8 @@ function weakSetElementGarbageCollection(): void {
     reclaimedElemId = NULL_ID
 
     // using coroutine to avoid WeakSet creation function inlining
-    const weakSetCreator = launch createTestWeakSet(ELEM_ID)
-    const weakSet = await weakSetCreator
+    const weakSetCreator = launch<WeakSet<Key>, (elemId: int) => WeakSet<Key>>(createTestWeakSet, ELEM_ID)
+    const weakSet = weakSetCreator.Await()
 
     while (reclaimedElemId != ELEM_ID) {
         try {

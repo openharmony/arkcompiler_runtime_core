@@ -15,6 +15,8 @@
 
 package std.core;
 
+import { launch } from "std/concurrency";
+
 type Task = () => void;
 
 /**
@@ -178,7 +180,7 @@ class StaticWorker implements InternalWorker {
             if (task === StaticWorker.closingTask) {
                 break;
             }
-            launch task();
+            launch<void, () => void>(task);
         }
     }
 }

@@ -16,9 +16,6 @@
 #ifndef PLUGINS_ETS_COMPILER_OPTIMIZER_IR_BUILDER_ETS_INST_BUILDER_H
 #define PLUGINS_ETS_COMPILER_OPTIMIZER_IR_BUILDER_ETS_INST_BUILDER_H
 
-template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
-void BuildLaunch(const BytecodeInstruction *bcInst);
-
 #ifdef PANDA_ETS_INTEROP_JS
 #include "plugins/ets/compiler/optimizer/ir_builder/js_interop/js_interop_inst_builder.h"
 #endif

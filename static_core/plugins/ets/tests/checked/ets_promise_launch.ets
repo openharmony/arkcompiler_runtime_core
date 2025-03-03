@@ -22,10 +22,12 @@
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*main.*'"
 
+import { launch } from "std/concurrency"
+
 function main(): int {
     for (let i = 0; i < 100; i++) {
-        let r: Promise<number> = launch ((p: number): number => p + p)(42.0)
-        assertEQ((await r), 84.0);
+        let r = launch<number, (p:number) => number>(((p: number): number => p + p), 42.0)
+        assertEQ((r.Await()), 84.0);
     }
     return 0;
 }

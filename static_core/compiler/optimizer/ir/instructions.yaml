@@ -795,34 +795,6 @@ instructions:
     abckit_flags: [can_throw, no_dce, no_hoist, no_cse, barrier, call, acc_write, acc_read]
     description: Calls a vrtual method resolved by ResolveVirtual. First input is a method address.
 
-  - opcode: CallLaunchStatic
-    base: CallInst
-    signature: [d-real-void, real-dyn, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, call, acc_write, acc_read]
-    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, barrier, runtime_call, call, acc_write, acc_read]
-    description: Launches static method.
-
-  - opcode: CallResolvedLaunchStatic
-    base: CallInst
-    signature: [d-real-void, ptr, real-dyn, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, barrier, require_state, call, acc_write, acc_read]
-    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, barrier, call, acc_write, acc_read]
-    description: Launches static method resolved by ResolveStatic. First input is a method address.
-
-  - opcode: CallLaunchVirtual
-    base: CallInst
-    signature: [d-real-void, ref-nc, real-dyn, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, call, acc_write, acc_read]
-    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, barrier, runtime_call, call, acc_write, acc_read]
-    description: Launches virtual method. First input is an object reference.
-
-  - opcode: CallResolvedLaunchVirtual
-    base: CallInst
-    signature: [d-real-void, ptr, ref-nc, real-dyn, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, barrier, require_state, call, acc_write, acc_read]
-    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, barrier, call, acc_write, acc_read]
-    description: Launches a virtual method resolved by ResolveVirtual. First input is a method address.
-
   - opcode: CallDynamic
     base: CallInst
     signature: [d-any-void, any-dyn, save_state]

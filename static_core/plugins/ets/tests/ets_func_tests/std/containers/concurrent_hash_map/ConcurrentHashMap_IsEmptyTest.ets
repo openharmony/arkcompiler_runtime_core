@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let flag: int = 0;
 
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -60,10 +62,10 @@ function main(): int {
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         assertFalse(concurrentHashMapOne.isEmpty());
-        let p1 = launch isEmptyFun();
-        let p2 = launch clearAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(isEmptyFun);
+        let p2 = launch<void, () => void>(clearAll);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapOne.isEmpty());
     });
     concurrentHashMapIsEmptyTestsuite.addTest("isEmptyAndTest_002", () =>
@@ -73,10 +75,10 @@ function main(): int {
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         assertFalse(concurrentHashMapOne.isEmpty());
-        let p1 = launch isEmptyFun();
-        let p2 = launch removeAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(isEmptyFun);
+        let p2 = launch<void, () => void>(removeAll);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapOne.isEmpty());
         flag = 0;
         for (let i = 0; i < 10; i++) {

@@ -12,19 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-  when "ETS_LAUNCH_SHORT_PREF_V4_V4_ID16"
-    handle_ets_launch_static_short(op[1], as_id(op[0]))
-  when "ETS_LAUNCH_PREF_V4_V4_V4_V4_ID16"
-    handle_ets_launch_static_long(op[1], as_id(op[0]))
-  when "ETS_LAUNCH_RANGE_PREF_V8_ID16"
-    handle_ets_launch_static_range(op[1], as_id(op[0]))
-  when "ETS_LAUNCH_VIRT_SHORT_PREF_V4_V4_ID16"
-    handle_ets_launch_virt_short(op[1], as_id(op[0]))
-  when "ETS_LAUNCH_VIRT_PREF_V4_V4_V4_V4_ID16"
-    handle_ets_launch_virt_long(op[1], as_id(op[0]))
-  when "ETS_LAUNCH_VIRT_RANGE_PREF_V8_ID16"
-    handle_ets_launch_virt_range(op[1], as_id(op[0]))
-
   when "ETS_LDNULLVALUE_PREF_NONE"
     handle_ets_ldnullvalue()
   when "ETS_MOVNULLVALUE_PREF_V8"

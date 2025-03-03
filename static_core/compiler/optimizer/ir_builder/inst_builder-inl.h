@@ -170,12 +170,10 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
 {
     constexpr auto SLOT_KIND = UnresolvedTypesInterface::SlotKind::METHOD;
     if (method_ == nullptr || (GetRuntime()->IsMethodStatic(GetMethod(), methodId_) && classId == 0) ||
-        Builder()->ForceUnresolved() || (OPCODE == Opcode::CallLaunchStatic && GetGraph()->IsAotMode())) {
+        Builder()->ForceUnresolved()) {
         resolver_ = GetGraph()->CreateInstResolveStatic(DataType::POINTER, pc_, methodId_, nullptr);
         if constexpr (OPCODE == Opcode::CallStatic) {
             call_ = GetGraph()->CreateInstCallResolvedStatic(Builder()->GetMethodReturnType(methodId_), pc_, methodId_);
-        } else {
-            call_ = GetGraph()->CreateInstCallResolvedLaunchStatic(DataType::VOID, pc_, methodId_);
         }
         if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), methodId_, SLOT_KIND);
@@ -184,8 +182,6 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
         if constexpr (OPCODE == Opcode::CallStatic) {
             call_ =
                 GetGraph()->CreateInstCallStatic(Builder()->GetMethodReturnType(methodId_), pc_, methodId_, method_);
-        } else {
-            call_ = GetGraph()->CreateInstCallLaunchStatic(DataType::VOID, pc_, methodId_, method_);
         }
     }
 }
@@ -201,16 +197,12 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
         if constexpr (OPCODE == Opcode::CallVirtual) {
             call_ = GetGraph()->CreateInstCallResolvedVirtual(Builder()->GetMethodReturnType(methodId_), pc_, methodId_,
                                                               method_);
-        } else {
-            call_ = GetGraph()->CreateInstCallResolvedLaunchVirtual(DataType::VOID, pc_, methodId_, method_);
         }
     } else if (method_ == nullptr || Builder()->ForceUnresolved()) {
         resolver_ = GetGraph()->CreateInstResolveVirtual(DataType::POINTER, pc_, methodId_, nullptr);
         if constexpr (OPCODE == Opcode::CallVirtual) {
             call_ =
                 GetGraph()->CreateInstCallResolvedVirtual(Builder()->GetMethodReturnType(methodId_), pc_, methodId_);
-        } else {
-            call_ = GetGraph()->CreateInstCallResolvedLaunchVirtual(DataType::VOID, pc_, methodId_);
         }
         if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(Builder()->GetMethod(), methodId_, SLOT_KIND);
@@ -220,8 +212,6 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
         if constexpr (OPCODE == Opcode::CallVirtual) {
             call_ =
                 GetGraph()->CreateInstCallVirtual(Builder()->GetMethodReturnType(methodId_), pc_, methodId_, method_);
-        } else {
-            call_ = GetGraph()->CreateInstCallLaunchVirtual(DataType::VOID, pc_, methodId_, method_);
         }
     }
 }
@@ -233,11 +223,11 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
     [[maybe_unused]] uint32_t classId)
 {
     // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements,bugprone-suspicious-semicolon)
-    if constexpr (OPCODE == Opcode::CallStatic || OPCODE == Opcode::CallLaunchStatic) {
+    if constexpr (OPCODE == Opcode::CallStatic) {
         BuildCallStaticInst(classId);
     }
     // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements,bugprone-suspicious-semicolon)
-    if constexpr (OPCODE == Opcode::CallVirtual || OPCODE == Opcode::CallLaunchVirtual) {
+    if constexpr (OPCODE == Opcode::CallVirtual) {
         BuildCallVirtualInst();
     }
     if (UNLIKELY(call_ == nullptr)) {
@@ -673,30 +663,6 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
 template InstBuilder::BuildCallHelper<Opcode::CallResolvedStatic, false, false>::BuildCallHelper(
     const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
 template InstBuilder::BuildCallHelper<Opcode::CallResolvedStatic, false, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, true>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, true, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, true, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, true, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, true>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, true, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, true, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, true, false, false>::BuildCallHelper(
     const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
 
 // NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)

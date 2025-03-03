@@ -26,35 +26,6 @@
 
 namespace ark::compiler {
 
-template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
-void InstBuilder::BuildLaunch(const BytecodeInstruction *bcInst)
-{
-    if (graph_->GetArch() == Arch::AARCH32) {
-        failed_ = true;
-        return;
-    }
-    auto pc = GetPc(bcInst->GetAddress());
-    auto inst = graph_->CreateInstLoadRuntimeClass(
-        DataType::REFERENCE, pc, TypeIdMixin {TypeIdMixin::MEM_PROMISE_CLASS_ID, GetGraph()->GetMethod()}, nullptr);
-    auto saveState = CreateSaveState(Opcode::SaveState, pc);
-    auto newObj = CreateNewObjectInst(pc, TypeIdMixin::MEM_PROMISE_CLASS_ID, saveState, inst);
-    AddInstruction(saveState, inst, newObj);
-    if (GetGraph()->IsAbcKit()) {
-        BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, false>(bcInst, this, newObj);
-    } else {
-        BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, true>(bcInst, this, newObj);
-    }
-    UpdateDefinitionAcc(newObj);
-}
-
-template void InstBuilder::BuildLaunch<Opcode::CallLaunchStatic, false, true>(const BytecodeInstruction *bc_inst);
-template void InstBuilder::BuildLaunch<Opcode::CallLaunchStatic, true, false>(const BytecodeInstruction *bcInst);
-template void InstBuilder::BuildLaunch<Opcode::CallLaunchStatic, false, false>(const BytecodeInstruction *bcInst);
-
-template void InstBuilder::BuildLaunch<Opcode::CallLaunchVirtual, false, true>(const BytecodeInstruction *bc_inst);
-template void InstBuilder::BuildLaunch<Opcode::CallLaunchVirtual, true, false>(const BytecodeInstruction *bcInst);
-template void InstBuilder::BuildLaunch<Opcode::CallLaunchVirtual, false, false>(const BytecodeInstruction *bcInst);
-
 static RuntimeInterface::IntrinsicId GetIntrinsicId(DataType::Type type)
 {
     switch (type) {

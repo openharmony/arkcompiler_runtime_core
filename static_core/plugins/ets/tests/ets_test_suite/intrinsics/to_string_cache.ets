@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+import {launch} from "std/concurrency"
+import {Job} from "std/core"
+
 // simple fast pseudo-random generator
 function xorshift(state: long): long {
     state ^= state << 13;
@@ -138,16 +141,19 @@ const valueCount = 500;
 const iterCount = valueCount * 3;
 
 function doTest<T>(values: T[], workers: int) {
-    let promises = new NullablePromise<String>[workers];
+    let jobs = new (Job<String> | undefined)[workers];
     for (let i = 0; i < workers; i++) {
         let state = (i as long * 1234567) | 42;
         // check only in one worker to make others faster
         let check = i == 0;
         let worker = new Worker<T>(values);
-        promises[i] = launch worker.work(state, iterCount, check);
+        const work = (w: Worker<T>, s: long, i: int, c: boolean) => { 
+            return w.work(s, i, c);
+        }
+        jobs[i] = launch<string, (w: Worker<T>, s: long, i: int, c: boolean) => string>(work, worker, state, iterCount, check);
     }
     for (let i = 0; i < workers; i++) {
-        let res = await promises[i]!;
+        let res = jobs[i]!.Await();
         assertEQ(res, "OK");
     }
 }

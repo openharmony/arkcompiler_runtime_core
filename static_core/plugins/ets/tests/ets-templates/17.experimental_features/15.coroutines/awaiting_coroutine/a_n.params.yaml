@@ -22,13 +22,9 @@ cases:
           let x = 42
           let r = await x
 
-    - use: |-
-          // syntax error
-          let r = await launch
-
     - decl: |-
-          function foo() {}
+          async function foo() {}
       use: |-
           // not a Promise expression
-          let r = launch foo()
+          let r = foo()
           let q = await (await r)

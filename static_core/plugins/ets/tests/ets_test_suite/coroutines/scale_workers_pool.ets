@@ -18,11 +18,11 @@ function main() {
 
     CoroutineExtras.scaleWorkersPool(1);
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
-    let workerId = await launch () => { return CoroutineExtras.getWorkerId(); }();
+    let workerId = launch<Int, () => Int>((): Int => { return CoroutineExtras.getWorkerId(); }).Await();
     CoroutineExtras.scaleWorkersPool(-1);
     assertNE(mainId, workerId);
 
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
-    workerId = await launch () => { return CoroutineExtras.getWorkerId(); }();
+    workerId = launch<Int, () => Int>((): Int => { return CoroutineExtras.getWorkerId(); }).Await();
     assertEQ(mainId, workerId);
 }

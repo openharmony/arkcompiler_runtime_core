@@ -86,10 +86,13 @@ export final class AsyncLock {
      */
     public lockAsync<T, U>(callback: AsyncLockCallback<T>, mode: AsyncLockMode, options: AsyncLockOptions<U>): Promise<T> {
         let callerCID = CoroutineExtras.getCoroutineId();
-        return launch this.wrapper<T, U>(callback, callerCID, mode, options) as Promise<T>;
+        let wrapped = (l: AsyncLock) => { return l.wrapper<T, U>(callback, callerCID, mode, options); }
+        return AsyncLock.launchInternalPromiseNative<T, (l:AsyncLock) => Promise<T>>(wrapped, [this]);
     }
 
-    private wrapper<T, U>(callback: AsyncLockCallback<T>, callerCID: int, mode: AsyncLockMode, options: AsyncLockOptions<U>) : T | Promise<T>{
+    private static native launchInternalPromiseNative<T, F>(func: F, args: NullishType[]): Promise<T>;
+
+    private wrapper<T, U>(callback: AsyncLockCallback<T>, callerCID: int, mode: AsyncLockMode, options: AsyncLockOptions<U>) : Promise<T> {
         let asyncLockInfo = new AsyncLockInfo(this.name, mode, callerCID);
         ConcurrencyHelpers.mutexLock(this.mutex);
         this.pending.add(asyncLockInfo);
@@ -97,7 +100,7 @@ export final class AsyncLock {
 
         this.lock<U>(callerCID, mode, asyncLockInfo, options);
         try {
-            return callback();
+            return callback() as Promise<T>;
         } finally {
             this.unlock(asyncLockInfo);
         }
