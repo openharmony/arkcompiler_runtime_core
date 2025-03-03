@@ -255,15 +255,11 @@
 13.compilation_units/05.declaration_modules/declaration_modules_7.sts
 #end of #22881
 
-#22883
+#23440
 13.compilation_units/05.declaration_modules/declaration_modules_8.sts
 13.compilation_units/05.declaration_modules/declaration_modules_9.sts
-#end of #22883
-
-#22874
 13.compilation_units/05.declaration_modules/declaration_modules_0.sts
 13.compilation_units/05.declaration_modules/declaration_modules_1.sts
-#end of #22874
 
 #19909
 09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_2.sts
@@ -348,7 +344,7 @@
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oome1.sts
 # end of es2panda fails
 
-# 22986
+# 23378
 07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_2.sts
 
 # 20483 es2panda aborts on literal type conversion in field initialization expression
@@ -396,7 +392,7 @@
 
 # 17053 Cannot create array of nullish tuples
 
-# 22986 Promise<void> should resolve as undefined
+# 23378 Promise<void> should resolve as undefined
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_func_0.sts
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_0.sts
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_lamb_0.sts
@@ -446,7 +442,7 @@
 17.experimental_features/07.statements/01.for-of_type_annotation/for_of_15.sts
 17.experimental_features/07.statements/01.for-of_type_annotation/for_of_25.sts
 
-# 20159
+# 23022
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_7.sts
 
 # 20328 Unexpected CTE in Record indexing expression: Value is possibly nullish
@@ -481,7 +477,7 @@
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_6.sts
 # end of es2panda fails
 
-# es2panda fails: panda#22986
+# es2panda fails: panda#23378
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_ref_8.sts
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_val_6.sts
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_val_7.sts
@@ -1251,8 +1247,10 @@
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_6.sts
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_6.sts
 
-#22462: Ambient declaration with multiline string is not work
-14.ambient_declarations/01.constant_declarations/constant_declarations_15.sts
+#22505: Ambient declaration allows class with private members
+14.ambient_declarations/03.class_declarations/class_declarations_neg_7.sts
+14.ambient_declarations/03.class_declarations/class_declarations_neg_8.sts
+14.ambient_declarations/03.class_declarations/class_declarations_neg_9.sts
 
 # 23067
 02.lexical_elements/07.keywords/types_8.sts
@@ -1596,7 +1594,7 @@
 06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_8.sts
 06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_9.sts
 
-# 22409
+# 23441
 07.expressions/20.unary_expressions/08.logical_complement/logical_complement_char.sts
 
 
@@ -1617,7 +1615,7 @@
 # 22253
 09.classes/06.method_declarations/09.methods_returning_this/methods_returning_this_interface_03.sts
 
-# 23056
+# 20724
 09.classes/05.field_declarations/04.overriding_fields/sample.sts
 # 23050
 09.classes/05.field_declarations/04.overriding_fields/overriding_fields_1.sts

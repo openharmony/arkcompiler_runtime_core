@@ -238,7 +238,7 @@ spec/import_export/07.export_directives/02.export_type_directives/to_export_for_
 ### issue 19719
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s01-0030.sts
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s01-0080.sts
-### issue 19717
+### issue 20282
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0020.sts
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0030.sts
 ### issue 19716
@@ -302,7 +302,7 @@ spec/03.types/References_Types/Tuples_type/func_tuple_1.sts
 spec/03.types/References_Types/Tuples_type/tuple_as_generic_7.sts
 ### Issue 15394
 spec/03.types/References_Types/Tuples_type/tuple_write_6.sts
-### Issue 21639
+### Issue 23081
 spec/03.types/References_Types/Tuples_type/tuple_write_7.sts
 ### end of tuples
 
