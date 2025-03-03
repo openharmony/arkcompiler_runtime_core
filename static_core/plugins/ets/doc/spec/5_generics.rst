@@ -68,7 +68,7 @@ Type Parameters
     frontend_status: Done
 
 *Type parameter* is declared in the type parameter section. It can be used as
-an ordinary type inside a *generic*. 
+an ordinary type inside a *generic*.
 
 Syntax-wise, a *type parameter* is an unqualified identifier with a proper
 scope (see :ref:`Scopes` for the scope of type parameters). Each type parameter
@@ -150,7 +150,7 @@ variables and fields of a type parameter (see :ref:`Field Initialization`):
 
 .. code-block:: typescript
    :linenos:
-   
+
     class G<T> {
         field: T // compile-time error, field is not initialized
         function foo() {
@@ -178,13 +178,16 @@ If possible instantiations need to be constrained, then an individual
 *constraint* can be set for each type parameter.
 
 A constraint of any type parameter can follow the keyword ``extends``. The
-constraint is denoted as any type. If no constraint is declared, then the type
-parameter is not compatible with ``Object``, and has no methods or fields
-available for use. Lack of constraint effectively means 
-``extends Object|null|undefined``. If type parameter *T* has type constraint
-*S*, then the actual type of the generic instantiation must be assignable to
-*S* (see :ref:`Assignability`). If the constraint *S* is a non-nullish
-type (see :ref:`Nullish Types`), then *T* is also non-nullish.
+constraint is denoted as any type except the case when constraint is a signle
+final class (see :ref:`Final Classes`) or becomes a single final class as a
+result of union normalization (see :ref:`Union Types Normalization`). Then a
+:index:`compile-time error` occurs.
+If no constraint is declared, then the type parameter is not compatible with
+``Object``, and has no methods or fields available for use. Lack of constraint
+effectively means  ``extends Object|null|undefined``. If type parameter *T* has
+type constraint *S*, then the actual type of the generic instantiation must be
+assignable to *S* (see :ref:`Assignability`). If the constraint *S* is a
+non-nullish type (see :ref:`Nullish Types`), then *T* is also non-nullish.
 
 .. index::
    constraint
@@ -210,7 +213,7 @@ type (see :ref:`Nullish Types`), then *T* is also non-nullish.
     class SomeType { }
 
     class G<T extends Base> { }
-    
+
     let x = new G<Base>      // OK
     let y = new G<Derived>   // OK
     let z = new G<SomeType>  // Compile-time : SomeType is not compatible with Base
@@ -230,6 +233,11 @@ type (see :ref:`Nullish Types`), then *T* is also non-nullish.
       f2: string = ""
       f3: boolean = false
     }
+    class B <T extends keyof A> {}
+    let b1 = new B<'f1'>    // OK
+    let b2 = new B<'f0'>    // Compiel-time error as 'f0' does not fit the constraint
+    let b3 = new B<keyof A> // OK
+
 
 A type parameter of a generic can *depend* on another type parameter
 of the same generic.
@@ -259,9 +267,9 @@ section depends on itself.
     class Base {}
     class Derived extends Base { }
     class SomeType { }
-  
+
     class G<T, S extends T> {}
-    
+
     let x: G<Base, Derived>  // correct: the second argument directly
                              // depends on the first one
     let y: G<Base, SomeType> // error: SomeType does not depend on Base
@@ -341,9 +349,9 @@ in the examples below:
     let c1 = new C2<number>          // equal to C2<number, number, string>
     let c2 = new C2<number, string>  // equal to C2<number, string, string>
     let c3 = new C2<number, Object, number> // all 3 type arguments provided
- 
+
     function foo <T1 = T2, T2 = T1> () {}
-    // That is a compile-time error, 
+    // That is a compile-time error,
     // as T1's default refers to T2, which is defined after the T1
     // T2's default is valid as it refers to already defined type parameter T1
 
@@ -361,7 +369,8 @@ Normally, two different argument types used to instantiate a generic class or
 interface are handled as different and unrelated types (*invariance*). |LANG|
 supports type parameter variance that allows such instantiations become base
 classes and derived classes (:ref:`Invariance, Covariance and Contravariance`), or vice versa
-(:ref:`Invariance, Covariance and Contravariance`), depending on the relationship of inheritance between
+(:ref:`Invariance, Covariance and Contravariance`),
+depending on the relationship of inheritance between
 argument types.
 
 .. index::
@@ -405,19 +414,19 @@ occur in any position.
 
     class X<in T1, out T2, T3> {
        // T1 can be used in in-position only
-       foo (p: T1) {...} 
+       foo (p: T1) {...}
 
        // T2 can be used in out-position only
-       bar(): T2 {...}   
-       readonly fld1: T2 
+       bar(): T2 {...}
+       readonly fld1: T2
 
        // T3 can be used in any position (in-out, write-read)
-       fld2: T3 
+       fld2: T3
        method (p: T3): T3 {...}
     }
 
 In case of function types (see :ref:`Function Types`) variance interleaving
-occurs. 
+occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -428,7 +437,7 @@ occurs.
        foo (p: (p: (p: T1)=>T2)=> T1) {...}            // in - out - in
        foo (p: (p: (p: (p: T2)=> T1)=>T2)=> T1) {...}  // out - in - out - in
        // and further more
-    } 
+    }
 
 .. index::
    function type
@@ -503,32 +512,14 @@ process of instantiation is designed to do the following:
 As a result of the instantiation process, a new class, interface, union, array,
 method, function, or lambda is created.
 
-If a value type (see :ref:`Value Types`) is specified as type argument in a
-generic instantiation, then the compiler actually replaces it as follows:
-
-- Primitive type (see :ref:`Primitive Types`) for its boxed type (see
-  :ref:`Boxed Types`);
-- Enumeration type (see :ref:`Enumerations`) for a union of literal types
-  that correspond to the values of the enumeration type.
-
 .. code-block:: typescript
    :linenos:
-
-    Array<number>  // replaced with Array<Number>
-    Array<boolean> // replaced with Array<Boolean>
-    enum Color {Red, Green, Blue}
-    Array<Color>   // replaced with Array<Color.Red|Color.Green|Color.Blue>
-    enum Reply {Yes="yes", No="no"}
-    Array<Reply>   // replaced with Array<"yes"|"no">
 
     class A <T> {}
     class B <U, V> extends A<U> { // Here A<U> is a new generic type
         field: A<V>               // Here A<V> is a new generic type
         method (p: A<Object>) {}  // Here A<Object> is a new non-generic type
     }
-
-**Note**. Built-in arrays are not generic, thus ``number[]`` contains elements
-of type ``number`` but not ``Number``.
 
 .. index::
    value type
@@ -542,10 +533,6 @@ of type ``number`` but not ``Number``.
    instantiation
    non-generic entity
    class
-   primitive type
-   boxed type
-   enumeration type
-   built-in array
 
 |
 
@@ -641,7 +628,7 @@ the list of its type arguments.
 
 ..
    lines 312, 314, 336 - initially the type was *T*:sub:`1`, ``...``, *T*:sub:`n`
-   lines 321, 322 - initially *C*:sub:`1`, ``...``, *C*:sub:`n` and *T*:sub:`1`, ``...``, *T*:sub:`n` 
+   lines 321, 322 - initially *C*:sub:`1`, ``...``, *C*:sub:`n` and *T*:sub:`1`, ``...``, *T*:sub:`n`
 
 If type parameters *T*:sub:`1`, ``...``, *T*:sub:`n` of a generic
 declaration are constrained by the corresponding ``C``:sub:`1`, ``...``,
@@ -767,11 +754,11 @@ It is represented in the example below:
     }
 
     function process(issue: Partial<Issue>) {
-        if (issue.title != undefined) { 
+        if (issue.title != undefined) {
             /* process title */
         }
     }
-    
+
     process({title: "aa"}) // description is undefined
 
 In the example above, type ``Partial<Issue>`` is transformed to a distinct but
@@ -814,11 +801,11 @@ It is represented in the example below:
         get property(): number { console.log ("Getter called") ... }
     }
     function foo (partial: Partial<A>) {
-        partial.property = 666 // setter to be called
+        partial.property = 42 // setter to be called
         console.log(partial.property) // getter to be called
     }
     foo ({property: new SomeType}) // No getter or setter from class A is called
-    // 666 is printed as object literal has its own setter and getter
+    // 42 is printed as object literal has its own setter and getter
 
 .. index::
    type
@@ -1001,9 +988,9 @@ and type of value expression is compatible with value type ``V``.
 
 .. code-block:: typescript
    :linenos:
-   
+
     type Keys = 'key1' | 'key2' | 'key3'
-   
+
     let x: Record<Keys, number> = {
         'key1': 1,
         'key2': 2,
@@ -1043,8 +1030,8 @@ accessed in any way. It is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
-   
-   function foo(): string {  // Potentially some side effect 
+
+   function foo(): string {  // Potentially some side effect
       return "private field value"
    }
 

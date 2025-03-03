@@ -38,13 +38,6 @@ Contributors:
 - Xian Yuqiang
 - Zouev Evgeniy
 
-Authors of the language specification:
-
-- Kanatov Alexey
-- Nedoria Aleksei
-- Trubenkov Dmitrii
-- Zouev Evgeniy
-
 Technical writer:
 
 - Baranov Dmitry

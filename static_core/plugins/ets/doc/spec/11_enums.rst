@@ -24,7 +24,7 @@ associated set of named constants that define its possible values:
 .. code-block:: abnf
 
     enumDeclaration:
-        'const'? 'enum' identifier '{' enumConstantList '}'
+        'const'? 'enum' identifier '{' enumConstantList? '}'
         ;
 
     enumConstantList:
@@ -71,8 +71,8 @@ are exported along with the mandatory qualification ``Color``.
 
 The value of an enum constant can be set as follows:
 
--  Explicitly to a numeric constant expression (expression of type ``int``) or
-   to a constant expression of type ``string``; or
+-  Explicitly to a numeric constant expression (expression of type ``int`` or
+   ``long``) or to a constant expression of type ``string``; or
 -  Implicitly by omitting the constant expression.
 
 
@@ -96,6 +96,14 @@ a :index:`compile-time error` occurs.
     enum E2 { A = 5, B = "hello" } // compile-time error
     enum E3 { A = 5, A = 77 } // compile-time error
     enum E4 { A = 5, B = 5 } // OK! values can be the same
+
+The corner case - empty enum is suppported for the compatibilty with |TS|. 
+
+.. code-block:: typescript
+   :linenos:
+
+    enum Empty {} // OK
+
 
 .. index::
    enum constant
@@ -121,9 +129,8 @@ Enumeration Integer Values
 The integer value of an ``enum`` constant is set implicitly if an enumeration
 constant specifies no value.
 
-A constant expression of type ``int`` is a signed 32-bit integer (see
-:ref:`Integer Types and Operations` for details). A constant expression of
-type ``int`` can be used to set the value explicitly:
+A constant expression of type ``int`` or ``long`` can be used to set the value
+explicitly:
 
 .. index::
    enumeration integer value
@@ -137,6 +144,10 @@ type ``int`` can be used to set the value explicitly:
    :linenos:
 
     enum Background { White = 0xFF, Grey = 0x7F, Black = 0x00 }
+    enum LongEnum { A = 0x7FFF_FFFF_1, B, C }
+
+The choice which type ``int`` or ``long`` to be used is performed on the same 
+prinicple as for integer literals (see :ref:`Integer Literals`).
 
 If all constants have no value, then the first constant is assigned
 the value zero. The other constant is assigned the value of the

@@ -190,7 +190,7 @@ in :ref:`Function, Method and Constructor Overloading` and
     let String = true
     function Record () {}
     interface Object {}
-    let Array = 666
+    let Array = 42
 
     // Functions have the same name but they are distinguishable by signatures
     function foo() {}
@@ -517,8 +517,8 @@ Meaningful names can be provided for anonymous types as follows:
 
     type Matrix = number[][]
     type Handler = (s: string, no: number) => string
-    type Predicate<T> = (x: T) => Boolean
-    type NullableNumber = Number | null
+    type Predicate<T> = (x: T) => boolean
+    type NullableNumber = number | null
 
 If the existing type name is too long, then a shorter new name can be
 introduced by using type alias (particularly for a generic type).
@@ -782,7 +782,7 @@ a non-array or non-tuple type, then a :index:`compile-time error` occurs:
 
     function foo (p: number[]) {
        let x: readonly number [] = p
-       x[0] = 666 // compile-time error as array itself is readonly
+       x[0] = 42 // compile-time error as array itself is readonly
        console.log (x[0]) // read operation is OK
     }
 
@@ -954,12 +954,12 @@ If the type of the initializer expression cannot be inferred, then a
     let b = cond ? 1 : 2         // type of 'b' is int
     let c = cond ? 3 : 3.14      // type of 'c' is double
     let d = cond ? "one" : "two" // type of 'd' is string
-    let e = cond ? 1 : "one"     // type of 'e' is Int | string
+    let e = cond ? 1 : "one"     // type of 'e' is int | string
 
     const bb = cond ? 1 : 2         // type of 'bb' is int
     const cc = cond ? 3 : 3.14      // type of 'cc' is double
     const dd = cond ? "one" : "two" // type of 'dd' is "one" | "two"
-    const ee = cond ? 1 : "one"     // type of 'ee' is Int | "one"
+    const ee = cond ? 1 : "one"     // type of 'ee' is int | "one"
 
     let f = {name: "aa"} // compile-time error
 
@@ -1223,23 +1223,16 @@ omitted in a function or method call:
 The second form is a short-cut notation and ``identifier '?' ':' type``
 effectively means that ``identifier`` has type ``T | undefined`` with the
 default value ``undefined``.
-If a type is of the *value* kind, then implicit boxing (see
-:ref:`Boxing Conversions`) must be applied (as in :ref:`Union Types`) as
-follows:
-``identifier '?' ':' valueType`` is equivalent to
-``identifier ':' referenceTypeForValueType | undefined = undefined``.
 
 .. index::
    notation
    parameter
-   boxing
    union type
    undefined
    default value
    identifier
    value type
    union type
-   implicit boxing
    function
 
 For example, the following two functions can be used in the same way:
@@ -1256,12 +1249,12 @@ For example, the following two functions can be used in the same way:
     hello2("John") // 'name' has a string value
 
     function foo1 (p?: number) {}
-    function foo2 (p: Number | undefined = undefined) {}
+    function foo2 (p: number | undefined = undefined) {}
 
     foo1()  // 'p' has 'undefined' value
-    foo1(5) // 'p' has an integer value
+    foo1(5) // 'p' has an numeric value
     foo2()  // 'p' has 'undefined' value
-    foo2(5) // 'p' has an integer value
+    foo2(5) // 'p' has an numeric value
 
 |
 

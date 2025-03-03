@@ -739,7 +739,6 @@ declaration declared in a declaration module must be fully defined elsewhere.
     declarationModule:
         importDirective* 
         ( 'export'? ambientDeclaration
-        | 'export'? typeAlias
         | selectiveExportDirective
         )*
         ;
@@ -944,6 +943,32 @@ occurs if more than one top-level declaration is marked as ``default``.
    :linenos:
 
     export default let PI = 3.141592653589
+
+
+One more form of *export default* is supported where expression is put as the
+export default target. It can be imported only with providing a name for the 
+constant variable exported with help of this scheme. Otherwise a
+:index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    // File1
+    class A {
+      foo () {}
+    }
+    export default new A
+
+    // File2
+    import {default as a} from "File1"
+
+    a.foo()  // Calling method foo() of class A where 'a' is the instance of type A
+    a = new A // Compile-time error as 'a' is a constant variable
+
+    // File3
+    import * as a from "File1" /* Compile-time error: such form of import
+                                  cannot be used for the default export */
+ 
 
 .. index::
    exported declaration
@@ -1159,7 +1184,7 @@ the separate module.
 
     declare namespace A {
         function foo(): void
-        type X = Array<Number>
+        type X = Array<number>
     }
 
     A.foo() // Valid function call, as 'foo' is acessible for top-level statements
@@ -1266,19 +1291,22 @@ Single Export Directive
     frontend_status: Done
 
 *Single export directive* allows specifying the declaration to be exported from
-the current compilation unit by using the declaration's own name. The directive
-in the example below exports variable 'v' by its name:
+the current compilation unit by using the declaration's own name or anonymously. 
+Synatx for the both cases is presented below: 
 
 .. code-block:: abnf
 
     singleExportDirective:
-        'export' 'default'? identifier
+        'export' 
+        'default'? identifier |
+        'default' expression
         ;
 
 
 If ``default`` is added, then only one such export directive is possible in
 the current compilation unit. Otherwise, a :index:`compile-time error` occurs.
 
+The directive in the example below exports variable 'v' by its name:
 
 .. code-block:: typescript
    :linenos:
@@ -1288,6 +1316,16 @@ the current compilation unit. Otherwise, a :index:`compile-time error` occurs.
 
     class A {}
     export default A
+
+The directive in the example below exports constant variable of some type
+anonymously:
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {}
+    export default new A
+
 
 *Single export directive* works as re-export when declaration referred by
 *identifier* was imported.

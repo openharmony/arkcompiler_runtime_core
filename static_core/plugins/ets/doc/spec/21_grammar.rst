@@ -31,6 +31,7 @@ Grammar Summary
         | functionType
         | functionTypeWithReceiver
         | unionType
+        | keyofType
         | StringLiteral
         )
         | '(' type ')'
@@ -76,6 +77,10 @@ Grammar Summary
 
     unionType:
         type ('|' type)*
+        ;
+
+    keyofType:
+        'keyof' typeReference
         ;
 
     qualifiedName:
@@ -679,13 +684,9 @@ Grammar Summary
         'constructor' parameters throwMark? constructorBody
         ;
 
-    constructorBody:
-        '{' statement* constructorCall? statement* '}'
-        ;
 
-    constructorCall:
-        'this' arguments
-        | 'super' arguments
+    constructorBody:
+        '{' statement* '}'
         ;
 
     interfaceDeclaration:
@@ -716,7 +717,7 @@ Grammar Summary
         ;
 
     enumDeclaration:
-        'const'? 'enum' identifier '{' enumConstantList '}'
+        'const'? 'enum' identifier '{' enumConstantList? '}'
         ;
 
     enumConstantList:
@@ -813,7 +814,9 @@ Grammar Summary
         ;
 
     singleExportDirective:
-        'export' 'default'? identifier
+        'export' 
+        'default'? identifier |
+        'default' expression
         ;
 
     exportTypeDirective:

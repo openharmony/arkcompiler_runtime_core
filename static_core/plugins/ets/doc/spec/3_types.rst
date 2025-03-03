@@ -32,12 +32,6 @@ declared entity and every expression is known at compile time. The type of
 an entity is either set explicitly by a developer, or inferred implicitly
 (see :ref:`Type Inference`) by the compiler.
 
-There are two categories of types:
-
-#. :ref:`Value Types`, and
-
-#. :ref:`Reference Types`.
-
 The types integral to |LANG| are called *predefined types* (see
 :ref:`Predefined Types`).
 
@@ -50,14 +44,71 @@ presented as source code in |LANG|.
    statically typed language
    expression
    compile time
-   value type
-   reference type
    type inference
    compiler
    predefined type
    user-defined type
    type definition
    source code
+
+All |LANG| types are summarized in the following table:
+
+.. table::
+   :widths: 50, 50
+
+   ========================= =========================
+   **Predefined Types**      **User-Defined Types**
+   ========================= =========================
+   ``number``, ``byte``,     class types,
+   ``short``, ``int``,       interface types,
+   ``long``, ``float``,      array types,
+   ``double``, ``char``,     fixed array types,
+   ``boolean``,              tuple types,
+    
+   ``string``,               union types,
+
+   ``bigint``,               literal types,
+
+   ``Object``,               function types,
+
+   ``never``, ``void``,      type parameters
+ 
+   ``undefined``, ``null``   enumeration types  
+   ========================= =========================
+
+**Note**. Type ``number`` is an alias to ``double``.
+
+Most *predefined types* have aliases to improve |TS| compatibility:
+
++--------------+--------------------------+
+| Primary Name | Alias                    |
++==============+==========================+
+| ``number``   |   ``Number``             |
++--------------+--------------------------+
+| ``byte``     |   ``Byte``               |
++--------------+--------------------------+
+| ``short``    |   ``Short``              |
++--------------+--------------------------+
+| ``int``      |   ``Int``                |
++--------------+--------------------------+
+| ``long``     |   ``Long``               |
++--------------+--------------------------+
+| ``float``    |   ``Float``              |
++--------------+--------------------------+
+| ``double``   |   ``Double``             |
++--------------+--------------------------+
+| ``boolean``  |   ``Boolean``            |
++--------------+--------------------------+
+| ``char``     |   ``Char``               |
++--------------+--------------------------+
+| ``string``   |   ``String``             |
++--------------+--------------------------+
+| ``bigint``   |   ``BigInt``             |
++--------------+--------------------------+
+| ``Object``   |   ``object``             |
++--------------+--------------------------+
+
+Using primary named of *predefined types* is recommended in all cases.
 
 |
 
@@ -71,36 +122,28 @@ Predefined Types
 
 Predefined types include the following:
 
--  Basic numeric value type: ``number``
+-  Numeric types: ``number``, ``byte``, ``short``, ``int``, ``long``, ``float``, and
+   ``double``;
 
--  High-performance value types:
+-  Character type: ``char``;
 
-     - Numeric types: ``byte``, ``short``, ``int``, ``long``, ``float``, and
-       ``double``;
-
-     - Character type: ``char``;
-
-     - Boolean type: ``boolean``;
-
--  Reference types: 
-   
-   -  :ref:`Type Object`;
-   -  :ref:`Type never`;
-   -  :ref:`Type void`;
-   -  :ref:`Type undefined`;
-   -  :ref:`Type null`;
-   -  :ref:`Type string`;
-   -  :ref:`Type bigint`;
-   -  :ref:`Array Types` (``Array<T>`` or ``T[]``);
-   -  :ref:`Fixed Array Types`;
-   -  :ref:`Boxed Types`.
+-  Boolean type: ``boolean``;
+ 
+-  :ref:`Type Object`;
+-  :ref:`Type never`;
+-  :ref:`Type void`;
+-  :ref:`Type undefined`;
+-  :ref:`Type null`;
+-  :ref:`Type string`;
+-  :ref:`Type bigint`;
+-  :ref:`Array Types` (``Array<T>`` or ``T[]``);
+-  :ref:`Fixed Array Types`.
 
 .. index::
    predefined type
    numeric type
    character type
    Boolean type
-   reference type
 
 |
 
@@ -112,39 +155,11 @@ Primitive Types
 .. meta:
     frontend_status: Done
 
-The predefined value types are called *primitive types*. Primitive types have
-no methods. All primitive type operations are discussed in :ref:`Value Types`.
-
-Primitive type names are reserved, i.e., they cannot be
-used for user-defined type names.
-
-Type ``double`` is an alias to ``number``. Type ``Double`` is an alias to
-``Number``.
+Types ``number``, ``byte``, ``short``, ``int``, ``long``, ``float``,
+``double``, ``char``, and ``boolean`` are called *primitive types*. 
 
 .. index::
-   predefined value
    primitive type
-   user-defined type
-
-|
-
-.. _Boxed Types:
-
-Boxed Types
-===========
-
-.. meta:
-    frontend_status: Done
-
-*Boxed type* is a predefined class type that corresponds to and wraps the value
-of each predefined value type: ``Number``, ``Byte``, ``Short``, ``Int``,
-``Long``, ``Float``, ``Double``, ``Char``, and ``Boolean``.
-
-.. index::
-   predefined type
-   predefined class
-   predefined value
-   wrap
 
 |
 
@@ -158,6 +173,36 @@ Numeric Types
 
 Integer (see :ref:`Integer Types and Operations`) and floating-point (see
 :ref:`Floating-Point Types and Operations`) types are *numeric types*.
+
+Larger type values include all values of smaller types:
+
+-  ``double`` > ``float`` > ``long`` > ``int`` > ``short`` > ``byte``
+
+Consequently, a value of a smaller type can be assigned to a variable of a
+larger type.
+
+Type ``bigint`` does not belong to this hierarchy. There is no implicit
+conversion from a numeric type (see :ref:`Numeric Types`) to ``bigint``.
+Standard library (see :ref:`Standard Library`) class ``BigInt`` methods must be
+used to create ``bigint`` values from numeric types.
+
+.. index::
+   integer type
+   floating-point type
+   numeric type
+   double
+   float
+   long
+   int
+   short
+   byte
+   bigint
+   long
+   int
+   short
+   byte
+   string
+   BigInt
 
 |
 
@@ -192,54 +237,6 @@ User-Defined Types
 
 |
 
-.. _Types by Category:
-
-Types by Category
-*****************
-
-.. meta:
-    frontend_status: Done
-
-All |LANG| types are summarized in the following table:
-
-.. table::
-   :widths: 25, 25, 25, 25
-
-   ========================= ========================= ========================= =========================
-   **Predefined Types**                                **User-Defined Types**
-   ------------------------- ------------------------- ------------------------- -------------------------
-   *Value Types*             *Reference Types*         *Value Types*             *Reference Types*
-   (Primitive Types)
-   ========================= ========================= ========================= =========================
-   ``number``, ``byte``,     ``Number``, ``Byte``,     enumeration types         class types,
-   ``short``, ``int``,       ``Short``, ``Int``,                                 interface types,
-   ``long``, ``float``,      ``Long``, ``Float``,                                array types,
-   ``double``, ``char``,     ``Double``, ``Char``,                               fixed array types,
-   ``boolean``               ``Boolean``,                                        tuple types,
-
-                             ``String``, ``string``,                             union types,
-
-                             ``BigInt``, ``bigint``,                             literal types,
-
-                             ``Object``, ``object``,                             function types,
-
-                             ``never``, ``void``,                                type parameters
-
-                             ``undefined``, ``null``
-   ========================= ========================= ========================= =========================
-
-**Note**. Type ``string`` (see :ref:`Type string`), type ``bigint`` (see
-:ref:`Type bigint`), literal types (see :ref:`Literal Types`), and all boxed
-types (:ref:`Boxed Types`) have value type semantics in equality expressions
-(:ref:`Equality Expressions`).
-
-.. index::
-   type string
-   type bigint
-   semantics
-
-|
-
 .. _Using Types:
 
 Using Types
@@ -261,6 +258,7 @@ A type can be referred to in source code by the following:
    + :ref:`Tuple Types`,
    + :ref:`Function Types`,
    + :ref:`Function Types with Receiver`,
+   + :ref:`Keyof Types`,
    + :ref:`Union Types`, or
    + Type in parentheses.
 
@@ -286,6 +284,7 @@ A type can be referred to in source code by the following:
         | functionType
         | functionTypeWithReceiver
         | unionType
+        | keyofType
         | StringLiteral
         )
         | '(' type ')'
@@ -305,6 +304,7 @@ The usage of types is presented by the example below:
     let f: ()=>number       // using function type
     let u: number|string    // using union type
     let l: "xyz"            // using string literal type
+    let k: keyof ("A"|"Z")  // using string keyof type
 
 Parentheses in types (where a type is a combination of array, function, or
 union types) are used to specify the required type structure.
@@ -520,19 +520,19 @@ Integer Types and Operations
 .. meta:
     frontend_status: Done
 
-+------------+--------------------------------------------------------------------+--------------------------+
-| Type       | Corresponding Set of Values                                        | Corresponding Class Type |
-+============+====================================================================+==========================+
-| ``byte``   | All signed 8-bit integers (:math:`-2^7` to :math:`2^7-1`)          |   ``Byte``               |
-+------------+--------------------------------------------------------------------+--------------------------+
-| ``short``  | All signed 16-bit integers (:math:`-2^{15}` to :math:`2^{15}-1`)   |   ``Short``              |
-+------------+--------------------------------------------------------------------+--------------------------+
-| ``int``    | All signed 32-bit integers (:math:`-2^{31}` to :math:`2^{31} - 1`) |   ``Int``                |
-+------------+--------------------------------------------------------------------+--------------------------+
-| ``long``   | All signed 64-bit integers (:math:`-2^{63}` to :math:`2^{63} - 1`) |   ``Long``               |
-+------------+--------------------------------------------------------------------+--------------------------+
-| ``bigint`` | All integers with no limits                                        |   ``BigInt``             |
-+------------+--------------------------------------------------------------------+--------------------------+
++------------+--------------------------------------------------------------------+
+| Type       | Corresponding Set of Values                                        |
++============+====================================================================+
+| ``byte``   | All signed 8-bit integers (:math:`-2^7` to :math:`2^7-1`)          |
++------------+--------------------------------------------------------------------+
+| ``short``  | All signed 16-bit integers (:math:`-2^{15}` to :math:`2^{15}-1`)   |
++------------+--------------------------------------------------------------------+
+| ``int``    | All signed 32-bit integers (:math:`-2^{31}` to :math:`2^{31} - 1`) |
++------------+--------------------------------------------------------------------+
+| ``long``   | All signed 64-bit integers (:math:`-2^{63}` to :math:`2^{63} - 1`) |
++------------+--------------------------------------------------------------------+
+| ``bigint`` | All integers with no limits                                        |
++------------+--------------------------------------------------------------------+
 
 |LANG| provides a number of operators to act on integer values as discussed
 below.
@@ -577,11 +577,6 @@ below.
    int
    long
    bigint
-   Byte
-   Short
-   Int
-   Long
-   BigInt
    integer value
    comparison operator
    numerical relational operator
@@ -616,10 +611,6 @@ below.
    string concatenation operator
    operand
 
-The classes ``Byte``, ``Short``, ``Int``, and ``Long`` predefine constructors,
-methods, and constants that are parts of the |LANG| standard library (see
-:ref:`Standard Library`).
-
 If one operand is not of type ``long``, then the numeric promotion (see
 :ref:`Primitive Types Conversions`) must be used to widen it first to type
 ``long``.
@@ -644,16 +635,8 @@ An integer operator can throw errors (see :ref:`Error Handling`) as follows:
 -  An integer division operator '``/``' (see :ref:`Division`), and an
    integer remainder operator '``%``' (see :ref:`Remainder`) throw
    ``ArithmeticError`` if their right-hand-side operand is zero.
--  An increment operator '``++``' and a decrement operator '``--``' (see
-   :ref:`Additive Expressions`) throw ``OutOfMemoryError`` if boxing
-   conversion (see :ref:`Boxing Conversions`) is required
-   but the available memory is not sufficient to perform it.
 
 .. index::
-   Byte
-   Short
-   Int
-   Long
    constructor
    method
    constant
@@ -676,7 +659,10 @@ An integer operator can throw errors (see :ref:`Error Handling`) as follows:
    increment operator
    decrement operator
    additive expression
-   boxing conversion
+
+Predefine constructors, methods, and constants for *integer types*
+are parts of the |LANG| standard library (see
+:ref:`Standard Library`).
 
 |
 
@@ -688,15 +674,15 @@ Floating-Point Types and Operations
 .. meta:
     frontend_status: Done
 
-+-------------+-------------------------------------+--------------------------+
-| Type        | Corresponding Set of Values         | Corresponding Class Type |
-+=============+=====================================+==========================+
-| ``float``   | The set of all IEEE 754 [3]_ 32-bit | ``Float``                |
-|             | floating-point numbers              |                          |
-+-------------+-------------------------------------+--------------------------+
-| ``number``, | The set of all IEEE 754 64-bit      | ``Number``               |
-| ``double``  | floating-point numbers              | ``Double``               |
-+-------------+-------------------------------------+--------------------------+
++-------------+-------------------------------------+
+| Type        | Corresponding Set of Values         |
++=============+=====================================+
+| ``float``   | The set of all IEEE 754 [3]_ 32-bit |
+|             | floating-point numbers              |
++-------------+-------------------------------------+
+| ``number``, | The set of all IEEE 754 64-bit      |
+| ``double``  | floating-point numbers              |
++-------------+-------------------------------------+
 
 .. index::
    IEEE 754
@@ -775,10 +761,6 @@ discussed below.
    string
    decimal form
 
-The classes ``Float`` and ``Double`` predefine constructors, methods, and
-constants that are parts of the |LANG| standard library (see
-:ref:`Standard Library`).
-
 An operation is called a *floating-point operation* if at least one of the
 operands in a binary operator is of a floating-point type (even if the
 other operand is integer).
@@ -802,9 +784,6 @@ Any floating-point type value can be cast to or from any numeric type (see
 :ref:`Numeric Types`).
 
 .. index::
-   Float
-   Double
-   class
    constructor
    method
    constant
@@ -874,12 +853,6 @@ produces ``NaN``.
 
 All numeric operations with a ``NaN`` operand result in ``NaN``.
 
-A floating-point operator (the increment '``++``' operator and decrement
-'``--``' operator, see :ref:`Additive Expressions`) can throw
-``OutOfMemoryError`` (see :ref:`Error Handling`) if boxing conversion (see
-:ref:`Boxing Conversions`) is required but the available memory is not
-sufficient to perform it.
-
 .. index::
    round toward zero
    conversion
@@ -894,7 +867,6 @@ sufficient to perform it.
    increment operator
    decrement operator
    error
-   boxing conversion
    overflow
    underflow
    signed zero
@@ -905,49 +877,9 @@ sufficient to perform it.
    floating-point value
    throw
 
-|
-
-.. _Numeric Types Hierarchy:
-
-Numeric Types Hierarchy
-=======================
-
-.. meta:
-    frontend_status: Done
-
-Integer and floating-point types are numeric types.
-
-Larger type values include all values of smaller types:
-
--  ``double`` > ``float`` > ``long`` > ``int`` > ``short`` > ``byte``
-
-Consequently, a value of a smaller type can be assigned to a variable of a
-larger type.
-
-Type ``bigint`` does not belong to this hierarchy. There is no implicit
-conversion from a numeric type (see :ref:`Numeric Types`) to ``bigint``.
-Standard library (see :ref:`Standard Library`) class ``BigInt`` methods must be
-used to create ``bigint`` values from numeric types.
-
-.. index::
-   integer type
-   floating-point type
-   numeric type
-   assignment
-   variable
-   double
-   float
-   long
-   int
-   short
-   byte
-   bigint
-   long
-   int
-   short
-   byte
-   string
-   BigInt
+Predefine constructors, methods, and constants for *floating-point types*
+are parts of the |LANG| standard library (see
+:ref:`Standard Library`).
 
 |
 
@@ -1050,17 +982,14 @@ Type ``Object``
 .. meta:
     frontend_status: Done
 
-Type ``Object`` is the superclass of all other classes,
-interfaces, arrays, tuples, function types, ``string`` and ``bigint`` types,
-unions except nullish ones, type parameters, and ``enum`` types.
-All these types inherit the methods of class ``Object`` (see :ref:`Inheritance`).
+Type ``Object`` is the supertype of all types except
+:ref:`Nullish Types` and :ref:`Type Parameters`.
+All subtypes of ``Object`` (see :ref:`Subtyping`) inherit the methods of class ``Object``
+(see :ref:`Inheritance`).
 All methods of class ``Object`` are described in full in :ref:`Standard Library`.
 
 The method ``toString`` as used in the examples in this document returns a
 string representation of the object.
-
-Using ``Object`` is recommended in all cases, although the name ``object``
-refers to type ``Object``.
 
 .. index::
    class
@@ -1086,7 +1015,8 @@ Multiple references to an object are possible.
 Most objects have state. The state is stored in the field if an object is
 a class instance, or in a variable that is an element of an array object.
 
-If two variables contain references to the same object, and the state of that
+If two variables of any type except :ref:`Value Types` contain references
+to the same object, and the state of that 
 object is modified in the reference of either variable, then the state so
 modified can be seen in the reference of the other variable.
 
@@ -1436,7 +1366,7 @@ The supertype for ``string`` literals (see :ref:`String Literals`) is type
    :linenos:
 
     class Base {
-        foo(p: "1"): string { return "666" }
+        foo(p: "1"): string { return "42" }
     }
     class Derived extends Base {
         override foo(p: string): "1" { return "1" }
@@ -1678,9 +1608,9 @@ access to tuple elements.
    :linenos:
 
    let tuple: [number, number, string, boolean, Object] =
-              [     6,      7,  "abc",    true,    666]
-   tuple[0] = 666
-   console.log (tuple[0], tuple[4]) // `666 666` be printed
+              [     6,      7,  "abc",    true,    42]
+   tuple[0] = 42
+   console.log (tuple[0], tuple[4]) // `42 42` be printed
 
 Any tuple type is assignable (see :ref:`Assignability`) to class
 ``Object`` (see :ref:`Type Object`).
@@ -1796,9 +1726,9 @@ default value.
     foo()
     foo(undefined)
     foo(undefined, undefined)
-    foo(666)
-    foo(666, undefined)
-    foo(666, "a string")
+    foo(42)
+    foo(42, undefined)
+    foo(42, "a string")
 
     type IncorrectFuncTypeWithOptionalParameters = (x?: number, y: string) => void
        // compile-time error: no mandatory parameter can follow an optional parameter
@@ -1835,7 +1765,7 @@ Union Types
 
 .. meta:
    frontend_status: Partly
-   todo: support literal in union
+   todo: support string literal in union
    todo: implement using common fields and methods, fix related issues
 
 .. code-block:: abnf
@@ -1851,16 +1781,8 @@ created from.
 A :index:`compile-time error` occurs if the type in the right-hand side of a
 union type declaration leads to a circular reference.
 
-If a *union* contains an enumeration type (see :ref:`Enumerations`), then every
-such type is replaced for a union of enumeration constant values.
-
-If a *union* contains a primitive type (see :ref:`Primitive Types`), then every
-such type is replaced for its boxed version (see :ref:`Boxed Types`) to keep the
-reference nature of the *union* type.
-
 If a *union* type contains more than one numeric type (see
-:ref:`Numeric Types`) or numeric literal (see :ref:`Numeric Literals`), then a
-:index:`compile-time error` occurs.
+:ref:`Numeric Types`) then a :index:`compile-time error` occurs.
 
 .. index::
    union type
@@ -1880,12 +1802,13 @@ Examples of incorrect union types are represented below:
    :linenos:
 
    type BadUnion1 = int | double // Compile-time error
-   type BadUnion2 = Int | Double // Compile-time error
-   type BadUnion3 = int | Double // Compile-time error
-   let x = cond? new Int (): new Double /* Compile-time error as conditional
-        expression contains an invalid union type Int | Double */
 
-   type BadUnion4 = 1 | 2  // Compile-time error: only types allowed
+   let i = 1
+   let d = 1.0
+   let x = cond? i : d /* Compile-time error as conditional
+        expression contains an invalid union type int | double */
+
+   type BadUnion2 = 1 | 2  // Compile-time error: only types allowed
 
 Typical usage examples of *union* type are represented below:
 
@@ -1952,8 +1875,8 @@ The following example represents primitive types:
 
     type Primitive = number | boolean
     let p: Primitive = 7
-    if (p instanceof Number) { // type of 'p' is Number here
-       let i: number = p as number // Casting conversion from Primitive to number
+    if (p instanceof number) { 
+       // type of 'p' is number here
     }
 
 The following example represents literal types:
@@ -1985,9 +1908,9 @@ values of the *union* type:
 
     type BMW_ModelCode = "325" | "530" | "735"
     let car_code: BMW_ModelCode = "325"
-    if (car_code == "666"){ ... }
+    if (car_code == "234"){ ... }
     /*
-       compile-time error as "666" does not belong to
+       compile-time error as "234" does not belong to
        values of literal type BMW_ModelCode
     */
 
@@ -2042,15 +1965,13 @@ after another:
 #. If present among union types, type ``never`` is removed.
 #. If one type in the union is ``string``, then all string literal types (if
    any) are removed.
-#. If a primitive type equals another union type after boxing (see
-   :ref:`Boxing Conversions`), then the initial type is removed.
 #. The following procedure is performed recursively until no assignable
    types remain, or the union type is reduced to
    a single type:
 
    -  If a union type includes two types ``T``:sub:`i` and ``T``:sub:`j` (i != j),
-      and ``T``:sub:`i` is assignable to ``T``:sub:`j` (see
-      :ref:`Assignability`), then only ``T``:sub:`j` remains in the union
+      and ``T``:sub:`i` is subtype of ``T``:sub:`j` (see
+      :ref:`Subtyping`), then only ``T``:sub:`j` remains in the union
       type, and ``T``:sub:`i` is removed.
 
 .. index::
@@ -2060,18 +1981,15 @@ after another:
    type never
    numeric type
    numeric literal type
-   unboxed type
    type never
    primitive type
-   boxing
    alias
    non-alias
    linearization
    literal type
    normalization
    Object type
-   numeric union type
-   assignability
+   subtyping
 
 The normalization process results in a normalized union type. The process
 is presented in the examples below:
@@ -2096,17 +2014,11 @@ is presented in the examples below:
     "1" | Object // normalized as Object. Object always wins
     AnyNonNullishType | Object // normalized as Object
 
-    enum Strings1 {aa = "AA", bb = "BB"}
-    enum Strings2 {aa = "AA", cc = "CC"}
-    Strings1 | Strings2 | string // normalized as string. string wins over string literals
-    Strings1 | Strings2 | number // normalized as  "AA" | "BB" | "CC" | number
-                                 // string enumerations unfolded and merged
-
     class Base {}
     class Derived1 extends Base {}
     class Derived2 extends Base {}
     Base | Derived1 // normalized as Base. Base wins over Derived.
-    Derived1 | Derived2 // normalized as Derived1 | Derived2. End of normalization
+    Derived1 | Derived2 // normalized as Derived1 | Derived2.
 
 The |LANG| compiler applies normalization while processing union types and
 handling the type inference for array literals (see
@@ -2175,6 +2087,74 @@ A :index:`compile-time error` occurs otherwise:
    method
    accessor
    signature
+
+|
+
+.. _Keyof Types:
+
+``Keyof`` Types
+===============
+
+.. meta:
+   frontend_status: None
+
+A special form of union types are ``keyof`` types built by using the keyword
+``keyof``. The keyword ``keyof`` is applied to the class or interface type (see
+:ref:`Classes` and :ref:`Interfaces`). The resultant new type is a union of
+names (as string literal types)
+of all accessible members of the class or interface type.
+
+.. code-block:: abnf
+
+    keyofType:
+        'keyof' typeReference
+        ;
+
+.. index::
+   keyof type
+   union type
+   keyof keyword
+   interface type
+   semantics
+
+A :index:`compile-time error` occurs if ``typeReference`` is not a class or
+interface type. The semantics of type ``keyof`` is presented in the example
+below:
+
+
+.. code-block-meta:
+   expect-cte:
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {
+       field: number
+       method() {}
+    }
+    type KeysOfA = keyof A // "field" | "method"
+    let a_keys: KeysOfA = "field" // OK
+    a_keys = "any string different from field or method"
+      // Compile-time error: invalid value for the type KeysOfA
+
+If the class or the interface is empty, then its type ``keyof`` is equivalent
+to type ``never``:
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {} // Empty class 
+    type KeysOfA = keyof A // never
+
+.. index::
+   class
+   interface type
+   type never
+   type keyof
+
+
 
 |
 

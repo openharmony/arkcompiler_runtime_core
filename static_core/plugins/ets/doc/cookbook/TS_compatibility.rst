@@ -498,7 +498,7 @@ Absence of Type ``Function``
 ----------------------------
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 |TS| has a supertype for all function types called *Function*. |LANG| does not
 have such type.

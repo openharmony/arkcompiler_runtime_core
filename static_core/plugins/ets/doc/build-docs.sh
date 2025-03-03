@@ -32,6 +32,7 @@ BUILD_STDLIB=no
 BUILD_TUTORIAL=no
 BUILD_SYSTEM_ARKTS=no
 BUILD_INTEROP_JS=no
+BUILD_CONCURRENCY=no
 
 function print_help()
 {
@@ -73,6 +74,7 @@ TARGETS
     * tutorial
     * system ArkTS
     * interop_js
+    * concurrency
 
     Following aliases are supported:
 
@@ -115,7 +117,7 @@ function build_sphinx_document()
     sphinx-build ${build_options} -b html "${src_dir}" "${BUILD_DIR}/${target}-html"
 
     # NB! Markdown for the spec is not skipped (mark-up too complex)
-    if [[ "${target}" != "spec" ]]; then
+    if [[ "${target}" != "spec" ]] && [[ "${target}" != "concurrency" ]]; then
         echo "${target}: Building Markdown"
         sphinx-build ${build_options} -b markdown "${src_dir}" "${BUILD_DIR}/${target}-md"
         python3 "${SCRIPT_DIR}/merge_markdown.py" "${SCRIPT_DIR}" "${target}" "${BUILD_DIR}"
@@ -192,6 +194,11 @@ for i in "$@"; do
 
         BUILD_INTEROP_JS=yes
         ;;
+    concurrency)
+        BUILD_SOMETHING=yes
+
+        BUILD_CONCURRENCY=yes
+        ;;
 
     # Alias build targets:
 
@@ -205,6 +212,7 @@ for i in "$@"; do
         BUILD_TUTORIAL=yes
         BUILD_SYSTEM_ARKTS=yes
         BUILD_INTEROP_JS=yes
+        BUILD_CONCURRENCY=yes
         ;;
     guides)
         BUILD_SOMETHING=yes
@@ -233,6 +241,7 @@ if [[ "${BUILD_SOMETHING}" == "no" ]] ; then
     BUILD_TUTORIAL=yes
     BUILD_SYSTEM_ARKTS=yes
     BUILD_INTEROP_JS=yes
+    BUILD_CONCURRENCY=yes
 fi
 
 check_ubuntu_version
@@ -278,5 +287,10 @@ fi
 if [[ "${BUILD_INTEROP_JS}" == "yes" ]]; then
     build_sphinx_document interop_js "${SCRIPT_DIR}/interop_js"
 fi
+
+if [[ "${BUILD_CONCURRENCY}" == "yes" ]]; then
+    build_sphinx_document concurrency "${SCRIPT_DIR}/concurrency"
+fi
+
 
 echo "Build succeeded, please find documents in ${BUILD_DIR}"
