@@ -2234,7 +2234,7 @@ export namespace url {
         let result = new Array<string>();
         if (input.length == 0) {
             return result;
-        } else if (input[0].length != 2) {
+        } else if (input[0][0] == undefined || input[0][1] == undefined) {
             throw new BusinessError('BusinessError: Parameter error. The type of input must be string[][].', SyntaxErrorCodeId);
         }
 

@@ -17,8 +17,8 @@ limitations under the License.
 desc: Invariance refers to the ability to use the originally-specified type as a derived one.
 ---*/
 
-type Base = [ i: number ]
-type Extended = [ i: Number ]
+type Base = [ number ]
+type Extended = [ Number ]
 
 function logBase( b: Base) {
   return b;

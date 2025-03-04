@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import {url} from "url/@ohos.url.sts"
- 
+
 /**
 * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_URL_15400
 * @tc.name: testUrlSearchParamsToString001
@@ -100,7 +100,7 @@ function testUrlSearchParamsConstruction001() {
 	let result = params.toString()
 	assertEQ(result, "user=abc&query=xyz")
 }
- 
+
 
 /**
 * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_URL_16100
@@ -119,7 +119,7 @@ function testUrlSearchParamsConstruction003() {
 	let result = params.toString()
 	assertEQ(result, "user=abc&query=first&query=second")
 }
-  
+
 /**
 * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_URL_16400
 * @tc.name: testUrlSearchParamsConstruction006
@@ -165,7 +165,7 @@ function testUrlSearchParamsConstruction008() {
 	let paramsResult = params.toString()
 	assertEQ(paramsResult, 'abcde=fghki')
 }
- 
+
 function main(): int {
 	let suite = new ArkTestsuite("URL UT tests");
 	suite.addTest("testUrlSearchParamsToString001", testUrlSearchParamsToString001);
@@ -178,7 +178,7 @@ function main(): int {
 	suite.addTest("testUrlSearchParamsConstruction006", testUrlSearchParamsConstruction006);
 	suite.addTest("testUrlSearchParamsConstruction007", testUrlSearchParamsConstruction007);
 	suite.addTest("testUrlSearchParamsConstruction008", testUrlSearchParamsConstruction008);
-	
+
 
 	//passed
 	return suite.run();

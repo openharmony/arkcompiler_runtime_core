@@ -39,9 +39,7 @@ function checkRestOfTuple(obj: [number, string][], ...tupleArr: [number, string]
     if(obj.length !== tupleArr.length)
         return false;
     for(let i = 0; i < obj.length; i++) {
-        if(obj[i].length !== tupleArr[i].length)
-            return false;
-        for(let j = 0; j < obj[i].length; j++) {
+        for(let j = 0; j < 2; j++) {
             if(obj[i][0] !== tupleArr[i][0] || obj[i][1] !== tupleArr[i][1])
                 return false;
         }

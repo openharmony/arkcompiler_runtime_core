@@ -26,6 +26,4 @@ function main(): void {
     let t: TEmpty = [[[]]];
     assertTrue( t[0] != undefined)
     assertTrue( t[0][0] != undefined)
-    assertEQ( t[0].length, 1)
-
 }

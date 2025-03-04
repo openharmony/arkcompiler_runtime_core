@@ -4740,6 +4740,10 @@ deprecated/15.exceptions/03.rethrowing_functions/rethrowing_function_without_cat
 17.experimental_features/12.adding_functionality_to_existing_types/05.lambda_expressions_with_receiver/lambda_expressions_with_receiver_4.sts
 17.experimental_features/12.adding_functionality_to_existing_types/05.lambda_expressions_with_receiver/lambda_expressions_with_receiver_5.sts
 
+#FailKind.TSC_FAIL
+15.semantic_rules/08.overloading_and_overriding/02.override-compatible_signatures/override_with_object_44.sts
+07.expressions/06.spread_expression/spex_46.sts
+
 #FailKind.DECLGEN_ETS2TS_FAIL
 13.compilation_units/03.import_directives/06.import_path/dir/module_a.sts
 13.compilation_units/07.top-level_declarations/01.exported_declarations/default_exported_declarations/nothing_exported.sts

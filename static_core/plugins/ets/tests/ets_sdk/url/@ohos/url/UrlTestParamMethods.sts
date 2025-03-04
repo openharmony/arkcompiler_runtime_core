@@ -541,7 +541,7 @@ function testUrlDelete005() {
 	let result = params.toString();
 	assertEQ(result, "foo=1&bar=2")
 }
-  
+
 
 
 function main(): int {
