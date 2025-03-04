@@ -19,6 +19,11 @@ if (ark_standalone_build) {
   import("//build/ohos.gni")
 }
 
+if (!(ark_standalone_build ||
+      (defined(ark_static_standalone_build) && ark_static_standalone_build))) {
+  import("//build/config/components/ets_frontend/ets2abc_config.gni")
+}
+
 # NB! Standard library is built only if the front-end is available.
 with_stdlib = false
 foreach(plugin, ark_enabled_plugins) {
@@ -44,6 +49,34 @@ group("ark_packages") {
   }
   if (ark_ets_interop_js) {
     deps += [ "runtime/interop_js:ets_interop_js_napi" ]
+  }
+  if (!(ark_standalone_build ||
+        (defined(ark_static_standalone_build) && ark_static_standalone_build))) {
+    deps += [ ":etsstdlib_bootabc" ]
+  }
+}
+
+if (!(ark_standalone_build ||
+      (defined(ark_static_standalone_build) && ark_static_standalone_build))) {
+  generate_static_abc("ets2abc_etsstdlib_bootabc") {
+    arktsconfig = "$ark_root/plugins/ets/stdlib/arktsconfig.json"
+    dst_file = "$target_out_dir/etsstdlib_bootabc.abc"
+    out_puts = [ "$target_out_dir/etsstdlib_bootabc.abc" ]
+    is_boot_abc = "True"
+    device_dst_file = "/system/framework/etsstdlib_bootabc.abc"
+    is_stdlib = "True"
+  }
+
+  ohos_prebuilt_etc("etsstdlib_bootabc_etc") {
+    source = "$target_out_dir/etsstdlib_bootabc.abc"
+    module_install_dir = "framework"
+    subsystem_name = "arkcompiler"
+    part_name = "runtime_core"
+    deps = [ ":ets2abc_etsstdlib_bootabc" ]
+  }
+
+  group("etsstdlib_bootabc") {
+    deps = [ ":etsstdlib_bootabc_etc" ]
   }
 }
 
