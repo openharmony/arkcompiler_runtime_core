@@ -11,5 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(calls)
-add_subdirectory(finalization_registry)
+ani_add_gtest(ani_test_example_calls
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/example.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/example.sts
+)
