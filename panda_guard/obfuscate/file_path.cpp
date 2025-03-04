@@ -24,12 +24,11 @@ namespace {
 constexpr std::string_view TAG = "[FilePath]";
 constexpr std::string_view COLON_DELIMITER = ":";
 constexpr std::string_view BUNDLE_PREFIX = "@bundle:";
-constexpr std::string_view PACKAGE_PREFIX = "@package:";
 constexpr std::string_view NORMALIZED_LOCAL_PREFIX = "@normalized:N&&";
 constexpr std::string_view NORMALIZED_OHM_DELIMITER = "&";
 constexpr size_t FILEPATH_ITEM_MAX_PART_NUM = 2;
 
-const std::vector<std::string_view> PATH_PREFIX_LIST = {BUNDLE_PREFIX, PACKAGE_PREFIX, NORMALIZED_LOCAL_PREFIX};
+const std::vector<std::string_view> PATH_PREFIX_LIST = {BUNDLE_PREFIX, NORMALIZED_LOCAL_PREFIX};
 
 bool FindPrefix(const std::string &name, std::string &prefix)
 {
@@ -67,11 +66,11 @@ void panda::guard::ReferenceFilePath::DeterminePathType()
     auto it = program_->nodeTable_.find(rawName_);
     std::string pkgName;
     if (it != program_->nodeTable_.end()) {
-        pkgName = it->second.pkgName_;
+        pkgName = it->second->pkgName_;
     } else {
         /* scene 1: record that does not exist in abc, when HAP references the record in HSP, the corresponding file
          * does not exist in abc */
-        auto itRaw = program_->prog_->record_table.find(rawName_);
+        const auto itRaw = program_->prog_->record_table.find(rawName_);
         if (itRaw == program_->prog_->record_table.end()) {
             LOG(INFO, PANDAGUARD) << TAG << "not found record: " << rawName_;
             pathType_ = FilePathType::EXTERNAL_DEPENDENCE;
@@ -86,8 +85,9 @@ void panda::guard::ReferenceFilePath::DeterminePathType()
         }
     }
 
-    // scene 3: records whose package names are in the skip list
-    if (GuardContext::GetInstance()->GetGuardOptions()->IsSkippedRemoteHar(pkgName)) {
+    // scene 3: records whose package names are in the skip list or in remote har pkg list
+    const auto &options = GuardContext::GetInstance()->GetGuardOptions();
+    if (options->IsSkippedRemoteHar(pkgName) || options->IsReservedRemoteHarPkgNames(pkgName)) {
         pathType_ = FilePathType::EXTERNAL_DEPENDENCE;
         return;
     }
@@ -104,7 +104,7 @@ void panda::guard::ReferenceFilePath::UpdateObfFilePath()
         LOG(INFO, PANDAGUARD) << TAG << "not found record: " << rawName_;
         obfFilePath_ = filePath_;
     } else {
-        obfFilePath_ = prefix_ + it->second.obfName_;
+        obfFilePath_ = prefix_ + it->second->obfName_;
     }
 }
 

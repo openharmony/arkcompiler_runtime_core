@@ -16,7 +16,6 @@
 #include "entity.h"
 
 #include "configs/guard_context.h"
-#include "file_path.h"
 #include "program.h"
 
 namespace {
@@ -35,6 +34,7 @@ void panda::guard::Entity::Create()
 void panda::guard::Entity::Obfuscate()
 {
     if (!this->needUpdate) {
+        this->WriteNameCache();
         return;
     }
 
@@ -55,12 +55,14 @@ void panda::guard::Entity::WriteNameCache(const std::string &filePath)
     this->WritePropertyCache();
 }
 
+void panda::guard::Entity::WriteNameCache() {}
+
 void panda::guard::Entity::SetNameCacheScope(const std::string &name)
 {
     if (this->scope_ == TOP_LEVEL) {
         this->nameCacheScope_ = name;
     } else {
-        if (!this->defineInsList_.empty() && this->defineInsList_[0].function_) {
+        if (!this->defineInsList_.empty()) {
             this->nameCacheScope_ = this->defineInsList_[0].function_->nameCacheScope_ + SCOPE_DELIMITER.data() + name;
         }
     }
@@ -71,12 +73,21 @@ std::string panda::guard::Entity::GetNameCacheScope() const
     return this->scope_ == TOP_LEVEL ? SCOPE_DELIMITER.data() + this->nameCacheScope_ : this->nameCacheScope_;
 }
 
+void panda::guard::Entity::UpdateLiteralArrayTableIdx(const std::string &originIdx, const std::string &updatedIdx) const
+{
+    auto entry = this->program_->prog_->literalarray_table.extract(originIdx);
+    entry.key() = updatedIdx;
+    this->program_->prog_->literalarray_table.insert(std::move(entry));
+}
+
+void panda::guard::Entity::SetExportAndRefreshNeedUpdate(const bool isExport)
+{
+    this->export_ = isExport;
+    this->RefreshNeedUpdate();
+}
+
 bool panda::guard::Entity::IsExport() const
 {
-    if (this->scope_ != TOP_LEVEL) {
-        return false;
-    }
-
     return this->export_;
 }
 
@@ -98,7 +109,7 @@ bool panda::guard::TopLevelOptionEntity::NeedUpdate(const Entity &entity)
 {
     bool needUpdate = true;
     do {
-        const auto options = GuardContext::GetInstance()->GetGuardOptions();
+        const auto &options = GuardContext::GetInstance()->GetGuardOptions();
         if (entity.IsExport()) {
             needUpdate = options->IsExportObfEnabled() && options->IsToplevelObfEnabled();
             break;
@@ -128,8 +139,11 @@ void panda::guard::TopLevelOptionEntity::WritePropertyCache(const panda::guard::
         return;
     }
 
-    const auto options = GuardContext::GetInstance()->GetGuardOptions();
-    if (!options->IsPropertyObfEnabled() || !options->IsToplevelObfEnabled()) {
+    const auto &options = GuardContext::GetInstance()->GetGuardOptions();
+    if (!options->IsToplevelObfEnabled()) {
+        return;
+    }
+    if (!options->IsPropertyObfEnabled() && !options->IsExportObfEnabled()) {
         return;
     }
 
@@ -149,7 +163,7 @@ void panda::guard::TopLevelOptionEntity::WritePropertyCache()
 
 bool panda::guard::PropertyOptionEntity::NeedUpdate(const Entity &entity)
 {
-    const auto options = GuardContext::GetInstance()->GetGuardOptions();
+    const auto &options = GuardContext::GetInstance()->GetGuardOptions();
     bool needUpdate;
     if (entity.IsExport()) {
         needUpdate = options->IsExportObfEnabled() && options->IsPropertyObfEnabled();
@@ -173,8 +187,8 @@ void panda::guard::PropertyOptionEntity::WritePropertyCache(const panda::guard::
         return;
     }
 
-    const auto options = GuardContext::GetInstance()->GetGuardOptions();
-    if (!options->IsPropertyObfEnabled()) {
+    const auto &options = GuardContext::GetInstance()->GetGuardOptions();
+    if (!options->IsPropertyObfEnabled() && !options->IsExportObfEnabled()) {
         return;
     }
 
@@ -190,40 +204,4 @@ void panda::guard::PropertyOptionEntity::WritePropertyCache(const panda::guard::
 void panda::guard::PropertyOptionEntity::WritePropertyCache()
 {
     return WritePropertyCache(*this);
-}
-
-bool panda::guard::InstructionInfo::IsInnerReg() const
-{
-    // if regs[0] is less than regsNum, the register is v, otherwise, the register is a
-    return this->ins_->regs[0] < this->function_->regsNum;
-}
-
-void panda::guard::InstructionInfo::UpdateInsName(bool generateNewName)
-{
-    this->origin_ = this->ins_->ids[0];
-    this->obfName_ = GuardContext::GetInstance()->GetNameMapping()->GetName(this->origin_, generateNewName);
-    this->ins_->ids[0] = this->obfName_;
-    this->function_->program_->prog_->strings.emplace(this->obfName_);
-}
-
-void panda::guard::InstructionInfo::UpdateInsFileName()
-{
-    this->origin_ = this->ins_->ids[0];
-    ReferenceFilePath filePath(this->function_->program_);
-    filePath.SetFilePath(this->origin_);
-    filePath.Init();
-    filePath.Update();
-    this->obfName_ = filePath.obfFilePath_;
-    this->ins_->ids[0] = this->obfName_;
-    this->function_->program_->prog_->strings.emplace(this->obfName_);
-}
-
-void panda::guard::InstructionInfo::WriteNameCache()
-{
-    GuardContext::GetInstance()->GetNameCache()->AddObfPropertyName(this->origin_, this->obfName_);
-}
-
-bool panda::guard::InstructionInfo::IsValid() const
-{
-    return this->ins_ != nullptr;
 }

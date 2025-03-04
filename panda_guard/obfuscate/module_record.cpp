@@ -133,7 +133,8 @@ void panda::guard::RegularImportItem::WriteFileCache(const std::string &filePath
 
 void panda::guard::RegularImportItem::WritePropertyCache()
 {
-    if (!GuardContext::GetInstance()->GetGuardOptions()->IsPropertyObfEnabled()) {
+    const auto &options = GuardContext::GetInstance()->GetGuardOptions();
+    if (!options->IsPropertyObfEnabled() && !options->IsExportObfEnabled()) {
         return;
     }
 
@@ -176,7 +177,8 @@ void panda::guard::NameSpaceImportItem::WriteFileCache(const std::string &filePa
 
 void panda::guard::NameSpaceImportItem::WritePropertyCache()
 {
-    if (!GuardContext::GetInstance()->GetGuardOptions()->IsPropertyObfEnabled()) {
+    const auto &options = GuardContext::GetInstance()->GetGuardOptions();
+    if (!options->IsPropertyObfEnabled() && !options->IsExportObfEnabled()) {
         return;
     }
     GuardContext::GetInstance()->GetNameCache()->AddObfPropertyName(this->localName_, this->obfLocalName_);
@@ -212,7 +214,7 @@ void panda::guard::LocalExportItem::ExtractNames(std::set<std::string> &strings)
 
 void panda::guard::LocalExportItem::RefreshNeedUpdate()
 {
-    auto options = GuardContext::GetInstance()->GetGuardOptions();
+    const auto &options = GuardContext::GetInstance()->GetGuardOptions();
     if (!options->IsToplevelObfEnabled()) {
         this->needUpdate = false;
         GuardContext::GetInstance()->GetNameMapping()->AddNameMapping(this->localName_);
@@ -246,7 +248,8 @@ void panda::guard::LocalExportItem::WriteFileCache(const std::string &filePath)
 
 void panda::guard::LocalExportItem::WritePropertyCache()
 {
-    if (!GuardContext::GetInstance()->GetGuardOptions()->IsPropertyObfEnabled()) {
+    const auto &options = GuardContext::GetInstance()->GetGuardOptions();
+    if (!options->IsPropertyObfEnabled() && !options->IsExportObfEnabled()) {
         return;
     }
 
@@ -297,7 +300,8 @@ void panda::guard::IndirectExportItem::WriteFileCache(const std::string &filePat
 
 void panda::guard::IndirectExportItem::WritePropertyCache()
 {
-    if (!GuardContext::GetInstance()->GetGuardOptions()->IsPropertyObfEnabled()) {
+    const auto &options = GuardContext::GetInstance()->GetGuardOptions();
+    if (!options->IsPropertyObfEnabled() && !options->IsExportObfEnabled()) {
         return;
     }
 
@@ -573,4 +577,29 @@ void panda::guard::ModuleRecord::UpdateFileNameReferences()
         item.Obfuscate();
     }
     LOG(INFO, PANDAGUARD) << TAG << "update FileNameReferences for " << this->literalArrayIdx_ << " start";
+}
+
+void panda::guard::ModuleRecord::UpdateLiteralArrayIdx(const std::string &literalArrayIdx)
+{
+    this->literalArrayIdx_ = literalArrayIdx;
+
+    for (auto &item : this->filePathList_) {
+        item.literalArrayIdx_ = literalArrayIdx;
+    }
+
+    for (auto &item : this->regularImportList_) {
+        item.literalArrayIdx_ = literalArrayIdx;
+    }
+
+    for (auto &item : this->nameSpaceImportList_) {
+        item.literalArrayIdx_ = literalArrayIdx;
+    }
+
+    for (auto &item : this->localExportList_) {
+        item.literalArrayIdx_ = literalArrayIdx;
+    }
+
+    for (auto &item : this->indirectExportList_) {
+        item.literalArrayIdx_ = literalArrayIdx;
+    }
 }

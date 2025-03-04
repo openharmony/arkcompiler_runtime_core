@@ -30,6 +30,12 @@ const OpcodeList PROPERTY_TYPE_LIST_NORMAL = {
     panda::pandasm::Opcode::DEFINEPROPERTYBYNAME, panda::pandasm::Opcode::STOBJBYVALUE,
     panda::pandasm::Opcode::STSUPERBYVALUE,
 };
+
+bool IsGetLdaStrPropertyIns(const panda::guard::InstructionInfo &info)
+{
+    return ((info.ins_->opcode == panda::pandasm::Opcode::STOBJBYVALUE) ||
+            (info.ins_->opcode == panda::pandasm::Opcode::STSUPERBYVALUE));
+}
 }  // namespace
 
 bool panda::guard::Property::IsPropertyIns(const panda::guard::InstructionInfo &info)
@@ -40,7 +46,7 @@ bool panda::guard::Property::IsPropertyIns(const panda::guard::InstructionInfo &
 
 void panda::guard::Property::GetPropertyNameInfo(const InstructionInfo &info, InstructionInfo &nameInfo)
 {
-    if (info.ins_->opcode != pandasm::Opcode::STOBJBYVALUE && info.ins_->opcode != pandasm::Opcode::STSUPERBYVALUE) {
+    if (!IsGetLdaStrPropertyIns(info)) {
         nameInfo = info;
         return;
     }
@@ -62,4 +68,15 @@ void panda::guard::Property::Update()
     this->obfName_ = GuardContext::GetInstance()->GetNameMapping()->GetName(this->name_);
     this->nameInfo_.ins_->ids[0] = this->obfName_;
     this->program_->prog_->strings.emplace(this->obfName_);
+
+    for (auto &defineIns : this->defineInsList_) {
+        if (!defineIns.IsValid()) {
+            LOG(INFO, PANDAGUARD) << TAG << "no bind define ins, ignore update define";
+            continue;
+        }
+
+        if (!IsGetLdaStrPropertyIns(defineIns)) {
+            defineIns.ins_->ids[0] = this->obfName_;
+        }
+    }
 }

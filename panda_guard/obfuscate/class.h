@@ -32,10 +32,6 @@ public:
 
     void WriteNameCache(const std::string &filePath) override;
 
-    [[nodiscard]] size_t GetMethodCnt() const;
-
-    [[nodiscard]] size_t GetPropertyCnt() const;
-
     /**
      * Traverse all method instructions
      * @param callback instruction callback
@@ -64,6 +60,8 @@ private:
 
     void CreateMethod(const pandasm::LiteralArray &literalArray, size_t index, bool isStatic);
 
+    void UpdateLiteralArrayIdx();
+
 public:
     ModuleRecord *moduleRecord_ = nullptr;
     Function constructor_;
@@ -85,12 +83,14 @@ public:
      *  foo: Method, in literalArray
      *  get v: OuterMethod, not in literalArray
      */
-    std::vector<Method> methods_ {};  // The defineclasswithbuffer instruction associates methods in literalArray
-    std::vector<OuterMethod> outerMethods_ {};  // The external method defined by the definemethod instruction
+    // The defineclasswithbuffer instruction associates methods in literalArray
+    std::vector<std::shared_ptr<Method>> methods_ {};
+    // The external method defined by the definemethod instruction
+    std::vector<std::shared_ptr<OuterMethod>> outerMethods_ {};
     /* if is callruntime instruction, special processing is required when parsing the literalArray because the end of
      * literalArray of callruntime instruction is not a static method but running information */
     bool callRunTimeInst_ = false;
-    bool component = false;  // is UI component class
+    bool component_ = false;  // is UI component class
 };
 
 }  // namespace panda::guard

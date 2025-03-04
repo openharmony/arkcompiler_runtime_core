@@ -33,7 +33,16 @@ constexpr std::string_view PATH_DELIMITER = "/";
 constexpr std::string_view PACKAGE_MODULES_PREFIX = "pkg_modules";
 constexpr std::string_view PKG_NAME_PREFIX = "pkgName@";
 constexpr std::string_view SCOPE_NAMES_FIELD = "scopeNames";
+constexpr std::string_view MODULE_RECORD_IDX_FIELD = "moduleRecordIdx";
 constexpr std::string_view JSON_FILE_FIELD = "jsonFileContent";
+constexpr size_t MAX_EXPORT_ITEM_LEN = 10000;
+constexpr size_t STOBJBYVALUE_ACC_INDEX = 2;
+
+constexpr std::string_view OBJECT_PROPERTY_OBJECT = "Object";
+constexpr std::string_view OBJECT_PROPERTY_PROTOTYPE = "prototype";
+constexpr std::string_view OBJECT_PROPERTY_GETOWNPROPERTYDESCRIPTOR = "getOwnPropertyDescriptor";
+constexpr std::string_view OBJECT_PROPERTY_DEFINEPROPERTY = "defineProperty";
+constexpr size_t NAMESPACE_OWN_PARAM_REG_INDEX = 3;  // a3(this)
 
 const OpcodeList METHOD_NAME_DIRECT_LIST = {
     panda::pandasm::Opcode::STOWNBYNAME,
@@ -63,7 +72,63 @@ void UpdateScopeNamesLiteralArray(panda::pandasm::LiteralArray &literalArray)
     }
 }
 
+template <typename T>
+void UpdateEntityNamespaceMemberExport(const std::string &entityIdx,
+                                       const std::unordered_map<std::string, std::shared_ptr<T>> &map)
+{
+    PANDA_GUARD_ASSERT_PRINT(map.find(entityIdx) == map.end(), TAG, panda::guard::ErrorCode::GENERIC_ERROR,
+                             "invalid entityIdx:" << entityIdx);
+    const auto &entity = map.at(entityIdx);
+    LOG(INFO, PANDAGUARD) << TAG << "update namespace export for entity:" << entityIdx;
+    entity->SetExportAndRefreshNeedUpdate(true);
+}
+
+bool IsRemoteHar(const std::string &name)
+{
+    return panda::guard::StringUtil::IsPrefixMatched(name, PACKAGE_MODULES_PREFIX.data());
+}
 }  // namespace
+
+bool panda::guard::Node::IsJsonFile(const pandasm::Record &record)
+{
+    return std::any_of(record.field_list.begin(), record.field_list.end(),
+                       [](const auto &field) { return field.name == JSON_FILE_FIELD; });
+}
+
+bool panda::guard::Node::FindPkgName(const pandasm::Record &record, std::string &pkgName)
+{
+    return std::any_of(
+        record.field_list.begin(), record.field_list.end(), [&](const panda::pandasm::Field &field) -> bool {
+            const bool found = field.name.rfind(PKG_NAME_PREFIX, 0) == 0;
+            if (found) {
+                pkgName = field.name.substr(PKG_NAME_PREFIX.size(), field.name.size() - PKG_NAME_PREFIX.size());
+            }
+            return found;
+        });
+}
+
+void panda::guard::Node::InitWithRecord(const pandasm::Record &record)
+{
+    if (IsJsonFile(record)) {
+        this->type_ = NodeType::JSON_FILE;
+        LOG(INFO, PANDAGUARD) << TAG << "json file:" << this->name_;
+        return;
+    }
+
+    std::string pkgName;
+    if (FindPkgName(record, pkgName)) {
+        this->type_ = NodeType::SOURCE_FILE;
+        this->pkgName_ = pkgName;
+        LOG(INFO, PANDAGUARD) << TAG << "source file:" << this->name_;
+        return;
+    }
+
+    if (record.metadata->IsAnnotation()) {
+        this->type_ = NodeType::ANNOTATION;
+        LOG(INFO, PANDAGUARD) << TAG << "annotation:" << this->name_;
+        return;
+    }
+}
 
 void panda::guard::Node::Build()
 {
@@ -72,7 +137,6 @@ void panda::guard::Node::Build()
     this->sourceName_ = GuardContext::GetInstance()->GetGuardOptions()->GetSourceName(this->name_);
     this->obfSourceName_ = this->sourceName_;
     LOG(INFO, PANDAGUARD) << TAG << "node sourceName_ " << this->sourceName_;
-
     this->isNormalizedOhmUrl_ = GuardContext::GetInstance()->GetGuardOptions()->IsUseNormalizedOhmUrl();
     CreateFilePath();
     this->filepath_.obfName = this->filepath_.name;
@@ -80,21 +144,20 @@ void panda::guard::Node::Build()
     LOG(INFO, PANDAGUARD) << TAG << "file path: " << this->filepath_.name;
     LOG(INFO, PANDAGUARD) << TAG << "post part: " << this->filepath_.postPart;
 
-    moduleRecord_.Create();
-    if (!Node::IsJsonFile(this->program_->prog_->record_table.at(this->name_))) {
-        Function entryFunc(this->program_, this->name_ + ENTRY_FUNC_NAME.data(), false);
-        entryFunc.Init();
-        entryFunc.Create();
+    if (this->type_ == NodeType::SOURCE_FILE) {
+        moduleRecord_.Create();
 
-        const auto &function = entryFunc.GetOriginFunction();
+        auto entryFunc = std::make_shared<Function>(this->program_, this->name_ + ENTRY_FUNC_NAME.data(), false);
+        entryFunc->Init();
+        entryFunc->Create();
+
+        const auto &function = entryFunc->GetOriginFunction();
         this->sourceFile_ = function.source_file;
         this->obfSourceFile_ = function.source_file;
 
-        this->functionTable_.emplace(entryFunc.idx_, entryFunc);
+        entryFunc->ForEachIns([&](const InstructionInfo &info) -> void { ForEachIns(info, TOP_LEVEL); });
 
-        entryFunc.ForEachIns([&](const InstructionInfo &info) -> void { ForEachIns(info, TOP_LEVEL); });
-    } else {
-        LOG(INFO, PANDAGUARD) << "json file record:" << this->name_;
+        this->functionTable_.emplace(entryFunc->idx_, entryFunc);
     }
 
     this->ExtractNames();
@@ -102,151 +165,267 @@ void panda::guard::Node::Build()
     LOG(INFO, PANDAGUARD) << TAG << "node create for " << this->name_ << " end";
 }
 
-void panda::guard::Node::ForEachIns(const panda::guard::InstructionInfo &info, panda::guard::Scope scope)
+panda::pandasm::Record &panda::guard::Node::GetRecord() const
+{
+    return this->program_->prog_->record_table.at(this->obfName_);
+}
+
+void panda::guard::Node::ForEachIns(const InstructionInfo &info, const Scope scope)
 {
     CreateFunction(info, scope);
+    CreateProperty(info);
     CreateClass(info, scope);
     CreateOuterMethod(info);
     CreateObject(info, scope);
     CreateObjectOuterProperty(info);
-    CreateOuterProperty(info);
     FindStLexVarName(info);
+    AddNameForExportObject(info);
+    if (GuardContext::GetInstance()->GetGuardOptions()->IsDecoratorObfEnabled()) {
+        CreateUiDecorator(info, scope);
+        CreateObjectDecoratorProperty(info);
+    }
+    UpdateExportForNamespaceMember(info);
 }
 
 void panda::guard::Node::CreateFunction(const InstructionInfo &info, const Scope scope)
 {
-    if (info.ins_->opcode != pandasm::Opcode::DEFINEFUNC) {
+    if (info.notEqualToOpcode(pandasm::Opcode::DEFINEFUNC)) {
         return;
     }
 
     const std::string idx = info.ins_->ids[0];
     if (this->functionTable_.find(idx) != this->functionTable_.end()) {
-        this->functionTable_.at(idx).defineInsList_.push_back(info);
+        this->functionTable_.at(idx)->defineInsList_.push_back(info);
         return;
     }
 
-    Function function(this->program_, idx);
-    function.scope_ = scope;
-    function.defineInsList_.push_back(info);
+    auto function = std::make_shared<Function>(this->program_, idx);
+    function->scope_ = scope;
+    function->defineInsList_.push_back(info);
+    function->component_ = info.function_->component_;
+    function->Init();
 
-    function.Init();
+    function->export_ = this->moduleRecord_.IsExportVar(function->name_);
+    function->Create();
 
-    function.export_ = this->moduleRecord_.IsExportVar(function.name_);
-    function.Create();
+    function->ForEachIns([&](const InstructionInfo &insInfo) -> void { ForEachIns(insInfo, FUNCTION); });
 
-    function.ForEachIns([&](const InstructionInfo &insInfo) -> void { ForEachIns(insInfo, FUNCTION); });
+    this->functionTable_.emplace(function->idx_, function);
+}
 
-    this->functionTable_.emplace(function.idx_, function);
+/**
+ * e.g. class A {
+ *  constructor {
+ *    this.v1 = 1;
+ *
+ *    let obj = {};
+ *    obj.v2 = 2;
+ *  }
+ * }
+ * v1: property, bind function
+ * v2: variable property, bind object
+ */
+void panda::guard::Node::CreateProperty(const InstructionInfo &info) const
+{
+    if (!Property::IsPropertyIns(info)) {
+        return;
+    }
+
+    InstructionInfo nameInfo;
+    Property::GetPropertyNameInfo(info, nameInfo);
+    // if function is enum function, try to find property in acc
+    if (!nameInfo.IsValid() && info.function_->type_ == FunctionType::ENUM_FUNCTION) {
+        // e.g. this[0] = 'property'
+        LOG(INFO, PANDAGUARD) << TAG << "try to find property in acc";
+        GraphAnalyzer::GetLdaStr(info, nameInfo, STOBJBYVALUE_ACC_INDEX);
+    }
+
+    if (!nameInfo.IsValid()) {
+        LOG(INFO, PANDAGUARD) << TAG << "invalid nameInfo:" << info.index_ << " " << info.ins_->ToString();
+        return;
+    }
+
+    const std::string name = StringUtil::UnicodeEscape(nameInfo.ins_->ids[0]);
+    bool innerReg = info.IsInnerReg();
+    if (!innerReg && (info.function_->propertyTable_.find(name) != info.function_->propertyTable_.end())) {
+        info.function_->propertyTable_.at(name)->defineInsList_.emplace_back(info);
+        return;
+    }
+
+    auto property = std::make_shared<Property>(this->program_, name);
+    property->defineInsList_.push_back(info);
+    property->nameInfo_ = nameInfo;
+    if (!innerReg) {
+        property->scope_ = this->scope_;
+        property->export_ = this->export_;
+        property->Create();
+
+        LOG(INFO, PANDAGUARD) << TAG << "find property:" << property->name_;
+
+        info.function_->propertyTable_.emplace(name, property);
+    } else {
+        property->scope_ = FUNCTION;
+        property->export_ = false;
+        property->Create();
+
+        LOG(INFO, PANDAGUARD) << TAG << "find variable property:" << property->name_;
+
+        info.function_->variableProperties_.push_back(property);
+    }
+}
+
+void panda::guard::Node::CreateObjectDecoratorProperty(const InstructionInfo &info)
+{
+    if (info.notEqualToOpcode(pandasm::Opcode::CALLTHIS2) && info.notEqualToOpcode(pandasm::Opcode::CALLTHIS3)) {
+        return;
+    }
+
+    std::string callName = GraphAnalyzer::GetCallName(info);
+    if (callName != OBJECT_PROPERTY_GETOWNPROPERTYDESCRIPTOR && callName != OBJECT_PROPERTY_DEFINEPROPERTY) {
+        return;
+    }
+
+    InstructionInfo objectParam;
+    GraphAnalyzer::GetCallTryLdGlobalByNameParam(info, INDEX_0, objectParam);
+    if (!objectParam.IsValid() || objectParam.ins_->ids[0] != OBJECT_PROPERTY_OBJECT) {
+        return;
+    }
+
+    InstructionInfo param1;
+    GraphAnalyzer::GetCallLdObjByNameParam(info, INDEX_1, param1);
+    if (!param1.IsValid() || param1.ins_->ids[0] != OBJECT_PROPERTY_PROTOTYPE) {
+        return;
+    }
+
+    InstructionInfo param2;
+    GraphAnalyzer::GetCallLdaStrParam(info, INDEX_2, param2);
+    if (!param2.IsValid()) {
+        return;
+    }
+
+    const std::string name = StringUtil::UnicodeEscape(param2.ins_->ids[0]);
+    auto property = std::make_shared<Property>(this->program_, name);
+    property->scope_ = this->scope_;
+    property->export_ = this->export_;
+    property->defineInsList_.push_back(param2);
+    property->nameInfo_ = param2;
+    property->Create();
+    LOG(INFO, PANDAGUARD) << TAG << "find object decorator property:" << property->name_;
+    info.function_->objectDecoratorProperties_.push_back(property);
 }
 
 void panda::guard::Node::CreateClass(const InstructionInfo &info, const Scope scope)
 {
-    if ((info.ins_->opcode != pandasm::Opcode::DEFINECLASSWITHBUFFER) &&
-        (info.ins_->opcode != pandasm::Opcode::CALLRUNTIME_DEFINESENDABLECLASS)) {
+    if (info.notEqualToOpcode(pandasm::Opcode::DEFINECLASSWITHBUFFER) &&
+        info.notEqualToOpcode(pandasm::Opcode::CALLRUNTIME_DEFINESENDABLECLASS)) {
         return;
     }
 
     const std::string idx = info.ins_->ids[1];
     if (this->classTable_.find(idx) != this->classTable_.end()) {
-        this->classTable_.at(idx).defineInsList_.push_back(info);
+        this->classTable_.at(idx)->defineInsList_.push_back(info);
         return;
     }
 
-    Class clazz(this->program_, info.ins_->ids[0]);
-    clazz.moduleRecord_ = &this->moduleRecord_;
-    clazz.literalArrayIdx_ = idx;
-    clazz.defineInsList_.push_back(info);
-    clazz.component = GraphAnalyzer::IsComponentClass(info);
-    clazz.scope_ = scope;
-    if (info.ins_->opcode == pandasm::Opcode::CALLRUNTIME_DEFINESENDABLECLASS) {
-        clazz.callRunTimeInst_ = true;
+    auto clazz = std::make_shared<Class>(this->program_, info.ins_->ids[0]);
+    clazz->moduleRecord_ = &this->moduleRecord_;
+    clazz->literalArrayIdx_ = idx;
+    clazz->defineInsList_.push_back(info);
+    if (GuardContext::GetInstance()->GetGuardOptions()->IsDecoratorObfEnabled()) {
+        clazz->component_ = GraphAnalyzer::IsComponentClass(info);
     }
-    clazz.Create();
+    clazz->scope_ = scope;
+    if (info.ins_->opcode == pandasm::Opcode::CALLRUNTIME_DEFINESENDABLECLASS) {
+        clazz->callRunTimeInst_ = true;
+    }
+    clazz->Create();
 
-    clazz.ForEachMethodIns([&](const InstructionInfo &insInfo) -> void { ForEachIns(insInfo, FUNCTION); });
+    clazz->ForEachMethodIns([&](const InstructionInfo &insInfo) -> void { ForEachIns(insInfo, FUNCTION); });
 
-    this->classTable_.emplace(clazz.literalArrayIdx_, clazz);
+    this->classTable_.emplace(clazz->literalArrayIdx_, clazz);
 }
 
 void panda::guard::Node::CreateOuterMethod(const InstructionInfo &info)
 {
-    if (info.ins_->opcode != pandasm::Opcode::DEFINEMETHOD) {
+    if (info.notEqualToOpcode(pandasm::Opcode::DEFINEMETHOD)) {
         return;
     }
 
     InstructionInfo defineInsInfo;
     InstructionInfo nameInsInfo;
     GraphAnalyzer::HandleDefineMethod(info, defineInsInfo, nameInsInfo);
+    PANDA_GUARD_ASSERT_PRINT(!defineInsInfo.IsValid(), TAG, ErrorCode::GENERIC_ERROR, "defineInsInfo is invalid");
+    // nameInsInfo maybe empty, therefore, there not check nameInsInfo. Instead, it is checked in actual use
 
     const std::string methodIdx = info.ins_->ids[0];
     std::string literalArrayIdx;
-    if ((defineInsInfo.ins_->opcode == pandasm::Opcode::DEFINECLASSWITHBUFFER) ||
-        (defineInsInfo.ins_->opcode == pandasm::Opcode::CALLRUNTIME_DEFINESENDABLECLASS)) {
+    if (defineInsInfo.equalToOpcode(pandasm::Opcode::DEFINECLASSWITHBUFFER) ||
+        defineInsInfo.equalToOpcode(pandasm::Opcode::CALLRUNTIME_DEFINESENDABLECLASS)) {
         literalArrayIdx = defineInsInfo.ins_->ids[1];
     } else {  // createobjectwithbuffer
         literalArrayIdx = defineInsInfo.ins_->ids[0];
     }
 
-    OuterMethod outerMethod(this->program_, methodIdx);
-    outerMethod.defineInsList_.push_back(info);
-    GetMethodNameInfo(nameInsInfo, outerMethod.nameInfo_);
-    outerMethod.Init();
+    auto outerMethod = std::make_shared<OuterMethod>(this->program_, methodIdx);
+    outerMethod->defineInsList_.push_back(info);
+    GetMethodNameInfo(nameInsInfo, outerMethod->nameInfo_);
+    outerMethod->Init();
 
     if (this->classTable_.find(literalArrayIdx) != this->classTable_.end()) {
-        auto &clazz = this->classTable_.at(literalArrayIdx);
-        outerMethod.className_ = clazz.name_;
-        outerMethod.export_ = clazz.export_;
-        outerMethod.scope_ = clazz.scope_;
+        const auto &clazz = this->classTable_.at(literalArrayIdx);
+        outerMethod->className_ = clazz->name_;
+        outerMethod->export_ = clazz->export_;
+        outerMethod->scope_ = clazz->scope_;
+        outerMethod->component_ = clazz->component_;
 
-        outerMethod.Create();
+        outerMethod->Create();
 
-        LOG(INFO, PANDAGUARD) << TAG << "found method:" << methodIdx << " for class:" << clazz.constructor_.name_;
-        clazz.outerMethods_.push_back(outerMethod);
+        LOG(INFO, PANDAGUARD) << TAG << "found method:" << methodIdx << " for class:" << clazz->name_;
+        clazz->outerMethods_.push_back(outerMethod);
     } else if (this->objectTable_.find(literalArrayIdx) != this->objectTable_.end()) {
-        auto &obj = this->objectTable_.at(literalArrayIdx);
-        outerMethod.export_ = obj.export_;
-        outerMethod.scope_ = obj.scope_;
+        const auto &obj = this->objectTable_.at(literalArrayIdx);
+        outerMethod->export_ = obj->export_;
+        outerMethod->scope_ = obj->scope_;
 
-        outerMethod.Create();
+        outerMethod->Create();
 
-        LOG(INFO, PANDAGUARD) << TAG << "found method:" << methodIdx << " for obj:" << obj.literalArrayIdx_;
-        obj.outerMethods_.push_back(outerMethod);
+        LOG(INFO, PANDAGUARD) << TAG << "found method:" << methodIdx << " for obj:" << obj->literalArrayIdx_;
+        obj->outerMethods_.push_back(outerMethod);
     } else {
         PANDA_GUARD_ABORT_PRINT(TAG, ErrorCode::GENERIC_ERROR, "unexpect outer method for:" << literalArrayIdx);
     }
 
-    outerMethod.ForEachIns([&](const InstructionInfo &insInfo) -> void { ForEachIns(insInfo, FUNCTION); });
+    outerMethod->ForEachIns([&](const InstructionInfo &insInfo) -> void { ForEachIns(insInfo, FUNCTION); });
 }
 
 void panda::guard::Node::CreateObject(const InstructionInfo &info, const Scope scope)
 {
-    if (info.ins_->opcode != pandasm::Opcode::CREATEOBJECTWITHBUFFER) {
+    if (info.notEqualToOpcode(pandasm::Opcode::CREATEOBJECTWITHBUFFER)) {
         return;
     }
 
     const std::string idx = info.ins_->ids[0];
     if (this->objectTable_.find(idx) != this->objectTable_.end()) {
-        this->objectTable_.at(idx).defineInsList_.push_back(info);
+        this->objectTable_.at(idx)->defineInsList_.push_back(info);
         return;
     }
 
-    Object object(this->program_, idx);
-    LOG(INFO, PANDAGUARD) << TAG << "found record object:" << object.literalArrayIdx_;
-    object.defineInsList_.push_back(info);
-    object.scope_ = scope;
-    object.moduleRecord = &this->moduleRecord_;
-    object.Create();
+    auto object = std::make_shared<Object>(this->program_, idx, this->name_);
+    LOG(INFO, PANDAGUARD) << TAG << "found record object:" << object->literalArrayIdx_;
+    object->defineInsList_.push_back(info);
+    object->scope_ = scope;
+    object->Create();
 
-    object.ForEachMethod([&](Function &function) -> void {
+    object->ForEachMethod([&](Function &function) -> void {
         function.ForEachIns([&](const InstructionInfo &insInfo) -> void { ForEachIns(insInfo, FUNCTION); });
     });
 
-    this->objectTable_.emplace(object.literalArrayIdx_, object);
+    this->objectTable_.emplace(object->literalArrayIdx_, object);
 }
 
 void panda::guard::Node::CreateObjectOuterProperty(const panda::guard::InstructionInfo &info)
 {
-    if (info.ins_->opcode != pandasm::Opcode::DEFINEPROPERTYBYNAME) {
+    if (info.notEqualToOpcode(pandasm::Opcode::DEFINEPROPERTYBYNAME)) {
         return;
     }
 
@@ -256,52 +435,97 @@ void panda::guard::Node::CreateObjectOuterProperty(const panda::guard::Instructi
         return;
     }
 
-    PANDA_GUARD_ASSERT_PRINT(defineIns.ins_->opcode != pandasm::Opcode::CREATEOBJECTWITHBUFFER, TAG,
+    PANDA_GUARD_ASSERT_PRINT(defineIns.notEqualToOpcode(pandasm::Opcode::CREATEOBJECTWITHBUFFER), TAG,
                              ErrorCode::GENERIC_ERROR, "unexpect related define ins");
 
     const std::string literalArrayIdx = defineIns.ins_->ids[0];
     PANDA_GUARD_ASSERT_PRINT(this->objectTable_.find(literalArrayIdx) == this->objectTable_.end(), TAG,
                              ErrorCode::GENERIC_ERROR, "no record object for literalArrayIdx:" << literalArrayIdx);
 
-    auto &object = this->objectTable_.at(literalArrayIdx);
-    Property property(this->program_, info.ins_->ids[0]);
-    property.defineInsList_.push_back(info);
-    property.nameInfo_ = info;
-    property.export_ = object.export_;
-    property.scope_ = object.scope_;
+    const auto &object = this->objectTable_.at(literalArrayIdx);
+    const auto property = std::make_shared<Property>(this->program_, info.ins_->ids[0]);
+    property->defineInsList_.push_back(info);
+    property->nameInfo_ = info;
+    property->export_ = object->export_;
+    property->scope_ = object->scope_;
 
-    property.Create();
+    property->Create();
 
-    object.outerProperties_.push_back(property);
-    LOG(INFO, PANDAGUARD) << TAG << "found object outer property:" << property.name_;
+    object->outerProperties_.push_back(property);
+    LOG(INFO, PANDAGUARD) << TAG << "found object outer property:" << property->name_;
 }
 
-void panda::guard::Node::CreateOuterProperty(const InstructionInfo &info)
+void panda::guard::Node::AddNameForExportObject(const InstructionInfo &info)
 {
-    if ((info.ins_->opcode != pandasm::Opcode::STOBJBYNAME) && (info.ins_->opcode != pandasm::Opcode::STOBJBYVALUE)) {
+    if (info.notEqualToOpcode(pandasm::Opcode::STMODULEVAR) &&
+        info.notEqualToOpcode(pandasm::Opcode::WIDE_STMODULEVAR)) {
         return;
     }
 
-    InstructionInfo nameInfo;
-    Property::GetPropertyNameInfo(info, nameInfo);
-    if (!nameInfo.IsValid()) {
-        LOG(INFO, PANDAGUARD) << TAG << "invalid nameInfo:" << info.index_ << " " << info.ins_->ToString();
+    InstructionInfo defineIns;
+    GraphAnalyzer::GetStModuleVarDefineIns(info, defineIns);
+    if (!defineIns.IsValid()) {
         return;
     }
 
-    Property property(this->program_, nameInfo.ins_->ids[0]);
-    property.defineInsList_.push_back(info);
-    property.nameInfo_ = nameInfo;
+    if (defineIns.notEqualToOpcode(pandasm::Opcode::CREATEOBJECTWITHBUFFER)) {
+        return;
+    }
 
-    property.Create();
+    const int64_t index = std::get<int64_t>(info.ins_->imms[0]);
+    PANDA_GUARD_ASSERT_PRINT(index < 0 || index > MAX_EXPORT_ITEM_LEN, TAG, ErrorCode::GENERIC_ERROR,
+                             "unexpect export item index:" << index);
+    const auto &exportName = this->moduleRecord_.GetLocalExportName(index);
 
-    this->outerProperties_.push_back(property);
-    LOG(INFO, PANDAGUARD) << TAG << "found outer property:" << property.name_;
+    const auto &objectIdx = defineIns.ins_->ids[0];
+    PANDA_GUARD_ASSERT_PRINT(this->objectTable_.find(objectIdx) == this->objectTable_.end(), TAG,
+                             ErrorCode::GENERIC_ERROR, "invalid objectIdx:" << objectIdx);
+    const auto &object = this->objectTable_.at(objectIdx);
+
+    object->SetExportName(exportName);
+    object->SetExportAndRefreshNeedUpdate(true);
+
+    LOG(INFO, PANDAGUARD) << TAG << "add export name:" << exportName << " for objectIdx:" << objectIdx;
 }
 
-void panda::guard::Node::FindStLexVarName(const panda::guard::InstructionInfo &info)
+void panda::guard::Node::UpdateExportForNamespaceMember(const InstructionInfo &info) const
 {
-    if (info.ins_->opcode != pandasm::Opcode::STLEXVAR) {
+    if (info.notEqualToOpcode(pandasm::Opcode::STOBJBYNAME) ||
+        (info.function_->type_ != FunctionType::NAMESPACE_FUNCTION) ||
+        ((info.ins_->regs[0] - info.function_->regsNum_) != NAMESPACE_OWN_PARAM_REG_INDEX)) {
+        return;
+    }
+
+    const auto propertyName = info.ins_->ids[0];
+    PANDA_GUARD_ASSERT_PRINT(info.function_->propertyTable_.find(propertyName) == info.function_->propertyTable_.end(),
+                             TAG, ErrorCode::GENERIC_ERROR, "invalid propertyName:" << propertyName);
+    const auto &property = info.function_->propertyTable_.at(propertyName);
+    property->SetExportAndRefreshNeedUpdate(true);
+
+    InstructionInfo defineIns;
+    GraphAnalyzer::GetStObjByNameDefineIns(info, defineIns);
+
+    if (!defineIns.IsValid()) {
+        return;
+    }
+
+    if (defineIns.equalToOpcode(pandasm::Opcode::DEFINEFUNC)) {
+        UpdateEntityNamespaceMemberExport(defineIns.ins_->ids[0], this->functionTable_);
+    }
+
+    if (defineIns.equalToOpcode(pandasm::Opcode::DEFINECLASSWITHBUFFER) ||
+        defineIns.equalToOpcode(pandasm::Opcode::CALLRUNTIME_DEFINESENDABLECLASS)) {
+        UpdateEntityNamespaceMemberExport(defineIns.ins_->ids[1], this->classTable_);
+    }
+
+    if (defineIns.equalToOpcode(pandasm::Opcode::CREATEOBJECTWITHBUFFER)) {
+        UpdateEntityNamespaceMemberExport(defineIns.ins_->ids[0], this->objectTable_);
+    }
+}
+
+void panda::guard::Node::FindStLexVarName(const InstructionInfo &info)
+{
+    if (info.notEqualToOpcode(pandasm::Opcode::STLEXVAR)) {
         return;
     }
 
@@ -315,9 +539,27 @@ void panda::guard::Node::FindStLexVarName(const panda::guard::InstructionInfo &i
     GuardContext::GetInstance()->GetNameMapping()->AddNameMapping(outInfo.ins_->ids[0]);
 }
 
+void panda::guard::Node::CreateUiDecorator(const InstructionInfo &info, Scope scope)
+{
+    if (!UiDecorator::IsUiDecoratorIns(info, scope)) {
+        return;
+    }
+
+    auto decorator = std::make_shared<UiDecorator>(this->program_, this->objectTable_);
+    decorator->scope_ = scope;
+    decorator->export_ = false;
+    decorator->baseInst_ = info;
+    decorator->Create();
+    if (!decorator->IsValidUiDecoratorType()) {
+        return;
+    }
+    this->uiDecorator_.emplace_back(decorator);
+}
+
 void panda::guard::Node::CreateFilePath()
 {
-    if (!GuardContext::GetInstance()->GetGuardOptions()->IsFileNameObfEnabled()) {
+    const auto &options = GuardContext::GetInstance()->GetGuardOptions();
+    if (!options->IsFileNameObfEnabled() || options->IsReservedRemoteHarPkgNames(this->pkgName_)) {
         this->filepath_.name = this->name_;
         return;
     }
@@ -331,8 +573,11 @@ void panda::guard::Node::CreateFilePath()
 
 void panda::guard::Node::CreateFilePathForDefaultMode()
 {
-    bool isRemoteHar = StringUtil::IsPrefixMatched(name_, PACKAGE_MODULES_PREFIX.data());
-    if (isRemoteHar) {
+    if (IsRemoteHar(this->name_)) {
+        if (this->type_ == NodeType::JSON_FILE) {
+            this->filepath_.name = this->name_;
+            return;
+        }
         std::string prefix = pkgName_ + PATH_DELIMITER.data();
         PANDA_GUARD_ASSERT_PRINT(!StringUtil::IsPrefixMatched(name_, prefix), TAG, ErrorCode::GENERIC_ERROR,
                                  "invalid remote har prefix");
@@ -364,8 +609,11 @@ void panda::guard::Node::CreateFilePathForDefaultMode()
 void panda::guard::Node::CreateFilePathForNormalizedMode()
 {
     // [<bundle name>?]&<package name>/<file path>&[<version>?]
-    size_t startPos = name_.find_first_of(NORMALIZED_OHM_DELIMITER.data(), 0);
-    std::string prefix = NORMALIZED_OHM_DELIMITER.data() + pkgName_ + PATH_DELIMITER.data();
+    const size_t startPos = name_.find_first_of(NORMALIZED_OHM_DELIMITER.data(), 0);
+    const std::string prefix = this->type_ == NodeType::SOURCE_FILE
+                                   ? NORMALIZED_OHM_DELIMITER.data() + pkgName_ + PATH_DELIMITER.data()
+                                   : NORMALIZED_OHM_DELIMITER.data();
+
     PANDA_GUARD_ASSERT_PRINT(!StringUtil::IsPrefixMatched(name_, prefix, startPos), TAG, ErrorCode::GENERIC_ERROR,
                              "invalid normalizedOhmUrl prefix");
     size_t prefixEnd = startPos + prefix.size();
@@ -384,15 +632,21 @@ void panda::guard::Node::ExtractNames()
     moduleRecord_.ExtractNames(this->strings_);
 
     for (const auto &[_, function] : this->functionTable_) {
-        function.ExtractNames(this->strings_);
+        function->ExtractNames(this->strings_);
     }
 
     for (const auto &[_, clazz] : this->classTable_) {
-        clazz.ExtractNames(this->strings_);
+        clazz->ExtractNames(this->strings_);
     }
 
     for (const auto &[_, object] : this->objectTable_) {
-        object.ExtractNames(this->strings_);
+        object->ExtractNames(this->strings_);
+    }
+
+    if (GuardContext::GetInstance()->GetGuardOptions()->IsDecoratorObfEnabled()) {
+        for (const auto &decorator : this->uiDecorator_) {
+            decorator->ExtractNames(this->strings_);
+        }
     }
 
     auto parts = StringUtil::Split(filepath_.name, PATH_DELIMITER.data());
@@ -410,16 +664,21 @@ void panda::guard::Node::ExtractNames()
 
 void panda::guard::Node::RefreshNeedUpdate()
 {
-    this->fileNameNeedUpdate_ = GuardContext::GetInstance()->GetGuardOptions()->IsFileNameObfEnabled();
+    const auto &options = GuardContext::GetInstance()->GetGuardOptions();
+    if (options->IsUseNormalizedOhmUrl()) {
+        this->fileNameNeedUpdate_ = options->IsFileNameObfEnabled() && !options->IsReservedRemoteHarPkgNames(pkgName_);
+    } else {
+        this->fileNameNeedUpdate_ = options->IsFileNameObfEnabled() && !IsRemoteHar(this->name_);
+    }
 
-    if (GuardContext::GetInstance()->GetGuardOptions()->IsKeepPath(this->name_)) {
+    if (options->IsKeepPath(this->name_)) {
         LOG(INFO, PANDAGUARD) << TAG << "found keep rule for:" << this->name_;
         this->contentNeedUpdate_ = false;
         GuardContext::GetInstance()->GetNameMapping()->AddNameMapping(this->strings_);
     }
 
     for (auto &[_, object] : this->objectTable_) {
-        object.SetContentNeedUpdate(this->contentNeedUpdate_);
+        object->SetContentNeedUpdate(this->contentNeedUpdate_);
     }
 
     this->needUpdate = this->fileNameNeedUpdate_ || this->contentNeedUpdate_;
@@ -428,15 +687,15 @@ void panda::guard::Node::RefreshNeedUpdate()
 void panda::guard::Node::ForEachFunction(const std::function<FunctionTraver> &callback)
 {
     for (auto &[_, function] : this->functionTable_) {
-        callback(function);
+        callback(*function);
     }
 
     for (auto &[_, clazz] : this->classTable_) {
-        clazz.ForEachFunction(callback);
+        clazz->ForEachFunction(callback);
     }
 
     for (auto &[_, object] : this->objectTable_) {
-        object.ForEachMethod(callback);
+        object->ForEachMethod(callback);
     }
 }
 
@@ -445,34 +704,39 @@ void panda::guard::Node::Update()
     LOG(INFO, PANDAGUARD) << TAG << "node update for " << this->name_ << " start";
 
     if (this->fileNameNeedUpdate_) {
-        UpdateFileNameDefine();
+        this->UpdateFileNameDefine();
     }
 
     // fileNameNeedUpdate_ || contentNeedUpdate_
     for (auto &[_, function] : this->functionTable_) {
-        function.Obfuscate();
-        function.WriteNameCache(this->sourceName_);
+        function->Obfuscate();
+        function->WriteNameCache(this->sourceName_);
     }
 
     for (auto &[_, clazz] : this->classTable_) {
-        clazz.Obfuscate();
-        clazz.WriteNameCache(this->sourceName_);
+        clazz->Obfuscate();
+        clazz->WriteNameCache(this->sourceName_);
     }
 
     for (auto &[_, object] : this->objectTable_) {
-        object.Obfuscate();
-        object.WriteNameCache(this->sourceName_);
+        object->Obfuscate();
+        object->WriteNameCache(this->sourceName_);
     }
 
-    for (auto &property : this->outerProperties_) {
-        property.Obfuscate();
-        property.WriteNameCache(this->sourceName_);
+    if (GuardContext::GetInstance()->GetGuardOptions()->IsDecoratorObfEnabled()) {
+        for (auto &decorator : this->uiDecorator_) {
+            decorator->Obfuscate();
+            decorator->WriteNameCache(this->sourceName_);
+        }
     }
 
     if (this->contentNeedUpdate_) {
         moduleRecord_.Obfuscate();
         moduleRecord_.WriteNameCache(this->sourceName_);
     }
+
+    this->UpdateScopeNames();
+    this->UpdateFieldsLiteralArrayIdx();
 
     this->WriteFileCache(this->sourceName_);
 
@@ -546,10 +810,10 @@ void panda::guard::Node::UpdateSourceFile(const std::string &file)
     LOG(INFO, PANDAGUARD) << TAG << "source_file: " << this->sourceFile_;
 }
 
-void panda::guard::Node::UpdateScopeNames()
+void panda::guard::Node::UpdateScopeNames() const
 {
     LOG(INFO, PANDAGUARD) << TAG << "update scopeNames for:" << this->name_;
-    auto &record = this->program_->prog_->record_table.at(this->obfName_);
+    auto &record = this->GetRecord();
     for (auto &it : record.field_list) {
         if (it.name == SCOPE_NAMES_FIELD) {
             const auto &literalArrayIdx = it.metadata->GetValue()->GetValue<std::string>();
@@ -561,26 +825,42 @@ void panda::guard::Node::UpdateScopeNames()
     }
 }
 
-bool panda::guard::Node::FindPkgName(const panda::pandasm::Record &record, std::string &pkgName)
+void panda::guard::Node::UpdateFieldsLiteralArrayIdx()
 {
-    return std::any_of(
-        record.field_list.begin(), record.field_list.end(), [&](const panda::pandasm::Field &field) -> bool {
-            bool found = field.name.rfind(PKG_NAME_PREFIX, 0) == 0;
-            if (found) {
-                pkgName = field.name.substr(PKG_NAME_PREFIX.size(), field.name.size() - PKG_NAME_PREFIX.size());
+    if (this->name_ == this->obfName_) {
+        return;
+    }
+
+    LOG(INFO, PANDAGUARD) << "update fields literalArrayIdx for:" << this->name_;
+    auto &record = this->GetRecord();
+    for (auto &it : record.field_list) {
+        if (it.name == SCOPE_NAMES_FIELD || it.name == MODULE_RECORD_IDX_FIELD) {
+            const auto &literalArrayIdx = it.metadata->GetValue()->GetValue<std::string>();
+            LOG(INFO, PANDAGUARD) << TAG << "literalArrayIdx:" << literalArrayIdx;
+
+            std::string updatedLiteralArrayIdx = literalArrayIdx;
+            updatedLiteralArrayIdx.replace(updatedLiteralArrayIdx.find(this->name_), this->name_.size(),
+                                           this->obfName_);
+            LOG(INFO, PANDAGUARD) << TAG << "updated literalArrayIdx:" << updatedLiteralArrayIdx;
+
+            UpdateLiteralArrayTableIdx(literalArrayIdx, updatedLiteralArrayIdx);
+
+            it.metadata->SetValue(
+                pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(updatedLiteralArrayIdx));
+
+            if (it.name == MODULE_RECORD_IDX_FIELD) {
+                this->moduleRecord_.UpdateLiteralArrayIdx(updatedLiteralArrayIdx);
             }
-            return found;
-        });
+        }
+    }
 }
 
-bool panda::guard::Node::IsJsonFile(const pandasm::Record &record)
+void panda::guard::Node::WriteNameCache()
 {
-    return std::any_of(record.field_list.begin(), record.field_list.end(),
-                       [](const auto &field) { return field.name == JSON_FILE_FIELD; });
+    this->WriteFileCache(this->sourceName_);
 }
 
-void panda::guard::Node::GetMethodNameInfo(const panda::guard::InstructionInfo &info,
-                                           panda::guard::InstructionInfo &nameInfo)
+void panda::guard::Node::GetMethodNameInfo(const InstructionInfo &info, InstructionInfo &nameInfo)
 {
     if (!info.IsValid()) {
         return;

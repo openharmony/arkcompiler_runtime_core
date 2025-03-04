@@ -42,6 +42,7 @@ constexpr std::string_view OBFUSCATION_RULES = "obfuscationRules";
 constexpr std::string_view DISABLE_OBFUSCATION = "disableObfuscation";
 constexpr std::string_view ENABLE_EXPORT_OBFUSCATION = "enableExportObfuscation";
 constexpr std::string_view ENABLE_REMOVE_LOG = "enableRemoveLog";
+constexpr std::string_view ENABLE_DECORATOR_OBFUSCATION = "enableDecoratorObfuscation";
 constexpr std::string_view PRINT_NAME_CACHE = "printNameCache";
 constexpr std::string_view APPLY_NAME_CACHE = "applyNameCache";
 constexpr std::string_view RESERVED_NAMES = "reservedNames";
@@ -55,6 +56,7 @@ constexpr std::string_view UNIVERSAL_RESERVED_TOPLEVEL_NAMES = "universalReserve
 constexpr std::string_view FILE_NAME_OBFUSCATION = "fileNameObfuscation";
 constexpr std::string_view RESERVED_FILE_NAMES = "reservedFileNames";
 constexpr std::string_view UNIVERSAL_RESERVED_FILE_NAMES = "universalReservedFileNames";
+constexpr std::string_view RESERVED_REMOTE_HAR_PKG_NAMES = "reservedRemoteHarPkgNames";
 constexpr std::string_view KEEP_OPTIONS = "keepOptions";
 constexpr std::string_view KEEP_PATHS = "keepPaths";
 
@@ -91,9 +93,22 @@ void ParseToplevelOption(const panda::JsonObject *obj, panda::guard::Obfuscation
                            option);
 }
 
-void ParseFileNameOption(const panda::JsonObject *obj, panda::guard::ObfuscationOption &option)
+void ParseFileNameOption(const panda::JsonObject *obj, panda::guard::FileNameOption &option)
 {
-    ParseObfuscationOption(obj, FILE_NAME_OBFUSCATION, RESERVED_FILE_NAMES, UNIVERSAL_RESERVED_FILE_NAMES, option);
+    auto innerObj = panda::guard::JsonUtil::GetJsonObject(obj, FILE_NAME_OBFUSCATION);
+    if (!innerObj) {
+        LOG(INFO, PANDAGUARD) << TAG << "fail to obtain object field :" << FILE_NAME_OBFUSCATION << " from json object";
+        return;
+    }
+    option.enable = panda::guard::JsonUtil::GetBoolValue(innerObj, ENABLE);
+    option.reservedFileNames = panda::guard::JsonUtil::GetArrayStringValue(innerObj, RESERVED_FILE_NAMES);
+    option.universalReservedFileNames =
+        panda::guard::JsonUtil::GetArrayStringValue(innerObj, UNIVERSAL_RESERVED_FILE_NAMES);
+    for (auto &str : option.universalReservedFileNames) {
+        panda::guard::StringUtil::RemoveSlashFromBothEnds(str);
+    }
+    option.reservedRemoteHarPkgNames =
+        panda::guard::JsonUtil::GetArrayStringValue(innerObj, RESERVED_REMOTE_HAR_PKG_NAMES);
 }
 
 void ParseKeepOption(const panda::JsonObject *obj, panda::guard::KeepOption &option)
@@ -134,6 +149,7 @@ void ParseObfuscationConfigFile(const std::string &content, panda::guard::Obfusc
     obfRule->disableObfuscation = panda::guard::JsonUtil::GetBoolValue(rulesObj, DISABLE_OBFUSCATION);
     obfRule->enableExportObfuscation = panda::guard::JsonUtil::GetBoolValue(rulesObj, ENABLE_EXPORT_OBFUSCATION);
     obfRule->enableRemoveLog = panda::guard::JsonUtil::GetBoolValue(rulesObj, ENABLE_REMOVE_LOG);
+    obfRule->enableDecorator = panda::guard::JsonUtil::GetBoolValue(rulesObj, ENABLE_DECORATOR_OBFUSCATION);
     obfRule->printNameCache = panda::guard::JsonUtil::GetStringValue(rulesObj, PRINT_NAME_CACHE);
     obfRule->applyNameCache = panda::guard::JsonUtil::GetStringValue(rulesObj, APPLY_NAME_CACHE);
     obfRule->reservedNames = panda::guard::JsonUtil::GetArrayStringValue(rulesObj, RESERVED_NAMES);
@@ -313,6 +329,11 @@ bool panda::guard::GuardOptions::IsRemoveLogObfEnabled() const
     return obfConfig_.obfuscationRules.enableRemoveLog;
 }
 
+bool panda::guard::GuardOptions::IsDecoratorObfEnabled() const
+{
+    return obfConfig_.obfuscationRules.enableDecorator;
+}
+
 const std::string &panda::guard::GuardOptions::GetPrintNameCache() const
 {
     return obfConfig_.obfuscationRules.printNameCache;
@@ -369,8 +390,8 @@ bool panda::guard::GuardOptions::IsReservedToplevelNames(const std::string &name
 
 bool panda::guard::GuardOptions::IsReservedFileNames(const std::string &name) const
 {
-    return NeedToBeReserved(obfConfig_.obfuscationRules.fileNameOption.reservedList,
-                            obfConfig_.obfuscationRules.fileNameOption.universalReservedList, name);
+    return NeedToBeReserved(obfConfig_.obfuscationRules.fileNameOption.reservedFileNames,
+                            obfConfig_.obfuscationRules.fileNameOption.universalReservedFileNames, name);
 }
 
 const std::string &panda::guard::GuardOptions::GetSourceName(const std::string &name) const
@@ -392,4 +413,11 @@ bool panda::guard::GuardOptions::IsSkippedRemoteHar(const std::string &pkgName) 
 bool panda::guard::GuardOptions::IsUseNormalizedOhmUrl() const
 {
     return obfConfig_.useNormalizedOHMUrl;
+}
+
+bool panda::guard::GuardOptions::IsReservedRemoteHarPkgNames(const std::string &name) const
+{
+    return std::any_of(obfConfig_.obfuscationRules.fileNameOption.reservedRemoteHarPkgNames.begin(),
+                       obfConfig_.obfuscationRules.fileNameOption.reservedRemoteHarPkgNames.end(),
+                       [name](const std::string &remoteHar) { return remoteHar == name; });
 }

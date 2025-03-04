@@ -29,21 +29,21 @@ void panda::guard::Program::Create()
     LOG(INFO, PANDAGUARD) << TAG << "===== program create start =====";
 
     for (const auto &[name, record] : this->prog_->record_table) {
-        if (Node::IsJsonFile(record)) {
-            Node node(this, name, "");
-            node.Create();
+        auto node = std::make_shared<Node>(this, name);
+        node->InitWithRecord(record);
+        if (node->type_ == NodeType::JSON_FILE) {
+            node->Create();
             this->nodeTable_.emplace(name, node);
+            continue;
         }
 
-        std::string pkgName;
-        if (Node::FindPkgName(record, pkgName)) {
-            if (GuardContext::GetInstance()->GetGuardOptions()->IsSkippedRemoteHar(pkgName)) {
+        if (node->type_ == NodeType::SOURCE_FILE) {
+            if (GuardContext::GetInstance()->GetGuardOptions()->IsSkippedRemoteHar(node->pkgName_)) {
                 LOG(INFO, PANDAGUARD) << TAG << "skip record: " << record.name;
                 continue;
             }
 
-            Node node(this, name, pkgName);
-            node.Create();
+            node->Create();
             this->nodeTable_.emplace(name, node);
         }
     }
@@ -54,7 +54,7 @@ void panda::guard::Program::Create()
 void panda::guard::Program::ForEachFunction(const std::function<FunctionTraver> &callback)
 {
     for (auto &[_, node] : this->nodeTable_) {
-        node.ForEachFunction(callback);
+        node->ForEachFunction(callback);
     }
 }
 
@@ -72,8 +72,7 @@ void panda::guard::Program::Obfuscate()
     LOG(INFO, PANDAGUARD) << TAG << "===== program obfuscate start =====";
 
     for (auto &[name, node] : this->nodeTable_) {
-        node.Obfuscate();
-        node.UpdateScopeNames();
+        node->Obfuscate();
     }
 
     this->UpdateReference();
@@ -87,6 +86,6 @@ void panda::guard::Program::UpdateReference()
 {
     this->ForEachFunction([](Function &function) -> void { function.UpdateReference(); });
     for (auto &[_, node] : this->nodeTable_) {
-        node.UpdateFileNameReferences();
+        node->UpdateFileNameReferences();
     }
 }

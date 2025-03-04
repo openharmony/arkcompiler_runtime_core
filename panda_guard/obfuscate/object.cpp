@@ -27,7 +27,6 @@ constexpr std::string_view TAG = "[Object]";
 constexpr size_t LITERAL_OBJECT_ITEM_LEN = 2;
 constexpr size_t LITERAL_OBJECT_COMMON_ITEM_GROUP_LEN = 4;  // Every 4 elements represent a set of regular key values
 constexpr size_t LITERAL_OBJECT_METHOD_ITEM_GROUP_LEN = 6;  // Every 6 elements represent a set of regular key values
-constexpr size_t MAX_EXPORT_ITEM_LEN = 10000;
 }  // namespace
 
 void panda::guard::ObjectProperty::ExtractNames(std::set<std::string> &strings) const
@@ -75,29 +74,18 @@ void panda::guard::ObjectProperty::SetContentNeedUpdate(bool toUpdate)
     }
 }
 
+void panda::guard::ObjectProperty::SetExportAndRefreshNeedUpdate(bool isExport)
+{
+    if (this->method_) {
+        this->method_->SetExportAndRefreshNeedUpdate(isExport);
+    }
+
+    Entity::SetExportAndRefreshNeedUpdate(isExport);
+}
+
 void panda::guard::Object::Build()
 {
     LOG(INFO, PANDAGUARD) << TAG << "object create for " << this->literalArrayIdx_ << " start";
-
-    const auto &parentFunc = this->program_->prog_->function_table.at(this->defineInsList_[0].function_->idx_);
-    const size_t nextInsIndex = this->defineInsList_[0].index_ + 1;
-    PANDA_GUARD_ASSERT_PRINT(nextInsIndex >= parentFunc.ins.size(), TAG, ErrorCode::GENERIC_ERROR,
-                             "try to find next ins of createobjectwithbuffer get bad ins index:" << nextInsIndex);
-
-    const auto &ins = parentFunc.ins[nextInsIndex];
-    // The next instruction is stmodulevar, which exports the object
-    this->export_ = ins.opcode == pandasm::Opcode::STMODULEVAR;
-
-    LOG(INFO, PANDAGUARD) << TAG << "export:" << (this->export_ ? "true" : "false");
-    if (this->export_) {
-        int64_t index = std::get<int64_t>(ins.imms[0]);
-        PANDA_GUARD_ASSERT_PRINT(index < 0 || index > MAX_EXPORT_ITEM_LEN, TAG, ErrorCode::GENERIC_ERROR,
-                                 "unexpect export item index:" << index);
-        this->name_ = this->moduleRecord->GetLocalExportName(index);
-        this->obfName_ = this->name_;
-        this->SetNameCacheScope(this->name_);
-        LOG(INFO, PANDAGUARD) << TAG << "name:" << this->name_;
-    }
 
     const auto &literalArray = this->program_->prog_->literalarray_table.at(this->literalArrayIdx_);
     size_t keyIndex = 1;                                     // object item key index
@@ -122,48 +110,85 @@ void panda::guard::Object::CreateProperty(const pandasm::LiteralArray &literalAr
     PANDA_GUARD_ASSERT_PRINT(keyTag != panda_file::LiteralTag::STRING, TAG, ErrorCode::GENERIC_ERROR,
                              "bad keyTag literal tag");
 
-    ObjectProperty property(this->program_, this->literalArrayIdx_);
-    property.name_ = StringUtil::UnicodeEscape(std::get<std::string>(keyValue));
-    property.scope_ = this->scope_;
-    property.export_ = this->export_;
-    property.index_ = index;
+    auto property = std::make_shared<ObjectProperty>(this->program_, this->literalArrayIdx_);
+    property->name_ = StringUtil::UnicodeEscape(std::get<std::string>(keyValue));
+    property->scope_ = this->scope_;
+    property->export_ = this->export_;
+    property->index_ = index;
 
     if (isMethod) {
-        size_t valueLiteralIndex = index + 2;
+        const size_t valueLiteralIndex = index + 2;
         PANDA_GUARD_ASSERT_PRINT(valueLiteralIndex >= literalArray.literals_.size(), TAG, ErrorCode::GENERIC_ERROR,
                                  "bad valueLiteralIndex:" << valueLiteralIndex);
         const auto &[valueTag, valueValue] = literalArray.literals_[valueLiteralIndex];
         PANDA_GUARD_ASSERT_PRINT(valueTag != panda_file::LiteralTag::METHOD, TAG, ErrorCode::GENERIC_ERROR,
                                  "bad valueLiteral tag:" << (int)valueTag);
-        property.method_ = std::make_shared<PropertyMethod>(this->program_, std::get<std::string>(valueValue));
-        property.method_->export_ = this->export_;
-        property.method_->scope_ = this->scope_;
+        property->method_ = std::make_shared<PropertyMethod>(this->program_, std::get<std::string>(valueValue));
+        property->method_->export_ = this->export_;
+        property->method_->scope_ = this->scope_;
     }
 
-    property.Create();
+    property->Create();
 
-    LOG(INFO, PANDAGUARD) << TAG << "find object property:" << property.name_;
+    LOG(INFO, PANDAGUARD) << TAG << "find object property:" << property->name_;
 
     this->properties_.push_back(property);
+}
+
+void panda::guard::Object::UpdateLiteralArrayIdx()
+{
+    if (!GuardContext::GetInstance()->GetGuardOptions()->IsFileNameObfEnabled()) {
+        return;
+    }
+
+    const auto &it = this->program_->nodeTable_.find(this->recordName_);
+    PANDA_GUARD_ASSERT_PRINT(it == this->program_->nodeTable_.end(), TAG, ErrorCode::GENERIC_ERROR,
+                             "not find node: " + this->recordName_);
+    const auto &node = it->second;
+    if (node->name_ == node->obfName_) {
+        return;
+    }
+    std::string updatedLiteralArrayIdx = this->literalArrayIdx_;
+    updatedLiteralArrayIdx.replace(updatedLiteralArrayIdx.find(node->name_), node->name_.size(), node->obfName_);
+
+    UpdateLiteralArrayTableIdx(this->literalArrayIdx_, updatedLiteralArrayIdx);
+
+    this->literalArrayIdx_ = updatedLiteralArrayIdx;
+
+    for (auto &inst : this->defineInsList_) {
+        inst.ins_->ids[INDEX_0] = updatedLiteralArrayIdx;
+    }
+
+    for (auto &property : this->properties_) {
+        property->literalArrayIdx_ = updatedLiteralArrayIdx;
+    }
 }
 
 void panda::guard::Object::ForEachMethod(const std::function<FunctionTraver> &callback)
 {
     for (const auto &property : this->properties_) {
-        if (property.method_) {
-            callback(property.method_.operator*());
+        if (property->method_) {
+            callback(property->method_.operator*());
         }
     }
 
     for (auto &method : this->outerMethods_) {
-        callback(method);
+        callback(*method);
     }
 }
 
 void panda::guard::Object::ExtractNames(std::set<std::string> &strings) const
 {
     for (const auto &property : this->properties_) {
-        property.ExtractNames(strings);
+        property->ExtractNames(strings);
+    }
+
+    for (const auto &property : this->outerProperties_) {
+        property->ExtractNames(strings);
+    }
+
+    for (const auto &method : this->outerMethods_) {
+        method->ExtractNames(strings);
     }
 }
 
@@ -181,16 +206,18 @@ void panda::guard::Object::Update()
         this->obfName_ = GuardContext::GetInstance()->GetNameMapping()->GetName(this->name_);
     }
 
-    for (auto &property : this->properties_) {
-        property.Obfuscate();
+    UpdateLiteralArrayIdx();
+
+    for (const auto &property : this->properties_) {
+        property->Obfuscate();
     }
 
-    for (auto &property : this->outerProperties_) {
-        property.Obfuscate();
+    for (const auto &property : this->outerProperties_) {
+        property->Obfuscate();
     }
 
-    for (auto &method : this->outerMethods_) {
-        method.Obfuscate();
+    for (const auto &method : this->outerMethods_) {
+        method->Obfuscate();
     }
 
     LOG(INFO, PANDAGUARD) << TAG << "object update for " << this->literalArrayIdx_ << " end";
@@ -207,22 +234,46 @@ void panda::guard::Object::WriteNameCache(const std::string &filePath)
                                                                           this->obfName_);
     }
 
-    for (auto &property : this->properties_) {
-        property.WriteNameCache(filePath);
+    for (const auto &property : this->properties_) {
+        property->WriteNameCache(filePath);
     }
 
-    for (auto &property : this->outerProperties_) {
-        property.WriteNameCache(filePath);
+    for (const auto &property : this->outerProperties_) {
+        property->WriteNameCache(filePath);
     }
 }
 
 void panda::guard::Object::SetContentNeedUpdate(bool toUpdate)
 {
     this->contentNeedUpdate_ = toUpdate;
-    for (auto &property : this->properties_) {
-        property.SetContentNeedUpdate(toUpdate);
+    for (const auto &property : this->properties_) {
+        property->SetContentNeedUpdate(toUpdate);
     }
-    for (auto &method : this->outerMethods_) {
-        method.SetContentNeedUpdate(toUpdate);
+    for (const auto &method : this->outerMethods_) {
+        method->SetContentNeedUpdate(toUpdate);
     }
+}
+
+void panda::guard::Object::SetExportAndRefreshNeedUpdate(bool isExport)
+{
+    for (const auto &property : this->properties_) {
+        property->SetExportAndRefreshNeedUpdate(isExport);
+    }
+
+    for (const auto &property : this->outerProperties_) {
+        property->SetExportAndRefreshNeedUpdate(isExport);
+    }
+
+    for (const auto &method : this->outerMethods_) {
+        method->SetExportAndRefreshNeedUpdate(isExport);
+    }
+
+    Entity::SetExportAndRefreshNeedUpdate(isExport);
+}
+
+void panda::guard::Object::SetExportName(const std::string &exportName)
+{
+    this->name_ = exportName;
+    this->obfName_ = exportName;
+    this->SetNameCacheScope(exportName);
 }

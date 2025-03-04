@@ -15,8 +15,8 @@
     "disableObfuscation": false,
     "enableExportObfuscation": true,
     "enableRemoveLog": true,
+    "enableDecoratorObfuscation": true,
     "printNameCache": "",
-    "applyNameCache": "./clang_x64/obj/arkcompiler/runtime_core/panda_guard/tests/configs/context_test_01_name_cache.json",
     "reservedNames": [],
     "propertyObfuscation": {
       "enable": true,

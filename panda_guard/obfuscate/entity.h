@@ -16,7 +16,7 @@
 #ifndef PANDA_GUARD_OBFUSCATE_ENTITY_H
 #define PANDA_GUARD_OBFUSCATE_ENTITY_H
 
-#include "assembly-program.h"
+#include "instruction_info.h"
 
 namespace panda::guard {
 
@@ -24,6 +24,13 @@ enum Scope {
     NONE,
     TOP_LEVEL,
     FUNCTION,
+};
+
+enum ParamIndex {
+    INDEX_0,
+    INDEX_1,
+    INDEX_2,
+    INDEX_3,
 };
 
 class IExtractNames {
@@ -37,48 +44,7 @@ public:
     virtual void ExtractNames(std::set<std::string> &strings) const = 0;
 };
 
-class Function;
-
-enum class FunctionType;
-
 using FunctionTraver = void(Function &function);
-
-/**
- * Instruction information
- * Due to STL's memory reallocation mechanism, internal pointers are only accessible during traversal
- */
-class InstructionInfo {
-public:
-    explicit InstructionInfo() = default;
-
-    InstructionInfo(Function *func, pandasm::Ins *ins, size_t index) : function_(func), ins_(ins), index_(index) {}
-
-    /**
-     * Determine whether the instruction uses registers within the function
-     */
-    [[nodiscard]] bool IsInnerReg() const;
-
-    /**
-     * Determine whether it is valid instruction information
-     */
-    [[nodiscard]] bool IsValid() const;
-
-    void UpdateInsName(bool generateNewName = true);
-
-    void UpdateInsFileName();
-
-    void WriteNameCache();
-
-    Function *function_ = nullptr;
-    pandasm::Ins *ins_ = nullptr;
-    size_t index_ = 0;
-
-private:
-    std::string origin_ {};
-    std::string obfName_ {};
-};
-
-class Program;
 
 class IEntity {
 public:
@@ -95,11 +61,19 @@ public:
     virtual void Obfuscate() = 0;
 };
 
+class Program;
+
 class Entity : public IEntity {
 public:
     explicit Entity(Program *program) : program_(program) {}
 
     Entity(Program *program, const std::string &name) : program_(program), name_(name), obfName_(name) {}
+
+    /**
+     * set entity and it's members export
+     * @param isExport entity is export
+     */
+    virtual void SetExportAndRefreshNeedUpdate(bool isExport);
 
     /**
      * get Entity is export
@@ -129,6 +103,11 @@ public:
      * @param filePath File name before obfuscation
      */
     virtual void WriteNameCache(const std::string &filePath);
+
+    /**
+     * Implement this method when obfuscated is not required but writing nameCache is needed
+     */
+    virtual void WriteNameCache();
 
     /**
      * origin name of Entity
@@ -177,6 +156,8 @@ protected:
     void SetNameCacheScope(const std::string &name);
 
     [[nodiscard]] std::string GetNameCacheScope() const;
+
+    void UpdateLiteralArrayTableIdx(const std::string &originIdx, const std::string &updatedIdx) const;
 
 public:
     Program *program_ = nullptr;

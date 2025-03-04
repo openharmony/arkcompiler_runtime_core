@@ -32,46 +32,28 @@ void panda::guard::Class::Build()
 {
     LOG(INFO, PANDAGUARD) << TAG << "class build for " << this->constructor_.idx_ << " start";
 
-    LOG(INFO, PANDAGUARD) << TAG << "isComponent:" << (this->component ? "true" : "false");
+    LOG(INFO, PANDAGUARD) << TAG << "isComponent:" << (this->component_ ? "true" : "false");
 
-    this->constructor_.defineInsList_ = this->defineInsList_;
-    this->constructor_.scope_ = this->scope_;
-    this->constructor_.Init();
+    constructor_.defineInsList_ = this->defineInsList_;
+    constructor_.scope_ = this->scope_;
+    constructor_.component_ = this->component_;
+    constructor_.Init();
 
     // init class base info
-    this->name_ = this->constructor_.name_;
+    this->name_ = constructor_.name_;
     this->SetNameCacheScope(this->name_);
-    this->constructor_.export_ = this->moduleRecord_->IsExportVar(this->constructor_.name_);
-    this->export_ = this->constructor_.export_;
+    constructor_.export_ = this->moduleRecord_->IsExportVar(constructor_.name_);
+    this->export_ = constructor_.export_;
 
-    this->constructor_.Create();
+    constructor_.Create();
 
     auto &literalArrayTable = program_->prog_->literalarray_table;
-    auto it = literalArrayTable.find(this->literalArrayIdx_);
+    const auto it = literalArrayTable.find(this->literalArrayIdx_);
     PANDA_GUARD_ASSERT_PRINT(it == literalArrayTable.end(), TAG, ErrorCode::GENERIC_ERROR,
                              "get bad literalArrayIdx:" << literalArrayIdx_);
     CreateMethods(it->second);
 
     LOG(INFO, PANDAGUARD) << TAG << "class build for " << this->constructor_.idx_ << " end";
-}
-
-size_t panda::guard::Class::GetMethodCnt() const
-{
-    return this->methods_.size() + this->outerMethods_.size();
-}
-
-size_t panda::guard::Class::GetPropertyCnt() const
-{
-    size_t cnt = 0;
-    for (const auto &method : this->methods_) {
-        cnt += method.properties_.size();
-    }
-
-    for (const auto &method : this->outerMethods_) {
-        cnt += method.properties_.size();
-    }
-
-    return cnt;
 }
 
 void panda::guard::Class::ForEachMethodIns(const std::function<InsTraver> &callback)
@@ -83,11 +65,11 @@ void panda::guard::Class::ForEachFunction(const std::function<FunctionTraver> &c
 {
     callback(this->constructor_);
     for (auto &method : this->methods_) {
-        callback(method);
+        callback(*method);
     }
 
     for (auto &method : this->outerMethods_) {
-        callback(method);
+        callback(*method);
     }
 }
 
@@ -96,11 +78,11 @@ void panda::guard::Class::ExtractNames(std::set<std::string> &strings) const
     this->constructor_.ExtractNames(strings);
 
     for (const auto &method : this->methods_) {
-        method.ExtractNames(strings);
+        method->ExtractNames(strings);
     }
 
     for (const auto &method : this->outerMethods_) {
-        method.ExtractNames(strings);
+        method->ExtractNames(strings);
     }
 }
 
@@ -147,21 +129,51 @@ void panda::guard::Class::CreateMethod(const pandasm::LiteralArray &literalArray
     const std::string methodIdx = std::get<std::string>(value_);
     LOG(INFO, PANDAGUARD) << TAG << "methodIdx:" << methodIdx;
 
-    Method method(this->program_, methodIdx);
-    method.literalArrayIdx_ = this->literalArrayIdx_;
-    method.className_ = this->name_;
-    method.idxIndex_ = methodIdxLiteralIndex;
-    method.nameIndex_ = methodNameLiteralIndex;
-    method.static_ = isStatic;
-    method.scope_ = this->scope_;
-    method.export_ = this->export_;
+    const auto method = std::make_shared<Method>(this->program_, methodIdx);
+    method->literalArrayIdx_ = this->literalArrayIdx_;
+    method->className_ = this->name_;
+    method->idxIndex_ = methodIdxLiteralIndex;
+    method->nameIndex_ = methodNameLiteralIndex;
+    method->static_ = isStatic;
+    method->scope_ = this->scope_;
+    method->export_ = this->export_;
+    method->component_ = this->component_;
 
-    method.Init();
-    method.Create();
-    PANDA_GUARD_ASSERT_PRINT(method.name_ != methodName, TAG, ErrorCode::GENERIC_ERROR,
-                             "get different name for method:" << method.idx_);
+    method->Init();
+    method->Create();
+    PANDA_GUARD_ASSERT_PRINT(method->name_ != methodName, TAG, ErrorCode::GENERIC_ERROR,
+                             "get different name for method:" << method->idx_);
 
     this->methods_.push_back(method);
+}
+
+void panda::guard::Class::UpdateLiteralArrayIdx()
+{
+    if (!GuardContext::GetInstance()->GetGuardOptions()->IsFileNameObfEnabled()) {
+        return;
+    }
+
+    const auto &it = this->program_->nodeTable_.find(this->constructor_.recordName_);
+    PANDA_GUARD_ASSERT_PRINT(it == this->program_->nodeTable_.end(), TAG, ErrorCode::GENERIC_ERROR,
+                             "not find node: " + this->constructor_.recordName_);
+    const auto &node = it->second;
+    if (node->name_ == node->obfName_) {
+        return;
+    }
+    std::string updatedLiteralArrayIdx = this->literalArrayIdx_;
+    updatedLiteralArrayIdx.replace(updatedLiteralArrayIdx.find(node->name_), node->name_.size(), node->obfName_);
+
+    UpdateLiteralArrayTableIdx(this->literalArrayIdx_, updatedLiteralArrayIdx);
+
+    this->literalArrayIdx_ = updatedLiteralArrayIdx;
+
+    for (auto &inst : this->defineInsList_) {
+        inst.ins_->ids[INDEX_1] = updatedLiteralArrayIdx;
+    }
+
+    for (auto &method : this->methods_) {
+        method->literalArrayIdx_ = updatedLiteralArrayIdx;
+    }
 }
 
 void panda::guard::Class::Update()
@@ -169,13 +181,14 @@ void panda::guard::Class::Update()
     LOG(INFO, PANDAGUARD) << TAG << "class update for " << this->name_ << " start";
     this->constructor_.Obfuscate();
     this->obfName_ = this->constructor_.obfName_;
+    UpdateLiteralArrayIdx();
 
-    for (auto &method : this->methods_) {
-        method.Obfuscate();
+    for (const auto &method : this->methods_) {
+        method->Obfuscate();
     }
 
-    for (auto &method : this->outerMethods_) {
-        method.Obfuscate();
+    for (const auto &method : this->outerMethods_) {
+        method->Obfuscate();
     }
 
     LOG(INFO, PANDAGUARD) << TAG << "class update for " << this->name_ << " end";
@@ -190,22 +203,22 @@ void panda::guard::Class::WriteNameCache(const std::string &filePath)
     this->WritePropertyCache();
 
     this->constructor_.WriteNameCache(filePath);
-    for (auto &property : this->constructor_.properties_) {
-        property.WriteNameCache(filePath);
+    for (const auto &[_, property] : this->constructor_.propertyTable_) {
+        property->WriteNameCache(filePath);
     }
 
-    for (auto &method : this->methods_) {
-        method.WriteNameCache(filePath);
+    for (const auto &method : this->methods_) {
+        method->WriteNameCache(filePath);
     }
 
-    for (auto &method : this->outerMethods_) {
-        method.WriteNameCache(filePath);
+    for (const auto &method : this->outerMethods_) {
+        method->WriteNameCache(filePath);
     }
 }
 
 void panda::guard::Class::WriteFileCache(const std::string &filePath)
 {
-    if (!constructor_.nameNeedUpdate_) {
+    if (!this->constructor_.nameNeedUpdate_) {
         return;
     }
 

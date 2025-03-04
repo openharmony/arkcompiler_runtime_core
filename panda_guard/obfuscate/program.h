@@ -37,7 +37,7 @@ private:
 
 public:
     pandasm::Program *prog_ = nullptr;
-    std::map<std::string, Node> nodeTable_ {};
+    std::map<std::string, std::shared_ptr<Node>> nodeTable_ {};
 };
 
 }  // namespace panda::guard

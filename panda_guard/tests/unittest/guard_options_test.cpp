@@ -54,6 +54,7 @@ HWTEST(GuardOptionsUnitTest, guard_options_test_001, TestSize.Level4)
     EXPECT_EQ(options.DisableObfuscation(), false);
     EXPECT_EQ(options.IsExportObfEnabled(), true);
     EXPECT_EQ(options.IsRemoveLogObfEnabled(), true);
+    EXPECT_EQ(options.IsDecoratorObfEnabled(), true);
     EXPECT_EQ(options.GetPrintNameCache().empty(), true);
     EXPECT_EQ(options.GetApplyNameCache().empty(), true);
     EXPECT_EQ(options.IsPropertyObfEnabled(), true);
@@ -63,6 +64,7 @@ HWTEST(GuardOptionsUnitTest, guard_options_test_001, TestSize.Level4)
     EXPECT_EQ(options.IsReservedProperties("xxx"), true);
     EXPECT_EQ(options.IsReservedToplevelNames("xxx"), true);
     EXPECT_EQ(options.IsReservedFileNames("xxx"), true);
+    EXPECT_EQ(options.IsReservedRemoteHarPkgNames("xxx"), true);
     EXPECT_EQ(options.IsKeepPath("xxx"), true);
     EXPECT_EQ(options.IsKeepPath("yyy"), false);
 }

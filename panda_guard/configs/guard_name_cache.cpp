@@ -335,7 +335,7 @@ std::string panda::guard::NameCache::BuildJson(const ProjectNameCacheInfo &nameC
     builder.AddProperty(ENTRY_PACKAGE_INFO, nameCacheInfo.entryPackageInfo);
     builder.AddProperty(COMPILE_SDK_VERSION, nameCacheInfo.compileSdkVersion);
 
-    if (options_->IsPropertyObfEnabled()) {
+    if (options_->IsPropertyObfEnabled() || options_->IsExportObfEnabled()) {
         builder.AddProperty(PROPERTY_CACHE, MapToJson(nameCacheInfo.propertyCacheMap, true));
     }
     if (options_->IsFileNameObfEnabled()) {
