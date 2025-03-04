@@ -121,9 +121,24 @@ function testFunction() {
     }
 }
 
+function testMemoryAllocationsWithIsTrue() {
+    const totalAllocations = 10000;
+    let allocations: Array<Object> = new Array<Object>(totalAllocations);
+    let count = 0;
+
+    for (let i = 0; i < totalAllocations; i++) {
+        allocations[i] = new ArrayBuffer(1024);
+        if (istrue(erase(new Int(1)))) {
+            count++
+        }
+    }
+    assertEQ(count, totalAllocations);
+}
+
 function main() {
     testNormal();
     testErase();
     testConditions();
     testFunction();
+    testMemoryAllocationsWithIsTrue();
 }
