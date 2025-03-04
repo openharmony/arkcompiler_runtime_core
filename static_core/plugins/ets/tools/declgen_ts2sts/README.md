@@ -30,6 +30,7 @@ npm run declgen -- <declgen options>
 
 ```
 npm run build
+npm run webpack
 npm run declgen -- -f my_file.ts
 ```
 
