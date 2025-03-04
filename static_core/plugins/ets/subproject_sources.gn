@@ -181,6 +181,7 @@ srcs_runtime = [
   "stdlib/native/core/IntlCollator.cpp",
   "stdlib/native/core/stdlib_ani_helpers.cpp",
   "stdlib/native/etsstdlib.cpp",
+  "stdlib/native/core/IntlDateTimeFormat.cpp",
 ]
 
 configs_runtime = []
