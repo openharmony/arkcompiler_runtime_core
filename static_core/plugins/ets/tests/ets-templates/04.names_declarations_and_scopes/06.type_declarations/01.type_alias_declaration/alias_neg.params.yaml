@@ -81,3 +81,7 @@ cases:
           type RF = (p: RF) => RF
       use: |-
           let v1: RF = (p: RF): RF => { return RF }
+
+    - defs: |-
+        { class ClassNestedInBlock{} }        
+        type TAlias = ClassNestedInBlock;

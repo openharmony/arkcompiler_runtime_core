@@ -341,7 +341,7 @@
 17.experimental_features/07.statements/02.multiple_catch_clauses_in_try_statements/try_4.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_1.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_2.sts
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_11.sts
+
 # end of es2panda fails not implemented yet
 
 #FailKind.RUNTIME_TIMEOUT - can't reproduce locally, but fail consistently on the CI
@@ -1382,7 +1382,7 @@
 
 # end of es2panda fails
 
-#19909
+#23200: Verifier fails on some interface overloading and overriding cases
 07.expressions/09.field_access_expressions/01.accessing_current_object_fields/nullable_reference_type.sts
 15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/two_interfaces_0.sts
 15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/two_interfaces_1.sts

@@ -2018,6 +2018,7 @@ deprecated/15.exceptions/03.rethrowing_functions/rethrowing_function_without_cat
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_14.sts
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_15.sts
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_16.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_17.sts
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_9.sts
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/scope_15.sts
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/scope_16.sts
