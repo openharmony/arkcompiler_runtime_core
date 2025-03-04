@@ -153,6 +153,7 @@ static constexpr std::string_view ANI_UNSAFE_DIRECT                    = "Lstd/a
 
 // escompat
 static constexpr std::string_view SHARED_MEMORY                        = "Lescompat/SharedMemory;";
+static constexpr std::string_view DATE                                 = "Lescompat/Date;";
 
 }  // namespace class_descriptors
 

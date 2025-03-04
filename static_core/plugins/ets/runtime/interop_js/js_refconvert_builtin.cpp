@@ -175,6 +175,27 @@ private:
         return wclass;
     }
 
+    ets_proxy::EtsClassWrapper *RegisterClassWithLeafMatcher(
+        std::string_view descriptor, char const *jsBuiltinName = nullptr,
+        const ets_proxy::EtsClassWrapper::OverloadsMap *overloads = nullptr)
+    {
+        ets_proxy::EtsClassWrapper *wclass = RegisterClass(descriptor, jsBuiltinName, overloads);
+        wclass->SetJSBuiltinMatcher(
+            [self = *this, wclass, descriptor](InteropCtx *ctxx, napi_value jsValue, bool verified = true) mutable {
+                (void)verified;
+                auto env = ctxx->GetJSEnv();
+                napi_value constructor;
+                bool match = false;
+                NAPI_CHECK_FATAL(napi_get_named_property(env, jsValue, "constructor", &constructor));
+                NAPI_CHECK_FATAL(napi_strict_equals(env, constructor, wclass->GetBuiltin(env), &match));
+                if (match) {
+                    return wclass->CreateJSBuiltinProxy(ctxx, jsValue);
+                }
+                return self.NotAssignable(descriptor.data());
+            });
+        return wclass;
+    }
+
     void RegisterArray()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_ARRAY_OVERLOADS = {
@@ -195,6 +216,25 @@ private:
             }
         }
         return wArray_->CreateJSBuiltinProxy(ctxx, jsValue);
+    }
+
+    EtsObject *MDate(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
+    {
+        napi_env env = ctxx->GetJSEnv();
+        bool isInstanceof;
+        if (!verified) {
+            NAPI_CHECK_FATAL(napi_is_date(env, jsValue, &isInstanceof));
+            if (!isInstanceof) {
+                return NotAssignable("Date");
+            }
+        }
+        ASSERT(wDate_ != nullptr);
+        return wDate_->CreateJSBuiltinProxy(ctxx, jsValue);
+    }
+
+    void RegisterObject()
+    {
+        wObject_ = RegisterClass(descriptors::OBJECT, "Object");
     }
 
     EtsObject *MError(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
@@ -248,7 +288,7 @@ private:
         }
         NAPI_CHECK_FATAL(napi_is_date(env, jsValue, &isInstanceof));
         if (isInstanceof) {
-            NotImplemented("Date");
+            return MDate(ctxx, jsValue);
         }
         NAPI_CHECK_FATAL(napi_is_dataview(env, jsValue, &isInstanceof));
         if (isInstanceof) {
@@ -305,9 +345,11 @@ public:
 
     void Run()
     {
-        wObject_ = RegisterClass(descriptors::OBJECT, "Object");
+        RegisterObject();
 
         RegisterExceptions();
+
+        wDate_ = RegisterClassWithLeafMatcher(descriptors::DATE, "Date");
 
         RegisterArray();
 
@@ -341,6 +383,7 @@ private:
     ets_proxy::EtsClassWrapper *wError_ {};
     ets_proxy::EtsClassWrapper *wObject_ {};
     ets_proxy::EtsClassWrapper *wArray_ {};
+    ets_proxy::EtsClassWrapper *wDate_ {};
 
     napi_ref ctorTypeError_ {nullptr};
     napi_ref ctorRangeError_ {nullptr};
