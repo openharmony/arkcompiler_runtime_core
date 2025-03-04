@@ -4743,3 +4743,10 @@ deprecated/15.exceptions/03.rethrowing_functions/rethrowing_function_without_cat
 #FailKind.DECLGEN_ETS2TS_FAIL
 13.compilation_units/03.import_directives/06.import_path/dir/module_a.sts
 13.compilation_units/07.top-level_declarations/01.exported_declarations/default_exported_declarations/nothing_exported.sts
+
+# 22784
+05.generics/03.utility_types/05.utility_type_private_field/private_field_check_0.sts
+05.generics/03.utility_types/05.utility_type_private_field/private_field_check_1.sts
+05.generics/03.utility_types/05.utility_type_private_field/private_field_check_2.sts
+05.generics/03.utility_types/05.utility_type_private_field/private_field_check_3.sts
+05.generics/03.utility_types/05.utility_type_private_field/private_field_check_4.sts
