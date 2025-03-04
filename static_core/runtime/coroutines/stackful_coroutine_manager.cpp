@@ -303,25 +303,16 @@ size_t StackfulCoroutineManager::GetCoroutineCountLimit()
     return coroutineCountLimit_;
 }
 
-Coroutine *StackfulCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
-                                            PandaVector<Value> &&arguments, CoroutineLaunchMode mode)
+bool StackfulCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
+                                      PandaVector<Value> &&arguments, CoroutineLaunchMode mode)
 {
-    // profiling: scheduler and launch time
-    ScopedCoroutineStats sSch(&GetCurrentWorker()->GetPerfStats(), CoroutineTimeStats::SCH_ALL);
-    ScopedCoroutineStats sLaunch(&GetCurrentWorker()->GetPerfStats(), CoroutineTimeStats::LAUNCH);
+    return LaunchWithMode(completionEvent, entrypoint, std::move(arguments), mode, false);
+}
 
-    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::Launch started";
-
-    auto *co = Coroutine::GetCurrent();
-    auto *w = co->GetContext<StackfulCoroutineContext>()->GetWorker();
-    mode = (mode == CoroutineLaunchMode::DEFAULT && w->InExclusiveMode()) ? CoroutineLaunchMode::SAME_WORKER : mode;
-    auto *result = LaunchImpl(completionEvent, entrypoint, std::move(arguments), mode);
-    if (result == nullptr) {
-        ThrowOutOfMemoryError("Launch failed");
-    }
-
-    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::Launch finished";
-    return result;
+bool StackfulCoroutineManager::LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint,
+                                                 PandaVector<Value> &&arguments, CoroutineLaunchMode mode)
+{
+    return LaunchWithMode(completionEvent, entrypoint, std::move(arguments), mode, true);
 }
 
 void StackfulCoroutineManager::Await(CoroutineEvent *awaitee)
@@ -517,14 +508,11 @@ stackful_coroutines::AffinityMask StackfulCoroutineManager::CalcAffinityMaskFrom
     return mask.to_ullong();
 }
 
-Coroutine *StackfulCoroutineManager::LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint,
-                                                PandaVector<Value> &&arguments, CoroutineLaunchMode mode)
+Coroutine *StackfulCoroutineManager::GetCoroutineInstanceForLaunch(CompletionEvent *completionEvent, Method *entrypoint,
+                                                                   PandaVector<Value> &&arguments,
+                                                                   stackful_coroutines::AffinityMask affinityMask)
 {
-#ifndef NDEBUG
-    GetCurrentWorker()->PrintRunnables("LaunchImpl begin");
-#endif
     auto coroName = entrypoint->GetFullName();
-
     Coroutine *co = nullptr;
     if (Runtime::GetOptions().IsUseCoroutinePool()) {
         co = TryGetCoroutineFromPool();
@@ -536,20 +524,85 @@ Coroutine *StackfulCoroutineManager::LaunchImpl(CompletionEvent *completionEvent
                                      Coroutine::Type::MUTATOR);
     }
     if (co == nullptr) {
-        LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchImpl: failed to create a coroutine!";
+        LOG(DEBUG, COROUTINES)
+            << "StackfulCoroutineManager::GetCoroutineInstanceForLaunch: failed to create a coroutine!";
         return co;
     }
     Runtime::GetCurrent()->GetNotificationManager()->ThreadStartEvent(co);
-
-    auto affinityMask = CalcAffinityMaskFromLaunchMode(mode);
     co->GetContext<StackfulCoroutineContext>()->SetAffinityMask(affinityMask);
+    return co;
+}
+
+bool StackfulCoroutineManager::LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint,
+                                          PandaVector<Value> &&arguments, CoroutineLaunchMode mode)
+{
+#ifndef NDEBUG
+    GetCurrentWorker()->PrintRunnables("LaunchImpl begin");
+#endif
+    Coroutine *co = nullptr;
+    auto affinityMask = CalcAffinityMaskFromLaunchMode(mode);
+    co = GetCoroutineInstanceForLaunch(completionEvent, entrypoint, std::move(arguments), affinityMask);
+    if (co == nullptr) {
+        LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchImpl: failed to create a coroutine!";
+        return false;
+    }
     auto *w = ChooseWorkerForCoroutine(co);
     w->AddRunnableCoroutine(co, IsJsMode());
 
 #ifndef NDEBUG
     GetCurrentWorker()->PrintRunnables("LaunchImpl end");
 #endif
-    return co;
+    return true;
+}
+
+bool StackfulCoroutineManager::LaunchImmediatelyImpl(CompletionEvent *completionEvent, Method *entrypoint,
+                                                     PandaVector<Value> &&arguments, CoroutineLaunchMode mode)
+{
+    Coroutine *co = nullptr;
+    auto affinityMask = CalcAffinityMaskFromLaunchMode(mode);
+
+    ASSERT(affinityMask == CalcAffinityMaskFromLaunchMode(CoroutineLaunchMode::SAME_WORKER));
+
+    co = GetCoroutineInstanceForLaunch(completionEvent, entrypoint, std::move(arguments), affinityMask);
+    if (co == nullptr) {
+        LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchImmediatelyImpl: failed to create a coroutine!";
+        return false;
+    }
+    auto *w = ChooseWorkerForCoroutine(co);
+    // since we are going to switch the context, we have to close the interval
+    GetCurrentWorker()->GetPerfStats().FinishInterval(CoroutineTimeStats::LAUNCH);
+    w->AddCreatedCoroutineAndSwitchToIt(co);
+    // resume the interval once we schedule the original coro again
+    GetCurrentWorker()->GetPerfStats().StartInterval(CoroutineTimeStats::LAUNCH);
+
+    return true;
+}
+
+bool StackfulCoroutineManager::LaunchWithMode(CompletionEvent *completionEvent, Method *entrypoint,
+                                              PandaVector<Value> &&arguments, CoroutineLaunchMode mode,
+                                              bool launchImmediately)
+{
+    // profiling: scheduler and launch time
+    ScopedCoroutineStats sSch(&GetCurrentWorker()->GetPerfStats(), CoroutineTimeStats::SCH_ALL);
+    ScopedCoroutineStats sLaunch(&GetCurrentWorker()->GetPerfStats(), CoroutineTimeStats::LAUNCH);
+
+    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchWithMode started";
+
+    auto *co = Coroutine::GetCurrent();
+    auto *w = co->GetContext<StackfulCoroutineContext>()->GetWorker();
+    mode = (mode == CoroutineLaunchMode::DEFAULT && w->InExclusiveMode()) ? CoroutineLaunchMode::SAME_WORKER : mode;
+    bool result = false;
+    if (launchImmediately) {
+        result = LaunchImmediatelyImpl(completionEvent, entrypoint, std::move(arguments), mode);
+    } else {
+        result = LaunchImpl(completionEvent, entrypoint, std::move(arguments), mode);
+    }
+    if (!result) {
+        ThrowOutOfMemoryError("LaunchWithMode failed");
+    }
+
+    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchWithMode finished";
+    return result;
 }
 
 void StackfulCoroutineManager::DumpCoroutineStats() const

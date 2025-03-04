@@ -130,8 +130,19 @@ public:
      * @param entrypoint the coroutine entrypoint method
      * @param arguments array of coroutine's entrypoint arguments
      */
-    virtual Coroutine *Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                              CoroutineLaunchMode mode) = 0;
+    virtual bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                        CoroutineLaunchMode mode) = 0;
+    /**
+     * @brief The public coroutine creation and execution interface. Switching to the newly created coroutine occurs
+     * immediately. Coroutine launch mode should correspond to the use of parent's worker.
+     *
+     * @param completionEvent the event used for notification when coroutine completes (also used to pass the return
+     * value to the language-level entities)
+     * @param entrypoint the coroutine entrypoint method
+     * @param arguments array of coroutine's entrypoint arguments
+     */
+    virtual bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                                   CoroutineLaunchMode mode) = 0;
     /// Suspend the current coroutine and schedule the next ready one for execution
     virtual void Schedule() = 0;
     /**

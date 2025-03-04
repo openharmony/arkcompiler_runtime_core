@@ -43,8 +43,10 @@ public:
     void Finalize() override;
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
-    Coroutine *Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                      CoroutineLaunchMode mode) override;
+    bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                CoroutineLaunchMode mode) override;
+    bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                           CoroutineLaunchMode mode) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
@@ -134,8 +136,15 @@ private:
     StackfulCoroutineWorker *ChooseWorkerForCoroutine(Coroutine *co);
     stackful_coroutines::AffinityMask CalcAffinityMaskFromLaunchMode(CoroutineLaunchMode mode);
 
-    Coroutine *LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                          CoroutineLaunchMode mode);
+    Coroutine *GetCoroutineInstanceForLaunch(CompletionEvent *completionEvent, Method *entrypoint,
+                                             PandaVector<Value> &&arguments,
+                                             stackful_coroutines::AffinityMask affinityMask);
+    bool LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                    CoroutineLaunchMode mode);
+    bool LaunchImmediatelyImpl(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                               CoroutineLaunchMode mode);
+    bool LaunchWithMode(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                        CoroutineLaunchMode mode, bool launchImmediately);
     /**
      * Tries to extract a coroutine instance from the pool for further reuse, returns nullptr in case when it is not
      * possible.

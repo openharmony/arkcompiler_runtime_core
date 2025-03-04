@@ -108,6 +108,12 @@ public:
     void AddRunningCoroutine(Coroutine *newCoro);
 
     /**
+     * @brief Add a new created coroutine and switch to it immediately.
+     * @param newCoro coroutine to add
+     */
+    void AddCreatedCoroutineAndSwitchToIt(Coroutine *newCoro);
+
+    /**
      * @brief Block current coroutine till an event happens and switch context to the next ready one
      * @param awaitee the event to wait
      */
