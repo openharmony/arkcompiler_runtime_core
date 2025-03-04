@@ -39,3 +39,7 @@ cases:
       @Retention("WRONG_POLICY")
     use: |-
       @interface SomeAnnotation {}
+  - decl: |-
+      @Retention()
+    use: |-
+      @interface SomeAnnotation {}
