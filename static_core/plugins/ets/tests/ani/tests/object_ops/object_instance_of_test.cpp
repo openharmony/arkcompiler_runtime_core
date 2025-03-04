@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "ani.h"
 #include "ani_gtest.h"
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
 namespace ark::ets::ani::testing {
@@ -79,7 +80,7 @@ TEST_F(ObjectInstanceOfTest, object_instance_of)
     ASSERT_EQ(res, ANI_TRUE);
 
     ASSERT_EQ(env_->Object_InstanceOf(objectB, typeRefC, &res), ANI_OK);
-    ASSERT_EQ(res, false);
+    ASSERT_EQ(res, ANI_FALSE);
 
     ASSERT_EQ(env_->Object_InstanceOf(objectC, typeRefA, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
@@ -136,6 +137,110 @@ TEST_F(ObjectInstanceOfTest, object_instance_of_loop)
         ASSERT_EQ(env_->Object_InstanceOf(objectC, typeRefA, &res), ANI_OK);
         ASSERT_EQ(res, ANI_TRUE);
     }
+}
+
+TEST_F(ObjectInstanceOfTest, object_instance_of_array)
+{
+    ani_object objectArr;
+    ani_class classA;
+    GetMethodData(&objectArr, &classA, "Lobject_instance_of_test/A;", "new_A_array", ":Lescompat/Array;");
+
+    ani_boolean res;
+    ani_class arrayCls;
+    ASSERT_EQ(env_->FindClass("Lescompat/Array;", &arrayCls), ANI_OK);
+    ASSERT_EQ(env_->Object_InstanceOf(objectArr, arrayCls, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_TRUE);
+}
+
+TEST_F(ObjectInstanceOfTest, object_interface_instance_of)
+{
+    ani_object objectI;
+    ani_class classF;
+    GetMethodData(&objectI, &classF, "Lobject_instance_of_test/F;", "new_I", ":Lobject_instance_of_test/I;");
+
+    ani_boolean res;
+    ani_class interfaceI;
+    ASSERT_EQ(env_->FindClass("Lobject_instance_of_test/I;", &interfaceI), ANI_OK);
+    ASSERT_EQ(env_->Object_InstanceOf(objectI, classF, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_TRUE);
+    ASSERT_EQ(env_->Object_InstanceOf(objectI, interfaceI, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_TRUE);
+
+    ani_object objectF;
+    GetMethodData(&objectF, &classF, "Lobject_instance_of_test/F;", "new_F", ":Lobject_instance_of_test/F;");
+    ASSERT_EQ(env_->Object_InstanceOf(objectF, classF, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_TRUE);
+    ASSERT_EQ(env_->Object_InstanceOf(objectF, interfaceI, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_TRUE);
+}
+
+TEST_F(ObjectInstanceOfTest, object_union_instance_of)
+{
+    ani_object objectU;
+    ani_class classF;
+    GetMethodData(&objectU, &classF, "Lobject_instance_of_test/F;", "new_Union", nullptr);
+
+    ani_object objectU1;
+    ani_class classD;
+    GetMethodData(&objectU1, &classD, "Lobject_instance_of_test/D;", "new_Union", nullptr);
+
+    ani_boolean res;
+    ASSERT_EQ(env_->Object_InstanceOf(objectU, classF, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_TRUE);
+    ASSERT_EQ(env_->Object_InstanceOf(objectU, classD, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_FALSE);
+    ASSERT_EQ(env_->Object_InstanceOf(objectU1, classF, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_FALSE);
+    ASSERT_EQ(env_->Object_InstanceOf(objectU1, classD, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_TRUE);
+}
+
+TEST_F(ObjectInstanceOfTest, pure_object_instance_of)
+{
+    ani_object object;
+    ani_object objectD;
+    ani_class classF;
+    ani_class classD;
+    GetMethodData(&object, &classF, "Lobject_instance_of_test/F;", "new_Object", ":Lstd/core/Object;");
+    GetMethodData(&objectD, &classD, "Lobject_instance_of_test/D;", "new_D", ":Lobject_instance_of_test/D;");
+
+    ani_class classObject;
+    ani_class interfaceI;
+    ani_class classA;
+    ASSERT_EQ(env_->FindClass("Lstd/core/Object;", &classObject), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_instance_of_test/I;", &interfaceI), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_instance_of_test/A;", &classA), ANI_OK);
+
+    ani_boolean res;
+    ASSERT_EQ(env_->Object_InstanceOf(objectD, classObject, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_TRUE);
+    ASSERT_EQ(env_->Object_InstanceOf(object, classObject, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_TRUE);
+    ASSERT_EQ(env_->Object_InstanceOf(object, classF, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_FALSE);
+    ASSERT_EQ(env_->Object_InstanceOf(object, classD, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_FALSE);
+    ASSERT_EQ(env_->Object_InstanceOf(object, interfaceI, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_FALSE);
+    ASSERT_EQ(env_->Object_InstanceOf(object, classA, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_FALSE);
+}
+
+TEST_F(ObjectInstanceOfTest, object_boxed_primitive_instance_of)
+{
+    ani_object objectInt;
+    ani_class classF;
+    GetMethodData(&objectInt, &classF, "Lobject_instance_of_test/F;", "new_Boxed_Primitive", ":Lstd/core/Int;");
+
+    ani_boolean res;
+    ani_class classInt;
+    ani_class classObject;
+    ASSERT_EQ(env_->FindClass("Lstd/core/Int;", &classInt), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lstd/core/Object;", &classObject), ANI_OK);
+    ASSERT_EQ(env_->Object_InstanceOf(objectInt, classInt, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_TRUE);
+    ASSERT_EQ(env_->Object_InstanceOf(objectInt, classObject, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_TRUE);
 }
 
 }  // namespace ark::ets::ani::testing
