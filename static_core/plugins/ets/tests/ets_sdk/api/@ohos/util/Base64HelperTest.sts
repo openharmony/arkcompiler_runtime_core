@@ -19,9 +19,12 @@ function main(): void {
     testEncodeDecodeBasic();
     testEncodeDecodeBasicSync();
     testUrlSafe();
-    // NOTE: (dr-irina) Uncomment when internal issue #23052 is resolwed
-    // testMime();
+    testMime();
+    testMimeUrlSafe();
     testDecodeWithNoise();
+    testEmptyEncode();
+    testEmptyDecode();
+    testBase64WithoutPadding();
 
     await testEncodeDecodeBasicAsync();
     await testEncodeDecodeAsyncBytes();
@@ -82,12 +85,54 @@ function testMime() {
     assertUint8ArraysEqual(decoded, input);
 }
 
+function testMimeUrlSafe() {
+    let helper = new util.Base64Helper();
+    let input = new Uint8Array(80);
+    for (let i: int = 0; i < 80; i++) {
+        input[i] = i;
+    }
+    let encodedStr: string = helper.encodeToStringSync(input, util.Type.MIME_URL_SAFE);
+    assertNE(encodedStr.indexOf("\r\n"), -1.0); 
+    assertEQ(encodedStr.indexOf("+"), -1);
+    assertEQ(encodedStr.indexOf("/"), -1);
+    let decoded: Uint8Array = helper.decodeSync(encodedStr, util.Type.MIME_URL_SAFE);
+    assertEQ(decoded.length, input.length);
+    assertUint8ArraysEqual(decoded, input);
+}
+
 function testDecodeWithNoise() {
     let helper = new util.Base64Helper();
     let input = new Uint8Array([72, 105]); // "Hi"
     let encodedStr: String = helper.encodeToStringSync(input, util.Type.BASIC);
     let noisy: String = "!!" + encodedStr + "##";
     let decoded: Uint8Array = helper.decodeSync(noisy, util.Type.BASIC);
+    assertEQ(decoded.length, input.length);
+    assertUint8ArraysEqual(decoded, input);
+}
+
+function testEmptyEncode() {
+    let helper = new util.Base64Helper();
+    let input = new Uint8Array(0);
+    let encodedStr: string = helper.encodeToStringSync(input, util.Type.BASIC);
+    assertEQ(encodedStr, "");
+    let decoded: Uint8Array = helper.decodeSync(encodedStr, util.Type.BASIC);
+    assertEQ(decoded.length, 0);
+}
+
+function testEmptyDecode() {
+    let helper = new util.Base64Helper();
+    let encodedStr = "";
+    let decoded: Uint8Array = helper.decodeSync(encodedStr, util.Type.BASIC);
+    assertEQ(decoded.length, 0);
+}
+
+function testBase64WithoutPadding() {
+    let helper = new util.Base64Helper();
+    let input = new Uint8Array([1, 2, 3, 4, 5, 6]);
+    let encodedStr: string = helper.encodeToStringSync(input, util.Type.BASIC);
+    let encodedWithoutPadding = encodedStr.replace(new RegExp("=+$"), "");
+    
+    let decoded: Uint8Array = helper.decodeSync(encodedWithoutPadding, util.Type.BASIC);
     assertEQ(decoded.length, input.length);
     assertUint8ArraysEqual(decoded, input);
 }
