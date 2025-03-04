@@ -440,30 +440,3 @@ export function count<K extends Comparable<Object>, V>(node: Node<K, V> | null):
         return 1 + count(node!.left) + count(node!.right);
     }
 }
-
-function treeFolder<K extends Comparable<Object>, V>(k: K, v: V, acc: Entry<K, V>[]): Entry<K, V>[] {
-    let entry = new Entry<K, V>(k, v);
-    let acc1 = new Entry<K, V>[acc.length + 1];
-
-    for (let i: int = 0; i < acc.length; i++) {
-        acc1[i] = acc[i];
-    }
-
-    acc1[acc.length] = entry;
-
-    return acc1;
-}
-
-function foldTree<K extends Comparable<Object>, V>(node: Node<K, V> | null, acc0: Entry<K, V>[], fn: (k: K, v: V, acc: Entry<K, V>[]) => Entry<K, V>[]): Entry<K, V>[] {
-    if (isEmpty(node)) {
-        return acc0;
-    } else {
-        let acc1 = foldTree(node!.left, acc0, fn);
-        let acc2 = fn(node!.key, node!.value, acc1);
-        return foldTree(node!.right, acc2, fn);
-    }
-}
-
-export function treeToArray<K extends Comparable<Object>, V>(node: Node<K, V> | null): Entry<K, V>[] {
-    return foldTree(node, new Entry<K, V>[0], treeFolder);
-}
