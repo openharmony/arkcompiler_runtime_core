@@ -25,6 +25,6 @@ export function foo(): int {
     return -1;
 }
 
-export function foo(i?: String ): int {
-    return -1;
+export function foo(): string {
+    return "";
 }
