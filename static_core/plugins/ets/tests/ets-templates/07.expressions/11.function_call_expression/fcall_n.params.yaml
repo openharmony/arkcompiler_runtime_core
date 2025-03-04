@@ -50,3 +50,8 @@ cases:
       use: |-
           assertEQ( ft("A"), "AA" ) // CTE: no ?. for nullish expression
 
+    - decl: |-
+          function foo() {}
+      use: |-
+          let e = foo() // CTE: void cannot be used as type annotation
+
