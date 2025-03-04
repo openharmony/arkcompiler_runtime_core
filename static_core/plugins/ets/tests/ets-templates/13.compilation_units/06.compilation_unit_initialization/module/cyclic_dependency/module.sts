@@ -19,4 +19,4 @@ tags: [compile-only, not-a-test]
 
 import {a} from "./test.sts"
 
-export let b: int = a;
+export let b = a;

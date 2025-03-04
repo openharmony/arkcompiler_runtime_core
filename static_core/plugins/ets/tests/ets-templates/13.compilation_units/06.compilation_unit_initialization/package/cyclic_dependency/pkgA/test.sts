@@ -26,4 +26,4 @@ package pkgA;
 
 import {b} from "../pkgB"
 
-export let a: int = b;
+export let a = b;
