@@ -162,7 +162,6 @@ add_subdirectory(bytecode_optimizer)
 add_subdirectory(irtoc_scripts)
 add_subdirectory(verification)
 add_subdirectory(tools)
-
 add_subdirectory(arkts_header)
 
 # NOTE(nsizov): change this logic when ets compiler moved into ets plugin
@@ -171,8 +170,28 @@ if(TARGET es2panda)
 
     set_target_properties(etsstdlib PROPERTIES FILE "${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.abc")
     add_dependencies(ark etsstdlib)
-
     add_subdirectory(sdk)
+
+    if(NOT CMAKE_CROSSCOMPILING)
+        set(verifier_target verifier)
+        set(verifier_bin    $<TARGET_FILE:${verifier_target}>)
+
+        add_dependencies(etsstdlib ${verifier_target})
+
+        set (ETS_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc")
+
+        set (RUN_VERIFIER_DST_DIR "${PANDA_BINARY_ROOT}/verification/verifier/")
+        set (RUN_VERIFIER_SRC_DIR "${CMAKE_SOURCE_DIR}/verification/verifier/")
+
+        configure_file(
+            ${RUN_VERIFIER_SRC_DIR}/run_verifier.sh
+            ${RUN_VERIFIER_DST_DIR}/run_verifier.sh
+            COPYONLY
+        )
+        add_custom_command(TARGET etsstdlib 
+            COMMAND bash -c "${RUN_VERIFIER_DST_DIR}/run_verifier.sh '${verifier_bin}' '${ETS_STD_LIB}'" -P
+        )
+    endif()
 else()
     message(WARNING "es2panda was not found for etsstdlib and etssdk build")
 endif()
