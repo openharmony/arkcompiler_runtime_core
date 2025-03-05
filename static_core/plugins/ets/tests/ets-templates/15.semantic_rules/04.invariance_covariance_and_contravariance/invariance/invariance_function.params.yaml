@@ -17,92 +17,66 @@ cases:
       number
     input:
       1
-    return:
-      i + i
 
   - argtype:
       Number
     input:
       1
-    return:
-      i + i
 
   - argtype:
       string
     input:
       "\"hey there\""
-    return:
-      i + i
 
   - argtype:
       String
     input:
       "\"hey there\""
-    return:
-      i + i
 
   - argtype:
       char
     input:
       "c'C'"
-    return:
-      i + i
 
   - argtype:
       Char
     input:
       "c'C'"
-    return:
-      i + i
 
   - argtype:
       int
     input:
       1
-    return:
-      i + i
 
   - argtype:
       Int
     input:
       1
-    return:
-      i + i
 
   - argtype:
       double
     input:
       1.1
-    return:
-      i + i
 
   - argtype:
       Double
     input:
       1.2
-    return:
-      i + i
 
   - argtype:
       float
     input:
       -0.2
-    return:
-      i + i
 
   - argtype:
       Float
     input:
       -0.0000008
-    return:
-      i + i
 
   - argtype:
       Object
     input:
       new Object()
-    return:
-      i
 
   - argtype:
       A
@@ -110,8 +84,6 @@ cases:
       class A {}
     input:
       new A()
-    return:
-      i
 
   - argtype:
       E
@@ -119,8 +91,6 @@ cases:
       enum E { S, M, L }
     input:
       E.S
-    return:
-      i
 
   - argtype:
       B
@@ -129,8 +99,6 @@ cases:
       class B extends A {}
     input:
       new B()
-    return:
-      i
 
   - argtype:
       A
@@ -139,8 +107,6 @@ cases:
       class A implements I {}
     input:
       new A()
-    return:
-      i
 
   - argtype:
       tpl
@@ -148,33 +114,23 @@ cases:
       type tpl = [string, number]
     input:
       ["v", 2.1]
-    return:
-      i
 
   - argtype:
       number[]
     input:
       [1, 2.1]
-    return:
-      i
 
   - argtype:
       String|undefined|null
     input:
       "\"abc\""
-    return:
-      i
 
   - argtype:
       String|undefined|null
     input:
-      undefined
-    return:
-      i
+      "undefined"
 
   - argtype:
       String|undefined|null
     input:
       "null"
-    return:
-      i

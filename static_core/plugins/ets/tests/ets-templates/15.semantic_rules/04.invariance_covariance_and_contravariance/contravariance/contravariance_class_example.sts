@@ -14,23 +14,38 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Invariance refers to the ability to use the originally-specified type as a derived one.
+desc: >-
+    Variance is how subtyping between class types relates to subtyping between class member signatures
+    (types of parameters, return type). Variance can be of three kinds:
+    - Invariance,
+    - Covariance, and
+    - Contravariance.
+    Contravariance is the ability to use a type that is more general than originally specified.
+
+    contravariance for parameter types: Base is a supertype for Derived
 ---*/
 
+let res: int = 0
+
 class Base {
-  foo(p: Base): Base {
+  foo(p: Derived): Derived {
+    res = 1
     return p;
   }
 }
 
 class Derived extends Base {
-  override foo(p: Base): Base {
-    return p;
+  override foo(p: Base): Derived {
+    res = 2
+    return new Derived();
   }
 }
 
 function main() {
   let a = new Base();
   let b = new Derived();
-  assertEQ( a.foo(a), b.foo(a) )
+  a.foo(b)
+  assertEQ( res, 1 )
+  b.foo(a)
+  assertEQ( res, 2 )
 }

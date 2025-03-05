@@ -14,24 +14,18 @@ limitations under the License.
 ---*/
 
 /*---
-desc: covariance for the return type - Derived is a subtype of Base
+desc: covariance for parameter types is prohibited
 tags: [compile-only, negative]
 ---*/
 
 class Base {
   foo(p: Base): Base {
-    return p;
+    return new Base()
   }
 }
 
 class Derived extends Base {
   override foo(p: Derived): Base {
-    return p;
+    return new Base()
   }
-}
-
-function main() {
-  let a = new Base();
-  let b = new Derived();
-  assertEQ( a.foo(a), b.foo(a) );
 }

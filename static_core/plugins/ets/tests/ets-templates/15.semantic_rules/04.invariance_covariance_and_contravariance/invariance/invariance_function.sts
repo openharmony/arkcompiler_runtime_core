@@ -13,20 +13,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for f in cases %}
+
 /*---
-desc: covariance for the return type - Derived is a subtype of Base
-tags: [negative, compile-only]
+desc: Invariance refers to the ability to use the originally-specified type as a derived one.
 ---*/
 
-interface I {}
+{{f.customobj}}
 
-class Base implements I {}
-
-class Derived extends Base {}
-
-class Standalone {}
+function foo( i: {{f.argtype}}): {{f.argtype}} {
+  return i;
+}
 
 function main() {
-  let arr: I[] = [ new Base(), new Derived(), new Standalone()];
-  assertEQ( arr.length, 3 );
+  let i:{{f.argtype}} = {{f.input}};
+  assertEQ( foo(i), i );
 }
+
+{% endfor %}

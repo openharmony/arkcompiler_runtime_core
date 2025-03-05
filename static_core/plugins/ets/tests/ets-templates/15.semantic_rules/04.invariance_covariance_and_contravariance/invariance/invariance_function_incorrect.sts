@@ -15,16 +15,11 @@ limitations under the License.
 
 /*---
 desc: Invariance refers to the ability to use the originally-specified type as a derived one.
+tags: [compile-only, negative]
 ---*/
 
-function foo( i: Number): Number {
-  return i + i;
-}
-
-function bar( i: Number): Number {
-  return i;
-}
+function foo( i: number) {}
 
 function main() {
-  assertTrue( foo(1) === foo(bar(1)) )
+  foo("str")
 }

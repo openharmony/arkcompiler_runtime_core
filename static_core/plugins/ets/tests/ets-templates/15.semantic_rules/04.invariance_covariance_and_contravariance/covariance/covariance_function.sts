@@ -13,25 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for f in cases %}
-
 /*---
-desc: Invariance refers to the ability to use the originally-specified type as a derived one.
+desc: covariance for the input argument - Derived is a subtype of Base
 ---*/
 
-{{f.customobj}}
+class Base {}
+class Derived extends Base {}
 
-function foo( i: {{f.argtype}}): {{f.argtype}} {
-  return {{f.return}};
-}
-
-function bar( i: {{f.argtype}}): {{f.argtype}} {
-  return i;
+function foo(i: Base) {
+  return 1;
 }
 
 function main() {
-  let i:{{f.argtype}} = {{f.input}};
-  assertEQ( foo(i), foo(bar(i)) );
+  assertEQ( foo(new Base()), foo(new Derived()) );
 }
-
-{% endfor %}
