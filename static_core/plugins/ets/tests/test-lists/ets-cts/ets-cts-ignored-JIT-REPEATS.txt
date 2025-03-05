@@ -1,2 +1,5 @@
 # panda#17445
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-wd_6.ets
+
+# issue 22748 Enable runtime 'on-the-fly' verifier and increase the warm-up time to cause a jit related bug
+07.expressions/17.typeof_expression/tof_func_14.sts
