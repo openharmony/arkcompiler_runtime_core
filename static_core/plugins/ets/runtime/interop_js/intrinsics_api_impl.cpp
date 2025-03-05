@@ -1089,6 +1089,7 @@ void SettleJsPromise(EtsObject *value, napi_deferred deferred, EtsInt state)
         ThrowNoInteropContextException();
         return;
     }
+    INTEROP_CODE_SCOPE_ETS(coro);
     napi_env env = ctx->GetJSEnv();
     napi_value completionValue;
 
