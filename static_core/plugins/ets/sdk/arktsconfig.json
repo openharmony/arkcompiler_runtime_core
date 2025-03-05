@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "baseUrl": "../../",
+        "paths": {
+            "std": [
+                "ets/stdlib/std"
+            ],
+            "escompat": [
+                "ets/stdlib/escompat"
+            ]
+        },
+        "outDir": "../cache"
+    },
+    "files" : [
+        "./api/@ohos.buffer.sts",
+        "./arkts/@arkts.math.Decimal.sts",
+        "./uri/@ohos.uri.sts",
+        "./url/@ohos.url.sts",
+        "./util/@ohos.util.LRUCache.sts"
+    ]
+}
