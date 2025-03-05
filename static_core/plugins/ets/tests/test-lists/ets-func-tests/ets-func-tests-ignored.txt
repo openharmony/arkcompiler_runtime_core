@@ -108,7 +108,7 @@ spec/11.Enumerations/enum_const_expr_02_01.sts
 ### End enum
 
 ### lambda issues begin
-### Issue 15579
+### Issue 23445
 spec/07.expressions/7.32.Lambda_Expressions/issue15579_0.sts
 spec/07.expressions/7.32.Lambda_Expressions/issue15579_1.sts
 spec/07.expressions/7.32.Lambda_Expressions/issue15579_2.sts

@@ -26,21 +26,24 @@
 #23493
 03.types/07.value_types/01.integer_types_and_operations/bitwise_complement/bitwise_complement_char_2.sts
 
-#11541
+#23596
 03.types/07.value_types/01.integer_types_and_operations/bitwise_complement/bitwise_complement_char_3.sts
+
+#23598
 03.types/07.value_types/01.integer_types_and_operations/division/division_by_zero_byte.sts
 03.types/07.value_types/01.integer_types_and_operations/division/division_by_zero_short.sts
+03.types/07.value_types/01.integer_types_and_operations/remainder/remainder_by_zero_byte.sts
+03.types/07.value_types/01.integer_types_and_operations/remainder/remainder_by_zero_short.sts
+
+#23599
 03.types/07.value_types/01.integer_types_and_operations/equal/equal_char_4.sts
 03.types/07.value_types/01.integer_types_and_operations/left_shift/left_shift_char_7.sts
 03.types/07.value_types/01.integer_types_and_operations/less_than/less_than_char_3.sts
 03.types/07.value_types/01.integer_types_and_operations/multiplication/multiplication_char_7.sts
-03.types/07.value_types/01.integer_types_and_operations/remainder/remainder_by_zero_byte.sts
-03.types/07.value_types/01.integer_types_and_operations/remainder/remainder_by_zero_short.sts
-
-#11542
 03.types/07.value_types/01.integer_types_and_operations/right_shift/right_shift_long_10.sts
 03.types/07.value_types/01.integer_types_and_operations/unsigned_right_shift/unsigned_right_shift_byte_7.sts
 03.types/07.value_types/01.integer_types_and_operations/unsigned_right_shift/unsigned_right_shift_short_7.sts
+
 
 #14338 Function, method, constructor overload signatures
 03.types/08.reference_types/04.literal_types/overriding_literal_types_0.sts
@@ -66,6 +69,9 @@
 #19950
 03.types/08.reference_types/11.tuple_types/tt_10.sts
 
+#23581
+03.types/08.reference_types/11.tuple_types/tt_16.sts
+
 #15188 es2panda aborts on union in tuple type
 03.types/08.reference_types/11.tuple_types/tt2_31.sts
 
@@ -80,7 +86,7 @@
 #22857
 03.types/08.reference_types/12.union_types/ut_7.sts
 
-#20907 No CTE when multiple numeric types in a union
+#23589
 03.types/08.reference_types/12.union_types/ut_n_0.sts
 03.types/08.reference_types/12.union_types/ut_n_1.sts
 03.types/08.reference_types/12.union_types/ut_n_2.sts
@@ -180,7 +186,6 @@
 03.types/08.reference_types/12.union_types/union_types_normalization/norm_15.sts
 
 # XXXXX Readonly arrays and readonly tuples not supported
-03.types/08.reference_types/11.tuple_types/tt_16.sts
 03.types/08.reference_types/12.union_types/union_types_normalization/norm_29.sts
 03.types/08.reference_types/12.union_types/union_types_normalization/norm_30.sts
 03.types/08.reference_types/12.union_types/union_types_normalization/norm_34.sts
@@ -488,7 +493,7 @@
 #19809 missing CTE for incorrect variable initialization
 05.generics/03.utility_types/02.required_utility_type/required_method_1.sts
 
-#20907
+#23589
 05.generics/03.utility_types/03.readonly_utility_type/readonly_type_reassignment_0.sts
 05.generics/03.utility_types/03.readonly_utility_type/readonly_type_reassignment_1.sts
 
@@ -643,7 +648,7 @@
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_var/decl-var_5.sts
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_var/decl-var_8.sts
 
-#17110 failed while merging 05.09 dev branch shuttle
+#23583
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var_6.sts
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_obj/comp-clss_6.sts
 06.contexts_and_conversions/05.implicit_conversions/08.char_to_string_conversion/assn-var.sts
@@ -801,13 +806,12 @@
 06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_8.sts
 06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_9.sts
 
-
-#FailKind.RUNTIME_TIMEOUT - can't reproduce locally, but fail consistently on the CI
+#23592
+07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/ase1.sts
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oome1.sts
 
-#12250
+#23590
 07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_1.sts
-07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/ase1.sts
 
 #14962
 07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_2.sts
@@ -1245,7 +1249,6 @@
 #23533
 11.enumerations/02.enumeration_string_values/enum_str_4.sts
 
-
 #21157
 13.compilation_units/03.import_directives/05.type_binding/type_binding_class_same_name_2.sts
 
@@ -1273,9 +1276,6 @@
 
 #22846
 13.compilation_units/08.namespace_declarations/pack1/namespace_package3.sts
-
-#22786
-13.compilation_units/08.namespace_declarations/simple_spec_pos4.sts
 
 #22704
 15.semantic_rules/03.supertyping/supertyping_among_array_types/cast_to_class_n_1.sts
@@ -1544,7 +1544,6 @@
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc_val_2.sts
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc_val_3.sts
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc_val_4.sts
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_exp_val_2.sts
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_fld_val_2.sts
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_func_val_1.sts
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_func_val_2.sts
@@ -1564,6 +1563,9 @@
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_val_5.sts
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_val_6.sts
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc2.sts
+
+#23493
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_exp_val_2.sts
 
 # ES2PANDA_NEG_FAIL
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_0.sts
