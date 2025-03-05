@@ -27,7 +27,7 @@ TEST_F(StringGetUtf16SubStringTest, StringGetUtf16SubString_SubstrMultiByte)
     auto status = env_->String_NewUTF16(example, sizeof(example) / sizeof(uint16_t) - 1U, &string);
     ASSERT_EQ(status, ANI_OK);
     const ani_size bufferSize = 30U;
-    uint16_t utf16Buffer[bufferSize];
+    uint16_t utf16Buffer[bufferSize] = {0U};
     ani_size substrOffset = 0U;
     ani_size substrSize = 2U;
     ani_size result = 0U;
@@ -225,6 +225,61 @@ TEST_F(StringGetUtf16SubStringTest, StringGetUtf16SubString_BufferTooSmall2)
     ani_size result = 0U;
     status = env_->String_GetUTF16SubString(string, substrOffset, substrSize, utf16Buffer, bufferSize, &result);
     ASSERT_EQ(status, ANI_BUFFER_TO_SMALL);
+}
+
+TEST_F(StringGetUtf16SubStringTest, StringGetUtf16SubString_Repeat)
+{
+    const uint16_t example[] = {0x0065, 0x0078, 0x0061, 0x006D, 0x0070, 0x006C, 0x0065, 0x0000};
+    ani_string string = nullptr;
+    auto status = env_->String_NewUTF16(example, sizeof(example) / sizeof(uint16_t) - 1U, &string);
+    ASSERT_EQ(status, ANI_OK);
+    const ani_size bufferSize = 10U;
+    uint16_t utf16Buffer[bufferSize] = {0U};
+    ani_size substrOffset = 0U;
+    ani_size substrSize = sizeof(example) / sizeof(uint16_t) - 1U;
+    ani_size result = 0U;
+    const int32_t loopCount = 3;
+    for (int32_t i = 0; i < loopCount; ++i) {
+        status = env_->String_GetUTF16SubString(string, substrOffset, substrSize, utf16Buffer, bufferSize, &result);
+        ASSERT_EQ(status, ANI_OK);
+        ASSERT_EQ(result, substrSize);
+    }
+}
+
+TEST_F(StringGetUtf16SubStringTest, StringGetUtf16SubString_ComUtf16)
+{
+    const uint16_t example[] = {0x4F60, 0x597D, 0x002C, 0x0020, 0x4E16, 0x754C, 0x0000};
+    ani_string string = nullptr;
+    ani_size exampleSize = sizeof(example) / sizeof(uint16_t) - 1U;
+    auto status = env_->String_NewUTF16(example, exampleSize, &string);
+    ASSERT_EQ(status, ANI_OK);
+    ASSERT_NE(string, nullptr);
+
+    ani_size result1 = 0U;
+    auto status1 = env_->String_GetUTF16Size(string, &result1);
+    ASSERT_EQ(status1, ANI_OK);
+    ASSERT_EQ(result1, exampleSize);
+
+    const ani_size bufferSize = 30U;
+    uint16_t utf16Buffer[bufferSize] = {0U};
+    ani_size result2 = 0U;
+    auto status2 = env_->String_GetUTF16(string, utf16Buffer, bufferSize, &result2);
+    ASSERT_EQ(status2, ANI_OK);
+    ASSERT_EQ(result2, exampleSize);
+    for (size_t i = 0; i < exampleSize; i++) {
+        ASSERT_EQ(utf16Buffer[i], example[i]);
+    }
+    const ani_size bufferSize3 = 10U;
+    uint16_t utf16Buffer3[bufferSize3] = {0U};
+    ani_size offset = 0U;
+    const ani_size subSize = 3U;
+    ani_size result3 = 0U;
+    auto status3 = env_->String_GetUTF16SubString(string, offset, subSize, utf16Buffer3, bufferSize3, &result3);
+    ASSERT_EQ(status3, ANI_OK);
+    ASSERT_EQ(result3, subSize);
+    ASSERT_EQ(utf16Buffer3[0U], 0x4F60);
+    ASSERT_EQ(utf16Buffer3[1U], 0x597D);
+    ASSERT_EQ(utf16Buffer3[2U], 0x002C);
 }
 }  // namespace ark::ets::ani::testing
 

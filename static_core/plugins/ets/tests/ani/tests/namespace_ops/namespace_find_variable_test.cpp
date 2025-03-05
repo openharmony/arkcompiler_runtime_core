@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -19,7 +19,7 @@ namespace ark::ets::ani::testing {
 
 class NamespaceFindVariableTest : public AniTest {};
 
-TEST_F(NamespaceFindVariableTest, get_int_variable)
+TEST_F(NamespaceFindVariableTest, get_int_variable_1)
 {
     ani_namespace ns {};
     ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
@@ -28,6 +28,16 @@ TEST_F(NamespaceFindVariableTest, get_int_variable)
     ani_variable variable {};
     ASSERT_EQ(env_->Namespace_FindVariable(ns, "x", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
+}
+
+TEST_F(NamespaceFindVariableTest, variable_env)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_NE(ns, nullptr);
+
+    ani_variable variable {};
+    ASSERT_EQ(env_->c_api->Namespace_FindVariable(nullptr, ns, "x", &variable), ANI_INVALID_ARGS);
 }
 
 TEST_F(NamespaceFindVariableTest, get_ref_variable)

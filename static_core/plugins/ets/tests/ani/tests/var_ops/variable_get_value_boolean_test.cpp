@@ -15,60 +15,67 @@
 
 #include "ani_gtest.h"
 
+// NOLINTBEGIN(readability-identifier-naming, misc-non-private-member-variables-in-classes)
 namespace ark::ets::ani::testing {
 
-class VariableGetValueBooleanTest : public AniTest {};
+class VariableGetValueBooleanTest : public AniTest {
+public:
+    void SetUp() override
+    {
+        AniTest::SetUp();
+        ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns_), ANI_OK);
+        ASSERT_NE(ns_, nullptr);
+    }
 
-TEST_F(VariableGetValueBooleanTest, get_double_value)
+    ani_namespace ns_ {};
+};
+
+TEST_F(VariableGetValueBooleanTest, get_boolean_value_normal_1)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_variable variable {};
-    ASSERT_EQ(env_->Namespace_FindVariable(ns, "z", &variable), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "z", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
-    ani_boolean z;
+    ani_boolean z = ANI_FALSE;
     ASSERT_EQ(env_->Variable_GetValue_Boolean(variable, &z), ANI_OK);
     ASSERT_EQ(z, true);
 }
 
-TEST_F(VariableGetValueBooleanTest, get_double_invalid_value_type)
+TEST_F(VariableGetValueBooleanTest, invalid_env)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_variable variable {};
-    ASSERT_EQ(env_->Namespace_FindVariable(ns, "s", &variable), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "z", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
-    ani_boolean z;
+    ani_boolean z = ANI_FALSE;
+    ASSERT_EQ(env_->c_api->Variable_GetValue_Boolean(nullptr, variable, &z), ANI_INVALID_ARGS);
+}
+
+TEST_F(VariableGetValueBooleanTest, invalid_variable_type)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "s", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+    ani_boolean z = ANI_FALSE;
     ASSERT_EQ(env_->Variable_GetValue_Boolean(variable, &z), ANI_INVALID_TYPE);
 }
 
 TEST_F(VariableGetValueBooleanTest, invalid_args_variable)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
-    ani_boolean z;
+    ani_boolean z = ANI_FALSE;
     ASSERT_EQ(env_->Variable_GetValue_Boolean(nullptr, &z), ANI_INVALID_ARGS);
 }
 
 TEST_F(VariableGetValueBooleanTest, invalid_args_value)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_variable variable {};
-    ASSERT_EQ(env_->Namespace_FindVariable(ns, "z", &variable), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "z", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
     ASSERT_EQ(env_->Variable_GetValue_Boolean(variable, nullptr), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing
+
+// NOLINTEND(readability-identifier-naming, misc-non-private-member-variables-in-classes)

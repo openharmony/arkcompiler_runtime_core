@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -27,7 +27,7 @@ TEST_F(StringGetUtf8StringTest, StringGetUtf8_MultiByte)
     auto status = env_->String_NewUTF8(example.c_str(), example.size(), &string);
     ASSERT_EQ(status, ANI_OK);
     const uint32_t bufferSize = 30U;
-    char utfBuffer[bufferSize];  // NOLINT(modernize-avoid-c-arrays)
+    char utfBuffer[bufferSize] = {0U};  // NOLINT(modernize-avoid-c-arrays)
     ani_size result = 0U;
     status = env_->String_GetUTF8(string, utfBuffer, bufferSize, &result);
     ASSERT_EQ(status, ANI_OK);
@@ -53,7 +53,7 @@ TEST_F(StringGetUtf8StringTest, StringGetUtf8_BasicString)
 TEST_F(StringGetUtf8StringTest, StringGetUtf8_NullString)
 {
     const uint32_t bufferSize = 100U;
-    char utfBuffer[bufferSize];  // NOLINT(modernize-avoid-c-arrays)
+    char utfBuffer[bufferSize] = {0U};  // NOLINT(modernize-avoid-c-arrays)
     ani_size result = 0U;
     ani_status status = env_->String_GetUTF8(nullptr, utfBuffer, bufferSize, &result);
     ASSERT_EQ(status, ANI_INVALID_ARGS);
@@ -80,7 +80,7 @@ TEST_F(StringGetUtf8StringTest, StringGetUtf8_NullResultPointer)
     ASSERT_EQ(status, ANI_OK);
 
     const uint32_t bufferSize = 100U;
-    char utfBuffer[bufferSize];
+    char utfBuffer[bufferSize] = {0U};  // NOLINT(modernize-avoid-c-arrays)
     status = env_->String_GetUTF8(string, utfBuffer, bufferSize, nullptr);
     ASSERT_EQ(status, ANI_INVALID_ARGS);
 }
@@ -102,12 +102,30 @@ TEST_F(StringGetUtf8StringTest, StringGetUtf8_Managed)
 {
     const auto string = static_cast<ani_string>(CallEtsFunction<ani_ref>("GetString"));
     const uint32_t bufferSize = 10U;
-    char utfBuffer[bufferSize];  // NOLINT(modernize-avoid-c-arrays)
+    char utfBuffer[bufferSize] = {0U};  // NOLINT(modernize-avoid-c-arrays)
     ani_size result = 0U;
     ani_status status = env_->String_GetUTF8(string, utfBuffer, bufferSize, &result);
     ASSERT_EQ(status, ANI_OK);
     ASSERT_EQ(result, 4U);
     ASSERT_STREQ(utfBuffer, "test");
+}
+
+TEST_F(StringGetUtf8StringTest, StringGetUtf8_Repeat)
+{
+    const std::string example {"example"};
+    ani_string string = nullptr;
+    auto status = env_->String_NewUTF8(example.c_str(), example.size(), &string);
+    ASSERT_EQ(status, ANI_OK);
+    const uint32_t bufferSize = 10U;
+    char utfBuffer[bufferSize] = {0U};  // NOLINT(modernize-avoid-c-arrays)
+    ani_size result = 0U;
+    const int32_t loopCount = 3;
+    for (int32_t i = 0; i < loopCount; ++i) {
+        status = env_->String_GetUTF8(string, utfBuffer, bufferSize, &result);
+        ASSERT_EQ(status, ANI_OK);
+        ASSERT_EQ(result, example.size());
+        ASSERT_STREQ(utfBuffer, "example");
+    }
 }
 }  // namespace ark::ets::ani::testing
 

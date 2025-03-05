@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -27,7 +27,7 @@ TEST_F(StringGetUtf8SubStringTest, StringGetUtf8SubString_SubstrSizeMismatchMult
     auto status = env_->String_NewUTF8(example.c_str(), example.size(), &string);
     ASSERT_EQ(status, ANI_OK);
     const uint32_t bufferSize = 30U;
-    char utfBuffer[bufferSize];  // NOLINT(modernize-avoid-c-arrays)
+    char utfBuffer[bufferSize] = {0U};  // NOLINT(modernize-avoid-c-arrays)
     ani_size substrOffset = 0U;
     ani_size substrSize = 7U;
     ani_size result = 0U;
@@ -64,7 +64,7 @@ TEST_F(StringGetUtf8SubStringTest, StringGetUtf8SubString_SubstrContainEnd)
 TEST_F(StringGetUtf8SubStringTest, StringGetUtf8SubString_NullString)
 {
     const uint32_t bufferSize = 100U;
-    char utfBuffer[bufferSize];  // NOLINT(modernize-avoid-c-arrays)
+    char utfBuffer[bufferSize] = {0U};  // NOLINT(modernize-avoid-c-arrays)
     ani_size result = 0U;
     ani_size substrOffset = 0U;
     ani_size substrSize = 5U;
@@ -98,7 +98,7 @@ TEST_F(StringGetUtf8SubStringTest, StringGetUtf8SubString_NullResultPointer)
     ani_size substrOffset = 0U;
     ani_size substrSize = 5U;
     const uint32_t bufferSize = 100U;
-    char utfBuffer[bufferSize];
+    char utfBuffer[bufferSize] = {0U};  // NOLINT(modernize-avoid-c-arrays)
     status = env_->String_GetUTF8SubString(string, substrOffset, substrSize, utfBuffer, sizeof(utfBuffer), nullptr);
     ASSERT_EQ(status, ANI_INVALID_ARGS);
 }
@@ -196,6 +196,75 @@ TEST_F(StringGetUtf8SubStringTest, StringGetUtf8SubString_BufferTooSmall)
     ani_size result = 0U;
     status = env_->String_GetUTF8SubString(string, substrOffset, substrSize, utfBuffer, sizeof(utfBuffer), &result);
     ASSERT_EQ(status, ANI_BUFFER_TO_SMALL);
+}
+
+TEST_F(StringGetUtf8SubStringTest, StringGetUtf8SubString_Repeat)
+{
+    const std::string example {"example"};
+    ani_string string = nullptr;
+    auto status = env_->String_NewUTF8(example.c_str(), example.size(), &string);
+    ASSERT_EQ(status, ANI_OK);
+    const uint32_t bufferSize = 10U;
+    char utfBuffer[bufferSize] = {0U};
+    ani_size substrOffset = 0U;
+    ani_size substrSize = 4U;
+    ani_size result = 0U;
+    const int32_t loopCount = 3;
+    for (int32_t i = 0; i < loopCount; ++i) {
+        status = env_->String_GetUTF8SubString(string, substrOffset, substrSize, utfBuffer, sizeof(utfBuffer), &result);
+        ASSERT_EQ(status, ANI_OK);
+        ASSERT_EQ(result, substrSize);
+        ASSERT_STREQ(utfBuffer, "exam");
+    }
+}
+
+TEST_F(StringGetUtf8SubStringTest, StringGetUtf8SubString_ComUtf8)
+{
+    const std::string testStr = "Hello, 世界";
+    ani_string string = nullptr;
+    auto status = env_->String_NewUTF8(testStr.c_str(), testStr.size(), &string);
+    ASSERT_EQ(status, ANI_OK);
+    ASSERT_NE(string, nullptr);
+
+    ani_size result2 = 0U;
+    auto status2 = env_->String_GetUTF8Size(string, &result2);
+    ASSERT_EQ(status2, ANI_OK);
+    ASSERT_EQ(result2, testStr.size());
+
+    const uint32_t bufferSize = 30U;
+    char utfBuffer[bufferSize] = {0U};
+    ani_size resultSize = 0U;
+    auto status3 = env_->String_GetUTF8(string, utfBuffer, bufferSize, &resultSize);
+    ASSERT_EQ(status3, ANI_OK);
+    ASSERT_EQ(resultSize, testStr.size());
+    ASSERT_STREQ(utfBuffer, "Hello, 世界");
+
+    const ani_size bufferSize4 = 10U;
+    char utfBuffer4[bufferSize4] = {0U};
+    ani_size offset = 2U;
+    const ani_size subSize = 3U;
+    ani_size resultSize4 = 0U;
+    auto status4 = env_->String_GetUTF8SubString(string, offset, subSize, utfBuffer4, bufferSize4, &resultSize4);
+    ASSERT_EQ(status4, ANI_OK);
+    ASSERT_EQ(resultSize4, subSize);
+    ASSERT_STREQ(utfBuffer4, "llo");
+}
+
+TEST_F(StringGetUtf8SubStringTest, StringGetUtf8SubString_ComGetUtf8SubString)
+{
+    const std::string testStr = "Hello World";
+    ani_string string = nullptr;
+    auto status = env_->String_NewUTF8(testStr.c_str(), testStr.size(), &string);
+    ASSERT_EQ(status, ANI_OK);
+    ASSERT_NE(string, nullptr);
+    const uint32_t bufferSize = 30U;
+    char utfBuffer[bufferSize] = {0U};
+    ani_size offset = 6U;
+    ani_size subSize = 5U;
+    ani_size resultSize = 0U;
+    env_->String_GetUTF8SubString(string, offset, subSize, utfBuffer, sizeof(utfBuffer), &resultSize);
+    ASSERT_STREQ(utfBuffer, "World");
+    ASSERT_EQ(resultSize, subSize);
 }
 }  // namespace ark::ets::ani::testing
 

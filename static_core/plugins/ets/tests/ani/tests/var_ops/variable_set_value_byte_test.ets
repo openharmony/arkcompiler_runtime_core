@@ -16,8 +16,21 @@
 namespace anyns {
     export let aByte: byte = 2;
     export let aDouble: double = 3.0;
+    export let sum: byte;
+    class A {
+        static val1: byte = 5;
+        static val2: byte = 1;
+        public static add(): byte {
+            sum = (A.val1 + A.val2) as byte;
+            return sum;
+        }
+    }
+
+    namespace second {
+        export let aValue: byte = 20;
+    }
 }
 
-function checkByteValue(value: byte): boolean {
-    return anyns.aByte == value;
+namespace anyns {
+    export let testValue: byte = 30;
 }

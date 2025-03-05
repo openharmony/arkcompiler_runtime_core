@@ -16,8 +16,22 @@
 namespace anyns {
     export let aBool: boolean = false;
     export let aByte: byte = 2;
+
+    export let result: boolean;
+    class A {
+        static val1: byte = 1;
+        static val2: byte = 2;
+        public static add(): boolean {
+            result = (A.val1 + A.val2) > aByte;
+            return result;
+        }
+    }
+
+    namespace second {
+        export let aValue: boolean = true;
+    }
 }
 
-function checkBooleanValue(value: boolean): boolean {
-    return anyns.aBool == value;
+namespace anyns {
+    export let testValue: boolean = true;
 }

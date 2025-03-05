@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-namespace anyns {
-    let x: short = 3;
-    let s: String = "abc";
-    let z: boolean = false;
-}
+class Operations {
+    static or(a0: boolean, a1: boolean): boolean {
+        return a0 || a1;
+    }
+};

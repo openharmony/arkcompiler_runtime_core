@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -75,6 +75,21 @@ TEST_F(StringGetUtf8SizeTest, StringGetUtf8Size_EmptyString)
     status = env_->String_GetUTF8Size(string, &result);
     ASSERT_EQ(status, ANI_OK);
     ASSERT_EQ(result, example.size());
+}
+
+TEST_F(StringGetUtf8SizeTest, StringGetUtf8Size_Repeat)
+{
+    const std::string example {"example"};
+    ani_string string = nullptr;
+    auto status = env_->String_NewUTF8(example.c_str(), example.size(), &string);
+    ASSERT_EQ(status, ANI_OK);
+    ani_size result = 0U;
+    const int32_t loopCount = 3;
+    for (int32_t i = 0; i < loopCount; ++i) {
+        status = env_->String_GetUTF8Size(string, &result);
+        ASSERT_EQ(status, ANI_OK);
+        ASSERT_EQ(result, example.size());
+    }
 }
 }  // namespace ark::ets::ani::testing
 

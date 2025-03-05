@@ -23,6 +23,7 @@ class EnsureEnoughReferencesTest : public AniTest {};
 constexpr ani_size SPECIFIED_CAPACITY = 60;
 constexpr ani_size MAX_CAPACITY = 32000000;
 constexpr ani_size MIN_CAPACITY = 1;
+constexpr ani_size CAPACITY = 10;
 
 TEST_F(EnsureEnoughReferencesTest, ensure_enough_references_test)
 {
@@ -64,6 +65,20 @@ TEST_F(EnsureEnoughReferencesTest, ensure_enough_references_invalid_args_test)
     // Free size of local reference storage is less than capacity: MAX_CAPACITY
     // blocks_count_: 1 need_blocks: 533334 blocks_free: 524287
     ASSERT_EQ(env_->CreateLocalScope(MAX_CAPACITY), ANI_OUT_OF_MEMORY);
+}
+
+TEST_F(EnsureEnoughReferencesTest, ensure_references_test)
+{
+    ASSERT_EQ(env_->EnsureEnoughReferences(CAPACITY), ANI_OK);
+
+    for (ani_size i = 0; i <= CAPACITY; i++) {
+        std::string stringName = "String_NewUTF8_" + std::to_string(i) + ";";
+
+        ani_ref objectRef {};
+        ASSERT_EQ(
+            env_->String_NewUTF8(stringName.c_str(), stringName.size(), reinterpret_cast<ani_string *>(&objectRef)),
+            ANI_OK);
+    }
 }
 
 }  // namespace ark::ets::ani::testing

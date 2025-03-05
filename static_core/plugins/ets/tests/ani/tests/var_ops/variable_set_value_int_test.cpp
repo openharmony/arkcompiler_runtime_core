@@ -16,69 +16,168 @@
 #include "ani_gtest.h"
 #include <climits>
 
-// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)
 namespace ark::ets::ani::testing {
 
-class VariableSetValueIntTest : public AniTest {};
+class VariableSetValueIntTest : public AniTest {
+public:
+    void SetUp() override
+    {
+        AniTest::SetUp();
+        ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns_), ANI_OK);
+        ASSERT_NE(ns_, nullptr);
+    }
 
-TEST_F(VariableSetValueIntTest, set_int_value_normal)
-{
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
-    ani_variable variable {};
-    ASSERT_EQ(env_->Namespace_FindVariable(ns, "intValue", &variable), ANI_OK);
-    ASSERT_NE(variable, nullptr);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkIntValue", 3U), ANI_TRUE);
-
-    ani_int value = 6U;
-    ASSERT_EQ(env_->Variable_SetValue_Int(variable, value), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkIntValue", value), ANI_TRUE);
-}
+    // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
+    ani_namespace ns_ {};
+};
 
 TEST_F(VariableSetValueIntTest, set_int_value_normal_1)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_variable variable {};
-    ASSERT_EQ(env_->Namespace_FindVariable(ns, "intValue", &variable), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "intValue", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
+    ani_int result = 0;
+    ASSERT_EQ(env_->Variable_GetValue_Int(variable, &result), ANI_OK);
+    ASSERT_NE(result, 3U);
 
-    ani_int maxValue = std::numeric_limits<int>::max();
-    ASSERT_EQ(env_->Variable_SetValue_Int(variable, maxValue), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkIntValue", maxValue), ANI_TRUE);
-
-    ani_int minValue = std::numeric_limits<int>::min();
-    ASSERT_EQ(env_->Variable_SetValue_Int(variable, minValue), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkIntValue", minValue), ANI_TRUE);
+    const ani_int value = 6U;
+    ASSERT_EQ(env_->Variable_SetValue_Int(variable, value), ANI_OK);
+    result = 0U;
+    ASSERT_EQ(env_->Variable_GetValue_Int(variable, &result), ANI_OK);
+    ASSERT_EQ(result, value);
 }
 
-TEST_F(VariableSetValueIntTest, set_int_value_invalid_args_variable_1)
+TEST_F(VariableSetValueIntTest, invalid_env)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_variable variable {};
-    ASSERT_EQ(env_->Namespace_FindVariable(ns, "floatValue", &variable), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "intValue", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
-    ani_int value = 6U;
+    const ani_int value = 6U;
+    ASSERT_EQ(env_->c_api->Variable_SetValue_Int(nullptr, variable, value), ANI_INVALID_ARGS);
+}
+
+TEST_F(VariableSetValueIntTest, invalid_variable_type)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "floatValue", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+    const ani_int value = 6U;
     ASSERT_EQ(env_->Variable_SetValue_Int(variable, value), ANI_INVALID_TYPE);
 }
 
-TEST_F(VariableSetValueIntTest, set_int_value_invalid_args_variable_2)
+TEST_F(VariableSetValueIntTest, invalid_args_variable)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
-    ani_int value = 6U;
+    const ani_int value = 6U;
     ASSERT_EQ(env_->Variable_SetValue_Int(nullptr, value), ANI_INVALID_ARGS);
+}
+
+TEST_F(VariableSetValueIntTest, other_type_value)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "intValue", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+    ani_long value = std::numeric_limits<int64_t>::max();
+    ASSERT_EQ(env_->Variable_SetValue_Int(variable, value), ANI_OK);
+    ani_int result = 0;
+    ASSERT_EQ(env_->Variable_GetValue_Int(variable, &result), ANI_OK);
+}
+
+TEST_F(VariableSetValueIntTest, composite_case_1)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->Namespace_FindClass(ns_, "LA;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "add", ":I", &method), ANI_OK);
+
+    ani_int sum = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Int(cls, method, &sum), ANI_OK);
+    ASSERT_EQ(sum, 3U);
+
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "sum", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+    ani_int getValue = 0;
+    ASSERT_EQ(env_->Variable_GetValue_Int(variable, &getValue), ANI_OK);
+    ASSERT_EQ(getValue, sum);
+
+    const ani_int value = 3U;
+    ASSERT_EQ(env_->Variable_SetValue_Int(variable, value), ANI_OK);
+    ani_int result = 0;
+    ASSERT_EQ(env_->Variable_GetValue_Int(variable, &result), ANI_OK);
+    ASSERT_EQ(result, value);
+}
+
+TEST_F(VariableSetValueIntTest, composite_case_2)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "intValue", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+    const ani_int values[] = {3U, 6U, 9U};
+    ani_int result = 0;
+    for (ani_int value : values) {
+        ASSERT_EQ(env_->Variable_SetValue_Int(variable, value), ANI_OK);
+        ASSERT_EQ(env_->Variable_GetValue_Int(variable, &result), ANI_OK);
+        ASSERT_EQ(result, value);
+    }
+}
+
+TEST_F(VariableSetValueIntTest, composite_case_3)
+{
+    ani_namespace result {};
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns_, "Lsecond;", &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
+
+    ani_variable variable1 {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "intValue", &variable1), ANI_OK);
+    ASSERT_NE(variable1, nullptr);
+
+    ani_int getValue1 = 0;
+    const ani_int val1 = 3U;
+    ASSERT_EQ(env_->Variable_SetValue_Int(variable1, val1), ANI_OK);
+    ASSERT_EQ(env_->Variable_GetValue_Int(variable1, &getValue1), ANI_OK);
+    ASSERT_EQ(getValue1, val1);
+
+    ani_variable variable2 {};
+    ASSERT_EQ(env_->Namespace_FindVariable(result, "aValue", &variable2), ANI_OK);
+    ASSERT_NE(variable2, nullptr);
+
+    ani_int getValue2 = 0;
+    const ani_int val2 = 6U;
+    ASSERT_EQ(env_->Variable_SetValue_Int(variable2, val2), ANI_OK);
+    ASSERT_EQ(env_->Variable_GetValue_Int(variable2, &getValue2), ANI_OK);
+    ASSERT_EQ(getValue2, val2);
+}
+
+TEST_F(VariableSetValueIntTest, composite_case_4)
+{
+    ani_variable variable1 {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "intValue", &variable1), ANI_OK);
+    ASSERT_NE(variable1, nullptr);
+
+    ani_int getValue1 = 0;
+    const ani_int val1 = 3U;
+    ASSERT_EQ(env_->Variable_SetValue_Int(variable1, val1), ANI_OK);
+    ASSERT_EQ(env_->Variable_GetValue_Int(variable1, &getValue1), ANI_OK);
+    ASSERT_EQ(getValue1, val1);
+
+    ani_variable variable2 {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "testValue", &variable2), ANI_OK);
+    ASSERT_NE(variable2, nullptr);
+
+    ani_int getValue2 = 0;
+    const ani_int val2 = 6U;
+    ASSERT_EQ(env_->Variable_SetValue_Int(variable2, val2), ANI_OK);
+    ASSERT_EQ(env_->Variable_GetValue_Int(variable2, &getValue2), ANI_OK);
+    ASSERT_EQ(getValue2, val2);
 }
 }  // namespace ark::ets::ani::testing
 
-// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
+// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)

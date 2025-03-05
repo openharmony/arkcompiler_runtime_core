@@ -14,10 +14,23 @@
  */
 
 namespace anyns {
-    export let intValue: int = 3;
+    export let intValue: int = 5;
     export let floatValue: float = 3.14;
+    export let sum: int;
+    class A {
+        static val1: int = 1;
+        static val2: int = 2;
+        public static add(): int {
+            sum = A.val1 + A.val2;
+            return sum;
+        }
+    }
+
+    namespace second {
+        export let aValue: int = 10;
+    }
 }
 
-function checkIntValue(value: int): boolean {
-    return anyns.intValue == value;
+namespace anyns {
+    export let testValue: int = 30;
 }

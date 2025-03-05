@@ -16,8 +16,21 @@
 namespace anyns {
     export let aBool: boolean = false;
     export let aDouble: double = 3.0;
+    export let sum: double;
+    class A {
+        static val1: double = 1.5;
+        static val2: double = 2.5;
+        public static add(): double {
+            sum = A.val1 + A.val2;
+            return sum;
+        }
+    }
+
+    namespace second {
+        export let aValue: double = 5.0;
+    }
 }
 
-function checkDoubleValue(value: double): boolean {
-    return anyns.aDouble == value;
+namespace anyns {
+    export let testValue: double = 3.14;
 }

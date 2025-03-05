@@ -16,8 +16,21 @@
 namespace anyns {
     export let shortValue: short = 3;
     export let stringValue: String = "test";
+    export let sum: String;
+    class A {
+        static val1: String = "hello";
+        static val2: String = "world";
+        public static add(): String {
+            sum = A.val1 + A.val2;
+            return sum;
+        }
+    }
+
+    namespace second {
+        export let aValue: String = "Chian";
+    }
 }
 
-function getStringObject(): Object {
-    return new String(anyns.stringValue);
+namespace anyns {
+    export let testValue: String = "HongKong";
 }

@@ -13,8 +13,19 @@
  * limitations under the License.
  */
 
-namespace anyns {
-    let x: short = 3;
-    let s: String = "abc";
-    let z: boolean = false;
+class MobilePhone {
+    constructor(model: String, weight: int) {
+        this.model = model;
+        this.weight = weight;
+    }
+    model: String;
+    weight: int;
+}
+
+function getObjectA(): Object {
+    return new String("Hello World!");
+}
+
+function getObjectB(): Object {
+    return new String("Hello World!");
 }

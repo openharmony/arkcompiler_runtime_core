@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -102,6 +102,18 @@ TEST_F(StringNewUtf8Test, StringNewUtf8_ZeroSize)
     ani_size resultSize = 0U;
     env_->String_GetUTF8SubString(result2, 0U, 0U, utfBuffer, sizeof(utfBuffer), &resultSize);
     ASSERT_STREQ(utfBuffer, "");
+}
+
+TEST_F(StringNewUtf8Test, StringNewUtf8_Repeat)
+{
+    const std::string example {"测测试emoji🙂🙂"};
+    ani_string result = nullptr;
+    const int32_t loopCount = 3;
+    for (int32_t i = 0; i < loopCount; ++i) {
+        auto status = env_->String_NewUTF8(example.c_str(), example.size(), &result);
+        ASSERT_EQ(status, ANI_OK);
+        ASSERT_NE(result, nullptr);
+    }
 }
 }  // namespace ark::ets::ani::testing
 
