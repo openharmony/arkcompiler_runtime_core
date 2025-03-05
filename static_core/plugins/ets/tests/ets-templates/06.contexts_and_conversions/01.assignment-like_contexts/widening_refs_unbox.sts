@@ -16,6 +16,7 @@
 {% for case in cases %}
 /*---
 desc: Assignment contexts allow the use a widening reference conversion followed by an unboxing conversion.
+tags: [{{case.tags}}]
 params: Assignment of '{{case.type}}' to '{{case.ptype}}'
 ---*/
 
