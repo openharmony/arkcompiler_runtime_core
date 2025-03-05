@@ -13,14 +13,9 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
-
+#include "ani_gtest.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/include/runtime.h"
-
-#include "plugins/ets/runtime/napi/ets_napi.h"
-#include "plugins/ets/runtime/types/ets_method.h"
 
 namespace ark::ets::test {
 
@@ -47,15 +42,16 @@ private:
     os::memory::ConditionVariable cv_;
 };
 
-class EtsNativeExclusiveWorkerTest : public testing::Test {
+class EtsNativeExclusiveWorkerTest : public ani::testing::AniTest {
 public:
     template <typename... Args>
-    void RunRoutineInExclusiveWorker(std::string_view routineName, Args &&...args)
+    void RunRoutineInExclusiveWorker(std::string_view routineName, std::string_view routineSignature, Args &&...args)
     {
         auto event = Event();
 
-        std::thread worker([this, &event, routineName, args = std::make_tuple(std::forward<Args>(args)...)]() mutable {
-            WorkerRoutine(event, routineName, std::forward<Args>(args)...);
+        std::thread worker([this, &event, routineName, routineSignature,
+                            args = std::make_tuple(std::forward<Args>(args)...)]() mutable {
+            WorkerRoutine(event, routineName, routineSignature, std::forward<Args>(args)...);
         });
 
         event.Wait();
@@ -63,105 +59,86 @@ public:
     }
 
     template <typename... Args>
-    static bool CallStaticBooleanMethod(std::string_view methodName, Args &&...args)
+    static bool CallStaticBooleanMethod(ani_env *env, std::string_view methodName, std::string_view signature,
+                                        Args &&...args)
     {
-        auto *env = PandaEtsNapiEnv::GetCurrent();
-        auto [cls, fn] = ResolveMethod(env, methodName);
+        ani_class cls;
+        auto mtd = ResolveMethod(&cls, env, methodName, signature);
+        ani_boolean result;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        return env->CallStaticBooleanMethod(cls, fn, std::forward<Args>(args)...);
+        env->Class_CallStaticMethod_Boolean(cls, mtd, &result, std::forward<Args>(args)...);
+        return result;
     }
 
     template <typename... Args>
-    static void CallStaticVoidMethod(std::string_view methodName, Args &&...args)
+    static void CallStaticVoidMethod(ani_env *env, std::string_view methodName, std::string_view signature,
+                                     Args &&...args)
     {
-        auto *env = PandaEtsNapiEnv::GetCurrent();
-        auto [cls, fn] = ResolveMethod(env, methodName);
+        ani_class cls;
+        auto mtd = ResolveMethod(&cls, env, methodName, signature);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        env->CallStaticVoidMethod(cls, fn, std::forward<Args>(args)...);
+        env->Class_CallStaticMethod_Void(cls, mtd, std::forward<Args>(args)...);
     }
 
-protected:
-    void SetUp() override
+    std::vector<std::string> GetExtraVmOptions() override
     {
-        const char *stdlib = std::getenv("ARK_ETS_STDLIB_PATH");
-        ASSERT_NE(stdlib, nullptr);
-
-        std::vector<EtsVMOption> optionsVector {{EtsOptionType::ETS_GC_TYPE, "g1-gc"},
-                                                {EtsOptionType::ETS_JIT, nullptr},
-                                                {EtsOptionType::ETS_BOOT_FILE, stdlib}};
-
-        auto abcPath = std::getenv("ARK_ETS_GTEST_ABC_PATH");
-        if (abcPath != nullptr) {
-            optionsVector.push_back({EtsOptionType::ETS_BOOT_FILE, abcPath});
-        }
-
-        EtsVMInitArgs vmArgs;
-        vmArgs.version = ETS_NAPI_VERSION_1_0;
-        vmArgs.options = optionsVector.data();
-        vmArgs.nOptions = static_cast<ets_int>(optionsVector.size());
-
-        ASSERT_TRUE(ETS_CreateVM(&vm_, &env_, &vmArgs) == ETS_OK) << "Cannot create ETS VM";
-    }
-
-    void TearDown() override
-    {
-        ASSERT_TRUE(vm_->DestroyEtsVM() == ETS_OK) << "Cannot destroy ETS VM";
+        return {{"--gc-type=g1-gc"}, {"--compiler-enable-jit"}};
     }
 
 private:
     template <typename... Args>
-    void WorkerRoutine(Event &event, std::string_view routineName, Args &&...args)
+    void WorkerRoutine(Event &event, std::string_view routineName, std::string_view routineSignature, Args &&...args)
     {
         ASSERT(Thread::GetCurrent() == nullptr);
-        [[maybe_unused]] EtsEnv *workerEnv = nullptr;
-        [[maybe_unused]] void *resultJsEnv = nullptr;
-        [[maybe_unused]] auto status = vm_->AttachThread(&workerEnv, &resultJsEnv);
-        ASSERT(status == ETS_OK);
+        [[maybe_unused]] ani_env *workerEnv = nullptr;
+        ani_options aniArgs {0, nullptr};
+        [[maybe_unused]] auto status = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &workerEnv);
+        ASSERT(status == ANI_OK);
 
         event.Fire();
 
-        ets_int eWorkerId = os::thread::GetCurrentThreadId();
-        CallStaticVoidMethod("setWorkerId", eWorkerId);
+        ani_int eWorkerId = os::thread::GetCurrentThreadId();
+        CallStaticVoidMethod(workerEnv, "setWorkerId", "I:V", eWorkerId);
 
-        ets_boolean res {};
-        res = CallStaticBooleanMethod(routineName, std::forward<Args>(args)...);
+        ani_boolean res {};
+        res = CallStaticBooleanMethod(workerEnv, routineName, routineSignature, std::forward<Args>(args)...);
         ASSERT_EQ(res, true);
 
-        status = vm_->DetachThread();
-        ASSERT(status == ETS_OK);
+        status = vm_->DetachCurrentThread();
+        ASSERT(status == ANI_OK);
     }
 
-    static std::pair<ets_class, ets_method> ResolveMethod(EtsEnv *env, std::string_view methodName)
+    static ani_static_method ResolveMethod(ani_class *cls, ani_env *env, std::string_view methodName,
+                                           std::string_view signature)
     {
-        ets_class cls = env->FindClass("ETSGLOBAL");
-        ASSERT(cls != nullptr);
-        ets_method fn = env->GetStaticp_method(cls, methodName.data(), nullptr);
-        return {cls, fn};
+        [[maybe_unused]] auto status = env->FindClass("LETSGLOBAL;", cls);
+        ASSERT(status == ANI_OK);
+        ani_static_method mtd;
+        status = env->Class_FindStaticMethod(*cls, methodName.data(), signature.data(), &mtd);
+        ASSERT(status == ANI_OK);
+        return mtd;
     }
-
-    EtsVM *vm_ {nullptr};
-    EtsEnv *env_ {nullptr};
 };
 
 TEST_F(EtsNativeExclusiveWorkerTest, CallMethod)
 {
-    RunRoutineInExclusiveWorker("call");
+    RunRoutineInExclusiveWorker("call", ":Z");
 }
 
 TEST_F(EtsNativeExclusiveWorkerTest, AsyncCallMethod)
 {
-    RunRoutineInExclusiveWorker("asyncCall");
+    RunRoutineInExclusiveWorker("asyncCall", ":Z");
 }
 
 TEST_F(EtsNativeExclusiveWorkerTest, LaunchCallMethod)
 {
-    RunRoutineInExclusiveWorker("launchCall");
+    RunRoutineInExclusiveWorker("launchCall", ":Z");
 }
 
 TEST_F(EtsNativeExclusiveWorkerTest, ConcurrentWorkerAndRuntimeDestroy)
 {
-    RunRoutineInExclusiveWorker("eWorkerRoutine");
-    CallStaticVoidMethod("mainRoutine");
+    RunRoutineInExclusiveWorker("eWorkerRoutine", ":Z");
+    CallStaticVoidMethod(env_, "mainRoutine", ":V");
 }
 
 }  // namespace ark::ets::test
