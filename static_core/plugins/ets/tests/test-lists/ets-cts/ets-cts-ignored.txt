@@ -1,11 +1,3 @@
-#19956
-02.lexical_elements/07.keywords/types_11.sts
-
-#23067
-02.lexical_elements/07.keywords/types_8.sts
-02.lexical_elements/07.keywords/types_10.sts
-02.lexical_elements/07.keywords/types_2.sts
-
 #19926 FailKind.ES2PANDA_FAIL not implemented yet
 02.lexical_elements/09.literals/04.bigint_literals/bigint_func_0.sts
 02.lexical_elements/09.literals/04.bigint_literals/bigint_func_1.sts
@@ -300,11 +292,44 @@
 
 #21833 null-safety violations, value was not initialized
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/02.constant_declarations/const_decl_5.sts
-
 # ES2PANDA_NEG_FAIL
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_3.sts
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_7.sts
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.type_compatibility_with_initializer/initializer_compatibility_n_8.sts
+
+#23499 CTE instead of successful compilation
+02.lexical_elements/07.keywords/reserved_3.sts
+02.lexical_elements/07.keywords/reserved_4.sts
+02.lexical_elements/07.keywords/soft_6.sts
+02.lexical_elements/07.keywords/soft_7.sts
+02.lexical_elements/07.keywords/soft_13.sts 
+
+#23500 Successful compilation instead of CTE
+02.lexical_elements/07.keywords/hard_16.sts
+02.lexical_elements/07.keywords/hard_29.sts
+02.lexical_elements/07.keywords/hard_41.sts
+02.lexical_elements/07.keywords/types_1.sts
+02.lexical_elements/07.keywords/types_2.sts
+02.lexical_elements/07.keywords/types_4.sts
+02.lexical_elements/07.keywords/types_6.sts
+02.lexical_elements/07.keywords/types_8.sts
+02.lexical_elements/07.keywords/types_10.sts
+02.lexical_elements/07.keywords/types_12.sts
+02.lexical_elements/07.keywords/types_14.sts
+02.lexical_elements/07.keywords/types_20.sts
+02.lexical_elements/07.keywords/types_24.sts
+
+#23501 Compiler crash instead of CTE
+02.lexical_elements/07.keywords/types_3.sts
+02.lexical_elements/07.keywords/types_5.sts
+02.lexical_elements/07.keywords/types_7.sts
+02.lexical_elements/07.keywords/types_9.sts
+02.lexical_elements/07.keywords/types_11.sts
+02.lexical_elements/07.keywords/types_13.sts
+02.lexical_elements/07.keywords/types_15.sts
+02.lexical_elements/07.keywords/types_19.sts
+02.lexical_elements/07.keywords/types_21.sts
+02.lexical_elements/07.keywords/types_23.sts
 
 #23134
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_16.sts
