@@ -132,9 +132,8 @@ if (enable_codegen) {
     subsystem_name = "$ark_subsystem_name"
   }
 
-  ohos_static_library("libarkencoder_frontend_static") {
+  ohos_static_library("libarkencoder_frontend_dependency_static") {
     sources = [
-      "encode.cpp",
       "target/asm_printer.cpp",
       "target/target.cpp",
     ]
@@ -216,6 +215,13 @@ if (enable_codegen) {
       "$ark_root/compiler:libarkcompiler_opcodes_h_arch_info_gen_h",
       "$ark_root/libpandabase:libarktsbase_frontend_static",
     ]
+    part_name = ark_part_name
+    subsystem_name = ark_subsystem_name
+  }
+
+  ohos_static_library("libarkencoder_frontend_static") {
+    sources = [ "encode.cpp" ]
+    deps = [ ":libarkencoder_frontend_dependency_static" ]
     part_name = ark_part_name
     subsystem_name = ark_subsystem_name
   }

@@ -339,7 +339,7 @@ ohos_source_set("libarktscompiler_frontend_static") {
     ]
   }
   if (enable_codegen) {
-    deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder_frontend_static" ]
+    deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder_frontend_dependency_static" ]
   }
   deps += plugin_compiler_deps
 
