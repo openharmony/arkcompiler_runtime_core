@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -65,7 +65,8 @@ class Tool(ToolBase):
         if OptFlags.AOT in self.flags:
             an_files.append('{an}')
         if an_files:
-            opts += '--enable-an:force --aot-files=' + \
+            enable_an = '' if Target.HOST == self.target else '--enable-an:force'
+            opts += f'{enable_an} --aot-files=' + \
                     ":".join(an_files) + ' '
         self.cmd = f'LD_LIBRARY_PATH={self.ark_lib} {self.ark} ' \
                    f'--boot-panda-files={self.etsstdlib} ' \
