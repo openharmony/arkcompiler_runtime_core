@@ -37,7 +37,7 @@ napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
 
     auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr);
-    auto method = etsThis->GetClass()->GetMethod(ark::ets::LAMBDA_METHOD_NAME);
+    auto method = etsThis->GetClass()->GetMethod(ark::ets::INVOKE_METHOD_NAME);
     ASSERT(method != nullptr);
 
     return CallETSInstance(coro, ctx, method->GetPandaMethod(), *jsArgs, etsThis);
@@ -50,7 +50,7 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
     auto env = ctx->GetJSEnv();
 
     ASSERT(obj->GetClass() == klass_);
-    ASSERT(klass_->GetMethod(ark::ets::LAMBDA_METHOD_NAME) != nullptr);
+    ASSERT(klass_->GetMethod(ark::ets::INVOKE_METHOD_NAME) != nullptr);
 
     JSValue *jsValue;
     {
@@ -63,7 +63,7 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
             napi_value jsFn;
             auto preInitCallback = [&env, &jsFn](ets_proxy::SharedReference **uninitializedRef) {
                 ASSERT(uninitializedRef != nullptr);
-                NAPI_CHECK_FATAL(napi_create_function(env, ark::ets::LAMBDA_METHOD_NAME, NAPI_AUTO_LENGTH,
+                NAPI_CHECK_FATAL(napi_create_function(env, ark::ets::INVOKE_METHOD_NAME, NAPI_AUTO_LENGTH,
                                                       EtsLambdaProxyInvoke, uninitializedRef, &jsFn));
                 return jsFn;
             };

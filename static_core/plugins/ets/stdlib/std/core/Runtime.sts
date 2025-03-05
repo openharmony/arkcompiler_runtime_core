@@ -143,7 +143,7 @@ export final class Runtime {
      * 
      * @returns exception object to throw
      */
-    internal static failedTypeCastException(src: NullishType, dstStr: string): ClassCastError {
+    static failedTypeCastException(src: NullishType, dstStr: string): ClassCastError {
         let srcStr = src === null ? "null" :
             (src === undefined ? "undefined" :
                 Class.of(src).getName());
@@ -151,6 +151,31 @@ export final class Runtime {
     }
 
     native static __getTypeInfo(o: NullishType): Class|undefined;
+
+    static prependRestArgumentsStub(original: __T[], prepend: __T[]): __T[] {
+        let res = new __T[original.length + prepend.length]
+        for (let i: int = 0; i < prepend.length; ++i) {
+            res[i] = prepend[i]
+        }
+        for (let i: int = 0; i < original.length; ++i) {
+            res[i + prepend.length] = original[i]
+        }
+        return res
+    }
+
+    static restArgumentsUnderapplicationStub(rest: __T[], required: int): __T[] {
+        if (rest.length >= required) {
+            return rest
+        }
+        let newRest = new __T[required]
+        for (let i: int = 0; i < rest.length; ++i) {
+            newRest[i] = rest[i]
+        }
+        for (let i: int = rest.length; i < required; ++i) {
+            newRest[i] = undefined
+        }
+        return newRest
+    }
 }
 
 export const runtime = new Runtime();

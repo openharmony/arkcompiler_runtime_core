@@ -20,6 +20,7 @@
 #include "assembly-program.h"
 #include "class_linker_context.h"
 #include "ets_typeapi_create_panda_constants.h"
+#include "types/ets_type.h"
 
 namespace ark {
 template <typename T>
@@ -227,8 +228,8 @@ public:
     void Create();
 
 private:
-    std::string name_ = "std.core.Function";
-    std::string fnName_ = "invoke0";
+    std::string name_ = STD_CORE_FUNCTION_PREFIX;
+    std::string fnName_ = STD_CORE_FUNCTION_INVOKE_PREFIX;
     pandasm::Record rec_ {name_, SourceLanguage::ETS};
     pandasm::Function fn_ {fnName_, SourceLanguage::ETS};
     bool finished_ = false;

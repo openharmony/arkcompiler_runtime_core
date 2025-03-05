@@ -17,85 +17,100 @@
 package std.core;
 
 {% set maxarity=16 %}
-{% macro typeParamsList(narg, avar, rvar) %}<{% for i in range(narg) %}{{avar}}P{{i + 1}}, {% endfor %}{{rvar}}R>{% endmacro %}
-{% macro typeParamsDeclList(narg) %}{{ narg }}{{ typeParamsList(narg, "in ", "out ") }}{% endmacro %}
-{% macro erasedTypeArgsList(narg) %}<{% for i in range(narg) %}__T, {% endfor %}__T>{% endmacro %}
 
-{% macro signature(narg) %}({% for i in range(narg) %}p{{i + 1}}: P{{i + 1}}{% if not loop.last %}, {% endif %}{% endfor %}): R{% endmacro %}
-{% macro erasedSignature(narg) %}({% for i in range(narg) %}p{{i + 1}}: __T{% if not loop.last %}, {% endif %}{% endfor %}): __T{% endmacro %}
-{% macro applyArgs(narg) %}({% for i in range(narg) %}p{{i + 1}}{% if not loop.last %}, {% endif %}{% endfor %}){% endmacro %}
+{%- macro typeParamsDeclList(narg, rest) -%}
+<{% for i in range(narg) -%}
+in P{{i + 1}}, {{""}}
+{%- endfor -%}
+{%- if rest %}in PR, {% endif %}{{rvar}}out R>
+{%- endmacro %}
+
+{%- macro typeParamsList(narg, rest) -%}
+<{% for i in range(narg) -%}
+P{{i + 1}}, {{""}}
+{%- endfor -%}
+{%- if rest %}{{rest}}, {% endif %}R>
+{%- endmacro %}
+
+{% macro erasedTypeArgsList(narg) -%}
+<{% for i in range(narg) %}__T, {% endfor %}__T>
+{%- endmacro %}
+
+{%- macro signature(narg, rest) -%}
+({% for i in range(narg) -%}
+p{{i + 1}}: P{{i + 1}}{% if not loop.last or rest %}, {% endif %}
+{%- endfor -%}
+{%- if rest %}...r: PR[]{% endif %}): R
+{%- endmacro %}
+
+{%- macro erasedSignature(narg, rest) -%}
+({% for i in range(narg) -%}
+p{{i + 1}}: __T{% if not loop.last or rest %}, {% endif %}
+{%- endfor -%}
+{%- if rest %}...r: __T[]{% endif %}): __T
+{%- endmacro %}
+
+{%- macro listArgs(from, to) -%}
+{% for i in range(from, to) -%}
+p{{i + 1}}{% if not loop.last %}, {% endif %}
+{%- endfor %}
+{%- endmacro %}
+
+{%- macro invokeName(narg, suffix) %}invoke{{suffix}}{{narg}}{% endmacro %}
 
 type __T = object | null | undefined;
 
-export interface Function<R> {}
+export interface Function {}
 
-export interface ThrowingFunctionN<R> extends Function<R> {
-    invoke0(...p: __T[]): R throws;
+export interface FunctionN<R> extends Function {
+    invokeN(...p: __T[]): R;
 }
 
-export interface RethrowingFunctionN<R> extends ThrowingFunctionN<R> {
-    invoke0(...p: __T[]): R rethrows;
-}
+export interface __FunctionN extends FunctionN<__T> {}
 
-export interface FunctionN<R> extends RethrowingFunctionN<R> {
-    invoke0(...p: __T[]): R;
-}
+export abstract class LambdaN implements __FunctionN {}
 
-export interface __Function extends Function<__T> {}
-export interface __ThrowingFunctionN extends ThrowingFunctionN<__T> {}
-export interface __RethrowingFunctionN extends RethrowingFunctionN<__T> {}
-export interface __FunctionN extends RethrowingFunctionN<__T> {}
-
-export abstract class ThrowingLambdaN implements __ThrowingFunctionN {}
-export abstract class RethrowingLambdaN implements __RethrowingFunctionN {}
-export abstract class LambdaN implements __RethrowingFunctionN {}
-
-{% macro defineChainingHelper(name, base, narg, maxarity) -%}
-export interface __{{name}}{{narg}}
-{%- if narg < maxarity %} extends {{name}}{{narg + 1}}{{erasedTypeArgsList(narg + 1)}}{% endif %}
+{%- macro defineChainingHelper(name, narg, erasedArgs) -%}
+export interface __{{name}}{{narg}} extends {{name}}{{narg}}{{erasedTypeArgsList(erasedArgs)}}
 {%- endmacro %}
 
-{% macro defineLambda(lambda, name, base, narg, maxarity) -%}
-export abstract class {{lambda}}{{narg}} implements
-{%- for n in range(narg, narg + 1) %} __{{name}}{{n}}{% if not loop.last %},{% endif %}{% endfor %}
+{%- macro defineLambdaHelper(lambda, name, narg) -%}
+export abstract class {{lambda}}{{narg}} implements __{{name}}{{narg}}
 {%- endmacro %}
-
-{% macro defineAritySignatures(from, to, tm) -%}
-    abstract invoke0{{ erasedSignature(from) }} {{tm}};
-{%- for narg in range(from + 1, to + 1) %}
-    final invoke0{{ erasedSignature(narg) }} {{tm}} { return this.invoke0{{applyArgs(from)}} }
-{%- endfor -%}
-{% endmacro %}
 
 {% for narg in range(maxarity + 1) %}
-export interface ThrowingFunction{{ typeParamsDeclList(narg) }}
-    extends Function<R>,
-    __ThrowingFunction{{narg}}
-    {
-    invoke0{{ signature(narg) }} throws;
+export interface FunctionR{{ narg }}{{ typeParamsDeclList(narg, True) }}
+    extends Function{% if not loop.last %}, __FunctionR{{narg + 1}}{% endif %}
+{
+    {{invokeName(narg, "R")}}{{ signature(narg, True) }};
 }
-export interface RethrowingFunction{{ typeParamsDeclList(narg) }}
-    extends ThrowingFunction{{narg}}{{ typeParamsList(narg) }},
-    __RethrowingFunction{{narg}}
-    {
-    invoke0{{ signature(narg) }}{% if narg > 0 %} rethrows{% endif %};
+export interface Function{{ narg }}{{ typeParamsDeclList(narg) }}
+    extends FunctionR{{narg}}{{ typeParamsList(narg, "__T") }}{% if not loop.last %}, __Function{{narg + 1}}{% endif %}
+{
+    {{invokeName(narg)}}{{ signature(narg) }};
 }
-export interface Function{{ typeParamsDeclList(narg) }}
-    extends RethrowingFunction{{narg}}{{ typeParamsList(narg) }},
-    __Function{{narg}}
-    {
-    invoke0{{ signature(narg) }};
+{{ defineChainingHelper("FunctionR", narg, narg + 1) }} {}
+{{ defineChainingHelper("Function", narg, narg) }} {}
+{{ defineLambdaHelper("LambdaR", "FunctionR", narg) }} {
+    abstract {{invokeName(narg, "R")}}{{erasedSignature(narg, True)}};
+{%- for extNarg in range(narg + 1, maxarity + 1) %}
+    final {{invokeName(extNarg, "R")}}{{erasedSignature(extNarg, True) }} {
+        return this.{{invokeName(narg, "R")}}({{listArgs(0, narg)}}{{", " if narg != 0 }}
+            Runtime.prependRestArgumentsStub(r, [{{listArgs(narg, extNarg)}}]))
+    }
+{%- endfor %}
 }
-{{ defineChainingHelper("ThrowingFunction", "", narg, maxarity) }} {}
-{{ defineChainingHelper("RethrowingFunction", "ThrowingFunction", narg, maxarity) }} {}
-{{ defineChainingHelper("Function", "RethrowingFunction", narg, maxarity) }} {}
-{{ defineLambda("ThrowingLambda", "ThrowingFunction", "", narg, maxarity) }} {
-    {{ defineAritySignatures(narg, maxarity, "throws") }}
-}
-{{ defineLambda("RethrowingLambda", "RethrowingFunction", "ThrowingFunction", narg, maxarity) }} {
-    {{ defineAritySignatures(narg, maxarity, "rethrows") }}
-}
-{{ defineLambda("Lambda", "Function", "RethrowingFunction", narg, maxarity) }} {
-    {{ defineAritySignatures(narg, maxarity, "") }}
+{{ defineLambdaHelper("Lambda", "Function", narg) }} {
+    abstract {{invokeName(narg)}}{{erasedSignature(narg)}};
+{%- for extNarg in range(narg + 1, maxarity + 1) %}
+    final {{invokeName(extNarg)}} {{erasedSignature(extNarg, False)}} {
+        return this.{{invokeName(narg)}}({{listArgs(0, narg)}})
+    }
+{%- endfor %}
+{%- for extNarg in range(narg, maxarity + 1) %}
+    final {{invokeName(extNarg, "R")}}{{erasedSignature(extNarg, True) }} {
+        return this.{{invokeName(narg)}}({{listArgs(0, narg)}})
+    }
+{%- endfor %}
 }
 {% endfor %}

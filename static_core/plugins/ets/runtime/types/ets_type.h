@@ -28,14 +28,15 @@ static constexpr char ARRAY_TYPE_PREFIX = '[';
 static constexpr char CLASS_TYPE_PREFIX = 'L';
 static constexpr char METHOD_PREFIX = 'M';
 static constexpr const char *TYPE_API_UNDEFINED_TYPE_DESC = "__TYPE_API_UNDEFINED";
-static constexpr const char *LAMBDA_PREFIX = "LambdaObject";
-static constexpr const char *STD_CORE_FUNCTION_PREFIX = "std.core.Function";
-static constexpr const char *LAMBDA_METHOD_NAME = "$_invoke";
-static constexpr const char *FN_INVOKE_METHOD_NAME = "invoke0";
+static constexpr const char *INVOKE_METHOD_NAME = "$_invoke";
 static constexpr const char *CONSTRUCTOR_NAME = "constructor";
 static constexpr char TYPE_DESC_DELIMITER = ';';
 static constexpr const char *GETTER_BEGIN = "<get>";
 static constexpr const char *SETTER_BEGIN = "<set>";
+
+static constexpr const char *STD_CORE_FUNCTION_PREFIX = "std.core.Function";
+static constexpr const char *STD_CORE_FUNCTION_INVOKE_PREFIX = "invoke";
+static constexpr const size_t STD_CORE_FUNCTION_MAX_ARITY = 15;
 
 enum class EtsType { BOOLEAN, BYTE, CHAR, SHORT, INT, LONG, FLOAT, DOUBLE, OBJECT, UNKNOWN, VOID };
 

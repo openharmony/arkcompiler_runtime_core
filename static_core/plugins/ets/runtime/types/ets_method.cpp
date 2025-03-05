@@ -31,6 +31,21 @@ bool EtsMethod::IsMethod(const PandaString &td)
     return td[0] == METHOD_PREFIX;
 }
 
+static EtsMethod *FindInvokeMethodInFunctionalType(EtsClass *type)
+{
+    ASSERT(type->IsFunction());
+    for (size_t arity = 0; arity <= STD_CORE_FUNCTION_MAX_ARITY; ++arity) {
+        PandaStringStream ss;
+        ss << STD_CORE_FUNCTION_INVOKE_PREFIX << arity;
+        PandaString str = ss.str();
+        auto method = type->GetMethod(str.c_str());
+        if (method != nullptr) {
+            return method;
+        }
+    }
+    UNREACHABLE();
+}
+
 EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td, EtsRuntimeLinker *contextLinker)
 {
     ASSERT(contextLinker != nullptr);
@@ -53,13 +68,10 @@ EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td, EtsRuntimeLinker
     }
     ASSERT(td[0] == CLASS_TYPE_PREFIX);
     auto type = classLinker->GetClass(td.c_str(), true, ctx);
-
-    auto method = type->GetMethod(ark::ets::LAMBDA_METHOD_NAME);
-    if (method != nullptr) {
+    if (auto method = type->GetMethod(ark::ets::INVOKE_METHOD_NAME); method != nullptr) {
         return method;
     }
-
-    return type->GetMethod(FN_INVOKE_METHOD_NAME);
+    return FindInvokeMethodInFunctionalType(type);
 }
 
 EtsValue EtsMethod::Invoke(napi::ScopedManagedCodeFix *s, Value *args)
