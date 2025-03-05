@@ -201,6 +201,13 @@
                         "header_files": [],
                         "header_base": "//arkcompiler/runtime_core/static_core/plugins/ets/runtime/ani"
                     }
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/static_core/runtime:libarkruntime",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/static_core/runtime"
+                    }
                 }
             ],
             "test": [
