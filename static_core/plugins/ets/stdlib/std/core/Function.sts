@@ -49,67 +49,67 @@ export abstract class LambdaR0 implements __FunctionR0 {
     abstract invokeR0(...r: __T[]): __T;
     final invokeR1(p1: __T, ...r: __T[]): __T {
         return this.invokeR0(
-            Runtime.prependRestArgumentsStub(r, [p1]))
+            ...Runtime.prependRestArgumentsStub(r, [p1]))
     }
     final invokeR2(p1: __T, p2: __T, ...r: __T[]): __T {
         return this.invokeR0(
-            Runtime.prependRestArgumentsStub(r, [p1, p2]))
+            ...Runtime.prependRestArgumentsStub(r, [p1, p2]))
     }
     final invokeR3(p1: __T, p2: __T, p3: __T, ...r: __T[]): __T {
         return this.invokeR0(
-            Runtime.prependRestArgumentsStub(r, [p1, p2, p3]))
+            ...Runtime.prependRestArgumentsStub(r, [p1, p2, p3]))
     }
     final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: __T[]): __T {
         return this.invokeR0(
-            Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4]))
+            ...Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4]))
     }
     final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T {
         return this.invokeR0(
-            Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5]))
+            ...Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5]))
     }
     final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
         return this.invokeR0(
-            Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6]))
+            ...Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6]))
     }
     final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
         return this.invokeR0(
-            Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7]))
+            ...Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7]))
     }
     final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
         return this.invokeR0(
-            Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8]))
+            ...Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8]))
     }
     final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
         return this.invokeR0(
-            Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9]))
+            ...Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9]))
     }
     final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
         return this.invokeR0(
-            Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10]))
+            ...Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10]))
     }
     final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
         return this.invokeR0(
-            Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11]))
+            ...Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11]))
     }
     final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
         return this.invokeR0(
-            Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12]))
+            ...Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12]))
     }
     final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
         return this.invokeR0(
-            Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13]))
+            ...Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13]))
     }
     final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
         return this.invokeR0(
-            Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
+            ...Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
     final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
         return this.invokeR0(
-            Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
+            ...Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
     final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
         return this.invokeR0(
-            Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
+            ...Runtime.prependRestArgumentsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda0 implements __Function0 {
@@ -231,63 +231,63 @@ export abstract class LambdaR1 implements __FunctionR1 {
     abstract invokeR1(p1: __T, ...r: __T[]): __T;
     final invokeR2(p1: __T, p2: __T, ...r: __T[]): __T {
         return this.invokeR1(p1, 
-            Runtime.prependRestArgumentsStub(r, [p2]))
+            ...Runtime.prependRestArgumentsStub(r, [p2]))
     }
     final invokeR3(p1: __T, p2: __T, p3: __T, ...r: __T[]): __T {
         return this.invokeR1(p1, 
-            Runtime.prependRestArgumentsStub(r, [p2, p3]))
+            ...Runtime.prependRestArgumentsStub(r, [p2, p3]))
     }
     final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: __T[]): __T {
         return this.invokeR1(p1, 
-            Runtime.prependRestArgumentsStub(r, [p2, p3, p4]))
+            ...Runtime.prependRestArgumentsStub(r, [p2, p3, p4]))
     }
     final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T {
         return this.invokeR1(p1, 
-            Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5]))
+            ...Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5]))
     }
     final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
         return this.invokeR1(p1, 
-            Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6]))
+            ...Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6]))
     }
     final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
         return this.invokeR1(p1, 
-            Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7]))
+            ...Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7]))
     }
     final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
         return this.invokeR1(p1, 
-            Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8]))
+            ...Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8]))
     }
     final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
         return this.invokeR1(p1, 
-            Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9]))
+            ...Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9]))
     }
     final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
         return this.invokeR1(p1, 
-            Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10]))
+            ...Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10]))
     }
     final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
         return this.invokeR1(p1, 
-            Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11]))
+            ...Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11]))
     }
     final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
         return this.invokeR1(p1, 
-            Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12]))
+            ...Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12]))
     }
     final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
         return this.invokeR1(p1, 
-            Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13]))
+            ...Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13]))
     }
     final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
         return this.invokeR1(p1, 
-            Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
+            ...Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
     final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
         return this.invokeR1(p1, 
-            Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
+            ...Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
     final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
         return this.invokeR1(p1, 
-            Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
+            ...Runtime.prependRestArgumentsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda1 implements __Function1 {
@@ -403,59 +403,59 @@ export abstract class LambdaR2 implements __FunctionR2 {
     abstract invokeR2(p1: __T, p2: __T, ...r: __T[]): __T;
     final invokeR3(p1: __T, p2: __T, p3: __T, ...r: __T[]): __T {
         return this.invokeR2(p1, p2, 
-            Runtime.prependRestArgumentsStub(r, [p3]))
+            ...Runtime.prependRestArgumentsStub(r, [p3]))
     }
     final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: __T[]): __T {
         return this.invokeR2(p1, p2, 
-            Runtime.prependRestArgumentsStub(r, [p3, p4]))
+            ...Runtime.prependRestArgumentsStub(r, [p3, p4]))
     }
     final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T {
         return this.invokeR2(p1, p2, 
-            Runtime.prependRestArgumentsStub(r, [p3, p4, p5]))
+            ...Runtime.prependRestArgumentsStub(r, [p3, p4, p5]))
     }
     final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
         return this.invokeR2(p1, p2, 
-            Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6]))
+            ...Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6]))
     }
     final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
         return this.invokeR2(p1, p2, 
-            Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7]))
+            ...Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7]))
     }
     final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
         return this.invokeR2(p1, p2, 
-            Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8]))
+            ...Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8]))
     }
     final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
         return this.invokeR2(p1, p2, 
-            Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8, p9]))
+            ...Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8, p9]))
     }
     final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
         return this.invokeR2(p1, p2, 
-            Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10]))
+            ...Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10]))
     }
     final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
         return this.invokeR2(p1, p2, 
-            Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11]))
+            ...Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11]))
     }
     final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
         return this.invokeR2(p1, p2, 
-            Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12]))
+            ...Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12]))
     }
     final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
         return this.invokeR2(p1, p2, 
-            Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13]))
+            ...Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13]))
     }
     final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
         return this.invokeR2(p1, p2, 
-            Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
+            ...Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
     final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
         return this.invokeR2(p1, p2, 
-            Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
+            ...Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
     final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
         return this.invokeR2(p1, p2, 
-            Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
+            ...Runtime.prependRestArgumentsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda2 implements __Function2 {
@@ -565,55 +565,55 @@ export abstract class LambdaR3 implements __FunctionR3 {
     abstract invokeR3(p1: __T, p2: __T, p3: __T, ...r: __T[]): __T;
     final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: __T[]): __T {
         return this.invokeR3(p1, p2, p3, 
-            Runtime.prependRestArgumentsStub(r, [p4]))
+            ...Runtime.prependRestArgumentsStub(r, [p4]))
     }
     final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T {
         return this.invokeR3(p1, p2, p3, 
-            Runtime.prependRestArgumentsStub(r, [p4, p5]))
+            ...Runtime.prependRestArgumentsStub(r, [p4, p5]))
     }
     final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
         return this.invokeR3(p1, p2, p3, 
-            Runtime.prependRestArgumentsStub(r, [p4, p5, p6]))
+            ...Runtime.prependRestArgumentsStub(r, [p4, p5, p6]))
     }
     final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
         return this.invokeR3(p1, p2, p3, 
-            Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7]))
+            ...Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7]))
     }
     final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
         return this.invokeR3(p1, p2, p3, 
-            Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8]))
+            ...Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8]))
     }
     final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
         return this.invokeR3(p1, p2, p3, 
-            Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8, p9]))
+            ...Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8, p9]))
     }
     final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
         return this.invokeR3(p1, p2, p3, 
-            Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8, p9, p10]))
+            ...Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8, p9, p10]))
     }
     final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
         return this.invokeR3(p1, p2, p3, 
-            Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11]))
+            ...Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11]))
     }
     final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
         return this.invokeR3(p1, p2, p3, 
-            Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12]))
+            ...Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12]))
     }
     final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
         return this.invokeR3(p1, p2, p3, 
-            Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13]))
+            ...Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13]))
     }
     final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
         return this.invokeR3(p1, p2, p3, 
-            Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
+            ...Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
     final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
         return this.invokeR3(p1, p2, p3, 
-            Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
+            ...Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
     final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
         return this.invokeR3(p1, p2, p3, 
-            Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
+            ...Runtime.prependRestArgumentsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda3 implements __Function3 {
@@ -717,51 +717,51 @@ export abstract class LambdaR4 implements __FunctionR4 {
     abstract invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: __T[]): __T;
     final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T {
         return this.invokeR4(p1, p2, p3, p4, 
-            Runtime.prependRestArgumentsStub(r, [p5]))
+            ...Runtime.prependRestArgumentsStub(r, [p5]))
     }
     final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
         return this.invokeR4(p1, p2, p3, p4, 
-            Runtime.prependRestArgumentsStub(r, [p5, p6]))
+            ...Runtime.prependRestArgumentsStub(r, [p5, p6]))
     }
     final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
         return this.invokeR4(p1, p2, p3, p4, 
-            Runtime.prependRestArgumentsStub(r, [p5, p6, p7]))
+            ...Runtime.prependRestArgumentsStub(r, [p5, p6, p7]))
     }
     final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
         return this.invokeR4(p1, p2, p3, p4, 
-            Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8]))
+            ...Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8]))
     }
     final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
         return this.invokeR4(p1, p2, p3, p4, 
-            Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8, p9]))
+            ...Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8, p9]))
     }
     final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
         return this.invokeR4(p1, p2, p3, p4, 
-            Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8, p9, p10]))
+            ...Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8, p9, p10]))
     }
     final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
         return this.invokeR4(p1, p2, p3, p4, 
-            Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8, p9, p10, p11]))
+            ...Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8, p9, p10, p11]))
     }
     final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
         return this.invokeR4(p1, p2, p3, p4, 
-            Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12]))
+            ...Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12]))
     }
     final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
         return this.invokeR4(p1, p2, p3, p4, 
-            Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13]))
+            ...Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13]))
     }
     final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
         return this.invokeR4(p1, p2, p3, p4, 
-            Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
+            ...Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
     final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
         return this.invokeR4(p1, p2, p3, p4, 
-            Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
+            ...Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
     final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
         return this.invokeR4(p1, p2, p3, p4, 
-            Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
+            ...Runtime.prependRestArgumentsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda4 implements __Function4 {
@@ -859,47 +859,47 @@ export abstract class LambdaR5 implements __FunctionR5 {
     abstract invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T;
     final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
-            Runtime.prependRestArgumentsStub(r, [p6]))
+            ...Runtime.prependRestArgumentsStub(r, [p6]))
     }
     final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
-            Runtime.prependRestArgumentsStub(r, [p6, p7]))
+            ...Runtime.prependRestArgumentsStub(r, [p6, p7]))
     }
     final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
-            Runtime.prependRestArgumentsStub(r, [p6, p7, p8]))
+            ...Runtime.prependRestArgumentsStub(r, [p6, p7, p8]))
     }
     final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
-            Runtime.prependRestArgumentsStub(r, [p6, p7, p8, p9]))
+            ...Runtime.prependRestArgumentsStub(r, [p6, p7, p8, p9]))
     }
     final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
-            Runtime.prependRestArgumentsStub(r, [p6, p7, p8, p9, p10]))
+            ...Runtime.prependRestArgumentsStub(r, [p6, p7, p8, p9, p10]))
     }
     final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
-            Runtime.prependRestArgumentsStub(r, [p6, p7, p8, p9, p10, p11]))
+            ...Runtime.prependRestArgumentsStub(r, [p6, p7, p8, p9, p10, p11]))
     }
     final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
-            Runtime.prependRestArgumentsStub(r, [p6, p7, p8, p9, p10, p11, p12]))
+            ...Runtime.prependRestArgumentsStub(r, [p6, p7, p8, p9, p10, p11, p12]))
     }
     final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
-            Runtime.prependRestArgumentsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13]))
+            ...Runtime.prependRestArgumentsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13]))
     }
     final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
-            Runtime.prependRestArgumentsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13, p14]))
+            ...Runtime.prependRestArgumentsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
     final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
-            Runtime.prependRestArgumentsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
+            ...Runtime.prependRestArgumentsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
     final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
-            Runtime.prependRestArgumentsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
+            ...Runtime.prependRestArgumentsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda5 implements __Function5 {
@@ -991,43 +991,43 @@ export abstract class LambdaR6 implements __FunctionR6 {
     abstract invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T;
     final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
-            Runtime.prependRestArgumentsStub(r, [p7]))
+            ...Runtime.prependRestArgumentsStub(r, [p7]))
     }
     final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
-            Runtime.prependRestArgumentsStub(r, [p7, p8]))
+            ...Runtime.prependRestArgumentsStub(r, [p7, p8]))
     }
     final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
-            Runtime.prependRestArgumentsStub(r, [p7, p8, p9]))
+            ...Runtime.prependRestArgumentsStub(r, [p7, p8, p9]))
     }
     final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
-            Runtime.prependRestArgumentsStub(r, [p7, p8, p9, p10]))
+            ...Runtime.prependRestArgumentsStub(r, [p7, p8, p9, p10]))
     }
     final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
-            Runtime.prependRestArgumentsStub(r, [p7, p8, p9, p10, p11]))
+            ...Runtime.prependRestArgumentsStub(r, [p7, p8, p9, p10, p11]))
     }
     final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
-            Runtime.prependRestArgumentsStub(r, [p7, p8, p9, p10, p11, p12]))
+            ...Runtime.prependRestArgumentsStub(r, [p7, p8, p9, p10, p11, p12]))
     }
     final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
-            Runtime.prependRestArgumentsStub(r, [p7, p8, p9, p10, p11, p12, p13]))
+            ...Runtime.prependRestArgumentsStub(r, [p7, p8, p9, p10, p11, p12, p13]))
     }
     final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
-            Runtime.prependRestArgumentsStub(r, [p7, p8, p9, p10, p11, p12, p13, p14]))
+            ...Runtime.prependRestArgumentsStub(r, [p7, p8, p9, p10, p11, p12, p13, p14]))
     }
     final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
-            Runtime.prependRestArgumentsStub(r, [p7, p8, p9, p10, p11, p12, p13, p14, p15]))
+            ...Runtime.prependRestArgumentsStub(r, [p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
     final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
-            Runtime.prependRestArgumentsStub(r, [p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
+            ...Runtime.prependRestArgumentsStub(r, [p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda6 implements __Function6 {
@@ -1113,39 +1113,39 @@ export abstract class LambdaR7 implements __FunctionR7 {
     abstract invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T;
     final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
-            Runtime.prependRestArgumentsStub(r, [p8]))
+            ...Runtime.prependRestArgumentsStub(r, [p8]))
     }
     final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
-            Runtime.prependRestArgumentsStub(r, [p8, p9]))
+            ...Runtime.prependRestArgumentsStub(r, [p8, p9]))
     }
     final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
-            Runtime.prependRestArgumentsStub(r, [p8, p9, p10]))
+            ...Runtime.prependRestArgumentsStub(r, [p8, p9, p10]))
     }
     final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
-            Runtime.prependRestArgumentsStub(r, [p8, p9, p10, p11]))
+            ...Runtime.prependRestArgumentsStub(r, [p8, p9, p10, p11]))
     }
     final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
-            Runtime.prependRestArgumentsStub(r, [p8, p9, p10, p11, p12]))
+            ...Runtime.prependRestArgumentsStub(r, [p8, p9, p10, p11, p12]))
     }
     final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
-            Runtime.prependRestArgumentsStub(r, [p8, p9, p10, p11, p12, p13]))
+            ...Runtime.prependRestArgumentsStub(r, [p8, p9, p10, p11, p12, p13]))
     }
     final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
-            Runtime.prependRestArgumentsStub(r, [p8, p9, p10, p11, p12, p13, p14]))
+            ...Runtime.prependRestArgumentsStub(r, [p8, p9, p10, p11, p12, p13, p14]))
     }
     final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
-            Runtime.prependRestArgumentsStub(r, [p8, p9, p10, p11, p12, p13, p14, p15]))
+            ...Runtime.prependRestArgumentsStub(r, [p8, p9, p10, p11, p12, p13, p14, p15]))
     }
     final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
-            Runtime.prependRestArgumentsStub(r, [p8, p9, p10, p11, p12, p13, p14, p15, p16]))
+            ...Runtime.prependRestArgumentsStub(r, [p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda7 implements __Function7 {
@@ -1225,35 +1225,35 @@ export abstract class LambdaR8 implements __FunctionR8 {
     abstract invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T;
     final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
-            Runtime.prependRestArgumentsStub(r, [p9]))
+            ...Runtime.prependRestArgumentsStub(r, [p9]))
     }
     final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
-            Runtime.prependRestArgumentsStub(r, [p9, p10]))
+            ...Runtime.prependRestArgumentsStub(r, [p9, p10]))
     }
     final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
-            Runtime.prependRestArgumentsStub(r, [p9, p10, p11]))
+            ...Runtime.prependRestArgumentsStub(r, [p9, p10, p11]))
     }
     final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
-            Runtime.prependRestArgumentsStub(r, [p9, p10, p11, p12]))
+            ...Runtime.prependRestArgumentsStub(r, [p9, p10, p11, p12]))
     }
     final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
-            Runtime.prependRestArgumentsStub(r, [p9, p10, p11, p12, p13]))
+            ...Runtime.prependRestArgumentsStub(r, [p9, p10, p11, p12, p13]))
     }
     final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
-            Runtime.prependRestArgumentsStub(r, [p9, p10, p11, p12, p13, p14]))
+            ...Runtime.prependRestArgumentsStub(r, [p9, p10, p11, p12, p13, p14]))
     }
     final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
-            Runtime.prependRestArgumentsStub(r, [p9, p10, p11, p12, p13, p14, p15]))
+            ...Runtime.prependRestArgumentsStub(r, [p9, p10, p11, p12, p13, p14, p15]))
     }
     final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
-            Runtime.prependRestArgumentsStub(r, [p9, p10, p11, p12, p13, p14, p15, p16]))
+            ...Runtime.prependRestArgumentsStub(r, [p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda8 implements __Function8 {
@@ -1327,31 +1327,31 @@ export abstract class LambdaR9 implements __FunctionR9 {
     abstract invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T;
     final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
-            Runtime.prependRestArgumentsStub(r, [p10]))
+            ...Runtime.prependRestArgumentsStub(r, [p10]))
     }
     final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
-            Runtime.prependRestArgumentsStub(r, [p10, p11]))
+            ...Runtime.prependRestArgumentsStub(r, [p10, p11]))
     }
     final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
-            Runtime.prependRestArgumentsStub(r, [p10, p11, p12]))
+            ...Runtime.prependRestArgumentsStub(r, [p10, p11, p12]))
     }
     final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
-            Runtime.prependRestArgumentsStub(r, [p10, p11, p12, p13]))
+            ...Runtime.prependRestArgumentsStub(r, [p10, p11, p12, p13]))
     }
     final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
-            Runtime.prependRestArgumentsStub(r, [p10, p11, p12, p13, p14]))
+            ...Runtime.prependRestArgumentsStub(r, [p10, p11, p12, p13, p14]))
     }
     final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
-            Runtime.prependRestArgumentsStub(r, [p10, p11, p12, p13, p14, p15]))
+            ...Runtime.prependRestArgumentsStub(r, [p10, p11, p12, p13, p14, p15]))
     }
     final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
-            Runtime.prependRestArgumentsStub(r, [p10, p11, p12, p13, p14, p15, p16]))
+            ...Runtime.prependRestArgumentsStub(r, [p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda9 implements __Function9 {
@@ -1419,27 +1419,27 @@ export abstract class LambdaR10 implements __FunctionR10 {
     abstract invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T;
     final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
-            Runtime.prependRestArgumentsStub(r, [p11]))
+            ...Runtime.prependRestArgumentsStub(r, [p11]))
     }
     final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
-            Runtime.prependRestArgumentsStub(r, [p11, p12]))
+            ...Runtime.prependRestArgumentsStub(r, [p11, p12]))
     }
     final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
-            Runtime.prependRestArgumentsStub(r, [p11, p12, p13]))
+            ...Runtime.prependRestArgumentsStub(r, [p11, p12, p13]))
     }
     final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
-            Runtime.prependRestArgumentsStub(r, [p11, p12, p13, p14]))
+            ...Runtime.prependRestArgumentsStub(r, [p11, p12, p13, p14]))
     }
     final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
-            Runtime.prependRestArgumentsStub(r, [p11, p12, p13, p14, p15]))
+            ...Runtime.prependRestArgumentsStub(r, [p11, p12, p13, p14, p15]))
     }
     final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
-            Runtime.prependRestArgumentsStub(r, [p11, p12, p13, p14, p15, p16]))
+            ...Runtime.prependRestArgumentsStub(r, [p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda10 implements __Function10 {
@@ -1501,23 +1501,23 @@ export abstract class LambdaR11 implements __FunctionR11 {
     abstract invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T;
     final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
         return this.invokeR11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, 
-            Runtime.prependRestArgumentsStub(r, [p12]))
+            ...Runtime.prependRestArgumentsStub(r, [p12]))
     }
     final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
         return this.invokeR11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, 
-            Runtime.prependRestArgumentsStub(r, [p12, p13]))
+            ...Runtime.prependRestArgumentsStub(r, [p12, p13]))
     }
     final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
         return this.invokeR11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, 
-            Runtime.prependRestArgumentsStub(r, [p12, p13, p14]))
+            ...Runtime.prependRestArgumentsStub(r, [p12, p13, p14]))
     }
     final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
         return this.invokeR11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, 
-            Runtime.prependRestArgumentsStub(r, [p12, p13, p14, p15]))
+            ...Runtime.prependRestArgumentsStub(r, [p12, p13, p14, p15]))
     }
     final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
         return this.invokeR11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, 
-            Runtime.prependRestArgumentsStub(r, [p12, p13, p14, p15, p16]))
+            ...Runtime.prependRestArgumentsStub(r, [p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda11 implements __Function11 {
@@ -1573,19 +1573,19 @@ export abstract class LambdaR12 implements __FunctionR12 {
     abstract invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T;
     final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
         return this.invokeR12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, 
-            Runtime.prependRestArgumentsStub(r, [p13]))
+            ...Runtime.prependRestArgumentsStub(r, [p13]))
     }
     final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
         return this.invokeR12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, 
-            Runtime.prependRestArgumentsStub(r, [p13, p14]))
+            ...Runtime.prependRestArgumentsStub(r, [p13, p14]))
     }
     final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
         return this.invokeR12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, 
-            Runtime.prependRestArgumentsStub(r, [p13, p14, p15]))
+            ...Runtime.prependRestArgumentsStub(r, [p13, p14, p15]))
     }
     final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
         return this.invokeR12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, 
-            Runtime.prependRestArgumentsStub(r, [p13, p14, p15, p16]))
+            ...Runtime.prependRestArgumentsStub(r, [p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda12 implements __Function12 {
@@ -1635,15 +1635,15 @@ export abstract class LambdaR13 implements __FunctionR13 {
     abstract invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T;
     final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
         return this.invokeR13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, 
-            Runtime.prependRestArgumentsStub(r, [p14]))
+            ...Runtime.prependRestArgumentsStub(r, [p14]))
     }
     final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
         return this.invokeR13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, 
-            Runtime.prependRestArgumentsStub(r, [p14, p15]))
+            ...Runtime.prependRestArgumentsStub(r, [p14, p15]))
     }
     final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
         return this.invokeR13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, 
-            Runtime.prependRestArgumentsStub(r, [p14, p15, p16]))
+            ...Runtime.prependRestArgumentsStub(r, [p14, p15, p16]))
     }
 }
 export abstract class Lambda13 implements __Function13 {
@@ -1687,11 +1687,11 @@ export abstract class LambdaR14 implements __FunctionR14 {
     abstract invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T;
     final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
         return this.invokeR14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, 
-            Runtime.prependRestArgumentsStub(r, [p15]))
+            ...Runtime.prependRestArgumentsStub(r, [p15]))
     }
     final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
         return this.invokeR14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, 
-            Runtime.prependRestArgumentsStub(r, [p15, p16]))
+            ...Runtime.prependRestArgumentsStub(r, [p15, p16]))
     }
 }
 export abstract class Lambda14 implements __Function14 {
@@ -1729,7 +1729,7 @@ export abstract class LambdaR15 implements __FunctionR15 {
     abstract invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T;
     final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
         return this.invokeR15(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, 
-            Runtime.prependRestArgumentsStub(r, [p16]))
+            ...Runtime.prependRestArgumentsStub(r, [p16]))
     }
 }
 export abstract class Lambda15 implements __Function15 {
