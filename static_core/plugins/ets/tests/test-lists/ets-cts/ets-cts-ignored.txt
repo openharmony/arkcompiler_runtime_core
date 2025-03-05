@@ -1293,10 +1293,6 @@
 15.semantic_rules/06.compatibility_call_args/tuple_rest_params_1.sts
 
 #20715 Smart cast fails to find out the parameter type
-15.semantic_rules/07.type_inference/01.smart_types/comb_13.sts
-15.semantic_rules/07.type_inference/01.smart_types/comb_13a.sts
-15.semantic_rules/07.type_inference/01.smart_types/comb_13b.sts
-15.semantic_rules/07.type_inference/01.smart_types/comb_13d.sts
 15.semantic_rules/07.type_inference/01.smart_types/comb_10a.sts
 15.semantic_rules/07.type_inference/01.smart_types/comb_12a.sts
 15.semantic_rules/07.type_inference/01.smart_types/comb_12b.sts
