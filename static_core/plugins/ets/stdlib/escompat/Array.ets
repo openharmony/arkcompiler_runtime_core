@@ -148,6 +148,59 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
+     * Creates a new instance of Array.
+     *
+     * @param arrayLength amount of elements.
+     *
+     * @param initialValue initial value of elements.
+     *
+     */
+    public static create<T>(arrayLength: number, initialValue: T): Array<T> {
+        let other = new Array<T>(arrayLength as int)
+        other.fill(initialValue)
+        return other
+    }
+
+    /**
+     * Extends Array with new elements to specified length.
+     *
+     * @param arrayLength amount of new added elements.
+     *
+     * @param initialValue initial value of new elements.
+     *
+     */
+    public extendTo(arrayLength: number, initialValue: T): void {
+        if (arrayLength <= this.actualLength) {
+            return
+        }
+        this.ensureUnusedCapacity(arrayLength as int)
+        for (let i: int = 0; i < arrayLength; i++) {
+            this.buffer[this.actualLength + i] = initialValue
+        }
+        this.actualLength += arrayLength
+    }
+
+    /**
+     * Shrinks Array to specified length.
+     *
+     * @param arrayLength length at which to shrink.
+     *
+     */
+    public shrinkTo(arrayLength: number): void {
+        if (arrayLength >= this.actualLength) {
+            return
+        }
+        let newLen: int = arrayLength as int
+        if (newLen < 0) {
+            // Convert from signed to unsigned
+            newLen = newLen & Int.MAX_VALUE
+        }
+        const other = this.slice(0, newLen)
+        this.buffer = other.buffer
+        this.actualLength = other.actualLength
+    }
+
+    /**
      * Creates a new instance of an Array with the specified length
      *
      * @param arrayLength The length of the array to be created (optional).
