@@ -36,6 +36,7 @@
 // CC-OFFNXT(G.PRE.02) should be with define
 #define CHECK_ENV(env)                                                                           \
     do {                                                                                         \
+        ANI_CHECK_RETURN_IF_EQ(env, nullptr, ANI_INVALID_ARGS);                                  \
         bool hasPendingException = ::ark::ets::PandaEnv::FromAniEnv(env)->HasPendingException(); \
         ANI_CHECK_RETURN_IF_EQ(hasPendingException, true, ANI_PENDING_ERROR);                    \
     } while (false)

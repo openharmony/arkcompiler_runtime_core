@@ -55,6 +55,20 @@ TEST_F(VariableSetValueDoubleTest, set_double_value_1)
     ASSERT_EQ(CallEtsFunction<ani_boolean>("checkDoubleValue", minValue), ANI_TRUE);
 }
 
+TEST_F(VariableSetValueDoubleTest, set_double_value_invalid_env)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_NE(ns, nullptr);
+
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns, "aDouble", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+    ani_double value = 2.0F;
+    ASSERT_EQ(env_->c_api->Variable_SetValue_Double(nullptr, variable, value), ANI_INVALID_ARGS);
+}
+
 TEST_F(VariableSetValueDoubleTest, set_double_value_invalid_value_type)
 {
     ani_namespace ns {};
