@@ -29,7 +29,6 @@
 #include "plugins/ets/runtime/types/ets_promise_ref.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "plugins/ets/runtime/types/ets_method.h"
-#include "plugins/ets/runtime/interop_js/js_remote_promise_resolver.h"
 
 namespace ark::ets::interop::js {
 

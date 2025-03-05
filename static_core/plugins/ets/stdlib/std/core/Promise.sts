@@ -341,7 +341,6 @@ export final class Promise<out T> implements PromiseLike<T> {
     private interopObject?: Object;
     private linkedPromise?: Object;
     private queueSize: int = 0;
-    private remotePromiseResolver: long = 0;
     private state: int = Promise.STATE_PENDING;
 }
 

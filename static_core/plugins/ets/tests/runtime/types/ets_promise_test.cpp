@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,7 +66,6 @@ public:
             MIRROR_FIELD_INFO(EtsPromise, interopObject_, "interopObject"),
             MIRROR_FIELD_INFO(EtsPromise, linkedPromise_, "linkedPromise"),
             MIRROR_FIELD_INFO(EtsPromise, queueSize_, "queueSize"),
-            MIRROR_FIELD_INFO(EtsPromise, remotePromiseResolver_, "remotePromiseResolver"),
             MIRROR_FIELD_INFO(EtsPromise, state_, "state"),
         };
     }
