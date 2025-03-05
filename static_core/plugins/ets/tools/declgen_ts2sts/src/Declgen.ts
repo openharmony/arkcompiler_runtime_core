@@ -40,20 +40,22 @@ export class Declgen {
 
   constructor(
     declgenOptions: DeclgenCLIOptions,
-    customResolveModuleNames?: (moduleName: string[], containingFile: string) => ts.ResolvedModuleFull[]) {
-    const { rootNames, options } = Declgen.parseDeclgenOptions(declgenOptions);
+    customResolveModuleNames?: (moduleName: string[], containingFile: string) => ts.ResolvedModuleFull[],
+    compilerOptions?: ts.CompilerOptions) {
+    let { rootNames, options } = Declgen.parseDeclgenOptions(declgenOptions);
 
     this.rootFiles = rootNames;
 
     this.sourceFileMap = new Map<string, ts.SourceFile>();
-
-    this.compilerOptions = Object.assign(options, {
+    this.compilerOptions = Object.assign({}, options, {
       declaration: true,
       emitDeclarationOnly: true,
       outDir: declgenOptions.outDir,
-      ...(declgenOptions.rootDir ? { rootDir: declgenOptions.rootDir } : {})
+      ...(declgenOptions.rootDir ? { rootDir: declgenOptions.rootDir } : {}),
+      ...(compilerOptions ?? {})
     });
-
+    // Prevent the noemit of the passed compilerOptions from being true
+    this.compilerOptions.noEmit = false;
     this.hookedHost = Declgen.createHookedCompilerHost(this.sourceFileMap, this.compilerOptions);
     if (customResolveModuleNames) {
       this.hookedHost.resolveModuleNames = customResolveModuleNames;
