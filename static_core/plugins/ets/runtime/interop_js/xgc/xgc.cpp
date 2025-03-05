@@ -180,20 +180,16 @@ void XGC::GCFinished(const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeG
         return;
     }
     XGCScope xgcFinishScope("XGC Finish", vm_);
-    stsVmIface_->FinishXGCBarrier();
     vm_->AddRootProvider(storage_);
     isXGcInProgress_ = false;
     if (remarkFinished_) {
         // XGC was not interrupted
-        // NOTE(audovichenko): Sweep SharedReferenceStorage. It could be done:
-        // * on the common STW
-        // * in the main thread.
-        // To do it on the main thread we should start a coro on the main worker
-        // or post async job using libuv.
         XGCScope xgcSweepScope("XGC Sweep", vm_);
         storage_->SweepUnmarkedRefs();
     }
     storage_->NotifyXGCFinished();
+    // Sweep should be done on common STW, so it's critical to have the barrier here
+    stsVmIface_->FinishXGCBarrier();
     // NOTE(ipetrov, XGC): if table will be cleared in concurrent, then compute the new size should not be based on
     // the current storage size, need storage size without dead references
     auto newTargetThreshold = this->ComputeNewSize();
