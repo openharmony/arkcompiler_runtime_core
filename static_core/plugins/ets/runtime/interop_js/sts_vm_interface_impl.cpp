@@ -38,11 +38,14 @@ void STSVMInterfaceImpl::OnVMDetach()
     xgcBarrier_.Decrement();
 }
 
-void STSVMInterfaceImpl::StartXGCBarrier()
+bool STSVMInterfaceImpl::StartXGCBarrier(const NoWorkPred &func)
 {
     ASSERT(xgcSyncState_ == XGCSyncState::NONE);
-    xgcBarrier_.InitialWait();
-    xgcSyncState_ = XGCSyncState::CONCURRENT_PHASE;
+    auto res = xgcBarrier_.InitialWait(func);
+    if (res) {
+        xgcSyncState_ = XGCSyncState::CONCURRENT_PHASE;
+    }
+    return res;
 }
 
 bool STSVMInterfaceImpl::WaitForConcurrentMark(const NoWorkPred &func)
@@ -107,9 +110,9 @@ void STSVMInterfaceImpl::VMBarrier::Decrement()
     Wake();
 }
 
-void STSVMInterfaceImpl::VMBarrier::InitialWait()
+bool STSVMInterfaceImpl::VMBarrier::InitialWait(const NoWorkPred &noWorkPred)
 {
-    Wait(nullptr, true);
+    return Wait(noWorkPred, true);
 }
 
 bool STSVMInterfaceImpl::VMBarrier::Wait(const NoWorkPred &noWorkPred)

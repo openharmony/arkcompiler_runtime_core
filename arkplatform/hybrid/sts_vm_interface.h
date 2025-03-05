@@ -61,8 +61,10 @@ public:
     /**
      * @brief Method waits for all threads to start XGC. The count of threads can be changed using methods OnVMAttach
      * and OnVMDetach. After this method XGC is considered to be running.
+     * @param func: predicate that checks if XGC was interrupted or not
+     * @returns value based on NoWorkPred, can be not only interruption in the common case
      */
-    virtual void StartXGCBarrier() = 0;
+    virtual bool StartXGCBarrier(const NoWorkPred &func) = 0;
     /**
      * @brief Method waits for all threads would call WaitForConcurrentMark.
      * @param func: predicate that checks if we need to leave barrier to continue marking

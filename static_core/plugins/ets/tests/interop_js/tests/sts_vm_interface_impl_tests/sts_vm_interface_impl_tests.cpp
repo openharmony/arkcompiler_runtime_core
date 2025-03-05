@@ -212,7 +212,7 @@ TEST_F(BarrierTests, TwoThreadScenario)
     static constexpr size_t PIPE_ELEMENT_COUNT = 100U;
 
     auto sthreadBody = [&stsVMIface, &queue] {
-        stsVMIface.StartXGCBarrier();
+        stsVMIface.StartXGCBarrier(nullptr);
         // start pushing something for other thread
         for (size_t i = 0; i < PIPE_ELEMENT_COUNT; i++) {
             queue.Push(i);
@@ -229,7 +229,7 @@ TEST_F(BarrierTests, TwoThreadScenario)
     };
 
     auto dthreadBody = [&stsVMIface, &queue] {
-        stsVMIface.StartXGCBarrier();
+        stsVMIface.StartXGCBarrier(nullptr);
         size_t counter = 0;
         do {
             while (queue.Size() != 0) {
@@ -256,6 +256,60 @@ TEST_F(BarrierTests, TwoThreadScenario)
     // ... real magic is here ...
     sthread.join();
     dthread.join();
+}
+
+TEST_F(BarrierTests, StartXGCBarrierWithPredicate)
+{
+    STSVMInterfaceImpl stsVMIface;
+    bool wasNotInterrupted = true;
+
+    auto threadBody = [&stsVMIface, &wasNotInterrupted] {
+        wasNotInterrupted = stsVMIface.StartXGCBarrier([] { return false; });
+        ASSERT_FALSE(wasNotInterrupted);
+        stsVMIface.NotifyWaiters();
+    };
+
+    std::thread thread(threadBody);
+
+    ASSERT_FALSE(stsVMIface.StartXGCBarrier([&wasNotInterrupted] { return wasNotInterrupted; }));
+
+    thread.join();
+}
+
+TEST_F(BarrierTests, StartXGCBarrierWithPredicate2)
+{
+    STSVMInterfaceImpl stsVMIface;
+
+    auto threadBody = [&stsVMIface] {
+        ASSERT_TRUE(stsVMIface.StartXGCBarrier([] { return true; }));
+        stsVMIface.NotifyWaiters();
+        stsVMIface.FinishXGCBarrier();
+    };
+
+    std::thread thread(threadBody);
+
+    ASSERT_TRUE(stsVMIface.StartXGCBarrier([] { return true; }));
+    stsVMIface.FinishXGCBarrier();
+
+    thread.join();
+}
+
+TEST_F(BarrierTests, StartXGCBarrierWithoutPredicate)
+{
+    STSVMInterfaceImpl stsVMIface;
+
+    auto threadBody = [&stsVMIface] {
+        ASSERT_TRUE(stsVMIface.StartXGCBarrier(nullptr));
+        stsVMIface.NotifyWaiters();
+        stsVMIface.FinishXGCBarrier();
+    };
+
+    std::thread thread(threadBody);
+
+    ASSERT_TRUE(stsVMIface.StartXGCBarrier(nullptr));
+    stsVMIface.FinishXGCBarrier();
+
+    thread.join();
 }
 
 }  // namespace ark::ets::interop::js::testing

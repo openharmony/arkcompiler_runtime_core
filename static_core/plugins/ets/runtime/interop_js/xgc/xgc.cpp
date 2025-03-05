@@ -226,7 +226,7 @@ void XGC::GCPhaseStarted(mem::GCPhase phase)
             UnmarkAll();
             {
                 XGCScope xgcStartBarrierScope("StartXGCBarrier", vm_);
-                stsVmIface_->StartXGCBarrier();
+                stsVmIface_->StartXGCBarrier(nullptr);
             }
             break;
         }
@@ -365,7 +365,12 @@ bool XGC::Trigger(mem::GC *gc, PandaUniquePtr<GCTask> task)
     if (!ctx->GetXGCVmAdaptor()->StartXRefMarking()) {
         return false;
     }
-    return gc->Trigger(std::move(task));
+    if (!gc->Trigger(std::move(task))) {
+        ctx->GetXGCVmAdaptor()->NotifyXGCInterruption();
+        stsVmIface_->NotifyWaiters();
+        return false;
+    }
+    return true;
 }
 
 void XGC::TriggerGcIfNeeded(mem::GC *gc)

@@ -42,7 +42,7 @@ public:
     PANDA_PUBLIC_API void OnVMAttach() override;
     PANDA_PUBLIC_API void OnVMDetach() override;
 
-    PANDA_PUBLIC_API void StartXGCBarrier() override;
+    PANDA_PUBLIC_API bool StartXGCBarrier(const NoWorkPred &func) override;
     PANDA_PUBLIC_API bool WaitForConcurrentMark(const NoWorkPred &func) override;
     PANDA_PUBLIC_API void RemarkStartBarrier() override;
     PANDA_PUBLIC_API bool WaitForRemark(const NoWorkPred &func) override;
@@ -64,7 +64,7 @@ private:
         PANDA_PUBLIC_API void Increment();
         PANDA_PUBLIC_API void Decrement();
 
-        PANDA_PUBLIC_API void InitialWait();
+        PANDA_PUBLIC_API bool InitialWait(const NoWorkPred &noWorkPred = nullptr);
         PANDA_PUBLIC_API bool Wait(const NoWorkPred &noWorkPred = nullptr);
         PANDA_PUBLIC_API void Signal();
 
