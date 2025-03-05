@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -34,6 +34,24 @@ BUILD_OHOS_RELEASE=${BUILD_OHOS_RELEASE:-false}
 BUILD_OHOS_RELEASE_GN=${BUILD_OHOS_RELEASE_GN:-false}
 LLVM_COMPONENTS="cmake-exports;llvm-headers;LLVM"
 LLVM_COMPONENTS_PLUS_LINK="${LLVM_COMPONENTS};llvm-link"
+
+# Release version with asserts and debug methods included
+FASTVERIFY_RELEASE=${FASTVERIFY_RELEASE:-false}
+ENABLE_LLVM_DUMP_FOR_RELEASE=OFF
+ENABLE_LLVM_ASSERTIONS_FOR_RELEASE=OFF
+RELEASE_POSTFIX=""
+
+if [[ "x${FASTVERIFY_RELEASE}" == "xtrue" ]]; then
+    if [[ "x${BUILD_OHOS_RELEASE}" == "xtrue" || "x${BUILD_AARCH64_RELEASE}" == "xtrue" ]]; then
+        ENABLE_LLVM_DUMP_FOR_RELEASE=ON
+        ENABLE_LLVM_ASSERTIONS_FOR_RELEASE=ON
+        RELEASE_POSTFIX="-fastverify"
+    else
+        echo "ERROR: FASTVERIFY_RELEASE should be used only with" \
+             "BUILD_OHOS_RELEASE or BUILD_AARCH64_RELEASE"
+        exit 1
+    fi
+fi
 
 # OHOS SDK and compiler
 OHOS_SDK=${OHOS_SDK:-""}
@@ -255,7 +273,7 @@ fi
 
 if [[ "x${BUILD_AARCH64_RELEASE}" == "xtrue" ]]; then
     TARGET="aarch64${BUILD_SUFFIX}"
-    INSTALL_DIR_NAME="llvm-${VERSION}-release-${TARGET}"
+    INSTALL_DIR_NAME="llvm-${VERSION}-release-${TARGET}${RELEASE_POSTFIX}"
     INSTALL_PREFIX="${INSTALL_DIR}/${INSTALL_DIR_NAME}"
     BUILD_PREFIX="${BUILD_DIR}/${INSTALL_DIR_NAME}"
     mkdir -p "${BUILD_PREFIX}"
@@ -275,6 +293,8 @@ if [[ "x${BUILD_AARCH64_RELEASE}" == "xtrue" ]]; then
         -DCMAKE_CXX_COMPILER="${CXX}" \
         -DCMAKE_STRIP="${STRIP}" \
         \
+        -DLLVM_ENABLE_DUMP=${ENABLE_LLVM_DUMP_FOR_RELEASE} \
+        -DLLVM_ENABLE_ASSERTIONS=${ENABLE_LLVM_ASSERTIONS_FOR_RELEASE} \
         -DLLVM_ENABLE_FFI=OFF \
         -DLLVM_ENABLE_TERMINFO=OFF \
         \
@@ -300,7 +320,7 @@ fi
 
 if [[ "x${BUILD_OHOS_RELEASE}" == "xtrue" ]]; then
     TARGET="ohos${BUILD_SUFFIX}"
-    INSTALL_DIR_NAME="llvm-${VERSION}-release-${TARGET}"
+    INSTALL_DIR_NAME="llvm-${VERSION}-release-${TARGET}${RELEASE_POSTFIX}"
     INSTALL_PREFIX="${INSTALL_DIR}/${INSTALL_DIR_NAME}"
     BUILD_PREFIX="${BUILD_DIR}/${INSTALL_DIR_NAME}"
     mkdir -p "${BUILD_PREFIX}"
@@ -315,6 +335,8 @@ if [[ "x${BUILD_OHOS_RELEASE}" == "xtrue" ]]; then
         \
         -DLLVM_DEFAULT_TARGET_TRIPLE=aarch64-linux-ohos \
         -DLLVM_TARGETS_TO_BUILD=AArch64 \
+        -DLLVM_ENABLE_DUMP=${ENABLE_LLVM_DUMP_FOR_RELEASE} \
+        -DLLVM_ENABLE_ASSERTIONS=${ENABLE_LLVM_ASSERTIONS_FOR_RELEASE} \
         \
         -DLLVM_ENABLE_FFI=OFF \
         -DLLVM_ENABLE_TERMINFO=OFF \
