@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 class Test {
     private static UNSET: int = 0;
     private static SUCCESS: int = 1;
+    private static FAIL: int = 2;
 
     constructor(iterations: int = 0) {
         this.result = Test.UNSET;
@@ -29,6 +30,7 @@ class Test {
     }
 
     fail(): void {
+        this.result = Test.FAIL;
         console.println("Test failed");
         throw new Error();
     }
@@ -41,6 +43,10 @@ class Test {
             console.println("Test result is not set");
         }
         throw new Error();
+    }
+
+    is_unset(): boolean {
+        return (this.result == Test.UNSET);
     }
 
     ready(): boolean {
@@ -75,6 +81,10 @@ let globalTest: Test | null = null;
 function check(): int {
     globalTest!.check();
     return 0;
+}
+
+function is_unset(): boolean {
+    return globalTest!.is_unset();
 }
 
 function ready(): boolean {
@@ -203,7 +213,7 @@ class PromiseChainFixture {
 }
 
 function testPromiseChain(): int {
-    globalTest = new Test(2);
+    globalTest = new Test();
     let fixture = new PromiseChainFixture();
     let p = new Promise<Object>((resolve: (value: Object) => void): void => {
         resolve(new Object());
@@ -234,7 +244,7 @@ function testPromiseChain(): int {
 }
 
 function testPromiseCatchFinallyChain(): int {
-    globalTest = new Test(2);
+    globalTest = new Test();
     let fixture = new PromiseChainFixture();
     let p: Promise<Object> = Promise.reject<Object>(new Object());
     // NOTE(audovichenko): Remove p1 and p2 variables #17359
@@ -259,7 +269,7 @@ function testPromiseCatchFinallyChain(): int {
 }
 
 function testResolvePromiseThenFinally(): int {
-    globalTest = new Test(1);
+    globalTest = new Test();
     let fixture = new PromiseChainFixture();
     let p = Promise.resolve<Object>(new Object());
     // NOTE(audovichenko): Remove p1 and p2 variables #17359
@@ -283,7 +293,7 @@ function testResolvePromiseThenFinally(): int {
 }
 
 function testRejectPromiseThenFinally(): int {
-    globalTest = new Test(1);
+    globalTest = new Test();
     let fixture = new PromiseChainFixture();
     let p = Promise.reject<Object>(new Object());
     // NOTE(audovichenko): Remove p1 and p2 variables #17359
@@ -336,6 +346,7 @@ function resolvePendingPromise(): boolean {
 
 let unresolved1: Object | null = null;
 let unresolved2: Object | null = null;
+let unresolved3: Object | null = null;
 
 async function asyncFuncAwait(): Promise<Object | null> {
     let promise: Promise<Object> = new Promise<Object>((resolve: (obj: Object) => void): void => {
@@ -353,10 +364,42 @@ let asyncLambdaAwait: () => Promise<Object | null> = async (): Promise<Object | 
     return null;
 }
 
+async function RejPromise1(): Promise<string> {
+    let s: string = await new Promise<string>(
+        (resolve: (obj: string) => void,
+         reject: (obj: string) => void): void => {
+        reject("rejected");
+    });
+    return s;
+}
+
+async function RejPromise2(): Promise<string> {
+    return await RejPromise1();
+}
+
+async function asyncFuncAwaitRejected(): Promise<Object | null> {
+    let promise: Promise<string> = RejPromise2();
+
+    let promise2: Promise<string> =
+    promise.then((x: Promise<string>): string => {
+        return "smth";
+    })
+
+    try {
+        unresolved3 = await promise;
+        globalTest!.fail();
+    } catch (e) {
+        return null;
+    }
+    globalTest!.fail();
+    return null;
+}
+
 function testAwaitPromise(): int {
     globalTest = new Test();
     let p1: Promise<Object | null> = asyncFuncAwait();
     let p2: Promise<Object | null> = asyncLambdaAwait();
+    let p3: Promise<Object | null> = asyncFuncAwaitRejected();
     if (unresolved1 != "resolved" || unresolved2 != "resolved") {
         globalTest!.fail();
     }
@@ -388,7 +431,7 @@ async function testAwaitJsPromise(pendingP: Promise<Object>): Promise<Object> {
 
     globalTest!.msg("testAwaitJsPromise: done", Test.INFO);
     /**
-     * NOTE(konstanting, #I67QXC): add a test where we would return here a PENDING promise.
+     * NOTE(konstanting, #IAD5MH): add a test where we would return here a PENDING promise.
      * Currently this leads to a crash, because:
      *     - testAwaitJsPromise$asyncImpl resolves its linked promise (P1) with makeResolvedPromise's result (P2)
      *     - since we returned P1 to JS as PENDING (due to await presence), it has listeners
@@ -458,7 +501,7 @@ function testPromiseAllEmpty(): void {
 }
 
 function testPromiseAllResolved(): void {
-    globalTest = new Test(1);
+    globalTest = new Test();
     let p1: Promise<Object> = Promise.resolve<Object>("abc");
     let p2: Promise<Object> = Promise.resolve<Object>("def");
     let p3: Promise<Object> = Promise.resolve<Object>("xyz");
@@ -483,7 +526,7 @@ function testPromiseAllResolved(): void {
 }
 
 function testPromiseAllRejected(): void {
-    globalTest = new Test(1);
+    globalTest = new Test();
     let p1: Promise<Object> = Promise.resolve<Object>("abc");
     let p2: Promise<Object> = Promise.reject<Object>("def");
     let p3: Promise<Object> = Promise.resolve<Object>("xyz");
@@ -501,7 +544,7 @@ function testPromiseAllRejected(): void {
 }
 
 function testPromiseAllRawValues(): void {
-    globalTest = new Test(1);
+    globalTest = new Test();
     let p1: Object = "abc";
     let p2: Object = "def";
     let p3: Object = "xyz";
@@ -526,7 +569,7 @@ function testPromiseAllRawValues(): void {
 }
 
 function testPromiseAllIterable(): void {
-    globalTest = new Test(1);
+    globalTest = new Test();
     let array = new Array<Object|PromiseLike<Object>>();
     array.push(Promise.resolve<Object>("abc"));
     array.push("def");
@@ -563,7 +606,7 @@ function testPromiseAllSettledEmpty(): void {
 }
 
 function testPromiseAllSettled(): void {
-    globalTest = new Test(1);
+    globalTest = new Test();
     let p1: Promise<Object> = Promise.resolve<Object>("abc");
     let p2: Promise<Object> = Promise.reject<Object>("def");
     let p3: Promise<Object> = Promise.resolve<Object>("xyz");
@@ -615,7 +658,7 @@ function testPromiseAnyEmpty(): void {
 }
 
 function testPromiseAnyResolved(): void {
-    globalTest = new Test(1);
+    globalTest = new Test();
     let p1: Promise<Object> = Promise.reject<Object>("abc");
     let p2: Promise<Object> = Promise.reject<Object>("def");
     let p3: Promise<Object> = Promise.resolve<Object>("xyz");
@@ -630,7 +673,7 @@ function testPromiseAnyResolved(): void {
 }
 
 function testPromiseAnyRejected(): void {
-    globalTest = new Test(1);
+    globalTest = new Test();
     let p1: Promise<Object> = Promise.reject<Object>("abc");
     let p2: Promise<Object> = Promise.reject<Object>("def");
     let p3: Promise<Object> = Promise.reject<Object>("xyz");
@@ -648,7 +691,7 @@ function testPromiseAnyRejected(): void {
 }
 
 function testPromiseAnyRawValues(): void {
-    globalTest = new Test(1);
+    globalTest = new Test();
     Promise.any([
         "abc", "def", "xyz"
     ]).then<void>((value: Object): void => {
@@ -673,7 +716,7 @@ function testPromiseAnyIterable(): void {
 }
 
 function testPromiseRaceResolved(): void {
-    globalTest = new Test(1);
+    globalTest = new Test();
     let p1: Promise<Object> = Promise.resolve<Object>("abc");
     let p2: Promise<Object> = Promise.reject<Object>("def");
     Promise.race([
@@ -689,7 +732,7 @@ function testPromiseRaceResolved(): void {
 }
 
 function testPromiseRaceRejected(): void {
-    globalTest = new Test(1);
+    globalTest = new Test();
     let p1: Promise<Object> = Promise.reject<Object>("abc");
     let p2: Promise<Object> = Promise.resolve<Object>("def");
     Promise.race([

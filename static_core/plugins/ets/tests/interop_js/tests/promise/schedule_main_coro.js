@@ -16,18 +16,18 @@
 const helper = requireNapiPreview('libinterop_test_helper.so', false);
 
 function init() {
-	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
-	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+    const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+    const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
 
-	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
-	const etsOpts = {
-		'panda-files': gtestAbcPath,
-		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
-		'coroutine-js-mode': true,
-		'coroutine-enable-external-scheduling': 'true',
-	};
-	if (!etsVm.createRuntime(etsOpts)) {
-		throw Error('Cannot create ETS runtime');
+    let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+    const etsOpts = {
+        'panda-files': gtestAbcPath,
+        'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
+        'coroutine-js-mode': true,
+        'coroutine-enable-external-scheduling': 'true',
+    };
+    if (!etsVm.createRuntime(etsOpts)) {
+        throw Error('Cannot create ETS runtime');
     }
     return etsVm;
 }

@@ -50,32 +50,11 @@ void EtsPromise::OnPromiseCompletion(EtsCoroutine *coro)
         EtsPromise::LaunchCallback(coro, thenCallback, launchMode);
     }
     ClearQueues(coro);
-
-    auto resolver = GetPromiseResolver();
-    InvalidatePromiseResolver();
-    if (resolver == nullptr) {
-        return;
-    }
-    auto remotePromiseResolverAction =
-        IsResolved() ? RemotePromiseResolver::Action::RESOLVE : RemotePromiseResolver::Action::REJECT;
-    if (coro == coro->GetCoroutineManager()->GetMainThread()) {
-        resolver->ResolveInPlace(GetValue(coro), remotePromiseResolverAction);
-    } else {
-        resolver->ResolveViaCallback(GetValue(coro), remotePromiseResolverAction);
-    }
-    Runtime::GetCurrent()->GetInternalAllocator()->Delete(resolver);
 }
 
 /* static */
 void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, CoroutineLaunchMode launchMode)
 {
-    // Post callback to js env
-    auto *jobQueue = coro->GetExternalIfaceTable()->GetJobQueue();
-    if ((launchMode == CoroutineLaunchMode::MAIN_WORKER) && (jobQueue != nullptr) &&
-        coro->GetCoroutineManager()->IsMainWorker(coro)) {
-        jobQueue->Post(callback);
-        return;
-    }
     // Launch callback in its own coroutine
     auto *coroManager = coro->GetCoroutineManager();
     auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);

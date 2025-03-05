@@ -547,7 +547,8 @@ bool StackfulCoroutineManager::LaunchImpl(CompletionEvent *completionEvent, Meth
         return false;
     }
     auto *w = ChooseWorkerForCoroutine(co);
-    w->AddRunnableCoroutine(co, IsJsMode());
+
+    w->AddRunnableCoroutine(co, mode == CoroutineLaunchMode::SAME_WORKER);
 
 #ifndef NDEBUG
     GetCurrentWorker()->PrintRunnables("LaunchImpl end");

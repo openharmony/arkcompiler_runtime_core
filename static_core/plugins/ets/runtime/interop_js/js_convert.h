@@ -414,9 +414,11 @@ JSCONVERT_WRAP(Promise)
     napi_deferred deferred;
     napi_value jsPromise;
     NAPI_CHECK_FATAL(napi_create_promise(env, &deferred, &jsPromise));
-    EtsMutex::LockHolder holder(hpromise);
+
+    hpromise->Lock();
     uint32_t state = hpromise->GetState();
-    if (state != EtsPromise::STATE_PENDING) {
+    // NOTE(alimovilya, #23064) This if should be removed. Only else branch should remain.
+    if (state != EtsPromise::STATE_PENDING) {  // it will never get PENDING again
         EtsHandle<EtsObject> value(coro, hpromise->GetValue(coro));
         napi_value completionValue;
         if (value.GetPtr() == nullptr) {
@@ -431,16 +433,20 @@ JSCONVERT_WRAP(Promise)
             NAPI_CHECK_FATAL(napi_reject_deferred(env, deferred, completionValue));
         }
     } else {
+        // connect->Invoke calls EtsPromiseSubmitCallback that acquires the mutex and checks the state again
+        hpromise->Unlock();
         ASSERT_MANAGED_CODE();
-        RemotePromiseResolver *resolver =
-            Runtime::GetCurrent()->GetInternalAllocator()->New<JsRemotePromiseResolver>(deferred);
-        hpromise->SetEtsPromiseResolver(resolver);
+        Method *connect = ctx->GetPromiseInteropConnectMethod();
+        std::array<Value, 2U> args = {Value(hpromise.GetPtr()), Value(reinterpret_cast<int64_t>(deferred))};
+        connect->Invoke(coro, args.data());
+        hpromise->Lock();
     }
     EtsPromiseRef *ref = EtsPromiseRef::Create(coro);
     ref->SetTarget(coro, hpromise->AsObject());
     hpromise->SetInteropObject(coro, ref);
     [[maybe_unused]] auto *sharedRef = storage->CreateETSObjectRef(ctx, ref, jsPromise);
     ASSERT(sharedRef != nullptr);
+    hpromise->Unlock();
     return jsPromise;
 }
 

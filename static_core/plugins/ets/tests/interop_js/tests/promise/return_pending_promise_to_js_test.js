@@ -62,6 +62,15 @@ function doThen(p) {
 }
 
 function queueTasks(etsVm) {
+	let tId = 0;
+	let queueTasksHelper = () => {
+		if (!testSuccess) {
+			return null;
+		}
+		helper.clearInterval(tId);
+		return null;
+	};
+
 	helper.setTimeout(() => {
 		if (testSuccess) {
 			throw Error('Promise must not be resolved');
@@ -69,15 +78,8 @@ function queueTasks(etsVm) {
 		if (!etsVm.call('.resolvePendingPromise')) {
 			throw Error("Call of 'resolvePendingPromise' return false");
 		}
-        helper.setTimeout(queueTasksHelper, 0, testSuccess);
+        tId = helper.setInterval(queueTasksHelper, 0);
 	}, 0);
-}
-
-function queueTasksHelper(testSuccess) {
-	if (!testSuccess) {
-		throw Error('Promise is not resolved or value is wrong');
-	}
-	return null;
 }
 
 function runAwaitTest() {

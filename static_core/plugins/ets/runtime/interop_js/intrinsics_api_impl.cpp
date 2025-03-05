@@ -701,14 +701,14 @@ EtsString *JSONStringify(JSValue *jsvalue)
 void SettleJsPromise(EtsObject *value, napi_deferred deferred, EtsInt state)
 {
     auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
+    ASSERT(coro->GetCoroutineManager()->IsMainWorker(coro));
     auto *ctx = InteropCtx::Current(coro);
     napi_env env = ctx->GetJSEnv();
     napi_value completionValue;
 
     NapiScope napiScope(env);
     if (value == nullptr) {
-        napi_get_null(env, &completionValue);
+        completionValue = GetUndefined(env);
     } else {
         auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
         completionValue = refconv->Wrap(ctx, value);
