@@ -54,3 +54,9 @@ final class AbcFile {
 
     public native getFilename(): string;
 }
+
+export class AbcFileNotFoundError extends LinkerError {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("AbcFileNotFoundError", message, options)
+    }
+}
