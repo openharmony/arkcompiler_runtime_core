@@ -43,7 +43,7 @@ function(add_ets_containers_test)
     foreach(impl ${ARG_IMPL})
         string(TOLOWER "${impl}" impl_name)
         set(impl_option "--coroutine-impl=${impl_name}")
-        if(impl STREQUAL "STACKFUL" AND 
+        if(impl STREQUAL "STACKFUL" AND
            (CMAKE_BUILD_TYPE STREQUAL "Debug" OR PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_THREAD_SANITIZER))
             list(APPEND impl_option "--coroutine-stack-size-pages=128")
         endif()
@@ -57,12 +57,8 @@ function(add_ets_containers_test)
 
             foreach(option_set ${ARG_OPTION_SETS_${impl}})
                 set(additional_options "")
-                if(option_set STREQUAL "JS")
-                    set(additional_options "--coroutine-js-mode=true")
-                elseif(option_set STREQUAL "POOL")
+                if (option_set STREQUAL "POOL")
                     set(additional_options "--use-coroutine-pool=true")
-                elseif(option_set STREQUAL "JS_POOL")
-                    set(additional_options "--coroutine-js-mode=true" "--use-coroutine-pool=true")
                 endif()
                 string(TOLOWER "${option_set}" options_name)
 
@@ -83,7 +79,7 @@ add_ets_containers_test(FILE blocking_queue.sts
                         OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" "--compiler-ignore-failures=true"
                         IMPL "THREADED" "STACKFUL"
                         OPTION_SETS_THREADED "DEFAULT"
-                        OPTION_SETS_STACKFUL "DEFAULT" "JS" "POOL"
+                        OPTION_SETS_STACKFUL "DEFAULT" "POOL"
                         WORKERS "ONE" "AUTO"
                         MODE "INT" "JIT" "AOT"
 )

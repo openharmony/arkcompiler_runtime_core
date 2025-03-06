@@ -38,7 +38,6 @@ function runTest(test) {
         'gc-trigger-type': 'heap-trigger',
         'load-runtimes': 'ets',
         'compiler-enable-jit': 'false',
-        'coroutine-js-mode': 'true',
         'coroutine-enable-external-scheduling': 'true',
     };
     if (!etsVm.createRuntime(etsOpts)) {

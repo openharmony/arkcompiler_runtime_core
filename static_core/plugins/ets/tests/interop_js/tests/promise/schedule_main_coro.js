@@ -23,7 +23,6 @@ function init() {
     const etsOpts = {
         'panda-files': gtestAbcPath,
         'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
-        'coroutine-js-mode': true,
         'coroutine-enable-external-scheduling': 'true',
     };
     if (!etsVm.createRuntime(etsOpts)) {

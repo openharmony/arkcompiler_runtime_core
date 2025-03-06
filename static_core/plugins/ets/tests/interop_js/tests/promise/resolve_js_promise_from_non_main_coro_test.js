@@ -29,7 +29,6 @@ async function runTest(test) {
         'run-gc-in-place': 'true',
         'coroutine-impl': 'stackful',
         'coroutine-workers-count': 2,
-        'coroutine-js-mode': true,
         'coroutine-enable-external-scheduling': 'true',
         // 'log-debug': 'coroutines'
     });

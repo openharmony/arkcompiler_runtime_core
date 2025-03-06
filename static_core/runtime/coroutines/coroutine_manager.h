@@ -29,8 +29,8 @@ struct CoroutineManagerConfig {
 
     /// enable the experimental task execution interface
     bool enableDrainQueueIface = false;
-    /// JS-compatible mode, affects async functions, await() and other things
-    bool emulateJs = false;
+    /// Migration feature
+    bool migration = false;
     /// Number of coroutine workers for the N:M mode
     uint32_t workersCount = WORKERS_COUNT_AUTO;
     /// Limit on the number of exclusive coroutines workers
@@ -189,12 +189,6 @@ public:
 
     void SetSchedulingPolicy(CoroutineSchedulingPolicy policy);
     CoroutineSchedulingPolicy GetSchedulingPolicy() const;
-
-    /// @return true if js compatibility mode is selected for the coroutine manager
-    virtual bool IsJsMode()
-    {
-        return false;
-    }
 
     virtual bool IsMainWorker(Coroutine *coro) const = 0;
 

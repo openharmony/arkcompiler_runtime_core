@@ -27,10 +27,6 @@ namespace ark {
 
 void ThreadedCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime *runtime, PandaVM *vm)
 {
-    if (config.emulateJs) {
-        LOG(FATAL, COROUTINES) << "ThreadedCoroutineManager(): JS emulation is not supported!";
-        UNREACHABLE();
-    }
     // create and activate workers
     size_t numberOfAvailableCores = std::max(std::thread::hardware_concurrency() / 4ULL, 2ULL);
     size_t targetNumberOfWorkers = (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO)

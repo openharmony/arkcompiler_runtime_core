@@ -44,7 +44,6 @@ protected:
         }
         options.SetBootPandaFiles({stdlib, "js_mode_launch.abc"});
         options.SetCoroutineImpl("stackful");
-        options.SetCoroutineJsMode(true);
 
         Runtime::Create(options);
 

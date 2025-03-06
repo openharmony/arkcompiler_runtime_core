@@ -130,8 +130,8 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
     CoroutineManagerConfig cfg {
         // enable drain queue interface
         options.IsCoroutineEnableFeaturesAniDrainQueue(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
-        // emulate_js
-        options.IsCoroutineJsMode(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // enable migration
+        options.IsCoroutineEnableFeaturesMigration(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
         // workers_count
         options.GetCoroutineWorkersCount(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
         // exclusive workers limit

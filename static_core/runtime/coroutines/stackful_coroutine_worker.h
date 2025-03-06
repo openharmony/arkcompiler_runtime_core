@@ -97,7 +97,7 @@ public:
      * @param newCoro coroutine to add
      * @param prioritize if true, add to the beginning of the queue (otherwise to the end)
      */
-    void AddRunnableCoroutine(Coroutine *newCoro, bool prioritize = false);
+    void AddRunnableCoroutine(Coroutine *newCoro);
 
     /**
      * @brief Registers the RUNNING coroutine in the worker's structures.
@@ -196,7 +196,7 @@ private:
     static void ScheduleLoopProxy(void *worker);
 
     /* runnables queue management */
-    void PushToRunnableQueue(Coroutine *co, bool pushFront = false) REQUIRES(runnablesLock_);
+    void PushToRunnableQueue(Coroutine *co) REQUIRES(runnablesLock_);
     Coroutine *PopFromRunnableQueue();
     bool RunnableCoroutinesExist() const;
     void WaitForRunnables() REQUIRES(runnablesLock_);
