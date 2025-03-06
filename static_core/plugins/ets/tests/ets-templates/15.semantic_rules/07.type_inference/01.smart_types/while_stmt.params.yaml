@@ -118,15 +118,11 @@ cases:
                       while (v.meth_a(1) != 'A1') {
                           return 1
                       }
-                      while (v instanceof C) {
-                          if (v.meth_c(1) != 'C1') {
-                              return 1
-                          }
+                      while (v instanceof C && v.meth_c(1) != 'C1') {
+                          return 1
                       }
-                      while (v instanceof D) {
-                          if (v.meth_d(1) != 'D1') {
-                              return 1
-                          }
+                      while (v instanceof D && v.meth_d(1) != 'D1') {
+                          return 1
                       }
                       v = null
                   }
@@ -164,15 +160,11 @@ cases:
                       while (v.meth_a(1) != 'A1') {
                           return 1
                       }
-                      while (v instanceof C) {
-                          if (v.meth_c(1) != 'C1') {
-                              return 1
-                          }
+                      while (v instanceof C && v.meth_c(1) != 'C1') {
+                          return 1
                       }
-                      while (v instanceof D) {
-                          if (v.meth_d(1) != 'D1') {
-                              return 1
-                          }
+                      while (v instanceof D && v.meth_d(1) != 'D1') {
+                          return 1
                       }
                       v = undefined
                   }

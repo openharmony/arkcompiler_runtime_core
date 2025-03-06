@@ -3,7 +3,7 @@
 02.lexical_elements/07.keywords/reserved_4.ets
 02.lexical_elements/07.keywords/soft_6.ets
 02.lexical_elements/07.keywords/soft_7.ets
-02.lexical_elements/07.keywords/soft_13.ets 
+02.lexical_elements/07.keywords/soft_13.ets
 
 #23500 Successful compilation instead of CTE
 02.lexical_elements/07.keywords/hard_16.ets
@@ -351,7 +351,7 @@
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_2.ets
 04.names_declarations_and_scopes/08.function_declarations/09.function_overload_signatures/overload.ets
 
-#23138, 23364 Does not work for primitives and enum 
+#23138, 23364 Does not work for primitives and enum
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_39.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_41.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_42.ets
@@ -1800,18 +1800,6 @@
 15.semantic_rules/07.type_inference/01.smart_types/comb_10a.ets
 15.semantic_rules/07.type_inference/01.smart_types/comb_12a.ets
 15.semantic_rules/07.type_inference/01.smart_types/comb_12b.ets
-
-#18335 Smart cast doesn't work in while statement
-15.semantic_rules/07.type_inference/01.smart_types/while_stmt_0.ets
-15.semantic_rules/07.type_inference/01.smart_types/while_stmt_10.ets
-15.semantic_rules/07.type_inference/01.smart_types/while_stmt_12.ets
-15.semantic_rules/07.type_inference/01.smart_types/while_stmt_14.ets
-15.semantic_rules/07.type_inference/01.smart_types/while_stmt_15.ets
-15.semantic_rules/07.type_inference/01.smart_types/while_stmt_2.ets
-15.semantic_rules/07.type_inference/01.smart_types/while_stmt_4.ets
-15.semantic_rules/07.type_inference/01.smart_types/while_stmt_5.ets
-15.semantic_rules/07.type_inference/01.smart_types/while_stmt_7.ets
-15.semantic_rules/07.type_inference/01.smart_types/while_stmt_9.ets
 
 #14338 es2panda fails to compile overloaded functions
 15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_6.ets
