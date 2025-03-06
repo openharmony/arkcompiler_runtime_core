@@ -3895,6 +3895,7 @@ deprecated/15.exceptions/03.rethrowing_functions/rethrowing_function_without_cat
 15.semantic_rules/06.compatibility_call_args/single_params_8.sts
 15.semantic_rules/06.compatibility_call_args/single_params_12.sts
 15.semantic_rules/06.compatibility_call_args/rest_params_spread_5.sts
+15.semantic_rules/09.overload_resolution/01.applicable_candidates_selection/overload_no_candidate_meth.sts
 
 #22261
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_11.sts
