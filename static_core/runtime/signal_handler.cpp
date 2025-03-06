@@ -318,7 +318,9 @@ bool SamplingProfilerHandler::Action(int sig, [[maybe_unused]] siginfo_t *siginf
         return false;
     }
     auto *thread = ManagedThread::GetCurrent();
-    ASSERT(thread != nullptr);
+    if (thread == nullptr) {
+        return false;
+    }
 
     auto *sampler = Runtime::GetCurrent()->GetTools().GetSamplingProfiler();
     if (sampler == nullptr || !sampler->IsSegvHandlerEnable()) {
@@ -381,7 +383,10 @@ bool StackOverflowHandler::Action(int sig, [[maybe_unused]] siginfo_t *siginfo, 
         return false;
     }
     auto *thread = ManagedThread::GetCurrent();
-    ASSERT(thread != nullptr);
+    if (thread == nullptr) {
+        return false;
+    }
+
     SignalContext signalContext(context);
     auto memCheckLocation = signalContext.GetSP() - ManagedThread::GetStackOverflowCheckOffset();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
@@ -420,7 +425,14 @@ bool CrashFallbackDumpHandler::Action(int sig, [[maybe_unused]] siginfo_t *sigin
 
     auto thread = ManagedThread::GetCurrent();
     if (thread == nullptr) {
-        LOG(ERROR, RUNTIME) << "SIGSEGV in unknown thread";
+        auto vmThread = Thread::GetCurrent();
+        if (vmThread == nullptr) {
+            LOG(ERROR, RUNTIME) << "SIGSEGV in unknown thread";
+            return false;
+        }
+        LOG(ERROR, RUNTIME) << "SIGSEGV in runtime thread: threadType="
+                            << helpers::ToUnderlying(vmThread->GetThreadType());
+        PrintStack(Logger::Message(Logger::Level::ERROR, Logger::Component::RUNTIME, false).GetStream());
         return false;
     }
     if (thread->IsInNativeCode()) {

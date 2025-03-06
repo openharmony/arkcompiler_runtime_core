@@ -24,7 +24,7 @@ namespace ark::ets {
 compiler::RuntimeInterface::ClassPtr EtsRuntimeInterface::GetClass(MethodPtr method, IdType id) const
 {
     if (id == RuntimeInterface::MEM_PROMISE_CLASS_ID) {
-        return PandaEtsVM::GetCurrent()->GetClassLinker()->GetEtsClassLinkerExtension()->GetPromiseClass();
+        return PlatformTypes(PandaEtsVM::GetCurrent())->corePromise->GetRuntimeClass();
     }
     return PandaRuntimeInterface::GetClass(method, id);
 }
@@ -212,13 +212,12 @@ uint32_t EtsRuntimeInterface::GetClassOffsetObject(MethodPtr method) const
 
 EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetStringBuilderClass() const
 {
-    return PandaEtsVM::GetCurrent()->GetClassLinker()->GetEtsClassLinkerExtension()->GetStringBuilderClass();
+    return PlatformTypes(PandaEtsVM::GetCurrent())->coreStringBuilder->GetRuntimeClass();
 }
 
 EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetStringBuilderDefaultConstructor() const
 {
-    auto classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    for (auto ctor : classLinker->GetStringBuilderClass()->GetConstructors()) {
+    for (auto ctor : PlatformTypes()->coreStringBuilder->GetConstructors()) {
         if (IsMethodStringBuilderDefaultConstructor(ctor)) {
             return ctor;
         }

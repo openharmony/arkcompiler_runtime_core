@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,7 +115,7 @@ protected:
 
 TEST_F(EtsFinalizableWeakRefTest, FinalizableWeakRefMemoryLayout)
 {
-    EtsClass *finalizableWeakRefClass = vm_->GetClassLinker()->GetFinalizableWeakRefClass();
+    EtsClass *finalizableWeakRefClass = PlatformTypes(vm_)->coreFinalizableWeakRef;
     CompareMemberOffsets(finalizableWeakRefClass, GetFinalizableWeakRefMembers());
 }
 
@@ -166,7 +166,7 @@ TEST_F(EtsFinalizableWeakRefTest, RegisterFinalizerTest)
     TestEvent<EVENT_COUNT> event;
     // Create referents
     {
-        auto *objectClass = vm_->GetClassLinker()->GetObjectClass();
+        auto *objectClass = vm_->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT);
         static constexpr size_t ARRAY_SIZE = 1024U;
         EtsHandleScope arrayScope(coro);
         std::array<EtsHandle<EtsObject>, EVENT_COUNT> arrayHandles;

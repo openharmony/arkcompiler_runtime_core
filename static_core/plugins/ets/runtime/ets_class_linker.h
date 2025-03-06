@@ -52,31 +52,6 @@ public:
     Method *GetMethod(const panda_file::File &pf, panda_file::File::EntityId id, ClassLinkerContext *classLinkerContext,
                       ClassLinkerErrorHandler *errorHandler = nullptr);
     Method *GetAsyncImplMethod(Method *method, EtsCoroutine *coroutine);
-    EtsClass *GetPromiseClass();
-    EtsClass *GetJobClass();
-    EtsClass *GetPromiseRefClass();
-    EtsClass *GetArrayClass();
-    EtsClass *GetWaitersListClass();
-    EtsClass *GetMutexClass();
-    EtsClass *GetEventClass();
-    EtsClass *GetCondVarClass();
-    EtsClass *GetArrayBufferClass();
-    EtsClass *GetStringBuilderClass();
-    EtsClass *GetSharedMemoryClass();
-    EtsClass *GetObjectClass();
-    EtsClass *GetVoidClass();
-    EtsClass *GetTypeAPIFieldClass();
-    EtsClass *GetTypeAPIMethodClass();
-    EtsClass *GetTypeAPIParameterClass();
-    EtsClass *GetFunctionClass();
-    EtsClass *GetFinalizableWeakRefClass();
-    EtsClass *GetRuntimeLinkerClass();
-    EtsClass *GetBootRuntimeLinkerClass();
-    EtsClass *GetAbcRuntimeLinkerClass();
-    EtsClass *GetAbcFileClass();
-    // NOTE(molotkovmikhail): Need to implement a method cache that should be accessible by some class and method ids.
-    Method *GetSubscribeOnAnotherPromiseMethod();
-    Method *GetFinalizationRegistryExecCleanupMethod();
 
     EtsClassLinkerExtension *GetEtsClassLinkerExtension()
     {

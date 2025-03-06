@@ -17,6 +17,7 @@
 #include "runtime/coroutines/coroutine_events.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 
@@ -26,7 +27,7 @@ namespace ark::ets {
 EtsPromise *EtsPromise::Create(EtsCoroutine *coro)
 {
     [[maybe_unused]] EtsHandleScope scope(coro);
-    auto *klass = coro->GetPandaVM()->GetClassLinker()->GetPromiseClass();
+    auto *klass = PlatformTypes(coro)->corePromise;
     auto hPromise = EtsHandle<EtsPromise>(coro, EtsPromise::FromEtsObject(EtsObject::Create(coro, klass)));
     auto *mutex = EtsMutex::Create(coro);
     hPromise->SetMutex(coro, mutex);

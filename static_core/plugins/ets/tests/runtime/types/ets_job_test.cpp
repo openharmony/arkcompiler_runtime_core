@@ -72,7 +72,7 @@ protected:
 // and at the same offsets
 TEST_F(EtsJobTest, JobMemoryLayout)
 {
-    EtsClass *jobClass = vm_->GetClassLinker()->GetJobClass();
+    EtsClass *jobClass = PlatformTypes(vm_)->coreJob;
     MirrorFieldInfo::CompareMemberOffsets(jobClass, GetJobMembers());
 }
 

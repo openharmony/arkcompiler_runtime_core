@@ -16,6 +16,7 @@
 #include "intrinsics.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "runtime/coroutines/coroutine_manager.h"
@@ -33,8 +34,8 @@ void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *inte
 {
     PandaVector<Value> args {Value(outsidePromise), Value(internalPromise)};
 
-    EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetSubscribeOnAnotherPromiseMethod()->Invoke(
-        EtsCoroutine::GetCurrent(), args.data());
+    PlatformTypes()->corePromiseSubscribeOnAnotherPromise->GetPandaMethod()->Invoke(EtsCoroutine::GetCurrent(),
+                                                                                    args.data());
 }
 
 static void EnsureCapacity(EtsCoroutine *coro, EtsHandle<EtsPromise> &hpromise)
@@ -45,7 +46,7 @@ static void EnsureCapacity(EtsCoroutine *coro, EtsHandle<EtsPromise> &hpromise)
         return;
     }
     auto newQueueLength = queueLength * 2U + 1U;
-    auto *objectClass = coro->GetPandaVM()->GetClassLinker()->GetObjectClass();
+    auto *objectClass = coro->GetPandaVM()->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT);
     auto *newCallbackQueue = EtsObjectArray::Create(objectClass, newQueueLength);
     if (hpromise->GetQueueSize() != 0) {
         hpromise->GetCallbackQueue(coro)->CopyDataTo(newCallbackQueue);
@@ -77,7 +78,7 @@ void EtsPromiseResolve(EtsPromise *promise, EtsObject *value)
     if (hpromise->GetState() != EtsPromise::STATE_PENDING) {
         return;
     }
-    if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(coro->GetPandaVM()->GetClassLinker()->GetPromiseClass())) {
+    if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(PlatformTypes(coro)->corePromise)) {
         auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
         EtsHandle<EtsPromise> hInternalPromise(coro, internalPromise);
         SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());

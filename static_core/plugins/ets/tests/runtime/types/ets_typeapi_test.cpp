@@ -113,19 +113,19 @@ TEST_F(EtsTypeAPITest, TypeAPITypeMemoryLayout)
 
 TEST_F(EtsTypeAPITest, TypeAPIMethodMemoryLayout)
 {
-    auto *typeAPIMethodClass = vm_->GetClassLinker()->GetTypeAPIMethodClass();
+    auto *typeAPIMethodClass = PlatformTypes(vm_)->coreMethod;
     MirrorFieldInfo::CompareMemberOffsets(typeAPIMethodClass, GetTypeAPIMethodClassMembers());
 }
 
 TEST_F(EtsTypeAPITest, TypeAPIFieldMemoryLayout)
 {
-    auto *typeAPIFieldClass = vm_->GetClassLinker()->GetTypeAPIFieldClass();
+    auto *typeAPIFieldClass = PlatformTypes(vm_)->coreField;
     MirrorFieldInfo::CompareMemberOffsets(typeAPIFieldClass, GetTypeAPIFieldClassMembers());
 }
 
 TEST_F(EtsTypeAPITest, TypeAPIParameterMemoryLayout)
 {
-    auto *typeAPIParameterClass = vm_->GetClassLinker()->GetTypeAPIParameterClass();
+    auto *typeAPIParameterClass = PlatformTypes(vm_)->coreParameter;
     MirrorFieldInfo::CompareMemberOffsets(typeAPIParameterClass, GetTypeAPIParameterClassMembers());
 }
 

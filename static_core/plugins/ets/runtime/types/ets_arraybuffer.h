@@ -23,6 +23,7 @@
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "runtime/include/thread_scopes.h"
 
 #include <cstdint>
@@ -64,7 +65,7 @@ public:
         ASSERT(!coro->HasPendingException());
 
         [[maybe_unused]] EtsHandleScope scope(coro);
-        auto *cls = coro->GetPandaVM()->GetClassLinker()->GetArrayBufferClass();
+        auto *cls = PlatformTypes(coro)->escompatArrayBuffer;
         EtsHandle<EtsEscompatArrayBuffer> handle(coro, EtsEscompatArrayBuffer::FromEtsObject(EtsObject::Create(cls)));
 
         handle->InitializeByDefault(coro, length);
@@ -80,7 +81,7 @@ public:
         ASSERT(!coro->HasPendingException());
 
         [[maybe_unused]] EtsHandleScope scope(coro);
-        auto *cls = coro->GetPandaVM()->GetClassLinker()->GetArrayBufferClass();
+        auto *cls = PlatformTypes(coro)->escompatArrayBuffer;
         EtsHandle<EtsEscompatArrayBuffer> handle(coro, EtsEscompatArrayBuffer::FromEtsObject(EtsObject::Create(cls)));
 
         handle->InitBufferByExternalData(coro, handle, externalData, finalizerFunction, finalizerHint, length);

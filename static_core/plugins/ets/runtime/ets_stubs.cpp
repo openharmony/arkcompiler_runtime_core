@@ -23,35 +23,35 @@
 namespace ark::ets {
 
 template <typename T>
-static std::optional<T> GetBoxedNumericValue(EtsClassLinkerExtension *ext, EtsObject *obj)
+static std::optional<T> GetBoxedNumericValue(EtsPlatformTypes const *ptypes, EtsObject *obj)
 {
-    auto *cls = obj->GetClass()->GetRuntimeClass();
+    auto *cls = obj->GetClass();
 
     auto const getValue = [obj](auto typeId) {
         using Type = typename decltype(typeId)::type;
         return static_cast<T>(EtsBoxPrimitive<Type>::FromCoreType(obj)->GetValue());
     };
 
-    if (cls == ext->GetBoxDoubleClass()) {
+    if (cls == ptypes->coreDouble) {
         return getValue(helpers::TypeIdentity<EtsDouble>());
     }
-    if (cls == ext->GetBoxIntClass()) {
+    if (cls == ptypes->coreInt) {
         return getValue(helpers::TypeIdentity<EtsInt>());
     }
 
-    if (cls == ext->GetBoxByteClass()) {
+    if (cls == ptypes->coreByte) {
         return getValue(helpers::TypeIdentity<EtsByte>());
     }
-    if (cls == ext->GetBoxShortClass()) {
+    if (cls == ptypes->coreShort) {
         return getValue(helpers::TypeIdentity<EtsShort>());
     }
-    if (cls == ext->GetBoxLongClass()) {
+    if (cls == ptypes->coreLong) {
         return getValue(helpers::TypeIdentity<EtsLong>());
     }
-    if (cls == ext->GetBoxFloatClass()) {
+    if (cls == ptypes->coreFloat) {
         return getValue(helpers::TypeIdentity<EtsFloat>());
     }
-    if (cls == ext->GetBoxCharClass()) {
+    if (cls == ptypes->coreChar) {
         return getValue(helpers::TypeIdentity<EtsChar>());
     }
     return std::nullopt;
@@ -86,48 +86,46 @@ static bool CompareBoxedPrimitive(EtsObject *obj1, EtsObject *obj2)
 
 bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
 {
-    auto ecls1 = obj1->GetClass();
-    auto ecls2 = obj2->GetClass();
-    auto cls1 = ecls1->GetRuntimeClass();
-    auto cls2 = ecls2->GetRuntimeClass();
-    ASSERT(ecls1->IsValueTyped() && ecls1->IsValueTyped());
+    auto cls1 = obj1->GetClass();
+    auto cls2 = obj2->GetClass();
+    ASSERT(cls1->IsValueTyped() && cls1->IsValueTyped());
 
-    auto ext = coro->GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
+    auto ptypes = PlatformTypes(coro);
+    ASSERT(ptypes != nullptr);
 
     if (cls1->IsStringClass()) {
         return cls2->IsStringClass() &&
                coretypes::String::Cast(obj1->GetCoreType())->Compare(coretypes::String::Cast(obj2->GetCoreType())) == 0;
     }
-    if (cls1 == ext->GetBoxBooleanClass()) {
-        return cls2 == ext->GetBoxBooleanClass() && CompareBoxedPrimitive<EtsBoolean>(obj1, obj2);
+    if (cls1 == ptypes->coreBoolean) {
+        return cls2 == ptypes->coreBoolean && CompareBoxedPrimitive<EtsBoolean>(obj1, obj2);
     }
-    if (cls1 == ext->GetBoxCharClass()) {
-        return cls2 == ext->GetBoxCharClass() && CompareBoxedPrimitive<EtsChar>(obj1, obj2);
+    if (cls1 == ptypes->coreChar) {
+        return cls2 == ptypes->coreChar && CompareBoxedPrimitive<EtsChar>(obj1, obj2);
     }
-    if (UNLIKELY(ecls1->IsBigInt())) {
-        return ecls2->IsBigInt() && EtsBigIntEquality(EtsBigInt::FromEtsObject(obj1), EtsBigInt::FromEtsObject(obj2));
+    if (UNLIKELY(cls1->IsBigInt())) {
+        return cls2->IsBigInt() && EtsBigIntEquality(EtsBigInt::FromEtsObject(obj1), EtsBigInt::FromEtsObject(obj2));
     }
-    if (cls1 == ext->GetBoxLongClass() && cls2 == ext->GetBoxLongClass()) {
+    if (cls1 == ptypes->coreLong && cls2 == ptypes->coreLong) {
         return CompareBoxedPrimitive<EtsLong>(obj1, obj2);
     }
-    if (auto num1 = GetBoxedNumericValue<EtsDouble>(ext, obj1); num1.has_value()) {
-        auto num2 = GetBoxedNumericValue<EtsDouble>(ext, obj2);
+    if (auto num1 = GetBoxedNumericValue<EtsDouble>(ptypes, obj1); num1.has_value()) {
+        auto num2 = GetBoxedNumericValue<EtsDouble>(ptypes, obj2);
         return num2.has_value() && num2.value() == num1.value();
     }
     UNREACHABLE();
 }
 
-[[maybe_unused]] static bool IsBoxedNumericClass(Class *rcls, EtsClassLinkerExtension *ext)
+[[maybe_unused]] static bool DbgIsBoxedNumericClass(EtsCoroutine *coro, EtsClass *cls)
 {
-    return rcls == ext->GetBoxByteClass() || rcls == ext->GetBoxCharClass() || rcls == ext->GetBoxShortClass() ||
-           rcls == ext->GetBoxIntClass() || rcls == ext->GetBoxLongClass() || rcls == ext->GetBoxFloatClass() ||
-           rcls == ext->GetBoxDoubleClass();
+    auto ptypes = PlatformTypes(coro);
+    return cls == ptypes->coreByte || cls == ptypes->coreChar || cls == ptypes->coreShort || cls == ptypes->coreInt ||
+           cls == ptypes->coreLong || cls == ptypes->coreFloat || cls == ptypes->coreDouble;
 }
 
 EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
 {
     // NOTE(vpukhov): #19799 use string constants
-    auto ext = coro->GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
     if (obj == nullptr) {
         return EtsString::CreateFromMUtf8("undefined");
     }
@@ -153,12 +151,11 @@ EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
 
     ASSERT(cls->IsBoxed());
 
-    auto rcls = cls->GetRuntimeClass();
-    if (rcls == ext->GetBoxBooleanClass()) {
+    if (cls == PlatformTypes(coro)->coreBoolean) {
         return EtsString::CreateFromMUtf8("boolean");
     }
 
-    ASSERT(IsBoxedNumericClass(rcls, ext));
+    ASSERT(DbgIsBoxedNumericClass(coro, cls));
     return EtsString::CreateFromMUtf8("number");
 }
 
@@ -167,7 +164,6 @@ bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj)
     if (IsReferenceNullish(coro, obj)) {
         return false;
     }
-    auto ext = coro->GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
     EtsClass *cls = obj->GetClass();
 
     if (!cls->IsValueTyped()) {
@@ -182,13 +178,13 @@ bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj)
 
     ASSERT(cls->IsBoxed());
 
-    auto rcls = cls->GetRuntimeClass();
-    if (rcls == ext->GetBoxBooleanClass()) {
+    auto ptypes = PlatformTypes(coro);
+    if (cls == ptypes->coreBoolean) {
         return EtsBoxPrimitive<EtsBoolean>::FromCoreType(obj)->GetValue() != 0;
     }
 
-    ASSERT(IsBoxedNumericClass(rcls, ext));
-    if (auto num = GetBoxedNumericValue<EtsDouble>(ext, obj); num.has_value()) {
+    ASSERT(DbgIsBoxedNumericClass(coro, cls));
+    if (auto num = GetBoxedNumericValue<EtsDouble>(ptypes, obj); num.has_value()) {
         return num.value() != 0 && !std::isnan(num.value());
     }
     UNREACHABLE();

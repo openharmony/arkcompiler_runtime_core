@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/ets_class_linker_context.h"
 
+#include "ets_platform_types.h"
 #include "include/class.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -106,7 +107,7 @@ bool TryLoadingClassInChain(const uint8_t *descriptor, DecoratorErrorHandler &er
     // All non-boot contexts are represented by EtsClassLinkerContext.
     auto *etsLinkerContext = reinterpret_cast<EtsClassLinkerContext *>(ctx);
     auto *runtimeLinker = etsLinkerContext->GetRuntimeLinker();
-    if (runtimeLinker->GetClass() != PandaEtsVM::GetCurrent()->GetClassLinker()->GetAbcRuntimeLinkerClass()) {
+    if (runtimeLinker->GetClass() != PlatformTypes()->coreAbcRuntimeLinker) {
         // Must call managed implementation.
         return false;
     }
@@ -142,8 +143,7 @@ bool TryEnumeratePandaFilesInChain(const ClassLinkerContext *ctx,
     // All non-boot contexts are represented by EtsClassLinkerContext
     auto *etsLinkerContext = reinterpret_cast<const EtsClassLinkerContext *>(ctx);
     auto *runtimeLinker = etsLinkerContext->GetRuntimeLinker();
-    auto *abcRuntimeLinkerClass = PandaEtsVM::GetCurrent()->GetClassLinker()->GetAbcRuntimeLinkerClass();
-    if (!runtimeLinker->IsInstanceOf(abcRuntimeLinkerClass)) {
+    if (!runtimeLinker->IsInstanceOf(PlatformTypes()->coreAbcRuntimeLinker)) {
         // Unexpected behavior, cannot walk through chain
         return false;
     }
@@ -205,8 +205,7 @@ void EtsClassLinkerContext::EnumeratePandaFilesImpl(const std::function<bool(con
 {
     ASSERT(PandaEtsVM::GetCurrent()->GetMutatorLock()->HasLock());
     auto *runtimeLinker = GetRuntimeLinker();
-    auto *klass = PandaEtsVM::GetCurrent()->GetClassLinker()->GetAbcRuntimeLinkerClass();
-    if (!runtimeLinker->IsInstanceOf(klass)) {
+    if (!runtimeLinker->IsInstanceOf(PlatformTypes()->coreAbcRuntimeLinker)) {
         return;
     }
     auto *contextAbcFiles = EtsAbcRuntimeLinker::FromEtsObject(runtimeLinker)->GetAbcFiles();
