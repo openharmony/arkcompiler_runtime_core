@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,19 +14,14 @@
  */
 
 /*---
-desc: lambda captured local variable reference type. change object in lambda body.
+desc: Generic declaration
 ---*/
 
-class A {
-  public x: int = 5;
-}
+let f = <T1, T2>(a: T1, b: T2): [T1, T2] => [a, b]
 
-type func = (y: int) => void;
 
-function main(): void {
-  let a: A = new A();
+let x = f(true, 1234.0)
+assertTrue(x[0] == true && x[1] == 1234.0, "boolean/float failed")
 
-  let bar: func = (y: int): void => { a.x += y; }
-  bar(5);
-  assertEQ( a.x, 10 )
-}
+let y = f(1, "test")
+assertTrue(y[0] == 1 && y[1] == "test", "int/string failed")
