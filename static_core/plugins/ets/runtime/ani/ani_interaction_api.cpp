@@ -1482,6 +1482,49 @@ static ani_status SetVariableValue(ani_env *env, ani_variable variable, T value)
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status FunctionalObject_Call(ani_env *env, ani_fn_object fn, ani_size argc, ani_ref *argv,
+                                                       ani_ref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(fn);
+    if (argc != 0) {
+        CHECK_PTR_ARG(argv);
+    }
+    CHECK_PTR_ARG(result);
+
+    ANI_CHECK_RETURN_IF_GT(argc, STD_CORE_FUNCTION_MAX_ARITY, ANI_INVALID_ARGS);
+
+    ani_status status = ANI_OK;
+    ScopedManagedCodeFix s(env);
+    EtsObject *etsFn = s.ToInternalType(fn);
+    EtsClass *etsCls = etsFn->GetClass();
+
+    ANI_CHECK_RETURN_IF_EQ(etsCls->IsFunction(), false, ANI_INVALID_TYPE);
+
+    EtsMethod *method = nullptr;
+    PandaStringStream methodName;
+    methodName << STD_CORE_FUNCTION_INVOKE_PREFIX << argc;
+    status = DoGetClassMethod<false>(etsCls, methodName.str().c_str(), nullptr, &method);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
+    ArgVector<Value> args = {};
+    args.reserve(argc + 1);
+    args.emplace_back(s.ToInternalType(fn)->GetCoreType());
+    for (ani_size i = 0; i < argc; ++i) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        args.emplace_back(s.ToInternalType(argv[i])->GetCoreType());
+    }
+
+    EtsValue res {};
+    status = method->Invoke(s, args.data(), &res);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
+    *result = res.GetAs<ani_ref>();
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Variable_SetValue_Boolean(ani_env *env, ani_variable variable, ani_boolean value)
 {
     ANI_DEBUG_TRACE(env);
@@ -5952,7 +5995,7 @@ const __ani_interaction_api INTERACTION_API = {
     EnumItem_GetValue_String,
     EnumItem_GetName,
     EnumItem_GetIndex,
-    NotImplementedAdapter<125>,
+    FunctionalObject_Call,
     Variable_SetValue_Boolean,
     Variable_SetValue_Char,
     Variable_SetValue_Byte,
