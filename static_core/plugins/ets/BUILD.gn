@@ -31,7 +31,10 @@ foreach(plugin, ark_enabled_plugins) {
 with_sdk = false
 
 group("ark_packages") {
-  deps = [ "runtime/napi/etsnative:etsnative" ]
+  deps = [
+    "runtime/libani_helpers:ani_helpers",
+    "runtime/napi/etsnative:etsnative",
+  ]
 
   if (ark_static_standalone_build) {
     deps += [ "$ark_es2panda_root/aot:ets2panda" ]

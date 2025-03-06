@@ -153,6 +153,7 @@ if (PANDA_ETS_INTEROP_JS)
 endif()
 
 add_subdirectory(napi)
+add_subdirectory(libani_helpers)
 
 set(IRTOC_ETS_SCRIPTS ${PANDA_ROOT}/plugins/ets/irtoc_scripts)
 set(IRTOC_ETS_SCRIPTS ${IRTOC_ETS_SCRIPTS} PARENT_SCOPE)

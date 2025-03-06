@@ -12,6 +12,7 @@ build-sdk/sdk/ohos_arm32/lib/libarkfile.so
 build-sdk/sdk/ohos_arm32/lib/libarkplatform.so
 build-sdk/sdk/ohos_arm32/lib/libarkruntime.so
 build-sdk/sdk/ohos_arm32/lib/libarktarget_options.so
+build-sdk/sdk/ohos_arm32/lib/libani_helpers.so
 build-sdk/sdk/ohos_arm32/lib/libarkziparchive.so
 build-sdk/sdk/ohos_arm32/lib/libc_secshared.so
 build-sdk/sdk/ohos_arm32/lib/libdprof.a
