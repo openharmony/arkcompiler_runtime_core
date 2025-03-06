@@ -201,6 +201,7 @@ typedef enum {
     ANI_OUT_OF_RANGE,
     ANI_BUFFER_TO_SMALL,
     ANI_INVALID_VERSION,
+    ANI_AMBIGUOUS,
     // NOTE: Add necessary status codes
 } ani_status;
 

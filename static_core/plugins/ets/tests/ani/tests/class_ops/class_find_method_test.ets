@@ -33,6 +33,26 @@ class A {
     {
         return a0 * a0;
     }
+
+    public overloadedBase(): int
+    {
+        return 1
+    }
+
+    public overloadedBase(i: int): int
+    {
+        return 1
+    }
+
+    public static staticOverloadedBase(): int
+    {
+        return 1
+    }
+
+    public static staticOverloadedBase(i: int): int
+    {
+        return 1
+    }
 }
 
 final class B extends A {
@@ -41,6 +61,26 @@ final class B extends A {
     public override int_override_method(a0: int, a1: int): int
     {
         return a1 * a1;
+    }
+
+    public overloaded(): int
+    {
+        return 1
+    }
+
+    public overloaded(i: int): int
+    {
+        return 1
+    }
+
+    public static staticOverloaded(): int
+    {
+        return 1
+    }
+
+    public static staticOverloaded(i: int): int
+    {
+        return 1
     }
 }
 

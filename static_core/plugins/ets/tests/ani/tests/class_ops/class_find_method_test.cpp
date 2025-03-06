@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "ani/ani.h"
 #include "ani_gtest.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
@@ -122,7 +123,7 @@ public:
         ASSERT_NE(cls, nullptr);
 
         ani_method ctor;
-        ASSERT_EQ(env_->Class_FindMethod(*cls, "<ctor>", nullptr, &ctor), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(*cls, "<ctor>", ":V", &ctor), ANI_OK);
 
         ASSERT_EQ(env_->Object_New(*cls, ctor, result), ANI_OK);
     }
@@ -949,6 +950,38 @@ TEST_F(ClassFindMethodTest, find_func_in_namespace)
     // Call the method and verify the return value.
     ASSERT_EQ(env_->Object_CallMethod_Int_A(object, method, &res, args), ANI_OK);
     ASSERT_EQ(res, TEST_EXPECTED_VALUE4 + TEST_EXPECTED_VALUE6);
+}
+
+TEST_F(ClassFindMethodTest, duplicate_no_signature)
+{
+    ani_class baseCls {};
+    ASSERT_EQ(env_->FindClass("Ltest/A;", &baseCls), ANI_OK);
+    ASSERT_NE(baseCls, nullptr);
+
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindMethod(baseCls, "overloadedBase", nullptr, &method), ANI_AMBIGUOUS);
+
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("Ltest/B;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "overloadedBase", nullptr, &method), ANI_AMBIGUOUS);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "overloaded", nullptr, &method), ANI_AMBIGUOUS);
+}
+
+TEST_F(ClassFindMethodTest, static_duplicate_no_signature)
+{
+    ani_class baseCls {};
+    ASSERT_EQ(env_->FindClass("Ltest/A;", &baseCls), ANI_OK);
+    ASSERT_NE(baseCls, nullptr);
+
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(baseCls, "staticOverloadedBase", nullptr, &method), ANI_AMBIGUOUS);
+
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("Ltest/B;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticOverloadedBase", nullptr, &method), ANI_AMBIGUOUS);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticOverloaded", nullptr, &method), ANI_AMBIGUOUS);
 }
 
 }  // namespace ark::ets::ani::testing
