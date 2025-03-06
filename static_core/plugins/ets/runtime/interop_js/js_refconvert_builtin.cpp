@@ -200,6 +200,8 @@ private:
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_ARRAY_OVERLOADS = {
             {utf::CStringAsMutf8("<ctor>"), ":V"},
+            {utf::CStringAsMutf8("$_get"), "I:Lstd/core/Object;"},
+            {utf::CStringAsMutf8("$_set"), "ILstd/core/Object;:V"},
         };
         wArray_ = RegisterClass(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);
         NAPI_CHECK_FATAL(napi_object_seal(ctx_->GetJSEnv(), jsGlobalEts_));

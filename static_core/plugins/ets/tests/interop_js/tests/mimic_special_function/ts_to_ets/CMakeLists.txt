@@ -11,5 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(ts_to_ets)
-add_subdirectory(ets_to_ts)
+set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
+
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_special_function_ts_to_ets
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/special_function.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_special_function.ets
+    ETS_CONFIG ${ETS_CONFIG}
+    TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/special_function.ts
+)
