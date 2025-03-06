@@ -22,6 +22,11 @@ import { jsNumber } from 'test_import';
 class BenchA2j {
 
     /**
+     * @Param 100, 1000
+     */
+    size: int;
+
+    /**
      * @Setup
      */
     public setup(): void {
@@ -31,8 +36,16 @@ class BenchA2j {
     /**
      * @Benchmark
      */
-    public test(): number {
+    public someTest(): number {
         return jsNumber;
     }
+
+    /**
+     * @Benchmark
+     */
+    public otherTest(): int {
+        return this.size * 6;
+    }
+    
 }
 

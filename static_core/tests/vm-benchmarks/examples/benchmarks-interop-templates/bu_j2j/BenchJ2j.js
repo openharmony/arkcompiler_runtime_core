@@ -32,9 +32,16 @@ function benchJ2j() {
     /**
      * @Benchmark
      */
-    this.test = function() {
+    this.test1 = function() {
         testFunction();
         return;
+    };
+
+    /**
+     * @Benchmark
+     */
+    this.test2 = function() {
+        return testFunction();
     };
 
     function testFunction() {

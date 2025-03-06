@@ -91,7 +91,8 @@ class Platform(PlatformBase):
             self.run_generated(bu)
             return
 
-        log.warning(f'Valid generated interop mode not found in tags: {bu.tags}')
+        log.warning('Valid generated interop mode not found in tags: %s',
+                    ','.join(bu.tags))
         return
 
     def run_generated(self, bu: BenchUnit) -> None:

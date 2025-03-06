@@ -47,9 +47,16 @@ function benchJ2a() {
     /**
      * @Benchmark
      */
-    this.test = function() {
+    this.test1 = function() {
         this.bench.testFunction();
         return;
+    };
+
+    /**
+     * @Benchmark
+     */
+    this.test2 = function() {
+        return this.bench.testFunction();
     };
 
     return;
