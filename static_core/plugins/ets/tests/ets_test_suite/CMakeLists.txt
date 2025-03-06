@@ -14,7 +14,7 @@
 function(add_ets_test test_suite)
     set(prefix ARG)
     set(noValues SKIP_ARM32_COMPILER)
-    set(singleValues FILE TEST_NAME)
+    set(singleValues FILE TEST_NAME ENTRYPOINT TEST_PATH)
     set(multiValues OPTIONS MODE)
     cmake_parse_arguments(${prefix} "${noValues}" "${singleValues}" "${multiValues}" ${ARGN})
 
@@ -27,11 +27,15 @@ function(add_ets_test test_suite)
     endif()
 
     set(test_in "${CMAKE_CURRENT_SOURCE_DIR}/${ARG_FILE}")
+    if (DEFINED ARG_TEST_PATH)
+        set(test_in "${ARG_TEST_PATH}")
+    endif()
+
     set(test_out_dir "${CMAKE_CURRENT_BINARY_DIR}/${ARG_TEST_NAME}")
 
     if ("INT" IN_LIST ARG_MODE)
         set(target ${test_suite}_${ARG_TEST_NAME}-ets-int)
-        run_int_ets_code(${target} ${test_out_dir} SOURCES "${test_in}" RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
+        run_int_ets_code(${target} ${test_out_dir} SOURCES "${test_in}" ENTRYPOINT ${ARG_ENTRYPOINT} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
         add_dependencies(${all_modes_tests} ${target})
     endif()
 
@@ -56,13 +60,13 @@ function(add_ets_test test_suite)
     if ("JIT" IN_LIST ARG_MODE)
         set(target ${test_suite}_${ARG_TEST_NAME}-ets-jit)
         LIST(APPEND targets ${target})
-        run_jit_ets_code(${test_in} ${test_out_dir} ${target} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
+        run_jit_ets_code(${test_in} ${test_out_dir} ${target} ENTRYPOINT ${ARG_ENTRYPOINT} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
     endif()
 
     if ("JITOSR" IN_LIST ARG_MODE AND PANDA_TARGET_ARM64)
         set(target ${test_suite}_${ARG_TEST_NAME}-ets-jit-osr)
         LIST(APPEND targets ${target})
-        run_jit_osr_ets_code(${test_in} ${test_out_dir} ${target} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
+        run_jit_osr_ets_code(${test_in} ${test_out_dir} ${target} ENTRYPOINT ${ARG_ENTRYPOINT} RUNTIME_EXTRA_OPTIONS ${ARG_OPTIONS})
     endif()
 
     foreach(target ${targets})
