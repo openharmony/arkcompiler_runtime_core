@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -22,7 +22,7 @@ namespace ark::ets::ani::testing {
 class IsAssignableFromTest : public AniTest {
 public:
     template <bool IS_ASSIGNABLE>
-    void ChechkIsAssignableFrom(const char *fromClsName, const char *toClsName)
+    void CheckIsAssignableFrom(const char *fromClsName, const char *toClsName)
     {
         ani_class fromCls;
         ASSERT_EQ(env_->FindClass(fromClsName, &fromCls), ANI_OK);
@@ -45,21 +45,21 @@ public:
 
 TEST_F(IsAssignableFromTest, is_assignable)
 {
-    ChechkIsAssignableFrom<true>("LA;", "LA;");
-    ChechkIsAssignableFrom<true>("LB;", "LA;");
-    ChechkIsAssignableFrom<true>("LA;", "Lstd/core/Object;");
-    ChechkIsAssignableFrom<true>("LB;", "Lstd/core/Object;");
-    ChechkIsAssignableFrom<true>("LA;", "LI;");
-    ChechkIsAssignableFrom<true>("LB;", "LI;");
+    CheckIsAssignableFrom<true>("LA;", "LA;");
+    CheckIsAssignableFrom<true>("LB;", "LA;");
+    CheckIsAssignableFrom<true>("LA;", "Lstd/core/Object;");
+    CheckIsAssignableFrom<true>("LB;", "Lstd/core/Object;");
+    CheckIsAssignableFrom<true>("LA;", "LI;");
+    CheckIsAssignableFrom<true>("LB;", "LI;");
 }
 
 TEST_F(IsAssignableFromTest, not_assignable)
 {
-    ChechkIsAssignableFrom<false>("LA;", "LB;");
-    ChechkIsAssignableFrom<false>("Lstd/core/Object;", "LA;");
-    ChechkIsAssignableFrom<false>("Lstd/core/Object;", "LB;");
-    ChechkIsAssignableFrom<false>("LI;", "LB;");
-    ChechkIsAssignableFrom<false>("LI;", "LA;");
+    CheckIsAssignableFrom<false>("LA;", "LB;");
+    CheckIsAssignableFrom<false>("Lstd/core/Object;", "LA;");
+    CheckIsAssignableFrom<false>("Lstd/core/Object;", "LB;");
+    CheckIsAssignableFrom<false>("LI;", "LB;");
+    CheckIsAssignableFrom<false>("LI;", "LA;");
 }
 
 TEST_F(IsAssignableFromTest, ani_invalid_args)
@@ -75,6 +75,23 @@ TEST_F(IsAssignableFromTest, ani_invalid_args)
     ASSERT_EQ(env_->Type_IsAssignableFrom(clsA, clsA, nullptr), ANI_INVALID_ARGS);
 }
 
+TEST_F(IsAssignableFromTest, is_assignable_combind_scenes_001)
+{
+    CheckIsAssignableFrom<true>("LBaseA;", "LBaseA;");
+    CheckIsAssignableFrom<true>("LSubB;", "LSubB;");
+    CheckIsAssignableFrom<true>("LSubB;", "LBaseA;");
+    CheckIsAssignableFrom<true>("LSubC;", "LSubC;");
+    CheckIsAssignableFrom<true>("LSubC;", "LSubB;");
+    CheckIsAssignableFrom<true>("LSubC;", "LBaseA;");
+    CheckIsAssignableFrom<true>("LD;", "LD;");
+
+    CheckIsAssignableFrom<false>("LBaseA;", "LSubB;");
+    CheckIsAssignableFrom<false>("LBaseA;", "LSubC;");
+    CheckIsAssignableFrom<false>("LSubB;", "LSubC;");
+    CheckIsAssignableFrom<false>("LSubC;", "LD;");
+    CheckIsAssignableFrom<false>("LSubB;", "LD;");
+    CheckIsAssignableFrom<false>("LBaseA;", "LD;");
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

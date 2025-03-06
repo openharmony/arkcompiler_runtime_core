@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -77,6 +77,138 @@ TEST_F(ClassBindNativeMethodsTest, RegisterNativesErrorTest)
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, nullptr, nrMethods), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), nrMethods), ANI_NOT_FOUND);
 }
+
+TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_002)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("Ltest002A;", &ns), ANI_OK);
+    ASSERT_NE(ns, nullptr);
+
+    ani_namespace result {};
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "Ltest002B;", &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
+
+    ani_class cls {};
+    ASSERT_EQ(env_->Namespace_FindClass(result, "LTestA002;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    std::array methods = {
+        ani_native_function {"foo", ":I", reinterpret_cast<void *>(NativeMethodsFooNative)},
+        ani_native_function {"long_foo", ":J", reinterpret_cast<void *>(NativeMethodsLongFooNative)},
+    };
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
+
+    ani_method constructorMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", nullptr, &constructorMethod), ANI_OK);
+    ASSERT_NE(constructorMethod, nullptr);
+
+    ani_object object {};
+    ASSERT_EQ(env_->Object_New(cls, constructorMethod, &object), ANI_OK);
+    ASSERT_NE(object, nullptr);
+
+    ani_method intFooMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "foo", nullptr, &intFooMethod), ANI_OK);
+    ASSERT_NE(intFooMethod, nullptr);
+
+    ani_int fooResult = 0;
+    ASSERT_EQ(env_->Object_CallMethod_Int(object, intFooMethod, &fooResult), ANI_OK);
+    ASSERT_EQ(fooResult, 42U);
+
+    ani_method longFooMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "long_foo", nullptr, &longFooMethod), ANI_OK);
+    ASSERT_NE(longFooMethod, nullptr);
+
+    ani_long longFooResult = 0L;
+    ASSERT_EQ(env_->Object_CallMethod_Long(object, longFooMethod, &longFooResult), ANI_OK);
+    ASSERT_EQ(longFooResult, 84L);
+}
+
+TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_003)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("LTestB003;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    std::array methods = {
+        ani_native_function {"foo", ":I", reinterpret_cast<void *>(NativeMethodsFooNative)},
+        ani_native_function {"long_foo", ":J", reinterpret_cast<void *>(NativeMethodsLongFooNative)},
+    };
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
+
+    ani_method constructorMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", nullptr, &constructorMethod), ANI_OK);
+    ASSERT_NE(constructorMethod, nullptr);
+
+    ani_object object {};
+    ASSERT_EQ(env_->Object_New(cls, constructorMethod, &object), ANI_OK);
+    ASSERT_NE(object, nullptr);
+
+    ani_method intFooMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "foo", nullptr, &intFooMethod), ANI_OK);
+    ASSERT_NE(intFooMethod, nullptr);
+
+    ani_int fooResult = 0;
+    ASSERT_EQ(env_->Object_CallMethod_Int(object, intFooMethod, &fooResult), ANI_OK);
+    ASSERT_EQ(fooResult, 42U);
+
+    ani_method longFooMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "long_foo", nullptr, &longFooMethod), ANI_OK);
+    ASSERT_NE(longFooMethod, nullptr);
+
+    ani_long longFooResult = 0L;
+    ASSERT_EQ(env_->Object_CallMethod_Long(object, longFooMethod, &longFooResult), ANI_OK);
+    ASSERT_EQ(longFooResult, 84L);
+}
+
+TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_004)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("LTestA004;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    std::array methods = {
+        ani_native_function {"foo", ":I", reinterpret_cast<void *>(NativeMethodsFooNative)},
+        ani_native_function {"long_foo", ":J", reinterpret_cast<void *>(NativeMethodsLongFooNative)},
+    };
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
+
+    ani_method constructorMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", nullptr, &constructorMethod), ANI_OK);
+    ASSERT_NE(constructorMethod, nullptr);
+
+    ani_object object {};
+    ASSERT_EQ(env_->Object_New(cls, constructorMethod, &object), ANI_OK);
+    ASSERT_NE(object, nullptr);
+
+    ani_method intFooMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "foo", nullptr, &intFooMethod), ANI_OK);
+    ASSERT_NE(intFooMethod, nullptr);
+
+    ani_int fooResult = 0;
+    ASSERT_EQ(env_->Object_CallMethod_Int(object, intFooMethod, &fooResult), ANI_OK);
+    ASSERT_EQ(fooResult, 42U);
+
+    ani_method longFooMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "long_foo", nullptr, &longFooMethod), ANI_OK);
+    ASSERT_NE(longFooMethod, nullptr);
+
+    ani_long longFooResult = 0L;
+    ASSERT_EQ(env_->Object_CallMethod_Long(object, longFooMethod, &longFooResult), ANI_OK);
+    ASSERT_EQ(longFooResult, 84L);
+}
+
+TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_005)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("LTestA005;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    std::array methods = {
+        ani_native_function {"foo", ":I", reinterpret_cast<void *>(NativeMethodsFooNative)},
+    };
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_NOT_FOUND);
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

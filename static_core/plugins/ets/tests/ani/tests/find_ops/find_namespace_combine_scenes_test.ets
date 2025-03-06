@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,9 @@
  * limitations under the License.
  */
 
-interface I {}
-
-class A implements I {}
-
-class B extends A {}
-
-class BaseA {}
-class SubB extends BaseA {}
-class SubC extends SubB {}
-class D {}
+namespace spaceB {
+    function sum(a0: int, a1: int): int
+    {
+        return a0 + a1;
+    }
+}

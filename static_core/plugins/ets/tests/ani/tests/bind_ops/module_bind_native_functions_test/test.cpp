@@ -14,9 +14,10 @@
  */
 
 #include "ani_gtest.h"
-#include <iostream>
 #include <array>
+#include <iostream>
 
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
 class ModuleBindNativeFunctionsTest : public AniTest {};
@@ -114,4 +115,109 @@ TEST_F(ModuleBindNativeFunctionsTest, function_not_found)
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_NOT_FOUND);
 }
 
+// NOLINTNEXTLINE(readability-named-parameter)
+static ani_int NativeMethodsFooNative(ani_env *, ani_class)
+{
+    const ani_int answer = 42U;
+    return answer;
+}
+
+// NOLINTNEXTLINE(readability-named-parameter)
+static ani_long NativeMethodsLongFooNative(ani_env *, ani_class)
+{
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    return static_cast<ani_long>(84L);
+}
+
+TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("L@abcModule/test;", &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ani_namespace ns {};
+    ASSERT_EQ(env_->Module_FindNamespace(module, "Ltest001A;", &ns), ANI_OK);
+    ASSERT_NE(ns, nullptr);
+
+    ani_class cls {};
+    ASSERT_EQ(env_->Namespace_FindClass(ns, "LTestA001;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    std::array methods = {
+        ani_native_function {"foo", ":I", reinterpret_cast<void *>(NativeMethodsFooNative)},
+        ani_native_function {"long_foo", ":J", reinterpret_cast<void *>(NativeMethodsLongFooNative)},
+    };
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_ALREADY_BINDED);
+
+    ani_method constructorMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", nullptr, &constructorMethod), ANI_OK);
+    ASSERT_NE(constructorMethod, nullptr);
+
+    ani_object object {};
+    ASSERT_EQ(env_->Object_New(cls, constructorMethod, &object), ANI_OK);
+    ASSERT_NE(object, nullptr);
+
+    ani_method intFooMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "foo", nullptr, &intFooMethod), ANI_OK);
+    ASSERT_NE(intFooMethod, nullptr);
+
+    ani_int fooResult = 0;
+    ASSERT_EQ(env_->Object_CallMethod_Int(object, intFooMethod, &fooResult), ANI_OK);
+    ASSERT_EQ(fooResult, 42U);
+
+    ani_method longFooMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "long_foo", nullptr, &longFooMethod), ANI_OK);
+    ASSERT_NE(longFooMethod, nullptr);
+
+    ani_long longFooResult = 0L;
+    ASSERT_EQ(env_->Object_CallMethod_Long(object, longFooMethod, &longFooResult), ANI_OK);
+    ASSERT_EQ(longFooResult, 84L);
+}
+
+TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001_not_found)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("L@abcModule/test;", &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ani_namespace ns {};
+    ASSERT_EQ(env_->Module_FindNamespace(module, "Ltest001A;", &ns), ANI_OK);
+    ASSERT_NE(ns, nullptr);
+
+    ani_class cls {};
+    ASSERT_EQ(env_->Namespace_FindClass(ns, "LTestA001;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    std::array methods = {
+        ani_native_function {"foo", ":I", reinterpret_cast<void *>(NativeMethodsFooNative)},
+        ani_native_function {"long_foo11", ":J", reinterpret_cast<void *>(NativeMethodsLongFooNative)},
+    };
+    ani_size nrMethods = 2U;
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), nrMethods), ANI_NOT_FOUND);
+}
+
+TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001_already_binded)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("L@abcModule/test;", &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ani_namespace ns {};
+    ASSERT_EQ(env_->Module_FindNamespace(module, "Ltest001A;", &ns), ANI_OK);
+    ASSERT_NE(ns, nullptr);
+
+    ani_class cls {};
+    ASSERT_EQ(env_->Namespace_FindClass(ns, "LTestA001;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    std::array methods = {
+        ani_native_function {"foo", ":I", reinterpret_cast<void *>(NativeMethodsFooNative)},
+        ani_native_function {"long_foo", ":J", reinterpret_cast<void *>(NativeMethodsLongFooNative)},
+    };
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_ALREADY_BINDED);
+}
 }  // namespace ark::ets::ani::testing
+
+// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

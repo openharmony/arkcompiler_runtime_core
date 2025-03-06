@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-enum ToFind {
+enum Color {
     RED,
     BLUE,
     GREEN
 }
 
-enum ToFindInt {
+enum ColorInt {
     RED = 5,
     BLUE = 77,
     GREEN = 9999
 }
 
-enum ToFindString {
+enum ColorString {
     RED = "str_red",
     BLUE = "str_blue",
     GREEN = "str_green"

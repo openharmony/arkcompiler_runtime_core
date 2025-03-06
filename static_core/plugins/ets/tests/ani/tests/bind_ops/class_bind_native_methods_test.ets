@@ -21,3 +21,42 @@ class RegisteringNativeMethodsTest {
         return 21;
     }
 }
+
+namespace test002A {
+    namespace test002B {
+        class TestA002 {
+            constructor() {
+            }
+            public native foo(): int;
+            public native long_foo(): long;
+        }
+    }
+}
+
+class TestA003 {
+    constructor() {
+    }
+};
+
+class TestB003 extends TestA003 {
+    constructor() {
+    }
+    public native foo(): int;
+    public native long_foo(): long;
+};
+
+final class TestA004 {
+    constructor() {
+    }
+    public native foo(): int;
+    public native long_foo(): long;
+};
+
+class TestA005 {
+    constructor() {
+    }
+
+    foo(): int {
+        return 50;
+    }
+};
