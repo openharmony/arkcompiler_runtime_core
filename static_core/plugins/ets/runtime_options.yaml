@@ -211,6 +211,10 @@ options:
     type: bool
     default: false
     description: "migration"
+  - name: migrate-await
+    type: bool
+    default: false
+    description: "migrate awakened coroutines"
 
 - name: coroutine-dump-stats
   lang:

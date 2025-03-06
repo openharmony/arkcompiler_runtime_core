@@ -22,7 +22,7 @@ add_custom_target(ets_test_suite_coroutines)
 #                         [OPTIONS "--gc-type=epsilon"]
 #                         IMPL "THREADED" "STACKFUL"
 #                         OPTION_SETS_THREADED "DEFAULT"
-#                         OPTION_SETS_STACKFUL "DEFAULT" "JS" "POOL" "JS_POOL"
+#                         OPTION_SETS_STACKFUL "DEFAULT" "JS" "POOL" "JS_POOL" "MIGRATION_AWAIT"
 #                         WORKERS "AUTO" "ONE"
 #                         MODE "INT" "JIT" "AOT" "LLVMAOT" "JITOSR"
 # )
@@ -67,6 +67,8 @@ function(add_ets_coroutines_test)
                     set(additional_options "--use-coroutine-pool=true")
                 elseif(option_set STREQUAL "STATS")
                     set(additional_options "--coroutine-dump-stats=true")
+                elseif(option_set STREQUAL "MIGRATION_AWAIT")
+                    set(additional_options "--coroutine-enable-features:migration,migrate-await")
                 endif()
                 string(TOLOWER "${option_set}" options_name)
 
@@ -357,3 +359,13 @@ add_ets_coroutines_test(FILE scale_workers_pool.ets
                         WORKERS "ONE"
                         MODE "INT"
 )
+
+if (NOT PANDA_ENABLE_THREAD_SANITIZER)
+add_ets_coroutines_test(FILE await_migrate.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "MIGRATION_AWAIT"
+                        WORKERS "AUTO"
+                        MODE "INT"
+)
+endif()

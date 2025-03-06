@@ -141,11 +141,13 @@ void CoroutineManager::FreeCoroutineId(uint32_t id)
 
 void CoroutineManager::SetSchedulingPolicy(CoroutineSchedulingPolicy policy)
 {
+    os::memory::LockHolder lock(policyLock_);
     schedulingPolicy_ = policy;
 }
 
 CoroutineSchedulingPolicy CoroutineManager::GetSchedulingPolicy() const
 {
+    os::memory::LockHolder lock(policyLock_);
     return schedulingPolicy_;
 }
 
