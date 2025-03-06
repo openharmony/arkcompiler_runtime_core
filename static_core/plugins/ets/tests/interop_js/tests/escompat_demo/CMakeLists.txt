@@ -17,4 +17,5 @@ panda_ets_interop_js_test_arkjsvm(ets_interop_js__test_escompat_demo
     JS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/out/demo.js
         ${CMAKE_CURRENT_SOURCE_DIR}/out/foo.js
+    COMPILATION_JS_WITH_CJS_ON
 )

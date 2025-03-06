@@ -15,18 +15,6 @@
 
 const helper = requireNapiPreview('libinterop_test_helper.so', false);
 
-async function jsAsync() {
-    return Promise.resolve('success');
-}
-
-async function jsAsyncFailing() {
-    return Promise.reject('rejected');
-}
-
-exports.jsAsync = jsAsync;
-exports.jsAsyncFailing = jsAsyncFailing;
-globalThis.require = require;
-
 function runTest(test) {
     print('Running test ' + test);
     const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');

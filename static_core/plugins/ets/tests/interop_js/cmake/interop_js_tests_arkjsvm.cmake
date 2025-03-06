@@ -11,11 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_custom_target(ets_interop_js_arkjsvm_gtests COMMENT "Run ets_interop_js Gtests on ArkJSVM")
+add_custom_target(ets_interop_js_arkjsvm_gtests COMMENT "Run ets_interop_js_arkjsvm_gtests Gtests on ArkJSVM")
 add_dependencies(ets_gtests ets_interop_js_arkjsvm_gtests)
 add_dependencies(ets_interop_tests ets_interop_js_arkjsvm_gtests)
 
-add_custom_target(ets_interop_js_tests_arkjsvm COMMENT "Run ets_interop_js tests on ArkJSVM")
+add_custom_target(ets_interop_js_tests_arkjsvm COMMENT "Run ets_interop_js_tests_arkjsvm tests on ArkJSVM")
 add_dependencies(ets_tests ets_interop_js_tests_arkjsvm)
 add_dependencies(ets_interop_tests ets_interop_js_tests_arkjsvm)
 
@@ -189,18 +189,16 @@ function(panda_ets_interop_js_test_arkjsvm TARGET)
         ETS_CONFIG ${ARG_ETS_CONFIG}
     )
 
+    set(JS_COMPILATION_OPTIONS --module --merge-abc)
+    if(ARG_COMPILATION_JS_WITH_CJS_ON)
+        set(JS_COMPILATION_OPTIONS --commonjs)
+    endif()
+
     if(DEFINED ARG_JS_SOURCES)
         compile_dynamic_file(${TARGET}_js_modules
             SOURCES ${ARG_JS_SOURCES}
-            COMPILE_OPTION --commonjs
+            COMPILE_OPTION ${JS_COMPILATION_OPTIONS}
         )
-    endif()
-
-    set(JS_COMPILATION_OPTIONS)
-    if(DEFINED ARG_COMPILATION_JS_WITH_CJS_ON)
-        set(JS_COMPILATION_OPTIONS --commonjs)
-    else()
-        set(JS_COMPILATION_OPTIONS --module)
     endif()
 
     set(COMPILED_LAUNCHER_NAME ${TARGET}_launcher_abc_name)
@@ -250,5 +248,5 @@ function(panda_ets_interop_js_test_arkjsvm TARGET)
     if(DEFINED ARG_JS_SOURCES)
         add_dependencies(${TARGET} ${TARGET}_js_modules)
     endif()
-    add_dependencies(ets_interop_js_tests_nodevm ${TARGET})
+    add_dependencies(ets_interop_js_tests_arkjsvm ${TARGET})
 endfunction(panda_ets_interop_js_test_arkjsvm)

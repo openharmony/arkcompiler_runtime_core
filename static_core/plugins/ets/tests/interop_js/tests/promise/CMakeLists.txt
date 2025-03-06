@@ -79,28 +79,32 @@ panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise8
     LAUNCHER_ARGS ".testReturnPromiseFromAsync" "Panda"
 )
 
-panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise9
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.sts
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/return_pending_promise_to_js_test.js
-    LAUNCHER_ARGS "then"
-)
+# NOTE: #23066
+# panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise9
+#     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.sts
+#     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/return_pending_promise_to_js_test.js
+#     LAUNCHER_ARGS "then"
+# )
 
-panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise10
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.sts
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/return_pending_promise_to_js_test.js
-    LAUNCHER_ARGS "await"
-)
+# NOTE: #23066
+# panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise10
+#     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.sts
+#     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/return_pending_promise_to_js_test.js
+#     LAUNCHER_ARGS "await"
+# )
 
 panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise11
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/await_js_promise.js
     LAUNCHER_ARGS "pending"
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise12
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/await_js_promise.js
     LAUNCHER_ARGS "resolved"
+    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_await_promise
@@ -289,47 +293,47 @@ panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_schedule_main_coro
 panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_proxy
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.js
+    JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test_exports.js
     ETS_CONFIG ${ETS_CONFIG}
     LAUNCHER_ARGS ".testProxyPromise"
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_proxy_with_await
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.js
+    JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test_exports.js
     ETS_CONFIG ${ETS_CONFIG}
     LAUNCHER_ARGS ".testAwaitPromiseProxy"
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_proxy_reject
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.js
+    JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test_exports.js
     ETS_CONFIG ${ETS_CONFIG}
     LAUNCHER_ARGS ".testProxyPromiseReject"
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_proxy_with_await_reject
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.js
+    JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test_exports.js
     ETS_CONFIG ${ETS_CONFIG}
     LAUNCHER_ARGS ".testAwaitPromiseProxyReject"
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_proxy_with_await_reject_fail
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.js
+    JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test_exports.js
     ETS_CONFIG ${ETS_CONFIG}
     LAUNCHER_ARGS ".testAwaitPromiseProxyRejectShouldFail"
-    COMPILATION_JS_WITH_CJS_ON
 )
 
 panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_proxy_with_then_await_reject_fail
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.js
+    JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test_exports.js
     ETS_CONFIG ${ETS_CONFIG}
     LAUNCHER_ARGS ".testAwaitPromiseProxyThenRejectShouldFail"
-    COMPILATION_JS_WITH_CJS_ON
 )
