@@ -33,9 +33,6 @@ set(TESTS_EXECUTED_WITH_NODEJS
     # Blocked by #22353
     dot_operator_nodejs
 
-    # Blocked by #22659
-    exceptions
-
     # Blocked by #22422
     indexed_type
 
@@ -63,7 +60,7 @@ set(TESTS_EXECUTED_WITH_NODEJS
 
 # NOTE: Remove this condition after all tests have been migrated to ArkJSVM.
 list(LENGTH TESTS_EXECUTED_WITH_NODEJS INTEROP_NODEJS_TEST_NUM)
-if(NOT ${INTEROP_NODEJS_TEST_NUM} EQUAL 21)
+if(NOT ${INTEROP_NODEJS_TEST_NUM} EQUAL 20)
     message(FATAL_ERROR "All new interop tests shouls be executed on ArkJSVM. 
                          INTEROP_NODEJS_TEST_NUM = ${INTEROP_NODEJS_TEST_NUM}")
 endif()

@@ -240,7 +240,7 @@ void InteropCtx::SharedEtsVmState::CacheClasses(EtsClassLinker *etsClassLinker)
 {
     jsRuntimeClass = CacheClass(etsClassLinker, descriptors::JS_RUNTIME);
     jsValueClass = CacheClass(etsClassLinker, descriptors::JS_VALUE);
-    jsErrorClass = CacheClass(etsClassLinker, descriptors::JS_ERROR);
+    esErrorClass = CacheClass(etsClassLinker, descriptors::ES_ERROR);
     objectClass = CacheClass(etsClassLinker, descriptors::OBJECT);
     stringClass = CacheClass(etsClassLinker, descriptors::STRING);
     bigintClass = CacheClass(etsClassLinker, descriptors::BIG_INT);
@@ -334,7 +334,7 @@ void InteropCtx::InitJsValueFinalizationRegistry(EtsCoroutine *coro)
     ASSERT(jsvalueFregistryRegister_ != nullptr);
 }
 
-EtsObject *InteropCtx::CreateETSCoreJSError(EtsCoroutine *coro, JSValue *jsvalue)
+EtsObject *InteropCtx::CreateETSCoreESError(EtsCoroutine *coro, JSValue *jsvalue)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coro);
     VMHandle<ObjectHeader> jsvalueHandle(coro, jsvalue->GetCoreType());
@@ -343,10 +343,10 @@ EtsObject *InteropCtx::CreateETSCoreJSError(EtsCoroutine *coro, JSValue *jsvalue
                                                      panda_file::Type(panda_file::Type::TypeId::REFERENCE)},
                         Method::Proto::RefTypeVector {utf::Mutf8AsCString(GetJSValueClass()->GetDescriptor())});
     auto ctorName = utf::CStringAsMutf8(panda_file_items::CTOR.data());
-    auto ctor = GetJSErrorClass()->GetDirectMethod(ctorName, proto);
+    auto ctor = GetESErrorClass()->GetDirectMethod(ctorName, proto);
     ASSERT(ctor != nullptr);
 
-    auto excObj = ObjectHeader::Create(coro, GetJSErrorClass());
+    auto excObj = ObjectHeader::Create(coro, GetESErrorClass());
     if (UNLIKELY(excObj == nullptr)) {
         return nullptr;
     }
@@ -382,7 +382,7 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     //    Where js.UserError will be wrapped into compat/TypeError
     //    NOTE(vpukhov): compat: add intrinsic to obtain JSValue from compat/ instances
 
-    auto objRefconv = JSRefConvertResolve(ctx, ctx->GetObjectClass());
+    auto objRefconv = JSRefConvertResolve(ctx, ctx->GetESErrorClass());
     LocalObjectHandle<EtsObject> etsObj(coro, objRefconv->Unwrap(ctx, val));
     if (UNLIKELY(etsObj.GetPtr() == nullptr)) {
         INTEROP_LOG(INFO) << "Something went wrong while unwrapping pending js exception";
@@ -396,8 +396,8 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
         return;
     }
 
-    // NOTE(vpukhov): should throw a special error (JSError?) with cause set
-    auto exc = JSConvertJSError::Unwrap(ctx, ctx->GetJSEnv(), val);
+    // NOTE(vpukhov): should throw a special error (ESError) with cause set
+    auto exc = JSConvertESError::Unwrap(ctx, ctx->GetJSEnv(), val);
     if (LIKELY(exc.has_value())) {
         ASSERT(exc != nullptr);
         coro->SetException(exc.value()->GetCoreType());

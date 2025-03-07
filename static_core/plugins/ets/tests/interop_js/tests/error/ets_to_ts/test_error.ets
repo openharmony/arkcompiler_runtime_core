@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,27 +13,23 @@
  * limitations under the License.
  */
 
+package error.test;
 
-//Static function throws builtin exception
-export const staticFunctionWithBuiltinException = ()=>{
-    throw new TypeError('This is a TypeError');
-};
+export let err = new Error('This is a Error');
 
-
-//Static function throws user-defined exception E
-export class CustomError extends Error {
-    constructor(message) {
-        super(message);
-        this.name = 'CustomErrorA';
-    }
+export function ErrorFunc(message: string): void {
+  throw new Error(message);
 }
 
-export const staticFunctionWithCustomException = ()=>{
-    throw new CustomError('This is a custom error(from static function)');
-};
+export class CustomError extends Error {
+  code: number;
+  constructor(message: string, code: number) {
+    super(message);
+    this.name = "CustomError";
+    this.code = code;
+  }
+}
 
-export function createError(name, message) {
-    const error = new Error(message);
-    error.name = name;
-    return error;
+export function CustomErrorFunc(message: string, code: number): void {
+  throw new CustomError(message, code);
 }

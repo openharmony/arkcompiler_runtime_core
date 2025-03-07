@@ -12,18 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class CustomErrorA extends Error {
+export class CustomErrorA extends Error {
     constructor(message, code) {
         super(message);
         this.name = 'CustomErrorA';
         this.code = code;
     }
 }
-function createCustomErrorA(message, code) {
+
+export function createCustomErrorA(message, code) {
     return new CustomErrorA(message, code);
 }
-
-module.exports = {
-    CustomErrorA,
-    createCustomErrorA
-};

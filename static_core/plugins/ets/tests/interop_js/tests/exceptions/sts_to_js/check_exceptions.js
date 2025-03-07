@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-const {
-    throwErrorFromSts,
-    throwErrorWithCauseFromSts,
-    throwCustomErrorFromSts,
-    throwExceptionFromSts,
-    throwExceptionWithCauseFromSts,
-    throwCustomExceptionFromSts,
-} = require('exceptions.test');
+const stsVm = globalThis.gtest.etsVm;
 
+const throwErrorFromSts = stsVm.getFunction('Lexceptions/test/ETSGLOBAL;', 'throwErrorFromSts');
+const throwErrorWithCauseFromSts = stsVm.getFunction('Lexceptions/test/ETSGLOBAL;', 'throwErrorWithCauseFromSts');
+const throwCustomErrorFromSts = stsVm.getFunction('Lexceptions/test/ETSGLOBAL;', 'throwCustomErrorFromSts');
+
+const throwExceptionFromSts = stsVm.getFunction('Lexceptions/test/ETSGLOBAL;', 'throwExceptionFromSts');
+const throwExceptionWithCauseFromSts = stsVm.getFunction('Lexceptions/test/ETSGLOBAL;', 'throwExceptionWithCauseFromSts');
+const throwCustomExceptionFromSts = stsVm.getFunction('Lexceptions/test/ETSGLOBAL;', 'throwCustomExceptionFromSts');
 
 function catchErrorFromSts() {
     try {
         throwErrorFromSts();
     } catch (e) {
         ASSERT_TRUE(e.name === 'Error');
-        ASSERT_TRUE(e.message === 'Throw Error from sts!');
+        ASSERT_TRUE(e.message === 'Throw Error from ets!');
     }
 }
 
@@ -37,7 +37,7 @@ function catchErrorWithCauseFromSts() {
         throwErrorWithCauseFromSts();
     } catch (e) {
         ASSERT_TRUE(e.name === 'Error');
-        ASSERT_TRUE(e.message === 'Throw Error with cause from sts!');
+        ASSERT_TRUE(e.message === 'Throw Error with cause from ets!');
         ASSERT_TRUE(e.cause === 'Test cause');
     }
 }
@@ -47,7 +47,7 @@ function catchCustomErrorFromSts() {
         throwCustomErrorFromSts();
     } catch (e) {
         ASSERT_TRUE(e.name === 'CustomError');
-        ASSERT_TRUE(e.message === 'Throw Custom Error from sts!');
+        ASSERT_TRUE(e.message === 'Throw Custom Error from ets!');
         ASSERT_TRUE(e.code === 12345);
     }
 }
@@ -56,7 +56,7 @@ function catchExceptionFromSts() {
     try {
         throwExceptionFromSts();
     } catch (e) {
-        ASSERT_TRUE(e.message === 'Throw Exception from sts!');
+        ASSERT_TRUE(e.message === 'Throw Exception from ets!');
     }
 }
 
@@ -64,7 +64,7 @@ function catchExceptionWithCauseFromSts() {
     try {
         throwExceptionWithCauseFromSts();
     } catch (e) {
-        ASSERT_TRUE(e.message === 'Throw Exception with cause from sts!');
+        ASSERT_TRUE(e.message === 'Throw Exception with cause from ets!');
         ASSERT_TRUE(e.getCause().reason === 'Test cause');
     }
 }
@@ -73,7 +73,7 @@ function catchCustomExceptionFromSts() {
     try {
         throwCustomExceptionFromSts();
     } catch (e) {
-        ASSERT_TRUE(e.message === 'Throw Custom Exception from sts!');
+        ASSERT_TRUE(e.message === 'Throw Custom Exception from ets!');
         ASSERT_TRUE(e.code === 54321);
     }
 }

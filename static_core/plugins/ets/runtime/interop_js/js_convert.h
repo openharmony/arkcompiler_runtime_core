@@ -242,39 +242,32 @@ JSCONVERT_UNWRAP(JSValue)
     return JSValue::Create(EtsCoroutine::GetCurrent(), ctx, jsVal);
 }
 
-// JSError convertors are supposed to box JSValue objects, do not treat them in any other way
-JSCONVERT_DEFINE_TYPE(JSError, EtsObject *);
-JSCONVERT_WRAP(JSError)
+// ESError convertors are supposed to box JSValue objects, do not treat them in any other way
+JSCONVERT_DEFINE_TYPE(ESError, EtsObject *);
+JSCONVERT_WRAP(ESError)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
 
     auto klass = etsVal->GetClass();
-    INTEROP_FATAL_IF(klass->GetRuntimeClass() != ctx->GetJSErrorClass());
+    INTEROP_FATAL_IF(klass->GetRuntimeClass() != ctx->GetESErrorClass());
 
-    // NOTE(vpukhov): remove call after adding a mirror-class for JSError
-    auto method = klass->GetMethod("getValue");
+    auto method = klass->GetMethod("getJsError");
     ASSERT(method != nullptr);
     std::array args = {Value(etsVal->GetCoreType())};
     auto val = JSValue::FromCoreType(method->GetPandaMethod()->Invoke(coro, args.data()).GetAs<ObjectHeader *>());
     INTEROP_FATAL_IF(val == nullptr);
     return val->GetNapiValue(env);
 }
-JSCONVERT_UNWRAP(JSError)
+JSCONVERT_UNWRAP(ESError)
 {
     auto coro = EtsCoroutine::GetCurrent();
-    ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-    ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsVal);
     JSValue *value = nullptr;
-    if (sharedRef != nullptr) {
-        value = JSValue::FromEtsObject(sharedRef->GetEtsObject());
-    } else {
-        value = JSValue::Create(coro, ctx, jsVal);
-    }
+    value = JSValue::Create(coro, ctx, jsVal);
     if (UNLIKELY(value == nullptr)) {
         return {};
     }
-    auto res = ctx->CreateETSCoreJSError(coro, value);
+    auto res = ctx->CreateETSCoreESError(coro, value);
     if (UNLIKELY(res == nullptr)) {
         return {};
     }

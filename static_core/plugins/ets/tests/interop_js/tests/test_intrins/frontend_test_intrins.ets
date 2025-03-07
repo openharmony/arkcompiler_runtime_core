@@ -214,21 +214,8 @@ function testLambdaProxyRecursive(): boolean {
 function testExceptionForwardingFromjs(): boolean {
     try {
         throwValue(123.321);
-    } catch (e: JSError) {
-        return "number:123.321" == vstringify(e.getValue());
-    }
-    throw unreachable();
-}
-
-function testExceptionForwardingFromets(): boolean {
-    let etsfn: (v: JSValue) => void = (v: JSValue): void => {
-        throw new JSError(v);
-    }
-
-    try {
-        applyArgs(etsfn, 12345.6);
-    } catch (e: JSError) {
-        return "number:12345.6" == vstringify(e.getValue());
+    } catch (e: ESError) {
+        return "number:123.321" == vstringify(e.getJsError());
     }
     throw unreachable();
 }
@@ -241,8 +228,8 @@ function testExceptionForwardingRecursive(): boolean {
 
     try {
         applyArgs(etsfn, 123.456);
-    } catch (e: JSError) {
-        return "number:123.456" == vstringify(e.getValue());
+    } catch (e: ESError) {
+        return "number:123.456" == vstringify(e.getJsError());
     }
     throw unreachable();
 }
@@ -265,8 +252,8 @@ function testTypecheckGetProp(): boolean {
     obj.prop = 1.23;
     try {
         obj.prop as String;
-    } catch (e: JSError) {
-        return "object:TypeError: String expected" == vstringify(e.getValue());
+    } catch (e: ESError) {
+        return "object:TypeError: String expected" == vstringify(e.getJsError());
     }
     throw unreachable();
 }
@@ -274,8 +261,8 @@ function testTypecheckGetProp(): boolean {
 function testTypecheckJscall(): boolean {
     try {
         identity(123) as String;
-    } catch (e: JSError) {
-        return "object:TypeError: String expected" == vstringify(e.getValue());
+    } catch (e: ESError) {
+        return "object:TypeError: String expected" == vstringify(e.getJsError());
     }
     throw unreachable();
 }
@@ -287,8 +274,8 @@ function testTypecheckCallets(): boolean {
         }
 
         applyArgs(etsfn, 123);
-    } catch (e: JSError) {
-        return "object:TypeError: String expected" == vstringify(e.getValue());
+    } catch (e: ESError) {
+        return "object:TypeError: String expected" == vstringify(e.getJsError());
     }
     throw unreachable();
 }
@@ -297,8 +284,8 @@ function testGetThrows(): boolean {
     let obj = new makeTestProxy();
     try {
         obj.foo as double;
-    } catch (e: JSError) {
-        return "object:Error: get exception" == vstringify(e.getValue());
+    } catch (e: ESError) {
+        return "object:Error: get exception" == vstringify(e.getJsError());
     }
     throw unreachable();
 }
@@ -307,8 +294,8 @@ function testSetThrows(): boolean {
     let obj = new makeTestProxy();
     try {
         obj.foo = 123;
-    } catch (e: JSError) {
-        return "object:Error: set exception" == vstringify(e.getValue());
+    } catch (e: ESError) {
+        return "object:Error: set exception" == vstringify(e.getJsError());
     }
     throw unreachable();
 }
@@ -316,8 +303,8 @@ function testSetThrows(): boolean {
 function testJscallResolutionThrows1(): boolean {
     try {
         nonexisting();
-    } catch (e: JSError) {
-        return "object:TypeError: call target is not a function" == vstringify(e.getValue());
+    } catch (e: ESError) {
+        return "object:TypeError: call target is not a function" == vstringify(e.getJsError());
     }
     throw unreachable();
 }
@@ -325,8 +312,8 @@ function testJscallResolutionThrows1(): boolean {
 function testJscallResolutionThrows2(): boolean {
     try {
         nonexisting.nonexisting();
-    } catch (e: JSError) {
-        return "object:TypeError: Cannot convert undefined or null to object" == vstringify(e.getValue());
+    } catch (e: ESError) {
+        return "object:TypeError: Cannot convert undefined or null to object" == vstringify(e.getJsError());
     }
     throw unreachable();
 }
@@ -335,8 +322,8 @@ function testJscallResolutionThrows3(): boolean {
     let obj = new makeTestProxy();
     try {
         obj.foo();
-    } catch (e: JSError) {
-        return "object:Error: get exception" == vstringify(e.getValue());
+    } catch (e: ESError) {
+        return "object:Error: get exception" == vstringify(e.getJsError());
     }
     throw unreachable();
 }
