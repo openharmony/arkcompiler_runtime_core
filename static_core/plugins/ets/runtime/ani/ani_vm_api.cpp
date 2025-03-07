@@ -21,6 +21,7 @@
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/interop_js/interop_context_api.h"
 #include "utils/pandargs.h"
 
 extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version, ani_vm **result)
@@ -37,18 +38,28 @@ extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version,
 
     ark::ets::ani::ANIOptionsParser aniParser(optionsSize, optionsArr);
 
+    // NOTE(konstanting, #23205): please note that compiler options are not supported by ANI_CreateVM.
+    // Compiler logging is not supported too. Please look at e.g. ets_vm_api.cpp:CreateRuntime
+    // and ets_vm_plugin.cpp:AddOptions for reference if you would like to support the mentioned
+    // features.
     ark::ets::ani::ANIOptions aniOptions;
     ark::base_options::Options baseOptions("");
     ark::PandArgParser paParser;
 
+    // NOTE(konstanting, #23205): consider adding options validation (Validate() method)
     // Add runtime options
     baseOptions.AddOptions(&paParser);
     aniOptions.AddOptions(&paParser);
-
     if (!paParser.Parse(aniParser.GetRuntimeOptions())) {
         std::cerr << paParser.GetErrorString() << std::endl;
         return ANI_ERROR;
     }
+#ifndef PANDA_ETS_INTEROP_JS
+    if (aniParser.IsInteropMode()) {
+        // no interop options allowed in the interop-free build!
+        return ANI_INVALID_ARGS;
+    }
+#endif /* PANDA_ETS_INTEROP_JS */
 
     ark::Logger::Initialize(baseOptions);
     if (!ark::Runtime::Create(aniOptions)) {
@@ -58,6 +69,16 @@ extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version,
 
     auto coroutine = ark::ets::EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
+#ifdef PANDA_ETS_INTEROP_JS
+    if (aniParser.IsInteropMode()) {
+        bool created = ark::ets::interop::js::CreateMainInteropContext(coroutine, aniParser.GetInteropEnv());
+        if (!created) {
+            LOG(ERROR, RUNTIME) << "Cannot create interop context";
+            ark::Runtime::Destroy();
+            return ANI_ERROR;
+        }
+    }
+#endif /* PANDA_ETS_INTEROP_JS */
 
     *result = coroutine->GetPandaVM();
     ASSERT(*result != nullptr);

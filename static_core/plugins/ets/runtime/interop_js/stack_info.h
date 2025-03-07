@@ -37,8 +37,10 @@ public:
         UNUSED_VAR(ctx_);
         UNUSED_VAR(mainCoro_);
     }
-    ALWAYS_INLINE void InitStackInfoIfNeeded() {};
-    ALWAYS_INLINE void UpdateStackInfoIfNeeded() {};
+    // NOTE(konstanting, #23205): revert to ALWAYS_INLINE once the migration of ets_vm_plugin.cpp to ANI is completed
+    PANDA_PUBLIC_API void InitStackInfoIfNeeded() {};
+    // NOTE(konstanting, #23205): revert to ALWAYS_INLINE once the migration of ets_vm_plugin.cpp to ANI is completed
+    PANDA_PUBLIC_API void UpdateStackInfoIfNeeded() {};
     ~StackInfoManagerBase() = default;
 
     NO_MOVE_SEMANTIC(StackInfoManagerBase);
@@ -52,8 +54,10 @@ protected:
 class StackInfoManagerOhos : public StackInfoManagerBase {
 public:
     StackInfoManagerOhos(InteropCtx *ctx, EtsCoroutine *coro);
-    ALWAYS_INLINE void InitStackInfoIfNeeded();
-    ALWAYS_INLINE void UpdateStackInfoIfNeeded();
+    // NOTE(konstanting, #23205): revert to ALWAYS_INLINE once the migration of ets_vm_plugin.cpp to ANI is completed
+    PANDA_PUBLIC_API void InitStackInfoIfNeeded();
+    // NOTE(konstanting, #23205): revert to ALWAYS_INLINE once the migration of ets_vm_plugin.cpp to ANI is completed
+    PANDA_PUBLIC_API void UpdateStackInfoIfNeeded();
     ~StackInfoManagerOhos();
 
     NO_MOVE_SEMANTIC(StackInfoManagerOhos);

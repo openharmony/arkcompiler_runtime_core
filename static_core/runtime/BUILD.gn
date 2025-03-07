@@ -436,12 +436,13 @@ ohos_source_set("libarkruntime_set_static") {
       ":bridge_dispatch_dyn_amd64",
     ]
   }
-  if (is_ohos && is_standard_system) {
-    defines = [ "PANDA_USE_OHOS_LOG" ]
-  }
 
   if (is_ohos && is_standard_system) {
-    external_deps += [ "hilog:libhilog" ]
+    defines = [ "PANDA_USE_OHOS_LOG" ]
+    external_deps += [
+      "hilog:libhilog",
+      "libuv:uv",
+    ]
   }
   part_name = ark_part_name
   subsystem_name = ark_subsystem_name

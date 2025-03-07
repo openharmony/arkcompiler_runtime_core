@@ -27,9 +27,6 @@ endif()
 
 set(ETS_INTEROP_JS_NAPI_SOURCES
     ets_vm_plugin.cpp
-    event_loop_module.cpp
-    timer_module.cpp
-    stack_info.cpp
 )
 set(ETS_INTEROP_JS_NAPI_LIBRARIES
     arkruntime
@@ -69,12 +66,14 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/ets_proxy/shared_reference.cpp
         ${ETS_EXT_SOURCES}/interop_js/ets_proxy/shared_reference_storage.cpp
         ${ETS_EXT_SOURCES}/interop_js/ets_proxy/ets_proxy.cpp
+        ${ETS_EXT_SOURCES}/interop_js/event_loop_module.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_value.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_refconvert.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_refconvert_builtin.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_refconvert_function.cpp
         ${ETS_EXT_SOURCES}/interop_js/napi_impl/napi_impl.cpp
         ${ETS_EXT_SOURCES}/interop_js/interop_common.cpp
+        ${ETS_EXT_SOURCES}/interop_js/timer_module.cpp
         ${ETS_EXT_SOURCES}/interop_js/ts2ets_copy.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_job_queue.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_remote_promise_resolver.cpp
@@ -85,6 +84,7 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_INTEROP_ARCH_SOURCES}
         ${ETS_INTEROP_HYBRID_SOURCES}
 )
+
 if(PANDA_TARGET_OHOS)
     panda_target_link_libraries(arkruntime_obj ace_napi.z uv -Wl,--no-undefined)
 else()
@@ -92,4 +92,10 @@ else()
     # In case of running using NodeVM or running on ArkJSVM but using ark_js_napi_cli tool it is enough to include directories,
     # because node and ark_js_napi_cli binaries are already linked with sources of uv and napi libraries
     panda_target_include_directories(arkruntime_obj SYSTEM INTERFACE ${NAPI_HEADERS_PATH})
+
+    if (PANDA_JS_ETS_HYBRID_MODE)
+        # NOTE(konstanting, #23205): A workaround for the hybrid cmake build. Will be removed soon
+        # using a separate .cpp file with weak symbols.
+        panda_target_compile_definitions(arkruntime_obj PRIVATE PANDA_JS_ETS_HYBRID_MODE_NEED_WEAK_SYMBOLS)
+    endif()
 endif()

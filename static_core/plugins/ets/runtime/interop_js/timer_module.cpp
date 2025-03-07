@@ -21,6 +21,59 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/types/ets_type.h"
 
+// NOTE(konstanting, #23205): in case of interop with Node, libuv will be available automatically via
+// the load of the ets_vm_plugin module. But since the libuv users are now in the libarkruntime, we should
+// define some weak stubs for libuv functions. Actually it's worth to create a separate cpp file for them,
+// like it is done for napi.
+#if (!defined(PANDA_TARGET_OHOS) && !defined(PANDA_JS_ETS_HYBRID_MODE)) || \
+    defined(PANDA_JS_ETS_HYBRID_MODE_NEED_WEAK_SYMBOLS)
+// NOLINTBEGIN(readability-identifier-naming)
+// CC-OFFNXT(G.FMT.10-CPP) project code style
+extern "C" {
+__attribute__((weak)) int uv_async_send([[maybe_unused]] uv_async_t *async)
+{
+    return -1;
+}
+__attribute__((weak)) int uv_async_init([[maybe_unused]] uv_loop_t *loop, [[maybe_unused]] uv_async_t *async,
+                                        [[maybe_unused]] uv_async_cb async_cb)
+{
+    return -1;
+}
+
+__attribute__((weak)) void uv_update_time([[maybe_unused]] uv_loop_t *loop) {}
+
+__attribute__((weak)) int uv_timer_init([[maybe_unused]] uv_loop_t *loop, [[maybe_unused]] uv_timer_t *handle)
+{
+    return -1;
+}
+__attribute__((weak)) int uv_timer_start([[maybe_unused]] uv_timer_t *handle, [[maybe_unused]] uv_timer_cb cb,
+                                         [[maybe_unused]] uint64_t timeout, [[maybe_unused]] uint64_t repeat)
+{
+    return -1;
+}
+__attribute__((weak)) int uv_timer_stop([[maybe_unused]] uv_timer_t *handle)
+{
+    return -1;
+}
+__attribute__((weak)) int uv_timer_again([[maybe_unused]] uv_timer_t *handle)
+{
+    return -1;
+}
+
+__attribute__((weak)) void uv_close([[maybe_unused]] uv_handle_t *handle, [[maybe_unused]] uv_close_cb close_cb) {}
+
+__attribute__((weak)) uv_loop_t *uv_default_loop()
+{
+    return nullptr;
+}
+__attribute__((weak)) int uv_run([[maybe_unused]] uv_loop_t *loop, [[maybe_unused]] uv_run_mode mode)
+{
+    return -1;
+}
+}
+// NOLINTEND(readability-identifier-naming)
+#endif /* !defined(PANDA_TARGET_OHOS) && !defined(PANDA_JS_ETS_HYBRID_MODE) */
+
 pid_t TimerModule::mainTid_ = 0;
 EtsEnv *TimerModule::mainEtsEnv_ = nullptr;
 napi_env TimerModule::jsEnv_ = nullptr;

@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/runtime/interop_js/interop_context_api.h"
 
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
@@ -26,7 +27,11 @@
 #include "runtime/include/runtime.h"
 #include "runtime/mem/local_object_handle.h"
 
+#include "plugins/ets/runtime/interop_js/event_loop_module.h"
+#include "plugins/ets/runtime/interop_js/timer_module.h"
+#include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 #include "plugins/ets/runtime/interop_js/handshake.h"
+#include "plugins/ets/runtime/interop_js/napi_impl/napi_impl.h"
 
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
 napi_status __attribute__((weak)) napi_create_runtime(napi_env env, napi_env *resultEnv);
@@ -34,6 +39,21 @@ napi_status __attribute__((weak)) napi_create_runtime(napi_env env, napi_env *re
 // CC-OFFNXT(G.FMT.10-CPP) project code style
 napi_status __attribute__((weak)) napi_throw_jsvalue(napi_env env, napi_value error);
 // NOLINTEND(readability-identifier-naming)
+#endif
+
+// NOTE(konstanting, #23205): this function is not listed in the ENUMERATE_NAPI macro, but now runtime needs it.
+// I will find a cleaner solution later, but for now let it stay like this, to make aot and verifier happy.
+#if (!defined(PANDA_TARGET_OHOS) && !defined(PANDA_JS_ETS_HYBRID_MODE)) || \
+    defined(PANDA_JS_ETS_HYBRID_MODE_NEED_WEAK_SYMBOLS)
+extern "C" napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_add_env_cleanup_hook([[maybe_unused]] napi_env env, [[maybe_unused]] void (*fun)(void *arg),
+                          [[maybe_unused]] void *arg)
+{
+    // NOTE: Empty stub. In CI currently used OHOS 4.0.8, but `napi_add_env_cleanup_hook`
+    // is public since 4.1.0. Remove this method after CI upgrade.
+    INTEROP_LOG(ERROR) << "napi_add_env_cleanup_hook is implemented in OHOS since 4.1.0, please update" << std::endl;
+    return napi_ok;
+}
 #endif
 
 namespace ark::ets::interop::js {
@@ -54,6 +74,28 @@ static Class *CacheClass(EtsClassLinker *etsClassLinker, std::string_view descri
     auto klass = etsClassLinker->GetClass(descriptor.data())->GetRuntimeClass();
     ASSERT(klass != nullptr);
     return klass;
+}
+
+static bool RegisterTimerModule(napi_env jsEnv)
+{
+    EtsVM *vm = nullptr;
+    ets_size count = 0;
+    // NOTE(konstanting, #23205): port to ANI ASAP
+    ETS_GetCreatedVMs(&vm, 1, &count);
+    if (count != 1) {
+        INTEROP_LOG(ERROR) << "RegisterTimerModule: No VM found";
+        return false;
+    }
+    EtsEnv *etsEnv = nullptr;
+    vm->GetEnv(&etsEnv, ETS_NAPI_VERSION_1_0);
+    return TimerModule::Init(etsEnv, jsEnv);
+}
+
+static void RegisterEventLoopModule(EtsCoroutine *coro)
+{
+    ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
+    coro->GetPandaVM()->CreateCallbackPosterFactory<EventLoopCallbackPosterFactoryImpl>();
+    coro->GetPandaVM()->SetRunEventLoopFunction([]() { EventLoop::RunEventLoop(); });
 }
 
 std::atomic_uint32_t ConstStringStorage::qnameBufferSize_ {0U};
@@ -180,7 +222,18 @@ InteropCtx::SharedEtsVmState::SharedEtsVmState(PandaEtsVM *vm)
         promiseInteropClass->GetMethod("connectPromise", "Lstd/core/Promise;J:V")->GetPandaMethod();
     ASSERT(promiseInteropConnectMethod != nullptr);
 
+    // xgc-related things
     stsVMInterface = MakePandaUnique<STSVMInterfaceImpl>();
+
+    // the event loop framework is per-EtsVM. Further on, it uses local InteropCtx instances
+    // to access the JSVM-specific data
+    RegisterEventLoopModule(EtsCoroutine::GetCurrent());
+}
+
+InteropCtx::SharedEtsVmState::~SharedEtsVmState()
+{
+    // will happen in the runtime destruction flow
+    XGC::Destroy();
 }
 
 void InteropCtx::SharedEtsVmState::CacheClasses(EtsClassLinker *etsClassLinker)
@@ -215,12 +268,6 @@ std::shared_ptr<InteropCtx::SharedEtsVmState> InteropCtx::SharedEtsVmState::inst
 os::memory::Mutex InteropCtx::SharedEtsVmState::mutex_;
 // NOLINTEND(fuchsia-statically-constructed-objects)
 
-void InteropCtx::InitSharedEtsVmState(PandaEtsVM *vm)
-{
-    sharedEtsVmState_ = SharedEtsVmState::GetInstance(vm);
-    RegisterBuiltinJSRefConvertors(this);
-}
-
 void InteropCtx::InitExternalInterfaces()
 {
     interfaceTable_.SetJobQueue(MakePandaUnique<JsJobQueue>());
@@ -228,7 +275,7 @@ void InteropCtx::InitExternalInterfaces()
     interfaceTable_.SetClearInteropHandleScopesFunction(
         [this](Frame *frame) { this->DestroyLocalScopeForTopFrame(frame); });
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
-    interfaceTable_.SetCreateJSRuntimeFunction([env = jsEnv_]() -> ExternalIfaceTable::JSEnv {
+    interfaceTable_.SetCreateJSRuntimeFunction([env = GetJSEnv()]() -> ExternalIfaceTable::JSEnv {
         napi_env resultJsEnv = nullptr;
         [[maybe_unused]] auto status = napi_create_runtime(env, &resultJsEnv);
         ASSERT(status == napi_ok);
@@ -246,13 +293,15 @@ void InteropCtx::InitExternalInterfaces()
 }
 
 InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
-    : jsEnv_(env), constStringStorage_(this), stackInfoManager_(this, coro)
+    : sharedEtsVmState_(SharedEtsVmState::GetInstance(coro->GetPandaVM())),
+      jsEnv_(env),
+      constStringStorage_(this),
+      stackInfoManager_(this, coro)
 {
-    jsEnv_ = env;
     stackInfoManager_.InitStackInfoIfNeeded();
 
     // the per-EtsVM part has to be initialized first
-    InitSharedEtsVmState(coro->GetPandaVM());
+    RegisterBuiltinJSRefConvertors(this);
 
     InitExternalInterfaces();
     InitJsValueFinalizationRegistry(coro);
@@ -518,7 +567,7 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
     ASSERT(istkIt == istk.rend() || istkIt->etsFrame == nullptr);
     printIstkFrames(nullptr);
 
-    auto env = ctx->jsEnv_;
+    auto env = ctx->GetJSEnv();
     INTEROP_LOG(ERROR) << (env != nullptr ? "<ets-entrypoint>" : "current js env is nullptr!");
 
     if (coro->HasPendingException()) {
@@ -557,6 +606,30 @@ void InteropCtx::Init(EtsCoroutine *coro, napi_env env)
         worker->SetExternalSchedulingEnabled();
     }
 #endif
+}
+
+// The external interface for ANI
+bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
+{
+    ASSERT(mainCoro->GetCoroutineManager()->GetMainThread() == mainCoro);
+    {
+        ScopedManagedCodeThread sm(mainCoro);
+        InteropCtx::Init(mainCoro, static_cast<napi_env>(napiEnv));
+    }
+
+    // NOTE(konstanting): support instantiation in the TimerModule and move this code to the InteropCtx constructor.
+    // The TimerModule should be bound to the exact JsEnv
+    if (!RegisterTimerModule(InteropCtx::Current()->GetJSEnv())) {
+        // throw some errors
+    }
+
+    // In the hybrid mode with JSVM=leading VM, we are binding the EtsVM lifetime to the JSVM's env lifetime
+    napi_add_env_cleanup_hook(
+        InteropCtx::Current()->GetJSEnv(), [](void *) { ark::Runtime::Destroy(); }, nullptr);
+
+    [[maybe_unused]] bool xgcCreated = XGC::Create(mainCoro);
+    ASSERT(xgcCreated);
+    return true;
 }
 
 }  // namespace ark::ets::interop::js
