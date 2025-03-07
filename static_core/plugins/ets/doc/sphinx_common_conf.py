@@ -29,10 +29,10 @@ author = u'Huawei Consumer BG'
 copyright = u'2021-2024 Huawei Device Co., Ltd.'
 
 # The short X.Y version
-version = u'1.1.0'
+version = u'1.2.0'
 
 # The full version, including alpha/beta/rc tags
-release = u'1.1.0'
+release = u'1.2.0-alpha'
 
 # Common glossary for the entire documentation bundle:
 rst_epilog = '''
