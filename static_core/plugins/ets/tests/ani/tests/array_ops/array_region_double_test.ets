@@ -40,3 +40,11 @@ function GetArray(): double[] {
 function CheckArray(a: double[]): boolean {
     return a[0] as int == 1 && a[1] as int == 2 && a[2] as int == 30 && a[3] as int == 40 && a[4] as int == 50
 }
+
+function GetSpecialArray(): double[] {
+	let min: double = Number.MIN_VALUE
+	let max: double = Number.MAX_VALUE
+	let minus: double = -Number.MAX_VALUE
+    let a : double[] = [min, max, minus, 0, 0, 0]
+    return a
+}

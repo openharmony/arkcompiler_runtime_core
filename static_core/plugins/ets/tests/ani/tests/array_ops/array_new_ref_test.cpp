@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-#include "ani_gtest.h"
+#include "ani_gtest_array_ops.h"
 #include <iostream>
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class ArrayNewRefTest : public AniTest {
+class ArrayNewRefTest : public AniGTestArrayOps {
 public:
-    static constexpr const ani_size LENGTH = 5;
     static constexpr const ani_size ZERO = 0;
 
     static constexpr ani_size MINI_LENGTH = 10;
     static constexpr ani_size MID_LENGTH = 50;
     static constexpr ani_size BIG_LENGTH = 200;
-    static constexpr ani_int LOOP_COUNT = 3;
+    static constexpr ani_size ARRAYSIZE_10K = 10240U;
+    static constexpr ani_size ARRAYSIZE_100K = 102400U;
 };
 
 TEST_F(ArrayNewRefTest, NewRefErrorTests)
@@ -38,10 +38,10 @@ TEST_F(ArrayNewRefTest, NewRefErrorTests)
 
     ani_array_ref array = nullptr;
     // Test null result pointer
-    ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH, nullptr, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH_5, nullptr, nullptr), ANI_INVALID_ARGS);
 
     // Test null class
-    ASSERT_EQ(env_->Array_New_Ref(nullptr, LENGTH, nullptr, &array), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Array_New_Ref(nullptr, LENGTH_5, nullptr, &array), ANI_INVALID_ARGS);
 
     if (sizeof(ani_size) > sizeof(uint32_t)) {
         ani_size maxLength = std::numeric_limits<uint32_t>::max() + ani_size(1);
@@ -66,27 +66,27 @@ TEST_F(ArrayNewRefTest, NewObjectArrayTest)
     ani_array_ref array = nullptr;
 
     // Test creating array with null initial element
-    ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH, nullptr, &array), ANI_OK);
+    ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH_5, nullptr, &array), ANI_OK);
     ASSERT_NE(array, nullptr);
     ani_size size = 0;
     ASSERT_EQ(env_->Array_GetLength(array, &size), ANI_OK);
-    ASSERT_EQ(size, LENGTH);
+    ASSERT_EQ(size, LENGTH_5);
 
     // Test creating array with undefined initial element
     ani_ref undefinedRef = nullptr;
     ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
-    ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH, undefinedRef, &array), ANI_OK);
+    ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH_5, undefinedRef, &array), ANI_OK);
     ASSERT_NE(array, nullptr);
     ASSERT_EQ(env_->Array_GetLength(array, &size), ANI_OK);
-    ASSERT_EQ(size, LENGTH);
+    ASSERT_EQ(size, LENGTH_5);
 
     // Test creating array with null initial element
     ani_ref nullRef = nullptr;
     ASSERT_EQ(env_->GetNull(&nullRef), ANI_OK);
-    ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH, nullRef, &array), ANI_OK);
+    ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH_5, nullRef, &array), ANI_OK);
     ASSERT_NE(array, nullptr);
     ASSERT_EQ(env_->Array_GetLength(array, &size), ANI_OK);
-    ASSERT_EQ(size, LENGTH);
+    ASSERT_EQ(size, LENGTH_5);
 
     // Test creating array with initial element
     ani_string str = nullptr;
@@ -103,8 +103,7 @@ TEST_F(ArrayNewRefTest, NewObjectArrayTest)
         ani_ref element = nullptr;
         ASSERT_EQ(env_->Array_Get_Ref(array2, i, &element), ANI_OK);
         ani_size resultSize = 0;
-        const ani_size utfBufferSize = 10;
-        char utfBuffer[utfBufferSize] = {0};
+        char utfBuffer[LENGTH_10] = {0};
         ASSERT_EQ(env_->String_GetUTF8SubString(reinterpret_cast<ani_string>(element), ZERO, stringLength, utfBuffer,
                                                 sizeof(utfBuffer), &resultSize),
                   ANI_OK);
@@ -151,7 +150,7 @@ TEST_F(ArrayNewRefTest, NewObjectArrayTest3)
     ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
     for (ani_int i = 0; i < LOOP_COUNT; i++) {
         ani_array_ref array = nullptr;
-        ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH, undefinedRef, &array), ANI_OK);
+        ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH_5, undefinedRef, &array), ANI_OK);
         ASSERT_NE(array, nullptr);
     }
 }
@@ -168,7 +167,6 @@ TEST_F(ArrayNewRefTest, NewObjectArrayTest4)
     ASSERT_NE(str, nullptr);
 
     const ani_size maxNum = std::numeric_limits<uint32_t>::max();
-
     ani_array_ref array1 = nullptr;
     ani_ref undefinedRef = nullptr;
     ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
@@ -183,6 +181,34 @@ TEST_F(ArrayNewRefTest, NewObjectArrayTest4)
 
     ani_array_ref array4 = nullptr;
     ASSERT_EQ(env_->Array_New_Ref(cls, maxNum, str, &array4), ANI_PENDING_ERROR);
+}
+
+TEST_F(ArrayNewRefTest, NewLargeArrayTypesTest)
+{
+    ani_array_boolean array = nullptr;
+    ASSERT_EQ(env_->Array_New_Boolean(ARRAYSIZE_10K, &array), ANI_OK);
+    ASSERT_EQ(env_->Array_New_Boolean(ARRAYSIZE_100K, &array), ANI_OK);
+    ani_array_char array2 = nullptr;
+    ASSERT_EQ(env_->Array_New_Char(ARRAYSIZE_10K, &array2), ANI_OK);
+    ASSERT_EQ(env_->Array_New_Char(ARRAYSIZE_100K, &array2), ANI_OK);
+    ani_array_byte array3 = nullptr;
+    ASSERT_EQ(env_->Array_New_Byte(ARRAYSIZE_10K, &array3), ANI_OK);
+    ASSERT_EQ(env_->Array_New_Byte(ARRAYSIZE_100K, &array3), ANI_OK);
+    ani_array_short array4 = nullptr;
+    ASSERT_EQ(env_->Array_New_Short(ARRAYSIZE_10K, &array4), ANI_OK);
+    ASSERT_EQ(env_->Array_New_Short(ARRAYSIZE_100K, &array4), ANI_OK);
+    ani_array_int array5 = nullptr;
+    ASSERT_EQ(env_->Array_New_Int(ARRAYSIZE_10K, &array5), ANI_OK);
+    ASSERT_EQ(env_->Array_New_Int(ARRAYSIZE_100K, &array5), ANI_OK);
+    ani_array_long array6 = nullptr;
+    ASSERT_EQ(env_->Array_New_Long(ARRAYSIZE_10K, &array6), ANI_OK);
+    ASSERT_EQ(env_->Array_New_Long(ARRAYSIZE_100K, &array6), ANI_OK);
+    ani_array_float array7 = nullptr;
+    ASSERT_EQ(env_->Array_New_Float(ARRAYSIZE_10K, &array7), ANI_OK);
+    ASSERT_EQ(env_->Array_New_Float(ARRAYSIZE_100K, &array7), ANI_OK);
+    ani_array_double array8 = nullptr;
+    ASSERT_EQ(env_->Array_New_Double(ARRAYSIZE_10K, &array8), ANI_OK);
+    ASSERT_EQ(env_->Array_New_Double(ARRAYSIZE_100K, &array8), ANI_OK);
 }
 
 }  // namespace ark::ets::ani::testing

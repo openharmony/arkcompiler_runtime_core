@@ -40,3 +40,4 @@ function GetArray(): boolean[] {
 function CheckArray(a: boolean[]): boolean {
     return a[0] == true && a[1] == true && a[2] == true && a[3] == false && a[4] == true
 }
+

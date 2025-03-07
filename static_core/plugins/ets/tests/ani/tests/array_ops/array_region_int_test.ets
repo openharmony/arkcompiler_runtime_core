@@ -40,3 +40,10 @@ function GetArray(): int[] {
 function CheckArray(a: int[]): boolean {
     return a[0] == 1 && a[1] == 2 && a[2] == 30 && a[3] == 40 && a[4] == 50
 }
+
+function GetSpecialArray(): int[] {
+	let min: int = -2147483648
+	let max: int = 2147483647
+    let a : int[] = [min, max, 0, 0, 0]
+    return a
+}
