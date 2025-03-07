@@ -3,5 +3,6 @@ api/@ohos/util/HashMap/HashMapEntriesTest.sts
 api/@ohos/util/HashSet/HashSetEntriesTest.sts
 api/@ohos/util/LightWeightMap/LightWeightMapEntriesTest.sts
 api/@ohos/util/LightWeightSet/LightWeightSetEntriesTest.sts
+api/@ohos/util/TreeMap/TreeMapSetGetTest.sts
 api/@ohos/util/TreeMap/TreeMapEntriesTest.sts
 api/@ohos/util/TreeSet/TreeSetEntriesTest.sts
