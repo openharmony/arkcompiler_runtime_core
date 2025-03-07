@@ -55,7 +55,7 @@ function processCreateLocaleError(createLocaleFunction : () => Intl.Locale, msg 
 function processInvalidValues(createLocaleFunction : ((arg : string) => Intl.Locale), msg ?: string) {
     const incorrectValues: ReadonlyArray<string> = Array.of<string>("", " ", "78", "Err", "!!!", "<<>>", "invalid")
     incorrectValues.forEach((invalidValue : string) => {
-        processCreateLocaleError(() => {createLocaleFunction(invalidValue)}, msg)
+        processCreateLocaleError(() => createLocaleFunction(invalidValue), msg)
     })
 }
 

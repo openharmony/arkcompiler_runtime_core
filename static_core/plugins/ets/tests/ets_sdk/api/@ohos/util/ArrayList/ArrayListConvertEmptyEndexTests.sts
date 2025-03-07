@@ -113,6 +113,7 @@ function testConvertToArrayAndCheckArray() {
     let array = arrayList.convertToArray();
     array.filter((value: Dog) => {
         assertTrue(value instanceof Dog, "The converted array's filter normally");
+        return true;
     })
 }
 
