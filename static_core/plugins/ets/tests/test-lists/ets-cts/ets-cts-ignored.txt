@@ -1903,5 +1903,8 @@
 17.experimental_features/20.non_nullish_type_parameter/ex4_1.sts
 17.experimental_features/20.non_nullish_type_parameter/ex5.sts
 
-# 23477: Bad candidate function invoked
+#23368
+18.annotations/02.using_annotations/using_annotations_n_10.sts
+
+#23477: Bad candidate function invoked
 15.semantic_rules/08.overloading_and_overriding/01.overload-equivalent_signatures/ex_6_1.sts

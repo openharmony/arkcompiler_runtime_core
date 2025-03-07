@@ -4078,8 +4078,9 @@ deprecated/15.exceptions/03.rethrowing_functions/rethrowing_function_without_cat
 18.annotations/02.using_annotations/01.using_single_field_annotations/annotation_places_single_arrays_1.sts
 18.annotations/02.using_annotations/01.using_single_field_annotations/annotation_places_single_arrays_2.sts
 18.annotations/02.using_annotations/01.using_single_field_annotations/annotation_places_single_0.sts
-18.annotations/02.using_annotations/using_annotations_n_3.sts
 18.annotations/02.using_annotations/using_annotations_n_0.sts
+18.annotations/02.using_annotations/using_annotations_n_1.sts
+18.annotations/02.using_annotations/using_annotations_n_3.sts
 18.annotations/04.ambient_annotations/annotation_ambient_decl/import_annotated_decl_class_2.sts
 18.annotations/04.ambient_annotations/annotation_ambient_decl/import_annotated_decl_class_1.sts
 18.annotations/04.ambient_annotations/annotation_ambient_decl/import_annotated_decl_class_0.sts

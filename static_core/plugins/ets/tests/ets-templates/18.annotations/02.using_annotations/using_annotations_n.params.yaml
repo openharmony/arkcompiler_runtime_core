@@ -19,6 +19,13 @@ cases:
     value: |-
        = 100
   - decl: |-
+      abstract class SomeAbstractClass {
+        @SomeAnnotation({field2: "Some string" })
+        abstract absfoo()      
+      }
+    value: |-
+      = 100
+  - decl: |-
       @SomeAnnotation({field2: "Some string"})
       @SomeAnnotation({field2: "Some string"})
       class SomeClass {}
@@ -42,3 +49,10 @@ cases:
        = c + 100
   - value: |-
        = c
+  - decl: |-
+      abstract class SomeAbstractClass {
+        @SomeAnnotation({field2: "Some string" })
+        foo() {}      
+      }
+    value: |-
+      = 100
