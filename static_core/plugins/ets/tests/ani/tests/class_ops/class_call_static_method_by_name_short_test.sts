@@ -18,3 +18,37 @@ class Operations {
         return a0 + a1 as short;
     }
 };
+
+namespace na {
+class A {
+    static funcA(a0: short, a1: short): short {
+        return a0 + a1 as short;
+    }
+    static funcA(a0: int, a1: int): int {
+        return a1 - a0 as int;
+    }
+};
+}
+
+namespace nb {
+namespace nc {
+class A {
+    static funcA(a0: short, a1: short): short {
+        return a0 + a1 as short;
+    }
+};
+}
+}
+
+namespace nd {
+class A {
+    static funcA(a0: short, a1: short): short {
+        return a0 + a1 as short;
+    }
+};
+class B extends A{
+    static funcA(a0: short, a1: short): short {
+        return a1 - a0 as short;
+    }
+};
+}

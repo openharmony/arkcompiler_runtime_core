@@ -18,3 +18,37 @@ class Operations {
         return a0 || a1;
     }
 }; 
+
+namespace na {
+class A {
+    static funcA(a0: boolean, a1: boolean): boolean {
+        return a0 || a1;
+    }
+    static funcA(a0: int, a1: int): int {
+        return a0 + a1 as int;
+    }
+};
+}
+
+namespace nb {
+namespace nc {
+class A {
+    static funcA(a0: boolean, a1: boolean): boolean {
+        return a0 || a1;
+    }
+};
+}
+}
+
+namespace nd {
+class A {
+    static funcA(a0: boolean, a1: boolean): boolean {
+        return a0 || a1;
+    }
+};
+class B extends A{
+    static funcA(a0: boolean, a1: boolean): boolean {
+        return a0 && a1;
+    }
+};
+}
