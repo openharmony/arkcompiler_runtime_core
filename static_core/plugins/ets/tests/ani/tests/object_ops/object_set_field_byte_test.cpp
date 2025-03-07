@@ -23,13 +23,13 @@ public:
     {
         auto packRef = CallEtsFunction<ani_ref>("newPackObject");
 
-        ani_class cls;
+        ani_class cls {};
         ASSERT_EQ(env_->FindClass("LPack;", &cls), ANI_OK);
 
-        ani_field fieldByte;
+        ani_field fieldByte {};
         ASSERT_EQ(env_->Class_FindField(cls, "byte_value", &fieldByte), ANI_OK);
 
-        ani_field fieldString;
+        ani_field fieldString {};
         ASSERT_EQ(env_->Class_FindField(cls, "string_value", &fieldString), ANI_OK);
 
         *packResult = static_cast<ani_object>(packRef);
@@ -40,30 +40,43 @@ public:
 
 TEST_F(ObjectSetFieldByteTest, set_field_byte)
 {
-    ani_object pack;
-    ani_field fieldByte;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldByte {};
+    ani_field fieldString {};
     GetTestDataForByte(&pack, &fieldByte, &fieldString);
     const int zoerValue = 0;
     const int maxByteValue = 127;
     const int valuE128 = -128;
     ASSERT_EQ(CallEtsFunction<ani_boolean>("checkByteValue", pack, zoerValue), ANI_TRUE);
 
-    ASSERT_EQ(env_->Object_SetField_Byte(pack, fieldByte, maxByteValue), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkByteValue", pack, maxByteValue), ANI_TRUE);
+    const int32_t loopCount = 3;
+    for (int i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetField_Byte(pack, fieldByte, maxByteValue), ANI_OK);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkByteValue", pack, maxByteValue), ANI_TRUE);
 
-    ASSERT_EQ(env_->Object_SetField_Byte(pack, fieldByte, valuE128), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkByteValue", pack, valuE128), ANI_TRUE);
+        ani_byte byt {};
+        ASSERT_EQ(env_->Object_GetField_Byte(pack, fieldByte, &byt), ANI_OK);
+        ASSERT_EQ(byt, maxByteValue);
 
-    ASSERT_EQ(env_->Object_SetField_Byte(pack, fieldByte, zoerValue), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkByteValue", pack, zoerValue), ANI_TRUE);
+        ASSERT_EQ(env_->Object_SetField_Byte(pack, fieldByte, valuE128), ANI_OK);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkByteValue", pack, valuE128), ANI_TRUE);
+
+        ASSERT_EQ(env_->Object_GetField_Byte(pack, fieldByte, &byt), ANI_OK);
+        ASSERT_EQ(byt, valuE128);
+
+        ASSERT_EQ(env_->Object_SetField_Byte(pack, fieldByte, zoerValue), ANI_OK);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkByteValue", pack, zoerValue), ANI_TRUE);
+
+        ASSERT_EQ(env_->Object_GetField_Byte(pack, fieldByte, &byt), ANI_OK);
+        ASSERT_EQ(byt, zoerValue);
+    }
 }
 
 TEST_F(ObjectSetFieldByteTest, set_field_byte_invalid_field_type)
 {
-    ani_object pack;
-    ani_field fieldByte;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldByte {};
+    ani_field fieldString {};
     GetTestDataForByte(&pack, &fieldByte, &fieldString);
 
     const int maxByteValue = 127;
@@ -72,9 +85,9 @@ TEST_F(ObjectSetFieldByteTest, set_field_byte_invalid_field_type)
 
 TEST_F(ObjectSetFieldByteTest, set_field_byte_invalid_args_object)
 {
-    ani_object pack;
-    ani_field fieldByte;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldByte {};
+    ani_field fieldString {};
     GetTestDataForByte(&pack, &fieldByte, &fieldString);
 
     const int maxByteValue = 127;
@@ -83,9 +96,9 @@ TEST_F(ObjectSetFieldByteTest, set_field_byte_invalid_args_object)
 
 TEST_F(ObjectSetFieldByteTest, set_field_byte_invalid_args_field)
 {
-    ani_object pack;
-    ani_field fieldByte;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldByte {};
+    ani_field fieldString {};
     GetTestDataForByte(&pack, &fieldByte, &fieldString);
 
     const int maxByteValue = 127;

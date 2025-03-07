@@ -23,13 +23,13 @@ public:
     {
         auto packRef = CallEtsFunction<ani_ref>("newPackObject");
 
-        ani_class cls;
+        ani_class cls {};
         ASSERT_EQ(env_->FindClass("LPack;", &cls), ANI_OK);
 
-        ani_field fieldChar;
+        ani_field fieldChar {};
         ASSERT_EQ(env_->Class_FindField(cls, "char_value", &fieldChar), ANI_OK);
 
-        ani_field fieldString;
+        ani_field fieldString {};
         ASSERT_EQ(env_->Class_FindField(cls, "string_value", &fieldString), ANI_OK);
 
         *packResult = static_cast<ani_object>(packRef);
@@ -40,26 +40,36 @@ public:
 
 TEST_F(ObjectSetFieldCharTest, set_field_char)
 {
-    ani_object pack;
-    ani_field fieldChar;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldChar {};
+    ani_field fieldString {};
     GetTestDataForChar(&pack, &fieldChar, &fieldString);
     const char zoerValue = 'a';
     const char maxCharValue = 'b';
     ASSERT_EQ(CallEtsFunction<ani_boolean>("checkCharValue", pack, zoerValue), ANI_TRUE);
 
-    ASSERT_EQ(env_->Object_SetField_Char(pack, fieldChar, maxCharValue), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkCharValue", pack, maxCharValue), ANI_TRUE);
+    const int32_t loopCount = 3;
+    for (int i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetField_Char(pack, fieldChar, maxCharValue), ANI_OK);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkCharValue", pack, maxCharValue), ANI_TRUE);
 
-    ASSERT_EQ(env_->Object_SetField_Char(pack, fieldChar, zoerValue), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkCharValue", pack, zoerValue), ANI_TRUE);
+        ani_char value {};
+        ASSERT_EQ(env_->Object_GetField_Char(pack, fieldChar, &value), ANI_OK);
+        ASSERT_EQ(value, maxCharValue);
+
+        ASSERT_EQ(env_->Object_SetField_Char(pack, fieldChar, zoerValue), ANI_OK);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkCharValue", pack, zoerValue), ANI_TRUE);
+
+        ASSERT_EQ(env_->Object_GetField_Char(pack, fieldChar, &value), ANI_OK);
+        ASSERT_EQ(value, zoerValue);
+    }
 }
 
 TEST_F(ObjectSetFieldCharTest, set_field_char_invalid_field_type)
 {
-    ani_object pack;
-    ani_field fieldChar;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldChar {};
+    ani_field fieldString {};
     GetTestDataForChar(&pack, &fieldChar, &fieldString);
 
     const char maxCharValue = 'a';
@@ -68,9 +78,9 @@ TEST_F(ObjectSetFieldCharTest, set_field_char_invalid_field_type)
 
 TEST_F(ObjectSetFieldCharTest, set_field_char_invalid_args_object)
 {
-    ani_object pack;
-    ani_field fieldChar;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldChar {};
+    ani_field fieldString {};
     GetTestDataForChar(&pack, &fieldChar, &fieldString);
 
     const char maxCharValue = 'a';
@@ -79,9 +89,9 @@ TEST_F(ObjectSetFieldCharTest, set_field_char_invalid_args_object)
 
 TEST_F(ObjectSetFieldCharTest, set_field_char_invalid_args_field)
 {
-    ani_object pack;
-    ani_field fieldChar;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldChar {};
+    ani_field fieldString {};
     GetTestDataForChar(&pack, &fieldChar, &fieldString);
 
     const char maxCharValue = 'a';

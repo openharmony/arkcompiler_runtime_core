@@ -23,13 +23,13 @@ public:
     {
         auto packRef = CallEtsFunction<ani_ref>("newPackObject");
 
-        ani_class cls;
+        ani_class cls {};
         ASSERT_EQ(env_->FindClass("LPack;", &cls), ANI_OK);
 
-        ani_field fieldFloat;
+        ani_field fieldFloat {};
         ASSERT_EQ(env_->Class_FindField(cls, "float_value", &fieldFloat), ANI_OK);
 
-        ani_field fieldString;
+        ani_field fieldString {};
         ASSERT_EQ(env_->Class_FindField(cls, "string_value", &fieldString), ANI_OK);
 
         *packResult = static_cast<ani_object>(packRef);
@@ -40,23 +40,38 @@ public:
 
 TEST_F(ObjectSetFieldFloatTest, set_field_float)
 {
-    ani_object pack;
-    ani_field fieldFloat;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldFloat {};
+    ani_field fieldString {};
+    const ani_float value = 3.14F;
+    const ani_float value1 = 2.71F;
     GetTestData(&pack, &fieldFloat, &fieldString);
 
     ASSERT_EQ(CallEtsFunction<ani_boolean>("checkFloatValue", pack, 0.0F), ANI_TRUE);
 
-    ASSERT_EQ(env_->Object_SetField_Float(pack, fieldFloat, 3.14F), ANI_OK);
+    const int32_t loopCount = 3;
+    for (int i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetField_Float(pack, fieldFloat, value), ANI_OK);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkFloatValue", pack, value), ANI_TRUE);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkFloatValue", pack, 3.14F), ANI_TRUE);
+        ani_float result = 0.0F;
+        ASSERT_EQ(env_->Object_GetField_Float(pack, fieldFloat, &result), ANI_OK);
+        ASSERT_EQ(result, value);
+
+        ASSERT_EQ(env_->Object_SetField_Float(pack, fieldFloat, value1), ANI_OK);
+
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkFloatValue", pack, value1), ANI_TRUE);
+
+        ASSERT_EQ(env_->Object_GetField_Float(pack, fieldFloat, &result), ANI_OK);
+        ASSERT_EQ(result, value1);
+    }
 }
 
 TEST_F(ObjectSetFieldFloatTest, set_field_float_negative_value)
 {
-    ani_object pack;
-    ani_field fieldFloat;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldFloat {};
+    ani_field fieldString {};
     GetTestData(&pack, &fieldFloat, &fieldString);
 
     ASSERT_EQ(env_->Object_SetField_Float(pack, fieldFloat, -2.71F), ANI_OK);
@@ -66,9 +81,9 @@ TEST_F(ObjectSetFieldFloatTest, set_field_float_negative_value)
 
 TEST_F(ObjectSetFieldFloatTest, set_field_float_invalid_field_type)
 {
-    ani_object pack;
-    ani_field fieldFloat;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldFloat {};
+    ani_field fieldString {};
     GetTestData(&pack, &fieldFloat, &fieldString);
 
     ASSERT_EQ(env_->Object_SetField_Float(pack, fieldString, 3.14F), ANI_INVALID_TYPE);
@@ -76,9 +91,9 @@ TEST_F(ObjectSetFieldFloatTest, set_field_float_invalid_field_type)
 
 TEST_F(ObjectSetFieldFloatTest, set_field_float_invalid_args_object)
 {
-    ani_object pack;
-    ani_field fieldFloat;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldFloat {};
+    ani_field fieldString {};
     GetTestData(&pack, &fieldFloat, &fieldString);
 
     ASSERT_EQ(env_->Object_SetField_Float(nullptr, fieldFloat, 3.14F), ANI_INVALID_ARGS);
@@ -86,9 +101,9 @@ TEST_F(ObjectSetFieldFloatTest, set_field_float_invalid_args_object)
 
 TEST_F(ObjectSetFieldFloatTest, set_field_float_invalid_args_field)
 {
-    ani_object pack;
-    ani_field fieldFloat;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldFloat {};
+    ani_field fieldString {};
     GetTestData(&pack, &fieldFloat, &fieldString);
 
     ASSERT_EQ(env_->Object_SetField_Float(pack, nullptr, 3.14F), ANI_INVALID_ARGS);
@@ -96,9 +111,9 @@ TEST_F(ObjectSetFieldFloatTest, set_field_float_invalid_args_field)
 
 TEST_F(ObjectSetFieldFloatTest, set_field_float_boundary_values)
 {
-    ani_object pack;
-    ani_field fieldFloat;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldFloat {};
+    ani_field fieldString {};
     GetTestData(&pack, &fieldFloat, &fieldString);
 
     ASSERT_EQ(env_->Object_SetField_Float(pack, fieldFloat, 3.4028235e+38F), ANI_OK);

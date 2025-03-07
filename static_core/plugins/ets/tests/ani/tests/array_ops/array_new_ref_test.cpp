@@ -23,6 +23,11 @@ class ArrayNewRefTest : public AniTest {
 public:
     static constexpr const ani_size LENGTH = 5;
     static constexpr const ani_size ZERO = 0;
+
+    static constexpr ani_size MINI_LENGTH = 10;
+    static constexpr ani_size MID_LENGTH = 50;
+    static constexpr ani_size BIG_LENGTH = 200;
+    static constexpr ani_int LOOP_COUNT = 3;
 };
 
 TEST_F(ArrayNewRefTest, NewRefErrorTests)
@@ -105,6 +110,79 @@ TEST_F(ArrayNewRefTest, NewObjectArrayTest)
                   ANI_OK);
         ASSERT_STREQ(utfBuffer, utf8String);
     }
+}
+
+TEST_F(ArrayNewRefTest, NewObjectArrayTest2)
+{
+    ani_class cls = nullptr;
+    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_array_ref array1 = nullptr;
+    ani_array_ref array2 = nullptr;
+    ani_array_ref array3 = nullptr;
+    ani_size size = 0;
+
+    ani_ref undefinedRef = nullptr;
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
+    ASSERT_EQ(env_->Array_New_Ref(cls, MINI_LENGTH, undefinedRef, &array1), ANI_OK);
+    ASSERT_NE(array1, nullptr);
+    ASSERT_EQ(env_->Array_GetLength(array1, &size), ANI_OK);
+    ASSERT_EQ(size, MINI_LENGTH);
+
+    ASSERT_EQ(env_->Array_New_Ref(cls, MID_LENGTH, undefinedRef, &array2), ANI_OK);
+    ASSERT_NE(array2, nullptr);
+    ASSERT_EQ(env_->Array_GetLength(array2, &size), ANI_OK);
+    ASSERT_EQ(size, MID_LENGTH);
+
+    ASSERT_EQ(env_->Array_New_Ref(cls, BIG_LENGTH, undefinedRef, &array3), ANI_OK);
+    ASSERT_NE(array3, nullptr);
+    ASSERT_EQ(env_->Array_GetLength(array3, &size), ANI_OK);
+    ASSERT_EQ(size, BIG_LENGTH);
+}
+
+TEST_F(ArrayNewRefTest, NewObjectArrayTest3)
+{
+    ani_class cls = nullptr;
+    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_ref undefinedRef = nullptr;
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
+    for (ani_int i = 0; i < LOOP_COUNT; i++) {
+        ani_array_ref array = nullptr;
+        ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH, undefinedRef, &array), ANI_OK);
+        ASSERT_NE(array, nullptr);
+    }
+}
+
+TEST_F(ArrayNewRefTest, NewObjectArrayTest4)
+{
+    ani_class cls = nullptr;
+    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_string str = nullptr;
+    auto status = env_->String_NewUTF8("", 0U, &str);
+    ASSERT_EQ(status, ANI_OK);
+    ASSERT_NE(str, nullptr);
+
+    const ani_size maxNum = std::numeric_limits<uint32_t>::max();
+
+    ani_array_ref array1 = nullptr;
+    ani_ref undefinedRef = nullptr;
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
+    ASSERT_EQ(env_->Array_New_Ref(cls, ZERO, undefinedRef, &array1), ANI_OK);
+    ASSERT_NE(array1, nullptr);
+
+    ani_array_ref array2 = nullptr;
+    ASSERT_EQ(env_->Array_New_Ref(cls, maxNum, undefinedRef, &array2), ANI_OUT_OF_MEMORY);
+
+    ani_array_ref array3 = nullptr;
+    ASSERT_EQ(env_->Array_New_Ref(cls, ZERO, str, &array3), ANI_PENDING_ERROR);
+
+    ani_array_ref array4 = nullptr;
+    ASSERT_EQ(env_->Array_New_Ref(cls, maxNum, str, &array4), ANI_PENDING_ERROR);
 }
 
 }  // namespace ark::ets::ani::testing

@@ -3435,6 +3435,7 @@ NO_UB_SANITIZE static ani_status Reference_StrictEquals(ani_env *env, ani_ref re
 NO_UB_SANITIZE static ani_status Object_InstanceOf(ani_env *env, ani_object object, ani_type type, ani_boolean *result)
 {
     ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
     CHECK_PTR_ARG(type);
     CHECK_PTR_ARG(object);
 

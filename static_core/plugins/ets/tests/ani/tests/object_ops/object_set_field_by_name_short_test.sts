@@ -23,7 +23,7 @@ class Animal {
 }
 
 function newAnimalObject() {
-    let value:short = 2;
+    let value:short = 32767;
     return new Animal("Cat", value);
 }
 

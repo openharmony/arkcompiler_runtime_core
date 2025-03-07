@@ -23,13 +23,13 @@ public:
     {
         auto packRef = CallEtsFunction<ani_ref>("newPackObject");
 
-        ani_class cls;
+        ani_class cls {};
         ASSERT_EQ(env_->FindClass("LPack;", &cls), ANI_OK);
 
-        ani_field fieldInt;
+        ani_field fieldInt {};
         ASSERT_EQ(env_->Class_FindField(cls, "int_value", &fieldInt), ANI_OK);
 
-        ani_field fieldString;
+        ani_field fieldString {};
         ASSERT_EQ(env_->Class_FindField(cls, "string_value", &fieldString), ANI_OK);
 
         *packResult = static_cast<ani_object>(packRef);
@@ -40,22 +40,37 @@ public:
 
 TEST_F(ObjectSetFieldIntTest, set_field_int)
 {
-    ani_object pack;
-    ani_field fieldInt;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldInt {};
+    ani_field fieldString {};
+    const ani_int value1 = 2;
+    const ani_int value2 = 3;
     GetTestData(&pack, &fieldInt, &fieldString);
 
     ASSERT_EQ(CallEtsFunction<ani_boolean>("checkIntValue", pack, 0), ANI_TRUE);
 
-    ASSERT_EQ(env_->Object_SetField_Int(pack, fieldInt, 2U), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkIntValue", pack, 2U), ANI_TRUE);
+    const int32_t loopCount = 3;
+    for (int i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetField_Int(pack, fieldInt, value1), ANI_OK);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkIntValue", pack, value1), ANI_TRUE);
+
+        ani_int result = 0;
+        ASSERT_EQ(env_->Object_GetField_Int(pack, fieldInt, &result), ANI_OK);
+        ASSERT_EQ(result, value1);
+
+        ASSERT_EQ(env_->Object_SetField_Int(pack, fieldInt, value2), ANI_OK);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkIntValue", pack, value2), ANI_TRUE);
+
+        ASSERT_EQ(env_->Object_GetField_Int(pack, fieldInt, &result), ANI_OK);
+        ASSERT_EQ(result, value2);
+    }
 }
 
 TEST_F(ObjectSetFieldIntTest, set_field_int_invalid_field_type)
 {
-    ani_object pack;
-    ani_field fieldInt;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldInt {};
+    ani_field fieldString {};
     GetTestData(&pack, &fieldInt, &fieldString);
 
     ASSERT_EQ(env_->Object_SetField_Int(pack, fieldString, 2U), ANI_INVALID_TYPE);
@@ -63,9 +78,9 @@ TEST_F(ObjectSetFieldIntTest, set_field_int_invalid_field_type)
 
 TEST_F(ObjectSetFieldIntTest, set_field_int_invalid_args_object)
 {
-    ani_object pack;
-    ani_field fieldInt;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldInt {};
+    ani_field fieldString {};
     GetTestData(&pack, &fieldInt, &fieldString);
 
     ASSERT_EQ(env_->Object_SetField_Int(nullptr, fieldInt, 2U), ANI_INVALID_ARGS);
@@ -73,9 +88,9 @@ TEST_F(ObjectSetFieldIntTest, set_field_int_invalid_args_object)
 
 TEST_F(ObjectSetFieldIntTest, set_field_int_invalid_args_field)
 {
-    ani_object pack;
-    ani_field fieldInt;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldInt {};
+    ani_field fieldString {};
     GetTestData(&pack, &fieldInt, &fieldString);
 
     ASSERT_EQ(env_->Object_SetField_Int(pack, nullptr, 2U), ANI_INVALID_ARGS);

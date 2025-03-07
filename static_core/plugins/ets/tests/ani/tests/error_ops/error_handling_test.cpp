@@ -25,6 +25,7 @@ public:
     static constexpr std::string_view MESSAGE_FROM_THROW_ERROR = "some error message from throwError";
     static constexpr std::string_view NAMESPACE_NAME = "testing";
     static const std::string NAMESPACE_DESCRIPTOR;
+    static constexpr int32_t LOOP_COUNT = 3;
 
     static std::string GetTraceLine(std::string_view functionName)
     {
@@ -73,8 +74,8 @@ TEST_F(ErrorHandlingTest, exist_unhandled_error_test)
 {
     auto func = GetThrowErrorFunction();
 
-    ani_int errorResult;
-    ani_boolean result;
+    ani_int errorResult = 0;
+    ani_boolean result = ANI_TRUE;
     ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
     ASSERT_EQ(result, ANI_FALSE);
     ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
@@ -86,8 +87,8 @@ TEST_F(ErrorHandlingTest, reset_error_test)
 {
     auto func = GetThrowErrorFunction();
 
-    ani_int errorResult;
-    ani_boolean result;
+    ani_int errorResult = 0;
+    ani_boolean result = ANI_TRUE;
     ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
     ASSERT_EQ(result, ANI_FALSE);
     ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
@@ -102,15 +103,15 @@ TEST_F(ErrorHandlingTest, get_unhandled_error_test)
 {
     auto func = GetThrowErrorFunction();
 
-    ani_int errorResult;
-    ani_boolean result;
+    ani_int errorResult = 0;
+    ani_boolean result = ANI_TRUE;
     ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
     ASSERT_EQ(result, ANI_FALSE);
     ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
     ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
     ASSERT_EQ(result, ANI_TRUE);
 
-    ani_error error;
+    ani_error error {};
     ASSERT_EQ(env_->GetUnhandledError(&error), ANI_OK);
     ASSERT_NE(error, nullptr);
 }
@@ -125,7 +126,7 @@ TEST_F(ErrorHandlingTest, throw_error_test)
     ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
     ASSERT_EQ(result, ANI_TRUE);
 
-    ani_error error;
+    ani_error error {};
     ASSERT_EQ(env_->GetUnhandledError(&error), ANI_OK);
 
     ASSERT_EQ(env_->ThrowError(error), ANI_OK);
@@ -263,6 +264,269 @@ TEST_F(ErrorHandlingTest, describe_error_thrown_through_native)
     CheckErrorDescription(output, "Error",
                           {"at escompat.Error.<ctor>", GetTraceLine("throwToNativeCaller"),
                            GetTraceLine("callThroughNative"), GetTraceLine("throwErrorThroughNative")});
+}
+
+TEST_F(ErrorHandlingTest, exist_multiple_call_test_1)
+{
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ani_boolean result = ANI_TRUE;
+        ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+        ASSERT_EQ(result, ANI_FALSE);
+    }
+}
+
+TEST_F(ErrorHandlingTest, exist_multiple_call_test_2)
+{
+    auto func = GetThrowErrorFunction();
+
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ani_int errorResult = 0;
+        ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+
+        ani_boolean result = ANI_FALSE;
+        ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+        ASSERT_EQ(result, ANI_TRUE);
+    }
+}
+
+TEST_F(ErrorHandlingTest, exist_multiple_call_test_3)
+{
+    auto func = GetThrowErrorFunction();
+
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ani_int errorResult = 0;
+        ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+
+        ani_boolean result = ANI_FALSE;
+        ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+        ASSERT_EQ(result, ANI_TRUE);
+
+        ASSERT_EQ(env_->ResetError(), ANI_OK);
+        ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+        ASSERT_EQ(result, ANI_FALSE);
+    }
+}
+
+TEST_F(ErrorHandlingTest, exist_multiple_call_test_4)
+{
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ani_boolean result = ANI_TRUE;
+        ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+        ASSERT_EQ(result, ANI_FALSE);
+    }
+}
+
+TEST_F(ErrorHandlingTest, reset_multiple_call_test_1)
+{
+    auto func = GetThrowErrorFunction();
+
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ani_int errorResult = 0;
+        ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+        ASSERT_EQ(env_->ResetError(), ANI_OK);
+    }
+}
+
+TEST_F(ErrorHandlingTest, reset_multiple_call_test_2)
+{
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->ResetError(), ANI_OK);
+    }
+}
+
+TEST_F(ErrorHandlingTest, reset_multiple_call_test_3)
+{
+    auto func = GetThrowErrorFunction();
+
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ani_int errorResult = 0;
+        ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+        ASSERT_EQ(env_->ResetError(), ANI_OK);
+
+        ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+        ASSERT_EQ(env_->ResetError(), ANI_OK);
+
+        ani_boolean result = ANI_TRUE;
+        ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+        ASSERT_EQ(result, ANI_FALSE);
+    }
+}
+
+TEST_F(ErrorHandlingTest, reset_multiple_call_test_4)
+{
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->ResetError(), ANI_OK);
+    }
+}
+
+TEST_F(ErrorHandlingTest, describe_multiple_call_test_1)
+{
+    auto func = GetThrowErrorFunction();
+
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ani_int errorResult = 0;
+        ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+        ASSERT_EQ(env_->DescribeError(), ANI_OK);
+    }
+}
+
+TEST_F(ErrorHandlingTest, describe_multiple_call_test_2)
+{
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->DescribeError(), ANI_OK);
+    }
+}
+
+TEST_F(ErrorHandlingTest, describe_multiple_call_test_3)
+{
+    auto func = GetThrowErrorFunction();
+
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ani_int errorResult = 0;
+        ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+        ASSERT_EQ(env_->DescribeError(), ANI_OK);
+
+        ASSERT_EQ(env_->ResetError(), ANI_OK);
+        ASSERT_EQ(env_->DescribeError(), ANI_OK);
+    }
+}
+
+TEST_F(ErrorHandlingTest, describe_multiple_call_test_4)
+{
+    auto func = GetThrowErrorFunction();
+
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ani_int errorResult = 0;
+        ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+        ASSERT_EQ(env_->DescribeError(), ANI_OK);
+
+        ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+        ASSERT_EQ(env_->DescribeError(), ANI_OK);
+    }
+}
+
+TEST_F(ErrorHandlingTest, describe_multiple_call_test_5)
+{
+    for (int i = 0; i < LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->DescribeError(), ANI_OK);
+    }
+}
+
+TEST_F(ErrorHandlingTest, throw_multiple_call_test)
+{
+    auto func = GetThrowErrorFunction();
+
+    ani_int errorResult = 0;
+    ani_boolean result = ANI_FALSE;
+    ani_error error {};
+    ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
+    ASSERT_EQ(env_->GetUnhandledError(&error), ANI_OK);
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->ThrowError(error), ANI_OK);
+    }
+}
+
+TEST_F(ErrorHandlingTest, get_unhandled_multiple_call_test_1)
+{
+    auto func = GetThrowErrorFunction();
+
+    ani_int errorResult = 0;
+    ani_error error {};
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+        ASSERT_EQ(env_->GetUnhandledError(&error), ANI_OK);
+    }
+}
+
+TEST_F(ErrorHandlingTest, get_unhandled_multiple_call_test_2)
+{
+    ani_error error {};
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->GetUnhandledError(&error), ANI_ERROR);
+    }
+}
+
+TEST_F(ErrorHandlingTest, get_unhandled_multiple_call_test_3)
+{
+    auto func = GetThrowErrorFunction();
+
+    ani_int errorResult = 0;
+    ani_error error {};
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+        ASSERT_EQ(env_->GetUnhandledError(&error), ANI_OK);
+
+        ASSERT_EQ(env_->ResetError(), ANI_OK);
+        ASSERT_EQ(env_->GetUnhandledError(&error), ANI_ERROR);
+    }
+}
+
+TEST_F(ErrorHandlingTest, get_unhandled_multiple_call_test_4)
+{
+    auto func = GetThrowErrorFunction();
+
+    ani_int errorResult = 0;
+    ani_error error {};
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+        ASSERT_EQ(env_->GetUnhandledError(&error), ANI_OK);
+
+        ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+        ASSERT_EQ(env_->GetUnhandledError(&error), ANI_OK);
+    }
+}
+
+TEST_F(ErrorHandlingTest, get_unhandled_multiple_call_test_5)
+{
+    ani_error error {};
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->GetUnhandledError(&error), ANI_ERROR);
+    }
+}
+
+TEST_F(ErrorHandlingTest, combined_scenes_test_1)
+{
+    auto func = GetThrowErrorFunction();
+
+    ani_int errorResult = 0;
+    ani_error error {};
+    ani_boolean result = ANI_FALSE;
+    ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
+    ASSERT_EQ(env_->GetUnhandledError(&error), ANI_OK);
+    ASSERT_EQ(env_->DescribeError(), ANI_OK);
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
+    ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+    ASSERT_EQ(result, ANI_FALSE);
+}
+
+TEST_F(ErrorHandlingTest, combined_scenes_test_2)
+{
+    auto func = GetThrowErrorFunction();
+
+    ani_int errorResult = 0;
+    ani_error error {};
+    ani_boolean result = ANI_TRUE;
+    ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->GetUnhandledError(&error), ANI_OK);
+    ASSERT_EQ(env_->ThrowError(error), ANI_OK);
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
+    ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+    ASSERT_EQ(result, ANI_FALSE);
+}
+
+TEST_F(ErrorHandlingTest, combined_scenes_test_3)
+{
+    auto func = GetThrowErrorFunction();
+
+    ani_int errorResult = 0;
+    ani_error error {};
+    ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->GetUnhandledError(&error), ANI_OK);
+    ASSERT_EQ(env_->ThrowError(error), ANI_OK);
 }
 
 }  // namespace ark::ets::ani::testing
