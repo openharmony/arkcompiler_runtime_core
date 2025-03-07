@@ -975,12 +975,6 @@
 06.contexts_and_conversions/05.implicit_conversions/08.char_to_string_conversion/call-lmbd.sts
 06.contexts_and_conversions/05.implicit_conversions/08.char_to_string_conversion/call-meth.sts
 
-# 17110 failed while merging 05.09 dev branch shuttle
-06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var_6.sts
-06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_obj/comp-clss_6.sts
-06.contexts_and_conversions/05.implicit_conversions/08.char_to_string_conversion/assn-var.sts
-06.contexts_and_conversions/05.implicit_conversions/08.char_to_string_conversion/comp-clss.sts
-
 # union of literals is not supported yet #19926
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/assn_var/assn-var-lit_0.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/assn_var/assn-var-lit_1.sts
