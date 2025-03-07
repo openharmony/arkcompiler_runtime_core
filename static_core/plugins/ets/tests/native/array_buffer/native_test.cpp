@@ -33,7 +33,7 @@ static constexpr int HUNDRED_TWENTY_THREE = 123;
 static constexpr int TWO_HUNDRED_THIRTY_FOUR = 234;
 static constexpr int THREE_HUNDRED_FOURTY_FIVE = 345;
 
-void TestFinalizer([[maybe_unused]] EtsEnv *env, void *data, [[maybe_unused]] void *finalizerHint)
+void TestFinalizer(void *data, [[maybe_unused]] void *finalizerHint)
 {
     delete[] reinterpret_cast<int64_t *>(data);
 }

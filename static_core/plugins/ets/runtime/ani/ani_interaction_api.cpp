@@ -5519,6 +5519,63 @@ NO_UB_SANITIZE static ani_status WeakReference_GetReference(ani_env *env, ani_wr
     return s.GetLocalRef(wref, wasReleasedResult, refResult);
 }
 
+template <bool IS_EXTERNAL>
+static ani_status DoCreateArrayBuffer(ani_env *env, [[maybe_unused]] void *externalData, size_t length,
+                                      [[maybe_unused]] void **resultData, ani_arraybuffer *resultBuffer)
+{
+    CHECK_PTR_ARG(resultBuffer);
+    ANI_CHECK_RETURN_IF_GT(length, static_cast<size_t>(std::numeric_limits<ani_int>::max()), ANI_INVALID_ARGS);
+
+    ScopedManagedCodeFix s(env);
+    EtsCoroutine *coro = s.GetCoroutine();
+
+    EtsEscompatArrayBuffer *internalArrayBuffer = nullptr;
+    if constexpr (IS_EXTERNAL) {
+        internalArrayBuffer = EtsEscompatArrayBuffer::Create(coro, externalData, length, nullptr, nullptr);
+    } else {
+        internalArrayBuffer = EtsEscompatArrayBuffer::Create(coro, length, resultData);
+    }
+
+    ASSERT(coro->HasPendingException() == false);
+    ANI_CHECK_RETURN_IF_EQ(internalArrayBuffer, nullptr, ANI_OUT_OF_MEMORY);
+
+    ani_ref arrayObject = nullptr;
+    ani_status ret = s.AddLocalRef(internalArrayBuffer, &arrayObject);
+    ANI_CHECK_RETURN_IF_NE(ret, ANI_OK, ret);
+    ASSERT(arrayObject != nullptr);
+
+    *resultBuffer = reinterpret_cast<ani_arraybuffer>(arrayObject);
+    return ret;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+ani_status CreateArrayBuffer(ani_env *env, size_t length, void **dataResult, ani_arraybuffer *arraybufferResult)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(dataResult);
+    CHECK_PTR_ARG(arraybufferResult);
+
+    return DoCreateArrayBuffer<false>(env, nullptr, length, dataResult, arraybufferResult);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status ArrayBuffer_GetInfo(ani_env *env, ani_arraybuffer arraybuffer, void **dataResult,
+                                                     size_t *lengthResult)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(arraybuffer);
+    CHECK_PTR_ARG(dataResult);
+    CHECK_PTR_ARG(lengthResult);
+
+    ScopedManagedCodeFix s(env);
+    auto *internalArrayBuffer = s.ToInternalType(arraybuffer);
+    *dataResult = internalArrayBuffer->GetData();
+    *lengthResult = internalArrayBuffer->GetByteLength();
+    return ANI_OK;
+}
+
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status EnsureEnoughReferences(ani_env *env, ani_size nrRefs)
 {
@@ -6287,9 +6344,9 @@ const __ani_interaction_api INTERACTION_API = {
     WeakReference_Create,
     WeakReference_Delete,
     WeakReference_GetReference,
-    NotImplementedAdapter<444>,
+    CreateArrayBuffer,
     NotImplementedAdapter<445>,
-    NotImplementedAdapter<446>,
+    ArrayBuffer_GetInfo,
     Promise_New,
     PromiseResolver_Resolve,
     PromiseResolver_Reject

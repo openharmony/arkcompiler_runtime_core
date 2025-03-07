@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_napi_env.h"
+#include "plugins/ets/runtime/types/ets_arraybuffer.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_module.h"
 #include "plugins/ets/runtime/types/ets_namespace.h"
@@ -106,6 +107,12 @@ public:
     {
         ASSERT(!IsNullishValue(tuple));
         return reinterpret_cast<EtsArray *>(GetInternalType(tuple));
+    }
+
+    EtsEscompatArrayBuffer *ToInternalType(ani_arraybuffer arraybuffer)
+    {
+        ASSERT(!IsNullishValue(arraybuffer));
+        return reinterpret_cast<EtsEscompatArrayBuffer *>(GetInternalType(arraybuffer));
     }
 
     EtsObject *ToInternalType(ani_ref ref)
