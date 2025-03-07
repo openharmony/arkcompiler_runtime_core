@@ -35,7 +35,7 @@ namespace ark::ets::interop::js {
 static napi_value ThenCallback(napi_env env, napi_callback_info info)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    INTEROP_CODE_SCOPE_JS(coro, env);
+    INTEROP_CODE_SCOPE_JS(coro);
 
     JsJobQueue::JsCallback *jsCallback = nullptr;
     [[maybe_unused]] napi_status status =
@@ -94,7 +94,7 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     PandaEtsVM *vm = coro->GetPandaVM();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS(coro, env);
+    INTEROP_CODE_SCOPE_JS(coro);
 
     mem::Reference *promiseRef = nullptr;
     size_t argc = 1;

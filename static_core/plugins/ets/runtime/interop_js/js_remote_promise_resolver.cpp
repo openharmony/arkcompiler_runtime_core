@@ -45,8 +45,7 @@ void JsRemotePromiseResolver::ResolveInPlace(EtsObject *resolveValue, Action act
 /*static*/
 void JsRemotePromiseResolver::ResolveRemotePromise(napi_deferred deferred, EtsObject *resolveValue, Action action)
 {
-    napi_env env = InteropCtx::Current()->GetJsEnvForEventLoopCallbacks();
-    INTEROP_CODE_SCOPE_JS(EtsCoroutine::GetCurrent(), env);
+    INTEROP_CODE_SCOPE_JS(EtsCoroutine::GetCurrent());
     switch (action) {
         case Action::RESOLVE: {
             PromiseInteropResolve(resolveValue, reinterpret_cast<EtsLong>(deferred));

@@ -25,8 +25,7 @@ uv_loop_t *EventLoop::GetEventLoop()
 {
     uv_loop_t *loop = nullptr;
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
-    [[maybe_unused]] auto nstatus =
-        napi_get_uv_event_loop(InteropCtx::Current()->GetJsEnvForEventLoopCallbacks(), &loop);
+    [[maybe_unused]] auto nstatus = napi_get_uv_event_loop(InteropCtx::Current()->GetJSEnv(), &loop);
     ASSERT(nstatus == napi_ok);
 #else
     loop = uv_default_loop();
@@ -100,10 +99,7 @@ void EventLoopCallbackPoster::AsyncEventToExecuteCallbacks(uv_async_t *async)
     auto *callbackQueue = reinterpret_cast<ThreadSafeCallbackQueue *>(async->data);
     ASSERT(callbackQueue != nullptr);
     auto *coro = EtsCoroutine::GetCurrent();
-    auto *interopCtx = InteropCtx::Current(coro);
-    auto env = interopCtx->GetJsEnvForEventLoopCallbacks();
     InteropCodeScope<false> codeScope(coro, __PRETTY_FUNCTION__);
-    JSNapiEnvScope jsEnvScope(interopCtx, env);
     callbackQueue->ExecuteAllCallbacks();
 }
 

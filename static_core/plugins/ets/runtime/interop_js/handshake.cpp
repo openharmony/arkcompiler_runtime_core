@@ -31,7 +31,6 @@ namespace ark::ets::interop::js {
 void Handshake::VmHandshake(napi_env env, [[maybe_unused]] EtsCoroutine *coro, arkplatform::STSVMInterface *stsVmIface)
 {
     auto ctx = InteropCtx::Current();
-    JSNapiEnvScope envscope(ctx, env);
     void *jsvmIface = nullptr;
     ASSERT(coro != nullptr);
     auto status = napi_vm_handshake(env, stsVmIface, &jsvmIface);

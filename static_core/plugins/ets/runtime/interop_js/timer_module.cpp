@@ -92,7 +92,6 @@ void TimerModule::TimerCallback(uv_timer_t *timer)
     }
     ets_class cls = mainEtsEnv_->GetObjectClass(info->GetFuncObject());
     ets_method invokeMethod = mainEtsEnv_->Getp_method(cls, ark::ets::INVOKE_METHOD_NAME, nullptr);
-    ark::ets::interop::js::JSNapiEnvScope scope(ark::ets::interop::js::InteropCtx::Current(), jsEnv_);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     mainEtsEnv_->CallVoidMethod(info->GetFuncObject(), invokeMethod);
     if (!oneShotTimer) {
