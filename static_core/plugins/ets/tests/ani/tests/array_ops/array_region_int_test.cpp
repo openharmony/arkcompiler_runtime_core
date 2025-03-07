@@ -30,6 +30,9 @@ protected:
     static constexpr ani_int TEST_UPDATE1 = 30;
     static constexpr ani_int TEST_UPDATE2 = 40;
     static constexpr ani_int TEST_UPDATE3 = 50;
+    static constexpr ani_int TEST_UPDATE4 = 222;
+    static constexpr ani_int TEST_UPDATE5 = 444;
+    static constexpr ani_int TEST_UPDATE6 = 333;
 };
 
 TEST_F(ArraySetGetRegionIntTest, SetIntArrayRegionErrorTests)
@@ -88,6 +91,59 @@ TEST_F(ArraySetGetRegionIntTest, SetRegionIntTest)
     const ani_size len4 = 3;
     ASSERT_EQ(env_->Array_SetRegion_Int(array, offset4, len4, nativeBuffer1), ANI_OK);
     ASSERT_EQ(CallEtsFunction<ani_boolean>("CheckArray", array), ANI_TRUE);
+}
+
+TEST_F(ArraySetGetRegionIntTest, CheckChangeFromManagedRegionIntTest)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LArrayClass;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_ref ref;
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "array", &ref), ANI_OK);
+    ASSERT_NE(ref, nullptr);
+
+    auto array = reinterpret_cast<ani_array_int>(ref);
+    ani_int nativeBuffer[5U] = {0};
+    const ani_size offset5 = 0;
+    const ani_size len5 = 5;
+
+    ASSERT_EQ(env_->Array_GetRegion_Int(array, offset5, len5, nativeBuffer), ANI_OK);
+    ASSERT_EQ(nativeBuffer[0U], TEST_VALUE1);
+    ASSERT_EQ(nativeBuffer[1U], TEST_VALUE2);
+    ASSERT_EQ(nativeBuffer[2U], TEST_VALUE3);
+    ASSERT_EQ(nativeBuffer[3U], TEST_VALUE4);
+    ASSERT_EQ(nativeBuffer[4U], TEST_VALUE5);
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "ChangeStaticArray", nullptr), ANI_OK);
+    ASSERT_EQ(env_->Array_GetRegion_Int(array, offset5, len5, nativeBuffer), ANI_OK);
+    ASSERT_EQ(nativeBuffer[0U], TEST_VALUE1);
+    ASSERT_EQ(nativeBuffer[1U], TEST_VALUE2);
+    ASSERT_EQ(nativeBuffer[2U], TEST_UPDATE4);
+    ASSERT_EQ(nativeBuffer[3U], TEST_VALUE4);
+    ASSERT_EQ(nativeBuffer[4U], TEST_UPDATE5);
+}
+
+TEST_F(ArraySetGetRegionIntTest, CheckChangeFromApiRegionIntTest)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LArrayClass;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_ref ref;
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "array", &ref), ANI_OK);
+    ASSERT_NE(ref, nullptr);
+
+    auto array = reinterpret_cast<ani_array_int>(ref);
+    ani_int nativeBuffer[3U] = {TEST_UPDATE4, TEST_UPDATE6, TEST_UPDATE5};
+    const ani_size offset6 = 2;
+    const ani_size len6 = 3;
+
+    ASSERT_EQ(env_->Array_SetRegion_Int(array, offset6, len6, nativeBuffer), ANI_OK);
+
+    ani_boolean result;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "CheckStaticArray", nullptr, &result), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
 }
 
 }  // namespace ark::ets::ani::testing

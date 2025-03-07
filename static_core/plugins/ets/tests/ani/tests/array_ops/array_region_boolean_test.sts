@@ -13,6 +13,25 @@
  * limitations under the License.
  */
 
+class ArrayClass {
+    public static array: boolean[] = [true, true, true, true, true];
+
+    public static ChangeStaticArray() {
+        ArrayClass.array[2] = false;
+        ArrayClass.array[4] = false;
+    }
+
+    public static CheckStaticArray(): boolean {
+        return (
+            ArrayClass.array[0] == true &&
+            ArrayClass.array[1] == true &&
+            ArrayClass.array[2] == false &&
+            ArrayClass.array[3] == false &&
+            ArrayClass.array[4] == false
+        )
+    }
+}
+
 function GetArray(): boolean[] {
     let a : boolean[] = [true, true, true, true, true]
     return a

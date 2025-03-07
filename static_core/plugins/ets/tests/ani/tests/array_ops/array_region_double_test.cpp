@@ -30,6 +30,9 @@ protected:
     static constexpr double TEST_UPDATE_1 = 30.0;
     static constexpr double TEST_UPDATE_2 = 40.0;
     static constexpr double TEST_UPDATE_3 = 50.0;
+    static constexpr double TEST_UPDATE_4 = 22.0;
+    static constexpr double TEST_UPDATE_5 = 44.0;
+    static constexpr double TEST_UPDATE_6 = 33.0;
 };
 
 TEST_F(ArraySetGetRegionDoubleTest, SetDoubleArrayRegionErrorTests)
@@ -90,6 +93,60 @@ TEST_F(ArraySetGetRegionDoubleTest, SetRegionDoubleTest)
     const ani_size len4 = 3;
     ASSERT_EQ(env_->Array_SetRegion_Double(array, offset4, len4, nativeBuffer1), ANI_OK);
     ASSERT_EQ(CallEtsFunction<ani_boolean>("CheckArray", array), ANI_TRUE);
+}
+
+TEST_F(ArraySetGetRegionDoubleTest, CheckChangeFromManagedRegionDoubleTest)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LArrayClass;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_ref ref;
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "array", &ref), ANI_OK);
+    ASSERT_NE(ref, nullptr);
+
+    auto array = reinterpret_cast<ani_array_double>(ref);
+    ani_double nativeBuffer[5U] = {0.0};
+    const ani_size offset5 = 0;
+    const ani_size len5 = 5;
+    const double epsilon = 1e-6;  // Define acceptable tolerance
+
+    ASSERT_EQ(env_->Array_GetRegion_Double(array, offset5, len5, nativeBuffer), ANI_OK);
+    ASSERT_NEAR(nativeBuffer[0U], TEST_VALUE_1, epsilon);
+    ASSERT_NEAR(nativeBuffer[1U], TEST_VALUE_2, epsilon);
+    ASSERT_NEAR(nativeBuffer[2U], TEST_VALUE_3, epsilon);
+    ASSERT_NEAR(nativeBuffer[3U], TEST_VALUE_4, epsilon);
+    ASSERT_NEAR(nativeBuffer[4U], TEST_VALUE_5, epsilon);
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "ChangeStaticArray", nullptr), ANI_OK);
+    ASSERT_EQ(env_->Array_GetRegion_Double(array, offset5, len5, nativeBuffer), ANI_OK);
+    ASSERT_NEAR(nativeBuffer[0U], TEST_VALUE_1, epsilon);
+    ASSERT_NEAR(nativeBuffer[1U], TEST_VALUE_2, epsilon);
+    ASSERT_NEAR(nativeBuffer[2U], TEST_UPDATE_4, epsilon);
+    ASSERT_NEAR(nativeBuffer[3U], TEST_VALUE_4, epsilon);
+    ASSERT_NEAR(nativeBuffer[4U], TEST_UPDATE_5, epsilon);
+}
+
+TEST_F(ArraySetGetRegionDoubleTest, CheckChangeFromApiRegionDoubleTest)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LArrayClass;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_ref ref;
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "array", &ref), ANI_OK);
+    ASSERT_NE(ref, nullptr);
+
+    auto array = reinterpret_cast<ani_array_double>(ref);
+    ani_double nativeBuffer[3U] = {TEST_UPDATE_4, TEST_UPDATE_6, TEST_UPDATE_5};
+    const ani_size offset6 = 2;
+    const ani_size len6 = 3;
+
+    ASSERT_EQ(env_->Array_SetRegion_Double(array, offset6, len6, nativeBuffer), ANI_OK);
+
+    ani_boolean result;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "CheckStaticArray", nullptr, &result), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
 }
 
 }  // namespace ark::ets::ani::testing
