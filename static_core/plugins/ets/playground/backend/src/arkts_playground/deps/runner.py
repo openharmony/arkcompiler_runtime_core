@@ -220,7 +220,7 @@ class Runner:
         entry_point = f"{Path(abcfile_name).stem[:-4]}.ETSGLOBAL::main"
         run_cmd = [f"--boot-panda-files={self.stdlib_abc}", "--load-runtimes=ets"]
         if runtime_verify:
-            run_cmd += ["--verification-enabled=true", "--verification-mode=on-the-fly"]
+            run_cmd += ["--verification-mode=on-the-fly"]
         if self._icu_data:
             run_cmd.append(f"--icu-data-path={self._icu_data}")
         run_cmd.append(abcfile_name)

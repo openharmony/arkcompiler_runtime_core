@@ -163,7 +163,6 @@ function(run_ets_code_impl TARGET WORK_DIR ETS_SOURCES)
         --boot-panda-files=${BOOT_PANDA_FILES}
         --panda-files=${ABC_FILES}
         --load-runtimes=ets
-        --verification-enabled=true
         --verification-mode=on-the-fly
         ${ARG_RUNTIME_EXTRA_OPTIONS}
         ${ENTRY_ABC}

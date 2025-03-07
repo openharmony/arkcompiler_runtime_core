@@ -116,7 +116,6 @@ function(run_sts_app_mode TARGET WORK_DIR APP_MAIN_ABILITY_CLASS APP_ABC_FILES)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "" ${ARGN})
     set(RUNTIME_EXTRA_OPTIONS
         "--load-runtimes=ets"
-        "--verification-enabled=true"
         "--verification-mode=on-the-fly"
         "--gc-type=g1-gc"
     )
@@ -404,7 +403,6 @@ function(create_verification_mode_test TARGET WORK_DIR SOURCE_DIR)
     # test --verification-mode on-the-fly mode
     set(RUNTIME_EXTRA_OPTIONS
         "--load-runtimes=ets"
-        "--verification-enabled=true"
         "--verification-mode=on-the-fly"
         "--gc-type=g1-gc"
     )
@@ -419,7 +417,6 @@ function(create_verification_mode_test TARGET WORK_DIR SOURCE_DIR)
     # test --verification-mode ahead-of-time mode
     set(RUNTIME_EXTRA_OPTIONS
         "--load-runtimes=ets"
-        "--verification-enabled=true"
         "--verification-mode=ahead-of-time"
         "--gc-type=g1-gc"
     )

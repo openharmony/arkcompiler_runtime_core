@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,17 +114,6 @@ static void SetPandaFiles(RuntimeOptions &runtimeOptions, ark::PandArg<std::stri
     runtimeOptions.SetBootPandaFiles(bootPandaFiles);
 }
 
-static void SetVerificationMode(RuntimeOptions &runtimeOptions)
-{
-    runtimeOptions.SetVerificationMode(VerificationModeFromString(
-        static_cast<Options>(runtimeOptions).GetVerificationMode()));  // NOLINT(cppcoreguidelines-slicing)
-    if (runtimeOptions.IsVerificationEnabled()) {
-        if (!runtimeOptions.WasSetVerificationMode()) {
-            runtimeOptions.SetVerificationMode(VerificationMode::AHEAD_OF_TIME);
-        }
-    }
-}
-
 static ark::PandArgParser GetPandArgParser(ark::PandArg<bool> &help, ark::PandArg<bool> &options,
                                            ark::PandArg<std::string> &file, ark::PandArg<std::string> &entrypoint)
 {
@@ -202,8 +191,6 @@ int Main(int argc, const char **argv)
     compiler::g_options.AdjustCpuFeatures(false);
 
     Logger::Initialize(baseOptions);
-
-    SetVerificationMode(runtimeOptions);
 
     ark::compiler::CompilerLogger::SetComponents(ark::compiler::g_options.GetCompilerLog());
     if (compiler::g_options.IsCompilerEnableEvents()) {
