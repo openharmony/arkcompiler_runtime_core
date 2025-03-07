@@ -62,14 +62,14 @@ cases:
   - imp: |-
       import * as dm from "./declaration_module.ets"
     use: |-
-      let myMapOfString: dm.MapOfString<string>;
+      let myMapOfString: dm.MapOfString<string> = new Map<string, string>();
       assertTrue(typeof myMapOfString == 'object' );   
 
   #7. Type parameter with generic
   - imp: |-
       import * as dm from "./declaration_module.ets"
     use: |-
-      let myAAA: dm.AAA<string>;
+      let myAAA: dm.AAA<string> = new Array<dm.AAA<string>>;
       assertTrue(typeof myAAA == 'object' );
 
   #8. Class with fields and method
