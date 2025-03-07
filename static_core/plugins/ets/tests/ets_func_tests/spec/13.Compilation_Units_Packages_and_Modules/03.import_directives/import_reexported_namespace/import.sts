@@ -14,12 +14,9 @@
  */
 
 /*---
-desc: Error ‘sin’ is not accessible. ES2PANDA_FAIL, TypeError Unresolved reference sin
-tags: [compile-only, negative]
+desc: Import reexported elements
+tags: [compile-only]
+files: ['./export.sts', './reexport.sts']
 ---*/
 
-import {sin as Sine, PI as PNumber} from "std/math";
-
-function main(): void {
-    let x = sin(PNumber);
-}
+import {N as Nalias, C as Calias} from "./reexport"
