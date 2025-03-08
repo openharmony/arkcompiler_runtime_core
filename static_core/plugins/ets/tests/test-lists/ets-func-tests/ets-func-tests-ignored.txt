@@ -461,3 +461,10 @@ std/containers/ArrayTestChecked.sts
 std/core/TypeCreateClassTest.sts
 std/core/TypeCreateInterfaceTest.sts
 std/core/TypeCreatePrimitiveNameTest.sts
+
+#23111
+20.implementation_details/06.keyword_struct_and_arkui/struct_class_test.sts
+20.implementation_details/06.keyword_struct_and_arkui/struct_empty_class.sts
+20.implementation_details/06.keyword_struct_and_arkui/struct_extends_class.sts
+20.implementation_details/06.keyword_struct_and_arkui/struct_implements_interface.sts
+20.implementation_details/06.keyword_struct_and_arkui/struct_simple_class.sts
