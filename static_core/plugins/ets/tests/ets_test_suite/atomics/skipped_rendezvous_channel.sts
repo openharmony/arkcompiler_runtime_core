@@ -17,9 +17,12 @@ let s = new SharedArrayBuffer(4);
 let arr = new Int32Array(s, 0, 1);
 
 function main() {
-    launch consumer()
+    let consumerPromise = launch consumer()
     heavyComputation()
-    launch producer()
+    let producerPromise = launch producer()
+
+    await producerPromise;
+    await consumerPromise;
 }
 
 function producer(): Int {
