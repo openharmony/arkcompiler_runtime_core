@@ -31,6 +31,8 @@
     } else {
       BuildStObjByName<false>(instruction, <%= get_type(inst.type(0)) %>);
     }
+    % when "CALL"
+    BuildCallByName(instruction);
     % when "LDNULLVALUE"
     UpdateDefinitionAcc(graph_->GetOrCreateUniqueObjectInst());
     % when "MOVNULLVALUE"

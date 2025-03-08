@@ -221,6 +221,12 @@ void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, compiler::
 template void InstBuilder::BuildStObjByName<true>(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
 template void InstBuilder::BuildStObjByName<false>(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
 
+void InstBuilder::BuildCallByName([[maybe_unused]] const BytecodeInstruction *bcInst)
+{
+    // NOTE issue(21892) support callbyname
+    UNREACHABLE();
+}
+
 void InstBuilder::BuildIsNullValue(const BytecodeInstruction *bcInst)
 {
     auto uniqueObjInst = graph_->GetOrCreateUniqueObjectInst();

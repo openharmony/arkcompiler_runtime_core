@@ -183,6 +183,67 @@ groups:
         prefix: ets
         intrinsic_name: INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_OBJ
 
+  - title: Call method from object by name
+    description: >
+      Call method from an object by method name method_id, i.e., resolve method and
+      create new frame, pass values of arguments, and continue the execution from the
+      first instruction of a method.
+      Callee must treat the accumulator value as undefined, and cannot use it
+      until accumulator in the new frame is defined.
+      Result (if any) is returned in accumulator.
+      Method, its class, and the number of arguments is resolved by a given
+      method_id in runtime constant-pool based on object reference.
+      Object reference is passed in the first source register, arguments are
+      passed starting from the second source register in the same order as in
+      the method signature.
+      Non-range instructions can be used to pass up to 4 arguments (including
+      object reference).
+      Unused register slot values are discarded, and corresponding registers
+      are not passed to the callee).
+      For methods with more arguments, range kinds of instruction are to be used.
+      The instructions take the required number of arguments starting from
+      'vs' register (including object reference).
+    verification:
+      - v1_object
+    properties:
+      - method_id
+      - call
+      - short_long_range
+    exceptions:
+      - x_null
+      - x_abstract
+      - x_call
+    pseudo: |
+      if args[0] == null then
+        throw NullPointerException
+      end
+      method = resolve_method_by_name(method_id)
+      if method != null then
+          if is_abstract(method) then
+            throw AbstractMethodError
+          end
+          acc = call(method, args)
+      else
+          throw NullPointerException
+      end
+    namespace: ets
+    instructions:
+      - sig: ets.call.name.short method_id, v1:in:top, v2:in:top
+        acc: out:top
+        format: [pref_op_v1_4_v2_4_id_16]
+        prefix: ets
+        intrinsic_name: INTRINSIC_COMPILER_ETS_CALL_BY_NAME_SHORT
+      - sig: ets.call.name method_id, v1:in:top, v2:in:top, v3:in:top, v4:in:top
+        acc: out:top
+        format: [pref_op_v1_4_v2_4_v3_4_v4_4_id_16]
+        prefix: ets
+        intrinsic_name: INTRINSIC_COMPILER_ETS_CALL_BY_NAME
+      - sig: ets.call.name.range method_id, v:in:top
+        acc: out:top
+        format: [pref_op_v_8_id_16]
+        prefix: ets
+        intrinsic_name: INTRINSIC_COMPILER_ETS_CALL_BY_NAME_RANGE
+
   - title: Load 'nullvalue' reference into accumulator
     description: >
       Load 'nullvalue' reference into accumulator.
