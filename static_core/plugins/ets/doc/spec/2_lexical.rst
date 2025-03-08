@@ -598,7 +598,7 @@ Integer literals are of integer types that match literals as follows:
 
 - For *hex*, *octal*, and *binary* integer literals
 
-  + ``int`` if bit represention of the value fits in 32-bits, i.e., the value 
+  + ``int`` if bit representation of the value fits in 32-bits, i.e., the value 
     is in the range 0..max(unsigned 32-bit integer); or
 
   + ``long`` otherwise.
@@ -626,7 +626,7 @@ examples below:
 
 An integer literal in variable and constant declarations can be implicitly
 converted to another numeric type  (see :ref:`Numeric Types`) or type ``char``
-(see :ref:`Type Compatibility with Initializer`). An casting conversion must be
+(see :ref:`Primitive Types Conversions`). An casting conversion must be
 used elsewhere (see :ref:`Cast Expressions`).
 
 .. index::
@@ -698,7 +698,7 @@ follows:
 - ``double`` otherwise (type ``number`` is an alias to ``double``).
 
 A floating-point literal in variable and constant declarations can be implicitly
-converted to type ``float`` (see :ref:`Type Compatibility with Initializer`).
+converted to type ``float`` (see :ref:`Assignability with Initializer`).
 
 A :index:`compile-time error` occurs if a non-zero floating-point literal is
 too large for its type.

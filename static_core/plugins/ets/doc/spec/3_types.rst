@@ -345,8 +345,8 @@ has the lowest precedence as presented in the following example:
     d = (): string => { return "hi" } // ok
 
 
-If annotation is used in front of type in parentheses then parentheses become
-mandatory part of annotation to prevent ambiguilty.
+If annotation is used in front of type in parentheses, then parentheses become
+a mandatory part of the annotation to prevent ambiguity.
 
 .. code-block:: typescript
    :linenos:
@@ -1054,8 +1054,7 @@ Type ``Object`` is the superclass of all other classes,
 interfaces, arrays, tuples, function types, ``string`` and ``bigint`` types,
 unions except nullish ones, type parameters, and ``enum`` types.
 All these types inherit the methods of class ``Object`` (see :ref:`Inheritance`).
-All methods of class ``Object`` are described in full in the standard library
-(see :ref:`Standard Library`).
+All methods of class ``Object`` are described in full in :ref:`Standard Library`.
 
 The method ``toString`` as used in the examples in this document returns a
 string representation of the object.
@@ -1077,8 +1076,8 @@ refers to type ``Object``.
    array
    inheritance
 
-The term *object* is used in the specificaton to refer to
-an instance of any type that is subtype of ``Object``
+The term *object* is used in the Specification to refer to
+an instance of any type that is a subtype of ``Object``
 or of type ``Object`` itself.
 
 Pointers to these objects are called *references*.
@@ -1110,7 +1109,7 @@ Type ``never``
 .. meta:
     frontend_status: Done
 
-Type ``never`` is compatible with any other type (see :ref:`Type Compatibility`).
+Type ``never`` is assignable to any other type (see :ref:`Assignability`).
 
 Type ``never`` has no instance. Type ``never`` is used as one of the following:
 
@@ -1178,7 +1177,7 @@ return type if a function or a method returns no value:
 A :index:`compile-time error` occurs if:
 
 -  Type ``void`` is used as type annotation;
--  An expression of type ``void`` is used as a value.
+-  Expression of type ``void`` is used as a value.
 
 .. code-block-meta:
    expect-cte:
@@ -1353,11 +1352,11 @@ Type ``bigint``
 .. meta:
     frontend_status: Done
 
-|LANG| has built-in ``bigint`` type. It allows dealing
-with theoretical arbitrary large integers. Values of this type can hold
-numbers larger than the maximum value of type ``long``. This type uses the
-arbitrary-precision arithmetic. Values of type ``bigint`` can be created from
-the following:
+|LANG| has the built-in ``bigint`` type. Type ``bigint`` allows handling
+theoretical arbitrary large integers. Values of type ``bigint`` can hold numbers
+which are larger than the maximum value of type ``long``. Type ``bigint`` uses
+the arbitrary-precision arithmetic. Values of type ``bigint`` can be created
+from the following:
 
 - *Bigint literals* (see :ref:`Bigint Literals`); or
 - Numeric type values, by using a call to the standard library class ``BigInt``
@@ -1365,7 +1364,7 @@ the following:
 
 Similarly to ``string``, ``bigint`` type has dual semantics:
 
-- If it is created, assigned, or passed as an argument, type ``bigint`` behaves
+- If created, assigned, or passed as an argument, type ``bigint`` behaves
   in the same manner as a reference type (see :ref:`Reference Types`).
 - All applicable operations handle type ``bigint`` as a value type (see
   :ref:`Value Types`). Operations are described in
@@ -1505,11 +1504,11 @@ Array Types
 .. meta:
     frontend_status: Partly
 
-|LANG| supports two predefined array types:
+|LANG| supports the following two predefined array types:
 
-- :ref:`Resizable Array Types`,
+- :ref:`Resizable Array Types`; and
 
-- :ref:`Fixed Array Types` as experimental feature.
+- :ref:`Fixed Array Types` as an experimental feature.
 
 *Resizable array types* are recommended for most cases. *Fixed array types*
 can be used where performance is the major requirement.
@@ -1537,7 +1536,8 @@ Resizable Array Types
 .. meta:
     frontend_status: Partly
 
-There are two syntax forms of *resizable array type* with elements of type ``T``:
+There are two syntax forms of *resizable array type* with elements of type ``T``
+as follows:
 
 - ``T[]``
 - ``Array<T>``
@@ -1567,8 +1567,8 @@ The first form uses the following rule:
 -  Accessing an element by its index is a constant-time operation.
 -  If passed to non-|LANG| environment, an array is represented as a contiguous
    memory location.
--  Type of each array element is compatible with the element type specified
-   in the array declaration (see :ref:`Type Compatibility`).
+-  Type of each array element is assignable to the element type specified
+   in the array declaration (see :ref:`Assignability`).
 
 .. index::
    array type
@@ -1592,8 +1592,8 @@ The length of an array can be set and changed in runtime using methods defined
 in the standard library (see :ref:`Standard Library`).
 
 An array can be created by using :ref:`Array Literal`,
-:ref:`Array Creation Expressions`, or the standard library defined constructors
-(see :ref:`Standard Library`).
+:ref:`Array Creation Expressions`, or the constructors defined in the standard
+library (see :ref:`Standard Library`).
 
 |LANG| allows setting a new value to ``length`` to shrink an array and provide
 better |TS| compatibility. The new value must be less or equal to the previous
@@ -1682,7 +1682,7 @@ access to tuple elements.
    tuple[0] = 666
    console.log (tuple[0], tuple[4]) // `666 666` be printed
 
-Any tuple type is compatible (see :ref:`Type Compatibility`) with class
+Any tuple type is assignable (see :ref:`Assignability`) to class
 ``Object`` (see :ref:`Type Object`).
 
 An empty tuple is a corner case. It is only added to support |TS| compatibility:
@@ -1694,7 +1694,7 @@ An empty tuple is a corner case. It is only added to support |TS| compatibility:
 
 .. index::
    tuple type
-   type compatibility
+   assignability
    object
    class
    reference type
@@ -2044,16 +2044,14 @@ after another:
    any) are removed.
 #. If a primitive type equals another union type after boxing (see
    :ref:`Boxing Conversions`), then the initial type is removed.
-#. The following procedure is performed recursively until no mutually compatible
-   types remain (see :ref:`Type Compatibility`), or the union type is reduced to
+#. The following procedure is performed recursively until no assignable
+   types remain, or the union type is reduced to
    a single type:
 
    -  If a union type includes two types ``T``:sub:`i` and ``T``:sub:`j` (i != j),
-      and ``T``:sub:`i` is compatible with ``T``:sub:`j` (see
-      :ref:`Type Compatibility`), then only ``T``:sub:`j` remains in the union
+      and ``T``:sub:`i` is assignable to ``T``:sub:`j` (see
+      :ref:`Assignability`), then only ``T``:sub:`j` remains in the union
       type, and ``T``:sub:`i` is removed.
-   -  If ``T``:sub:`j` is compatible with ``T``:sub:`i` (see :ref:`Type Compatibility`),
-      then ``T``:sub:`i` remains in the union type, and ``T``:sub:`j` is removed.
 
 .. index::
    union type
@@ -2073,8 +2071,7 @@ after another:
    normalization
    Object type
    numeric union type
-   compatible type
-   type compatibility
+   assignability
 
 The normalization process results in a normalized union type. The process
 is presented in the examples below:
@@ -2101,7 +2098,7 @@ is presented in the examples below:
 
     enum Strings1 {aa = "AA", bb = "BB"}
     enum Strings2 {aa = "AA", cc = "CC"}
-    Strings1 | Strings2 | string // normalized as string. string wins over strign literals
+    Strings1 | Strings2 | string // normalized as string. string wins over string literals
     Strings1 | Strings2 | number // normalized as  "AA" | "BB" | "CC" | number
                                  // string enumerations unfolded and merged
 
@@ -2305,8 +2302,8 @@ Default Values for Types
 
 **Note**. This feature in |LANG| is experimental.
 
-The following types use so-called *default values* for variables without a need
-for explicit initialization (see :ref:`Variable Declarations`):
+The following types use so-called *default values* for variables that require
+no explicit initialization (see :ref:`Variable Declarations`):
 
 .. - All primitive types and *string* (see the table below).
 

@@ -228,7 +228,7 @@ distinguishable in the declaration scope (see
 
 **Note**: Import directives are handled by the compiler during compilation, and
 have no effect during program execution. Though they ensure that imported
-entities are initialised before use in the current compilation unit.
+entities are initialized before use in the current compilation unit.
 
 .. index::
    binding
@@ -462,7 +462,7 @@ applied to a single name:
 |                             | .. code-block:: typescript |                              |
 | A name is explicitly used   |                            | OK. Both aliases are         |
 | with alias several times.   |                            | accessible. But warning can  |
-|                             |     import {sin as Sine,   | be dispalyed.                |
+|                             |     import {sin as Sine,   | be displayed.                |
 |                             |        sin as SIN}         |                              |
 |                             |        from "..."          |                              |
 +-----------------------------+----------------------------+------------------------------+
@@ -732,7 +732,7 @@ Declaration Modules
 *Declaration module* is a special kind of compilation units that can be
 imported by using :ref:`Import Directives`. A declaration module contains
 :ref:`Ambient Declarations` and :ref:`Type Alias Declaration` only. An ambient
-declaration defined in a declaration module must be fully declared elsewhere.
+declaration declared in a declaration module must be fully defined elsewhere.
 
 .. code-block:: abnf
 
@@ -788,16 +788,16 @@ and cannot be used by modules that import this declaration module:
    export function process_field (p: A)
 
    // Module which uses B and process_field
-   import {* as m} from "path_to_declaration_module"
+   import * as m from "path_to_declaration_module"
 
    let b = new m.B  // B instance is created
    m.process_field (b.a) // exported field is passed to function as an argument
 
    let a = new m.A // compile-time error as A is not exported
 
-How declaration modules are stored in the file system and how the storage of
-declaration modules differs from the storage of other modules is determined by
-specific implementations.
+How declaration modules are stored in the file system and if the storage scheme
+of declaration modules differs from the way other modules are stored is
+determined by the particular implementation.
 
 .. index::
    declaration
@@ -886,6 +886,7 @@ functions (see :ref:`Function Declarations`), or namespaces (see
         | functionWithReceiverDeclaration
         | accessorWithReceiverDeclaration
         | namespaceDeclaration
+        | ambientDeclaration
         )
         ;
 
@@ -1116,7 +1117,28 @@ An usage example is presented below:
         static {} // Compile-time error as only one initializer allowed
     }
 
-**Note**. A namespace name can be a qualified name:
+**Note**. A namespace name can be a qualified name. It is a shortcut notation of
+embedded namespaces as represented below:
+
+.. code-block:: typescript
+   :linenos:
+
+    namespace A.B {
+        /*some declarations*/
+    }
+
+The code above is the shortcut version of the following code:
+
+.. code-block:: typescript
+   :linenos:
+
+    namespace A {
+        export namespace B {
+          /*some declarations*/
+        }
+    }
+
+This code illustrates the usage of declarations in the following case:
 
 .. code-block:: typescript
    :linenos:
@@ -1125,7 +1147,33 @@ An usage example is presented below:
         export function foo() { ... }
     }
 
-    A.B.C.foo() // Valid function call
+    A.B.C.foo() // Valid function call, as 'B' and 'C' are implicitly exported
+
+If an ambient namespace (see :ref:`Ambient Namespace Declarations`) belongs to
+a separate module (see :ref:`Separate Modules`) then all ambient namespace
+declarations are accessible across all declarations and top-level statements of
+the separate module.
+
+.. code-block:: typescript
+   :linenos:
+
+    declare namespace A {
+        function foo(): void
+        type X = Array<Number>
+    }
+
+    A.foo() // Valid function call, as 'foo' is acessible for top-level statements
+    function foo () {
+        A.foo() // Valid function call, as 'foo' is acessible here as well
+    }
+    class C {
+        method () {
+            A.foo() // Valid function call, as 'foo' is acessible here too
+            let x: A.X = [] // Type A.X can be used
+        }
+    }
+
+
 
 |
 
@@ -1228,7 +1276,7 @@ in the example below exports variable 'v' by its name:
         ;
 
 
-If ``default`` is added then there could be only one such export directive in
+If ``default`` is added, then only one such export directive is possible in
 the current compilation unit. Otherwise, a :index:`compile-time error` occurs.
 
 
@@ -1240,6 +1288,15 @@ the current compilation unit. Otherwise, a :index:`compile-time error` occurs.
 
     class A {}
     export default A
+
+*Single export directive* works as re-export when declaration referred by
+*identifier* was imported.
+
+.. code-block:: typescript
+   :linenos:
+
+    import {v} from "some location"
+    export v
    
 
 .. index::
@@ -1313,9 +1370,7 @@ Re-Export Directive
     frontend_status: Done
 
 In addition to exporting what is declared in the module, it is possible to
-re-export declarations that are part of other modules' export. Only
-limited re-export possibilities are currently supported.
-
+re-export declarations that are part of other modules' export. 
 A particular declaration or all declarations can be re-exported from a module.
 When re-exporting, new names can be given. This action is similar to importing
 but has the opposite direction. The appropriate grammar is presented below:
@@ -1380,7 +1435,7 @@ The sequence above is equal to the following:
       statements_1; statements_2
 
 
-Example below illustartes that:
+It is represented by the example below:
 
 
 .. code-block:: typescript
@@ -1397,7 +1452,7 @@ Example below illustartes that:
    a = "a string"
 
 
-   // The logically ordered text - declaratiosn then statements
+   // The logically ordered text - declarations then statements
    type A = number | string
    function foo () {
       console.log (a)
@@ -1469,7 +1524,7 @@ return statement (:ref:`Expression Statements`).
 
 The execution of top-level statements means that all statements, except type
 declarations, are executed one after another in the textual order of their
-appearance within the module until an erroneous sitation is thrown (see
+appearance within the module until an erroneous situation is thrown (see
 :ref:`Errors`), or last statement is executed.
 
 
@@ -1491,7 +1546,7 @@ Separate modules or packages can act as programs (applications). Program
 execution starts from the execution of a *program entry point* which can
 be of the following two kinds:
 
-- Top-level statements for separate modules (see :ref:Top-Level Statements); or
+- Top-level statements for separate modules (see :ref:`Top-Level Statements`); or
 - Entry point function (see below).
 
 A separate module can have the following forms of entry point:
@@ -1502,17 +1557,17 @@ A separate module can have the following forms of entry point:
 - Both top-level statement and entry point function (same as above, plus the
   function called after the top-level statement execution is completed).
 
-A package can have a sole entry point function only (``main`` or other as
+A package can have a sole entry point function (``main`` or other as
 described below).
 
 Entry point functions have the following features:
 
 - Any exported top-level function can be used as an entry point. An entry point
-  is selected by the compiler, the execution enviroment, or both;
+  is selected by the compiler, the execution environment, or both;
 - Entry point function must either have no parameters, or have one parameter of
   type ``string[]`` that provides access to the arguments of a program command
   line;
-- Entry point function return type is either ``void`` (see :ref:Type void) or
+- Entry point function return type is either ``void`` (see :ref:`Type void`) or
   ``int``;
 - Entry point function cannot have overloading;
 - Entry point function is called ``main`` by default.

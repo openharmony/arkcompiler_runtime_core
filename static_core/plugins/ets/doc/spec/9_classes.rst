@@ -442,13 +442,9 @@ the following:
 
 A class *implements* all its superinterfaces.
 
-A :index:`compile-time error` occurs if a class is at the same time
-compatible (see :ref:`Type Compatibility`) with the following:
-
--  Two interface types that represent different instantiations of the same
-   generic interface (see :ref:`Generics`); or
--  Instantiation of a generic interface, and a raw type that names the
-   a generic interface.
+A :index:`compile-time error` occurs if a class implements
+two interface types that represent different instantiations of the same
+generic interface (see :ref:`Generics`).
 
 .. index::
    class type
@@ -461,7 +457,6 @@ compatible (see :ref:`Type Compatibility`) with the following:
    instantiation
    generic interface
    compatibility
-   raw type
 
 If a class is not declared *abstract*, then:
 
@@ -757,7 +752,7 @@ Members can be as follows:
    name is accessible (see :ref:`Accessible`); and
 -  Non-static, or instance members that belong to any instance of the class.
 
-All names in both static and non-static class declaration scopes (see
+All names in static and separately in non-static class declaration scopes (see
 :ref:`Scopes`) must be unique, i.e., fields and methods cannot have the
 same name.
 
@@ -1229,36 +1224,49 @@ Overriding Fields
 .. meta:
     frontend_status: None
 
-While extending a class or implementing interfaces, a field declared in
-a superclass or a superintertafce can be overriden by field
-with the same name and the same static or non-static status.
-Using the keyword *override* is not required. 
-The new declaration acts as redeclaration. The type of the
-overriding field is to be the same as the type of the overridden field.
-Otherwise a :index:`compile-time error` occurs.
+While extending a class or implementing interfaces, a field declared in a
+superclass or a superinterface can be overridden by field with the same name
+and the same static or non-static status. Using the keyword *override* is not
+required. The new declaration acts as redeclaration. The type of the overriding
+field is to be the same as the type of the overridden field. Otherwise a
+:index:`compile-time error` occurs. Initialization process presumes calls to
+all initializers starting from the super ones.
+If the field was not delcared in a superclass as *readonly* it is a
+:index:`compile-time error` if overrding field is marked as *readonly*.
+
 
 .. code-block:: typescript
    :linenos:
 
     class Base1 {
-        field: Base1 = new Base1
+        field: number = init_in_base_1()
+        private init_in_base_1() {
+           console.log ("Base1 field initialization")
+           return 123
+        }
     }
     interface Base2 {
-        field: Base1
+        field: number
     }
     class Derived extends Base1 implements Base2 {
-        field: Base1 = new Derived // overriding 'field' and providing new initial value
+        field = init_in_derived() // overriding 'field' and providing new initial value
+        private init_in_derived() {
+           console.log ("Derived field initialization")
+           return 666
+        }
     }
+    new Derived()  
+    /* Output:
+        Base1 field initialization
+        Derived field initialization
+    */
     
-
 
 .. index::
    overriding
    field overriding
    superclass
    superinterface
-
-
 
 
 |
@@ -1829,7 +1837,7 @@ contains the following:
    :ref:`Field Access Expression`); or
 -  Any type of a variable declared outside the class initializer.
 
-Restrictions of class initializers’ ability to refer to static fields (even
+Restrictions of class initializer’s ability to refer to static fields (even
 static fields within a scope) are specified in
 :ref:`Errors and Initialization Expression`.
 
@@ -2362,9 +2370,9 @@ Local Classes and Interfaces
 .. meta:
     frontend_status: Done
 
-Local classes and interfaces (see :ref:`Interfaces`) are declared within the
-body of a function, method, or any block delimited by balanced braces in a
-group of zero or more statements.
+Local classes and interfaces (see :ref:`Interfaces`) can be declared within any
+block (see :ref:`Block`) for example body of a function, method, constructor, or
+any embedded block.
 
 Names of local classes and interfaces are visible only within the scope in
 which they are declared. Local classes and interfaces have access to, and can
@@ -2468,6 +2476,19 @@ surrounding class members are not accessible from local classes (see
         LocalClass.method()
       }
     }
+
+Note: Local classes and interfaces are not nested ones which are not part of
+the language. Thus the code below will lead to a :index:`compile-time error`.
+
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {
+        class B {} // That is not a local class - compile-time error
+    }
+
+
 
 -------------
 
