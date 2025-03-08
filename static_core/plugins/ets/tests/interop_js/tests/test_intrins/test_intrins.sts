@@ -453,28 +453,3 @@ function gcJsruntimeCleanup(): void {
         assertTrue( false, "Unexpected exception during GC");
     }
 }
-
-function testFinalizers(): boolean {
-    let workload = 128;
-    let repeats = 4;
-
-    for (let k = 0; k < repeats; ++k) {
-        gcJsruntimeCleanup();
-        let numRefsPre = JSRuntime.getNumSharedJSValues();
-
-        for (let i = 0; i < workload; ++i) {
-            JSRuntime.createObject();
-        }
-        for (let i = 0; i < workload; ++i) {
-            JSRuntime.newJSValueString("foo");
-        }
-        for (let i = 0; i < workload; ++i) {
-            JSRuntime.newJSValueDouble(1234);
-        }
-
-        assertEQ( JSRuntime.getNumSharedJSValues(), numRefsPre + workload);
-        gcJsruntimeCleanup();
-        assertEQ( JSRuntime.getNumSharedJSValues(), numRefsPre);
-    }
-    return true;
-}

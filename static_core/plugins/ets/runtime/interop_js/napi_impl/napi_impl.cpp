@@ -23,9 +23,28 @@
 #include <iostream>
 
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
-// NOLINTNEXTLINE(readability-identifier-naming)
+// NOLINTBEGIN(readability-identifier-naming)
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_wrap_with_xref([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js_object,
+                    [[maybe_unused]] void *native_object, [[maybe_unused]] napi_finalize finalize_cb,
+                    [[maybe_unused]] napi_ref *result)
+{
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+                       << " is implemented in later versions of OHOS, please update." << std::endl;
+    return napi_ok;
+}
+
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_xref_unwrap([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js_object, [[maybe_unused]] void **result)
+{
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+                       << " is implemented in later versions of OHOS, please update." << std::endl;
+    return napi_ok;
+}
+
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_create_xref([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value value,
+                 [[maybe_unused]] uint32_t initial_refcount, [[maybe_unused]] napi_ref *result)
 {
     INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
                        << " is implemented in later versions of OHOS, please update." << std::endl;
@@ -39,17 +58,7 @@ napi_mark_from_object([[maybe_unused]] napi_env env, [[maybe_unused]] napi_ref r
                        << " is implemented in later versions of OHOS, please update." << std::endl;
     return napi_ok;
 }
-// NOLINTNEXTLINE(readability-identifier-naming)
-napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
-// NOLINT(readability-identifier-naming)
-napi_xref_wrap([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js_object,
-               [[maybe_unused]] void *native_object, [[maybe_unused]] napi_finalize finalize_cb,
-               [[maybe_unused]] NapiXRefDirection ref_direction, [[maybe_unused]] napi_ref *result)
-{
-    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
-                       << " is implemented in later versions of OHOS, please update." << std::endl;
-    return napi_ok;
-}
+// NOLINTEND(readability-identifier-naming)
 #endif  // PANDA_JS_ETS_HYBRID_MODE
 
 namespace ark::ets::interop::js {

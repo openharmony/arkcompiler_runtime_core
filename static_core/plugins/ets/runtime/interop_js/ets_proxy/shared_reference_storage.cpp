@@ -191,55 +191,49 @@ static void DeleteSharedReferenceRefCallback([[maybe_unused]] napi_env env, void
 {
     delete static_cast<SharedReference **>(data);
 }
-
-static SharedReference **CreateXRef(napi_env env, napi_value jsObject, [[maybe_unused]] NapiXRefDirection direction,
-                                    napi_ref *result,
-                                    const SharedReferenceStorage::PreInitJSObjectCallback &preInitCallback)
-{
-    ScopedNativeCodeThreadIfNeeded scope(EtsCoroutine::GetCurrent());
-    // Deleter can be called after Runtime::Destroy, so InternalAllocator can not be used
-    auto **refRef = new SharedReference *(nullptr);
-    if (preInitCallback != nullptr) {
-        jsObject = preInitCallback(refRef);
-    }
-#if defined(PANDA_JS_ETS_HYBRID_MODE) || defined(PANDA_TARGET_OHOS)
-    if (UNLIKELY(napi_ok !=
-                 napi_xref_wrap(env, jsObject, refRef, DeleteSharedReferenceRefCallback, direction, result))) {
-        DeleteSharedReferenceRefCallback(env, refRef, nullptr);
-        return nullptr;
-    }
-#else
-    if (UNLIKELY((napi_ok != napi_wrap(env, jsObject, refRef, DeleteSharedReferenceRefCallback, nullptr, nullptr)) ||
-                 (napi_ok != napi_create_reference(env, jsObject, 1, result)))) {
-        DeleteSharedReferenceRefCallback(env, refRef, nullptr);
-        return nullptr;
-    }
-#endif
-    return refRef;
-}
-
-template <SharedReference::InitFn REF_INIT>
-inline SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx, EtsObject *etsObject,
-                                                                napi_value jsObject, NapiXRefDirection direction,
-                                                                const PreInitJSObjectCallback &preInitCallback)
+static void TriggerXGCIfNeeded([[maybe_unused]] InteropCtx *ctx)
 {
     // NOTE(ipetrov, XGC): XGC should be triggered only in hybrid mode. Need to remove when interop will work only in
     // hybrid mode
 #ifdef PANDA_JS_ETS_HYBRID_MODE
     XGC::GetInstance()->TriggerGcIfNeeded(ctx->GetPandaEtsVM()->GetGC());
 #endif  // PANDA_JS_ETS_HYBRID_MODE
-    napi_ref jsRef;
-    // Create XRef before SharedReferenceStorage lock to avoid deadlock situation with JS mutator lock in napi calls
-    SharedReference **refRef = CreateXRef(ctx->GetJSEnv(), jsObject, direction, &jsRef, preInitCallback);
-    if (refRef == nullptr) {
-        auto *coro = EtsCoroutine::GetCurrent();
-        if (coro->HasPendingException()) {
-            ctx->ForwardEtsException(coro);
+}
+
+static SharedReference **CreateXRef(InteropCtx *ctx, napi_value jsObject, napi_ref *result,
+                                    const SharedReferenceStorage::PreInitJSObjectCallback &preInitCallback = nullptr)
+{
+    auto *currentCoro = EtsCoroutine::GetCurrent();
+    ScopedNativeCodeThreadIfNeeded scope(currentCoro);
+    napi_env env = ctx->GetJSEnv();
+    // Deleter can be called after Runtime::Destroy, so InternalAllocator can not be used
+    auto **refRef = new SharedReference *(nullptr);
+    if (preInitCallback != nullptr) {
+        jsObject = preInitCallback(refRef);
+    }
+    napi_status status = napi_ok;
+#if defined(PANDA_JS_ETS_HYBRID_MODE) || defined(PANDA_TARGET_OHOS)
+    status = napi_wrap_with_xref(env, jsObject, refRef, DeleteSharedReferenceRefCallback, result);
+#else
+    status = napi_wrap(env, jsObject, refRef, DeleteSharedReferenceRefCallback, nullptr, nullptr);
+    if (status == napi_ok) {
+        status = napi_create_reference(env, jsObject, 1, result);
+    }
+#endif
+    if (UNLIKELY(status != napi_ok)) {
+        DeleteSharedReferenceRefCallback(env, refRef, nullptr);
+        if (currentCoro->HasPendingException()) {
+            ctx->ForwardEtsException(currentCoro);
         }
         ASSERT(ctx->SanityJSExceptionPending());
         return nullptr;
     }
-    os::memory::WriteLockHolder lock(storageLock_);
+    return refRef;
+}
+
+template <SharedReference::InitFn REF_INIT>
+SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx, EtsObject *etsObject, napi_ref jsRef)
+{
     SharedReference *sharedRef = AllocItem();
     if (UNLIKELY(sharedRef == nullptr)) {
         ctx->ThrowJSError(ctx->GetJSEnv(), "no free space for SharedReference");
@@ -267,9 +261,6 @@ inline SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx,
     if (isXGCinProgress_) {
         refsAllocatedDuringXGC_.insert(sharedRef);
     }
-    // Atomic with release order reason: XGC thread should see all writes (initialization of SharedReference) before
-    // check initialization status
-    AtomicStore(refRef, sharedRef, std::memory_order_release);
     LOG(DEBUG, ETS_INTEROP_JS) << "Alloc shared ref: " << sharedRef;
     return startRef;
 }
@@ -277,21 +268,51 @@ inline SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx,
 SharedReference *SharedReferenceStorage::CreateETSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject,
                                                             const PreInitJSObjectCallback &callback)
 {
-    return CreateReference<&SharedReference::InitETSObject>(
-        ctx, etsObject, jsObject, NapiXRefDirection::NAPI_DIRECTION_DYNAMIC_TO_STATIC, callback);
+    TriggerXGCIfNeeded(ctx);
+    napi_ref jsRef;
+    // Create XRef before SharedReferenceStorage lock to avoid deadlock situation with JS mutator lock in napi calls
+    SharedReference **refRef = CreateXRef(ctx, jsObject, &jsRef, callback);
+    if (refRef == nullptr) {
+        return nullptr;
+    }
+    os::memory::WriteLockHolder lock(storageLock_);
+    auto *sharedRef = CreateReference<&SharedReference::InitETSObject>(ctx, etsObject, jsRef);
+    // Atomic with release order reason: XGC thread should see all writes (initialization of SharedReference) before
+    // check initialization status
+    AtomicStore(refRef, sharedRef, std::memory_order_release);
+    return sharedRef;
 }
 
 SharedReference *SharedReferenceStorage::CreateJSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject)
 {
-    return CreateReference<&SharedReference::InitJSObject>(ctx, etsObject, jsObject,
-                                                           NapiXRefDirection::NAPI_DIRECTION_STATIC_TO_DYNAMIC);
+    TriggerXGCIfNeeded(ctx);
+    napi_ref jsRef;
+#if defined(PANDA_JS_ETS_HYBRID_MODE)
+    NAPI_CHECK_FATAL(napi_create_xref(ctx->GetJSEnv(), jsObject, 1, &jsRef));
+#else
+    NAPI_CHECK_FATAL(napi_create_reference(ctx->GetJSEnv(), jsObject, 1, &jsRef));
+#endif
+    os::memory::WriteLockHolder lock(storageLock_);
+    auto *sharedRef = CreateReference<&SharedReference::InitJSObject>(ctx, etsObject, jsRef);
+    return sharedRef;
 }
 
 SharedReference *SharedReferenceStorage::CreateHybridObjectRef(InteropCtx *ctx, EtsObject *etsObject,
                                                                napi_value jsObject)
 {
-    return CreateReference<&SharedReference::InitHybridObject>(ctx, etsObject, jsObject,
-                                                               NapiXRefDirection::NAPI_DIRECTION_HYBRID);
+    TriggerXGCIfNeeded(ctx);
+    napi_ref jsRef;
+    // Create XRef before SharedReferenceStorage lock to avoid deadlock situation with JS mutator lock in napi calls
+    SharedReference **refRef = CreateXRef(ctx, jsObject, &jsRef);
+    if (refRef == nullptr) {
+        return nullptr;
+    }
+    os::memory::WriteLockHolder lock(storageLock_);
+    auto *sharedRef = CreateReference<&SharedReference::InitHybridObject>(ctx, etsObject, jsRef);
+    // Atomic with release order reason: XGC thread should see all writes (initialization of SharedReference) before
+    // check initialization status
+    AtomicStore(refRef, sharedRef, std::memory_order_release);
+    return sharedRef;
 }
 
 void SharedReferenceStorage::RemoveReference(SharedReference *sharedRef)
