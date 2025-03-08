@@ -21,7 +21,8 @@ export class SilentLogger implements ILogger {
   constructor(){
     logMessages.length=0;
   }
-  private log(level: string,message: string){
+  private log(level: string,message: string): void{
+    void this;
     logMessages.push(`[${level}] ${message}`);
   }
   doTrace(message: string): void {

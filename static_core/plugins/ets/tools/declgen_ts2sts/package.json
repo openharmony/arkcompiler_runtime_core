@@ -18,7 +18,7 @@
     "pack:declgen": "rimraf bundle && mkdir bundle && npm pack --pack-destination bundle",
     "pretest": "npm run fix && npm run eslint-check",
     "test_main": "npm run compile && rimraf test/results && node build/src/TestRunner.js test",
-    "eslint-check": "npx eslint --ext .ts .",
+    "eslint-check": "npx eslint",
     "eslint-fix": "npm run eslint-check -- --fix",
     "prettier-fix": "npx prettier --write .",
     "fix": "npm run prettier-fix && npm run eslint-fix",
@@ -28,18 +28,23 @@
   "dependencies": {
     "commander": "^9.4.0",
     "log4js": "^6.4.0",
-    "typescript": "^4.8.4"
+    "typescript": "^4.9.5"
   },
   "devDependencies": {
+    "@eslint/compat": "latest",
+    "@eslint/js": "latest",
+    "@stylistic/eslint-plugin": "latest",
     "@types/node": "18.11.7",
-    "@typescript-eslint/eslint-plugin": "5.33.1",
-    "@typescript-eslint/parser": "5.51.0",
-    "eslint": "^8.57.0",
+    "typescript-eslint": "latest",
+    "eslint": "latest",
     "prettier": "latest",
     "rimraf": "^3.0.2",
     "webpack": "5.72.1",
     "webpack-cli": "5.0.2"
   },
-  "bundledDependencies": [
+  "bundleDependencies": [
+    "typescript",
+    "log4js",
+    "commander"
   ]
 }
