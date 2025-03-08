@@ -71,8 +71,5 @@ function runTest(test, iter) {
 }
 
 let args = helper.getArgv();
-if (args.length !== 7) {
-	throw Error('Expected <test name> <expected value> <number of iterations>');
-}
 expectedValue = args[5];
 runTest(args[4]);

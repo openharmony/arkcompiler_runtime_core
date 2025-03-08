@@ -48,7 +48,15 @@ Create build directory for static_core:
 mkdir arkcompiler/runtime_core/static_core/build
 ```
 
+Prepare environment for copying binaries script running:
+
+```
+export PANDA_BUILD_PATH=/absolute_path_to/arkcompiler/runtime_core/static_core/build
+export ARK_STANDALONE_ROOT=/absolute_path_to/root_standalone_dir
+```
+
 Run script to copy all necessary binaries to static_core build:
+
 ```
 arkcompiler/runtime_core/static_core/tools/ark_js_napi_cli/standalone_cp_libs_for_interop_tests.sh debug
 ```
