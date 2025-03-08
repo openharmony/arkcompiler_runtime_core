@@ -228,7 +228,6 @@ function process_manifest() {
 if [[ "$ARK_INSTALL_NODE" == "yes" ]] ; then
     NODE_VERSION="v18.13.0"
     DISTRO="linux-x64"
-    ADDON_API_VERSION="v8.3.1"
     if [ -f "$SCRIPT_DIR/extras/install_nodejs.sh" ]; then
         bash $SCRIPT_DIR/extras/install_nodejs.sh --node-version=${NODE_VERSION} --distro=${DISTRO}
     else
@@ -245,15 +244,6 @@ if [[ "$ARK_INSTALL_NODE" == "yes" ]] ; then
             unzip ${ARK_THIRD_PARTY_DIR}/nodejs/${NODE_API_STUB_LIB} -d ${ARK_THIRD_PARTY_DIR}/nodejs/node-${NODE_VERSION}-${DISTRO}/lib/
             rm ${ARK_THIRD_PARTY_DIR}/nodejs/${NODE_API_STUB_LIB}
         fi
-    fi
-
-    if [ ! -d "${ARK_THIRD_PARTY_DIR}/node-addon-api" ]; then
-        echo "-- Downloading node-addon-api ${ADDON_API_VERSION} for interop tests"
-        mkdir -p ${ARK_THIRD_PARTY_DIR}/node-addon-api
-        NODE_ADDON_API=${ADDON_API_VERSION}.tar.gz
-        wget -q -P ${ARK_THIRD_PARTY_DIR}/node-addon-api https://github.com/nodejs/node-addon-api/archive/refs/tags/${ADDON_API_VERSION}.tar.gz
-        tar -xzf ${ARK_THIRD_PARTY_DIR}/node-addon-api/${NODE_ADDON_API} -C ${ARK_THIRD_PARTY_DIR}/node-addon-api --strip-components=1
-        rm ${ARK_THIRD_PARTY_DIR}/node-addon-api/${NODE_ADDON_API}
     fi
     exit 0
 fi
