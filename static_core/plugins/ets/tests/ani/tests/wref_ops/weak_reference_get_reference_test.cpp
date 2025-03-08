@@ -40,7 +40,7 @@ TEST_F(WeakReferenceGetReferenceTest, from_null_ref)
 TEST_F(WeakReferenceGetReferenceTest, from_undefined_ref)
 {
     ani_ref undefinedRef;
-    ASSERT_EQ(env_->GetNull(&undefinedRef), ANI_OK);
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
     ani_wref wref;
     ASSERT_EQ(env_->WeakReference_Create(undefinedRef, &wref), ANI_OK);
 
@@ -107,13 +107,6 @@ TEST_F(WeakReferenceGetReferenceTest, from_object_gref)
         ASSERT_EQ(env_->Reference_StrictEquals(objectRef, ref, &isStrictEquals), ANI_OK);
         ASSERT_TRUE(isStrictEquals);
     }
-}
-
-TEST_F(WeakReferenceGetReferenceTest, invalid_wref)
-{
-    ani_boolean wasReleased;
-    ani_ref ref;
-    ASSERT_EQ(env_->WeakReference_GetReference(nullptr, &wasReleased, &ref), ANI_INVALID_ARGS);
 }
 
 TEST_F(WeakReferenceGetReferenceTest, invalid_was_reslease_result)

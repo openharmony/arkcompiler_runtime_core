@@ -32,7 +32,7 @@ TEST_F(GlobalReferenceDeleteTest, delete_null_gref)
 TEST_F(GlobalReferenceDeleteTest, delete_undefined_gref)
 {
     ani_ref undefinedRef;
-    ASSERT_EQ(env_->GetNull(&undefinedRef), ANI_OK);
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
     ani_ref undefinedGRef;
     ASSERT_EQ(env_->GlobalReference_Create(undefinedRef, &undefinedGRef), ANI_OK);
 
