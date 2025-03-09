@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,21 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
     In an implicit instantiation, type arguments are not specified explicitly.
     Such type arguments are inferred from the context the generic is referred in.
-params: function
 tags: [compile-only, negative]
 ---*/
 
-function foo <T> (p: T, q: T): T {
-    return p ?? q
+class A {}
+class B extends A {}
+
+interface I<T extends U, U extends Object> {
+    a: T
+    b: U
 }
 
 function main() {
-    {{c.use|indent}}
+    let i1: I<A> = new I<B>(new A(), new B())
 }
-{% endfor %}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,15 +16,11 @@
 {% for c in cases %}
 /*---
 desc: >-
-    In an implicit instantiation, type arguments are not specified explicitly.
-    Such type arguments are inferred from the context the generic is referred in.
-params: function
-tags: [compile-only, negative]
+    An array literal is an expression that can be used to create an array, and provide some initial values.
+tags: [negative, compile-only]
 ---*/
 
-function foo <T> (p: T, q: T): T {
-    return p ?? q
-}
+{{c.decl}}
 
 function main() {
     {{c.use|indent}}

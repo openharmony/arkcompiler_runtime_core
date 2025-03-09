@@ -1,0 +1,152 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    # case 0
+    - decl: |-
+        class Cls<T, U> {
+            a: T
+            b: U
+            constructor(a: T, b: U) {
+                this.a = a
+                this.b = b
+            }
+        }
+      use: |-
+        let cls = new Cls<number, string>(1, "abc")
+        assertEQ(typeof cls.a, 'number')
+        assertEQ(typeof cls.b, 'string')
+    # case 1
+    - decl: |-
+        class Cls<T, U> {
+            a: [T, U]
+            constructor(a: T, b: U) {
+                this.a = [a, b]
+            }
+        }
+      use: |-
+        let cls = new Cls<number, string>(1, "abc")
+        assertEQ(typeof cls.a, 'object')
+        assertEQ(typeof cls.a[0], 'number')
+        assertEQ(typeof cls.a[1], 'string')
+    # case 2
+    - decl: |-
+        class A<T>{
+            a: T
+            constructor(a: T) {
+                this.a = a
+            }
+        }
+
+        class B<T, U> extends A<T>{
+            b: U
+            constructor(a: T, b: U) {
+                super (a)
+                this.b = b
+            }
+        }
+      use: |-
+        let cls: B<number, string> = new B<number, string>(1, "abc")
+        assertEQ(typeof cls.a, 'number')
+        assertEQ(typeof cls.b, 'string')
+    # case 3
+    - decl: |-
+        class A {}
+        class B extends A {}
+
+        class Cls<T extends U, U extends Object> {
+            a: T
+            b: U
+            constructor(a: T, b: U) {
+                this.a = a
+                this.b = b
+            }
+        }
+      use: |-
+        let cls1: Cls<Object, Object> = new Cls<Object, Object>(new Object(), new Object())
+    # case 4
+    - decl: |-
+        class A {}
+        class B extends A {}
+
+        class Cls<T extends U, U extends Object> {
+            a: T
+            b: U
+            constructor(a: T, b: U) {
+                this.a = a
+                this.b = b
+            }
+        }
+      use: |-
+        let cls2: Cls<A, Object> = new Cls<A, Object>(new A(), new Object())
+    # case 5
+    - decl: |-
+        class A {}
+        class B extends A {}
+
+        class Cls<T extends U, U extends Object> {
+            a: T
+            b: U
+            constructor(a: T, b: U) {
+                this.a = a
+                this.b = b
+            }
+        }
+      use: |-
+        let cls3: Cls<B, Object> = new Cls<B, Object>(new B(), new Object())
+    # case 6
+    - decl: |-
+        class A {}
+        class B extends A {}
+
+        class Cls<T extends U, U extends Object> {
+            a: T
+            b: U
+            constructor(a: T, b: U) {
+                this.a = a
+                this.b = b
+            }
+        }
+      use: |-
+        let cls4: Cls<A, A> = new Cls<A, A>(new A(), new A())
+    # case 7
+    - decl: |-
+        class A {}
+        class B extends A {}
+
+        class Cls<T extends U, U extends Object> {
+            a: T
+            b: U
+            constructor(a: T, b: U) {
+                this.a = a
+                this.b = b
+            }
+        }
+      use: |-
+        let cls5: Cls<B, A> = new Cls<B, A>(new B(), new A())
+    # case 8
+    - decl: |-
+        class A {}
+        class B extends A {}
+
+        class Cls<T extends U, U extends Object> {
+            a: T
+            b: U
+            constructor(a: T, b: U) {
+                this.a = a
+                this.b = b
+            }
+        }
+      use: |-
+        let cls6: Cls<B, B> = new Cls<B, B>(new B(), new B())

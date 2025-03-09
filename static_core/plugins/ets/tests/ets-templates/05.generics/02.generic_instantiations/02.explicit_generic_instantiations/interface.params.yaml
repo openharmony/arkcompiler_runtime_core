@@ -1,0 +1,49 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+---
+cases:
+    #case 0
+    - decl: |-
+        interface I<T, U> {
+            a: T
+            b: U
+        }
+      use: |-
+        let i: I<number, string> = {a: 1, b: "abc"}
+        assertEQ(typeof i.a, 'number')
+        assertEQ(typeof i.b, 'string')
+    #case 1
+    - decl: |-
+        interface I<T, U> {
+            a: [T, U]
+        }
+      use: |-
+        let i: I<number, string> = {a: [1, "abc"]}
+        assertEQ(typeof i.a, 'object')
+        assertEQ(typeof i.a[0], 'number')
+        assertEQ(typeof i.a[1], 'string')
+    #case 2
+    - decl: |-
+        interface A<T>{
+            a: T
+        }
+
+        interface B<T, U> extends A<T>{
+            b: U
+        }
+      use: |-
+        let i: B<number, string> = {a: 1, b: "abc"}
+        assertEQ(typeof i.a, 'number')
+        assertEQ(typeof i.b, 'string')
