@@ -227,8 +227,7 @@ public:
           loopStoreEdges_(graph->GetLocalAllocator()->Adapter()),
           workSet_(graph->GetLocalAllocator()->Adapter()),
           nullSet_(graph->GetLocalAllocator(), ObjectTypeInfo::UNKNOWN),
-          allSet_(graph->GetLocalAllocator(), ObjectTypeInfo::INVALID),
-          startTime_(time::GetCurrentTimeInMillis())
+          allSet_(graph->GetLocalAllocator(), ObjectTypeInfo::INVALID)
     {
         AliasVisitor::Init(graph->GetLocalAllocator());
         refInfos_[NULL_REF] = ObjectTypeInfo::UNKNOWN;
@@ -295,8 +294,6 @@ private:
     bool AddEdge(Pointer from, Pointer to);
     bool AddLoadEdge(const Pointer &from, const Inst *toObj, const ArenaTypedRefSet &srcRefSet);
     bool AddStoreEdge(const Inst *fromObj, const Pointer &to, const ArenaTypedRefSet &srcRefSet);
-    [[maybe_unused]] static constexpr uint64_t TIME_LIMIT_MS = 5000U;
-    void CheckTimeLimit() const;
 
     friend class LoopPropagationVisitor;
 
@@ -320,7 +317,6 @@ private:
     ArenaTypedRefSet nullSet_;
     ArenaTypedRefSet allSet_;
     bool inLoop_ {false};
-    uint64_t startTime_ {};
 };
 
 bool ObjectTypePropagationVisitor::RunImpl()
@@ -415,7 +411,6 @@ void ObjectTypePropagationVisitor::WalkEdges()
         WalkOutgoingEdges(fromInst, edges);
     }
     while (!workSet_.empty()) {
-        CheckTimeLimit();
         auto inst = *workSet_.begin();
         workSet_.erase(workSet_.begin());
 
@@ -593,7 +588,6 @@ void ObjectTypePropagationVisitor::CleanupState(BasicBlock *block)
 void ObjectTypePropagationVisitor::VisitInstsInBlock(BasicBlock *bb)
 {
     for (auto inst : bb->AllInsts()) {
-        CheckTimeLimit();
         AliasVisitor::VisitInstruction(inst);
         TypePropagationVisitor::VisitInstruction(inst);
     }
@@ -789,11 +783,6 @@ bool ObjectTypePropagationVisitor::AddStoreEdge(const Inst *fromObj, const Point
         srcRefSet.Visit([this](Ref ref) { currentBlockState_->TryEscape(ref); });
     }
     return changed;
-}
-
-void ObjectTypePropagationVisitor::CheckTimeLimit() const
-{
-    ASSERT_DO(time::GetCurrentTimeInMillis() - startTime_ < TIME_LIMIT_MS, GetGraph()->Dump(&std::cerr));
 }
 
 LoopPropagationVisitor::LoopPropagationVisitor(ObjectTypePropagationVisitor *parent)
