@@ -54,7 +54,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return this.actualLength as number
     }
 
-    set length(newLen: number): void {
+    set length(newLen: number) {
         const len = newLen as int
         if (len < 0 || len > this.actualLength) {
             throw new RangeError("can't change length to bigger or negative")

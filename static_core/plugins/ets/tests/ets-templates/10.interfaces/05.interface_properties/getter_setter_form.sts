@@ -29,7 +29,7 @@ class B implements I {
         return this.text;
     }
 
-    set text(s: string): void {
+    set text(s: string) {
         this.text = s;
     }
 }

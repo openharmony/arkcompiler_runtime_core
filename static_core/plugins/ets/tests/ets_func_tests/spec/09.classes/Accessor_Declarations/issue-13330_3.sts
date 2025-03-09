@@ -23,14 +23,14 @@ let accessCounter = 0;
 
 class Base {
 
-    set base(value: int): void {
+    set base(value: int) {
         accessCounter++;
     }
 }
 
 class Derive extends Base {
 
-    set derive(value: int): void {
+    set derive(value: int) {
         this.base = value
         accessCounter++;
     }

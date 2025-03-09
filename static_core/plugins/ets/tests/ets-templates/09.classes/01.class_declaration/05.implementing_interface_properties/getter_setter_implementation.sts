@@ -19,7 +19,7 @@ desc: Implementing getter from interface
 
 interface I {
     get text(): string
-    set text(s: string): void
+    set text(s: string)
 }
 
 class B implements I {
@@ -29,7 +29,7 @@ class B implements I {
         return this._text;
     }
 
-    set text(s: string): void {
+    set text(s: string) {
         this._text = s;
     }
 }

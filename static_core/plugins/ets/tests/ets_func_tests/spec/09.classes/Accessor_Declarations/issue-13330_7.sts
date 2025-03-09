@@ -21,14 +21,14 @@ tags: []
 
 class Base {
 
-    set base(value: int): void {
+    set base(value: int) {
         accessCounter++;
     }
 }
 
 class Derive extends Base {
 
-    set base(value: int): void {
+    set base(value: int) {
         super.base = value;
     }
 }
