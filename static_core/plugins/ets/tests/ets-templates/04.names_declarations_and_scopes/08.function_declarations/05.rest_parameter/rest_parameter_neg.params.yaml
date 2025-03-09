@@ -13,7 +13,7 @@
 
 ---
 cases:
-  # not the last parameter
+  # 0. not the last parameter
   - sig: |-
       foo(y: boolean, ...p: int[], x: int): int[]
     def: |-
@@ -29,7 +29,7 @@ cases:
     def: |-
       return q.length + p.length;
 
-  # not array
+  # 3. not array
   - sig: |-
       foo(...p: Object): Object
     def: |-
@@ -40,7 +40,7 @@ cases:
     def: |-
       return 1;
 
-  # missing type
+  # 5. missing type
   - sig: |-
       foo(a: int, ...p:): int
     def: |-
@@ -51,7 +51,7 @@ cases:
     def: |-
       return a;
 
-  # same name parameters
+  # 7. same name parameters
   - sig: |-
       foo(p: char, ...p: int[]): char
     def: |-
