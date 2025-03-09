@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# NOTE(ypigunova) enable tests. Issue: #23593
 if (PANDA_TARGET_ARM32)
     return()
 endif()
