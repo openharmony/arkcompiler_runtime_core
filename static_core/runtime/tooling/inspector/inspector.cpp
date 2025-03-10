@@ -597,6 +597,26 @@ DebuggableThread *Inspector::GetDebuggableThread(PtThread thread)
     return it != threads_.end() ? &it->second : nullptr;
 }
 
+void Inspector::Disable(PtThread thread)
+{
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return;
+    }
+
+    auto *debuggableThread = GetDebuggableThread(thread);
+    if (debuggableThread == nullptr) {
+        return;
+    }
+    debuggableThread->Reset();
+    debuggableThread->Continue();
+}
+
+void Inspector::ClientDisconnect(PtThread thread)
+{
+    (void)thread;
+}
+
 void Inspector::RegisterMethodHandlers()
 {
     // NOLINTBEGIN(modernize-avoid-bind)
@@ -620,6 +640,8 @@ void Inspector::RegisterMethodHandlers()
     inspectorServer_.OnCallDebuggerStepOut(std::bind(&Inspector::StepOut, this, _1));
     inspectorServer_.OnCallDebuggerStepOver(std::bind(&Inspector::StepOver, this, _1));
     inspectorServer_.OnCallDebuggerEvaluateOnCallFrame(std::bind(&Inspector::Evaluate, this, _1, _2, _3));
+    inspectorServer_.OnCallDebuggerDisable(std::bind(&Inspector::Disable, this, _1));
+    inspectorServer_.OnCallDebuggerClientDisconnect(std::bind(&Inspector::ClientDisconnect, this, _1));
     inspectorServer_.OnCallRuntimeEnable(std::bind(&Inspector::RuntimeEnable, this, _1));
     inspectorServer_.OnCallRuntimeGetProperties(std::bind(&Inspector::GetProperties, this, _1, _2, _3));
     inspectorServer_.OnCallRuntimeRunIfWaitingForDebugger(std::bind(&Inspector::RunIfWaitingForDebugger, this, _1));

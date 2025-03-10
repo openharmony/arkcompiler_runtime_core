@@ -95,6 +95,8 @@ public:
     void OnCallDebuggerStepOver(std::function<void(PtThread)> &&handler);
     void OnCallDebuggerEvaluateOnCallFrame(
         std::function<Expected<EvaluationResult, std::string>(PtThread, const std::string &, size_t)> &&handler);
+    void OnCallDebuggerClientDisconnect(std::function<void(PtThread)> &&handler);
+    void OnCallDebuggerDisable(std::function<void(PtThread)> &&handler);
 
     void OnCallRuntimeEnable(std::function<void(PtThread)> &&handler);
     void OnCallRuntimeGetProperties(

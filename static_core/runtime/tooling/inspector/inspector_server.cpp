@@ -47,7 +47,7 @@ InspectorServer::InspectorServer(Server &server) : server_(server)
     struct Response : public JsonSerializable {
         void Serialize(JsonObjectBuilder &builder) const override
         {
-            builder.AddProperty("debuggerId", "debugger");
+            builder.AddProperty("debuggerId", 0);
         }
     };
     server_.OnCall("Debugger.enable",
@@ -683,6 +683,24 @@ void InspectorServer::OnCallDebuggerEvaluateOnCallFrame(
             return std::unique_ptr<JsonSerializable>(std::make_unique<EvaluationResult>(std::move(*optResult)));
         });
     // clang-format on
+}
+
+void InspectorServer::OnCallDebuggerDisable(std::function<void(PtThread)> &&handler)
+{
+    server_.OnCall("Debugger.disable", [this, handler = std::move(handler)](auto &sessionId, auto &) {
+        auto thread = sessionManager_.GetThreadBySessionId(sessionId);
+        handler(thread);
+        return std::unique_ptr<JsonSerializable>();
+    });
+}
+
+void InspectorServer::OnCallDebuggerClientDisconnect(std::function<void(PtThread)> &&handler)
+{
+    server_.OnCall("Debugger.clientDisconnect", [this, handler = std::move(handler)](auto &sessionId, auto &) {
+        auto thread = sessionManager_.GetThreadBySessionId(sessionId);
+        handler(thread);
+        return std::unique_ptr<JsonSerializable>();
+    });
 }
 
 void InspectorServer::OnCallRuntimeEnable(std::function<void(PtThread)> &&handler)
