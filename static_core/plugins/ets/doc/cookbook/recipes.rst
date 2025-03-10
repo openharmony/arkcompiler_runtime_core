@@ -32,8 +32,15 @@ Recipes
 |LANG| does not support objects with property names that are numbers, or
 strings, or computed values.
 
-Use classes to access data by property names that are identifiers.
-Use arrays to access data by numeric indices.
+1. For simple objects:
+   * Use classes with proper property declarations
+   * Convert numeric keys to semantic identifiers
+2. For Collection-Like Objects:
+   * Use arrays for numerically-indexed data
+   * Use Maps for truly dynamic key-value pairs
+3. For Mixed Cases:
+   * Consider splitting into multiple structures
+   * Document access patterns clearly
 
 |CB_BAD|
 ~~~~~~~~
@@ -43,6 +50,25 @@ Use arrays to access data by numeric indices.
     var x = {"name": 1, 2: 3}
 
     console.log(x["name"], x[2])
+
+    enum A { 'red' = '1' }
+
+    // a dictionary with string keys
+    const colors = {
+        "red": "#FF0000",
+        "green": "#00FF00"
+    };
+
+    // numeric-keyed lookup
+    const users = {
+        1001: "Alice",
+        1002: "Bob"
+    };
+
+    // dynamic keys
+    function createConfig(key: string) {
+        return {[key]: true};
+    }
 
 |CB_OK|
 ~~~~~~~
@@ -66,6 +92,30 @@ Use arrays to access data by numeric indices.
     z.set(2, 2)
     console.log(z.get("name"))
     console.log(z.get(2))
+
+    enum A { RED = '1' }
+
+    // a dictionary with string keys
+    class Colors {
+        red: string = "#FF0000";
+        green: string = "#00FF00";
+    }
+
+    // numeric-keyed lookup
+    // ArkTS option 1 (if sequential)
+    const users = ["Alice", "Bob"];
+    // ArkTS option 2 (if non-sequential)
+    class Users {
+        id1001: string = "Alice";
+        id1002: string = "Bob";
+    }
+
+    // dynamic keys
+    function createConfig(key: string) {
+        const config = new Map<string, boolean>();
+        config.set(key, true);
+        return config;
+    }
 
 |CB_SEE|
 ~~~~~~~~
@@ -97,6 +147,25 @@ environment. In particular, the object layout is defined at compile time,
 and cannot be changed at runtime.
 
 |LANG| supports the usage of ``Symbol.iterator`` in iterable interfaces.
+
+Migration Strategy
+
+1. Audit Codebase:
+
+   * Find all Symbol() usage
+   * Identify iterator vs non-iterator cases
+
+2. Refactor Patterns:
+
+   * Convert symbol properties to class members
+   * Replace metadata symbols with annotation systems
+   * Preserve iterator symbols where valid
+
+3. Validation:
+
+   * Verify static type definitions
+   * Ensure no runtime property additions
+   * Test iteration functionality
 
 |CB_BAD|
 ~~~~~~~~
@@ -180,25 +249,41 @@ Use the keyword ``private`` instead.
 |CB_ERROR|
 
 Names for all types (classes, interfaces, enums) and namespaces must be unique
-and distinct from other names, e.g., variable names and function names.
+within the same scope level and distinct from other names, e.g., variable names
+and function names.
 
 |CB_BAD|
 ~~~~~~~~
 
 .. code-block:: typescript
 
-    let X: string
-    type X = number[] // Type alias name and variable name are the same
+    // Collision between variable and type
+    let DataProcessor: string;
+    class DataProcessor {} // Compile-time error
+                           // Type alias name and variable name are the same
+
+    // Namespace/type conflict
+    namespace Utilities {
+        export function log() {}
+    }
+    interface Utilities {} // Error
 
 |CB_OK|
 ~~~~~~~
 
 .. code-block:: typescript
 
-    let X: string
-    type T = number[] // X is not allowed here to avoid name collisions
+    // Unique names at same scope
+    let dataProcessor: string;
+    class DataHandler {}
 
-
+    // Scoped uniqueness
+    namespace Network {
+        export function send() {}
+    }
+    namespace FileSystem {
+        export interface Network {} // Allowed in different scope
+    }
 
 .. _R005:
 
@@ -524,6 +609,22 @@ Combine multiple static block statements into a single static block.
 
     let myArray: X = new X()
     const secondItem = myArray.f[1]
+
+    // or
+
+    class StringArray {
+        array: string[];
+        constructor(arr: string[]) { this.array = arr; }
+        $_get(index: number): string { return this.array[index as int]; }
+    }
+
+    function getStringArray() : StringArray {
+        return new StringArray(["a", "b", "c"])
+    }
+
+    const myArray: StringArray = getStringArray()
+    const secondItem = myArray[1]
+    console.log(secondItem);
 
 .. _R019:
 
@@ -904,7 +1005,7 @@ and enums.
 
 |CB_ERROR|
 
-Currently, |LANG| does not support structural typing and it is recommened to
+Currently, |LANG| does not support structural typing and it is recommended to
 use other mechanisms (inheritance, interfaces, or type aliases) instead.
 
 |CB_BAD|
@@ -1117,7 +1218,6 @@ of the following:
 * Anything with type ``any``, ``Object``, or ``object``;
 * Classes or interfaces with methods;
 * Classes that declare a ``constructor`` with parameters;
-* Classes with ``readonly`` fields.
 
 In addition, |LANG| supports the usage of object literals to initialize the
 value of special type ``Record<K, V>``. The type ``K`` denotes an object key,
@@ -1142,12 +1242,6 @@ from these types, and literals of these types.
         }
     }
     let o4: C2 = {s: "foo"}
-
-    class C3 {
-        readonly n: number = 0
-        readonly s: string = ""
-    }
-    let o5: C3 = {n: 42, s: "foo"}
 
     abstract class A {}
     let o6: A = {}
@@ -1202,12 +1296,6 @@ from these types, and literals of these types.
         }
     }
     let o4 = new C2("foo")
-
-    class C3 {
-        n: number = 0
-        s: string = ""
-    }
-    let o5: C3 = {n: 42, s: "foo"}
 
     abstract class A {}
     class C extends A {}
@@ -1891,6 +1979,8 @@ to check whether certain class members exist.
     let p = new Person()
 
     let b = p instanceof Person // true, and "name" is guaranteed to be present
+    // or
+    let b = Reflect.has(p, "name")
 
 |CB_SEE|
 ~~~~~~~~
@@ -2131,9 +2221,16 @@ if specified. Omit type annotations as |LANG| does not support these types.
 |CB_ERROR|
 
 |LANG| does not support the iteration over object contents by the
-``for .. in`` loop. Iteration over object properties at runtime is considered
-redundant as object layout is known at compile time, and cannot be changed at
-runtime after. You can iterate arrays with the regular ``for`` loop.
+``for .. in`` loop. The ``for .. in`` loop in |TS| iterates over all
+enumerable properties of an object, including properties inherited through the
+prototype chain. This behavior is inherently dynamic and can lead to unexpected
+results when object structures change at runtime.
+
+Instead of ``for .. in``:
+1. For arrays, use the standard ``for`` loop with numeric indices.
+2. For object properties, use ``Object.keys()`` or ``Object.entries()`` with a
+``for .. of`` loop.
+3. For iterating over collections, use the ``for .. of`` loop.
 
 |CB_BAD|
 ~~~~~~~~
@@ -2145,6 +2242,11 @@ runtime after. You can iterate arrays with the regular ``for`` loop.
         console.log(a[i])
     }
 
+    let obj: CC = new CC()
+    for (let key in obj) {
+        console.log(key)
+    }
+
 |CB_OK|
 ~~~~~~~
 
@@ -2153,6 +2255,11 @@ runtime after. You can iterate arrays with the regular ``for`` loop.
     let a: number[] = [1.0, 2.0, 3.0]
     for (let i = 0; i < a.length; ++i) {
         console.log(a[i])
+    }
+
+    let obj: CC = new CC()
+    for (let key in Object.keys(obj)) {
+        console.log(key)
     }
 
 .. _R083:
@@ -2650,11 +2757,11 @@ appropriate type before use.
 
 |CB_ERROR|
 
-|LANG| only supports the scenario in which the spread operator spreads an array
-(or class derived from an array) into a rest parameter or an array literal.
-Otherwise, *unpack* data from arrays and objects manually, where necessary.
-|LANG| also supports all typed arrays from the standard library (e.g.,
-``Int32Array``).
+|LANG| supports the scenario in which the spread operator spreads an array and
+tuples (or class derived from an array) into a rest parameter or an array or
+tuple literal. Otherwise, *unpack* data from arrays and objects manually, where
+necessary. |LANG| also supports all typed arrays from the standard library
+(e.g., ``Int32Array``).
 
 |CB_BAD|
 ~~~~~~~~
@@ -2664,9 +2771,6 @@ Otherwise, *unpack* data from arrays and objects manually, where necessary.
     function foo(x: number, y: number, z: number) {
         console.log(x, y, z)
     }
-
-    let args: [number, number, number] = [0, 1, 2]
-    foo(...args)
 
     let list1 = [1, 2]
     let list2 = [...list1, 3, 4]
@@ -2690,8 +2794,6 @@ Otherwise, *unpack* data from arrays and objects manually, where necessary.
     function log_numbers(x: number, y: number, z: number) {
         console.log(x, y, z)
     }
-    let numbers: number[] = [1, 2, 3]
-    log_numbers(numbers[0], numbers[1], numbers[2])
 
     let list1: number[] = [1, 2]
     let list2: number[] = [list1[0], list1[1], 3, 4]
@@ -3601,7 +3703,7 @@ objects with dynamically changed layouts are unsupported.
 
 Currently, |LANG| does not support utility types from |TS| extensions to the
 standard library, except ``Partial``, ``Required``, ``Readonly``, and
-``Record``.
+``Record``. Generic arguments of these types must be a class or interface type.
 
 For type ``Record<K, V>``, an indexing expression *rec[index]* is of type
 ``V | undefined``.
@@ -3847,8 +3949,8 @@ literals with corresponding literal types).
 
 .. code-block:: typescript
 
-    // Type 'string':
-    let x: string = "hello"
+    // Type 'hello':
+    let x: "hello" = "hello"
 
     // Type 'number[]':
     let y: number[] = [10, 20]
@@ -5072,7 +5174,7 @@ all exported entities explicitly.
 
 .. :comment-end:
 
-.. _R165:
+.. _R183:
 
 |CB_R| Object literal properties can only contain name-value pairs
 ------------------------------------------------------------------
@@ -5123,7 +5225,7 @@ consists of an identifier and an expression.
         b: b,
     }
 
-.. _R183:
+.. _R184:
 
 |CB_R| Optional methods are not supported
 -----------------------------------------
@@ -5165,3 +5267,925 @@ in interface implementation.
     interface Y {
         throw(): void
     }
+
+
+
+.. _R181:
+
+|CB_R| Local classes and interfaces are not supported
+-----------------------------------------------------
+
+|CB_RULE| ``arkts-no-local-classes-ifaces``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: LocalClassesInterfaces
+
+|CB_ERROR|
+
+|LANG| does not support local classes and interfaces, unlike |TS| where one may
+define a class or interface in any block of code.
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    export function foo () {
+        class X {}
+        new X
+    }
+
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    class X {} // Keep class as non-exported
+    export function foo () {
+        new X
+    }
+
+.. _R189:
+
+|CB_R| Numeric semantics is different for integer values
+--------------------------------------------------------
+
+|CB_RULE| ``arkts-numeric-semantic``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: NumericSemantics
+
+|CB_WARNING|
+
+|TS| has a single numeric type ``number`` that handles both integer and real
+numbers. |LANG| interprets numbers as variety of numeric types: ``int``,
+``long``, ``float``, ``double``. Calculations depends on the context and can
+produce different results.
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    let n = 1
+    console.log(n / 2) // TypeScript output: 0.5
+                       // ArkTS output: 0
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    let n: int = 1
+    console.log(n / 2) // 0
+
+    // OR
+    let n: float = 1
+    console.log(n / 2) // 0.5
+
+.. _R190:
+
+|CB_R| Stricter assignments into variables of function type
+-----------------------------------------------------------
+
+|CB_RULE| ``arkts-incompatible-func-types``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: IncompationbleFunctionType
+
+|CB_ERROR|
+
+|TS| allows more relaxed assignments into variables of function type, while
+|LANG| follows stricter rules stated in Function Types Conversions (6.5.10)
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    type FuncType = (p: string) => void
+    let f1: FuncType = (p: string): number => { return 0 } // compile-time error in ArkTS
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    type FuncType = (p: string) => void
+    let f1: FuncType = (p:string) => {
+        ((p: string): number => { return 0 })(p)
+        // the function with incompatible type may have some side effects,
+        // so it should execute
+    }
+
+
+.. _R193:
+
+|CB_R| ``void`` operator is not supported
+-----------------------------------------
+
+|CB_RULE| ``arkts-no-void-operator``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: VoidOperator
+
+|CB_ERROR|
+
+|LANG| does not support ``void`` operator. Replace some of the code with
+a lambda function call, while retaining all side effects.
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    void 2 === "2"    // return false
+    void (2 === "2")  // return undefined
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    (() => {
+        2 === "2";
+        return undefined;
+    })()
+
+.. _R194:
+
+|CB_R| No ``override`` modifier for field declarations
+------------------------------------------------------
+
+|CB_RULE| ``arkts-no-override-fields``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: MethodOverridingField
+
+|CB_WARNING|
+
+There is no ``override`` keyword for a fireld declarations in |LANG|
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    class Base1 {
+        field: number = init_in_base_1()
+        private init_in_base_1() {
+            console.log ("Base1 field initialization")
+            return 123
+        }
+    }
+    interface Base2 {
+        field: number
+    }
+    class Derived extends Base1 implements Base2 {
+        override field = init_in_derived() // overriding 'field' and providing new initial value
+        private init_in_derived() {
+            console.log ("Derived field initialization")
+            return 666
+        }
+    }
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    class Base1 {
+        field: number = init_in_base_1()
+        private init_in_base_1() {
+            console.log ("Base1 field initialization")
+            return 123
+        }
+    }
+    interface Base2 {
+        field: number
+    }
+    class Derived extends Base1 implements Base2 {
+        field = init_in_derived() // overriding 'field' and providing new initial value
+        private init_in_derived() {
+            console.log ("Derived field initialization")
+            return 666
+        }
+    }
+
+.. _R221:
+
+|CB_R| Importing/re-exporting itself is prohibited
+--------------------------------------------------
+
+|CB_RULE| ``arkts-no-import-itself``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: NoTsReExportEts
+
+|CB_ERROR|
+
+Importing itself and re-exporting itself is prohibited
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    // module.ets
+    import {} from 'module'
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    // just remove that import
+
+.. _R222:
+
+|CB_R| Import for side-effect only is prohibited.
+-------------------------------------------------
+
+|CB_RULE| ``arkts-no-side-effect-import``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: NoSideEffectImportEtsToTs
+
+|CB_ERROR|
+
+By prohibiting side-effect imports, |LANG| ensures that module initialization
+occurs in a predictable manner based on explicitly imported dependencies.
+
+If the module truly has no exports but only side effects (e.g., modifying
+global state):
+
+- Consider refactoring the dependency to expose explicit exports
+- Move the initialization code to a more appropriate location
+- If the side effect is essential, consider using a different mechanism
+  like explicit initialization functions
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    import {} from 'module'
+    // or
+    import 'module'
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    import { X, Y } from 'module'
+
+.. _R223:
+
+|CB_R| Empty list of name bindings is prohibited
+------------------------------------------------
+
+|CB_RULE| ``arkts-no-empty-import-binding-list``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: SharedNoSideEffectImport
+
+|CB_ERROR|
+
+Each binding adds a declaration or declarations to the scope of a module or
+a package (see Scopes). Any declaration added so must be distinguishable
+in the declaration scope (see Distinguishable Declarations). A compile-time
+error occurs if a declaration added to the scope of a module or a package by
+a binding is not distinguishable
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    import {} from 'module'
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    import { foo } from 'module'
+
+.. _R225:
+
+|CB_R| The ``DynamicObject`` type can only be casted to class or interface type
+-------------------------------------------------------------------------------
+
+|CB_RULE| ``arkts-dynamic-obj-cast``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: DynamicCtorCall
+
+|CB_WARNING|
+
+Dynamic objects in |LANG| represent data with structure unknown at compile
+time, typically originating from external sources like JSON, JavaScript
+interop, or web APIs. To bridge the gap between this dynamic data and |LANG|'s
+static type system, the language provides controlled casting mechanisms.
+
+The ``DynamicObject`` type can only be cast to class or interface types. This
+restriction ensures that dynamic data is mapped to well-defined structures with
+specific properties and methods.
+
+**Prohibited Cast Targets**
+
+- Primitive types: ``number``, ``string``, ``boolean``
+- Union types
+- Function types
+
+When casting a dynamic object, the developer assumes responsibility for
+ensuring the runtime data actually matches the specified class or interface
+structure.
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    // Casting DynamicObject to primitive types
+    import { ESObject } from '@arkts.jsapi.d.ets'
+
+    function processDynamicData(data: ESObject) {
+        // Error: Cannot cast DynamicObject to primitive types
+        let id = data as number;
+        let name = data as string;
+        let isActive = data as boolean;
+
+        // Error: Cannot cast to union types
+        let value = data as (string | number);
+
+        // Error: Cannot cast to function type
+        let callback = data as () => void;
+    }
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    // Casting DynamicObject to class or interface types
+    import { ESObject } from '@arkts.jsapi.d.ets'
+
+    class DataModel {
+        id: number;
+        name: string;
+        isActive: boolean;
+        value: string | number;
+        callback: () => void;
+    }
+
+    function processDynamicData(data: ESObject) {
+        let model = data as DataModel;
+    }
+
+.. _R239:
+
+|CB_R| This keyword cannot be used as identifiers
+-------------------------------------------------
+
+|CB_RULE| ``arkts-invalid-identifier``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: InvalidIdentifier
+
+|CB_ERROR|
+
+|LANG| enforces strict rules about what names can be used as identifiers to
+ensure language consistency, prevent ambiguity, and maintain compatibility with
+its runtime environment.
+
+Language syntax keywords, predefined types, and standard library entities like
+``number``, ``String``, ``Record``, ``Object``, etc. cannot be used as
+identifiers.
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    let foo(internal: number) {}
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    let foo(internal_param: number) {}
+
+
+.. _R228:
+
+|CB_R| Only loop statements are allowed to have a label
+-------------------------------------------------------
+
+|CB_RULE| ``arkts-invalid-label``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: InvalidIdentifier
+
+|CB_ERROR|
+
+Only loop statements are allowed to have a label. Only one label can be
+specified for a certain loop statement.
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    // Error: Labels on non-loop statements
+    L1: function calculateTotal() {
+        // Function body
+    }
+
+    START: let count = 0;
+
+    BLOCK: {
+        console.log("This is a block");
+    }
+
+    CONDITION: if (x > 10) {
+        console.log("x is greater than 10");
+    }
+
+    // Error: Multiple labels on a single loop
+    OUTER: INNER: for (let i = 0; i < 10; i++) {
+        console.log(i);
+    }
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    // Correct: Labels on loop statements
+    outer: for (let i = 0; i < 5; i++) {
+        inner: for (let j = 0; j < 5; j++) {
+            if (i * j > 10) {
+                break outer; // Breaking out of outer loop
+            }
+            if (j === 3) {
+                continue inner; // Continue inner loop
+            }
+            console.log(i, j);
+        }
+    }
+
+    // Correct: Using labeled while loop
+    pro cess: while (hasMoreData()) {
+        const data = getData();
+        if (isInvalid(data)) {
+            break process;
+        }
+        processData(data);
+    }
+
+    // Correct: Using labeled do-while loop
+    retry: do {
+        const result = attemptOperation();
+        if (result.success) {
+            break retry;
+        }
+    } while (shouldRetry());
+
+.. _R229:
+
+|CB_R| No support of ``keyof`` types
+------------------------------------
+
+|CB_RULE| ``arkts-no-keyof``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: MappedType
+
+|CB_ERROR|
+
+|LANG| does not support ``keyof`` types
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    type Point = { x: number; y: number };
+    type P = keyof Point;
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    type Point = { x: number; y: number };
+    type P = "x" || "y"
+
+.. _R230:
+
+|CB_R| The parameter with ``this`` name is not supported
+--------------------------------------------------------
+
+|CB_RULE| ``arkts-no-this-param``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: IncompationbleFunctionType
+
+|CB_ERROR|
+
+|LANG| does not support a method parameter with ``this`` name. This restriction
+helps maintain consistency in function parameter lists, avoiding potential
+confusion between special and regular parameters.
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    // Error: Using 'this' as a parameter name
+    interface UIElement {
+        addClickListener(onclick: (this: void, e: Event) => void): void;
+    }
+
+    class Handler {
+        info: string;
+
+        constructor(info: string) {
+            this.info = info;
+        }
+
+        // Error: 'this' parameter not supported in methods
+        onClick(this: Handler, e: Event) {
+            console.log('Clicked!', this.info);
+        }
+    }
+
+    // Error: 'this' parameter in standalone function
+    function processEvent(this: Document, event: Event) {
+        console.log(this.title, event.type);
+    }
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    // Correct: Avoid 'this' parameter and use arrow functions to preserve context
+    interface UIElement {
+        addClickListener(onclick: (e: Event) => void): void;
+    }
+
+    class Handler {
+        info: string;
+
+        constructor(info: string) {
+            this.info = info;
+        }
+
+        // Method without 'this' parameter
+        onClick(e: Event) {
+            console.log('Clicked!', this.info);
+        }
+
+        // Use arrow function to preserve 'this' context
+        getClickHandler() {
+            return (e: Event) => {
+                console.log('Clicked!', this.info);
+            };
+        }
+    }
+
+    // Correct: Pass context explicitly
+    function processEvent(document: Document, event: Event) {
+        console.log(document.title, event.type);
+    }
+
+    // Usage
+    const doc = document;
+    processEvent(doc, new Event('click'));
+
+.. _R231:
+
+|CB_R| No support of ``module.exports``
+---------------------------------------
+
+|CB_RULE| ``arkts-no-module-exports``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: SharedModuleExportsWarning
+
+|CB_ERROR|
+
+Key differences between CommonJS and ESM that impact |LANG| compatibility:
+
+1. **Static vs. Dynamic**: ESM supports static analysis at compile time,
+allowing for better tree-shaking, type checking, and optimizations. CommonJS is
+inherently dynamic, with exports resolved at runtime.
+
+2. **Synchronous vs. Asynchronous**: CommonJS modules are loaded synchronously,
+while ESM was designed with asynchronous loading in mind, making it more
+suitable for browser environments and modern applications.
+
+3. **Single Export vs. Named Exports**: CommonJS uses a single object
+(``module.exports``)    as its export mechanism, while ESM allows for named
+exports that can be statically analyzed.
+
+When migrating from CommonJS to |LANG|'s ESM syntax:
+
+- Replace ``module.exports = value`` with ``export default value``
+- Replace ``module.exports.name = value`` with ``export const name = value``
+- Replace ``exports.name = value`` with ``export const name = value``
+- Replace export objects with individual named exports or a default export
+- Group multiple exports using the ``export { name1, name2 }`` syntax
+
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    // Error: Using CommonJS module.exports
+    module.exports = function foo() {
+        return 'Hello ArkTS';
+    };
+
+    // Error: Using CommonJS module.exports with object assignment
+    module.exports = {
+        add: function(a, b) { return a + b; },
+        subtract: function(a, b) { return a - b; },
+        name: 'Calculator'
+    };
+
+    // Error: Using CommonJS exports property assignments
+    exports.multiply = function(a, b) {
+        return a * b;
+    };
+
+    // Error: Combined CommonJS approach
+    const utilities = {
+        format: (s) => s.trim(),
+        validate: (s) => s.length > 0
+    };
+    module.exports = utilities;
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    // Correct: Using ES module export statements
+    export function foo() {
+        return 'Hello ArkTS';
+    }
+
+    // Correct: Using named exports
+    export function add(a: number, b: number): number {
+        return a + b;
+    }
+
+    export function subtract(a: number, b: number): number {
+        return a - b;
+    }
+
+    export const name = 'Calculator';
+
+    // Correct: Using export with type
+    export type MathFunction = (a: number, b: number) => number;
+
+    // Correct: Using default export (when needed)
+    export default class Calculator {
+        add(a: number, b: number): number {
+            return a + b;
+        }
+
+        subtract(a: number, b: number): number {
+            return a - b;
+        }
+    }
+
+    // Correct: Export multiple items at once
+    function multiply(a: number, b: number): number {
+        return a * b;
+    }
+
+    function divide(a: number, b: number): number {
+        return a / b;
+    }
+
+    export { multiply, divide };
+
+.. _R234:
+
+|CB_R| Decorators are not supported
+-----------------------------------
+
+|CB_RULE| ``arkts-no-ts-decorators``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: DecoratorsNotSupported
+
+|CB_ERROR|
+
+|LANG| does not support |TS|-like decorators.
+When migrating from |TS| to |LANG|, decorators must be refactored using
+alternative patterns such as:
+- Class composition and inheritance
+- Higher-order functions
+- Explicit proxying or wrapper methods
+- Direct implementation of cross-cutting concerns
+
+Note that while |TS|-style decorators are not supported, |LANG| does provide
+its own decorator system specifically for UI development (such as
+``@Component``, ``@State``, etc.). These ArkTS UI decorators are fundamentally
+different - they're part of the language's UI framework and operate through
+compile-time transformations rather than runtime modifications.
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    // Error: Class decorator
+    function logClass(constructor: Function) {
+        console.log(`Class created: ${constructor.name}`);
+    }
+
+    @logClass
+    class User {
+        name: string;
+        constructor(name: string) {
+            this.name = name;
+        }
+    }
+
+    // Error: Method decorator
+    function logMethod(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+        const originalMethod = descriptor.value;
+        descriptor.value = function(...args: any[]) {
+            console.log(`Calling method: ${propertyKey}`);
+            return originalMethod.apply(this, args);
+        };
+        return descriptor;
+    }
+
+    class Logger {
+        @logMethod
+        log(message: string) {
+            console.log(message);
+        }
+    }
+
+    // Error: Property decorator
+    function format(formatString: string) {
+        return function (target: any, propertyKey: string) {
+            let value: string;
+            Object.defineProperty(target, propertyKey, {
+                get: () => formatString.replace("%s", value),
+                set: (newValue: string) => { value = newValue },
+            });
+        };
+    }
+
+    class Greeting {
+        @format("Hello, %s!")
+        name: string;
+    }
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    // Instead of class decorators, use composition or inheritance
+    class LoggingCapability {
+        logCreation(className: string) {
+            console.log(`Class created: ${className}`);
+        }
+    }
+
+    class User extends LoggingCapability {
+        name: string;
+
+        constructor(name: string) {
+            super();
+            this.name = name;
+            this.logCreation("User");
+        }
+    }
+
+    // Instead of method decorators, use higher-order functions or proxy methods
+    class Logger {
+        log(message: string) {
+            console.log(message);
+        }
+
+        // Create a logging wrapper method
+        logWithTracking(message: string) {
+            console.log("Calling log method");
+            this.log(message);
+        }
+    }
+
+    // Instead of property decorators, use explicit getters/setters
+    class Greeting {
+        private _name: string = "";
+
+        get name(): string {
+            return `Hello, ${this._name}!`;
+        }
+
+        set name(value: string) {
+            this._name = value;
+        }
+    }
+
+    // If using ArkTS UI decorators, use the supported syntax
+    @Component
+    struct MyComponent {
+        @State count: number = 0;
+
+        build() {
+            // UI building code
+        }
+    }
+
+.. _R236:
+
+|CB_R| Method can't override a field in interface implemented
+-------------------------------------------------------------
+
+|CB_RULE| ``arkts-no-method-overriding-field``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: MethodOverridingField
+
+|CB_ERROR|
+
+Overriding a field with a functional type and vice-versa is not allowed.
+
+|LANG| enforces strict type consistency between interfaces and their
+implementing classes, particularly regarding the distinction between methods
+and fields with function types. While both can represent callable entities,
+they have different semantics that cannot be interchanged.
+
+1. **Method Declaration**: A method is a function that is part of a class or
+interface definition, defined using the syntax
+``methodName(parameters): returnType {...}``. Methods are invoked using the dot
+notation and have a fixed implementation.
+
+2. **Function-Typed Field**: A field with a function type (e.g.,
+``fieldName: (parameters) => returnType``) is a property that holds a reference
+to a function. This function can be reassigned, unlike methods which have a
+fixed implementation.
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    interface I {
+        callback1: () => void;
+        callback2(): void;
+    }
+
+    class C implements I {
+        callback1(): void {}                // Error
+        callback2: () => void = () => {};   // Error
+    }
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    interface I {
+        callback1: () => void;
+        callback2(): void;
+    }
+
+    class C implements I {
+        callback1: () => void = () => {};
+        callback2(): void {}
+    }
+
+

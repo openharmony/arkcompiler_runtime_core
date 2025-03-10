@@ -18,12 +18,11 @@
 .. meta:
     frontend_status: None
 
-This section discusses all issues related to different aspects of compatibility
-between |LANG| and |TS|.
+This section discusses the |LANG| compatibility with |TS| and all issues related.
 
 |
 
-.. _No undefined as universal value:
+.. _Undefined is Not a Universal Value:
 
 Undefined is Not a Universal Value
 ----------------------------------
@@ -31,8 +30,8 @@ Undefined is Not a Universal Value
 .. meta:
     frontend_status: Done
 
-|LANG| raises a compile-time or a runtime error in many cases, in which
-|TS| uses ``undefined`` as runtime value.
+A compile-time or a runtime error occurs in |LANG| in many cases, in which
+|TS| uses ``undefined`` as a runtime value.
 
 .. code-block-meta:
    expect-cte
@@ -54,7 +53,7 @@ Undefined is Not a Universal Value
 
 |
 
-.. _Numeric semantics:
+.. _Numeric Semantics:
 
 Numeric Semantics
 -----------------
@@ -65,8 +64,8 @@ Numeric Semantics
 |TS| has a single numeric type ``number`` that handles both integer and real
 numbers.
 
-|LANG| interprets ``number`` as a variety of |LANG| types. Calculations depend
-on the context and can produce different results:
+|LANG| interprets ``number`` as a variety of types. Calculations depend
+on the context and can produce different results as follows:
 
 .. code-block-meta:
 
@@ -88,7 +87,7 @@ on the context and can produce different results:
 
 |
 
-.. _Covariant overriding:
+.. _Covariant Overriding:
 
 Covariant Overriding
 --------------------
@@ -100,8 +99,8 @@ Covariant Overriding
 non-existing property is accessed from an object during program execution.
 
 |LANG| allows generating highly efficient code that relies on an objects'
-layout known at compile time. Covariant overriding
-is prohibited because it violates type-safety:
+layout known at compile time. Covariant overriding violates type-safety and
+is prohibited:
 
 .. code-block:: typescript
    :linenos:
@@ -135,7 +134,10 @@ is prohibited because it violates type-safety:
    property
    access
    compile time
+   method
+   function
    type safety
+   layout
 
 |
 
@@ -147,8 +149,9 @@ Function Types Compatibility
 .. meta:
     frontend_status: Done
 
-|TS| allows more relaxed assignments into variables of function type.
-|LANG| follows stricter rules (see the |LANG| specification for details).
+|TS| allows rather relaxed assignment into variables of function type.
+|LANG| follows stricter rules as follows (see the |LANG| specification for
+details):
 
 .. code-block:: typescript
    :linenos:
@@ -166,10 +169,10 @@ Function Types Compatibility
 
 |
 
-.. _Compatibility for utility types:
+.. _Utility Type Compatibility:
 
-Compatibility for Utility Types
--------------------------------
+Utility Type Compatibility
+--------------------------
 
 .. meta:
     frontend_status: Done
@@ -201,11 +204,10 @@ with object literals only.
 .. meta:
     frontend_status: Done
 
-|LANG| does not support overload signatures in |TS|-style where several function
-headers are followed by a single body. Each overloaded function, method, or
-constructor is required to have a separate body.
-
-The following code is valid in |TS| but causes a compile-time error in |LANG|:
+|LANG| supports no overload signatures like |TS| does. In |TS|, several function
+headers can be followed by a single body. In |LANG|, each overloaded function,
+method, or constructor must have a separate body. E.g., the following code is
+valid in |TS| but causes a compile-time error in |LANG|:
 
 .. code-block-meta:
    expect-cte
@@ -248,9 +250,9 @@ Class Fields While Inheriting
 or covariant type.
 |LANG| supports overriding a class field with a field in a subclass of invariant
 type only.
-In both languages, an overriding field can have a new initial value.
+An overriding field can have a new initial value in both languages.
 
-The situations are illustrated by the following examples:
+The two situations are represented by the following examples:
 
 .. code-block-meta:
 
@@ -304,7 +306,7 @@ Type ``void`` Compatibility
 .. meta:
     frontend_status: Done
 
-|TS| allows using type ``void`` in union types. |LANG| does not allow ``void``
+|TS| allows using type ``void`` in union types. |LANG| allows no ``void``
 in union types. This situation is represented by the example below:
 
 .. code-block:: typescript
@@ -360,8 +362,8 @@ Tuples and Arrays
     frontend_status: None
 
 |TS| allows assignments of tuples into arrays. |LANG| handles arrays and tuples
-as different types, and does not allow assignment of tuples into arrays. This
-situation is represented by the folowing example:
+as different types. |LANG| allows no assignment of tuples into arrays. This
+situation is represented by the following example:
 
 .. code-block:: typescript
    :linenos:
@@ -383,7 +385,7 @@ Extending Class Object
     frontend_status: Done
 
 |TS| forbids using ``super`` and ``override`` if class ``Object`` is not
-listed explicitly in the ``extends`` clause of a class. |LANG| allows this as
+listed explicitly in the ``extends`` clause of a class. |LANG| allows it because
 ``Object`` is a superclass for any class without an explicit ``extends`` clause:
 
 .. code-block:: typescript
@@ -418,7 +420,7 @@ Syntax of ``extends`` and ``implements`` Clauses
 
 |TS| handles entities listed in ``extends`` and ``implements`` clauses as
 expressions.
-|LANG| handles such clauses at compile time, and allows no expressions
+|LANG| handles such clauses at compile time. |LANG| allows no expressions
 but *type references*:
 
 .. code-block:: typescript
@@ -442,7 +444,7 @@ Uniqueness of Functional Objects
 .. meta:
     frontend_status: Done
 
-|TS| and |LANG| handle function objects differently, and the equality test can
+|TS| and |LANG| handle function objects differently. The equality test can
 perform differently. The difference can be eliminated in the future versions of
 |LANG|.
 
@@ -470,9 +472,11 @@ Functional Objects for Methods
 .. meta:
     frontend_status: None
 
-|TS| and |LANG| handle function objects differently, and the sematics of the 
-work with 'this' is different. |TS| supports *undefined* as a value of 'this',
-while |LANG| has 'this' always attached to a valid object.
+|TS| and |LANG| handle function objects differently. The sematics of work with
+``this`` is different. |TS| supports ``undefined`` as a value of ``this``. In
+|LANG| ``this`` is always attached to a valid object. This also affects
+comparison of function objects created from methods. |TS| does not bind ``this``
+with the function object, while |LANG| does.
 
 .. code-block:: typescript
    :linenos:
@@ -484,41 +488,13 @@ while |LANG| has 'this' always attached to a valid object.
     const method = a.method
     method() // Typescript output: undefined, while ArkTS output: object 'a' content
 
+    const aa = new A
+    a.method == aa.method // Typescript: true, while ArkTS: false
+
 
 .. index::
    function object
    this
-
-
-|
-
-.. _Absence of Type Function:
-
-Absence of Type ``Function``
-----------------------------
-
-.. meta:
-    frontend_status: Done
-
-|TS| has a supertype for all function types called *Function*. |LANG| does not
-have such type.
-
-.. code-block:: typescript
-   :linenos:
-
-    // Typescript code style: type unsafe
-    function calls (functor: Function) {
-        functor ()
-        functor (1)
-        functor (1, true, "some string")
-    }
-
-    // ArkTS code style: type safe
-    function calls (functor: Object) {
-        if (functor instanceof (()=>void)) functor ()
-        if (functor instanceof ((p: number)=>void)) functor (1)
-        if (functor instanceof ((p: number)=>void)) functor (1, true, "some string")
-    }
 
 
 |
@@ -533,9 +509,9 @@ Differences in Namespaces
 
 |TS| allows having non-exported entities with the same name in two or more
 different declarations of a namespace, because these entities are local to a
-particular declaration of the namespace. Such situations are forbidden in
-|LANG|, because this language merges all declarations into one and declarations
-become non-distinguishable:
+particular declaration of the namespace. |LANG| forbids such situations,
+because |LANG| merges all declarations into one, and the declarations become
+non-distinguishable:
 
 
 .. code-block:: typescript
@@ -564,7 +540,7 @@ Differences in Math.pow
     frontend_status: Done
 
 The function ``Math.pow`` in |LANG| conforms to the latest IEEE 754-2019
-standard. The following calls produce the result *1* (one):
+standard. The result of the following calls in |LANG| is *1* (one):
 
 - ``Math.pow(1, Infinity)``,
 - ``Math.pow(-1, Infinity)``,
@@ -572,7 +548,7 @@ standard. The following calls produce the result *1* (one):
 - ``Math.pow(-1, -Infinity)``.
 
 The function ``Math.pow`` in |TS| conforms to the outdated 2008 version of the
-IEEE 754-2019 standard. The same calls as listed above produce ``NaN`` in |TS|.
+IEEE 754-2019 standard. The result of the above calls in |TS| is ``NaN``.
 
 .. index::
    IEEE 754
@@ -584,10 +560,10 @@ IEEE 754-2019 standard. The same calls as listed above produce ``NaN`` in |TS|.
 Differences in Constructor Body
 -------------------------------
 
-Work is in progress to have support for the corner cases of mandatory calls to
-*super()* or *this()* in the compiler for |LANG|. So, the code below will be
-temporarily rejected. Compiler requires call to *super()* or *this()* to be
-not embedded into other constructions.
+Work is in progress to have support for corner cases of mandatory calls to
+``super()`` or ``this()`` in the compiler for |LANG|. The code below is
+temporarily rejected. The compiler requires a call to ``super()`` or ``this()``
+to be not embedded into other constructions as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -599,4 +575,52 @@ not embedded into other constructions.
            else { this (2) }
        }     
     }
+
+
+|
+
+.. _Differences in Static Fields Initialization:
+
+Differences in Static Fields Initialization
+-------------------------------------------
+
+The order of initialization of the static fields is different.  |TS| processes
+the source code as it is, in the order of it was written. And that is why all 
+static fields are initialized when the module is being loaded. |LANG|
+initializes the static fields either at compile-time or right before the first
+use of the field.
+
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base1 {
+        static field: number = Base1.init_in_base_1()
+        private static init_in_base_1() {
+           console.log ("Base1 static field initialization")
+           return 321
+        }
+    }
+
+    class Base2 extends Base1 {
+        static override field: number = Base3.init_in_base_2()
+        private static init_in_base_2() {
+           console.log ("Base2 static field initialization")
+           return 777
+        }
+    }
+    console.log (Base1.field, Base3.field)
+    /* ArkTS output:
+        Base1 static field initialization
+        321
+        Base3 static field initialization
+        777
+    */
+    /* Typescript output:
+        Base1 static field initialization
+        Base2 static field initialization
+        321
+        777
+    */
+
 
