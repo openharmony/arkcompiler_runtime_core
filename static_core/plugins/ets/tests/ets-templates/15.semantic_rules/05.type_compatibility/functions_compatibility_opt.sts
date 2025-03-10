@@ -17,7 +17,6 @@
 
 /*---
 desc: Mixing function overload and signature overload will result in CTE.
-tags: [compile-only, negative]
 ---*/
 
 {{c.decl}}
