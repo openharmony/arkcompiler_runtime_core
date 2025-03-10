@@ -18,7 +18,9 @@ Statements
 .. meta:
     frontend_status: Done
 
-Statements are designed to control execution:
+Statements are designed to control execution.
+
+The syntax of *statements* is presented below:
 
 .. code-block:: abnf
 
@@ -61,6 +63,7 @@ execution is considered to *complete abruptly* if it causes an error thrown.
    statement execution
    normal completion
    abrupt completion
+   mode of evaluation
 
 |
 
@@ -72,7 +75,9 @@ Expression Statements
 .. meta:
     frontend_status: Done
 
-Any expression can be used as a statement:
+Any expression can be used as a statement.
+
+The syntax of *expression statement* is presented below:
 
 .. code-block:: abnf
 
@@ -99,7 +104,9 @@ Block
     frontend_status: Done
 
 A sequence of statements (see :ref:`Statements`) enclosed in balanced braces
-forms a *block*:
+forms a *block*.
+
+The syntax of *block statement* is presented below:
 
 .. code-block:: abnf
 
@@ -109,8 +116,8 @@ forms a *block*:
 
 The execution of a block means that all block statements, except type
 declarations, are executed one after another in the textual order of their
-appearance within the block until an erroneous situation is thrown (see
-:ref:`Errors`), or return (see :ref:`Return Statements`) occurs.
+appearance within the block while an error is thrown (see :ref:`Errors`), or
+until a return occurs (see :ref:`Return Statements`).
 
 If a block is the body of a ``functionDeclaration`` (see
 :ref:`Function Declarations`) or a ``classMethodDeclaration`` (see
@@ -123,6 +130,7 @@ return statement at all. Such a block is equivalent to one that ends in a
    statement
    balanced brace
    block
+   error
    execution
    block statement
    type declaration
@@ -139,11 +147,13 @@ Local Declarations
 .. meta:
     frontend_status: Done
 
-*Local declarations* define new mutable or immutable variables or types within
-the enclosing context.
+*Local declarations* define new mutable or immutable variables within the
+enclosing context.
 
 ``Let`` and ``const`` declarations have the initialization part that presumes
-execution, and actually act as statements:
+execution, and actually act as statements.
+
+The syntax of *local declaration* is presented below:
 
 .. code-block:: abnf
 
@@ -151,7 +161,6 @@ execution, and actually act as statements:
         annotationUsage?
         ( variableDeclaration
         | constantDeclaration
-        | typeDeclaration
         )
         ;
 
@@ -184,7 +193,9 @@ The usage of annotations is discussed in :ref:`Using Annotations`.
     todo: ambiguous wording in the spec: "Any 'else' corresponds to the first 'if' of an if statement" - what first means?
 
 An ``if`` statement allows executing alternative statements (if provided) under
-certain conditions:
+certain conditions.
+
+The syntax of *if statement* is presented below:
 
 .. code-block:: abnf
 
@@ -204,6 +215,11 @@ certain conditions:
 Type of expression must be ``boolean``, or a type mentioned in
 :ref:`Extended Conditional Expressions`. Otherwise, a
 :index:`compile-time error` occurs.
+
+.. index::
+   if statement
+   statement
+   expression
 
 If an expression is successfully evaluated as ``true``, then *thenStatement* is
 executed. Otherwise, *elseStatement* is executed (if provided).
@@ -233,7 +249,6 @@ A list of statements in braces (see :ref:`Block`) is used to combine the
    statement
    expression
    evaluation
-   compile-time error
 
 |
 
@@ -247,8 +262,7 @@ Loop Statements
 
 |LANG| has four kinds of loops. A loop of each kind can have an optional loop
 label that can be used only by ``break`` and ``continue`` statements contained
-in the body of the loop. The label is characterized by an *identifier* as shown
-below:
+in the body of the loop. The label is characterized by an *identifier*.
 
 .. index::
    loop statement
@@ -257,6 +271,8 @@ below:
    break statement
    continue statement
    identifier
+
+The syntax of *loop statements* is presented below:
 
 .. code-block:: abnf
 
@@ -274,6 +290,13 @@ that can be used in :ref:`Break Statements` and :ref:`Continue Statements`.
 A :index:`compile-time error` occurs if the label *identifier* is not used
 within ``loopStatement``.
 
+.. index::
+   loop statement
+   label
+   break statement
+   continue statement
+   identifier
+
 |
 
 .. _While Statements and Do Statements:
@@ -288,7 +311,9 @@ A ``while`` statement and a ``do`` statement evaluate an expression and
 execute the statement repeatedly till the expression value is ``true``.
 The key difference is that *whileStatement* starts from evaluating and
 checking the expression value, and *doStatement* starts from executing
-the statement:
+the statement.
+
+The syntax of *while and do statements* is presented below:
 
 .. code-block:: abnf
 
@@ -321,6 +346,8 @@ Otherwise, a :index:`compile-time error` occurs.
 
 .. meta:
     frontend_status: Done
+
+The syntax of *for statements* is presented below:
 
 .. code-block:: abnf
 
@@ -377,10 +404,13 @@ mentioned in :ref:`Extended Conditional Expressions`. Otherwise, a
 *********************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+	todo: type of element for strings
 
 A ``for-of`` loop iterates elements of ``array`` or ``string``, or an instance
-of *iterable* class or interface (see :ref:`Iterable Types`):
+of *iterable* class or interface (see :ref:`Iterable Types`).
+
+The syntax of *for-of statements* is presented below:
 
 .. code-block:: abnf
 
@@ -406,7 +436,6 @@ the result of class iterator advancing.
    loop
    array
    string
-   compile-time error
    expression
    type
    array
@@ -417,17 +446,36 @@ the result of class iterator advancing.
    statement
 
 If *forVariable* has the modifiers ``let`` or ``const``, then a new variable
-is used inside the loop. Otherwise, the variable is as declared above.
+is declared in the loop scope and is accessible only inside loop body.
+Otherwise, the variable is as declared above.
 The modifier ``const`` prohibits assignments into *forVariable*,
 while ``let`` allows modifications.
 
+If *forVariable* is declared inside loop, its type is inferred 
+to be the type of *iterated* elements, namely
+
+-  ``T``, if ``Array<T>`` or ``FixedArray<T>`` instance is iterated;
+
+-  ``string``, if ``string`` value is iterated;
+
+-  Type argument of the *iterator*, if an instance of *iterable* type
+   is iterated.
+
+If *forVariable* is declared outside the loop, the type of iterated element
+must be assignable (see :ref:`Assignability`)
+to the type of the variable, otherwise a :index:`compile-time error` occurs.
+
 Explicit type annotation of *forVariable* is allowed as an experimental
-feature (see :ref:`For-of Type Annotation`).
+feature (see :ref:`For-of Type Annotation`). 
+
+
 
 .. index::
    modifier
-   let modifier
-   const modifier
+   modifier let
+   let
+   modifier const
+   const
    variable
    assignment
    modification
@@ -441,14 +489,14 @@ feature (see :ref:`For-of Type Annotation`).
    :linenos:
 
     // existing variable 'ch'
-    let ch : char
-    for (ch of "a string object") {
-      console.log(ch)
+    let s : string
+    for (s of "a string object") {
+      console.log(s)
     }
 
-    // new variable 'ch', its type is inferred from expression after 'of'
-    for (let ch of "a string object") {
-      console.log(ch)
+    // new variable 's', its type is inferred from expression after 'of'
+    for (let s of "a string object") {
+      console.log(s)
     }
 
     // new variable 'element', its type is inferred from expression after 'of',
@@ -470,13 +518,15 @@ feature (see :ref:`For-of Type Annotation`).
     todo: break with label causes compile time assertion
 
 A ``break`` statement transfers control out of the enclosing *loopStatement*
-or *switchStatement*:
+or *switchStatement*.
 
 .. index::
    break statement
    control transfer
    switch statement
    loop statement
+
+The syntax of *break statement* is presented below:
 
 .. code-block:: abnf
 
@@ -508,7 +558,6 @@ a :index:`compile-time error` occurs.
    do statement
    for statement
    for-of statement
-   compile-time error
    loop statement
 
 |
@@ -525,6 +574,8 @@ a :index:`compile-time error` occurs.
 A ``continue`` statement stops the execution of the current loop iteration,
 and transfers control to the next iteration. Appropriate checks of loop
 exit conditions depend on the kind of the loop.
+
+The syntax of *continue statement* is presented below:
 
 .. code-block:: abnf
 
@@ -564,13 +615,16 @@ then a :index:`compile-time error` occurs.
 
 A ``return`` statement can have or not have an expression.
 
+The syntax of *return statement* is presented below:
+
 .. code-block:: abnf
 
     returnStatement:
         'return' expression?
         ;
 
-A *return expression* statement can only occur inside a function or a method body.
+A ``return`` statement with *expression* can only occur inside a function or a
+method body with non-``void`` return type.
 
 .. index::
    return statement
@@ -581,26 +635,23 @@ A *return expression* statement can only occur inside a function or a method bod
    method body
    constructor
 
-A ``return`` statement (with no expression) can occur in one of the following
+A ``return`` statement (with no *expression*) can occur in one of the following
 situations:
 
-- Inside a class initializer;
-- Inside a constructor body; or
+- Inside a initializer block;
+- Inside a constructor body;
 - Inside a function or a method body with return type ``void`` (see
-  :ref:`Type void`).
+  :ref:`Type void`);
 
 A :index:`compile-time error` occurs if a ``return`` statement is found in:
 
 -  Top-level statements (see :ref:`Top-Level Statements`);
--  Class initializers (see :ref:`Class Initializer`) and constructors (see
-   :ref:`Constructor Declaration`), where it has an expression;
 -  Functions or methods with return type ``void`` (see :ref:`Type void`)
    that have an expression;
 -  Functions or methods with a non-``void`` return type that have no
    expression.
 
 .. index::
-   compile-time error
    return statement
    expression
    statement
@@ -612,29 +663,33 @@ A :index:`compile-time error` occurs if a ``return`` statement is found in:
    initializer
    constructor
    constructor declaration
+   initializer block
+   constructor body
+   return type
 
 The execution of *returnStatement* leads to the termination of the
-surrounding function or method. If an *expression* is provided,
-the resultant value is the evaluated *expression*.
+surrounding function, method, or initializer. If an *expression* is
+provided, the resultant value is the evaluated *expression*.
 
-In case of constructors, class initializers, and top-level statements, the
-control is transferred out of the scope of the construction in question, but
-no result is required. Other statements of the surrounding function, method
-body, class initializer, or top-level statement are not executed.
+In case of constructors, initializer blocks, and top-level
+statements, the control is transferred out of the scope of the construction in
+question, but no result is required. Other statements of the surrounding
+function, method body, initializer block, or top-level statement are
+not executed.
 
 .. index::
    execution
+   return statement
    termination
    surrounding function
    surrounding method
    constructor
-   class initializer
+   initializer block
    top-level statement
    control transfer
    expression
    evaluation
    method body
-   class initializer
    top-level statement
    return statement
 
@@ -662,6 +717,8 @@ result of successful evaluation of the value of a ``switch`` expression.
    evaluation
    switch expression
 
+The syntax of *switch statement* is presented below:
+
 .. code-block:: abnf
 
     switchStatement:
@@ -680,40 +737,19 @@ result of successful evaluation of the value of a ``switch`` expression.
         : 'default' ':' statement*
         ;
 
-The ``switch`` expression type must be of type ``char``, ``byte``, ``short``,
-``int``, ``long``, ``string``,
-or ``enum``.
+A ``switch`` expression can be of any type.
 
 .. index::
    expression type
-   constant expression
-   enum constant
-   char
-   byte
-   short
-   int
-   long
 
-A :index:`compile-time error` occurs if not **all** of the following is true:
-
--  Every case expression type is
-   assignable (see :ref:`Assignability`) to the type of the ``switch``
-   statement expression.
-
--  In a ``switch`` statement expression of type ``enum``, every case expression
-   associated with the ``switch`` statement is of type ``enum``.
-
--  No two case constant expressions (see :ref:`Constant Expressions`)
-   have identical values.
-
--  No case expression is ``null``.
+A :index:`compile-time error` occurs if at least one of case expression types
+is not assignable (see :ref:`Assignability`) to the type of the ``switch``
+statement expression.
 
 .. index::
    expression
    switch statement
-   compatibility
-   constant
-   null expression
+   assignability
 
 .. code-block:: typescript
    :linenos:
@@ -731,23 +767,39 @@ A :index:`compile-time error` occurs if not **all** of the following is true:
         alert('An unknown value')
     }
 
+    class A {}
+    let a: A| null = assignIt()
+    switch (a) {
+      case null:
+      case null: // One may have several case clauses with the same expression in 
+        console.log ("a is null")
+        break
+      case new A:
+        console.log ("Never matches as new A is a new unique object")
+        break
+      default:
+        console.log ("a is A")
+    }
+    function assignIt () {
+        return new A
+    }    
+
+
 The execution of a ``switch`` statement starts from the evaluation of the
 ``switch`` expression.
 
-The value of the ``switch`` expression is compared repeatedly to the
-value of case expressions starting from the top till the first *match*. The
-*match* means that particular case expression value equals the value of the
-``switch`` expression in terms of the operator '``==``'.  However, if the
-expression value is of type  ``string``, then the equality for strings
-determines the equality.
+The value of the ``switch`` expression is compared repeatedly to the value
+of case expressions. The comparison starts from the top and proceeds till the
+first *match*. A *match* occurs when a particular case expression value equals
+the value of the ``switch`` expression in terms of the operator '``==``'. The
+execution is transferred to the set of statements of the *caseClause* where the
+match occurred. If this set of statements executes a ``break`` statement, then
+the entire ``switch`` statement terminates. If no ``break`` statement is
+executed, then the execution continues through any remaining *caseClause*(s) and
+*defaultClause* until first ``break`` statement occurs.
 
-So, in case of *match* execution is transferred to the set of statements of
-the *caseClause* where match occurred. If this set of statements executes
-*break* statement then the whole ``switch`` statement terminates. If no *break*
-statement was executed then execution continues through all remaining
-*caseClause*s as well as *defaultClause* at last if it is present.
-If no *match* occurred and *defaultClause* is present then it is executed.
-
+If no *match* occurs but *defaultClause* is present,
+then execution is transferred to statements in *defaultClause*.
 
 .. index::
    execution
@@ -757,6 +809,8 @@ If no *match* occurred and *defaultClause* is present then it is executed.
    constant
    operator
    string
+   match
+   break statement
 
 |
 
@@ -774,13 +828,15 @@ multiple statements, constructors, functions, and method calls until a ``try``
 statement (see :ref:`Try Statements`) is found that catches the value thrown.
 If no ``try`` statement is found, then ``UncaughtExceptionError`` is thrown.
 
+The syntax of *throw statement* is presented below:
+
 .. code-block:: abnf
 
     throwStatement:
         'throw' expression
         ;
 
-The expression type must be assignable (see :ref:`Assignment`) to type
+The expression type must be assignable (see :ref:`Assignability`) to type
 ``Error``. Otherwise, a :index:`compile-time error` occurs.
 
 This implies that the object thrown is never ``null``.
@@ -799,7 +855,7 @@ Errors can be thrown at any place in the code.
    try block
    try statement
    assignment
-   compile-time error
+   assignability
 
 |
 
@@ -811,13 +867,16 @@ Errors can be thrown at any place in the code.
 .. meta:
     frontend_status: Done
 
-A ``try`` statement runs blocks of code, and provides sets of catch clauses
-to handle different errors (see :ref:`Error Handling`).
+A ``try`` statement runs block of code, and provides optional ``catch`` clause
+to handle errors (see :ref:`Error Handling`) which may occur during block of
+code execution.
 
 .. index::
    try statement
    block
    catch clause
+
+The syntax of *try statement* is presented below:
 
 .. code-block:: abnf
 
@@ -848,7 +907,6 @@ control is transferred to the ``catch`` clause.
    try statement
    try block
    normal completion
-   compile-time error
    control transfer
    finally clause
    block
@@ -928,6 +986,8 @@ A ``finally`` clause defines the set of actions in the form of a block to be
 executed without regard to whether a ``try-catch`` completes normally or
 abruptly.
 
+The syntax of *finally clause* is presented below:
+
 .. code-block:: abnf
 
     finallyClause:
@@ -995,9 +1055,10 @@ can be performed while leaving the ``try-catch``:
    statement completes abruptly.
 
 #. If no ``catch`` clause in place then the error is propagated to the
-   surrounding scope until it reaches the scope with the ``catch`` clause which
-   handles the error. If no such scope exits then ``UncaughtExceptionError`` is
-   thrown and program execution terminates (see :ref:`Program Exit`).
+   surrounding and caller scopes until it reaches the scope with the ``catch``
+   clause which handles the error. If no such scope exits then the whole
+   coroutine stack (see :ref:`Coroutines (Experimental)`) is discarded,
+   and subsequent steps are defined by the execution environment.
 
 #. If ``finally`` clause in place and its execution completes abruptly then the
    ``try`` statement completes abruptly as well.
@@ -1012,7 +1073,7 @@ can be performed while leaving the ``try-catch``:
    catch clause
    runtime
    catch clause
-   compatibility
+   assignability
    propagation
    surrounding scope
    function
