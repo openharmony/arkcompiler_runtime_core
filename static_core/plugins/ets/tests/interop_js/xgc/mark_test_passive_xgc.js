@@ -21,7 +21,8 @@ let g_etsVm;
 // clear the cross-reference objects that are referenced by the active objects
 function clearActiveRef() {
     g_array = new Array();
-    g_etsVm.call('.clearActiveRef');
+    const clearActiveRef = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'clearActiveRef');
+    clearActiveRef();
 }
 
 /**
@@ -37,24 +38,26 @@ function passiveXGCTest() {
     let jsNumAfter = 0;
     let stsNumAfter = 0;
     checkXRefsNumber(jsNum, stsNum);
+    const proxyJsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
+    const createStsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
     for (let i = 0; i < g_threasholdSize; i++) {
         let j = i % 4;
         switch (j) {
             case 0:
-                g_etsVm.call('.proxyJsObject', Promise.resolve(), false, false);
+                proxyJsObject(Promise.resolve(), false, false);
                 jsNum++;
                 break;
             case 1:
-                g_etsVm.call('.proxyJsObject', Promise.resolve(), true, false);
+                proxyJsObject(Promise.resolve(), true, false);
                 jsNum++;
                 jsNumAfter++;
                 break;
             case 2:
-                g_etsVm.call('.createStsObject', false, false);
+                createStsObject(false, false);
                 stsNum++;
                 break;
             default:
-                g_array.push(g_etsVm.call('.createStsObject', false, false));
+                g_array.push(createStsObject(false, false));
                 stsNum++;
                 stsNumAfter++;
         }
@@ -63,11 +66,12 @@ function passiveXGCTest() {
     return {jsNumAfter: jsNumAfter, stsNumAfter: stsNumAfter};
 }
 
-g_etsVm = init('mark_test_passive_xgc_module', 'mark_test_sts.abc');
+g_etsVm = init('mark_test_passive_xgc_module', 'xgc_tests.abc');
 
 let res = passiveXGCTest();
 // When the threshold is exceeded, the XGC is triggered
-g_etsVm.call('.createStsObject', false, false);
+const createStsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
+createStsObject(false, false);
 
 checkXRefsNumber(res.jsNumAfter, res.stsNumAfter + 1);
 clearActiveRef();

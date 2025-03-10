@@ -20,7 +20,8 @@ let g_etsVm;
 // clear the cross-reference objects that are referenced by the active objects
 function clearActiveRef() {
     g_array = new Array();
-    g_etsVm.call('.clearActiveRef');
+    const clearActiveRef = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'clearActiveRef');
+    clearActiveRef();
 }
 
 function clearRefStorage() {
@@ -35,9 +36,10 @@ function clearRefStorage() {
  * js obj <- sts pobj <- sts obj <- root
  */
 function sweepTest01(num) {
+    const proxyJsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
     for (let i = 0; i < num; i++) {
-        g_etsVm.call('.proxyJsObject', Promise.resolve(), false, false);
-        g_etsVm.call('.proxyJsObject', Promise.resolve(), true, false);
+        proxyJsObject(Promise.resolve(), false, false);
+        proxyJsObject(Promise.resolve(), true, false);
     }
 }
 
@@ -47,9 +49,10 @@ function sweepTest01(num) {
  * root   -> js obj   -> js pobj -> sts obj
  */
 function sweepTest02(num) {
+    const createStsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
     for (let i = 0; i < num; i++) {
-        g_etsVm.call('.createStsObject', false, false);
-        g_array.push(g_etsVm.call('.createStsObject', false, false));
+        createStsObject(false, false);
+        g_array.push(createStsObject(false, false));
     }
 }
 
@@ -61,11 +64,13 @@ function sweepTest02(num) {
  * root   -> js obj   -> js pobj -> sts obj
  */
 function sweepTest03(num) {
+    const proxyJsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
+    const createStsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
     for (let i = 0; i < num; i++) {
-        g_etsVm.call('.proxyJsObject', Promise.resolve(), false, false);
-        g_etsVm.call('.proxyJsObject', Promise.resolve(), true, false);
-        g_etsVm.call('.createStsObject', false, false);
-        g_array.push(g_etsVm.call('.createStsObject', false, false));
+        proxyJsObject(Promise.resolve(), false, false);
+        proxyJsObject(Promise.resolve(), true, false);
+        createStsObject(false, false);
+        g_array.push(createStsObject(false, false));
     }
 }
 
@@ -82,7 +87,8 @@ function sweepTest03(num) {
 function sweepRecursiveTest01(num, isRootRef1, isRootRef2, isRootRef3) {
     let obj1 = Promise.resolve();
     let obj2 = Promise.resolve();
-    obj2.ref = g_etsVm.call('.proxyJsObjectWithReturnValue', obj1, num, isRootRef3, false);
+    const proxyJsObjectWithReturnValue = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObjectWithReturnValue');
+    obj2.ref = proxyJsObjectWithReturnValue(obj1, num, isRootRef3, false);
     if (isRootRef1) {
         g_array.push(obj1);
     }
@@ -114,14 +120,16 @@ function createRecursiveJsObject(num) {
  */
 function sweepRecursiveTest02(num, isRootRef1, isRootRef2, isRootRef3) {
     let ret = createRecursiveJsObject(num);
-    g_etsVm.call('.proxyJsObject', ret.head, isRootRef2, false);
-    ret.tail.ref = g_etsVm.call('.createStsObject', isRootRef1, false);
+    const proxyJsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
+    proxyJsObject(ret.head, isRootRef2, false);
+    const createStsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
+    ret.tail.ref = createStsObject(isRootRef1, false);
     if (isRootRef3) {
         g_array.push(ret.head);
     }
 }
 
-g_etsVm = init('mark_test_mass_ref_module', 'mark_test_sts.abc');
+g_etsVm = init('mark_test_mass_ref_module', 'xgc_tests.abc');
 
 let num = 200;
 sweepTest01(num);

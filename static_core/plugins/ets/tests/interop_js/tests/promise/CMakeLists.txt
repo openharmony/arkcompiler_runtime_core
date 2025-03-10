@@ -17,70 +17,70 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise1
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testPendingPromise"
+#     LAUNCHER_ARGS "testPendingPromise"
 # )
 
 # NOTE: #23100
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise2
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testResolvedPromise"
+#     LAUNCHER_ARGS "testResolvedPromise"
 # )
 
 # NOTE: #23100
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise3
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testRejectedPromise"
+#     LAUNCHER_ARGS "testRejectedPromise"
 # )
 
 # NOTE: #23100
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise4
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testThenBeforeResolve"
+#     LAUNCHER_ARGS "testThenBeforeResolve"
 # )
 
 # NOTE: #23100
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise5
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testPromiseEmptyThen"
+#     LAUNCHER_ARGS "testPromiseEmptyThen"
 # )
 
 # NOTE: #23100
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise6
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testPromiseChain"
+#     LAUNCHER_ARGS "testPromiseChain"
 # )
 
 # NOTE: #23100
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_catch_finally_chain
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testPromiseCatchFinallyChain"
+#     LAUNCHER_ARGS "testPromiseCatchFinallyChain"
 # )
 
 # NOTE: #23100
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_resolve_promise_then_finally
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testResolvePromiseThenFinally"
+#     LAUNCHER_ARGS "testResolvePromiseThenFinally"
 # )
 
 # NOTE: #23100
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_reject_promise_then_finally
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testRejectPromiseThenFinally"
+#     LAUNCHER_ARGS "testRejectPromiseThenFinally"
 # )
 
 # NOTE: #23100
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise7
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/return_promise_to_js_test.js
-#     LAUNCHER_ARGS ".testReturnPromise" "Panda"
+#     LAUNCHER_ARGS "testReturnPromise" "Panda"
 # )
 
 # NOTE: #23100
@@ -131,7 +131,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_async_bool
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/return_promise_to_js_test.js
-#     LAUNCHER_ARGS ".testAsyncBoolean" true 2
+#     LAUNCHER_ARGS "testAsyncBoolean" true 2
 # )
 
 # NOTE: #23100
@@ -152,7 +152,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_async_short
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/return_promise_to_js_test.js
-#     LAUNCHER_ARGS ".testAsyncShort" 32767 2
+#     LAUNCHER_ARGS "testAsyncShort" 32767 2
 # )
 
 # NOTE: #23100
@@ -180,7 +180,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_async_double
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/return_promise_to_js_test.js
-#     LAUNCHER_ARGS ".testAsyncDouble" 3.2 2
+#     LAUNCHER_ARGS "testAsyncDouble" 3.2 2
 # )
 
 # NOTE: #23100
@@ -208,7 +208,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_async_void3
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/return_promise_to_js_test.js
-#     LAUNCHER_ARGS ".testAsyncVoidNothing" "undefined" 2
+#     LAUNCHER_ARGS "testAsyncVoidNothing" "undefined" 2
 # )
 
 # NOTE: #23100
@@ -222,63 +222,63 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_all_resolved
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testPromiseAllResolved"
+#     LAUNCHER_ARGS "testPromiseAllResolved"
 # )
 
 # NOTE: #23100
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_all_rejected
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testPromiseAllRejected"
+#     LAUNCHER_ARGS "testPromiseAllRejected"
 # )
 
 # NOTE: #23100
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_all_raw
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testPromiseAllRawValues"
+#     LAUNCHER_ARGS "testPromiseAllRawValues"
 # )
 
 # NOTE: #23100
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_all_iterable
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testPromiseAllIterable"
+#     LAUNCHER_ARGS "testPromiseAllIterable"
 # )
 
 # NOTE: #23100
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_allsettled_empty
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testPromiseAllSettledEmpty"
+#     LAUNCHER_ARGS "testPromiseAllSettledEmpty"
 # )
 
 # NOTE: #23100
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_allsettled
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testPromiseAllSettled"
+#     LAUNCHER_ARGS "testPromiseAllSettled"
 # )
 
 # NOTE: #23100
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_any_empty
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testPromiseAnyEmpty"
+#     LAUNCHER_ARGS "testPromiseAnyEmpty"
 # )
 
 # NOTE: #23100
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_any_resolved
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testPromiseAnyResolved"
+#     LAUNCHER_ARGS "testPromiseAnyResolved"
 # )
 
 # NOTE: #23100
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_any_rejected
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testPromiseAnyRejected"
+#     LAUNCHER_ARGS "testPromiseAnyRejected"
 # )
 
 # NOTE: #23100
@@ -292,7 +292,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_any_iterable
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testPromiseAnyRejected"
+#     LAUNCHER_ARGS "testPromiseAnyRejected"
 # )
 
 # NOTE: #23100
@@ -306,7 +306,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 # panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_race_rejected
 #     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
 #     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#     LAUNCHER_ARGS ".testPromiseRaceRejected"
+#     LAUNCHER_ARGS "testPromiseRaceRejected"
 # )
 
 # NOTE: #23100

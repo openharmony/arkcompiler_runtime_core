@@ -29,7 +29,8 @@ function runTest(test) {
 	if (!etsVm.createRuntimeViaAni(etsOpts)) {
 		throw Error('Cannot create ETS runtime');
 	}
-	let res = etsVm.call(test);
+	const runTestImpl = etsVm.getFunction('LETSGLOBAL;', test);
+	runTestImpl();
 	let counter = 0;
 	const maxCounter = 5;
 	const checkDelay = 1000;
@@ -39,7 +40,8 @@ function runTest(test) {
 		if (counter === maxCounter) {
 			throw new Error('Test failed: timeout.');
 		}
-		let result = etsVm.call('.check');
+		const check = etsVm.getFunction('LETSGLOBAL;', 'check');
+		let result = check();
 		if (result) {
 			helper.clearInterval(tId);
 		}

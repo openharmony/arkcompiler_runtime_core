@@ -52,7 +52,8 @@ class Result {
 
 function clearActiveRef() {
     g_obj = Promise.resolve();
-    g_etsVm.call('.clearActiveRef');
+    const clearActiveRef = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'clearActiveRef');
+    clearActiveRef();
 }
 
 function clearRefStorage() {
@@ -80,7 +81,8 @@ function createRecursiveJsObject(num) {
  */
 function createCrossRefNode(obj, isRootRef2) {
     let res = createRecursiveJsObject(g_redundantNum);
-    obj.ref = g_etsVm.call('.proxyJsObjectWithReturnValue', res.headJsObj, g_redundantNum, isRootRef2, false);
+    const proxyJsObjectWithReturnValue = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObjectWithReturnValue');
+    obj.ref = proxyJsObjectWithReturnValue(res.headJsObj, g_redundantNum, isRootRef2, false);
     return res.tailJsObj;
 }
 
@@ -156,7 +158,7 @@ function createCrossRefTest2(num, isRootRef1, isRootRef2) {
 }
 
 // Initialize the runtime
-g_etsVm = init('mark_test_cross_module', 'mark_test_sts.abc');
+g_etsVm = init('mark_test_cross_module', 'xgc_tests.abc');
 
 let res = createCrossRefTest1(10, false, false);
 validationXGCResult(res.beforeJsNum, res.beforeStsNum, res.afterJsNum, res.afterStsNum);

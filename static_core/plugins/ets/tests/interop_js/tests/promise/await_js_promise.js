@@ -85,7 +85,8 @@ function runAwaitTest(name, promiseCreator, promiseResolver) {
 	let etsVm = init();
 	let promise = promiseCreator();
 	// similar to async JS function call. Returns a Promise instance
-	let res = etsVm.call('.testAwaitJsPromise', promise);
+	const testAwaitJsPromise = etsVm.getFunction('LETSGLOBAL;', 'testAwaitJsPromise');
+	let res = testAwaitJsPromise(promise);
 	msg('Called testAwaitJsPromise OK, result:', INFO);
 	msg(res, INFO);
 	if (typeof res !== 'object') {

@@ -22,7 +22,8 @@ let g_etsVm;
 function clearActiveRef() {
     g_obj = Promise.resolve();
     g_inlineObj = Promise.resolve();
-    g_etsVm.call('.clearActiveRef');
+    const clearActiveRef = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'clearActiveRef');
+    clearActiveRef();
 }
 
 function clearRefStorage() {
@@ -57,10 +58,11 @@ function createJsObject(isRootRef1, isRootRef2) {
  */
 function proxyStsObjectTest(isRootRef1, isRootRef2, isRootRef3, isRootRef4) {
     let obj = createJsObject(isRootRef1, isRootRef2);
-    obj.p = g_etsVm.call('.createStsObject', isRootRef3, isRootRef4);
+    const createStsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
+    obj.p = createStsObject(isRootRef3, isRootRef4);
 }
 
-g_etsVm = init('mark_test_js_ref_sts_module', 'mark_test_sts.abc');
+g_etsVm = init('mark_test_js_ref_sts_module', 'xgc_tests.abc');
 
 proxyStsObjectTest(false, false, false, false);
 validationXGCResult(0, 1, 0, 0);

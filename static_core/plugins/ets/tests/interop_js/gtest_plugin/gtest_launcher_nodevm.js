@@ -52,7 +52,6 @@ function main() {
 	// Add 'gtest' object to global space.
 	// This object is used by gtests as storage to save and restore variables
 	globalThis.gtest = {};
-	globalThis.gtest.ret = 0;
 
 	// load ets_interop_js_napi to globalThis.gtest.etsVm
 	globalThis.gtest.etsVm = require('lib/module/ets_interop_js_napi');

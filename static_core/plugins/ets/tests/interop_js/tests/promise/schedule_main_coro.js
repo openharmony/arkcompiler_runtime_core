@@ -36,14 +36,17 @@ function runTest() {
     let tId = 0;
 
     let waitForSchedule = () => {
-        let wasSchedulded = etsVm.call('.wasScheduled');
+        const isWasScheduled = etsVm.getFunction('LETSGLOBAL;', 'wasScheduled');
+        let wasSchedulded = isWasScheduled();
         if (wasSchedulded) {
             helper.clearInterval(tId);
         }
     };
 
-    etsVm.call('.waitUntillJsIsReady');
-    etsVm.call('.jsIsReady');
+    const waitUntillJsIsReady = etsVm.getFunction('LETSGLOBAL;', 'waitUntillJsIsReady');
+    waitUntillJsIsReady();
+    const jsIsReady = etsVm.getFunction('LETSGLOBAL;', 'jsIsReady');
+    jsIsReady();
     tId = helper.setInterval(waitForSchedule, 0);
 }
 

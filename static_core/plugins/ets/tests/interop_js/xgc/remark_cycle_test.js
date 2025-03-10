@@ -20,7 +20,8 @@ function empty(etsVm) {
 
 function createRefs(etsVm) {
     let p = Promise.resolve();
-    p.ref = etsVm.call('.rememberCycle', p);
+    const rememberCycle = etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'rememberCycle');
+    p.ref = rememberCycle(p);
 }
 
 globalThis.createRefs = createRefs;

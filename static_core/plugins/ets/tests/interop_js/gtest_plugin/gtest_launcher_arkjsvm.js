@@ -58,7 +58,6 @@ function main() {
 	// Add 'gtest' object to global space.
 	// This object is used by gtests as storage to save and restore variables
 	globalThis.gtest = {};
-	globalThis.gtest.ret = 0;
 
 	globalThis.gtest.etsVm = requireNapiPreview('lib/ets_interop_js_napi_arkjsvm.so', false);
 

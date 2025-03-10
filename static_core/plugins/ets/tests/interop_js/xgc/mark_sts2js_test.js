@@ -16,7 +16,8 @@ const testRunner = require('./test_utils.js');
 
 function sts2js(etsVm) {
     let p = Promise.resolve();
-    etsVm.call('.sts2js', p);
+    const sts2js = etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'sts2js');
+    sts2js(p);
 }
 
 testRunner.runTest('mark_sts2js_test_module', 'xgc_tests.abc', sts2js);

@@ -20,7 +20,8 @@ let g_etsVm;
  * js obj <- sts pobj <- sts obj
  */
 function proxyJsObjectTest() {
-    g_etsVm.call('.proxyJsObject', Promise.resolve(), false, false);
+    const proxyJsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
+    proxyJsObject(Promise.resolve(), false, false);
 }
 
 /**
@@ -28,7 +29,8 @@ function proxyJsObjectTest() {
  * js pobj -> sts obj
  */
 function proxyStsObjectTest() {
-    g_etsVm.call('.createStsObject', false, false);
+    const createStsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
+    createStsObject(false, false);
 }
 
 /**
@@ -37,11 +39,13 @@ function proxyStsObjectTest() {
  * js pobj -> sts obj
  */
 function proxyObjectTest() {
-    g_etsVm.call('.proxyJsObject', Promise.resolve(), false, false);
-    g_etsVm.call('.createStsObject', false, false);
+    const proxyJsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
+    proxyJsObject(Promise.resolve(), false, false);
+    const createStsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
+    createStsObject(false, false);
 }
 
-g_etsVm = init('mark_test_create_proxy_module', 'mark_test_sts.abc');
+g_etsVm = init('mark_test_create_proxy_module', 'xgc_tests.abc');
 
 proxyJsObjectTest();
 validationXGCResult(1, 0, 0, 0);
