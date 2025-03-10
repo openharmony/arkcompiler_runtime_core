@@ -25,3 +25,36 @@ class Operations {
 
     static count: int = 0;
 }
+
+class A {
+    static funcA(a0: int, a1: int): void {
+        A.count += a0;
+        A.count += a1;
+    }
+
+    static funcA(a0: double, a1: double): double {
+        return a0 + a1 as double;
+    }
+
+    static funcB(a0: int, a1: int): void {
+        return A.funcA(a0, a1);
+    }
+
+    static getCount(): int {
+        return A.count;
+    }
+
+    static count: int = 0;
+};
+class B extends A{
+    static funcB(a0: int, a1: int): void {
+        B.count += a1;
+        B.count -= a0;
+    }
+
+    static getCount(): int {
+        return B.count;
+    }
+
+    static count: int = 0;
+};

@@ -24,3 +24,30 @@ class Operations {
         return c as char;
     }
 };
+
+class A {
+    static funcA(a0: char, a1: char): char {
+        let c: Char = new Char('0');
+        if (a0 > a1) {
+            c = a0 - a1;
+        } else {
+            c = a1 - a0;
+        }
+        return c as char;
+    }
+
+    static funcA(a0: int, a1: int): int {
+        return a0 + a1 as int;
+    }
+
+    static funcB(a0: char, a1: char): char {
+        return A.funcA(a0, a1);
+    }
+};
+class B extends A{
+    static funcB(a0: char, a1: char): char {
+        let c: Char = new Char('0');
+        c = a0 + a1;
+        return c as char;
+    }
+};

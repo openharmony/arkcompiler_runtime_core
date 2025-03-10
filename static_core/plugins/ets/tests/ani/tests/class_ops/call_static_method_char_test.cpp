@@ -20,9 +20,10 @@ namespace ark::ets::ani::testing {
 
 class CallStaticMethodTest : public AniTest {
 public:
+    static constexpr size_t ARG_COUNT = 2U;
     void GetMethodData(ani_class *clsResult, ani_static_method *methodResult)
     {
-        ani_class cls;
+        ani_class cls {};
         ASSERT_EQ(env_->FindClass("LOperations;", &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
@@ -37,11 +38,11 @@ public:
 
 TEST_F(CallStaticMethodTest, call_static_method_char)
 {
-    ani_class cls;
+    ani_class cls {};
     ani_static_method method;
     GetMethodData(&cls, &method);
 
-    ani_char value;
+    ani_char value = '\0';
     char c = 'C' - 'A';
     ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Char(env_, cls, method, &value, 'A', 'C'), ANI_OK);
     ASSERT_EQ(value, c);
@@ -49,11 +50,11 @@ TEST_F(CallStaticMethodTest, call_static_method_char)
 
 TEST_F(CallStaticMethodTest, call_static_method_char_v)
 {
-    ani_class cls;
+    ani_class cls {};
     ani_static_method method;
     GetMethodData(&cls, &method);
 
-    ani_char value;
+    ani_char value = '\0';
     char c = 'C' - 'A';
     ASSERT_EQ(env_->Class_CallStaticMethod_Char(cls, method, &value, 'A', 'C'), ANI_OK);
     ASSERT_EQ(value, c);
@@ -61,42 +62,42 @@ TEST_F(CallStaticMethodTest, call_static_method_char_v)
 
 TEST_F(CallStaticMethodTest, call_static_method_char_A)
 {
-    ani_class cls;
+    ani_class cls {};
     ani_static_method method;
     GetMethodData(&cls, &method);
 
-    ani_value args[2U];
+    ani_value args[ARG_COUNT];
     args[0U].c = 'A';
     args[1U].c = 'C';
 
-    ani_char value;
+    ani_char value = '\0';
     ASSERT_EQ(env_->Class_CallStaticMethod_Char_A(cls, method, &value, args), ANI_OK);
     ASSERT_EQ(value, args[1U].c - args[0U].c);
 }
 
 TEST_F(CallStaticMethodTest, call_static_method_char_null_class)
 {
-    ani_class cls;
+    ani_class cls {};
     ani_static_method method;
     GetMethodData(&cls, &method);
 
-    ani_char value;
+    ani_char value = '\0';
     ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Char(env_, nullptr, method, &value, 'A', 'C'), ANI_INVALID_ARGS);
 }
 
 TEST_F(CallStaticMethodTest, call_static_method_char_null_method)
 {
-    ani_class cls;
+    ani_class cls {};
     ani_static_method method;
     GetMethodData(&cls, &method);
 
-    ani_char value;
+    ani_char value = '\0';
     ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Char(env_, cls, nullptr, &value, 'A', 'C'), ANI_INVALID_ARGS);
 }
 
 TEST_F(CallStaticMethodTest, call_static_method_char_null_result)
 {
-    ani_class cls;
+    ani_class cls {};
     ani_static_method method;
     GetMethodData(&cls, &method);
 
@@ -105,27 +106,27 @@ TEST_F(CallStaticMethodTest, call_static_method_char_null_result)
 
 TEST_F(CallStaticMethodTest, call_static_method_char_V_null_class)
 {
-    ani_class cls;
+    ani_class cls {};
     ani_static_method method;
     GetMethodData(&cls, &method);
 
-    ani_char value;
+    ani_char value = '\0';
     ASSERT_EQ(env_->Class_CallStaticMethod_Char(nullptr, method, &value, 'A', 'C'), ANI_INVALID_ARGS);
 }
 
 TEST_F(CallStaticMethodTest, call_static_method_char_V_null_method)
 {
-    ani_class cls;
+    ani_class cls {};
     ani_static_method method;
     GetMethodData(&cls, &method);
 
-    ani_char value;
+    ani_char value = '\0';
     ASSERT_EQ(env_->Class_CallStaticMethod_Char(cls, nullptr, &value, 'A', 'C'), ANI_INVALID_ARGS);
 }
 
 TEST_F(CallStaticMethodTest, call_static_method_char_v_null_result)
 {
-    ani_class cls;
+    ani_class cls {};
     ani_static_method method;
     GetMethodData(&cls, &method);
 
@@ -134,39 +135,39 @@ TEST_F(CallStaticMethodTest, call_static_method_char_v_null_result)
 
 TEST_F(CallStaticMethodTest, call_static_method_char_A_null_class)
 {
-    ani_class cls;
+    ani_class cls {};
     ani_static_method method;
     GetMethodData(&cls, &method);
 
-    ani_value args[2U];
+    ani_value args[ARG_COUNT];
     args[0U].c = 'A';
     args[1U].c = 'C';
 
-    ani_char value;
+    ani_char value = '\0';
     ASSERT_EQ(env_->Class_CallStaticMethod_Char_A(nullptr, method, &value, args), ANI_INVALID_ARGS);
 }
 
 TEST_F(CallStaticMethodTest, call_static_method_char_A_null_method)
 {
-    ani_class cls;
+    ani_class cls {};
     ani_static_method method;
     GetMethodData(&cls, &method);
 
-    ani_value args[2U];
+    ani_value args[ARG_COUNT];
     args[0U].c = 'A';
     args[1U].c = 'C';
 
-    ani_char value;
+    ani_char value = '\0';
     ASSERT_EQ(env_->Class_CallStaticMethod_Char_A(cls, nullptr, &value, args), ANI_INVALID_ARGS);
 }
 
 TEST_F(CallStaticMethodTest, call_static_method_char_A_null_result)
 {
-    ani_class cls;
+    ani_class cls {};
     ani_static_method method;
     GetMethodData(&cls, &method);
 
-    ani_value args[2U];
+    ani_value args[ARG_COUNT];
     args[0U].c = 'A';
     args[1U].c = 'C';
 
@@ -175,12 +176,88 @@ TEST_F(CallStaticMethodTest, call_static_method_char_A_null_result)
 
 TEST_F(CallStaticMethodTest, call_static_method_char_A_null_args)
 {
-    ani_class cls;
+    ani_class cls {};
     ani_static_method method;
     GetMethodData(&cls, &method);
 
-    ani_char value;
+    ani_char value = '\0';
     ASSERT_EQ(env_->Class_CallStaticMethod_Char_A(cls, method, &value, nullptr), ANI_INVALID_ARGS);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_char_combine_scenes_1)
+{
+    ani_class clsA {};
+    ASSERT_EQ(env_->FindClass("LA;", &clsA), ANI_OK);
+    ani_static_method methodA;
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsA, "funcA", "CC:C", &methodA), ANI_OK);
+
+    ani_class clsB {};
+    ASSERT_EQ(env_->FindClass("LB;", &clsB), ANI_OK);
+    ani_static_method methodB;
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsB, "funcB", "CC:C", &methodB), ANI_OK);
+
+    ani_char valueA = '\0';
+    ASSERT_EQ(env_->Class_CallStaticMethod_Char(clsA, methodA, &valueA, 'A', 'C'), ANI_OK);
+    ASSERT_EQ(valueA, 'C' - 'A');
+
+    ani_char valueB = '\0';
+    ASSERT_EQ(env_->Class_CallStaticMethod_Char(clsB, methodB, &valueB, 'A', 'C'), ANI_OK);
+    ASSERT_EQ(valueB, 'A' + 'C');
+
+    ani_value args[ARG_COUNT];
+    args[0U].c = 'A';
+    args[1U].c = 'C';
+    ani_char valueAA = '\0';
+    ASSERT_EQ(env_->Class_CallStaticMethod_Char_A(clsA, methodA, &valueAA, args), ANI_OK);
+    ASSERT_EQ(valueAA, 'C' - 'A');
+
+    ani_char valueBA = '\0';
+    ASSERT_EQ(env_->Class_CallStaticMethod_Char_A(clsB, methodB, &valueBA, args), ANI_OK);
+    ASSERT_EQ(valueBA, 'A' + 'C');
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_char_combine_scenes_2)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("LA;", &cls), ANI_OK);
+    ani_static_method methodA;
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "CC:C", &methodA), ANI_OK);
+    ani_static_method methodB;
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "II:I", &methodB), ANI_OK);
+
+    ani_char value = '\0';
+    ASSERT_EQ(env_->Class_CallStaticMethod_Char(cls, methodA, &value, 'A', 'C'), ANI_OK);
+    ASSERT_EQ(value, 'C' - 'A');
+
+    ani_value args[ARG_COUNT];
+    args[0U].c = 'A';
+    args[1U].c = 'C';
+    ani_char valueA = '\0';
+    ASSERT_EQ(env_->Class_CallStaticMethod_Char_A(cls, methodA, &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, 'C' - 'A');
+
+    ani_int value2 = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Int(cls, methodB, &value2, 6U, 6U), ANI_OK);
+    ASSERT_EQ(value2, 6U + 6U);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_char_combine_scenes_3)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("LA;", &cls), ANI_OK);
+    ani_static_method method;
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcB", "CC:C", &method), ANI_OK);
+
+    ani_char value = '\0';
+    ASSERT_EQ(env_->Class_CallStaticMethod_Char(cls, method, &value, 'A', 'C'), ANI_OK);
+    ASSERT_EQ(value, 'C' - 'A');
+
+    ani_value args[ARG_COUNT];
+    args[0U].c = 'A';
+    args[1U].c = 'C';
+    ani_char valueA = '\0';
+    ASSERT_EQ(env_->Class_CallStaticMethod_Char_A(cls, method, &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, 'C' - 'A');
 }
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
