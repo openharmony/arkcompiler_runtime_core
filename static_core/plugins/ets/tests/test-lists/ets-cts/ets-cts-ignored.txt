@@ -1902,9 +1902,6 @@
 #23533
 11.enumerations/02.enumeration_string_values/enum_str_4.sts
 
-#21157
-13.compilation_units/03.import_directives/05.type_binding/type_binding_class_same_name_2.sts
-
 #23076
 13.compilation_units/05.declaration_modules/declaration_modules_5.sts
 
@@ -2511,9 +2508,6 @@
 # 23115
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/interface_override_with_object_example_return_4.sts
 # endof 23115
-
-#21157 Annotation name coinciding with type name gets compiled but shouldn't
-18.annotations/01.declaring_annotations/declaration_coincide_name_n_1.sts
 
 #23368
 18.annotations/02.using_annotations/using_annotations_n_10.sts

@@ -2202,6 +2202,7 @@ deprecated/15.exceptions/03.rethrowing_functions/rethrowing_function_without_cat
 03.types/08.reference_types/12.union_types/ut_n_13.sts
 03.types/08.reference_types/12.union_types/ut_n_7.sts
 03.types/08.reference_types/12.union_types/ut_n_8.sts
+04.names_declarations_and_scopes/03.distinguishable_declarations/spec_decl2.sts
 04.names_declarations_and_scopes/03.distinguishable_declarations/spec_decl_n1.sts
 04.names_declarations_and_scopes/03.distinguishable_declarations/spec_decl_n3.sts
 04.names_declarations_and_scopes/03.distinguishable_declarations/spec_decl_n6.sts
@@ -2251,6 +2252,8 @@ deprecated/15.exceptions/03.rethrowing_functions/rethrowing_function_without_cat
 04.names_declarations_and_scopes/05.accesible/type_name_interface_prop_7.sts
 04.names_declarations_and_scopes/05.accesible/type_name_interface_prop_8.sts
 04.names_declarations_and_scopes/05.accesible/type_name_interface_prop_9.sts
+04.names_declarations_and_scopes/05.accesible/type_name_neg_1.sts
+04.names_declarations_and_scopes/05.accesible/type_name_neg_2.sts
 04.names_declarations_and_scopes/05.accesible/type_name_neg_3.sts
 04.names_declarations_and_scopes/05.accesible/type_name_neg_5.sts
 04.names_declarations_and_scopes/05.accesible/type_name_neg_6.sts
