@@ -1,0 +1,56 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+cases:
+  - { type: byte, value: 26, sign: '*', expected: 260 }
+  - { type: byte, value: 26, sign: '/', expected: 2   }
+  - { type: byte, value: 26, sign: '%', expected: 6   }
+  - { type: byte, value: 26, sign: '+', expected: 36  }
+  - { type: byte, value: 26, sign: '-', expected: 16  }
+
+  - { type: short, value: 26,  sign: '*', expected: 260 }
+  - { type: short, value: 260, sign: '/', expected: 26  }
+  - { type: short, value: 260, sign: '%', expected: 0   }
+  - { type: short, value: 260, sign: '+', expected: 270 }
+  - { type: short, value: 260, sign: '-', expected: 250 }
+
+  - { type: char, value: c'p', sign: '*', expected: 1120 }
+  - { type: char, value: c'p', sign: '/', expected: 11   }
+  - { type: char, value: c'p', sign: '%', expected: 2    }
+  - { type: char, value: c'p', sign: '+', expected: 122  }
+  - { type: char, value: c'p', sign: '-', expected: 102  }
+
+  - { type: int, value: 38,  sign: '*', expected: 380 }
+  - { type: int, value: 308, sign: '/', expected: 30  }
+  - { type: int, value: 308, sign: '%', expected: 8   }
+  - { type: int, value: 308, sign: '+', expected: 318 }
+  - { type: int, value: 308, sign: '-', expected: 298 }
+
+  - { type: long, value: 56,  sign: '*', expected: 560, conversion: as int }
+  - { type: long, value: 506, sign: '/', expected: 50,  conversion: as int }
+  - { type: long, value: 506, sign: '%', expected: 6,   conversion: as int }
+  - { type: long, value: 506, sign: '+', expected: 516, conversion: as int }
+  - { type: long, value: 506, sign: '-', expected: 496, conversion: as int }
+
+  - { type: float, value: 123.2f, sign: '*', expected: 1232, conversion: as int }
+  - { type: float, value: 123.2f, sign: '/', expected: 12,   conversion: as int }
+  - { type: float, value: 123.2f, sign: '%', expected: 3,    conversion: as int }
+  - { type: float, value: 123.2f, sign: '+', expected: 133,  conversion: as int }
+  - { type: float, value: 123.2f, sign: '-', expected: 113,  conversion: as int }
+
+  - { type: number, value: 551.9, sign: '*', expected: 5519, conversion: as int }
+  - { type: number, value: 551.9, sign: '/', expected: 55,   conversion: as int }
+  - { type: number, value: 551.9, sign: '%', expected: 1,    conversion: as int }
+  - { type: number, value: 551.9, sign: '+', expected: 561,  conversion: as int }
+  - { type: number, value: 551.9, sign: '-', expected: 541,  conversion: as int }
+      
