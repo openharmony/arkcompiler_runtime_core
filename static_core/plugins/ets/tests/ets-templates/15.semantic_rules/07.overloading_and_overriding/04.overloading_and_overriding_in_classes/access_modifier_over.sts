@@ -21,7 +21,7 @@ desc: >-
     member. Otherwise, a compile-time error occurs.
     Only accessible (see Accessible) methods are subject for overloading and overriding. For example, neither
     overriding nor overloading is considered if a superclass contains a private method, and a subclass has a method
-    with the same name. Accessors are considered methods here.
+    with the same name. In case of overriding the same rules are applied for accessors as well.
 
     {{c.doc}}
 tags: [{{c.tags}}]
