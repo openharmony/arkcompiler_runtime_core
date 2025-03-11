@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -481,13 +481,13 @@ void RegisterProcessNativeMethods(EtsEnv *env)
                     EtsNativeMethod {"chdir", nullptr, reinterpret_cast<void *>(ChangeCurrentWorkingDirectory)},
                     EtsNativeMethod {"uptime", nullptr, reinterpret_cast<void *>(GetSystemUptime)}};
 
-    auto childProcessKlass = env->FindClass("escompat/ChildProcess");
+    auto childProcessKlass = env->FindClass("escompat/StdProcess/ChildProcess");
     env->RegisterNatives(childProcessKlass, childProcessImpls.data(), childProcessImpls.size());
 
-    auto processManagerKlass = env->FindClass("escompat/ProcessManager");
+    auto processManagerKlass = env->FindClass("escompat/StdProcess/ProcessManager");
     env->RegisterNatives(processManagerKlass, processManagerImpls.data(), processManagerImpls.size());
 
-    auto processKlass = env->FindClass("escompat/process");
+    auto processKlass = env->FindClass("escompat/StdProcess/process");
     env->RegisterNatives(processKlass, processImpls.data(), processImpls.size());
 }
 
