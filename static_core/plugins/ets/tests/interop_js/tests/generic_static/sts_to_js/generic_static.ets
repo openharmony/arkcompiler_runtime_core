@@ -41,15 +41,15 @@ const BaseObj: Base = { a: stsInt };
 // }
 
 // NOTE: issue (18007) fix constrain
-// type Tuple = [int, boolean];
+// type TupleT = [int, boolean];
 
 // class ExtraSetStatic {
-//     static get<T extends Tuple>(value: T): int {
+//     static get<T extends TupleT>(value: T): int {
 //         return value[0];
 //     }
 // }
 
-// function genericExtraSetCallFromSts(arg: Tuple): int {
+// function genericExtraSetCallFromSts(arg: TupleT): int {
 //     return ExtraSetStatic.get(arg);
 // }
 

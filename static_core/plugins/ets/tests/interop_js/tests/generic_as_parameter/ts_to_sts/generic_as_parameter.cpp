@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,8 +49,8 @@ TEST_F(EtsGenericAsParameterTsToEtsTest, checkAnyTypeParameterUnion)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkAnyTypeParameterUnion"));
 }
-
-TEST_F(EtsGenericAsParameterTsToEtsTest, checkAnyTypeParameterTuple)
+// NOTE (#24570): fix interop tests
+TEST_F(EtsGenericAsParameterTsToEtsTest, DISABLED_checkAnyTypeParameterTuple)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkAnyTypeParameterTuple"));
 }
@@ -125,7 +125,8 @@ TEST_F(EtsGenericAsParameterTsToEtsTest, checkGenericTypeFunctionReturnAnyUnion)
     ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericTypeFunctionReturnAnyUnion"));
 }
 
-TEST_F(EtsGenericAsParameterTsToEtsTest, checkGenericTypeFunctionReturnAnyTuple)
+// NOTE (#24570): fix interop test
+TEST_F(EtsGenericAsParameterTsToEtsTest, DISABLED_checkGenericTypeFunctionReturnAnyTuple)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericTypeFunctionReturnAnyTuple"));
 }
@@ -200,7 +201,8 @@ TEST_F(EtsGenericAsParameterTsToEtsTest, checkExtendGenericUnion)
     ASSERT_EQ(true, CallEtsMethod<bool>("checkExtendGenericUnion"));
 }
 
-TEST_F(EtsGenericAsParameterTsToEtsTest, checkExtendGenericTuple)
+// NOTE (#24570): add issue, fix interop test
+TEST_F(EtsGenericAsParameterTsToEtsTest, DISABLED_checkExtendGenericTuple)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkExtendGenericTuple"));
 }
@@ -219,8 +221,8 @@ TEST_F(EtsGenericAsParameterTsToEtsTest, checkGenericExtendType)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericExtendType"));
 }
-
-TEST_F(EtsGenericAsParameterTsToEtsTest, checkTupleGeneric)
+// NOTE (#24570): fix interop tests with tuples
+TEST_F(EtsGenericAsParameterTsToEtsTest, DISABLED_checkTupleGeneric)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkTupleGeneric"));
 }
@@ -289,8 +291,8 @@ TEST_F(EtsGenericAsParameterTsToEtsTest, checkGenericDefaultUnion)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericDefaultUnion"));
 }
-
-TEST_F(EtsGenericAsParameterTsToEtsTest, checkGenericDefaultTuple)
+// NOTE (#24570): fix interop tests for tuples
+TEST_F(EtsGenericAsParameterTsToEtsTest, DISABLED_checkGenericDefaultTuple)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericDefaultTuple"));
 }

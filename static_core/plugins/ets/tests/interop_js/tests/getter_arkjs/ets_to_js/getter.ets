@@ -121,21 +121,21 @@ function create_union_type_getter_class_from_ets(arg: Union): UnionTypeClass {
     return new UnionTypeClass(arg);
 }
 
-type Tuple = [number, string];
+type TupleT = [number, string];
 
 class TupleTypeClass {
-    private _value: Tuple;
+    private _value: TupleT;
 
-    constructor(value: Tuple) {
+    constructor(value: TupleT) {
         this._value = value;
     }
 
-    public get value(): Tuple {
+    public get value(): TupleT {
         return this._value;
     }
 }
 
-function create_tuple_type_getter_class_from_ets(arg: Tuple): TupleTypeClass {
+function create_tuple_type_getter_class_from_ets(arg: TupleT): TupleTypeClass {
     return new TupleTypeClass(arg);
 }
 
@@ -220,8 +220,8 @@ function create_any_type_getter_class_from_ets_obj(arg: object): AnyTypeClass<ob
     return new AnyTypeClass<object>(arg);
 }
 
-function create_any_type_getter_class_from_ets_tuple(arg: Tuple): AnyTypeClass<Tuple> {
-    return new AnyTypeClass<Tuple>(arg);
+function create_any_type_getter_class_from_ets_tuple(arg: TupleT): AnyTypeClass<TupleT> {
+    return new AnyTypeClass<TupleT>(arg);
 }
 
 function create_any_type_getter_class_from_ets_union(arg: Union): AnyTypeClass<Union> {

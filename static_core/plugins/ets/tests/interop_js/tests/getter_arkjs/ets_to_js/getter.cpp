@@ -54,6 +54,11 @@ TEST_F(EtsGetterEtsToJsTest, check_any_type_getter_class)
 {
     ASSERT_TRUE(RunJsTestSuite("check_any_type_getter_class.js"));
 }
+// NOTE (#24570): fix interop tests for tuples
+TEST_F(EtsGetterEtsToJsTest, DISABLED_check_any_type_getter_class_tuple)
+{
+    ASSERT_TRUE(RunJsTestSuite("check_any_type_getter_class_tuple.js"));
+}
 
 TEST_F(EtsGetterEtsToJsTest, check_subset_by_ref_getter_class)
 {

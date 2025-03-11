@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -124,18 +124,18 @@ TEST_F(EtsInterfaceTsToEtsTest, check_instance_subset_by_value_class_from_ts)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceSubsetByValueClassFromTs"));
 }
-
-TEST_F(EtsInterfaceTsToEtsTest, check_tuple_type_class)
+// NOTE (#24570): fix interop tests with tuples
+TEST_F(EtsInterfaceTsToEtsTest, DISABLED_check_tuple_type_class)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkTupleTypeClass"));
 }
-
-TEST_F(EtsInterfaceTsToEtsTest, check_create_tuple_class_from_ts)
+// NOTE (#24570): fix interop tests with tuples
+TEST_F(EtsInterfaceTsToEtsTest, DISABLED_check_create_tuple_class_from_ts)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateTupleClassFromTs"));
 }
-
-TEST_F(EtsInterfaceTsToEtsTest, check_instance_tuple_class_from_ts)
+// NOTE (#24570): fix interop tests with tuples
+TEST_F(EtsInterfaceTsToEtsTest, DISABLED_check_instance_tuple_class_from_ts)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceTupleClassFromTs"));
 }

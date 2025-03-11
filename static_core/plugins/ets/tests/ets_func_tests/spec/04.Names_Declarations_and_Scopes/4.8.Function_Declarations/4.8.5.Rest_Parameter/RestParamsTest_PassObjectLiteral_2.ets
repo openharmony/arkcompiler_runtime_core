@@ -28,7 +28,7 @@ class Base {
 
 }
 
-class Tuple {
+class TupleT {
     index: int;
     name: String = "";
 }
@@ -47,8 +47,8 @@ function main(): int {
     let test = new Testee();
     let result: int = 0;
 
-    let tu: Tuple = {index: 11, name: "Jane"};
-    result = test.spread("Double Tuple", tu, {index: 11, name: "Jane"} as Tuple);
+    let tu: TupleT = {index: 11, name: "Jane"};
+    result = test.spread("Double Tuple", tu, {index: 11, name: "Jane"} as TupleT);
     if(result != 42) return 1;
 
     return 0;

@@ -27,6 +27,7 @@ readonly DATAVIEW="${GEN_ESCOMPAT_PATH}/DataView.ets"
 readonly TYPED_ARR="${GEN_ESCOMPAT_PATH}/TypedArrays.ets"
 readonly TYPED_UARR="${GEN_ESCOMPAT_PATH}/TypedUArrays.ets"
 readonly FUNC="${GEN_STDCORE_PATH}/Function.ets"
+readonly TUP="${GEN_STDCORE_PATH}/Tuple.ets"
 
 cd "$SCRIPT_DIR"
 
@@ -68,5 +69,9 @@ echo "Generating ${TYPED_UARR}"
 # Generate Functions
 echo "Generating ${FUNC}"
 "${JINJA_PATH}" "${SCRIPT_DIR}/Function.ets.j2" -o "${FUNC}"
+
+# Generate Tuples
+echo "Generating ${TUP}"
+"${JINJA_PATH}" "${SCRIPT_DIR}/Tuple.ets.j2" -o "${TUP}"
 
 exit 0

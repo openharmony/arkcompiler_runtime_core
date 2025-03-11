@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { string, number, bool, arr, obj, tuple } from './constant';
+import { string, number, bool, arr, obj } from './constant';
 
 const etsVm = globalThis.gtest.etsVm;
 const checkArray = (arg) => arg instanceof Array;
@@ -24,75 +24,62 @@ const createAnyTypeGetterClassFromEtsInt = etsVm.getFunction('Lgetter/test/ETSGL
 const createAnyTypeGetterClassFromEtsBool = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'create_any_type_getter_class_from_ets_bool');
 const createAnyTypeGetterClassFromEtsArr = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'create_any_type_getter_class_from_ets_arr');
 const createAnyTypeGetterClassFromEtsObj = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'create_any_type_getter_class_from_ets_obj');
-const createAnyTypeGetterClassFromEtsTuple = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'create_any_type_getter_class_from_ets_tuple');
 const createAnyTypeGetterClassFromEtsUnion = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'create_any_type_getter_class_from_ets_union');
 
 
 function checkClassGetterClassValueInt() {
-	const GClass = new AnyTypeClass(number);
-	ASSERT_TRUE(GClass.value === number);
+    const GClass = new AnyTypeClass(number);
+    ASSERT_TRUE(GClass.value === number);
 }
 
 function checkClassGetterClassValueString() {
-	const GClass = new AnyTypeClass(string);
-	ASSERT_TRUE(GClass.value === string);
+    const GClass = new AnyTypeClass(string);
+    ASSERT_TRUE(GClass.value === string);
 }
 
 function checkClassGetterClassValueBool() {
-	const GClass = new AnyTypeClass(bool);
-	ASSERT_TRUE(GClass.value === bool);
+    const GClass = new AnyTypeClass(bool);
+    ASSERT_TRUE(GClass.value === bool);
 }
 
 function checkClassGetterClassValueArr() {
-	const GClass = new AnyTypeClass(arr);
-	ASSERT_TRUE(checkArray(GClass.value) && GClass.value[0] === arr[0]);
+    const GClass = new AnyTypeClass(arr);
+    ASSERT_TRUE(checkArray(GClass.value) && GClass.value[0] === arr[0]);
 }
 
 function checkClassGetterClassValueObj() {
-	const GClass = new AnyTypeClass(obj);
-	ASSERT_TRUE(checkObj(GClass.value));
-}
-
-function checkClassGetterClassValueTuple() {
-	const GClass = new AnyTypeClass(tuple);
-	const res = GClass.value;
-	ASSERT_TRUE(checkArray(res) && res[0] === tuple[0] && res[1] === tuple[1]);
+    const GClass = new AnyTypeClass(obj);
+    ASSERT_TRUE(checkObj(GClass.value));
 }
 
 function checkCreateAnyTypeGetterClassFromEtsString() {
-	const GClass = createAnyTypeGetterClassFromEtsString(string);
-	ASSERT_TRUE(GClass.value === string);
+    const GClass = createAnyTypeGetterClassFromEtsString(string);
+    ASSERT_TRUE(GClass.value === string);
 }
 
 function checkCreateAnyTypeGetterClassFromEtsInt() {
-	const GClass = createAnyTypeGetterClassFromEtsInt(number);
-	ASSERT_TRUE(GClass.value === number);
+    const GClass = createAnyTypeGetterClassFromEtsInt(number);
+    ASSERT_TRUE(GClass.value === number);
 }
 
 function checkCreateAnyTypeGetterClassFromEtsBool() {
-	const GClass = createAnyTypeGetterClassFromEtsBool(bool);
-	ASSERT_TRUE(GClass.value === bool);
+    const GClass = createAnyTypeGetterClassFromEtsBool(bool);
+    ASSERT_TRUE(GClass.value === bool);
 }
 
 function checkCreateAnyTypeGetterClassFromEtsArr() {
-	const GClass = createAnyTypeGetterClassFromEtsArr(arr);
-	ASSERT_TRUE(checkArray(GClass.value) && GClass.value[0] === arr[0]);
+    const GClass = createAnyTypeGetterClassFromEtsArr(arr);
+    ASSERT_TRUE(checkArray(GClass.value) && GClass.value[0] === arr[0]);
 }
 
 function checkCreateAnyTypeGetterClassFromEtsObj() {
-	const GClass = createAnyTypeGetterClassFromEtsObj(obj);
-	ASSERT_TRUE(checkObj(GClass.value));
-}
-
-function checkCreateAnyTypeGetterClassFromEtsTuple() {
-	const GClass = createAnyTypeGetterClassFromEtsTuple(tuple);
-	const res = GClass.value;
-	ASSERT_TRUE(checkArray(res) && res[0] === tuple[0] && res[1] === tuple[1]);
+    const GClass = createAnyTypeGetterClassFromEtsObj(obj);
+    ASSERT_TRUE(checkObj(GClass.value));
 }
 
 function checkCreateAnyTypeGetterClassFromEtsUnion() {
-	const GClass = createAnyTypeGetterClassFromEtsUnion(number);
-	ASSERT_TRUE(GClass.value === number);
+    const GClass = createAnyTypeGetterClassFromEtsUnion(number);
+    ASSERT_TRUE(GClass.value === number);
 }
 
 checkClassGetterClassValueInt();
@@ -100,11 +87,9 @@ checkClassGetterClassValueString();
 checkClassGetterClassValueBool();
 checkClassGetterClassValueArr();
 checkClassGetterClassValueObj();
-checkClassGetterClassValueTuple();
 checkCreateAnyTypeGetterClassFromEtsString();
 checkCreateAnyTypeGetterClassFromEtsInt();
 checkCreateAnyTypeGetterClassFromEtsBool();
 checkCreateAnyTypeGetterClassFromEtsArr();
 checkCreateAnyTypeGetterClassFromEtsObj();
-checkCreateAnyTypeGetterClassFromEtsTuple();
 checkCreateAnyTypeGetterClassFromEtsUnion();

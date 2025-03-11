@@ -21,7 +21,7 @@ tags:
 - negative
 ---*/
 
-class Tuple {
+class TupleT {
     index: int;
     name: String;
 }
@@ -29,7 +29,7 @@ class Tuple {
 function main(): int {
     let test: Array<undefined>;
     test = new Array<undefined>();
-    test.push({index: 2, name: "John Dow"} as Tuple);
+    test.push({index: 2, name: "John Dow"} as TupleT);
 
     return 0;
 }

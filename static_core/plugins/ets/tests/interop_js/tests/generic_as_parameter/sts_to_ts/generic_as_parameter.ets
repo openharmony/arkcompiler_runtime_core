@@ -16,7 +16,7 @@
 package generic_as_parameter.test;
 
 type Union = string | int;
-type Tuple = [int, boolean];
+type TupleT = [int, boolean];
 
 const etsInt = 1;
 const etsString = 'string';
@@ -24,7 +24,7 @@ const etsBool = true;
 const etsArr: int[] = [etsInt];
 const etsObj: object = {};
 const etsUnion: Union = etsInt;
-const etsTuple: Tuple = [etsInt, etsBool];
+const etsTuple: TupleT = [etsInt, etsBool];
 
 
 // NOTE: issue (1835) enable this after fix Literal type
@@ -69,8 +69,8 @@ function anyTypeParameterExplicitCallFromEtsUnion(): Union {
 
 }
 
-function anyTypeParameterExplicitCallFromEtsTuple(): Tuple {
-    return anyTypeParameter<Tuple>(etsTuple);
+function anyTypeParameterExplicitCallFromEtsTuple(): TupleT {
+    return anyTypeParameter<TupleT>(etsTuple);
 }
 
 function genericDefaultInt<T = int>(arg: T): T {
@@ -97,7 +97,7 @@ function genericDefaultUnion<T = Union>(arg: T): T {
     return arg;
 }
 
-function genericDefaultTuple<T = Tuple>(arg: T): T {
+function genericDefaultTuple<T = TupleT>(arg: T): T {
     return arg;
 }
 
@@ -125,8 +125,8 @@ function genericDefaultUnionCallFromEts(): Union {
     return genericDefaultUnion<Union>(etsUnion);
 }
 
-function genericDefaultTupleCallFromEts(): Tuple {
-    return genericDefaultTuple<Tuple>(etsTuple);
+function genericDefaultTupleCallFromEts(): TupleT {
+    return genericDefaultTuple<TupleT>(etsTuple);
 }
 
 
@@ -144,7 +144,7 @@ function genericExtendInterface<T extends GInterfaceClass>(arg: T): T {
 
 function genericExtendInterfaceFromEts(): GInterfaceClass {
     const obj: GInterfaceClass = { data: 'string' }
-    
+
     return genericExtendInterface(obj as GInterfaceClass);
 }
 
@@ -157,7 +157,7 @@ function genericExtendInterfaceFromEts(): GInterfaceClass {
 
 // class GTypeClass implements GType {
 //     data = 'string';
-// } 
+// }
 
 // function genericExtendType<T extends GTypeClass>(arg: T): T {
 //     return arg;
@@ -181,8 +181,8 @@ function genericExtendClassFromEts(): User {
     return genericExtendClass(obj as User);
 }
 
-function tupleGeneric<T, U>(arg: [T, U]): [U, T] {
-    return [arg[1], arg[0]]
+function tupleGeneric<T, U>(arg: (T|U)[]): [U, T] {
+    return [arg[1] as U, arg[0] as T]
 }
 
 function collectGeneric<T>(...args: T[]): T[] {

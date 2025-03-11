@@ -31,11 +31,11 @@ import {
     AbstractClassObject
 } from 'js/setter';
 
-type Tuple = [int, string];
+type TupleT = [int, string];
 
 const strContent = 'ets_test_string';
 const numContent = 1;
-const tupleContent: Tuple = [numContent, strContent];
+const tupleContent: TupleT = [numContent, strContent];
 
 function errLog(op: String) {
     console.println("Bug operation: " + op);

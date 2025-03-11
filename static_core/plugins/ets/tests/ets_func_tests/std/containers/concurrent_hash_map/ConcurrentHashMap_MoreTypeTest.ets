@@ -241,9 +241,6 @@ function main(): int {
         });
     });
 
-    // Cannot run when key and Vaule have the same type and
-    // Unexpected exception: ClassCastError: [Lstd/core/Object; cannot be cast to [Double, Double]|undefined
-    /*
     concurrentHashMapTestsuite.addTest("entriesOfNumber", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, number> = new ConcurrentHashMap<number, number>();
@@ -261,7 +258,7 @@ function main(): int {
         assertEQ(iterEntries.next().value, undefined);
     });
     concurrentHashMapTestsuite.addTest("entriesOfNumber", () =>
-    {       
+    {
         let concurrentHashMap: ConcurrentHashMap<string, string> = new ConcurrentHashMap<string, string>();
         for (let i: int = 0; i < 10 ; i++) {
             concurrentHashMap.set(arrValues[i], arrValues[i]);
@@ -276,7 +273,7 @@ function main(): int {
         }
         assertEQ(iterEntries.next().value, undefined);
     });
-    */
+
 
     return concurrentHashMapTestsuite.run();
 }
