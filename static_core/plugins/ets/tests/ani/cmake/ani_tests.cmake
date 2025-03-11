@@ -63,6 +63,7 @@ function(ani_add_gtest TARGET)
             "${ANI_GTEST_ABC_PATH}"
 
         SOURCES ${ARG_CPP_SOURCES}
+        INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani
         LIBRARIES ${ARG_LIBRARIES} ani_gtest arkruntime
         SANITIZERS ${PANDA_SANITIZERS_LIST}
         TSAN_EXTRA_OPTIONS ${ARG_TSAN_EXTRA_OPTIONS}

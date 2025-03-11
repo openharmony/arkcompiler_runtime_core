@@ -22,6 +22,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
+#include "utils/logger.h"
 #include "utils/pandargs.h"
 
 extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version, ani_vm **result)
@@ -50,10 +51,18 @@ extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version,
     // Add runtime options
     baseOptions.AddOptions(&paParser);
     aniOptions.AddOptions(&paParser);
+
+    ark::Logger::Initialize(baseOptions, aniParser.GetLoggerCallback());
     if (!paParser.Parse(aniParser.GetRuntimeOptions())) {
-        std::cerr << paParser.GetErrorString() << std::endl;
+        std::string errorMessage = paParser.GetErrorString();
+        if (!errorMessage.empty() && errorMessage.back() == '\n') {
+            // Trim new line
+            errorMessage = std::string(errorMessage.c_str(), errorMessage.length() - 1);
+        }
+        LOG(ERROR, ANI) << errorMessage;
         return ANI_ERROR;
     }
+
 #ifndef PANDA_ETS_INTEROP_JS
     if (aniParser.IsInteropMode()) {
         // no interop options allowed in the interop-free build!
@@ -61,7 +70,6 @@ extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version,
     }
 #endif /* PANDA_ETS_INTEROP_JS */
 
-    ark::Logger::Initialize(baseOptions);
     if (!ark::Runtime::Create(aniOptions)) {
         LOG(ERROR, RUNTIME) << "Cannot create runtime";
         return ANI_ERROR;

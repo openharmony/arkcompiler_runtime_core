@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-#include "ani/ani.h"
+#include "ani.h"
 
 namespace ark::ets::ani {
 
@@ -30,6 +30,8 @@ namespace ark::ets::ani {
  */
 class ANIOptionsParser {
 public:
+    using LoggerCallback = void (*)(FILE *stream, int level, const char *component, const char *message);
+
     ANIOptionsParser(size_t optionsSize, const ani_option *inputOptions)
         : optionsSize_(optionsSize), inputOptions_(inputOptions)
     {
@@ -56,33 +58,47 @@ public:
         return interopEnv_;
     }
 
+    LoggerCallback GetLoggerCallback()
+    {
+        return loggerCallback_;
+    }
+
 private:
     void Parse()
     {
+        const std::string depricatedPref = "--ext:--";
         const std::string prefix = "--ext:";
 
         for (size_t i = 0; i < optionsSize_; ++i) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            std::string option(inputOptions_[i].option);
+            const ani_option opt = inputOptions_[i];
+            std::string option(opt.option);
+
+            if (option == "--logger") {
+                loggerCallback_ = reinterpret_cast<LoggerCallback>(opt.extra);
+                continue;
+            }
 
             // NOTE(konstanting, #23205): this explicit comparison was requested by v.cherkashin
             // for better readability. To be refactored.
             if (option == "--ext:interop") {
                 isInteropMode_ = true;
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                interopEnv_ = inputOptions_[i].extra;
+                interopEnv_ = opt.extra;
                 continue;
             }
 
             // NOTE: need to skip forbidden options, such as "--load-runtimes"
-            if (option.size() >= prefix.size() && option.substr(0, prefix.size()) == prefix) {
-                runtimeOptions_.push_back(option.substr(prefix.size()));
+            if (option.size() >= depricatedPref.size() && option.substr(0, depricatedPref.size()) == depricatedPref) {
+                runtimeOptions_.push_back("--" + option.substr(depricatedPref.size()));
+            } else if (option.size() >= prefix.size() && option.substr(0, prefix.size()) == prefix) {
+                runtimeOptions_.push_back("--" + option.substr(prefix.size()));
             }
         }
     }
 
     void *interopEnv_ {nullptr};
     bool isInteropMode_ {false};
+    LoggerCallback loggerCallback_ = nullptr;
 
     size_t optionsSize_;
     const ani_option *inputOptions_;
