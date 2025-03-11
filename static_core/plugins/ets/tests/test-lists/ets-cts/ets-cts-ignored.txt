@@ -29,12 +29,6 @@
 #23596
 03.types/07.value_types/01.integer_types_and_operations/bitwise_complement/bitwise_complement_char_3.sts
 
-#23598
-03.types/07.value_types/01.integer_types_and_operations/division/division_by_zero_byte.sts
-03.types/07.value_types/01.integer_types_and_operations/division/division_by_zero_short.sts
-03.types/07.value_types/01.integer_types_and_operations/remainder/remainder_by_zero_byte.sts
-03.types/07.value_types/01.integer_types_and_operations/remainder/remainder_by_zero_short.sts
-
 #23599
 03.types/07.value_types/01.integer_types_and_operations/equal/equal_char_4.sts
 03.types/07.value_types/01.integer_types_and_operations/left_shift/left_shift_char_7.sts
