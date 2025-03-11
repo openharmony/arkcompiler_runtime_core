@@ -15,6 +15,8 @@
 
 package std.concurrency;
 
+import { mlaunch } from "std/concurrency"
+
 /// This class provides api for sync primitives (see SyncPrimitives.ets)
 final class ConcurrencyHelpers {
     // Mutex api
@@ -24,4 +26,19 @@ final class ConcurrencyHelpers {
     public static native eventCreate(): Object;
     public static native eventWait(event: Object): void;
     public static native eventFire(event: Object): void;
+}
+
+class NativeAsyncWorkHelper {
+    static queue(executeCb: long, completeCb: long, data: long): void {
+        NativeAsyncWorkHelper.queueInternal(executeCb, completeCb, data);
+    }
+    static async queueInternal(executeCb: long, completeCb: long, data: long) {
+        let p = mlaunch<void, (nativeCb: long, data: long, needNativeScope: boolean) => void>(NativeAsyncWorkHelper.asyncWorkNativeInvokeInternal, executeCb, data, true);
+        p.Await();
+        NativeAsyncWorkHelper.asyncWorkNativeInvokeInternal(completeCb, data, false);
+    }
+    static native asyncWorkNativeInvoke(nativeCb: long, data: long, needNativeScope: boolean): void;
+    static asyncWorkNativeInvokeInternal(nativeCb: long, data: long, needNativeScope: boolean) {
+        NativeAsyncWorkHelper.asyncWorkNativeInvoke(nativeCb, data, needNativeScope);
+    }
 }

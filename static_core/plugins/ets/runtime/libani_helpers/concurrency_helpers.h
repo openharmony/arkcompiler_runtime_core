@@ -24,6 +24,7 @@ enum class WorkStatus {
     OK,
     INVALID_ARGS,
     CANCELED,
+    ERROR,
 };
 
 class AsyncWork;
