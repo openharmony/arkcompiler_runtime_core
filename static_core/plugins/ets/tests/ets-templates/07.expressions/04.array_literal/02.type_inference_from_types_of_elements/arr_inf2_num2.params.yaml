@@ -1,0 +1,121 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    # zeros
+    - val: '[[0]]'
+    - val: '[[0.0f]]'
+
+    # primitives
+    - val: '[[0b1 as byte]]'
+    - val: '[[0xF as short]]'
+    - val: '[[0o7 as int]]'
+    - val: '[[-9223372036854775807 as long]]'
+    - val: '[[111e11 as float]]'
+    - val: '[[222e22 as double]]'
+    - val: '[[11111111111n]]'
+
+    # boxed
+    - val: '[[new Byte]]'
+    - val: '[[new Short]]'
+    - val: '[[new Int]]'
+    - val: '[[new Long]]'
+    - val: '[[new Float]]'
+    - val: '[[new Double]]'
+    - val: '[[new BigInt(5)]]'
+
+    # combinations
+    - val: '[[0b1, 0xF, 0o7, 1e1, 3f, 9223372036854775807]]'
+    - val: '[[new Byte(), new Short(), new Int(), new Long(), new Float(), new Double()]]'
+    - val: '[[1 as byte, 2 as short, 3 as int, 4 as long, 5 as float, 6 as double, 7n]]'
+    - val: '[[0n, 0, 0 as byte, 0 as short, 0 as int, 0 as long, 0 as float, 0 as double]]'
+    - val: '[[new Byte, 2 as short, new Int(3), 4 as long, new Float(5f), 6 as double, 7n]]'
+
+    # variables
+    - decl: |-
+          let a: byte = 1
+          let b: short = 2
+          let c: int = 3
+          let d: long = 4
+          let e: float = 5
+          let f: double = 6
+      val: '[[a, b, c, d, e, f,]]'
+
+    - decl: |-
+          let a: Byte = 1
+          let b: Short = 2
+          let c: Int = 3
+          let d: Long = 4
+          let e: Float = 5
+          let f: Double = 6
+      val: '[[a, b, c, d, e, f,]]'
+
+    - decl: |-
+          let a: byte = 1
+          let b: Short = 2
+          let c: int = 3
+          let d: Long = 4
+          let e: float = 5
+          let f: Double = 6
+          let g: bigint = 7n
+      val: '[[a, b, c, d, e, f, g]]'
+
+    - decl: |-
+          let a: Byte = 1
+          let b: short = 2
+          let c: Int = 3
+          let d: long = 4
+          let e: Float = 5
+          let f: double = 6
+          let g: BigInt = new BigInt(7)
+      val: '[[a, b, c, d, e, f, g]]'
+
+    # variables and constants
+    - decl: |-
+          let a: byte = 1
+          const b: short = 2
+          let c: int = 3
+          const d: long = 4
+          let e: float = 5
+          const f: double = 6
+      val: '[[0, a], [b, c, d], [e, f,]]'
+
+    - decl: |-
+          const a: Byte = 1
+          let b: Short = 2
+          const c: Int = 3
+          let d: Long = 4
+          const e: Float = 5
+          let f: Double = 6
+      val: '[[a, 0, b, c], [d, e, f,]]'
+
+    - decl: |-
+          const a: byte = 1
+          let b: Short = 2
+          const c: int = 3
+          let d: Long = 4
+          const e: float = 5
+          let f: Double = 6
+          const g: bigint = 7n
+      val: '[[a, b], [0, c], [d, e], [f, g]]'
+
+    - decl: |-
+          const a: Byte = 1
+          let b: short = 2
+          const c: Int = 3
+          let d: long = 4
+          const e: Float = 5
+          let f: double = 6
+          const g: BigInt = new BigInt(7)
+      val: '[[a, b], [c, 0], [d, e], [f, g]]'

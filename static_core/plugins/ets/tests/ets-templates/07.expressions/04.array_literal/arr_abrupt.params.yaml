@@ -30,9 +30,9 @@ cases:
           assertTrue( false )
 
     - decl: |-
-          function foo(p: boolean): boolean throws {
+          function foo(p: boolean): boolean {
               if (p) {
-                  throw new Exception()
+                  throw new Error()
               }
               return p
           }

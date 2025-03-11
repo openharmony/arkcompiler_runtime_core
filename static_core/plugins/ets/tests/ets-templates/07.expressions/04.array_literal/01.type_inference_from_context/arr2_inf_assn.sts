@@ -13,8 +13,15 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-{description}
+desc: >-
+  The type of an array literal can be inferred from the assignment context.
 ---*/
 
-{code}
+{{c.decl}}
+
+function main() {
+    {{c.use|indent}}
+}
+{% endfor %}
