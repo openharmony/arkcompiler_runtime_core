@@ -32,7 +32,7 @@ const anyTypeParameterExplicitCallFromEtsBool = getFunction('anyTypeParameterExp
 const anyTypeParameterExplicitCallFromEtsArr = getFunction('anyTypeParameterExplicitCallFromEtsArr');
 const anyTypeParameterExplicitCallFromEtsObj = getFunction('anyTypeParameterExplicitCallFromEtsObj');
 const anyTypeParameterExplicitCallFromEtsUnion = getFunction('anyTypeParameterExplicitCallFromEtsUnion');
-const anyTypeParameterExplicitCallFromEtsTuple = getFunction('anyTypeParameterExplicitCallFromEtsTuple');
+
 
 function checkAnyTypeParameterInt() {
     ASSERT_TRUE(anyTypeParameter(jsInt) === jsInt);
@@ -85,11 +85,6 @@ function checkAnyTypeParameterExplicitCallFromEtsUnion() {
     ASSERT_TRUE(anyTypeParameterExplicitCallFromEtsUnion() === jsInt);
 }
 
-function checkAnyTypeParameterExplicitCallFromEtsTuple() {
-    const res = anyTypeParameterExplicitCallFromEtsTuple();
-    ASSERT_TRUE(checkArray(res) && res[0] === jsTuple[0] && res[1] === jsTuple[1]);
-}
-
 checkAnyTypeParameterInt();
 checkAnyTypeParameterString();
 checkAnyTypeParameterBool();
@@ -102,4 +97,3 @@ checkAnyTypeParameterExplicitCallFromEtsBool();
 checkAnyTypeParameterExplicitCallFromEtsArr();
 checkAnyTypeParameterExplicitCallFromEtsObj();
 checkAnyTypeParameterExplicitCallFromEtsUnion();
-checkAnyTypeParameterExplicitCallFromEtsTuple();

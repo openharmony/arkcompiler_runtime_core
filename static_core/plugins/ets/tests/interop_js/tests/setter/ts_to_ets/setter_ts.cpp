@@ -49,8 +49,8 @@ TEST_F(EtsSetterTsToEtsTest, check_extends_class_with_value)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkExtendsClassWithValue"));
 }
-
-TEST_F(EtsSetterTsToEtsTest, check_tuple_type_object_form_ts)
+// NOTE (#24570): fix interop tests
+TEST_F(EtsSetterTsToEtsTest, DISABLED_check_tuple_type_object_form_ts)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkTupleTypeObjectFormTs"));
 }

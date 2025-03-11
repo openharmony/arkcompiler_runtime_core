@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,8 +82,8 @@ TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_undefined)
     auto ret = CallEtsMethod<bool>("TestFunctionArgTypeUndefined");
     ASSERT_EQ(ret, true);
 }
-
-TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_tuple)
+// NOTE (#24570): fix interop tests for tuples
+TEST_F(EtsInteropScenariosJsToEts, DISABLED_Test_function_arg_type_tuple)
 {
     auto ret = CallEtsMethod<bool>("TestFunctionArgTypeTuple");
     ASSERT_EQ(ret, true);

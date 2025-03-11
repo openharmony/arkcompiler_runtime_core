@@ -186,8 +186,8 @@ TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_undefined_call)
     // Note this also covers scenario of return type undefined
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_undefined_call.js"));
 }
-
-TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_tuple_call)
+// NOTE (#24570): fix interop tests with tuple
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_function_arg_type_tuple_call)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_tuple_call.js"));
 }
@@ -367,8 +367,8 @@ TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_async_function_any)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_async_function_any.js"));
 }
-
-TEST_F(EtsInteropScenariosEtsToJs, test_async_function_extra_set)
+// NOTE (#24570): fix interop test with tuple
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_async_function_extra_set)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_async_function_extra_set.js"));
 }

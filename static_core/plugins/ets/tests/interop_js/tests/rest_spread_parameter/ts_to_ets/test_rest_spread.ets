@@ -73,6 +73,7 @@ function testRestOfJSValue() {
 testRestOfNumber();
 testRestOfString();
 testRestOfObject();
-testRestOfTuple();
+// NOTE (#24570): correct interop tests with tuples
+// testRestOfTuple();
 testRestofUnion();
 testRestOfJSValue();

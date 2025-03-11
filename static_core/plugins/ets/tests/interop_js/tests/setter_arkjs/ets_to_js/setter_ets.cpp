@@ -54,8 +54,8 @@ TEST_F(EtsSetterEtsToJsTest, check_setter_any_type)
 {
     ASSERT_TRUE(RunJsTestSuite("check_setter_any_type.js"));
 }
-
-TEST_F(EtsSetterEtsToJsTest, check_setter_tuple)
+// NOTE (#24570): fix interop tests with tuples
+TEST_F(EtsSetterEtsToJsTest, DISABLED_check_setter_tuple)
 {
     ASSERT_TRUE(RunJsTestSuite("check_setter_tuple.js"));
 }

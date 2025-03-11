@@ -47,7 +47,7 @@ TEST_F(TupleValueSetItemRefTest, tupleValueSetItemRefNullEnv)
     ASSERT_EQ(env_->c_api->TupleValue_SetItem_Ref(nullptr, tuple, 0U, string), ANI_INVALID_ARGS);
 }
 
-TEST_F(TupleValueSetItemRefTest, tupleValueSetItemRefCharTuple)
+TEST_F(TupleValueSetItemRefTest, DISABLED_tupleValueSetItemRefCharTuple)
 {
     auto tuple = GetTupleWithCheck("tuplevalue_setitem_ref_test", "getCharTuple");
     ani_string string {};

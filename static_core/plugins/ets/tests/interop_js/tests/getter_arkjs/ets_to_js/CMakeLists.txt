@@ -20,6 +20,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__getter_ets_to_js
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/check_any_type_getter_class.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_any_type_getter_class_tuple.js
         ${CMAKE_CURRENT_SOURCE_DIR}/check_private_getter_class.js
         ${CMAKE_CURRENT_SOURCE_DIR}/check_private_getter_inheritance_class.js
         ${CMAKE_CURRENT_SOURCE_DIR}/check_protected_getter_class.js
