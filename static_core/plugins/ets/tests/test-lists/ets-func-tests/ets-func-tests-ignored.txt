@@ -114,7 +114,7 @@ spec/07.expressions/7.32.Lambda_Expressions/issue15579_1.ets
 spec/07.expressions/7.32.Lambda_Expressions/issue15579_2.ets
 spec/07.expressions/7.32.Lambda_Expressions/issue15579_3.ets
 spec/07.expressions/7.32.Lambda_Expressions/issue15579_4.ets
-### Issue 14054
+### Issue 23719
 spec/07.expressions/7.32.Lambda_Expressions/callMethodFromAsyncLambda1.ets
 ### Issue 19964
 spec/07.expressions/7.32.Lambda_Expressions/callRegularLambdaWithAsyncOverload.ets
@@ -128,8 +128,6 @@ spec/07.expressions/7.32.Lambda_Expressions/propertyLookupWithTypeAlias_03.ets
 spec/07.expressions/7.32.Lambda_Expressions/lambdaExpressionWithoutParenthesis.ets
 ### lambda issues end
 ### Undefined type
-spec/03.types/References_Types/Type_undefined/array-and-undefined-union_3.ets
-spec/03.types/References_Types/Type_undefined/array-of-class-and-undefined_4.ets
 spec/03.types/References_Types/Type_undefined/define/define-class-member-as-undefined-in-other-class_1.ets
 spec/03.types/References_Types/Type_undefined/undefined-and-array-of-class-and-undefined_10.ets
 spec/03.types/References_Types/Type_undefined/undefined-and-array-of-class-and-undefined_9.ets
@@ -139,17 +137,18 @@ spec/03.types/References_Types/Type_undefined/set-add/add-undefined-to-undefined
 ###### Issue 19962
 spec/03.types/References_Types/Type_undefined/undefined-union-array-type_2.ets
 spec/03.types/References_Types/Type_undefined/undefined-union-array-type_3.ets
-###### End Issue 19947
+###### Issue 19947
+spec/03.types/References_Types/Type_undefined/array-and-undefined-union_3.ets
+spec/03.types/References_Types/Type_undefined/array-of-class-and-undefined_4.ets
+spec/03.types/References_Types/Type_undefined/define/define-class-member-as-question-and-assign.ets
 spec/03.types/References_Types/Type_undefined/define/define-class-member-as-undefined-and-assign-1.ets
+
 ###### Issue 19961
 spec/03.types/References_Types/Type_undefined/assign/assign-undefined-to-undefined_1.ets
 spec/03.types/References_Types/Type_undefined/assign/assign-undefined-to-untyped_1.ets
 ###### Issue 19963
 spec/03.types/References_Types/Type_undefined/array-of-complex-type.ets
 spec/03.types/References_Types/Type_undefined/complex-type.ets
-###### Issue 19947
-spec/03.types/References_Types/Type_undefined/define/define-class-member-as-question-and-assign.ets
-###### End Issue 19947
 ###### Issue 19936
 spec/03.types/References_Types/Type_undefined/array-of-type_0.ets
 spec/03.types/References_Types/Type_undefined/array-of-type_1.ets
@@ -160,7 +159,7 @@ spec/16.Support_for_GUI_Programming/callable-classes/type-call-instantiate_7.ets
 ### End of Feature: Callable classes
 
 ### Feature: Null safety tests
-### Issue 19666, #19947
+### Issue 19666
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-default-param_2.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-default-param_5.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-default-param_2.ets
@@ -238,7 +237,7 @@ spec/import_export/07.export_directives/02.export_type_directives/to_export_for_
 ### issue 19719
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s01-0030.ets
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s01-0080.ets
-### issue 20282
+### issue 23724
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0020.ets
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0030.ets
 ### issue 19716
@@ -334,11 +333,11 @@ spec/10.Interfaces/method_overload6.ets
 spec/10.Interfaces/method_overload7.ets
 ### Issue 19727 end
 
-### Issue 19950
+### Issue 19926
 std/core/std_core_typedarrays_bignum__BigInt64Array.ets
 std/core/std_core_typedarrays_bignum__BigUint64Array.ets
 
-### Failures #15642
+### Failures #23827
 # Type violation in type erasure
 regression/12581_box_type_array_Boolean_array.ets
 regression/12581_box_type_array_Byte_array.ets
@@ -348,7 +347,7 @@ regression/12581_box_type_array_Long_array.ets
 ###
 
 ### Class constructor inheritance
-### Issue 19809
+#23815
 spec/09.classes/constructor-inheritance/issue14720_2.ets
 ### Issue 19811
 spec/09.classes/constructor-inheritance/issue14720_6.ets
@@ -393,7 +392,7 @@ spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/overri
 ### Issue 17149
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.2.Static_Method_Declarations/static_method_0003.ets
 
-### Issue 19809
+#23815
 spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0001.ets
 spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0002.ets
 spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0003.ets
@@ -405,7 +404,6 @@ spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_ty
 spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0009.ets
 spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0010.ets
 spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0011.ets
-### Issue 19809 end
 
 ### Issue 22831 begin
 spec/05.Generics/function_as_type_generic_0010.ets

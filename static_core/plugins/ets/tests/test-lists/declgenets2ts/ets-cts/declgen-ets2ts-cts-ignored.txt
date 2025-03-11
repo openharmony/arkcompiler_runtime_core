@@ -1748,6 +1748,7 @@
 13.compilation_units/08.namespace_declarations/namespace_declarations_neg12.ets
 13.compilation_units/08.namespace_declarations/namespace_declarations_neg15.ets
 13.compilation_units/08.namespace_declarations/namespace_storage2.ets
+13.compilation_units/09.export_directives/01.selective_export_directive/negative_selective_exports_2.ets
 13.compilation_units/09.export_directives/01.selective_export_directive/negative_selective_exports_3.ets
 14.ambient_declarations/03.class_declarations/class_declarations_neg_0.ets
 14.ambient_declarations/03.class_declarations/class_declarations_neg_1.ets
