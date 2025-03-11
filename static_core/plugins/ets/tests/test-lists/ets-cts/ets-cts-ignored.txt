@@ -531,11 +531,6 @@
 #20330 Compiler doesn't respect type argument for Array<T>
 05.generics/03.utility_types/04.record_utility_type/rec_3.sts
 
-#20291: reserve names for Required/Partial/Readonly
-05.generics/03.utility_types/incorrect_utility_type_usage_0.sts
-05.generics/03.utility_types/incorrect_utility_type_usage_1.sts
-05.generics/03.utility_types/incorrect_utility_type_usage_2.sts
-
 #18344 Invalid test, ArkTS doesn't have intersection type
 06.contexts_and_conversions/01.assignment-like_contexts/identity2_10.sts
 
