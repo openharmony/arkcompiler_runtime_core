@@ -13,6 +13,7 @@
 
 if (NOT PANDA_TARGET_ARM32)
     ani_add_gtest(ets_native_exclusive_worker_tests
+        ETS_NAMED_MODE
         CPP_SOURCES
             ${CMAKE_CURRENT_SOURCE_DIR}/exclusive_worker_tests.cpp
         ETS_SOURCES

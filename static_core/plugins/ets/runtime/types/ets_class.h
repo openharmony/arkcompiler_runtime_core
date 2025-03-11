@@ -460,6 +460,11 @@ public:
         return (GetFlags() & IS_BIGINT) != 0;
     }
 
+    [[nodiscard]] bool IsModule() const
+    {
+        return (GetFlags() & IS_MODULE) != 0;
+    }
+
     EtsClass() = delete;
     ~EtsClass() = delete;
     NO_COPY_SEMANTIC(EtsClass);
@@ -518,6 +523,8 @@ private:
     constexpr static uint32_t IS_FUNCTION = 1U << 22U;
     // Class is BigInt
     constexpr static uint32_t IS_BIGINT = 1U << 23U;
+    // Class is Module
+    constexpr static uint32_t IS_MODULE = 1U << 24U;
 
     ark::ObjectHeader header_;  // EtsObject
 

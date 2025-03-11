@@ -31,7 +31,7 @@ int SumEightElements(int, int, int, int, int, int, int, int);
 // NOLINTBEGIN(readability-magic-numbers, readability-named-parameter, cppcoreguidelines-pro-type-vararg,
 // hicpp-signed-bitwice)
 
-ANI_EXPORT ani_int NativeSumEightElements([[maybe_unused]] ani_env *, [[maybe_unused]] ani_class)
+ANI_EXPORT ani_int NativeSumEightElements([[maybe_unused]] ani_env *)
 {
     constexpr int MULT = 8;
     constexpr int OFF = 28;
@@ -57,19 +57,19 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    static const char *className = "LSamplerAsmTest/ETSGLOBAL;";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        auto msg = std::string("Cannot find \"") + className + std::string("\" class!");
+    static const char *moduleName = "LSamplerAsmTest;";
+    ani_module md;
+    if (ANI_OK != env->FindModule(moduleName, &md)) {
+        auto msg = std::string("Cannot find \"") + moduleName + std::string("\" module!");
         ark::ets::stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", msg.data(), "Lstd/core/String;:V");
         return ANI_ERROR;
     }
 
-    const auto methods = std::array {
+    const auto functions = std::array {
         ani_native_function {"NativeSumEightElements", ":I", reinterpret_cast<void *>(NativeSumEightElements)}};
 
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
-        auto msg = std::string("Cannot bind native methods to '") + className + std::string("'");
+    if (ANI_OK != env->Module_BindNativeFunctions(md, functions.data(), functions.size())) {
+        auto msg = std::string("Cannot bind native functions to '") + moduleName + std::string("'");
         ark::ets::stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", msg.data(), "Lstd/core/String;:V");
         return ANI_ERROR;
     };

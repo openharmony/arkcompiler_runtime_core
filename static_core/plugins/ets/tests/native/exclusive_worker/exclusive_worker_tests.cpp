@@ -62,11 +62,10 @@ public:
     static bool CallStaticBooleanMethod(ani_env *env, std::string_view methodName, std::string_view signature,
                                         Args &&...args)
     {
-        ani_class cls;
-        auto mtd = ResolveMethod(&cls, env, methodName, signature);
+        auto func = ResolveFunction(env, methodName, signature);
         ani_boolean result;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        env->Class_CallStaticMethod_Boolean(cls, mtd, &result, std::forward<Args>(args)...);
+        env->Function_Call_Boolean(func, &result, std::forward<Args>(args)...);
         return result;
     }
 
@@ -74,10 +73,9 @@ public:
     static void CallStaticVoidMethod(ani_env *env, std::string_view methodName, std::string_view signature,
                                      Args &&...args)
     {
-        ani_class cls;
-        auto mtd = ResolveMethod(&cls, env, methodName, signature);
+        auto func = ResolveFunction(env, methodName, signature);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        env->Class_CallStaticMethod_Void(cls, mtd, std::forward<Args>(args)...);
+        env->Function_Call_Void(func, std::forward<Args>(args)...);
     }
 
     std::vector<ani_option> GetExtraAniOptions() override
@@ -111,15 +109,15 @@ private:
         ASSERT(status == ANI_OK);
     }
 
-    static ani_static_method ResolveMethod(ani_class *cls, ani_env *env, std::string_view methodName,
-                                           std::string_view signature)
+    static ani_function ResolveFunction(ani_env *env, std::string_view methodName, std::string_view signature)
     {
-        [[maybe_unused]] auto status = env->FindClass("Lexclusive_worker_tests/ETSGLOBAL;", cls);
+        ani_module md;
+        [[maybe_unused]] auto status = env->FindModule("Lexclusive_worker_tests;", &md);
         ASSERT(status == ANI_OK);
-        ani_static_method mtd;
-        status = env->Class_FindStaticMethod(*cls, methodName.data(), signature.data(), &mtd);
+        ani_function func;
+        status = env->Module_FindFunction(md, methodName.data(), signature.data(), &func);
         ASSERT(status == ANI_OK);
-        return mtd;
+        return func;
     }
 };
 
