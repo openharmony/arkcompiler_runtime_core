@@ -29,9 +29,9 @@ extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version,
 {
     ANI_DEBUG_TRACE(env);
     ANI_CHECK_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
-
+    ANI_CHECK_RETURN_IF_EQ(options, nullptr, ANI_INVALID_ARGS);
     if (!ark::ets::ani::IsVersionSupported(version)) {
-        return ANI_ERROR;  // NOTE: Unsupported version?
+        return ANI_INVALID_VERSION;
     }
 
     size_t optionsSize = options->nr_options;
@@ -108,7 +108,7 @@ extern "C" ani_status ANI_GetCreatedVMs(ani_vm **vmsBuffer, ani_size vmsBufferLe
     auto *coroutine = ark::ets::EtsCoroutine::CastFromThread(thread);
     if (coroutine != nullptr) {
         if (vmsBufferLength < 1) {
-            return ANI_ERROR;
+            return ANI_INVALID_ARGS;
         }
 
         vmsBuffer[0] = coroutine->GetPandaVM();  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -167,7 +167,7 @@ static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, ui
 {
     ANI_DEBUG_TRACE(vm);
     ANI_CHECK_RETURN_IF_EQ(vm, nullptr, ANI_INVALID_ARGS);
-
+    ANI_CHECK_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
     ANI_CHECK_RETURN_IF_EQ(IsVersionSupported(version), false, ANI_INVALID_VERSION);
 
     if (Thread::GetCurrent() != nullptr) {
