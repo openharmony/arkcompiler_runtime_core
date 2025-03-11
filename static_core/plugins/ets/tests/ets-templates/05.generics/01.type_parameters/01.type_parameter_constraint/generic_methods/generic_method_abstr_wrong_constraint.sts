@@ -13,19 +13,31 @@
 * limitations under the License.
 ---*/
 
+{% for mm in abstr_or_native_method_modifiers %}
+{% for c in constraints %}
+
 /*---
-desc: generic parameters with wrong constraint in extends
+desc: >-
+    If type parameter T has type constraint S, then the actual type of the generic instantiation must be
+    compatible with S (see Type Compatibility).
 tags: [compile-only, negative]
 ---*/
 
-interface A {}
-interface B extends A{}
-interface C {}
-interface D<T, S extends T> {}
+{% if "Color" in c %}
+enum Color { Red, Green, Blue}
+{% endif %}
 
-function main(): void {
-    let i1: D<B, A>
-    let i2: D<C, A>
-    let i3: D<A, C>
+abstract class Point {
+	{{mm}} foo<X extends {{c.type}}>(): void;
 }
 
+class A extends Point {
+    foo<X extends {{c.type}}>(): void {}
+}
+
+function main() {
+    new A().foo<{{c.use}}>()
+}
+
+{% endfor %}
+{% endfor %}

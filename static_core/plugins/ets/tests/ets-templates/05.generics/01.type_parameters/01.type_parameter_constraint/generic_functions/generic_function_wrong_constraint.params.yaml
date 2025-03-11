@@ -11,27 +11,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # Wrong type constraints for generic parameters
-wrong_constraints:
-  - boolean
-  - byte
-  - char
-  - double
-  - float
-  - int
-  - int & Object
-  - int & Object & String
-  - long
-  - Object & int
-  - Object & int & String
-  - Object & String & int
-  - short
-  - void
-  - 'null'
-  - undefined
-  - "enum Color { Red, Green, Blue }"
-  - "int[]"
-  - Int[]
-  - 1 | 2
-  - 1.0 | 2.0
-  - true | false
+--- # Type constraints for generic parameters
+constraints:
+  - type: number
+    use: byte
+    p: 1 as byte
+  - type: short
+    use: long
+    p: 1 as long
+  - type: int
+    use: long
+    p: 1 as long
+  - type: byte
+    use: char
+    p: c'A'
+  - type: char
+    use: byte
+    p: 1 as byte
+  - type: string
+    use: char
+    p: c'A'
+  - type: char
+    use: string
+    p: '"str"'

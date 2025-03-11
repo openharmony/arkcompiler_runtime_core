@@ -11,33 +11,97 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # Type constraints for generic parameters
-constaints:
+---
+# Top level class modifiers
+top_level_class_modifiers:
+  - ""
+  - abstract
+  - final
+
+# Type constraints for generic parameters
+constraints:
   - type: Int
     use: Int
+    tags: negative
+    doc: cannot extend final class
   - type: Int | Double
     use: Int
   - type: Int | Double
     use: Double
   - type: Byte
     use: Byte
+    tags: negative
+    doc: cannot extend final class
   - type: Short
     use: Short
+    tags: negative
+    doc: cannot extend final class
   - type: Long
     use: Long
+    tags: negative
+    doc: cannot extend final class
   - type: Float
     use: Float
+    tags: negative
+    doc: cannot extend final class
   - type: Double
     use: Double
+    tags: negative
+    doc: cannot extend final class
   - type: Boolean
     use: Boolean
+    tags: negative
+    doc: cannot extend final class
   - type: Char
     use: Char
+    tags: negative
+    doc: cannot extend final class
+  - type: Number
+    use: Number
+    tags: negative
+    doc: cannot extend final class
+  - type: String
+    use: String
+    tags: negative
+    doc: cannot extend final class
   - type: '"a" | "b"'
     use: '"a"'
-
-# Top level class modifiers
-top_level_class_modifiers:
-  - ""
-  - abstract
-  - final
+  - type: byte
+    use: byte
+  - type: short
+    use: short
+  - type: int
+    use: int
+  - type: long
+    use: long
+  - type: float
+    use: float
+  - type: double
+    use: double
+  - type: double
+    use: number
+  - type: number
+    use: double
+  - type: number
+    use: number
+  - type: boolean
+    use: boolean
+  - type: void
+    use: void
+  - type: char
+    use: char
+  - type: 'null'
+    use: 'null'
+  - type: 'undefined'
+    use: 'undefined'
+  - type: Int[]
+    use: Int[]
+  - type: int[]
+    use: int[]
+  - type: Color
+    decl: enum Color { Red, Green, Blue}
+    use: Color
+  - type: Object, Z extends int
+    use: Object, int
+  - type: int, Z extends Object
+    use: int, Object

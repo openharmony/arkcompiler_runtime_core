@@ -13,19 +13,31 @@
 * limitations under the License.
 ---*/
 
+{% for c in constraints %}
+{% for mm in method_modifiers %}
+
 /*---
-desc: generic parameters with wrong constraint in extends
-tags: [compile-only, negative]
+desc: >-
+    If possible instantiations need to be constrained, then an individual constraint can be set for each type parameter.
+    A constraint of any type parameter can follow the keyword extends. The constraint is denoted as any type.
+params: >
+  {{c.type}}
+  {{mm}}
 ---*/
 
-class A {}
-class B extends A{}
-class C {}
-class D<T, S extends T> {}
+{{c.decl}}
 
-function main(): void {
-    new D<B, A>
-    new D<C, A>
-    new D<A, C>
+class Point {
+  {{mm}} foo<X extends {{c.type}}>(i: X, j: Z) { return i};
 }
 
+function main(): void {
+{% if "static" in mm %}
+  assertEQ( Point.foo<{{c.use}}>({{c.p}}), {{c.expected}} )
+{% else %}
+  assertEQ( new Point().foo<{{c.use}}>({{c.p}}), {{c.expected}} )
+{% endif %}
+}
+
+{% endfor %}
+{% endfor %}

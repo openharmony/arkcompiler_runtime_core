@@ -13,19 +13,22 @@
 * limitations under the License.
 ---*/
 
+{% for c in constraints %}
+
 /*---
-desc: generic parameters with wrong constraint in extends
-tags: [compile-only, negative]
+desc: >-
+    If possible instantiations need to be constrained, then an individual constraint can be set for each type parameter.
+    A constraint of any type parameter can follow the keyword extends. The constraint is denoted as any type.
+params: >
+  {{c.type}}
 ---*/
 
-class A {}
-class B extends A{}
-class C {}
-function foo<T, S extends T>() {}
+{{c.decl}}
+
+function foo<X extends {{c.type}}>(i: X, j: Z): X { return i };
 
 function main(): void {
-    foo<B, A>()
-    foo<C, A>()
-    foo<A, C>()
+  assertEQ( foo<{{c.use}}>({{c.arg}}), {{c.res}} )
 }
 
+{% endfor %}

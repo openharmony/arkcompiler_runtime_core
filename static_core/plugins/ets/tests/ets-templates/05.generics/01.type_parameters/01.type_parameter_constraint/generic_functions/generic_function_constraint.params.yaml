@@ -15,34 +15,90 @@
 constraints:
   - type: Int
     use: Int
-    p: 1
+    tags: negative
   - type: Int | Double
     use: Int
-    p: 1
+    p: new Int()
   - type: Int | Double
     use: Double
-    p: 1.0
   - type: Byte
     use: Byte
-    p: 1 as byte
+    tags: negative
   - type: Short
     use: Short
-    p: 1 as short
+    tags: negative
   - type: Long
     use: Long
-    p: 1
+    tags: negative
   - type: Float
     use: Float
-    p: new Float(1.0)
+    tags: negative
   - type: Double
     use: Double
-    p: 1.0
+    tags: negative
   - type: Boolean
     use: Boolean
-    p: 'true'
+    tags: negative
   - type: Char
     use: Char
-    p: new Char("1")
+    tags: negative
+  - type: Number
+    use: Number
+    tags: negative
+  - type: String
+    use: String
+    tags: negative
   - type: '"a" | "b"'
     use: '"a"'
     p: '"a"'
+  - type: byte
+    use: byte
+    p: 1 as byte
+  - type: short
+    use: short
+    p: 1 as short
+  - type: int
+    use: int
+    p: 1 as int
+  - type: long
+    use: long
+    p: 1 as long
+  - type: float
+    use: float
+    p: 1.1 as float
+  - type: double
+    use: double
+    p: 1.2 as double
+  - type: double
+    use: number
+    p: 1.3 as number
+  - type: number
+    use: double
+    p: 1.4 as double
+  - type: number
+    use: number
+    p: 1.5 as number
+  - type: boolean
+    use: boolean
+    p: "true"
+  - type: char
+    use: char
+    p: c'V'
+  - type: "null"
+    use: "null"
+    p: "null"
+  - type: 'undefined'
+    use: 'undefined'
+    p: 'undefined'
+  - type: Int[]
+    use: Int[]
+    decl: let i = [new Int()]
+    p: i
+  - type: int[]
+    use: int[]
+    decl: let i = [ 1 as int ]
+    p: i
+  - type: Color
+    use: Color
+    decl: enum Color { Red, Green, Blue}
+    p: Color.Red
