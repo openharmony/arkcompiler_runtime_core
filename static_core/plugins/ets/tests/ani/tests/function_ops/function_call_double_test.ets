@@ -17,4 +17,55 @@ namespace ops {
 function sum(a0: double, a1: double): double {
     return a0 + a1 as double;
 }
-}; 
+}
+
+function moduleFunction(value1: double, value2: double): double {
+    return value1 + value2 as double;
+}
+
+function moduleFunction(value1: double, value2: double, value3: double): double {
+    return value1 + value2 + value3 as double;
+}
+
+namespace A {
+    function doubleFunctionA(value1: double, value2: double): double {
+        return value1 + value2 as double;
+    }
+
+    function doubleFunctionA(value1: double, value2: double, value3: double): double {
+        return value1 + value2 + value3 as double;
+    }
+
+    function nestedFunction(value1: double, value2: double): double {
+        let lambdaFunction: (p1: double, p2: double) => double =
+            (param1: double, param2: double): double => {
+                return param1 + param2 as double;
+        };
+        return lambdaFunction(value1, value2);
+    }
+    
+    export function recursiveFunction(value: int): double {
+        if (value <= 1) {
+            return 1;
+        } else {
+            return value + recursiveFunction(value - 1) as double;
+        }
+    }
+
+    function calculateSum(value1: double, value2: double, value3: char, value4: int): double {
+        let aChar: char = 'A';
+        if (value3 == aChar) {
+            return value2 - value1 as double;
+        }
+        if (value4 == 1) {
+            return value1;
+        }
+        return value2 + value1 as double;
+    }
+
+    namespace B {
+        function doubleFunctionB(value1: double, value2: double): double {
+            return value1 + value2 as double;
+        }
+    }
+}

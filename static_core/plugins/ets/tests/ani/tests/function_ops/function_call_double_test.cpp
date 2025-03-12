@@ -15,22 +15,29 @@
 
 #include "ani_gtest.h"
 
-// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
 namespace ark::ets::ani::testing {
 
 class FunctionCallDoubleTest : public AniTest {
 public:
     static constexpr ani_double VAL1 = 1.5;
     static constexpr ani_double VAL2 = 2.5;
+    static constexpr ani_double VAL3 = 3.5;
     static constexpr size_t ARG_COUNT = 2U;
 
     void GetMethod(ani_namespace *nsResult, ani_function *fnResult)
     {
+        ani_module module {};
+        ASSERT_EQ(env_->FindModule("L@functionModule/function_call_double_test;", &module), ANI_OK);
+        ASSERT_NE(module, nullptr);
+
         ani_namespace ns {};
-        ASSERT_EQ(env_->FindNamespace("Lops;", &ns), ANI_OK);
+        ASSERT_EQ(env_->Module_FindNamespace(module, "Lops;", &ns), ANI_OK);
+        ASSERT_NE(ns, nullptr);
 
         ani_function fn {};
         ASSERT_EQ(env_->Namespace_FindFunction(ns, "sum", "DD:D", &fn), ANI_OK);
+        ASSERT_NE(fn, nullptr);
 
         *nsResult = ns;
         *fnResult = fn;
@@ -43,7 +50,7 @@ TEST_F(FunctionCallDoubleTest, function_call_double)
     ani_function fn {};
     GetMethod(&ns, &fn);
 
-    ani_double value;
+    ani_double value = 0.0;
     ASSERT_EQ(env_->c_api->Function_Call_Double(env_, fn, &value, VAL1, VAL2), ANI_OK);
     ASSERT_EQ(value, VAL1 + VAL2);
 }
@@ -57,7 +64,7 @@ TEST_F(FunctionCallDoubleTest, function_call_double_a)
     ani_value args[ARG_COUNT];
     args[0U].d = VAL1;
     args[1U].d = VAL2;
-    ani_double value;
+    ani_double value = 0.0;
     ASSERT_EQ(env_->Function_Call_Double_A(fn, &value, args), ANI_OK);
     ASSERT_EQ(value, VAL1 + VAL2);
 }
@@ -68,14 +75,14 @@ TEST_F(FunctionCallDoubleTest, function_call_double_v)
     ani_function fn {};
     GetMethod(&ns, &fn);
 
-    ani_double value;
+    ani_double value = 0.0;
     ASSERT_EQ(env_->Function_Call_Double(fn, &value, VAL1, VAL2), ANI_OK);
     ASSERT_EQ(value, VAL1 + VAL2);
 }
 
 TEST_F(FunctionCallDoubleTest, function_call_double_invalid_function)
 {
-    ani_double value;
+    ani_double value = 0.0;
     ASSERT_EQ(env_->c_api->Function_Call_Double(env_, nullptr, &value, VAL1, VAL2), ANI_INVALID_ARGS);
 }
 
@@ -92,7 +99,7 @@ TEST_F(FunctionCallDoubleTest, function_call_double_a_invalid_function)
     ani_value args[ARG_COUNT];
     args[0U].d = VAL1;
     args[1U].d = VAL2;
-    ani_double value;
+    ani_double value = 0.0;
     ASSERT_EQ(env_->Function_Call_Double_A(nullptr, &value, args), ANI_INVALID_ARGS);
 }
 
@@ -114,13 +121,13 @@ TEST_F(FunctionCallDoubleTest, function_call_double_a_invalid_args)
     ani_function fn {};
     GetMethod(&ns, &fn);
 
-    ani_double value;
+    ani_double value = 0.0;
     ASSERT_EQ(env_->Function_Call_Double_A(fn, &value, nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(FunctionCallDoubleTest, function_call_double_v_invalid_function)
 {
-    ani_double value;
+    ani_double value = 0.0;
     ASSERT_EQ(env_->Function_Call_Double(nullptr, &value, VAL1, VAL2), ANI_INVALID_ARGS);
 }
 
@@ -131,6 +138,243 @@ TEST_F(FunctionCallDoubleTest, function_call_double_v_invalid_result)
     GetMethod(&ns, &fn);
     ASSERT_EQ(env_->Function_Call_Double(fn, nullptr, VAL1, VAL2), ANI_INVALID_ARGS);
 }
+
+TEST_F(FunctionCallDoubleTest, function_call_double_001)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_double_test;", &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ani_namespace nA {};
+    ani_function fA {};
+    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_NE(nA, nullptr);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "doubleFunctionA", "DD:D", &fA), ANI_OK);
+    ASSERT_NE(fA, nullptr);
+
+    ani_double value = 0.0;
+    ASSERT_EQ(env_->Function_Call_Double(fA, &value, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+
+    ani_value args[ARG_COUNT];
+    args[0U].d = VAL1;
+    args[1U].d = VAL2;
+    ASSERT_EQ(env_->Function_Call_Double_A(fA, &value, args), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+}
+
+TEST_F(FunctionCallDoubleTest, function_call_double_002)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_double_test;", &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ani_namespace nA {};
+    ani_namespace nB {};
+    ani_function fB {};
+    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_NE(nA, nullptr);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "LA/B;", &nB), ANI_OK);
+    ASSERT_NE(nB, nullptr);
+    ASSERT_EQ(env_->Namespace_FindFunction(nB, "doubleFunctionB", "DD:D", &fB), ANI_OK);
+    ASSERT_NE(fB, nullptr);
+
+    ani_double value = 0.0;
+    ASSERT_EQ(env_->Function_Call_Double(fB, &value, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+
+    ani_value args[ARG_COUNT];
+    args[0U].d = VAL1;
+    args[1U].d = VAL2;
+    ASSERT_EQ(env_->Function_Call_Double_A(fB, &value, args), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+}
+
+TEST_F(FunctionCallDoubleTest, function_call_double_003)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_double_test;", &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ani_namespace nA {};
+    ani_function fA {};
+    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_NE(nA, nullptr);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "doubleFunctionA", "DDD:D", &fA), ANI_OK);
+    ASSERT_NE(fA, nullptr);
+
+    ani_double value = 0.0;
+    ASSERT_EQ(env_->Function_Call_Double(fA, &value, VAL1, VAL2, VAL3), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2 + VAL3);
+
+    ani_value args[3U];
+    args[0U].d = VAL1;
+    args[1U].d = VAL2;
+    args[2U].d = VAL3;
+    ASSERT_EQ(env_->Function_Call_Double_A(fA, &value, args), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2 + VAL3);
+}
+
+TEST_F(FunctionCallDoubleTest, function_call_double_004)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_double_test;", &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ani_function fA {};
+    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "DD:D", &fA), ANI_OK);
+    ASSERT_NE(fA, nullptr);
+
+    ani_double value = 0.0;
+    ASSERT_EQ(env_->Function_Call_Double(fA, &value, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+
+    ani_value args[ARG_COUNT];
+    args[0U].d = VAL1;
+    args[1U].d = VAL2;
+    ASSERT_EQ(env_->Function_Call_Double_A(fA, &value, args), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+}
+
+TEST_F(FunctionCallDoubleTest, function_call_double_005)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_double_test;", &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ani_double value = 0.0;
+    ani_function fB {};
+    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "DDD:D", &fB), ANI_OK);
+    ASSERT_NE(fB, nullptr);
+
+    ani_value argsB[3U];
+    argsB[0U].d = VAL1;
+    argsB[1U].d = VAL2;
+    argsB[2U].d = VAL3;
+    ASSERT_EQ(env_->Function_Call_Double(fB, &value, VAL1, VAL2, VAL3), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2 + VAL3);
+    ASSERT_EQ(env_->Function_Call_Double_A(fB, &value, argsB), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2 + VAL3);
+}
+
+TEST_F(FunctionCallDoubleTest, function_call_double_006)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_double_test;", &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ani_namespace nA {};
+    ani_function fA {};
+    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_NE(nA, nullptr);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "nestedFunction", "DD:D", &fA), ANI_OK);
+    ASSERT_NE(fA, nullptr);
+
+    ani_double value = 0.0;
+    ASSERT_EQ(env_->Function_Call_Double(fA, &value, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+
+    ani_value args[ARG_COUNT];
+    args[0U].d = VAL1;
+    args[1U].d = VAL2;
+    ASSERT_EQ(env_->Function_Call_Double_A(fA, &value, args), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+}
+
+TEST_F(FunctionCallDoubleTest, function_call_double_007)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_double_test;", &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ani_namespace nA {};
+    ani_function fA {};
+    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_NE(nA, nullptr);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "recursiveFunction", "I:D", &fA), ANI_OK);
+    ASSERT_NE(fA, nullptr);
+
+    ani_double value = 0.0;
+    const ani_int value1 = 5;
+    const ani_double result = 15;
+    ASSERT_EQ(env_->Function_Call_Double(fA, &value, value1), ANI_OK);
+    ASSERT_EQ(value, result);
+
+    ani_value args[1U];
+    args[0U].i = value1;
+    ASSERT_EQ(env_->Function_Call_Double_A(fA, &value, args), ANI_OK);
+    ASSERT_EQ(value, result);
+}
+
+TEST_F(FunctionCallDoubleTest, function_call_double_008)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_double_test;", &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ani_namespace nA {};
+    ani_function fA {};
+    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_NE(nA, nullptr);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "calculateSum", "DDCI:D", &fA), ANI_OK);
+    ASSERT_NE(fA, nullptr);
+
+    ani_double value = 0.0;
+    const ani_char cValue = 'A';
+    const ani_int iValue = 1;
+    ASSERT_EQ(env_->Function_Call_Double(fA, &value, VAL1, VAL2, cValue, iValue), ANI_OK);
+    ASSERT_EQ(value, VAL2 - VAL1);
+
+    const ani_char cValue1 = 'B';
+    ani_value args[4U];
+    args[0U].d = VAL1;
+    args[1U].d = VAL2;
+    args[2U].c = cValue1;
+    args[3U].i = iValue;
+    ASSERT_EQ(env_->Function_Call_Double_A(fA, &value, args), ANI_OK);
+    ASSERT_EQ(value, VAL1);
+
+    const ani_int iValue1 = 2;
+    ASSERT_EQ(env_->Function_Call_Double(fA, &value, VAL1, VAL2, cValue1, iValue1), ANI_OK);
+    ASSERT_EQ(value, VAL2 + VAL1);
+}
+
+TEST_F(FunctionCallDoubleTest, function_call_double_009)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_double_test;", &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ani_namespace nA {};
+    ani_function fA {};
+    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_NE(nA, nullptr);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "doubleFunctionA", "DD:D", &fA), ANI_OK);
+    ASSERT_NE(fA, nullptr);
+
+    ani_double value = 0.0;
+    ASSERT_EQ(env_->Function_Call_Double(fA, &value, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+
+    const ani_double value1 = 5.0;
+    ASSERT_EQ(env_->Function_Call_Double(fA, &value, value1, VAL2), ANI_OK);
+    ASSERT_EQ(value, value1 + VAL2);
+
+    const ani_double value2 = 2.0;
+    ani_value args[ARG_COUNT];
+    args[0U].d = value1;
+    args[1U].d = value2;
+    ASSERT_EQ(env_->Function_Call_Double_A(fA, &value, args), ANI_OK);
+    ASSERT_EQ(value, value1 + value2);
+
+    const ani_double value3 = 4.0;
+    ASSERT_EQ(env_->Function_Call_Double(fA, &value, value2, value3), ANI_OK);
+    ASSERT_EQ(value, value2 + value3);
+
+    const ani_double value4 = 6.0;
+    ASSERT_EQ(env_->Function_Call_Double(fA, &value, value3, value4), ANI_OK);
+    ASSERT_EQ(value, value3 + value4);
+}
 }  // namespace ark::ets::ani::testing
 
-// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
+// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
