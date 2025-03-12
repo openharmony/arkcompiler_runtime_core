@@ -1740,10 +1740,6 @@
 #23197 Lambda doesn't support "super" keyword
 07.expressions/32.lambda_expression/02.lambda_body/body_3.sts
 
-#22401 Lambda doesn't support simple notation
-07.expressions/32.lambda_expression/callback_3.sts
-07.expressions/32.lambda_expression/callback_4.sts
-
 #23199 Lambda doesn't support rest parameter
 07.expressions/32.lambda_expression/decl_full_ref_4.sts
 07.expressions/32.lambda_expression/decl_full_value_4.sts

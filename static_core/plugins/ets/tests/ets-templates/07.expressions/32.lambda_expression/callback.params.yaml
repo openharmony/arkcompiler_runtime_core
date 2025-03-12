@@ -47,12 +47,3 @@ cases:
             return op(arg)
         }
         assertEQ(test(n => n), 4, "Same failed")
-
-  - desc: two value args without parenseses
-    impl: |-
-        function test(op: (a: int, b: int) => int) {
-            const a = 5
-            const b = 3
-            return op(a, b)
-        }
-        assertEQ(test(a, b => a * b), 15, "Mul failed")
