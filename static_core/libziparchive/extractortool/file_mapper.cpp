@@ -15,7 +15,6 @@
 
 #include "file_mapper.h"
 
-#include "libpandabase/os/file.h"
 #include "libpandabase/os/mem.h"
 #include "libpandabase/utils/logger.h"
 #include "zip_file_reader.h"
@@ -57,26 +56,33 @@ bool FileMapper::CreateFileMapper(const std::string &fileName, bool compress, in
         return false;
     }
 
-    auto file = os::file::File(fd);
-    uint32_t mmapFlag = os::mem::MMAP_FLAG_PRIVATE | MAP_XPM;
+    size_t adjust = offset % static_cast<size_t>(g_pageSize);
+    size_t adjOffset = offset - adjust;
+    baseLen_ = len + adjust;
+    int32_t mmapFlag = os::mem::MMAP_FLAG_PRIVATE | MAP_XPM;
     if (type == FileMapperType::SHARED_MMAP) {
         mmapFlag = os::mem::MMAP_FLAG_SHARED;
     }
-    os::mem::BytePtr ptr = os::mem::MapFile(file, os::mem::MMAP_PROT_READ, mmapFlag, len, offset, nullptr);
-    if (ptr.Get() == nullptr) {
+#ifdef PANDA_TARGET_WINDOWS
+    basePtr_ =
+        reinterpret_cast<uint8_t *>(os::mem::mmap(nullptr, baseLen_, os::mem::MMAP_PROT_READ, mmapFlag, fd, adjOffset));
+    if (basePtr_ == reinterpret_cast<void *>(-1)) {
+#else
+    basePtr_ = reinterpret_cast<uint8_t *>(mmap(nullptr, baseLen_, os::mem::MMAP_PROT_READ, mmapFlag, fd, adjOffset));
+    if (basePtr_ == MAP_FAILED) {
+#endif
         LOG(ERROR, ZIPARCHIVE) << "mmap failed, errno: " << errno << ", fileName: " << fileName
                                << ", offset: " << offset << ", pageSize: " << g_pageSize << ", mmapFlag: " << mmapFlag;
         baseLen_ = 0;
         return false;
     }
 
-    basePtr_ = reinterpret_cast<uint8_t *>(ptr.Get());
-    size_t adjust = offset % static_cast<size_t>(g_pageSize);
-    usePtr_ = basePtr_ + adjust;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     isCompressed_ = compress;
     fileName_ = fileName;
     offset_ = offset;
     dataLen_ = len;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    usePtr_ = reinterpret_cast<uint8_t *>(basePtr_) + adjust;
     type_ = type;
     return true;
 }
