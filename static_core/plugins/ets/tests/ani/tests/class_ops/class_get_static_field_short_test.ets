@@ -15,4 +15,18 @@
 class TestShort {
     static short_value: short = 3;
     static string_value: String = "testString";
+    static special2: string = "";
+    static special3: null = null;
+    static special4: undefined  = undefined ;
+    static special5: int = 0;
+    static shortMin: short = -32768;
+    static shortMax: short = 32767;
+}
+
+class TestShortA extends TestShort {
+    static short_value: short = 3;
+}
+
+final class TestShortFinal extends TestShort {
+    static short_value: short = 3;
 }

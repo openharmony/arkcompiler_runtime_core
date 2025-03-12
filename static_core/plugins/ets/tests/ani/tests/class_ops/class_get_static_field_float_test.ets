@@ -15,4 +15,19 @@
 class TestFloat {
     static float_value: float = 18.0;
     static string_value: String = "18.0";
+    static specia1: int = 0;
+    static specia3: string = "";
+    static specia4: null = null;
+    static specia5: undefined  = undefined ;
+    static floatMin: float = -3.40282346638528860e+38;
+    static minpositive: float =  1.17549435e-38;
+    static floatMax: float = 3.40282346638528860e+38;
+}
+
+class TestFloatA extends TestFloat {
+    static float_value: float = 18.0;
+}
+
+final class TestFloatFinal extends TestFloat {
+    static float_value: float = 18.0;
 }
