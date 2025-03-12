@@ -71,9 +71,6 @@
 03.types/06.value_types/01.integer_types_and_operations/unsigned_right_shift/unsigned_right_shift_byte_7.ets
 03.types/06.value_types/01.integer_types_and_operations/unsigned_right_shift/unsigned_right_shift_short_7.ets
 
-#22662
-03.types/09.type_never/never_class_instance_neg_12.ets
-
 #14338 Function, method, constructor overload signatures
 03.types/15.literal_types/overriding_literal_types_0.ets
 03.types/15.literal_types/overriding_literal_types_1.ets
@@ -1351,14 +1348,6 @@
 
 #20547 Cannot use Enum in the Record value
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_10.ets
-
-#22662
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_n_0.ets
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_n_10.ets
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_n_4.ets
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_n_5.ets
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_n_8.ets
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_n_9.ets
 
 #20024 es2panda fails to infer type of spread expression of enum array
 07.expressions/06.spread_expression/spex_12.ets
