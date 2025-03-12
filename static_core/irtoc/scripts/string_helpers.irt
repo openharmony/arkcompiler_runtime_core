@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -130,13 +130,17 @@ def GenerateStringEquals(lang, dynamic, compression)
             }
             length := Cast(length1.u32).u64
         else
-            # assume STRING_LENGTH_OFFSET == OBJECT_CLASS_OFFSET + 4
-            class_and_length1 := LoadI(str1).Imm(Constants::OBJECT_CLASS_OFFSET).u64
-            class_and_length2 := LoadI(str2).Imm(Constants::OBJECT_CLASS_OFFSET).u64
-            If(class_and_length1, class_and_length2).NE.Unlikely.b {
+            class1 := LoadI(str1).Imm(Constants::OBJECT_CLASS_OFFSET).u32
+            class2 := LoadI(str2).Imm(Constants::OBJECT_CLASS_OFFSET).u32
+            If(class1, class2).NE.Unlikely.b {
                 Goto(:NotEqual)
             }
-            length := Shr(class_and_length1, 32).u64
+            length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
+            length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
+            If(length1, length2).NE.Unlikely.b {
+                Goto(:NotEqual)
+            }
+            length := Cast(length1.u32).u64
         end
         length := unpack_length(length, compression, length_shift)
         If(length, 8).GT.b {

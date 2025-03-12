@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -675,7 +675,7 @@ TEST_F(CodegenTest, CallVirtual)
     EXPECT_TRUE(RegAlloc(graph));
     EXPECT_TRUE(graph->RunPass<Codegen>());
     // exclude offset from verification to avoid test modifications
-    const char *expectedCode[] = {"ldr w0, [x1, #", "ldr x0, [x0, #", "ldr x30, [x0, #",
+    const char *expectedCode[] = {"ldr w0, [x1]", "ldr x0, [x0, #", "ldr x30, [x0, #",
                                   "blr x30"};  // CallVirtual is encoded without tmp reg
     AssertCode(expectedCode);
 }

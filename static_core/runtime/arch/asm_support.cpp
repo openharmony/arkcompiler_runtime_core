@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,8 @@ namespace ark {
 // CC-OFFNXT(C_RULE_ID_MACRODEFINE_ENDWITH_SEMICOLON) code generation
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFINE_VALUE(name, value) static_assert((name) == (value));
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEFINE_VALUE_WITH_TYPE(name, value, type) static_assert((name) == (value));
 #include "asm_defines/asm_defines.def"
 
 // Frame doesn't have aligned storage, so check its offset manually
