@@ -163,8 +163,7 @@
 03.types/08.reference_types/12.union_types/ut_n2_89.sts
 03.types/08.reference_types/12.union_types/ut_n2_92.sts
 03.types/08.reference_types/12.union_types/ut_n2_97.sts
-03.types/08.reference_types/12.union_types/union_types_normalization/norm_n_4.sts
-03.types/08.reference_types/12.union_types/union_types_normalization/norm_40.sts
+03.types/20.union_types/01.union_types_normalization/norm_40.sts
 
 #20935 Runtime aborts on access to common field with generics
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_11.sts
@@ -190,18 +189,14 @@
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_9.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_9.sts
 
-# XXXXX Array literal type inference needs to be improved
+# 22791 Array literal type inference needs to be improved
 03.types/08.reference_types/12.union_types/ut_34.sts
 
-# XXXXX Aborts on assignment of char to union normalized to string
-03.types/08.reference_types/12.union_types/union_types_normalization/norm_10.sts
-03.types/08.reference_types/12.union_types/union_types_normalization/norm_15.sts
-
-# XXXXX Readonly arrays and readonly tuples not supported
-03.types/08.reference_types/12.union_types/union_types_normalization/norm_29.sts
-03.types/08.reference_types/12.union_types/union_types_normalization/norm_30.sts
-03.types/08.reference_types/12.union_types/union_types_normalization/norm_34.sts
-03.types/08.reference_types/12.union_types/union_types_normalization/norm_35.sts
+# 23696 Readonly arrays and readonly tuples not supported
+03.types/20.union_types/01.union_types_normalization/norm_29.sts
+03.types/20.union_types/01.union_types_normalization/norm_30.sts
+03.types/20.union_types/01.union_types_normalization/norm_34.sts
+03.types/20.union_types/01.union_types_normalization/norm_35.sts
 
 #20936 Access to common union method doesn't work
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_spec_0.sts
