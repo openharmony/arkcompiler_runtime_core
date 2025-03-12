@@ -120,6 +120,20 @@ TEST_F(StringGetUtf16Test, StringGetutf16BufferBound2)
     ASSERT_EQ(utf16Buffer[6U], 0x0000);
 }
 
+TEST_F(StringGetUtf16Test, StringGetutf16BufferTooSmall)
+{
+    const uint16_t example[] = {0x4F60, 0x597D, 0x002C, 0x0020, 0x4E16, 0x754C, 0x0000};
+    ani_string string {};
+    auto status = env_->String_NewUTF16(example, sizeof(example) / sizeof(uint16_t) - 1U, &string);
+    ASSERT_EQ(status, ANI_OK);
+    const ani_size bufferSize = 6U;
+    uint16_t utf16Buffer[bufferSize] = {0U};
+    ani_size result = 0U;
+    status = env_->String_GetUTF16(string, utf16Buffer, bufferSize, &result);
+    ASSERT_EQ(status, ANI_BUFFER_TO_SMALL);
+    ASSERT_EQ(result, 0U);
+}
+
 TEST_F(StringGetUtf16Test, StringGetutf16BufferTooSmall1)
 {
     const uint16_t example[] = {0x4F60, 0x597D, 0x002C, 0x0020, 0x4E16, 0x754C, 0x0000};

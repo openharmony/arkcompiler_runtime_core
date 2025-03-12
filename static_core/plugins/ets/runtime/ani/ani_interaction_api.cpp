@@ -3913,6 +3913,7 @@ NO_UB_SANITIZE static ani_status String_GetUTF8(ani_env *env, ani_string string,
         return ANI_BUFFER_TO_SMALL;
     }
     ani_size actualCopiedSize = internalString->CopyDataRegionUtf8(utf8Buffer, 0, utf8Length, utf8Length);
+    ANI_CHECK_RETURN_IF_NE(actualCopiedSize, utf8Length, ANI_ERROR);
     utf8Buffer[actualCopiedSize] = '\0';  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     *result = actualCopiedSize;
     return ANI_OK;
@@ -3984,13 +3985,10 @@ NO_UB_SANITIZE static ani_status String_GetUTF16(ani_env *env, ani_string string
     CHECK_PTR_ARG(utf16Buffer);
     CHECK_PTR_ARG(result);
 
-    if (UNLIKELY(utf16BufferSize < 1)) {
-        return ANI_BUFFER_TO_SMALL;
-    }
     ScopedManagedCodeFix s(env);
     EtsString *internalString = s.ToInternalType(string);
     auto utf16Length = internalString->GetUtf16Length();
-    if (UNLIKELY(utf16BufferSize < utf16Length)) {
+    if (UNLIKELY(utf16BufferSize < utf16Length || (utf16BufferSize - utf16Length) < 1)) {
         return ANI_BUFFER_TO_SMALL;
     }
     ani_size actualCopiedSize = internalString->CopyDataRegionUtf16(utf16Buffer, 0, utf16Length, utf16BufferSize);
