@@ -16,4 +16,25 @@
 class GetCharStatic {
     static name: char = 'b';
     static age: int = 20;
+    static specia2: string = "";
+    static specia3: null = null;
+    static specia4: undefined  = undefined ;
+    static specia5: char = "\n";
+    static specia6: char = "\r";
+    static specia7: char = "\t";
+    static specia8: char = "\b";
+    static specia9: char = "\a";
+    static specia10: char = "\f";
+    static specia11: char = "\v";
+    static specia12: char = "\0";
+    static charMin: char = 0;
+    static charMax: char = 65535;
+}
+
+class CharStaticA extends GetCharStatic {
+    static char_value: char = 'a';
+}
+
+final class CharStaticFinal extends GetCharStatic {
+    static char_value: char = 'a';
 }

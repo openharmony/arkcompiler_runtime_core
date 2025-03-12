@@ -15,4 +15,20 @@
 class TestBoolean {
     static boolean_value: boolean = true;
     static string_value: String = "true";
+    static special1: int = 0;
+    static special3: String = "";
+    static special4: null = null;
+    static special5: undefined  = undefined ;
+    static special6: boolean = !'s';
+    static special7: boolean = !0;
+    static special8: boolean = true;
+    static special9: boolean = false;
+}
+
+class TestBooleanA extends TestBoolean {
+    static boolean_value: boolean = false;
+}
+
+final class TestBooleanFinal extends TestBoolean {
+    static boolean_value: boolean = false;
 }

@@ -16,4 +16,19 @@
 class Woman {
     static name: String = "Bob";
     static age: double = 20.0;
+    static specia1: int = 0;
+    static specia3: string = "";
+    static specia4: null = null;
+    static specia5: undefined  = undefined ;
+    static doubleMin: double = -1.7976931348623157e+308;
+    static minpositive: double = 2.2250738585072014e-308;
+    static doubleMax: double = 1.7976931348623157e+308;
+}
+
+class DoubleStaticA extends Woman {
+    static double_value: double = 0.0;
+}
+
+final class DoubleStaticFinal extends Woman {
+    static double_value: double = 0.0;
 }
