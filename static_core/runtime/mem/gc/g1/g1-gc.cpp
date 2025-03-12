@@ -1149,8 +1149,10 @@ void G1GC<LanguageConfig>::MarkObjectRecursively(ObjectHeader *object)
 {
     ASSERT(object != nullptr);
     ASSERT(this->GetLastGCCause() == GCTaskCause::CROSSREF_CAUSE);
-    ASSERT(this->GetGCPhase() == GCPhase::GC_PHASE_RUNNING || this->GetGCPhase() == GCPhase::GC_PHASE_INITIAL_MARK ||
-           this->GetGCPhase() == GCPhase::GC_PHASE_MARK || this->GetGCPhase() == GCPhase::GC_PHASE_REMARK);
+    [[maybe_unused]] auto phase = this->GetGCPhase();  // Load phase once to avoid false-positive assertion failure
+    ASSERT_PRINT(phase == GCPhase::GC_PHASE_RUNNING || phase == GCPhase::GC_PHASE_INITIAL_MARK ||
+                     phase == GCPhase::GC_PHASE_MARK || phase == GCPhase::GC_PHASE_REMARK,
+                 GCScopedPhase::GetPhaseAbbr(phase));
     if (concXMarker_.MarkIfNotMarked(object)) {
         GCMarkingStackType stack(this);
         stack.PushToStack(RootType::ROOT_VM, object);
