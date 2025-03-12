@@ -13,9 +13,6 @@
     },
     "files" : [
         "./api/@ohos.buffer.sts",
-        "./arkts/@arkts.math.Decimal.sts",
-        "./uri/@ohos.uri.sts",
-        "./url/@ohos.url.sts",
-        "./util/@ohos.util.LRUCache.sts"
+        "./arkts/@arkts.math.Decimal.sts"
     ]
 }
