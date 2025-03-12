@@ -96,7 +96,7 @@
 03.types/16.array_types/01.resizable_array_types/resizable_array_2.ets
 03.types/16.array_types/01.resizable_array_types/resizable_array_4.ets
 
-#20715
+#24032
 03.types/17.tuple_types/tt_7.ets
 
 #19950
@@ -1826,11 +1826,6 @@
 #22692
 15.semantic_rules/05.compatibility_call_args/tuple_rest_params_0.ets
 15.semantic_rules/05.compatibility_call_args/tuple_rest_params_1.ets
-
-#20715 Smart cast fails to find out the parameter type
-15.semantic_rules/06.type_inference/01.smart_types/comb_10a.ets
-15.semantic_rules/06.type_inference/01.smart_types/comb_12a.ets
-15.semantic_rules/06.type_inference/01.smart_types/comb_12b.ets
 
 #14338 es2panda fails to compile overloaded functions
 15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_6.ets
