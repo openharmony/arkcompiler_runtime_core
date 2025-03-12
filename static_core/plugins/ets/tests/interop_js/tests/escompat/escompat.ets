@@ -357,14 +357,12 @@ function ArrayBuffer_TestJSSlice(arr: ArrayBuffer): void {
 }
 
 function ArrayBuffer_TestJSResize(arr: ArrayBuffer): void {
-    arr.resize(16);
-    let view = new Int8Array(arr);
-    // NOTE (oignatenko) uncomment below after toString won't throw AIOOBE
-    // assert arr.toString() == "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+    // NOTE(dslynko, #23919): finalize semantics of resizable ArrayBuffers
+    assertEQ(arr.resizable, false);
 }
 
 function ArrayBuffer_CreateEtsSample(): ArrayBuffer {
-    return new ArrayBuffer(32);
+    return new ArrayBuffer(32, 32);
 }
 
 function JSON_stringify_jsv(x: JSValue) {

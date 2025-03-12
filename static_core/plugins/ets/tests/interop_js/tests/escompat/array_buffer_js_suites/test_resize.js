@@ -23,7 +23,7 @@ const TestJSResize = etsMod.getFunction('ArrayBuffer_TestJSResize');
 {
 	// Test JS ArrayBuffer
 	const LENGTH = 32;
-	TestJSResize(new ArrayBuffer(LENGTH));
+	TestJSResize(new ArrayBuffer(LENGTH, { maxByteLength: LENGTH }));
 }
 
 {

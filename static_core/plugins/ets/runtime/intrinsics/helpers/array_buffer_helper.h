@@ -23,6 +23,10 @@
 #include "include/mem/panda_string.h"
 #include "include/mem/panda_containers.h"
 
+namespace ark::ets {
+class EtsEscompatArrayBuffer;
+}  // namespace ark::ets
+
 namespace ark::ets::intrinsics::helpers {
 
 template <typename T>
@@ -56,7 +60,7 @@ namespace base64 {
 
 namespace encoding {
 
-[[nodiscard]] Result<bool> ValidateBuffer(const void *buffer) noexcept;
+[[nodiscard]] Result<bool> ValidateBuffer(const EtsEscompatArrayBuffer *buffer) noexcept;
 [[nodiscard]] Result<bool> ValidateIndices(int byteLength, int start, int end);
 
 /**

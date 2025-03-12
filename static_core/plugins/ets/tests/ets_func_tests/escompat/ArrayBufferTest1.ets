@@ -27,7 +27,9 @@ function main(): int {
  */
 function createEmptyArrayBuffer(): int {
   let a = new ArrayBuffer(0);
-  return a.byteLength ? 1 : 0;
+  if (a.byteLength != 0 || a.detached)
+    return 1;
+  return 0;
 }
 
 /**

@@ -58,6 +58,11 @@ public:
         return EtsByteArray::Create(length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT)->GetCoreType();
     }
 
+    ALWAYS_INLINE static EtsLong GetAddress(EtsByteArray *array)
+    {
+        return reinterpret_cast<EtsLong>(array->GetData<void>());
+    }
+
     /// Creates ArrayBuffer with managed buffer.
     static EtsEscompatArrayBuffer *Create(EtsCoroutine *coro, size_t length, void **resultData)
     {
@@ -67,6 +72,10 @@ public:
         [[maybe_unused]] EtsHandleScope scope(coro);
         auto *cls = PlatformTypes(coro)->escompatArrayBuffer;
         EtsHandle<EtsEscompatArrayBuffer> handle(coro, EtsEscompatArrayBuffer::FromEtsObject(EtsObject::Create(cls)));
+        if (UNLIKELY(handle.GetPtr() == nullptr)) {
+            ASSERT(coro->HasPendingException());
+            return nullptr;
+        }
 
         handle->InitializeByDefault(coro, length);
         *resultData = handle->GetData();
@@ -83,6 +92,10 @@ public:
         [[maybe_unused]] EtsHandleScope scope(coro);
         auto *cls = PlatformTypes(coro)->escompatArrayBuffer;
         EtsHandle<EtsEscompatArrayBuffer> handle(coro, EtsEscompatArrayBuffer::FromEtsObject(EtsObject::Create(cls)));
+        if (UNLIKELY(handle.GetPtr() == nullptr)) {
+            ASSERT(coro->HasPendingException());
+            return nullptr;
+        }
 
         handle->InitBufferByExternalData(coro, handle, externalData, finalizerFunction, finalizerHint, length);
         return handle.GetPtr();
@@ -98,12 +111,11 @@ public:
         return byteLength_;
     }
 
+    /// @brief Returns non-null data for a non-detached buffer
     void *GetData()
     {
-        if (IsExternal()) {
-            return reinterpret_cast<void *>(nativeData_);
-        }
-        return managedData_->GetData<void>();
+        ASSERT(!WasDetached());
+        return reinterpret_cast<void *>(nativeData_);
     }
 
     void Detach()
@@ -113,20 +125,21 @@ public:
         // Do not free memory, as the address was already passed into finalizer.
         // Memory will be freed after GC execution with object destruction
         nativeData_ = 0;
-        wasDetached_ = ToEtsBoolean(true);
+        ASSERT(WasDetached());
     }
 
-    bool WasDetached()
+    /// NOTE: behavior of this method must repeat implementation of `detached` property in ArkTS `ArrayBuffer`
+    bool WasDetached() const
     {
-        return wasDetached_ == ToEtsBoolean(true);
+        return nativeData_ == 0;
     }
 
     bool IsExternal() const
     {
-        return isExternal_ == ToEtsBoolean(true);
+        return managedData_ == nullptr;
     }
 
-    bool IsDetachable()
+    bool IsDetachable() const
     {
         return !WasDetached() && IsExternal();
     }
@@ -151,18 +164,19 @@ public:
 
     void SetValues(EtsEscompatArrayBuffer *other, EtsInt begin)
     {
-        ASSERT(!IsExternal());
+        ASSERT(!WasDetached());
+        ASSERT(other != nullptr);
+        ASSERT(!other->WasDetached());
         ASSERT(begin >= 0);
-        auto byteLength = GetByteLength();
-        ASSERT(begin + byteLength <= other->GetByteLength());
+        auto thisByteLength = GetByteLength();
+        ASSERT(begin + thisByteLength <= other->GetByteLength());
+
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto *srcData = reinterpret_cast<int8_t *>(other->GetData()) + begin;
-        auto *dstData = managedData_->GetData<int8_t>();
+        auto *dstData = GetData();
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        errno_t res = memcpy_s(dstData, byteLength, srcData, byteLength);
-        if (res != 0) {
-            UNREACHABLE();
-        }
+        [[maybe_unused]] errno_t res = memcpy_s(dstData, thisByteLength, srcData, thisByteLength);
+        ASSERT(res == 0);
     }
 
 private:
@@ -206,7 +220,7 @@ private:
 
     static void DoFinalization(void *arg)
     {
-        ASSERT(arg);
+        ASSERT(arg != nullptr);
         auto *info = reinterpret_cast<FinalizationInfo *>(arg);
 
         ASSERT(info->function != nullptr);
@@ -229,9 +243,9 @@ private:
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_),
                                   AllocateNonMovableArray(length));
         byteLength_ = length;
-        nativeData_ = 0;
-        isExternal_ = ToEtsBoolean(false);
-        wasDetached_ = ToEtsBoolean(false);
+        nativeData_ = GetAddress(managedData_);
+        ASSERT(nativeData_ != 0);
+        isResizable_ = ToEtsBoolean(false);
     }
 
     /// Initializes ArrayBuffer with externally provided buffer.
@@ -241,8 +255,8 @@ private:
         managedData_ = nullptr;
         byteLength_ = length;
         nativeData_ = reinterpret_cast<EtsLong>(data);
-        isExternal_ = ToEtsBoolean(true);
-        wasDetached_ = ToEtsBoolean(false);
+        ASSERT(nativeData_ != 0);
+        isResizable_ = ToEtsBoolean(false);
 
         RegisterFinalizationInfo(coro, arrayBufferHandle, finalizerFunction, finalizerHint);
     }
@@ -260,11 +274,13 @@ private:
     }
 
 private:
+    // Managed array used in this `ArrayBuffer`, null if buffer is external
     ObjectPointer<EtsByteArray> managedData_;
     EtsInt byteLength_;
+    // Contains pointer to either managed non-movable data or external data.
+    // Null if `ArrayBuffer` was detached, non-null otherwise
     EtsLong nativeData_;
-    EtsBoolean isExternal_;
-    EtsBoolean wasDetached_;
+    EtsBoolean isResizable_;
 
     friend class test::EtsArrayBufferTest;
     friend class test::EtsEscompatArrayBufferMembers;

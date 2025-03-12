@@ -105,7 +105,8 @@ extern "C" EtsEscompatArrayBuffer *EtsArrayBufferFromEncodedString(EtsString *st
     }
     [[maybe_unused]] EtsHandleScope s(coro);
     EtsHandle<EtsEscompatArrayBuffer> newBuffer = CreateArrayBuffer(coro, length, length > 0 ? bytes.data() : nullptr);
-    if (newBuffer.GetPtr() == nullptr || newBuffer->GetData() == nullptr) {
+    if (newBuffer.GetPtr() == nullptr) {
+        ASSERT(coro->HasPendingException());
         return nullptr;
     }
     return newBuffer.GetPtr();
@@ -132,6 +133,12 @@ extern "C" ObjectHeader *EtsEscompatArrayBufferAllocateNonMovable(EtsInt length)
     return EtsEscompatArrayBuffer::AllocateNonMovableArray(length);
 }
 
+extern "C" EtsLong EtsEscompatArrayBufferGetAddress(ObjectHeader *byteArray)
+{
+    ASSERT(byteArray != nullptr);
+    return EtsEscompatArrayBuffer::GetAddress(reinterpret_cast<EtsByteArray *>(byteArray));
+}
+
 /// @brief Creates new ArrayBuffer from slice of existing buffer
 extern "C" EtsEscompatArrayBuffer *EtsArrayBufferFromBufferSlice(EtsEscompatArrayBuffer *obj, ets_int offset,
                                                                  ets_int length)
@@ -140,6 +147,13 @@ extern "C" EtsEscompatArrayBuffer *EtsArrayBufferFromBufferSlice(EtsEscompatArra
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     [[maybe_unused]] EtsHandleScope s(coro);
     EtsHandle<EtsEscompatArrayBuffer> original(coro, obj);
+    if (original->WasDetached()) {
+        ThrowException(ctx, coro, ctx.GetIllegalArgumentExceptionClassDescriptor(),
+                       utf::CStringAsMutf8("ArrayBuffer was detached"));
+        return nullptr;
+    }
+    ASSERT(original->GetData() != nullptr);
+
     EtsInt origByteLength = original->GetByteLength();
     if (offset < 0 || offset > origByteLength) {
         ThrowException(ctx, coro, ctx.GetIndexOutOfBoundsExceptionClassDescriptor(),
@@ -153,13 +167,12 @@ extern "C" EtsEscompatArrayBuffer *EtsArrayBufferFromBufferSlice(EtsEscompatArra
     }
 
     EtsHandle<EtsEscompatArrayBuffer> newBuffer = CreateArrayBuffer(coro, length);
-    if (newBuffer.GetPtr() == nullptr || newBuffer->GetData() == nullptr) {
+    if (newBuffer.GetPtr() == nullptr) {
+        ASSERT(coro->HasPendingException());
         return nullptr;
     }
-    if (original->GetData() != nullptr) {
-        std::copy_n(std::next(reinterpret_cast<uint8_t *>(original->GetData()), offset), length,
-                    reinterpret_cast<uint8_t *>(newBuffer->GetData()));
-    }
+    std::copy_n(std::next(reinterpret_cast<uint8_t *>(original->GetData()), offset), length,
+                reinterpret_cast<uint8_t *>(newBuffer->GetData()));
     return newBuffer.GetPtr();
 }
 
@@ -182,9 +195,8 @@ extern "C" EtsString *EtsArrayBufferToString(EtsEscompatArrayBuffer *buffer, Ets
         return nullptr;
     }
 
-    auto etsObj = reinterpret_cast<EtsObject *>(buffer);
     [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsEscompatArrayBuffer> buf(coro, reinterpret_cast<EtsEscompatArrayBuffer *>(etsObj));
+    EtsHandle<EtsEscompatArrayBuffer> buf(coro, buffer);
     EtsInt byteLength = buf->GetByteLength();
 
     auto vi = helpers::encoding::ValidateIndices(byteLength, start, end);

@@ -54,17 +54,24 @@ export class ArrayBuffer extends Buffer
      *
      * @param length size of ArrayBuffer
      */
-    public constructor(length: int)
+    public constructor(length: int, maxByteLength?: int)
     {
         super()
         if (length < 0) {
             throw new RangeError("length can't be less than 0")
         }
-        this.data = ArrayBuffer.allocateNonMovable(length)
+        if (maxByteLength != undefined) {
+            if (maxByteLength! < 0) {
+                throw new RangeError("maxByteLength can't be less than 0")
+            }
+            if (length > maxByteLength) {
+                throw new RangeError("length can't be greater than maxByteLength")
+            }
+        }
+        this.isResizable = (maxByteLength != undefined)
+        this.data = ArrayBuffer.allocateNonMovable(this.isResizable ? maxByteLength! : length)
         this._byteLength = length
-        this.dataExternal = 0
-        this.isExternal = false
-        this.wasDetached = false
+        this.dataAddress = ArrayBuffer.getAddress(this.data!)
     }
 
     /**
@@ -72,9 +79,9 @@ export class ArrayBuffer extends Buffer
      *
      * @param length size of ArrayBuffer
      */
-    public constructor(length: number)
+    public constructor(length: number, maxByteLength?: number)
     {
-        this(length as int)
+        this(length as int, (maxByteLength !== undefined) ? maxByteLength as int : undefined)
     }
 
     /**
@@ -111,7 +118,7 @@ export class ArrayBuffer extends Buffer
             resultLength = 0
         }
 
-        let result = new ArrayBuffer(resultLength);
+        let result = new ArrayBuffer(resultLength)
 
         if (resultLength == 0) return result
         result.setValues(this, startIndex)
@@ -143,6 +150,9 @@ export class ArrayBuffer extends Buffer
      * @returns data taken from current ArrayBuffer with respect to begin and end parameters
      */
     public slice(begin: int, end?: int): ArrayBuffer {
+        if (this.detached) {
+            throw new TypeError("ArrayBuffer was detached")
+        }
         if (end == undefined) return this.sliceInternal(begin, this.getByteLength()) as ArrayBuffer
         else return this.sliceInternal(begin, end) as ArrayBuffer
     }
@@ -168,13 +178,22 @@ export class ArrayBuffer extends Buffer
     public native override set(pos: int, val: byte): void
 
     public override getByteLength(): int {
-        return this._byteLength;
+        return this._byteLength
     }
 
     get byteLength(): number {
         return this._byteLength
     }
 
+    get detached(): boolean {
+        return this.dataAddress == 0
+    }
+
+    get resizable(): boolean {
+        return this.isResizable
+    }
+
+    /// @brief Copy `this.byteLength` bytes starting from `begin` index of `other` data
     private native setValues(other: ArrayBuffer, begin: int): void
 
     /**
@@ -184,17 +203,23 @@ export class ArrayBuffer extends Buffer
      */
     //NOTE: return undefined
     public resize(newLen : int): void {
-        let resizable = !this.wasDetached && !this.isExternal
-        if (!resizable) {
-            throw new Error("ArrayBuffer is not resizable")
+        if (this.detached) {
+            throw new TypeError("ArrayBuffer was detached")
         }
-        if (newLen > this._byteLength) {
-            throw new Error("resize only supports shrinking")
+        if (!this.resizable) {
+            throw new TypeError("ArrayBuffer is not resizable")
+        }
+        if (newLen < 0 || newLen > this.data!.length) {
+            throw new RangeError("new length cannot be larger than maxByteLength")
         }
         this._byteLength = newLen
     }
 
+    /// @brief Allocates non-movable array of fixed length
     private native static allocateNonMovable(length: int): byte[]
+
+    /// @brief Returns native address of non-movable array
+    private native static getAddress(array: byte[]): long
 
     /**
     * Creates a new ArrayBuffer from an array of bytes.
@@ -205,8 +230,8 @@ export class ArrayBuffer extends Buffer
     * @returns {ArrayBuffer} A new ArrayBuffer containing the data from the byte array.
     */
     public static from(arr: byte[]): ArrayBuffer {
-        const bf = new ArrayBuffer(arr.length);
-        copyTo(arr, bf.data, 0, 0, arr.length)
+        const bf = new ArrayBuffer(arr.length)
+        copyTo(arr, bf.data!, 0, 0, arr.length)
         return bf
     }
 
@@ -220,9 +245,9 @@ export class ArrayBuffer extends Buffer
     * @returns {ArrayBuffer} A new ArrayBuffer containing the data from the array.
     */
     public static from(array: number[]): ArrayBuffer {
-        const buf = new ArrayBuffer(array.length);
+        const buf = new ArrayBuffer(array.length)
         for (let i = 0; i < array.length; ++i) {
-            buf.set(i, array[i] as byte);
+            buf.set(i, array[i] as byte)
         }
         return buf
     }
@@ -237,8 +262,13 @@ export class ArrayBuffer extends Buffer
     * @returns {ArrayBuffer} A new ArrayBuffer containing the same binary data as the Uint8Array.
     */
     public static from(u8arr: Uint8Array): ArrayBuffer {
-        const arrBuff = u8arr.buffer as ArrayBuffer;
-        return ArrayBuffer.from(arrBuff.data as byte[]);
+        const arrBuff = u8arr.buffer as ArrayBuffer
+        if (arrBuff.detached) {
+            return new ArrayBuffer(0)
+        }
+        const result = new ArrayBuffer(arrBuff.byteLength)
+        result.setValues(arrBuff, 0)
+        return result
     }
 
     /**
@@ -326,12 +356,12 @@ export class ArrayBuffer extends Buffer
 
     
     // Fields' order is important due to alignment
-    private data: byte[]
-    /** Length in bytes */
+    private data: byte[] | undefined
+    // Length in bytes
     private _byteLength: int
-    private dataExternal: long
-    private isExternal: boolean
-    private wasDetached: boolean
+    // Pointer to underlying array, which is either non-movable array or native
+    private dataAddress: long
+    private isResizable: boolean
 
 
     /**

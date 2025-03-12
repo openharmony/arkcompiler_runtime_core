@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
-function CheckArrayBuffer(arrayBuffer : ArrayBuffer) : boolean
-{
+export function CheckArrayBuffer(arrayBuffer : ArrayBuffer) : boolean {
     return arrayBuffer.byteLength == 10 && arrayBuffer.at(0) == 1 && arrayBuffer.at(1) == 2 && arrayBuffer.at(2) == 3;
+}
+
+export function checkCreatedArrayBuffer(ab: ArrayBuffer, expectedLength: int): boolean {
+    return !ab.resizable && !ab.detached && ab.getByteLength() == expectedLength;
 }

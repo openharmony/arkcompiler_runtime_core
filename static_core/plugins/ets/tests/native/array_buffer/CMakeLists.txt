@@ -13,6 +13,7 @@
 
 panda_ets_native_add_gtest(array_buffer_native_test
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/native_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/NativeTest.ets
 )
 
 panda_ets_native_add_gtest(array_buffer_native_managed_test

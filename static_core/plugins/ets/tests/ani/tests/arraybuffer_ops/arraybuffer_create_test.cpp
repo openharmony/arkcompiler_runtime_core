@@ -26,7 +26,12 @@ namespace ark::ets::ani::testing {
 class ArrayBufferCreateTest : public AniTest {
 public:
     static constexpr const ani_size EXPECTED_SIZE = 10U;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    static constexpr const char *CHECK_ARRAY_BUFFER_FUNCTION = "checkCreatedArrayBuffer";
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    static constexpr const char *MODULE_NAME = "arraybuffer_create_test";
 };
+
 TEST_F(ArrayBufferCreateTest, InvalidArgs)
 {
     ani_arraybuffer arrayBuffer;
@@ -49,6 +54,7 @@ TEST_F(ArrayBufferCreateTest, InvalidArgs)
     auto status3 = env_->CreateArrayBuffer(EXPECTED_SIZE, nullptr, &arrayBuffer3);
     ASSERT_EQ(status3, ANI_INVALID_ARGS);
 }
+
 TEST_F(ArrayBufferCreateTest, CreateEmpty)
 {
     ani_arraybuffer arrayBuffer;
@@ -66,6 +72,9 @@ TEST_F(ArrayBufferCreateTest, CreateEmpty)
     ASSERT_EQ(resultStatus, ANI_OK);
     ASSERT_EQ(resultData, data);
     ASSERT_EQ(resultLength, 0);
+
+    auto bufferIsCorrect = CallEtsFunction<ani_boolean>(MODULE_NAME, CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, 0);
+    ASSERT_EQ(bufferIsCorrect, ANI_TRUE);
 }
 
 TEST_F(ArrayBufferCreateTest, CreateWithLength)
@@ -93,6 +102,10 @@ TEST_F(ArrayBufferCreateTest, CreateWithLength)
     ASSERT_EQ(resultData[0U], 1U);
     ASSERT_EQ(resultData[1U], 2U);
     ASSERT_EQ(resultData[2U], 3U);
+
+    auto bufferIsCorrect =
+        CallEtsFunction<ani_boolean>(MODULE_NAME, CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, EXPECTED_SIZE);
+    ASSERT_EQ(bufferIsCorrect, ANI_TRUE);
 }
 
 TEST_F(ArrayBufferCreateTest, CreateForManaged)
@@ -109,8 +122,12 @@ TEST_F(ArrayBufferCreateTest, CreateForManaged)
     byteData[1U] = 2U;
     byteData[2U] = 3U;
 
-    auto ok = CallEtsFunction<ani_boolean>("arraybuffer_create_test", "CheckArrayBuffer", arrayBuffer);
+    auto ok = CallEtsFunction<ani_boolean>(MODULE_NAME, "CheckArrayBuffer", arrayBuffer);
     ASSERT_EQ(ok, ANI_TRUE);
+
+    auto bufferIsCorrect =
+        CallEtsFunction<ani_boolean>(MODULE_NAME, CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, EXPECTED_SIZE);
+    ASSERT_EQ(bufferIsCorrect, ANI_TRUE);
 }
 
 TEST_F(ArrayBufferCreateTest, TestGC)
@@ -140,6 +157,10 @@ TEST_F(ArrayBufferCreateTest, TestGC)
     ASSERT_EQ(data2[0U], 1U);
     ASSERT_EQ(data2[1U], 2U);
     ASSERT_EQ(data2[2U], 3U);
+
+    auto bufferIsCorrect =
+        CallEtsFunction<ani_boolean>(MODULE_NAME, CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, EXPECTED_SIZE);
+    ASSERT_EQ(bufferIsCorrect, ANI_TRUE);
 }
 }  // namespace ark::ets::ani::testing
 
