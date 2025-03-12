@@ -142,12 +142,7 @@ public:
     PANDA_PUBLIC_API static void Init(EtsCoroutine *coro, napi_env env);
     virtual ~InteropCtx();
 
-    static void Destroy(void *ptr)
-    {
-        auto *instance = reinterpret_cast<InteropCtx *>(ptr);
-        Runtime::GetCurrent()->GetInternalAllocator()->Delete(instance);
-        SharedEtsVmState::TryReleaseInstance();
-    }
+    static void Destroy(void *ptr);
 
     static InteropCtx *Current(Coroutine *coro)
     {

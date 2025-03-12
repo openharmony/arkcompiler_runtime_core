@@ -251,7 +251,6 @@ TEST_F(BarrierTests, TwoThreadScenario)
         ASSERT_EQ(counter, PIPE_ELEMENT_COUNT);
         stsVMIface.FinishXGCBarrier();
     };
-
     std::thread sthread(sthreadBody);
     std::thread dthread(dthreadBody);
     // ... real magic is here ...

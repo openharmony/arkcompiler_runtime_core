@@ -16,18 +16,15 @@
 #ifndef PLUGINS_ETS_RUNTIME_INTEROP_JS_HYBRID_HANDSHAKE_H
 #define PLUGINS_ETS_RUNTIME_INTEROP_JS_HYBRID_HANDSHAKE_H
 
-#include "hybrid/sts_vm_interface.h"
 #include <node_api.h>
-
-namespace ark::ets {
-class EtsCoroutine;
-}  // namespace ark::ets
 
 namespace ark::ets::interop::js {
 
+class InteropCtx;
+
 class Handshake {
 public:
-    static void VmHandshake(napi_env env, EtsCoroutine *coro, arkplatform::STSVMInterface *stsVmIface);
+    static void VmHandshake(napi_env env, InteropCtx *ctx);
 };
 
 }  // namespace ark::ets::interop::js

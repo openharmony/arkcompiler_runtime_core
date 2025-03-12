@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,6 +58,14 @@ EtsObjectStateInfo *EtsObjectStateTable::LookupInfo(EtsObjectStateInfo::Id id)
         return it->second;
     }
     return nullptr;
+}
+
+void EtsObjectStateTable::EnumerateObjectStates(const std::function<void(EtsObjectStateInfo *)> &cb)
+{
+    os::memory::WriteLockHolder wlh(lock_);
+    for (auto &objectState : table_) {
+        cb(objectState.second);
+    }
 }
 
 void EtsObjectStateTable::FreeInfo(EtsObjectStateInfo::Id id)

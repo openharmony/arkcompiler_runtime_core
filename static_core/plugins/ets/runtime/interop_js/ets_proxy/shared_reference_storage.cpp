@@ -339,6 +339,68 @@ void SharedReferenceStorage::DeleteJSRefAndRemoveReference(SharedReference *shar
     RemoveReference(sharedRef);
 }
 
+void SharedReferenceStorage::DeleteReferenceFromChain(EtsObject *etsObject, SharedReference *prevRef,
+                                                      SharedReference *removingRef, uint32_t nextIndex)
+{
+    DeleteJSRefAndRemoveReference(removingRef);
+    // The current reference is head of chain
+    if (prevRef == nullptr) {
+        if (nextIndex == 0U) {
+            // Chain contains only one reference, so no more references for this EtsObject
+            etsObject->DropInteropIndex();
+        } else {
+            auto *nextRef = GetItemByIndex(nextIndex);
+            // Copy content from next reference to head of chain, so we keep index in EtsObject header
+            [[maybe_unused]] auto res =
+                memcpy_s(removingRef, sizeof(SharedReference), nextRef, sizeof(SharedReference));
+            ASSERT(res == EOK);
+        }
+    } else {
+        prevRef->flags_.SetNextIndex(nextIndex);
+    }
+}
+
+bool SharedReferenceStorage::DeleteReference(
+    SharedReference *sharedRef, const std::function<bool(const SharedReference *sharedRef)> &deletePredicate)
+{
+    ASSERT(sharedRef != nullptr);
+    ASSERT(!sharedRef->IsEmpty());
+    auto *etsObject = sharedRef->GetEtsObject();
+    // EtsObject contains interop index for the first reference in chain
+    uint32_t nextIndex = etsObject->GetInteropIndex();
+    ASSERT(nextIndex != 0U);
+    SharedReference *prevRef = nullptr;
+    do {
+        auto *currentRef = GetItemByIndex(nextIndex);
+        nextIndex = currentRef->flags_.GetNextIndex();
+        if (deletePredicate(currentRef)) {
+            DeleteReferenceFromChain(etsObject, prevRef, currentRef, nextIndex);
+            return true;
+        }
+        prevRef = currentRef;
+    } while (nextIndex != 0U);
+    return false;
+}
+
+void SharedReferenceStorage::DeleteAllReferencesWithCtx(const InteropCtx *ctx)
+{
+    os::memory::WriteLockHolder lock(storageLock_);
+    const std::function<bool(const SharedReference *)> contextPredicate = [ctx](const SharedReference *ref) {
+        return ctx == ref->ctx_;
+    };
+    const size_t capacity = Capacity();
+    for (size_t i = 1U; i < capacity; ++i) {
+        SharedReference *ref = GetItemByIndex(i);
+        if (ref->IsEmpty()) {
+            continue;
+        }
+        if (contextPredicate(ref)) {
+            [[maybe_unused]] bool isDeleted = DeleteReference(ref, contextPredicate);
+            ASSERT(isDeleted == true);
+        }
+    }
+}
+
 void SharedReferenceStorage::DeleteUnmarkedReferences(SharedReference *sharedRef)
 {
     ASSERT(sharedRef != nullptr);

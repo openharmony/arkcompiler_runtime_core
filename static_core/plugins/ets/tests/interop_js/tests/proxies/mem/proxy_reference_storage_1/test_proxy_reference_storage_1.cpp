@@ -63,6 +63,11 @@ public:
         return storage_->RemoveReference(ref);
     }
 
+    bool HasReference(EtsObject *object) const
+    {
+        return SharedReference::HasReference(object);
+    }
+
     bool CheckAlive(void *data)
     {
         return storage_->CheckAlive(data);
@@ -81,9 +86,9 @@ TEST_F(SharedReferenceStorage1GTest, test_0)
 {
     EtsObject *etsObject = NewEtsObject();
 
-    ASSERT_EQ(SharedReference::HasReference(etsObject), false);
+    ASSERT_EQ(HasReference(etsObject), false);
     SharedReference *ref = CreateReference(etsObject);
-    ASSERT_EQ(SharedReference::HasReference(etsObject), true);
+    ASSERT_EQ(HasReference(etsObject), true);
 
     SharedReference *refX = storage_->GetReference(etsObject);
     SharedReference *refY = GetReference((void *)ref);

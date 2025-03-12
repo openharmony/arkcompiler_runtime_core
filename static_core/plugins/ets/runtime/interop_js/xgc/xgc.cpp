@@ -103,35 +103,22 @@ static auto CreateXObjectHandler(ets_proxy::SharedReferenceStorage *storage, STS
 }
 
 /* static */
-bool XGC::Create(EtsCoroutine *mainCoro)
+bool XGC::Create(PandaEtsVM *vm, ets_proxy::SharedReferenceStorage *storage, STSVMInterfaceImpl *stsVmIface)
 {
-#ifdef PANDA_JS_ETS_HYBRID_MODE
-    auto gcType = mainCoro->GetVM()->GetGC()->GetType();
-    if (gcType != mem::GCType::G1_GC || Runtime::GetOptions().IsNoAsyncJit()) {
-        // XGC is not implemented for other GC types
-        LOG(ERROR, RUNTIME) << "XGC requires GC type to be g1-gc and no-async-jit option must be false";
-        return false;
-    }
-#endif /* PANDA_JS_ETS_HYBRID_MODE */
     if (instance_ != nullptr) {
         return false;
     }
-    auto *ctx = InteropCtx::Current(mainCoro);
-    ASSERT(ctx != nullptr);
-    auto *stsVmIface = static_cast<STSVMInterfaceImpl *>(ctx->GetSTSVMInterface());
     if (stsVmIface == nullptr) {
         // JS VM is not ArkJS.
         // NOTE(audovichenko): remove this later
         return true;
     }
-    ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
     auto xobjHandler = CreateXObjectHandler(storage, stsVmIface);
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
     auto *extentionGCData = allocator->New<mem::XGCExtensionData>(xobjHandler);
     if (extentionGCData == nullptr) {
         return false;
     }
-    auto *vm = mainCoro->GetPandaVM();
     instance_ = allocator->New<XGC>(vm, stsVmIface, storage);
     if (instance_ == nullptr) {
         allocator->Delete(extentionGCData);
@@ -167,6 +154,33 @@ bool XGC::Destroy()
     return true;
 }
 
+void XGC::OnAttach([[maybe_unused]] const InteropCtx *context) {}
+
+void XGC::NotifyToFinishXGC()
+{
+    os::memory::LockHolder lh(finishXgcLock_);
+    // Atomic with relaxed order reason: data race with isXGcInProgress_ with no synchronization or ordering
+    // constraints imposed on other reads or writes
+    isXGcInProgress_.store(false, std::memory_order_relaxed);
+    finishXgcCV_.SignalAll();
+}
+
+void XGC::WaitForFinishXGC()
+{
+    os::memory::LockHolder lh(finishXgcLock_);
+    // Atomic with relaxed order reason: data race with isXGcInProgress_ with no synchronization or ordering
+    // constraints imposed on other reads or writes
+    while (isXGcInProgress_.load(std::memory_order_relaxed)) {
+        finishXgcCV_.Wait(&finishXgcLock_);
+    }
+}
+
+void XGC::OnDetach(const InteropCtx *context)
+{
+    WaitForFinishXGC();
+    storage_->DeleteAllReferencesWithCtx(context);
+}
+
 void XGC::GCStarted(const GCTask &task, [[maybe_unused]] size_t heapSize)
 {
     if (task.reason != GCTaskCause::CROSSREF_CAUSE) {
@@ -175,7 +189,9 @@ void XGC::GCStarted(const GCTask &task, [[maybe_unused]] size_t heapSize)
     XGCScope xgcStartScope("XGC Start", vm_);
     storage_->NotifyXGCStarted();
     vm_->RemoveRootProvider(storage_);
-    isXGcInProgress_ = true;
+    // Atomic with relaxed order reason: data race with isXGcInProgress_ with no synchronization or ordering
+    // constraints imposed on other reads or writes
+    isXGcInProgress_.store(true, std::memory_order_relaxed);
     remarkFinished_ = false;
     beforeGCStorageSize_ = storage_->Size();
 }
@@ -185,17 +201,10 @@ void XGC::GCFinished(const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeG
     if (task.reason != GCTaskCause::CROSSREF_CAUSE) {
         return;
     }
-    XGCScope xgcFinishScope("XGC Finish", vm_);
-    vm_->AddRootProvider(storage_);
-    isXGcInProgress_ = false;
-    if (remarkFinished_) {
-        // XGC was not interrupted
-        XGCScope xgcSweepScope("XGC Sweep", vm_);
-        storage_->SweepUnmarkedRefs();
+    if (!remarkFinished_) {
+        // Remark was interrupted, so XGC did not Finish on remark phase and do it here
+        Finish();
     }
-    storage_->NotifyXGCFinished();
-    // Sweep should be done on common STW, so it's critical to have the barrier here
-    stsVmIface_->FinishXGCBarrier();
     // NOTE(ipetrov, XGC): if table will be cleared in concurrent, then compute the new size should not be based on
     // the current storage size, need storage size without dead references
     auto newTargetThreshold = this->ComputeNewSize();
@@ -207,14 +216,18 @@ void XGC::GCFinished(const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeG
 
 void XGC::GCPhaseStarted(mem::GCPhase phase)
 {
-    if (!isXGcInProgress_) {
+    // Atomic with relaxed order reason: data race with isXGcInProgress_ with no synchronization or ordering
+    // constraints imposed on other reads or writes
+    if (!isXGcInProgress_.load(std::memory_order_relaxed)) {
         return;
     }
     switch (phase) {
         case mem::GCPhase::GC_PHASE_INITIAL_MARK: {
-            XGCScope xgcInitialMarkkScope("UnmarkAll", vm_);
-            storage_->UnmarkAll();
-            stsVmIface_->StartXGCBarrier();
+            UnmarkAll();
+            {
+                XGCScope xgcStartBarrierScope("StartXGCBarrier", vm_);
+                stsVmIface_->StartXGCBarrier();
+            }
             break;
         }
         case mem::GCPhase::GC_PHASE_REMARK: {
@@ -233,7 +246,9 @@ void XGC::GCPhaseStarted(mem::GCPhase phase)
 
 void XGC::GCPhaseFinished(mem::GCPhase phase)
 {
-    if (!isXGcInProgress_) {
+    // Atomic with relaxed order reason: data race with isXGcInProgress_ with no synchronization or ordering
+    // constraints imposed on other reads or writes
+    if (!isXGcInProgress_.load(std::memory_order_relaxed)) {
         return;
     }
     switch (phase) {
@@ -243,9 +258,14 @@ void XGC::GCPhaseFinished(mem::GCPhase phase)
             break;
         }
         case mem::GCPhase::GC_PHASE_REMARK: {
-            XGCScope xgcRemarkFinishScope("WaitForRemark", vm_);
-            stsVmIface_->WaitForRemark(nullptr);
-            remarkFinished_ = true;
+            {
+                XGCScope xgcRemarkFinishScope("WaitForRemark", vm_);
+                stsVmIface_->WaitForRemark(nullptr);
+                remarkFinished_ = true;
+            }
+            // All common phases with other JS GC threads are done and concurrent mark was not interrupted,
+            // so XGC may finish immediately after common Remark
+            Finish();
             break;
         }
         default: {
@@ -254,12 +274,12 @@ void XGC::GCPhaseFinished(mem::GCPhase phase)
     }
 }
 
-void XGC::MarkFromObject([[maybe_unused]] void *obj)
+void XGC::MarkFromObject([[maybe_unused]] void *data)
 {
-    ASSERT(obj != nullptr);
+    ASSERT(data != nullptr);
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
     // NOTE(audovichenko): Find the corresponding ref
-    auto *nativeRef = static_cast<NativeReference *>(obj);
+    auto *nativeRef = static_cast<NativeReference *>(data);
     auto *refRef = static_cast<ets_proxy::SharedReference **>(nativeRef->GetData());
     // Atomic with acquire order reason: load visibility after shared reference initialization in mutator thread
     auto *sharedRef = AtomicLoad(refRef, std::memory_order_acquire);
@@ -272,6 +292,12 @@ void XGC::MarkFromObject([[maybe_unused]] void *obj)
         MarkEtsObject(sharedRef, vm_);
     }
 #endif  // PANDA_JS_ETS_HYBRID_MODE
+}
+
+void XGC::UnmarkAll()
+{
+    XGCScope xgcInitialMarkkScope("XGC UnmarkAll", vm_);
+    storage_->UnmarkAll();
 }
 
 void XGC::Remark()
@@ -289,6 +315,26 @@ void XGC::Remark()
         }
         ref = storage_->ExtractRefAllocatedDuringXGC();
     }
+}
+
+void XGC::Sweep()
+{
+    XGCScope xgcSweepScope("XGC Sweep", vm_);
+    storage_->SweepUnmarkedRefs();
+}
+
+void XGC::Finish()
+{
+    XGCScope xgcFinishScope("XGC Finish", vm_);
+    vm_->AddRootProvider(storage_);
+    if (remarkFinished_) {
+        // XGC was not interrupted
+        Sweep();
+    }
+    storage_->NotifyXGCFinished();
+    // Sweep should be done on common STW, so it's critical to have the barrier here
+    stsVmIface_->FinishXGCBarrier();
+    NotifyToFinishXGC();
 }
 
 size_t XGC::ComputeNewSize()
@@ -317,7 +363,6 @@ bool XGC::Trigger(mem::GC *gc, PandaUniquePtr<GCTask> task)
     // NOTE(audovichenko): Handle the situation when the function create several equal tasks
     // NOTE(audovichenko): Handle the situation when GC is triggered in one VM but cannot be triggered in another VM.
     if (!ctx->GetXGCVmAdaptor()->StartXRefMarking()) {
-        ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR, "Cannot start ArkJS XGC");
         return false;
     }
     return gc->Trigger(std::move(task));
