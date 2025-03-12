@@ -11,10 +11,50 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of reserved keywords
+--- # List of hard keywords
 keywords:
-    - is
-    - keyof
-    - struct
-    - var
-    - yield
+    - abstract
+    - as
+    - async
+    - await
+    - break
+    - case
+    - class
+    - const
+    - constructor
+    - continue
+    - default
+    - do
+    - else
+    - enum
+    - export
+    - extends
+    - false
+    - final
+    - for
+    - function
+    - if
+    - implements
+    - import
+    - interface
+    - internal
+    - launch
+    - let
+    - native
+    - new
+    - null
+    - override
+    - package
+    - private
+    - protected
+    - public
+    - return
+    - static
+    - super
+    - switch
+    - this
+    - throw
+    - true
+    - try
+    - undefined
+    - while
