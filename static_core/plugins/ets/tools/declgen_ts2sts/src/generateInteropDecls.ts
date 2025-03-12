@@ -26,6 +26,7 @@ export interface RunnerParms {
   rootDir?: string;
   customResolveModuleNames?: (moduleName: string[], containingFile: string) => ts.ResolvedModuleFull[];
   customCompilerOptions?: ts.CompilerOptions;
+  includePaths?: string[];
 }
 
 export function generateInteropDecls(config: RunnerParms): string[] {
@@ -36,7 +37,8 @@ export function generateInteropDecls(config: RunnerParms): string[] {
     inputFiles: config.inputFiles,
     inputDirs: config.inputDirs,
     rootDir: config.rootDir,
-    tsconfig: undefined
+    tsconfig: undefined,
+    includePaths: config.includePaths
   }
   const declgen = new Declgen(tsConfig, config.customResolveModuleNames, config.customCompilerOptions);
   declgen.run();
