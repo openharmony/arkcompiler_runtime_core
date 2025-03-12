@@ -16,6 +16,7 @@
 #include "ani.h"
 #include "ani_options_parser.h"
 #include "ani_options.h"
+#include "generated/base_options.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
@@ -37,12 +38,19 @@ extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version,
     ark::ets::ani::ANIOptionsParser aniParser(optionsSize, optionsArr);
 
     ark::ets::ani::ANIOptions aniOptions;
+    ark::base_options::Options baseOptions("");
     ark::PandArgParser paParser;
 
     // Add runtime options
+    baseOptions.AddOptions(&paParser);
     aniOptions.AddOptions(&paParser);
-    paParser.Parse(aniParser.GetRuntimeOptions());
 
+    if (!paParser.Parse(aniParser.GetRuntimeOptions())) {
+        std::cerr << paParser.GetErrorString() << std::endl;
+        return ANI_ERROR;
+    }
+
+    ark::Logger::Initialize(baseOptions);
     if (!ark::Runtime::Create(aniOptions)) {
         LOG(ERROR, RUNTIME) << "Cannot create runtime";
         return ANI_ERROR;
