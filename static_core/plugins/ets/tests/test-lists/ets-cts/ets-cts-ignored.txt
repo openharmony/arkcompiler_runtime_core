@@ -2475,9 +2475,6 @@
 #21157 Annotation name coinciding with type name gets compiled but shouldn't
 18.annotations/01.declaring_annotations/declaration_coincide_name_n_1.sts
 
-#22969
-18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_6.sts
-
 #23368
 18.annotations/02.using_annotations/using_annotations_n_10.sts
 
