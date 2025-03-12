@@ -250,6 +250,21 @@
 03.types/08.reference_types/02.object_class_type/class_methods_2.sts
 03.types/08.reference_types/02.object_class_type/class_methods_3.sts
 
+#22791 : Resizable arrays implementation
+03.types/17.array_types/01.resizable_array_types/form_1_assign_to_2.sts
+03.types/17.array_types/01.resizable_array_types/form_2_assign_to_1.sts
+03.types/17.array_types/01.resizable_array_types/grow_array_form_one_1.sts
+03.types/17.array_types/01.resizable_array_types/grow_array_form_two_1.sts
+03.types/17.array_types/01.resizable_array_types/put_to_empty_form_1.sts
+03.types/17.array_types/01.resizable_array_types/put_to_empty_form_2.sts
+03.types/17.array_types/01.resizable_array_types/shrink_array_form_one.sts
+03.types/17.array_types/01.resizable_array_types/shrink_array_form_two.sts
+
+#23522
+03.types/17.array_types/01.resizable_array_types/resizable_array_0.sts
+03.types/17.array_types/01.resizable_array_types/resizable_array_2.sts
+03.types/17.array_types/01.resizable_array_types/resizable_array_4.sts
+
 #22987 es2panda aborts when name of the declaration clashes with the predefined type or standard library entity name.
 04.names_declarations_and_scopes/03.distinguishable_declarations/spec_decl_n8.sts
 04.names_declarations_and_scopes/03.distinguishable_declarations/spec_decl_n10.sts
