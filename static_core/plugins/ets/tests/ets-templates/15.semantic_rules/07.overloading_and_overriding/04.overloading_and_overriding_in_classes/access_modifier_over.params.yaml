@@ -200,7 +200,7 @@ cases:
       new Derived().private_foo();
       assertEQ( res, 11);
 
-  # overload-equivalent, expected to fail without 'override' keyword
+  # not override-compatible
   - tags: negative, compile-only
     decl: |-
       class Derived extends Base implements Interface {
@@ -234,8 +234,7 @@ cases:
       new Derived().get_protected_foo(new Number());
       assertEQ( res, 11);
 
-  - tags: negative, compile-only
-    decl: |-
+  - decl: |-
       class Derived<T,S> extends Gen2<T,S> {
         protected foo(y: S) { res = 11;}
         get_foo(y: S) {this.foo(y)}
