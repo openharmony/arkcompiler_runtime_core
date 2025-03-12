@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +12,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+class TestBacktrace {
+    static { loadLibrary("call_backtrace") }
+
+    native callBacktrace(): int;
+}
+
+function new_TestBacktrace(): TestBacktrace {
+    return new TestBacktrace;
+}
+
+function TestBacktrace_entry_simple(test: TestBacktrace): int {
+    return TestBacktrace_func1(test);
+}
+
+function TestBacktrace_func1(test: TestBacktrace): int {
+    return TestBacktrace_func2(test);
+}
+
+function TestBacktrace_func2(test: TestBacktrace): int {
+    return test.callBacktrace();
+}
+
+function TestBacktrace_entry_complex(test: TestBacktrace): int {
+    return TestBacktrace_entry_test_1_frame(test);
+}
+
+function TestBacktrace_entry_test_1_frame(test: TestBacktrace): int {
+    return getOperationFactory(test)
+}
 
 interface FileDataValue {
   fileName: string;
@@ -48,7 +78,7 @@ class OperationFactory {
   }
 }
 
-function getFileDate() {
+function getFileDate(test: TestBacktrace): int {
   let FileDataValues: FileDataValue[] = [{
     fileName: 'OperationFactoryFile',
     filePath: 'source/url/OperationFactoryFile',
@@ -58,18 +88,16 @@ function getFileDate() {
       dataStr: 'This is a test data!'
     }
   }];
-  EtsStepArkTest();
-  return FileDataValues;
+  return test.callBacktrace();
 }
 
-function getOperationFactory() {
-  getFileDate();
+function getOperationFactory(test: TestBacktrace): int {
   const factory = new OperationFactory();
   factory.createOperation('add', 2, 3);
   factory.createOperation('subtract', 5, 5);
   factory.createOperation('multiply', 3, 6);
   factory.createOperation('divide', 2, 2);
+  return getFileDate(test);
 }
 
-getOperationFactory();
 

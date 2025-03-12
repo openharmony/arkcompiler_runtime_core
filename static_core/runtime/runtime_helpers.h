@@ -19,7 +19,6 @@
 namespace ark {
 
 void PrintStackTrace();
-void EtsStepArkTest();
 
 }  // namespace ark
 
