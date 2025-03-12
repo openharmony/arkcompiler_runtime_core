@@ -14,24 +14,32 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Contravariance is the ability to use a type that is more general than originally specified.
-tags: [negative, compile-only]
+desc: >-
+    Variance is how subtyping between class types relates to subtyping between class member signatures
+    (types of parameters, return type). Variance can be of three kinds:
+    - Invariance,
+    - Covariance, and
+    - Contravariance.
+
+    covariance for the return type: Derived is a subtype of Base
 ---*/
 
 class Base {
-  foo(p: Derived): Derived {
-    return p;
+  foo(p: Derived) {
+    return new Base()
   }
 }
 
 class Derived extends Base {
-  override foo(p: Derived): Base {
-    return p;
+  override foo(p: Derived) {
+    return new Derived()
   }
 }
 
 function main() {
   let a = new Base();
   let b = new Derived();
-  assertEQ( a.foo(b), b.foo(b) )
+  assertTrue( a.foo(b) instanceof Base );
+  assertFalse( a.foo(b) instanceof Derived );
+  assertTrue( b.foo(b) instanceof Derived );
 }

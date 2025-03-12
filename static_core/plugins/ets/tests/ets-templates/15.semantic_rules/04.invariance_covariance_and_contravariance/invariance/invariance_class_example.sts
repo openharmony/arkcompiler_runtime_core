@@ -14,16 +14,29 @@ limitations under the License.
 ---*/
 
 /*---
-desc: covariance for the return type - Derived is a subtype of Base
+desc: >-
+    Variance is how subtyping between class types relates to subtyping between class member signatures
+    (types of parameters, return type). Variance can be of three kinds:
+    - Invariance,
+    - Covariance, and
+    - Contravariance.
+    Invariance refers to the ability to use the originally-specified type as a derived one.
 ---*/
 
-interface I {}
+class Base {
+  foo(p: Base): Base {
+    return p;
+  }
+}
 
-class Base implements I {}
-
-class Derived extends Base {}
+class Derived extends Base {
+  override foo(p: Base): Base {
+    return p;
+  }
+}
 
 function main() {
-  let arr: I[] = [ new Base(), new Derived()];
-  assertEQ( arr.length, 2);
+  let a = new Base();
+  let b = new Derived();
+  assertEQ( a.foo(a), b.foo(a) )
 }
