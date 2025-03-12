@@ -18,8 +18,100 @@
         return new A();
     }
 
-	public double_method(value1: double, value2: double): double
+	public doubleMethod(value1: double, value2: double): double
     {
         return value1 + value2;
+    }
+}
+
+interface ji {
+    jf(value: double): double;
+}
+
+class B implements ji {
+    constructor(data: double) {
+        this.data = data;
+    }
+
+    data: double;
+
+    public doubleMethod(value1: double, value2: double): double {
+        if (this.data > value1 + value2) {
+            return this.data;
+        } else {
+            return value1 + value2 as double;
+        }
+    }
+
+    public doubleMethod(value: double): double {
+        if (this.data > value) {
+            return this.data;
+        } else {
+            return value;
+        }
+    }
+
+    protected protectedMethod(value: double): double {
+        return this.data + value as double;
+    }
+
+    private privateMethod(value: double): double {
+        return this.data - value as double;
+    }
+
+    public nestedMethod(value: double): double {
+        let lambdaMethod: (p1: double, p2: double) => double =
+            (param1: double, param2: double): double => {
+                return param1 + param2 as double;
+        };
+        return lambdaMethod(this.data, value);
+    }
+
+    public recursiveMethod(value: int): double {
+        if (value <= 0) {
+            return 1;
+        } else {
+            return value * this.recursiveMethod(value - 1) as double;
+        }
+    }
+
+    calculateSum(value1: double, value2: char, value3: int): double {
+        let aChar: char = 'A';
+        if (value2 == aChar) {
+            return this.data - value1 as double;
+        }
+        if (value3 == 1) {
+            return value1;
+        }
+        return this.data + value1 as double;
+    }
+
+    public jf(value: double): double {
+        return this.data - value as double;
+    }
+}
+
+final class C extends B {
+    constructor(data1: double) {
+        super(data1);
+        this.data1 = data1;
+    }
+
+    data1: double;
+
+    public doubleAddMethod(value1: double, value2: double): double {
+        return this.data1 + value1 + value2 as double;
+    }
+
+    public override doubleMethod(value1: double, value2: double): double {
+        return this.data1 - value1 - value2 as double;
+    }
+
+    public callProtected(value: double): double {
+        return this.protectedMethod(value) as double;
+    }
+
+    public jf(value: double): double {
+        return this.data1 + value as double;
     }
 }
