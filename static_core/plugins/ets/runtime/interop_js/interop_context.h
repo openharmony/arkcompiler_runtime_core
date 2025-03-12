@@ -424,15 +424,15 @@ public:
         Fatal(msg.c_str());
     }
 
-    void SetPendingNewInstance(EtsObject *newInstance)
+    void SetPendingNewInstance(EtsHandle<EtsObject> handle)
     {
-        pendingNewInstance_ = newInstance;
+        pendingNewInstance_ = handle;
     }
 
     EtsObject *AcquirePendingNewInstance()
     {
-        auto res = pendingNewInstance_;
-        pendingNewInstance_ = nullptr;
+        auto res = pendingNewInstance_.GetPtr();
+        pendingNewInstance_ = EtsHandle<EtsObject>();
         return res;
     }
 
@@ -573,7 +573,7 @@ private:
     Method *jsvalueFregistryRegister_ {};
 
     // ets_proxy data
-    EtsObject *pendingNewInstance_ {};
+    EtsHandle<EtsObject> pendingNewInstance_ {};
     ets_proxy::EtsMethodWrappersCache etsMethodWrappersCache_ {};
     ets_proxy::EtsClassWrappersCache etsClassWrappersCache_ {};
 
