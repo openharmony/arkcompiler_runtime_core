@@ -15,5 +15,15 @@
 
 class Man {
     static name: String = "Bob";
-    static age: int = 58;
+    static age: int = 2;
+}
+
+class BoxStaticA extends Man {
+    static int_value: int = 0;
+    static string_value: String = "";
+}
+
+final class BoxStaticFinal extends Man {
+    static int_value: int = 0;
+    static string_value: String = "";
 }

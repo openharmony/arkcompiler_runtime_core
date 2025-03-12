@@ -18,11 +18,10 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
-static constexpr int32_t LOOP_COUNT = 3;
 
 class ClassGetStaticFieldByNameFloatTest : public AniTest {
 public:
-    void GetFieldValue(const char *className, const char *fieldName)
+    void CheckFieldValue(const char *className, const char *fieldName)
     {
         ani_class cls {};
         const ani_float setTarget = 2U;
@@ -122,7 +121,8 @@ TEST_F(ClassGetStaticFieldByNameFloatTest, combination_test1)
     const ani_float expectedAge2 = 3.0F;
     ani_float single = 0.0F;
     ASSERT_EQ(env_->FindClass("LGetFloatStatic;", &cls), ANI_OK);
-    for (int32_t i = 0; i < LOOP_COUNT - 1; i++) {
+    const int32_t loopCount = 3;
+    for (int32_t i = 0; i < loopCount; i++) {
         ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, "age", expectedAge2), ANI_OK);
         ASSERT_EQ(env_->Class_GetStaticFieldByName_Float(cls, "age", &single), ANI_OK);
         ASSERT_EQ(single, expectedAge2);
@@ -134,36 +134,17 @@ TEST_F(ClassGetStaticFieldByNameFloatTest, combination_test1)
 
 TEST_F(ClassGetStaticFieldByNameFloatTest, combination_test2)
 {
-    ani_class cls {};
-    const ani_float expectedAge = 2.0F;
-    ASSERT_EQ(env_->FindClass("LGetFloatStatic;", &cls), ANI_OK);
-    ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, "age", expectedAge), ANI_OK);
-    ani_float single = 0.0F;
-    for (int32_t i = 0; i < LOOP_COUNT; i++) {
-        ASSERT_EQ(env_->Class_GetStaticFieldByName_Float(cls, "age", &single), ANI_OK);
-        ASSERT_EQ(single, expectedAge);
-    }
+    CheckFieldValue("LGetFloatStatic;", "age");
 }
 
 TEST_F(ClassGetStaticFieldByNameFloatTest, combination_test3)
 {
-    ani_class cls {};
-    const ani_float expectedAge = 2.0F;
-    ASSERT_EQ(env_->FindClass("LGetFloatStatic;", &cls), ANI_OK);
-    ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, "age", expectedAge), ANI_OK);
-    ani_float single = 0.0F;
-    ASSERT_EQ(env_->Class_GetStaticFieldByName_Float(cls, "age", &single), ANI_OK);
-    ASSERT_EQ(single, expectedAge);
+    CheckFieldValue("LFloatStaticA;", "float_value");
 }
 
 TEST_F(ClassGetStaticFieldByNameFloatTest, combination_test4)
 {
-    GetFieldValue("LFloatStaticA;", "float_value");
-}
-
-TEST_F(ClassGetStaticFieldByNameFloatTest, combination_test5)
-{
-    GetFieldValue("LFloatStaticFinal;", "float_value");
+    CheckFieldValue("LFloatStaticFinal;", "float_value");
 }
 
 }  // namespace ark::ets::ani::testing

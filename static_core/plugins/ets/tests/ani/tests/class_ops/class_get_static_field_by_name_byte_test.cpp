@@ -17,11 +17,10 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
-static constexpr int32_t LOOP_COUNT = 3;
 
 class ClassGetStaticFieldByNameByteTest : public AniTest {
 public:
-    void GetFieldValue(const char *className, const char *fieldName)
+    void CheckFieldValue(const char *className, const char *fieldName)
     {
         ani_class cls {};
         const ani_byte setTarget = 2U;
@@ -125,7 +124,8 @@ TEST_F(ClassGetStaticFieldByNameByteTest, combination_test1)
     const ani_byte setTarget2 = 3U;
     ani_byte single = 1U;
     ASSERT_EQ(env_->FindClass("LGetbyteStatic;", &cls), ANI_OK);
-    for (int32_t i = 0; i < LOOP_COUNT - 1; i++) {
+    const int32_t loopCount = 3;
+    for (int32_t i = 0; i < loopCount; i++) {
         ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(cls, "age", setTarget2), ANI_OK);
         ASSERT_EQ(env_->Class_GetStaticFieldByName_Byte(cls, "age", &single), ANI_OK);
         ASSERT_EQ(single, setTarget2);
@@ -137,36 +137,17 @@ TEST_F(ClassGetStaticFieldByNameByteTest, combination_test1)
 
 TEST_F(ClassGetStaticFieldByNameByteTest, combination_test2)
 {
-    ani_class cls {};
-    const ani_byte setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("LGetbyteStatic;", &cls), ANI_OK);
-    ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(cls, "age", setTarget), ANI_OK);
-    ani_byte single = 1U;
-    for (int32_t i = 0; i < LOOP_COUNT; i++) {
-        ASSERT_EQ(env_->Class_GetStaticFieldByName_Byte(cls, "age", &single), ANI_OK);
-        ASSERT_EQ(single, setTarget);
-    }
+    CheckFieldValue("LGetbyteStatic;", "age");
 }
 
 TEST_F(ClassGetStaticFieldByNameByteTest, combination_test3)
 {
-    ani_class cls {};
-    const ani_byte setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("LGetbyteStatic;", &cls), ANI_OK);
-    ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(cls, "age", setTarget), ANI_OK);
-    ani_byte single = 1U;
-    ASSERT_EQ(env_->Class_GetStaticFieldByName_Byte(cls, "age", &single), ANI_OK);
-    ASSERT_EQ(single, setTarget);
+    CheckFieldValue("LByteStaticA;", "byte_value");
 }
 
 TEST_F(ClassGetStaticFieldByNameByteTest, combination_test4)
 {
-    GetFieldValue("LByteStaticA;", "byte_value");
-}
-
-TEST_F(ClassGetStaticFieldByNameByteTest, combination_test5)
-{
-    GetFieldValue("LByteStaticFinal;", "byte_value");
+    CheckFieldValue("LByteStaticFinal;", "byte_value");
 }
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

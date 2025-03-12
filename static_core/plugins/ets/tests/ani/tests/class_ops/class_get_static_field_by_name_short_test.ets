@@ -16,4 +16,18 @@
 class GetShortStatic {
     static name: String = "Bob";
     static age: short = +20;
+    static specia1: int = 0;
+    static specia3: string = "";
+    static specia4: null = null;
+    static specia5: undefined  = undefined ;
+    static min: short = -32768;
+    static max: short = +32767;
+}
+
+class ShortStaticA extends GetShortStatic {
+    static short_value: short = 0;
+}
+
+final class ShortStaticFinal extends GetShortStatic {
+    static short_value: short = 0;
 }

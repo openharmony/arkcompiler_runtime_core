@@ -16,4 +16,18 @@
 class GetLongStatic {
     static name: String = "Bob";
     static age: long = 20;
+    static specia1: int = 0;
+    static specia3: string = "";
+    static specia4: null = null;
+    static specia5: undefined  = undefined ;
+    static min: long = -9223372036854775808;
+    static max: long = 9223372036854775807;
+}
+
+class PackageStaticA extends GetLongStatic {
+    static long_value: long = 0;
+}
+
+final class PackageStaticFinal extends GetLongStatic {
+    static long_value: long = 0;
 }

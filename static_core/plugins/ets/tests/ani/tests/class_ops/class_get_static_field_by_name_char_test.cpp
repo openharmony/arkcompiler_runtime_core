@@ -17,11 +17,10 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
-static constexpr int32_t LOOP_COUNT = 3;
 
 class ClassGetStaticFieldByNameCharTest : public AniTest {
 public:
-    void GetFieldValue(const char *className, const char *fieldName)
+    void CheckFieldValue(const char *className, const char *fieldName)
     {
         ani_class cls {};
         const ani_char setTarget = 2U;
@@ -136,7 +135,8 @@ TEST_F(ClassGetStaticFieldByNameCharTest, combination_test1)
     const ani_char setTarget2 = 3U;
     ani_char single = 'c';
     ASSERT_EQ(env_->FindClass("LGetCharStatic;", &cls), ANI_OK);
-    for (int32_t i = 0; i < LOOP_COUNT - 1; i++) {
+    const int32_t loopCount = 3;
+    for (int32_t i = 0; i < loopCount; i++) {
         ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "name", setTarget2), ANI_OK);
         ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "name", &single), ANI_OK);
         ASSERT_EQ(single, setTarget2);
@@ -148,36 +148,17 @@ TEST_F(ClassGetStaticFieldByNameCharTest, combination_test1)
 
 TEST_F(ClassGetStaticFieldByNameCharTest, combination_test2)
 {
-    ani_class cls {};
-    const ani_char setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("LGetCharStatic;", &cls), ANI_OK);
-    ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "name", setTarget), ANI_OK);
-    ani_char single = 'c';
-    for (int32_t i = 0; i < LOOP_COUNT; i++) {
-        ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "name", &single), ANI_OK);
-        ASSERT_EQ(single, setTarget);
-    }
+    CheckFieldValue("LGetCharStatic;", "name");
 }
 
 TEST_F(ClassGetStaticFieldByNameCharTest, combination_test3)
 {
-    ani_class cls;
-    const ani_char target = 'b';
-    ASSERT_EQ(env_->FindClass("LGetCharStatic;", &cls), ANI_OK);
-    ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "name", target), ANI_OK);
-    ani_char resultValue = ' ';
-    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "name", &resultValue), ANI_OK);
-    ASSERT_EQ(resultValue, target);
+    CheckFieldValue("LCharStaticA;", "char_value");
 }
 
 TEST_F(ClassGetStaticFieldByNameCharTest, combination_test4)
 {
-    GetFieldValue("LCharStaticA;", "char_value");
-}
-
-TEST_F(ClassGetStaticFieldByNameCharTest, combination_test5)
-{
-    GetFieldValue("LCharStaticFinal;", "char_value");
+    CheckFieldValue("LCharStaticFinal;", "char_value");
 }
 }  // namespace ark::ets::ani::testing
 

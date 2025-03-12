@@ -20,7 +20,7 @@ namespace ark::ets::ani::testing {
 
 class ClassGetStaticFieldBooleanTest : public AniTest {
 public:
-    void GetFieldValue(const char *className, const char *fieldName)
+    void CheckFieldValue(const char *className, const char *fieldName)
     {
         ani_class cls {};
         ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
@@ -181,28 +181,12 @@ TEST_F(ClassGetStaticFieldBooleanTest, combination_test2)
 
 TEST_F(ClassGetStaticFieldBooleanTest, combination_test3)
 {
-    ani_class cls {};
-    ani_static_field field {};
-    ani_boolean single = ANI_FALSE;
-    ASSERT_EQ(env_->FindClass("LTestBoolean;", &cls), ANI_OK);
-    ASSERT_EQ(env_->Class_FindStaticField(cls, "boolean_value", &field), ANI_OK);
-    ASSERT_NE(field, nullptr);
-    ASSERT_EQ(env_->Class_SetStaticField_Boolean(cls, field, ANI_FALSE), ANI_OK);
-    const int32_t loopNum = 3;
-    for (int32_t i = 0; i < loopNum; i++) {
-        ASSERT_EQ(env_->Class_GetStaticField_Boolean(cls, field, &single), ANI_OK);
-        ASSERT_EQ(single, ANI_FALSE);
-    }
+    CheckFieldValue("LTestBooleanA;", "boolean_value");
 }
 
 TEST_F(ClassGetStaticFieldBooleanTest, combination_test4)
 {
-    GetFieldValue("LTestBooleanA;", "boolean_value");
-}
-
-TEST_F(ClassGetStaticFieldBooleanTest, combination_test5)
-{
-    GetFieldValue("LTestBooleanFinal;", "boolean_value");
+    CheckFieldValue("LTestBooleanFinal;", "boolean_value");
 }
 }  // namespace ark::ets::ani::testing
 
