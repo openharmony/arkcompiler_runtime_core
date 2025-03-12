@@ -49,8 +49,8 @@ napi_value GetETSFunction(napi_env env, std::string_view packageName, std::strin
                                           std::string(methodName) + " method");
         return nullptr;
     }
+    NAPI_CHECK_FATAL(napi_object_seal(env, jsMethod));
 
-    NAPI_CHECK_FATAL(NapiObjectSeal(env, jsMethod));
     return jsMethod;
 }
 

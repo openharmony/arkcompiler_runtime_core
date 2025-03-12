@@ -219,17 +219,6 @@ inline bool NapiThrownGeneric(napi_status rc)
     return rc == napi_generic_failure;
 }
 
-inline napi_status NapiObjectSeal([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value jsVal)
-{
-// Ark js vm crashes in napi_object_seal.
-// Disable the call temporary
-#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
-    return napi_ok;
-#else
-    return napi_object_seal(env, jsVal);
-#endif  // PANDA_TARGET_OHOS
-}
-
 inline napi_status NapiCallFunction(napi_env env, napi_value recv, napi_value func, size_t argc, const napi_value *argv,
                                     napi_value *result)
 {

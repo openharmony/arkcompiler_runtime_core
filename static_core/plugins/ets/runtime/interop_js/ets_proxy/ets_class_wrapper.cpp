@@ -544,7 +544,7 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
                                                : (base->HasBuiltin() ? base->GetBuiltin(env) : base->GetJsCtor(env));
 
     SimulateJSInheritance(env, jsCtor, fakeSuper);
-    NAPI_CHECK_FATAL(NapiObjectSeal(env, jsCtor));
+    NAPI_CHECK_FATAL(napi_object_seal(env, jsCtor));
     NAPI_CHECK_FATAL(napi_create_reference(env, jsCtor, 1, &_this->jsCtorRef_));
 
     return _this;
