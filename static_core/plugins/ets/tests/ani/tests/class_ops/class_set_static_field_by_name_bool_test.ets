@@ -17,3 +17,11 @@ class BoolStatic {
     static bool_value: boolean = false;
     static string_value: String = "";
 }
+
+class BoolStaticA extends BoolStatic {
+    static bool_value: boolean = true;
+}
+
+final class BoolStaticFinal extends BoolStatic {
+    static bool_value: boolean = true;
+}

@@ -17,3 +17,11 @@ class PackageStatic {
     static long_value: long = 0;
     static string_value: String = "";
 }
+
+class PackageStaticA extends PackageStatic {
+    static long_value: long = 0;
+}
+
+final class PackageStaticFinal extends PackageStatic {
+    static long_value: long = 0;
+}

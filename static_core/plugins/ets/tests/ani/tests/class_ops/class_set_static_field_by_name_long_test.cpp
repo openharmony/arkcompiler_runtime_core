@@ -14,37 +14,51 @@
  */
 
 #include "ani_gtest.h"
+#include <cmath>
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class ClassSetStaticFieldByNameLongTest : public AniTest {};
+class ClassSetStaticFieldByNameLongTest : public AniTest {
+public:
+    void CheckFieldValue(const char *className, const char *fieldName)
+    {
+        ani_class cls {};
+        const ani_long setTarget = 2U;
+        ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
+
+        ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, fieldName, setTarget), ANI_OK);
+        ani_long resultValue = 0L;
+        ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, fieldName, &resultValue), ANI_OK);
+        ASSERT_EQ(resultValue, setTarget);
+    }
+};
 
 TEST_F(ClassSetStaticFieldByNameLongTest, set_static_field_by_name_long_capi)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_long_test/PackageStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Long(env_, cls, "long_value", 8L), ANI_OK);
-    ani_long resultValue;
+    ani_long resultValue = 0L;
     ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_Long(env_, cls, "long_value", &resultValue), ANI_OK);
     ASSERT_EQ(resultValue, 8L);
 }
 
 TEST_F(ClassSetStaticFieldByNameLongTest, set_static_field_by_name_long)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_long_test/PackageStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, "long_value", 8L), ANI_OK);
-    ani_long resultValue;
+    ani_long resultValue = 0L;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "long_value", &resultValue), ANI_OK);
     ASSERT_EQ(resultValue, 8L);
 }
 
 TEST_F(ClassSetStaticFieldByNameLongTest, set_static_field_by_name_long_invalid_field_type)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_long_test/PackageStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, "string_value", 8L), ANI_INVALID_TYPE);
@@ -52,7 +66,7 @@ TEST_F(ClassSetStaticFieldByNameLongTest, set_static_field_by_name_long_invalid_
 
 TEST_F(ClassSetStaticFieldByNameLongTest, set_static_field_by_name_long_invalid_args_object)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_long_test/PackageStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(nullptr, "long_value", 8L), ANI_INVALID_ARGS);
@@ -60,10 +74,73 @@ TEST_F(ClassSetStaticFieldByNameLongTest, set_static_field_by_name_long_invalid_
 
 TEST_F(ClassSetStaticFieldByNameLongTest, set_static_field_by_name_long_invalid_args_field)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_long_test/PackageStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, nullptr, 8L), ANI_INVALID_ARGS);
+}
+
+TEST_F(ClassSetStaticFieldByNameLongTest, special_values)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_long_test/PackageStatic;", &cls), ANI_OK);
+    ani_long single = 0L;
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, "long_value", static_cast<ani_long>(0)), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "long_value", &single), ANI_OK);
+    ASSERT_EQ(single, static_cast<ani_long>(0));
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, "long_value", static_cast<ani_long>(NULL)), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "long_value", &single), ANI_OK);
+    ASSERT_EQ(single, static_cast<ani_long>(NULL));
+
+    ani_long max = std::numeric_limits<ani_long>::max();
+    ani_long min = -std::numeric_limits<ani_long>::max();
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, "long_value", static_cast<ani_long>(max)), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "long_value", &single), ANI_OK);
+    ASSERT_EQ(single, static_cast<ani_long>(max));
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, "long_value", static_cast<ani_long>(min)), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "long_value", &single), ANI_OK);
+    ASSERT_EQ(single, static_cast<ani_long>(min));
+}
+
+TEST_F(ClassSetStaticFieldByNameLongTest, combination_test1)
+{
+    ani_class cls {};
+    const ani_short setTarget = 2L;
+    const ani_short setTarget2 = 3L;
+    ani_long single = 0L;
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_long_test/PackageStatic;", &cls), ANI_OK);
+    const int32_t loopCount = 3;
+    for (int32_t i = 0; i < loopCount; i++) {
+        ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, "long_value", setTarget2), ANI_OK);
+        ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "long_value", &single), ANI_OK);
+        ASSERT_EQ(single, setTarget2);
+    }
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, "long_value", setTarget), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "long_value", &single), ANI_OK);
+    ASSERT_EQ(single, setTarget);
+}
+
+TEST_F(ClassSetStaticFieldByNameLongTest, combination_test2)
+{
+    CheckFieldValue("Lclass_set_static_field_by_name_long_test/PackageStaticA;", "long_value");
+}
+
+TEST_F(ClassSetStaticFieldByNameLongTest, combination_test3)
+{
+    CheckFieldValue("Lclass_set_static_field_by_name_long_test/PackageStaticFinal;", "long_value");
+}
+
+TEST_F(ClassSetStaticFieldByNameLongTest, invalid_argument1)
+{
+    ani_class cls {};
+    const ani_long setTarget = 2U;
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_long_test/PackageStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, "", setTarget), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, "\n", setTarget), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Long(nullptr, cls, "long_value", setTarget), ANI_INVALID_ARGS);
 }
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

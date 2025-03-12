@@ -17,3 +17,11 @@ class FloatStatic {
     static float_value: float = 0.0f;
     static string_value: String = "";
 }
+
+class FloatStaticA extends FloatStatic {
+    static float_value: float = 0.0f;
+}
+
+final class FloatStaticFinal extends FloatStatic {
+    static float_value: float = 0.0f;
+}
