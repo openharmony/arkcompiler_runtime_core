@@ -18,9 +18,131 @@
         return new A();
     }
 
-    public get_name(value1: int, value2: int): string
+    public getName(value1: int, value2: int): string
     {
         if (value1 == 10 && value2 == 20) {
+            return "Equality";
+        } else {
+            return "Inequality";
+        }
+    }
+}
+
+interface ji {
+    jf(value: int): string;
+}
+
+class B implements ji {
+    constructor(data: int) {
+        this.data = data;
+    }
+
+    data: int;
+
+    public refMethod(value1: int, value2: int): string {
+        if (value1 === value2) {
+            return "Equality";
+        } else {
+            return "Inequality";
+        }
+    }
+
+    public refMethod(value: int): string {
+        if (this.data > value) {
+            return "Greater";
+        } else {
+            return "Less";
+        }
+    }
+
+    protected protectedMethod(value: int): string {
+        if (this.data > value) {
+            return "Greater";
+        } else {
+            return "Less";
+        }
+    }
+
+    private privateMethod(value: int): string {
+        if (this.data > value) {
+            return "Greater";
+        } else {
+            return "Less";
+        }
+    }
+
+    public nestedMethod(value: int): string {
+        let lambdaMethod: (p1: int, p2: int) => string =
+            (param1: int, param2: int): string => {
+                if (this.data > value) {
+                    return "Greater";
+                } else {
+                    return "Less";
+                }
+        };
+        return lambdaMethod(this.data, value);
+    }
+
+    public recursiveMethod(value: int): string {
+        if (value <= 0) {
+            return "Less";
+        }
+        if (value === 1) {
+            return "Greater";
+        }
+        return this.recursiveMethod(value - 1);
+    }
+
+    calculateSum(value1: int, value2: char, value3: double): string {
+        let aChar: char = 'A';
+        if (value2 == aChar) {
+            return "CharEquality";
+        }
+        if (value3 == 1.0) {
+            return "NumEquality";
+        }
+        return "Inequality";
+    }
+
+    public jf(value: int): string {
+        if (this.data > value) {
+            return "Greater";
+        } else {
+            return "Less";
+        }
+    }
+}
+
+final class C extends B {
+    constructor(data1: int) {
+        super(data1);
+        this.data1 = data1;
+    }
+
+    data1: int;
+
+    public refCompareMethod(value1: int, value2: int): string {
+        if (value1 > value2) {
+            return "Greater";
+        } else {
+            return "Less";
+        }
+    }
+
+    public override refMethod(value1: int, value2: int): string {
+        if (value1 == value2) {
+            return "Equality";
+        } else {
+            return "Inequality";
+        }
+    }
+
+    public callProtected(value: int): string {
+        return this.protectedMethod(value) as string;
+    }
+
+    public jf(value: int): string {
+        if (this.data1 === value) {
             return "Equality";
         } else {
             return "Inequality";
