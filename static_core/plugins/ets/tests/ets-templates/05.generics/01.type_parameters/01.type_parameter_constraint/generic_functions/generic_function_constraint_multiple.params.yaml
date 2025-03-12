@@ -11,26 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # Method modifiers for implemented methods
-method_modifiers:
-  - static
-  - ""
-
-# Type constraints for generic parameters
+--- # Type constraints for generic parameters
 constraints:
-  - type: number
-    use: byte
-  - type: short
-    use: long
-  - type: int
-    use: long
-  - type: byte
-    use: char
-  - type: char
-    use: byte
-  - type: string
-    use: char
-  - type: char
-    use: string
-  - type: void
-    use: void
+  - type: Object, Z extends int
+    use: Object, int
+    decl: let a = new Object()
+    arg: a, 1 as int
+    res: a
+  - type: int, Z extends Object
+    use: int, Object
+    arg: 2 as int, new Object()
+    res: 2 as int

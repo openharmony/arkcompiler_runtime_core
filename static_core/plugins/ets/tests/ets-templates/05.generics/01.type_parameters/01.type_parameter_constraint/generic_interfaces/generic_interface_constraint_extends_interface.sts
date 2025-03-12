@@ -14,7 +14,12 @@
 ---*/
 
 /*---
-desc: generic parameters with constraint in extends
+desc: >-
+    A type parameter of a generic can depend on another type parameter of the same generic.
+    If S constrains T, then the type parameter T directly depends on the type parameter S,
+    while T directly depends on the following
+      • S; or
+      • Type parameter U that depends on S.
 ---*/
 
 interface A {}

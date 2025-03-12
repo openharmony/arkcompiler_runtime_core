@@ -11,26 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # Method modifiers for implemented methods
-method_modifiers:
-  - static
-  - ""
+--- # Type constraints for generic parameters
+calls:
+  - foo<C>()
+  - foo<Object>()
+  - bar<Object>()
+  - zoo<B, A>()
+  - zoo<C, A>()
+  - zoo<A, C>()
 
-# Type constraints for generic parameters
-constraints:
-  - type: number
-    use: byte
-  - type: short
-    use: long
-  - type: int
-    use: long
-  - type: byte
-    use: char
-  - type: char
-    use: byte
-  - type: string
-    use: char
-  - type: char
-    use: string
-  - type: void
-    use: void

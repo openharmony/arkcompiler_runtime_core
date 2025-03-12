@@ -12,50 +12,18 @@
 # limitations under the License.
 
 --- # Method modifiers for implemented methods
-abstr_or_native_method_modifiers:
-  - abstract
-  - static native
-  - native static
-  - native
+method_modifiers:
+  - static
+  - ""
 
 # Type constraints for generic parameters
 constraints:
-  - type: Int
-    tags: negative
-  - type: Int | Double
-  - type: Byte
-    tags: negative
-  - type: Short
-    tags: negative
-  - type: Long
-    tags: negative
-  - type: Float
-    tags: negative
-  - type: Double
-    tags: negative
-  - type: Boolean
-    tags: negative
-  - type: Char
-    tags: negative
-  - type: Number
-    tags: negative
-  - type: String
-    tags: negative
-  - type: '"a" | "b"'
-  - type: byte
-  - type: short
-  - type: int
-  - type: long
-  - type: float
-  - type: double
-  - type: number
-  - type: boolean
-  - type: void
-  - type: char
-  - type: 'null'
-  - type: 'undefined'
-  - type: Int[]
-  - type: int[]
-  - type: Color
   - type: Object, Z extends int
+    use: Object, int
+    decl: let a = new Object()
+    p: a, 1 as int
+    expected: a
   - type: int, Z extends Object
+    use: int, Object
+    p: 2 as int, new Object()
+    expected: 2 as int

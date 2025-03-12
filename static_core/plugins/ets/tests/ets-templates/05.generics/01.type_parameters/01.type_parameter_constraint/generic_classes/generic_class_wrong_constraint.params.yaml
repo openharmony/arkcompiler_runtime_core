@@ -11,35 +11,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # Wrong type constraints for generic parameters
-wrong_constaints:
-  - byte
-  - short
-  - int
-  - long
-  - float
-  - double
-  - boolean
-  - void
-  - char
-  - 'null'
-  - undefined
-  - Int[]
-  - "int[]"
-  - "enum Color { Red, Green, Blue}"
-  - Object & int
-  - int & Object
-  - Object & String & int
-  - Object & int & String
-  - int & Object & String
-  - "Object, extends int"
-  - "int, extends Object"
-  - 1 | 2
-  - 1.0 | 2.0
-  - true | false
-
+---
 # Top level class modifiers
 top_level_class_modifiers:
   - ""
-  - abstract
   - final
+
+# Type constraints for generic parameters
+constraints:
+  - type: number
+    use: byte
+  - type: short
+    use: long
+  - type: int
+    use: long
+  - type: byte
+    use: char
+  - type: char
+    use: byte
+  - type: string
+    use: char
+  - type: char
+    use: string

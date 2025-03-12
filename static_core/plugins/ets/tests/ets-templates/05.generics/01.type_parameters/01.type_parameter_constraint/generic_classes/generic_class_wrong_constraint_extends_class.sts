@@ -13,8 +13,15 @@
 * limitations under the License.
 ---*/
 
+{% for call in calls %}
+
 /*---
-desc: generic parameters with wrong constraint in extends
+desc: >-
+    A type parameter of a generic can depend on another type parameter of the same generic.
+    If S constrains T, then the type parameter T directly depends on the type parameter S,
+    while T directly depends on the following
+      • S; or
+      • Type parameter U that depends on S.
 tags: [compile-only, negative]
 ---*/
 
@@ -30,10 +37,10 @@ class F<T> {
         p.toString()
     }
 }
+class G<T, S extends T> {}
 
 function main(): void {
-    new D<C>
-    new D<Object>
-    new E<Object>
+    {{call}}
 }
 
+{% endfor %}

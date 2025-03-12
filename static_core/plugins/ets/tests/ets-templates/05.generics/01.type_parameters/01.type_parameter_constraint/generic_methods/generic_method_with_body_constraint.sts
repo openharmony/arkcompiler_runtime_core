@@ -17,21 +17,29 @@
 {% for mm in method_modifiers %}
 
 /*---
-desc: Constraints for type variable
+desc: >-
+    If possible instantiations need to be constrained, then an individual constraint can be set for each type parameter.
+    A constraint of any type parameter can follow the keyword extends. The constraint is denoted as any type.
 params: >
-  {{wc}}
+  {{c.type}}
   {{mm}}
 ---*/
 
+{{c.decl}}
+
+{% if "Color" in c.type %}
+enum Color { Red, Green, Blue}
+{% endif %}
+
 class Point {
-  {{mm}} foo<X extends {{c.type}}>(): void {};
+  {{mm}} foo<X extends {{c.type}}>(i: X) { return i};
 }
 
 function main(): void {
 {% if "static" in mm %}
-  Point.foo<{{c.use}}>()
+  assertEQ( Point.foo<{{c.use}}>({{c.p}}), {{c.expected}} )
 {% else %}
-  new Point().foo<{{c.use}}>()
+  assertEQ( new Point().foo<{{c.use}}>({{c.p}}), {{c.expected}} )
 {% endif %}
 }
 

@@ -13,8 +13,17 @@
 * limitations under the License.
 ---*/
 
+{% for type in types %}
+
 /*---
-desc: generic parameters with wrong constraint in extends
+desc: >-
+    A type parameter of a generic can depend on another type parameter of the same generic.
+    If S constrains T, then the type parameter T directly depends on the type parameter S,
+    while T directly depends on the following
+      • S; or
+      • Type parameter U that depends on S.
+
+    generic parameters with wrong constraint in extends
 tags: [compile-only, negative]
 ---*/
 
@@ -23,10 +32,10 @@ interface B extends A{}
 interface C {}
 interface D<T extends A> {}
 interface E<T extends A | C> {}
+interface F<T, S extends T> {}
 
 function main(): void {
-    let i1: D<C> = {}
-    let i2: D<Object> = {}
-    let i3: E<Object> = {}
+    let i: {{type}} = {}
 }
 
+{% endfor %}
