@@ -573,10 +573,6 @@
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/cce_5a.sts
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/pos_2a.sts
 
-#18095 CTE expected on casting to type parameter
-06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/neg_gen1.sts
-06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/neg_gen2.sts
-
 #18550 [ArkTS frontend] es2panda aborts on implicit number conversion
 06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_const/decl-const_6.sts
 # 15242 Ensure-Not-Nullish expression for nullish tuple not recognized
