@@ -17,6 +17,7 @@ limitations under the License.
 desc: Import class type.
 files:
 - ../../07.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class_same_name_2.sts
+tags: [negative, compile-only]
 ---*/
 
 import type {A} from "../../07.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class_same_name_2"

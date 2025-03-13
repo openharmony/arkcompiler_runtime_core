@@ -15,7 +15,7 @@ limitations under the License.
 
 /*---
 desc: Declarations must be distinguishable in a declaration space.
-tags: [compile-only]
+tags: [negative, compile-only]
 ---*/
 
 class A {}
