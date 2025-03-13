@@ -239,10 +239,10 @@ private:
 protected:
     EtsEnv *etsEnv_ {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
     ani_env *env_ {nullptr};    // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_vm *vm_ {nullptr};      // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
     EtsVM *etsVm_ {nullptr};
-    ani_vm *vm_ {nullptr};
 };
 
 }  // namespace ark::ets::ani::testing

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 if (NOT PANDA_TARGET_ARM32)
-    panda_ets_native_add_gtest(ets_native_exclusive_worker_tests
+    ani_add_gtest(ets_native_exclusive_worker_tests
         CPP_SOURCES
             ${CMAKE_CURRENT_SOURCE_DIR}/exclusive_worker_tests.cpp
         ETS_SOURCES
