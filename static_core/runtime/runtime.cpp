@@ -1126,7 +1126,11 @@ std::optional<Runtime::Error> Runtime::CreateApplicationClassLinkerContext(std::
     }
 
     PandaString aotCtx;
-    appContext_.ctx->EnumeratePandaFiles(compiler::AotClassContextCollector(&aotCtx, options_.IsAotVerifyAbsPath()));
+    {
+        ScopedManagedCodeThread smct(ManagedThread::GetCurrent());
+        appContext_.ctx->EnumeratePandaFiles(
+            compiler::AotClassContextCollector(&aotCtx, options_.IsAotVerifyAbsPath()));
+    }
     classLinker_->GetAotManager()->SetAppClassContext(aotCtx);
 
     tooling::DebugInf::AddCodeMetaInfo(pf.get());

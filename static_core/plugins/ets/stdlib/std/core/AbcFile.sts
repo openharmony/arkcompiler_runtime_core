@@ -40,6 +40,19 @@ final class AbcFile {
     public static native loadAbcFile(runtimeLinker: RuntimeLinker, path: string): AbcFile;
 
     /**
+     * Loads ABC file from memory.
+     *
+     * @param runtimeLinker which the opened file will correspond to.
+     *
+     * @param rawFile byte array containing the ABC file contents.
+     *
+     * @returns instance of loaded AbcFile.
+     *
+     * @throws errors happened on loading ABC file.
+     */
+    public static native loadFromMemory(runtimeLinker: RuntimeLinker, rawFile: byte[]): AbcFile;
+
+    /**
      * Loads class from ABC file.
      *
      * @param runtimeLinker which the opened file will correspond to.

@@ -29,13 +29,15 @@ static std::optional<Method *> FindMethodInVTable(Class *klass, Method *imethod,
     auto vtable = klass->GetVTable();
     Method *candidate = nullptr;
 
+    // Must take context of the class which is being loaded
+    auto *ctx = klass->GetLoadContext();
     for (size_t i = vtable.size(); i != 0;) {
         i--;
         auto kmethod = vtable[i];
         if (kmethod->GetName() != imethod->GetName()) {
             continue;
         }
-        if (!ETSProtoIsOverriddenBy(imethod->GetProtoId(), kmethod->GetProtoId())) {
+        if (!ETSProtoIsOverriddenBy(ctx, imethod->GetProtoId(), kmethod->GetProtoId())) {
             continue;
         }
         if (candidate != nullptr) {

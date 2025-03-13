@@ -40,6 +40,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Runtime.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Class.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_AbcFile.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_AbcRuntimeLinker.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Char.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Console.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Double.cpp

@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-function cname(name: string) { return name; }
-
 class A { }
 
 class DummyRuntimeLinker extends RuntimeLinker {
@@ -38,9 +36,9 @@ class DummyRuntimeLinker extends RuntimeLinker {
 }
 
 class Test {
-    static stdCoreObjectName = cname("std.core.Object");
-    static additionalClass1Name = cname("additional1.AdditionalClass1");
-    static additionalClass2Name = cname("additional2.AdditionalClass2");
+    static stdCoreObjectName = "std.core.Object";
+    static additionalClass1Name = "additional1.AdditionalClass1";
+    static additionalClass2Name = "additional2.AdditionalClass2";
 
     static testDummyLinker() {
         const placeholderClass = Class.of(new A());
@@ -56,8 +54,7 @@ class Test {
         testLoadObject(abcLinker);
     }
 
-    static testEmptyAbcRuntimeLinker() {
-        const linker = new AbcRuntimeLinker(undefined, []);
+    private static testEmptyLinker(linker: RuntimeLinker) {
         const cls1 = linker.loadClass(Test.stdCoreObjectName);
         assertEQ(cls1, Class.of(new Object()));
         // Object must be returned from BootRuntimeLinker
@@ -66,29 +63,49 @@ class Test {
         assertEQ(cls1, cls2, "loadClass must be idempotent");
     }
 
-    static getAdditionalFilesList() {
+    static testEmptyAbcRuntimeLinker() {
+        const linker = new AbcRuntimeLinker(undefined, []);
+        Test.testEmptyLinker(linker);
+    }
+
+    static testEmptyMemoryRuntimeLinker() {
+        const linker = new MemoryRuntimeLinker(undefined, []);
+        Test.testEmptyLinker(linker);
+    }
+
+    private static native loadFile(path: string): byte[] | undefined;
+
+    private static getAdditionalFilesList(): string[] {
         const abcFiles = ProcessManager.getEnvironmentVar("ADDITIONAL_ABC_FILES");
         assertLT(0, abcFiles.length, "this test must have additional abc files")
         return abcFiles.split(":");
     }
 
-    static testAbcRuntimeLinker() {
-        const abcLinker = new AbcRuntimeLinker(undefined, Test.getAdditionalFilesList());
+    private static loadRawFiles(paths: string[]): byte[][] {
+        const rawFiles = new byte[paths.length as int][0];
+        for (let i = 0; i < rawFiles.length; i++) {
+            const raw = Test.loadFile(paths[i]);
+            assertNE(raw, undefined, "failed to load file " + paths[i]);
+            rawFiles[i] = raw!;
+        }
+        return rawFiles;
+    }
 
-        const objectClass = abcLinker.loadClass(Test.stdCoreObjectName);
+    private static testOnAdditionalFiles(linker: RuntimeLinker) {
+        const objectClass = linker.loadClass(Test.stdCoreObjectName);
         assertEQ(objectClass, Class.of(new Object()));
         assertEQ(objectClass.getLinker(), getBootRuntimeLinker(), "std.core.Object must be loaded by BootRuntimeLinker");
 
         // Load class from "additional1.sts"
-        const cls1 = abcLinker.loadClass(Test.additionalClass1Name, true);
+        const cls1 = linker.loadClass(Test.additionalClass1Name, true);
         assertNE(cls1, undefined, "AdditionalClass1 must be found");
-        assertEQ(cls1.getLinker(), abcLinker, "AdditionalClass1 must be loaded by custom linker");
+        assertEQ(cls1.getLinker(), linker, "AdditionalClass1 must be loaded by custom linker");
 
         // Load class from "additional2.sts"
         // As side effect, this must load "additional3.sts" and execute code from it
-        const cls2 = abcLinker.loadClass(Test.additionalClass2Name, true);
+        const cls2 = linker.loadClass(Test.additionalClass2Name, true);
         assertNE(cls2, undefined, "AdditionalClass2 must be found");
-        assertEQ(cls2.getLinker(), abcLinker, "AdditionalClass2 must be loaded by custom linker");
+        assertEQ(cls2.getLinker(), linker, "AdditionalClass2 must be loaded by custom linker");
 
         // Check that RuntimeLinker loads into an isolated context
         const abcLinker2 = new AbcRuntimeLinker(undefined, Test.getAdditionalFilesList());
@@ -101,6 +118,16 @@ class Test {
         assertNE(otherLinkerClass1, undefined);
         assertEQ(otherLinkerClass1.getLinker(), abcLinker2, "linker contexts must be isolated");
         assertNE(cls1, otherLinkerClass1, "classes from different contexts must not conflict");
+    }
+
+    static testAbcRuntimeLinker() {
+        const linker = new AbcRuntimeLinker(undefined, Test.getAdditionalFilesList());
+        Test.testOnAdditionalFiles(linker);
+    }
+
+    static testMemoryRuntimeLinker() {
+        const linker = new MemoryRuntimeLinker(undefined, Test.loadRawFiles(Test.getAdditionalFilesList()));
+        Test.testOnAdditionalFiles(linker);
     }
 
     static testCustomAbcRuntimeLinker() {
@@ -135,7 +162,7 @@ class Test {
         const cls2 = linker.loadClass(Test.additionalClass2Name, false);
         assertNE(cls2, undefined);
         assertEQ(cls2.getLinker(), linker);
-        // Trigger initialization, which will not find "AdditionalClass1"
+        // Trigger class initialization, which will not find "AdditionalClass1"
         expectThrow(() => { linker.loadClass(Test.additionalClass2Name, true); },
             (e) => e instanceof LinkerUnresolvedClassError
         );
@@ -143,14 +170,12 @@ class Test {
 
     private static triggerGC() {
         expectNoThrow((): void throws => {
-            const gcId = GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE);
-            if (gcId > 0) {
-                GC.waitForFinishGC(gcId);
-            }
+            GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE));
         });
     }
 
-    private static createAbcRuntimeLinker(): WeakRef<AbcRuntimeLinker> {
+    // Do not inline this method, otherwise `AbcRuntimeLinker` will survive and test will fail
+    private static createWeakRef(): WeakRef<AbcRuntimeLinker> {
         const abcLinker = new AbcRuntimeLinker(undefined, Test.getAdditionalFilesList());
 
         const objectClass = abcLinker.loadClass(Test.stdCoreObjectName);
@@ -174,9 +199,66 @@ class Test {
     }
 
     static testAbcRuntimeLinkerUnload() {
-        const abcLinkerRef = Test.createAbcRuntimeLinker();
+        const abcLinkerRef = Test.createWeakRef();
         Test.triggerGC();
-        assertEQ(abcLinkerRef.deref(), undefined);
+        assertEQ(abcLinkerRef.deref(), undefined, "AbcRuntimeLinker must be collected");
+    }
+
+    private static testAddAbcFiles(linker: AbcRuntimeLinker, newFiles: string[]) {
+        // Load "AdditionalClass2" without initialization
+        const cls2 = linker.loadClass(Test.additionalClass2Name, false);
+        assertNE(cls2, undefined);
+        assertEQ(cls2.getLinker(), linker);
+
+        // Add the missing file
+        linker.addAbcFiles(newFiles);
+
+        // Trigger class initialization, which must not fail
+        linker.loadClass(Test.additionalClass2Name, true);
+    }
+
+    static testRuntimeLinkerAddAbcFiles() {
+        const allAbcFiles = Test.getAdditionalFilesList();
+        // Cut out "additional1.sts" from the ABC files list
+        const reducedAbcFiles = Array.from(allAbcFiles).slice(1);
+        const abcFiles = new string[reducedAbcFiles.length];
+        reducedAbcFiles.forEach((path: string, idx: number) => { abcFiles[idx as int] = path; });
+        // Create linker
+        const linker = new AbcRuntimeLinker(undefined, abcFiles);
+        Test.testAddAbcFiles(linker, [allAbcFiles[0]]);
+    }
+
+    static testMemoryRuntimeLinkerAddAbcFiles() {
+        const allAbcFiles = Test.getAdditionalFilesList();
+        // Cut out "additional1.sts" from the ABC files list
+        const reducedAbcFiles = Array.from(allAbcFiles).slice(1);
+        const abcFiles = new string[reducedAbcFiles.length];
+        reducedAbcFiles.forEach((path: string, idx: number) => { abcFiles[idx as int] = path; });
+        // Create linker
+        const linker = new MemoryRuntimeLinker(undefined, Test.loadRawFiles(abcFiles));
+        Test.testAddAbcFiles(linker, [allAbcFiles[0]]);
+    }
+
+    private static addSingleAbcFile(linker: AbcRuntimeLinker, path: string): void {
+        linker.addAbcFiles([path]);
+    }
+
+    static testConcurrentAddAbcFiles() {
+        const linker = new AbcRuntimeLinker(undefined, []);
+        const allAbcFiles = Test.getAdditionalFilesList();
+        const promises = new Array<Promise<void>>();
+        // Add all files except "additional1.sts"
+        for (let i = 1; i < allAbcFiles.length; i++) {
+            promises.push(launch Test.addSingleAbcFile(linker, allAbcFiles[i]));
+        }
+        // Try to load a class from "additional1.sts"
+        expectThrow(() => { linker.loadClass(Test.additionalClass1Name, true); },
+            (e) => e instanceof LinkerClassNotFoundError
+        );
+        promises.forEach((p: Promise<void>): void => { await p; });
+        Test.addSingleAbcFile(linker, allAbcFiles[0]);
+        // Now class must be found
+        expectNoThrow(() => { linker.loadClass(Test.additionalClass1Name, true); });
     }
 
     static testAbcRuntimeLinkerLoadErrorPath() {
@@ -189,13 +271,19 @@ class Test {
     static test() {
         Test.testDummyLinker();
         Test.testEmptyAbcRuntimeLinker();
+        Test.testEmptyMemoryRuntimeLinker();
         Test.testAbcRuntimeLinker();
+        Test.testMemoryRuntimeLinker();
         Test.testClassInitializationFail();
         Test.testAbcRuntimeLinkerUnload();
         Test.testAbcRuntimeLinkerLoadErrorPath();
+        Test.testRuntimeLinkerAddAbcFiles();
+        Test.testMemoryRuntimeLinkerAddAbcFiles();
+        Test.testConcurrentAddAbcFiles();
     }
 }
 
 function main() {
+    loadLibrary("runtime_linker_extensions-shared-lib");
     Test.test();
 }

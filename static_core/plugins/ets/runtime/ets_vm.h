@@ -371,7 +371,8 @@ public:
     PANDA_PUBLIC_API void AddRootProvider(mem::RootProvider *provider);
     PANDA_PUBLIC_API void RemoveRootProvider(mem::RootProvider *provider);
 
-    EtsAbcRuntimeLinker *CreateApplicationRuntimeLinker(const PandaVector<PandaString> &abcFiles);
+    /// @brief Create application `AbcRuntimeLinker` in managed scope.
+    ClassLinkerContext *CreateApplicationRuntimeLinker(const PandaVector<PandaString> &abcFiles);
 
 protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;

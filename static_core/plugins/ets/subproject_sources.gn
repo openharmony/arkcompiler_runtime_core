@@ -120,6 +120,7 @@ srcs_runtime = [
   "runtime/intrinsics/std_concurrency_Launch.cpp",
   "runtime/intrinsics/std_core_Class.cpp",
   "runtime/intrinsics/std_core_AbcFile.cpp",
+  "runtime/intrinsics/std_core_AbcRuntimeLinker.cpp",
   "runtime/intrinsics/std_core_Console.cpp",
   "runtime/intrinsics/std_core_Double.cpp",
   "runtime/intrinsics/std_core_ExclusiveLauncher.cpp",
