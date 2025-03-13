@@ -162,7 +162,15 @@ napi_value EtsMethodWrapper::DoEtsMethodCall(napi_env env, napi_callback_info ci
         ASSERT(ctx->SanityJSExceptionPending());
         return nullptr;
     }
-
+    uint32_t actualArgNum = etsMethod->GetParametersNum();
+    if (actualArgNum > argc && !method->HasVarArgs()) {
+        auto newJsArgs = ctx->GetTempArgs<napi_value>(actualArgNum);
+        std::copy(jsArgs->begin(), jsArgs->end(), newJsArgs->begin());
+        napi_value result;
+        napi_get_undefined(env, &result);
+        std::fill(newJsArgs->begin() + argc, newJsArgs->end(), result);
+        return CallETSInstance(coro, ctx, method, *newJsArgs, etsThis);
+    }
     return CallETSInstance(coro, ctx, method, *jsArgs, etsThis);
 }
 

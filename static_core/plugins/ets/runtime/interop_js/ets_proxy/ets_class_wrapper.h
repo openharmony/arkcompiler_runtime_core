@@ -49,7 +49,8 @@ public:
     static constexpr auto STATIC_METHOD_ATTR = napi_static;
     // clang-format on
 
-    using OverloadsMap = std::unordered_map<uint8_t const *, char const *, utf::Mutf8Hash, utf::Mutf8Equal>;
+    using OverloadsMap =
+        std::unordered_multimap<uint8_t const *, std::pair<char const *, uint32_t>, utf::Mutf8Hash, utf::Mutf8Equal>;
 
     static std::unique_ptr<EtsClassWrapper> Create(InteropCtx *ctx, EtsClass *etsClass,
                                                    const char *jsBuiltinName = nullptr,
@@ -119,6 +120,7 @@ private:
     void UpdatePropsWithBaseClasses(PropsMap *props);
     void CollectConstructors(PropsMap *props);
     void CollectClassMethods(PropsMap *props, const OverloadsMap *overloads);
+    bool HasOverloadsMethod(const OverloadsMap *overloads, Method *m);
     std::pair<FieldsVec, MethodsVec> CalculateFieldsAndMethods(const PropsMap &props);
     std::vector<napi_property_descriptor> BuildJSProperties(napi_env &env, Span<Field *> fields,
                                                             Span<EtsMethodSet *> methods);

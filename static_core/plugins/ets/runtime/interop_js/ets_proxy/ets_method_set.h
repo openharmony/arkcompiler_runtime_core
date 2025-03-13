@@ -64,10 +64,13 @@ public:
 
     ALWAYS_INLINE EtsMethod *GetMethod(uint32_t parametersNum) const
     {
-        if (LIKELY(parametersNum < entries_.size())) {
-            if (LIKELY(entries_[parametersNum] != nullptr)) {
-                return entries_[parametersNum];
+        // Try optional parameters
+        uint32_t tempParameter = parametersNum;
+        while (LIKELY(tempParameter < entries_.size())) {
+            if (LIKELY(entries_[tempParameter] != nullptr)) {
+                return entries_[tempParameter];
             }
+            tempParameter++;
         }
         // Try rest params
         for (size_t params = std::min(static_cast<size_t>(parametersNum), entries_.size() - 1); params > 0; params--) {

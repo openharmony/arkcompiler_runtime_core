@@ -147,7 +147,6 @@ static constexpr std::string_view JS_ERROR                             = "Lstd/i
 
 static constexpr std::string_view ARRAY                                = "Lescompat/Array;";
 static constexpr std::string_view ARRAY_AS_LIST_INT                    = "Lstd/containers/ArrayAsListInt;";
-static constexpr std::string_view ITERATOR_RESULT                      = "Lescompat/IteratorResult;";
 
 // ANI annotation classes
 static constexpr std::string_view ANI_UNSAFE_QUICK                     = "Lstd/annotations/ani/unsafe/Quick;";
@@ -156,6 +155,10 @@ static constexpr std::string_view ANI_UNSAFE_DIRECT                    = "Lstd/a
 // escompat
 static constexpr std::string_view SHARED_MEMORY                        = "Lescompat/SharedMemory;";
 static constexpr std::string_view DATE                                 = "Lescompat/Date;";
+static constexpr std::string_view ARRAY_ENTRIES_ITERATOR_T             = "Lescompat/ArrayEntriesIterator_T;";
+static constexpr std::string_view ITERATOR_RESULT                      = "Lescompat/IteratorResult;";
+static constexpr std::string_view ARRAY_KEYS_ITERATOR                  = "Lescompat/ArrayKeysIterator;";
+static constexpr std::string_view ARRAY_VALUES_ITERATOR_T              = "Lescompat/ArrayValuesIterator_T;";
 
 }  // namespace class_descriptors
 
