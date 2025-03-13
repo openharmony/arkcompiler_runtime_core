@@ -25,4 +25,6 @@ export final class CoroutineExtras {
     public static native setSchedulingPolicy(policy: int): void;
     // returns coroutine id
     public static native getCoroutineId(): int;
+    // returns true if current worker is main, false otherwise
+    public static native isMainWorker(): boolean;
 }

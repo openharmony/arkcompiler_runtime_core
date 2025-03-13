@@ -3329,6 +3329,16 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::StdSystemGetCoroutineId
 
+  - name: StdCoroutineIsMainWorker
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: isMainWorker
+    static: true
+    signature:
+      ret: u1
+      args: []
+    impl: ark::ets::intrinsics::StdSystemIsMainWorker
+
   - name: StdAtomicFlagSet
     space: ets
     class_name: std.debug.concurrency.AtomicFlag
@@ -5330,6 +5340,36 @@ intrinsics:
       ret: void
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsMutexUnlock
+
+  - name: stdConcurrencyHelpersEventCreate
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: eventCreate
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsEventCreate
+
+  - name: stdConcurrencyHelpersEventWait
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: eventWait
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEventWait
+
+  - name: stdConcurrencyHelpersEventFire
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: eventFire
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEventFire
 
 ###############################
 # std.core.ExclusiveLauncher #

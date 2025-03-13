@@ -46,8 +46,8 @@ bool TimerModule::Init(EtsEnv *env, napi_env jsEnv)
     }
 
     const std::array<EtsNativeMethod, 2> impls = {
-        {{"startTimer", nullptr, reinterpret_cast<void *>(TimerModule::StartTimer)},
-         {"stopTimer", nullptr, reinterpret_cast<void *>(TimerModule::StopTimer)}}};
+        {{"startTimerImpl", nullptr, reinterpret_cast<void *>(TimerModule::StartTimer)},
+         {"stopTimerImpl", nullptr, reinterpret_cast<void *>(TimerModule::StopTimer)}}};
     return env->RegisterNatives(globalClass, impls.data(), impls.size()) == ETS_OK;
 }
 
