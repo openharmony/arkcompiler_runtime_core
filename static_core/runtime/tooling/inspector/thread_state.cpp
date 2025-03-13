@@ -42,8 +42,10 @@ void ThreadState::Reset()
     stepLocations_.clear();
     methodEntered_ = false;
     breakpointsActive_ = true;
+    skipAllPauses_ = false;
     nextBreakpointId_ = 0;
     breakpointLocations_.clear();
+    breakpointConditions_.Clear();
     pauseOnExceptionsState_ = PauseOnExceptionsState::NONE;
 }
 
@@ -92,7 +94,7 @@ void ThreadState::StepOut()
 
 void ThreadState::Pause()
 {
-    if (!paused_) {
+    if (!paused_ && !skipAllPauses_) {
         stepKind_ = StepKind::PAUSE;
     }
 }
@@ -146,6 +148,9 @@ void ThreadState::SetPauseOnExceptions(PauseOnExceptionsState state)
 void ThreadState::OnException(bool uncaught)
 {
     ASSERT(!paused_);
+    if (skipAllPauses_) {
+        return;
+    }
     switch (pauseOnExceptionsState_) {
         case PauseOnExceptionsState::NONE:
             break;
@@ -259,7 +264,7 @@ static std::string DumpBreakpoint(BreakpointId bpId, const PtLocation &loc)
 
 bool ThreadState::ShouldStopAtBreakpoint(const PtLocation &location)
 {
-    if (!breakpointsActive_) {
+    if (!breakpointsActive_ || skipAllPauses_) {
         return false;
     }
 

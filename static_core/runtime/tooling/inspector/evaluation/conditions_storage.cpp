@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,11 @@ void ConditionsStorage::RemoveCondition(BreakpointId id)
 bool ConditionsStorage::HasCondition(BreakpointId id) const
 {
     return conditions_.find(id) != conditions_.end();
+}
+
+void ConditionsStorage::Clear()
+{
+    conditions_.clear();
 }
 
 Expected<bool, Error> ConditionsStorage::EvaluateCondition(BreakpointId id)

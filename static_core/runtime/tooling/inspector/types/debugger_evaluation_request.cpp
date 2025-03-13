@@ -25,7 +25,7 @@ Expected<DebuggerEvaluationRequest, std::string> DebuggerEvaluationRequest::From
 {
     DebuggerEvaluationRequest parsed;
 
-    auto optFrameId = ParseSizeProperty(object, "callFrameId");
+    auto optFrameId = ParseNumericId<FrameId>(object, "callFrameId");
     if (!optFrameId) {
         return Unexpected(optFrameId.Error());
     }

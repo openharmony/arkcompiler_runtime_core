@@ -72,6 +72,8 @@ private:
 
     void Pause(PtThread thread);
     void Continue(PtThread thread);
+    void Disable(PtThread thread);
+    void ClientDisconnect(PtThread thread);
 
     void SetBreakpointsActive(PtThread thread, bool active);
     void SetSkipAllPauses(PtThread thread, bool skip);
