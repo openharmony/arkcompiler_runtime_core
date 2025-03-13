@@ -14,24 +14,6 @@
 ---
 cases:
     # Examples from Specification
-    - decl: |-
-          type BadUnion1 = int | double // Compile-time error
-      use: ''
-
-    - decl: |-
-          type BadUnion2 = Int | Double // Compile-time error
-      use: ''
-
-    - decl: |-
-          type BadUnion3 = int | Double // Compile-time error
-      use: ''
-
-    - decl: |-
-          function cond(): boolean {
-              return true
-          }
-      use: |-
-          let x = cond() ? new Int(): new Double() // Compile-time error as conditional expression contains an invalid union type Int | Double
 
     - decl: |-
           type BadUnion4 = 1 | 2   // Compile-time error

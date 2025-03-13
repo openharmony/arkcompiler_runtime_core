@@ -13,20 +13,15 @@
 
 ---
 types:
-  - Byte
-  - Short
-  - Long
-  - Float
-  - Double
-
-types1:
-  - byte
-  - short
-  - long
-  - float
-  - double
-  - Byte
-  - Short
-  - Long
-  - Float
-  - Double
+    - byte
+    - short
+    - int
+    - long
+    - float
+    - double
+    - Byte
+    - Short
+    - Int
+    - Long
+    - Float
+    - Double
