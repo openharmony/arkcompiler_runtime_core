@@ -1721,6 +1721,12 @@
 09.classes/07.accessor_declarations/getter_native_modifier.ets
 09.classes/07.accessor_declarations/setter_native_modifier.ets
 
+#23764 Constructor body doesn't cause CTE
+09.classes/09.constructor_declaration/02.constructor_body/this_argument_neg.ets
+
+#23818 Compiler doesn't detect circular references
+09.classes/09.constructor_declaration/02.constructor_body/circular_reference.ets
+
 #23898
 09.classes/11.local_classes_and_interfaces/local_class_and_interface_declaration_10.ets
 09.classes/11.local_classes_and_interfaces/local_class_and_interface_declaration_11.ets
