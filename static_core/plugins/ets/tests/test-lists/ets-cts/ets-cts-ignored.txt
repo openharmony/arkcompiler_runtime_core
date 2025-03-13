@@ -290,13 +290,6 @@
 13.compilation_units/08.namespace_declarations/pack1/namespace_package3.sts
 #end of 22846
 
-#19909
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_24.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_25.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_53.sts
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_79.sts
-#end of #19909
-
 #19720
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_8.sts
 
@@ -1865,6 +1858,41 @@
 
 #20214 Generic lambda is not supported by compiler
 07.expressions/32.lambda_expression/generic.sts
+
+#23513
+07.expressions/33.constant_expression/check_array/constant_logical_expression_0.sts
+07.expressions/33.constant_expression/check_array/constant_logical_expression_1.sts
+07.expressions/33.constant_expression/check_array/constant_logical_expression_2.sts
+07.expressions/33.constant_expression/check_array/constant_logical_expression_3.sts
+07.expressions/33.constant_expression/check_array/constant_logical_expression_10.sts
+07.expressions/33.constant_expression/check_array/constant_logical_expression_11.sts
+07.expressions/33.constant_expression/check_enum/constant_logical_expression_11.sts
+07.expressions/33.constant_expression/check_enum/constant_logical_expression_12.sts
+
+#23515
+07.expressions/33.constant_expression/check_array/constant_logical_expression_12.sts
+07.expressions/33.constant_expression/check_array/constant_logical_expression_13.sts
+07.expressions/33.constant_expression/check_array/constant_logical_expression_14.sts
+07.expressions/33.constant_expression/check_array/constant_logical_expression_15.sts
+
+#22825
+07.expressions/33.constant_expression/check_enum/constant_logical_expression_9.sts
+07.expressions/33.constant_expression/check_enum/constant_logical_expression_10.sts
+
+#23307
+07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_0.sts
+07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_1.sts
+07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_2.sts
+07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_3.sts
+07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_4.sts
+07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_5.sts
+07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_6.sts
+07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_7.sts
+07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_8.sts
+07.expressions/33.constant_expression/check_enum/constant_number_conversion_2.sts
+
+#23309
+07.expressions/33.constant_expression/check_enum/constant_str_chain_initializer_2.sts
 
 #18763 es2panda aborts on for-of over a union type array
 08.statements/09.for_of_statements/for_of_28.sts
