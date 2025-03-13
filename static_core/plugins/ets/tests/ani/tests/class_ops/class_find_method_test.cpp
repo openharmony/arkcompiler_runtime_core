@@ -291,12 +291,8 @@ TEST_F(ClassFindMethodTest, special_types2)
 {
     ani_value args;
 
-    {
-        // NOTE(ypigunova) change native args. Issue #23595
-        ani_int blue = TEST_ARG1;
-        args.i = blue;
-        CheckClassFindMethod<true>("SpecialTypes", "enum_method", nullptr, &args, TEST_EXPECTED_VALUE6);
-    }
+    // NOTE(ypigunova) change native args. Issue #23595
+    // NOTE(daizihan) remove this test commented out, since the arg was not correct, need wait #23595
     {
         env_->GetUndefined(&args.r);
         CheckClassFindMethod<true>("SpecialTypes", "null_method", nullptr, &args, TEST_EXPECTED_VALUE1);

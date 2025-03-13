@@ -22,15 +22,15 @@ class EnumFindTest : public AniTest {};
 TEST_F(EnumFindTest, find_enum)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("L#ToFind;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("LToFind;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum aniEnumInt {};
-    ASSERT_EQ(env_->FindEnum("L#ToFindInt;", &aniEnumInt), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("LToFindInt;", &aniEnumInt), ANI_OK);
     ASSERT_NE(aniEnumInt, nullptr);
 
     ani_enum aniEnumString {};
-    ASSERT_EQ(env_->FindEnum("L#ToFindString;", &aniEnumString), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("LToFindString;", &aniEnumString), ANI_OK);
     ASSERT_NE(aniEnumString, nullptr);
 }
 
@@ -39,13 +39,13 @@ TEST_F(EnumFindTest, invalid_arg_enum)
     ani_enum en {};
     ASSERT_EQ(env_->FindEnum(nullptr, &en), ANI_INVALID_ARGS);
 
-    ASSERT_EQ(env_->FindEnum("L#ToFind;", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FindEnum("LToFind;", nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(EnumFindTest, invalid_arg_name)
 {
     ani_enum en {};
-    ASSERT_EQ(env_->FindEnum("L#NotFound;", &en), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindEnum("LNotFound;", &en), ANI_NOT_FOUND);
 }
 
 }  // namespace ark::ets::ani::testing

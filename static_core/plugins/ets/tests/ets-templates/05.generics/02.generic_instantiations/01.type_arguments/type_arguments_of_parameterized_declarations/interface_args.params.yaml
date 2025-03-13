@@ -62,10 +62,6 @@ cases:
       let v: J<I[]> = new A<I[]>(new I[0])
     bound: ' extends Object[]'
 
-  - use: |-
-      let v: J<Color[]> = new A<Color[]>(new Color[0])
-    bound: ' extends Color[]|null'
-
   # type argument is alias
   - use: |-
       let v: J<B> = new A<B>(new X())
@@ -97,3 +93,7 @@ cases:
   # Boxed to Reference type
   - use: |-
       let v: J<int> = new A<int>(1)
+
+  # Enum is reference type
+  - use: |-
+      let v: J<Color> = new A<Color>(Color.Red)

@@ -13,15 +13,6 @@
 
 ---
 cases:
-  # Cannot refer enum member using type alias
-  - decl: |-
-      enum Color {Red, Blue=-2}
-      type T = Color
-
-      function main() {
-          let a: T = T.Blue;
-      }
-
   # SyntaxError Variable 'A' has already been declared.
   - decl: |-
       type A = String;

@@ -218,3 +218,12 @@ cases:
           assertTrue(b instanceof T)
           assertTrue(a == b)
       }
+
+  - decl: |-
+      enum Color {Red, Blue=-2}
+      type T = Color
+
+    check: |- 
+      function main() {
+          let a: T = T.Blue;
+      }

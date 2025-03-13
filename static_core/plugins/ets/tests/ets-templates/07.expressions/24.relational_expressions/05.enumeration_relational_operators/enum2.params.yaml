@@ -26,6 +26,7 @@ cases:
               else if (p == 1) return Color2.Green;
               else return Color2.Blue
           }
+      tags: [compile-only, negative]
       use: |-
           // different enum types
           assertTrue(foo1(0) >= foo2(0))
@@ -33,6 +34,7 @@ cases:
     - decl: |-
           enum Color { Red, Green, Blue }
           enum Size { XS, S, M, L, XL, XXL }
+      tags: [compile-only, negative]
       use: |-
           // different enum types
           assertTrue(Color.Red <= Size.XL)
@@ -41,6 +43,7 @@ cases:
           enum Color { Red = "1", Green = "2", Blue = "3" }
           enum Size { XS = "0", S = "1", M = "2", L = "3", XL = "4", XXL = "5" }
           let c = Color.Blue
+      tags: [compile-only, negative]
       use: |-
           // string values, different enum types
           assertTrue(c > Size.S)
@@ -62,6 +65,7 @@ cases:
           enum Size { XS, S, M, L, XL, XXL }
           let c: Color|Size = Color.Red
           let s: Color|Size = Size.XL
+      tags: [compile-only, negative]
       use: |-
           // compare enums in unions
           assertTrue((c as Color) < (s as Size))

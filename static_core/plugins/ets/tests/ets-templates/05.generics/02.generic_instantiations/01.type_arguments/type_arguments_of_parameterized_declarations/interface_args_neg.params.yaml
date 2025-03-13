@@ -38,6 +38,10 @@ cases:
     bound: ' extends Object[]|null'
 
   - use: |-
+      let v: J<Color[]> = new A<Color[]>(new Color[0])
+    bound: ' extends Color[]|null'
+
+  - use: |-
       let v: J<J<X>[]> = new A<J<X>[]>(new J<Y>[0])  // J<Y>[] is not J<X>[]
 
   - use: |-
@@ -98,10 +102,6 @@ cases:
     decl: |-
       type B = Y[]
     bound: ' extends J<X[]>'
-
-  # not a reference type
-  - use: |-
-      let v: J<Color> = new A<Color>(Color.Red)
 
   # use abstract classes and interfaces to instantied array
   - use: |-

@@ -26,15 +26,15 @@ TEST_F(EnumFindInNamespaceTest, find_enum)
     ASSERT_NE(ns, nullptr);
 
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "L#ToFind;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "LToFind;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum aniEnumInt {};
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "L#ToFindInt;", &aniEnumInt), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "LToFindInt;", &aniEnumInt), ANI_OK);
     ASSERT_NE(aniEnumInt, nullptr);
 
     ani_enum aniEnumString {};
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "L#ToFindString;", &aniEnumString), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "LToFindString;", &aniEnumString), ANI_OK);
     ASSERT_NE(aniEnumString, nullptr);
 }
 
@@ -45,11 +45,11 @@ TEST_F(EnumFindInNamespaceTest, invalid_arg_enum)
     ASSERT_NE(ns, nullptr);
 
     ani_enum en {};
-    ASSERT_EQ(env_->Namespace_FindEnum(nullptr, "L#ToFind;", &en), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Namespace_FindEnum(nullptr, "LToFind;", &en), ANI_INVALID_ARGS);
 
     ASSERT_EQ(env_->Namespace_FindEnum(ns, nullptr, &en), ANI_INVALID_ARGS);
 
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "L#ToFind;", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "LToFind;", nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(EnumFindInNamespaceTest, invalid_arg_name)
@@ -59,7 +59,7 @@ TEST_F(EnumFindInNamespaceTest, invalid_arg_name)
     ASSERT_NE(ns, nullptr);
 
     ani_enum en {};
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "L#NotFound;", &en), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "LNotFound;", &en), ANI_NOT_FOUND);
 }
 
 }  // namespace ark::ets::ani::testing

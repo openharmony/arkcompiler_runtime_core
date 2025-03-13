@@ -259,8 +259,8 @@
 04.names_declarations_and_scopes/04.scopes/type_param_interface.sts
 
 #19602
+04.names_declarations_and_scopes/05.accesible/type_name_neg_0.sts
 04.names_declarations_and_scopes/05.accesible/type_name_neg_1.sts
-04.names_declarations_and_scopes/05.accesible/type_name_neg_2.sts
 
 #19640: compilation segfault, custom type
 04.names_declarations_and_scopes/05.accesible/type_name_interface_prop_22.sts
@@ -298,7 +298,7 @@
 #end of #19909
 
 #19720
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_9.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_8.sts
 
 #18272 Smart cast fails on lambda expression
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_1.sts
@@ -348,7 +348,7 @@
 02.lexical_elements/07.keywords/types_23.sts
 
 #23134
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_16.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_15.sts
 04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_neg_7.sts
 
 #23065
@@ -752,9 +752,9 @@
 # #15600 overloading methods with tuples in parameters
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_10.sts
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_9.sts
-15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_12.sts
-15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_13.sts
-15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_14.sts
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_12.sts
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_13.sts
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_14.sts
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_7.sts
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_9.sts
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_6.sts
@@ -767,12 +767,12 @@
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_12.sts
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_15.sts
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_16.sts
-15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_15.sts
-15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_16.sts
-15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_17.sts
-15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_21.sts
-15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_22.sts
-15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_23.sts
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_15.sts
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_16.sts
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_17.sts
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_21.sts
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_22.sts
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_23.sts
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_8.sts
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_10.sts
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_12.sts
@@ -790,11 +790,11 @@
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_6.sts
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_7.sts
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_8.sts
-15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_10.sts
-15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_11.sts
-15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_6.sts
-15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_7.sts
-15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_8.sts
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_10.sts
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_11.sts
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_6.sts
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_7.sts
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_8.sts
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_10.sts
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_6.sts
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_9.sts
@@ -844,17 +844,17 @@
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_23.sts
 
 # 14338
-15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_9.sts
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_9.sts
 
 # 15185
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_7.sts
 
 # 15767 Cannot select the right method among overloaded ones
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over3_1.sts
-15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over2_1.sts
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over2_1.sts
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co3_over_1.sts
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over3_3.sts
-15.semantic_rules/08.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over2_3.sts
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over2_3.sts
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co3_over_3.sts
 
 # 15817 Tests failing on the latest dev branch status
@@ -1808,9 +1808,6 @@
 #23378
 07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_2.sts
 
-#20510 unclear semantics
-07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum2_neg_3.sts
-
 #18843 type compatability
 07.expressions/25.equality_expressions/01.numerical_equality_operators/char_eq_n_2.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/eq_0.sts
@@ -2250,6 +2247,7 @@
 15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_7.sts
 15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_8.sts
 15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops_9.sts
+15.semantic_rules/11.compatibility_features/01.extended_conditional_expressions/ops2_35.sts
 
 #23378
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_ref_8.sts

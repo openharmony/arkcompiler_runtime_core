@@ -24,7 +24,7 @@ TEST_F(EnumItemGetIndexTest, get_enum_item_index)
     std::string itemName;
 
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("L#ToFind;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("LToFind;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
     ani_enum_item red {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnum, "RED", &red), ANI_OK);
@@ -47,7 +47,7 @@ TEST_F(EnumItemGetIndexTest, get_enum_item_index)
 TEST_F(EnumItemGetIndexTest, invalid_arg_enum)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("L#ToFind;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("LToFind;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};

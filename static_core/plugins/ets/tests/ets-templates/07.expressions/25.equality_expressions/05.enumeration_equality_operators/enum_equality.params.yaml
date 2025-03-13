@@ -60,3 +60,17 @@ cases:
           let foo: (i: int) => Enum = (i: int): Enum => arr[i]
       use: |-
           assertTrue(foo(0) == foo(1) && foo(1) == arr[2] && foo(0) == Enum.third)
+
+    - decl: |-
+          enum Enum1 { first }
+          enum Enum2 { first }
+      tags: [compile-only, negative]
+      use: |-
+          assertTrue( Enum1.first != Enum2.first )
+
+    - decl: |-
+          enum Enum1 { first = "A" }
+          enum Enum2 { first = "A" }
+      tags: [compile-only, negative]
+      use: |-
+          assertTrue( Enum1.first != Enum2.first )

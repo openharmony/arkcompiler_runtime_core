@@ -369,7 +369,7 @@ enum TrafficLightColor {
 }
 
 class TrafficLight {
-    color: TrafficLightColor = TrafficLightColor.Yellow
+    color: int = TrafficLightColor.Yellow
 }
 
 function testStringifyEnum(): int {
