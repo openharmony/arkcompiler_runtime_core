@@ -20,7 +20,7 @@ ani_add_gtest(backtracetest_by_ani
     CPP_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/backtrace_test.cpp
         ${PANDA_ETS_PLUGIN_SOURCE}/runtime/interop_js/jsbacktrace/backtrace.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/backtrace_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/backtrace_test.ets
 )
 
 # Build rules for call_backtrace native shared library

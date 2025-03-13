@@ -16,21 +16,21 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__optional_operator_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/optional_operator/optional_operator.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/optional_operator/optional_operator.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/optional_operator/optional_operator.ets
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__not_nullish_operator_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/not_nullish_operator/not_nullish_operator.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/not_nullish_operator/not_nullish_operator.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/not_nullish_operator/not_nullish_operator.ets
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__call_chaining_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_chaining/call_chaining.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_chaining/call_chaining.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_chaining/call_chaining.ets
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
 )

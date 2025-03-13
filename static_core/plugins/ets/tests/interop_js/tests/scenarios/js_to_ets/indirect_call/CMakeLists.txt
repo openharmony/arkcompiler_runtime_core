@@ -17,43 +17,43 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_any
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_any.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_any.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_any.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_literal
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_literal.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_literal.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_literal.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_extra
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_extra.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_extra.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_extra.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_ref
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_ref.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_ref.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_ref.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_value
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_value.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_value.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_value.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_user
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_user.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_user.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_user.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_union
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_union.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_union.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_union.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 

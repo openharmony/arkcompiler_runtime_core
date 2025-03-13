@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-// This test check that STS array with large string
-// that is transferred from STS -> JS and then from JS -> STS
+// This test check that ETS array with large string
+// that is transferred from ETS -> JS and then from JS -> ETS
 // creating cyclic reference - can be collected by GC
 
 import { interop } from './gc_test_common';

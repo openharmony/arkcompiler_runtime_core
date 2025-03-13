@@ -46,7 +46,7 @@ def make_arktsconfig(configpath: Union[str, Path],
         dynamic_paths: dict = {}
         for path in extra_paths:
             lib_name = Path(path).stem
-            is_compilable = Path(path).suffix == '.sts' or Path(path).is_dir()
+            is_compilable = Path(path).suffix == '.ets' or Path(path).is_dir()
             paths[lib_name] = [path]
             if not is_compilable:
                 dynamic_paths[path] = {'language': 'js', 'hasDecl': False}
@@ -74,7 +74,7 @@ class Tool(ToolBase):
             'tools', 'es2panda', 'generated', 'arktsconfig.json'))
         panda_stdlib_src = os.environ.get('PANDA_STDLIB_SRC', None)
         stdlib_opt = f'--stdlib={panda_stdlib_src}' if panda_stdlib_src else '--gen-stdlib=false'
-        self.opts = f'{stdlib_opt} --extension=sts --ets-unnamed --opt-level=2 ' \
+        self.opts = f'{stdlib_opt} --extension=ets --ets-unnamed --opt-level=2 ' \
             f'{self.custom}'
         self.es2panda = self.ensure_file(self.panda_root, 'bin', 'es2panda')
 
@@ -97,12 +97,12 @@ class Tool(ToolBase):
         return str(arktsconfig_path)
 
     def exec(self, bu: BenchUnit) -> None:
-        for lib in bu.libs('.ts', '.sts'):
+        for lib in bu.libs('.ts', '.ets'):
             abc = lib.with_suffix('.abc')
             if abc.is_file():
                 continue
             self.run_es2panda(lib, abc, self.opts, bu)
-        src = bu.src('.ts', '.sts')
+        src = bu.src('.ts', '.ets')
         abc = src.with_suffix('.abc')
         res = self.run_es2panda(src, abc, self.opts, bu)
         abc_size = self.sh.get_filesize(abc)

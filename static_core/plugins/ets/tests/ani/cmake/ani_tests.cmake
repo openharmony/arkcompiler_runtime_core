@@ -23,7 +23,7 @@ add_custom_target(ani_tests COMMENT "Common target to run ANI ETS tests")
 #       tests/unit1_test.cpp
 #       tests/unit2_test.cpp
 #     ETS_SOURCES
-#       tests/unit1_test.sts
+#       tests/unit1_test.ets
 #     LIBRARIES
 #       lib_target1
 #       lib_target2

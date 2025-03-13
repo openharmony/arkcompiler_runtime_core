@@ -28,10 +28,10 @@ If you add new test and it fails with FailKind.SRC_DUMPER_FAIL, you can fix src 
 bash runner.sh --srcdumper --processes=$(nproc) --build-dir=<build> --work-dir=<build>tools/es2panda/test/unit/src_dumper/dumped_src --es2panda-timeout=120 --timeout=120
 
 # Manually dump src
-<build>/bin/es2panda --extension=sts --output=/dev/null --dump-ets-src-after-phases plugins-after-parse --exit-after-phases plugins-after-parse <path_to_test> > <path_to_dumped>
+<build>/bin/es2panda --extension=ets --output=/dev/null --dump-ets-src-after-phases plugins-after-parse --exit-after-phases plugins-after-parse <path_to_test> > <path_to_dumped>
 
 # Manually fast dump ast
-<build>/bin/es2panda --extension=sts --output=/dev/null --dump-after-phases plugins-after-parse --exit-after-phases plugins-after-parse <path_to_test> > <path_to_ast>
+<build>/bin/es2panda --extension=ets --output=/dev/null --dump-after-phases plugins-after-parse --exit-after-phases plugins-after-parse <path_to_test> > <path_to_ast>
 ```
 
 

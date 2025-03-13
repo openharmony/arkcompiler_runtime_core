@@ -18,42 +18,42 @@ endif()
 
 ani_add_gtest(ani_test_find_enum
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_enum_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_enum_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_enum_test.ets
 )
 
 ani_add_gtest(ani_test_find_enum_namespace
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_enum_namespace_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_enum_namespace_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_enum_namespace_test.ets
 )
 
 ani_add_gtest(ani_test_get_enum_item
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_enum_item_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_enum_item_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_enum_item_test.ets
 )
 
 ani_add_gtest(ani_test_get_enum_from_item
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_enum_from_item_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_enum_from_item_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_enum_from_item_test.ets
 )
 
 ani_add_gtest(ani_test_enum_item_get_value
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/enum_item_get_value_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/enum_item_get_value_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/enum_item_get_value_test.ets
 )
 
 ani_add_gtest(ani_test_enum_item_get_name
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/enum_item_get_name_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/enum_item_get_name_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/enum_item_get_name_test.ets
 )
 
 ani_add_gtest(ani_test_enum_item_get_index
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/enum_item_get_index_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/enum_item_get_index_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/enum_item_get_index_test.ets
 )
 
 ani_add_gtest(ani_test_find_enum_module
     ETS_NAMED_MODE
     ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/find_enum_module_test/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_enum_module_test/test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_enum_module_test/test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_enum_module_test/test.ets
 )

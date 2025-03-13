@@ -234,13 +234,13 @@ let resfoo = foo()
 .. code-block:: typescript
 /* ... */
 ```
-Explanation: in context of this verifier "subset code" - is a code, which is correct for .ts AND .sts. For this reason, expectation of compilation error can't be combined with any subset status
+Explanation: in context of this verifier "subset code" - is a code, which is correct for .ts AND .ets. For this reason, expectation of compilation error can't be combined with any subset status
 
 ### Results
 
 In **spec_verifier/snippets** you can find the snippets that were found in .rst file(files).
 The snippet names are written in *theme_line* format, where theme - is the name of .rst file, line - line in .rst file where snippet were found. E.g.
-> 3_types_232.sts - the code that can be found in the 232 line in 3_types.rst
+> 3_types_232.ets - the code that can be found in the 232 line in 3_types.rst
 
 **The snippets/_output.txt** contains the results of an attempts to compile snippets
 snippets/abs contains .abs and .json files.

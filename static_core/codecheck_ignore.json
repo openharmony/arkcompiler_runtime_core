@@ -139,7 +139,7 @@
   "plugins/ets/tests/runtime/types/get_test_class.h": "*",
   "plugins/ets/tests/scripts": "*",
   "plugins/ets/tests/stdlib-templates": "*",
-  "plugins/ets/tests/sts_ts_subset": "*",
+  "plugins/ets/tests/ets_ts_subset": "*",
   "plugins/ets/tools": "*",
   "plugins/ets/verification": "*",
   "quickener": "*",

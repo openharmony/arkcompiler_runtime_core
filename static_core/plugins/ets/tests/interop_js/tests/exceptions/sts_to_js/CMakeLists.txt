@@ -13,5 +13,5 @@
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js__exceptions_sts_to_js
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/exceptions.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/exceptions.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/exceptions.ets
 )

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-// This test check by WeakRef on JS side that STS object that is transferred 
-// from STS -> JS and then from JS -> STS creating cyclic reference -
+// This test check by WeakRef on JS side that ETS object that is transferred 
+// from ETS -> JS and then from JS -> ETS creating cyclic reference -
 // can be collected by GC
 
 import { interop } from './gc_test_common';

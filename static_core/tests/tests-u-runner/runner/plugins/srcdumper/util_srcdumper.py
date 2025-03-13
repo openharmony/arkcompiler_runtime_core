@@ -31,7 +31,7 @@ class PathConverter:
         os.makedirs(os.path.join(self.artefacts, os.path.dirname(self.test_id)), exist_ok=True)
 
     def dumped_src_path(self) -> str:
-        return f"{os.path.splitext(os.path.join(self.artefacts, self.test_id))[0]}_dumped.sts"
+        return f"{os.path.splitext(os.path.join(self.artefacts, self.test_id))[0]}_dumped.ets"
 
 
 class AstComparator:

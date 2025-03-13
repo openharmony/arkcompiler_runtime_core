@@ -54,7 +54,7 @@ vmb all -p node_host -l js -T sanity ./examples
 
 ```shell
 export PANDA_BUILD=~/arkcompiler/runtime_core/static_core/build
-# Run sts and ts tests on ArkTS in
+# Run ets and ts tests on ArkTS in
 # 1) interpretation mode
 vmb all -p arkts_host --aot-skip-libs \
     --mode=int --report-json=int.json ./examples/benchmarks/
@@ -88,7 +88,7 @@ or `arkts_ohos` - for ArkTS on OHOS device
 
 ## Selecting language and source files
 `gen` command requires `-l` (`--langs`) option.
-F.e. `vmb gen -l sts,swift,ts,js ./examples/benchmarks`
+F.e. `vmb gen -l ets,swift,ts,js ./examples/benchmarks`
 will generate benches for all 4 languages in examples.
 
 Then provided to `all` command `--langs` will override langs, supported by platform.
@@ -103,7 +103,7 @@ Defaults are:
 
 | platform      | langs      | sources         |
 |---------------|------------|-----------------|
-| `arkts_*`     | `sts`      | `*.sts`, `*.ts` |
+| `arkts_*`     | `ets`      | `*.ets`, `*.ts` |
 | `ark_js_vm_*` | `ts`       | `*.ts`          |
 | `swift_*`     | `swift`    | `*.swift`       |
 | `v_8_*`       | `ts`, `js` | `*.ts`, `*.js`  |
@@ -268,11 +268,11 @@ Please refer to [this manual](./interop.readme.md) for freestyle benchmark devel
 
 #### Doclet
 Allows use corpus of existing VMB tests in interop mode.
-Benchmarks are generated from sts [doclets](#doclet-format).
+Benchmarks are generated from ets [doclets](#doclet-format).
 
 ```shell
 export PANDA_BUILD=$HOME/ark-built-with-interop/runtime_core/static_core/build
-vmb all -p arkts_node_interop_host -v debug ./examples/benchmarks/sts
+vmb all -p arkts_node_interop_host -v debug ./examples/benchmarks/ets
 ```
 
 ## Self tests and linters

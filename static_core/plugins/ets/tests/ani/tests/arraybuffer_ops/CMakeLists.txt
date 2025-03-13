@@ -13,10 +13,10 @@
 
 ani_add_gtest(ani_test_arraybuffer_create
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arraybuffer_create_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arraybuffer_create_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arraybuffer_create_test.ets
 )
 
 ani_add_gtest(ani_test_arraybuffer_get_info
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arraybuffer_get_info_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arraybuffer_get_info_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arraybuffer_get_info_test.ets
 )

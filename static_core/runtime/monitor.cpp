@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,7 +106,7 @@ void Monitor::InflateThinLock(MTManagedThread *thread, [[maybe_unused]] const VM
     auto threadManager = reinterpret_cast<MTThreadManager *>(thread->GetVM()->GetThreadManager());
     os::thread::ThreadId ownerThreadId = mark.GetThreadId();
     {
-        ScopedChangeThreadStatus sts(thread, ThreadStatus::IS_WAITING_INFLATION);
+        ScopedChangeThreadStatus ets(thread, ThreadStatus::IS_WAITING_INFLATION);
         owner = threadManager->SuspendAndWaitThreadByInternalThreadId(ownerThreadId);
     }
     thread->SetEnterMonitorObject(nullptr);
@@ -601,7 +601,7 @@ void Monitor::Acquire(MTManagedThread *thread, const VMHandle<ObjectHeader> &obj
     thread->SetEnterMonitorObject(objHandle.GetPtr());
     thread->SetWaitingMonitorOldStatus(ThreadStatus::IS_BLOCKED);
     {
-        ScopedChangeThreadStatus sts(thread, ThreadStatus::IS_BLOCKED);
+        ScopedChangeThreadStatus ets(thread, ThreadStatus::IS_BLOCKED);
         // Save current monitor, on which the given thread is blocked.
         // It can be used to detect potential deadlock with daemon threds.
         thread->SetEnteringMonitor(this);

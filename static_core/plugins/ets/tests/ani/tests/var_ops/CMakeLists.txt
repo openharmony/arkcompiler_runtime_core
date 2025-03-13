@@ -13,90 +13,90 @@
 
 ani_add_gtest(ani_test_var_ops_variable_get_value_boolean
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_boolean_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_boolean_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_boolean_test.ets
 )
 
 ani_add_gtest(ani_test_var_ops_variable_get_value_char
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_char_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_char_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_char_test.ets
 )
 
 ani_add_gtest(ani_test_var_ops_variable_get_value_byte
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_byte_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_byte_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_byte_test.ets
 )
 
 ani_add_gtest(ani_test_var_ops_variable_get_value_short
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_short_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_short_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_short_test.ets
 )
 
 ani_add_gtest(ani_test_var_ops_variable_get_value_float
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_float_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_float_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_float_test.ets
 )
 
 ani_add_gtest(ani_test_var_ops_variable_get_value_long
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_long_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_long_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_long_test.ets
 )
 
 ani_add_gtest(ani_test_var_ops_variable_get_value_int
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_int_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_int_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_int_test.ets
 )
 
 ani_add_gtest(ani_test_var_ops_variable_get_value_double
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_double_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_double_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_double_test.ets
 )
 
 ani_add_gtest(ani_test_var_ops_variable_get_value_ref
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_ref_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_ref_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_get_value_ref_test.ets
 )
 
 ani_add_gtest(ani_test_var_ops_variable_set_value_boolean
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_boolean_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_boolean_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_boolean_test.ets
 )
 
 ani_add_gtest(ani_test_var_ops_variable_set_value_char
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_char_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_char_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_char_test.ets
 )
 
 ani_add_gtest(ani_test_var_ops_variable_set_value_byte
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_byte_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_byte_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_byte_test.ets
 )
 
 ani_add_gtest(ani_test_var_ops_variable_set_value_short
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_short_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_short_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_short_test.ets
 )
 
 ani_add_gtest(ani_test_var_ops_variable_set_value_int
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_int_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_int_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_int_test.ets
 )
 
 ani_add_gtest(ani_test_var_ops_variable_set_value_long
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_long_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_long_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_long_test.ets
 )
 
 ani_add_gtest(ani_test_var_ops_variable_set_value_float
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_float_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_float_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_float_test.ets
 )
 
 ani_add_gtest(ani_test_var_ops_variable_set_value_double
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_double_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_double_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_double_test.ets
 )
 
 ani_add_gtest(ani_test_var_ops_variable_set_value_ref
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_ref_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_ref_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/variable_set_value_ref_test.ets
 )

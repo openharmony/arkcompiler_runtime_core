@@ -62,16 +62,16 @@ class RunnerJSParser(RunnerJS):
 
         test_dirs: List[TestDirectory] = [
             TestDirectory('compiler/ts', 'ts', flags=['--extension=ts']),
-            TestDirectory('compiler/ets', 'sts', flags=[
-                '--extension=sts',
+            TestDirectory('compiler/ets', 'ets', flags=[
+                '--extension=ets',
                 '--output=/dev/null',
                 f'--arktsconfig={self.arktsconfig}',
                 f'--ets-path={es2panda_test}'
             ]),
             TestDirectory('parser/ts', 'ts', flags=['--parse-only', '--extension=ts']),
             TestDirectory('parser/as', 'ts', flags=['--parse-only', '--extension=as']),
-            TestDirectory('parser/ets', 'sts', flags=[
-                '--extension=sts',
+            TestDirectory('parser/ets', 'ets', flags=[
+                '--extension=ets',
                 '--output=/dev/null',
                 f'--arktsconfig={self.arktsconfig}',
                 f'--ets-path={es2panda_test}'

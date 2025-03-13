@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -62,7 +62,7 @@ function(run_atomics_tests ETS_SRC WORK_DIR TARGET)
 endfunction()
 
 foreach(test ${atomics_tests})
-    set(test_in "${tests_in_dir}/${test}.sts")
+    set(test_in "${tests_in_dir}/${test}.ets")
     set(test_out_dir "${tests_out_dir}/${test}")
     file(MAKE_DIRECTORY ${test_out_dir})
     set(target ets_test_suite_atomics_${test})

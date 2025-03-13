@@ -33,7 +33,7 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
     set(ES2PANDA_ARGUMENTS
         --opt-level=${ARG_OPT_LEVEL}
         --thread=0
-        --extension=sts
+        --extension=ets
         --output=${OUTPUT_ABC}
         ${ARG_COMPILER_EXTRA_OPTIONS}
     )
@@ -73,7 +73,7 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
 
     add_custom_command(
         OUTPUT ${OUTPUT_ABC}
-        COMMENT "Running es2panda for sts file: ${ETS_SRC}"
+        COMMENT "Running es2panda for ets file: ${ETS_SRC}"
         COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS}
         DEPENDS ${COMPILE_DEPENDENCIES}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}

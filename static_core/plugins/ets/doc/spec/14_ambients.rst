@@ -473,14 +473,14 @@ top-level statements of the current module.
 .. code-block:: typescript
    :linenos:
 
-    // File1.d.sts
+    // File1.d.ets
     export declare namespace A { // namespace itself must be exported
         function foo(): void
         type X = Array<Number>
     }
 
-    // File2.sts
-    import {A} from 'File1.d.sts'
+    // File2.ets
+    import {A} from 'File1.d.ets'
 
     A.foo() // Valid function call, as 'foo' is acessible for top-level statements
     function foo () {

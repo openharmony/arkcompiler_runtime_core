@@ -13,5 +13,5 @@
 
 ani_add_gtest(ani_test_error_handling_test
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/error_handling_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/error_handling_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/error_handling_test.ets
 )

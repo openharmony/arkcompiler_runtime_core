@@ -13,7 +13,7 @@
 
 cases:
   - import: |-
-        import {A} from "./modules/declarations.sts"  // Base class
+        import {A} from "./modules/declarations.ets"  // Base class
     decl: |-
         class B extends A {};
     call: |-
@@ -23,15 +23,15 @@ cases:
         assertTrue(x instanceof A);
 
   - import: |-
-        import {A} from "./modules/declarations.sts"  // Base class
-        import {B} from "./modules/declarations.sts"  // Derived class
+        import {A} from "./modules/declarations.ets"  // Base class
+        import {B} from "./modules/declarations.ets"  // Derived class
     call: |-
         let z: B = new B();
         assertTrue(z instanceof A);
 
   - import: |-
-        import {AC} from "./modules/declarations.sts"  // Abstract class
-        import {C} from "./modules/declarations.sts"  // Derived class
+        import {AC} from "./modules/declarations.ets"  // Abstract class
+        import {C} from "./modules/declarations.ets"  // Derived class
     decl: |-
         class B extends AC {};
     call: |-
@@ -43,8 +43,8 @@ cases:
         assertTrue(x instanceof B);
 
   - import: |-
-        import {I} from "./modules/declarations.sts"  // Base interface
-        import {II} from "./modules/declarations.sts"  // Derived interface
+        import {I} from "./modules/declarations.ets"  // Base interface
+        import {II} from "./modules/declarations.ets"  // Derived interface
     decl: |-
         class A implements I {};
         class B implements II {};
@@ -58,9 +58,9 @@ cases:
         assertTrue(x instanceof I);
 
   - import: |-
-        import {I} from "./modules/declarations.sts"  // Base interface
-        import {II} from "./modules/declarations.sts"  // Derived interface
-        import {D} from "./modules/declarations.sts"  // Derived class
+        import {I} from "./modules/declarations.ets"  // Base interface
+        import {II} from "./modules/declarations.ets"  // Derived interface
+        import {D} from "./modules/declarations.ets"  // Derived class
     call: |-
         let z: I = new D();
         assertTrue(z instanceof D);
@@ -68,68 +68,68 @@ cases:
         assertTrue(z instanceof II);
 
   - import: |-
-        import {ENUM} from "./modules/declarations.sts"  // Enum
+        import {ENUM} from "./modules/declarations.ets"  // Enum
     call: |-
         assertEQ(ENUM.Red.valueOf(), 0);
         assertEQ(ENUM.Blue.valueOf(), 1);
 
   - import: |-
-        import {A} from "./modules/declarations.sts"  // Base class
-        import {CLASS_A} from "./modules/declarations.sts"  // Type, class
+        import {A} from "./modules/declarations.ets"  // Base class
+        import {CLASS_A} from "./modules/declarations.ets"  // Type, class
     call: |-
         let z: CLASS_A = new CLASS_A();
         assertTrue(z instanceof A);
 
   - import: |-
-        import {VAR_i} from "./modules/declarations.sts"  // variable of primitive type (int)
+        import {VAR_i} from "./modules/declarations.ets"  // variable of primitive type (int)
     call: |-
         let z: VAR_i = 3;
         assertEQ(z, 3);
 
   - import: |-
-        import {TPL} from "./modules/declarations.sts"  // Tuple type
+        import {TPL} from "./modules/declarations.ets"  // Tuple type
     call: |-
         let z: TPL = [new Number(), new String()];
         assertTrue(z[0] instanceof Number);
         assertTrue(z[1] instanceof String);
 
   - import: |-
-        import {NoArg} from "./modules/declarations.sts"  // Function without arguments
-        import {res} from "./modules/declarations.sts"  // Function without arguments
+        import {NoArg} from "./modules/declarations.ets"  // Function without arguments
+        import {res} from "./modules/declarations.ets"  // Function without arguments
 
     call: |-
         NoArg();
         assertEQ(res, 1);
 
   - import: |-
-        import {OneArg} from "./modules/declarations.sts"  // Function, argument of Number type
+        import {OneArg} from "./modules/declarations.ets"  // Function, argument of Number type
     call: |-
         assertEQ(OneArg(new Number()), 2);
 
   - import: |-
-        import {TwoArgs} from "./modules/declarations.sts"  // Function, arguments of char and byte types
+        import {TwoArgs} from "./modules/declarations.ets"  // Function, arguments of char and byte types
     call: |-
         assertEQ(TwoArgs(c'A', 1 as byte), 3);
 
   - import: |-
-        import {Gen} from "./modules/declarations.sts"  // Function, generic argument
+        import {Gen} from "./modules/declarations.ets"  // Function, generic argument
     call: |-
         let s = "knock-knock";
         assertEQ(Gen(s), s);
         assertEQ(Gen(new Number(1.45)), 1.45);
 
   - import: |-
-        import {ArgFun} from "./modules/declarations.sts"  // Function, argument is of function type
+        import {ArgFun} from "./modules/declarations.ets"  // Function, argument is of function type
     call: |-
         assertEQ(ArgFun( () => { return 3; } ), 3);
 
   - import: |-
-        import {ArgFun2} from "./modules/declarations.sts"  // Function, arguments - function type + primitive
+        import {ArgFun2} from "./modules/declarations.ets"  // Function, arguments - function type + primitive
     call: |-
         assertEQ(ArgFun2( (i) => { return i; }, 4), 4);
 
   - import: |-
-        import {a} from "./modules/declarations.sts"  // Variable, primitive, implicit type
+        import {a} from "./modules/declarations.ets"  // Variable, primitive, implicit type
     call: |-
         assertEQ(a, 1);
         a = 2;
@@ -137,7 +137,7 @@ cases:
         a = 1;
 
   - import: |-
-        import {i} from "./modules/declarations.sts"  // Variable, int
+        import {i} from "./modules/declarations.ets"  // Variable, int
     call: |-
         assertEQ(i, 2);
         i += 3;
@@ -145,7 +145,7 @@ cases:
         i = 2;
 
   - import: |-
-        import {n} from "./modules/declarations.sts"  // Variable, number
+        import {n} from "./modules/declarations.ets"  // Variable, number
     call: |-
         assertEQ(n, 3);
         n += 0.1;
@@ -153,7 +153,7 @@ cases:
         n = 3;
 
   - import: |-
-        import {s} from "./modules/declarations.sts"  // Variable, String
+        import {s} from "./modules/declarations.ets"  // Variable, String
     call: |-
         assertEQ(s, "knock-knock");
         s += " who`s there";
@@ -161,7 +161,7 @@ cases:
         s = "knock-knock";
 
   - import: |-
-        import {c} from "./modules/declarations.sts"  // Variable, char
+        import {c} from "./modules/declarations.ets"  // Variable, char
     call: |-
         assertEQ(c, c'A');
         c = c'b';
@@ -169,7 +169,7 @@ cases:
         c = c'A';
 
   - import: |-
-        import {u} from "./modules/declarations.sts"  // Variable, union
+        import {u} from "./modules/declarations.ets"  // Variable, union
     call: |-
         assertEQ(u, undefined);
         u = new Number(1.2);
@@ -179,7 +179,7 @@ cases:
         u = undefined;
 
   - import: |-
-        import {arr} from "./modules/declarations.sts"  // Variable, bytes[3]
+        import {arr} from "./modules/declarations.ets"  // Variable, bytes[3]
     call: |-
         assertEQ(arr.length, 3);
         arr = new byte[2];
@@ -187,36 +187,36 @@ cases:
         arr = new byte[3];
 
   - import: |-
-        import {ca} from "./modules/declarations.sts"  // Const implicit int
+        import {ca} from "./modules/declarations.ets"  // Const implicit int
     call: |-
         assertEQ(ca, 11);
 
   - import: |-
-        import {ca} from "./modules/declarations.sts"  // Const implicit int
+        import {ca} from "./modules/declarations.ets"  // Const implicit int
     call: |-
         ca = 21;
     tags: |-
          negative, compile-only
 
   - import: |-
-        import {ci} from "./modules/declarations.sts"  // Const int
+        import {ci} from "./modules/declarations.ets"  // Const int
     call: |-
         assertEQ(ci, 12);
 
   - import: |-
-        import {ci} from "./modules/declarations.sts"  // Const int
+        import {ci} from "./modules/declarations.ets"  // Const int
     call: |-
         ci = 22;
     tags: |-
       negative, compile-only
 
   - import: |-
-        import {cs} from "./modules/declarations.sts"  // Const str
+        import {cs} from "./modules/declarations.ets"  // Const str
     call: |-
         assertEQ(cs, "who`s there");
 
   - import: |-
-        import {cs} from "./modules/declarations.sts"  // Const str
+        import {cs} from "./modules/declarations.ets"  // Const str
     call: |-
         cs = "new value";
     tags: |-

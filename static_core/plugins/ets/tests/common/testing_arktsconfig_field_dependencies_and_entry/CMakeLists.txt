@@ -13,6 +13,6 @@
 
 run_int_ets_code(testing_arktsconfig_field_dependencies_and_entry ${CMAKE_CURRENT_BINARY_DIR}
                  ENTRYPOINT "HarA.a1"
-                 SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/A/src/main/ets/a1.sts ${CMAKE_CURRENT_SOURCE_DIR}/A/indexA.sts ${CMAKE_CURRENT_SOURCE_DIR}/B/src/main/ets/pages/b.sts ${CMAKE_CURRENT_SOURCE_DIR}/B/indexB.sts ${CMAKE_CURRENT_SOURCE_DIR}/C/src/main/ets/pages/c.sts ${CMAKE_CURRENT_SOURCE_DIR}/C/indexC.sts
+                 SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/A/src/main/ets/a1.ets ${CMAKE_CURRENT_SOURCE_DIR}/A/indexA.ets ${CMAKE_CURRENT_SOURCE_DIR}/B/src/main/ets/pages/b.ets ${CMAKE_CURRENT_SOURCE_DIR}/B/indexB.ets ${CMAKE_CURRENT_SOURCE_DIR}/C/src/main/ets/pages/c.ets ${CMAKE_CURRENT_SOURCE_DIR}/C/indexC.ets
                  ARKTS_CONFIGS ${CMAKE_CURRENT_SOURCE_DIR}/A/arktsconfig.json ${CMAKE_CURRENT_SOURCE_DIR}/A/arktsconfig.json ${CMAKE_CURRENT_SOURCE_DIR}/B/arktsconfig.json ${CMAKE_CURRENT_SOURCE_DIR}/B/arktsconfig.json ${CMAKE_CURRENT_SOURCE_DIR}/C/arktsconfig.json ${CMAKE_CURRENT_SOURCE_DIR}/C/arktsconfig.json
                 )

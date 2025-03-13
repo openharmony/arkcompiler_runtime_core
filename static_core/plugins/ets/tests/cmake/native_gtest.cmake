@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,7 +22,7 @@ add_dependencies(ets_gtests ets_native_gtests)
 #       tests/unit1_test.cpp
 #       tests/unit2_test.cpp
 #     ETS_SOURCES
-#       tests/unit1_test.sts
+#       tests/unit1_test.ets
 #     LIBRARIES
 #       lib_target1
 #       lib_target2

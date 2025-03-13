@@ -16,7 +16,7 @@ import("$ark_root/plugins/ets/tests/interop_js/interop_tests.gni")
 
 interop_test("attach_thread_test") {
   js = [ "attach_thread_test.js" ]
-  sts = "attach_test.sts"
+  ets = "attach_test.ets"
   sources = [ "attach_thread_test.cpp" ]
 }
 

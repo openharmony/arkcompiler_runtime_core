@@ -130,7 +130,7 @@ class BenchGenerator:
 
     @staticmethod
     def check_common_files(full: Path, lang_name: str) -> str:
-        """Check if there is 'common' code at ../common/sts/*.sts.
+        """Check if there is 'common' code at ../common/ets/*.ets.
 
         This feature is actually meaningless now
         and added only for the compatibility with existing tests
@@ -152,7 +152,7 @@ class BenchGenerator:
 
     @staticmethod
     def check_resources(full: Path, lang_name: str, dest: Path) -> bool:
-        """Check 'resources' at ../sts/*.sts and link to destdir."""
+        """Check 'resources' at ../ets/*.ets and link to destdir."""
         if full.parent.name != lang_name:
             return False
         resources = full.parent.parent.joinpath('resources')
@@ -337,7 +337,7 @@ def generate_mode(mode: str, lang: str,
         for variant in generator.process_source_file(src.full, lang_impl):
             bu = generator.add_bu(bus, template, lang_impl, src,
                                   variant, settings, out_ext)
-            if mode == 'bu_a2j' and lang == 'sts':
+            if mode == 'bu_a2j' and lang == 'ets':
                 create_interop_runner(generator, variant, bu)
     return tags_workaround(bus, mode)
 
@@ -374,13 +374,13 @@ def generate_main_interop(generator: BenchGenerator = None) -> List[BenchUnit]:
         log.warning("Generator for interop is not defined, stop")
         return bus  # empty
     # Note a2a and a2j templates are like in arkts_host
-    bus += generate_mode('bu_a2a', 'sts', generator, settings=GenSettings(src={'.sts'},
-                         template='Template.sts',
-                         out='.sts',
+    bus += generate_mode('bu_a2a', 'ets', generator, settings=GenSettings(src={'.ets'},
+                         template='Template.ets',
+                         out='.ets',
                          link_to_src=False))
-    bus += generate_mode('bu_a2j', 'sts', generator, settings=GenSettings(src={'.sts'},
-                         template='Template.sts',
-                         out='.sts',
+    bus += generate_mode('bu_a2j', 'ets', generator, settings=GenSettings(src={'.ets'},
+                         template='Template.ets',
+                         out='.ets',
                          link_to_src=False))
     bus += generate_mode('bu_j2a', 'js', generator, settings=GenSettings(src={'.js'},
                          template='Template.js',

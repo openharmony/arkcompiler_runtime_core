@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -36,7 +36,7 @@ BUILD_INTEROP_JS=no
 function print_help()
 {
     local help_message="
-STS documentation builder
+ETS documentation builder
 
 Tested and used under Ubuntu 20+ distributions. All dependencies are provisioned
 by the main install-deps-ubuntu script, see its help for details.

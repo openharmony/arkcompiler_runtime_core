@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,37 +17,37 @@ ani_add_gtest(ani_test_array_getlen
 
 ani_add_gtest(ani_test_array_region_boolean
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_boolean_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_boolean_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_boolean_test.ets
 )
 
 ani_add_gtest(ani_test_array_region_byte
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_byte_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_byte_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_byte_test.ets
 )
 
 ani_add_gtest(ani_test_array_region_short
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_short_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_short_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_short_test.ets
 )
 
 ani_add_gtest(ani_test_array_region_int
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_int_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_int_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_int_test.ets
 )
 
 ani_add_gtest(ani_test_array_region_long
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_long_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_long_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_long_test.ets
 )
 
 ani_add_gtest(ani_test_array_region_float
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_float_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_float_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_float_test.ets
 )
 
 ani_add_gtest(ani_test_array_region_double
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_double_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_double_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_double_test.ets
 )
 
 ani_add_gtest(ani_test_array_new_ref
@@ -56,15 +56,15 @@ ani_add_gtest(ani_test_array_new_ref
 
 ani_add_gtest(ani_test_array_get_ref
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_get_ref_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_get_ref_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_get_ref_test.ets
 )
 
 ani_add_gtest(ani_test_array_set_ref
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_set_ref_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_set_ref_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_set_ref_test.ets
 )
 
 ani_add_gtest(ani_test_array_region_char
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_char_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_char_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_char_test.ets
 )

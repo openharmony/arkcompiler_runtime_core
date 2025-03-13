@@ -19,16 +19,16 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.decl.json ${ETS_CONFIG
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_class_operations
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_operations.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_operations.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_operations.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_frontend_class_operations
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_operations.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_operations_frontend.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_operations_frontend.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_class_operations_decl
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_operations.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_operations_decl.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_operations_decl.ets
     ETS_CONFIG ${ETS_CONFIG_DECL}
 )

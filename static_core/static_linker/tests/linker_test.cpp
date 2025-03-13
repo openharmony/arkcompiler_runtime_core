@@ -280,7 +280,7 @@ void TestMultiple(const std::string &path, std::vector<std::string> perms, bool 
 #ifdef TEST_STATIC_LINKER_WITH_STS
 void TestSts(const std::string &path, const std::vector<std::string> &files, bool isGood = true)
 {
-    const auto sourcePathPrefix = "data/sts/" + path + "/";
+    const auto sourcePathPrefix = "data/ets/" + path + "/";
     const auto targetPathPrefix = "data/output/" + path + "/";
 
     std::string linkerCommand = "../../bin/ark_link";
@@ -471,35 +471,35 @@ TEST(linkertests, ForeignBase)
 TEST(linkertests, StsHelloWorld)
 {
 #ifdef TEST_STATIC_LINKER_WITH_STS
-    TestSts("hello_world", {"1.sts.abc"});
+    TestSts("hello_world", {"1.ets.abc"});
 #endif
 }
 
 TEST(linkertests, StsForeignClass)
 {
 #ifdef TEST_STATIC_LINKER_WITH_STS
-    TestSts("fclass", {"1.sts.abc", "2.sts.abc"});
+    TestSts("fclass", {"1.ets.abc", "2.ets.abc"});
 #endif
 }
 
 TEST(linkertests, StsForeignMethod)
 {
 #ifdef TEST_STATIC_LINKER_WITH_STS
-    TestSts("fmethod", {"1.sts.abc", "2.sts.abc"});
+    TestSts("fmethod", {"1.ets.abc", "2.ets.abc"});
 #endif
 }
 
 TEST(linkertests, StsFMethodOverloaded)
 {
 #ifdef TEST_STATIC_LINKER_WITH_STS
-    TestSts("fmethod_overloaded", {"1.sts.abc", "2.sts.abc"});
+    TestSts("fmethod_overloaded", {"1.ets.abc", "2.ets.abc"});
 #endif
 }
 
 TEST(linkertests, StsFMethodOverloaded2)
 {
 #ifdef TEST_STATIC_LINKER_WITH_STS
-    TestSts("fmethod_overloaded_2", {"1.sts.abc", "2.sts.abc", "3.sts.abc", "4.sts.abc"});
+    TestSts("fmethod_overloaded_2", {"1.ets.abc", "2.ets.abc", "3.ets.abc", "4.ets.abc"});
 #endif
 }
 

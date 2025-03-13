@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,13 +18,13 @@ add_dependencies(ets_interop_js_tests_nodevm declgen_ets2ts_test_diff declgen_et
 # Create create_declgen_ets2ts_test test
 #
 # Declgen test consists of files:
-#   ${ROOT_DIR}/*.sts
+#   ${ROOT_DIR}/*.ets
 #   ${ROOT_DIR}/*.ts
 #   ${ROOT_DIR}/*.js
 #   ${ROOT_DIR}/*.expected
 # This function:
 #   1. Compiles 'ets' files with es2panda into 'abc' and decl 'ts':
-#      ${ROOT_DIR}/*.sts -> ${BINARY_ROOT_DIR}/*.abc ${BINARY_ROOT_DIR}/*.ts
+#      ${ROOT_DIR}/*.ets -> ${BINARY_ROOT_DIR}/*.abc ${BINARY_ROOT_DIR}/*.ts
 #   2. Copies ${ROOT_DIR}/*.ts into ${BINARY_ROOT_DIR}/*.ts
 #   3. Compiles 'ts' project with tsc:
 #      ${BINARY_ROOT_DIR}/*.ts -> ${BINARY_ROOT_DIR}/*.js
@@ -47,8 +47,8 @@ add_dependencies(ets_interop_js_tests_nodevm declgen_ets2ts_test_diff declgen_et
 #       JS_SOURCES
 #           ${CMAKE_CURRENT_SOURCE_DIR}/test_dyn.js
 #       ETS_SOURCES
-#           ${CMAKE_CURRENT_SOURCE_DIR}/lib1.sts
-#           ${CMAKE_CURRENT_SOURCE_DIR}/lib2.sts
+#           ${CMAKE_CURRENT_SOURCE_DIR}/lib1.ets
+#           ${CMAKE_CURRENT_SOURCE_DIR}/lib2.ets
 #       DECLS_EXPECTED
 #           ${CMAKE_CURRENT_SOURCE_DIR}/lib1.expected
 #           ${CMAKE_CURRENT_SOURCE_DIR}/lib2.expected
@@ -114,7 +114,7 @@ function(create_declgen_ets2ts_test TARGET)
     # NOTE(dkofanov): `ImportExportAccessValid` need to be fixed
     # set(ETS_VERIFICATOR_ERRORS "${ETS_VERIFICATOR_ERRORS}:ImportExportAccessValid")
 
-    # Compile source .sts files into .abc and declaration .ts files
+    # Compile source .ets files into .abc and declaration .ts files
     set(ABC_FILES "")
     set(DECL_FILES "")
     set(GLUE_FILES "")
@@ -131,7 +131,7 @@ function(create_declgen_ets2ts_test TARGET)
         add_custom_command(
             OUTPUT ${ABC_PATH} ${DECL_PATH}
             COMMENT "Compiling: ${ETS_SOURCE}"
-            COMMAND $<TARGET_FILE:es2panda> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output ${ABC_PATH} --extension=sts --ast-verifier:errors=${ETS_VERIFICATOR_ERRORS} ${ETS_SOURCE}
+            COMMAND $<TARGET_FILE:es2panda> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output ${ABC_PATH} --extension=ets --ast-verifier:errors=${ETS_VERIFICATOR_ERRORS} ${ETS_SOURCE}
             COMMAND $<TARGET_FILE:declgen_ets2ts> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output-dets=${DECL_PATH} --output-ets=${GLUE_PATH} ${ETS_SOURCE}
             DEPENDS es2panda declgen_ets2ts ${ETS_SOURCE} ${ARKTSCONFIG}
         )

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,6 +12,6 @@
 # limitations under the License.
 
 run_int_jit_aot_ets_code(
-    "${CMAKE_CURRENT_SOURCE_DIR}/class_composite.sts"
+    "${CMAKE_CURRENT_SOURCE_DIR}/class_composite.ets"
     "${CMAKE_CURRENT_BINARY_DIR}"
     ets_test_suite_arrays_class_composite)

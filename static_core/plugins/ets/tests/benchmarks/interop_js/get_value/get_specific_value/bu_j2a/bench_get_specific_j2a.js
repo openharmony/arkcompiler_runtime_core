@@ -50,10 +50,10 @@ function getSpecificJ2a() {
     this.test = function() {
         const stsObj = this.getObj();
 
-        const boolVal = stsObj.stsBoolean;
-        const bigintVal = stsObj.stsBigint;
-        const undefinedVal = stsObj.stsUndefined;
-        const nullVal = stsObj.stsNull;
+        const boolVal = stsObj.etsBoolean;
+        const bigintVal = stsObj.etsBigint;
+        const undefinedVal = stsObj.etsUndefined;
+        const nullVal = stsObj.etsNull;
 
         return;
     };

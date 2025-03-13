@@ -40,8 +40,8 @@ function(build_spawn_managed_code TARGET ABC_FILES WORK_DIR)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     set(SPAWN_ETS_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/spawn/spawn.sts;
-        ${CMAKE_CURRENT_SOURCE_DIR}/spawn/ability.sts;
+        ${CMAKE_CURRENT_SOURCE_DIR}/spawn/spawn.ets;
+        ${CMAKE_CURRENT_SOURCE_DIR}/spawn/ability.ets;
     )
     compile_arktsconfig_unit(${TARGET} RESULT ${WORK_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/spawn/arktsconfig.json
                              "${SPAWN_ETS_SOURCES}"
@@ -133,9 +133,9 @@ function(prepare_app TARGET ABC_FILES WORK_DIR SOURCE_DIR)
     # `app` package
     set(SOURCES_APP_DIR ${SOURCE_DIR}/app)
     set(SOURCES_APP
-        ${SOURCES_APP_DIR}/module1.sts
-        ${SOURCES_APP_DIR}/module2.sts
-        ${SOURCES_APP_DIR}/module3.sts
+        ${SOURCES_APP_DIR}/module1.ets
+        ${SOURCES_APP_DIR}/module2.ets
+        ${SOURCES_APP_DIR}/module3.ets
     )
     set(TARGET_APP ${TARGET}-app-abc)
     compile_arktsconfig_unit(${TARGET_APP} ABCS_MODULES ${WORK_DIR} ${SOURCES_APP_DIR}/arktsconfig.json
@@ -146,8 +146,8 @@ function(prepare_app TARGET ABC_FILES WORK_DIR SOURCE_DIR)
     # `foo` package
     set(TARGET_FOO ${TARGET}-foo-abc)
     set(SOURCES_FOO
-        ${SOURCE_DIR}/foo/base.sts
-        ${SOURCE_DIR}/foo/foo.sts
+        ${SOURCE_DIR}/foo/base.ets
+        ${SOURCE_DIR}/foo/foo.ets
     )
     compile_arktsconfig_unit(${TARGET_FOO} ABCS_FOO ${WORK_DIR} ${SOURCE_DIR}/foo/arktsconfig.json
                              "${SOURCES_FOO}"
@@ -157,7 +157,7 @@ function(prepare_app TARGET ABC_FILES WORK_DIR SOURCE_DIR)
     # `bar` package
     set(TARGET_BAR ${TARGET}-bar-abc)
     compile_arktsconfig_unit(${TARGET_BAR} ABCS_BAR ${WORK_DIR} ${SOURCE_DIR}/bar/arktsconfig.json
-                             ${SOURCE_DIR}/bar/bar.sts
+                             ${SOURCE_DIR}/bar/bar.ets
     )
     set(RESULT ${RESULT} ${ABCS_BAR})
     set(${ABC_FILES} "${RESULT}" PARENT_SCOPE)
@@ -175,13 +175,13 @@ function(prepare_incompatible_app TARGET ABC_FILES WORK_DIR SOURCE_DIR MODULE_NA
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     # src package
     set(TARGET_SRC ${TARGET}-${MODULE_NAME}-src-abc)
-    file(GLOB SOURCES_SRC "${SOURCE_DIR}/${MODULE_NAME}/src/*.sts")
+    file(GLOB SOURCES_SRC "${SOURCE_DIR}/${MODULE_NAME}/src/*.ets")
     compile_arktsconfig_unit(${TARGET_SRC} ABCS_SRC ${WORK_DIR} ${SOURCE_DIR}/${MODULE_NAME}/src/arktsconfig.json
                              "${SOURCES_SRC}"
     )
     # incompatible package
     set(TARGET_INCOMPATIABLE ${TARGET}-${MODULE_NAME}-incompatible-abc)
-    file(GLOB SOURCES_INCOMPATIABLE "${SOURCE_DIR}/${MODULE_NAME}/incompatible/*.sts")
+    file(GLOB SOURCES_INCOMPATIABLE "${SOURCE_DIR}/${MODULE_NAME}/incompatible/*.ets")
     compile_arktsconfig_unit(${TARGET_INCOMPATIABLE} ABCS_INCOMPATIABLE ${WORK_DIR} ${SOURCE_DIR}/${MODULE_NAME}/incompatible/arktsconfig.json
                              "${SOURCES_INCOMPATIABLE}"
     )
@@ -211,7 +211,7 @@ function(prepare_incompatible_app TARGET ABC_FILES WORK_DIR SOURCE_DIR MODULE_NA
 
     # `app` package
     set(TARGET_APP ${TARGET}-${MODULE_NAME}-app-abc)
-    file(GLOB SOURCES_APP "${SOURCE_DIR}/${MODULE_NAME}/app/*.sts")
+    file(GLOB SOURCES_APP "${SOURCE_DIR}/${MODULE_NAME}/app/*.ets")
     compile_arktsconfig_unit(${TARGET_APP} ABCS_APP ${WORK_DIR} ${SOURCE_DIR}/${MODULE_NAME}/app/arktsconfig.json
                              "${SOURCES_APP}"
     )
@@ -249,7 +249,7 @@ endfunction()
 function(create_no_class_def_found_test TARGET WORK_DIR SOURCE_DIR)
     prepare_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR})
     list_find_by_regex("${ABC_FILES}" "(.*)-base.abc" BASE_ABC_IDX)
-    # As a result, `@foo.foo.Dummy` class from `foo.sts` must be not loaded
+    # As a result, `@foo.foo.Dummy` class from `foo.ets` must be not loaded
     list(REMOVE_AT ABC_FILES ${BASE_ABC_IDX})
 
     set(STDOUT_FILE ${WORK_DIR}/${TARGET}-output.txt)
@@ -276,7 +276,7 @@ function(create_incompatible_class_change_test TARGET WORK_DIR SOURCE_DIR)
     # Take `Base` class from `incompatible-foo` package's file
     set(TARGET_INCOMPATIBLE_FOO ${TARGET}-incompatible-foo-abc)
     compile_arktsconfig_unit(${TARGET_INCOMPATIBLE_FOO} ABCS_FOO ${WORK_DIR} ${SOURCE_DIR}/incompatible_foo/arktsconfig.json
-                             ${SOURCE_DIR}/incompatible_foo/base.sts
+                             ${SOURCE_DIR}/incompatible_foo/base.ets
     )
     set(ABC_FILES ${ABC_FILES} ${ABCS_FOO})
 
@@ -345,7 +345,7 @@ create_loop_inheritance_class_test(ets_modules_loop_inheritance_class_test ${CMA
 function(create_multiple_override_test TARGET WORK_DIR SOURCE_DIR)
     prepare_incompatible_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR} "multiple_override")
 
-    # test override_base.sts multiple override method
+    # test override_base.ets multiple override method
     run_sts_app_mode(${TARGET}-multiple_override-run-sts-app-mode ${WORK_DIR} "@app.module.MainAbility" "${ABC_FILES}"
                      SPAWN_ENTRYPOINT_FUNCTION "mainMultipleOverrideBase")
     add_dependencies(${TARGET}-multiple_override-run-sts-app-mode ${TARGET}-app)
@@ -354,7 +354,7 @@ function(create_multiple_override_test TARGET WORK_DIR SOURCE_DIR)
         DEPENDS ${TARGET}-multiple_override-run-sts-app-mode
     )
 
-    # test override_base1.sts multiple override method
+    # test override_base1.ets multiple override method
     run_sts_app_mode(${TARGET}-multiple_override1-run-sts-app-mode ${WORK_DIR} "@app.module1.MainAbility" "${ABC_FILES}"
                      SPAWN_ENTRYPOINT_FUNCTION "mainMultipleOverrideBase1")
     add_dependencies(${TARGET}-multiple_override1-run-sts-app-mode ${TARGET}-app)
@@ -373,7 +373,7 @@ create_multiple_override_test(ets_modules_multiple_override_test ${CMAKE_CURRENT
 
 function(create_multiple_implement_test TARGET WORK_DIR SOURCE_DIR)
     prepare_incompatible_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR} "multiple_implement")
-    # test a2_extends_a1_i1.sts multiple implement method
+    # test a2_extends_a1_i1.ets multiple implement method
     run_sts_app_mode(${TARGET}-multiple_implement-run-sts-app-mode ${WORK_DIR} "@app.module.MainAbility" "${ABC_FILES}"
                      SPAWN_ENTRYPOINT_FUNCTION "mainMultipleImplement")
     add_dependencies(${TARGET}-multiple_implement-run-sts-app-mode ${TARGET}-app)
@@ -382,7 +382,7 @@ function(create_multiple_implement_test TARGET WORK_DIR SOURCE_DIR)
         DEPENDS ${TARGET}-multiple_implement-run-sts-app-mode
     )
 
-    # test a2_extends_a1_i2.sts multiple implement method
+    # test a2_extends_a1_i2.ets multiple implement method
     run_sts_app_mode(${TARGET}-multiple_implement1-run-sts-app-mode ${WORK_DIR} "@app.module1.MainAbility" "${ABC_FILES}"
                      SPAWN_ENTRYPOINT_FUNCTION "mainMultipleImplement1")
     add_dependencies(${TARGET}-multiple_implement1-run-sts-app-mode ${TARGET}-app)

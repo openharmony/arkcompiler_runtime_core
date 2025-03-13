@@ -16,6 +16,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js__getter_ts_to_ets
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/getter.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/getter.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/getter.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
