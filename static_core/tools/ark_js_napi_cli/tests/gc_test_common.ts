@@ -31,13 +31,14 @@ if (!globalThis.test.etsVm.createRuntime({
     throw new Error('Failed to create ETS runtime');
 }
 
-globalThis.test.RunJsGC = () => {
+let RunJsGC: () => void = () => {
     globalThis.ArkTools.GC.clearWeakRefForTest();
     print('--- Start JS GC Full ---');
     let gcId = globalThis.ArkTools.GC.startGC('full');
     globalThis.ArkTools.GC.waitForFinishGC(gcId);
     print('--- Finish JS GC Full ---');
-}
+};
+globalThis.test.RunJsGC = RunJsGC;
 
 export let GetSTSObject: () => Object = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetSTSObject');
 export let GetSTSArrayOfObjects: () => Object[] = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetSTSArrayOfObjects');
@@ -56,7 +57,7 @@ let RunInteropGCInternal: () => void = globalThis.test.etsVm.getFunction('LPanda
 export let RunInteropGC: () => void = () => {
     globalThis.ArkTools.GC.clearWeakRefForTest();
     RunInteropGCInternal();
-}
+};
 export let GetPandaFreeHeapSize: () => number = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetPandaFreeHeapSize');
 export let GetPandaUsedHeapSize: () => number = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetPandaUsedHeapSize');
 export const PandaBaseClass = globalThis.test.etsVm.getClass('LPandaGC/PandaBaseClass;');

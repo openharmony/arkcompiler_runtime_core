@@ -166,7 +166,6 @@
   "tests/tests-u-runner/runner_test.py": "*",
   "tests/verifier-tests": "*",
   "tests/vm-benchmarks": "*",
-  "tools/ark_js_napi_cli/tests": "*",
   "verification/util/bit_vector.h": "*",
   "verification/type/type_type.cpp": "*",
   "compiler/optimizer/ir/visitor.inc": {"G.INC.02": "*", "G.INC.04-CPP": "*"},

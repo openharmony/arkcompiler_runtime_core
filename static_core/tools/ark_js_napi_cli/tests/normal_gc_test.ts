@@ -19,7 +19,7 @@
 import { interop } from './gc_test_common';
 
 function getSTSWeakRef(): WeakRef<Object> {
-    return new WeakRef(interop.GetSTSObjectWithWeakRef())
+    return new WeakRef(interop.GetSTSObjectWithWeakRef());
 }
 
 function getJSPromiseWeakRef(): WeakRef<Promise<Object>> {

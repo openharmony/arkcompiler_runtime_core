@@ -15,12 +15,12 @@
 
 import { interop } from './gc_test_common';
 
-function sendArrayToSTS() {
+function sendArrayToSTS(): void {
     let arr: Object[] = [];
     arr.push(interop.GetSTSObjectWithWeakRef());
     globalThis.test.RunJsGC();
     interop.AddPandaArray(arr);
-    }
+}
 
 function main(): void {
     sendArrayToSTS();

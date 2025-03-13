@@ -29,7 +29,7 @@ class JsDerivedClass extends interop.PandaBaseClass {
     }
 }
 
-function setObjWeakRef() {
+function setObjWeakRef(): void {
     let obj = new JsDerivedClass();
     interop.SetJSObjectWithWeakRef(obj as Object);
 }
