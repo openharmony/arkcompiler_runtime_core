@@ -679,6 +679,20 @@
 #22450 - should throw an exception
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.class_or_interface_casting_conversions/cce_5.sts
 
+#23604
+06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/ref_type_from_object_6.sts
+06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/ref_type_from_object_7.sts
+06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/ref_type_from_object_8.sts
+
+#23605
+06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/ref_type_from_object_10.sts
+06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/ref_type_from_object_11.sts
+06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/ref_type_from_object_12.sts
+
+#23603
+06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/union_type_from_object_0.sts
+06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/union_type_from_object_1.sts
+
 #18118 No ClassCastError on casting to a wrong function type
 06.contexts_and_conversions/04.casting_contexts_and_conversions/04.casting_conversions_from_union/cce_5.sts
 
