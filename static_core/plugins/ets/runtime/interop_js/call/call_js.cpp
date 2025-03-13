@@ -402,6 +402,24 @@ extern "C" uint64_t CallJSProxy(Method *method, uint8_t *args, uint8_t *inStackA
     };
     return CallJSHandler::HandleImpl<false, ArgSetup>(method, args, inStackArgs);
 }
+
+extern "C" uint64_t CallJSFunction(Method *method, uint8_t *args, uint8_t *inStackArgs)
+{
+    struct ArgSetup {
+        ALWAYS_INLINE bool operator()([[maybe_unused]] InteropCtx *ctx, [[maybe_unused]] CallJSHandler *st)
+        {
+            ObjectHeader *etsThis = st->SetupArgreader(true);
+
+            auto refconv = JSRefConvertResolve(ctx, etsThis->ClassAddr<Class>());
+            napi_value jsCallBackFn = refconv->Wrap(ctx, EtsObject::FromCoreType(etsThis));
+
+            st->SetupJSCallee(jsCallBackFn, jsCallBackFn);
+            return true;
+        }
+    };
+    return CallJSHandler::HandleImpl<false, ArgSetup>(method, args, inStackArgs);
+}
+
 extern "C" void CallJSProxyBridge(Method *method, ...);
 
 static void *SelectCallJSEntrypoint(InteropCtx *ctx, Method *method)
