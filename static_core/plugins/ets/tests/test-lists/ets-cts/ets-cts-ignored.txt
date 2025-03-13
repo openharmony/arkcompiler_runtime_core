@@ -300,9 +300,6 @@
 #19720
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_8.sts
 
-#18272 Smart cast fails on lambda expression
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_1.sts
-
 #20367
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_4.sts
 
@@ -318,7 +315,7 @@
 02.lexical_elements/07.keywords/reserved_4.sts
 02.lexical_elements/07.keywords/soft_6.sts
 02.lexical_elements/07.keywords/soft_7.sts
-02.lexical_elements/07.keywords/soft_13.sts 
+02.lexical_elements/07.keywords/soft_13.sts
 
 #23500 Successful compilation instead of CTE
 02.lexical_elements/07.keywords/hard_16.sts
@@ -2059,10 +2056,6 @@
 15.semantic_rules/07.type_inference/01.smart_types/while_stmt_5.sts
 15.semantic_rules/07.type_inference/01.smart_types/while_stmt_7.sts
 15.semantic_rules/07.type_inference/01.smart_types/while_stmt_9.sts
-
-#18272 Smart cast fails on lambda expression
-15.semantic_rules/07.type_inference/01.smart_types/un1_15.sts
-15.semantic_rules/07.type_inference/01.smart_types/un1_17.sts
 
 #14338 es2panda fails to compile overloaded functions
 15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_6.sts
