@@ -92,3 +92,22 @@ cases:
           assertTrue( Enum.first == -1 )
           assertTrue( Enum.second == 0 )
           assertTrue( Enum.third == -42 )
+
+    - decl: |-
+          enum Enum { first = -1, second = 12345678910, third }
+      use: |-
+          assertEQ( Enum.first + Enum.second - Enum.third, -2 )
+
+    - decl: |-
+          enum Enum { first = -1, second = 12345678910, third }
+      use: |-
+          assertEQ( Enum.first.valueOf(), -1 )
+          assertEQ( Enum.second.valueOf(), 12345678910 )
+          assertEQ( Enum.third.valueOf(), 12345678911 )
+
+    - decl: |-
+          enum Enum { first = -1, second = 12345678910, third }
+      use: |-
+          assertEQ( Enum.first.toString(), "-1" )
+          assertEQ( Enum.second.toString(), "12345678910" )
+          assertEQ( Enum.third.toString(), "12345678911" )
