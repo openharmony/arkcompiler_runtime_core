@@ -1747,10 +1747,6 @@
 10.interfaces/01.interface_declarations/empty_interface_declaration_negative_10.ets
 10.interfaces/01.interface_declarations/empty_interface_declaration_negative_11.ets
 
-#23058
-10.interfaces/05.interface_properties/getter_setter_form.ets
-10.interfaces/05.interface_properties/readonly_simple_form_0.ets
-10.interfaces/05.interface_properties/simple_form.ets
 
 #23530
 10.interfaces/05.interface_properties/external_interface_with_property_0.ets
