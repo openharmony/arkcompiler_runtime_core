@@ -22,4 +22,4 @@ files:
 
 import {b} from "./module.sts"
 
-export let a: int = b;
+export let a = b;

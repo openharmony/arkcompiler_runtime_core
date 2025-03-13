@@ -1996,9 +1996,6 @@
 13.compilation_units/05.declaration_modules/declaration_modules_0.sts
 13.compilation_units/05.declaration_modules/declaration_modules_1.sts
 
-#20763 cyclic dependencies don't cause compile-time error
-13.compilation_units/06.compilation_unit_initialization/module/cyclic_dependency/test.sts
-13.compilation_units/06.compilation_unit_initialization/package/cyclic_dependency/pkgA/test.sts
 # 20214 Generic lambda is not supported by compiler
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_0.sts
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_1.sts
