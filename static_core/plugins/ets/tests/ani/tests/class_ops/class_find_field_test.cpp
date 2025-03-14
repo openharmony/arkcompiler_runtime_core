@@ -19,7 +19,7 @@ namespace ark::ets::ani::testing {
 
 class ClassFindFieldTest : public AniTest {};
 
-TEST_F(ClassFindFieldTest, get_field)
+TEST_F(ClassFindFieldTest, get_point_field)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("LPoint;", &cls), ANI_OK);
@@ -31,6 +31,142 @@ TEST_F(ClassFindFieldTest, get_field)
     ani_field fieldY;
     ASSERT_EQ(env_->Class_FindField(cls, "y", &fieldY), ANI_OK);
     ASSERT_NE(fieldY, nullptr);
+
+    ani_field fieldGetRadius;
+    ASSERT_EQ(env_->Class_FindField(cls, "getRadius", &fieldGetRadius), ANI_OK);
+    ASSERT_NE(fieldGetRadius, nullptr);
+}
+
+TEST_F(ClassFindFieldTest, point_field_not_found)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LPoint;", &cls), ANI_OK);
+
+    ani_field fieldZ = nullptr;
+    ASSERT_EQ(env_->Class_FindField(cls, "z", &fieldZ), ANI_NOT_FOUND);
+    ASSERT_EQ(fieldZ, nullptr);
+}
+
+TEST_F(ClassFindFieldTest, get_extended_point_field)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LExtendedPoint;", &cls), ANI_OK);
+
+    ani_field fieldX;
+    ASSERT_EQ(env_->Class_FindField(cls, "x", &fieldX), ANI_OK);
+    ASSERT_NE(fieldX, nullptr);
+
+    ani_field fieldY;
+    ASSERT_EQ(env_->Class_FindField(cls, "y", &fieldY), ANI_OK);
+    ASSERT_NE(fieldY, nullptr);
+
+    ani_field fieldGetRadius;
+    ASSERT_EQ(env_->Class_FindField(cls, "getRadius", &fieldGetRadius), ANI_OK);
+    ASSERT_NE(fieldGetRadius, nullptr);
+
+    ani_field fieldZ;
+    ASSERT_EQ(env_->Class_FindField(cls, "z", &fieldZ), ANI_OK);
+    ASSERT_NE(fieldZ, nullptr);
+}
+
+TEST_F(ClassFindFieldTest, get_vector_field)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LVector;", &cls), ANI_OK);
+
+    ani_field fieldP1;
+    ASSERT_EQ(env_->Class_FindField(cls, "p1", &fieldP1), ANI_OK);
+    ASSERT_NE(fieldP1, nullptr);
+
+    ani_field fieldP2;
+    ASSERT_EQ(env_->Class_FindField(cls, "p2", &fieldP2), ANI_OK);
+    ASSERT_NE(fieldP2, nullptr);
+
+    ani_field fieldLength;
+    ASSERT_EQ(env_->Class_FindField(cls, "length", &fieldLength), ANI_OK);
+    ASSERT_NE(fieldLength, nullptr);
+}
+
+TEST_F(ClassFindFieldTest, get_circle_field)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LCircle;", &cls), ANI_OK);
+
+    ani_field fieldPoints;
+    ASSERT_EQ(env_->Class_FindField(cls, "points", &fieldPoints), ANI_OK);
+    ASSERT_NE(fieldPoints, nullptr);
+
+    ani_field fieldVectors;
+    ASSERT_EQ(env_->Class_FindField(cls, "vectors", &fieldVectors), ANI_OK);
+    ASSERT_NE(fieldVectors, nullptr);
+
+    ani_field fieldRadius;
+    ASSERT_EQ(env_->Class_FindField(cls, "radius", &fieldRadius), ANI_OK);
+    ASSERT_NE(fieldRadius, nullptr);
+
+    ani_field fieldCenter;
+    ASSERT_EQ(env_->Class_FindField(cls, "center", &fieldCenter), ANI_OK);
+    ASSERT_NE(fieldCenter, nullptr);
+}
+
+TEST_F(ClassFindFieldTest, get_sphere_field)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LSphere;", &cls), ANI_OK);
+
+    ani_field fieldPoints;
+    ASSERT_EQ(env_->Class_FindField(cls, "points", &fieldPoints), ANI_OK);
+    ASSERT_NE(fieldPoints, nullptr);
+
+    ani_field fieldVectors;
+    ASSERT_EQ(env_->Class_FindField(cls, "vectors", &fieldVectors), ANI_OK);
+    ASSERT_NE(fieldVectors, nullptr);
+
+    ani_field fieldRadius;
+    ASSERT_EQ(env_->Class_FindField(cls, "radius", &fieldRadius), ANI_OK);
+    ASSERT_NE(fieldRadius, nullptr);
+
+    ani_field fieldCenter;
+    ASSERT_EQ(env_->Class_FindField(cls, "center", &fieldCenter), ANI_OK);
+    ASSERT_NE(fieldCenter, nullptr);
+}
+
+TEST_F(ClassFindFieldTest, get_space_field)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LSpace;", &cls), ANI_OK);
+
+    ani_field fieldObjects;
+    ASSERT_EQ(env_->Class_FindField(cls, "objects", &fieldObjects), ANI_OK);
+    ASSERT_NE(fieldObjects, nullptr);
+
+    ani_field fieldDimension;
+    ASSERT_EQ(env_->Class_FindField(cls, "dimension", &fieldDimension), ANI_OK);
+    ASSERT_NE(fieldDimension, nullptr);
+
+    ani_field fieldName;
+    ASSERT_EQ(env_->Class_FindField(cls, "name", &fieldName), ANI_OK);
+    ASSERT_NE(fieldName, nullptr);
+}
+
+TEST_F(ClassFindFieldTest, get_partial_field)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LUniversalFigureHandler;", &cls), ANI_OK);
+
+    ani_field fieldFigure;
+    ASSERT_EQ(env_->Class_FindField(cls, "figure", &fieldFigure), ANI_OK);
+    ASSERT_NE(fieldFigure, nullptr);
+}
+
+TEST_F(ClassFindFieldTest, get_required_field)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LNamedSpaceHandler;", &cls), ANI_OK);
+
+    ani_field fieldSpace;
+    ASSERT_EQ(env_->Class_FindField(cls, "space", &fieldSpace), ANI_OK);
+    ASSERT_NE(fieldSpace, nullptr);
 }
 
 TEST_F(ClassFindFieldTest, invalid_argument1)
