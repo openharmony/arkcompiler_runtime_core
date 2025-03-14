@@ -56,6 +56,9 @@ public:
     bool DestroyExclusiveWorker() override;
     bool IsExclusiveWorkersLimitReached() const override;
 
+    void CreateWorkers(size_t howMany, Runtime *runtime, PandaVM *vm) override;
+    void FinalizeWorkers(size_t howMany, Runtime *runtime, PandaVM *vm) override;
+
     /* ThreadManager interfaces, see ThreadManager class for the details */
     void WaitForDeregistration() override;
     void SuspendAllThreads() override;
@@ -75,13 +78,13 @@ public:
     void DestroyEntrypointfulCoroutine(Coroutine *co) override;
 
     /// get next free worker id
-    size_t GetNextFreeWorkerId() const;
+    size_t GetNextFreeWorkerId();
 
     /* events */
     /// called when a coroutine worker thread ends its execution
-    void OnWorkerShutdown();
+    void OnWorkerShutdown(StackfulCoroutineWorker *worker);
     /// called when a coroutine worker thread starts its execution
-    void OnWorkerStartup();
+    void OnWorkerStartup(StackfulCoroutineWorker *worker);
     /// Should be called when a coro makes the non_active->active transition (see the state diagram in coroutine.h)
     void OnCoroBecameActive(Coroutine *co) override;
     /**
@@ -131,8 +134,10 @@ protected:
                                 PandaVector<Value> &&arguments, PandaString name);
 
 private:
+    using WorkerId = uint32_t;
+
     StackfulCoroutineContext *CreateCoroutineContextImpl(bool needStack);
-    StackfulCoroutineWorker *ChooseWorkerForCoroutine(Coroutine *co);
+    StackfulCoroutineWorker *ChooseWorkerForCoroutine(Coroutine *co) REQUIRES(workersLock_);
     stackful_coroutines::AffinityMask CalcAffinityMaskFromLaunchMode(CoroutineLaunchMode mode);
 
     Coroutine *GetCoroutineInstanceForLaunch(CompletionEvent *completionEvent, Method *entrypoint,
@@ -151,11 +156,15 @@ private:
     Coroutine *TryGetCoroutineFromPool();
 
     /* workers API */
+    void CreateWorkersImpl(size_t howMany, Runtime *runtime, PandaVM *vm) REQUIRES(workersLock_);
     /**
-     * @brief create the arbitrary number of worker threads
-     * @param how_many total number of worker threads, including MAIN
+     * This method creates main worker and coroutine + the number of common workers
+     * @param howMany total number of common worker threads, NOT including MAIN
      */
-    void CreateWorkers(size_t howMany, Runtime *runtime, PandaVM *vm) REQUIRES(workersLock_);
+    void CreateMainCoroAndWorkers(size_t howMany, Runtime *runtime, PandaVM *vm) REQUIRES(workersLock_);
+    void OnWorkerStartupImpl(StackfulCoroutineWorker *worker) REQUIRES(workersLock_);
+    StackfulCoroutineWorker *CreateWorker(Runtime *runtime, PandaVM *vm,
+                                          StackfulCoroutineWorker::ScheduleLoopType wType, PandaString workerName);
 
     /* coroutine registry management */
     void AddToRegistry(Coroutine *co);
@@ -184,13 +193,22 @@ private:
     void IncrementActiveCoroutines();
     void DecrementActiveCoroutines();
 
+    StackfulCoroutineWorker *ChooseWorkerForFinalization();
+
+    void InitializeWorkerIdAllocator();
+    WorkerId AllocateWorkerId();
+    void ReleaseWorkerId(WorkerId workerId);
+
     // for thread safety with GC
     mutable os::memory::Mutex coroListLock_;
     // all registered coros
     PandaSet<Coroutine *> coroutines_ GUARDED_BY(coroListLock_);
 
     // worker threads-related members
-    PandaVector<StackfulCoroutineWorker *> workers_ GUARDED_BY(workersLock_);
+    PandaList<StackfulCoroutineWorker *> workers_ GUARDED_BY(workersLock_);
+    // allocator of worker ids
+    os::memory::Mutex workerIdLock_;
+    PandaList<WorkerId> freeWorkerIds_ GUARDED_BY(workerIdLock_);
     size_t activeWorkersCount_ GUARDED_BY(workersLock_) = 0;
     mutable os::memory::RecursiveMutex workersLock_;
     mutable os::memory::ConditionVariable workersCv_;
@@ -221,6 +239,7 @@ private:
 
     // stats
     CoroutineStats stats_;
+    PandaVector<CoroutineWorkerStats> finalizedWorkerStats_;
 
     os::memory::Mutex eWorkerCreationLock_;
 

@@ -63,7 +63,7 @@ public:
      */
     enum class Status { CREATED, RUNNABLE, RUNNING, BLOCKED, TERMINATING, AWAIT_LOOP };
     /// the type of work that a coroutine performs
-    enum class Type { MUTATOR, SCHEDULER };
+    enum class Type { MUTATOR, SCHEDULER, FINALIZER };
 
     /// Needed for object locking
     static constexpr ThreadId MAX_COROUTINE_ID = MarkWord::LIGHT_LOCK_THREADID_MAX_COUNT;

@@ -25,7 +25,7 @@ StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, 
     : CoroutineWorker(runtime, vm),
       coroManager_(coroManager),
       threadId_(os::thread::GetCurrentThreadId()),
-      exclusiveWorkerCompletionEvent_(coroManager),
+      workerCompletionEvent_(coroManager),
       stats_(name),
       name_(std::move(name)),
       id_(id)
@@ -115,8 +115,8 @@ void StackfulCoroutineWorker::UnblockWaiters(CoroutineEvent *blocker)
             }
         }
     }
-    if (unblockedCoro != nullptr && InExclusiveMode()) {
-        exclusiveWorkerCompletionEvent_.Happen();
+    if (unblockedCoro != nullptr && IsDisabledForCrossWorkersLaunch()) {
+        workerCompletionEvent_.Happen();
     }
 }
 
@@ -150,28 +150,29 @@ void StackfulCoroutineWorker::FinalizeFiberScheduleLoop()
     }
 }
 
-void StackfulCoroutineWorker::CompleteAllExclusiveCoroutines()
+void StackfulCoroutineWorker::CompleteAllAffinedCoroutines()
 {
     ASSERT(GetCurrentContext()->GetWorker() == this);
-    ASSERT(InExclusiveMode());
+    ASSERT(IsDisabledForCrossWorkersLaunch());
 
-    // G.FMT.04-CPP project code style
+    // CC-OFFNXT(G.FMT.04-CPP): project code style
     auto lock = [](auto &&...locks) { ([&]() NO_THREAD_SAFETY_ANALYSIS { locks.Lock(); }(), ...); };
+    // CC-OFFNXT(G.FMT.04-CPP): project code style
     auto unlock = [](auto &&...locks) { ([&]() NO_THREAD_SAFETY_ANALYSIS { locks.Unlock(); }(), ...); };
 
     ScopedManagedCodeThread n(Coroutine::GetCurrent());
 
-    // CC-OFFNXT(G.CTL.03) false positive
+    // CC-OFFNXT(G.CTL.03): false positive
     while (true) {
         lock(waitersLock_, runnablesLock_);
         if (runnables_.size() > 1) {
             unlock(waitersLock_, runnablesLock_);
             coroManager_->Schedule();
         } else if (!waiters_.empty()) {
-            exclusiveWorkerCompletionEvent_.SetNotHappened();
-            exclusiveWorkerCompletionEvent_.Lock();
+            workerCompletionEvent_.SetNotHappened();
+            workerCompletionEvent_.Lock();
             unlock(waitersLock_, runnablesLock_);
-            coroManager_->Await(&exclusiveWorkerCompletionEvent_);
+            coroManager_->Await(&workerCompletionEvent_);
         } else {
             unlock(waitersLock_, runnablesLock_);
             break;
@@ -220,7 +221,7 @@ void StackfulCoroutineWorker::ThreadProc()
     scheduleLoopCtx_->RequestResume();
     AddRunningCoroutine(scheduleLoopCtx_);
     scheduleLoopCtx_->NativeCodeBegin();
-    coroManager_->OnWorkerStartup();
+    coroManager_->OnWorkerStartup(this);
 
     // profiling: start interval here, end in ctxswitch
     stats_.StartInterval(CoroutineTimeStats::SCH_ALL);
@@ -228,7 +229,7 @@ void StackfulCoroutineWorker::ThreadProc()
 
     coroManager_->DestroyEntrypointlessCoroutine(scheduleLoopCtx_);
     ASSERT(threadId_ == os::thread::GetCurrentThreadId());
-    coroManager_->OnWorkerShutdown();
+    coroManager_->OnWorkerShutdown(this);
 }
 
 void StackfulCoroutineWorker::ScheduleLoop()

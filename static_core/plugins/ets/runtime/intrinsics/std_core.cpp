@@ -147,6 +147,21 @@ extern "C" EtsBoolean StdSystemIsMainWorker()
     return static_cast<EtsBoolean>(coro->GetCoroutineManager()->IsMainWorker(coro));
 }
 
+extern "C" void StdSystemScaleWorkersPool(int32_t scaler)
+{
+    if (UNLIKELY(scaler == 0)) {
+        return;
+    }
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *vm = coro->GetPandaVM();
+    auto *runtime = vm->GetRuntime();
+    if (scaler > 0) {
+        coro->GetManager()->CreateWorkers(scaler, runtime, vm);
+        return;
+    }
+    Coroutine::GetCurrent()->GetManager()->FinalizeWorkers(std::abs(scaler), runtime, vm);
+}
+
 extern "C" void StdSystemAtomicFlagSet(EtsAtomicFlag *instance, EtsBoolean v)
 {
     instance->SetValue(v);

@@ -348,5 +348,12 @@ add_ets_coroutines_test(FILE setTimeout.sts
                         IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO"
+)
+
+add_ets_coroutines_test(FILE scale_workers_pool.sts
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "ONE"
                         MODE "INT"
 )

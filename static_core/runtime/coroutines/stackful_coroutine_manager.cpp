@@ -41,69 +41,169 @@ void StackfulCoroutineManager::FreeCoroutineStack(uint8_t *stack)
     }
 }
 
-void StackfulCoroutineManager::CreateWorkers(size_t howMany, Runtime *runtime, PandaVM *vm)
+void StackfulCoroutineManager::CreateMainCoroAndWorkers(size_t howMany, Runtime *runtime, PandaVM *vm)
 {
-    auto allocator = runtime->GetInternalAllocator();
-    bool isStatsEnabled = stats_.IsEnabled();
-
-    auto *wMain =
-        allocator->New<StackfulCoroutineWorker>(runtime, vm, this, StackfulCoroutineWorker::ScheduleLoopType::FIBER,
-                                                "[main] worker 0", stackful_coroutines::MAIN_WORKER_ID);
-    if (isStatsEnabled) {
-        wMain->GetPerfStats().Enable();
-    }
-    workers_.push_back(wMain);
-    ASSERT(workers_[stackful_coroutines::MAIN_WORKER_ID] == wMain);
+    auto *wMain = CreateWorker(runtime, vm, StackfulCoroutineWorker::ScheduleLoopType::FIBER, "[main] worker ");
     ASSERT(wMain->GetId() == stackful_coroutines::MAIN_WORKER_ID);
 
-    for (uint32_t i = 1; i < howMany; ++i) {
-        auto *w = allocator->New<StackfulCoroutineWorker>(
-            runtime, vm, this, StackfulCoroutineWorker::ScheduleLoopType::THREAD, "worker " + ToPandaString(i), i);
-        if (isStatsEnabled) {
-            w->GetPerfStats().Enable();
-        }
-        workers_.push_back(w);
-        ASSERT(workers_[i] == w);
-        ASSERT(w->GetId() == i);
-    }
-
     auto *mainCo = CreateMainCoroutine(runtime, vm);
-    Coroutine::SetCurrent(mainCo);
     wMain->AddRunningCoroutine(mainCo);
-    activeWorkersCount_ = 1;  // 1 is for MAIN
+    OnWorkerStartupImpl(wMain);
 
+    CreateWorkersImpl(howMany, runtime, vm);
+}
+
+void StackfulCoroutineManager::CreateWorkers(size_t howMany, Runtime *runtime, PandaVM *vm)
+{
+    os::memory::LockHolder lh(workersLock_);
+    CreateWorkersImpl(howMany, runtime, vm);
+}
+
+void StackfulCoroutineManager::FinalizeWorkers(size_t howMany, Runtime *runtime, PandaVM *vm)
+{
+    struct EntrypointParam {
+        explicit EntrypointParam(size_t wCount, CoroutineManager *coroMan)
+            : wCount_(wCount), workerFinalizationEvent(coroMan)
+        {
+        }
+
+        // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
+        const size_t wCount_;
+        GenericEvent workerFinalizationEvent;
+        std::atomic<uint32_t> finalizedWorkersCount = 0;
+        // NOLINTEND(misc-non-private-member-variables-in-classes)
+    };
+
+    auto wCountBeforeFinalization = GetActiveWorkersCount();
+    ASSERT(wCountBeforeFinalization > howMany);
+
+    auto entrypointParam = EntrypointParam(howMany, this);
+    auto coroEntryPoint = [](void *param) {
+        auto *finalizee = Coroutine::GetCurrent()->GetContext<StackfulCoroutineContext>()->GetWorker();
+        finalizee->MigrateCoroutines();
+        finalizee->CompleteAllAffinedCoroutines();
+        finalizee->SetActive(false);
+        auto *entryParams = reinterpret_cast<EntrypointParam *>(param);
+        // Atomic with relaxed order reason: synchronization is not required
+        if (entryParams->finalizedWorkersCount.fetch_add(1, std::memory_order_relaxed) == entryParams->wCount_ - 1) {
+            entryParams->workerFinalizationEvent.Happen();
+        }
+    };
+
+    for (auto i = 0U; i < howMany; i++) {
+        auto *finWorker = ChooseWorkerForFinalization();
+        auto *co = CreateNativeCoroutine(runtime, vm, coroEntryPoint, &entrypointParam, "[finalize coro] ",
+                                         Coroutine::Type::FINALIZER);
+        finWorker->AddRunnableCoroutine(co);
+    }
+    entrypointParam.workerFinalizationEvent.Lock();
+    Await(&entrypointParam.workerFinalizationEvent);
+
+    {
+        ScopedNativeCodeThread nativeCode(Coroutine::GetCurrent());
+        os::memory::LockHolder lh(workersLock_);
+        while (activeWorkersCount_ != wCountBeforeFinalization - howMany) {
+            workersCv_.Wait(&workersLock_);
+        }
+        ASSERT(activeWorkersCount_ > 0);
+    }
+}
+
+StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerForFinalization()
+{
+    os::memory::LockHolder lh(workersLock_);
+    auto finWorkerIt = std::find_if(workers_.begin(), workers_.end(), [](auto &&worker) {
+        return !worker->IsMainWorker() && !worker->IsDisabledForCrossWorkersLaunch() && !worker->InExclusiveMode();
+    });
+    ASSERT(finWorkerIt != workers_.end());
+    (*finWorkerIt)->DisableForCrossWorkersLaunch();
+    return *finWorkerIt;
+}
+
+void StackfulCoroutineManager::CreateWorkersImpl(size_t howMany, Runtime *runtime, PandaVM *vm)
+{
+    auto wCountBeforeCreation = activeWorkersCount_;
+    for (uint32_t i = 0; i < howMany; ++i) {
+        CreateWorker(runtime, vm, StackfulCoroutineWorker::ScheduleLoopType::THREAD, "worker ");
+    }
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::CreateWorkers(): waiting for workers startup";
-    while (activeWorkersCount_ < howMany) {
+    while (activeWorkersCount_ != howMany + wCountBeforeCreation) {
         // NOTE(konstanting, #IAD5MH): need timed wait?..
         workersCv_.Wait(&workersLock_);
     }
 }
 
-void StackfulCoroutineManager::OnWorkerShutdown()
+StackfulCoroutineWorker *StackfulCoroutineManager::CreateWorker(Runtime *runtime, PandaVM *vm,
+                                                                StackfulCoroutineWorker::ScheduleLoopType wType,
+                                                                PandaString workerName)
+{
+    auto allocator = runtime->GetInternalAllocator();
+    auto workerId = AllocateWorkerId();
+    workerName += ToPandaString(workerId);
+    auto *worker = allocator->New<StackfulCoroutineWorker>(runtime, vm, this, wType, std::move(workerName), workerId);
+    if (stats_.IsEnabled()) {
+        worker->GetPerfStats().Enable();
+    }
+    return worker;
+}
+
+void StackfulCoroutineManager::OnWorkerShutdown(StackfulCoroutineWorker *worker)
 {
     os::memory::LockHolder lock(workersLock_);
+    auto workerIt = std::find_if(workers_.begin(), workers_.end(), [worker](auto &&w) { return w == worker; });
+    workers_.erase(workerIt);
+    // We may have a problem related to the coroutine affinity mask aliasing (The ABA Problem) #23715:
+    // 1. Finalizing worker was available for the coroutine (the coroutine had a bit set in the affinity mask)
+    // 2. New specific worker (e.g. EAWorker) was created with the same Id
+    // 3. This worker becomes available for the coroutine, but it was not initially expected
+    ReleaseWorkerId(worker->GetId());
     --activeWorkersCount_;
+    auto &workerStats = worker->GetPerfStats();
+    workerStats.Disable();
+    finalizedWorkerStats_.emplace_back(std::move(workerStats));
+    Runtime::GetCurrent()->GetInternalAllocator()->Delete(worker);
     workersCv_.Signal();
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::OnWorkerShutdown(): COMPLETED, workers left = "
                            << activeWorkersCount_;
 }
 
-void StackfulCoroutineManager::OnWorkerStartup()
+void StackfulCoroutineManager::OnWorkerStartup(StackfulCoroutineWorker *worker)
 {
     os::memory::LockHolder lock(workersLock_);
+    OnWorkerStartupImpl(worker);
+}
+
+void StackfulCoroutineManager::OnWorkerStartupImpl(StackfulCoroutineWorker *worker)
+{
+    workers_.push_back(worker);
     ++activeWorkersCount_;
     workersCv_.Signal();
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::OnWorkerStartup(): COMPLETED, active workers = "
                            << activeWorkersCount_;
 }
 
-size_t StackfulCoroutineManager::GetNextFreeWorkerId() const
+void StackfulCoroutineManager::InitializeWorkerIdAllocator()
 {
-    os::memory::LockHolder lock(workersLock_);
-    if (activeWorkersCount_ > stackful_coroutines::MAX_WORKER_ID) {
-        return stackful_coroutines::INVALID_WORKER_ID;
+    os::memory::LockHolder lh(workerIdLock_);
+    for (auto id = stackful_coroutines::MAIN_WORKER_ID; id != stackful_coroutines::MAX_WORKERS_COUNT; ++id) {
+        freeWorkerIds_.push_back(id);
     }
-    return activeWorkersCount_;
+}
+
+uint32_t StackfulCoroutineManager::AllocateWorkerId()
+{
+    os::memory::LockHolder lh(workerIdLock_);
+    ASSERT(!freeWorkerIds_.empty());
+    auto workerId = freeWorkerIds_.front();
+    freeWorkerIds_.pop_front();
+    return workerId;
+}
+
+void StackfulCoroutineManager::ReleaseWorkerId(uint32_t workerId)
+{
+    os::memory::LockHolder lh(workerIdLock_);
+    freeWorkerIds_.push_back(workerId);
+    ASSERT(freeWorkerIds_.size() <= stackful_coroutines::MAX_WORKERS_COUNT);
 }
 
 void StackfulCoroutineManager::DisableCoroutineSwitch()
@@ -155,8 +255,10 @@ void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
                                   "common workers to number of CPUs / 4, but not less than 2 and no more than "
                                << maxCommonWorkers << " = " << targetNumberOfCommonWorkers;
     }
+    ASSERT(targetNumberOfCommonWorkers > 0);
+    InitializeWorkerIdAllocator();
     os::memory::LockHolder lock(workersLock_);
-    CreateWorkers(targetNumberOfCommonWorkers, runtime, vm);
+    CreateMainCoroAndWorkers(targetNumberOfCommonWorkers - 1, runtime, vm);  // 1 is for MAIN here
     commonWorkersCount_ = targetNumberOfCommonWorkers;
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): successfully created and activated " << workers_.size()
                            << " coroutine workers";
@@ -182,7 +284,7 @@ void StackfulCoroutineManager::AddToRegistry(Coroutine *co)
     co->GetVM()->GetGC()->OnThreadCreate(co);
     coroutines_.insert(co);
     coroutineCount_++;
-    if (co->GetType() == Coroutine::Type::SCHEDULER) {
+    if (co->GetType() != Coroutine::Type::MUTATOR) {
         systemCoroutineCount_++;
     }
 }
@@ -191,7 +293,7 @@ void StackfulCoroutineManager::RemoveFromRegistry(Coroutine *co)
 {
     coroutines_.erase(co);
     coroutineCount_--;
-    if (co->GetType() == Coroutine::Type::SCHEDULER) {
+    if (co->GetType() != Coroutine::Type::MUTATOR) {
         systemCoroutineCount_--;
     }
 }
@@ -451,17 +553,17 @@ StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerForCoroutine(Coro
         return first->GetLoadFactor() < second->GetLoadFactor();
     };
 
-    os::memory::LockHolder lkWorkers(workersLock_);
 #ifndef NDEBUG
     LOG(DEBUG, COROUTINES) << "Evaluating load factors:";
-    for (auto w : workers_) {
+    for (auto *w : workers_) {
         LOG(DEBUG, COROUTINES) << w->GetName() << ": LF = " << w->GetLoadFactor();
     }
 #endif
     std::vector<StackfulCoroutineWorker *> suitableWorkers;
-    // skip exclusive workers
-    std::copy_if(workers_.begin(), workers_.end(), std::inserter(suitableWorkers, suitableWorkers.begin()),
-                 [&affinityBits](auto *w) { return !w->InExclusiveMode() || affinityBits.test(w->GetId()); });
+    // skip exclusive and finalizing workers
+    std::copy_if(workers_.begin(), workers_.end(), std::back_inserter(suitableWorkers), [affinityBits](auto *w) {
+        return !w->IsDisabledForCrossWorkersLaunch() || affinityBits.test(w->GetId());
+    });
     ASSERT(!suitableWorkers.empty());
 
     auto wIt = std::min_element(suitableWorkers.begin(), suitableWorkers.end(), preferFirstOverSecond);
@@ -545,9 +647,11 @@ bool StackfulCoroutineManager::LaunchImpl(CompletionEvent *completionEvent, Meth
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchImpl: failed to create a coroutine!";
         return false;
     }
-    auto *w = ChooseWorkerForCoroutine(co);
-    w->AddRunnableCoroutine(co);
-
+    {
+        os::memory::LockHolder lkWorkers(workersLock_);
+        auto *w = ChooseWorkerForCoroutine(co);
+        w->AddRunnableCoroutine(co);
+    }
 #ifndef NDEBUG
     GetCurrentWorker()->PrintRunnables("LaunchImpl end");
 #endif
@@ -567,7 +671,11 @@ bool StackfulCoroutineManager::LaunchImmediatelyImpl(CompletionEvent *completion
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchImmediatelyImpl: failed to create a coroutine!";
         return false;
     }
-    auto *w = ChooseWorkerForCoroutine(co);
+    StackfulCoroutineWorker *w = nullptr;
+    {
+        os::memory::LockHolder lkWorkers(workersLock_);
+        w = ChooseWorkerForCoroutine(co);
+    }
     // since we are going to switch the context, we have to close the interval
     GetCurrentWorker()->GetPerfStats().FinishInterval(CoroutineTimeStats::LAUNCH);
     w->AddCreatedCoroutineAndSwitchToIt(co);
@@ -607,14 +715,8 @@ bool StackfulCoroutineManager::LaunchWithMode(CompletionEvent *completionEvent, 
 void StackfulCoroutineManager::DumpCoroutineStats() const
 {
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager: dumping performance statistics...";
-    os::memory::LockHolder lock(workersLock_);
-    PandaVector<CoroutineWorkerStats *> wstats;
-    for (auto *worker : workers_) {
-        worker->GetPerfStats().Disable();
-        wstats.push_back(&worker->GetPerfStats());
-    }
     std::cout << "=== Coroutine statistics begin ===" << std::endl;
-    std::cout << stats_.GetFullStatistics(std::move(wstats));
+    std::cout << stats_.GetFullStatistics(finalizedWorkerStats_);
     std::cout << "=== Coroutine statistics end ===" << std::endl;
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager: performance statistics dumped successfully.";
 }
@@ -675,19 +777,20 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
     // profiling: the SCH interval is expected to be started after the ctxswitch
     GetCurrentWorker()->GetPerfStats().FinishInterval(CoroutineTimeStats::SCH_ALL);
 
+    OnWorkerShutdown(GetCurrentWorker());
+
+#ifndef NDEBUG
+    {
+        os::memory::LockHolder lkWorkers(workersLock_);
+        ASSERT(workers_.empty());
+        ASSERT(activeWorkersCount_ == 0);
+    }
+#endif
+
     if (stats_.IsEnabled()) {
         DumpCoroutineStats();
     }
     stats_.Disable();
-
-    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::MainCoroutineCompleted(): deleting workers";
-    {
-        os::memory::LockHolder lkWorkers(workersLock_);
-        for (auto *worker : workers_) {
-            Runtime::GetCurrent()->GetInternalAllocator()->Delete(worker);
-        }
-        workers_.clear();
-    }
 
     // We need to lock programCompletionLock_ here to call
     // programCompletionLock_.Unlock() in ExclusiveWorker before runtime destruction
@@ -829,7 +932,7 @@ Coroutine *StackfulCoroutineManager::CreateExclusiveWorkerForThread(Runtime *run
 {
     ASSERT(Thread::GetCurrent() == nullptr);
 
-    // actually we need this lock due to workerId problem
+    // actually we need this lock due to worker limit
     os::memory::LockHolder eWorkerLock(eWorkerCreationLock_);
 
     if (IsExclusiveWorkersLimitReached()) {
@@ -837,33 +940,14 @@ Coroutine *StackfulCoroutineManager::CreateExclusiveWorkerForThread(Runtime *run
         return nullptr;
     }
 
-    auto workerId = GetNextFreeWorkerId();
-
-    ASSERT(workerId != stackful_coroutines::INVALID_WORKER_ID);
-    if (workerId == stackful_coroutines::INVALID_WORKER_ID) {
-        LOG(DEBUG, COROUTINES) << "The program reached the limit of worker ID's";
-        return nullptr;
-    }
-
-    auto workerName = "[e-worker] " + ToPandaString(workerId);
-
-    auto allocator = runtime->GetInternalAllocator();
-    auto *eWorker = allocator->New<StackfulCoroutineWorker>(
-        runtime, vm, this, StackfulCoroutineWorker::ScheduleLoopType::FIBER, workerName, workerId);
+    auto *eWorker = CreateWorker(runtime, vm, StackfulCoroutineWorker::ScheduleLoopType::FIBER, "[e-worker] ");
     eWorker->SetExclusiveMode(true);
-
-    auto *eCoro = CreateEntrypointlessCoroutine(runtime, vm, true, "[ea_coro] " + std::move(workerName),
-                                                Coroutine::Type::MUTATOR);
+    eWorker->DisableForCrossWorkersLaunch();
+    auto *eCoro =
+        CreateEntrypointlessCoroutine(runtime, vm, true, "[ea_coro] " + eWorker->GetName(), Coroutine::Type::MUTATOR);
     ASSERT(eCoro != nullptr);
     eWorker->AddRunningCoroutine(eCoro);
-    {
-        os::memory::LockHolder lh(workersLock_);
-        workers_.push_back(eWorker);
-        ASSERT(workers_[workerId] == eWorker);
-        ASSERT(eWorker->GetId() == workerId);
-    }
-
-    OnWorkerStartup();
+    OnWorkerStartup(eWorker);
 
     ASSERT(Coroutine::GetCurrent() == eCoro);
     return eCoro;
@@ -877,31 +961,19 @@ bool StackfulCoroutineManager::DestroyExclusiveWorker()
         return false;
     }
 
-    eWorker->CompleteAllExclusiveCoroutines();
+    eWorker->CompleteAllAffinedCoroutines();
 
-    {
-        os::memory::LockHolder eWorkerLock(eWorkerCreationLock_);
+    eWorker->SetActive(false);
+    eWorker->FinalizeFiberScheduleLoop();
 
-        {
-            os::memory::LockHolder lkWorkers(workersLock_);
-            auto currentWorker = std::find(workers_.begin(), workers_.end(), eWorker);
-            workers_.erase(currentWorker);
-        }
+    CheckProgramCompletion();
 
-        eWorker->SetActive(false);
-        eWorker->FinalizeFiberScheduleLoop();
+    auto *eaCoro = Coroutine::GetCurrent();
+    programCompletionLock_.Lock();
+    DestroyEntrypointlessCoroutine(eaCoro);
+    Coroutine::SetCurrent(nullptr);
 
-        CheckProgramCompletion();
-
-        Runtime::GetCurrent()->GetInternalAllocator()->Delete(eWorker);
-
-        auto *eaCoro = Coroutine::GetCurrent();
-        programCompletionLock_.Lock();
-        DestroyEntrypointlessCoroutine(eaCoro);
-        Coroutine::SetCurrent(nullptr);
-    }
-
-    OnWorkerShutdown();
+    OnWorkerShutdown(eWorker);
     programCompletionLock_.Unlock();
     return true;
 }
