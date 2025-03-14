@@ -364,9 +364,9 @@ static napi_value Init(napi_env env, napi_value exports)
         napi_property_descriptor {"call", 0, Call, 0, 0, 0, napi_enumerable, 0},
         napi_property_descriptor {"callWithCopy", 0, CallWithCopy, 0, 0, 0, napi_enumerable, 0},
         // NOTE(konstanting, #23205): to be deleted
-        napi_property_descriptor {"createRuntime", 0, CreateRuntimeLegacy, 0, 0, 0, napi_enumerable, 0},
+        napi_property_descriptor {"createRuntimeLegacy", 0, CreateRuntimeLegacy, 0, 0, 0, napi_enumerable, 0},
         // NOTE(konstanting, #23205): to be renamed once migration is complete
-        napi_property_descriptor {"createRuntimeViaAni", 0, CreateRuntimeViaAni, 0, 0, 0, napi_enumerable, 0},
+        napi_property_descriptor {"createRuntime", 0, CreateRuntimeViaAni, 0, 0, 0, napi_enumerable, 0},
         napi_property_descriptor {"getFunction", 0, GetEtsFunction, 0, 0, 0, napi_enumerable, 0},
         napi_property_descriptor {"getClass", 0, GetEtsClass, 0, 0, 0, napi_enumerable, 0},
     };

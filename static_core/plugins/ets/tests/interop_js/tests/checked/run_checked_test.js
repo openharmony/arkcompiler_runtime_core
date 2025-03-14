@@ -24,7 +24,7 @@ function runTest(test, pandaOptions) {
 		'--panda-files',
 		penv.ARK_ETS_INTEROP_JS_TEST_ABC_PATH,
 	].concat(pandaOptions);
-	const etsVmRes = etsVm.createRuntime(options);
+	const etsVmRes = etsVm.createRuntimeLegacy(options);
 	if (!etsVmRes) {
 		console.error(`Failed to create ETS runtime`);
 		return 1;
