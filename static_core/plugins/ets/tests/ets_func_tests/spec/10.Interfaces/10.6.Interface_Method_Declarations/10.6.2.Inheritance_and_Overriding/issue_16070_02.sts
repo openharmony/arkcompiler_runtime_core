@@ -16,7 +16,7 @@
 /*---
  desc: 10.06.02 Inheritance and Overriding
  name: 10.interfaces/10.06.interface_method_declarations/10.06.02.inheritance_and_overriding/issue_16070_02
- tags: [negative, compile-only]
+ tags: [compile-only]
  ---*/
 
 interface I {
