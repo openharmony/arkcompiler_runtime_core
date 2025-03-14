@@ -51,6 +51,13 @@ function abilityExpectFailure(cb: (e: Error) => void) {
     throw new Error("Error expected, but nothing was thrown")
 }
 
+function abilityExpectVerificationError(expectedMessage: string) {
+    abilityExpectFailure((e: Error) => {
+        assertTrue(e instanceof LinkerVerificationError)
+        assertEQ(e.message, expectedMessage);
+    })
+}
+
 function mainCatchLinkerUnresolvedClassError() {
     abilityExpectFailure((e: Error) => {
         assertTrue(e instanceof LinkerVerificationError)
@@ -66,74 +73,37 @@ function mainCatchLinkerBadSupertypeError() {
 }
 
 function mainMisatchedExtendsFinal() {
-    abilityExpectFailure((e: Error) => {
-        assertTrue(e instanceof LinkerVerificationError)
-        assertEQ(e.message, "@mismatched.extends_final.ExtendsFinal")
-    })
+    abilityExpectVerificationError("@mismatched.extends_final.ExtendsFinal")
 }
 
 function mainMisatchedOverrideFinal() {
-    abilityExpectFailure((e: Error) => {
-        assertTrue(e instanceof LinkerVerificationError)
-        assertTrue(e.cause instanceof LinkerMethodConflictError)
-        let c = e.cause as LinkerMethodConflictError
-        assertEQ(c.message, "Method overrides final method L@mismatched/override_final/OverrideFinal;func L@mismatched/final_method/FinalMethod;func");
-    })
+    abilityExpectVerificationError("@app.module5.MainAbility::invoke")
 }
 
 function mainCircularityExtends() {
-    abilityExpectFailure((e: Error) => {
-        assertTrue(e instanceof LinkerVerificationError)
-        assertTrue(e.cause instanceof LinkerTypeCircularityError)
-        let c = e.cause as LinkerTypeCircularityError
-        assertEQ(c.message, "Class or interface \"L@loop_inheritance/level_two/LevelTwo;\" is its own superclass or superinterface");
-    })
-}
-function mainMultipleOverrideImpl(expectedMessage: string) {
-    abilityExpectFailure((e: Error) => {
-        assertTrue(e instanceof LinkerVerificationError)
-        assertTrue(e.cause instanceof LinkerMethodConflictError)
-        let c = e.cause as LinkerMethodConflictError
-        assertEQ(c.message, expectedMessage);
-    })
+    abilityExpectVerificationError("@app.module6.MainAbility::invoke")
 }
 
 function mainMultipleOverrideBase() {
-    mainMultipleOverrideImpl("Multiple override L@multiple_override/override_base/OverrideBase;foo L@multiple_override/base/Base;foo");
+    abilityExpectVerificationError("@app.module.MainAbility::invoke");
 }
 
 function mainMultipleOverrideBase1() {
-    mainMultipleOverrideImpl("Multiple override L@multiple_override/override_base2/OverrideBase2;foo L@multiple_override/base2/Base2;foo");
-}
-
-function mainVerificationImpl(expectedMessage: string) {
-    abilityExpectFailure((e: Error) => {
-        assertTrue(e instanceof LinkerVerificationError)
-        assertEQ(e.message, expectedMessage);
-    })
+    abilityExpectVerificationError("@app.module1.MainAbility::invoke");
 }
 
 function mainVerificationModeOnTheFly() {
-    mainVerificationImpl("@verification_mode.bar.ETSGLOBAL::bar");
+    abilityExpectVerificationError("@verification_mode.bar.ETSGLOBAL::bar");
 }
 
 function mainVerificationModeAheadOfTime() {
-    mainVerificationImpl("L@verification_mode/bar/ETSGLOBAL;");
-}
-
-function mainMultipleImplementImpl(expectedMessage: string) {
-    abilityExpectFailure((e: Error) => {
-        assertTrue(e instanceof LinkerVerificationError)
-        assertTrue(e.cause instanceof LinkerMethodConflictError)
-        let c = e.cause as LinkerMethodConflictError
-        assertEQ(c.message,  expectedMessage);
-    })
+    abilityExpectVerificationError("L@verification_mode/bar/ETSGLOBAL;");
 }
 
 function mainMultipleImplement() {
-    mainMultipleImplementImpl("Conflicting default implementations L@multiple_implement/i2/I2;foo L@multiple_implement/i1/I1;foo");
+    abilityExpectVerificationError("@app.module.MainAbility::invoke");
 }
 
 function mainMultipleImplement1() {
-    mainMultipleImplementImpl("Conflicting default implementations L@multiple_implement/i1/I1;foo L@multiple_implement/i2/I2;foo");
+    abilityExpectVerificationError("@app.module1.MainAbility::invoke");
 }

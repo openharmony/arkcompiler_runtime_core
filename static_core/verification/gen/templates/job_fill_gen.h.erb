@@ -196,7 +196,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %        bool isArrayConstructorCall = false;
 %        if (calledMethod == nullptr) {
 %            panda_file::MethodDataAccessor const mda(*pf, methodId);
-%            Class * cls = classLinker_->GetClass(*method_, mda.GetClassId());
+%            Class *cls = classLinker_->GetClass(*method_, mda.GetClassId(), &errorHandler);
 %
 %            auto opcode = inst.GetOpcode();
 %            if (UNLIKELY((opcode == BytecodeInstructionSafe::Opcode::INITOBJ_SHORT_V4_V4_ID16 ||
