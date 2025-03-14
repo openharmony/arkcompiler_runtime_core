@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,90 @@
  * limitations under the License.
  */
 
-class StringOperations {
-    concat(s0: String, s1: String): String {
-        return s0 + s1;
+class A {
+    public static newA()
+    {
+        return new A();
     }
-};
 
-function newStringOperations(): StringOperations {
-    return new StringOperations();
+    public stringMethod(a0: int, a1: int): String
+    {
+        if (a0 > a1) {
+			return "hello";
+		} else {
+			return "nihao";
+		}
+    }
+
+    public stringMethodVoidParam(): String
+    {
+        return "hello world";
+    }
+
+    public stringMethodMultipleParam(a0: int, a1: boolean, a2: float, a3: int, a4: float): String
+    {
+        if (a1) {
+            return "china";
+        } else if (a0 > a3) {
+            return "england";
+        } else if (a2 > a4) {
+            return "japan";
+        } else {
+            return "korea";
+        }
+    }
+
+    public nestedMethod(data1: int, data2: int): String
+    {
+        let method = (value1: int, value2: int): String => {
+            if (value1 + value2 > 10) {
+				return "hello";
+			} else {
+				return "nihao";
+			}
+        }
+
+        return method(data1, data2);
+    }
+
+    public recursionMethod(a0: int): String
+    {
+        if (a0 > 100) {
+            return "hello";
+        } else {
+            return this.recursionMethod((a0 + 10) as short);
+        }
+    }
 }
 
-function checkConcatOps(s0: String, s1: String, result: String): boolean {
-    return s0 + s1 === result;
+final class B extends A {
+
+    public subStringMethodVoidParam(): String
+    {
+        return "world";
+    }
+}
+
+abstract class C {
+    public abstract func(a: int, b: int): String;
+}
+
+class D extends C {
+    public override func(a: int, b: int): String {
+        if (a > b) {
+            return "hello";
+        } else {
+            return "nihao";
+        }
+    }
+}
+
+class E extends D {
+    public override func(a: int, b: int): String {
+        if (a + b > 10) {
+            return "hello world";
+        } else {
+            return "hello";
+        }
+    }
 }
