@@ -33,6 +33,9 @@ static constexpr const char *CONSTRUCTOR_NAME = "constructor";
 static constexpr char TYPE_DESC_DELIMITER = ';';
 static constexpr const char *GETTER_BEGIN = "<get>";
 static constexpr const char *SETTER_BEGIN = "<set>";
+static constexpr const char *GET_INDEX_METHOD = "$_get";
+static constexpr const char *SET_INDEX_METHOD = "$_set";
+static constexpr const uint8_t SETTER_GETTER_PREFIX_LENGTH = 5;
 
 static constexpr const char *STD_CORE_FUNCTION_PREFIX = "std.core.Function";
 static constexpr const char *STD_CORE_FUNCTION_INVOKE_PREFIX = "invoke";

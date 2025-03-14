@@ -66,6 +66,10 @@ napi_value EtsClassWrapper::Wrap(InteropCtx *ctx, EtsObject *etsObject)
     EtsHandle<EtsObject> handle(coro, etsObject);
     ctx->SetPendingNewInstance(handle);
     NAPI_CHECK_FATAL(napi_new_instance(env, GetJsCtor(env), 0, nullptr, &jsValue));
+
+    if (this->needProxy_) {
+        jsValue = CreateProxy(env, jsValue, this);
+    }
     return jsValue;
 }
 
@@ -505,6 +509,9 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     auto [fields, methods] = _this->CalculateProperties(overloads);
     for (auto method : methods) {
         const std::string methodName(method->GetName());
+        if (methodName == GET_INDEX_METHOD || methodName == SET_INDEX_METHOD) {
+            _this->SetUpMimicHandler(env);
+        }
         auto baseClassWrapper = _this->baseWrapper_;
         while (nullptr != baseClassWrapper) {
             EtsMethodSet *baseMethodSet = baseClassWrapper->GetMethod(methodName);
@@ -551,6 +558,121 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     NAPI_CHECK_FATAL(napi_create_reference(env, jsCtor, 1, &_this->jsCtorRef_));
 
     return _this;
+}
+
+void EtsClassWrapper::SetUpMimicHandler(napi_env env)
+{
+    this->needProxy_ = true;
+
+    napi_value global;
+    NAPI_CHECK_FATAL(napi_get_global(env, &global));
+
+    napi_value jsProxyCtorRef;
+    NAPI_CHECK_FATAL(napi_get_named_property(env, global, "Proxy", &jsProxyCtorRef));
+    NAPI_CHECK_FATAL(napi_create_reference(env, jsProxyCtorRef, 1, &this->jsProxyCtorRef_));
+
+    napi_value jsProxyHandlerRef;
+    NAPI_CHECK_FATAL(napi_create_object(env, &jsProxyHandlerRef));
+    NAPI_CHECK_FATAL(napi_create_reference(env, jsProxyHandlerRef, 1, &this->jsProxyHandlerRef_));
+
+    napi_value getHandlerFunc;
+    NAPI_CHECK_FATAL(napi_create_function(env, nullptr, NAPI_AUTO_LENGTH, EtsClassWrapper::MimicGetHandler, nullptr,
+                                          &getHandlerFunc));
+    napi_value setHandlerFunc;
+    NAPI_CHECK_FATAL(napi_create_function(env, nullptr, NAPI_AUTO_LENGTH, EtsClassWrapper::MimicSetHandler, nullptr,
+                                          &setHandlerFunc));
+
+    NAPI_CHECK_FATAL(napi_set_named_property(env, jsProxyHandlerRef, "get", getHandlerFunc));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, jsProxyHandlerRef, "set", setHandlerFunc));
+}
+
+/*static*/
+napi_value EtsClassWrapper::CreateProxy(napi_env env, napi_value jsCtor, EtsClassWrapper *thisWrapper)
+{
+    napi_value jsProxyHandlerRef;
+    NAPI_CHECK_FATAL(napi_get_reference_value(env, thisWrapper->jsProxyHandlerRef_, &jsProxyHandlerRef));
+    napi_value jsProxyCtorRef;
+    NAPI_CHECK_FATAL(napi_get_reference_value(env, thisWrapper->jsProxyCtorRef_, &jsProxyCtorRef));
+
+    napi_value proxyObj;
+    std::vector<napi_value> args = {jsCtor, jsProxyHandlerRef};
+
+    NAPI_CHECK_FATAL(napi_new_instance(env, jsProxyCtorRef, args.size(), args.data(), &proxyObj));
+    return proxyObj;
+}
+
+/*static*/
+napi_value EtsClassWrapper::MimicGetHandler(napi_env env, napi_callback_info info)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_JS(coro);
+
+    size_t argc;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr));
+    auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &argc, jsArgs->data(), nullptr, nullptr));
+
+    napi_value target = jsArgs[0];
+    napi_value property = jsArgs[1];
+
+    if (GetValueType(env, property) == napi_number) {
+        ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
+        ASSERT(storage != nullptr);
+        ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsArgs[0]);
+        if (sharedRef == nullptr) {
+            InteropFatal("MimicGetHandler sharedRef is empty");
+        }
+
+        auto *etsThis = sharedRef->GetEtsObject();
+        ASSERT(etsThis != nullptr);
+        auto method = etsThis->GetClass()->GetMethod(GET_INDEX_METHOD);
+        ASSERT(method != nullptr);
+
+        Span sp(jsArgs->begin(), jsArgs->end());
+        const size_t startIndex = 1;
+        const size_t argSize = 1;
+        return CallETSInstance(coro, ctx, method->GetPandaMethod(), sp.SubSpan(startIndex, argSize), etsThis);
+    }
+
+    napi_value result;
+    NAPI_CHECK_FATAL(napi_get_property(env, target, property, &result));
+    return result;
+}
+
+/*static*/
+napi_value EtsClassWrapper::MimicSetHandler(napi_env env, napi_callback_info info)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_JS(coro);
+
+    size_t argc;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr));
+    auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &argc, jsArgs->data(), nullptr, nullptr));
+
+    ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
+    ASSERT(storage != nullptr);
+    ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsArgs[0]);
+    if (sharedRef == nullptr) {
+        InteropFatal("MimicGetHandler sharedRef is empty");
+    }
+
+    auto *etsThis = sharedRef->GetEtsObject();
+    ASSERT(etsThis != nullptr);
+    auto method = etsThis->GetClass()->GetMethod(SET_INDEX_METHOD);
+    ASSERT(method != nullptr);
+
+    Span sp(jsArgs->begin(), jsArgs->end());
+
+    const size_t startIndex = 1;
+    const size_t argSize = 2;
+    CallETSInstance(coro, ctx, method->GetPandaMethod(), sp.SubSpan(startIndex, argSize), etsThis);
+
+    napi_value trueValue;
+    NAPI_CHECK_FATAL(napi_get_boolean(env, true, &trueValue));
+    return trueValue;
 }
 
 /*static*/
