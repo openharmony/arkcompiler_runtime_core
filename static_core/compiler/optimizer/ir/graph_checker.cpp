@@ -2239,9 +2239,14 @@ void GraphChecker::VisitCallNative([[maybe_unused]] GraphVisitor *v, Inst *inst)
         v, callNative->IsRuntimeCall() == (callNative->GetSaveState() != nullptr),
         (std::cerr << "CallNative with runtime_call flag must have SaveState (and vice versa):\n",
          callNative->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, callNative->GetInputsCount() > 0U && callNative->GetInput(0U).GetInst()->GetType() == DataType::POINTER,
+        (std::cerr << "CallNative must have native pointer as 0 input:\n", callNative->Dump(&std::cerr)));
+
     if (!callNative->IsRuntimeCall()) {
         [[maybe_unused]] bool hasRefInputs = false;
-        for (auto input : callNative->GetInputs()) {
+        for (size_t i = 1U; i < callNative->GetInputsCount(); ++i) {
+            auto input = callNative->GetInput(i);
             if (DataType::IsReference(input.GetInst()->GetType())) {
                 hasRefInputs = true;
                 break;

@@ -28,6 +28,7 @@
 #include "runtime/include/thread.h"
 #include "runtime/include/coretypes/native_pointer.h"
 #include "runtime/mem/heap_manager.h"
+#include "runtime/mem/refstorage/reference.h"
 #include "compiler/inplace_task_runner.h"
 #include "compiler/background_task_runner.h"
 
@@ -269,11 +270,37 @@ bool PandaRuntimeInterface::IsInterfaceMethod(MethodPtr parentMethod, MethodId i
     return (method->GetClass()->IsInterface() && !method->IsDefaultInterfaceMethod());
 }
 
+bool PandaRuntimeInterface::IsMethodNativeApi(MethodPtr method) const
+{
+    auto *pandaMethod = MethodCast(method);
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*pandaMethod);
+    return Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->IsMethodNativeApi(pandaMethod);
+}
+
 bool PandaRuntimeInterface::CanThrowException(MethodPtr method) const
 {
     auto *pandaMethod = MethodCast(method);
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*pandaMethod);
     return Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->CanThrowException(pandaMethod);
+}
+
+bool PandaRuntimeInterface::IsNecessarySwitchThreadState(MethodPtr method) const
+{
+    auto *pandaMethod = MethodCast(method);
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*pandaMethod);
+    return Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->IsNecessarySwitchThreadState(pandaMethod);
+}
+
+uint8_t PandaRuntimeInterface::GetStackReferenceMask() const
+{
+    return static_cast<uint8_t>(mem::Reference::ObjectType::STACK);
+}
+
+bool PandaRuntimeInterface::CanNativeMethodUseObjects(MethodPtr method) const
+{
+    auto *pandaMethod = MethodCast(method);
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*pandaMethod);
+    return Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->CanNativeMethodUseObjects(pandaMethod);
 }
 
 uint32_t PandaRuntimeInterface::FindCatchBlock(MethodPtr m, ClassPtr cls, uint32_t pc) const

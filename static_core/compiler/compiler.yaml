@@ -401,6 +401,12 @@ options:
   description: Apply Memory Coalescing only to aligned accesses
   tags: [perf]
 
+- name: compiler-optimize-native-calls
+  type: bool
+  default: true
+  description: Optimize Native API methods (insert call without asm bridge)
+  tags: [perf]
+
 - name: compiler-print-stats
   type: bool
   default: false

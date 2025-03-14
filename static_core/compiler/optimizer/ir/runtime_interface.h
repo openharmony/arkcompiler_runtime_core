@@ -330,7 +330,22 @@ public:
         return true;
     }
 
-    virtual bool IsMethodNative([[maybe_unused]] MethodPtr method) const
+    virtual bool IsMethodNativeApi([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
+    virtual bool IsNecessarySwitchThreadState([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
+    virtual uint8_t GetStackReferenceMask() const
+    {
+        return 0U;
+    }
+
+    virtual bool CanNativeMethodUseObjects([[maybe_unused]] MethodPtr method) const
     {
         return false;
     }
@@ -343,6 +358,21 @@ public:
     virtual void *GetMethodNativePointer([[maybe_unused]] MethodPtr method) const
     {
         return nullptr;
+    }
+
+    virtual uint64_t GetDeprecatedNativeApiMask() const
+    {
+        return 0U;
+    }
+
+    virtual uint64_t GetNativeApiStaticFunctionMask() const
+    {
+        return 0U;
+    }
+
+    virtual uint32_t GetRuntimeClassOffset([[maybe_unused]] Arch arch) const
+    {
+        return 0U;
     }
 
     virtual bool IsMethodFinal([[maybe_unused]] MethodPtr method) const
@@ -657,6 +687,10 @@ public:
         return ark::cross_values::GetManagedThreadPreWrbEntrypointOffset(arch);
     }
     virtual size_t GetTlsPromiseClassPointerOffset([[maybe_unused]] Arch arch) const
+    {
+        return 0;
+    }
+    virtual size_t GetTlsNativeApiOffset([[maybe_unused]] Arch arch) const
     {
         return 0;
     }
@@ -1611,6 +1645,7 @@ enum class DeoptimizeType : uint8_t {
     OVERFLOW,
     HOLE,
     NOT_NUMBER,
+    NOT_SUPPORTED_NATIVE,
     CAUSE_METHOD_DESTRUCTION,
     NOT_SMALL_INT = CAUSE_METHOD_DESTRUCTION,
     BOUNDS_CHECK_WITH_DEOPT,
@@ -1624,23 +1659,15 @@ enum class DeoptimizeType : uint8_t {
 
 inline constexpr auto DEOPT_COUNT = static_cast<uint8_t>(DeoptimizeType::COUNT);
 
-inline constexpr std::array<const char *, DEOPT_COUNT> DEOPT_TYPE_NAMES = {"INVALID_TYPE",
-                                                                           "INLINE_CHA",
-                                                                           "NULL_CHECK",
-                                                                           "BOUNDS_CHECK",
-                                                                           "ZERO_CHECK",
-                                                                           "NEGATIVE_CHECK",
-                                                                           "CHECK_CAST",
-                                                                           "ANY_TYPE_CHECK",
-                                                                           "OVERFLOW",
-                                                                           "HOLE ",
-                                                                           "NOT_NUMBER",
-                                                                           "NOT_SMALL_INT",
-                                                                           "BOUNDS_CHECK_WITH_DEOPT",
-                                                                           "DOUBLE_WITH_INT",
-                                                                           "INLINE_IC",
-                                                                           "INLINE_DYN",
-                                                                           "NOT_PROFILED",
+inline constexpr std::array<const char *, DEOPT_COUNT> DEOPT_TYPE_NAMES = {"INVALID_TYPE",    "INLINE_CHA",
+                                                                           "NULL_CHECK",      "BOUNDS_CHECK",
+                                                                           "ZERO_CHECK",      "NEGATIVE_CHECK",
+                                                                           "CHECK_CAST",      "ANY_TYPE_CHECK",
+                                                                           "OVERFLOW",        "HOLE ",
+                                                                           "NOT_NUMBER",      "NOT_SUPPORTED_NATIVE",
+                                                                           "NOT_SMALL_INT",   "BOUNDS_CHECK_WITH_DEOPT",
+                                                                           "DOUBLE_WITH_INT", "INLINE_IC",
+                                                                           "INLINE_DYN",      "NOT_PROFILED",
                                                                            "IFIMM_TRY"};
 
 inline const char *DeoptimizeTypeToString(DeoptimizeType deoptType)

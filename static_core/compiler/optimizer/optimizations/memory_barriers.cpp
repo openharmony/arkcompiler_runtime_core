@@ -144,17 +144,6 @@ void OptimizeMemoryBarriers::VisitCallDynamic(GraphVisitor *v, Inst *inst)
 
 void OptimizeMemoryBarriers::VisitCallNative(GraphVisitor *v, Inst *inst)
 {
-    if (!inst->CastToCallNative()->IsRuntimeCall()) {
-        return;
-    }
-    static_cast<OptimizeMemoryBarriers *>(v)->CheckAllInputs(inst);
-}
-
-void OptimizeMemoryBarriers::VisitCallResolvedNative(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->CastToCallResolvedNative()->IsRuntimeCall()) {
-        return;
-    }
     static_cast<OptimizeMemoryBarriers *>(v)->CheckAllInputs(inst);
 }
 

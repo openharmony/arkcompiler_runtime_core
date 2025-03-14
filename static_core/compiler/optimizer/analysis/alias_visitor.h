@@ -316,7 +316,6 @@ public:
     static void VisitCallLaunchVirtual(GraphVisitor *v, Inst *inst);
     static void VisitCallResolvedLaunchVirtual(GraphVisitor *v, Inst *inst);
     static void VisitCallNative(GraphVisitor *v, Inst *inst);
-    static void VisitCallResolvedNative(GraphVisitor *v, Inst *inst);
     static void VisitCall(GraphVisitor *v, Inst *inst);
     static void VisitGetManagedClassObject(GraphVisitor *v, Inst *inst);
     static void VisitResolveObjectFieldStatic(GraphVisitor *v, Inst *inst);

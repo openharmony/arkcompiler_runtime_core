@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -286,6 +286,7 @@ public:
     virtual void EncodeMoveBitsRaw(Reg dst, Reg src);
     virtual void EncodeExtractBits(Reg dst, Reg src, Imm imm1, Imm imm2);
     virtual void EncodeCrc32Update(Reg dst, Reg crcReg, Reg valReg);
+    virtual void EncodeGetCurrentPc(Reg dst);
     /**
      * Encode dummy load from the address [sp + offset].
      * @param offset offset from the stack pointer register

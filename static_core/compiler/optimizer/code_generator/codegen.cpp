@@ -1768,25 +1768,8 @@ void Codegen::EmitCallNative(CallInst *callNative)
     ASSERT(GetGraph()->SupportManagedCode());
     ASSERT(!HasLiveCallerSavedRegs(callNative));
 
-    // NOTE: check native pointer for nullptr at runtime, throw exception
-    if (callNative->GetOpcode() == Opcode::CallResolvedNative) {
-        auto methodReg = ConvertRegister(callNative->GetSrcReg(0), DataType::POINTER);
-        GetEncoder()->MakeCall(MemRef(methodReg, GetRuntime()->GetNativePointerOffset(GetArch())));
-    } else {
-        auto *method = callNative->GetCallMethod();
-        auto *nativePointer = GetRuntime()->GetMethodNativePointer(method);
-        if (GetGraph()->IsJitOrOsrMode() && nativePointer != nullptr) {
-            GetEncoder()->MakeCall(nativePointer);
-        } else {
-            ScopedTmpReg tmpReg(GetEncoder());
-            GetEncoder()->EncodeMov(tmpReg, Imm(bit_cast<uintptr_t>(method)));
-            GetEncoder()->MakeCall(MemRef(tmpReg, GetRuntime()->GetNativePointerOffset(GetArch())));
-        }
-    }
-
-    if (callNative->GetSaveState() != nullptr) {
-        CreateStackMap(callNative);
-    }
+    auto nativePointerReg = ConvertRegister(callNative->GetSrcReg(0), DataType::POINTER);
+    GetEncoder()->MakeCall(nativePointerReg);
 
     if (callNative->GetType() != DataType::VOID) {
         auto arch = GetArch();
@@ -1794,8 +1777,8 @@ void Codegen::EmitCallNative(CallInst *callNative)
         auto dstReg = ConvertRegister(callNative->GetDstReg(), callNative->GetType());
         auto returnReg = GetTarget().GetReturnReg(dstReg.GetType());
         // We must:
-        //  sign extended INT8 and INT16 to INT32
-        //  zero extended UINT8 and UINT16 to UINT32
+        //  sign extend INT8 and INT16 to INT32
+        //  zero extend UINT8 and UINT16 to UINT32
         if (DataType::ShiftByType(returnType, arch) < DataType::ShiftByType(DataType::INT32, arch)) {
             bool isSigned = DataType::IsTypeSigned(returnType);
             GetEncoder()->EncodeCast(Reg(dstReg.GetId(), INT32_TYPE), isSigned, returnReg, isSigned);
@@ -1803,8 +1786,6 @@ void Codegen::EmitCallNative(CallInst *callNative)
             GetEncoder()->EncodeMov(dstReg, returnReg);
         }
     }
-
-    // NOTE: check native exception here
 }
 
 void Codegen::EmitCallDynamic(CallInst *call)

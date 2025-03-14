@@ -170,8 +170,7 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
 {
     constexpr auto SLOT_KIND = UnresolvedTypesInterface::SlotKind::METHOD;
     if (method_ == nullptr || (GetRuntime()->IsMethodStatic(GetMethod(), methodId_) && classId == 0) ||
-        Builder()->ForceUnresolved() || (OPCODE == Opcode::CallLaunchStatic && GetGraph()->IsAotMode()) ||
-        builder_->NeedResolveNativeMethod(GetGraph(), method_)) {
+        Builder()->ForceUnresolved() || (OPCODE == Opcode::CallLaunchStatic && GetGraph()->IsAotMode())) {
         resolver_ = GetGraph()->CreateInstResolveStatic(DataType::POINTER, pc_, methodId_, nullptr);
         if constexpr (OPCODE == Opcode::CallStatic) {
             call_ = GetGraph()->CreateInstCallResolvedStatic(Builder()->GetMethodReturnType(methodId_), pc_, methodId_);
@@ -1349,7 +1348,7 @@ CallInst *InstBuilder::BuildCallStaticForInitObject(const BytecodeInstruction *b
     size_t inputsCount = ONE_FOR_OBJECT + argsCount + ONE_FOR_SSTATE;
     auto method = GetRuntime()->GetMethodById(graph_->GetMethod(), methodId);
     CallInst *call = nullptr;
-    if (method == nullptr || ForceUnresolved() || NeedResolveNativeMethod(graph_, method)) {
+    if (method == nullptr || ForceUnresolved()) {
         ResolveStaticInst *resolveStatic = graph_->CreateInstResolveStatic(DataType::POINTER, pc, methodId, nullptr);
         *resolver = resolveStatic;
         call = graph_->CreateInstCallResolvedStatic(GetMethodReturnType(methodId), pc, methodId);

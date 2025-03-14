@@ -697,7 +697,7 @@ instructions:
 
   - opcode: DeoptimizeCompareImm
     base: DeoptimizeCompareImmInst
-    signature: [any-int-bool-ref, save_state]
+    signature: [any-int-bool-ref-ptr, save_state]
     flags: [can_throw, no_dce, no_cse, no_hoist, require_state, acc_read, barrier, can_deoptimize, low_level]
     modes: [jit_aot]
     description: Compare and jump to interpreter if the result is true.
@@ -857,17 +857,20 @@ instructions:
 
   - opcode: CallNative
     base: CallInst
-    signature: [d-real-void, real-dyn, save_state]
-    flags: [can_throw, heap_inv, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, call]
-    modes: [jit_aot]
-    description: Call Native API method directly, without bridge.
-
-  - opcode: CallResolvedNative
-    base: CallInst
     signature: [d-real-void, ptr, real-dyn, save_state]
-    flags: [can_throw, heap_inv, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, call]
+    flags: [heap_inv, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, call]
     modes: [jit_aot]
-    description: Calls native method resolved by ResolveStatic/ResolveVirtual. First input is a method address.
+    description: Call Native API method directly, without bridge. First input is a resolved and checked native pointer.
+
+  - opcode: WrapObjectNative
+    base: WrapObjectNativeInst
+    signature: [d-ptr, ref]
+    flags: [no_cse]
+    modes: [jit_aot]
+    description: >-
+      Calculate stack address of managed reference, spilled on stack, for passing as a parameter to Native API method.
+      Reference parameter is a pseudo-input, there is no need to allocate a register for it
+      (since we use a location of input, recorded in SaveState, not a value of the input).
 
   - opcode: Builtin
     base: IntrinsicInst

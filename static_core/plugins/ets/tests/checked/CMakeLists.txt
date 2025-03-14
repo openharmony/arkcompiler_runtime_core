@@ -137,7 +137,7 @@ function(panda_add_checked_test_ets)
 
         panda_add_library("${NATIVE_LIB}" SHARED "${NATIVE_FILE}")
         set_target_properties("${NATIVE_LIB}" PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${TEST_DIR}")
-        panda_target_include_directories("${NATIVE_LIB}" PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/napi)
+        panda_target_include_directories("${NATIVE_LIB}" PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani)
         add_dependencies(${TEST_NAME} "${NATIVE_LIB}")
     endif()
 
@@ -298,3 +298,4 @@ panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/load_array.sts)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_negation.sts)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/llvm_infer_flags.sts)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/direct_native.sts NATIVE SUPPORT_RELEASE)
+panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/quick_native.sts NATIVE SUPPORT_RELEASE)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,7 +80,7 @@ void RegAllocResolver::AddCatchPhiMoves(Inst *inst)
 
 void RegAllocResolver::ResolveInputs(Inst *inst)
 {
-    if (inst->IsPhi() || inst->IsCatchPhi() || IsPseudoUserOfMultiOutput(inst)) {
+    if (inst->IsPhi() || inst->IsCatchPhi() || IsPseudoUserOfMultiOutput(inst) || InstHasPseudoInputs(inst)) {
         return;
     }
     // Life-position before instruction to analyze intervals, that were splitted directly before it

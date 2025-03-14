@@ -58,12 +58,15 @@ public:
     }
 
     static void VisitCallStatic(GraphVisitor *v, Inst *inst);
-    static void VisitCallResolvedStatic(GraphVisitor *v, Inst *inst);
 
 #include "optimizer/ir/visitor.inc"
 
 private:
-    static void OptimizeCallStatic(GraphVisitor *v, CallInst *callInst);
+    static void OptimizePrimitiveNativeCall(GraphVisitor *v, CallInst *callInst);
+    static void OptimizeNativeCallWithObjects(GraphVisitor *v, CallInst *callInst);
+
+    IntrinsicInst *CreateNativeApiIntrinsic(DataType::Type type, uint32_t pc, RuntimeInterface::IntrinsicId id,
+                                            const MethodDataMixin *methodData);
 
     bool isApplied_ {false};
 };

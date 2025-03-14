@@ -70,9 +70,15 @@ public:
 
     bool InitializeClass(Class *klass) override;
 
+    bool IsMethodNativeApi(const Method *method) const override;
+
     const void *GetNativeEntryPointFor(Method *method) const override;
 
     bool CanThrowException([[maybe_unused]] const Method *method) const override;
+
+    bool IsNecessarySwitchThreadState(const Method *method) const override;
+
+    bool CanNativeMethodUseObjects(const Method *method) const override;
 
     ClassLinkerErrorHandler *GetErrorHandler() override
     {

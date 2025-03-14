@@ -50,6 +50,7 @@ bool HasTryCatchBlocks(Graph *graph)
     return false;
 }
 
+// CC-OFFNXT(huge_method[C++]) solid logic
 bool SimplifyStringBuilder::RunImpl()
 {
     isApplied_ = false;
@@ -59,6 +60,22 @@ bool SimplifyStringBuilder::RunImpl()
     }
 
     ASSERT(GetGraph()->GetRootLoop() != nullptr);
+
+    // NOTE: Disable this pass if there is a NativeApi call in the graph. That is because this pass can delete
+    // StringBuilder instances, which will lead to incorrect state in case Native call deoptimizes (i.e. unsupported API
+    // version). Remove this workaround after proper fix!
+    for (auto *bb : GetGraph()->GetBlocksRPO()) {
+        for (auto *inst : bb->Insts()) {
+            if (inst->GetOpcode() != Opcode::CallStatic) {
+                continue;
+            }
+
+            CallInst *callInst = inst->CastToCallStatic();
+            if (callInst->GetIsNative() && !GetGraph()->GetRuntime()->IsMethodIntrinsic(callInst->GetCallMethod())) {
+                return false;
+            }
+        }
+    }
 
     // Loops with try-catch block and OSR mode are not supported in current implementation
     if (!HasTryCatchBlocks(GetGraph()) && !GetGraph()->IsOsrMode()) {

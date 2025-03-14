@@ -209,16 +209,11 @@ private:
         return vregsAndArgsCount_ + 1 + GetGraph()->GetEnvCount();
     }
 
-    bool NeedResolveNativeMethod(Graph *graph, RuntimeInterface::MethodPtr method) const
-    {
-        ASSERT(method != nullptr);
-        return graph->IsAotMode() && graph->CanOptimizeNativeMethods() && GetRuntime()->IsMethodNative(method);
-    }
-
     void SetCallNativeFlags(CallInst *callInst, RuntimeInterface::MethodPtr method) const
     {
-        callInst->SetIsNative(method != nullptr && GetRuntime()->IsMethodNative(method));
-        callInst->SetCanNativeException(method == nullptr || GetRuntime()->HasNativeException(method));
+        bool isNativeApi = method != nullptr && GetRuntime()->IsMethodNativeApi(method);
+        callInst->SetIsNative(isNativeApi);
+        callInst->SetCanNativeException(isNativeApi && GetRuntime()->HasNativeException(method));
     }
 
     ConstantInst *FindOrCreate32BitConstant(uint32_t value);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -282,7 +282,7 @@ void Cleanup::MarkInlinedCaller(Marker liveMrk, Inst *saveState)
 
 bool Cleanup::IsRemovableCall(Inst *inst)
 {
-    if (inst->IsCall() && static_cast<CallInst *>(inst)->IsInlined()) {
+    if (inst->IsCall() && static_cast<CallInst *>(inst)->IsInlined() && !static_cast<CallInst *>(inst)->GetIsNative()) {
         for (auto &ssUser : inst->GetSaveState()->GetUsers()) {
             if (ssUser.GetInst()->GetOpcode() == Opcode::ReturnInlined &&
                 ssUser.GetInst()->GetFlag(inst_flags::MEM_BARRIER)) {

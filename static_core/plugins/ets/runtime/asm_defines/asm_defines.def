@@ -15,6 +15,9 @@
 // NOLINTBEGIN(readability-identifier-naming)
 DEFINE_VALUE(ETS_COROUTINE_PROMISE_CLASS_OFFSET, ark::ets::EtsCoroutine::GetTlsPromiseClassPointerOffset())
 DEFINE_VALUE(ETS_COROUTINE_NULL_VALUE_OFFSET, ark::ets::EtsCoroutine::GetTlsNullValueOffset())
+DEFINE_VALUE(ETS_COROUTINE_ANI_ENV_OFFSET, ark::ets::EtsCoroutine::GetTlsNapiEnvOffset())
 
 DEFINE_VALUE(ETS_VM_DOUBLE_TO_STRING_CACHE_OFFSET, ark::ets::PandaEtsVM::GetDoubleToStringCacheOffset())
+
+DEFINE_VALUE(ETS_CLASS_RUNTIME_CLASS_OFFSET, ark::ets::EtsClass::GetRuntimeClassOffset())
 // NOLINTEND(readability-identifier-naming)

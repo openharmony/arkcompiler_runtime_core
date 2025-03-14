@@ -353,4 +353,77 @@ extern "C" ObjectHeader *DoubleToStringDecimalNoCacheEntrypoint(uint64_t number)
     return DoubleToStringCache::GetNoCache(bit_cast<double>(number))->GetCoreType();
 }
 
+extern "C" void BeginGeneralNativeMethod()
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+
+    constexpr uint32_t MAX_LOCAL_REF = 4096;
+    if (UNLIKELY(!storage->PushLocalEtsFrame(MAX_LOCAL_REF))) {
+        LOG(FATAL, RUNTIME) << "eTS NAPI push local frame failed";
+    }
+
+    coroutine->NativeCodeBegin();
+}
+
+extern "C" void EndGeneralNativeMethodPrim()
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+
+    coroutine->NativeCodeEnd();
+    storage->PopLocalEtsFrame(nullptr);
+}
+
+extern "C" ObjectHeader *EndGeneralNativeMethodObj(ark::mem::Reference *ref)
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+
+    coroutine->NativeCodeEnd();
+
+    ObjectHeader *ret = nullptr;
+    auto *etsRef = EtsReference::CastFromReference(ref);
+    if (etsRef != nullptr) {
+        ret = storage->GetEtsObject(etsRef)->GetCoreType();
+    }
+
+    storage->PopLocalEtsFrame(nullptr);
+    return ret;
+}
+
+extern "C" void BeginQuickNativeMethod()
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+
+    constexpr uint32_t MAX_LOCAL_REF = 4096;
+    if (UNLIKELY(!storage->PushLocalEtsFrame(MAX_LOCAL_REF))) {
+        LOG(FATAL, RUNTIME) << "eTS NAPI push local frame failed";
+    }
+}
+
+extern "C" void EndQuickNativeMethodPrim()
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+
+    storage->PopLocalEtsFrame(nullptr);
+}
+
+extern "C" ObjectHeader *EndQuickNativeMethodObj(ark::mem::Reference *ref)
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+
+    ObjectHeader *ret = nullptr;
+    auto *etsRef = EtsReference::CastFromReference(ref);
+    if (etsRef != nullptr) {
+        ret = storage->GetEtsObject(etsRef)->GetCoreType();
+    }
+
+    storage->PopLocalEtsFrame(nullptr);
+    return ret;
+}
+
 }  // namespace ark::ets

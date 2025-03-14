@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3006,6 +3006,17 @@ void Aarch64Encoder::EncodeStackOverflowCheck(ssize_t offset)
     ScopedTmpReg tmp(this);
     EncodeAdd(tmp, GetTarget().GetStackReg(), Imm(offset));
     EncodeLdr(tmp, false, MemRef(tmp));
+}
+
+void Aarch64Encoder::EncodeGetCurrentPc(Reg dst)
+{
+    ASSERT(dst.GetType() == INT64_TYPE);
+
+    auto currentPc = CreateLabel();
+    BindLabel(currentPc);
+
+    auto *labelHolder = static_cast<Aarch64LabelHolder *>(GetLabels());
+    GetMasm()->Adr(VixlReg(dst), labelHolder->GetLabel(currentPc));
 }
 
 bool Aarch64Encoder::CanEncodeImmAddSubCmp(int64_t imm, [[maybe_unused]] uint32_t size,

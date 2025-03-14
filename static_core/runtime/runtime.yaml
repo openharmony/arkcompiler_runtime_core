@@ -712,3 +712,100 @@ intrinsics:
     args: [panda.Object]
   impl: ark::intrinsics::ObjectNotifyAll
   clear_flags: [require_state, runtime_call, can_throw, heap_inv ]
+
+- name: CompilerGetNativeMethod
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: ptr
+    args: []
+  clear_flags: [can_throw, call, acc_write, acc_read]
+  codegen_arch: [arm64, amd64]
+  codegen_func: GetNativeMethod
+  skip_codegen_decl: true
+
+- name: CompilerGetNativeMethodManagedClass
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: ptr
+    args: [ptr] # method
+  clear_flags: [can_throw, heap_inv, no_dce, barrier, require_state, runtime_call, call, acc_write, acc_read]
+  codegen_arch: [arm64, amd64]
+  codegen_func: GetNativeMethodManagedClass
+  skip_codegen_decl: true
+
+- name: CompilerGetMethodNativePointer
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: ptr
+    args: [ptr] # method
+  clear_flags: [can_throw, heap_inv, no_dce, barrier, require_state, runtime_call, call, acc_write, acc_read]
+  codegen_arch: [arm64, amd64]
+  codegen_func: GetMethodNativePointer
+  skip_codegen_decl: true
+
+- name: CompilerGetNativeApiEnv
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: ptr
+    args: []
+  clear_flags: [can_throw, heap_inv, no_dce, barrier, require_state, runtime_call, call, acc_write, acc_read]
+  codegen_arch: [arm64, amd64]
+  codegen_func: GetNativeApiEnv
+  skip_codegen_decl: true
+
+- name: CompilerBeginNativeMethod
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: void
+    args: []
+  clear_flags: [can_throw, acc_write, acc_read]
+  codegen_arch: [arm64, amd64]
+  codegen_func: BeginNativeMethod
+  skip_codegen_decl: true
+
+- name: CompilerEndNativeMethodPrim
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: void
+    args: []
+  clear_flags: [can_throw, acc_write, acc_read]
+  codegen_arch: [arm64, amd64]
+  codegen_func: EndNativeMethodPrim
+  skip_codegen_decl: true
+
+- name: CompilerEndNativeMethodObj
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: panda.Object
+    args: [ptr]
+  clear_flags: [can_throw, acc_write, acc_read]
+  codegen_arch: [arm64, amd64]
+  codegen_func: EndNativeMethodObj
+  need_param_locations: true
+  skip_codegen_decl: true
+
+- name: CompilerCheckNativeException
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: void
+    args: []
+  clear_flags: [runtime_call, acc_write, acc_read]
+  codegen_arch: [arm64, amd64]
+  codegen_func: CheckNativeException
+  skip_codegen_decl: true

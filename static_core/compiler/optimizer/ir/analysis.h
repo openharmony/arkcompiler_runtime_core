@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,6 +52,11 @@ RuntimeInterface::ClassPtr GetClass(Inst *inst);
 inline bool IsInstInDifferentBlocks(Inst *i1, Inst *i2)
 {
     return i1->GetBasicBlock() != i2->GetBasicBlock();
+}
+
+inline bool InstHasPseudoInputs(Inst *inst)
+{
+    return inst->GetOpcode() == Opcode::WrapObjectNative;
 }
 
 // This function bypass all blocks and delete 'SaveStateOSR' if the block is no longer the header of the loop
