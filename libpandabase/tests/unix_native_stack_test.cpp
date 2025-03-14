@@ -28,18 +28,19 @@ HWTEST(NativeStackTest, ReadAndWriteFileTest, testing::ext::TestSize.Level0)
 {
     remove("./test_native_stack.txt");
 
-    int fd = open("./test_native_stack.txt", O_WRONLY|O_APPEND|O_CREAT, 0777);
-    ASSERT_NE(fd, -1);
+    FILE* fp = fopen("./test_native_stack.txt", "a");
+    ASSERT_NE(fp, nullptr);
 
     char buff[1024] = "abcdefg";
-    ASSERT_TRUE(os::native_stack::WriterOsFile(reinterpret_cast<void *>(buff), static_cast<size_t>(strlen(buff)), fd));
+    ASSERT_TRUE(os::native_stack::WriterOsFile(reinterpret_cast<void *>(buff), static_cast<size_t>(strlen(buff)),
+                                               fileno(fp)));
 
     std::string result = "";
     ASSERT_TRUE(os::native_stack::ReadOsFile("./test_native_stack.txt", &result));
 
     ASSERT_EQ(result, "abcdefg");
 
-    close(fd);
+    fclose(fp);
 }
 
 }  // namespace panda::test
