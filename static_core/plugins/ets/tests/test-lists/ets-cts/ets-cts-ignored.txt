@@ -2109,11 +2109,6 @@
 17.experimental_features/04.indexable_types/ind_class_13.ets
 17.experimental_features/04.indexable_types/ind_class_16.ets
 
-#22662
-17.experimental_features/04.indexable_types/cte_10.ets
-17.experimental_features/04.indexable_types/cte_12.ets
-17.experimental_features/05.iterable_types/it_7.ets
-
 #18763 es2panda aborts on for-of over a union type array
 17.experimental_features/05.iterable_types/it_11.ets
 17.experimental_features/05.iterable_types/it_12.ets
