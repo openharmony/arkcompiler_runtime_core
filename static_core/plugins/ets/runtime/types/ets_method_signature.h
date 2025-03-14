@@ -18,9 +18,8 @@
 
 #include "libpandabase/utils/logger.h"
 #include "runtime/include/method.h"
-#include "plugins/ets/runtime/ani/ani_mangle.h"
-#include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_value.h"
+#include "plugins/ets/runtime/ani/ani_mangle.h"
 
 namespace ark::ets {
 

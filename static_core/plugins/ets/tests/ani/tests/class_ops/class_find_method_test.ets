@@ -505,3 +505,35 @@ class SubCalculator extends BasicCalculator {
     private width: int;
     private height: int;
 };
+
+class AllFunctions {
+    static foo (): int {
+        return 42;
+    }
+
+    foo(): int {
+        return 43
+    }
+}
+
+class MixedFunctions {
+    static foo (): int {
+        return 42;
+    }
+
+    bar(): int {
+        return 43
+    }
+}
+
+class NotOverloaded {
+    public notOverloaded(): int
+    {
+        return 1
+    }
+
+    public static notOverloaded(): int
+    {
+        return 1
+    }
+};

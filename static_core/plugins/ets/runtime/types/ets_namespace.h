@@ -42,10 +42,7 @@ public:
 
     EtsMethod *GetFunction(const char *name, const char *signature)
     {
-        if (signature == nullptr) {
-            return GetMethod(name);
-        }
-        return GetMethod(name, signature);
+        return GetStaticMethod(name, signature);
     }
 };
 

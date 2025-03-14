@@ -596,6 +596,30 @@ public:
 
     Field *GetDeclaredFieldByName(const uint8_t *mutf8Name) const;
 
+    Method *GetClassMethod(const uint8_t *mutf8Name) const;
+
+    Method *GetStaticClassMethod(const uint8_t *mutf8Name) const;
+
+    Method *GetVirtualClassMethod(const uint8_t *mutf8Name) const;
+
+    Method *GetClassMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
+
+    Method *GetStaticClassMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
+
+    Method *GetVirtualClassMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
+
+    Method *GetInterfaceMethod(const uint8_t *mutf8Name) const;
+
+    Method *GetStaticInterfaceMethod(const uint8_t *mutf8Name) const;
+
+    Method *GetVirtualInterfaceMethod(const uint8_t *mutf8Name) const;
+
+    Method *GetInterfaceMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
+
+    Method *GetStaticInterfaceMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
+
+    Method *GetVirtualInterfaceMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
+
     Method *GetVirtualInterfaceMethod(panda_file::File::EntityId id) const;
 
     Method *GetStaticInterfaceMethod(panda_file::File::EntityId id) const;
@@ -606,15 +630,11 @@ public:
 
     Method *GetDirectMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
 
-    Method *GetClassMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
-
     Method *GetClassMethod(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
 
     Method *GetStaticClassMethodByName(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
 
     Method *GetVirtualClassMethodByName(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
-
-    Method *GetInterfaceMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
 
     Method *GetInterfaceMethod(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
 
@@ -623,10 +643,6 @@ public:
     Method *GetVirtualInterfaceMethodByName(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
 
     Method *GetDirectMethod(const uint8_t *mutf8Name) const;
-
-    Method *GetClassMethod(const uint8_t *mutf8Name) const;
-
-    Method *GetInterfaceMethod(const uint8_t *mutf8Name) const;
 
     Method *ResolveVirtualMethod(const Method *method) const;
 

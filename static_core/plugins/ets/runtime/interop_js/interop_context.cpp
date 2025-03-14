@@ -257,7 +257,7 @@ InteropCtx::SharedEtsVmState::SharedEtsVmState(PandaEtsVM *vm)
         EtsClass::FromRuntimeClass(CacheClass(etsClassLinker, "Lstd/interop/js/PromiseInterop;"));
     ASSERT(promiseInteropClass != nullptr);
     promiseInteropConnectMethod =
-        promiseInteropClass->GetMethod("connectPromise", "Lstd/core/Promise;J:V")->GetPandaMethod();
+        promiseInteropClass->GetStaticMethod("connectPromise", "Lstd/core/Promise;J:V")->GetPandaMethod();
     ASSERT(promiseInteropConnectMethod != nullptr);
 
     // xgc-related things
@@ -357,8 +357,8 @@ InteropCtx::~InteropCtx()
 
 void InteropCtx::InitJsValueFinalizationRegistry(EtsCoroutine *coro)
 {
-    auto *method =
-        EtsClass::FromRuntimeClass(sharedEtsVmState_->jsRuntimeClass)->GetMethod("createFinalizationRegistry");
+    auto *method = EtsClass::FromRuntimeClass(sharedEtsVmState_->jsRuntimeClass)
+                       ->GetStaticMethod("createFinalizationRegistry", ":Lstd/core/FinalizationRegistry;");
     ASSERT(method != nullptr);
     Value res;
     if (coro->IsManagedCode()) {
@@ -371,9 +371,10 @@ void InteropCtx::InitJsValueFinalizationRegistry(EtsCoroutine *coro)
     auto queue = EtsObject::FromCoreType(res.GetAs<ObjectHeader *>());
     jsvalueFregistryRef_ = Refstor()->Add(queue->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     ASSERT(jsvalueFregistryRef_ != nullptr);
-    jsvalueFregistryRegister_ = queue->GetClass()
-                                    ->GetMethod("register", "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:V")
-                                    ->GetPandaMethod();
+    jsvalueFregistryRegister_ =
+        queue->GetClass()
+            ->GetInstanceMethod("register", "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:V")
+            ->GetPandaMethod();
     ASSERT(jsvalueFregistryRegister_ != nullptr);
 }
 
