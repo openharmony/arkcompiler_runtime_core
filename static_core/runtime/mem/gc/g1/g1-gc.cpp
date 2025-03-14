@@ -50,20 +50,12 @@ void Unreachable([[maybe_unused]] ObjectHeader *obj)
 
 /* static */
 template <class LanguageConfig>
+template <bool ATOMICALLY>
 void G1GC<LanguageConfig>::CalcLiveBytesMarkPreprocess(const ObjectHeader *object, BaseClass *baseKlass)
 {
     Region *region = ObjectToRegion(object);
     size_t objectSize = GetAlignedObjectSize(object->ObjectSize<LanguageConfig::LANG_TYPE>(baseKlass));
-    region->AddLiveBytes<true>(objectSize);
-}
-
-/* static */
-template <class LanguageConfig>
-void G1GC<LanguageConfig>::CalcLiveBytesNotAtomicallyMarkPreprocess(const ObjectHeader *object, BaseClass *baseKlass)
-{
-    Region *region = ObjectToRegion(object);
-    size_t objectSize = GetAlignedObjectSize(object->ObjectSize<LanguageConfig::LANG_TYPE>(baseKlass));
-    region->AddLiveBytes<false>(objectSize);
+    region->AddLiveBytes<ATOMICALLY>(objectSize);
 }
 
 template <class LanguageConfig>
@@ -412,12 +404,13 @@ void G1GC<LanguageConfig>::ClearEmptyTenuredMovableRegions(PandaVector<Region *>
     auto deathVisitor = [](ObjectHeader *objectHeader) {
         LOG_DEBUG_OBJECT_EVENTS << "DELETE tenured object " << objectHeader;
     };
-    for (auto i : *emptyTenuredRegions) {
-        deleteCount += i->GetAllocatedObjects();
-        deleteSize += i->GetAllocatedBytes();
-        ASSERT(i->GetLiveBitmap()->FindFirstMarkedChunks() == nullptr);
+    for (auto *region : *emptyTenuredRegions) {
+        deleteCount += region->GetAllocatedObjects();
+        deleteSize += region->GetAllocatedBytes();
+        ASSERT_PRINT(region->GetLiveBitmap()->FindFirstMarkedChunks() == nullptr,
+                     *region << " contains marked object: " << region->GetLiveBitmap()->FindFirstMarkedChunks());
         if (g1TrackFreedObjects_) {
-            i->IterateOverObjects(deathVisitor);
+            region->IterateOverObjects(deathVisitor);
         }
     }
     {
@@ -608,7 +601,7 @@ template <class LanguageConfig>
 template <typename Marker>
 void G1GC<LanguageConfig>::ExecuteRemarkTask(GCMarkWorkersTask::StackType *objectsStack, Marker &marker)
 {
-    this->MarkStack(&marker, objectsStack, CalcLiveBytesMarkPreprocess);
+    this->MarkStack(&marker, objectsStack, CalcLiveBytesMarkPreprocess<true>);
     ASSERT(objectsStack->Empty());
     this->GetInternalAllocator()->Delete(objectsStack);
 }
@@ -649,7 +642,7 @@ void G1GC<LanguageConfig>::ExecuteFullMarkingTask(GCMarkWorkersTask::StackType *
         // process all refs
         return true;
     };
-    this->MarkStack(&marker_, objectsStack, CalcLiveBytesMarkPreprocess, refEnablePred);
+    this->MarkStack(&marker_, objectsStack, CalcLiveBytesMarkPreprocess<true>, refEnablePred);
     ASSERT(objectsStack->Empty());
     this->GetInternalAllocator()->Delete(objectsStack);
 }
@@ -1012,9 +1005,9 @@ void G1GC<LanguageConfig>::RunConcurrentGC(ark::GCTask &task, OnPauseMarker &pma
     }
 
     if (UNLIKELY(refProcess)) {
-        ConcurrentMark<true>(&concurrentMarkingStack_, cmarker);
+        ConcurrentMark<true>(task, &concurrentMarkingStack_, cmarker);
     } else {
-        ConcurrentMark<false>(&concurrentMarkingStack_, cmarker);
+        ConcurrentMark<false>(task, &concurrentMarkingStack_, cmarker);
     }
     PauseTimeGoalDelay();
 
@@ -1055,6 +1048,11 @@ void G1GC<LanguageConfig>::RunConcurrentGC(ark::GCTask &task, OnPauseMarker &pma
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::ConcurrentSweep(ark::GCTask &task)
 {
+    // NOTE(ipetrov, 20146): Cross reference can be allocated during concurrent sweep, so XGC should handle this
+    // situation. There is hot fix: XGC does not concurrent sweep
+    if (task.reason == GCTaskCause::CROSSREF_CAUSE) {
+        return;
+    }
     ScopedTiming t("Concurrent Sweep", *this->GetTiming());
     ConcurrentScope concurrentScope(this);
     auto emptyTenuredRegions = GetEmptyTenuredRegularRegions(topGarbageRegions_);
@@ -1156,7 +1154,7 @@ void G1GC<LanguageConfig>::MarkObjectRecursively(ObjectHeader *object)
     if (concXMarker_.MarkIfNotMarked(object)) {
         GCMarkingStackType stack(this);
         stack.PushToStack(RootType::ROOT_VM, object);
-        this->MarkStack(&concXMarker_, &stack, GC::EmptyMarkPreprocess);
+        this->MarkStack(&concXMarker_, &stack, CalcLiveBytesMarkPreprocess<true>);
     } else {
         LOG_DEBUG_GC << "Skip object: " << object << " since it is already marked";
     }
@@ -1216,7 +1214,7 @@ void G1GC<LanguageConfig>::MarkStackMixed(GCMarkingStackType *stack)
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::MarkStackFull(GCMarkingStackType *stack)
 {
-    this->MarkStack(&marker_, stack, CalcLiveBytesMarkPreprocess, GC::EmptyReferenceProcessPredicate);
+    this->MarkStack(&marker_, stack, CalcLiveBytesMarkPreprocess<true>, GC::EmptyReferenceProcessPredicate);
 }
 
 template <class LanguageConfig>
@@ -1799,7 +1797,7 @@ NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::OnPauseMark(GCTask &task, G
         // non-young mem-range checker
         [objectAllocator](MemRange &memRange) { return !objectAllocator->IsIntersectedWithYoung(memRange); },
         // mark predicate
-        CalcLiveBytesMarkPreprocess);
+        CalcLiveBytesMarkPreprocess<true>);
     if (useGcWorkers) {
         this->GetWorkersTaskPool()->WaitUntilTasksEnd();
     }
@@ -1920,11 +1918,17 @@ void G1GC<LanguageConfig>::UnmarkAll([[maybe_unused]] Marker &marker)
 
 template <class LanguageConfig>
 template <bool PROCESS_WEAK_REFS, typename Marker>
-void G1GC<LanguageConfig>::ConcurrentMark(GCMarkingStackType *objectsStack, Marker &marker)
+void G1GC<LanguageConfig>::ConcurrentMark(const GCTask &task, GCMarkingStackType *objectsStack, Marker &marker)
 {
     ConcurrentScope concurrentScope(this);
     GCScope<TRACE_TIMING_PHASE> scope(__FUNCTION__, this, GCPhase::GC_PHASE_MARK);
-    this->ConcurrentMarkImpl<PROCESS_WEAK_REFS>(objectsStack, marker);
+    if (task.reason == GCTaskCause::CROSSREF_CAUSE) {
+        // Live region bytes calculation does from GC several thread, so atomic calculation is required
+        this->ConcurrentMarkImpl<PROCESS_WEAK_REFS, true>(objectsStack, marker);
+    } else {
+        // Only GC thread can modify live bytes in region, so no need atomically calculation
+        this->ConcurrentMarkImpl<PROCESS_WEAK_REFS, false>(objectsStack, marker);
+    }
 }
 
 template <class LanguageConfig>
@@ -1951,9 +1955,9 @@ void G1GC<LanguageConfig>::Remark(const GCTask &task, Marker &marker)
         // If so we should bind bitmaps of new regions.
         DrainSatb(&stack, marker);
         if constexpr (PROCESS_WEAK_REFS) {
-            this->MarkStack(&marker, &stack, CalcLiveBytesMarkPreprocess, GC::EmptyReferenceProcessPredicate);
+            this->MarkStack(&marker, &stack, CalcLiveBytesMarkPreprocess<true>, GC::EmptyReferenceProcessPredicate);
         } else {
-            this->MarkStack(&marker, &stack, CalcLiveBytesMarkPreprocess);
+            this->MarkStack(&marker, &stack, CalcLiveBytesMarkPreprocess<true>);
         }
 
         if (useGcWorkers) {
@@ -2716,7 +2720,7 @@ size_t G1GC<LanguageConfig>::CalculateDesiredEdenLengthByPauseDuration()
 }
 
 template <class LanguageConfig>
-template <bool PROCESS_WEAK_REFS, typename Marker>
+template <bool PROCESS_WEAK_REFS, bool ATOMICALLY, typename Marker>
 NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::ConcurrentMarkImpl(GCMarkingStackType *objectsStack,
                                                                         Marker &marker)
 {
@@ -2753,7 +2757,7 @@ NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::ConcurrentMarkImpl(GCMarkin
         LOG_DEBUG_GC << "Current object: " << GetDebugInfoAboutObject(object);
 
         ASSERT(!object->IsForwarded());
-        CalcLiveBytesNotAtomicallyMarkPreprocess(object, objectClass);
+        CalcLiveBytesMarkPreprocess<ATOMICALLY>(object, objectClass);
         if constexpr (PROCESS_WEAK_REFS) {
             marker.MarkInstance(objectsStack, object, objectClass, GC::EmptyReferenceProcessPredicate);
         } else {

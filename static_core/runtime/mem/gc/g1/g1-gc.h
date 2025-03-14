@@ -249,21 +249,14 @@ private:
 
     /**
      * Mark predicate with calculation of live bytes in region
-     * @see MarkStackCond
-     *
+     * @tparam ATOMICALLY atomically or non-atomically live bytes calculation
      * @param object marked object from marking-stack
-     *
-     * @return true
-     */
-    static void CalcLiveBytesMarkPreprocess(const ObjectHeader *object, BaseClass *baseKlass);
-
-    /**
-     * Mark predicate with calculation of live bytes in region, not atomically
+     * @param baseKlass class of the passed object from marking-stack
+     * @see MarkStack
      * @see ConcurrentMarkImpl
-     *
-     * @param object marked object from marking-stack
      */
-    static void CalcLiveBytesNotAtomicallyMarkPreprocess(const ObjectHeader *object, BaseClass *baseKlass);
+    template <bool ATOMICALLY = true>
+    static void CalcLiveBytesMarkPreprocess(const ObjectHeader *object, BaseClass *baseKlass);
 
     /// Caches refs from remset and marks objects in collection set (young-generation + maybe some tenured regions).
     void MixedMarkAndCacheRefs(const GCTask &task, const CollectionSet &collectibleRegions);
@@ -357,7 +350,7 @@ private:
     void OnPauseMark(GCTask &task, GCMarkingStackType *objectsStack, bool useGcWorkers);
 
     /// Iterate over roots and mark them concurrently
-    template <bool PROCESS_WEAK_REFS, typename Marker>
+    template <bool PROCESS_WEAK_REFS, bool ATOMICALLY, typename Marker>
     NO_THREAD_SAFETY_ANALYSIS void ConcurrentMarkImpl(GCMarkingStackType *objectsStack, Marker &marker);
 
     void PauseTimeGoalDelay();
@@ -366,7 +359,7 @@ private:
      * Mark the heap in concurrent mode and calculate live bytes
      */
     template <bool PROCESS_WEAK_REFS, typename Marker>
-    void ConcurrentMark(GCMarkingStackType *objectsStack, Marker &marker);
+    void ConcurrentMark(const GCTask &task, GCMarkingStackType *objectsStack, Marker &marker);
 
     /// ReMarks objects after Concurrent marking and actualize information about live bytes
     template <bool PROCESS_WEAK_REFS, typename Marker>
