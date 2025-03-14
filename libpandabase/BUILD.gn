@@ -190,7 +190,10 @@ ohos_source_set("libarkbase_static_fuzz") {
 
   deps = libarkbase_deps
 
-  external_deps = [ sdk_libc_secshared_dep ]
+  external_deps = [
+    "json:nlohmann_json_static",
+    sdk_libc_secshared_dep,
+  ]
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
@@ -204,11 +207,20 @@ ohos_static_library("libarkbase_static") {
   deps = libarkbase_deps
 
   if (is_arkui_x) {
-    deps += [ "$ark_third_party_root/bounds_checking_function:libsec_static" ]
+    deps += [
+      "$ark_third_party_root/bounds_checking_function:libsec_static",
+      "$ark_third_party_root/json:nlohmann_json_static",
+    ]
   } else if (ark_standalone_build) {
-    external_deps = [ sdk_libc_secshared_dep ]
+    external_deps = [
+      "json:nlohmann_json_static",
+      sdk_libc_secshared_dep,
+    ]
   } else {
-    public_external_deps = [ sdk_libc_secshared_dep ]
+    public_external_deps = [
+      "json:nlohmann_json_static",
+      sdk_libc_secshared_dep,
+    ]
   }
 
   if (enable_hilog) {
@@ -240,9 +252,15 @@ ohos_source_set("libarkbase_frontend_set_static") {
   deps = libarkbase_deps
 
   if (is_arkui_x) {
-    deps += [ "$ark_third_party_root/bounds_checking_function:libsec_static" ]
+    deps += [
+      "$ark_third_party_root/bounds_checking_function:libsec_static",
+      "$ark_third_party_root/json:nlohmann_json_static",
+    ]
   } else {
-    external_deps = [ sdk_libc_secshared_dep ]
+    external_deps = [
+      "json:nlohmann_json_static",
+      sdk_libc_secshared_dep,
+    ]
   }
 
   part_name = "runtime_core"

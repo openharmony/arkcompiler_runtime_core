@@ -25,20 +25,21 @@
 
 namespace panda {
 // Event list
+constexpr std::string_view EVENT_GENERATE_ABC = "generate merged abc by es2abc (async)";
 constexpr std::string_view EVENT_TOTAL = "Total";
 constexpr std::string_view EVENT_COMPILE = "Compile";
 constexpr std::string_view EVENT_RESOLVE_DEPS = "Resolve file dep relations";
 constexpr std::string_view EVENT_EMIT_ABC = "Emit abc";
-constexpr std::string_view EVENT_READ_INPUT_AND_CACHE = "Read input and cache";
-constexpr std::string_view EVENT_COMPILE_FILE = "Compile file";
-constexpr std::string_view EVENT_COMPILE_ABC_FILE = "Compile abc file";
-constexpr std::string_view EVENT_COMPILE_ABC_FILE_RECORD = "Compile abc file record";
-constexpr std::string_view EVENT_UPDATE_ABC_PKG_VERSION = "Update abc package version";
-constexpr std::string_view EVENT_UPDATE_ABC_PROGRAM_STRING = "Update abc program string";
-constexpr std::string_view EVENT_UPDATE_ABC_PROG_CACHE = "Update abc program cache";
-constexpr std::string_view EVENT_OPTIMIZE_PROGRAM = "Optimize program";
-constexpr std::string_view EVENT_PARSE = "Parse";
-constexpr std::string_view EVENT_COMPILE_TO_PROGRAM = "Compile to program";
+constexpr std::string_view EVENT_READ_INPUT_AND_CACHE = "Read input and cache (async)";
+constexpr std::string_view EVENT_COMPILE_FILE = "Compile file (async)";
+constexpr std::string_view EVENT_COMPILE_ABC_FILE = "Compile abc file (async)";
+constexpr std::string_view EVENT_COMPILE_ABC_FILE_RECORD = "Compile abc file record (async)";
+constexpr std::string_view EVENT_UPDATE_ABC_PKG_VERSION = "Update abc package version (async)";
+constexpr std::string_view EVENT_UPDATE_ABC_PROGRAM_STRING = "Update abc program string (async)";
+constexpr std::string_view EVENT_UPDATE_ABC_PROG_CACHE = "Update abc program cache (async)";
+constexpr std::string_view EVENT_OPTIMIZE_PROGRAM = "Optimize program (async)";
+constexpr std::string_view EVENT_PARSE = "Parse (async)";
+constexpr std::string_view EVENT_COMPILE_TO_PROGRAM = "Compile to program (async)";
 constexpr std::string_view EVENT_EMIT_SINGLE_PROGRAM = "Emit single program";
 constexpr std::string_view EVENT_EMIT_MERGED_PROGRAM = "Emit merged program";
 constexpr std::string_view EVENT_EMIT_CACHE_FILE = "Emit cache file";
@@ -77,6 +78,26 @@ const std::unordered_map<std::string_view, EventLevel> eventMap = {
     { EVENT_EMIT_CACHE_FILE, EventLevel::SECOND },
 };
 
+const std::unordered_map<std::string_view, std::string_view> eventParent = {
+    { EVENT_TOTAL, EVENT_GENERATE_ABC },
+    { EVENT_COMPILE, EVENT_TOTAL },
+    { EVENT_READ_INPUT_AND_CACHE, EVENT_COMPILE },
+    { EVENT_COMPILE_ABC_FILE, EVENT_COMPILE },
+    { EVENT_COMPILE_ABC_FILE_RECORD, EVENT_COMPILE_ABC_FILE },
+    { EVENT_UPDATE_ABC_PKG_VERSION, EVENT_COMPILE_ABC_FILE },
+    { EVENT_UPDATE_ABC_PROGRAM_STRING, EVENT_COMPILE_ABC_FILE },
+    { EVENT_UPDATE_ABC_PROG_CACHE, EVENT_COMPILE_ABC_FILE },
+    { EVENT_COMPILE_FILE, EVENT_COMPILE },
+    { EVENT_PARSE, EVENT_COMPILE_FILE },
+    { EVENT_COMPILE_TO_PROGRAM, EVENT_COMPILE_FILE },
+    { EVENT_OPTIMIZE_PROGRAM, EVENT_COMPILE },
+    { EVENT_RESOLVE_DEPS, EVENT_TOTAL },
+    { EVENT_EMIT_ABC, EVENT_TOTAL },
+    { EVENT_EMIT_SINGLE_PROGRAM, EVENT_EMIT_ABC },
+    { EVENT_EMIT_MERGED_PROGRAM, EVENT_EMIT_ABC },
+    { EVENT_EMIT_CACHE_FILE, EVENT_EMIT_ABC },
+};
+
 typedef void (*TimeStartFunc)(const std::string_view event, std::string fileName);
 typedef void (*TimeEndFunc)(const std::string_view event, std::string fileName);
 typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
@@ -105,6 +126,8 @@ private:
     static void TimerEndImpl(const std::string_view event, std::string fileName = "");
     static void TimerStartDoNothing(const std::string_view event, std::string fileName = "") {}
     static void TimerEndDoNothing(const std::string_view event, std::string fileName = "") {}
+    static void PrintJson();
+    static void PrintTxt();
 
     static std::unordered_map<std::string_view, TimeRecord> timers_;  // pair of {event, TimeRecord}
     static std::vector<std::string_view> events_;
