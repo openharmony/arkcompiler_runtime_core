@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
-import {Logger as L} from "std/debug"
+
+import {StdDebug} from "std/debug"
 import {CoroutineExtras} from "std/debug/concurrency"
 
+type L = StdDebug.Logger
 async function async_chain_element(caller_wid: int, counter: int): Promise<int> {
     let id_worker: int = CoroutineExtras.getWorkerId();
     if (caller_wid != id_worker) {

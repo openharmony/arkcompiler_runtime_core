@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,24 +15,27 @@
 
 package std.debug;
 
+export namespace StdDebug {
+
 export final class Logger {
-    private static LOG_ENABLED: boolean = false;
+        private static LOG_ENABLED: boolean = false;
 
-    public static enableLogging(): void {
-        Logger.LOG_ENABLED = true;
-    }
-
-    public static disableLogging(): void {
-        Logger.LOG_ENABLED = false;
-    }
-
-    public static log(m: String): void {
-        if (Logger.LOG_ENABLED) {
-            console.println(m);
+        public static enableLogging(): void {
+            Logger.LOG_ENABLED = true;
         }
-    }
 
-    public static logError(m: String): void {
-        console.println("ERROR: " + m);
+        public static disableLogging(): void {
+            Logger.LOG_ENABLED = false;
+        }
+
+        public static log(m: String): void {
+            if (Logger.LOG_ENABLED) {
+                console.println(m);
+            }
+        }
+
+        public static logError(m: String): void {
+            console.println("ERROR: " + m);
+        }
     }
 }
