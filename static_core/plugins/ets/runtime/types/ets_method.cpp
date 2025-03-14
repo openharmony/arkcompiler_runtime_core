@@ -38,7 +38,7 @@ static EtsMethod *FindInvokeMethodInFunctionalType(EtsClass *type)
         PandaStringStream ss;
         ss << STD_CORE_FUNCTION_INVOKE_PREFIX << arity;
         PandaString str = ss.str();
-        auto method = type->GetMethod(str.c_str());
+        EtsMethod *method = type->GetInstanceMethod(str.c_str(), nullptr);
         if (method != nullptr) {
             return method;
         }
@@ -68,7 +68,9 @@ EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td, EtsRuntimeLinker
     }
     ASSERT(td[0] == CLASS_TYPE_PREFIX);
     auto type = classLinker->GetClass(td.c_str(), true, ctx);
-    if (auto method = type->GetMethod(ark::ets::INVOKE_METHOD_NAME); method != nullptr) {
+    EtsMethod *method = type->GetInstanceMethod(ark::ets::INVOKE_METHOD_NAME, nullptr);
+    method = method == nullptr ? type->GetStaticMethod(ark::ets::INVOKE_METHOD_NAME, nullptr) : method;
+    if (method != nullptr) {
         return method;
     }
     return FindInvokeMethodInFunctionalType(type);

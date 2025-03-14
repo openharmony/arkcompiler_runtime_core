@@ -51,12 +51,21 @@ static EtsClass *FindType(EtsClassLinker *classLinker, std::string_view descript
     return klass;
 }
 
+template <bool IS_STATIC>
 static EtsMethod *FindMethod(EtsClass *klass, char const *name, char const *signature)
 {
     if (klass == nullptr) {
         return nullptr;
     }
-    auto method = klass->GetMethod(name, signature);
+
+    EtsMethod *method = [&]() {
+        if constexpr (IS_STATIC) {
+            return klass->GetStaticMethod(name, signature);
+        } else {
+            return klass->GetInstanceMethod(name, signature);
+        }
+    }();
+
     if (method == nullptr) {
         LOG(ERROR, RUNTIME) << "Method " << name << " is not found in class " << klass->GetDescriptor();
         return nullptr;
@@ -90,7 +99,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
 
     corePromise = findType(PROMISE);
     corePromiseSubscribeOnAnotherPromise =
-        FindMethod(corePromise, "subscribeOnAnotherPromise", "Lstd/core/PromiseLike;:V");
+        FindMethod<false>(corePromise, "subscribeOnAnotherPromise", "Lstd/core/PromiseLike;:V");
     corePromiseRef = findType(PROMISE_REF);
     coreJob = findType(JOB);
     coreWaitersList = findType(WAITERS_LIST);
@@ -116,7 +125,8 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
 
     coreFinalizableWeakRef = findType(FINALIZABLE_WEAK_REF);
     coreFinalizationRegistry = findType(FINALIZATION_REGISTRY);
-    coreFinalizationRegistryExecCleanup = FindMethod(coreFinalizationRegistry, "execCleanup", "[Lstd/core/WeakRef;I:V");
+    coreFinalizationRegistryExecCleanup =
+        FindMethod<true>(coreFinalizationRegistry, "execCleanup", "[Lstd/core/WeakRef;I:V");
 }
 
 }  // namespace ark::ets

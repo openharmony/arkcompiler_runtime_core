@@ -36,7 +36,7 @@ static EtsMethod *ResolveInvokeMethod(EtsCoroutine *coro, VMHandle<EtsObject> fu
         return nullptr;
     }
 
-    EtsMethod *method = func->GetClass()->GetMethod(INVOKE_METHOD_NAME);
+    EtsMethod *method = func->GetClass()->GetInstanceMethod(INVOKE_METHOD_NAME, nullptr);
     ASSERT(method != nullptr);
 
     if (method->IsAbstract()) {

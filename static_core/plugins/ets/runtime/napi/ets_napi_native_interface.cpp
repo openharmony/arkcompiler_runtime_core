@@ -708,7 +708,7 @@ NO_UB_SANITIZE static ets_method Getp_method(EtsEnv *env, ets_class cls, const c
         return nullptr;
     }
 
-    EtsMethod *method = (sig == nullptr ? klass->GetMethod(name) : klass->GetMethod(name, sig));
+    EtsMethod *method = klass->GetInstanceMethod(name, sig);
     if (method == nullptr || method->IsStatic()) {
         PandaStringStream ss;
         ss << "Method " << klass->GetRuntimeClass()->GetName() << "::" << name
@@ -1498,7 +1498,7 @@ NO_UB_SANITIZE static ets_method GetStaticp_method(EtsEnv *env, ets_class cls, c
         return nullptr;
     }
 
-    EtsMethod *method = (sig == nullptr ? klass->GetMethod(name) : klass->GetMethod(name, sig));
+    EtsMethod *method = klass->GetStaticMethod(name, sig);
     if (method == nullptr || !method->IsStatic()) {
         PandaStringStream ss;
         ss << "Static method " << klass->GetRuntimeClass()->GetName() << "::" << name
@@ -2444,8 +2444,8 @@ static void SetNativeCallType(EtsMethod *method, uint32_t nativeFlag)
     }  // EtsNapiEntryPoint is set by default.
 }
 
-NO_UB_SANITIZE static ets_int RegisterNatives(EtsEnv *env, ets_class cls, const EtsNativeMethod *methods,
-                                              ets_int nMethods)
+NO_UB_SANITIZE static ets_int RegisterNatives([[maybe_unused]] EtsEnv *env, ets_class cls,
+                                              const EtsNativeMethod *methods, ets_int nMethods)
 {
     ETS_NAPI_DEBUG_TRACE(env);
     ETS_NAPI_ABORT_IF_NULL(cls);
@@ -2471,9 +2471,8 @@ NO_UB_SANITIZE static ets_int RegisterNatives(EtsEnv *env, ets_class cls, const 
             return ETS_ERR_INVAL;
         }
 
-        EtsMethod *method =
-            (signature == nullptr ? klass->GetMethod(methods[i].name) : klass->GetMethod(methods[i].name, signature));
-
+        EtsMethod *method = klass->GetInstanceMethod(methods[i].name, nullptr);
+        method = method == nullptr ? klass->GetStaticMethod(methods[i].name, nullptr) : method;
         if (method == nullptr || !method->IsNative()) {
             PandaStringStream ss;
             ss << "Method " << klass->GetRuntimeClass()->GetName() << "::" << methods[i].name

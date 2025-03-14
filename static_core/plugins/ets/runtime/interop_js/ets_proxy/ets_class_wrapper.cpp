@@ -258,7 +258,7 @@ public:
         auto ret = objectConverter->Unwrap(ctx, jsValue);
 
         std::array args = {Value {ret->GetCoreType()}};
-        auto *method = EtsClass::FromRuntimeClass(ctx->GetJSRuntimeClass())->GetMethod("CreateIterator");
+        auto *method = EtsClass::FromRuntimeClass(ctx->GetJSRuntimeClass())->GetStaticMethod("CreateIterator", nullptr);
         auto *coro = EtsCoroutine::GetCurrent();
         auto resObject = method->GetPandaMethod()->Invoke(coro, args.data());
         ret = EtsObject::FromCoreType(resObject.GetAs<ObjectHeader *>());
@@ -775,7 +775,7 @@ napi_value EtsClassWrapper::MimicGetHandler(napi_env env, napi_callback_info inf
 
         auto *etsThis = sharedRef->GetEtsObject();
         ASSERT(etsThis != nullptr);
-        auto method = etsThis->GetClass()->GetMethod(GET_INDEX_METHOD);
+        EtsMethod *method = etsThis->GetClass()->GetInstanceMethod(GET_INDEX_METHOD, nullptr);
         ASSERT(method != nullptr);
 
         Span sp(jsArgs->begin(), jsArgs->end());
@@ -812,7 +812,7 @@ napi_value EtsClassWrapper::MimicSetHandler(napi_env env, napi_callback_info inf
 
     auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr);
-    auto method = etsThis->GetClass()->GetMethod(SET_INDEX_METHOD);
+    EtsMethod *method = etsThis->GetClass()->GetInstanceMethod(SET_INDEX_METHOD, nullptr);
     ASSERT(method != nullptr);
 
     Span sp(jsArgs->begin(), jsArgs->end());
