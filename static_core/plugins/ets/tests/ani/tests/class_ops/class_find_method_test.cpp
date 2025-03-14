@@ -984,5 +984,62 @@ TEST_F(ClassFindMethodTest, static_duplicate_no_signature)
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "staticOverloaded", nullptr, &method), ANI_AMBIGUOUS);
 }
 
+TEST_F(ClassFindMethodTest, same_name_static_virtual_function)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Ltest/AllFunctions;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_method ctor {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":V", &ctor), ANI_OK);
+    ASSERT_NE(ctor, nullptr);
+
+    ani_static_method staticMethod {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "foo", ":I", &staticMethod), ANI_OK);
+    ASSERT_NE(staticMethod, nullptr);
+
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "foo", ":I", &method), ANI_OK);
+    ASSERT_NE(method, nullptr);
+
+    ani_object object {};
+    ASSERT_EQ(env_->Object_New(cls, ctor, &object), ANI_OK);
+    ASSERT_NE(object, nullptr);
+
+    ani_int fooVal {};
+    ASSERT_EQ(env_->Object_CallMethod_Int(object, method, &fooVal), ANI_OK);
+    ASSERT_EQ(fooVal, 43U);
+
+    ani_int staticFooVal {};
+    ASSERT_EQ(env_->Class_CallStaticMethod_Int(cls, staticMethod, &staticFooVal), ANI_OK);
+    ASSERT_EQ(staticFooVal, 42U);
+}
+
+TEST_F(ClassFindMethodTest, no_static_virtual_function)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Ltest/MixedFunctions;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_static_method staticMethod {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "bar", ":I", &staticMethod), ANI_NOT_FOUND);
+
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "foo", ":I", &method), ANI_NOT_FOUND);
+}
+
+TEST_F(ClassFindMethodTest, static_no_duplicate)
+{
+    ani_class baseCls {};
+    ASSERT_EQ(env_->FindClass("Ltest/NotOverloaded;", &baseCls), ANI_OK);
+    ASSERT_NE(baseCls, nullptr);
+
+    ani_static_method smethod {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(baseCls, "notOverloaded", nullptr, &smethod), ANI_OK);
+
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindMethod(baseCls, "notOverloaded", nullptr, &method), ANI_OK);
+}
+
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

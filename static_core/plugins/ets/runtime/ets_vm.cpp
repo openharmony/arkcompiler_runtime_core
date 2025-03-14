@@ -569,9 +569,11 @@ static void PrintExceptionInfo(EtsCoroutine *coro, EtsHandle<EtsObject> exceptio
         return EtsString::FromEtsObject(callRes)->ConvertToStringView(&strBuf);
     };
 
-    ss << std::endl << performCall(cls->GetMethod("toString")).value_or("invoke toString failed");
+    ss << std::endl
+       << performCall(cls->GetInstanceMethod("toString", ":Lstd/core/String;")).value_or("invoke toString failed");
     if (PlatformTypes(coro)->escompatError->IsAssignableFrom(cls)) {
-        ss << std::endl << performCall(cls->GetMethod("<get>stack")).value_or("exception dump failed");
+        ss << std::endl
+           << performCall(cls->GetInstanceMethod("<get>stack", ":Lstd/core/String;")).value_or("exception dump failed");
     }
 }
 

@@ -256,7 +256,7 @@ JSCONVERT_WRAP(ESError)
     auto klass = etsVal->GetClass();
     INTEROP_FATAL_IF(klass->GetRuntimeClass() != ctx->GetESErrorClass());
 
-    auto method = klass->GetMethod("getJsError");
+    auto method = klass->GetInstanceMethod("getJsError", nullptr);
     ASSERT(method != nullptr);
     std::array args = {Value(etsVal->GetCoreType())};
     auto val = JSValue::FromCoreType(method->GetPandaMethod()->Invoke(coro, args.data()).GetAs<ObjectHeader *>());

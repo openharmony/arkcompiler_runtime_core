@@ -524,11 +524,12 @@ static ani_status DoFind(ani_env *env, const char *descriptor, T *result)
     return DoFind<IS_MODULE>(pandaEnv, descriptor, s, result);
 }
 
+template <bool IS_STATIC>
 static bool CheckUniqueMethod(EtsClass *klass, const char *name)
 {
     size_t nameCounter = 0;
     for (auto &method : klass->GetMethods()) {
-        if (::strcmp(method->GetName(), name) == 0) {
+        if (method->IsStatic() == IS_STATIC && ::strcmp(method->GetName(), name) == 0) {
             if (++nameCounter == 2U) {
                 return false;
             }
@@ -541,12 +542,17 @@ template <bool IS_STATIC_METHOD>
 static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char *signature, EtsMethod **result)
 {
     ASSERT_MANAGED_CODE();
-    if (signature == nullptr && !CheckUniqueMethod(klass, name)) {
+    if (signature == nullptr && !CheckUniqueMethod<IS_STATIC_METHOD>(klass, name)) {
         return ANI_AMBIGUOUS;
     }
-
-    EtsMethod *method = (signature == nullptr ? klass->GetMethod(name) : klass->GetMethod(name, signature, true));
-    if (method == nullptr || method->IsStatic() != IS_STATIC_METHOD) {
+    EtsMethod *method = [&]() {
+        if constexpr (IS_STATIC_METHOD) {
+            return klass->GetStaticMethod(name, signature, true);
+        } else {
+            return klass->GetInstanceMethod(name, signature, true);
+        }
+    }();
+    if (method == nullptr) {
         return ANI_NOT_FOUND;
     }
     *result = method;
@@ -2972,7 +2978,7 @@ static ani_status DoGetPropertyByName(ani_env *env, ani_object object, const cha
         }
     } else {
         // Property as getter
-        EtsMethod *method = klass->GetMethod((PandaString(GETTER_BEGIN) + name).c_str());
+        EtsMethod *method = klass->GetInstanceMethod((PandaString(GETTER_BEGIN) + name).c_str(), nullptr);
         ANI_CHECK_RETURN_IF_EQ(method, nullptr, ANI_NOT_FOUND);
         ANI_CHECK_RETURN_IF_EQ(method->IsStatic(), true, ANI_NOT_FOUND);
         ANI_CHECK_RETURN_IF_NE(method->GetNumArgs(), 1, ANI_NOT_FOUND);
@@ -3136,7 +3142,7 @@ static ani_status DoSetPropertyByName(ani_env *env, ani_object object, const cha
         }
     } else {
         // Property as setter
-        EtsMethod *method = klass->GetMethod((PandaString(SETTER_BEGIN) + name).c_str());
+        EtsMethod *method = klass->GetInstanceMethod((PandaString(SETTER_BEGIN) + name).c_str(), nullptr);
         ANI_CHECK_RETURN_IF_EQ(method, nullptr, ANI_NOT_FOUND);
         ANI_CHECK_RETURN_IF_EQ(method->IsStatic(), true, ANI_NOT_FOUND);
         ANI_CHECK_RETURN_IF_NE(method->GetNumArgs(), 2U, ANI_NOT_FOUND);
