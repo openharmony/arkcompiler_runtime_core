@@ -26,39 +26,68 @@ public:
     }
 };
 
-constexpr uint32_t CMP_VALUE = 2.0;
-constexpr uint32_t SET_VALUE = 21.0;
+constexpr float CMP_VALUE = 3.4028235E38;
+constexpr float SET_VALUE = -3.4028235E38;
 
-TEST_F(ObjectSetFieldByNameFloatTest, set_field)
+TEST_F(ObjectSetFieldByNameFloatTest, set_field01)
+{
+    const ani_float tmpValue = 0.01;
+    ani_object animal = NewAnimal();
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_float>(CMP_VALUE)), ANI_TRUE);
+
+    ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, "value", static_cast<ani_float>(tmpValue)), ANI_OK);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_float>(tmpValue)), ANI_TRUE);
+
+    ani_float value = 0.0F;
+    ASSERT_EQ(env_->Object_GetFieldByName_Float(animal, "value", &value), ANI_OK);
+    ASSERT_EQ(value, tmpValue);
+}
+
+TEST_F(ObjectSetFieldByNameFloatTest, set_field02)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, ani_float(CMP_VALUE)), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_float>(CMP_VALUE)), ANI_TRUE);
 
-    ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, "value", ani_float(SET_VALUE)), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, ani_float(SET_VALUE)), ANI_TRUE);
+    const int32_t loopCount = 3;
+    for (int i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, "value", static_cast<ani_float>(SET_VALUE)), ANI_OK);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_float>(SET_VALUE)),
+                  ANI_TRUE);
+
+        ani_float value = 0.0F;
+        ASSERT_EQ(env_->Object_GetFieldByName_Float(animal, "value", &value), ANI_OK);
+        ASSERT_EQ(value, SET_VALUE);
+
+        ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, "value", static_cast<ani_float>(CMP_VALUE)), ANI_OK);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_float>(CMP_VALUE)),
+                  ANI_TRUE);
+
+        ASSERT_EQ(env_->Object_GetFieldByName_Float(animal, "value", &value), ANI_OK);
+        ASSERT_EQ(value, CMP_VALUE);
+    }
 }
 
 TEST_F(ObjectSetFieldByNameFloatTest, not_found_name)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, "x", ani_float(SET_VALUE)), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, "x", static_cast<ani_float>(SET_VALUE)), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectSetFieldByNameFloatTest, invalid_type)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, "name", ani_float(SET_VALUE)), ANI_INVALID_TYPE);
+    ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, "name", static_cast<ani_float>(SET_VALUE)), ANI_INVALID_TYPE);
 }
 
 TEST_F(ObjectSetFieldByNameFloatTest, invalid_object)
 {
-    ASSERT_EQ(env_->Object_SetFieldByName_Float(nullptr, "x", ani_float(SET_VALUE)), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_SetFieldByName_Float(nullptr, "x", static_cast<ani_float>(SET_VALUE)), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectSetFieldByNameFloatTest, invalid_name)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, nullptr, ani_float(SET_VALUE)), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_SetFieldByName_Float(animal, nullptr, static_cast<ani_float>(SET_VALUE)), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing

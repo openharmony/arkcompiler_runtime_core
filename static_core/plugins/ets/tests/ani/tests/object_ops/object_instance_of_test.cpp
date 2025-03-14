@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -29,20 +29,22 @@ public:
     void GetMethodData(ani_object *objectResult, ani_class *classResult, const char *className,
                        const char *newClassName, const char *signature)
     {
-        ani_class cls;
+        ani_class cls {};
         // Locate the class in the environment.
         ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         // Emulate allocation an instance of class.
-        ani_static_method newMethod;
+        ani_static_method newMethod {};
         ASSERT_EQ(env_->Class_FindStaticMethod(cls, newClassName, signature, &newMethod), ANI_OK);
-        ani_ref ref;
+        ani_ref ref {};
         ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
 
         *objectResult = static_cast<ani_object>(ref);
         *classResult = cls;
     }
+
+    static constexpr int32_t LOOP_COUNT = 3;
 };
 
 /**
@@ -53,25 +55,25 @@ public:
  */
 TEST_F(ObjectInstanceOfTest, object_instance_of)
 {
-    ani_object objectA;
-    ani_class classA;
+    ani_object objectA {};
+    ani_class classA {};
     GetMethodData(&objectA, &classA, "LA;", "new_A", ":LA;");
 
-    ani_object objectB;
-    ani_class classB;
+    ani_object objectB {};
+    ani_class classB {};
     GetMethodData(&objectB, &classB, "LB;", "new_B", ":LB;");
 
-    ani_object objectC;
-    ani_class classC;
+    ani_object objectC {};
+    ani_class classC {};
     GetMethodData(&objectC, &classC, "LC;", "new_C", ":LC;");
 
-    ani_object objectD;
-    ani_class classD;
+    ani_object objectD {};
+    ani_class classD {};
     GetMethodData(&objectD, &classD, "LD;", "new_D", ":LD;");
 
     ani_type typeRefC = classC;
     ani_type typeRefA = classA;
-    ani_boolean res;
+    ani_boolean res = ANI_FALSE;
 
     ASSERT_EQ(env_->Object_InstanceOf(objectC, typeRefC, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
@@ -88,6 +90,52 @@ TEST_F(ObjectInstanceOfTest, object_instance_of)
     ASSERT_EQ(env_->Object_InstanceOf(nullptr, typeRefA, &res), ANI_INVALID_ARGS);
 
     ASSERT_EQ(env_->Object_InstanceOf(objectC, nullptr, &res), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectInstanceOfTest, invalid_parameter)
+{
+    ani_object objectA {};
+    ani_class classA {};
+    ani_boolean res = ANI_FALSE;
+    GetMethodData(&objectA, &classA, "LA;", "new_A", ":LA;");
+
+    ani_type type = nullptr;
+    ASSERT_EQ(env_->Object_InstanceOf(objectA, type, &res), ANI_INVALID_ARGS);
+    ASSERT_EQ(res, false);
+
+    ani_type typeRefA = classA;
+    ASSERT_EQ(env_->c_api->Object_InstanceOf(nullptr, objectA, typeRefA, &res), ANI_INVALID_ARGS);
+    ASSERT_EQ(res, false);
+}
+
+TEST_F(ObjectInstanceOfTest, object_instance_of_loop)
+{
+    ani_object objectA {};
+    ani_class classA {};
+    GetMethodData(&objectA, &classA, "LA;", "new_A", ":LA;");
+
+    ani_object objectB {};
+    ani_class classB {};
+    GetMethodData(&objectB, &classB, "LB;", "new_B", ":LB;");
+
+    ani_object objectC {};
+    ani_class classC {};
+    GetMethodData(&objectC, &classC, "LC;", "new_C", ":LC;");
+
+    ani_type typeRefC = classC;
+    ani_type typeRefA = classA;
+    ani_boolean res = ANI_FALSE;
+
+    for (uint16_t i = 0; i < LOOP_COUNT; ++i) {
+        ASSERT_EQ(env_->Object_InstanceOf(objectC, typeRefC, &res), ANI_OK);
+        ASSERT_EQ(res, ANI_TRUE);
+
+        ASSERT_EQ(env_->Object_InstanceOf(objectB, typeRefC, &res), ANI_OK);
+        ASSERT_EQ(res, false);
+
+        ASSERT_EQ(env_->Object_InstanceOf(objectC, typeRefA, &res), ANI_OK);
+        ASSERT_EQ(res, ANI_TRUE);
+    }
 }
 
 }  // namespace ark::ets::ani::testing

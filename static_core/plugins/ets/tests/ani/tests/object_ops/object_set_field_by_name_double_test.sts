@@ -23,7 +23,7 @@ class Animal {
 }
 
 function newAnimalObject() {
-    return new Animal("Cat", 2.0);
+    return new Animal("Cat", -1.7976931348623157E308);
 }
 
 function checkObjectField(animal: Animal,  value: double): boolean {

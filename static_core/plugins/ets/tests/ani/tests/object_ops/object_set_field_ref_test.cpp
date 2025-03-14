@@ -23,13 +23,13 @@ public:
     {
         auto boxRef = CallEtsFunction<ani_ref>("newBoxObject");
 
-        ani_class cls;
+        ani_class cls {};
         ASSERT_EQ(env_->FindClass("LBoxx;", &cls), ANI_OK);
 
-        ani_field fieldInt;
+        ani_field fieldInt {};
         ASSERT_EQ(env_->Class_FindField(cls, "int_value", &fieldInt), ANI_OK);
 
-        ani_field fieldString;
+        ani_field fieldString {};
         ASSERT_EQ(env_->Class_FindField(cls, "string_value", &fieldString), ANI_OK);
 
         *boxResult = static_cast<ani_object>(boxRef);
@@ -48,24 +48,53 @@ TEST_F(ObjectSetFieldRefTest, set_field_ref)
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8("abcdef", 6U, &string), ANI_OK);
 
-    ASSERT_EQ(env_->Object_SetField_Ref(box, fieldString, string), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkStringValue", box, string), ANI_TRUE);
+    const int32_t loopCount = 3;
+    for (int i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetField_Ref(box, fieldString, string), ANI_OK);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkStringValue", box, string), ANI_TRUE);
+
+        ani_ref nameRef {};
+        ASSERT_EQ(env_->Object_GetField_Ref(box, fieldString, &nameRef), ANI_OK);
+
+        auto name = static_cast<ani_string>(nameRef);
+        std::array<char, 7U> buffer {};
+        ani_size nameSize {};
+        ASSERT_EQ(env_->String_GetUTF8SubString(name, 0U, 6U, buffer.data(), buffer.size(), &nameSize), ANI_OK);
+        ASSERT_EQ(nameSize, 6U);
+        ASSERT_STREQ(buffer.data(), "abcdef");
+
+        ani_string string1 {};
+        ASSERT_EQ(env_->String_NewUTF8("abcdefg", 7U, &string1), ANI_OK);
+
+        ASSERT_EQ(env_->Object_SetField_Ref(box, fieldString, string1), ANI_OK);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkStringValue", box, string1), ANI_TRUE);
+
+        ani_ref nameRef1 {};
+        ASSERT_EQ(env_->Object_GetField_Ref(box, fieldString, &nameRef1), ANI_OK);
+
+        auto name1 = static_cast<ani_string>(nameRef1);
+        std::array<char, 8U> buffer1 {};
+        ani_size nameSize1 {};
+        ASSERT_EQ(env_->String_GetUTF8SubString(name1, 0U, 7U, buffer1.data(), buffer1.size(), &nameSize1), ANI_OK);
+        ASSERT_EQ(nameSize1, 7U);
+        ASSERT_STREQ(buffer1.data(), "abcdefg");
+    }
 }
 
 TEST_F(ObjectSetFieldRefTest, set_field_ref2)
 {
     auto boxc = static_cast<ani_object>(CallEtsFunction<ani_ref>("newBoxcObject"));
 
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("LBoxc;", &cls), ANI_OK);
 
-    ani_field fieldInt;
+    ani_field fieldInt {};
     ASSERT_EQ(env_->Class_FindField(cls, "int_value", &fieldInt), ANI_OK);
 
-    ani_field fieldString;
+    ani_field fieldString {};
     ASSERT_EQ(env_->Class_FindField(cls, "string_value", &fieldString), ANI_OK);
 
-    ani_field fieldStr;
+    ani_field fieldStr {};
     ASSERT_EQ(env_->Class_FindField(cls, "str_value", &fieldStr), ANI_OK);
 
     ani_string string {};

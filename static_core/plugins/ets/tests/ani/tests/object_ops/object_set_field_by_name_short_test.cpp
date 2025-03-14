@@ -26,39 +26,67 @@ public:
     }
 };
 
-constexpr char CMP_VALUE = 2;
-constexpr char SET_VALUE = 15;
+constexpr int16_t CMP_VALUE = 32767;
+constexpr int16_t SET_VALUE = -32768;
 
-TEST_F(ObjectSetFieldByNameShortTest, set_field)
+TEST_F(ObjectSetFieldByNameShortTest, set_field01)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, ani_short(CMP_VALUE)), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_short>(CMP_VALUE)), ANI_TRUE);
 
-    ASSERT_EQ(env_->Object_SetFieldByName_Short(animal, "value", ani_short(SET_VALUE)), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, ani_short(SET_VALUE)), ANI_TRUE);
+    ASSERT_EQ(env_->Object_SetFieldByName_Short(animal, "value", static_cast<ani_short>(0)), ANI_OK);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_short>(0)), ANI_TRUE);
+
+    ani_short value = 0;
+    ASSERT_EQ(env_->Object_GetFieldByName_Short(animal, "value", &value), ANI_OK);
+    ASSERT_EQ(value, 0);
+}
+
+TEST_F(ObjectSetFieldByNameShortTest, set_field02)
+{
+    ani_object animal = NewAnimal();
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_short>(CMP_VALUE)), ANI_TRUE);
+
+    const int32_t loopCount = 3;
+    for (int i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetFieldByName_Short(animal, "value", static_cast<ani_short>(SET_VALUE)), ANI_OK);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_short>(SET_VALUE)),
+                  ANI_TRUE);
+
+        ani_short value = 0;
+        ASSERT_EQ(env_->Object_GetFieldByName_Short(animal, "value", &value), ANI_OK);
+        ASSERT_EQ(value, SET_VALUE);
+
+        ASSERT_EQ(env_->Object_SetFieldByName_Short(animal, "value", static_cast<ani_short>(CMP_VALUE)), ANI_OK);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_short>(CMP_VALUE)),
+                  ANI_TRUE);
+
+        ASSERT_EQ(env_->Object_GetFieldByName_Short(animal, "value", &value), ANI_OK);
+        ASSERT_EQ(value, CMP_VALUE);
+    }
 }
 
 TEST_F(ObjectSetFieldByNameShortTest, not_found_name)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(env_->Object_SetFieldByName_Short(animal, "x", ani_short(SET_VALUE)), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_SetFieldByName_Short(animal, "x", static_cast<ani_short>(SET_VALUE)), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectSetFieldByNameShortTest, invalid_type)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(env_->Object_SetFieldByName_Short(animal, "name", ani_short(SET_VALUE)), ANI_INVALID_TYPE);
+    ASSERT_EQ(env_->Object_SetFieldByName_Short(animal, "name", static_cast<ani_short>(SET_VALUE)), ANI_INVALID_TYPE);
 }
 
 TEST_F(ObjectSetFieldByNameShortTest, invalid_object)
 {
-    ASSERT_EQ(env_->Object_SetFieldByName_Short(nullptr, "x", ani_short(SET_VALUE)), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_SetFieldByName_Short(nullptr, "x", static_cast<ani_short>(SET_VALUE)), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectSetFieldByNameShortTest, invalid_name)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(env_->Object_SetFieldByName_Short(animal, nullptr, ani_short(SET_VALUE)), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_SetFieldByName_Short(animal, nullptr, static_cast<ani_short>(SET_VALUE)), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing

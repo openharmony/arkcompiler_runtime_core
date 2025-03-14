@@ -23,13 +23,13 @@ public:
     {
         auto packRef = CallEtsFunction<ani_ref>("newPackageObject");
 
-        ani_class cls;
+        ani_class cls {};
         ASSERT_EQ(env_->FindClass("LPackage;", &cls), ANI_OK);
 
-        ani_field fieldLong;
+        ani_field fieldLong {};
         ASSERT_EQ(env_->Class_FindField(cls, "long_value", &fieldLong), ANI_OK);
 
-        ani_field fieldString;
+        ani_field fieldString {};
         ASSERT_EQ(env_->Class_FindField(cls, "string_value", &fieldString), ANI_OK);
 
         *packResult = static_cast<ani_object>(packRef);
@@ -40,22 +40,37 @@ public:
 
 TEST_F(ObjectSetFieldLongTest, set_field_long)
 {
-    ani_object pack;
-    ani_field fieldLong;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldLong {};
+    ani_field fieldString {};
+    ani_long longValue = 8L;
+    ani_long longValue1 = 7L;
     GetTestData(&pack, &fieldLong, &fieldString);
 
     ASSERT_EQ(CallEtsFunction<ani_boolean>("checkLongValue", pack, ani_long(0)), ANI_TRUE);
 
-    ASSERT_EQ(env_->Object_SetField_Long(pack, fieldLong, 8L), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkLongValue", pack, ani_long(8L)), ANI_TRUE);
+    const int32_t loopCount = 3;
+    for (int i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetField_Long(pack, fieldLong, longValue), ANI_OK);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkLongValue", pack, ani_long(longValue)), ANI_TRUE);
+
+        ani_long value {};
+        ASSERT_EQ(env_->Object_GetField_Long(pack, fieldLong, &value), ANI_OK);
+        ASSERT_EQ(value, longValue);
+
+        ASSERT_EQ(env_->Object_SetField_Long(pack, fieldLong, longValue1), ANI_OK);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkLongValue", pack, ani_long(longValue1)), ANI_TRUE);
+
+        ASSERT_EQ(env_->Object_GetField_Long(pack, fieldLong, &value), ANI_OK);
+        ASSERT_EQ(value, longValue1);
+    }
 }
 
 TEST_F(ObjectSetFieldLongTest, set_field_long_invalid_field_type)
 {
-    ani_object pack;
-    ani_field fieldLong;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldLong {};
+    ani_field fieldString {};
     GetTestData(&pack, &fieldLong, &fieldString);
 
     ASSERT_EQ(env_->Object_SetField_Long(pack, fieldString, 5U), ANI_INVALID_TYPE);
@@ -63,9 +78,9 @@ TEST_F(ObjectSetFieldLongTest, set_field_long_invalid_field_type)
 
 TEST_F(ObjectSetFieldLongTest, set_field_long_invalid_args_object)
 {
-    ani_object pack;
-    ani_field fieldLong;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldLong {};
+    ani_field fieldString {};
     GetTestData(&pack, &fieldLong, &fieldString);
 
     ASSERT_EQ(env_->Object_SetField_Long(nullptr, fieldLong, 5U), ANI_INVALID_ARGS);
@@ -73,9 +88,9 @@ TEST_F(ObjectSetFieldLongTest, set_field_long_invalid_args_object)
 
 TEST_F(ObjectSetFieldLongTest, set_field_long_invalid_args_field)
 {
-    ani_object pack;
-    ani_field fieldLong;
-    ani_field fieldString;
+    ani_object pack {};
+    ani_field fieldLong {};
+    ani_field fieldString {};
     GetTestData(&pack, &fieldLong, &fieldString);
 
     ASSERT_EQ(env_->Object_SetField_Long(pack, nullptr, 5U), ANI_INVALID_ARGS);

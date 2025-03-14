@@ -29,32 +29,34 @@ public:
     void GetMethodData(ani_object *objectResult, ani_class *classResult, const char *className,
                        const char *newClassName, const char *signature)
     {
-        ani_class cls;
+        ani_class cls {};
         // Locate the class in the environment.
         ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         // Emulate allocation an instance of class.
-        ani_static_method newMethod;
+        ani_static_method newMethod {};
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ASSERT_EQ(env_->Class_FindStaticMethod(cls, newClassName, signature, &newMethod), ANI_OK);
-        ani_ref ref;
+        ani_ref ref {};
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
 
         *objectResult = static_cast<ani_object>(ref);
         *classResult = cls;
     }
+
+    static constexpr int32_t LOOP_COUNT = 3;
 };
 
 TEST_F(ObjectGetTypeTest, class_obect_type)
 {
-    ani_class classA;
-    ani_object objectA;
+    ani_class classA {};
+    ani_object objectA {};
     GetMethodData(&objectA, &classA, "LA;", "new_A", ":LA;");
 
-    ani_type type;
-    ani_boolean res;
+    ani_type type {};
+    ani_boolean res = ANI_FALSE;
     ASSERT_EQ(env_->Object_GetType(objectA, &type), ANI_OK);
     ASSERT_EQ(env_->Object_InstanceOf(objectA, type, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
@@ -67,8 +69,8 @@ TEST_F(ObjectGetTypeTest, string_obect_type)
     ASSERT_EQ(status, ANI_OK);
     ASSERT_NE(result, nullptr);
 
-    ani_type type;
-    ani_boolean res;
+    ani_type type {};
+    ani_boolean res = ANI_FALSE;
     ASSERT_EQ(env_->Object_GetType(result, &type), ANI_OK);
     ASSERT_EQ(env_->Object_InstanceOf(result, type, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
@@ -83,6 +85,30 @@ TEST_F(ObjectGetTypeTest, invalid_parameters)
 
     ASSERT_EQ(env_->Object_GetType(result, nullptr), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Object_GetType(nullptr, nullptr), ANI_INVALID_ARGS);
+    ani_type type {};
+    ASSERT_EQ(env_->c_api->Object_GetType(nullptr, result, &type), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectGetTypeTest, invalid_object)
+{
+    ani_object object = nullptr;
+    ani_type type {};
+    ASSERT_EQ(env_->Object_GetType(object, &type), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectGetTypeTest, class_obect_type_loop)
+{
+    ani_class classA {};
+    ani_object objectA {};
+    GetMethodData(&objectA, &classA, "LA;", "new_A", ":LA;");
+
+    ani_type type {};
+    ani_boolean res = ANI_FALSE;
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->Object_GetType(objectA, &type), ANI_OK);
+        ASSERT_EQ(env_->Object_InstanceOf(objectA, type, &res), ANI_OK);
+        ASSERT_EQ(res, ANI_TRUE);
+    }
 }
 }  // namespace ark::ets::ani::testing
 
