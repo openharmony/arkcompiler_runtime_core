@@ -58,7 +58,7 @@ void JSValue::FinalizeETSWeak(InteropCtx *ctx, EtsObject *cbarg)
         case napi_object:
             [[fallthrough]];
         case napi_function:
-            NAPI_CHECK_FATAL(napi_delete_reference(ctx->GetJSEnv(), jsValue->GetNapiRef()));
+            NAPI_CHECK_FATAL(napi_delete_reference(ctx->GetJSEnv(), jsValue->GetNapiRef(ctx->GetJSEnv())));
             return;
         case napi_bigint:
             delete jsValue->GetBigInt();

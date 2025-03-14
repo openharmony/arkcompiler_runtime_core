@@ -153,7 +153,8 @@ public:
     napi_value GetRefValue(napi_env env)
     {
         napi_value value;
-        NAPI_ASSERT_OK(napi_get_reference_value(env, GetNapiRef(), &value));
+        auto napiRef = GetNapiRef(env);
+        NAPI_ASSERT_OK(napi_get_reference_value(env, napiRef, &value));
         return value;
     }
 
@@ -219,10 +220,19 @@ private:
     // Returns moved jsValue
     [[nodiscard]] static JSValue *AttachFinalizer(EtsCoroutine *coro, JSValue *jsValue);
 
-    napi_ref GetNapiRef() const
+    napi_ref GetNapiRef(napi_env env) const
     {
         ASSERT(IsRefType(GetType()));
+
         ets_proxy::SharedReference *sharedRef = GetData<ets_proxy::SharedReference *>();
+
+        // Interop ctx check:
+        // check if the ctx is the same as the one that created the reference
+        if (sharedRef->GetCtx()->GetJSEnv() != env) {
+            // NOTE(MockMockBlack, #24062): to be replaced with a runtime exception
+            InteropFatal("InteropFatal, interop object must be used in the same interopCtx as it was created.");
+        }
+
         return sharedRef->GetJsRef();
     }
 
