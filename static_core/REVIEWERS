@@ -135,7 +135,9 @@ static_core/plugins/ets/tests/ets_sdk/                                        ^a
 static_core/plugins/ets/tests/interop_js/                                     ^igelhaus @semenovaleksandr ^rokashevichsvetlana ^kurnevichstanislav
 static_core/plugins/ets/tests/stdlib-templates/                               ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
 static_core/plugins/ets/tests/test-lists/                                     ^amate ^sergeyandreev @kuchkovairina
+static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @kuchkovairina @dreamdoomwalker
 static_core/plugins/ets/tools/declgen_ts2sts/                                 @dreamdoomwalker ^trubachevilya ^hufeng20 @nazarovkonstantin
+static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 @dreamdoomwalker ^amate @sergeyandreev @anton-sysoev
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
 static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        ^dmitriitr @udav ^ipetrov
 static_core/plugins/ets/runtime/interop_js/xgc/                               ^dmitriitr @udav ^ipetrov
