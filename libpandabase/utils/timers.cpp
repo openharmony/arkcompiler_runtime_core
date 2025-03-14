@@ -14,6 +14,7 @@
  */
 
 #include "timers.h"
+#include <nlohmann/json.hpp>
 #include "os/file.h"
 
 #include <algorithm>
@@ -26,6 +27,7 @@ std::unordered_map<std::string_view, TimeRecord> Timer::timers_;
 std::vector<std::string_view> Timer::events_;
 std::mutex Timer::mutex_;
 std::string Timer::perfFile_;
+static const int INDENT_LEVEL = 4;
 
 void Timer::InitializeTimer(std::string &perfFile)
 {
@@ -80,6 +82,64 @@ void ProcessTimePointRecord(
 }
 
 void Timer::PrintTimers()
+{
+    const std::string suffix = ".json";
+    if (perfFile_.length() >= suffix.length() &&
+        perfFile_.compare(perfFile_.length() - suffix.length(), suffix.length(), suffix) == 0) {
+        PrintJson();
+    } else {
+        PrintTxt();
+    }
+}
+
+void to_json(nlohmann::json& j, const TimeRecord& t)
+{
+    auto early = std::chrono::steady_clock::time_point::max();
+    auto late = std::chrono::steady_clock::time_point::min();
+
+    for (auto& [fileName, timePointRecord] : t.timePoints) {
+        if (timePointRecord.startTime < early) {
+            early = timePointRecord.startTime;
+        }
+        if (timePointRecord.endTime > late) {
+            late = timePointRecord.endTime;
+        }
+    }
+    auto start = std::chrono::duration_cast<std::chrono::nanoseconds>(early.time_since_epoch()).count();
+    auto end = std::chrono::duration_cast<std::chrono::nanoseconds>(late.time_since_epoch()).count();
+    auto duration = end - start;
+
+    std::string parentEvent;
+    auto eventIter = eventParent.find(t.event);
+    if (eventIter != eventParent.end()) {
+        parentEvent = eventIter->second;
+    }
+    j = nlohmann::json{
+        {"name", t.event},
+        {"parentEvent", parentEvent},
+        {"startTime", start},
+        {"endTime", end},
+        {"duration", duration}
+    };
+}
+
+void Timer::PrintJson()
+{
+    std::stringstream ss;
+    nlohmann::json jsonArray = nlohmann::json::array();
+
+    for (auto &event: events_) {
+        auto &timeRecord = timers_.at(event);
+        nlohmann::json j = timeRecord;
+        jsonArray.push_back(j);
+    }
+
+    ss << jsonArray.dump(INDENT_LEVEL) << std::endl;
+
+    WriteFile(ss, perfFile_);
+}
+
+void Timer::PrintTxt()
 {
     std::stringstream ss;
     ss << "------------- Compilation time consumption in milliseconds: -------------" << std::endl;
