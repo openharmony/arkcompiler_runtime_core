@@ -1151,7 +1151,7 @@
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_8.ets
 
 #23725
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1n_4.ets
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1n_2.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_24.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_25.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_53.ets
