@@ -7,6 +7,6 @@
                 "."
             ]
         },
-        "entry": "../../../indexC.sts"
+        "entry": "./indexC.sts"
     }
 }
