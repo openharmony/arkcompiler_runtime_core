@@ -49,12 +49,7 @@ ohos_source_set("ets_interop_js_napi_static") {
     ":interop_js_public_config",
   ]
 
-  sources = [
-    "ets_vm_plugin.cpp",
-    "event_loop_module.cpp",
-    "stack_info.cpp",
-    "timer_module.cpp",
-  ]
+  sources = [ "ets_vm_plugin.cpp" ]
 
   deps = [
     ":interop_intrinsic_kinds_h",

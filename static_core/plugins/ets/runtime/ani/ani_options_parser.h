@@ -46,6 +46,16 @@ public:
         return aniSpecificOptions_;
     }
 
+    bool IsInteropMode() const
+    {
+        return isInteropMode_;
+    }
+
+    void *GetInteropEnv() const
+    {
+        return interopEnv_;
+    }
+
 private:
     void Parse()
     {
@@ -55,12 +65,24 @@ private:
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             std::string option(inputOptions_[i].option);
 
+            // NOTE(konstanting, #23205): this explicit comparison was requested by v.cherkashin
+            // for better readability. To be refactored.
+            if (option == "--ext:interop") {
+                isInteropMode_ = true;
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                interopEnv_ = inputOptions_[i].extra;
+                continue;
+            }
+
             // NOTE: need to skip forbidden options, such as "--load-runtimes"
             if (option.size() >= prefix.size() && option.substr(0, prefix.size()) == prefix) {
                 runtimeOptions_.push_back(option.substr(prefix.size()));
             }
         }
     }
+
+    void *interopEnv_ {nullptr};
+    bool isInteropMode_ {false};
 
     size_t optionsSize_;
     const ani_option *inputOptions_;

@@ -18,6 +18,18 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
 
+// NOTE(konstanting, #23205): A workaround for the hybrid cmake build. Will be removed soon
+// using a separate .cpp file with weak symbols.
+#if defined(PANDA_JS_ETS_HYBRID_MODE_NEED_WEAK_SYMBOLS)
+extern "C" napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_get_uv_event_loop([[maybe_unused]] napi_env env, [[maybe_unused]] struct uv_loop_s **loop)
+{
+    // NOTE: Empty stub. Needed only for the corner case with verifier/aot in the hybrid cmake build
+    INTEROP_LOG(ERROR) << "napi_add_env_cleanup_hook is implemented in OHOS since 4.1.0, please update" << std::endl;
+    return napi_ok;
+}
+#endif /* PANDA_JS_ETS_HYBRID_MODE_NEED_WEAK_SYMBOLS */
+
 namespace ark::ets::interop::js {
 
 /*static*/

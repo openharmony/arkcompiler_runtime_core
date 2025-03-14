@@ -392,7 +392,9 @@ template("libabckit_host_unittest_action") {
           "/arkcompiler/runtime_core:" + rebase_path(_root_out_dir_) +
           "/arkcompiler/ets_runtime:" + rebase_path(_root_out_dir_) +
           "/thirdparty/icu:" + rebase_path(_root_out_dir_) +
-          "/thirdparty/zlib:",
+          "/thirdparty/zlib:" + rebase_path(_root_out_dir_) +
+          "/thirdparty/libuv:" + rebase_path(_root_out_dir_) + "/arkui/napi:" +
+          rebase_path(_root_out_dir_) + "/thirdparty/bounds_checking_function:",
     ]
 
     if (abckit_with_sanitizers) {

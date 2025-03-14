@@ -461,7 +461,8 @@ public:
         return &constStringStorage_;
     }
 
-    ALWAYS_INLINE void UpdateInteropStackInfoIfNeeded()
+    // NOTE(konstanting, #23205): revert to ALWAYS_INLINE once the migration of ets_vm_plugin.cpp to ANI is completed
+    PANDA_PUBLIC_API void UpdateInteropStackInfoIfNeeded()
     {
         stackInfoManager_.UpdateStackInfoIfNeeded();
     }
@@ -490,7 +491,6 @@ protected:
 private:
     explicit InteropCtx(EtsCoroutine *coro, napi_env env);
     void InitJsValueFinalizationRegistry(EtsCoroutine *coro);
-    void InitSharedEtsVmState(PandaEtsVM *vm);
     void InitExternalInterfaces();
 
     void VmHandshake(napi_env env, EtsCoroutine *coro, arkplatform::STSVMInterface *stsVmIface);
@@ -509,7 +509,7 @@ private:
         static std::shared_ptr<SharedEtsVmState> GetInstance(PandaEtsVM *vm);
         // should be called when we would like to check if there are no more InteropCtx instances left
         static void TryReleaseInstance();
-        ~SharedEtsVmState() = default;
+        ~SharedEtsVmState();
 
         js_proxy::JSProxy *GetJsProxyInstance(EtsClass *cls) const;
         void SetJsProxyInstance(EtsClass *cls, js_proxy::JSProxy *proxy);
