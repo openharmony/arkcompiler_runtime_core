@@ -27,13 +27,21 @@ function prepare_file_test2() {
         cat "$SCRIPT_DIR"/test/test_file_expected_list_ohos_arm32.txt >> "$EXPECTED"
     fi
     if [ "$OHOS_ARM64" = "true" ]; then
-        cat "$SCRIPT_DIR"/test/test_file_expected_list_ohos_arm64.txt >> "$EXPECTED"
+	if [ "${PANDA_LLVM_BACKEND}" == "ON" ]; then
+            cat "$SCRIPT_DIR"/test/test_file_expected_list_ohos_arm64.txt >> "$EXPECTED"
+        else
+	    cat "$SCRIPT_DIR"/test/test_file_expected_list_ohos_arm64_withoutLLVM.txt >> "$EXPECTED"
+	fi
     fi
     if [ "$LINUX_ARM64_TOOLS" = "true" ]; then
         cat "$SCRIPT_DIR"/test/test_file_expected_list_arm64.txt >> "$EXPECTED"
     fi
     if [ "$LINUX_TOOLS" = "true" ]; then
-        cat "$SCRIPT_DIR"/test/test_file_expected_list_linux.txt >> "$EXPECTED"
+	if [ "${PANDA_LLVM_BACKEND}" == "ON" ]; then
+            cat "$SCRIPT_DIR"/test/test_file_expected_list_linux.txt >> "$EXPECTED"
+	else
+	    cat "$SCRIPT_DIR"/test/test_file_expected_list_linux_withoutLLVM.txt >> "$EXPECTED"
+	fi
     fi
     if [ "$WINDOWS_TOOLS" = "true" ]; then
         cat "$SCRIPT_DIR"/test/test_file_expected_list_windows.txt >> "$EXPECTED"

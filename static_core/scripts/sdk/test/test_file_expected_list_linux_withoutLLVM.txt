@@ -7,7 +7,6 @@ build-sdk/sdk/linux_host_tools/bin/ark_link
 build-sdk/sdk/linux_host_tools/bin/es2panda
 build-sdk/sdk/linux_host_tools/bin/verifier
 build-sdk/sdk/linux_host_tools/lib
-build-sdk/sdk/linux_host_tools/lib/libLLVM-15.so
 build-sdk/sdk/linux_host_tools/lib/libarkaotmanager.so
 build-sdk/sdk/linux_host_tools/lib/libarkassembler.so
 build-sdk/sdk/linux_host_tools/lib/libarkbase.so
@@ -18,7 +17,6 @@ build-sdk/sdk/linux_host_tools/lib/libarkfile.so
 build-sdk/sdk/linux_host_tools/lib/libarklinker.so
 build-sdk/sdk/linux_host_tools/lib/libarkruntime.so
 build-sdk/sdk/linux_host_tools/lib/libarktarget_options.so
-build-sdk/sdk/linux_host_tools/lib/libani_helpers.so
 build-sdk/sdk/linux_host_tools/lib/libarkziparchive.so
 build-sdk/sdk/linux_host_tools/lib/libc_secshared.so
 build-sdk/sdk/linux_host_tools/lib/libe2p_test_plugin.so
@@ -29,4 +27,3 @@ build-sdk/sdk/linux_host_tools/lib/libhmicui18n.z.so
 build-sdk/sdk/linux_host_tools/lib/libhmicuuc.z.so
 build-sdk/sdk/linux_host_tools/lib/libinit_icu.so
 build-sdk/sdk/linux_host_tools/lib/libirtoc.so
-build-sdk/sdk/linux_host_tools/lib/libllvmbackend.so

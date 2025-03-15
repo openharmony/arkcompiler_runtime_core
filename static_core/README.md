@@ -26,7 +26,7 @@ If you want additionally to install Python dependencies for running tests add a 
 ```
 $ sudo ./scripts/install-deps-ubuntu -i=dev -i=test
 ```
-It creates a virtual environment .venv-panda in your home directory with all required dependencies. 
+It creates a virtual environment .venv-panda in your home directory with all required dependencies.
 Later, tests Python scripts can activate this environment. If you already have run with the parameter `-i=test`
 the second time it might be skipped.
 
@@ -37,6 +37,18 @@ Panda uses third party libraries. To install the libraries and apply patches, ru
 ```
 $ ./scripts/install-third-party --force-clone
 ```
+
+# Ets frontend
+
+To build panda SDK, you should also checkout following project:
+```
+git clone https://gitee.com/openharmony/arkcompiler_ets_frontend
+```
+And create symlink in static_core directory:
+```
+ln -s /path/to/arkcompiler_ets_frontend /path/to/arkcompiler_runtime_core/static_core/tools/es2panda
+```
+Note: please, check, that for `arkcompiler_ets_frontend` you use the same branch as for `arkcompiler_runtime_core`.
 
 # Building
 
