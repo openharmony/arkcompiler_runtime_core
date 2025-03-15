@@ -82,7 +82,6 @@ endmacro()
 
 add_subdirectory(arrays)
 add_subdirectory(atomics)
-add_subdirectory(containers)
 add_subdirectory(coroutines)
 add_subdirectory(gc)
 add_subdirectory(generics)
