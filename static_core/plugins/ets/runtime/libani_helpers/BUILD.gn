@@ -26,7 +26,10 @@ ohos_source_set("ani_helpers_static") {
 
   include_dirs = [ "$ark_root/plugins/ets/runtime/ani" ]
 
-  sources = [ "concurrency_helpers.cpp" ]
+  sources = [
+    "ani_signature_builder.cpp",
+    "concurrency_helpers.cpp",
+  ]
 
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
