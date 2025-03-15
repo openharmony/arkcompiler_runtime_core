@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -13,91 +13,275 @@
  * limitations under the License.
  */
 
-#include "ani_gtest.h"
+#include "ani_gtest_object_ops.h"
 #include <iostream>
 #include <cstdarg>
 
-// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
 namespace ark::ets::ani::testing {
 
-class CallObjectMethodLongTest : public AniTest {
+class CallObjectMethodLongTest : public AniGtestObjectOps {
 public:
-    void NewObject(ani_class cls, ani_object *result)
-    {
-        ani_static_method newMethod;
-        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_C", ":LC;", &newMethod), ANI_OK);
-        ani_ref ref;
-        ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
-
-        *result = static_cast<ani_object>(ref);
-    }
-
-    ani_status TestFuncV(ani_object object, ani_method method, ani_long *result, ...)
-    {
-        va_list args;
-        va_start(args, result);
-        ani_status aniResult = env_->Object_CallMethod_Long_V(object, method, result, args);
-        va_end(args);
-        return aniResult;
-    }
+    static constexpr ani_long INIT_VALUE = 0U;
+    static constexpr ani_long VAL = 2U;
+    static constexpr ani_long VAL1 = 3U;
+    static constexpr ani_long VAL2 = 5U;
+    static constexpr ani_long VAL3 = 6U;
+    static constexpr ani_long VAL4 = 103U;
 };
 
-// ninja ani_test_object_callmethod_long_gtests
-TEST_F(CallObjectMethodLongTest, CallMethodLongTestOK)
+TEST_F(CallObjectMethodLongTest, object_call_method_long_a)
 {
-    ani_class cls;
-    ASSERT_EQ(env_->FindClass("LC;", &cls), ANI_OK);
-    ASSERT_NE(cls, nullptr);
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "longMethod", "JJ:J", &object, &method);
 
-    ani_object obj {};
-    this->NewObject(cls, &obj);
+    ani_value args[2U];
+    ani_long arg1 = VAL;
+    ani_long arg2 = VAL1;
+    args[0U].l = arg1;
+    args[1U].l = arg2;
 
-    ani_method method;
-    ASSERT_EQ(env_->Class_FindMethod(cls, "long_method", "JI:J", &method), ANI_OK);
-
-    ani_long result;
-    ani_value arg1;
-    ani_value arg2;
-    arg1.l = 1L;
-    const int testVal = 121;
-    arg2.i = testVal;
-    ani_long arg3 = 0;
-    // Object_CallMethod_Long
-    ASSERT_EQ(env_->Object_CallMethod_Long(obj, method, &result, arg1, arg2), ANI_OK);
-    ASSERT_EQ(result, arg3);
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Long(env_, obj, method, &result, arg1, arg2), ANI_OK);
-    ASSERT_EQ(result, arg3);
-    // Object_CallMethod_Long_A
-    const std::vector<ani_value> longArgs = {arg1, arg2};
-    ASSERT_EQ(env_->Object_CallMethod_Long_A(obj, method, &result, longArgs.data()), ANI_OK);
-    ASSERT_EQ(result, arg3);
-
-    // Object_CallMethod_Long_V
-    ASSERT_EQ(this->TestFuncV(obj, method, &result, arg1, arg2), ANI_OK);
-    ASSERT_EQ(result, arg3);
+    ani_long sum = INIT_VALUE;
+    ASSERT_EQ(env_->Object_CallMethod_Long_A(object, method, &sum, args), ANI_OK);
+    ASSERT_EQ(sum, arg1 + arg2);
 }
 
-TEST_F(CallObjectMethodLongTest, CallMethodLongTestError)
+TEST_F(CallObjectMethodLongTest, object_call_method_long_v)
 {
-    ani_class cls;
-    ASSERT_EQ(env_->FindClass("LC;", &cls), ANI_OK);
-    ASSERT_NE(cls, nullptr);
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "longMethod", "JJ:J", &object, &method);
 
-    ani_object obj {};
-    this->NewObject(cls, &obj);
+    ani_long sum = INIT_VALUE;
+    ani_long arg1 = VAL;
+    ani_long arg2 = VAL1;
+    ASSERT_EQ(env_->Object_CallMethod_Long(object, method, &sum, arg1, arg2), ANI_OK);
+    ASSERT_EQ(sum, arg1 + arg2);
+}
 
-    ani_method method;
-    ASSERT_EQ(env_->Class_FindMethod(cls, "long_method", "JI:J", &method), ANI_OK);
+TEST_F(CallObjectMethodLongTest, call_method_long_v_invalid_env)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "longMethod", "JJ:J", &object, &method);
 
-    ani_long result;
-    ani_value arg1;
-    ani_value arg2;
-    ASSERT_EQ(env_->Object_CallMethod_Long(obj, method, nullptr, arg1), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Object_CallMethod_Long(obj, nullptr, nullptr, arg1), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Object_CallMethod_Long(nullptr, method, nullptr, arg1), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Object_CallMethod_Long_A(nullptr, method, &result, nullptr), ANI_INVALID_ARGS);
-    ASSERT_EQ(this->TestFuncV(obj, nullptr, &result, arg1, arg2), ANI_INVALID_ARGS);
+    ani_long sum = INIT_VALUE;
+    ani_long arg1 = VAL2;
+    ani_long arg2 = VAL3;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_Long(nullptr, object, method, &sum, arg1, arg2), ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodLongTest, call_method_long_v_invalid_method)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "longMethod", "JJ:J", &object, &method);
+
+    ani_long sum = INIT_VALUE;
+    ani_long arg1 = VAL2;
+    ani_long arg2 = VAL3;
+    ASSERT_EQ(env_->Object_CallMethod_Long(object, nullptr, &sum, arg1, arg2), ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodLongTest, call_method_long_v_invalid_result)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "longMethod", "JJ:J", &object, &method);
+
+    ani_long arg1 = VAL2;
+    ani_long arg2 = VAL3;
+    ASSERT_EQ(env_->Object_CallMethod_Long(object, method, nullptr, arg1, arg2), ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodLongTest, call_method_long_v_invalid_object)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "longMethod", "JJ:J", &object, &method);
+
+    ani_long sum = INIT_VALUE;
+    ani_long arg1 = VAL2;
+    ani_long arg2 = VAL3;
+    ASSERT_EQ(env_->Object_CallMethod_Long(nullptr, method, &sum, arg1, arg2), ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodLongTest, call_method_long_a_invalid_args)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "longMethod", "JJ:J", &object, &method);
+
+    ani_long sum = INIT_VALUE;
+    ASSERT_EQ(env_->Object_CallMethod_Long_A(object, method, &sum, nullptr), ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodLongTest, call_Void_Param_Method)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "longMethodVoidParam", ":J", &object, &method);
+
+    ani_long result = INIT_VALUE;
+    ASSERT_EQ(env_->Object_CallMethod_Long(object, method, &result), ANI_OK);
+    ASSERT_EQ(result, VAL2);
+
+    ani_value args[2U];
+    ASSERT_EQ(env_->Object_CallMethod_Long_A(object, method, &result, args), ANI_OK);
+    ASSERT_EQ(result, VAL2);
+}
+
+TEST_F(CallObjectMethodLongTest, call_Multiple_Param_Method)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "longMethodMultipleParam", "JZFJF:J", &object, &method);
+
+    ani_value args[5U] = {};
+    ani_long arg1 = VAL;
+    ani_boolean arg2 = ANI_TRUE;
+    ani_float arg3 = 3.0F;
+    ani_long arg4 = 4U;
+    ani_float arg5 = 5.0F;
+    args[0U].i = arg1;
+    args[1U].z = arg2;
+    args[2U].f = arg3;
+    args[3U].s = arg4;
+    args[4U].d = arg5;
+
+    ani_long result = INIT_VALUE;
+    ASSERT_EQ(env_->Object_CallMethod_Long(object, method, &result, arg1, arg2, arg3, arg4, arg5), ANI_OK);
+    ASSERT_EQ(result, arg1 + arg4);
+
+    ASSERT_EQ(env_->Object_CallMethod_Long_A(object, method, &result, args), ANI_OK);
+    ASSERT_EQ(result, arg1 + arg4);
+}
+
+TEST_F(CallObjectMethodLongTest, call_Parent_Class_Void_Param_Method)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LB;", "longMethodVoidParam", ":J", &object, &method);
+
+    ani_long result = INIT_VALUE;
+    ASSERT_EQ(env_->Object_CallMethod_Long(object, method, &result), ANI_OK);
+    ASSERT_EQ(result, VAL2);
+
+    ani_value args[2U];
+    ASSERT_EQ(env_->Object_CallMethod_Long_A(object, method, &result, args), ANI_OK);
+    ASSERT_EQ(result, VAL2);
+}
+
+TEST_F(CallObjectMethodLongTest, call_Parent_Class_Method)
+{
+    ani_class clsC {};
+    ASSERT_EQ(env_->FindClass("LC;", &clsC), ANI_OK);
+    ASSERT_NE(clsC, nullptr);
+
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindMethod(clsC, "func", nullptr, &method), ANI_OK);
+    ASSERT_NE(method, nullptr);
+
+    ani_class clsD {};
+    ASSERT_EQ(env_->FindClass("LD;", &clsD), ANI_OK);
+    ASSERT_NE(clsD, nullptr);
+    ani_method ctor {};
+    ASSERT_EQ(env_->Class_FindMethod(clsD, "<ctor>", ":V", &ctor), ANI_OK);
+
+    ani_object object {};
+    ASSERT_EQ(env_->Object_New(clsD, ctor, &object), ANI_OK);
+    ASSERT_NE(object, nullptr);
+
+    ani_long result = 0U;
+    ani_value args[2U] = {};
+    ani_long arg1 = VAL;
+    ani_long arg2 = VAL1;
+    args[0U].l = arg1;
+    args[1U].l = arg2;
+    ASSERT_EQ(env_->Object_CallMethod_Long(object, method, &result, arg1, arg2), ANI_OK);
+    ASSERT_EQ(result, VAL2);
+
+    ASSERT_EQ(env_->Object_CallMethod_Long_A(object, method, &result, args), ANI_OK);
+    ASSERT_EQ(result, VAL2);
+}
+
+TEST_F(CallObjectMethodLongTest, call_Sub_Class_Method)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LE;", "func", nullptr, &object, &method);
+
+    ani_long result = 0U;
+    ani_value args[2U] = {};
+    ani_long arg1 = VAL3;
+    ani_long arg2 = VAL1;
+    args[0U].l = arg1;
+    args[1U].l = arg2;
+    ASSERT_EQ(env_->Object_CallMethod_Long(object, method, &result, arg1, arg2), ANI_OK);
+    ASSERT_EQ(result, VAL1);
+
+    ASSERT_EQ(env_->Object_CallMethod_Long_A(object, method, &result, args), ANI_OK);
+    ASSERT_EQ(result, VAL1);
+}
+
+TEST_F(CallObjectMethodLongTest, multiple_Call_Method)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "longMethod", "JJ:J", &object, &method);
+
+    ani_long result = INIT_VALUE;
+    ani_value args[2U] = {};
+    ani_long arg1 = VAL1;
+    ani_long arg2 = VAL1;
+    args[0U].l = arg1;
+    args[1U].l = arg2;
+
+    for (ani_long i = 0; i < VAL1; i++) {
+        ASSERT_EQ(env_->Object_CallMethod_Long(object, method, &result, arg1, arg2), ANI_OK);
+        ASSERT_EQ(result, VAL3);
+        ASSERT_EQ(env_->Object_CallMethod_Long_A(object, method, &result, args), ANI_OK);
+        ASSERT_EQ(result, VAL3);
+    }
+}
+
+TEST_F(CallObjectMethodLongTest, call_Nested_Method)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "nestedMethod", "JJ:J", &object, &method);
+
+    ani_long result = INIT_VALUE;
+    ani_value args[2U] = {};
+    ani_long arg1 = VAL1;
+    ani_long arg2 = VAL1;
+    args[0U].l = arg1;
+    args[1U].l = arg2;
+
+    ASSERT_EQ(env_->Object_CallMethod_Long(object, method, &result, arg1, arg2), ANI_OK);
+    ASSERT_EQ(result, VAL3);
+
+    ASSERT_EQ(env_->Object_CallMethod_Long_A(object, method, &result, args), ANI_OK);
+    ASSERT_EQ(result, VAL3);
+}
+
+TEST_F(CallObjectMethodLongTest, call_Recursion_Method)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "recursionMethod", "J:J", &object, &method);
+
+    ani_long result = INIT_VALUE;
+    ani_value args[1U] = {};
+    ani_long arg1 = VAL1;
+    args[0U].l = arg1;
+    ASSERT_EQ(env_->Object_CallMethod_Long(object, method, &result, arg1), ANI_OK);
+    ASSERT_EQ(result, VAL4);
+
+    ASSERT_EQ(env_->Object_CallMethod_Long_A(object, method, &result, args), ANI_OK);
+    ASSERT_EQ(result, VAL4);
 }
 }  // namespace ark::ets::ani::testing
 
-// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
+// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
