@@ -55,7 +55,7 @@ function processCreateLocaleError(createLocaleFunction : () => Intl.Locale, msg 
 function processInvalidValues(createLocaleFunction : ((arg : string) => Intl.Locale), msg ?: string) {
     const incorrectValues: ReadonlyArray<string> = Array.of<string>("", " ", "78", "Err", "!!!", "<<>>", "invalid")
     incorrectValues.forEach((invalidValue : string) => {
-        processCreateLocaleError(() => {createLocaleFunction(invalidValue)}, msg)
+        processCreateLocaleError(() => createLocaleFunction(invalidValue), msg)
     })
 }
 
@@ -190,7 +190,7 @@ function testIncorrect() : int {
     }
     {
         // NOTE(ekaterinazaytseva) invalid region
-        processInvalidValues((invalidValue : string) => { new Intl.Locale("ru", {region : invalidValue} as Intl.LocaleOptions)} )
+        processInvalidValues((invalidValue : string) => { return new Intl.Locale("ru", {region : invalidValue} as Intl.LocaleOptions)} )
     }
     {
         // NOTE(ekaterinazaytseva) invalid script
@@ -268,7 +268,7 @@ function testManyExtensions() : int {
                 if (i == j)
                     continue
                 let tag = "ru" + validExtensions[i] + validExtensions[j]
-                processCreateLocaleError(() => { new Intl.Locale(tag)} )
+                processCreateLocaleError(() => { return new Intl.Locale(tag)} )
             }
         }
     }

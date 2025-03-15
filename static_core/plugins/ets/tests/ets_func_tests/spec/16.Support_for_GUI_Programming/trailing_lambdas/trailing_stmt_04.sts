@@ -25,7 +25,7 @@ function is_active(fn: () => int): int {
     return fn()
 }
 
-function with_param(fn: () => int): void {
+function with_param(fn: () => void): void {
     fn()
 }
 
