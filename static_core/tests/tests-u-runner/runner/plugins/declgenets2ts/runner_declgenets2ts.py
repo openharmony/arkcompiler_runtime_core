@@ -30,7 +30,7 @@ from runner.plugins.ets.ets_test_suite import (
     FuncEtsTestSuite,
     RuntimeEtsTestSuite
 )
-from runner.plugins.declgenets2ts.test_declgenets2ts import TestDeclgenETS2TS
+from runner.plugins.declgenets2ts.test_declgenets2ts import DeclgenEts2tsStage, TestDeclgenETS2TS
 from runner.plugins.declgenets2ts.declgenets2ts_suites import DeclgenEtsSuites
 from runner.runner_base import get_test_id
 from runner.runner_file_based import RunnerFileBased
@@ -137,3 +137,18 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
             DeclgenEtsSuites.RUNTIME.value: RuntimeEtsTestSuite,
         }
         return name_to_class.get(ets_suite_name)
+
+    def run(self) -> None:
+        super().run()
+        TestDeclgenETS2TS.results.extend(self.results)
+        TestDeclgenETS2TS.state = DeclgenEts2tsStage.TSC
+        self.tests.clear()
+        for result in self.results:
+            if result.passed:
+                self.tests.add(result)
+        super().run()
+        path_to_result = {result.path: result for result in self.results}
+        for i, result in enumerate(TestDeclgenETS2TS.results):
+            if result.path in path_to_result:
+                TestDeclgenETS2TS.results[i] = path_to_result[result.path]
+        self.results = TestDeclgenETS2TS.results

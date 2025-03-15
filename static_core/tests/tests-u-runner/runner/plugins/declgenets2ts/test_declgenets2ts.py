@@ -17,15 +17,26 @@
 
 from __future__ import annotations
 
+from enum import Enum
 from os import path, makedirs
 from typing import Tuple, Optional, List
 
 from runner.enum_types.fail_kind import FailKind
 from runner.enum_types.params import TestEnv, TestReport, Params
+from runner.test_base import Test
 from runner.test_file_based import TestFileBased
 
 
+class DeclgenEts2tsStage(Enum):
+    DECLGEN = 1
+    TSC = 2
+
+
 class TestDeclgenETS2TS(TestFileBased):
+
+    state: DeclgenEts2tsStage = DeclgenEts2tsStage.DECLGEN
+    results: List[Test] = []
+
     def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str, build_dir: str) -> None:
         super().__init__(test_env, test_path, flags, test_id)
         self.declgen_ets2ts_executor = path.join(
@@ -37,24 +48,24 @@ class TestDeclgenETS2TS(TestFileBased):
         self.decl_path = test_env.work_dir.intermediate
         makedirs(self.decl_path, exist_ok=True)
         name_without_ext, _ = path.splitext(self.test_id)
-        self.test_dts = path.join(self.decl_path, f"{name_without_ext}.d.ts")
-        self.test_ts = path.join(self.decl_path, "ts", f"{name_without_ext}.ts")
-        makedirs(path.dirname(self.test_dts), exist_ok=True)
-        makedirs(path.dirname(self.test_ts), exist_ok=True)
+        self.test_dets = path.join(self.decl_path, f"{name_without_ext}.d.ets")
+        self.test_ets = path.join(self.decl_path, "ets", f"{name_without_ext}.ets")
+        makedirs(path.dirname(self.test_dets), exist_ok=True)
+        makedirs(path.dirname(self.test_ets), exist_ok=True)
 
     def do_run(self) -> TestDeclgenETS2TS:
-        self.passed, self.report, self.fail_kind = self._run_declgen_ets2ts(
-            self.test_dts, self.test_ts)
-        if not self.passed:
-            return self
-        self.passed, self.report, self.fail_kind = self._run_tsc(
-            self.test_dts)
+        if TestDeclgenETS2TS.state == DeclgenEts2tsStage.DECLGEN:
+            self.passed, self.report, self.fail_kind = self._run_declgen_ets2ts(
+                self.test_dets, self.test_ets)
+        elif TestDeclgenETS2TS.state == DeclgenEts2tsStage.TSC:
+            self.passed, self.report, self.fail_kind = self._run_tsc(
+                self.test_dets)
         return self
 
-    def _run_declgen_ets2ts(self, test_dts: str, test_ts: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
+    def _run_declgen_ets2ts(self, test_dets: str, test_ets: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
         declgen_flags = []
-        declgen_flags.append(f"--output-dets={test_dts}")
-        declgen_flags.append(f"--output-ets={test_ts}")
+        declgen_flags.append(f"--output-dets={test_dets}")
+        declgen_flags.append(f"--output-ets={test_ets}")
         declgen_flags.append("--export-all")
         declgen_flags.append(self.path)
 
@@ -72,13 +83,15 @@ class TestDeclgenETS2TS(TestFileBased):
         passed, report, fail_kind = self.run_one_step(
             name="declgen_ets2ts",
             params=params,
-            result_validator=lambda _, _2, rc: self._validate_declgen_ets2ts(rc, test_dts)
+            result_validator=lambda _, _2, rc: self._validate_declgen_ets2ts(rc, test_dets)
         )
         return passed, report, fail_kind
 
-    def _run_tsc(self, test_dts: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
+    def _run_tsc(self, test_dets: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
         tsc_flags = []
-        tsc_flags.append(test_dts)
+        tsc_flags.append("--lib")
+        tsc_flags.append("es2020")
+        tsc_flags.append(test_dets)
 
         params = Params(
             executor=self.tsc_executor,
@@ -103,4 +116,3 @@ class TestDeclgenETS2TS(TestFileBased):
 
     def _validate_tsc(self, return_code: int) -> bool:
         return return_code == 0
-    
