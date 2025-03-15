@@ -52,7 +52,7 @@ cases:
       import * as dm from "./declaration_module.sts"
     use: |-
       let myNumber: dm.NullableNumber;
-      assertTrue(typeof myNumber == 'undefined' );
+      assertTrue( (typeof myNumber as string) == 'undefined' );
       myNumber = 1;
       assertTrue(typeof myNumber == 'number' );
       myNumber = null;

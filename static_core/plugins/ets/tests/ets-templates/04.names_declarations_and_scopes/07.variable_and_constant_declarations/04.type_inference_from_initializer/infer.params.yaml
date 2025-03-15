@@ -49,3 +49,24 @@ cases:
       const b = new B();  // inferred type B
     use: a = b;
     assert: a instanceof A && b instanceof B && a === b
+
+  - decl: let myV = undefined
+    assert: typeof myV == "undefined"
+
+  - decl: let myV = true
+    assert: typeof myV == "boolean"
+
+  - decl: let myV = "true"
+    assert: typeof myV == "string"
+
+  - decl: declare const myC = 1
+    assert: typeof myC == "number"
+
+  - decl: declare const myC = 2.0
+    assert: typeof myC == "number"
+
+  - decl: declare const myC = "1"
+    assert: typeof myC == "string"
+
+  - decl: declare const myC = "string"
+    assert: typeof myC == "string"

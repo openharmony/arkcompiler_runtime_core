@@ -35,18 +35,6 @@
 03.types/08.reference_types/04.literal_types/overriding_literal_types_0.sts
 03.types/08.reference_types/04.literal_types/overriding_literal_types_1.sts
 
-# fix as part of PR 3375
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_35.sts
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_36.sts
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_37.sts
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_40.sts
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_41.sts
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_44.sts
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_45.sts
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_46.sts
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_47.sts
-# end PR 3375
-
 #20774 rest parameter doesn`t work with tuples
 03.types/08.reference_types/04.literal_types/function_literal_type_18.sts
 
@@ -263,38 +251,34 @@
 04.names_declarations_and_scopes/05.accesible/type_name_variable_enum.sts
 04.names_declarations_and_scopes/05.accesible/type_name_interface_prop_23.sts
 
-#22791 - Array, FixedArray not implemented yet
-17.experimental_features/02.fixed_array_types/fixed_array_0.sts
-17.experimental_features/02.fixed_array_types/fixed_array_1.sts
-17.experimental_features/02.fixed_array_types/fixed_array_2.sts
-17.experimental_features/02.fixed_array_types/fixed_array_3.sts
-17.experimental_features/02.fixed_array_types/fixed_array_4.sts
-17.experimental_features/02.fixed_array_types/fixed_array_5.sts
-17.experimental_features/02.fixed_array_types/fixed_array_6.sts
-17.experimental_features/02.fixed_array_types/fixed_array_7.sts
-17.experimental_features/02.fixed_array_types/fixed_array_8.sts
-17.experimental_features/02.fixed_array_types/fixed_array_9.sts
-
-#22786
-13.compilation_units/08.namespace_declarations/simple_spec_pos4.sts
-#end of #22786
-
-#22846
-13.compilation_units/08.namespace_declarations/pack1/namespace_package3.sts
-#end of 22846
-
 #19720
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_8.sts
 
 #20367
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_4.sts
 
+#23134
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_16.sts
+
 #21833 null-safety violations, value was not initialized
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/02.constant_declarations/const_decl_5.sts
+
 # ES2PANDA_NEG_FAIL
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_3.sts
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_7.sts
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.type_compatibility_with_initializer/initializer_compatibility_n_8.sts
+
+# not implemented
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.type_compatibility_with_initializer/initializer_compatibility_8.sts
+
+#23643
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_12.sts
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_13.sts
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_14.sts
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_15.sts
+
+#23648
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_n.sts
 
 #23499 CTE instead of successful compilation
 02.lexical_elements/07.keywords/reserved_3.sts
@@ -365,8 +349,10 @@
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_n_0.sts
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_n_1.sts
 
-# not implemented
-04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.type_compatibility_with_initializer/initializer_compatibility_8.sts
+#22791 - Array, FixedArray not implemented yet
+04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_12.sts
+04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_13.sts
+04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_14.sts
 
 #19926 FailKind.ES2PANDA_FAIL not implemented yet
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_2.sts
@@ -603,6 +589,27 @@
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_5.sts
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_6.sts
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_7.sts
+
+# 20214 Generic lambda is not supported by compiler
+05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_0.sts
+05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_1.sts
+05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_2.sts
+05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_3.sts
+05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_4.sts
+05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_5.sts
+05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_6.sts
+05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_0.sts
+05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_1.sts
+05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_2.sts
+05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_3.sts
+05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_4.sts
+05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_5.sts
+05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_6.sts
+05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_n_3.sts
+
+# 20215 es2panda aborts on function types in generic type arguments
+05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_1.sts
+05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_1.sts
 
 #22852
 05.generics/03.utility_types/01.partial_utility_type/partial_inherit3.sts
@@ -1811,6 +1818,13 @@
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_25.sts
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_53.sts
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_79.sts
+#end of #19909
+
+#19909
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_24.sts
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_25.sts
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_53.sts
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_79.sts
 
 #19926 FailKind.ES2PANDA_FAIL not implemented yet
 07.expressions/30.conditional_expressions/conditional_expression_object_2.sts
@@ -1991,6 +2005,9 @@
 #23076
 13.compilation_units/05.declaration_modules/declaration_modules_5.sts
 
+#21157
+13.compilation_units/03.import_directives/05.type_binding/type_binding_class_same_name_2.sts
+
 #22881
 13.compilation_units/05.declaration_modules/declaration_modules_3.sts
 13.compilation_units/05.declaration_modules/declaration_modules_4.sts
@@ -2003,6 +2020,9 @@
 13.compilation_units/05.declaration_modules/declaration_modules_0.sts
 13.compilation_units/05.declaration_modules/declaration_modules_1.sts
 
+#20763 cyclic dependencies don't cause compile-time error
+13.compilation_units/06.compilation_unit_initialization/module/cyclic_dependency/test.sts
+13.compilation_units/06.compilation_unit_initialization/package/cyclic_dependency/pkgA/test.sts
 # 20214 Generic lambda is not supported by compiler
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_0.sts
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_1.sts
@@ -2029,6 +2049,14 @@
 
 #22846
 13.compilation_units/08.namespace_declarations/pack1/namespace_package3.sts
+
+#22786
+13.compilation_units/08.namespace_declarations/simple_spec_pos4.sts
+#end of #22786
+
+#22846
+13.compilation_units/08.namespace_declarations/pack1/namespace_package3.sts
+#end of 22846
 
 #22704
 15.semantic_rules/03.supertyping/supertyping_among_array_types/cast_to_class_n_1.sts
@@ -2067,6 +2095,9 @@
 
 #23477: Bad candidate function invoked
 15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/ex_6_1.sts
+
+#23115
+15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/interface_override_with_object_example_return_4.sts
 
 #23537
 15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_18.sts
@@ -2309,7 +2340,6 @@
 #23493
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_exp_val_2.sts
 
-
 # ES2PANDA_NEG_FAIL
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_0.sts
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_1.sts
@@ -2322,6 +2352,17 @@
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_6.sts
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_6.sts
 
+#22791 - Array, FixedArray not implemented yet
+17.experimental_features/02.fixed_array_types/fixed_array_0.sts
+17.experimental_features/02.fixed_array_types/fixed_array_1.sts
+17.experimental_features/02.fixed_array_types/fixed_array_2.sts
+17.experimental_features/02.fixed_array_types/fixed_array_3.sts
+17.experimental_features/02.fixed_array_types/fixed_array_4.sts
+17.experimental_features/02.fixed_array_types/fixed_array_5.sts
+17.experimental_features/02.fixed_array_types/fixed_array_6.sts
+17.experimental_features/02.fixed_array_types/fixed_array_7.sts
+17.experimental_features/02.fixed_array_types/fixed_array_8.sts
+17.experimental_features/02.fixed_array_types/fixed_array_9.sts
 
 #14563 Verifier failure on unboxing in array dimension expression
 17.experimental_features/03.array_creation_expressions/expr_1.sts
@@ -2588,6 +2629,9 @@
 # 23115
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/interface_override_with_object_example_return_4.sts
 # endof 23115
+
+#21157 Annotation name coinciding with type name gets compiled but shouldn't
+18.annotations/01.declaring_annotations/declaration_coincide_name_n_1.sts
 
 #23368
 18.annotations/02.using_annotations/using_annotations_n_10.sts
