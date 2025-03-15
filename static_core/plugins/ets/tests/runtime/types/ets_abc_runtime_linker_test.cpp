@@ -85,13 +85,13 @@ private:
 
 TEST_F(EtsAbcRuntimeLinkerTest, AbcFileMemoryLayout)
 {
-    EtsClass *abcFileClass = vm_->GetClassLinker()->GetAbcFileClass();
+    EtsClass *abcFileClass = PlatformTypes(vm_)->coreAbcFile;
     MirrorFieldInfo::CompareMemberOffsets(abcFileClass, GetEtsAbcClassMembers());
 }
 
 TEST_F(EtsAbcRuntimeLinkerTest, AbcRuntimeLinkerMemoryLayout)
 {
-    EtsClass *abcRuntimeLinkerClass = vm_->GetClassLinker()->GetAbcRuntimeLinkerClass();
+    EtsClass *abcRuntimeLinkerClass = PlatformTypes(vm_)->coreAbcRuntimeLinker;
     MirrorFieldInfo::CompareMemberOffsets(abcRuntimeLinkerClass, GetEtsAbcRuntimeLinkerClassMembers());
 }
 

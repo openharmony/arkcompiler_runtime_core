@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,7 +87,7 @@ protected:
 // and at the same offsets
 TEST_F(EtsSyncPrimitivesTest, WaitersListMemoryLayout)
 {
-    auto *waitersListClass = vm_->GetClassLinker()->GetWaitersListClass();
+    auto *waitersListClass = PlatformTypes(vm_)->coreWaitersList;
     MirrorFieldInfo::CompareMemberOffsets(waitersListClass, GetWaitersListMembers());
 }
 
@@ -95,7 +95,7 @@ TEST_F(EtsSyncPrimitivesTest, WaitersListMemoryLayout)
 // and at the same offsets
 TEST_F(EtsSyncPrimitivesTest, MutexMemoryLayout)
 {
-    auto *mutexClass = vm_->GetClassLinker()->GetMutexClass();
+    auto *mutexClass = PlatformTypes(vm_)->coreMutex;
     MirrorFieldInfo::CompareMemberOffsets(mutexClass, GetMutexMembers());
 }
 
@@ -103,7 +103,7 @@ TEST_F(EtsSyncPrimitivesTest, MutexMemoryLayout)
 // and at the same offsets
 TEST_F(EtsSyncPrimitivesTest, EventMemoryLayout)
 {
-    auto *eventClass = vm_->GetClassLinker()->GetEventClass();
+    auto *eventClass = PlatformTypes(vm_)->coreEvent;
     MirrorFieldInfo::CompareMemberOffsets(eventClass, GetEventMembers());
 }
 
@@ -111,7 +111,7 @@ TEST_F(EtsSyncPrimitivesTest, EventMemoryLayout)
 // and at the same offsets
 TEST_F(EtsSyncPrimitivesTest, CondVarMemoryLayout)
 {
-    auto *condVarClass = vm_->GetClassLinker()->GetCondVarClass();
+    auto *condVarClass = PlatformTypes(vm_)->coreCondVar;
     MirrorFieldInfo::CompareMemberOffsets(condVarClass, GetCondVarMembers());
 }
 

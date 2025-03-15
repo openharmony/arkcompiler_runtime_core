@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,49 +77,49 @@ using EtsArrayBoxedDoubleTest = EtsArrayObjectMembers<EtsBoxPrimitive<EtsDouble>
 
 TEST_F(EtsArrayBoxedBooleanTest, MemoryLayout)
 {
-    EtsClass *klass = vm_->GetClassLinker()->GetArrayClass();
+    EtsClass *klass = PlatformTypes(vm_)->escompatArray;
     MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
 }
 
 TEST_F(EtsArrayBoxedByteTest, MemoryLayout)
 {
-    EtsClass *klass = vm_->GetClassLinker()->GetArrayClass();
+    EtsClass *klass = PlatformTypes(vm_)->escompatArray;
     MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
 }
 
 TEST_F(EtsArrayBoxedCharTest, MemoryLayout)
 {
-    EtsClass *klass = vm_->GetClassLinker()->GetArrayClass();
+    EtsClass *klass = PlatformTypes(vm_)->escompatArray;
     MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
 }
 
 TEST_F(EtsArrayBoxedShortTest, MemoryLayout)
 {
-    EtsClass *klass = vm_->GetClassLinker()->GetArrayClass();
+    EtsClass *klass = PlatformTypes(vm_)->escompatArray;
     MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
 }
 
 TEST_F(EtsArrayBoxedIntTest, MemoryLayout)
 {
-    EtsClass *klass = vm_->GetClassLinker()->GetArrayClass();
+    EtsClass *klass = PlatformTypes(vm_)->escompatArray;
     MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
 }
 
 TEST_F(EtsArrayBoxedLongTest, MemoryLayout)
 {
-    EtsClass *klass = vm_->GetClassLinker()->GetArrayClass();
+    EtsClass *klass = PlatformTypes(vm_)->escompatArray;
     MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
 }
 
 TEST_F(EtsArrayBoxedFloatTest, MemoryLayout)
 {
-    EtsClass *klass = vm_->GetClassLinker()->GetArrayClass();
+    EtsClass *klass = PlatformTypes(vm_)->escompatArray;
     MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
 }
 
 TEST_F(EtsArrayBoxedDoubleTest, MemoryLayout)
 {
-    EtsClass *klass = vm_->GetClassLinker()->GetArrayClass();
+    EtsClass *klass = PlatformTypes(vm_)->escompatArray;
     MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
 }
 

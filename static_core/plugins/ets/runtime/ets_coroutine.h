@@ -32,7 +32,7 @@ public:
     NO_COPY_SEMANTIC(EtsCoroutine);
     NO_MOVE_SEMANTIC(EtsCoroutine);
 
-    enum class DataIdx { INTEROP_CTX_PTR, LAST_ID };
+    enum class DataIdx { ETS_PLATFORM_TYPES_PTR, INTEROP_CTX_PTR, LAST_ID };
     using LocalStorage = StaticLocalStorage<DataIdx>;
 
     /**

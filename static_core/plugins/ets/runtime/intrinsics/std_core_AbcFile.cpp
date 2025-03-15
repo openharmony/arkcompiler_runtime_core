@@ -36,8 +36,7 @@ namespace ark::ets::intrinsics {
 static EtsAbcFile *CreateAbcFile(EtsCoroutine *coro, ClassLinkerContext *ctx,
                                  std::unique_ptr<const panda_file::File> &&pf)
 {
-    auto *abcFileClass = coro->GetPandaVM()->GetClassLinker()->GetAbcFileClass();
-    auto *abcFile = EtsAbcFile::FromEtsObject(EtsObject::Create(coro, abcFileClass));
+    auto *abcFile = EtsAbcFile::FromEtsObject(EtsObject::Create(coro, PlatformTypes(coro)->coreAbcFile));
     abcFile->SetPandaFile(pf.get());
 
     Runtime::GetCurrent()->GetClassLinker()->AddPandaFile(std::move(pf), ctx);

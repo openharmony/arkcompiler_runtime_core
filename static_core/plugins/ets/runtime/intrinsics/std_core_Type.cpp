@@ -54,23 +54,23 @@ static EtsByte GetRefTypeKind(const EtsClass *refType)
     EtsByte result;
 
     if (refType->IsBoxed()) {
-        const auto *runtimeClass = refType->GetRuntimeClass();
-        auto *ext = PandaEtsVM::GetCurrent()->GetClassLinker()->GetEtsClassLinkerExtension();
-        if (runtimeClass == ext->GetBoxBooleanClass()) {
+        const auto *runtimeClass = refType;
+        auto ptypes = PlatformTypes(EtsCoroutine::GetCurrent());
+        if (runtimeClass == ptypes->coreBoolean) {
             result = static_cast<EtsByte>(EtsTypeAPIKind::BOOLEAN);
-        } else if (runtimeClass == ext->GetBoxByteClass()) {
+        } else if (runtimeClass == ptypes->coreByte) {
             result = static_cast<EtsByte>(EtsTypeAPIKind::BYTE);
-        } else if (runtimeClass == ext->GetBoxCharClass()) {
+        } else if (runtimeClass == ptypes->coreChar) {
             result = static_cast<EtsByte>(EtsTypeAPIKind::CHAR);
-        } else if (runtimeClass == ext->GetBoxShortClass()) {
+        } else if (runtimeClass == ptypes->coreShort) {
             result = static_cast<EtsByte>(EtsTypeAPIKind::SHORT);
-        } else if (runtimeClass == ext->GetBoxIntClass()) {
+        } else if (runtimeClass == ptypes->coreInt) {
             result = static_cast<EtsByte>(EtsTypeAPIKind::INT);
-        } else if (runtimeClass == ext->GetBoxLongClass()) {
+        } else if (runtimeClass == ptypes->coreLong) {
             result = static_cast<EtsByte>(EtsTypeAPIKind::LONG);
-        } else if (runtimeClass == ext->GetBoxFloatClass()) {
+        } else if (runtimeClass == ptypes->coreFloat) {
             result = static_cast<EtsByte>(EtsTypeAPIKind::FLOAT);
-        } else if (runtimeClass == ext->GetBoxDoubleClass()) {
+        } else if (runtimeClass == ptypes->coreDouble) {
             result = static_cast<EtsByte>(EtsTypeAPIKind::DOUBLE);
         } else {
             UNREACHABLE();

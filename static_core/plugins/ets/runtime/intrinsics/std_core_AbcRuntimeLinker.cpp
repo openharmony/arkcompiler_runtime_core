@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "ets_platform_types.h"
 #include "file.h"
 #include "include/object_header.h"
 #include "intrinsics.h"
@@ -41,8 +42,7 @@ void EtsAbcRuntimeLinkerAddNewAbcFiles(EtsAbcRuntimeLinker *runtimeLinker, Objec
     EtsHandle currentAbcFilesHandle(coro, linkerHandle->GetAbcFiles());
     auto currentLength = currentAbcFilesHandle->GetLength();
     auto resultLength = newAbcFilesHandle->GetLength() + currentLength;
-    EtsHandle resultAbcFilesHandle(
-        coro, EtsObjectArray::Create(coro->GetPandaVM()->GetClassLinker()->GetAbcFileClass(), resultLength));
+    EtsHandle resultAbcFilesHandle(coro, EtsObjectArray::Create(PlatformTypes(coro)->coreAbcFile, resultLength));
     if (UNLIKELY(resultAbcFilesHandle.GetPtr() == nullptr)) {
         ASSERT(coro->HasPendingException());
         return;

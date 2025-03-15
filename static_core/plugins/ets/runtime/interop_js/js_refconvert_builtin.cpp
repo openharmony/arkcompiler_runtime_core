@@ -366,6 +366,7 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
     auto coro = EtsCoroutine::GetCurrent();
     PandaEtsVM *vm = coro->GetPandaVM();
     EtsClassLinkerExtension *linkerExt = vm->GetClassLinker()->GetEtsClassLinkerExtension();
+    auto ptypes = PlatformTypes(coro);
 
     RegisterBuiltinRefConvertor<JSConvertJSValue>(cache, ctx->GetJSValueClass());
     RegisterBuiltinRefConvertor<JSConvertJSError>(cache, ctx->GetJSErrorClass());
@@ -375,14 +376,14 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
     RegisterBuiltinRefConvertor<JSConvertArrayBuffer>(cache, ctx->GetArrayBufferClass());
     RegisterBuiltinRefConvertor<JSConvertEtsNull>(cache, ctx->GetNullValueClass());
 
-    RegisterBuiltinRefConvertor<JSConvertStdlibBoolean>(cache, linkerExt->GetBoxBooleanClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibByte>(cache, linkerExt->GetBoxByteClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibChar>(cache, linkerExt->GetBoxCharClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibShort>(cache, linkerExt->GetBoxShortClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibInt>(cache, linkerExt->GetBoxIntClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibLong>(cache, linkerExt->GetBoxLongClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibFloat>(cache, linkerExt->GetBoxFloatClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibDouble>(cache, linkerExt->GetBoxDoubleClass());
+    RegisterBuiltinRefConvertor<JSConvertStdlibBoolean>(cache, ptypes->coreBoolean->GetRuntimeClass());
+    RegisterBuiltinRefConvertor<JSConvertStdlibByte>(cache, ptypes->coreByte->GetRuntimeClass());
+    RegisterBuiltinRefConvertor<JSConvertStdlibChar>(cache, ptypes->coreChar->GetRuntimeClass());
+    RegisterBuiltinRefConvertor<JSConvertStdlibShort>(cache, ptypes->coreShort->GetRuntimeClass());
+    RegisterBuiltinRefConvertor<JSConvertStdlibInt>(cache, ptypes->coreInt->GetRuntimeClass());
+    RegisterBuiltinRefConvertor<JSConvertStdlibLong>(cache, ptypes->coreLong->GetRuntimeClass());
+    RegisterBuiltinRefConvertor<JSConvertStdlibFloat>(cache, ptypes->coreFloat->GetRuntimeClass());
+    RegisterBuiltinRefConvertor<JSConvertStdlibDouble>(cache, ptypes->coreDouble->GetRuntimeClass());
 
     RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_U1, JSConvertU1>(cache, linkerExt);
     RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_I32, JSConvertI32>(cache, linkerExt);

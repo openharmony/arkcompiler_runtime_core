@@ -31,28 +31,28 @@ EtsBoxPrimitive<T> *EtsBoxPrimitive<T>::Create(EtsCoroutine *coro, T value)
 template <typename T>
 Class *EtsBoxPrimitive<T>::GetBoxClass(EtsCoroutine *coro)
 {
-    auto *ext = coro->GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
-    Class *boxClass = nullptr;
+    auto ptypes = PlatformTypes(coro);
+    EtsClass *boxClass = nullptr;
 
     if constexpr (std::is_same<T, EtsBoolean>::value) {
-        boxClass = ext->GetBoxBooleanClass();
+        boxClass = ptypes->coreBoolean;
     } else if constexpr (std::is_same<T, EtsByte>::value) {
-        boxClass = ext->GetBoxByteClass();
+        boxClass = ptypes->coreByte;
     } else if constexpr (std::is_same<T, EtsChar>::value) {
-        boxClass = ext->GetBoxCharClass();
+        boxClass = ptypes->coreChar;
     } else if constexpr (std::is_same<T, EtsShort>::value) {
-        boxClass = ext->GetBoxShortClass();
+        boxClass = ptypes->coreShort;
     } else if constexpr (std::is_same<T, EtsInt>::value) {
-        boxClass = ext->GetBoxIntClass();
+        boxClass = ptypes->coreInt;
     } else if constexpr (std::is_same<T, EtsLong>::value) {
-        boxClass = ext->GetBoxLongClass();
+        boxClass = ptypes->coreLong;
     } else if constexpr (std::is_same<T, EtsFloat>::value) {
-        boxClass = ext->GetBoxFloatClass();
+        boxClass = ptypes->coreFloat;
     } else if constexpr (std::is_same<T, EtsDouble>::value) {
-        boxClass = ext->GetBoxDoubleClass();
+        boxClass = ptypes->coreDouble;
     }
-    ASSERT(EtsClass::FromRuntimeClass(boxClass)->IsBoxed());
-    return boxClass;
+    ASSERT(boxClass->IsBoxed());
+    return boxClass->GetRuntimeClass();
 }
 
 }  // namespace ark::ets

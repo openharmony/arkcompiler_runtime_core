@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,14 @@
 
 #include "plugins/ets/runtime/types/ets_typeapi_parameter.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
 namespace ark::ets {
 
 EtsTypeAPIParameter *EtsTypeAPIParameter::Create(EtsCoroutine *etsCoroutine)
 {
-    EtsClass *klass = etsCoroutine->GetPandaVM()->GetClassLinker()->GetTypeAPIParameterClass();
+    EtsClass *klass = PlatformTypes(etsCoroutine)->coreParameter;
     EtsObject *etsObject = EtsObject::Create(etsCoroutine, klass);
     return reinterpret_cast<EtsTypeAPIParameter *>(etsObject);
 }

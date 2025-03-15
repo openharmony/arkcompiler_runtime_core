@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/types/ets_job.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
 namespace ark::ets {
@@ -23,7 +24,7 @@ namespace ark::ets {
 EtsJob *EtsJob::Create(EtsCoroutine *coro)
 {
     [[maybe_unused]] EtsHandleScope scope(coro);
-    auto *klass = coro->GetPandaVM()->GetClassLinker()->GetJobClass();
+    auto *klass = PlatformTypes(coro)->coreJob;
     auto hJob = EtsHandle<EtsJob>(coro, EtsJob::FromEtsObject(EtsObject::Create(coro, klass)));
     auto *mutex = EtsMutex::Create(coro);
     hJob->SetMutex(coro, mutex);

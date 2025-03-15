@@ -577,7 +577,7 @@ void EtsClassLinkerExtension::InitializeBuiltinSpecialClasses()
     using namespace panda_file_items::class_descriptors;
 
     CacheClass(STRING, [](auto *c) { c->SetValueTyped(); });
-    nullValueClass_ = CacheClass(NULL_VALUE, [](auto *c) {
+    CacheClass(NULL_VALUE, [](auto *c) {
         c->SetNullValue();
         c->SetValueTyped();
     });
@@ -585,19 +585,25 @@ void EtsClassLinkerExtension::InitializeBuiltinSpecialClasses()
         c->SetBoxed();
         c->SetValueTyped();
     };
-    boxBooleanClass_ = CacheClass(BOX_BOOLEAN, setupBoxedFlags);
-    boxByteClass_ = CacheClass(BOX_BYTE, setupBoxedFlags);
-    boxCharClass_ = CacheClass(BOX_CHAR, setupBoxedFlags);
-    boxShortClass_ = CacheClass(BOX_SHORT, setupBoxedFlags);
-    boxIntClass_ = CacheClass(BOX_INT, setupBoxedFlags);
-    boxLongClass_ = CacheClass(BOX_LONG, setupBoxedFlags);
-    boxFloatClass_ = CacheClass(BOX_FLOAT, setupBoxedFlags);
-    boxDoubleClass_ = CacheClass(BOX_DOUBLE, setupBoxedFlags);
-    bigintClass_ = CacheClass(BIG_INT, [](auto *c) {
+    CacheClass(BOX_BOOLEAN, setupBoxedFlags);
+    CacheClass(BOX_BYTE, setupBoxedFlags);
+    CacheClass(BOX_CHAR, setupBoxedFlags);
+    CacheClass(BOX_SHORT, setupBoxedFlags);
+    CacheClass(BOX_INT, setupBoxedFlags);
+    CacheClass(BOX_LONG, setupBoxedFlags);
+    CacheClass(BOX_FLOAT, setupBoxedFlags);
+    CacheClass(BOX_DOUBLE, setupBoxedFlags);
+    CacheClass(BIG_INT, [](auto *c) {
         c->SetBigInt();
         c->SetValueTyped();
     });
-    functionClass_ = CacheClass(FUNCTION, [](auto *c) { c->SetFunction(); });
+    CacheClass(FUNCTION, [](auto *c) { c->SetFunction(); });
+
+    CacheClass(FINALIZABLE_WEAK_REF, [](auto *c) {
+        c->SetFinalizeReference();
+        c->SetWeakReference();
+    });
+    CacheClass(WEAK_REF, [](auto *c) { c->SetWeakReference(); });
 }
 
 void EtsClassLinkerExtension::InitializeBuiltinClasses()
@@ -607,50 +613,14 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
 
     InitializeBuiltinSpecialClasses();
 
-    runtimeLinkerClass_ = CacheClass(RUNTIME_LINKER);
-    bootRuntimeLinkerClass_ = CacheClass(BOOT_RUNTIME_LINKER);
-    abcFileClass_ = CacheClass(ABC_FILE);
-    abcRuntimeLinkerClass_ = CacheClass(ABC_RUNTIME_LINKER);
-    promiseClass_ = CacheClass(PROMISE);
-    if (promiseClass_ != nullptr) {
-        subscribeOnAnotherPromiseMethod_ = EtsMethod::ToRuntimeMethod(
-            EtsClass::FromRuntimeClass(promiseClass_)->GetMethod("subscribeOnAnotherPromise"));
-        ASSERT(subscribeOnAnotherPromiseMethod_ != nullptr);
-    }
-    promiseRefClass_ = CacheClass(PROMISE_REF);
-    jobClass_ = CacheClass(JOB);
-    waiterListClass_ = CacheClass(WAITERS_LIST);
-    mutexClass_ = CacheClass(MUTEX);
-    eventClass_ = CacheClass(EVENT);
-    condVarClass_ = CacheClass(COND_VAR);
-    exceptionClass_ = CacheClass(EXCEPTION);
-    errorClass_ = CacheClass(ERROR);
-    arraybufClass_ = CacheClass(ARRAY_BUFFER);
-    stringBuilderClass_ = CacheClass(STRING_BUILDER);
-    arrayAsListIntClass_ = CacheClass(ARRAY_AS_LIST_INT);
-    arrayClass_ = CacheClass(ARRAY);
-    typeapiFieldClass_ = CacheClass(FIELD);
-    typeapiMethodClass_ = CacheClass(METHOD);
-    typeapiParameterClass_ = CacheClass(PARAMETER);
-    sharedMemoryClass_ = CacheClass(SHARED_MEMORY);
-    jsvalueClass_ = CacheClass(JS_VALUE);
-    finalizableWeakClass_ = CacheClass(FINALIZABLE_WEAK_REF, [](auto *c) {
-        c->SetFinalizeReference();
-        c->SetWeakReference();
-    });
-    CacheClass(WEAK_REF, [](auto *c) { c->SetWeakReference(); });
-    finalizationRegistryClass_ = CacheClass(FINALIZATION_REGISTRY);
-    if (finalizationRegistryClass_ != nullptr) {
-        finalizationRegistryExecCleanupMethod_ = EtsMethod::ToRuntimeMethod(
-            EtsClass::FromRuntimeClass(finalizationRegistryClass_)->GetMethod("execCleanup"));
-        ASSERT(finalizationRegistryExecCleanupMethod_ != nullptr);
-    }
+    plaformTypes_ = PandaUniquePtr<EtsPlatformTypes>(
+        Runtime::GetCurrent()->GetInternalAllocator()->New<EtsPlatformTypes>(EtsCoroutine::GetCurrent()));
 
-    auto coro = EtsCoroutine::GetCurrent();
-    coro->SetPromiseClass(promiseClass_);
-    coro->SetJobClass(jobClass_);
     // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields
     // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
+    auto coro = EtsCoroutine::GetCurrent();
+    coro->SetPromiseClass(GetPlatformTypes()->corePromise->GetRuntimeClass());
+    coro->SetJobClass(GetPlatformTypes()->coreJob->GetRuntimeClass());
     coro->SetStringClassPtr(GetClassRoot(ClassRoot::STRING));
     coro->SetArrayU16ClassPtr(GetClassRoot(ClassRoot::ARRAY_U16));
     coro->SetArrayU8ClassPtr(GetClassRoot(ClassRoot::ARRAY_U8));
@@ -670,8 +640,7 @@ static EtsRuntimeLinker *CreateBootRuntimeLinker(ClassLinkerContext *ctx)
 {
     ASSERT(ctx->IsBootContext());
     ASSERT(ctx->GetRefToLinker() == nullptr);
-    auto *klass = PandaEtsVM::GetCurrent()->GetClassLinker()->GetBootRuntimeLinkerClass();
-    auto *etsObject = EtsObject::Create(klass);
+    auto *etsObject = EtsObject::Create(PlatformTypes()->coreBootRuntimeLinker);
     if (UNLIKELY(etsObject == nullptr)) {
         LOG(FATAL, CLASS_LINKER) << "Could not allocate BootRuntimeLinker";
     }

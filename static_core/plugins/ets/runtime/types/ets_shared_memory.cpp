@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_class.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_shared_memory.h"
 #include "plugins/ets/runtime/types/ets_shared_memory-inl.h"
 
@@ -53,7 +54,7 @@ EtsSharedMemory *EtsSharedMemory::Create(size_t length)
     auto *currentCoro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(currentCoro);
 
-    auto cls = currentCoro->GetPandaVM()->GetClassLinker()->GetSharedMemoryClass();
+    auto cls = PlatformTypes(currentCoro)->escompatSharedMemory;
     // Note: This object must be non-movable since the 'waiter_' pointer is shared between different threads
     EtsHandle<EtsSharedMemory> hmem(currentCoro, EtsSharedMemory::FromEtsObject(EtsObject::CreateNonMovable(cls)));
     auto *arrayPtr = EtsByteArray::Create(length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);

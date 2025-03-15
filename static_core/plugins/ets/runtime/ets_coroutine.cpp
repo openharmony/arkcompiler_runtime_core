@@ -60,8 +60,10 @@ void EtsCoroutine::Initialize()
     etsNapiEnv_ = etsNapiEnv.Value();
     // Main EtsCoroutine is Initialized before class linker and promise_class_ptr_ will be set after creating the class
     if (Runtime::GetCurrent()->IsInitialized()) {
-        promiseClassPtr_ = GetPandaVM()->GetClassLinker()->GetPromiseClass()->GetRuntimeClass();
-        nullValue_ = GetPandaVM()->GetNullValue();
+        promiseClassPtr_ = PlatformTypes(GetPandaVM())->corePromise->GetRuntimeClass();
+        SetupNullValue(GetPandaVM()->GetNullValue());
+        GetLocalStorage().Set<EtsCoroutine::DataIdx::ETS_PLATFORM_TYPES_PTR>(
+            ToUintPtr(GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension()->GetPlatformTypes()));
         // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields
         // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
         auto *linkExt = GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
@@ -94,13 +96,11 @@ void EtsCoroutine::RequestCompletion(Value returnValue)
         return;
     }
     auto *storage = GetVM()->GetGlobalObjectStorage();
-    auto *completionObj = storage->Get(completionObjRef);
-    auto *promiseKlassPtr = GetPandaVM()->GetClassLinker()->GetPromiseClass()->GetRuntimeClass();
-    auto *jobKlassPtr = GetPandaVM()->GetClassLinker()->GetJobClass()->GetRuntimeClass();
+    auto *completionObj = EtsObject::FromCoreType(storage->Get(completionObjRef));
 
-    if (completionObj->IsInstanceOf(promiseKlassPtr)) {
+    if (completionObj->IsInstanceOf(PlatformTypes(this)->corePromise)) {
         RequestPromiseCompletion(completionObjRef, returnValue);
-    } else if (completionObj->IsInstanceOf(jobKlassPtr)) {
+    } else if (completionObj->IsInstanceOf(PlatformTypes(this)->coreJob)) {
         RequestJobCompletion(completionObjRef, returnValue);
     } else {
         UNREACHABLE();
@@ -186,7 +186,7 @@ void EtsCoroutine::RequestPromiseCompletion(mem::Reference *promiseRef, Value re
         intrinsics::EtsPromiseReject(hpromise.GetPtr(), EtsObject::FromCoreType(exc));
         return;
     }
-    if (retObject != nullptr && retObject->IsInstanceOf(GetPandaVM()->GetClassLinker()->GetPromiseClass())) {
+    if (retObject != nullptr && retObject->IsInstanceOf(PlatformTypes(this)->corePromise)) {
         retObject = GetValueFromPromiseSync(EtsPromise::FromEtsObject(retObject));
     }
     intrinsics::EtsPromiseResolve(hpromise.GetPtr(), retObject);

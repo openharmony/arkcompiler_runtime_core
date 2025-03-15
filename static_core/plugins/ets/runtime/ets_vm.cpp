@@ -250,6 +250,9 @@ bool PandaEtsVM::Initialize()
             ASSERT(GetThreadManager()->GetMainThread() == Thread::GetCurrent());
             auto *coro = EtsCoroutine::GetCurrent();
             coro->SetupNullValue(GetNullValue());
+            coro->GetLocalStorage().Set<EtsCoroutine::DataIdx::ETS_PLATFORM_TYPES_PTR>(
+                ToUintPtr(classLinker_->GetEtsClassLinkerExtension()->GetPlatformTypes()));
+            ASSERT(PlatformTypes(coro) != nullptr);
 
             doubleToStringCache_ = DoubleToStringCache::Create(coro);
             floatToStringCache_ = FloatToStringCache::Create(coro);
@@ -374,7 +377,7 @@ void PandaEtsVM::HandleGCRoutineInMutator()
         auto *objArray =
             EtsObjectArray::FromCoreType(GetGlobalObjectStorage()->Get(registeredFinalizationRegistryInstancesRef_));
         auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
-        Method *cleanup = this->GetClassLinker()->GetFinalizationRegistryExecCleanupMethod();
+        Method *cleanup = PlatformTypes(this)->coreFinalizationRegistryExecCleanup->GetPandaMethod();
         auto args = PandaVector<Value> {Value(objArray->GetCoreType())};
         [[maybe_unused]] bool launchResult =
             coroManager->Launch(event, cleanup, std::move(args), CoroutineLaunchMode::SAME_WORKER);
@@ -546,7 +549,6 @@ void PandaEtsVM::ResolveNativeMethod(Method *method)
 
 static void PrintExceptionInfo(EtsCoroutine *coro, EtsHandle<EtsObject> exception, PandaStringStream &ss)
 {
-    auto extension = coro->GetPandaVM()->GetEtsClassLinkerExtension();
     auto cls = exception->GetClass();
 
     PandaVector<uint8_t> strBuf;
@@ -561,8 +563,7 @@ static void PrintExceptionInfo(EtsCoroutine *coro, EtsHandle<EtsObject> exceptio
         return EtsString::FromEtsObject(callRes)->ConvertToStringView(&strBuf);
     };
 
-    char const *dumperName =
-        extension->GetErrorClass()->IsAssignableFrom(cls->GetRuntimeClass()) ? "<get>stack" : "toString";
+    char const *dumperName = PlatformTypes(coro)->escompatError->IsAssignableFrom(cls) ? "<get>stack" : "toString";
     ss << std::endl << performCall(cls->GetMethod(dumperName)).value_or("exception dump failed");
 }
 
@@ -794,7 +795,7 @@ static void EnsureFinalizationRegistryInstancesCapacity(EtsCoroutine *coro, size
                                                         mem::Reference *&ref)
 {
     auto *vm = coro->GetPandaVM();
-    EtsClass *objectClass = vm->GetClassLinker()->GetObjectClass();
+    EtsClass *objectClass = vm->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT);
     if (ref == nullptr) {
         constexpr uint32_t SIZE = 10;
         auto *objArray = EtsObjectArray::Create(objectClass, SIZE, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
@@ -879,7 +880,7 @@ ClassLinkerContext *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector
         UNREACHABLE();
     };
 
-    auto *klass = classLinker_->GetAbcRuntimeLinkerClass();
+    auto *klass = PlatformTypes(this)->coreAbcRuntimeLinker;
     EtsHandle<EtsAbcRuntimeLinker> linkerHandle(coro, EtsAbcRuntimeLinker::FromEtsObject(EtsObject::Create(klass)));
 
     EtsHandle<EtsObjectArray> pathsHandle(

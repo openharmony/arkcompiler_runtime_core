@@ -69,7 +69,7 @@ protected:
 
 TEST_F(EtsArrayBufferTest, MemoryLayout)
 {
-    EtsClass *klass = vm_->GetClassLinker()->GetArrayBufferClass();
+    EtsClass *klass = PlatformTypes(vm_)->escompatArrayBuffer;
     MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
 }
 }  // namespace ark::ets::test

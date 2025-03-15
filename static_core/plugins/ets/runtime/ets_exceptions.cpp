@@ -126,12 +126,10 @@ EtsObject *SetupEtsException(EtsCoroutine *coro, const char *classDescriptor, co
         return nullptr;
     }
 
-    EtsClassLinkerExtension *extension = coro->GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
-
-    if (extension->GetErrorClass()->IsAssignableFrom(cls->GetRuntimeClass())) {
+    if (PlatformTypes(coro)->escompatError->IsAssignableFrom(cls)) {
         return CreateErrorInstance(coro, cls, etsMsg, pending);
     }
-    if (extension->GetExceptionClass()->IsAssignableFrom(cls->GetRuntimeClass())) {
+    if (PlatformTypes(coro)->coreException->IsAssignableFrom(cls)) {
         return CreateExceptionInstance(coro, cls, etsMsg, pending);
     }
     LOG(FATAL, RUNTIME) << "Class " << cls->GetDescriptor() << " is not compatible with (Error | Exception)";
