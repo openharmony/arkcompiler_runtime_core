@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "ani_gtest.h"
+#include "ani_gtest_object_ops.h"
 
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
 namespace ark::ets::ani::testing {
 
 /**
@@ -24,40 +25,12 @@ namespace ark::ets::ani::testing {
  * correct functionality of calling boolean-returning methods with various
  * parameter scenarios.
  */
-class CallObjectMethodBooleanTest : public AniTest {
+class CallObjectMethodBooleanTest : public AniGtestObjectOps {
 public:
-    /**
-     * @brief Retrieves the ani_object and ani_method needed for testing.
-     *
-     * This method allocates an object and fetches a method from the class,
-     * which can then be used in test cases for method invocation.
-     *
-     * @param objectResult Pointer to store the allocated ani_object.
-     * @param methodResult Pointer to store the retrieved ani_method.
-     */
-    void GetMethodData(ani_object *objectResult, ani_method *methodResult)  // NOLINT(readability-identifier-naming)
-    {
-        ani_class cls;
-        // Locate the class "LA;" in the environment.
-        ASSERT_EQ(env_->FindClass("LA;", &cls), ANI_OK);
-        ASSERT_NE(cls, nullptr);
-
-        // Emulate allocation an instance of class.
-        ani_static_method newMethod;
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_A", ":LA;", &newMethod), ANI_OK);
-        ani_ref ref;
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
-
-        ani_method method;
-        // Retrieve a method named "boolean_method" with signature "II:Z".
-        ASSERT_EQ(env_->Class_FindMethod(cls, "boolean_method", "II:Z", &method), ANI_OK);
-        ASSERT_NE(method, nullptr);
-
-        *objectResult = static_cast<ani_object>(ref);
-        *methodResult = method;
-    }
+    static constexpr ani_int VAL1 = 5U;
+    static constexpr ani_int VAL2 = 6U;
+    static constexpr ani_int VAL3 = 2U;
+    static constexpr ani_int VAL4 = 3U;
 };
 
 /**
@@ -68,20 +41,20 @@ public:
  */
 TEST_F(CallObjectMethodBooleanTest, object_call_method_boolean_a)
 {
-    ani_object object;
-    ani_method method;
-    GetMethodData(&object, &method);
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "booleanMethod", "II:Z", &object, &method);
 
     ani_value args[2];  // NOLINT(modernize-avoid-c-arrays)
-    ani_int arg1 = 2U;
-    ani_int arg2 = 3U;
+    ani_int arg1 = VAL1;
+    ani_int arg2 = VAL2;
     args[0].i = arg1;
     args[1].i = arg2;
 
-    ani_boolean res;
+    ani_boolean res = ANI_FALSE;
     // Call the method and verify the return value.
     ASSERT_EQ(env_->Object_CallMethod_Boolean_A(object, method, &res, args), ANI_OK);
-    ASSERT_EQ(res, false);
+    ASSERT_EQ(res, ANI_TRUE);
 }
 
 /**
@@ -92,13 +65,13 @@ TEST_F(CallObjectMethodBooleanTest, object_call_method_boolean_a)
  */
 TEST_F(CallObjectMethodBooleanTest, object_call_method_boolean_v)
 {
-    ani_object object;
-    ani_method method;
-    GetMethodData(&object, &method);
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "booleanMethod", "II:Z", &object, &method);
 
-    ani_boolean res;
-    ani_int arg1 = 5U;
-    ani_int arg2 = 6U;
+    ani_boolean res = ANI_FALSE;
+    ani_int arg1 = VAL1;
+    ani_int arg2 = VAL2;
     // Call the method using variadic arguments and verify the return value.
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Object_CallMethod_Boolean(object, method, &res, arg1, arg2), ANI_OK);
@@ -113,17 +86,32 @@ TEST_F(CallObjectMethodBooleanTest, object_call_method_boolean_v)
  */
 TEST_F(CallObjectMethodBooleanTest, object_call_method_boolean)
 {
-    ani_object object;
-    ani_method method;
-    GetMethodData(&object, &method);
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "booleanMethod", "II:Z", &object, &method);
 
-    ani_boolean res;
-    ani_int arg1 = 2U;
-    ani_int arg2 = 3U;
+    ani_boolean res = ANI_FALSE;
+    ani_int arg1 = VAL1;
+    ani_int arg2 = VAL2;
     // Call the method and verify the return value.
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean(env_, object, method, &res, arg1, arg2), ANI_OK);
-    ASSERT_EQ(res, ANI_FALSE);
+    ASSERT_EQ(res, ANI_TRUE);
+}
+
+TEST_F(CallObjectMethodBooleanTest, object_call_method_boolean_v_invalid_env)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "booleanMethod", "II:Z", &object, &method);
+
+    ani_boolean res = ANI_FALSE;
+    ani_int arg1 = VAL1;
+    ani_int arg2 = VAL2;
+    // Call the method using variadic arguments and verify the return value.
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    ASSERT_EQ(env_->Object_CallMethod_Boolean(object, method, &res, arg1, arg2), ANI_OK);
+    ASSERT_EQ(res, ANI_TRUE);
 }
 
 /**
@@ -134,13 +122,13 @@ TEST_F(CallObjectMethodBooleanTest, object_call_method_boolean)
  */
 TEST_F(CallObjectMethodBooleanTest, call_method_boolean_v_invalid_method)
 {
-    ani_object object;
-    ani_method method;
-    GetMethodData(&object, &method);
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "booleanMethod", "II:Z", &object, &method);
 
-    ani_boolean res;
-    ani_int arg1 = 5U;
-    ani_int arg2 = 6U;
+    ani_boolean res = ANI_FALSE;
+    ani_int arg1 = VAL1;
+    ani_int arg2 = VAL2;
     // Attempt to call the method with a nullptr method pointer.
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Object_CallMethod_Boolean(object, nullptr, &res, arg1, arg2), ANI_INVALID_ARGS);
@@ -153,12 +141,12 @@ TEST_F(CallObjectMethodBooleanTest, call_method_boolean_v_invalid_method)
  */
 TEST_F(CallObjectMethodBooleanTest, call_method_boolean_v_invalid_result)
 {
-    ani_object object;
-    ani_method method;
-    GetMethodData(&object, &method);
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "booleanMethod", "II:Z", &object, &method);
 
-    ani_int arg1 = 5U;
-    ani_int arg2 = 6U;
+    ani_int arg1 = VAL1;
+    ani_int arg2 = VAL2;
     // Attempt to call the method with a nullptr result pointer.
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Object_CallMethod_Boolean(object, method, nullptr, arg1, arg2), ANI_INVALID_ARGS);
@@ -172,13 +160,13 @@ TEST_F(CallObjectMethodBooleanTest, call_method_boolean_v_invalid_result)
  */
 TEST_F(CallObjectMethodBooleanTest, call_method_boolean_v_invalid_object)
 {
-    ani_object object;
-    ani_method method;
-    GetMethodData(&object, &method);
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "booleanMethod", "II:Z", &object, &method);
 
     ani_boolean res;
-    ani_int arg1 = 5U;
-    ani_int arg2 = 6U;
+    ani_int arg1 = VAL1;
+    ani_int arg2 = VAL2;
     // Attempt to call the method with a nullptr object pointer.
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Object_CallMethod_Boolean(nullptr, method, &res, arg1, arg2), ANI_INVALID_ARGS);
@@ -191,13 +179,177 @@ TEST_F(CallObjectMethodBooleanTest, call_method_boolean_v_invalid_object)
  */
 TEST_F(CallObjectMethodBooleanTest, call_method_boolean_a_invalid_args)
 {
-    ani_object object;
-    ani_method method;
-    GetMethodData(&object, &method);
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "booleanMethod", "II:Z", &object, &method);
 
     ani_boolean res;
     // Attempt to call the method with a nullptr argument array.
-    ASSERT_EQ(env_->Object_CallMethod_Boolean_A(nullptr, method, &res, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethod_Boolean_A(object, method, &res, nullptr), ANI_INVALID_ARGS);
 }
 
+TEST_F(CallObjectMethodBooleanTest, call_Void_Param_Method)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "booleanMethodVoidParam", ":Z", &object, &method);
+
+    ani_boolean result = 0U;
+    ASSERT_EQ(env_->Object_CallMethod_Boolean(object, method, &result), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
+
+    ani_value args[2U];
+    ASSERT_EQ(env_->Object_CallMethod_Boolean_A(object, method, &result, args), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
+}
+
+TEST_F(CallObjectMethodBooleanTest, call_Multiple_Param_Method)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "booleanMethodMultipleParam", "BFFB:Z", &object, &method);
+
+    ani_value args[4U] = {};
+    ani_byte arg1 = VAL3;
+    ani_float arg2 = 2.0F;
+    ani_float arg3 = 3.0F;
+    ani_byte arg4 = 4U;
+    args[0U].b = arg1;
+    args[1U].f = arg2;
+    args[2U].f = arg3;
+    args[3U].b = arg4;
+
+    ani_boolean result;
+    ASSERT_EQ(env_->Object_CallMethod_Boolean(object, method, &result, arg1, arg2, arg3, arg4), ANI_OK);
+    ASSERT_EQ(result, ANI_FALSE);
+
+    ASSERT_EQ(env_->Object_CallMethod_Boolean_A(object, method, &result, args), ANI_OK);
+    ASSERT_EQ(result, ANI_FALSE);
+}
+
+TEST_F(CallObjectMethodBooleanTest, call_Parent_Class_Void_Param_Method_1)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LB;", "booleanMethodVoidParam", ":Z", &object, &method);
+
+    ani_boolean result = 0U;
+    ASSERT_EQ(env_->Object_CallMethod_Boolean(object, method, &result), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
+
+    ani_value args[2U];
+    ASSERT_EQ(env_->Object_CallMethod_Boolean_A(object, method, &result, args), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
+}
+
+TEST_F(CallObjectMethodBooleanTest, call_Parent_Class_Method)
+{
+    ani_class clsC {};
+    ASSERT_EQ(env_->FindClass("LC;", &clsC), ANI_OK);
+    ASSERT_NE(clsC, nullptr);
+
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindMethod(clsC, "func", "II:Z", &method), ANI_OK);
+    ASSERT_NE(method, nullptr);
+
+    ani_class clsD {};
+    ASSERT_EQ(env_->FindClass("LD;", &clsD), ANI_OK);
+    ASSERT_NE(clsD, nullptr);
+    ani_method ctor {};
+    ASSERT_EQ(env_->Class_FindMethod(clsD, "<ctor>", ":V", &ctor), ANI_OK);
+
+    ani_object object {};
+    ASSERT_EQ(env_->Object_New(clsD, ctor, &object), ANI_OK);
+    ASSERT_NE(object, nullptr);
+
+    ani_boolean result = ANI_TRUE;
+    ani_value args[2U] = {};
+    ani_int arg1 = VAL3;
+    ani_int arg2 = VAL4;
+    args[0U].i = arg1;
+    args[1U].i = arg2;
+    ASSERT_EQ(env_->Object_CallMethod_Boolean(object, method, &result, arg1, arg2), ANI_OK);
+    ASSERT_EQ(result, ANI_FALSE);
+
+    ASSERT_EQ(env_->Object_CallMethod_Boolean_A(object, method, &result, args), ANI_OK);
+    ASSERT_EQ(result, ANI_FALSE);
+}
+
+TEST_F(CallObjectMethodBooleanTest, call_Sub_Class_Method)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LE;", "func", "II:Z", &object, &method);
+
+    ani_boolean result = ANI_FALSE;
+    ani_value args[2U] = {};
+    ani_int arg1 = VAL1;
+    ani_int arg2 = VAL2;
+    args[0U].i = arg1;
+    args[1U].i = arg2;
+    ASSERT_EQ(env_->Object_CallMethod_Boolean(object, method, &result, arg1, arg2), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
+
+    ASSERT_EQ(env_->Object_CallMethod_Boolean_A(object, method, &result, args), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
+}
+
+TEST_F(CallObjectMethodBooleanTest, multiple_Call_Method)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "booleanMethod", "II:Z", &object, &method);
+
+    ani_boolean result = ANI_FALSE;
+    ani_value args[2U] = {};
+    ani_byte arg1 = 6U;
+    ani_byte arg2 = 7U;
+    args[0U].b = arg1;
+    args[1U].b = arg2;
+
+    for (ani_int i = 0; i < VAL4; i++) {
+        ASSERT_EQ(env_->Object_CallMethod_Boolean(object, method, &result, arg1, arg2), ANI_OK);
+        ASSERT_EQ(result, ANI_TRUE);
+        ASSERT_EQ(env_->Object_CallMethod_Boolean_A(object, method, &result, args), ANI_OK);
+        ASSERT_EQ(result, ANI_TRUE);
+    }
+}
+
+TEST_F(CallObjectMethodBooleanTest, call_Nested_Method)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "nestedMethod", nullptr, &object, &method);
+
+    ani_boolean result = ANI_TRUE;
+    ani_value args[2U] = {};
+    ani_byte arg1 = VAL4;
+    ani_byte arg2 = VAL4;
+    args[0U].b = arg1;
+    args[1U].b = arg2;
+
+    ASSERT_EQ(env_->Object_CallMethod_Boolean(object, method, &result, arg1, arg2), ANI_OK);
+    ASSERT_EQ(result, ANI_FALSE);
+
+    ASSERT_EQ(env_->Object_CallMethod_Boolean_A(object, method, &result, args), ANI_OK);
+    ASSERT_EQ(result, ANI_FALSE);
+}
+
+TEST_F(CallObjectMethodBooleanTest, call_Recursion_Method)
+{
+    ani_object object {};
+    ani_method method {};
+    GetMethodAndObject("LA;", "recursionMethod", "I:Z", &object, &method);
+
+    ani_boolean result = ANI_FALSE;
+    ani_value args[1U] = {};
+    ani_byte arg1 = VAL4;
+    args[0U].i = arg1;
+    ASSERT_EQ(env_->Object_CallMethod_Boolean(object, method, &result, arg1), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
+
+    ASSERT_EQ(env_->Object_CallMethod_Boolean_A(object, method, &result, args), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
+}
 }  // namespace ark::ets::ani::testing
+// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
