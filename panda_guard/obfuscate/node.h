@@ -22,21 +22,49 @@
 #include "function.h"
 #include "module_record.h"
 #include "object.h"
+#include "ui_decorator.h"
 
 namespace panda::guard {
 
+enum class NodeType {
+    NONE = 0,
+    SOURCE_FILE = 1,  // common source file
+    JSON_FILE = 2,    // json file,
+    ANNOTATION = 3,   // annotation
+};
+
 class Node final : public Entity {
 public:
-    Node(Program *program, const std::string &name, std::string pkgName)
-        : Entity(program, name),
-          moduleRecord_(program, name),
-          pkgName_(std::move(pkgName)),
-          sourceName_(name),
-          obfSourceName_(name)
+    Node(Program *program, const std::string &name)
+        : Entity(program, name), moduleRecord_(program, name), sourceName_(name), obfSourceName_(name)
     {
     }
 
+    /**
+     * Find PkgName field in pandasm::Record
+     */
+    static bool FindPkgName(const pandasm::Record &record, std::string &pkgName);
+
+    /**
+     * record is json file
+     * @param record record
+     * @return true, false
+     */
+    static bool IsJsonFile(const pandasm::Record &record);
+
+    /**
+     * init type pkgName with record
+     * @param record IR record
+     */
+    void InitWithRecord(const pandasm::Record &record);
+
     void Build() override;
+
+    /**
+     *  get origin IR program record
+     * @return pandasm::Record
+     */
+    [[nodiscard]] pandasm::Record &GetRecord() const;
 
     /**
      * For Each Function In Node
@@ -57,21 +85,9 @@ public:
     void UpdateSourceFile(const std::string &file);
 
     /**
-     * update record scopeNames
+     * NameCache write interface, used when the current file does not need to be obfuscated
      */
-    void UpdateScopeNames();
-
-    /**
-     * Find PkgName field in pandasm::Record
-     */
-    static bool FindPkgName(const pandasm::Record &record, std::string &pkgName);
-
-    /**
-     * record is json file
-     * @param record record
-     * @return true, false
-     */
-    static bool IsJsonFile(const pandasm::Record &record);
+    void WriteNameCache() override;
 
 protected:
     void RefreshNeedUpdate() override;
@@ -81,7 +97,20 @@ protected:
 private:
     void ForEachIns(const InstructionInfo &info, Scope scope);
 
+    /**
+     * create function
+     * @param info instruction info
+     * @param scope function scope
+     */
     void CreateFunction(const InstructionInfo &info, Scope scope);
+
+    /**
+     * create property for function
+     * @param info instruction info
+     */
+    void CreateProperty(const InstructionInfo &info) const;
+
+    void CreateObjectDecoratorProperty(const InstructionInfo &info);
 
     void CreateClass(const InstructionInfo &info, Scope scope);
 
@@ -114,13 +143,25 @@ private:
     void CreateObjectOuterProperty(const InstructionInfo &info);
 
     /**
-     * let obj = new ClassA();
-     * obj.field = 1; // field not defined in ClassA, field is a outer property
-     * @param info instruction info
+     * add name for export object
+     *
+     * export const obj = {};
+     * pa:
+     * createobjectwithbuffer
+     *
+     * stmodulevar 0x00(index for export name)
+     *
+     * @param info input ins(stmodulevar)
      */
-    void CreateOuterProperty(const InstructionInfo &info);
+    void AddNameForExportObject(const InstructionInfo &info);
 
-    /*
+    /**
+     * update namespace member export
+     * @param info input instruction
+     */
+    void UpdateExportForNamespaceMember(const InstructionInfo &info) const;
+
+    /**
      * this instruction crosses functions and cannot be analyzed by graph, therefore it has been added to the whitelist
      * e.g.
      * class A { ['field'] = 1; }
@@ -129,6 +170,8 @@ private:
      *  func2: defineclasswithbuffer
      */
     static void FindStLexVarName(const InstructionInfo &info);
+
+    void CreateUiDecorator(const InstructionInfo &info, Scope scope);
 
     void CreateFilePath();
 
@@ -144,15 +187,26 @@ private:
 
     void UpdateFileNameDefine();
 
+    /**
+     * update record scopeNames
+     */
+    void UpdateScopeNames() const;
+
+    /**
+     * update record fields literalArrayIdx to updated recordName
+     * fields: scopeNames, moduleRecordIdx
+     */
+    void UpdateFieldsLiteralArrayIdx();
+
     static void GetMethodNameInfo(const InstructionInfo &info, InstructionInfo &nameInfo);
 
 public:
     ModuleRecord moduleRecord_;
     FilePath filepath_;
-    std::unordered_map<std::string, Function> functionTable_ {};  // key: Function idx
-    std::unordered_map<std::string, Class> classTable_ {};        // key: class literalArray idx
-    std::unordered_map<std::string, Object> objectTable_ {};      // key: object literalArray idx
-    std::vector<Property> outerProperties_ {};
+    std::unordered_map<std::string, std::shared_ptr<Function>> functionTable_ {};  // key: Function idx
+    std::unordered_map<std::string, std::shared_ptr<Class>> classTable_ {};        // key: class literalArray idx
+    std::unordered_map<std::string, std::shared_ptr<Object>> objectTable_ {};      // key: object literalArray idx
+    std::vector<std::shared_ptr<UiDecorator>> uiDecorator_ {};
     std::set<std::string> strings_ {};
     std::string pkgName_;
     bool fileNameNeedUpdate_ = true;
@@ -163,6 +217,7 @@ public:
     std::string sourceFile_;  // file path in "abc record's source_file"
     std::string obfSourceFile_;
     bool sourceFileUpdated_ = false;  // is sourceFile updated
+    NodeType type_ = NodeType::NONE;  // node type
 };
 
 }  // namespace panda::guard

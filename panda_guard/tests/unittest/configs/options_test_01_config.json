@@ -9,12 +9,15 @@
   "sourceMapsPath": "",
   "entryPackageInfo": "xxx",
   "defaultNameCachePath": "xxx",
-  "skippedRemoteHarList": ["xxx"],
+  "skippedRemoteHarList": [
+    "xxx"
+  ],
   "useNormalizedOHMUrl": true,
   "obfuscationRules": {
     "disableObfuscation": false,
     "enableExportObfuscation": true,
     "enableRemoveLog": true,
+    "enableDecoratorObfuscation": true,
     "printNameCache": "",
     "applyNameCache": "",
     "reservedNames": [
@@ -39,7 +42,10 @@
       "reservedFileNames": [
         "xxx"
       ],
-      "universalReservedFileNames": []
+      "universalReservedFileNames": [],
+      "reservedRemoteHarPkgNames": [
+        "xxx"
+      ]
     },
     "keepOptions": {
       "enable": true,

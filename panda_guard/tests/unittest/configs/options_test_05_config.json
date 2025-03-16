@@ -15,6 +15,7 @@
     "disableObfuscation": false,
     "enableExportObfuscation": true,
     "enableRemoveLog": true,
+    "enableDecoratorObfuscation": true,
     "printNameCache": "",
     "applyNameCache": "",
     "reservedNames": [],

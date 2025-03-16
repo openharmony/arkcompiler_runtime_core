@@ -29,6 +29,13 @@ struct ObfuscationOption {
     std::vector<std::string> universalReservedList;
 };
 
+struct FileNameOption {
+    bool enable = false;
+    std::vector<std::string> reservedFileNames;
+    std::vector<std::string> universalReservedFileNames;
+    std::vector<std::string> reservedRemoteHarPkgNames;
+};
+
 struct KeepOption {
     bool enable = false;
     std::vector<std::string> keepPaths;
@@ -38,12 +45,13 @@ struct ObfuscationRules {
     bool disableObfuscation = false;
     bool enableExportObfuscation = false;
     bool enableRemoveLog = false;
+    bool enableDecorator = false;
     std::string printNameCache;
     std::string applyNameCache;
     std::vector<std::string> reservedNames;
     ObfuscationOption propertyOption;
     ObfuscationOption toplevelOption;
-    ObfuscationOption fileNameOption;
+    FileNameOption fileNameOption;
     KeepOption keepOption;
 };
 
@@ -93,6 +101,8 @@ public:
 
     [[nodiscard]] bool IsRemoveLogObfEnabled() const;
 
+    [[nodiscard]] bool IsDecoratorObfEnabled() const;
+
     [[nodiscard]] bool IsPropertyObfEnabled() const;
 
     [[nodiscard]] bool IsToplevelObfEnabled() const;
@@ -114,6 +124,8 @@ public:
     [[nodiscard]] bool IsSkippedRemoteHar(const std::string &pkgName) const;
 
     [[nodiscard]] bool IsUseNormalizedOhmUrl() const;
+
+    [[nodiscard]] bool IsReservedRemoteHarPkgNames(const std::string &name) const;
 
 private:
     ObfuscationConfig obfConfig_ {};

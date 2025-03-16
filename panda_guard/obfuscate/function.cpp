@@ -40,7 +40,6 @@ constexpr std::string_view STATIC_INITIALIZER_TAG = ">#static_initializer";
 constexpr std::string_view INSTANCE_INITIALIZER_TAG = ">#instance_initializer";
 constexpr std::string_view CONSOLE_INS_VAR = "console";
 constexpr std::string_view ANONYMOUS_FUNCTION_NAME = "^0";  // first anonymous function name
-constexpr size_t STOBJBYVALUE_ACC_INDEX = 2;
 
 const std::map<char, panda::guard::FunctionType> FUNCTION_TYPE_MAP = {
     {'>', panda::guard::FunctionType::INSTANCE_FUNCTION},    {'<', panda::guard::FunctionType::STATIC_FUNCTION},
@@ -205,9 +204,10 @@ void panda::guard::Function::Init()
     LOG(INFO, PANDAGUARD) << TAG << "idx:" << this->idx_;
     LOG(INFO, PANDAGUARD) << TAG << "recordName:" << this->recordName_;
     LOG(INFO, PANDAGUARD) << TAG << "rawName:" << this->rawName_;
-    LOG(INFO, PANDAGUARD) << TAG << "regsNum:" << this->regsNum;
+    LOG(INFO, PANDAGUARD) << TAG << "regsNum:" << this->regsNum_;
     LOG(INFO, PANDAGUARD) << TAG << "startLine:" << this->startLine_;
     LOG(INFO, PANDAGUARD) << TAG << "endLine:" << this->endLine_;
+    LOG(INFO, PANDAGUARD) << TAG << "component:" << (this->component_ ? "true" : "false");
 
     if (!this->useScope_) {
         return;
@@ -243,7 +243,7 @@ void panda::guard::Function::InitBaseInfo()
     const auto &func = this->GetOriginFunction();
     this->name_ = this->idx_;
     this->obfName_ = this->name_;
-    this->regsNum = func.regs_num;
+    this->regsNum_ = func.regs_num;
 
     size_t startLineIndex = 0;
     while (startLineIndex < func.ins.size()) {
@@ -266,7 +266,7 @@ void panda::guard::Function::InitBaseInfo()
     }
 }
 
-void panda::guard::Function::SetFunctionType(char functionTypeCode)
+void panda::guard::Function::SetFunctionType(const char functionTypeCode)
 {
     PANDA_GUARD_ASSERT_PRINT(FUNCTION_TYPE_MAP.find(functionTypeCode) == FUNCTION_TYPE_MAP.end(), TAG,
                              ErrorCode::GENERIC_ERROR, "unsupported function type code:" << functionTypeCode);
@@ -289,12 +289,9 @@ void panda::guard::Function::Build()
 
     this->InitNameCacheScope();
 
-    this->ForEachIns([&](const InstructionInfo &info) -> void { CreateProperty(info); });
-
     LOG(INFO, PANDAGUARD) << TAG << "scope:" << (this->scope_ == TOP_LEVEL ? "TOP_LEVEL" : "Function");
     LOG(INFO, PANDAGUARD) << TAG << "nameCacheScope:" << this->GetNameCacheScope();
     LOG(INFO, PANDAGUARD) << TAG << "export:" << (this->export_ ? "true" : "false");
-    LOG(INFO, PANDAGUARD) << TAG << "propertiesSize:" << this->properties_.size();
 
     LOG(INFO, PANDAGUARD) << TAG << "function build for " << this->idx_ << " end";
 }
@@ -319,15 +316,11 @@ void panda::guard::Function::ForEachIns(const std::function<InsTraver> &callback
         InstructionInfo info(this, &func.ins[i], i);
         callback(info);
     }
+    this->FreeGraph();
 }
 
 void panda::guard::Function::UpdateReference()
 {
-    if (IsImplicitMethod(this->idx_)) {
-        LOG(INFO, PANDAGUARD) << TAG << "skip update reference for:" << this->idx_;
-        return;
-    }
-
     LOG(INFO, PANDAGUARD) << TAG << "update reference start:" << this->idx_;
     this->ForEachIns([&](InstructionInfo &info) -> void { InstObf::UpdateInst(info); });
     LOG(INFO, PANDAGUARD) << TAG << "update reference end:" << this->idx_;
@@ -357,22 +350,41 @@ void panda::guard::Function::RemoveConsoleLog()
     }
 }
 
-void panda::guard::Function::FillInstInfo(size_t index, InstructionInfo &instInfo)
+void panda::guard::Function::FillInstInfo(const size_t index, InstructionInfo &instInfo)
 {
     auto &func = this->GetOriginFunction();
     PANDA_GUARD_ASSERT_PRINT(index >= func.ins.size(), TAG, ErrorCode::GENERIC_ERROR, "out of range index: " << index);
 
-    instInfo.index_ = index;
-    instInfo.ins_ = &func.ins[index];
     instInfo.function_ = this;
+    instInfo.ins_ = &func.ins[index];
+    instInfo.index_ = index;
 }
 
 void panda::guard::Function::ExtractNames(std::set<std::string> &strings) const
 {
     strings.emplace(this->name_);
-    for (const auto &property : this->properties_) {
-        property.ExtractNames(strings);
+    for (const auto &[_, property] : this->propertyTable_) {
+        property->ExtractNames(strings);
     }
+
+    for (const auto &property : this->variableProperties_) {
+        property->ExtractNames(strings);
+    }
+
+    if (GuardContext::GetInstance()->GetGuardOptions()->IsDecoratorObfEnabled()) {
+        for (const auto &property : this->objectDecoratorProperties_) {
+            property->ExtractNames(strings);
+        }
+    }
+}
+
+void panda::guard::Function::SetExportAndRefreshNeedUpdate(const bool isExport)
+{
+    for (const auto &[_, property] : this->propertyTable_) {
+        property->SetExportAndRefreshNeedUpdate(isExport);
+    }
+
+    Entity::SetExportAndRefreshNeedUpdate(isExport);
 }
 
 std::string panda::guard::Function::GetLines() const
@@ -381,56 +393,13 @@ std::string panda::guard::Function::GetLines() const
            std::to_string(this->endLine_);
 }
 
-void panda::guard::Function::CreateProperty(const InstructionInfo &info)
-{
-    if (!Property::IsPropertyIns(info)) {
-        return;
-    }
-
-    InstructionInfo nameInfo;
-    Property::GetPropertyNameInfo(info, nameInfo);
-    // if function is enum function, try to find property in acc
-    if (!nameInfo.IsValid() && this->type_ == FunctionType::ENUM_FUNCTION) {
-        // e.g. this[0] = 'property'
-        LOG(INFO, PANDAGUARD) << TAG << "try to find property in acc";
-        GraphAnalyzer::GetLdaStr(info, nameInfo, STOBJBYVALUE_ACC_INDEX);
-    }
-
-    if (!nameInfo.IsValid()) {
-        LOG(INFO, PANDAGUARD) << TAG << "invalid nameInfo:" << info.index_ << " " << info.ins_->ToString();
-        return;
-    }
-
-    std::string name = StringUtil::UnicodeEscape(nameInfo.ins_->ids[0]);
-    Property property(this->program_, name);
-    property.defineInsList_.push_back(info);
-    property.nameInfo_ = nameInfo;
-    if (!info.IsInnerReg()) {
-        property.scope_ = this->scope_;
-        property.export_ = this->export_;
-        property.Create();
-
-        LOG(INFO, PANDAGUARD) << TAG << "find property:" << property.name_;
-
-        this->properties_.push_back(property);
-    } else {
-        property.scope_ = FUNCTION;
-        property.export_ = false;
-        property.Create();
-
-        LOG(INFO, PANDAGUARD) << TAG << "find variable property:" << property.name_;
-
-        this->variableProperties_.push_back(property);
-    }
-}
-
-void panda::guard::Function::UpdateName(const Node &node)
+void panda::guard::Function::UpdateName(const std::shared_ptr<Node> &node)
 {
     std::string obfRawName;
     // The judgment here cannot be moved to the outer layer. The function here should not only confuse its own name, but
     // also the file name Even if the file is kept, The function name may also be modified due to file name confusion,
     // and the related logic still needs to be executed by the function itself
-    if (node.contentNeedUpdate_ && this->nameNeedUpdate_) {
+    if (node->contentNeedUpdate_ && this->nameNeedUpdate_) {
         /* e.g.
          * #~@0=#EntryAbility
          *  name_: EntryAbility
@@ -445,7 +414,7 @@ void panda::guard::Function::UpdateName(const Node &node)
         obfRawName = this->rawName_;
     }
 
-    this->obfIdx_ = node.obfName_ + RECORD_DELIMITER.data() + obfRawName;
+    this->obfIdx_ = node->obfName_ + RECORD_DELIMITER.data() + obfRawName;
 }
 
 void panda::guard::Function::UpdateDefine() const
@@ -474,7 +443,7 @@ void panda::guard::Function::UpdateDefine() const
     }
 }
 
-void panda::guard::Function::UpdateFunctionTable(Node &node)
+void panda::guard::Function::UpdateFunctionTable(const std::shared_ptr<Node> &node) const
 {
     if (this->idx_ == this->obfIdx_) {
         return;
@@ -482,9 +451,9 @@ void panda::guard::Function::UpdateFunctionTable(Node &node)
     auto entry = this->program_->prog_->function_table.extract(this->idx_);
     entry.key() = this->obfIdx_;
     entry.mapped().name = this->obfIdx_;
-    if (node.fileNameNeedUpdate_ && !entry.mapped().source_file.empty()) {
-        node.UpdateSourceFile(entry.mapped().source_file);
-        entry.mapped().source_file = node.obfSourceFile_;
+    if (node->fileNameNeedUpdate_ && !entry.mapped().source_file.empty()) {
+        node->UpdateSourceFile(entry.mapped().source_file);
+        entry.mapped().source_file = node->obfSourceFile_;
     }
     this->program_->prog_->function_table.insert(std::move(entry));
 }
@@ -505,9 +474,9 @@ void panda::guard::Function::GetGraph(compiler::Graph *&outGraph)
                              "can not find method ptr for: " << this->idx_);
 
     auto methodPtr = reinterpret_cast<compiler::RuntimeInterface::MethodPtr>(this->methodPtr_);
-    this->allocator_ = std::make_shared<ArenaAllocator>(SpaceType::SPACE_TYPE_COMPILER);
-    this->localAllocator_ = std::make_shared<ArenaAllocator>(SpaceType::SPACE_TYPE_COMPILER, nullptr, true);
-    this->runtimeInterface_ = std::make_shared<panda::BytecodeOptimizerRuntimeAdapter>(context->GetAbcFile());
+    this->allocator_ = std::make_unique<ArenaAllocator>(SpaceType::SPACE_TYPE_COMPILER);
+    this->localAllocator_ = std::make_unique<ArenaAllocator>(SpaceType::SPACE_TYPE_COMPILER, nullptr, true);
+    this->runtimeInterface_ = std::make_unique<panda::BytecodeOptimizerRuntimeAdapter>(context->GetAbcFile());
     auto graph =
         this->allocator_->New<compiler::Graph>(this->allocator_.get(), this->localAllocator_.get(), Arch::NONE,
                                                methodPtr, this->runtimeInterface_.get(), false, nullptr, true, true);
@@ -540,6 +509,16 @@ void panda::guard::Function::BuildPcInsMap(const compiler::Graph *graph)
     }
 }
 
+void panda::guard::Function::FreeGraph()
+{
+    std::unordered_map<size_t, size_t>().swap(this->pcInstMap_);
+
+    this->graph_ = nullptr;
+    this->localAllocator_ = nullptr;
+    this->runtimeInterface_ = nullptr;
+    this->allocator_ = nullptr;
+}
+
 void panda::guard::Function::Update()
 {
     LOG(INFO, PANDAGUARD) << TAG << "function update for " << this->idx_ << " start";
@@ -552,14 +531,20 @@ void panda::guard::Function::Update()
     this->UpdateDefine();
     this->UpdateFunctionTable(it->second);
 
-    if (it->second.contentNeedUpdate_ && this->contentNeedUpdate_) {
-        for (auto &property : this->properties_) {
-            property.Obfuscate();
+    if (it->second->contentNeedUpdate_ && this->contentNeedUpdate_) {
+        for (const auto &[_, property] : this->propertyTable_) {
+            property->Obfuscate();
         }
     }
 
-    for (auto &property : this->variableProperties_) {
-        property.Obfuscate();
+    for (const auto &property : this->variableProperties_) {
+        property->Obfuscate();
+    }
+
+    if (GuardContext::GetInstance()->GetGuardOptions()->IsDecoratorObfEnabled()) {
+        for (const auto &property : this->objectDecoratorProperties_) {
+            property->Obfuscate();
+        }
     }
 
     LOG(INFO, PANDAGUARD) << TAG << "function update for " << this->idx_ << " end";
@@ -572,12 +557,18 @@ void panda::guard::Function::WriteNameCache(const std::string &filePath)
         this->WritePropertyCache();
     }
 
-    for (auto &property : this->properties_) {
-        property.WriteNameCache(filePath);
+    for (const auto &[_, property] : this->propertyTable_) {
+        property->WriteNameCache(filePath);
     }
 
-    for (auto &property : this->variableProperties_) {
-        property.WritePropertyCache();
+    for (const auto &property : this->variableProperties_) {
+        property->WritePropertyCache();
+    }
+
+    if (GuardContext::GetInstance()->GetGuardOptions()->IsDecoratorObfEnabled()) {
+        for (const auto &property : this->objectDecoratorProperties_) {
+            property->WritePropertyCache();
+        }
     }
 }
 

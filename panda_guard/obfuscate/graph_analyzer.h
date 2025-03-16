@@ -63,6 +63,91 @@ public:
      * @return is component class
      */
     static bool IsComponentClass(const InstructionInfo &inIns);
+
+    /**
+     * get stmodulevar bind define instruction
+     * @param inIns input ins (stmodulevar or wide.stdmodulevar)
+     * @param defineIns bind define instruction
+     */
+    static void GetStModuleVarDefineIns(const InstructionInfo &inIns, InstructionInfo &defineIns);
+
+    /**
+     * get stobjbyname bind define instruction
+     * @param inIns input ins (stobjbyname)
+     * @param defineIns bind define instruction
+     */
+    static void GetStObjByNameDefineIns(const InstructionInfo &inIns, InstructionInfo &defineIns);
+
+    /**
+     * Get the predecessor instruction associated with the stobjbyname instruction and check if it is one of the
+     * following commands NEWOBTRANSAGE, CALLTHIS2, CALLTHIS3, If it meets the requirements, return the corresponding
+     * pre-instruction information
+     * @param inIns stobjbyname ins
+     * @param out related input ins
+     */
+    static void GetStObjByNameInput(const InstructionInfo &inIns, InstructionInfo &out);
+
+    /**
+     * Get the object name followed by the tryldglobalbyname instruction associated with the newobjrange instruction,
+     * as well as the ldastr parameter associated with the newobjrange instruction
+     * @param inIns newobjrange ins
+     * @param name newobjrange ins name
+     * @param out related ins
+     */
+    static void GetNewObjRangeInfo(const InstructionInfo &inIns, std::string &name, InstructionInfo &out);
+
+    /**
+     * Get call instruction object name
+     * @param inIns call ins
+     */
+    static std::string GetCallName(const InstructionInfo &inIns);
+
+    /**
+     * Get Related ldaStr instruction of call ins
+     * @param inIns call ins
+     * @param paramIndex call param index
+     * @param out param ins
+     */
+    static void GetCallLdaStrParam(const InstructionInfo &inIns, uint32_t paramIndex, InstructionInfo &out);
+
+    /**
+     * Get Related tryLdGlobalByName instruction of call ins
+     * @param inIns call ins
+     * @param paramIndex call param index
+     * @param out param ins
+     */
+    static void GetCallTryLdGlobalByNameParam(const InstructionInfo &inIns, uint32_t paramIndex, InstructionInfo &out);
+
+    /**
+     * Get Related ldobjbyname instruction of call ins
+     * @param inIns call ins
+     * @param paramIndex call param index
+     * @param out param ins
+     */
+    static void GetCallLdObjByNameParam(const InstructionInfo &inIns, uint32_t paramIndex, InstructionInfo &out);
+
+    /**
+     * Get Related instruction of isin ins
+     * @param inIns isin ins
+     * @param out related ins array
+     */
+    static void GetIsInInfo(const InstructionInfo &inIns, std::vector<InstructionInfo> &out);
+
+    /**
+     * Get Related createobjectwithbuffer instruction of call ins
+     * @param inIns call ins
+     * @param paramIndex call param index
+     * @param out object ins
+     */
+    static void GetCallCreateObjectWithBufferParam(const InstructionInfo &inIns, uint32_t paramIndex,
+                                                   InstructionInfo &out);
+
+    /**
+     * Get Related definefunc instruction in acc of definepropertybyname ins
+     * @param inIns call ins
+     * @param out function ins
+     */
+    static void GetDefinePropertyByNameFunction(const InstructionInfo &inIns, InstructionInfo &out);
 };
 
 }  // namespace panda::guard

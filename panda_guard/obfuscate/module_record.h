@@ -185,6 +185,11 @@ public:
      */
     void UpdateFileNameReferences();
 
+    /**
+     * Update literalArrayIdx
+    */
+    void UpdateLiteralArrayIdx(const std::string &literalArrayIdx);
+
 private:
     void CreateModuleVar(const pandasm::LiteralArray &literalArray);
 

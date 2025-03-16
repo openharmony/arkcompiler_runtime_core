@@ -10,7 +10,7 @@
     "disableObfuscation": false,
     "enableExportObfuscation": true,
     "enableRemoveLog": true,
-    "printNameCache": "./clang_x64/obj/arkcompiler/runtime_core/panda_guard/tests/configs/new_name_cache_test.json",
+    "enableDecoratorObfuscation": true,
     "applyNameCache": "",
     "reservedNames": [],
     "propertyObfuscation": {

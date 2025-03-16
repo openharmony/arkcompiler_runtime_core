@@ -26,6 +26,7 @@ namespace {
 constexpr std::string_view TAG = "[Graph]";
 constexpr std::string_view UI_COMPONENT_BASE_CLASS_VIEW_PU = "ViewPU";
 constexpr std::string_view UI_COMPONENT_BASE_CLASS_VIEW_V2 = "ViewV2";
+constexpr size_t PARAM_COUNT_THRESHOLD = 2;
 
 using IntrinsicId = panda::compiler::RuntimeInterface::IntrinsicId;
 using InstIdFilterList = std::vector<IntrinsicId>;
@@ -77,6 +78,10 @@ const InstIdFilterList INST_ID_LIST_STOWNBYVALUEWITHNAMESET = {
     IntrinsicId::STOWNBYVALUEWITHNAMESET_IMM16_V8_V8,
     IntrinsicId::STOWNBYVALUEWITHNAMESET_IMM8_V8_V8,
 };
+const InstIdFilterList INST_ID_LIST_DEFINEFUNC = {
+    IntrinsicId::DEFINEFUNC_IMM8_ID16_IMM8,
+    IntrinsicId::DEFINEFUNC_IMM16_ID16_IMM8,
+};
 const InstIdFilterList INST_ID_LIST_DEFINEMETHOD = {
     IntrinsicId::DEFINEMETHOD_IMM16_ID16_IMM8,
     IntrinsicId::DEFINEMETHOD_IMM8_ID16_IMM8,
@@ -106,6 +111,56 @@ const InstIdFilterList INST_ID_LIST_DEFINEPROPERTYBYNAME = {
 const InstIdFilterList INST_ID_LIST_CALLRUNTIME_DEFINESENDABLECLASS = {
     IntrinsicId::CALLRUNTIME_DEFINESENDABLECLASS_PREF_IMM16_ID16_ID16_IMM16_V8,
 };
+const InstIdFilterList INST_ID_LIST_STMODULEVAR = {
+    IntrinsicId::STMODULEVAR_IMM8,
+    IntrinsicId::WIDE_STMODULEVAR_PREF_IMM16,
+};
+
+const InstIdFilterList INST_ID_LIST_STOBJBYNAME = {
+    IntrinsicId::STOBJBYNAME_IMM8_ID16_V8,
+    IntrinsicId::STOBJBYNAME_IMM16_ID16_V8,
+};
+const InstIdFilterList INST_ID_LIST_NEWOBJRANGE = {
+    IntrinsicId::NEWOBJRANGE_IMM8_IMM8_V8,
+    IntrinsicId::NEWOBJRANGE_IMM16_IMM8_V8,
+};
+const InstIdFilterList INST_ID_LIST_CALLTHIS1 = {
+    IntrinsicId::CALLTHIS1_IMM8_V8_V8,
+};
+const InstIdFilterList INST_ID_LIST_CALLTHIS2 = {
+    IntrinsicId::CALLTHIS2_IMM8_V8_V8_V8,
+};
+const InstIdFilterList INST_ID_LIST_CALLTHIS3 = {
+    IntrinsicId::CALLTHIS3_IMM8_V8_V8_V8_V8,
+};
+const InstIdFilterList INST_ID_LIST_CALLARG0 = {
+    IntrinsicId::CALLARG0_IMM8,
+};
+const InstIdFilterList INST_ID_LIST_CALLARG1 = {
+    IntrinsicId::CALLARG1_IMM8_V8,
+};
+const InstIdFilterList INST_ID_LIST_CALLARGS2 = {
+    IntrinsicId::CALLARGS2_IMM8_V8_V8,
+};
+const InstIdFilterList INST_ID_LIST_CALLARGS3 = {
+    IntrinsicId::CALLARGS3_IMM8_V8_V8_V8,
+};
+const InstIdFilterList INST_ID_LIST_CALLRANGE = {
+    IntrinsicId::CALLRANGE_IMM8_IMM8_V8,
+};
+const InstIdFilterList INST_ID_LIST_CALLRUNTIME_ISFALSE = {
+    IntrinsicId::CALLRUNTIME_ISFALSE_PREF_IMM8,
+};
+
+const std::map<panda::pandasm::Opcode, InstIdFilterList> CALL_INST_MAP = {
+    {panda::pandasm::Opcode::CALLTHIS1, INST_ID_LIST_CALLTHIS1},
+    {panda::pandasm::Opcode::CALLTHIS2, INST_ID_LIST_CALLTHIS2},
+    {panda::pandasm::Opcode::CALLTHIS3, INST_ID_LIST_CALLTHIS3},
+    {panda::pandasm::Opcode::CALLARG1, INST_ID_LIST_CALLARG1},
+    {panda::pandasm::Opcode::CALLARGS2, INST_ID_LIST_CALLARGS2},
+    {panda::pandasm::Opcode::CALLARGS3, INST_ID_LIST_CALLARGS3},
+    {panda::pandasm::Opcode::CALLRANGE, INST_ID_LIST_CALLRANGE},
+};
 
 const std::map<panda::pandasm::Opcode, InstParam> LDA_STA_INST_PARAM_MAP = {
     {panda::pandasm::Opcode::DYNAMICIMPORT, {0, INST_ID_LIST_DYNAMICIMPORT}},
@@ -124,9 +179,10 @@ const std::vector<InstIdFilterList> DEFINE_INST_PASS_THROUGH_LIST = {
     INST_ID_LIST_DEFINEMETHOD,
 };
 const std::vector<InstIdFilterList> DEFINE_INST_ID_LIST = {
+    INST_ID_LIST_DEFINEFUNC,
     INST_ID_LIST_DEFINECLASSWITHBUFFER,
     INST_ID_LIST_CREATEOBJECTWITHBUFFER,
-    INST_ID_LIST_LDOBJBYNAME,
+    INST_ID_LIST_LDOBJBYNAME,  // XXX.prototype: get define ins by ldobjbyname of XXX object
     INST_ID_LIST_CALLRUNTIME_DEFINESENDABLECLASS,
 };
 const std::vector<InstIdFilterList> METHOD_NAME_INST_ID_LIST = {
@@ -166,7 +222,7 @@ bool IsInstMatched(const panda::compiler::Inst *inst, const InstructionInfo &tar
         return false;
     }
 
-    uint32_t pcVal = inst->GetPc();
+    const uint32_t pcVal = inst->GetPc();
     auto &pcInstMap = targetIns.function_->pcInstMap_;
     if (pcInstMap.find(pcVal) == pcInstMap.end() || pcInstMap.at(pcVal) != targetIns.index_) {
         return false;
@@ -197,8 +253,7 @@ void VisitGraph(const InstructionInfo &inIns, const InstIdFilterList &list, cons
         }
     }
 
-    PANDA_GUARD_ABORT_PRINT(TAG, ErrorCode::GENERIC_ERROR,
-                            "not find inst: " << inIns.index_ << " in " << inIns.function_->idx_);
+    PANDA_GUARD_ABORT_PRINT(TAG, ErrorCode::GENERIC_ERROR, "not find inst: " << inIns.index_ << " in " << func->idx_);
 }
 
 /**
@@ -209,10 +264,10 @@ void VisitGraph(const InstructionInfo &inIns, const InstIdFilterList &list, cons
  */
 void FillInstInfo(const InstructionInfo &inIns, const panda::compiler::Inst *target, InstructionInfo &outIns)
 {
-    uint32_t pcVal = target->GetPc();
+    const uint32_t pcVal = target->GetPc();
     Function *func = inIns.function_;
     PANDA_GUARD_ASSERT_PRINT(func->pcInstMap_.find(pcVal) == func->pcInstMap_.end(), TAG, ErrorCode::GENERIC_ERROR,
-                             "no valid target ins: " << inIns.function_->idx_ << ", " << inIns.index_);
+                             "no valid target ins: " << func->idx_ << ", " << inIns.index_);
     func->FillInstInfo(func->pcInstMap_.at(pcVal), outIns);
 }
 
@@ -246,6 +301,21 @@ void FindLdaStr(const panda::compiler::Inst *prevInst, const panda::compiler::In
     outIns = targetInst;
 }
 
+void FillLdaStrInst(const InstructionInfo &inIns, const panda::compiler::Inst *curInst, uint32_t targetIndex,
+                    InstructionInfo &out)
+{
+    const panda::compiler::Inst *prevInst = curInst->GetInput(targetIndex).GetInst();
+    const panda::compiler::Inst *targetInst = nullptr;
+    FindLdaStr(prevInst, targetInst);
+    if (targetInst == nullptr) {
+        LOG(INFO, PANDAGUARD) << TAG << "FillLdaStrInst failed: " << inIns.function_->idx_ << ", " << inIns.index_
+                              << ";" << PrintInst(prevInst);
+        return;
+    }
+
+    FillInstInfo(inIns, targetInst, out);
+}
+
 /**
  * Find the object definition instruction corresponding to the input instruction
  */
@@ -272,31 +342,21 @@ void FindDefineInst(const panda::compiler::Inst *prevInst, const panda::compiler
 
 void GraphAnalyzer::GetLdaStr(const InstructionInfo &inIns, InstructionInfo &outIns, int index /* = -1 */)
 {
-    auto it = LDA_STA_INST_PARAM_MAP.find(inIns.ins_->opcode);
+    const auto it = LDA_STA_INST_PARAM_MAP.find(inIns.ins_->opcode);
     PANDA_GUARD_ASSERT_PRINT(it == LDA_STA_INST_PARAM_MAP.end(), TAG, ErrorCode::GENERIC_ERROR,
                              "unsupported lda.str scene: " << inIns.ins_->ToString());
 
-    const panda::compiler::Inst *inst;
+    const compiler::Inst *inst;
     VisitGraph(inIns, it->second.filterList, inst);
 
-    unsigned targetIndex = index >= 0 ? index : it->second.index;
-    const panda::compiler::Inst *prevInst = inst->GetInput(targetIndex).GetInst();
-    const panda::compiler::Inst *targetInst = nullptr;
-    FindLdaStr(prevInst, targetInst);
-
-    if (targetInst == nullptr) {
-        LOG(INFO, PANDAGUARD) << TAG << "GetLdaStr failed: " << inIns.function_->idx_ << ", " << inIns.index_ << ";"
-                              << PrintInst(prevInst);
-        return;
-    }
-
-    FillInstInfo(inIns, targetInst, outIns);
+    const unsigned targetIndex = index >= 0 ? index : it->second.index;
+    FillLdaStrInst(inIns, inst, targetIndex, outIns);
 }
 
 void GraphAnalyzer::HandleDefineMethod(const InstructionInfo &inIns, InstructionInfo &defineIns,
                                        InstructionInfo &nameIns)
 {
-    const panda::compiler::Inst *inst;
+    const compiler::Inst *inst;
     VisitGraph(inIns, INST_ID_LIST_DEFINEMETHOD, inst);
 
     for (const auto &userIns : inst->GetUsers()) {
@@ -313,7 +373,7 @@ void GraphAnalyzer::HandleDefineMethod(const InstructionInfo &inIns, Instruction
                              "unexpect defineMethod scene: " << inIns.function_->idx_ << ", " << inIns.index_ << ";"
                                                              << PrintInst(inst));
 
-    const panda::compiler::Inst *targetInst = nullptr;
+    const compiler::Inst *targetInst = nullptr;
     FindDefineInst(inst, targetInst);
     PANDA_GUARD_ASSERT_PRINT(targetInst == nullptr, TAG, ErrorCode::GENERIC_ERROR,
                              "HandleDefineMethod failed: " << inIns.function_->idx_ << ", " << inIns.index_ << ";"
@@ -322,13 +382,12 @@ void GraphAnalyzer::HandleDefineMethod(const InstructionInfo &inIns, Instruction
     FillInstInfo(inIns, targetInst, defineIns);
 }
 
-void GraphAnalyzer::HandleDefineProperty(const panda::guard::InstructionInfo &inIns,
-                                         panda::guard::InstructionInfo &defineIns)
+void GraphAnalyzer::HandleDefineProperty(const InstructionInfo &inIns, InstructionInfo &defineIns)
 {
-    const panda::compiler::Inst *inst;
+    const compiler::Inst *inst;
     VisitGraph(inIns, INST_ID_LIST_DEFINEPROPERTYBYNAME, inst);
 
-    const panda::compiler::Inst *target = nullptr;
+    const compiler::Inst *target = nullptr;
     FindDefineInst(inst->GetInput(0).GetInst(), target);
     if (target == nullptr) {
         return;
@@ -337,16 +396,16 @@ void GraphAnalyzer::HandleDefineProperty(const panda::guard::InstructionInfo &in
     FillInstInfo(inIns, target, defineIns);
 }
 
-bool GraphAnalyzer::IsComponentClass(const panda::guard::InstructionInfo &inIns)
+bool GraphAnalyzer::IsComponentClass(const InstructionInfo &inIns)
 {
     if (inIns.ins_->opcode != pandasm::Opcode::DEFINECLASSWITHBUFFER) {
         return false;
     }
 
-    const panda::compiler::Inst *inst;
+    const compiler::Inst *inst;
     VisitGraph(inIns, INST_ID_LIST_DEFINECLASSWITHBUFFER, inst);
 
-    const panda::compiler::Inst *tryldglobalbyname = inst->GetInput(0).GetInst();
+    const compiler::Inst *tryldglobalbyname = inst->GetInput(0).GetInst();
     if (!IsInstIdMatched(tryldglobalbyname, INST_ID_LIST_TRYLDGLOBALBYNAME)) {
         return false;
     }
@@ -362,4 +421,231 @@ bool GraphAnalyzer::IsComponentClass(const panda::guard::InstructionInfo &inIns)
     LOG(INFO, PANDAGUARD) << TAG << "found UI component:" << inIns.ins_->ids[0];
 
     return true;
+}
+
+void GraphAnalyzer::GetStModuleVarDefineIns(const InstructionInfo &inIns, InstructionInfo &defineIns)
+{
+    if (inIns.ins_->opcode != pandasm::Opcode::STMODULEVAR && inIns.ins_->opcode != pandasm::Opcode::WIDE_STMODULEVAR) {
+        return;
+    }
+
+    const compiler::Inst *inst;
+    VisitGraph(inIns, INST_ID_LIST_STMODULEVAR, inst);
+
+    const compiler::Inst *target = inst->GetInput(0).GetInst();
+    PANDA_GUARD_ASSERT_PRINT(target == nullptr, TAG, ErrorCode::GENERIC_ERROR, "find define inst failed");
+    if (!IsInstIdMatched(target, {INST_ID_LIST_CREATEOBJECTWITHBUFFER, INST_ID_LIST_DEFINECLASSWITHBUFFER,
+                                  INST_ID_LIST_CALLRUNTIME_DEFINESENDABLECLASS})) {
+        return;
+    }
+
+    FillInstInfo(inIns, target, defineIns);
+}
+
+void GraphAnalyzer::GetStObjByNameDefineIns(const InstructionInfo &inIns, InstructionInfo &defineIns)
+{
+    if (inIns.notEqualToOpcode(pandasm::Opcode::STOBJBYNAME)) {
+        return;
+    }
+
+    const compiler::Inst *inst;
+    VisitGraph(inIns, INST_ID_LIST_STOBJBYNAME, inst);
+    const compiler::Inst *target = inst->GetInput(1).GetInst();
+    if (!IsInstIdMatched(target, DEFINE_INST_ID_LIST)) {
+        return;
+    }
+
+    FillInstInfo(inIns, target, defineIns);
+}
+
+void GraphAnalyzer::GetStObjByNameInput(const InstructionInfo &inIns, InstructionInfo &out)
+{
+    const compiler::Inst *inst;
+    VisitGraph(inIns, INST_ID_LIST_STOBJBYNAME, inst);
+
+    const compiler::Inst *target = inst->GetInput(INDEX_1).GetInst();
+    if (!IsInstIdMatched(target, {INST_ID_LIST_NEWOBJRANGE, INST_ID_LIST_CALLTHIS2, INST_ID_LIST_CALLTHIS3})) {
+        return;
+    }
+    FillInstInfo(inIns, target, out);
+}
+
+void GraphAnalyzer::GetNewObjRangeInfo(const InstructionInfo &inIns, std::string &name, InstructionInfo &out)
+{
+    const compiler::Inst *inst;
+    VisitGraph(inIns, INST_ID_LIST_NEWOBJRANGE, inst);
+
+    const compiler::Inst *tryInst = inst->GetInput(INDEX_0).GetInst();
+    if (!IsInstIdMatched(tryInst, INST_ID_LIST_TRYLDGLOBALBYNAME)) {
+        return;
+    }
+    InstructionInfo tryInstInfo;
+    FillInstInfo(inIns, tryInst, tryInstInfo);
+    name = tryInstInfo.ins_->ids[INDEX_0];
+    if (name.empty()) {
+        return;
+    }
+
+    FillLdaStrInst(inIns, inst, INDEX_3, out);
+}
+
+std::string GraphAnalyzer::GetCallName(const InstructionInfo &inIns)
+{
+    const auto it = CALL_INST_MAP.find(inIns.ins_->opcode);
+    PANDA_GUARD_ASSERT_PRINT(it == CALL_INST_MAP.end(), TAG, ErrorCode::GENERIC_ERROR,
+                             "unsupported call name scene: " << inIns.ins_->ToString());
+
+    const compiler::Inst *callInst;
+    VisitGraph(inIns, it->second, callInst);
+
+    uint32_t inputCnt = callInst->GetInputsCount();
+    PANDA_GUARD_ASSERT_PRINT(inputCnt < PARAM_COUNT_THRESHOLD, TAG, ErrorCode::GENERIC_ERROR,
+                             "unexpected call param count scene: " << inIns.ins_->ToString());
+
+    const compiler::Inst *callNameInst = callInst->GetInput(inputCnt - 2).GetInst();
+    if (IsInstIdMatched(callNameInst, {INST_ID_LIST_CALLARG0, INST_ID_LIST_CALLARG1})) {
+        inputCnt = callNameInst->GetInputsCount();
+        PANDA_GUARD_ASSERT_PRINT(inputCnt < PARAM_COUNT_THRESHOLD, TAG, ErrorCode::GENERIC_ERROR,
+                                 "unexpected call args param count scene: " << inIns.ins_->ToString());
+        callNameInst = callNameInst->GetInput(inputCnt - PARAM_COUNT_THRESHOLD).GetInst();
+    }
+    if (!IsInstIdMatched(callNameInst, {INST_ID_LIST_LDOBJBYNAME, INST_ID_LIST_TRYLDGLOBALBYNAME})) {
+        return "";
+    }
+
+    InstructionInfo nameIns;
+    FillInstInfo(inIns, callNameInst, nameIns);
+    return nameIns.ins_->ids[INDEX_0];
+}
+
+void GraphAnalyzer::GetCallLdaStrParam(const InstructionInfo &inIns, uint32_t paramIndex, InstructionInfo &out)
+{
+    const auto it = CALL_INST_MAP.find(inIns.ins_->opcode);
+    PANDA_GUARD_ASSERT_PRINT(it == CALL_INST_MAP.end(), TAG, ErrorCode::GENERIC_ERROR,
+                             "unsupported get call lda str param scene: " << inIns.ins_->ToString());
+
+    const compiler::Inst *callInst;
+    VisitGraph(inIns, it->second, callInst);
+
+    FillLdaStrInst(inIns, callInst, paramIndex, out);
+}
+void GraphAnalyzer::GetCallTryLdGlobalByNameParam(const InstructionInfo &inIns, uint32_t paramIndex,
+                                                  InstructionInfo &out)
+{
+    const auto it = CALL_INST_MAP.find(inIns.ins_->opcode);
+    PANDA_GUARD_ASSERT_PRINT(it == CALL_INST_MAP.end(), TAG, ErrorCode::GENERIC_ERROR,
+                             "unsupported get call tryldblobalbyname param scene: " << inIns.ins_->ToString());
+
+    const compiler::Inst *callInst;
+    VisitGraph(inIns, it->second, callInst);
+
+    const compiler::Inst *target = callInst->GetInput(paramIndex).GetInst();
+    if (!IsInstIdMatched(target, INST_ID_LIST_TRYLDGLOBALBYNAME)) {
+        return;
+    }
+    FillInstInfo(inIns, target, out);
+}
+
+void GraphAnalyzer::GetCallLdObjByNameParam(const InstructionInfo &inIns, uint32_t paramIndex, InstructionInfo &out)
+{
+    const auto it = CALL_INST_MAP.find(inIns.ins_->opcode);
+    PANDA_GUARD_ASSERT_PRINT(it == CALL_INST_MAP.end(), TAG, ErrorCode::GENERIC_ERROR,
+                             "unsupported get call ldobjbyname param scene: " << inIns.ins_->ToString());
+
+    const compiler::Inst *callInst;
+    VisitGraph(inIns, it->second, callInst);
+
+    const compiler::Inst *target = callInst->GetInput(paramIndex).GetInst();
+    if (!IsInstIdMatched(target, INST_ID_LIST_LDOBJBYNAME)) {
+        return;
+    }
+    FillInstInfo(inIns, target, out);
+}
+
+void GraphAnalyzer::GetIsInInfo(const InstructionInfo &inIns, std::vector<InstructionInfo> &out)
+{
+    const compiler::Inst *isinInst;
+    VisitGraph(inIns, INST_ID_LIST_ISIN, isinInst);
+
+    InstructionInfo ldStrInstInfo;
+    FillLdaStrInst(inIns, isinInst, INDEX_0, ldStrInstInfo);
+    if (!ldStrInstInfo.IsValid()) {
+        return;
+    }
+
+    const compiler::Inst *isFalseInst = isinInst->GetUsers().Front().GetInst();
+    if (!IsInstIdMatched(isFalseInst, INST_ID_LIST_CALLRUNTIME_ISFALSE)) {
+        return;
+    }
+
+    const compiler::Inst *ldInst = nullptr;
+    auto falseBlock = isinInst->GetBasicBlock()->GetFalseSuccessor();
+    for (const compiler::Inst *inst : falseBlock->AllInsts()) {
+        if (!IsInstIdMatched(inst, INST_ID_LIST_LDOBJBYNAME)) {
+            ldInst = inst;
+            break;
+        }
+    }
+    if (!ldInst) {
+        return;
+    }
+    InstructionInfo ldInstInfo;
+    FillInstInfo(inIns, ldInst, ldInstInfo);
+    if (!ldInstInfo.IsValid()) {
+        return;
+    }
+
+    const compiler::Inst *phiInst = ldInst->GetUsers().Front().GetInst();
+    if (!phiInst->IsPhi()) {
+        return;
+    }
+
+    const compiler::Inst *stInst = phiInst->GetUsers().Front().GetInst();
+    if (!IsInstIdMatched(stInst, INST_ID_LIST_STOBJBYNAME)) {
+        return;
+    }
+    InstructionInfo stInstInfo;
+    FillInstInfo(inIns, stInst, stInstInfo);
+    if (!stInstInfo.IsValid()) {
+        return;
+    }
+
+    if ((ldStrInstInfo.ins_->ids[INDEX_0] == ldInstInfo.ins_->ids[INDEX_0]) &&
+        (ldInstInfo.ins_->ids[INDEX_0] == stInstInfo.ins_->ids[INDEX_0])) {
+        out.emplace_back(ldStrInstInfo);
+        out.emplace_back(ldInstInfo);
+        out.emplace_back(stInstInfo);
+    }
+}
+void GraphAnalyzer::GetCallCreateObjectWithBufferParam(const InstructionInfo &inIns, uint32_t paramIndex,
+                                                       InstructionInfo &out)
+{
+    const auto it = CALL_INST_MAP.find(inIns.ins_->opcode);
+    PANDA_GUARD_ASSERT_PRINT(it == CALL_INST_MAP.end(), TAG, ErrorCode::GENERIC_ERROR,
+                             "unsupported get call createobjectwithbuffer param scene: " << inIns.ins_->ToString());
+
+    const compiler::Inst *callInst;
+    VisitGraph(inIns, it->second, callInst);
+
+    const compiler::Inst *target = callInst->GetInput(paramIndex).GetInst();
+    if (!IsInstIdMatched(target, INST_ID_LIST_CREATEOBJECTWITHBUFFER)) {
+        return;
+    }
+    FillInstInfo(inIns, target, out);
+}
+
+void GraphAnalyzer::GetDefinePropertyByNameFunction(const InstructionInfo &inIns, InstructionInfo &out)
+{
+    if (inIns.notEqualToOpcode(pandasm::Opcode::DEFINEPROPERTYBYNAME)) {
+        return;
+    }
+
+    const compiler::Inst *inst;
+    VisitGraph(inIns, INST_ID_LIST_DEFINEPROPERTYBYNAME, inst);
+
+    const compiler::Inst *target = inst->GetInput(INDEX_1).GetInst();
+    if (!IsInstIdMatched(target, INST_ID_LIST_DEFINEFUNC)) {
+        return;
+    }
+    FillInstInfo(inIns, target, out);
 }

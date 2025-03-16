@@ -18,7 +18,6 @@
 
 #include "entity.h"
 #include "method.h"
-#include "module_record.h"
 
 namespace panda::guard {
 
@@ -36,6 +35,8 @@ public:
      */
     void SetContentNeedUpdate(bool toUpdate);
 
+    void SetExportAndRefreshNeedUpdate(bool isExport) override;
+
 protected:
     void Build() override;
 
@@ -50,8 +51,8 @@ public:
 
 class Object final : public Entity, public IExtractNames {
 public:
-    Object(Program *program, std::string literalArrayIdx)
-        : Entity(program), literalArrayIdx_(std::move(literalArrayIdx))
+    Object(Program *program, std::string literalArrayIdx, std::string recordName)
+        : Entity(program), literalArrayIdx_(std::move(literalArrayIdx)), recordName_(std::move(recordName))
     {
     }
 
@@ -72,6 +73,10 @@ public:
      */
     void SetContentNeedUpdate(bool toUpdate);
 
+    void SetExportAndRefreshNeedUpdate(bool isExport) override;
+
+    void SetExportName(const std::string &exportName);
+
 protected:
     void RefreshNeedUpdate() override;
 
@@ -80,14 +85,16 @@ protected:
 private:
     void CreateProperty(const pandasm::LiteralArray &literalArray, size_t index, bool isMethod);
 
+    void UpdateLiteralArrayIdx();
+
 public:
-    ModuleRecord *moduleRecord = nullptr;
     bool needUpdateName_ = false;
     bool contentNeedUpdate_ = false;
     std::string literalArrayIdx_;
-    std::vector<ObjectProperty> properties_ {};
-    std::vector<OuterMethod> outerMethods_ {};
-    std::vector<Property> outerProperties_ {};
+    std::string recordName_;
+    std::vector<std::shared_ptr<ObjectProperty>> properties_ {};
+    std::vector<std::shared_ptr<OuterMethod>> outerMethods_ {};
+    std::vector<std::shared_ptr<Property>> outerProperties_ {};
 };
 
 }  // namespace panda::guard

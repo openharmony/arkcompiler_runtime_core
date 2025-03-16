@@ -61,6 +61,8 @@ public:
 
     void ExtractNames(std::set<std::string> &strings) const override;
 
+    void SetExportAndRefreshNeedUpdate(bool isExport) override;
+
     /**
      * Traverse all instructions of the function
      * @param callback instruction callback
@@ -114,34 +116,22 @@ protected:
 
     [[nodiscard]] std::string GetLines() const;
 
-    virtual bool IsWhiteListOrAnonymousFunction(const std::string &functionIdx) const;
+    [[nodiscard]] virtual bool IsWhiteListOrAnonymousFunction(const std::string &functionIdx) const;
 
-    virtual bool IsNameObfuscated() const;
+    [[nodiscard]] virtual bool IsNameObfuscated() const;
 
 private:
     void InitBaseInfo();
 
     void SetFunctionType(char functionTypeCode);
 
-    /**
-     * e.g. class A {
-     *  constructor {
-     *    this.v1 = 1;
-     *
-     *    let obj = {};
-     *    obj.v2 = 2;
-     *  }
-     * }
-     * v1: property, bind function
-     * v2: variable property, bind object
-     */
-    void CreateProperty(const InstructionInfo &info);
+    void UpdateName(const std::shared_ptr<Node> &node);
 
-    void UpdateName(const Node &node);
-
-    void UpdateFunctionTable(Node &node);
+    void UpdateFunctionTable(const std::shared_ptr<Node> &node) const;
 
     void BuildPcInsMap(const compiler::Graph *graph);
+
+    void FreeGraph();
 
 public:
     std::string idx_;
@@ -150,23 +140,28 @@ public:
     std::string rawName_;
     std::string scopeTypeStr_;
     FunctionType type_ = FunctionType::NONE;
-    size_t regsNum = 0;  // The number of registers requested within the function
+    size_t regsNum_ = 0;  // The number of registers requested within the function
     size_t startLine_ = 0;
     size_t endLine_ = 0;
-    uint32_t methodPtr_ = 0;                           // this field is used for graph analysis
-    std::vector<Property> properties_ {};              // own property, Attributes associated with constructor
-    std::vector<Property> variableProperties_ {};      // Traverse the properties present in the function or parameters
+    uint32_t methodPtr_ = 0;  // this field is used for graph analysis
+    // own property, Attributes associated with function key:property name
+    std::unordered_map<std::string, std::shared_ptr<Property>> propertyTable_ {};
+    // Traverse the properties present in the function or parameters
+    std::vector<std::shared_ptr<Property>> variableProperties_ {};
+    // Object.defineProperty, only when enable ui decorator scene is assigned values
+    std::vector<std::shared_ptr<Property>> objectDecoratorProperties_ {};
     std::unordered_map<size_t, size_t> pcInstMap_ {};  // Mapping table between instruction PC and instruction index
     bool useScope_ = true;
     bool nameNeedUpdate_ = true;     // Function name needs to be updated
     bool contentNeedUpdate_ = true;  // Function content (attributes, etc.) needs to be updated
+    bool component_ = false;
 
 private:
     bool anonymous = false;  // is anonymous function
     compiler::Graph *graph_ = nullptr;
-    std::shared_ptr<ArenaAllocator> allocator_ = nullptr;
-    std::shared_ptr<ArenaAllocator> localAllocator_ = nullptr;
-    std::shared_ptr<compiler::RuntimeInterface> runtimeInterface_ = nullptr;
+    std::unique_ptr<ArenaAllocator> allocator_ = nullptr;
+    std::unique_ptr<ArenaAllocator> localAllocator_ = nullptr;
+    std::unique_ptr<compiler::RuntimeInterface> runtimeInterface_ = nullptr;
 };
 
 }  // namespace panda::guard

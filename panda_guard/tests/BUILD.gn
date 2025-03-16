@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
-import("$ark_root/panda_guard/tests/panda_guard_test_config.gni")
 import("$ark_root/tests/test_helper.gni")
 
 panda_guard_test_configs = [ "$ark_root/panda_guard:panda_guard_public_config" ]
@@ -21,12 +20,13 @@ panda_guard_test_deps = [ "$ark_root/panda_guard:panda_guard_static" ]
 
 panda_guard_include_dirs = [ "$ark_root/panda_guard/tests" ]
 
-ohos_copy("copy_config_files") {
-  sources = [ "$ark_root/panda_guard/tests/unittest/configs" ]
-  outputs = [ "${target_out_dir}/configs" ]
-
-  part_name = "runtime_core"
-  subsystem_name = "arkcompiler"
+action("update_unittest_config") {
+  script = "$ark_root/panda_guard/tests/script/update_test_config_json.py"
+  args = [
+    "--project-dir",
+    rebase_path("$ark_root/panda_guard"),
+  ]
+  outputs = [ "${target_out_dir}/panda_guard_unittest_json_update" ]
 }
 
 host_unittest_action("PandaGuardUnitTest") {
@@ -50,10 +50,10 @@ host_unittest_action("PandaGuardUnitTest") {
     "$ark_root/compiler:arkcompiler_public_config",
   ]
   deps = panda_guard_test_deps
-  unit_test_dir = rebase_path(target_out_dir)
+  unit_test_dir = rebase_path("$ark_root/panda_guard/tests/unittest/")
   defines = [ "PANDA_GUARD_UNIT_TEST_DIR=\"${unit_test_dir}/\"" ]
 
-  deps += [ ":copy_config_files" ]
+  deps += [ ":update_unittest_config" ]
 
   external_deps = [ sdk_libc_secshared_dep ]
 }
