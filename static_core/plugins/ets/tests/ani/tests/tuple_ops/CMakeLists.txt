@@ -13,5 +13,5 @@
 
 ani_add_gtest(ani_test_tuple_ops_tuple_set_element
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuple.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuple.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuple.sts
 )

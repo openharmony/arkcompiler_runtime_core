@@ -14,7 +14,7 @@
  */
 
 // This test check that JS objects of JS class
-// that is derived from ETS class and transferred from ETS -> JS
+// that is derived from STS class and transferred from STS -> JS
 // creating cyclic reference - can be collected by GC
 
 import { interop } from './gc_test_common';

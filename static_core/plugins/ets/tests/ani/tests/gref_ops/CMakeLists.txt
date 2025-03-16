@@ -13,7 +13,7 @@
 
 ani_add_gtest(ani_test_global_reference_create
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/global_reference_create_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/global_reference_create_test.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/global_reference_create_test.sts
 )
 
 ani_add_gtest(ani_test_global_reference_delete

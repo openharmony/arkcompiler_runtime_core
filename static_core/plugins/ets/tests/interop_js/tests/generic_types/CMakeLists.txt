@@ -13,7 +13,7 @@
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__ets_proxy_test_generic_types
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_generic_types.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_generic_types.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_generic_types.sts
     JS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/check_compat_objects.js
         ${CMAKE_CURRENT_SOURCE_DIR}/check_ets_objects.js

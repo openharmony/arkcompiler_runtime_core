@@ -16,18 +16,18 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig_features_table_scenarios.
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_arg_type_js_to_ets
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_type.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_type.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_type.sts
     ETS_CONFIG ${ETS_FEATURES_CONFIG}
 )
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_opt_arg_type_js_to_ets
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/opt_arg_type.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/opt_arg_type.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/opt_arg_type.sts
     ETS_CONFIG ${ETS_FEATURES_CONFIG}
 )
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_ret_type_js_to_ets
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ret_type.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ret_type.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ret_type.sts
     ETS_CONFIG ${ETS_FEATURES_CONFIG}
 )

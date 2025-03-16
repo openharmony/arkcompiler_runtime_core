@@ -54,8 +54,8 @@ class EtsTestDir:
         return self.tests / "ets_es_checked"
 
     @property
-    def ets_ts_subset(self) -> Path:
-        return self.tests / "ets_ts_subset"
+    def sts_ts_subset(self) -> Path:
+        return self.tests / "sts_ts_subset"
 
     @property
     def ets_sdk(self) -> Path:

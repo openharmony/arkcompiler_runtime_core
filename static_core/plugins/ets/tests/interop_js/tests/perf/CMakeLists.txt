@@ -43,7 +43,7 @@ foreach(TEST ${PERF_TESTS})
     # NOTE(dkofanov): `ImportExportAccessValid` need to be fixed
     # set(ETS_VERIFICATOR_ERRORS "${ETS_VERIFICATOR_ERRORS}:ImportExportAccessValid")
     panda_ets_interop_js_test_nodevm(ets_interop_js_perf_test_frontend_${TEST}
-        ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_frontend.ets
+        ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_frontend.sts
         JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_test.js
         LAUNCHER_ARGS ${TEST} ${WARMUP} ${ITERS}
         ETS_CONFIG ${ETS_CONFIG}

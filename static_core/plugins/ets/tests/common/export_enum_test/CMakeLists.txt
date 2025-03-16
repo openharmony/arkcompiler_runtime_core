@@ -12,5 +12,5 @@
 # limitations under the License.
 
 run_int_ets_code(export_enum_test ${CMAKE_CURRENT_BINARY_DIR} SOURCES
-                    ${CMAKE_CURRENT_SOURCE_DIR}/enum_compare.ets;
-                    ${CMAKE_CURRENT_SOURCE_DIR}/enum_export.ets)
+                    ${CMAKE_CURRENT_SOURCE_DIR}/enum_compare.sts;
+                    ${CMAKE_CURRENT_SOURCE_DIR}/enum_export.sts)

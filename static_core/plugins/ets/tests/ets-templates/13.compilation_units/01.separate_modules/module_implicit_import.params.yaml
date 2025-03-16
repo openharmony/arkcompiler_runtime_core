@@ -14,71 +14,71 @@
 cases:
   # functions
   - import: |-
-      import {decode} from "./modules/stdlib_implicit_import.ets"
+      import {decode} from "./modules/stdlib_implicit_import.sts"
     call: |-
       assertEQ( decode("some%20str"), "some str" )
 
   - import: |-
-      import {encode} from "./modules/stdlib_implicit_import.ets"
+      import {encode} from "./modules/stdlib_implicit_import.sts"
     call: |-
       assertEQ( encode("some str"), "some%20str" )
 
   - import: |-
-      import {encodeComp} from "./modules/stdlib_implicit_import.ets"
+      import {encodeComp} from "./modules/stdlib_implicit_import.sts"
     call: |-
       assertEQ( encodeComp("some str"), "some%20str" )
 
   # classes
   - import: |-
-      import {iteratorRes} from "./modules/stdlib_implicit_import.ets"
+      import {iteratorRes} from "./modules/stdlib_implicit_import.sts"
     call: |-
       assertTrue( iteratorRes() instanceof IteratorResult )
 
   - import: |-
-      import {json} from "./modules/stdlib_implicit_import.ets"
+      import {json} from "./modules/stdlib_implicit_import.sts"
     call: |-
       assertTrue( json() instanceof JSON )
 
   - import: |-
-      import {promise} from "./modules/stdlib_implicit_import.ets"
+      import {promise} from "./modules/stdlib_implicit_import.sts"
     call: |-
       assertTrue( promise() instanceof Promise )
 
   - import: |-
-      import {rangeError} from "./modules/stdlib_implicit_import.ets"
+      import {rangeError} from "./modules/stdlib_implicit_import.sts"
     call: |-
       assertTrue( rangeError() instanceof RangeError )
       assertTrue( rangeError() instanceof Error )
 
   - import: |-
-      import {referenceError} from "./modules/stdlib_implicit_import.ets"
+      import {referenceError} from "./modules/stdlib_implicit_import.sts"
     call: |-
       assertTrue( referenceError() instanceof ReferenceError )
       assertTrue( referenceError() instanceof Error )
 
   - import: |-
-      import {syntaxError} from "./modules/stdlib_implicit_import.ets"
+      import {syntaxError} from "./modules/stdlib_implicit_import.sts"
     call: |-
       assertTrue( syntaxError() instanceof SyntaxError )
       assertTrue( syntaxError() instanceof Error )
 
   - import: |-
-      import {uriError} from "./modules/stdlib_implicit_import.ets"
+      import {uriError} from "./modules/stdlib_implicit_import.sts"
     call: |-
       assertTrue( uriError() instanceof URIError )
       assertTrue( uriError() instanceof Error )
 
   - import: |-
-      import {regexp} from "./modules/stdlib_implicit_import.ets"
+      import {regexp} from "./modules/stdlib_implicit_import.sts"
     call: |-
       assertTrue( regexp() instanceof RegExp )
 
   - import: |-
-      import {weakMap} from "./modules/stdlib_implicit_import.ets"
+      import {weakMap} from "./modules/stdlib_implicit_import.sts"
     call: |-
       assertTrue( weakMap() instanceof WeakMap )
 
   - import: |-
-      import {weakSet} from "./modules/stdlib_implicit_import.ets"
+      import {weakSet} from "./modules/stdlib_implicit_import.sts"
     call: |-
       assertTrue( weakSet() instanceof WeakSet )

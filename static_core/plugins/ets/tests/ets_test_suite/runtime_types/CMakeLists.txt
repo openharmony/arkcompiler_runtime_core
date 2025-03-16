@@ -23,7 +23,7 @@ add_custom_target(ets_test_suite_runtime_types)
 foreach(test ${runtime_types})
     set(test_out_dir "${runtime_types_out_dir}/${test}")
 
-    set(test_in "${runtime_types_in_dir}/${test}.ets")
+    set(test_in "${runtime_types_in_dir}/${test}.sts")
     set(target ets_test_suite_runtime_types_${test})
 
     run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target})

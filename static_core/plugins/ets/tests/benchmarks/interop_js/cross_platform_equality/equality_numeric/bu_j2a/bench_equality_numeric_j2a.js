@@ -61,7 +61,7 @@ function equalityNumericJ2a() {
      * @Benchmark
      */
     this.test = function() {
-        comparison(this.bench.etsNum, this.bench.etsNum, equal, 'number ');
+        comparison(this.bench.stsNum, this.bench.stsNum, equal, 'number ');
         return;
     };
 

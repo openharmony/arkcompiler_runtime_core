@@ -13,7 +13,7 @@
 
 
 panda_ets_interop_js_test_arkjsvm(ets_interop_js_object_state_interop_interop_hashed_test
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/hashed_object.ets
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/hashed_object.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/interop_index_state_test.js
     LAUNCHER_ARGS "hash_to_info"
 )

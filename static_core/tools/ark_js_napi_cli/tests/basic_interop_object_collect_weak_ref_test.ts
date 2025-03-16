@@ -28,7 +28,7 @@ function getJSPromiseWeakRef(): WeakRef<Promise<Object>> {
     return new WeakRef(a);
 }
 
-// From ETS -> JS, ETS collect 1st, JS collect 2nd
+// From STS -> JS, STS collect 1st, JS collect 2nd
 function isSts2JsObjectCollectedTest(): number {
     let bTestResult = 0;
     let wr = getSTSWeakRef();
@@ -37,7 +37,7 @@ function isSts2JsObjectCollectedTest(): number {
     interop.RunPandaGC();
 
     if (!interop.isSTSObjectCollected()) {
-        print('isSts2JsObjectCollectedTest failed. ETS object is collected.');
+        print('isSts2JsObjectCollectedTest failed. STS object is collected.');
         bTestResult = 1;
     }
     if (wr.deref() !== undefined) {
@@ -47,7 +47,7 @@ function isSts2JsObjectCollectedTest(): number {
     return bTestResult;
 }
 
-// From JS -> ETS, ETS collect 1st, JS collect 2nd
+// From JS -> STS, STS collect 1st, JS collect 2nd
 function isJs2StsPromiseCollectedTest(): number {
     let bTestResult = 0;
     let wr = getJSPromiseWeakRef();
@@ -56,7 +56,7 @@ function isJs2StsPromiseCollectedTest(): number {
     interop.RunPandaGC();
 
     if (!(interop.isSTSPromiseCollected())) {
-        print('isJs2StsPromiseCollectedTest failed. ETS promise is not collected.');
+        print('isJs2StsPromiseCollectedTest failed. STS promise is not collected.');
         bTestResult = 1;
     }
     if (wr.deref() !== undefined) {

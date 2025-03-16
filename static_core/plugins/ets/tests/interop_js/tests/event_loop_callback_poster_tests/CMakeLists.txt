@@ -13,5 +13,5 @@
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_event_loop_module_tests
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/event_loop_module_tests.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/event_loop_module_tests.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/event_loop_module_tests.sts
 )

@@ -17,19 +17,19 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/scenarios.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/scenarios.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/scenarios.sts
     ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_symbol_test_js_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/symbol.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/symbol.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/symbol.sts
     ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets_conflict_types
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conflict_types.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conflict_types.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conflict_types.sts
     ETS_CONFIG ${ETS_CONFIG}
 )
 

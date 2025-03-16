@@ -14,6 +14,8 @@
  */
 
 export const enum Extension {
+  STS = '.sts',
+  DSTS = '.d.sts',
   ETS = '.ets',
   DETS = '.d.ets'
 }

@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -4095,7 +4095,7 @@ imports in the reverse direction.
 
 .. code-block:: typescript
 
-    // app.ets
+    // app.sts
     export class C {
         // ...
     }
@@ -4109,12 +4109,12 @@ imports in the reverse direction.
 
 .. code-block:: typescript
 
-    // lib1.ets
+    // lib1.sts
     export class C {
         // ...
     }
 
-    // lib2.ets
+    // lib2.sts
     import { C } from "lib1"
 
 .. _R148:
@@ -4262,7 +4262,7 @@ to interop calls and assigned to other variables of type ``ESObject``.
     declare function foo(): any
     declare function bar(a: any): number
 
-    // main.ets
+    // main.sts
     let e0: ESObject = foo() // CTE - ``ESObject`` typed variable can only be local
 
     function f() {
@@ -4469,7 +4469,7 @@ categories:
 
 .. code-block:: typescript
 
-    // a.ets
+    // a.sts
     @Sendable
     class A {}
 
@@ -4480,7 +4480,7 @@ categories:
         B
     }
 
-    // b.ets
+    // b.sts
     import { A, I, E } from "a"
 
     @Sendable
@@ -4583,7 +4583,7 @@ Only ``Sendable data`` types are allowed as type arguments of generic
 
 .. code-block:: typescript
 
-    // a.ets
+    // a.sts
     @Sendable
     export class A {
         a: number = 1
@@ -4592,7 +4592,7 @@ Only ``Sendable data`` types are allowed as type arguments of generic
     @Sendable
     export class B<T> {}
 
-    // b.ets
+    // b.sts
     import { A, B } from "a"
 
     @Sendable
@@ -4663,7 +4663,7 @@ classes, and functions only can be used inside a ``Sendable`` class body.
 
 .. code-block:: typescript
 
-    // a.ets
+    // a.sts
     export let foo: number = 1
 
     export function bar() {
@@ -4673,7 +4673,7 @@ classes, and functions only can be used inside a ``Sendable`` class body.
     @Sendable
     export class A {}
 
-    // b.ets
+    // b.sts
     import {foo, bar, A} from "a"
 
     @Sendable
@@ -4760,7 +4760,7 @@ objects of type ``Sendable``.
 
 .. code-block:: typescript
 
-    import {collections} from "@arkts.collections.d.ets"
+    import {collections} from "@arkts.collections.d.sts"
 
     let a: collections.Array<number> = [1, 2, 3]
 
@@ -4776,7 +4776,7 @@ objects of type ``Sendable``.
 
 .. code-block:: typescript
 
-    import {collections} from "@arkts.collections.d.ets"
+    import {collections} from "@arkts.collections.d.sts"
 
     let a: collections.Array<number> = new collections.Array<number>([1, 2, 3])
 
@@ -4956,7 +4956,7 @@ Only ``Sendable`` entities can be exported in shared modules in |LANG|.
 
 .. code-block:: typescript
 
-    // a.ets
+    // a.sts
     'use shared'
 
     export enum E { A, B } // Error, regular enum is not sendable
@@ -4971,7 +4971,7 @@ Only ``Sendable`` entities can be exported in shared modules in |LANG|.
     export { D } from 'b'  // Error, re-exporting non-sendable class
     export { v3 } from 'b' // Error, re-exporting variable with non-sendable type
 
-    // b.ets
+    // b.sts
     export class D {}
     export let v3: D
 
@@ -4980,7 +4980,7 @@ Only ``Sendable`` entities can be exported in shared modules in |LANG|.
 
 .. code-block:: typescript
 
-    // a.ets
+    // a.sts
     'use shared'
 
     export const enum E { A, B }
@@ -4996,7 +4996,7 @@ Only ``Sendable`` entities can be exported in shared modules in |LANG|.
 
     export { D, v3, v4 } from 'b'
 
-    // b.ets
+    // b.sts
     @Sendable
     export class D {}
     export let v3: D
@@ -5031,12 +5031,12 @@ all exported entities explicitly.
 
 .. code-block:: typescript
 
-    // a.ets
+    // a.sts
     @Sendable
     export class C {}
     export let a: number
 
-    // b.ets
+    // b.sts
     'use shared'
     export * from 'a' // Error, wildcard export in a shared module
 
@@ -5045,12 +5045,12 @@ all exported entities explicitly.
 
 .. code-block:: typescript
 
-    // a.ets
+    // a.sts
     @Sendable
     export class C {}
     export let a: number
 
-    // b.ets
+    // b.sts
     'use shared'
     export { C, a } from 'a'
 

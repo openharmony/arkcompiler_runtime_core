@@ -63,16 +63,16 @@ function equalityPrimitivesJ2a() {
     this.test = function() {
         // NOTE issue (17741) - enable below after fix import bigInt
         if (false) {
-            comparison(this.bench.etsBigInt, this.bench.etsBigInt, equal, 'BigInt ');
+            comparison(this.bench.stsBigInt, this.bench.stsBigInt, equal, 'BigInt ');
         }
 
-        comparison(this.bench.etsBool, this.bench.etsBool, equal, 'boolean ');
+        comparison(this.bench.stsBool, this.bench.stsBool, equal, 'boolean ');
 
         comparison(this.bench.null, this.bench.null, equal, 'null ');
 
         // NOTE: (19193) enable below after fix comparison
         if (false) {
-            comparison(this.bench.etsUndefined, this.bench.etsUndefined, equal, 'undefined ');
+            comparison(this.bench.stsUndefined, this.bench.stsUndefined, equal, 'undefined ');
         }
 
         return;

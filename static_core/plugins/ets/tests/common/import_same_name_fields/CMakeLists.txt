@@ -16,5 +16,5 @@ if (PANDA_TARGET_ARM32)
 endif()
 
 run_int_ets_code(import_same_name_fields ${CMAKE_CURRENT_BINARY_DIR}/import_same_name_fields SOURCES
-	${CMAKE_CURRENT_SOURCE_DIR}/import.ets;
-	${CMAKE_CURRENT_SOURCE_DIR}/class_module.ets)
+	${CMAKE_CURRENT_SOURCE_DIR}/import.sts;
+	${CMAKE_CURRENT_SOURCE_DIR}/class_module.sts)

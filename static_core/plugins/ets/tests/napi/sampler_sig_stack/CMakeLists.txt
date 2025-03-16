@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -42,7 +42,7 @@ panda_target_link_libraries(sampler_asm_test arkruntime)
 panda_target_include_directories(sampler_asm_test PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/napi)
 add_custom_target(sampler_asm_test_suite COMMENT "Running signal alternate stack sampler test")
 
-set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=ets --ets-unnamed --opt-level=0)
+set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=sts --ets-unnamed --opt-level=0)
 
 set(RUNTIME_ARGUMENTS
     --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
@@ -55,7 +55,7 @@ set(testing_dir "${CMAKE_CURRENT_BINARY_DIR}")
 
 # Compile Ets tests
 add_custom_target(sampler_asm_es2panda
-    COMMAND ${es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${testing_dir}/SamplerAsmTest.abc ${CMAKE_CURRENT_SOURCE_DIR}/SamplerAsmTest.ets
+    COMMAND ${es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${testing_dir}/SamplerAsmTest.abc ${CMAKE_CURRENT_SOURCE_DIR}/SamplerAsmTest.sts
     WORKING_DIRECTORY "${testing_dir}"
     DEPENDS ${es2panda_target}
 )

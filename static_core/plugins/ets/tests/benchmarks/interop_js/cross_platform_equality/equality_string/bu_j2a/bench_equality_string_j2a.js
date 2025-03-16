@@ -61,7 +61,7 @@ function equalityStringJ2a() {
      * @Benchmark
      */
     this.test = function() {
-        comparison(this.bench.etsString, this.bench.etsString, equal, 'string ');
+        comparison(this.bench.stsString, this.bench.stsString, equal, 'string ');
         return;
     };
 

@@ -16,7 +16,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__generic_as_parameter_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_as_parameter.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_as_parameter.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_as_parameter.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_as_parameter.js
 )

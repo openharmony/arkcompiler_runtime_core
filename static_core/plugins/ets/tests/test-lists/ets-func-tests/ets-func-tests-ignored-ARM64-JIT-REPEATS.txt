@@ -1,2 +1,2 @@
 # #20821
-escompat/JsonReplacerTest.ets
+escompat/JsonReplacerTest.sts

@@ -61,11 +61,11 @@ function equalityObjectsJ2a() {
      * @Benchmark
      */
     this.test = function() {
-        comparison(this.bench.etsObj, this.bench.etsObj, equal, 'object ');
+        comparison(this.bench.stsObj, this.bench.stsObj, equal, 'object ');
 
-        comparison(this.bench.etsObj, this.bench.etsObjCopy, equal, 'object by link ');
+        comparison(this.bench.stsObj, this.bench.stsObjCopy, equal, 'object by link ');
 
-        comparison(this.bench.etsObj, this.bench.etsObjOther, noEqual, 'object different object ');
+        comparison(this.bench.stsObj, this.bench.stsObjOther, noEqual, 'object different object ');
 
         return;
     };

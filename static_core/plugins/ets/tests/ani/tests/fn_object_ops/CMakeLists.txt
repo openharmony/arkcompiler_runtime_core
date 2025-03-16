@@ -13,5 +13,5 @@
 
 ani_add_gtest(ani_test_fn_object_ops_call_functional_object
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_functional_object_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_functional_object_test.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_functional_object_test.sts
 )

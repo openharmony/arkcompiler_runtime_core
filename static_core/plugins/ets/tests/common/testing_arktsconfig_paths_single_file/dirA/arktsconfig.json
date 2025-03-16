@@ -3,7 +3,7 @@
       "package": "@TestA",
       "baseUrl": ".",
       "paths": {
-            "HarB.foo": ["../dirB/foo.ets"]
+            "HarB.foo": ["../dirB/foo.sts"]
       }
     }
 }

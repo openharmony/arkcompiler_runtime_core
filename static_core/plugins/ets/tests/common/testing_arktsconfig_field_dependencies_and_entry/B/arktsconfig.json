@@ -10,7 +10,7 @@
         "dependencies": [
             "../C/arktsconfig.json"
         ],
-        "entry": "./indexB.ets"
+        "entry": "./indexB.sts"
         
     }
 }

@@ -66,7 +66,7 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
         self.collect_excluded_test_lists(test_name=self.__declgen_ets_name)
         self.collect_ignored_test_lists(test_name=self.__declgen_ets_name)
 
-        self.add_directories([TestDirectory(self.test_root, "ets", [])])
+        self.add_directories([TestDirectory(self.test_root, "sts", [])])
 
     @property
     def default_work_dir_root(self) -> Path:

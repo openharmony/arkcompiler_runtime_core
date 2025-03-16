@@ -129,7 +129,7 @@ static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsProm
 {
     /**
      * This is a backed by JS equivalent promise.
-     * ETS mode: error, no one can create such a promise!
+     * STS mode: error, no one can create such a promise!
      * JS mode:
      *      - add a callback to JQ, that will:
      *          - resolve the promise with some value OR reject it
@@ -173,7 +173,7 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
         return AwaitProxyPromise(currentCoro, promiseHandle);
     }
 
-    /* CASE 2. This is a native ETS promise */
+    /* CASE 2. This is a native STS promise */
     LOG(DEBUG, COROUTINES) << "Promise::await: starting await() for a promise...";
     promiseHandle->Wait();
     ASSERT(!promiseHandle->IsPending());
@@ -181,7 +181,7 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
 
     /**
      * The promise is already resolved or rejected. Further actions:
-     *      ETS mode:
+     *      STS mode:
      *          if resolved: return Promise.value
      *          if rejected: throw Promise.value
      *      JS mode: NOTE!

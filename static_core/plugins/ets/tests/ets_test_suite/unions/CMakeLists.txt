@@ -16,7 +16,7 @@ set(unions_tests_out_dir "${CMAKE_CURRENT_BINARY_DIR}")
 
 add_custom_target(ets_test_suite_unions)
 
-file(GLOB test_files "${unions_tests_in_dir}/*.ets")
+file(GLOB test_files "${unions_tests_in_dir}/*.sts")
 foreach(filename ${test_files})
     get_filename_component(test_file "${filename}" NAME)
     get_filename_component(test_name "${test_file}" NAME_WE)

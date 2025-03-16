@@ -16,11 +16,11 @@ set(taskpool_test_out_dir "${CMAKE_CURRENT_BINARY_DIR}")
 
 add_custom_target(ets_test_suite_taskpool)
 
-file(GLOB test_files "${taskpool_test_in_dir}/*.ets")
+file(GLOB test_files "${taskpool_test_in_dir}/*.sts")
 foreach(filename ${test_files})
     get_filename_component(test_file "${filename}" NAME)
     get_filename_component(test_name "${test_file}" NAME_WE)
-    if (NOT "${test_file}" STREQUAL "group_tasks.ets" OR NOT PANDA_ENABLE_ADDRESS_SANITIZER OR NOT PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER)
+    if (NOT "${test_file}" STREQUAL "group_tasks.sts" OR NOT PANDA_ENABLE_ADDRESS_SANITIZER OR NOT PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER)
         add_ets_test(ets_test_suite_taskpool
                     SKIP_ARM32_COMPILER
                     FILE ${test_file}

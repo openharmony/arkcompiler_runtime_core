@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,8 +20,8 @@
 #     ABC_FILE
 #       path/to/file0.abc
 #     ETS_SOURCE
-#       path/to/file0.ets
-#       path/to/file1.ets
+#       path/to/file0.sts
+#       path/to/file1.sts
 #     OUTPUT_DIRECTORY
 #       path/to/output_director
 #     ETS_CONFIG
@@ -59,7 +59,7 @@ function(do_panda_ets_package TARGET)
     set(ES2PANDA_ARGUMENTS
         --opt-level=2
         --thread=0
-        --extension=ets
+        --extension=sts
     )
     if(DEFINED ARG_ETS_VERIFICATOR_ERRORS)
         string(REPLACE "," ":" ARG_ETS_VERIFICATOR_ERRORS, ${ARG_ETS_VERIFICATOR_ERRORS})
@@ -78,7 +78,7 @@ function(do_panda_ets_package TARGET)
 
     set(BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/${TARGET})
 
-    # Convert *.ets -> classes.abc
+    # Convert *.sts -> classes.abc
     set(OUTPUT_ABC ${BUILD_DIR}/src/classes.abc)
     if(DEFINED ARG_ETS_SOURCES)
         list(LENGTH ARG_ETS_SOURCES list_length)
@@ -87,16 +87,16 @@ function(do_panda_ets_package TARGET)
             if(NOT ARG_ETS_NAMED_MODE)
                 list(APPEND ES2PANDA_ARGUMENTS --ets-unnamed)
             endif()
-            # Compile one .ets file to OUTPUT_ABC
+            # Compile one .sts file to OUTPUT_ABC
             add_custom_command(
                 OUTPUT ${OUTPUT_ABC}
-                COMMENT "${TARGET}: Convert ets files to ${OUTPUT_ABC}"
+                COMMENT "${TARGET}: Convert sts files to ${OUTPUT_ABC}"
                 COMMAND mkdir -p ${BUILD_DIR}/src
                 COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS} --output=${OUTPUT_ABC} ${ARG_ETS_SOURCES}
                 DEPENDS ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc ${es2panda_target} ${ARG_ETS_SOURCES}
             )
         else()
-            # Compile several .ets files and link them to OUTPUT_ABC
+            # Compile several .sts files and link them to OUTPUT_ABC
             set(ABC_FILES)
             foreach(ETS_SOURCE ${ARG_ETS_SOURCES})
                 get_filename_component(CLEAR_NAME ${ETS_SOURCE} NAME_WE)
@@ -170,8 +170,8 @@ endfunction(do_panda_ets_package)
 #     ABC_FILE
 #       path/to/file0.abc
 #     ETS_SOURCES
-#       path/to/file0.ets
-#       path/to/file1.ets
+#       path/to/file0.sts
+#       path/to/file1.sts
 #     ETS_CONFIG
 #       path/to/arktsconfig.json
 #   )
@@ -188,8 +188,8 @@ endfunction(panda_ets_package)
 # Example usage:
 #   panda_ets_package_gtest(package_name
 #     ETS_SOURCES
-#       path/to/file0.ets
-#       path/to/file1.ets
+#       path/to/file0.sts
+#       path/to/file1.sts
 #     ETS_CONFIG
 #       path/to/arktsconfig.json
 #   )

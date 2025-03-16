@@ -13,10 +13,10 @@
 
 ani_add_gtest(ani_test_type_ops_get_super_class
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_super_class_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_super_class_test.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_super_class_test.sts
 )
 
 ani_add_gtest(ani_test_type_ops_is_assignable_from
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/is_assignable_from_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/is_assignable_from_test.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/is_assignable_from_test.sts
 )

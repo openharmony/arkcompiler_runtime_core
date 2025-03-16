@@ -47,7 +47,7 @@ add_custom_target(ets_interop_js_perf_benchmarks)
 macro(add_ets_interop_js_benchmark BENCHMARK CALLER CALLEE)
     panda_ets_interop_js_test_nodevm(ets_interop_js_perf_benchmarks_${CALLER}_${CALLEE}_${BENCHMARK}
         NODE_OPTIONS "--jitless"
-        ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/caller.ets ${CMAKE_CURRENT_LIST_DIR}/callee.ets
+        ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/caller.sts ${CMAKE_CURRENT_LIST_DIR}/callee.sts
         JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/launcher.js
         LAUNCHER_ARGS ${BENCHMARK} ${CALLER} ${CALLEE} ${WARMUP} ${ITERS}
     )

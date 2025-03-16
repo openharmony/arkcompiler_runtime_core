@@ -13,6 +13,6 @@
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_rest_spread_ets_to_ts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/rest_spread.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_rest_spread.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_rest_spread.sts
     TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/rest_spread.ts
 )

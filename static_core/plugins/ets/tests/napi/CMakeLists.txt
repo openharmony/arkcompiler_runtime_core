@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -60,7 +60,7 @@ panda_target_include_directories(etsnapi_lib PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/
 
 add_custom_target(etsnapi_test_suite COMMENT "Running etsnapi tests")
 
-set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=ets --ets-unnamed --opt-level=0)
+set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=sts --ets-unnamed --opt-level=0)
 
 set(BOOT_PANDA_FILES ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc)
 
@@ -76,7 +76,7 @@ foreach(t ${ets_tests_list})
 
     # Compile Ets tests
     add_custom_target(es2panda_${t}
-        COMMAND ${es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${testing_dir}/${t}.abc ${CMAKE_CURRENT_SOURCE_DIR}/ets/${t}.ets
+        COMMAND ${es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${testing_dir}/${t}.abc ${CMAKE_CURRENT_SOURCE_DIR}/ets/${t}.sts
         WORKING_DIRECTORY "${testing_dir}"
         DEPENDS ${es2panda_target}
     )

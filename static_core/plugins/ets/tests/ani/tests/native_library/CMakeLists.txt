@@ -18,7 +18,7 @@ endif()
 
 ani_add_gtest(ani_test_constructor_native_library
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/constructor_native_library_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/constructor_native_library_test.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/constructor_native_library_test.sts
 )
 
 # Build rules for ctor_test native shared library

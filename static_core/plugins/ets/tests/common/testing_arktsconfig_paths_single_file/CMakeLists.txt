@@ -13,6 +13,6 @@
 
 run_int_ets_code(testing_arktsconfig_paths_single_file ${CMAKE_CURRENT_BINARY_DIR}
                  ENTRYPOINT "@TestA.a"
-                 SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dirA/a.ets ${CMAKE_CURRENT_SOURCE_DIR}/dirB/foo.ets
+                 SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dirA/a.sts ${CMAKE_CURRENT_SOURCE_DIR}/dirB/foo.sts
                  ARKTS_CONFIGS ${CMAKE_CURRENT_SOURCE_DIR}/dirA/arktsconfig.json ${CMAKE_CURRENT_SOURCE_DIR}/dirB/arktsconfig.json
                 )

@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,7 +24,7 @@ add_custom_target(ets_test_suite_stubs)
 foreach(test ${stubs_tests})
     set(test_out_dir "${stubs_tests_out_dir}/${test}")
 
-    set(test_in "${stubs_tests_in_dir}/${test}.ets")
+    set(test_in "${stubs_tests_in_dir}/${test}.sts")
     set(target ets_test_suite_stubs_${test})
 
     run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target})

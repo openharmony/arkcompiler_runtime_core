@@ -13,20 +13,20 @@
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_test__opt_default_arg_type
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/opt_default_arg_type.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/opt_default_arg_type.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/opt_default_arg_type.sts
 )
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_test__opt_arg_type
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/opt_arg_type.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/opt_arg_type.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/opt_arg_type.sts
 )
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_test__arg_type
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_type.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_type.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_type.sts
 )
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_test__ret_type
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ret_type.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ret_type.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ret_type.sts
 )

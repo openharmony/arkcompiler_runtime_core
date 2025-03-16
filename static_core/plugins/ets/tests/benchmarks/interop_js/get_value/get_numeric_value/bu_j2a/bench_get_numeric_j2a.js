@@ -51,13 +51,13 @@ function getNumericJ2a() {
     this.test = function() {
         const stsObj = this.getObj();
 
-        const numVal = stsObj.etsNumber;
-        const byteVal = stsObj.etsByte;
-        const shortVal = stsObj.etsShort;
-        const intVal = stsObj.etsInt;
-        const longVal = stsObj.etsLong;
-        const floatVal = stsObj.etsFloat;
-        const doubleVal = stsObj.etsDouble;
+        const numVal = stsObj.stsNumber;
+        const byteVal = stsObj.stsByte;
+        const shortVal = stsObj.stsShort;
+        const intVal = stsObj.stsInt;
+        const longVal = stsObj.stsLong;
+        const floatVal = stsObj.stsFloat;
+        const doubleVal = stsObj.stsDouble;
 
         return;
     };

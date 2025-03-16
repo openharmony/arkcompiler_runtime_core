@@ -12,7 +12,7 @@
         }
     },
     "include": [
-        "./**/*.ets"
+        "./**/*.sts"
     ],
     "references": [
         { "path": "../foo" },

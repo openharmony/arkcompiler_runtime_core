@@ -13,7 +13,7 @@
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__generic_static_sts_to_ts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_static.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_static.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_static.sts
     JS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/check_class_extends.js
         ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_static_extra_set.js

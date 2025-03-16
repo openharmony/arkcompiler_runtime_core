@@ -13,7 +13,7 @@
  
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__sealed_function
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/sealed_function.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/sealed_function.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/sealed_function.sts
     JS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/sealed_function.js
         ${CMAKE_CURRENT_SOURCE_DIR}/sealed_function.test.js

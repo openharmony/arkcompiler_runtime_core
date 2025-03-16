@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -62,7 +62,7 @@ function(panda_ets_interop_js_checked_test)
     file(MAKE_DIRECTORY "${TEST_DIR}")
     SET(OPTIONS "--run-gc-in-place")
     set(PAOC_OPTIONS ${OPTIONS} "--load-runtimes=ets" "--boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc")
-    set(ES2PANDA_OPTIONS --thread=0 --extension=ets --ets-unnamed --arktsconfig=${ETS_CONFIG} --ast-verifier:errors=${ETS_VERIFICATOR_ERRORS})
+    set(ES2PANDA_OPTIONS --thread=0 --extension=sts --ets-unnamed --arktsconfig=${ETS_CONFIG} --ast-verifier:errors=${ETS_VERIFICATOR_ERRORS})
 
     if (PANDA_LLVM_AOT)
         set(WITH_LLVM "--with-llvm")

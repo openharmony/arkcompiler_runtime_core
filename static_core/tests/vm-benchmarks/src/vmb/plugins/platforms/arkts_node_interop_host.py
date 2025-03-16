@@ -86,8 +86,8 @@ class Platform(PlatformBase):
             self.node(bu)
             return
         if 'bu_j2a' in bu.tags:
-            self.sh.run(f'cp -f {str(bu.doclet_src.parent)}/*.ets {bu.path}')
-            bu.src_for_es2panda_override = Path(f'{bu.path}/*.ets')  # wildcard here assumes single ets file
+            self.sh.run(f'cp -f {str(bu.doclet_src.parent)}/*.sts {bu.path}')
+            bu.src_for_es2panda_override = Path(f'{bu.path}/*.sts')  # wildcard here assumes single sts file
             self.run_generated(bu)
             return
 

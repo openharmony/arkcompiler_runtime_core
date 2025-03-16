@@ -20,13 +20,13 @@ const {
 const deferentTypes = new NullAndUndefinedTypes();
 
 function checkNull() {
-    ASSERT_TRUE(typeof deferentTypes.etsNull === 'object');
-    ASSERT_TRUE(deferentTypes.etsNull === null);
+    ASSERT_TRUE(typeof deferentTypes.stsNull === 'object');
+    ASSERT_TRUE(deferentTypes.stsNull === null);
 }
 
 function checkUndefined() {
-    ASSERT_TRUE(typeof deferentTypes.etsUndefined === 'undefined');
-    ASSERT_TRUE(deferentTypes.etsUndefined === undefined);
+    ASSERT_TRUE(typeof deferentTypes.stsUndefined === 'undefined');
+    ASSERT_TRUE(deferentTypes.stsUndefined === undefined);
 }
 
 checkNull();

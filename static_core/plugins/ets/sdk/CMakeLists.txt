@@ -18,17 +18,17 @@ message(STATUS "Building ArkTS SDK")
 
 add_custom_target(ets_sdk_prereqs)
 
-file(GLOB_RECURSE SDK_SOURCES CONFIGURE_DEPENDS "**/*.ets")
+file(GLOB_RECURSE SDK_SOURCES CONFIGURE_DEPENDS "**/*.sts")
 panda_target_sources(ets_sdk_prereqs PRIVATE ${SDK_SOURCES})
 
 add_dependencies(ets_sdk_prereqs etsstdlib)
 # Note(ivan-tyulyandin): use of ark_link is a workaround for internal issue #21462
 add_dependencies(ets_sdk_prereqs ark_link)
 
-# Note(ivan-tyulyandin): provide script to collect all ets files in build time on each rerun, issue #21800
+# Note(ivan-tyulyandin): provide script to collect all sts files in build time on each rerun, issue #21800
 set(SDK_SRCS
-    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.buffer.ets"
-    "${CMAKE_CURRENT_SOURCE_DIR}/arkts/@arkts.math.Decimal.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.buffer.sts"
+    "${CMAKE_CURRENT_SOURCE_DIR}/arkts/@arkts.math.Decimal.sts"
 )
 
 set(ABCS_TO_LINK "")

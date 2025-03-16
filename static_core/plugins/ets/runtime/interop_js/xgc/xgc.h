@@ -32,7 +32,7 @@ class SharedReferenceStorage;
 
 /**
  * Cross-reference garbage collector.
- * Implements logic to collect cross-references between JS and ETS in SharedReferenceStorage.
+ * Implements logic to collect cross-references between JS and STS in SharedReferenceStorage.
  */
 class XGC final : public mem::GCTrigger {
 public:

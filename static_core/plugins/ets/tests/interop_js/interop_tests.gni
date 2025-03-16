@@ -17,7 +17,7 @@ import("$build_root/config/components/ets_frontend/es2abc_config.gni")
 
 template("interop_test") {
   assert(defined(invoker.js), "js must be defined")
-  assert(defined(invoker.ets), "ets must be defined")
+  assert(defined(invoker.sts), "sts must be defined")
 
   lines = []
   count = 0
@@ -38,7 +38,7 @@ template("interop_test") {
     js_file = rebase_path(files[0])
   }
   jsabc_file = "$target_out_dir/${target_name}/${target_name}_js.abc"
-  sts_file = invoker.ets
+  sts_file = invoker.sts
   stsabc_file = "$target_out_dir/${target_name}/" +
                 get_path_info(sts_file, "name") + ".abc"
 
@@ -59,7 +59,7 @@ template("interop_test") {
     outputs = [ stsabc_file ]
 
     args = [
-      "--extension=ets",
+      "--extension=sts",
       "--opt-level=2",
       "--ets-unnamed",
       "--output=" + rebase_path(stsabc_file),

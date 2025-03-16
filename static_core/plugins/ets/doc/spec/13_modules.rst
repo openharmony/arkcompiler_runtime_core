@@ -536,7 +536,7 @@ while *import type* imports only exported types.
 .. code-block:: typescript
    :linenos:
 
-    // File module.ets
+    // File module.sts
     console.log ("Module initialization code")
 
     export class Class1 {/*body*/}
@@ -544,10 +544,10 @@ while *import type* imports only exported types.
     class Class2 {}
     export type {Class2} 
 
-    // MainProgram.ets
+    // MainProgram.sts
 
-    import {Class1} from "./module.ets"
-    import type {Class2} from "./module.ets"
+    import {Class1} from "./module.sts"
+    import type {Class2} from "./module.sts"
 
     let c1 = new Class1() // OK
     let c2 = new Class2() // OK, the same

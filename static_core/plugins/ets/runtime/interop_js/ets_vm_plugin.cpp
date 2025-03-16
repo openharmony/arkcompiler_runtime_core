@@ -88,7 +88,7 @@ static napi_value GetEtsFunction(napi_env env, napi_callback_info info)
 
 // This function returns napi_value, thus it is possible to get accessto it`s fields
 // It gives opportunity to get acces to global variables from ETSGLOBAL
-// test.ets
+// test.sts
 // export let x = 1
 // test.js
 // etsvm.getClass("ETSGLOBAL").x

@@ -401,7 +401,7 @@ keyword ``export`` as follows:
 .. code-block:: typescript
    :linenos:
 
-    // a.ets
+    // a.sts
     export @interface MyAnno {}
 
 If an annotation is imported as a part of an imported module, then the
@@ -410,7 +410,7 @@ annotation is accessed by its qualified name:
 .. code-block:: typescript
    :linenos:
 
-    // b.ets
+    // b.sts
     import * as ns from "./a"
 
     @ns.MyAnno
@@ -431,7 +431,7 @@ Unqualified import is also allowed:
 .. code-block:: typescript
    :linenos:
 
-    // b.ets
+    // b.sts
     import { MyAnno } from "./a"
 
     @MyAnno
@@ -504,10 +504,10 @@ identical, including field initialization:
 .. code-block:: typescript
    :linenos:
 
-    // a.d.ets
+    // a.d.sts
     export declare @interface NameAnno{name: string = ""}
 
-    // a.ets
+    // a.sts
     export @interface NameAnno{name: string = ""} // ok
 
 The code in the example below is incorrect because the ambient declaration is
@@ -516,10 +516,10 @@ not identical to the annotation declaration:
 .. code-block:: typescript
    :linenos:
 
-    // a.d.ets
+    // a.d.sts
     export declare @interface VersionAnno{version: number} // initialization is missing
 
-    // a.ets
+    // a.sts
     export @interface VersionAnno{version: number = 1}
 
 An ambient declaration can be imported and used in exactly the same manner
@@ -528,16 +528,16 @@ as a regular annotation:
 .. code-block:: typescript
    :linenos:
 
-    // a.d.ets
+    // a.d.sts
     export declare @interface MyAnno {}
 
-    // b.ets
+    // b.sts
     import { MyAnno } from "./a"
 
     @MyAnno
     class C {/*body*/}
 
-If an annotation is applied to an ambient declaration in the *.d.ets* file (see
+If an annotation is applied to an ambient declaration in the *.d.sts* file (see
 the example below), then the annotation is to be applied to the implementation
 declaration manually, because the annotation is not automatically applied to
 the declaration that implements the ambient declaration:
@@ -545,7 +545,7 @@ the declaration that implements the ambient declaration:
 .. code-block:: typescript
    :linenos:
 
-    // a.d.ets
+    // a.d.sts
     export declare @interface MyAnno {}
 
     @MyAnno

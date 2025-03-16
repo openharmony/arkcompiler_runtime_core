@@ -16,13 +16,13 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test__dynamic_object
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dynamic_object.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dynamic_object.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dynamic_object.sts
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/index.js
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test_dynamic_call
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dynamic_call.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dynamic_call.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dynamic_call.sts
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/index.js
 )

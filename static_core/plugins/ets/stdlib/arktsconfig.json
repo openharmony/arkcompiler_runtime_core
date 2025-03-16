@@ -12,6 +12,6 @@
         "outDir": "../cache"
     },
     "include": [
-        "./**/*.ets"
+        "./**/*.sts"
     ]
 }

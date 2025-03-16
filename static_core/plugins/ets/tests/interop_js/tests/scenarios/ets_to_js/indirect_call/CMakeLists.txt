@@ -14,17 +14,17 @@
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_ets_to_js_indirect_ref
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_ref/indirect_ref.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_ref/indirect_ref.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_ref/indirect_ref.sts
 )
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_ets_to_js_indirect_value
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_value/indirect_value.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_value/indirect_value.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_value/indirect_value.sts
 )
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_ets_to_js_indirect_union
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_union/indirect_union.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_union/indirect_union.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_union/indirect_union.sts
 )
 
 add_custom_target(ets_interop_js_scenarios_ets_to_js_indirect)

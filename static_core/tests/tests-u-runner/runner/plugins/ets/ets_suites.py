@@ -25,5 +25,5 @@ class EtsSuites(Enum):
     FUNC = "ets-func-tests"
     GCSTRESS = "ets-gc-stress"
     RUNTIME = "ets-runtime"
-    TS_SUBSET = "ets-ts-subset"
+    TS_SUBSET = "sts-ts-subset"
     SDK = "ets-sdk"

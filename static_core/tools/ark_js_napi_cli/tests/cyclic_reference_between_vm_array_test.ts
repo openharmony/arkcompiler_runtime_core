@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-// This test check that ETS array with many objects
-// that is transferred from ETS -> JS and then from JS -> ETS
+// This test check that STS array with many objects
+// that is transferred from STS -> JS and then from JS -> STS
 // creating cyclic reference - can be collected by GC
 
 import { interop } from './gc_test_common';

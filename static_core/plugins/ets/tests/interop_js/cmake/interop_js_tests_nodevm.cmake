@@ -27,8 +27,8 @@ add_dependencies(ets_interop_tests ets_interop_js_tests_nodevm)
 #       tests/unit1_test.cpp
 #       tests/unit2_test.cpp
 #     ETS_SOURCES
-#       tests/unit1_test.ets
-#       tests/unit2_test.ets
+#       tests/unit1_test.sts
+#       tests/unit2_test.sts
 #     LIBRARIES
 #       lib_target1
 #       lib_target2

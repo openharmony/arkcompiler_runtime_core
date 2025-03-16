@@ -13,10 +13,10 @@
 
 ani_add_gtest(ani_test_find_class
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_class_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_class_test.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_class_test.sts
 )
 
 ani_add_gtest(ani_test_find_namespace
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_namespace_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_namespace_test.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_namespace_test.sts
 )

@@ -109,15 +109,15 @@ def compile_ts_cmd(config: PathConfig, file: str) -> bool:
 
 
 def compile_sts_cmd(config: PathConfig, file: str) -> bool:
-    """Compile ets file via es2panda"""
-    abc_file: str = config.get_abc(file, '.ets')
+    """Compile sts file via es2panda"""
+    abc_file: str = config.get_abc(file, '.sts')
     return check_command_result([
         f'{config.build_root}/arkcompiler/ets_frontend/es2panda',
-        '--extension=ets',
+        '--extension=sts',
         '--opt-level=2',
         f'--arktsconfig={config.build_root}/arkcompiler/ets_frontend/arktsconfig.json',
         f'--output={abc_file}',
-        os.path.join(config.test_dir, 'ets', file)
+        os.path.join(config.test_dir, 'sts', file)
     ])
 
 
@@ -126,7 +126,7 @@ def prepare_test_files(path_config: PathConfig) -> bool:
     test_space: str = path_config.get_testspace()
     try:
         os.makedirs(f'{test_space}/module', exist_ok=True)
-        # Copy ETS specific files
+        # Copy STS specific files
         shutil.copy(f'{path_config.build_root}/arkcompiler/runtime_core/libets_interop_js_napi.so',
                     f'{test_space}/module')
         shutil.copy(f'{path_config.build_root}/gen/arkcompiler/runtime_core/static_core/plugins/ets/etsstdlib.abc',
@@ -167,7 +167,7 @@ def judge_output(arguments: argparse.Namespace) -> bool:
         test_names = line.strip()
         if test_names and test_names[0] != '#':
             file_names = list(map(lambda x: x.strip(), test_names.split(',')))
-            assert len(file_names) == 2, "Expected 2 files: .ts and .ets"
+            assert len(file_names) == 2, "Expected 2 files: .ts and .sts"
             # Run test
             logger.debug('---- Run: %s, %s ---', file_names[0], file_names[1])
             if (compile_ts_cmd(path_config, file_names[0]) and

@@ -17,6 +17,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 # 21832: test initializes everything with undefined
 # panda_ets_interop_js_nodevm_gtest(ets_interop_js_test_incorrect_conversion_types_ts_to_arkts
 #     CPP_SOURCES ${CMAKE_CURRENT_LIST_DIR}/incorrect_conversion_types.cpp
-#     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/incorrect_conversion_types.ets
+#     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/incorrect_conversion_types.sts
 #     ETS_CONFIG ${ETS_CONFIG}
 # )

@@ -13,7 +13,7 @@
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__callable_signature_sts_to_js
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/callable_signature.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/callable_signature.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/callable_signature.sts
     JS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/check_callable_signature.js
         ${CMAKE_CURRENT_SOURCE_DIR}/check_call_invoke_instantiate.js

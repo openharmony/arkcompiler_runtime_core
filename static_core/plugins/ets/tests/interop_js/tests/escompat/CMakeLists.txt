@@ -17,7 +17,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test__escompat
         ${CMAKE_CURRENT_SOURCE_DIR}/escompat_error.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_buffer.cpp
     ETS_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/escompat.ets
+        ${CMAKE_CURRENT_SOURCE_DIR}/escompat.sts
     VERIFY_SOURCES false
     JS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/array_buffer_js_suites/test_is_view.js

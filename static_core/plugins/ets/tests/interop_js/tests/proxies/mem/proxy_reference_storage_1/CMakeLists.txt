@@ -13,6 +13,6 @@
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js__test_proxy_reference_storage_1
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_proxy_reference_storage_1.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_proxy_reference_storage_1.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_proxy_reference_storage_1.sts
     LIBRARIES ets_interop_js_napi
 )

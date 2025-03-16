@@ -13,7 +13,7 @@
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__dot_operator_sts_to_js
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dot_operator.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dot_operator.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dot_operator.sts
     JS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/check_call_chaining.js
         ${CMAKE_CURRENT_SOURCE_DIR}/check_call_method_for_value.js

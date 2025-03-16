@@ -49,7 +49,7 @@ function(add_linker_test test additional_dependencies)
     endif()
 
     set(test_out_dir "${linker_tests_out_dir}/${test}")
-    set(test_in "${linker_tests_in_dir}/${test}.ets")
+    set(test_in "${linker_tests_in_dir}/${test}.sts")
     set(target ets_test_suite_linker_${test})
 
     run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target}
@@ -91,7 +91,7 @@ foreach(test ${linker_tests})
 endforeach()
 
 function(test_runtime_linker_extensions test)
-    file(GLOB abc_runtime_linker_sources "${linker_tests_in_dir}/abc_runtime_linker_sources/*.ets")
+    file(GLOB abc_runtime_linker_sources "${linker_tests_in_dir}/abc_runtime_linker_sources/*.sts")
     set(additional_abc_dir "${linker_tests_out_dir}/abc_runtime_linker_sources")
     set(additional_abc_files_list "")
     set(compilations_targets_list "")
@@ -144,7 +144,7 @@ endfunction()
 
 function(test_app_linker_context_exception TARGET WORK_DIR)
     # Must provide a valid abc file, so that runtime would start creating application linker context
-    set(EXISTING_SOURCE "${linker_tests_in_dir}/abc_runtime_linker_sources/additional1.ets")
+    set(EXISTING_SOURCE "${linker_tests_in_dir}/abc_runtime_linker_sources/additional1.sts")
     set(EXISTING_ABC "${WORK_DIR}/${TARGET}-existing.abc")
     set(ABC_TARGET ${TARGET}-abc)
     compile_ets_code(${EXISTING_SOURCE} ${EXISTING_ABC} ${ABC_TARGET})

@@ -50,7 +50,7 @@ function getStringJ2a() {
     this.test = function() {
         const stsObj = this.getObj();
 
-        const stringVal = stsObj.etsString;
+        const stringVal = stsObj.stsString;
 
         return;
     };

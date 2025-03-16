@@ -70,7 +70,7 @@ class Runner:
         """
         async with aiofiles.tempfile.NamedTemporaryFile(dir=tempdir,
                                                         mode="w",
-                                                        suffix=".ets",
+                                                        suffix=".sts",
                                                         delete=False) as stsfile:
             await stsfile.write(code)
             return str(stsfile.name)
@@ -149,10 +149,10 @@ class Runner:
         return result
 
     async def _compile(self, filename: str, options: list) -> Dict[str, Any]:
-        """Compiles ets code stored in file
+        """Compiles sts code stored in file
         :rtype: Dict[str, Any]
         """
-        options.extend(["--extension=ets", f"--output={filename}.abc", filename])
+        options.extend(["--extension=sts", f"--output={filename}.abc", filename])
         stdout, stderr, retcode = await self._execute_cmd(self.binary.es2panda, *options)
         if retcode == -11:
             stderr += "compilation: Segmentation fault"
