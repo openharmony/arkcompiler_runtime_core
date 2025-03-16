@@ -15,13 +15,29 @@ Each command is a valid code in the `ruby` language.
 
 * **CHECKER** (description: string) begin new Checker with specified description
 * **RUN** run panda application, following named arguments are allowed:
-    - *force_jit: bool* - run jit compilation for every executed method
     - *options: string* - additional options for Panda VM
     - *entry: string* - entry point, default - `_GLOBAL::main`
     - *result: int* - expected value to be returned by the `panda` application
     - *abort: int* - expected terminal signal
+    - *env: string* - environment variables setup string to be used as execution command prefix
+    - *force_jit: bool* - run jit compilation for every executed method
+    - *force_profiling: bool* - enables profdata collection for every interpreter-executed method
+    - *pgo_emit_profdata: bool* - enables on-disk generating for profile data to be used in PGO
 * **RUN_PAOC** run paoc application on the compiled panda file. Output panda file will be passed to the following panda
-    run. Thus, `RUN_PAOC` command must be placed before `RUN` command.
+    run. Thus, `RUN_PAOC` command must be placed before `RUN` command. Following options are allowed:
+    - *options: string* - additional options for paoc
+    - *bool: bool* - enables boot output
+    - *result: int* - expected value to be returned by the `paoc`
+    - *abort: int* - expected terminal signal
+    - *env: string* - environment variables setup string to be used as execution command prefix
+    - *inputs: string* - list of panda files to compile
+    - *output: string* - name of AOT file to be generated (incompatible to subsequent `RUN` call for now)
+    - *pgo_use_profdata: bool* - usese profile data for PGO. Should be used after `RUN` call with `pgo_emit_profdata` enabled
+* **RUN_PGO_PROF** - runs panda application with forces profiling and PGO profdata emitting. Output profdata will be passed to the following AOT run that use PGO. Syntax sugar for `RUN` command with `pgo_emit_profdata` enabled
+* **RUN_PGO_PAOC** - runs paoc to compile panda file using collected profdata. Should be run after `RUN` with `pgo_emit_profdata` enabled. Syntax sugar for `RUN_PAOC` call
+* **RUN_LLVM** - runs paoc application on the compiled panda file with LLVM AOT backend. Requires LLVM support at `paoc` and passing `--with-llvm` to `checker.rb`
+* **RUN_AOT** - runs paoc application on the compiled panda file with various AOT modes. Currently, command creates separate checkes for `RUN_PAOC` and `RUN_LLVM` backends
+* **RUN_BCO** - runs frontend with bytecode optimizer
 * **EVENT** (event: pattern) search event within all events
 * **EVENT_NEXT** (event: pattern) ordered search event, i.e. search from position of the last founded event
 * **EVENT_NOT** (event: pattern) ensure event is not occurred

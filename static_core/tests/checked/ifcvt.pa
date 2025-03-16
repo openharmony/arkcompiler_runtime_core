@@ -96,6 +96,24 @@ done:
 #! RUN          options: "", entry: "_GLOBAL::main1"
 #! EVENT        "AotEntrypointFound,_GLOBAL::ifconv__noinline__"
 
+#! CHECKER      Check hotness and increase limit IfConversion in PGO AOT
+#! SKIP_IF      @architecture == "arm32" || true
+#! RUN_PGO_PROF entry: "_GLOBAL::main1"
+#! RUN_PGO_PAOC options: ""
+#! EVENT        /Compilation,_GLOBAL::ifconv__noinline__,.*COMPILED/
+#! METHOD       "_GLOBAL::main"
+#! PASS_AFTER   "IfConversion"
+#! INST         "hotness=0"
+#! INST_NOT     /hotness=[1-9]/
+#! METHOD       "_GLOBAL::ifconv__noinline__"
+#! PASS_AFTER   "MemoryCoalescing"
+#! INST_NOT     "SelectImm LT i32"
+#! PASS_AFTER   "IfConversion"
+#! INST         /hotness=[1-9]/
+#! INST_COUNT   "SelectImm LT i32", 3
+#! RUN          entry: "_GLOBAL::main1"
+#! EVENT        "AotEntrypointFound,_GLOBAL::ifconv__noinline__"
+
 .function i32 ifconv__noinline__(i32 a0, i32 a1, i32 a2)
 {
     ldai 10
