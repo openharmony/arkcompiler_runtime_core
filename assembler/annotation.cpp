@@ -269,4 +269,12 @@ void AnnotationData::DeleteAnnotationElementByName(const std::string_view &annot
         (void)elements_.erase(annotation_elem_iter);
     }
 }
+
+void AnnotationData::EnumerateAnnotationElements(const std::function<void(AnnotationElement&)> &callback)
+{
+    for (auto &element : elements_) {
+        callback(element);
+    }
+}
+
 }  // namespace panda::pandasm

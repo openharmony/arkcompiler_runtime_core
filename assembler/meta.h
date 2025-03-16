@@ -208,6 +208,13 @@ public:
         annotations_.insert(annotations_.end(), annotations.begin(), annotations.end());
     }
 
+    void EnumerateAnnotations(const std::function<void(AnnotationData&)> &callback)
+    {
+        for (auto &annotation : annotations_) {
+            callback(annotation);
+        }
+    }
+
     void DeleteAnnotationElementByName(std::string_view annotation_name, std::string_view annotation_elem_name)
     {
         auto annotation_iter = std::find_if(annotations_.begin(), annotations_.end(),
