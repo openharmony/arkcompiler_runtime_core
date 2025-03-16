@@ -14,29 +14,29 @@
  */
 
 //! CHECKER       Math.floor JIT
-//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ETSGLOBAL::main"
-//! METHOD        "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ets_floor.ETSGLOBAL::main"
+//! METHOD        "ets_floor.ETSGLOBAL::main"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /Intrinsic.StdMathFloor/, 12
-//! ASM_METHOD    "ETSGLOBAL::main"
+//! ASM_METHOD    "ets_floor.ETSGLOBAL::main"
 //! ASM_INST      "Intrinsic.StdMathFloor"
 //! ASM           x64: /roundsd.*1,/, arm64: "frintm", arm32: "vrintm"
 
 //! CHECKER       Math.floor AOT
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*main.*'"
-//! METHOD        "ETSGLOBAL::main"
+//! METHOD        "ets_floor.ETSGLOBAL::main"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /Intrinsic.StdMathFloor/, 12
-//! ASM_METHOD    "ETSGLOBAL::main"
+//! ASM_METHOD    "ets_floor.ETSGLOBAL::main"
 //! ASM_INST      "Intrinsic.StdMathFloor"
 //! ASM           x64: /roundsd.*1,/, arm64: "frintm"
-//! RUN           entry: "ETSGLOBAL::main"
+//! RUN           entry: "ets_floor.ETSGLOBAL::main"
 
 //! CHECKER       Math.floor LLVM AOT
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_LLVM      options: "--compiler-regex='.*main.*'"
-//! RUN           entry: "ETSGLOBAL::main"
+//! RUN           entry: "ets_floor.ETSGLOBAL::main"
 
 function main(): int {
     if (floor(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) return 1;

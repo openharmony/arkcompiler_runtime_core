@@ -132,7 +132,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    static const char *className = "LTestBacktrace;";
+    static const char *className = "Lbacktrace_test/TestBacktrace;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         std::cerr << "Not found '" << className << "'" << std::endl;

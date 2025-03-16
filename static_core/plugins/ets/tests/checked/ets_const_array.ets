@@ -14,7 +14,7 @@
  */
 
 //! CHECKER         Test ConstArrayResolver for array of std.core.String
-//! RUN_BCO         method: "ETSGLOBAL.const_array_str"
+//! RUN_BCO         method: "ets_const_array.ETSGLOBAL.const_array_str"
 //! METHOD          "const_array_str"
 //! PASS_AFTER      "IrBuilder"
 //! INST            "NewArray"
@@ -26,10 +26,10 @@
 //! INST_NOT        "NewArray"
 //! INST_NOT        "LoadString"
 //! INST_NOT        "StoreArray"
-//! BC_METHOD       "ETSGLOBAL.const_array_str"
+//! BC_METHOD       "ets_const_array.ETSGLOBAL.const_array_str"
 //! INST            "lda.const"
 //! INST_NOT        "newarr"
-//! RUN             entry: "ETSGLOBAL::test_const_array_str"
+//! RUN             entry: "ets_const_array.ETSGLOBAL::test_const_array_str"
 
 function const_array_str(idx: int): String {
     let a: String[] = ["ab", "cd", "ef"];
@@ -49,7 +49,7 @@ function test_const_array_str(): int {
 }
 
 //! CHECKER         Test ConstArrayResolver for ArkTS int array
-//! RUN_BCO         method: "ETSGLOBAL.const_array_int"
+//! RUN_BCO         method: "ets_const_array.ETSGLOBAL.const_array_int"
 //! METHOD          "const_array_int"
 //! PASS_AFTER      "IrBuilder"
 //! INST            "NewArray"
@@ -58,10 +58,10 @@ function test_const_array_str(): int {
 //! INST            "LoadConstArray"
 //! INST_NOT        "NewArray"
 //! INST_NOT        "StoreArray"
-//! BC_METHOD       "ETSGLOBAL.const_array_int"
+//! BC_METHOD       "ets_const_array.ETSGLOBAL.const_array_int"
 //! INST            "lda.const"
 //! INST_NOT        "newarr"
-//! RUN             entry: "ETSGLOBAL::test_const_array_int"
+//! RUN             entry: "ets_const_array.ETSGLOBAL::test_const_array_int"
 
 function const_array_int(idx: int): int {
     let a: int[] = [5, 8, 13];

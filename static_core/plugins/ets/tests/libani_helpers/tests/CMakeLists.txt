@@ -14,13 +14,12 @@
 function(ani_helpers_add_gtest TARGET)
     cmake_parse_arguments(
         ARG # give prefix `ARG` to each argument
-        "ETS_NAMED_MODE"
+        ""
         "ETS_CONFIG"
         "CPP_SOURCES;ETS_SOURCES;LIBRARIES"
         ${ARGN}
     )
     ani_add_gtest(${TARGET}
-        ETS_NAMED_MODE ${ARG_ETS_NAMED_MODE}
         ETS_CONFIG ${ARG_ETS_CONFIG}
         CPP_SOURCES ${ARG_CPP_SOURCES}
         ETS_SOURCES ${ARG_ETS_SOURCES}

@@ -14,8 +14,8 @@
  */
 
 //! CHECKER      IR Builder inlining double
-//! RUN          force_jit: true, options: "--compiler-regex='.*check_isnan_f64.*'", entry: "ETSGLOBAL::check_isnan_f64"
-//! METHOD       "ETSGLOBAL::check_isnan_f64"
+//! RUN          force_jit: true, options: "--compiler-regex='.*check_isnan_f64.*'", entry: "ets_isNaN.ETSGLOBAL::check_isnan_f64"
+//! METHOD       "ets_isNaN.ETSGLOBAL::check_isnan_f64"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Compare/
 //! INST_NEXT_NOT /Intrinsic/
@@ -23,15 +23,15 @@
 //! CHECKER       AOT IR Builder inlining double 
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_AOT       options: "--compiler-regex='.*check_isnan_f64.*'"
-//! METHOD        "ETSGLOBAL::check_isnan_f64"
+//! METHOD        "ets_isNaN.ETSGLOBAL::check_isnan_f64"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Compare/
 //! INST_NEXT_NOT /Intrinsic/
-//! RUN           entry: "ETSGLOBAL::check_isnan_f64"
+//! RUN           entry: "ets_isNaN.ETSGLOBAL::check_isnan_f64"
 
 //! CHECKER      IR Builder inlining float
-//! RUN          force_jit: true, options: "--compiler-regex='.*check_isnan_f32.*'", entry: "ETSGLOBAL::check_isnan_f32"
-//! METHOD       "ETSGLOBAL::check_isnan_f32"
+//! RUN          force_jit: true, options: "--compiler-regex='.*check_isnan_f32.*'", entry: "ets_isNaN.ETSGLOBAL::check_isnan_f32"
+//! METHOD       "ets_isNaN.ETSGLOBAL::check_isnan_f32"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Compare/
 //! INST_NEXT_NOT /Intrinsic/
@@ -39,11 +39,11 @@
 //! CHECKER       AOT IR Builder inlining float
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_AOT       options: "--compiler-regex='.*check_isnan_f32.*'"
-//! METHOD        "ETSGLOBAL::check_isnan_f32"
+//! METHOD        "ets_isNaN.ETSGLOBAL::check_isnan_f32"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Compare/
 //! INST_NEXT_NOT /Intrinsic/
-//! RUN           entry: "ETSGLOBAL::check_isnan_f32"
+//! RUN           entry: "ets_isNaN.ETSGLOBAL::check_isnan_f32"
 
 
 function check_isnan_f64() : int {

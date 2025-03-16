@@ -26,53 +26,53 @@ function getobj(): SomeRef { return new Object(); }
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC     options: "--compiler-regex='.*(equals_).*'"
 //!
-//! METHOD       "ETSGLOBAL::strict_equals_dce"
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_dce"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsStrictEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsStrictEquals/
 //!
-//! METHOD       "ETSGLOBAL::strict_equals_cse"
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_cse"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   /Intrinsic.CompilerEtsStrictEquals/, 2
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   /Intrinsic.CompilerEtsStrictEquals/, 1
 //!
-//! METHOD       "ETSGLOBAL::strict_equals_same_inputs"
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_same_inputs"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsStrictEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsStrictEquals/
 //!
-//! METHOD       "ETSGLOBAL::strict_equals_null"
-//! PASS_AFTER   "IrBuilder"
-//! INST         /Intrinsic.CompilerEtsStrictEquals/
-//! PASS_AFTER   "ChecksElimination"
-//! INST_NOT     /Intrinsic.CompilerEtsStrictEquals/
-//! INST         /Compare/
-//!
-//! METHOD       "ETSGLOBAL::strict_equals_undefined"
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_null"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsStrictEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsStrictEquals/
 //! INST         /Compare/
 //!
-//! METHOD       "ETSGLOBAL::strict_equals_null_undefined"
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_undefined"
+//! PASS_AFTER   "IrBuilder"
+//! INST         /Intrinsic.CompilerEtsStrictEquals/
+//! PASS_AFTER   "ChecksElimination"
+//! INST_NOT     /Intrinsic.CompilerEtsStrictEquals/
+//! INST         /Compare/
+//!
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_null_undefined"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsStrictEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsStrictEquals/
 //! INST_NOT     /Compare/
 //!
-//! METHOD       "ETSGLOBAL::strict_equals_reftyped_input"
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_reftyped_input"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsStrictEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsStrictEquals/
 //! INST_NOT     /Compare/
 //!
-//! RUN          entry: "ETSGLOBAL::main"
+//! RUN          entry: "ets_strict_equals.ETSGLOBAL::main"
 
 function strict_equals_dce(x: SomeRef, y: SomeRef) {
     return getfalse() && x === y;

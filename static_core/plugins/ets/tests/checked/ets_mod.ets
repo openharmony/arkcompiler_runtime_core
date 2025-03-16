@@ -14,18 +14,18 @@
  */
 
 //! CHECKER       Math.mod JIT
-//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ETSGLOBAL::main"
-//! METHOD        "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ets_mod.ETSGLOBAL::main"
+//! METHOD        "ets_mod.ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic/
 
 //! CHECKER       Math.mod AOT
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_AOT       options: "--compiler-regex='.*main.*'"
-//! METHOD        "ETSGLOBAL::main"
+//! METHOD        "ets_mod.ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic/
-//! RUN           entry: "ETSGLOBAL::main"
+//! RUN           entry: "ets_mod.ETSGLOBAL::main"
 
 function main(): int {
     if (mod(2.0, 1.0) != 0.) return 1;

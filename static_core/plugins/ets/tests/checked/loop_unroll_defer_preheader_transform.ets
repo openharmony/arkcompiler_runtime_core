@@ -14,8 +14,8 @@
  */
 
 //! CHECKER         Check preheader's `Compare` isn't squashed by VN.
-//! RUN             force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events.csv", entry: "ETSGLOBAL::main"
-//! METHOD          "ETSGLOBAL::main"
+//! RUN             force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events.csv", entry: "loop_unroll_defer_preheader_transform.ETSGLOBAL::main"
+//! METHOD          "loop_unroll_defer_preheader_transform.ETSGLOBAL::main"
 //! PASS_AFTER      "LoopPeeling"
 //! PASS_AFTER_NEXT "GVN"
 //! INST            /Compare.* -> \(v[0-9]+\)/
@@ -26,15 +26,15 @@
 //! EVENT           /ETSGLOBAL::main,loop-unroll.*unroll_type:without branching/
 
 //! CHECKER         Check preheader's `Compare` is squashed if '--compiler-defer-preheader-transform' is disabled.
-//! RUN             force_jit: true, options: "--compiler-defer-preheader-transform=false ", entry: "ETSGLOBAL::main"
-//! METHOD          "ETSGLOBAL::main"
+//! RUN             force_jit: true, options: "--compiler-defer-preheader-transform=false ", entry: "loop_unroll_defer_preheader_transform.ETSGLOBAL::main"
+//! METHOD          "loop_unroll_defer_preheader_transform.ETSGLOBAL::main"
 //! PASS_AFTER      "LoopPeeling"
 //! PASS_AFTER_NEXT "GVN"
 //! INST            /Compare.* -> \(v[0-9]+, v[0-9]+\)/
 
 //! CHECKER         Check preheader's `Compare` is squashed if unroll is disabled.
-//! RUN             force_jit: true, options: "--compiler-loop-unroll=false ", entry: "ETSGLOBAL::main"
-//! METHOD          "ETSGLOBAL::main"
+//! RUN             force_jit: true, options: "--compiler-loop-unroll=false ", entry: "loop_unroll_defer_preheader_transform.ETSGLOBAL::main"
+//! METHOD          "loop_unroll_defer_preheader_transform.ETSGLOBAL::main"
 //! PASS_AFTER      "LoopPeeling"
 //! PASS_AFTER_NEXT "GVN"
 //! INST            /Compare.* -> \(v[0-9]+, v[0-9]+\)/

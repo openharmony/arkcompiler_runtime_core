@@ -17,7 +17,7 @@
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*toString[0-9]+.*' --compiler-inlining=false"
 //!
-//! METHOD        "ETSGLOBAL::toString0"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString0"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -27,7 +27,7 @@
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /StringBuilder::toString/
 //!
-//! METHOD        "ETSGLOBAL::toString1"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString1"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -37,7 +37,7 @@
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /StringBuilder::toString/
 //!
-//! METHOD        "ETSGLOBAL::toString2"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString2"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -58,7 +58,7 @@
 //! INST_NEXT_NOT /NullCheck/
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
-//! METHOD        "ETSGLOBAL::toString3"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString3"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -72,7 +72,7 @@
 //! INST_NOT      /NullCheck/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
 //!
-//! METHOD        "ETSGLOBAL::toString4"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -89,7 +89,7 @@
 //! INST_NEXT_NOT /NullCheck/
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
-//! METHOD        "ETSGLOBAL::toString5"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString5"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -105,7 +105,7 @@
 //! INST_NEXT_NOT /SaveState/
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
-//! METHOD        "ETSGLOBAL::toString6"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString6"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -121,7 +121,7 @@
 //! INST_NEXT_NOT /SaveState/
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
-//! METHOD        "ETSGLOBAL::toString7"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString7"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -138,7 +138,7 @@
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!
-//! METHOD        "ETSGLOBAL::toString8"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString8"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -151,7 +151,7 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!
-//! METHOD        "ETSGLOBAL::toString10"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString10"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
@@ -159,12 +159,12 @@
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
 //!
-//! RUN           entry: "ETSGLOBAL::main"
+//! RUN           entry: "ets_stringbuilder.ETSGLOBAL::main"
 
 //! CHECKER       JIT IR Builder, check StringBuilder::toString replacement
-//! RUN           force_jit: true, options: "--compiler-regex='.*toString[0-9]+.*' --compiler-inlining=false", entry: "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*toString[0-9]+.*' --compiler-inlining=false", entry: "ets_stringbuilder.ETSGLOBAL::main"
 //!
-//! METHOD        "ETSGLOBAL::toString0"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString0"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -174,7 +174,7 @@
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /StringBuilder::toString/
 //!
-//! METHOD        "ETSGLOBAL::toString1"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString1"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -184,7 +184,7 @@
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /StringBuilder::toString/
 //!
-//! METHOD        "ETSGLOBAL::toString2"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString2"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -205,7 +205,7 @@
 //! INST_NEXT_NOT /NullCheck/
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
-//! METHOD        "ETSGLOBAL::toString3"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString3"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -219,7 +219,7 @@
 //! INST_NOT      /NullCheck/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
 //!
-//! METHOD        "ETSGLOBAL::toString4"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -236,7 +236,7 @@
 //! INST_NEXT_NOT /NullCheck/
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
-//! METHOD        "ETSGLOBAL::toString5"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString5"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -252,7 +252,7 @@
 //! INST_NEXT_NOT /SaveState/
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
-//! METHOD        "ETSGLOBAL::toString6"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString6"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -268,7 +268,7 @@
 //! INST_NEXT_NOT /SaveState/
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
-//! METHOD        "ETSGLOBAL::toString7"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString7"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -285,7 +285,7 @@
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!
-//! METHOD        "ETSGLOBAL::toString8"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString8"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
@@ -298,7 +298,7 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!
-//! METHOD        "ETSGLOBAL::toString9"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString9"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    /StringBuilder::<ctor>/,2
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,6
@@ -306,7 +306,7 @@
 //! INST_COUNT    /StringBuilder::<ctor>/,2
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
 //!
-//! METHOD        "ETSGLOBAL::toString10"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString10"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
@@ -314,7 +314,7 @@
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
 //!
-//! METHOD        "ETSGLOBAL::toString11"
+//! METHOD        "ets_stringbuilder.ETSGLOBAL::toString11"
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2

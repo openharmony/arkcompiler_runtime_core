@@ -14,9 +14,9 @@
  */
 
 //! CHECKER      Try Catch Resolving JIT Optimize with default catch only
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-regex=MultipleCatch::__noinline__multipleCatch", entry: "ETSGLOBAL::main"
-//! EVENT        /Compilation,MultipleCatch::__noinline__multipleCatch,.*,COMPILED/
-//! METHOD       "MultipleCatch::__noinline__multipleCatch"
+//! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-regex=ets_try_catch1.MultipleCatch::__noinline__multipleCatch", entry: "ets_try_catch1.ETSGLOBAL::main"
+//! EVENT        /Compilation,ets_try_catch1.MultipleCatch::__noinline__multipleCatch,.*,COMPILED/
+//! METHOD       "ets_try_catch1.MultipleCatch::__noinline__multipleCatch"
 //! PASS_AFTER   "Inline"
 //! INST_COUNT   "Throw",2
 //! PASS_AFTER   "TryCatchResolving"
@@ -24,8 +24,8 @@
 
 //! CHECKER      Try Catch Resolving AOT Optimize with default catch only
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC     options: "--compiler-regex=MultipleCatch::__noinline__multipleCatch"
-//! METHOD       "MultipleCatch::__noinline__multipleCatch"
+//! RUN_PAOC     options: "--compiler-regex=ets_try_catch1.MultipleCatch::__noinline__multipleCatch"
+//! METHOD       "ets_try_catch1.MultipleCatch::__noinline__multipleCatch"
 //! PASS_AFTER   "Inline"
 //! INST_COUNT   "Throw",2
 //! PASS_AFTER   "TryCatchResolving"

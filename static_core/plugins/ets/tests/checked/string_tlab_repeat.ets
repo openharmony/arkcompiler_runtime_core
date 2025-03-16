@@ -20,11 +20,11 @@
  * the function is run in compiled mode by using compileMethod() */
 
 //! CHECKER      Use TLAB for String.repeat() allocations
-//! RUN          options: "--no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "ETSGLOBAL::testStringRepeat"
+//! RUN          options: "--no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "string_tlab_repeat.ETSGLOBAL::testStringRepeat"
 
 //! CHECKER      Use TLAB for String.repeat() allocations AOT
 //! RUN_PAOC     options: "--compiler-enable-tlab-events=true --compiler-regex=.*StringRepeat.*"
-//! RUN          options: "--compiler-enable-tlab-events=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "ETSGLOBAL::testStringRepeat"
+//! RUN          options: "--compiler-enable-tlab-events=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "string_tlab_repeat.ETSGLOBAL::testStringRepeat"
 
 native function compileMethod(str: String) : int;
 
@@ -62,7 +62,7 @@ function StringRepeat(): int {
 
 function testStringRepeat()
 {
-    loadLibrary("jitinterface");
-    compileMethod("ETSGLOBAL::StringRepeat");
+    loadLibrary("string_tlab_repeat");
+    compileMethod("string_tlab_repeat.ETSGLOBAL::StringRepeat");
     return StringRepeat();
 }

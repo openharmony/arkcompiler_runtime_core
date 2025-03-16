@@ -14,8 +14,8 @@
  */
 
 //! CHECKER JIT IR Builder inlining String.getLength()
-//! RUN     force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ETSGLOBAL::main"
-//! METHOD  "ETSGLOBAL::main"
+//! RUN     force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ets_string_length.ETSGLOBAL::main"
+//! METHOD  "ets_string_length.ETSGLOBAL::main"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic/
 //! INST       /LenArray/
@@ -30,7 +30,7 @@
 //! CHECKER AOT IR Builder inlining String.getLength()
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC   options: "--compiler-regex='.*main.*'"
-//! METHOD  "ETSGLOBAL::main"
+//! METHOD  "ets_string_length.ETSGLOBAL::main"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic/
 //! INST       /LenArray/
@@ -41,12 +41,12 @@
 //! INST       /LenArray/
 //! INST_NEXT  /ShrI/
 //! INST_NEXT  /IfImm EQ i32/
-//! RUN        entry: "ETSGLOBAL::main"
+//! RUN        entry: "ets_string_length.ETSGLOBAL::main"
 
 //! CHECKER String.length() with LLVMAOT
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_LLVM   options: "--compiler-regex='.*main.*'"
-//! RUN        entry: "ETSGLOBAL::main"
+//! RUN        entry: "ets_string_length.ETSGLOBAL::main"
 
 function newString(): String {
     return new String("abcde");

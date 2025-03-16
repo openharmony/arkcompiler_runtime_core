@@ -18,8 +18,8 @@ let C:int = 0;
 let C1:int = 2;
 
 //! CHECKER      Verify check's users NO_HOIST if check's input is is hoistable.
-//! RUN          force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events.csv", entry: "ETSGLOBAL::HoistableInput"
-//! METHOD       "ETSGLOBAL::HoistableInput"
+//! RUN          force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events.csv", entry: "checks_elimination_no_hoist.ETSGLOBAL::HoistableInput"
+//! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::HoistableInput"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Div/; div1Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
 //! INST_NEXT    /Div/; div2Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
@@ -50,8 +50,8 @@ function HoistableInput(): int {
 }
 
 //! CHECKER      Verify check's users hoisted if there is a dominating check outside.
-//! RUN          force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events.csv", entry: "ETSGLOBAL::DomCheckOutside"
-//! METHOD       "ETSGLOBAL::DomCheckOutside"
+//! RUN          force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events.csv", entry: "checks_elimination_no_hoist.ETSGLOBAL::DomCheckOutside"
+//! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::DomCheckOutside"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Div/; div1Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
 //! INST_NEXT    /Div/; div2Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
@@ -82,8 +82,8 @@ function DomCheckOutside(): int {
 }
 
 //! CHECKER      Verify check's users NO_HOIST if check's input's bounds are invalid at the outermost preheader.
-//! RUN          force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events.csv", entry: "ETSGLOBAL::InvalidBoundsOutside"
-//! METHOD       "ETSGLOBAL::InvalidBoundsOutside"
+//! RUN          force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events.csv", entry: "checks_elimination_no_hoist.ETSGLOBAL::InvalidBoundsOutside"
+//! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::InvalidBoundsOutside"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Div/; div1Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
 //! EVENT_NOT    /licm,inst_id:#{div1Id}/
@@ -109,8 +109,8 @@ function InvalidBoundsOutside(): int {
 }
 
 //! CHECKER      Verify check's users hoisted if check's input's bounds are valid at the outermost preheader.
-//! RUN          force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events.csv", entry: "ETSGLOBAL::ValidBoundsOutside"
-//! METHOD       "ETSGLOBAL::ValidBoundsOutside"
+//! RUN          force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events.csv", entry: "checks_elimination_no_hoist.ETSGLOBAL::ValidBoundsOutside"
+//! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::ValidBoundsOutside"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Div/; div1Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
 //! EVENT        /licm,inst_id:#{div1Id}/
@@ -135,8 +135,8 @@ function ValidBoundsOutside(): int {
 }
 
 //! CHECKER      Check NO_HOIST flag for NullCheck.
-//! RUN          force_jit: true, entry: "ETSGLOBAL::NullCheck"
-//! METHOD       "ETSGLOBAL::NullCheck"
+//! RUN          force_jit: true, entry: "checks_elimination_no_hoist.ETSGLOBAL::NullCheck"
+//! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::NullCheck"
 //! PASS_AFTER   "Codegen"
 //! INST         "Intrinsic.StdCoreStringIndexOf"
 function __noinline__getnull(): string | null {
@@ -163,7 +163,7 @@ function NullCheck(): int {
 
 //! CHECKER      Check NO_HOIST flag for BoundsCheck.
 //! RUN_PAOC     options: "--compiler-cross-arch=arm64 --compiler-regex=.*BoundsCheck --compiler-enable-events --compiler-events-path=./events.csv"
-//! METHOD       "ETSGLOBAL::BoundsCheck"
+//! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::BoundsCheck"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "LoadCompressedStringChar"; lcscId = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
 //! EVENT        /licm,inst_id:#{lcscId}/

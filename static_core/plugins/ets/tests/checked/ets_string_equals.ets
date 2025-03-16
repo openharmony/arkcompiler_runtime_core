@@ -18,30 +18,30 @@
 //! CHECKER      AOT IR Builder, check string-null equality
 //! RUN_PAOC     options: "--compiler-regex='.*(equals_).*'"
 //!
-//! METHOD       "ETSGLOBAL::equals_str_str"
+//! METHOD       "ets_string_equals.ETSGLOBAL::equals_str_str"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /Intrinsic.CompilerEtsEquals/
 //! INST         /Intrinsic.StdCoreStringEquals/
 //!
-//! METHOD       "ETSGLOBAL::equals_str_null"
+//! METHOD       "ets_string_equals.ETSGLOBAL::equals_str_null"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.StdCoreStringEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic/
 //!
-//! METHOD       "ETSGLOBAL::not_equals_null_str"
+//! METHOD       "ets_string_equals.ETSGLOBAL::not_equals_null_str"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.StdCoreStringEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic/
 //!
-//! METHOD       "ETSGLOBAL::not_equals_str_null"
+//! METHOD       "ets_string_equals.ETSGLOBAL::not_equals_str_null"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.StdCoreStringEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic/
 //!
-//! RUN          entry: "ETSGLOBAL::main"
+//! RUN          entry: "ets_string_equals.ETSGLOBAL::main"
 
 // Prevents comparison elimination by frontend type inferrence
 function getnull(): String | null {

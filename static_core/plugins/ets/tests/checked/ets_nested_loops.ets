@@ -14,12 +14,12 @@
  */
 
 //! CHECKER       IR Builder nested loops
-//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ets_nested_loops.ETSGLOBAL::main"
 
 //! CHECKER       AOT IR Builder nested loops
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*main.*'"
-//! RUN           entry: "ETSGLOBAL::main"
+//! RUN           entry: "ets_nested_loops.ETSGLOBAL::main"
 
 class C0 {
   x0: boolean

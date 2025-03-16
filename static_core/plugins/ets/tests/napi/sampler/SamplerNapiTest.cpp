@@ -24,8 +24,9 @@ extern "C" {
 // NOLINTBEGIN(readability-magic-numbers, readability-named-parameter, cppcoreguidelines-pro-type-vararg,
 // hicpp-signed-bitwice)
 
-ETS_EXPORT ets_int ETS_CALL ETS_ETSGLOBAL_NativeSlowFunction([[maybe_unused]] EtsEnv *, [[maybe_unused]] ets_class,
-                                                             ets_int iterations)
+ETS_EXPORT ets_int ETS_CALL ETS_SamplerNapiTest_ETSGLOBAL_NativeSlowFunction([[maybe_unused]] EtsEnv *,
+                                                                             [[maybe_unused]] ets_class,
+                                                                             ets_int iterations)
 {
     ets_int res = 0;
     for (ets_int i = 0; i < iterations; i++) {
@@ -40,20 +41,23 @@ ETS_EXPORT ets_int ETS_CALL ETS_ETSGLOBAL_NativeSlowFunction([[maybe_unused]] Et
     return res;
 }
 
-ETS_EXPORT ets_int ETS_CALL ETS_ETSGLOBAL_NativeFastFunction([[maybe_unused]] EtsEnv *, [[maybe_unused]] ets_class)
+ETS_EXPORT ets_int ETS_CALL ETS_SamplerNapiTest_ETSGLOBAL_NativeFastFunction([[maybe_unused]] EtsEnv *,
+                                                                             [[maybe_unused]] ets_class)
 {
     ets_int res = 1;
     return res;
 }
 
-ETS_EXPORT ets_int ETS_CALL ETS_ETSGLOBAL_NativeNAPISlowFunction(EtsEnv *env, ets_class cls, ets_int iterations)
+ETS_EXPORT ets_int ETS_CALL ETS_SamplerNapiTest_ETSGLOBAL_NativeNAPISlowFunction(EtsEnv *env, ets_class cls,
+                                                                                 ets_int iterations)
 {
     ets_method method = env->GetStaticp_method(cls, "SlowETSFunction", "I:I");
     ets_int res = env->CallStaticIntMethod(cls, method, iterations);
     return res;
 }
 
-ETS_EXPORT ets_int ETS_CALL ETS_ETSGLOBAL_NativeNAPIFastFunction(EtsEnv *env, ets_class cls, ets_int iterations)
+ETS_EXPORT ets_int ETS_CALL ETS_SamplerNapiTest_ETSGLOBAL_NativeNAPIFastFunction(EtsEnv *env, ets_class cls,
+                                                                                 ets_int iterations)
 {
     ets_method method = env->GetStaticp_method(cls, "FastETSFunction", ":I");
     ets_int res = 0;

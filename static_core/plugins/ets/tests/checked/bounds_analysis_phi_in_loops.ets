@@ -15,63 +15,63 @@
 
 //! CHECKER      Check BoundsAnalysis work with phi functions in loop in AOT mode
 //! SKIP_IF      @architecture == "arm32"
-//! RUN_AOT      options: "--compiler-inlining=false", entry: "ETSGLOBAL::main"
+//! RUN_AOT      options: "--compiler-inlining=false", entry: "bounds_analysis_phi_in_loops.ETSGLOBAL::main"
 //!
-//! METHOD       "ETSGLOBAL::switch_case_loop"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::switch_case_loop"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "ETSGLOBAL::simple_loop"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::simple_loop"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "ETSGLOBAL::two_vars_loop"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::two_vars_loop"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "ETSGLOBAL::nested_loops"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::nested_loops"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "ETSGLOBAL::triple_nested_loops"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::triple_nested_loops"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "ETSGLOBAL::loop_init_without_update"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::loop_init_without_update"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "BoundsCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   "BoundsCheck", 1
 //!
-//! METHOD       "ETSGLOBAL::different_operations"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::different_operations"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 2
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 1
 //!
-//! METHOD       "ETSGLOBAL::operations_chain"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::operations_chain"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 2
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 1
 //!
-//! METHOD       "ETSGLOBAL::linked_vars"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::linked_vars"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 3
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 1
 //!
-//! METHOD       "ETSGLOBAL::not_countable_nested_loop"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::not_countable_nested_loop"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 1
 //! PASS_AFTER   "ChecksElimination"
@@ -80,63 +80,63 @@
 
 //! CHECKER      Check BoundsAnalysis work with phi functions in loop in JIT mode
 //! SKIP_IF      @architecture == "arm32"
-//! RUN          force_jit: true, options: "--compiler-inlining=false", entry: "ETSGLOBAL::main"
+//! RUN          force_jit: true, options: "--compiler-inlining=false", entry: "bounds_analysis_phi_in_loops.ETSGLOBAL::main"
 //!
-//! METHOD       "ETSGLOBAL::switch_case_loop"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::switch_case_loop"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "ETSGLOBAL::simple_loop"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::simple_loop"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "ETSGLOBAL::two_vars_loop"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::two_vars_loop"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "ETSGLOBAL::nested_loops"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::nested_loops"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "ETSGLOBAL::triple_nested_loops"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::triple_nested_loops"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "ETSGLOBAL::loop_init_without_update"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::loop_init_without_update"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "BoundsCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   "BoundsCheck", 1
 //!
-//! METHOD       "ETSGLOBAL::different_operations"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::different_operations"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 2
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 1
 //!
-//! METHOD       "ETSGLOBAL::operations_chain"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::operations_chain"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 2
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 1
 //!
-//! METHOD       "ETSGLOBAL::linked_vars"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::linked_vars"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 3
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 1
 //!
-//! METHOD       "ETSGLOBAL::not_countable_nested_loop"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::not_countable_nested_loop"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 1
 //! PASS_AFTER   "ChecksElimination"

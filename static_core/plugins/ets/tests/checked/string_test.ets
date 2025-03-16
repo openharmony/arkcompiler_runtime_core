@@ -14,9 +14,9 @@
  */
 
 //! CHECKER      Test check initobj for string in compiler
-//! RUN          force_jit: true, options: "", entry: "ETSGLOBAL::main"
-//! EVENT        /Compilation,ETSGLOBAL::main,.*,COMPILED/
-//! METHOD       "ETSGLOBAL::main"
+//! RUN          force_jit: true, options: "", entry: "string_test.ETSGLOBAL::main"
+//! EVENT        /Compilation,string_test.ETSGLOBAL::main,.*,COMPILED/
+//! METHOD       "string_test.ETSGLOBAL::main"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "InitEmptyString"
 //! INST         "InitString FromCharArray"

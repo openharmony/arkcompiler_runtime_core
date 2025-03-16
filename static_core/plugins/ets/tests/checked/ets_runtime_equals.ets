@@ -14,8 +14,8 @@
  */
 
 //! CHECKER       Runtime equals JIT
-//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ETSGLOBAL::main"
-//! METHOD        "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ets_runtime_equals.ETSGLOBAL::main"
+//! METHOD        "ets_runtime_equals.ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /CallVirtual/
 //! PASS_AFTER    "ChecksElimination"
@@ -25,13 +25,13 @@
 //! CHECKER       Runtime equals AOT
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_AOT       options: "--compiler-regex='.*main.*'"
-//! METHOD        "ETSGLOBAL::main"
+//! METHOD        "ets_runtime_equals.ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /CallVirtual/
 //! PASS_AFTER    "ChecksElimination"
 //! INST_NOT      /Intrinsic/
 //! INST_NOT      /CallVirtual/
-//! RUN           entry: "ETSGLOBAL::main"
+//! RUN           entry: "ets_runtime_equals.ETSGLOBAL::main"
 
 function main(): int {
     let obj1: Object = new Object();

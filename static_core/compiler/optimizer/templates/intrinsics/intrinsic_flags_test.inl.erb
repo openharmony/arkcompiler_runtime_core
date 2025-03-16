@@ -23,7 +23,7 @@
     inst->SetFlag(static_cast<inst_flags::Flags>(CLEAR_FLAGS));
     // expected flags after inverse flags adjustment
     auto expectedFlags = inst_flags::NO_DCE | inst_flags::NO_CSE | inst_flags::NO_HOIST | inst_flags::BARRIER | inst_flags::REQUIRE_STATE | inst_flags::RUNTIME_CALL |
-            inst_flags::CAN_THROW | inst_flags::HEAP_INV | inst_flags::CALL | inst_flags::ACC_WRITE | inst_flags::ACC_READ;
+        inst_flags::CAN_THROW | inst_flags::HEAP_INV | inst_flags::CALL | inst_flags::ACC_WRITE | inst_flags::ACC_READ;
     ASSERT_EQ(expectedFlags, inst->GetFlagsMask()) << "Fix <%= intrinsic.enum_name %> intrinsic flags";
   }
 % end

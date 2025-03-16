@@ -14,9 +14,9 @@
  */
 
 //! CHECKER         Test check optimize LenArray and MultiArray two layers
-//! RUN             force_jit: true, options: "", entry: "ETSGLOBAL::main1"
-//! EVENT           /Compilation,ETSGLOBAL::main1,.*,COMPILED/
-//! METHOD          "ETSGLOBAL::main1"
+//! RUN             force_jit: true, options: "", entry: "multiarray.ETSGLOBAL::main1"
+//! EVENT           /Compilation,multiarray.ETSGLOBAL::main1,.*,COMPILED/
+//! METHOD          "multiarray.ETSGLOBAL::main1"
 //! PASS_BEFORE     "Peepholes"
 //! INST_COUNT      "LenArray", 2
 //! INST_COUNT      "BoundsCheck", 2
@@ -29,24 +29,24 @@
 //! CHECKER         Test check optimize LenArray and MultiArray checking work BoundCheck
 //! SKIP_IF         @architecture == "arm32"
 //! RUN_PAOC        options: "--compiler-regex='.*main2.*'"
-//! EVENT           /Compilation,ETSGLOBAL::main2,.*,COMPILED/
-//! METHOD          "ETSGLOBAL::main2"
+//! EVENT           /Compilation,multiarray.ETSGLOBAL::main2,.*,COMPILED/
+//! METHOD          "multiarray.ETSGLOBAL::main2"
 //! PASS_BEFORE     "Peepholes"
 //! INST_COUNT      "LenArray", 3
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT      "LenArray", 0
-//! RUN             options: "--compiler-enable-jit=false", entry: "ETSGLOBAL::main2", result: 1
-//! EVENT           /DeoptimizationReason,ETSGLOBAL::main2,BOUNDS_CHECK/
+//! RUN             options: "--compiler-enable-jit=false", entry: "multiarray.ETSGLOBAL::main2", result: 1
+//! EVENT           /DeoptimizationReason,multiarray.ETSGLOBAL::main2,BOUNDS_CHECK/
 
 //! CHECKER         LenArray and MultiArray with LLVM AOT
 //! SKIP_IF         @architecture == "arm32"
 //! RUN_LLVM        options: "--compiler-regex='.*main2.*'"
-//! RUN             options: "--compiler-enable-jit=false", entry: "ETSGLOBAL::main2", result: 1
+//! RUN             options: "--compiler-enable-jit=false", entry: "multiarray.ETSGLOBAL::main2", result: 1
 
 //! CHECKER         Test check don't optimize LenArray of String in MultiArray
-//! RUN             force_jit: true, options: "--compiler-regex='.*main3.*'", entry: "ETSGLOBAL::main3"
-//! EVENT           /Compilation,ETSGLOBAL::main3,.*,COMPILED/
-//! METHOD          "ETSGLOBAL::main3"
+//! RUN             force_jit: true, options: "--compiler-regex='.*main3.*'", entry: "multiarray.ETSGLOBAL::main3"
+//! EVENT           /Compilation,multiarray.ETSGLOBAL::main3,.*,COMPILED/
+//! METHOD          "multiarray.ETSGLOBAL::main3"
 //! PASS_AFTER      "Codegen"
 //! INST_COUNT      "LenArray", 1
 

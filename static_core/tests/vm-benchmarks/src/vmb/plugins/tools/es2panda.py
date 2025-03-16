@@ -74,7 +74,7 @@ class Tool(ToolBase):
             'tools', 'es2panda', 'generated', 'arktsconfig.json'))
         panda_stdlib_src = os.environ.get('PANDA_STDLIB_SRC', None)
         stdlib_opt = f'--stdlib={panda_stdlib_src}' if panda_stdlib_src else '--gen-stdlib=false'
-        self.opts = f'{stdlib_opt} --extension=ets --ets-unnamed --opt-level=2 ' \
+        self.opts = f'{stdlib_opt} --extension=ets --opt-level=2 ' \
             f'{self.custom}'
         self.es2panda = self.ensure_file(self.panda_root, 'bin', 'es2panda')
 

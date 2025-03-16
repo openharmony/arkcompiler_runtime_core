@@ -14,8 +14,8 @@
  */
 
 //! CHECKER       IR Builder inlining abs
-//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ETSGLOBAL::main"
-//! METHOD        "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ets_abs.ETSGLOBAL::main"
+//! METHOD        "ets_abs.ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Abs/, 9
 //! INST_NEXT_NOT /Intrinsic/
@@ -23,11 +23,11 @@
 //! CHECKER       AOT IR Builder inlining abs
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_AOT       options: "--compiler-regex='.*main.*'"
-//! METHOD        "ETSGLOBAL::main"
+//! METHOD        "ets_abs.ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Abs/, 9
 //! INST_NEXT_NOT /Intrinsic/
-//! RUN           entry: "ETSGLOBAL::main"
+//! RUN           entry: "ets_abs.ETSGLOBAL::main"
 
 function main(): int {
     if (abs(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) return 1;

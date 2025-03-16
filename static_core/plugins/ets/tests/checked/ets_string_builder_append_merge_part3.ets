@@ -17,7 +17,7 @@
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*append[0-9]*' --compiler-inlining=true"
 //!
-//! METHOD        "ETSGLOBAL::_0_int_3_append4"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_0_int_3_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
@@ -25,7 +25,7 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendInt"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString3"
 //!
-//! METHOD        "ETSGLOBAL::_1_int_2_append4"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_1_int_2_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
@@ -34,7 +34,7 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendInt"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 //!
-//! METHOD        "ETSGLOBAL::_2_int_1_append4"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_2_int_1_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
@@ -43,7 +43,7 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendInt"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 //!
-//! METHOD        "ETSGLOBAL::_3_int_0_append4"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_3_int_0_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
@@ -51,14 +51,14 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString3"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendInt"
 //!
-//! METHOD        "ETSGLOBAL::_0_toString_5_append6"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_0_toString_5_append6"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",6
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString4"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 //!
-//! METHOD        "ETSGLOBAL::_1_toString_4_append6"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_1_toString_4_append6"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",6
 //! PASS_AFTER    "SimplifyStringBuilder"
@@ -66,28 +66,28 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString4"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 //!
-//! METHOD        "ETSGLOBAL::_2_toString_3_append6"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_2_toString_3_append6"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",6
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString4"
 //!
-//! METHOD        "ETSGLOBAL::_3_toString_2_append6"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_3_toString_2_append6"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",6
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString3"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString3"
 //!
-//! METHOD        "ETSGLOBAL::_4_toString_1_append6"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_4_toString_1_append6"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",6
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString4"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 //!
-//! METHOD        "ETSGLOBAL::_5_toString_0_append6"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_5_toString_0_append6"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",6
 //! PASS_AFTER    "SimplifyStringBuilder"
@@ -97,9 +97,9 @@
 
 //! CHECKER       JIT IR Builder, check StringBuilder append calls merging  (--gc-type=stw)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ets_string_builder_append_merge_part3.ETSGLOBAL::main"
 //!
-//! METHOD        "ETSGLOBAL::_0_int_3_append4"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_0_int_3_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
@@ -107,7 +107,7 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendInt"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString3"
 //!
-//! METHOD        "ETSGLOBAL::_1_int_2_append4"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_1_int_2_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
@@ -116,7 +116,7 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendInt"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 //!
-//! METHOD        "ETSGLOBAL::_2_int_1_append4"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_2_int_1_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
@@ -125,7 +125,7 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendInt"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 //!
-//! METHOD        "ETSGLOBAL::_3_int_0_append4"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_3_int_0_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
@@ -133,14 +133,14 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString3"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendInt"
 //!
-//! METHOD        "ETSGLOBAL::_0_toString_5_append6"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_0_toString_5_append6"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",6
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString4"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 //!
-//! METHOD        "ETSGLOBAL::_1_toString_4_append6"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_1_toString_4_append6"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",6
 //! PASS_AFTER    "SimplifyStringBuilder"
@@ -148,28 +148,28 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString4"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 //!
-//! METHOD        "ETSGLOBAL::_2_toString_3_append6"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_2_toString_3_append6"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",6
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString4"
 //!
-//! METHOD        "ETSGLOBAL::_3_toString_2_append6"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_3_toString_2_append6"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",6
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString3"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString3"
 //!
-//! METHOD        "ETSGLOBAL::_4_toString_1_append6"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_4_toString_1_append6"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",6
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString4"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 //!
-//! METHOD        "ETSGLOBAL::_5_toString_0_append6"
+//! METHOD        "ets_string_builder_append_merge_part3.ETSGLOBAL::_5_toString_0_append6"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",6
 //! PASS_AFTER    "SimplifyStringBuilder"
@@ -179,11 +179,11 @@
 
 //! CHECKER       JIT IR Builder, check StringBuilder append calls merging (--gc-type=gen-gc)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--gc-type=gen-gc --no-async-jit=false --compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--gc-type=gen-gc --no-async-jit=false --compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ets_string_builder_append_merge_part3.ETSGLOBAL::main"
 
 //! CHECKER       JIT IR Builder, check StringBuilder append calls merging (--gc-type=g1-gc)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--gc-type=g1-gc --no-async-jit=false --compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--gc-type=g1-gc --no-async-jit=false --compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ets_string_builder_append_merge_part3.ETSGLOBAL::main"
 
 function _0_int_3_append4(): string {
     let sb = new StringBuilder();

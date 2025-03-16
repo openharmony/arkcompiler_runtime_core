@@ -35,8 +35,8 @@ function test(i0: byte, i1: short, i2: int, i3: long, f0: float, f1: double, f2:
 
 //! CHECKER       Direct ANI call optimization, JIT
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-hotness-threshold=1 --compiler-regex='ETSGLOBAL::test.*'", entry: "ETSGLOBAL::main"
-//! METHOD        "ETSGLOBAL::test"
+//! RUN           force_jit: true, options: "--compiler-hotness-threshold=1 --compiler-regex='direct_native.ETSGLOBAL::test.*'", entry: "direct_native.ETSGLOBAL::main"
+//! METHOD        "direct_native.ETSGLOBAL::test"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -47,8 +47,8 @@ function test(i0: byte, i1: short, i2: int, i3: long, f0: float, f1: double, f2:
 
 //! CHECKER       Direct ANI call optimization, AOT
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC       options: "--compiler-regex='ETSGLOBAL::test.*'"
-//! METHOD        "ETSGLOBAL::test"
+//! RUN_PAOC       options: "--compiler-regex='direct_native.ETSGLOBAL::test.*'"
+//! METHOD        "direct_native.ETSGLOBAL::test"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -56,7 +56,7 @@ function test(i0: byte, i1: short, i2: int, i3: long, f0: float, f1: double, f2:
 //! INST          /Intrinsic\.CompilerGetNativeMethod/
 //! INST_NEXT     /Intrinsic\.CompilerGetMethodNativePointer/
 //! INST_NEXT     /CallNative/
-//! RUN           entry: "ETSGLOBAL::main"
+//! RUN           entry: "direct_native.ETSGLOBAL::main"
 
 function main(): int {
     let res = 0;

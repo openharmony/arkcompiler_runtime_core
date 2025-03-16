@@ -14,8 +14,8 @@
  */
 
 //! CHECKER         Load with negative index is correct
-//! RUN             force_jit: true, options: "--compiler-regex='.*func.*'", entry: "ETSGLOBAL::main", return: 0
-//! METHOD          "ETSGLOBAL::func"
+//! RUN             force_jit: true, options: "--compiler-regex='.*func.*'", entry: "load_array.ETSGLOBAL::main", return: 0
+//! METHOD          "load_array.ETSGLOBAL::func"
 //! PASS_BEFORE     "AdjustRefs"
 //! INST            "LoadArrayI"
 //! INST_NEXT       "AddI"
@@ -27,7 +27,7 @@
 //! INST_NEXT       /AddI.*0x210/
 //! INST_NEXT       "Load 8"
 //!
-//! ASM_METHOD      "ETSGLOBAL::func"
+//! ASM_METHOD      "load_array.ETSGLOBAL::func"
 //! ASM_INST        "Load 8"
 //! ASM             arm64: /ldr w.., \[x.., w.., sxtw #2\]/, amd64: /movsxd .*movsxdl (.*)/
 

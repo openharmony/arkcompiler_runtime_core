@@ -16,13 +16,13 @@
 //! CHECKER      AOT test check no deoptimization occurs in String.split
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC     options: "--compiler-inlining=true"
-//! EVENT_NOT    /Deoptimization,ETSGLOBAL::main,BOUNDS_CHECK/
-//! METHOD       "ETSGLOBAL::main"
+//! EVENT_NOT    /Deoptimization,string_split_test.ETSGLOBAL::main,BOUNDS_CHECK/
+//! METHOD       "string_split_test.ETSGLOBAL::main"
 
 //! CHECKER      JIT test check no deoptimization occurs in String.split
-//! RUN          force_jit: true, options: "--compiler-inlining=false", entry: "ETSGLOBAL::main"
-//! EVENT_NOT    /Deoptimization,ETSGLOBAL::main,BOUNDS_CHECK/
-//! METHOD       "ETSGLOBAL::main"
+//! RUN          force_jit: true, options: "--compiler-inlining=false", entry: "string_split_test.ETSGLOBAL::main"
+//! EVENT_NOT    /Deoptimization,string_split_test.ETSGLOBAL::main,BOUNDS_CHECK/
+//! METHOD       "string_split_test.ETSGLOBAL::main"
 
 function main(): void
 {

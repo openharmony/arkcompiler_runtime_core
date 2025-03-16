@@ -14,14 +14,14 @@
  */
 
 //! CHECKER       Escape is applied, temporary array must be removed.
-//! RUN           force_jit: true, options: "--compiler-regex='.*test.*'", entry: "ETSGLOBAL::main"
-//! METHOD        "ETSGLOBAL::test1"
+//! RUN           force_jit: true, options: "--compiler-regex='.*test.*'", entry: "ets_escape_array.ETSGLOBAL::main"
+//! METHOD        "ets_escape_array.ETSGLOBAL::test1"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    "NewArray", 1
 //! PASS_AFTER    "Escape"
 //! INST_COUNT    "NewArray", 1
-//! EVENT         /Inline,ETSGLOBAL::test1,ETSGLOBAL::sum,.*,STATIC,SUCCESS/
-//! METHOD        "ETSGLOBAL::test2"
+//! EVENT         /Inline,ets_escape_array.ETSGLOBAL::test1,ets_escape_array.ETSGLOBAL::sum,.*,STATIC,SUCCESS/
+//! METHOD        "ets_escape_array.ETSGLOBAL::test2"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    "NewArray", 1
 //! INST_COUNT    "StoreArray", 4
@@ -30,12 +30,12 @@
 //! INST_COUNT    "NewArray", 1
 //! INST_COUNT    "StoreArray", 4
 //! INST_COUNT    "LoadArray", 3
-//! METHOD        "ETSGLOBAL::test3"
+//! METHOD        "ets_escape_array.ETSGLOBAL::test3"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    "NewArray", 1
 //! PASS_AFTER    "Escape"
 //! INST_COUNT    "NewArray", 1
-//! METHOD        "ETSGLOBAL::test4"
+//! METHOD        "ets_escape_array.ETSGLOBAL::test4"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    "NewArray", 2
 //! PASS_AFTER    "Escape"

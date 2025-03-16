@@ -17,7 +17,7 @@
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*append[0-9]*' --compiler-inlining=true"
 //!
-//! METHOD        "ETSGLOBAL::_0_if1_else1_2_append4"
+//! METHOD        "ets_string_builder_append_merge_part2.ETSGLOBAL::_0_if1_else1_2_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
 //! PASS_AFTER    "SimplifyStringBuilder"
@@ -25,13 +25,13 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 //!
-//! METHOD        "ETSGLOBAL::_1_if1_else1_1_append4"
+//! METHOD        "ets_string_builder_append_merge_part2.ETSGLOBAL::_1_if1_else1_1_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
 //!
-//! METHOD        "ETSGLOBAL::_2_if1_else1_0_append4"
+//! METHOD        "ets_string_builder_append_merge_part2.ETSGLOBAL::_2_if1_else1_0_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
 //! PASS_AFTER    "SimplifyStringBuilder"
@@ -39,7 +39,7 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 //!
-//! METHOD        "ETSGLOBAL::_1_if2_else1_0_append4"
+//! METHOD        "ets_string_builder_append_merge_part2.ETSGLOBAL::_1_if2_else1_0_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
 //! PASS_AFTER    "SimplifyStringBuilder"
@@ -47,7 +47,7 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 //!
-//! METHOD        "ETSGLOBAL::_0_if2_else2_0_append4"
+//! METHOD        "ets_string_builder_append_merge_part2.ETSGLOBAL::_0_if2_else2_0_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
 //! PASS_AFTER    "SimplifyStringBuilder"
@@ -56,9 +56,9 @@
 
 //! CHECKER       JIT IR Builder, check StringBuilder append calls merging  (--gc-type=stw)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ets_string_builder_append_merge_part2.ETSGLOBAL::main"
 //!
-//! METHOD        "ETSGLOBAL::_0_if1_else1_2_append4"
+//! METHOD        "ets_string_builder_append_merge_part2.ETSGLOBAL::_0_if1_else1_2_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
 //! PASS_AFTER    "SimplifyStringBuilder"
@@ -66,13 +66,13 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 //!
-//! METHOD        "ETSGLOBAL::_1_if1_else1_1_append4"
+//! METHOD        "ets_string_builder_append_merge_part2.ETSGLOBAL::_1_if1_else1_1_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
 //!
-//! METHOD        "ETSGLOBAL::_2_if1_else1_0_append4"
+//! METHOD        "ets_string_builder_append_merge_part2.ETSGLOBAL::_2_if1_else1_0_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
 //! PASS_AFTER    "SimplifyStringBuilder"
@@ -80,7 +80,7 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 //!
-//! METHOD        "ETSGLOBAL::_1_if2_else1_0_append4"
+//! METHOD        "ets_string_builder_append_merge_part2.ETSGLOBAL::_1_if2_else1_0_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
 //! PASS_AFTER    "SimplifyStringBuilder"
@@ -88,7 +88,7 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 //!
-//! METHOD        "ETSGLOBAL::_0_if2_else2_0_append4"
+//! METHOD        "ets_string_builder_append_merge_part2.ETSGLOBAL::_0_if2_else2_0_append4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
 //! PASS_AFTER    "SimplifyStringBuilder"
@@ -97,11 +97,11 @@
 
 //! CHECKER       JIT IR Builder, check StringBuilder append calls merging (--gc-type=gen-gc)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--gc-type=gen-gc --no-async-jit=false --compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--gc-type=gen-gc --no-async-jit=false --compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ets_string_builder_append_merge_part2.ETSGLOBAL::main"
 
 //! CHECKER       JIT IR Builder, check StringBuilder append calls merging (--gc-type=g1-gc)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--gc-type=g1-gc --no-async-jit=false --compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--gc-type=g1-gc --no-async-jit=false --compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ets_string_builder_append_merge_part2.ETSGLOBAL::main"
 
 function _0_if1_else1_2_append4(cond: boolean): string {
     let sb = new StringBuilder();

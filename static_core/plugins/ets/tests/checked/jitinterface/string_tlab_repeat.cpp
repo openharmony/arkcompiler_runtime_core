@@ -43,7 +43,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    static const char *className = "Lstring_tlab_allocations/ETSGLOBAL;";
+    static const char *className = "Lstring_tlab_repeat/ETSGLOBAL;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         auto msg = std::string("Cannot find \"") + className + std::string("\" class!");

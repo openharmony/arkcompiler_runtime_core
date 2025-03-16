@@ -23,8 +23,8 @@ function check(arr1:Object, arr2:Object): boolean {
 
 class TestBailout {
     //! CHECKER       TestBailout1
-    //! RUN           force_jit: true, entry: "TestBailout::mayAlias"
-    //! METHOD        "TestBailout::mayAlias"
+    //! RUN           force_jit: true, entry: "memmove_bailout.TestBailout::mayAlias"
+    //! METHOD        "memmove_bailout.TestBailout::mayAlias"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
     static mayAlias(): boolean
@@ -43,8 +43,8 @@ class TestBailout {
     }
 
     //! CHECKER       TestBailout2
-    //! RUN           force_jit: true, entry: "TestBailout::patternMissmatch_offsets1"
-    //! METHOD        "TestBailout::patternMissmatch_offsets1"
+    //! RUN           force_jit: true, entry: "memmove_bailout.TestBailout::patternMissmatch_offsets1"
+    //! METHOD        "memmove_bailout.TestBailout::patternMissmatch_offsets1"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
     static patternMissmatch_offsets1(): boolean
@@ -59,8 +59,8 @@ class TestBailout {
     }
 
     //! CHECKER       TestBailout3
-    //! RUN           force_jit: true, entry: "TestBailout::patternMissmatch_offsets2"
-    //! METHOD        "TestBailout::patternMissmatch_offsets2"
+    //! RUN           force_jit: true, entry: "memmove_bailout.TestBailout::patternMissmatch_offsets2"
+    //! METHOD        "memmove_bailout.TestBailout::patternMissmatch_offsets2"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
     static patternMissmatch_offsets2(): boolean
@@ -75,8 +75,8 @@ class TestBailout {
     }
 
     //! CHECKER       TestBailout4
-    //! RUN           force_jit: true, entry: "TestBailout::refArray"
-    //! METHOD        "TestBailout::refArray"
+    //! RUN           force_jit: true, entry: "memmove_bailout.TestBailout::refArray"
+    //! METHOD        "memmove_bailout.TestBailout::refArray"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
     static refArray(): boolean
@@ -91,8 +91,8 @@ class TestBailout {
     }
 
     //! CHECKER       TestBailout5
-    //! RUN           force_jit: true, entry: "TestBailout::differentTypes"
-    //! METHOD        "TestBailout::differentTypes"
+    //! RUN           force_jit: true, entry: "memmove_bailout.TestBailout::differentTypes"
+    //! METHOD        "memmove_bailout.TestBailout::differentTypes"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
     static differentTypes(): boolean

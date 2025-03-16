@@ -14,29 +14,29 @@
  */
 
 //! CHECKER       Math.round JIT
-//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ETSGLOBAL::main"
-//! METHOD        "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ets_round.ETSGLOBAL::main"
+//! METHOD        "ets_round.ETSGLOBAL::main"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /Intrinsic.StdMathRound/, 12
-//! ASM_METHOD    "ETSGLOBAL::main"
+//! ASM_METHOD    "ets_round.ETSGLOBAL::main"
 //! ASM_INST      "Intrinsic.StdMathRound"
 //! ASM           x64: /roundsd.*3,/, arm64: "frinta", arm32: "vrinta"
 
 //! CHECKER       Math.round AOT
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*main.*'"
-//! METHOD        "ETSGLOBAL::main"
+//! METHOD        "ets_round.ETSGLOBAL::main"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /Intrinsic.StdMathRound/, 12
-//! ASM_METHOD    "ETSGLOBAL::main"
+//! ASM_METHOD    "ets_round.ETSGLOBAL::main"
 //! ASM_INST      "Intrinsic.StdMathRound"
 //! ASM           x64: /roundsd.*3,/, arm64: "frinta"
-//! RUN           entry: "ETSGLOBAL::main"
+//! RUN           entry: "ets_round.ETSGLOBAL::main"
 
 //! CHECKER       Math.round LLVM AOT
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_LLVM      options: "--compiler-regex='.*main.*'"
-//! RUN           entry: "ETSGLOBAL::main"
+//! RUN           entry: "ets_round.ETSGLOBAL::main"
 
 function main(): int {
     if (round(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) return 1;

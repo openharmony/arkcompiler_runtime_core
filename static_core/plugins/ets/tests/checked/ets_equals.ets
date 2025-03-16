@@ -26,53 +26,53 @@ function getobj(): SomeRef { return new Object(); }
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC     options: "--compiler-regex='.*(equals_).*'"
 //!
-//! METHOD       "ETSGLOBAL::equals_dce"
+//! METHOD       "ets_equals.ETSGLOBAL::equals_dce"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsEquals/
 //!
-//! METHOD       "ETSGLOBAL::equals_cse"
+//! METHOD       "ets_equals.ETSGLOBAL::equals_cse"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   /Intrinsic.CompilerEtsEquals/, 2
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   /Intrinsic.CompilerEtsEquals/, 1
 //!
-//! METHOD       "ETSGLOBAL::equals_same_inputs"
+//! METHOD       "ets_equals.ETSGLOBAL::equals_same_inputs"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsEquals/
 //!
-//! METHOD       "ETSGLOBAL::equals_null"
-//! PASS_AFTER   "IrBuilder"
-//! INST         /Intrinsic.CompilerEtsEquals/
-//! PASS_AFTER   "ChecksElimination"
-//! INST_NOT     /Intrinsic.CompilerEtsEquals/
-//! INST         /Compare/
-//!
-//! METHOD       "ETSGLOBAL::equals_undefined"
+//! METHOD       "ets_equals.ETSGLOBAL::equals_null"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsEquals/
 //! INST         /Compare/
 //!
-//! METHOD       "ETSGLOBAL::equals_null_undefined"
+//! METHOD       "ets_equals.ETSGLOBAL::equals_undefined"
+//! PASS_AFTER   "IrBuilder"
+//! INST         /Intrinsic.CompilerEtsEquals/
+//! PASS_AFTER   "ChecksElimination"
+//! INST_NOT     /Intrinsic.CompilerEtsEquals/
+//! INST         /Compare/
+//!
+//! METHOD       "ets_equals.ETSGLOBAL::equals_null_undefined"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsEquals/
 //! INST_NOT     /Compare/
 //!
-//! METHOD       "ETSGLOBAL::equals_reftyped_input"
+//! METHOD       "ets_equals.ETSGLOBAL::equals_reftyped_input"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsEquals/
 //! INST_NOT     /Compare/
 //!
-//! RUN          entry: "ETSGLOBAL::main"
+//! RUN          entry: "ets_equals.ETSGLOBAL::main"
 
 function equals_dce(x: SomeRef, y: SomeRef) {
     return getfalse() && x == y;

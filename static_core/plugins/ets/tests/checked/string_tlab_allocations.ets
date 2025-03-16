@@ -20,64 +20,64 @@
  * the function is run in compiled mode by using compileMethod() */
 
 //! CHECKER      Use TLAB for string from chars allocations
-//! RUN          options: "--no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "ETSGLOBAL::testCreateStringFromChars"
+//! RUN          options: "--no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "string_tlab_allocations.ETSGLOBAL::testCreateStringFromChars"
 //! EVENT        /TlabAlloc,.*,40/
 //! EVENT_NEXT   /TlabAlloc,.*,48/
 
 //! CHECKER      Use TLAB for string from chars allocations AOT
 //! RUN_PAOC     options: "--compiler-enable-tlab-events=true --compiler-regex=.*CreateStringFromChars.*"
-//! RUN          options: "--compiler-enable-tlab-events=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "ETSGLOBAL::testCreateStringFromChars"
+//! RUN          options: "--compiler-enable-tlab-events=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "string_tlab_allocations.ETSGLOBAL::testCreateStringFromChars"
 //! EVENT        /TlabAlloc,.*,40/
 //! EVENT_NEXT   /TlabAlloc,.*,48/
 
 //! CHECKER      Use TLAB for string from string allocations
-//! RUN          options: "--no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "ETSGLOBAL::testCreateStringFromString"
+//! RUN          options: "--no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "string_tlab_allocations.ETSGLOBAL::testCreateStringFromString"
 //! EVENT        /TlabAlloc,.*,40/
 //! EVENT_NEXT   /TlabAlloc,.*,48/
 
 //! CHECKER      Use TLAB for string from string allocations AOT
 //! RUN_PAOC     options: "--compiler-enable-tlab-events=true --compiler-regex=.*CreateStringFromString.*"
-//! RUN          options: "--compiler-enable-tlab-events=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "ETSGLOBAL::testCreateStringFromString"
+//! RUN          options: "--compiler-enable-tlab-events=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "string_tlab_allocations.ETSGLOBAL::testCreateStringFromString"
 //! EVENT        /TlabAlloc,.*,40/
 //! EVENT_NEXT   /TlabAlloc,.*,48/
 
 //! CHECKER      Use TLAB for String.getChars() allocations
-//! RUN          options: "--no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "ETSGLOBAL::testGetCharsFromString"
+//! RUN          options: "--no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "string_tlab_allocations.ETSGLOBAL::testGetCharsFromString"
 //! EVENT        /TlabAlloc,.*,64/
 //! EVENT_NEXT   /TlabAlloc,.*,48/
 
 //! CHECKER      Use TLAB for String.getChars() allocations AOT
 //! RUN_PAOC     options: "--compiler-enable-tlab-events=true --compiler-regex=.*GetCharsFromString.*"
-//! RUN          options: "--compiler-enable-tlab-events=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "ETSGLOBAL::testGetCharsFromString"
+//! RUN          options: "--compiler-enable-tlab-events=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "string_tlab_allocations.ETSGLOBAL::testGetCharsFromString"
 //! EVENT        /TlabAlloc,.*,64/
 //! EVENT_NEXT   /TlabAlloc,.*,48/
 
 //! CHECKER      Use TLAB for String.getBytes() allocations
-//! RUN          options: "--no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "ETSGLOBAL::testGetBytesFromString"
+//! RUN          options: "--no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "string_tlab_allocations.ETSGLOBAL::testGetBytesFromString"
 //! EVENT        /TlabAlloc,.*,40/
 //! EVENT_NEXT   /TlabAlloc,.*,32/
 
 //! CHECKER      Use TLAB for String.getBytes() allocations AOT
 //! RUN_PAOC     options: "--compiler-enable-tlab-events=true --compiler-regex=.*GetBytesFromString.*"
-//! RUN          options: "--compiler-enable-tlab-events=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "ETSGLOBAL::testGetBytesFromString"
+//! RUN          options: "--compiler-enable-tlab-events=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "string_tlab_allocations.ETSGLOBAL::testGetBytesFromString"
 //! EVENT        /TlabAlloc,.*,40/
 //! EVENT_NEXT   /TlabAlloc,.*,32/
 
 //! CHECKER      Use TLAB for String.substring() allocations
-//! RUN          options: "--no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "ETSGLOBAL::testStringSubstring"
+//! RUN          options: "--no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "string_tlab_allocations.ETSGLOBAL::testStringSubstring"
 //! EVENT        /TlabAlloc,.*,32/
 //! EVENT_NEXT   /TlabAlloc,.*,40/
 //! EVENT_NEXT   /TlabAlloc,.*,56/
 
 //! CHECKER      Use TLAB for String.substring() allocations AOT
 //! RUN_PAOC     options: "--compiler-enable-tlab-events=true --compiler-regex=.*StringSubstring.*"
-//! RUN          options: "--compiler-enable-tlab-events=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "ETSGLOBAL::testStringSubstring"
+//! RUN          options: "--compiler-enable-tlab-events=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "string_tlab_allocations.ETSGLOBAL::testStringSubstring"
 //! EVENT        /TlabAlloc,.*,32/
 //! EVENT_NEXT   /TlabAlloc,.*,40/
 //! EVENT_NEXT   /TlabAlloc,.*,56/
 
 //! CHECKER      Use TLAB for String.concat() allocations
-//! RUN          options: "--no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "ETSGLOBAL::testStringConcat"
+//! RUN          options: "--no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "string_tlab_allocations.ETSGLOBAL::testStringConcat"
 //! EVENT_NEXT   /TlabAlloc,.*,40/
 //! EVENT_NEXT   /TlabAlloc,.*,56/
 //! EVENT_NEXT   /TlabAlloc,.*,64/
@@ -85,7 +85,7 @@
 /* No AOT test for the concat() test as it requires AOT'ing of etsstdlib */
 
 //! CHECKER      Use TLAB for StringBuilder.append() allocations
-//! RUN          options: "--no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "ETSGLOBAL::testStringBuilderAppend"
+//! RUN          options: "--no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "string_tlab_allocations.ETSGLOBAL::testStringBuilderAppend"
 //! EVENT        /TlabAlloc,.*,24/
 //! EVENT_NEXT   /TlabAlloc,.*,32/
 //! EVENT_NEXT   /TlabAlloc,.*,48/
@@ -94,7 +94,7 @@
 
 //! CHECKER      Use TLAB for StringBuilder.append() allocations AOT
 //! RUN_PAOC     options: "--compiler-enable-tlab-events=true --compiler-regex=.*StringBuilderAppend.*"
-//! RUN          options: "--compiler-enable-tlab-events=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "ETSGLOBAL::testStringBuilderAppend"
+//! RUN          options: "--compiler-enable-tlab-events=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "string_tlab_allocations.ETSGLOBAL::testStringBuilderAppend"
 //! EVENT        /TlabAlloc,.*,24/
 //! EVENT_NEXT   /TlabAlloc,.*,32/
 //! EVENT_NEXT   /TlabAlloc,.*,48/
@@ -155,7 +155,7 @@ function CreateStringFromChars(): int {
 
 function testCreateStringFromChars() : int {
     loadLibrary("jitinterface");
-    compileMethod("ETSGLOBAL::CreateStringFromChars");
+    compileMethod("string_tlab_allocations.ETSGLOBAL::CreateStringFromChars");
     return CreateStringFromChars();
 }
 
@@ -191,13 +191,13 @@ function StringSubstring(): int {
 
 function testStringSubstring() : int {
     loadLibrary("jitinterface");
-    compileMethod("ETSGLOBAL::StringSubstring");
+    compileMethod("string_tlab_allocations.ETSGLOBAL::StringSubstring");
     return StringSubstring();
 }
 
 function testCreateStringFromString() : int {
     loadLibrary("jitinterface");
-    compileMethod("ETSGLOBAL::CreateStringFromString");
+    compileMethod("string_tlab_allocations.ETSGLOBAL::CreateStringFromString");
     return CreateStringFromString();
 }
 
@@ -233,7 +233,7 @@ function GetCharsFromString() : int {
 
 function testGetCharsFromString() {
     loadLibrary("jitinterface");
-    compileMethod("ETSGLOBAL::GetCharsFromString");
+    compileMethod("string_tlab_allocations.ETSGLOBAL::GetCharsFromString");
     return GetCharsFromString();
 }
 
@@ -252,7 +252,7 @@ function GetBytesFromString() : int {
 
 function testGetBytesFromString() : int {
     loadLibrary("jitinterface");
-    compileMethod("ETSGLOBAL::GetBytesFromString");
+    compileMethod("string_tlab_allocations.ETSGLOBAL::GetBytesFromString");
     return GetBytesFromString();
 }
 
@@ -277,7 +277,7 @@ function StringConcat() : int {
 
 function testStringConcat() : int {
     loadLibrary("jitinterface");
-    compileMethod("ETSGLOBAL::StringConcat");
+    compileMethod("string_tlab_allocations.ETSGLOBAL::StringConcat");
     return StringConcat();
 }
 
@@ -293,6 +293,6 @@ function StringBuilderAppend(): int {
 
 function testStringBuilderAppend() : int {
     loadLibrary("jitinterface");
-    compileMethod("ETSGLOBAL::StringBuilderAppend");
+    compileMethod("string_tlab_allocations.ETSGLOBAL::StringBuilderAppend");
     return StringBuilderAppend();
 }

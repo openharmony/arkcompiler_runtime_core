@@ -14,8 +14,8 @@
  */
 
 //! CHECKER       Remove redundant Call.Inlined and ReturnInlined
-//! RUN           force_jit: true, options: "--compiler-regex='ETSGLOBAL::test_.*'", entry: "ETSGLOBAL::main"
-//! METHOD        "ETSGLOBAL::test_after_checks_elim"
+//! RUN           force_jit: true, options: "--compiler-regex='cleanup_call_inlined.ETSGLOBAL::test_.*'", entry: "cleanup_call_inlined.ETSGLOBAL::main"
+//! METHOD        "cleanup_call_inlined.ETSGLOBAL::test_after_checks_elim"
 //! PASS_AFTER    "Inline"
 //! INST_COUNT    /Call.*Inlined/, 1
 //! INST_COUNT    /ReturnInlined/, 1
@@ -23,7 +23,7 @@
 //! PASS_AFTER_NEXT "Cleanup" # skip cleanup in light mode
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_NOT      /Inlined/
-//! METHOD        "ETSGLOBAL::test_after_escape"
+//! METHOD        "cleanup_call_inlined.ETSGLOBAL::test_after_escape"
 //! PASS_AFTER    "Inline"
 //! INST_COUNT    /Call.*Inlined/, 9
 //! INST_COUNT    /ReturnInlined/, 13

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,7 +55,7 @@ TEST_F(RegisteringNativeMethodsTestDeath, RegisterNativesDeathTest)
     }
 
     {
-        ets_class cls = env_->FindClass("RegisteringNativeMethodsTest");
+        ets_class cls = env_->FindClass("RegisteringNativeMethodsTest/RegisteringNativeMethodsTest");
         ASSERT_NE(cls, nullptr);
         EXPECT_DEATH(env_->RegisterNatives(cls, nullptr, 1), "");
         EXPECT_DEATH(env_->RegisterNatives(cls, nullptr, -1), "");
@@ -67,7 +67,7 @@ TEST_F(RegisteringNativeMethodsTestDeath, RegisterNativesDeathTest)
         EXPECT_DEATH(env_->RegisterNatives(nullptr, &native_method, 1), "");
         EXPECT_DEATH(env_->RegisterNatives(nullptr, &native_method, -1), "");
 
-        ets_class cls = env_->FindClass("RegisteringNativeMethodsTest");
+        ets_class cls = env_->FindClass("RegisteringNativeMethodsTest/RegisteringNativeMethodsTest");
         ASSERT_NE(cls, nullptr);
         EXPECT_DEATH(env_->RegisterNatives(cls, &native_method, -1), "");
     }
@@ -75,7 +75,7 @@ TEST_F(RegisteringNativeMethodsTestDeath, RegisterNativesDeathTest)
 
 TEST_F(RegisteringNativeMethodsTest, RegisterNativesTest)
 {
-    ets_class cls = env_->FindClass("RegisteringNativeMethodsTest");
+    ets_class cls = env_->FindClass("RegisteringNativeMethodsTest/RegisteringNativeMethodsTest");
     ASSERT_NE(cls, nullptr);
     EtsNativeMethod native_method = {"foo", ":I", reinterpret_cast<void *>(NativeMethods_foo_native)};
 
@@ -86,7 +86,7 @@ TEST_F(RegisteringNativeMethodsTest, RegisterNativesTest)
 
 TEST_F(RegisteringNativeMethodsTest, RegisterNativesArrayTest)
 {
-    ets_class cls = env_->FindClass("RegisteringNativeMethodsTest");
+    ets_class cls = env_->FindClass("RegisteringNativeMethodsTest/RegisteringNativeMethodsTest");
     ASSERT_NE(cls, nullptr);
     EtsNativeMethod native_method = {"foo", ":I", reinterpret_cast<void *>(NativeMethods_foo_native)};
     EtsNativeMethod long_native_method = {"long_foo", ":J", reinterpret_cast<void *>(NativeMethods_long_foo_native)};
@@ -113,19 +113,19 @@ TEST_F(RegisteringNativeMethodsTestDeath, UnregisterNativesDeathTest)
 TEST_F(RegisteringNativeMethodsTest, UnregisterNativesTest)
 {
     {
-        ets_class a_cls = env_->FindClass("A");
+        ets_class a_cls = env_->FindClass("RegisteringNativeMethodsTest/A");
         ASSERT_NE(a_cls, nullptr);
         ASSERT_EQ(env_->UnregisterNatives(a_cls), ETS_OK);
     }
 
     {
-        ets_class cls = env_->FindClass("RegisteringNativeMethodsTest");
+        ets_class cls = env_->FindClass("RegisteringNativeMethodsTest/RegisteringNativeMethodsTest");
         ASSERT_NE(cls, nullptr);
         ASSERT_EQ(env_->UnregisterNatives(cls), ETS_OK);
     }
 
     {
-        ets_class cls = env_->FindClass("RegisteringNativeMethodsTest");
+        ets_class cls = env_->FindClass("RegisteringNativeMethodsTest/RegisteringNativeMethodsTest");
         ASSERT_NE(cls, nullptr);
         EtsNativeMethod native_method = {"foo", ":I", reinterpret_cast<void *>(NativeMethods_foo_native)};
 
@@ -134,7 +134,7 @@ TEST_F(RegisteringNativeMethodsTest, UnregisterNativesTest)
     }
 
     {
-        ets_class cls = env_->FindClass("RegisteringNativeMethodsTest");
+        ets_class cls = env_->FindClass("RegisteringNativeMethodsTest/RegisteringNativeMethodsTest");
         ASSERT_NE(cls, nullptr);
         EtsNativeMethod native_method = {"foo", ":I", reinterpret_cast<void *>(NativeMethods_foo_native)};
         EtsNativeMethod long_native_method = {"long_foo", ":J",

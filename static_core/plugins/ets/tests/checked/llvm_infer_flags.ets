@@ -47,7 +47,7 @@ function simple(): int {
 //! READ_FILE      "console.out"
 //! LLVM_METHOD    /.*willThrow.*/
 //! INST_NEXT      /.*ArithmeticException.*/
-//! RUN            entry: "ETSGLOBAL::willThrow"
+//! RUN            entry: "llvm_infer_flags.ETSGLOBAL::willThrow"
 
 function willThrow(): int {
     let i0 = 1
@@ -69,7 +69,7 @@ function willThrow(): int {
 //! RUN_LLVM       options: "--llvm-options=--print-after=infer-flags --compiler-regex='.*overflows.*'"
 //! READ_FILE      "console.out"
 //! LLVM_METHOD    /.*overflows.*/
-//! RUN            entry: "ETSGLOBAL::overflows"
+//! RUN            entry: "llvm_infer_flags.ETSGLOBAL::overflows"
 function overflows(): int {
     try {
         let i0: int = 2147483647

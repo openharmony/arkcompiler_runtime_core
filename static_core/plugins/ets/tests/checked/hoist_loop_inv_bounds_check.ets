@@ -14,8 +14,8 @@
  */
 
 //! CHECKER       Hoist loop invariant BoundsCheck
-//! RUN           force_jit: true, options: "--compiler-regex='.*test.*'", entry: "ETSGLOBAL::main"
-//! METHOD       "ETSGLOBAL::test"
+//! RUN           force_jit: true, options: "--compiler-regex='.*test.*'", entry: "hoist_loop_inv_bounds_check.ETSGLOBAL::main"
+//! METHOD       "hoist_loop_inv_bounds_check.ETSGLOBAL::test"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "BoundsCheck", 2
 //! PASS_AFTER   "ChecksElimination"

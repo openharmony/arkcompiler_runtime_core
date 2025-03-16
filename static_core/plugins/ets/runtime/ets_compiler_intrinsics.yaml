@@ -228,8 +228,7 @@ intrinsics:
       ret: u1
       args: [ ref ]
     impl: ark::ets::intrinsics::CompilerEtsIstrue
-    clear_flags: [ acc_read ]
-    safe_intrinsic: true
+    clear_flags: [ acc_read, require_state, can_throw, heap_inv, no_dce, no_cse, no_hoist  ]
     need_param_locations: true
 
   - name: CompilerEtsDoubleToStringDecimal

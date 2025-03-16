@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,11 +14,12 @@
  */
 
 #include "plugins/ets/runtime/napi/ets_napi.h"
-#include <ostream>
+#include <iostream>
 
 extern "C" {
 // NOLINTBEGIN(readability-named-parameter, cppcoreguidelines-pro-type-vararg, readability-identifier-naming)
-ETS_EXPORT ets_string ETS_CALL ETS_EtsnapiVersionHookTest_hello(EtsEnv *env, [[maybe_unused]] ets_class)
+ETS_EXPORT ets_string ETS_CALL ETS_EtsnapiVersionHookTest_EtsnapiVersionHookTest_hello(EtsEnv *env,
+                                                                                       [[maybe_unused]] ets_class)
 {
     return env->NewStringUTF("Hello");
 }
@@ -26,7 +27,7 @@ ETS_EXPORT ets_string ETS_CALL ETS_EtsnapiVersionHookTest_hello(EtsEnv *env, [[m
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 static EtsNativeMethod gMethods[] = {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-    {"hello", ":Lstd/core/String;", (void *)ETS_EtsnapiVersionHookTest_hello},
+    {"hello", ":Lstd/core/String;", (void *)ETS_EtsnapiVersionHookTest_EtsnapiVersionHookTest_hello},
 };
 
 static int registerNativeMethods(EtsEnv *env, const char *classname, EtsNativeMethod *methods, int countMethods)
@@ -40,11 +41,11 @@ static int registerNativeMethods(EtsEnv *env, const char *classname, EtsNativeMe
     }
     return ETS_TRUE;
 }
-
 static int registerNatives(EtsEnv *env)
 {
     // NOLINTNEXTLINE(readability-implicit-bool-conversion)
-    if (!registerNativeMethods(env, "EtsnapiVersionHookTest", gMethods, sizeof(gMethods) / sizeof(gMethods[0]))) {
+    if (!registerNativeMethods(env, "EtsnapiVersionHookTest/EtsnapiVersionHookTest", gMethods,
+                               sizeof(gMethods) / sizeof(gMethods[0]))) {
         return ETS_FALSE;
     }
     return ETS_TRUE;

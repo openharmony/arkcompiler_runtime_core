@@ -50,7 +50,7 @@ protected:
         EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
         ScopedManagedCodeThread scope(coroutine);
         EtsClassLinker *etsClassLinker = coroutine->GetPandaVM()->GetClassLinker();
-        EtsClass *global = etsClassLinker->GetClass("LJSCoroutine;");
+        EtsClass *global = etsClassLinker->GetClass("Ljs_mode_launch/JSCoroutine;");
         ASSERT_NE(nullptr, global);
         EtsMethod *getCoroIdMethod = global->GetMethod("getCoroutineId");
         ASSERT_NE(nullptr, getCoroIdMethod);
@@ -69,7 +69,7 @@ protected:
 
 TEST_F(JsModeLaunchTest, Call)
 {
-    const std::string mainFunc = "ETSGLOBAL::main";
+    const std::string mainFunc = "js_mode_launch.ETSGLOBAL::main";
     auto res = Runtime::GetCurrent()->ExecutePandaFile(abcFile_.c_str(), mainFunc.c_str(), {});
     ASSERT_EQ(0, res.Value());
 }

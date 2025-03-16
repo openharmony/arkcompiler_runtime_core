@@ -14,8 +14,8 @@
  */
 
 //! CHECKER      OOM exception for StringBuilder
-//! RUN          force_jit: true, options: "--compiler-enable-osr=false --compiler-regex='ETSGLOBAL::main'", entry: "ETSGLOBAL::main"
-//! EVENT        /Exception,ETSGLOBAL::main.*NATIVE/
+//! RUN          force_jit: true, options: "--compiler-enable-osr=false --compiler-regex='ETSGLOBAL::main'", entry: "ets_stringbuilder_oom.ETSGLOBAL::main"
+//! EVENT        /Exception,ets_stringbuilder_oom.ETSGLOBAL::main.*NATIVE/
 function foo(n: int): int { return (n * 17 + 7) % 141;}
 function main(): int {
     let c: char[] = new char[10000];

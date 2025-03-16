@@ -33,6 +33,7 @@ function(do_panda_ets_package TARGET)
     add_custom_target(${TARGET})
 
     # Parse arguments
+    # after remove interop js test , ETS_NAMED_MODE will be removed
     cmake_parse_arguments(
         ARG
         "ETS_NAMED_MODE"
@@ -77,16 +78,32 @@ function(do_panda_ets_package TARGET)
     endif()
 
     set(BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/${TARGET})
+    # interop js don't remove --ets-unnamed because it will be removed in another pr
+    string(FIND "${TARGET}" "ets_interop_js_" PREFIX_POS)
+    if(PREFIX_POS EQUAL 0)
+        # do not add --ets-unnamed for ets_interop_js_perf_benchmarks
+        string(FIND "${TARGET}" "ets_interop_js_perf_benchmarks" PREFIX_POS)
+        if(PREFIX_POS EQUAL 0)
+        else()
+            if(NOT ARG_ETS_NAMED_MODE)
+                list(APPEND ES2PANDA_ARGUMENTS --ets-unnamed)
+            endif()
+        endif()
+    else()
+        string(FIND "${TARGET}" "interop_" PREFIX_POS)
+        if(PREFIX_POS EQUAL 0)
+            if(NOT ARG_ETS_NAMED_MODE)
+                list(APPEND ES2PANDA_ARGUMENTS --ets-unnamed)
+            endif()
+        endif()
+    endif()
 
     # Convert *.ets -> classes.abc
     set(OUTPUT_ABC ${BUILD_DIR}/src/classes.abc)
     if(DEFINED ARG_ETS_SOURCES)
         list(LENGTH ARG_ETS_SOURCES list_length)
-
         if (list_length EQUAL 1)
-            if(NOT ARG_ETS_NAMED_MODE)
-                list(APPEND ES2PANDA_ARGUMENTS --ets-unnamed)
-            endif()
+
             # Compile one .ets file to OUTPUT_ABC
             add_custom_command(
                 OUTPUT ${OUTPUT_ABC}

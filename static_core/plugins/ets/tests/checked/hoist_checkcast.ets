@@ -14,11 +14,11 @@
  */
 
 //! CHECKER      Hoist loop invariant CheckCast and replace by deopt, JIT
-//! RUN          force_jit: true, options: "--compiler-regex='.*test.*'", entry: "ETSGLOBAL::main"
-//! EVENT        /Inline,ETSGLOBAL::test,ETSGLOBAL::set,.*,STATIC,SUCCESS/
-//! EVENT        /Compilation,ETSGLOBAL::test,.*,COMPILED/
-//! EVENT        /DeoptimizationReason,ETSGLOBAL::test,CHECK_CAST/
-//! METHOD       "ETSGLOBAL::test"
+//! RUN          force_jit: true, options: "--compiler-regex='.*test.*'", entry: "hoist_checkcast.ETSGLOBAL::main"
+//! EVENT        /Inline,hoist_checkcast.ETSGLOBAL::test,hoist_checkcast.ETSGLOBAL::set,.*,STATIC,SUCCESS/
+//! EVENT        /Compilation,hoist_checkcast.ETSGLOBAL::test,.*,COMPILED/
+//! EVENT        /DeoptimizationReason,hoist_checkcast.ETSGLOBAL::test,CHECK_CAST/
+//! METHOD       "hoist_checkcast.ETSGLOBAL::test"
 //! PASS_AFTER   "Inline"
 //! INST_COUNT   "CheckCast", 1
 //! INST_COUNT   "RefTypeCheck", 1
@@ -33,7 +33,7 @@
 //! CHECKER      Hoist loop invariant CheckCast and replace by deopt, AOT
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_AOT      options: "--compiler-regex='.*test.*'"
-//! RUN          entry: "ETSGLOBAL::main"
+//! RUN          entry: "hoist_checkcast.ETSGLOBAL::main"
 
 class A {}
 class B {}
@@ -50,7 +50,7 @@ function test(arr: A[], value: A | B) : int {
             set(arr, i, value);
         }
     } catch (e: ClassCastError) {
-        assertNE(e.toString().match('ClassCastError: B cannot be cast to A'), null);
+        assertNE(e.toString().match('ClassCastError: hoist_checkcast.B cannot be cast to hoist_checkcast.A'), null);
         return -iters;
     }
     return iters;
@@ -68,10 +68,10 @@ function main(): int {
 }
 
 //! CHECKER      Hoist loop invariant RefTypeCheck and replace by deopt, JIT
-//! RUN          force_jit: true, options: "--compiler-regex='.*test2.*'", entry: "ETSGLOBAL::main2"
-//! EVENT        /Compilation,ETSGLOBAL::test2,.*,COMPILED/
-//! EVENT        /DeoptimizationReason,ETSGLOBAL::test2,CHECK_CAST/
-//! METHOD       "ETSGLOBAL::test2"
+//! RUN          force_jit: true, options: "--compiler-regex='.*test2.*'", entry: "hoist_checkcast.ETSGLOBAL::main2"
+//! EVENT        /Compilation,hoist_checkcast.ETSGLOBAL::test2,.*,COMPILED/
+//! EVENT        /DeoptimizationReason,hoist_checkcast.ETSGLOBAL::test2,CHECK_CAST/
+//! METHOD       "hoist_checkcast.ETSGLOBAL::test2"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     "CheckCast"
 //! INST_COUNT   "RefTypeCheck", 1
@@ -85,16 +85,16 @@ function main(): int {
 //! CHECKER      Hoist loop invariant RefTypeCheck and replace by deopt, AOT
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_AOT      options: "--compiler-regex='.*test2.*'"
-//! RUN          entry: "ETSGLOBAL::main2"
+//! RUN          entry: "hoist_checkcast.ETSGLOBAL::main2"
 
 //! CHECKER      Hoist loop invariant RefTypeCheck and replace by deopt, JIT with CPP interpreter
-//! RUN          force_jit: true, options: "--compiler-regex='.*test2.*' --interpreter-type=cpp", entry: "ETSGLOBAL::main2"
+//! RUN          force_jit: true, options: "--compiler-regex='.*test2.*' --interpreter-type=cpp", entry: "hoist_checkcast.ETSGLOBAL::main2"
 
 //! CHECKER      Check stacktrace for starr_obj with wrong type, CPP interpreter
-//! RUN          options: "--compiler-enable-jit=false --interpreter-type=cpp", entry: "ETSGLOBAL::main2"
+//! RUN          options: "--compiler-enable-jit=false --interpreter-type=cpp", entry: "hoist_checkcast.ETSGLOBAL::main2"
 
 //! CHECKER      Check stacktrace for starr_obj with wrong type, irtoc interpreter
-//! RUN          options: "--compiler-enable-jit=false --interpreter-type=irtoc", entry: "ETSGLOBAL::main2"
+//! RUN          options: "--compiler-enable-jit=false --interpreter-type=irtoc", entry: "hoist_checkcast.ETSGLOBAL::main2"
 
 function test2(arr: Object[], value: A | B) : int {
     let iters = 0;
@@ -105,7 +105,7 @@ function test2(arr: Object[], value: A | B) : int {
         }
     } catch (e: ArrayStoreError) {
         // NOTE: line number is invalid in interpreter, see #17098
-        assertNE(e.toString().match('ArrayStoreError: B cannot be stored in an array of type \\[LA;'), null);
+        assertNE(e.toString().match('ArrayStoreError: hoist_checkcast.B cannot be stored in an array of type \\[Lhoist_checkcast/A;'), null);
         return -iters;
     }
     return iters;

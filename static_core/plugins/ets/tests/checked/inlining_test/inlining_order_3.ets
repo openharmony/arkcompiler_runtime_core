@@ -15,26 +15,26 @@
 
 /* `hot_inf` is inlined firstly even without profiling */
 //! CHECKER      Check inlining sequence without profiling
-//! RUN          options: "--compiler-profiling-threshold=100 --compiler-hotness-threshold=30 --log-level=debug --log-components=compiler --compiler-log=inlining --no-async-jit", entry: "ETSGLOBAL::main"
-//! EVENT        /Inline,ETSGLOBAL::test_loops,ETSGLOBAL::hot_inf,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,ETSGLOBAL::test_loops,ETSGLOBAL::cold,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,ETSGLOBAL::test_loops,ETSGLOBAL::hot,.*,STATIC,SUCCESS/
-//!# EVENT_NEXT   /Inline,ETSGLOBAL::test_loops,ETSGLOBAL::hot_catch,.*,STATIC,SUCCESS/ (Inlining in catch blocks is not supported)
+//! RUN          options: "--compiler-profiling-threshold=100 --compiler-hotness-threshold=30 --log-level=debug --log-components=compiler --compiler-log=inlining --no-async-jit", entry: "inlining_order_3.ETSGLOBAL::main"
+//! EVENT        /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot_inf,.*,STATIC,SUCCESS/
+//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::cold,.*,STATIC,SUCCESS/
+//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
+//!# EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot_catch,.*,STATIC,SUCCESS/ (Inlining in catch blocks is not supported)
 
 //! CHECKER      Check inlining sequence with profiling
-//! RUN          options: "--compiler-profiling-threshold=0 --compiler-hotness-threshold=30 --log-level=debug --log-components=compiler --compiler-log=inlining --no-async-jit", entry: "ETSGLOBAL::main"
-//! EVENT        /Inline,ETSGLOBAL::test_loops,ETSGLOBAL::hot_inf,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,ETSGLOBAL::test_loops,ETSGLOBAL::hot,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,ETSGLOBAL::test_loops,ETSGLOBAL::cold,.*,STATIC,SUCCESS/
-//!# EVENT_NEXT   /Inline,ETSGLOBAL::test_loops,ETSGLOBAL::hot_catch,.*,STATIC,SUCCESS/ (Inlining in catch blocks is not supported)
+//! RUN          options: "--compiler-profiling-threshold=0 --compiler-hotness-threshold=30 --log-level=debug --log-components=compiler --compiler-log=inlining --no-async-jit", entry: "inlining_order_3.ETSGLOBAL::main"
+//! EVENT        /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot_inf,.*,STATIC,SUCCESS/
+//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
+//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::cold,.*,STATIC,SUCCESS/
+//!# EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot_catch,.*,STATIC,SUCCESS/ (Inlining in catch blocks is not supported)
 
 //! CHECKER      Check inlining sequence with profiling (AOT)
 //! RUN_PAOC     options: ""
-//! EVENT        /Inline,ETSGLOBAL::test_loops,ETSGLOBAL::hot_inf,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,ETSGLOBAL::test_loops,ETSGLOBAL::hot,.*,STATIC,SUCCESS/
-//!# EVENT_NEXT   /Inline,ETSGLOBAL::test_loops,ETSGLOBAL::hot_catch,.*,STATIC,SUCCESS/ (Inlining in catch blocks is not supported)
-//! EVENT_NEXT   /Inline,ETSGLOBAL::test_loops,ETSGLOBAL::cold,.*,STATIC,SUCCESS/
-//! RUN          options: "--log-level=debug --log-components=compiler --compiler-log=inlining", entry: "ETSGLOBAL::main"
+//! EVENT        /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot_inf,.*,STATIC,SUCCESS/
+//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
+//!# EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot_catch,.*,STATIC,SUCCESS/ (Inlining in catch blocks is not supported)
+//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::cold,.*,STATIC,SUCCESS/
+//! RUN          options: "--log-level=debug --log-components=compiler --compiler-log=inlining", entry: "inlining_order_3.ETSGLOBAL::main"
 
 function cold(): int { return 30; }
 

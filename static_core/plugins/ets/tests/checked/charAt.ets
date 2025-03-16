@@ -14,8 +14,8 @@
  */
 
 //! CHECKER      Test charAt inlining in compiler
-//! RUN          force_jit: true, options: "", entry: "ETSGLOBAL::main"
-//! METHOD       "ETSGLOBAL::main"
+//! RUN          force_jit: true, options: "", entry: "charAt.ETSGLOBAL::main"
+//! METHOD       "charAt.ETSGLOBAL::main"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     "Intrinsic.StdCoreStringCharAt"
 

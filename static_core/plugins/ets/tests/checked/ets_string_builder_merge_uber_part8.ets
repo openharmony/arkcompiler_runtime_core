@@ -15,11 +15,11 @@
 
 //! CHECKER       JIT IR Builder, check String Builders merging
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--panda-files=../../ets_string_builder_merge_uber_export.checked/test.abc --compiler-regex='.*chain_concat[0-9]+.*' --compiler-inlining=false", entry: "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--panda-files=../../ets_string_builder_merge_uber_export.checked/test.abc --compiler-regex='.*chain_concat[0-9]+.*' --compiler-inlining=false", entry: "ets_string_builder_merge_uber_part8.ETSGLOBAL::main"
 
 //! CHECKER       JIT IR Builder, check String Builders merging (w/o optimizations)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--panda-files=../../ets_string_builder_merge_uber_export.checked/test.abc --compiler-inlining=false --compiler-simplify-string-builder=false", entry: "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--panda-files=../../ets_string_builder_merge_uber_export.checked/test.abc --compiler-inlining=false --compiler-simplify-string-builder=false", entry: "ets_string_builder_merge_uber_part8.ETSGLOBAL::main"
 
 import { uber_chain_concat4 } from "./ets_string_builder_merge_uber_export.ets"
 

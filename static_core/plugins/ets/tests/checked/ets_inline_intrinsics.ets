@@ -15,8 +15,8 @@
 
 //! CHECKER      Inline StringEquals intrinsic
 //! SKIP_IF      @architecture == "arm32"
-//! RUN          options: "--no-async-jit=true  --compiler-hotness-threshold=4 --compiler-profiling-threshold=2 --compiler-regex='.*equals_obj_obj.*'", entry: "ETSGLOBAL::main"
-//! METHOD       "ETSGLOBAL::equals_obj_obj"
+//! RUN          options: "--no-async-jit=true  --compiler-hotness-threshold=4 --compiler-profiling-threshold=2 --compiler-regex='.*equals_obj_obj.*'", entry: "ets_inline_intrinsics.ETSGLOBAL::main"
+//! METHOD       "ets_inline_intrinsics.ETSGLOBAL::equals_obj_obj"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /CallVirtual/
 //! INST_NOT     /Intrinsic/
@@ -30,8 +30,8 @@
 
 //! CHECKER      Not inline StringEquals intrinsic
 //! SKIP_IF      @architecture != "arm32"
-//! RUN          options: "--no-async-jit=true  --compiler-hotness-threshold=4 --compiler-profiling-threshold=2 --compiler-regex='.*equals_obj_obj.*'", entry: "ETSGLOBAL::main"
-//! METHOD       "ETSGLOBAL::equals_obj_obj"
+//! RUN          options: "--no-async-jit=true  --compiler-hotness-threshold=4 --compiler-profiling-threshold=2 --compiler-regex='.*equals_obj_obj.*'", entry: "ets_inline_intrinsics.ETSGLOBAL::main"
+//! METHOD       "ets_inline_intrinsics.ETSGLOBAL::equals_obj_obj"
 //! PASS_AFTER   "Inline"
 //! INST         /CallVirtual/
 //! INST_NOT     /Intrinsic/

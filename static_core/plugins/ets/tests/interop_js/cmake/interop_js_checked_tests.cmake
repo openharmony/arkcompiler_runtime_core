@@ -62,7 +62,8 @@ function(panda_ets_interop_js_checked_test)
     file(MAKE_DIRECTORY "${TEST_DIR}")
     SET(OPTIONS "--run-gc-in-place")
     set(PAOC_OPTIONS ${OPTIONS} "--load-runtimes=ets" "--boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc")
-    set(ES2PANDA_OPTIONS --thread=0 --extension=ets --ets-unnamed --arktsconfig=${ETS_CONFIG} --ast-verifier:errors=${ETS_VERIFICATOR_ERRORS})
+    # interop check tests don't remove --ets-unnamed because it will be removed in another pr
+    set(ES2PANDA_OPTIONS --thread=0 --extension=ets --arktsconfig=${ETS_CONFIG} --ast-verifier:errors=${ETS_VERIFICATOR_ERRORS} --ets-unnamed)
 
     if (PANDA_LLVM_AOT)
         set(WITH_LLVM "--with-llvm")

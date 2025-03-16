@@ -15,13 +15,13 @@
 
 //! CHECKER      Memory Coalescing JIT
 //! SKIP_IF      @architecture != "arm64"
-//! RUN          force_jit: true, options: "--compiler-loop-unroll=false", entry: "ETSGLOBAL::main"
-//! EVENT        /Compilation,ETSGLOBAL::main,.*,COMPILED/
-//! EVENT        /Compilation,Test::__noinline__fnSum,.*,COMPILED/
-//! EVENT        /Compilation,Test::__noinline__fnSumMem,.*,COMPILED/
-//! EVENT        /Compilation,Test::__noinline__fnSumGC,.*,COMPILED/
-//! EVENT        /Compilation,Test::__noinline__fnSumCls,.*,COMPILED/
-//! METHOD        "Test::__noinline__fnSum"
+//! RUN          force_jit: true, options: "--compiler-loop-unroll=false", entry: "memory_coalescing1.ETSGLOBAL::main"
+//! EVENT        /Compilation,memory_coalescing1.ETSGLOBAL::main,.*,COMPILED/
+//! EVENT        /Compilation,memory_coalescing1.Test::__noinline__fnSum,.*,COMPILED/
+//! EVENT        /Compilation,memory_coalescing1.Test::__noinline__fnSumMem,.*,COMPILED/
+//! EVENT        /Compilation,memory_coalescing1.Test::__noinline__fnSumGC,.*,COMPILED/
+//! EVENT        /Compilation,memory_coalescing1.Test::__noinline__fnSumCls,.*,COMPILED/
+//! METHOD        "memory_coalescing1.Test::__noinline__fnSum"
 //! PASS_BEFORE  "MemoryCoalescing"
 //! INST_NOT     "LoadArrayPair"
 //! INST_NOT     "LoadPairPart"
@@ -32,7 +32,7 @@
 //! INST         "StoreArrayPair"
 //! INST_COUNT   /StoreObjectPair/, 2
 //! INST_COUNT   /LoadObjectPair/, 1
-//! METHOD       "Test::__noinline__fnSumMem"
+//! METHOD       "memory_coalescing1.Test::__noinline__fnSumMem"
 //! PASS_BEFORE  "MemoryCoalescing"
 //! INST_NOT     "LoadArrayPair"
 //! INST_NOT     "LoadPairPart"
@@ -43,7 +43,7 @@
 //! INST_NOT     "StoreArrayPair"
 //! INST_COUNT   /StoreObjectPair/, 1
 //! INST_NOT     "LoadObjectPair"
-//! METHOD       "Test::__noinline__fnSumGC"
+//! METHOD       "memory_coalescing1.Test::__noinline__fnSumGC"
 //! PASS_BEFORE  "MemoryCoalescing"
 //! INST_NOT     "LoadArrayPair"
 //! INST_NOT     "LoadPairPart"
@@ -54,7 +54,7 @@
 //! INST_NOT     "StoreArrayPair"
 //! INST_COUNT   /StoreObjectPair/, 1
 //! INST_NOT     "LoadObjectPair"
-//! METHOD       "Test::__noinline__fnSumCls"
+//! METHOD       "memory_coalescing1.Test::__noinline__fnSumCls"
 //! PASS_BEFORE  "MemoryCoalescing"
 //! INST_NOT     "LoadArrayPair"
 //! INST_NOT     "LoadPairPart"
