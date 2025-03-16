@@ -32,7 +32,7 @@
 02.lexical_elements/07.keywords/types_21.ets
 02.lexical_elements/07.keywords/types_23.ets
 
-#19926 FailKind.ES2PANDA_FAIL not implemented yet
+#23980
 02.lexical_elements/09.literals/04.bigint_literals/bigint_func_0.ets
 02.lexical_elements/09.literals/04.bigint_literals/bigint_func_1.ets
 02.lexical_elements/09.literals/04.bigint_literals/bigint_func_2.ets
@@ -40,12 +40,9 @@
 02.lexical_elements/09.literals/04.bigint_literals/bigint_func_4.ets
 02.lexical_elements/09.literals/04.bigint_literals/bigint_func_5.ets
 
-#not implemented
+#24028 not implemented
 03.types/01.predefined_types/class_types_declaration_2.ets
 03.types/03.using_types/array_value_types_declaration_18.ets
-03.types/08.type_object/class_methods_0.ets
-03.types/08.type_object/class_methods_2.ets
-03.types/08.type_object/class_methods_3.ets
 
 #23493
 03.types/06.value_types/01.integer_types_and_operations/bitwise_complement/bitwise_complement_char_2.ets
@@ -61,6 +58,11 @@
 03.types/06.value_types/01.integer_types_and_operations/right_shift/right_shift_long_10.ets
 03.types/06.value_types/01.integer_types_and_operations/unsigned_right_shift/unsigned_right_shift_byte_7.ets
 03.types/06.value_types/01.integer_types_and_operations/unsigned_right_shift/unsigned_right_shift_short_7.ets
+
+#24030
+03.types/08.type_object/class_methods_0.ets
+03.types/08.type_object/class_methods_2.ets
+03.types/08.type_object/class_methods_3.ets
 
 #14338 Function, method, constructor overload signatures
 03.types/15.literal_types/overriding_literal_types_0.ets
@@ -93,10 +95,10 @@
 #23581
 03.types/17.tuple_types/tt_16.ets
 
-#15188 es2panda aborts on union in tuple type
+#23975
 03.types/17.tuple_types/tt2_31.ets
 
-#19926 FailKind.ES2PANDA_FAIL not implemented yet
+#23981
 03.types/18.function_types/function_type_2.ets
 03.types/18.function_types/function_type_3.ets
 03.types/18.function_types/function_type_4.ets
@@ -104,7 +106,7 @@
 03.types/18.function_types/function_type_6.ets
 03.types/18.function_types/function_type_7.ets
 
-#ES2PANDA_NEG_FAIL
+#23998
 03.types/19.union_types/02.access_to_common_union_members/cm_fld1_6.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_fld2_6.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_fld3_6.ets
@@ -114,12 +116,8 @@
 03.types/19.union_types/02.access_to_common_union_members/cm_fld2_11.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_fld3_11.ets
 
-#22858
-03.types/19.union_types/02.access_to_common_union_members/cm_fld3_12.ets
-
 #22857
 03.types/19.union_types/ut_7.ets
-
 
 #20935 Runtime aborts on access to common field with generics
 03.types/19.union_types/02.access_to_common_union_members/cm_fld1_11.ets
@@ -129,14 +127,11 @@
 
 #20936 Access to common union method doesn't work
 03.types/19.union_types/02.access_to_common_union_members/cm_spec_0.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_spec_2.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth1_0.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth1_1.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth1_10.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth1_11.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth1_12.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth1_14.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth1_15.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth1_2.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth1_3.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth1_4.ets
@@ -170,7 +165,6 @@
 03.types/19.union_types/02.access_to_common_union_members/cm_meth3_7.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth3_8.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth3_9.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_fld1_10.ets
 
 # 24113 keyof not implemented
 03.types/19.union_types/03.keyof_types/keyof_class_0.ets
@@ -295,30 +289,28 @@
 #23802
 04.names_declarations_and_scopes/04.scopes/type_param_interface.ets
 
-#19602
-04.names_declarations_and_scopes/05.accesible/type_name_neg_0.ets
-04.names_declarations_and_scopes/05.accesible/type_name_neg_1.ets
-
-#14338 enum, union
+#24109
 04.names_declarations_and_scopes/05.accesible/type_name_const_enum.ets
 04.names_declarations_and_scopes/05.accesible/type_name_variable_enum.ets
+
+#24110
 04.names_declarations_and_scopes/05.accesible/type_name_interface_prop_23.ets
 
 #19720
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_8.ets
 
-#23134
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_16.ets
-
 #21833 null-safety violations, value was not initialized
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/02.constant_declarations/const_decl_5.ets
 
-# ES2PANDA_NEG_FAIL
+#24000 ES2PANDA_NEG_FAIL
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_3.ets
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_7.ets
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.assignability_with_initializer/initializer_compatibility_n_8.ets
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_custom_neg_6.ets
+04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_n_0.ets
+04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_n_1.ets
 
-#not implemented
+#24001
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.assignability_with_initializer/initializer_compatibility_8.ets
 
 #23643
@@ -358,18 +350,16 @@
 04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_context_and_conversion_6.ets
 04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_context_and_conversion_8.ets
 
-#23074
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_custom_neg_6.ets
-04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_n_0.ets
-04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_n_1.ets
-
 #22791 - Array, FixedArray not implemented yet
 04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_12.ets
 04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_13.ets
 04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_14.ets
 
-#19926 FailKind.ES2PANDA_FAIL not implemented yet
+#23983
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_2.ets
+
+#23982
+04.names_declarations_and_scopes/08.function_declarations/09.function_overload_signatures/overload.ets
 
 #23138, 23364 Does not work for primitives and enum
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_39.ets
@@ -410,7 +400,6 @@
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_22.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_23.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_27.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_28.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_2.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_multiple_0.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_functions/generic_function_constraint_multiple_1.ets
@@ -447,8 +436,6 @@
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_27.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_34.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_35.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_36.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_37.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_38.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_39.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_40.ets
@@ -574,7 +561,6 @@
 #23717 ES2PANDA_NEG_FAIL
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_21.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_10.ets
-05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/interface_args_neg_21.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_11.ets
 
 #23754
@@ -611,7 +597,7 @@
 #22852
 05.generics/03.utility_types/01.partial_utility_type/partial_inherit3.ets
 
-#20377 getter/setter for class with required segfault/trap
+#24056
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_0.ets
 
 #23714
@@ -652,7 +638,7 @@
 #22450 - should throw an exception
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.class_or_interface_casting_conversions/cce_5.ets
 
-#23604
+#22791
 06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/ref_type_from_object_6.ets
 06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/ref_type_from_object_7.ets
 06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/ref_type_from_object_8.ets
@@ -678,7 +664,7 @@
 06.contexts_and_conversions/05.implicit_conversions/12.literal_type_conversions/decl_field/decl-field2_4.ets
 06.contexts_and_conversions/05.implicit_conversions/12.literal_type_conversions/decl_field/decl-field2_6.ets
 
-#18550 [ArkTS frontend] es2panda aborts on implicit number conversion
+#24021
 06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_const/decl-const_6.ets
 
 #15704 Constant Narrowing Integer Conversion is not implemented
@@ -775,7 +761,7 @@
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_var/decl-var_5.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_var/decl-var_8.ets
 
-#23583
+#24132
 06.contexts_and_conversions/05.implicit_conversions/06.char_to_string_conversions/comp-clss.ets
 
 #23137
@@ -807,6 +793,12 @@
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/assn_var/assn-var-lit_3.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/assn_var/assn-var-lit_4.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/assn_var/assn-var-lit_7.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_0.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_1.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_2.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_3.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_4.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_7.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_func/call-func-lit_0.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_func/call-func-lit_1.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_func/call-func-lit_2.ets
@@ -836,28 +828,28 @@
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_2.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_3.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_4.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_5.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_6.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_7.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_0.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_1.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_2.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_3.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_4.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_7.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_var/decl-var-lit_0.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_var/decl-var-lit_1.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_var/decl-var-lit_2.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_var/decl-var-lit_3.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_var/decl-var-lit_4.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_var/decl-var-lit_7.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_0.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_1.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_2.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_3.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_4.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_7.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/spec8.ets
+
+#23986
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_5.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_6.ets
+
+#23985
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_0.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_1.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_2.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_3.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_4.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_7.ets
+
+#23987
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/spec2.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/spec5b.ets
 
@@ -929,24 +921,28 @@
 #23590
 07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_1.ets
 
-#14962
-07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_2.ets
-
-# not implemented
+#24031 not implemented
 07.expressions/01.evaluation_of_expressions/heap_pollution.ets
+
+#24033
 07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_2.ets
 07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_3.ets
 07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_6.ets
-07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/aioobe4.ets
+
+#23902
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe1.ets
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe2.ets
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe3.ets
+07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_by_super_of_generic.ets
+
+#24035
+07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/aioobe4.ets
+
+#24036
 07.expressions/01.evaluation_of_expressions/03.operator_precedence/typeof.ets
+
+#24037
 07.expressions/01.evaluation_of_expressions/eval_decl.ets
-07.expressions/08.this_expression/this_in_interface_method.ets
-07.expressions/08.this_expression/this_in_lambda.ets
-07.expressions/08.this_expression/this_in_lambda_negative.ets
-07.expressions/08.this_expression/this_primary_expression_in_lambda.ets
 
 #22791 FixedArray and Array<T> support is not implemented yet
 07.expressions/04.array_literal/01.type_inference_from_context/spec-ex8.ets
@@ -1357,12 +1353,11 @@
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_13.ets
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_14.ets
 
-# XXXXX Cannot use Byte, Short values in K
+#24003
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_8.ets
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_9.ets
 
-#20547 Cannot use Enum in the Record value
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_10.ets
+#24005
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_9.ets
 
 #20024 es2panda fails to infer type of spread expression of enum array
 07.expressions/06.spread_expression/spex_12.ets
@@ -1371,7 +1366,7 @@
 07.expressions/06.spread_expression/spex_26.ets
 07.expressions/06.spread_expression/spex_27.ets
 
-# XXXXX Array literal type inference needs to be improved
+#24006 Array literal type inference needs to be improved
 07.expressions/06.spread_expression/spex_36.ets
 07.expressions/06.spread_expression/spex_38.ets
 
@@ -1476,24 +1471,28 @@
 07.expressions/06.spread_expression/spex_lmbd_30.ets
 07.expressions/06.spread_expression/spex_lmbd_31.ets
 
+#24039
+07.expressions/08.this_expression/this_in_interface_method.ets
+
+#24042
+07.expressions/08.this_expression/this_in_lambda.ets
+07.expressions/08.this_expression/this_in_lambda_negative.ets
+07.expressions/08.this_expression/this_primary_expression_in_lambda.ets
+
 #23200: Verifier fails on some interface overloading and overriding cases
 07.expressions/09.field_access_expressions/01.accessing_current_object_fields/nullable_reference_type.ets
-
-#23902
-07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_by_super_of_generic.ets
 
 #23901
 07.expressions/09.field_access_expressions/02.accessing_superclass_fields/super_in_object.ets
 
-#23900
-07.expressions/20.unary_expressions/06.unary_minus/unary_minus_corner_0.ets
-
-# es2panda fails: panda, 4.8.3 optional parameters not fully implemented
+#23996
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_17.ets
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_18.ets
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_19.ets
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_20.ets
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_21.ets
+
+#23997
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_19.ets
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_22.ets
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_23.ets
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_24.ets
@@ -1504,9 +1503,6 @@
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_24.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_25.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_26.ets
-
-# #15709
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1n_4.ets
 
 #19951
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_0.ets
@@ -1521,14 +1517,21 @@
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_6.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_8.ets
 
+#23725
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1n_4.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_24.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_25.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_53.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_79.ets
+
 #14001 Type number cannot be used as an index type
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_access6.ets
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_access7.ets
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_0.ets
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_1.ets
 
-#22989
-07.expressions/17.typeof_expression/tof_obj_21.ets
+#23900
+07.expressions/20.unary_expressions/06.unary_minus/unary_minus_corner_0.ets
 
 #23441
 07.expressions/20.unary_expressions/08.logical_complement/logical_complement_char.ets
@@ -1581,17 +1584,13 @@
 #23051 Reference comparison
 07.expressions/25.equality_expressions/07.reference_equality/type_conversion_of_one_operand_to_another_type.ets
 
-#23725
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_24.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_25.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_53.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_79.ets
-
-#19926 FailKind.ES2PANDA_FAIL not implemented yet
+#23977
 07.expressions/30.conditional_expressions/conditional_expression_object_2.ets
 07.expressions/30.conditional_expressions/conditional_expression_object_3.ets
 07.expressions/30.conditional_expressions/conditional_expression_object_4.ets
 07.expressions/30.conditional_expressions/conditional_expression_object_5.ets
+
+#23976
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_1.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_2.ets
 
@@ -1605,7 +1604,7 @@
 #23197 Lambda doesn't support "super" keyword
 07.expressions/32.lambda_expression/02.lambda_body/body_3.ets
 
-#23199 Lambda doesn't support rest parameter
+#23199 Lambda doesn't support rest parameter #24005
 07.expressions/32.lambda_expression/decl_full_ref_4.ets
 07.expressions/32.lambda_expression/decl_full_value_4.ets
 07.expressions/32.lambda_expression/decl_short_ref_4.ets
@@ -1649,13 +1648,13 @@
 #23309
 07.expressions/33.constant_expression/check_enum/constant_str_chain_initializer_2.ets
 
-#18763 es2panda aborts on for-of over a union type array
+#24126 es2panda aborts on for-of over a union type array
 08.statements/09.for_of_statements/for_of_28.ets
 
 #22513
 08.statements/12.return_statements/return_4.ets
 
-#19926 FailKind.ES2PANDA_FAIL not implemented yet
+#23978
 08.statements/14.throw_statements/throw_neg2.ets
 
 
@@ -1746,10 +1745,6 @@
 09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_2.ets
 09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_3.ets
 
-#23074
-09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/no_throwing_in_abstract_method.ets
-09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/no_throwing_in_overrided_method.ets
-
 #22252
 09.classes/06.method_declarations/09.methods_returning_this/methods_returning_this_08.ets
 
@@ -1815,7 +1810,6 @@
 
 
 #23530
-10.interfaces/05.interface_properties/external_interface_with_property_0.ets
 10.interfaces/05.interface_properties/external_interface_with_property_1.ets
 
 #16840
@@ -1823,31 +1817,35 @@
 10.interfaces/06.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets
 10.interfaces/07.interface_inheritance/inheritance_method_with_declared_signature.ets
 
-#23533
-11.enumerations/02.enumeration_string_values/enum_str_4.ets
-
 #21888 no support for package initializer
 13.compilation_units/06.compilation_unit_initialization/package/init_once/test.ets
 
-#23074
+#23537
+15.semantic_rules/03.assignability/classes_compatibility_2.ets
+15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_array_3.ets
+15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_function_6.ets
+15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_13.ets
+15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_17.ets
+15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_argument_equivalent_neg_n2_0.ets
+15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_18.ets
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/access_modifier_over_10.ets
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/access_modifier_over_15.ets
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/access_modifier_over_25.ets
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/access_modifier_over_28.ets
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/access_modifier_over_7.ets
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/access_modifier_over_8.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/instance_method_over_n2_20.ets
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/single_class_over_generic_1.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/static_method_over_n2_19.ets
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/interface_return_value_overload_2.ets
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/single_interface_overload_neg_1.ets
 
 #22692
 15.semantic_rules/05.compatibility_call_args/tuple_rest_params_0.ets
 15.semantic_rules/05.compatibility_call_args/tuple_rest_params_1.ets
 
-#14338 es2panda fails to compile overloaded functions
-15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/pos_6.ets
-
 #23477: Bad candidate function invoked
 15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/ex_6_1.ets
-
-#23115
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/interface_override_with_object_example_return_4.ets
-
-#23537
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_18.ets
 
 #14338 Function, method, constructor overload signatures
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_tuple_0.ets
@@ -1857,28 +1855,17 @@
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_tuple_3.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_tuple_8.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_tuple_9.ets
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_array_1.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_array_2.ets
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_array_3.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatible_signature_6.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatible_signature_7.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatible_signature_8.ets
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_13.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_15.ets
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_17.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_10.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_38.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_39.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_5.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_27.ets
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_argument_equivalent_neg_n2_0.ets
 15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_argument_equivalent_n.ets
-15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/access_modifier_over_10.ets
-15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/access_modifier_over_15.ets
-15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/access_modifier_over_25.ets
-15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/access_modifier_over_28.ets
-15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/access_modifier_over_7.ets
-15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/access_modifier_over_8.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/class_method_over_n3_1.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/class_method_over_n3_3.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/class_method_over_n3_10.ets
@@ -1887,11 +1874,9 @@
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/instance_method_over_n2_2.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/instance_method_over_n2_18.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/instance_method_over_n2_37.ets
-15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/single_class_over_generic_1.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/static_method_over_n2_2.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_0.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_1.ets
-15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_10.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_11.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_12.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_13.ets
@@ -1914,10 +1899,7 @@
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_7.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_8.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_9.ets
-15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/single_interface_overload_neg_1.ets
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/interface_return_value_overload.ets
-15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/interface_return_value_overload_1.ets
-15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/interface_return_value_overload_2.ets
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/multiple_interfaces_inheritance_0.ets
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/multiple_interfaces_inheritance_2.ets
 
@@ -1949,12 +1931,10 @@
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/two_interfaces_8.ets
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/two_interfaces_9.ets
 
-#15600 overloading methods with tuples in parameters
+#24111 overloading methods with tuples, unions in parameters
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_12.ets
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_13.ets
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_14.ets
-
-#15276 overloading methods with unions in parameters
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_15.ets
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_16.ets
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_17.ets
@@ -1962,50 +1942,40 @@
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_22.ets
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_23.ets
 
-#14338 overloading with enums in parameters
+#24107
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_10.ets
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_11.ets
-15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_6.ets
-15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_7.ets
-15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_8.ets
-
-#14338
-15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_9.ets
-
-#15767 Cannot select the right method among overloaded ones
-15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over2_1.ets
-15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over2_3.ets
-
-#16840
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_3.ets
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_4.ets
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_5.ets
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_6.ets
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_9.ets
 
-#23378 runtime fails: Enum object incorrect evaluation in runtime
+#24108
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_7.ets
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_8.ets
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_10.ets
+
+#24128
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over2_1.ets
+
+#24129
+15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_array_1.ets
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over2_3.ets
+
+#24017
+15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/interface_return_value_overload_1.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_0.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_1.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_10.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_11.ets
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_12.ets
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_13.ets
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_14.ets
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_15.ets
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_16.ets
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_17.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_18.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_19.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_2.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_20.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_21.ets
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_22.ets
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_23.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_24.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_25.ets
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_26.ets
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_27.ets
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_28.ets
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_29.ets
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_3.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_30.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_31.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_32.ets
@@ -2013,24 +1983,53 @@
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_34.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_35.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_36.ets
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_4.ets
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_5.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_6.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_7.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_8.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_9.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_35.ets
 
-#23378
+#24020
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_12.ets
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_13.ets
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_14.ets
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_15.ets
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_16.ets
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_17.ets
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_3.ets
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_4.ets
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_5.ets
+
+#24024
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_22.ets
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_23.ets
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_26.ets
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_27.ets
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_28.ets
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_29.ets
+
+#23378 Promise<void> should resolve as undefined
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_ref_8.ets
+17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_7.ets
+17.experimental_features/15.coroutines/create_and_launch_coroutine/c_func_0.ets
+17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_0.ets
+17.experimental_features/15.coroutines/create_and_launch_coroutine/c_lamb_0.ets
+17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_0.ets
+17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_0.ets
+
+#24009
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_val_6.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_val_7.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_val_8.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_val_9.ets
+
+#24011
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_arr_ref_3.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_arr_ref_4.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_arr_val_3.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_arr_val_4.ets
+
+#24012
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_func_val_6.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_func_val_7.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_func_val_8.ets
@@ -2083,7 +2082,7 @@
 #23493
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_exp_val_2.ets
 
-# ES2PANDA_NEG_FAIL
+#24002 ES2PANDA_NEG_FAIL
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_0.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_1.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_2.ets
@@ -2091,6 +2090,9 @@
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_4.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_5.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_6.ets
+17.experimental_features/03.array_creation_expressions/expr_n_10.ets
+17.experimental_features/03.array_creation_expressions/expr_n_11.ets
+17.experimental_features/03.array_creation_expressions/expr_n_12.ets
 
 #22791 - Array, FixedArray not implemented yet
 17.experimental_features/02.fixed_array_types/fixed_array_0.ets
@@ -2110,15 +2112,9 @@
 17.experimental_features/03.array_creation_expressions/expr_9.ets
 17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_7.ets
 
-# es2panda fails: panda, cannot convert to int
+#24027 es2panda fails: panda, cannot convert to int
 17.experimental_features/03.array_creation_expressions/expr_2.ets
 17.experimental_features/03.array_creation_expressions/expr_3.ets
-
-# es2panda fails: panda Not implemented
-17.experimental_features/03.array_creation_expressions/expr_n_10.ets
-17.experimental_features/03.array_creation_expressions/expr_n_11.ets
-17.experimental_features/03.array_creation_expressions/expr_n_12.ets
-
 
 #18550 es2panda aborts on implicit number conversion
 17.experimental_features/04.indexable_types/ind_interface_7.ets
@@ -2145,48 +2141,36 @@
 17.experimental_features/06.callable_types/02.callable_types_with_instantiate_method/ct_inst_17.ets
 
 
-#15475 Cannot use enum array in for-of statement
-17.experimental_features/07.statements/01.for-of_type_annotation/for_of_10.ets
-
 #15484 Type conversions are not supported in for-of statement
 17.experimental_features/07.statements/01.for-of_type_annotation/for_of_15.ets
-17.experimental_features/07.statements/01.for-of_type_annotation/for_of_25.ets
 
-#19926 FailKind.ES2PANDA_FAIL not implemented yet
-17.experimental_features/07.statements/02.multiple_catch_clauses_in_try_statements/catch3.ets
-17.experimental_features/07.statements/02.multiple_catch_clauses_in_try_statements/exec_2.ets
-17.experimental_features/07.statements/02.multiple_catch_clauses_in_try_statements/try_4.ets
+#23984
 17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading_30.ets
-
-#16840
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_4.ets
-
-#15185
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_7.ets
 
 #15767 Cannot select the right method among overloaded ones
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over3_1.ets
-17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co3_over_1.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over3_3.ets
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co3_over_3.ets
 
 #15817 Tests failing on the latest dev branch status
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_14.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_11.ets
-17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_8.ets
 
-#14338 types, lambda, nullish types
+#24112
+17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_10.ets
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_11.ets
-17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_10.ets
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_13.ets
+17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_9.ets
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_11.ets
+17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_8.ets
+17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_9.ets
+17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co3_over_1.ets
 
 #15600 overloading methods with tuples in parameters
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_10.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_9.ets
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_7.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_9.ets
-17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_6.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_4.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_4.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_4.ets
@@ -2194,59 +2178,38 @@
 #15276 overloading methods with unions in parameters
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_11.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_12.ets
+17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_13.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_15.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_16.ets
-17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_8.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_10.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_12.ets
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_11.ets
-17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_9.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_13.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_16.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_18.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_18.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_18.ets
 
-#14338 overloading with enums in parameters
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_13.ets
+#24114
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_5.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_6.ets
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_7.ets
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_8.ets
-17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_10.ets
-17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_6.ets
-17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_9.ets
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_8.ets
-17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_10.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_5.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_5.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_5.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_6.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_6.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_6.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_7.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_7.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_7.ets
+17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_7.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_10.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_0.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_1.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_2.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_3.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_8.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_9.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_10.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_11.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_12.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_14.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_15.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_17.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_20.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_22.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_23.ets
+
+#24121
+17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_4.ets
+17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_8.ets
+17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_6.ets
+
+#24123
+17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_8.ets
+17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_6.ets
+17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_10.ets
 
 #22818
 17.experimental_features/09.native_functions_and_methods/03.native_constructors/natc_local_1.ets
 17.experimental_features/09.native_functions_and_methods/03.native_constructors/natc_local_2.ets
+
 #23049
 17.experimental_features/11.default_interface_method_declarations/private_interface_methods1.ets
 17.experimental_features/11.default_interface_method_declarations/private_interface_methods2.ets
@@ -2296,23 +2259,6 @@
 17.experimental_features/13.trailing_lambda/trlambda_static_met_1.ets
 17.experimental_features/13.trailing_lambda/trlambda_static_met_3.ets
 
-# Throwing function types
-17.experimental_features/15.exceptions/01.throwing_functions/lambda.ets
-
-17.experimental_features/15.exceptions/01.throwing_functions/lambda_call_with_catch.ets
-17.experimental_features/15.exceptions/01.throwing_functions/lambda_call_with_default_catch.ets
-17.experimental_features/15.exceptions/02.non_throwing_functions/lambda_with_default_catch.ets
-17.experimental_features/15.exceptions/02.non_throwing_functions/lambda_without_default_catch.ets
-17.experimental_features/15.exceptions/03.rethrowing_functions/rethrowing_function_declaration.ets
-17.experimental_features/15.exceptions/03.rethrowing_functions/rethrowing_function_with_non_throwing_function.ets
-
-#23378 Promise<void> should resolve as undefined
-17.experimental_features/15.coroutines/create_and_launch_coroutine/c_func_0.ets
-17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_0.ets
-17.experimental_features/15.coroutines/create_and_launch_coroutine/c_lamb_0.ets
-17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_0.ets
-17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_0.ets
-
 #21834 overloads for |undefined are not available
 17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading2_2.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_12.ets
@@ -2332,7 +2278,35 @@
 17.experimental_features/17.packages/02.package_initializer/p4/init4_1.ets
 17.experimental_features/17.packages/02.package_initializer/p6/init6_1.ets
 
-# not yet implemented
+#24118
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_5.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_6.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_5.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_6.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_0.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_1.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_10.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_11.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_12.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_13.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_14.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_15.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_16.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_17.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_18.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_2.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_20.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_22.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_23.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_3.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_4.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_5.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_6.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_7.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_8.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_9.ets
+
+#23995 not yet implemented
 17.experimental_features/18.generics_experimental/01.non_nullish_type_parameter/ex1.ets
 17.experimental_features/18.generics_experimental/01.non_nullish_type_parameter/ex2.ets
 17.experimental_features/18.generics_experimental/01.non_nullish_type_parameter/ex2_1.ets
