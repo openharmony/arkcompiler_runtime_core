@@ -13,7 +13,7 @@
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test_class_methods_returning_values_ets_to_js
     CPP_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_class_methods.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_class_methods.sts
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_class_methods.ets
     JS_SOURCES 
         ${CMAKE_CURRENT_SOURCE_DIR}/js_suites/test_function_return_bool_subset_by_value.js
         ${CMAKE_CURRENT_SOURCE_DIR}/js_suites/test_function_return_class.js

@@ -1620,13 +1620,13 @@ defined in a compilation unit other than the one that defines the receiver type:
 .. code-block:: typescript
    :linenos:
 
-      // file a.sts
+      // file a.ets
       class A {
           foo() { ... }
       }
 
-      // file ext.sts
-      import {A} from "a.sts" // name 'A' is imported
+      // file ext.ets
+      import {A} from "a.ets" // name 'A' is imported
       function bar(this: A) () {
          this.foo() // Method foo() is called
       }

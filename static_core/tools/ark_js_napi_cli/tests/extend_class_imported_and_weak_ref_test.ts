@@ -14,7 +14,7 @@
  */
 
 // This test check by WeakRef on JS side that JS object of JS class
-// that is derived from STS class and transferred from STS -> JS
+// that is derived from ETS class and transferred from ETS -> JS
 // creating cyclic reference - can be collected by GC
 
 import { interop } from './gc_test_common';

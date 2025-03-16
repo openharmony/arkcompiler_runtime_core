@@ -16,7 +16,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__constructor_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/constructor.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/constructor.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/constructor.ets
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/constructor.js
     ETS_CONFIG ${ETS_CONFIG}
 )

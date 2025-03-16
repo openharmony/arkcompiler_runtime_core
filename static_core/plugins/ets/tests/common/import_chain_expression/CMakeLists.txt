@@ -16,7 +16,7 @@ if (PANDA_TARGET_ARM32)
 endif()
 
 run_int_ets_code(import_chain_expression ${CMAKE_CURRENT_BINARY_DIR} SOURCES
-                 ${CMAKE_CURRENT_SOURCE_DIR}/a.sts;
-                 ${CMAKE_CURRENT_SOURCE_DIR}/b.sts;
-                 ${CMAKE_CURRENT_SOURCE_DIR}/c.sts;
-                 ${CMAKE_CURRENT_SOURCE_DIR}/d.sts)
+                 ${CMAKE_CURRENT_SOURCE_DIR}/a.ets;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/b.ets;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/c.ets;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/d.ets)

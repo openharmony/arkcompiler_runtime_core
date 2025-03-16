@@ -46,7 +46,7 @@ def runner_fixture(ark_build):
 async def test_compile(monkeypatch, ark_build, compile_opts, disasm, verifier):
     mocker = MockAsyncSubprocess(
         [
-            FakeCommand(opts=["--extension=sts", *compile_opts],
+            FakeCommand(opts=["--extension=ets", *compile_opts],
                         expected=str(ark_build[1]),
                         stdout=b"executed",
                         return_code=0),
@@ -85,7 +85,7 @@ async def test_compile(monkeypatch, ark_build, compile_opts, disasm, verifier):
 def _get_mocker_compile_and_run(ark_build, compile_opts: list) -> MockAsyncSubprocess:
     return MockAsyncSubprocess(
         [
-            FakeCommand(opts=["--extension=sts", *compile_opts],
+            FakeCommand(opts=["--extension=ets", *compile_opts],
                         expected=str(ark_build[1]),
                         stdout=b"executed",
                         return_code=0),
@@ -164,7 +164,7 @@ async def test_compile_and_run(monkeypatch, ark_build, compile_opts: list, disas
 async def test_run_when_compile_failed(monkeypatch, ark_build):
     mocker = MockAsyncSubprocess(
         [
-            FakeCommand(opts=["--extension=sts"],
+            FakeCommand(opts=["--extension=ets"],
                         expected=str(ark_build[1]),
                         stdout=b"compile error",
                         return_code=-1)
@@ -190,7 +190,7 @@ async def test_run_when_compile_failed(monkeypatch, ark_build):
 async def test_run_when_compile_segfault(monkeypatch, ark_build):
     mocker = MockAsyncSubprocess(
         [
-            FakeCommand(opts=["--extension=sts"],
+            FakeCommand(opts=["--extension=ets"],
                         expected=str(ark_build[1]),
                         stdout=b"compile error",
                         return_code=-11)
@@ -215,7 +215,7 @@ async def test_run_when_compile_segfault(monkeypatch, ark_build):
 async def test_run_disasm_failed(monkeypatch, ark_build, ):
     mocker = MockAsyncSubprocess(
         [
-            FakeCommand(opts=["--extension=sts"],
+            FakeCommand(opts=["--extension=ets"],
                         expected=str(ark_build[1]),
                         stdout=b"executed",
                         return_code=0),
@@ -258,7 +258,7 @@ async def test_run_disasm_failed(monkeypatch, ark_build, ):
 async def test_compile_failed_with_disasm(monkeypatch, ark_build):
     mocker = MockAsyncSubprocess(
         [
-            FakeCommand(opts=["--extension=sts"],
+            FakeCommand(opts=["--extension=ets"],
                         expected=str(ark_build[1]),
                         stdout=b"compile error",
                         return_code=1),
@@ -283,7 +283,7 @@ async def test_compile_failed_with_disasm(monkeypatch, ark_build):
 async def test_run_with_verify_on_the_fly(monkeypatch, ark_build, ):
     mocker = MockAsyncSubprocess(
         [
-            FakeCommand(opts=["--extension=sts"],
+            FakeCommand(opts=["--extension=ets"],
                         expected=str(ark_build[1]),
                         stdout=b"executed",
                         return_code=0),

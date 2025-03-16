@@ -122,14 +122,14 @@ If nothing failed you have ready to work environment.
 ### Build eTS stdlib first
 
 ```
-./bin/es2panda [--arktsconfig path/to/your/arktsconfig.json] --gen-stdlib=true --extension=sts --output=etsstdlib.abc --opt-level=0
+./bin/es2panda [--arktsconfig path/to/your/arktsconfig.json] --gen-stdlib=true --extension=ets --output=etsstdlib.abc --opt-level=0
 ```
 
 File `etsstdlib.abc` should be generated.
 
 ### Build dummy file and run it
 
-Feed file `x.sts` with code:
+Feed file `x.ets` with code:
 
 ```
 function main(): void {
@@ -139,7 +139,7 @@ function main(): void {
 and compile it
 
 ```
-./bin/es2panda [--arktsconfig path/to/your/arktsconfig.json] --extension=sts --output=x.abc --opt-level=0 x.sts
+./bin/es2panda [--arktsconfig path/to/your/arktsconfig.json] --extension=ets --output=x.abc --opt-level=0 x.ets
 ```
 
 Now run things out:

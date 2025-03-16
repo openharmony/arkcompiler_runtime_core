@@ -13,5 +13,5 @@
 
 ani_add_gtest(ani_test_example_calls
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/example.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/example.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/example.ets
 )

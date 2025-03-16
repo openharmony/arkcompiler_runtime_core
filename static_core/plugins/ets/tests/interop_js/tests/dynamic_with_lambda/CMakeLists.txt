@@ -16,7 +16,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_dynamic_with_lambda
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dynamic_with_lambda.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dynamic_with_lambda.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dynamic_with_lambda.ets
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/index.js
 )

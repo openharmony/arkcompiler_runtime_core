@@ -21,8 +21,8 @@
 
 namespace ark::abc2program {
 
-constexpr std::string_view HELLO_WORLD_ABC_TEST_FILE_NAME = "sts/HelloWorld.abc";
-constexpr std::string_view FUNCTIONS_ABC_TEST_FILE_NAME = "sts/Functions.abc";
+constexpr std::string_view HELLO_WORLD_ABC_TEST_FILE_NAME = "ets/HelloWorld.abc";
+constexpr std::string_view FUNCTIONS_ABC_TEST_FILE_NAME = "ets/Functions.abc";
 
 class Abc2ProgramTest : public testing::Test {
 public:

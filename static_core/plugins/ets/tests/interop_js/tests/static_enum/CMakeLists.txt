@@ -12,6 +12,6 @@
 # limitations under the License.
 
 panda_ets_interop_js_test_nodevm(ets_interop_js_static_enum_test
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/static_enum_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/static_enum_test.ets
     JS_LAUNCHER ${CMAKE_CURRENT_SOURCE_DIR}/static_enum_test.js
 )

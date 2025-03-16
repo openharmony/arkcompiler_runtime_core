@@ -16,5 +16,5 @@ if (PANDA_TARGET_ARM32)
 endif()
 
 run_int_ets_code(selective_export_w_amb_const ${CMAKE_CURRENT_BINARY_DIR} SOURCES
-                 ${CMAKE_CURRENT_SOURCE_DIR}/main.sts;
-                 ${CMAKE_CURRENT_SOURCE_DIR}/ambient_const_vars.sts)
+                 ${CMAKE_CURRENT_SOURCE_DIR}/main.ets;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/ambient_const_vars.ets)

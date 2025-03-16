@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-// This test check that transferring JS objects from JS -> STS
+// This test check that transferring JS objects from JS -> ETS
 // are collected and no memory leak occurs
 
 import { interop } from './gc_test_common';

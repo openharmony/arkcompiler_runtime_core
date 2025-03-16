@@ -20,14 +20,14 @@ gen_file(TARGET test_number_subtypes_gen_cpp
 )
 
 gen_file(TARGET test_number_subtypes_gen_ets
-    TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/number_subtypes.sts.erb
-    OUTPUT ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes.sts
+    TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/number_subtypes.ets.erb
+    OUTPUT ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes.ets
     REQUIRES ${CMAKE_CURRENT_SOURCE_DIR}/../number_subtypes.rb
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test_number_subtypes_ts_to_sts
     CPP_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes.cpp
-    ETS_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes.sts
+    ETS_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes.ets
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module.js
     COMPILATION_JS_WITH_CJS_ON
 )

@@ -23,11 +23,11 @@ All the interop benchmarks will be located in `runtime_core/static_core/plugins/
 
 Within this folder, every benchmark suite is put into a subdirectory with a related name. This folder contains named separate benchmarks, or bench units - also in subdirectories, prefixed with "bu_". 
 
-Within the bench unit, VMB searches for files matching the pattern "bench_%benchUnitName%.(abc|zip|js|sts)", in this exact order.
+Within the bench unit, VMB searches for files matching the pattern "bench_%benchUnitName%.(abc|zip|js|ets)", in this exact order.
 
 - if **abc | zip** files are found, VMB will assume these are precompiled binaries (or archives of such). Therefore, source compilation will be skipped, and the binaries will be executed as is.
 - **js** overrides default interop runner. Since that, it can be used BOTH for benchmarking pure javascript code AND custom interop logic.
-- If only **sts** files are found matching the pattern, they will compiled and executed using the default runner.  
+- If only **ets** files are found matching the pattern, they will compiled and executed using the default runner.  
 
 ### Naming convention
 
@@ -39,15 +39,15 @@ A benchmark suite should contain four bench units: pure JS, pure ArkTS, ArkTS in
 *
 └── feature_name
     ├── bu_feature_name_a2j
-    │   ├── bench_a2j.sts
+    │   ├── bench_a2j.ets
     │   └── test_import.js
     ├── bu_feature_name_j2a
-    │   ├── bench_a2j.sts
+    │   ├── bench_a2j.ets
     │   └── bench_a2j.js
     ├── bu_feature_name_j2j
     │   └── bench_a2j.js
     └── bu_feature_name_a2a
-        └── bench_j2a.sts
+        └── bench_j2a.ets
 
 ```
 
@@ -60,9 +60,9 @@ A benchmark suite should contain four bench units: pure JS, pure ArkTS, ArkTS in
 - `arktsconfig.json` is generated when a benchmark is ran. All JS files in a benchmark unit are automatically added to this JSON with path names as file name minus extension (e.g. `test_import.js` will be accessible as `test_import`)
 - use `Chrono.nanoNow` from `std/time` package in ARK, or `process.hrtime` in JS to provide better precision. 
 
-### *.sts:
+### *.ets:
 
-STS benchmark file should export a class with a name matching the overall bench unit name, but in pascal case (camelcase with a capital first letter). E.g., for a bench unit `call_async_function` a class `CallAsyncFunction` would be expected, while `SHA256` benchmark will need a class also called `SHA256`.
+ETS benchmark file should export a class with a name matching the overall bench unit name, but in pascal case (camelcase with a capital first letter). E.g., for a bench unit `call_async_function` a class `CallAsyncFunction` would be expected, while `SHA256` benchmark will need a class also called `SHA256`.
 
 ####  The class **must** expose these public methods:
 

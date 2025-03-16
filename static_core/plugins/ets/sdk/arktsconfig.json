@@ -12,7 +12,7 @@
         "outDir": "../cache"
     },
     "files" : [
-        "./api/@ohos.buffer.sts",
-        "./arkts/@arkts.math.Decimal.sts"
+        "./api/@ohos.buffer.ets",
+        "./arkts/@arkts.math.Decimal.ets"
     ]
 }

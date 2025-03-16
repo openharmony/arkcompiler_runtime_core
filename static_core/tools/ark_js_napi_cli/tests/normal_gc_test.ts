@@ -37,7 +37,7 @@ function isSts2JsObjectCollectedTest(): number {
 
     // Check: cross objects are not collected 
     if (interop.isSTSObjectCollected()) {
-        print('isSts2JsObjectCollectedTest failed. STS object is collected.');
+        print('isSts2JsObjectCollectedTest failed. ETS object is collected.');
         result += 1;
     }
     if (wr.deref() === undefined) {
@@ -56,7 +56,7 @@ function isJs2StsPromiseCollectedTest(): number {
 
     // Check: cross objects are not collected 
     if (interop.isSTSPromiseCollected()) {
-        print('isJs2StsPromiseCollectedTest failed. STS promise is collected.');
+        print('isJs2StsPromiseCollectedTest failed. ETS promise is collected.');
         result += 1;
     }
     if (wr.deref() === undefined) {

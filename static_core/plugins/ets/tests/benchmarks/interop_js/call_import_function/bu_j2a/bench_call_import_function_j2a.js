@@ -18,7 +18,7 @@
  * @Tags interop, bu_j2a
  */
 function callImportFunctionJ2a() {
-    this.stsVoid = null;
+    this.etsVoid = null;
     this.returnAnonymous = null;
 
     /**
@@ -42,7 +42,7 @@ function callImportFunctionJ2a() {
             return 1;
         }
 
-        this.stsVoid = stsVm.getFunction('LETSGLOBAL;', 'stsVoid');
+        this.etsVoid = stsVm.getFunction('LETSGLOBAL;', 'stsVoid');
         this.returnAnonymous = stsVm.getFunction('LETSGLOBAL;', 'returnAnonymous');
         return 0;
     };
@@ -60,7 +60,7 @@ function callImportFunctionJ2a() {
 
         callFunction(anonymous, 'anonymous fu');
 
-        callFunction(this.stsVoid, 'function');
+        callFunction(this.etsVoid, 'function');
 
         return;
     };

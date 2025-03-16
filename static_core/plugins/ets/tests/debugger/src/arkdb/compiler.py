@@ -29,7 +29,7 @@ from .logs import logger
 
 LOG = logger(__name__)
 
-CompilerExtensions = Literal["js", "ts", "as", "sts"]
+CompilerExtensions = Literal["js", "ts", "as", "ets"]
 
 CompileLogLevel = Literal["debug", "info", "warning", "error", "fatal"]
 
@@ -54,7 +54,7 @@ class Options:
 
 @dataclass
 class CompilerArguments:
-    extension: CompilerExtensions = "sts"
+    extension: CompilerExtensions = "ets"
     ets_module: bool = False
     opt_level: int = 0
     debug_info: bool = True
@@ -223,7 +223,7 @@ class StringCodeCompiler:
         ast_parser: AstParser | None = None,
     ) -> ScriptFile:
         """
-        Compiles the ``sts``-file and returns the :class:`ScriptFile` instance.
+        Compiles the ``ets``-file and returns the :class:`ScriptFile` instance.
         """
         args = arguments if arguments else CompilerArguments()
         source_file = self._write_into_file(source_code, name, args.extension)
@@ -279,7 +279,7 @@ def code_compiler(
     ark_compiler: Compiler,
 ) -> StringCodeCompiler:
     """
-    Return :class:`StringCodeCompiler` instance that can compile ``sts``-file.
+    Return :class:`StringCodeCompiler` instance that can compile ``ets``-file.
     """
     return StringCodeCompiler(
         tmp_path=tmp_path,

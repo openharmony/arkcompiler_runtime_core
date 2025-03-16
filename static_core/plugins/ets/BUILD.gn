@@ -231,7 +231,7 @@ if (with_stdlib) {
         "json")
 
     args = [
-      "--extension=sts",
+      "--extension=ets",
       "--opt-level=2",
       "--gen-stdlib=true",
       "--output=" + rebase_path(outputs[0], root_build_dir),

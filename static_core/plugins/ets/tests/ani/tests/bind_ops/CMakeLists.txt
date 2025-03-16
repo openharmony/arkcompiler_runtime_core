@@ -13,17 +13,17 @@
 
 ani_add_gtest(ani_test_bind_ops_class_bind_native_methods
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_bind_native_methods_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_bind_native_methods_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_bind_native_methods_test.ets
 )
 
 ani_add_gtest(ani_test_bind_ops_module_bind_native_functions
     ETS_NAMED_MODE
     ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/module_bind_native_functions_test/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_bind_native_functions_test/test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_bind_native_functions_test/test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_bind_native_functions_test/test.ets
 )
 
 ani_add_gtest(ani_test_bind_ops_namespace_bind_native_functions
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_bind_native_functions_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_bind_native_functions_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_bind_native_functions_test.ets
 )

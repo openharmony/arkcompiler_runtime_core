@@ -16,7 +16,7 @@ import("$ark_root/plugins/ets/tests/interop_js/interop_tests.gni")
 
 interop_test("create_runtime_test") {
   js = [ "create_runtime_test.js" ]
-  sts = "xgc_tests.sts"
+  ets = "xgc_tests.ets"
 }
 
 interop_test("mark_sts2js_test") {
@@ -24,7 +24,7 @@ interop_test("mark_sts2js_test") {
     "mark_sts2js_test.js",
     "test_utils.js",
   ]
-  sts = "xgc_tests.sts"
+  ets = "xgc_tests.ets"
   sources = [ "mark_sts2js_test.cpp" ]
 }
 
@@ -33,7 +33,7 @@ interop_test("mark_js2sts_test") {
     "mark_js2sts_test.js",
     "test_utils.js",
   ]
-  sts = "xgc_tests.sts"
+  ets = "xgc_tests.ets"
   sources = [ "mark_js2sts_test.cpp" ]
 }
 
@@ -42,7 +42,7 @@ interop_test("mark_deep_js2sts_test") {
     "mark_deep_js2sts_test.js",
     "test_utils.js",
   ]
-  sts = "xgc_tests.sts"
+  ets = "xgc_tests.ets"
   sources = [ "mark_deep_js2sts_test.cpp" ]
 }
 
@@ -51,7 +51,7 @@ interop_test("mark_cycle_test") {
     "mark_cycle_test.js",
     "test_utils.js",
   ]
-  sts = "xgc_tests.sts"
+  ets = "xgc_tests.ets"
   sources = [ "mark_cycle_test.cpp" ]
 }
 
@@ -60,7 +60,7 @@ interop_test("mark_cycle2_test") {
     "mark_cycle2_test.js",
     "test_utils.js",
   ]
-  sts = "xgc_tests.sts"
+  ets = "xgc_tests.ets"
   sources = [ "mark_cycle2_test.cpp" ]
 }
 
@@ -69,7 +69,7 @@ interop_test("sweep_cycle_test") {
     "sweep_cycle_test.js",
     "test_utils.js",
   ]
-  sts = "xgc_tests.sts"
+  ets = "xgc_tests.ets"
   sources = [ "sweep_cycle_test.cpp" ]
 }
 
@@ -78,7 +78,7 @@ interop_test("sweep_js2sts_test") {
     "sweep_js2sts_test.js",
     "test_utils.js",
   ]
-  sts = "xgc_tests.sts"
+  ets = "xgc_tests.ets"
   sources = [ "sweep_js2sts_test.cpp" ]
 }
 
@@ -87,7 +87,7 @@ interop_test("sweep_sts2js_test") {
     "sweep_sts2js_test.js",
     "test_utils.js",
   ]
-  sts = "xgc_tests.sts"
+  ets = "xgc_tests.ets"
   sources = [ "sweep_sts2js_test.cpp" ]
 }
 
@@ -96,7 +96,7 @@ interop_test("remark_cycle_test") {
     "remark_cycle_test.js",
     "test_utils.js",
   ]
-  sts = "xgc_tests.sts"
+  ets = "xgc_tests.ets"
   sources = [ "remark_cycle_test.cpp" ]
 }
 
@@ -105,7 +105,7 @@ interop_test("mark_test_create_proxy") {
     "mark_test_create_proxy.js",
     "mark_test_utils.js",
   ]
-  sts = "mark_test_sts.sts"
+  ets = "mark_test_sts.ets"
   sources = [ "mark_test_utils.cpp" ]
 }
 
@@ -114,7 +114,7 @@ interop_test("mark_test_cross") {
     "mark_test_cross.js",
     "mark_test_utils.js",
   ]
-  sts = "mark_test_sts.sts"
+  ets = "mark_test_sts.ets"
   sources = [ "mark_test_utils.cpp" ]
 }
 
@@ -123,7 +123,7 @@ interop_test("mark_test_cycle") {
     "mark_test_cycle.js",
     "mark_test_utils.js",
   ]
-  sts = "mark_test_sts.sts"
+  ets = "mark_test_sts.ets"
   sources = [ "mark_test_utils.cpp" ]
 }
 
@@ -132,7 +132,7 @@ interop_test("mark_test_gc") {
     "mark_test_gc.js",
     "mark_test_utils.js",
   ]
-  sts = "mark_test_sts.sts"
+  ets = "mark_test_sts.ets"
   sources = [ "mark_test_utils.cpp" ]
 }
 
@@ -141,7 +141,7 @@ interop_test("mark_test_js_ref_sts") {
     "mark_test_js_ref_sts.js",
     "mark_test_utils.js",
   ]
-  sts = "mark_test_sts.sts"
+  ets = "mark_test_sts.ets"
   sources = [ "mark_test_utils.cpp" ]
 }
 
@@ -150,7 +150,7 @@ interop_test("mark_test_mass_ref") {
     "mark_test_mass_ref.js",
     "mark_test_utils.js",
   ]
-  sts = "mark_test_sts.sts"
+  ets = "mark_test_sts.ets"
   sources = [ "mark_test_utils.cpp" ]
 }
 
@@ -159,7 +159,7 @@ interop_test("mark_test_passive_xgc") {
     "mark_test_passive_xgc.js",
     "mark_test_utils.js",
   ]
-  sts = "mark_test_sts.sts"
+  ets = "mark_test_sts.ets"
   sources = [ "mark_test_utils.cpp" ]
 }
 
@@ -168,7 +168,7 @@ interop_test("mark_test_sts_ref_js") {
     "mark_test_sts_ref_js.js",
     "mark_test_utils.js",
   ]
-  sts = "mark_test_sts.sts"
+  ets = "mark_test_sts.ets"
   sources = [ "mark_test_utils.cpp" ]
 }
 

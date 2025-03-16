@@ -1,2 +1,2 @@
 #23132
-std/core/SortInternalTestLong.sts
+std/core/SortInternalTestLong.ets

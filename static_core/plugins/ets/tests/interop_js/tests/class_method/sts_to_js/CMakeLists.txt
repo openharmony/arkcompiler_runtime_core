@@ -13,7 +13,7 @@
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__class_method_sts_to_ts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_method.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_method.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_method.ets
     JS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/check_abstract_class_method.js
         ${CMAKE_CURRENT_SOURCE_DIR}/check_child_class_method.js

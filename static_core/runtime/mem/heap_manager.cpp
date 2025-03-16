@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -393,7 +393,7 @@ void HeapManager::CountInstances(const PandaVector<Class *> &classes, bool assig
     {
         MTManagedThread *thread = MTManagedThread::GetCurrent();
         ASSERT(thread != nullptr);
-        ScopedChangeThreadStatus sts(thread, ThreadStatus::RUNNING);
+        ScopedChangeThreadStatus ets(thread, ThreadStatus::RUNNING);
         ScopedSuspendAllThreadsRunning ssatr(thread->GetVM()->GetRendezvous());
         GetObjectAllocator().AsObjectAllocator()->IterateOverObjects(objectsChecker);
     }

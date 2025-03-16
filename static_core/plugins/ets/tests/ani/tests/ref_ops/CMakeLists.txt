@@ -13,27 +13,27 @@
 
 ani_add_gtest(ani_test_get_null
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_null_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_null_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_null_test.ets
 )
 
 ani_add_gtest(ani_test_get_undefined
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_undefined_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_undefined_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_undefined_test.ets
 )
 
 ani_add_gtest(ani_test_reference_is_null
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_is_null_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_is_null_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_is_null_test.ets
 )
 
 ani_add_gtest(ani_test_reference_is_undefined
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_is_undefined_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_is_undefined_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_is_undefined_test.ets
 )
 
 ani_add_gtest(ani_test_reference_is_nullish_value
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_is_nullish_value_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_is_nullish_value_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_is_nullish_value_test.ets
 )
 
 ani_add_gtest(ani_test_reference_delete
@@ -42,10 +42,10 @@ ani_add_gtest(ani_test_reference_delete
 
 ani_add_gtest(ani_test_reference_equals
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_equals_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_equals_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_equals_test.ets
 )
 
 ani_add_gtest(ani_test_reference_strict_equals
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_strict_equals_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_strict_equals_test.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reference_strict_equals_test.ets
 )

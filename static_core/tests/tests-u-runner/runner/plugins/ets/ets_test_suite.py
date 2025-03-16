@@ -167,7 +167,7 @@ class TsSubsetEtsTestSuite(EtsTestSuite):
 
     def set_preparation_steps(self) -> None:
         self._preparation_steps.append(CopyStep(
-            test_source_path=self._ets_test_dir.sts_ts_subset,
+            test_source_path=self._ets_test_dir.ets_ts_subset,
             test_gen_path=self.test_root,
             config=self.config
         ))
@@ -192,7 +192,7 @@ class CustomEtsTestSuite(EtsTestSuite):
                 test_source_path=self.config.custom.test_root,
                 test_gen_path=self.test_root,
                 config=self.config,
-                extension="sts"
+                extension="ets"
             ))
             copy_source_path = self.test_root
         else:

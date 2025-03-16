@@ -21,7 +21,7 @@ create_declgen_ets2ts_test(depend_export
     TS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/depend_export.ts
     ETS_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib.sts
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib.ets
     DECLS_EXPECTED
         ${CMAKE_CURRENT_SOURCE_DIR}/lib.expected
 )

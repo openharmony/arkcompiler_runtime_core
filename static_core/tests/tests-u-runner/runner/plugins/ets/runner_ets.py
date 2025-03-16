@@ -27,7 +27,7 @@ from runner.options.config import Config
 from runner.plugins.ets.ets_suites import EtsSuites
 from runner.plugins.ets.ets_test_suite import EtsTestSuite
 from runner.plugins.ets.test_ets import TestETS
-from runner.plugins.ets.test_sts_ts_subset import TestTSSubset
+from runner.plugins.ets.test_ets_ts_subset import TestTSSubset
 from runner.runner_base import get_test_id
 from runner.runner_file_based import RunnerFileBased
 from runner.enum_types.test_directory import TestDirectory
@@ -54,7 +54,7 @@ class RunnerETS(RunnerFileBased):
         self.test_env.es2panda_args.extend([
             f"--arktsconfig={self.arktsconfig}",
             "--gen-stdlib=false",
-            "--extension=sts",
+            "--extension=ets",
             f"--opt-level={self.config.es2panda.opt_level}"
         ])
         if self.config.es2panda.debug_info:
@@ -94,7 +94,7 @@ class RunnerETS(RunnerFileBased):
         self.collect_excluded_test_lists(test_name=suite_name)
         self.collect_ignored_test_lists(test_name=suite_name)
 
-        self.add_directories([TestDirectory(self.test_root, "sts", [])])
+        self.add_directories([TestDirectory(self.test_root, "ets", [])])
 
     @property
     def default_work_dir_root(self) -> Path:
@@ -122,7 +122,7 @@ class RunnerETS(RunnerFileBased):
             name = EtsSuites.ESCHECKED.value
         elif 'ets_custom' in test_suites:
             name = EtsSuites.CUSTOM.value
-        elif 'sts_ts_subset' in test_suites:
+        elif 'ets_ts_subset' in test_suites:
             name = EtsSuites.TS_SUBSET.value
         elif 'ets_sdk' in test_suites:
             name = EtsSuites.SDK.value

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -107,7 +107,7 @@ private:
         return head_ != nullptr;
     }
 
-    /// alignment is necessary for arm32 to ensure the same field layout as in the STS class
+    /// alignment is necessary for arm32 to ensure the same field layout as in the ETS class
     alignas(alignof(EtsLong)) Node *head_;
     alignas(alignof(EtsLong)) std::atomic<Node *> tail_;
 

@@ -16,6 +16,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
 panda_ets_interop_js_nodevm_gtest(ets_interop_js__call_method_for_value_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_method_for_value/call_method_for_value.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_method_for_value/call_method_for_value.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/call_method_for_value/call_method_for_value.ets
     ETS_CONFIG ${ETS_CONFIG}
 )

@@ -1,6 +1,6 @@
-spec/nullables/nullable-lambda-default-param_0.sts
-spec/nullables/nullable-lambda-default-param_1.sts
-spec/nullables/nullable-lambda-default-param_3.sts
-spec/nullables/nullable-lambda-default-param_4.sts
-spec/nullables/nullable-lambda-default-param_5.sts
-spec/nullables/nullable-lambda-default-param_6.sts
+spec/nullables/nullable-lambda-default-param_0.ets
+spec/nullables/nullable-lambda-default-param_1.ets
+spec/nullables/nullable-lambda-default-param_3.ets
+spec/nullables/nullable-lambda-default-param_4.ets
+spec/nullables/nullable-lambda-default-param_5.ets
+spec/nullables/nullable-lambda-default-param_6.ets

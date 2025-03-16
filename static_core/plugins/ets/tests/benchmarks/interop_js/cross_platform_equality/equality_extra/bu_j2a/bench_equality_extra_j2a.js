@@ -68,17 +68,17 @@ function equalityExtraJ2a() {
     this.test = function() {
         //NOTE: issue(19194) enable below after fix compare arrays
         if (false) {
-            comparison(this.bench.stsArr, this.bench.stsArr, equal, 'array ');
-            comparison(this.bench.stsArr, this.bench.stsArrCopy, equal, 'array by link ');
+            comparison(this.bench.etsArr, this.bench.etsArr, equal, 'array ');
+            comparison(this.bench.etsArr, this.bench.etsArrCopy, equal, 'array by link ');
         }
 
-        comparison(this.bench.stsArr, this.bench.stsArrOther, noEqual, 'array different array ');
+        comparison(this.bench.etsArr, this.bench.etsArrOther, noEqual, 'array different array ');
 
-        comparison(this.bench.stsArrowFunction, this.bench.stsArrowFunction, equal, 'arrow function ');
+        comparison(this.bench.etsArrowFunction, this.bench.etsArrowFunction, equal, 'arrow function ');
 
-        comparison(this.bench.stsArrowFunction, this.bench.stsArrowFunctionCopy, equal, 'arrow function by link ');
+        comparison(this.bench.etsArrowFunction, this.bench.etsArrowFunctionCopy, equal, 'arrow function by link ');
 
-        comparison(this.bench.stsArrowFunction, this.bench.stsArrowFunctionOther, noEqual, 'arrow different arrow ');
+        comparison(this.bench.etsArrowFunction, this.bench.etsArrowFunctionOther, noEqual, 'arrow different arrow ');
 
         //NOTE: issue (19133) enable below after fix comparison functions
         if (false) {

@@ -13,6 +13,6 @@
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__getter_js_to_ets
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/getter.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_getter.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_getter.ets
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/getter.js
 )

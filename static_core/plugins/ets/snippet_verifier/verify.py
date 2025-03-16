@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -87,7 +87,7 @@ def write_snippet(rst_lines, snippet_name, snippet_meta, previous_snippet_name, 
 
     expect_cte = "cte" if snippet_meta["expect-cte"] else "sc"
     expect_subset = "ns" if sm["not-subset"] else ""
-    snippet_ets = os.fdopen(os.open("snippets/" + current_snippet_name + ".sts", os.O_WRONLY, 0o755), "w+")
+    snippet_ets = os.fdopen(os.open("snippets/" + current_snippet_name + ".ets", os.O_WRONLY, 0o755), "w+")
     write_code_meta(expect_cte, frontend_status, expect_subset, snippet_ets)
 
     if not snippet_meta["not-subset"] and not snippet_meta["expect-cte"]:

@@ -348,7 +348,7 @@ foreach(file, test_ts_files) {
 
 foreach(file, test_ets_files) {
   ets2abc_gen_abc("gen_${file}_abc") {
-    test_ets = "${test_js_path}${file}.sts"
+    test_ets = "${test_js_path}${file}.ets"
     test_abc = "$target_out_dir/${file}.abc"
 
     # Only targets in this file can depend on this.

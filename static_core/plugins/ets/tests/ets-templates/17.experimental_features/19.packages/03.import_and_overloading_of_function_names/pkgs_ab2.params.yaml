@@ -31,7 +31,7 @@ cases:
     - arg1: '[new A3(), new A3()], [new B3(), new B3()]'
       arg2: '[new A3(), new A3()], [new A3(), new A3()]'
       decl: |-
-          import { A3, B3 } from './pkg_a/pkg_3.sts'
+          import { A3, B3 } from './pkg_a/pkg_3.ets'
 
     # 4
     - arg1: '[1, "A4"], ["B4", 2]'
@@ -57,25 +57,25 @@ cases:
     - arg1: 'Size.XL, Color.Red'
       arg2: 'Color.Red, Color.Green'
       decl: |-
-          import { Color, Size } from './pkg_a/pkg_7.sts'
+          import { Color, Size } from './pkg_a/pkg_7.ets'
 
     # 8
     - arg1: 'new B8(), new A8()'
       arg2: 'new A8(), new B8()'
       decl: |-
-          import { A8, B8 } from './pkg_a/pkg_8.sts'
+          import { A8, B8 } from './pkg_a/pkg_8.ets'
 
     # 9
     - arg1: 'new A9()'
       arg2: 'new B9()'
       decl: |-
-          import { A9, B9 } from './pkg_a/pkg_9.sts'
+          import { A9, B9 } from './pkg_a/pkg_9.ets'
 
     # 10
     - arg1: 'new A10()'
       arg2: 'new B10()'
       decl: |-
-          import { A10, B10 } from './pkg_a/pkg_10.sts'
+          import { A10, B10 } from './pkg_a/pkg_10.ets'
 
     # 11
     - arg1: 'new Object(), true, false, true'
@@ -117,7 +117,7 @@ cases:
     - arg1: 'new B20(), new B20()'
       arg2: 'new A20(), new A20()'
       decl: |-
-          import { A20, B20 } from './pkg_a/pkg_20.sts'
+          import { A20, B20 } from './pkg_a/pkg_20.ets'
 
     # 21
     - arg1: '"", false, 1.5, ["", ""] as string[], [false] as boolean[], null'
@@ -134,4 +134,4 @@ cases:
     - arg1: '{ f1: 1, f2: 2 } as A23'
       arg2: '{ f1: 1 as long, f2: 2 as long } as B23'
       decl: |-
-          import { A23, B23 } from './pkg_a/pkg_23.sts'
+          import { A23, B23 } from './pkg_a/pkg_23.ets'
