@@ -684,11 +684,6 @@
 06.contexts_and_conversions/05.implicit_conversions/14.literal_type_conversions/decl_field/decl-field2_4.ets
 06.contexts_and_conversions/05.implicit_conversions/14.literal_type_conversions/decl_field/decl-field2_6.ets
 
-#15238 Cannot cast tuple to Object
-06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/cce_5.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/cce_5a.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/pos_2a.ets
-
 #18550 [ArkTS frontend] es2panda aborts on implicit number conversion
 06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_const/decl-const_6.ets
 # 15242 Ensure-Not-Nullish expression for nullish tuple not recognized
