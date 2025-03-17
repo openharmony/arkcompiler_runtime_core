@@ -27,21 +27,29 @@ ani_add_gtest(ani_test_function_call_long
 )
 
 ani_add_gtest(ani_test_function_call_ref
+ETS_NAMED_MODE
+    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_ref_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_ref_test.ets
 )
 
 ani_add_gtest(ani_test_function_call_boolean
+ETS_NAMED_MODE
+    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_boolean_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_boolean_test.ets
 )
 
 ani_add_gtest(ani_test_function_call_byte
+ETS_NAMED_MODE
+    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_byte_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_byte_test.ets
 )
 
 ani_add_gtest(ani_test_function_call_double
+ETS_NAMED_MODE
+    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_double_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_double_test.ets
 )

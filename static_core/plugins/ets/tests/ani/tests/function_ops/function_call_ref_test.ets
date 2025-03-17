@@ -26,3 +26,83 @@ function concat(v0: int, v1: int): String {
 // function checkConcat(): boolean {
 //     return ops.concat("abc", "def") == "abcdef";
 // }
+
+function moduleFunction(value1: int, value2: int): string {
+    if (value1 === value2) {
+        return "Equality";
+    } else {
+        return "Inequality";
+    }
+}
+
+function moduleFunction(value1: int, value2: int, value3: int): string {
+    if (value1 > value2 && value1 > value3) {
+        return "Greater";
+    } else {
+        return "Less";
+    }
+}
+
+namespace A {
+    function refFunctionA(value1: int, value2: int): string {
+        if (value1 === value2) {
+            return "Equality";
+        } else {
+            return "Inequality";
+        }
+    }
+
+    function refFunctionA(value1: int, value2: int, value3: int): string {
+        if (value1 > value2 && value1 > value3) {
+            return "Greater";
+        } else {
+            return "Less";
+        }
+    }
+
+    function nestedFunction(value1: int, value2: int): string {
+        let lambdaFunction: (p1: int, p2: int) => string =
+            (param1: int, param2: int): string => {
+                if (param1 === param2) {
+                    return "Equality";
+                } else {
+                    return "Inequality";
+                }
+        };
+        return lambdaFunction(value1, value2);
+    }
+    
+    export function recursiveFunction(value: int): string {
+        if (value <= 0) {
+            return "Less";
+        }
+        if (value === 1) {
+            return "Greater";
+        }
+        return recursiveFunction(value - 1);
+    }
+
+    function calculateSum(value1: int, value2: int, value3: double, value4: int): string {
+        if (value3 == 1.0) {
+            return "CharEquality";
+        }
+        if (value4 == 1) {
+            return "NumEquality";
+        }
+        if (value1 === value2) {
+            return "Equality";
+        } else {
+            return "Inequality";
+        }
+    }
+
+    namespace B {
+        function refFunctionB(value1: int, value2: int): string {
+            if (value1 > value2) {
+                return "Greater";
+            } else {
+                return "Less";
+            }
+        }
+    }
+}
