@@ -155,7 +155,7 @@ void panda::guard::Node::Build()
         this->sourceFile_ = function.source_file;
         this->obfSourceFile_ = function.source_file;
 
-        entryFunc->ForEachIns([&](const InstructionInfo &info) -> void { ForEachIns(info, TOP_LEVEL); });
+        entryFunc->EnumerateIns([&](const InstructionInfo &info) -> void { EnumerateIns(info, TOP_LEVEL); });
 
         this->functionTable_.emplace(entryFunc->idx_, entryFunc);
     }
@@ -170,7 +170,7 @@ panda::pandasm::Record &panda::guard::Node::GetRecord() const
     return this->program_->prog_->record_table.at(this->obfName_);
 }
 
-void panda::guard::Node::ForEachIns(const InstructionInfo &info, const Scope scope)
+void panda::guard::Node::EnumerateIns(const InstructionInfo &info, const Scope scope)
 {
     CreateFunction(info, scope);
     CreateProperty(info);
@@ -200,6 +200,7 @@ void panda::guard::Node::CreateFunction(const InstructionInfo &info, const Scope
     }
 
     auto function = std::make_shared<Function>(this->program_, idx);
+    function->node_ = this;
     function->scope_ = scope;
     function->defineInsList_.push_back(info);
     function->component_ = info.function_->component_;
@@ -208,7 +209,7 @@ void panda::guard::Node::CreateFunction(const InstructionInfo &info, const Scope
     function->export_ = this->moduleRecord_.IsExportVar(function->name_);
     function->Create();
 
-    function->ForEachIns([&](const InstructionInfo &insInfo) -> void { ForEachIns(insInfo, FUNCTION); });
+    function->EnumerateIns([&](const InstructionInfo &insInfo) -> void { EnumerateIns(insInfo, FUNCTION); });
 
     this->functionTable_.emplace(function->idx_, function);
 }
@@ -328,6 +329,7 @@ void panda::guard::Node::CreateClass(const InstructionInfo &info, const Scope sc
     }
 
     auto clazz = std::make_shared<Class>(this->program_, info.ins_->ids[0]);
+    clazz->node_ = this;
     clazz->moduleRecord_ = &this->moduleRecord_;
     clazz->literalArrayIdx_ = idx;
     clazz->defineInsList_.push_back(info);
@@ -340,7 +342,7 @@ void panda::guard::Node::CreateClass(const InstructionInfo &info, const Scope sc
     }
     clazz->Create();
 
-    clazz->ForEachMethodIns([&](const InstructionInfo &insInfo) -> void { ForEachIns(insInfo, FUNCTION); });
+    clazz->EnumerateMethodIns([&](const InstructionInfo &insInfo) -> void { EnumerateIns(insInfo, FUNCTION); });
 
     this->classTable_.emplace(clazz->literalArrayIdx_, clazz);
 }
@@ -366,7 +368,8 @@ void panda::guard::Node::CreateOuterMethod(const InstructionInfo &info)
         literalArrayIdx = defineInsInfo.ins_->ids[0];
     }
 
-    auto outerMethod = std::make_shared<OuterMethod>(this->program_, methodIdx);
+    const auto outerMethod = std::make_shared<OuterMethod>(this->program_, methodIdx);
+    outerMethod->node_ = this;
     outerMethod->defineInsList_.push_back(info);
     GetMethodNameInfo(nameInsInfo, outerMethod->nameInfo_);
     outerMethod->Init();
@@ -395,7 +398,7 @@ void panda::guard::Node::CreateOuterMethod(const InstructionInfo &info)
         PANDA_GUARD_ABORT_PRINT(TAG, ErrorCode::GENERIC_ERROR, "unexpect outer method for:" << literalArrayIdx);
     }
 
-    outerMethod->ForEachIns([&](const InstructionInfo &insInfo) -> void { ForEachIns(insInfo, FUNCTION); });
+    outerMethod->EnumerateIns([&](const InstructionInfo &insInfo) -> void { EnumerateIns(insInfo, FUNCTION); });
 }
 
 void panda::guard::Node::CreateObject(const InstructionInfo &info, const Scope scope)
@@ -412,12 +415,13 @@ void panda::guard::Node::CreateObject(const InstructionInfo &info, const Scope s
 
     auto object = std::make_shared<Object>(this->program_, idx, this->name_);
     LOG(INFO, PANDAGUARD) << TAG << "found record object:" << object->literalArrayIdx_;
+    object->node_ = this;
     object->defineInsList_.push_back(info);
     object->scope_ = scope;
     object->Create();
 
-    object->ForEachMethod([&](Function &function) -> void {
-        function.ForEachIns([&](const InstructionInfo &insInfo) -> void { ForEachIns(insInfo, FUNCTION); });
+    object->EnumerateMethods([&](Function &function) -> void {
+        function.EnumerateIns([&](const InstructionInfo &insInfo) -> void { EnumerateIns(insInfo, FUNCTION); });
     });
 
     this->objectTable_.emplace(object->literalArrayIdx_, object);
@@ -681,21 +685,21 @@ void panda::guard::Node::RefreshNeedUpdate()
         object->SetContentNeedUpdate(this->contentNeedUpdate_);
     }
 
-    this->needUpdate = this->fileNameNeedUpdate_ || this->contentNeedUpdate_;
+    this->needUpdate_ = this->fileNameNeedUpdate_ || this->contentNeedUpdate_;
 }
 
-void panda::guard::Node::ForEachFunction(const std::function<FunctionTraver> &callback)
+void panda::guard::Node::EnumerateFunctions(const std::function<FunctionTraver> &callback)
 {
     for (auto &[_, function] : this->functionTable_) {
         callback(*function);
     }
 
     for (auto &[_, clazz] : this->classTable_) {
-        clazz->ForEachFunction(callback);
+        clazz->EnumerateFunctions(callback);
     }
 
     for (auto &[_, object] : this->objectTable_) {
-        object->ForEachMethod(callback);
+        object->EnumerateMethods(callback);
     }
 }
 
@@ -723,8 +727,13 @@ void panda::guard::Node::Update()
         object->WriteNameCache(this->sourceName_);
     }
 
+    for (const auto &annotation : this->annotations_) {
+        annotation->Obfuscate();
+        annotation->WriteNameCache(this->sourceName_);
+    }
+
     if (GuardContext::GetInstance()->GetGuardOptions()->IsDecoratorObfEnabled()) {
-        for (auto &decorator : this->uiDecorator_) {
+        for (const auto &decorator : this->uiDecorator_) {
             decorator->Obfuscate();
             decorator->WriteNameCache(this->sourceName_);
         }

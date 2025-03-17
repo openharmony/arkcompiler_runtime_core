@@ -23,6 +23,7 @@
 #include "module_record.h"
 #include "object.h"
 #include "ui_decorator.h"
+#include "annotation.h"
 
 namespace panda::guard {
 
@@ -71,7 +72,7 @@ public:
      * 1. Functions
      * 2. For Each Function In Classes
      */
-    void ForEachFunction(const std::function<FunctionTraver> &callback);
+    void EnumerateFunctions(const std::function<FunctionTraver> &callback);
 
     /**
      * Update file name references in this node
@@ -95,7 +96,7 @@ protected:
     void Update() override;
 
 private:
-    void ForEachIns(const InstructionInfo &info, Scope scope);
+    void EnumerateIns(const InstructionInfo &info, Scope scope);
 
     /**
      * create function
@@ -207,6 +208,7 @@ public:
     std::unordered_map<std::string, std::shared_ptr<Class>> classTable_ {};        // key: class literalArray idx
     std::unordered_map<std::string, std::shared_ptr<Object>> objectTable_ {};      // key: object literalArray idx
     std::vector<std::shared_ptr<UiDecorator>> uiDecorator_ {};
+    std::vector<std::shared_ptr<Annotation>> annotations_ {};
     std::set<std::string> strings_ {};
     std::string pkgName_;
     bool fileNameNeedUpdate_ = true;

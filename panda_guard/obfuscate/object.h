@@ -62,7 +62,7 @@ public:
      * 遍历所有方法
      * @param callback 方法回调
      */
-    void ForEachMethod(const std::function<FunctionTraver> &callback);
+    void EnumerateMethods(const std::function<FunctionTraver> &callback);
 
     void ExtractNames(std::set<std::string> &strings) const override;
 
@@ -88,6 +88,7 @@ private:
     void UpdateLiteralArrayIdx();
 
 public:
+    std::optional<Node *> node_ = std::nullopt;
     bool needUpdateName_ = false;
     bool contentNeedUpdate_ = false;
     std::string literalArrayIdx_;

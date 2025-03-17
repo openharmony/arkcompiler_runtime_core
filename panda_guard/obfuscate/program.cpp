@@ -16,45 +16,79 @@
 #include "program.h"
 
 #include "utils/logger.h"
-
+#include "util/string_util.h"
+#include "util/assert_util.h"
 #include "configs/guard_context.h"
 #include "graph_analyzer.h"
+#include "annotation.h"
 
 namespace {
 constexpr std::string_view TAG = "[Program]";
-}
+constexpr std::string_view ANNOTATION_NODE_DELIMITER = ".";
+}  // namespace
 
 void panda::guard::Program::Create()
 {
     LOG(INFO, PANDAGUARD) << TAG << "===== program create start =====";
 
-    for (const auto &[name, record] : this->prog_->record_table) {
-        auto node = std::make_shared<Node>(this, name);
-        node->InitWithRecord(record);
-        if (node->type_ == NodeType::JSON_FILE) {
-            node->Create();
-            this->nodeTable_.emplace(name, node);
-            continue;
-        }
-
-        if (node->type_ == NodeType::SOURCE_FILE) {
-            if (GuardContext::GetInstance()->GetGuardOptions()->IsSkippedRemoteHar(node->pkgName_)) {
-                LOG(INFO, PANDAGUARD) << TAG << "skip record: " << record.name;
-                continue;
-            }
-
-            node->Create();
-            this->nodeTable_.emplace(name, node);
-        }
+    for (const auto &[_, record] : this->prog_->record_table) {
+        this->CreateNode(record);
     }
 
     LOG(INFO, PANDAGUARD) << TAG << "===== program create end =====";
 }
 
-void panda::guard::Program::ForEachFunction(const std::function<FunctionTraver> &callback)
+void panda::guard::Program::CreateNode(const pandasm::Record &record)
+{
+    auto node = std::make_shared<Node>(this, record.name);
+    node->InitWithRecord(record);
+
+    if (node->type_ == NodeType::JSON_FILE) {
+        node->Create();
+        this->nodeTable_.emplace(record.name, node);
+        return;
+    }
+
+    if (node->type_ == NodeType::SOURCE_FILE) {
+        if (GuardContext::GetInstance()->GetGuardOptions()->IsSkippedRemoteHar(node->pkgName_)) {
+            LOG(INFO, PANDAGUARD) << TAG << "skip record: " << record.name;
+            return;
+        }
+
+        node->Create();
+        this->nodeTable_.emplace(record.name, node);
+        return;
+    }
+
+    if (node->type_ == NodeType::ANNOTATION) {
+        this->CreateAnnotation(record);
+    }
+}
+
+void panda::guard::Program::CreateAnnotation(const pandasm::Record &record)
+{
+    if (Annotation::IsWhiteListAnnotation(record.name)) {
+        return;
+    }
+
+    auto [nodeName, annoName] = StringUtil::RSplitOnce(record.name, ANNOTATION_NODE_DELIMITER.data());
+    auto node = this->nodeTable_.find(nodeName);
+    PANDA_GUARD_ASSERT_PRINT(node == this->nodeTable_.end(), TAG, ErrorCode::GENERIC_ERROR,
+                             "parse annotation get bad nodeName:" << nodeName);
+    auto annotation = std::make_shared<Annotation>(this, annoName);
+    annotation->nodeName_ = nodeName;
+    annotation->recordName_ = record.name;
+    annotation->needUpdate_ = node->second->needUpdate_;
+    annotation->scope_ = TOP_LEVEL;
+    annotation->export_ = node->second->moduleRecord_.IsExportVar(annoName);
+    annotation->Create();
+    node->second->annotations_.emplace_back(annotation);
+}
+
+void panda::guard::Program::EnumerateFunctions(const std::function<FunctionTraver> &callback)
 {
     for (auto &[_, node] : this->nodeTable_) {
-        node->ForEachFunction(callback);
+        node->EnumerateFunctions(callback);
     }
 }
 
@@ -64,7 +98,7 @@ void panda::guard::Program::RemoveConsoleLog()
         return;
     }
 
-    this->ForEachFunction([](Function &function) { function.RemoveConsoleLog(); });
+    this->EnumerateFunctions([](Function &function) { function.RemoveConsoleLog(); });
 }
 
 void panda::guard::Program::Obfuscate()
@@ -84,7 +118,10 @@ void panda::guard::Program::Obfuscate()
 
 void panda::guard::Program::UpdateReference()
 {
-    this->ForEachFunction([](Function &function) -> void { function.UpdateReference(); });
+    this->EnumerateFunctions([](Function &function) -> void {
+        function.UpdateReference();
+        function.UpdateAnnotationReference();
+    });
     for (auto &[_, node] : this->nodeTable_) {
         node->UpdateFileNameReferences();
     }

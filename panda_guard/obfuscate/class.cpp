@@ -33,7 +33,7 @@ void panda::guard::Class::Build()
     LOG(INFO, PANDAGUARD) << TAG << "class build for " << this->constructor_.idx_ << " start";
 
     LOG(INFO, PANDAGUARD) << TAG << "isComponent:" << (this->component_ ? "true" : "false");
-
+    constructor_.node_ = this->node_;
     constructor_.defineInsList_ = this->defineInsList_;
     constructor_.scope_ = this->scope_;
     constructor_.component_ = this->component_;
@@ -56,12 +56,12 @@ void panda::guard::Class::Build()
     LOG(INFO, PANDAGUARD) << TAG << "class build for " << this->constructor_.idx_ << " end";
 }
 
-void panda::guard::Class::ForEachMethodIns(const std::function<InsTraver> &callback)
+void panda::guard::Class::EnumerateMethodIns(const std::function<InsTraver> &callback)
 {
-    this->ForEachFunction([&callback](Function &func) { func.ForEachIns(callback); });
+    this->EnumerateFunctions([&callback](Function &func) { func.EnumerateIns(callback); });
 }
 
-void panda::guard::Class::ForEachFunction(const std::function<FunctionTraver> &callback)
+void panda::guard::Class::EnumerateFunctions(const std::function<FunctionTraver> &callback)
 {
     callback(this->constructor_);
     for (auto &method : this->methods_) {
@@ -130,6 +130,7 @@ void panda::guard::Class::CreateMethod(const pandasm::LiteralArray &literalArray
     LOG(INFO, PANDAGUARD) << TAG << "methodIdx:" << methodIdx;
 
     const auto method = std::make_shared<Method>(this->program_, methodIdx);
+    method->node_ = this->node_;
     method->literalArrayIdx_ = this->literalArrayIdx_;
     method->className_ = this->name_;
     method->idxIndex_ = methodIdxLiteralIndex;
@@ -196,7 +197,7 @@ void panda::guard::Class::Update()
 
 void panda::guard::Class::WriteNameCache(const std::string &filePath)
 {
-    if (!this->obfuscated) {
+    if (!this->obfuscated_) {
         return;
     }
     this->WriteFileCache(filePath);

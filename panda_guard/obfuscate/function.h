@@ -67,12 +67,17 @@ public:
      * Traverse all instructions of the function
      * @param callback instruction callback
      */
-    void ForEachIns(const std::function<InsTraver> &callback);
+    void EnumerateIns(const std::function<InsTraver> &callback);
 
     /**
      * Update all reference instruction
      */
     void UpdateReference();
+
+    /**
+     * update function annotation reference
+     */
+    void UpdateAnnotationReference();
 
     /**
      * To delete the ConsoleLog log, call it after updating other instruction (deleting the log will change the relative
@@ -134,6 +139,7 @@ private:
     void FreeGraph();
 
 public:
+    std::optional<Node *> node_ = std::nullopt;
     std::string idx_;
     std::string obfIdx_;
     std::string recordName_;
@@ -157,7 +163,7 @@ public:
     bool component_ = false;
 
 private:
-    bool anonymous = false;  // is anonymous function
+    bool anonymous_ = false;  // is anonymous function
     compiler::Graph *graph_ = nullptr;
     std::unique_ptr<ArenaAllocator> allocator_ = nullptr;
     std::unique_ptr<ArenaAllocator> localAllocator_ = nullptr;

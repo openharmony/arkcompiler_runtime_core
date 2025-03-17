@@ -458,7 +458,7 @@ void panda::guard::UiDecorator::BuildReusableV2Decorator()
     }
 
     auto func = Function(this->program_, defineFuncInst.ins_->ids[0]);
-    func.ForEachIns([&](const InstructionInfo &inst) -> void { ForEachIns(inst); });
+    func.EnumerateIns([&](const InstructionInfo &inst) -> void { EnumerateIns(inst); });
 }
 
 bool panda::guard::UiDecorator::IsReusableV2UiDecoratorType() const
@@ -482,7 +482,7 @@ std::shared_ptr<panda::guard::Property> panda::guard::UiDecorator::GetObjectOute
     return nullptr;
 }
 
-void panda::guard::UiDecorator::ForEachIns(const panda::guard::InstructionInfo &inst)
+void panda::guard::UiDecorator::EnumerateIns(const panda::guard::InstructionInfo &inst)
 {
     if (inst.notEqualToOpcode(pandasm::Opcode::LDA_STR)) {
         return;

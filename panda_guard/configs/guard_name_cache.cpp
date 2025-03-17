@@ -106,7 +106,8 @@ void panda::guard::NameCache::Load(const std::string &applyNameCachePath)
         LOG(WARNING, PANDAGUARD) << TAG << "get apply name cache file content failed";
         return;
     }
-
+    LOG(INFO, PANDAGUARD) << TAG << "load apply name cache:" << applyNameCachePath;
+    LOG(INFO, PANDAGUARD) << TAG << "apply name cache content:" << content;
     ParseAppliedNameCache(content);
     ParseHistoryNameCacheToUsedNames();
 }
