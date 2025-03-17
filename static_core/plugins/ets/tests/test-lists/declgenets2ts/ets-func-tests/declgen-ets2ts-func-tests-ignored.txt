@@ -71,6 +71,19 @@ spec/10.Interfaces/method_overload6.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_all_2.ets
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_03.ets
 
+#23891
+spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0000.ets
+#23892
+spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0001.ets
+#23893
+spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0002.ets
+#23894
+spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0003.ets
+#23895
+spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0004.ets
+#23896
+spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0005.ets
+
 # FailKind.TSC_FAIL - 584 tests:
 algorithms/SampleAppTest.ets
 escompat/ArrayProxyTest.ets
