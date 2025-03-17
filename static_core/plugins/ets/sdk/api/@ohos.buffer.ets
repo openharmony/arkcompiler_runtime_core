@@ -37,6 +37,7 @@ export namespace buffer {
         | 'hex';
 
     type TypedArray = Int8Array;
+    type TypedArrayOrigin = Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array
 
     /**
      * Allocates a new Buffer using an array of bytes in the range 0 – 255. 
@@ -288,4 +289,227 @@ export namespace buffer {
             return true;
         }
     }
+
+    export interface BlobOptions {
+        /** The Blob content-type. The intent is for type to convey the MIME media type of the data, however no validation of the type format is performed. */
+        type: string
+        /** One of either 'transparent' or 'native'. When set to 'native', line endings in string source parts will be converted to the platform native line-ending as specified by require('node:os').EOL.*/
+        endings: 'transparent'|'native'
+    };
+
+    type SrcType = string[] | ArrayBuffer[] | TypedArray[] | DataView[] | Blob[]
+    type SrcItemType = string | ArrayBuffer | TypedArray | DataView | Blob
+    type ArrSrcType = Array<string> | Array<ArrayBuffer> | Array<TypedArray> | Array<DataView> | Array<Blob>
+
+    function typeKey(sources: SrcType): string {
+        if (sources instanceof string[]) {
+            return "string"
+        } else if (sources instanceof ArrayBuffer[]) {
+            return "ArrayBuffer"
+        } else if (sources instanceof TypedArray[]) {
+            return "TypedArray"
+        } else if (sources instanceof DataView[]) {
+            return "DataView"
+        } else if (sources instanceof Blob[]) {
+            return "Blob"
+        }
+        return ""
+    }
+
+    function toString(src: SrcItemType): string {
+        if (src instanceof string) {
+            return src
+        } else if (src instanceof ArrayBuffer) {
+            return buffer.from(src as ArrayBuffer).toString()
+        } else if (src instanceof TypedArray) {
+            return (src as TypedArray).join('')
+        } else if (src instanceof DataView) {
+            return buffer.from((src as DataView).buffer as ArrayBuffer).toString()
+        }
+        return ""
+    }
+
+    /**
+    * A Blob encapsulates immutable, raw data that can be safely shared across multiple worker threads.
+    */
+    export class Blob {
+        /**
+         * Creates a new Blob object containing a concatenation of the given sources.
+         * <ArrayBuffer>, <TypedArray>, <DataView>, and <Buffer> sources are copied into the 'Blob' and can therefore be safely modified after the 'Blob' is created.
+         * String sources are encoded as UTF-8 byte sequences and copied into the Blob. Unmatched surrogate pairs within each string part will be replaced by Unicode U+FFFD replacement characters.
+         * @param {string[] | ArrayBuffer[] | TypedArray[] | DataView[] | Blob[]} [sources] - An array of string, <ArrayBuffer>, <TypedArray>, <DataView>, or <Blob> objects, or any mix of such objects, that will be stored within the Blob.
+         * @param {BlobOptions} [options] - options
+         */
+        constructor(sources: string[] | ArrayBuffer[] | TypedArray[] | DataView[] | Blob[], options?: BlobOptions) {
+            this.typeKey = typeKey(sources)
+            this.createArray(sources)
+            if (options != undefined) {
+                this.type = options!.type ? options!.type! : ''
+            } else {
+                this.type = ''
+            }
+            this.calcSize()
+        }
+
+        private constructor(sources: ArrSrcType, typeKey: string, type?: string) {
+            this.arr = sources
+            this.typeKey = typeKey
+            this.calcSize()
+            if (type != undefined) {
+                this.type = type
+            } else {
+                this.type = ''
+            }
+        }
+
+        private constructor(blob: Blob) {
+            this.arr = blob.arr
+            this.size = blob.size
+            this.type = blob.type
+            this.typeKey = blob.typeKey
+        }
+
+        private calcSize(): number {
+            this.size = 0
+            switch (this.typeKey) {
+                case "string": {
+                    for (const item of this.arr as Array<string>) {
+                        this.size += item.length
+                    }
+                } break
+                case "ArrayBuffer": {
+                    for (const item of this.arr as Array<ArrayBuffer>) {
+                        this.size += item.getByteLength()
+                    }
+                } break
+                case "TypedArray": {
+                    for (const item of this.arr as Array<TypedArray>) {
+                        this.size += item.byteLength
+                    }
+                } break
+                case "DataView": {
+                    for (const item of this.arr as Array<DataView>) {
+                        this.size += item.byteLength
+                    }
+                } break
+                case "Blob": {
+                    for (const item of this.arr as Array<Blob>) {
+                        this.size += item.calcSize()
+                    }
+                } break
+            }
+            return this.size
+        }
+
+        private createArray(sources: SrcType) {
+            switch (this.typeKey) {
+                case "string": {
+                    this.arr = Array.from(sources as string[])
+                } break
+                case "ArrayBuffer": {
+                    this.arr = Array.from(sources as ArrayBuffer[])
+                } break
+                case "TypedArray": {
+                    this.arr = Array.from(sources as TypedArray[])
+                } break
+                case "DataView": {
+                    this.arr = Array.from(sources as DataView[])
+                } break
+                case "Blob": {
+                    this.arr = Array.from(sources as Blob[])
+                } break
+            }
+        }
+
+        /**
+         * Creates and returns a new Blob containing a subset of this Blob objects data. The original Blob is not altered.
+         * 
+         * @param {number} [start=0] - The starting index.
+         * @param {number} [end=buffer.length] -  The ending index.
+         * @param {string} [type] - The content-type for the new Blob
+         * @returns {Blob}
+         */
+        slice(start?: number, end?: number, type?: string): Blob {
+            switch (this.typeKey) {
+                case "string": {
+                    let arr: Array<string> = (this.arr as Array<string>).slice(start, end)
+                    return new Blob(arr, this.typeKey, type)
+                }
+                case "ArrayBuffer": {
+                    let arr: Array<ArrayBuffer> = (this.arr as Array<ArrayBuffer>).slice(start, end)
+                    return new Blob(arr, this.typeKey, type)
+                }
+                case "TypedArray": {
+                    let arr: Array<TypedArray> = (this.arr as Array<TypedArray>).slice(start, end)
+                    return new Blob(arr, this.typeKey, type)
+                }
+                case "DataView": {
+                    let arr: Array<DataView> = (this.arr as Array<DataView>).slice(start, end)
+                    return new Blob(arr, this.typeKey, type)
+                }
+                case "Blob": {
+                    let arr: Array<Blob> = (this.arr as Array<Blob>).slice(start, end)
+                    return new Blob(arr, this.typeKey, type)
+                }
+            }
+            return new Blob(this)
+        }
+
+        /**
+         * Returns a promise that fulfills with the contents of the Blob decoded as a UTF-8 string.
+         * 
+         * @returns {Promise}
+         */
+        text(): Promise<string> {
+            return Promise.resolve(this.getString())
+        }
+
+        /**
+         * Returns a promise that fulfills with an <ArrayBuffer> containing a copy of the Blob data.
+         * 
+         * @returns {Promise}
+         */
+        arrayBuffer(): Promise<ArrayBuffer> {
+            return Promise.resolve(this.toArrayBuffer())
+        }
+
+        size: number 
+
+        /**
+         * The content-type of the Blob.
+         */
+        type: string
+
+        private arr: ArrSrcType
+        private typeKey: string = 'string'
+
+        private toArrayBuffer(): ArrayBuffer {
+            const str = this.getString()
+            return ArrayBuffer.from(str, "utf-8", ArrayBuffer.bytesLength(str, "utf-8"))
+        }
+
+        private getString(): string {
+            let str = ''
+            let b = new StringBuilder()
+            switch (this.typeKey) {
+                case "string": {
+                    (this.arr as Array<string>).forEach((value: string) => { b.append(toString(value as SrcItemType)) })
+                } break
+                case "ArrayBuffer": {
+                    (this.arr as Array<ArrayBuffer>).forEach((value: ArrayBuffer) => { b.append(toString(value)) })
+                } break
+                case "TypedArray": {
+                    (this.arr as Array<TypedArray>).forEach((value: TypedArray) => { b.append(toString(value)) })
+                } break
+                case "DataView": {
+                    (this.arr as Array<DataView>).forEach((value: DataView) => { b.append(toString(value)) })
+                } break
+                case "Blob": {
+                    (this.arr as Array<Blob>).forEach((value: Blob) => { b.append(value.getString()) })
+                } break
+            }
+            return b.toString()
+        }
+    }
 }
+
