@@ -21,6 +21,7 @@
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "types/ets_object.h"
+#include "types/ets_typeapi_type.h"
 
 namespace ark::ets::interop::js {
 
@@ -29,6 +30,7 @@ JSValue *JSRuntimeNewJSValueDouble(double v);
 JSValue *JSRuntimeNewJSValueBoolean(uint8_t v);
 JSValue *JSRuntimeNewJSValueString(EtsString *v);
 JSValue *JSRuntimeNewJSValueObject(EtsObject *v);
+JSValue *JSRuntimeNewJSValueBigInt(EtsBigInt *v);
 double JSRuntimeGetValueDouble(JSValue *etsJsValue);
 uint8_t JSRuntimeGetValueBoolean(JSValue *etsJsValue);
 EtsString *JSRuntimeGetValueString(JSValue *etsJsValue);
@@ -37,12 +39,24 @@ JSValue *JSRuntimeGetUndefined();
 JSValue *JSRuntimeGetNull();
 JSValue *JSRuntimeGetGlobal();
 JSValue *JSRuntimeCreateObject();
+JSValue *JSRuntimeCreateArray();
 uint8_t JSRuntimeInstanceOf(JSValue *object, JSValue *ctor);
 uint8_t JSRuntimeInstanceOfDynamic(JSValue *object, JSValue *ctor);
 uint8_t JSRuntimeInstanceOfStatic(JSValue *etsJsValue, EtsClass *etsCls);
 std::pair<std::string_view, std::string_view> ResolveModuleName(std::string_view module);
 JSValue *JSRuntimeLoadModule(EtsString *module);
 uint8_t JSRuntimeStrictEqual([[maybe_unused]] JSValue *lhs, [[maybe_unused]] JSValue *rhs);
+uint8_t JSRuntimeHasProperty(JSValue *object, EtsString *name);
+JSValue *JSRuntimeGetProperty(JSValue *object, JSValue *property);
+uint8_t JSRuntimeHasPropertyJSValue(JSValue *object, JSValue *property);
+uint8_t JSRuntimeHasElement(JSValue *object, int index);
+uint8_t JSRuntimeHasOwnProperty(JSValue *object, EtsString *name);
+uint8_t JSRuntimeHasOwnPropertyJSValue(JSValue *object, JSValue *property);
+EtsString *JSRuntimeTypeOf(JSValue *object);
+uint8_t JSRuntimeIsPromise(JSValue *object);
+uint8_t JSRuntimeInstanceOfStaticType(JSValue *object, EtsTypeAPIType *paramType);
+JSValue *JSRuntimeInvoke(JSValue *recv, JSValue *func, EtsArray *args);
+JSValue *JSRuntimeInstantiate(JSValue *callable, EtsArray *args);
 EtsString *JSValueToString(JSValue *object);
 napi_value ToLocal(void *value);
 void *CompilerGetJSNamedProperty(void *val, char *propStr);
@@ -120,6 +134,22 @@ typename T::cpptype JSValueIndexedGetter(JSValue *etsJsValue, int32_t index)
     }
 
     return res.value();
+}
+
+template <typename T>
+void JSValueIndexedSetter(JSValue *etsJsValue, int32_t index, typename T::cpptype value)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
+    auto env = ctx->GetJSEnv();
+    NapiScope jsHandleScope(env);
+
+    auto rec = napi_set_element(env, JSConvertJSValue::WrapWithNullCheck(env, etsJsValue), index,
+                                JSConvertJSValue::WrapWithNullCheck(env, value));
+    if (rec != napi_ok) {
+        ctx->ForwardJSException(coro);
+    }
 }
 
 template <typename T>
