@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,132 +16,75 @@
 package std.containers;
 
 /**
- * BlockingQueue implementation
+ * BlockingQueue interface
  */
-export final class BlockingQueue<T> {
+export interface BlockingQueue<T> {
+    /**
+     * Inserts element at the end. If the queue is full, ​blocking​.
+     *
+     * @param element the element pushed to the BlockingQueue
+     *
+     * @returns void
+     */
+    push(element: T): void;
 
-    constructor() {
-        // Array, where all BlockingQueue elements will be located
-        this.array = new Array<T>(BlockingQueue.initSize);
-        this.mutex = ConcurrencyHelpers.mutexCreate();
-        this.condVar = ConcurrencyHelpers.condVarCreate();
-    }
+    /**
+     * pop() is remove operation and returns T.
+     * If the BlockingQueue is empty, ​blocking​.
+     *
+     * @returns T The first element.
+     */
+    pop(): T;
 
-    // Inserts element at the end.
-    push(el: T) {
-        ConcurrencyHelpers.mutexLock(this.mutex);
-        if (this.curTailIdx == this.array.length) {
-            this.stretch();
-        }
-        this.array[this.curTailIdx++] = el;
-        ConcurrencyHelpers.condVarNotifyOne(this.condVar, this.mutex);
-        ConcurrencyHelpers.mutexUnlock(this.mutex);
-    }
+    /**
+     * The insert operation​. Return true upon success and false if no space is currently available,​ no blocking.
+     *
+     * @param element the element inserted to the BlockingQueue
+     *
+     * @returns T True upon success and false if no space is currently available.
+     */
+    add(element: T): boolean;
 
-    // Removes and returns the first element in a BlockingQueue.
-    // If the BlockingQueue is empty then wait method is called.
-    pop(): T {
-        ConcurrencyHelpers.mutexLock(this.mutex);
-        this.waitUntilQueueIsEmpty();
-        try {
-            let curQueueSize: int = this.curTailIdx - this.curHeadIdx;
+    /**
+     * The poll operation. Pop one element and return it if the queue is not empty.
+     * Return null when the queue is empty. No blocking.
+     *
+     * @returns Return the deleted element or null.
+     */
+    poll(): T | null;
 
-            // If number of elements in a BlockingQueue is too small
-            // compared to the BlockingQueue capacity, it is better to reduce capacity.
-            if (curQueueSize * BlockingQueue.sizeReductionCheckCoef < this.array.length &&
-                this.array.length >= BlockingQueue.minSizeToReduce) {
-                this.shrink();
-            }
+    /**
+     * Returns the first element in a BlockingQueue.
+     *
+     * @returns T | null The first element or null.
+     */
+    getFirst(): T | null;
 
-            // If there is a lot of free space at the beginning of an array in a BlockingQueue,
-            // it is better to copy elements to the beginning - it saves space for new objects.
-            if (this.curHeadIdx * 2 > this.array.length) {
-                assertLT(curQueueSize, this.array.length);
-                for (let i: int = 0; i < curQueueSize; ++i) {
-                    this.array[i] = this.array[this.curHeadIdx++];
-                }
-                this.curHeadIdx = 0;
-                this.curTailIdx = curQueueSize;
-            }
-            return this.array[this.curHeadIdx++];
-        } finally {
-            ConcurrencyHelpers.mutexUnlock(this.mutex);
-        }
-    }
+    /**
+     * Checks if the BlockingQueue is empty.
+     *
+     * @returns boolean True if a BlockingQueue has no elements, otherwise false.
+     */
+    isEmpty(): boolean;
 
-    // Returns the first element in a BlockingQueue.
-    // If the BlockingQueue is empty then wait method is called.
-    front(): T {
-        ConcurrencyHelpers.mutexLock(this.mutex);
-        this.waitUntilQueueIsEmpty();
-        try {
-            return this.array[this.curHeadIdx];
-        } finally {
-            ConcurrencyHelpers.mutexUnlock(this.mutex);
-        }
-    }
+    /**
+     * Returns the size of a BlockingQueue.
+     *
+     * @returns int The size of the BlockingQueue.
+     */
+    get size(): int;
 
-    // Returns the last element in a BlockingQueue.
-    // If the BlockingQueue is empty then wait method is called.
-    back(): T {
-        ConcurrencyHelpers.mutexLock(this.mutex);
-        this.waitUntilQueueIsEmpty();
-        try {
-            return this.array[this.curTailIdx - 1];
-        } finally {
-            ConcurrencyHelpers.mutexUnlock(this.mutex);
-        }
-    }
+    /**
+     * Returns the capacity of a BlockingQueue.
+     *
+     * @returns int The capacity of the BlockingQueue.
+     */
+    get capacity(): int;
 
-    // Returns size of a BlockingQueue.
-    size(): int {
-        ConcurrencyHelpers.mutexLock(this.mutex);
-        try {
-            return this.curTailIdx - this.curHeadIdx;
-        } finally {
-            ConcurrencyHelpers.mutexUnlock(this.mutex);
-        }
-    }
-
-    // Returns true if a BlockingQueue has no elements.
-    empty(): boolean {
-        return this.size() == 0;
-    }
-
-    private shrink() {
-        this.resizeQueue((this.array.length / 2) as int);
-    }
-
-    private stretch() {
-        this.resizeQueue((this.array.length * 2) as int);
-    }
-
-    private resizeQueue(size: int) {
-        let curQueueSize: int = this.curTailIdx - this.curHeadIdx;
-        let newArr = new Array<T>(size);
-        for (let i: int = 0; i < curQueueSize; ++i) {
-            newArr[i] = this.array[this.curHeadIdx++];
-        }
-        this.array = newArr;
-        this.curHeadIdx = 0;
-        this.curTailIdx = curQueueSize;
-    }
-
-    private waitUntilQueueIsEmpty() {
-        while (this.curHeadIdx == this.curTailIdx) {
-            // Currently, the queue is empty. Need to await.
-            // This method is used for waiting until the BlockingQueue
-            // has at least one element.
-            ConcurrencyHelpers.condVarWait(this.condVar, this.mutex);
-        }
-    }
-
-    private array: Array<T>;
-    private curHeadIdx: int = 0;                    // Index of the first element in a BlockingQueue
-    private curTailIdx: int = 0;                    // Index of the last element in a BlockingQueue
-    private mutex: Object;                          // push/pop Mutex
-    private condVar: Object;                        // push/pop CondVar
-    private static initSize: int = 8;               // Initial size of a BlockingQueue
-    private static minSizeToReduce: int = 16;       // Minimal size for capacity decrease (see pop())
-    private static sizeReductionCheckCoef: int = 3; // Coeff used for BlockingQueue fullness estimation
+    /**
+     * Returns the number of additional elements that this queue can ideally accept without blocking.
+     *
+     * @returns int The capacity of the BlockingQueue.
+     */
+    remainingCapacity(): int;
 }

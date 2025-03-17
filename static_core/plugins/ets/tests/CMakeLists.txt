@@ -436,7 +436,7 @@ function(compile_stdlib TARGET_ARCH)
         DEPENDS ark_aot etsstdlib
     )
     add_dependencies(ets-compile-stdlib ets-compile-stdlib-aot-${TARGET_ARCH} ets-compile-stdlib-jit-${TARGET_ARCH} ets-compile-stdlib-aot-${TARGET_ARCH}-no-inline ets-compile-stdlib-aot-${TARGET_ARCH}-stw)
-    if (PANDA_LLVM_AOT)
+    if(PANDA_LLVM_AOT AND NOT PANDA_THREAD_SAFETY AND NOT PANDA_ENABLE_THREAD_SANITIZER AND NOT PANDA_ENABLE_ADDRESS_SANITIZER)
         add_custom_target(ets-compile-stdlib-llvm-${TARGET_ARCH}
             COMMENT "Running ark_aot compilation for etsstdlib for ${TARGET_ARCH} with llvm"
             COMMAND ${ARK_AOT_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=llvm -compiler-options="${COMPILER_OPTIONS_LLVM}" -paoc-output=etsstdlib_llvmaot_${TARGET_ARCH}.an

@@ -19,7 +19,7 @@
 const NUMBER_OF_FREE_REGIONS = 2;
 
 class TestHumongousStress {
-    private static GARBAGE = new BlockingQueue<Object>();
+    private static GARBAGE = new LinkedBlockingQueue<Object>();
 
     regionSize: int;
     humongousSize: int;
@@ -40,7 +40,7 @@ class TestHumongousStress {
             }
         }
         catch(e: OutOfMemoryError) {
-            TestHumongousStress.GARBAGE = new BlockingQueue<Object>();
+            TestHumongousStress.GARBAGE = new LinkedBlockingQueue<Object>();
             try {
                 GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
             }
@@ -101,7 +101,7 @@ class TestHumongousStress {
     }
 
     public clear(): void {
-        TestHumongousStress.GARBAGE = new BlockingQueue<Object>();
+        TestHumongousStress.GARBAGE = new LinkedBlockingQueue<Object>();
         try {
             GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
         }

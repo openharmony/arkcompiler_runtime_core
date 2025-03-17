@@ -17,9 +17,9 @@ const elementsNum: int = 100;
 let testArrayInt: Array<int> = new Array<int>(elementsNum);
 let testArrayObj: Array<Object> = new Array<Object>(elementsNum);
 let testArrayStr: Array<String> = new Array<String>(elementsNum);
-let queueInt: BlockingQueue<int> = new BlockingQueue<int>();
-let queueObj: BlockingQueue<Object> = new BlockingQueue<Object>();
-let queueStr: BlockingQueue<String> = new BlockingQueue<String>();
+let queueInt: BlockingQueue<int> = new ArrayBlockingQueue<int>(100);
+let queueObj: BlockingQueue<Object> = new LinkedBlockingQueue<Object>(100);
+let queueStr: BlockingQueue<String> = new LinkedBlockingQueue<String>(100);
 
 function wait(): int {
     let i = 1
@@ -65,7 +65,10 @@ function pusherStr() {
 function popperInt(): Array<int> {
     let arr = new Array<int>(elementsNum);
     for (let i = 0; i < elementsNum; i++) {
-        let el = queueInt.front();
+        let el = queueInt.getFirst();
+        if (el === null) {
+            continue;
+        }
         arr[i] = queueInt.pop();
         assertEQ(el, arr[i]);
     }
@@ -75,7 +78,10 @@ function popperInt(): Array<int> {
 function popperObj(): Array<Object> {
     let arr = new Array<Object>(elementsNum);
     for (let i = 0; i < elementsNum; i++) {
-        let el = queueObj.front();
+        let el = queueObj.getFirst();
+        if (el === null) {
+            continue;
+        }
         arr[i] = queueObj.pop();
         assertEQ(el, arr[i]);
     }
@@ -85,7 +91,10 @@ function popperObj(): Array<Object> {
 function popperStr(): Array<String> {
     let arr = new Array<String>(elementsNum);
     for (let i = 0; i < elementsNum; i++) {
-        let el = queueStr.front();
+        let el = queueStr.getFirst();
+        if (el === null) {
+            continue;
+        }
         arr[i] = queueStr.pop();
         assertEQ(el, arr[i]);
     }
@@ -93,30 +102,33 @@ function popperStr(): Array<String> {
 }
 
 function concurrentPushPopTestInt() {
-    launch pusherInt();
+    let p1 = launch pusherInt();
+    await p1;
     let arrayToCheck = popperInt();
     for (let i = 0; i < elementsNum; i++) {
         assertEQ(testArrayInt[i], arrayToCheck[i]);
     }
-    assertEQ(queueInt.size(), 0);
+    assertEQ(queueInt.size, 0);
 }
 
 function concurrentPushPopTestObj() {
-    launch pusherObj();
+    let p1 = launch pusherObj();
+    await p1;
     let arrayToCheck = popperObj();
     for (let i = 0; i < elementsNum; i++) {
         assertEQ(testArrayObj[i], arrayToCheck[i]);
     }
-    assertEQ(queueObj.size(), 0);
+    assertEQ(queueObj.size, 0);
 }
 
 function concurrentPushPopTestStr() {
-    launch pusherStr();
+    let p1 = launch pusherStr();
+    await p1;
     let arrayToCheck = popperStr();
     for (let i = 0; i < elementsNum; i++) {
         assertEQ(testArrayStr[i], arrayToCheck[i]);
     }
-    assertEQ(queueStr.size(), 0);
+    assertEQ(queueStr.size, 0);
 }
 
 function simpleQueuePushPopFrontBackSizeEmptyTest() {
@@ -125,16 +137,16 @@ function simpleQueuePushPopFrontBackSizeEmptyTest() {
         let el = (random() * 10000) as int;
         arr[i] = el;
         queueInt.push(el);
-        assertEQ(el, queueInt.back());
+        assertEQ(el, (queueInt as ArrayBlockingQueue<int>).getEnd());
     }
     let ind: int = 0;
-    while (!queueInt.empty()) {
-        let el = queueInt.front();
+    while (!queueInt.isEmpty()) {
+        let el = queueInt.getFirst();
         assertEQ(el, queueInt.pop());
         assertEQ(el, arr[ind++]);
     }
     assertEQ(ind, arr.length);
-    assertEQ(queueInt.size(), 0);
+    assertEQ(queueInt.size, 0);
 }
 
 function main() {

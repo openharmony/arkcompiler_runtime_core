@@ -138,11 +138,11 @@ class InteropWorker implements InternalWorker {
 }
 
 class StaticWorker implements InternalWorker {
-    private tasks: BlockingQueue<Task>;
+    private tasks: LinkedBlockingQueue<Task>;
     private static closingTask: Task = (): void => {};
 
     constructor() {
-        this.tasks = new BlockingQueue<Task>();
+        this.tasks = new LinkedBlockingQueue<Task>();
         ExclusiveLauncher.elaunch(() => this.body(), false);
     }
 
