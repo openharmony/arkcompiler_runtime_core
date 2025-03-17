@@ -194,7 +194,7 @@ function ohos_arm32() {
 function ts_linter() {
     echo "> Building tslinter..."
     local linter_root="$ARK_ROOT/tools/es2panda/linter"
-    (cd "$linter_root" && npm install)
+    (cd "$linter_root" && npm install && npm run install-ohos-typescript && npm run build)
     local tgz="$(ls "$linter_root"/bundle/panda-tslinter*tgz)"
     mkdir -p "$PANDA_SDK_PATH"/tslinter
     tar -xf "$tgz" -C "$PANDA_SDK_PATH"/tslinter
