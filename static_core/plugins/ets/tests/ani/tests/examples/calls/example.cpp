@@ -29,28 +29,27 @@ public:
 // NOLINTBEGIN(readability-magic-numbers)
 TEST_F(ExampleTest, EtsFunctionCall)
 {
-    ets_double p1 = 5.0;
-    ets_double p2 = 6.0;
+    ani_double p1 = 5.0;
+    ani_double p2 = 6.0;
 
-    auto res = CallEtsFunction<ets_double>(MODULE_NAME, "exampleFunction", p1, p2);
+    auto res = CallEtsFunction<ani_double>(MODULE_NAME, "exampleFunction", p1, p2);
     ASSERT_EQ(res, p1 + p2);
 }
 
-static ets_long NativeFuncExample([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass, ets_long param1,
-                                  ets_long param2)
+ani_long NativeFuncExample([[maybe_unused]] ani_env *env, ani_long param1, ani_long param2)
 {
     return param1 * param2;
 }
 
 TEST_F(ExampleTest, CallNativeFunction)
 {
-    NativeFunction fn("nativeExampleFunction", NativeFuncExample);
+    NativeFunction fn(MODULE_NAME, "nativeExampleFunction", NativeFuncExample);
 
-    ets_long p1 = 12;
-    ets_long p2 = -123;
+    ani_long p1 = 12;
+    ani_long p2 = -123;
 
     // Generic call
-    auto res = CallEtsNativeMethod<ets_long>(MODULE_NAME, fn, p1, p2);
+    auto res = CallEtsNativeMethod<ani_long>(fn, p1, p2);
     ASSERT_EQ(res, p1 * p2);
 }
 

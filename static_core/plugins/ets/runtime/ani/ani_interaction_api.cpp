@@ -242,9 +242,8 @@ static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method,
     panda_file::ShortyIterator it(method->GetPandaMethod()->GetShorty());
     panda_file::ShortyIterator end;
     ++it;  // skip the return value
-    while (it != end) {
+    for (; it != end; ++it) {
         panda_file::Type type = *it;
-        ++it;
         // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
         switch (type.GetId()) {
             case TypeId::U1:
@@ -266,8 +265,8 @@ static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method,
                 parsedArgs.push_back(ConstructValueFromFloatingPoint(va_arg(args, double)));
                 break;
             case TypeId::REFERENCE: {
-                auto param = va_arg(args, ani_object);
-                parsedArgs.emplace_back(param != nullptr ? s->ToInternalType(param)->GetCoreType() : nullptr);
+                auto *param = s->ToInternalType(va_arg(args, ani_ref));
+                parsedArgs.emplace_back(param != nullptr ? param->GetCoreType() : nullptr);
                 break;
             }
             default:
@@ -279,6 +278,7 @@ static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method,
     return parsedArgs;
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method, const ani_value *args,
                                      ani_object object)
 {
@@ -291,10 +291,9 @@ static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method,
     panda_file::ShortyIterator it(method->GetPandaMethod()->GetShorty());
     panda_file::ShortyIterator end;
     ++it;  // skip the return value
-    auto *arg = args;
-    while (it != end) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    for (const auto *arg = args; it != end; ++arg, ++it) {
         panda_file::Type type = *it;
-        ++it;
         switch (type.GetId()) {
             case TypeId::U1:
                 parsedArgs.emplace_back(arg->z);
@@ -321,14 +320,14 @@ static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method,
                 parsedArgs.push_back(ConstructValueFromFloatingPoint(arg->d));
                 break;
             case TypeId::REFERENCE: {
-                parsedArgs.emplace_back(s->ToInternalType(arg->r)->GetCoreType());
+                auto *param = s->ToInternalType(arg->r);
+                parsedArgs.emplace_back(param != nullptr ? param->GetCoreType() : nullptr);
                 break;
             }
             default:
                 LOG(FATAL, ANI) << "Unexpected argument type";
                 break;
         }
-        ++arg;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
     return parsedArgs;
 }
@@ -356,8 +355,11 @@ static ani_status DoGeneralMethodCall(ScopedManagedCodeFix &s, ani_object obj, M
         m = ResolveVirtualMethod(&s, obj, method);
     } else if constexpr (std::is_same_v<MethodType, ani_static_method>) {
         m = ToInternalMethod(method);
+    } else if constexpr (std::is_same_v<MethodType, ani_function>) {
+        m = ToInternalFunction(method);
     } else {
-        static_assert(!(std::is_same_v<MethodType, ani_method> || std::is_same_v<MethodType, ani_static_method>),
+        static_assert(!(std::is_same_v<MethodType, ani_method> || std::is_same_v<MethodType, ani_static_method> ||
+                        std::is_same_v<MethodType, ani_function>),
                       "Unreachable type");
     }
     ASSERT(m != nullptr);
@@ -383,9 +385,9 @@ static ani_status GeneralMethodCall(ani_env *env, ani_object obj, MethodType met
 template <typename EtsValueType, typename AniType, typename Args>
 static ani_status GeneralFunctionCall(ani_env *env, ani_function fn, AniType *result, Args args)
 {
-    auto method = reinterpret_cast<ani_static_method>(fn);
+    auto method = reinterpret_cast<ani_function>(fn);
     ScopedManagedCodeFix s(env);
-    return DoGeneralMethodCall<EtsValueType, AniType, ani_static_method, Args>(s, nullptr, method, result, args);
+    return DoGeneralMethodCall<EtsValueType, AniType, ani_function, Args>(s, nullptr, method, result, args);
 }
 
 template <typename T>
@@ -3164,6 +3166,7 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Ref(ani_env *env, ani_
 NO_UB_SANITIZE static ani_status ExistUnhandledError(ani_env *env, ani_boolean *result)
 {
     ANI_DEBUG_TRACE(env);
+    CHECK_PTR_ARG(env);
     CHECK_PTR_ARG(result);
 
     PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
@@ -3175,6 +3178,8 @@ NO_UB_SANITIZE static ani_status ExistUnhandledError(ani_env *env, ani_boolean *
 NO_UB_SANITIZE static ani_status ResetError(ani_env *env)
 {
     ANI_DEBUG_TRACE(env);
+    CHECK_PTR_ARG(env);
+
     PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
     ScopedManagedCodeFix s(pandaEnv);
     pandaEnv->ClearException();
@@ -3185,10 +3190,10 @@ NO_UB_SANITIZE static ani_status ResetError(ani_env *env)
 NO_UB_SANITIZE static ani_status ThrowError(ani_env *env, ani_error err)
 {
     ANI_DEBUG_TRACE(env);
+    CHECK_PTR_ARG(env);
     CHECK_PTR_ARG(err);
 
     PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
-    ANI_CHECK_RETURN_IF_EQ(pandaEnv, nullptr, ANI_ERROR);
     ScopedManagedCodeFix s(pandaEnv);
     EtsThrowable *exception = s.ToInternalType(err);
     ANI_CHECK_RETURN_IF_EQ(exception, nullptr, ANI_ERROR);
@@ -3299,6 +3304,7 @@ static ani_status GetErrorDescription(ani_env *env, ani_error error, ani_array_r
 NO_UB_SANITIZE static ani_status DescribeError(ani_env *env)
 {
     ANI_DEBUG_TRACE(env);
+    CHECK_PTR_ARG(env);
 
     ani_boolean errorExists = ANI_FALSE;
     auto status = env->ExistUnhandledError(&errorExists);
@@ -3332,11 +3338,10 @@ NO_UB_SANITIZE static ani_status DescribeError(ani_env *env)
 NO_UB_SANITIZE static ani_status GetUnhandledError(ani_env *env, ani_error *result)
 {
     ANI_DEBUG_TRACE(env);
-
+    CHECK_PTR_ARG(env);
     CHECK_PTR_ARG(result);
-    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
-    ANI_CHECK_RETURN_IF_EQ(pandaEnv, nullptr, ANI_INVALID_ARGS);
 
+    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
     ScopedManagedCodeFix s(pandaEnv);
     EtsThrowable *throwable = pandaEnv->GetThrowable();
     ANI_CHECK_RETURN_IF_EQ(throwable, nullptr, ANI_ERROR);
@@ -4068,6 +4073,7 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean(ani_env *env, ani_obj
                                                            ani_boolean *result, ...)
 {
     ANI_DEBUG_TRACE(env);
+
     va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(args, result);
     ani_status res = Object_CallMethod_Boolean_V(env, object, method, result, args);
@@ -4109,6 +4115,7 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Char(ani_env *env, ani_object
                                                         ani_char *result, ...)
 {
     ANI_DEBUG_TRACE(env);
+
     va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(args, result);
     ani_status status = Object_CallMethod_Char_V(env, object, method, result, args);
@@ -4150,6 +4157,7 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Byte(ani_env *env, ani_object
                                                         ani_byte *result, ...)
 {
     ANI_DEBUG_TRACE(env);
+
     va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(args, result);
     ani_status status = Object_CallMethod_Byte_V(env, object, method, result, args);
@@ -4191,6 +4199,7 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Short(ani_env *env, ani_objec
                                                          ani_short *result, ...)
 {
     ANI_DEBUG_TRACE(env);
+
     va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(args, result);
     ani_status status = Object_CallMethod_Short_V(env, object, method, result, args);
@@ -4247,6 +4256,9 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Int_A(ani_env *env, ani_objec
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(result);
+    CHECK_PTR_ARG(args);
 
     CheckMethodReturnType(method, EtsType::INT);
     return GeneralMethodCall<EtsInt>(env, object, method, result, args);
@@ -4276,6 +4288,7 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Long_V(ani_env *env, ani_obje
     CHECK_PTR_ARG(object);
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
+
     CheckMethodReturnType(method, EtsType::LONG);
     return GeneralMethodCall<EtsLong>(env, object, method, result, args);
 }
@@ -4284,6 +4297,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Long_V(ani_env *env, ani_obje
 NO_UB_SANITIZE static ani_status Object_CallMethod_Long(ani_env *env, ani_object object, ani_method method,
                                                         ani_long *result, ...)
 {
+    ANI_DEBUG_TRACE(env);
+
     va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(args, result);
     ani_status aniResult = Object_CallMethod_Long_V(env, object, method, result, args);
@@ -4393,6 +4408,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Ref_V(ani_env *env, ani_objec
 NO_UB_SANITIZE static ani_status Object_CallMethod_Ref(ani_env *env, ani_object object, ani_method method,
                                                        ani_ref *result, ...)
 {
+    ANI_DEBUG_TRACE(env);
+
     va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(args, result);
     ani_status status = Object_CallMethod_Ref_V(env, object, method, result, args);
@@ -4436,6 +4453,7 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Void_V(ani_env *env, ani_obje
                                                           va_list args)
 {
     ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
     CHECK_PTR_ARG(object);
     CHECK_PTR_ARG(method);
 
@@ -4449,6 +4467,7 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Void_V(ani_env *env, ani_obje
 NO_UB_SANITIZE static ani_status Object_CallMethod_Void(ani_env *env, ani_object object, ani_method method, ...)
 {
     ANI_DEBUG_TRACE(env);
+
     va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(args, method);
     ani_status status = Object_CallMethod_Void_V(env, object, method, args);

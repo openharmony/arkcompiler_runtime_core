@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 #include <cstdlib>
+#include <optional>
 #include <vector>
 
 #include "libpandabase/macros.h"
@@ -59,11 +60,6 @@ public:
         uint32_t aniVersion;
         ASSERT_TRUE(env_->GetVersion(&aniVersion) == ANI_OK) << "Cannot get ani version";
         ASSERT_TRUE(aniVersion == ANI_VERSION_1) << "Incorrect ani version";
-
-        // Get ETS Env
-        ets_size nVms = 0;
-        ASSERT_TRUE(ETS_GetCreatedVMs(&etsVm_, 1, &nVms) == ETS_OK) << "Cannot get ETS napi vm";
-        ASSERT_TRUE(etsVm_->GetEnv(&etsEnv_, ETS_NAPI_VERSION_1_0) == ETS_OK) << "Cannot get ETS napi env";
     }
 
     void TearDown() override
@@ -71,30 +67,31 @@ public:
         ASSERT_TRUE(vm_->DestroyVM() == ANI_OK) << "Cannot destroy ANI VM";
     }
 
+    /// Call function with name `fnName` from module denoted by `moduleDescriptor`
     template <typename R, typename... Args>
-    R CallEtsClassStaticMethod(const std::string &className, const std::string &fnName, Args &&...args)
+    R CallEtsFunction(const std::string &moduleName, const std::string &fnName, Args &&...args)
     {
         std::optional<R> result;
-        CallEtsFunctionImpl(&result, className, fnName, std::forward<Args>(args)...);
+        auto moduleDescriptor = "L" + moduleName + ";";
+        CallEtsFunctionImpl(&result, moduleDescriptor, fnName, std::forward<Args>(args)...);
         if constexpr (!std::is_same_v<R, void>) {
             return result.value();
         }
     }
 
-    /// Call function with name `fnName` from ETSGLOBAL
-    template <typename R, typename... Args>
-    R CallEtsFunction(const std::string &moduleName, const std::string &fnName, Args &&...args)
-    {
-        std::string etsGlobalName(moduleName + "/ETSGLOBAL");
-        return CallEtsClassStaticMethod<R>(etsGlobalName, fnName, std::forward<Args>(args)...);
-    }
-
     class NativeFunction {
     public:
         template <typename FuncT>
-        NativeFunction(const char *functionName, FuncT nativeFunction)
-            : functionName_(functionName), nativeFunction_(reinterpret_cast<void *>(nativeFunction))
+        NativeFunction(const char *moduleDescriptor, const char *functionName, FuncT nativeFunction)
+            : moduleDescriptor_(moduleDescriptor),
+              functionName_(functionName),
+              nativeFunction_(reinterpret_cast<void *>(nativeFunction))
         {
+        }
+
+        const char *GetModule() const
+        {
+            return moduleDescriptor_;
         }
 
         const char *GetName() const
@@ -108,16 +105,17 @@ public:
         }
 
     private:
+        const char *moduleDescriptor_ {nullptr};
         const char *functionName_ {nullptr};
         void *nativeFunction_ {nullptr};
     };
 
     template <typename R, typename... Args>
-    R CallEtsNativeMethod(const std::string &moduleName, const NativeFunction &fn, Args &&...args)
+    R CallEtsNativeMethod(const NativeFunction &fn, Args &&...args)
     {
         std::optional<R> result;
 
-        CallEtsNativeMethodImpl(&result, moduleName, fn, std::forward<Args>(args)...);
+        CallEtsNativeMethodImpl(&result, fn, std::forward<Args>(args)...);
 
         if constexpr (!std::is_same_v<R, void>) {
             return result.value();
@@ -146,97 +144,93 @@ protected:
     }
 
 private:
-    static std::string GetFindClassFailureMsg(const std::string &className)
+    static std::string GetFindModuleFailureMsg(const std::string &moduleDescriptor)
     {
         std::stringstream ss;
-        ss << "Failed to find class " << className << ".";
+        ss << "Failed to find module `" << moduleDescriptor << "`.";
         return ss.str();
     }
 
-    static std::string GetFindMethodFailureMsg(const std::string &className, const std::string &methodName)
+    static std::string GetFindFunctionFailureMsg(const std::string &moduleDescriptor, const std::string &fnName)
     {
         std::stringstream ss;
-        ss << "Failed to find method `" << methodName << "` in " << className << ".";
+        ss << "Failed to find function `" << fnName << "` in `" << moduleDescriptor << "`.";
         return ss.str();
     }
 
     template <typename R, typename... Args>
-    void CallEtsFunctionImpl(std::optional<R> *result, const std::string &className, const std::string &fnName,
+    void CallEtsFunctionImpl(std::optional<R> *result, const std::string &moduleDescriptor, const std::string &fnName,
                              Args &&...args)
     {
-        ets_class cls = etsEnv_->FindClass(className.c_str());
-        ASSERT_NE(cls, nullptr) << GetFindClassFailureMsg(className) << " " << fnName;
-
-        ets_method fn = etsEnv_->GetStaticp_method(cls, fnName.data(), nullptr);
-        ASSERT_NE(fn, nullptr) << GetFindMethodFailureMsg(className, fnName);
-
-        *result = DoCallEtsMethod<R>(cls, fn, std::forward<Args>(args)...);
+        ani_module mod {};
+        ASSERT_EQ(env_->FindModule(moduleDescriptor.c_str(), &mod), ANI_OK)
+            << GetFindModuleFailureMsg(moduleDescriptor);
+        ani_function fn {};
+        ASSERT_EQ(env_->Module_FindFunction(mod, fnName.c_str(), nullptr, &fn), ANI_OK)
+            << GetFindFunctionFailureMsg(moduleDescriptor, fnName);
+        DoCallFunction(result, fn, std::forward<Args>(args)...);
     }
 
     template <typename R, typename... Args>
-    void CallEtsNativeMethodImpl(std::optional<R> *result, const std::string &moduleName, const NativeFunction &fn,
-                                 Args &&...args)
+    void CallEtsNativeMethodImpl(std::optional<R> *result, const NativeFunction &fn, Args &&...args)
     {
-        auto functionName = fn.GetName();
-        std::string className(moduleName + "/ETSGLOBAL");
-        auto cls = etsEnv_->FindClass(className.c_str());
-        ASSERT_NE(cls, nullptr) << GetFindClassFailureMsg(className);
+        const auto moduleDescriptor = std::string("L") + fn.GetModule() + ";";
+        const auto *fnName = fn.GetName();
+        ani_module mod {};
+        ASSERT_EQ(env_->FindModule(moduleDescriptor.c_str(), &mod), ANI_OK)
+            << GetFindModuleFailureMsg(moduleDescriptor);
+        ani_function aniFn {};
+        ASSERT_EQ(env_->Module_FindFunction(mod, fnName, nullptr, &aniFn), ANI_OK)
+            << GetFindFunctionFailureMsg(moduleDescriptor, fnName);
 
-        auto mtd = etsEnv_->GetStaticp_method(cls, functionName, nullptr);
-        ASSERT_NE(mtd, nullptr) << GetFindMethodFailureMsg(className, functionName);
+        ani_native_function nativeFn = {fnName, nullptr, fn.GetNativePtr()};
 
-        std::array<EtsNativeMethod, 1> method = {{{functionName, nullptr, fn.GetNativePtr()}}};
+        ASSERT_EQ(env_->Module_BindNativeFunctions(mod, &nativeFn, 1), ANI_OK)
+            << "Failed to register native function `" << fnName << "` in module " << moduleDescriptor << ".";
 
-        ASSERT_EQ(etsEnv_->RegisterNatives(cls, method.data(), method.size()), ETS_OK)
-            << "Failed to register native function " << functionName << ".";
-
-        *result = DoCallEtsMethod<R>(cls, mtd, std::forward<Args>(args)...);
-
-        ASSERT_EQ(etsEnv_->UnregisterNatives(cls), ETS_OK)
-            << "Failed to unregister native function " << functionName << ".";
+        DoCallFunction(result, aniFn, std::forward<Args>(args)...);
     }
 
     template <typename R, typename... Args>
-    std::optional<R> DoCallEtsMethod(ets_class cls, ets_method mtd, Args &&...args)
+    void DoCallFunction(std::optional<R> *result, ani_function fn, Args &&...args)
     {
+        [[maybe_unused]] std::conditional_t<std::is_same_v<R, void>, std::nullopt_t, R> value {};
         // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
-        if constexpr (std::is_same_v<R, ets_boolean>) {
-            return etsEnv_->CallStaticBooleanMethod(cls, mtd, std::forward<Args>(args)...);
-        } else if constexpr (std::is_same_v<R, ets_byte>) {
-            return etsEnv_->CallStaticByteMethod(cls, mtd, std::forward<Args>(args)...);
-        } else if constexpr (std::is_same_v<R, ets_char>) {
-            return etsEnv_->CallStaticCharMethod(cls, mtd, std::forward<Args>(args)...);
-        } else if constexpr (std::is_same_v<R, ets_short>) {
-            return etsEnv_->CallStaticShortMethod(cls, mtd, std::forward<Args>(args)...);
-        } else if constexpr (std::is_same_v<R, ets_int>) {
-            return etsEnv_->CallStaticIntMethod(cls, mtd, std::forward<Args>(args)...);
-        } else if constexpr (std::is_same_v<R, ets_long>) {
-            return etsEnv_->CallStaticLongMethod(cls, mtd, std::forward<Args>(args)...);
-        } else if constexpr (std::is_same_v<R, ets_float>) {
-            return etsEnv_->CallStaticFloatMethod(cls, mtd, std::forward<Args>(args)...);
-        } else if constexpr (std::is_same_v<R, ets_double>) {
-            return etsEnv_->CallStaticDoubleMethod(cls, mtd, std::forward<Args>(args)...);
+        if constexpr (std::is_same_v<R, ani_boolean>) {
+            ASSERT_EQ(env_->Function_Call_Boolean(fn, &value, std::forward<Args>(args)...), ANI_OK);
+        } else if constexpr (std::is_same_v<R, ani_byte>) {
+            ASSERT_EQ(env_->Function_Call_Byte(fn, &value, std::forward<Args>(args)...), ANI_OK);
+        } else if constexpr (std::is_same_v<R, ani_char>) {
+            ASSERT_EQ(env_->Function_Call_Char(fn, &value, std::forward<Args>(args)...), ANI_OK);
+        } else if constexpr (std::is_same_v<R, ani_short>) {
+            ASSERT_EQ(env_->Function_Call_Short(fn, &value, std::forward<Args>(args)...), ANI_OK);
+        } else if constexpr (std::is_same_v<R, ani_int>) {
+            ASSERT_EQ(env_->Function_Call_Int(fn, &value, std::forward<Args>(args)...), ANI_OK);
+        } else if constexpr (std::is_same_v<R, ani_long>) {
+            ASSERT_EQ(env_->Function_Call_Long(fn, &value, std::forward<Args>(args)...), ANI_OK);
+        } else if constexpr (std::is_same_v<R, ani_float>) {
+            ASSERT_EQ(env_->Function_Call_Float(fn, &value, std::forward<Args>(args)...), ANI_OK);
+        } else if constexpr (std::is_same_v<R, ani_double>) {
+            ASSERT_EQ(env_->Function_Call_Double(fn, &value, std::forward<Args>(args)...), ANI_OK);
         } else if constexpr (std::is_same_v<R, void>) {
-            etsEnv_->CallStaticVoidMethod(cls, mtd, args...);
-            return std::nullopt;
+            ASSERT_EQ(env_->Function_Call_Void(fn, std::forward<Args>(args)...), ANI_OK);
+            value = std::nullopt;
         } else if constexpr (std::is_same_v<R, ani_ref> || std::is_same_v<R, ani_tuple_value> ||
                              std::is_same_v<R, ani_object>) {
-            return reinterpret_cast<R>(etsEnv_->CallStaticObjectMethod(cls, mtd, std::forward<Args>(args)...));
+            ani_ref resultRef {};
+            ASSERT_EQ(env_->Function_Call_Ref(fn, &resultRef, std::forward<Args>(args)...), ANI_OK);
+            value = static_cast<R>(resultRef);
         } else {
             enum { INCORRECT_TEMPLATE_TYPE = false };
             static_assert(INCORRECT_TEMPLATE_TYPE, "Incorrect template type");
         }
+        result->emplace(value);
         // NOLINTEND(cppcoreguidelines-pro-type-vararg)
-        UNREACHABLE();
     }
 
 protected:
-    EtsEnv *etsEnv_ {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
-    ani_env *env_ {nullptr};    // NOLINT(misc-non-private-member-variables-in-classes)
-    ani_vm *vm_ {nullptr};      // NOLINT(misc-non-private-member-variables-in-classes)
-
-private:
-    EtsVM *etsVm_ {nullptr};
+    ani_env *env_ {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_vm *vm_ {nullptr};    // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 }  // namespace ark::ets::ani::testing
