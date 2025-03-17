@@ -1822,18 +1822,6 @@
 #23533
 11.enumerations/02.enumeration_string_values/enum_str_4.ets
 
-#23076
-13.compilation_units/05.declaration_modules/declaration_modules_5.ets
-
-#21157
-13.compilation_units/03.import_directives/05.type_binding/type_binding_class_same_name_2.ets
-
-#23440
-13.compilation_units/05.declaration_modules/declaration_modules_8.ets
-13.compilation_units/05.declaration_modules/declaration_modules_9.ets
-13.compilation_units/05.declaration_modules/declaration_modules_0.ets
-13.compilation_units/05.declaration_modules/declaration_modules_1.ets
-
 #21888 no support for package initializer
 13.compilation_units/06.compilation_unit_initialization/package/init_once/test.ets
 
