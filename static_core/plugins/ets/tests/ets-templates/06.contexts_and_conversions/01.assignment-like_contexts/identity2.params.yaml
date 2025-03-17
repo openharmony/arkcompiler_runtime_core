@@ -46,14 +46,3 @@ cases:
     type: B<A>
     expr: new B<A>()
     op: '!=='
-
-  - defs: |-
-      interface I {}
-      interface J {}
-      class A {}
-      class B {}
-      class C implements I, J {}
-      class Klazz<in T, out U, V extends I & J> {}
-    type: Klazz<A, B, C>
-    expr: new Klazz<A, B, C>()
-    op: '!=='

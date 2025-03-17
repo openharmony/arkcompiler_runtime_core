@@ -638,9 +638,6 @@
 #20330 Compiler doesn't respect type argument for Array<T>
 05.generics/03.utility_types/04.record_utility_type/rec_3.ets
 
-#18344 Invalid test, ArkTS doesn't have intersection type
-06.contexts_and_conversions/01.assignment-like_contexts/identity2_10.ets
-
 #23079
 06.contexts_and_conversions/01.assignment-like_contexts/forbidden2_5.ets
 
