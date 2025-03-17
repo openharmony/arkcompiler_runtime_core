@@ -72,6 +72,24 @@ end
   end
 end
 
+macro(:lookup_method_by_name) do |v, id|
+  res := cache_entry(id, false, false, :ptr, nil)
+  res_u64 := Bitcast(res).SrcType("DataType::POINTER").u64
+  method_flag = AndI(res_u64).Imm(0x1).u64
+  If(res, 0).NE.Likely {
+    If(method_flag, 0x1).EQ.Likely {
+      method_class := LoadI(res).Imm(Constants::METHOD_CLASS_OFFSET).ref
+      If(method_class, v).EQ.Likely {
+        method_0 := res
+        Goto(:Exit_1)
+      }
+    }
+  }
+  method_1 := call_runtime("LookupMethodByNameEntrypoint", get_cache_entry_ptr(), v, id, get_method_ptr(), %pc).ptr
+  Label(:Exit_1)
+  Phi(method_0, method_1).ptr
+end
+
 ['static', 'virt'].each do |dispatch|
   ['short', 'long', 'range'].each do |flavor|
     macro(:"handle_ets_launch_#{dispatch}_#{flavor}") do |v, id|
@@ -297,4 +315,77 @@ end
     result := Phi(result_0, result_1, result_2, result_3).b
     set_acc_primitive(btou8(result))
   end
+end
+
+macro(:"handle_ets_call_name_short") do |v1, v2, id, size|
+  klass := vreg_value(v1).ref
+  If(klass, 0).EQ.Unlikely {
+    call_runtime("ThrowNullPointerExceptionFromInterpreter").void
+    move_to_exception
+  }
+  method := lookup_method_by_name(klass, id)
+  If(method, 0).EQ.Unlikely {
+    call_runtime("ThrowEtsExceptionNoSuchMethodEntrypoint", klass, id, get_method_ptr()).void
+    move_to_exception
+  }
+  method_flags := LoadI(method).Imm(Constants::METHOD_ACCESS_FLAGS_OFFSET).u32
+  copy_lambda := lambda { |new_frame, num_vregs, _, new_moffset|
+    copy_reg(new_frame, num_vregs, v1, new_moffset)
+    copy_reg(new_frame, AddI(num_vregs).Imm(1).word, v2, new_moffset)
+  }
+  generic_call(id, size, false, method, 2, copy_lambda)
+end
+
+macro(:"handle_ets_call_name_long") do |v1, v2, v3, v4, id, size|
+  klass := vreg_value(v1).ref
+  If(klass, 0).EQ.Unlikely {
+    call_runtime("ThrowNullPointerExceptionFromInterpreter").void
+    move_to_exception
+  }
+  method := lookup_method_by_name(klass, id)
+  If(method, 0).EQ.Unlikely {
+    call_runtime("ThrowEtsExceptionNoSuchMethodEntrypoint", klass, id, get_method_ptr()).void
+    move_to_exception
+  }
+  method_flags := LoadI(method).Imm(Constants::METHOD_ACCESS_FLAGS_OFFSET).u32
+  copy_lambda := lambda { |new_frame, num_vregs, _, new_moffset|
+    copy_reg(new_frame, num_vregs, v1, new_moffset)
+    copy_reg(new_frame, AddI(num_vregs).Imm(1).word, v2, new_moffset)
+    copy_reg(new_frame, AddI(num_vregs).Imm(2).word, v3, new_moffset)
+    copy_reg(new_frame, AddI(num_vregs).Imm(3).word, v4, new_moffset)
+  }
+  generic_call(id, size, false, method, 4, copy_lambda)
+end
+
+macro(:"handle_ets_call_name_range") do |v, id, size|
+  klass := vreg_value(v).ref
+  If(klass, 0).EQ.Unlikely {
+    call_runtime("ThrowNullPointerExceptionFromInterpreter").void
+    move_to_exception
+  }
+  method := lookup_method_by_name(klass, id)
+  If(method, 0).EQ.Unlikely {
+    call_runtime("ThrowEtsExceptionNoSuchMethodEntrypoint", klass, id, get_method_ptr()).void
+    move_to_exception
+  }
+  method_flags := LoadI(method).Imm(Constants::METHOD_ACCESS_FLAGS_OFFSET).u32
+  copy_lambda := lambda { |new_frame, num_vregs, num_args, new_moffset|
+    dst_ptr_0 := frame_vreg_ptr(new_frame, num_vregs)
+    src_ptr_0 := vreg_ptr(v)
+    i0 := 0
+    Label(:Head)  # TODO(mbolshov): use While loops when they are ready
+    i := Phi(i0, i1).word
+    If(i, num_args).EQ.Unlikely do
+      Goto(:Exit)
+    end
+    offset := Mul(i, Constants::VREGISTER_SIZE).word
+    dst_ptr := Add(dst_ptr_0, offset).ptr
+    src_ptr := Add(src_ptr_0, offset).ptr
+    set_value(dst_ptr, get_value(src_ptr).i64)
+    set_tag_frame(new_frame, dst_ptr, get_tag(src_ptr), new_moffset)
+    i1 := Add(i, 1).word
+    Goto(:Head)
+    Label(:Exit)
+  }
+  generic_call(id, size, false, method, nil, copy_lambda)
 end

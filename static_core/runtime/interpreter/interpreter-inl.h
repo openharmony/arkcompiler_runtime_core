@@ -3222,6 +3222,24 @@ public:
     {
         auto curFrameHandler = this->template GetFrameHandler<IS_DYNAMIC_T>();
         auto frameHandler = this->template GetFrameHandler<IS_DYNAMIC_T>(&frame);
+
+#ifdef PANDA_WITH_ETS
+        if constexpr (FORMAT == BytecodeInstruction::Format::PREF_V4_V4_ID16) {
+            frameHandler.GetVReg(numVregs) = curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
+            frameHandler.GetVReg(numVregs + 1U) =
+                curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 1U>());
+            return;
+        } else if constexpr (FORMAT == BytecodeInstruction::Format::PREF_V4_V4_V4_V4_ID16) {
+            frameHandler.GetVReg(numVregs) = curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
+            frameHandler.GetVReg(numVregs + 1U) =
+                curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 1U>());
+            frameHandler.GetVReg(numVregs + 2U) =
+                curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 2U>());
+            frameHandler.GetVReg(numVregs + 3U) =
+                curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 3U>());
+            return;
+        }
+#endif
         frameHandler.GetVReg(numVregs) = curFrameHandler.GetVReg(this->GetInst().GetVReg(0));
         if (numActualArgs == 2) {
             frameHandler.GetVReg(numVregs + 1U).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());

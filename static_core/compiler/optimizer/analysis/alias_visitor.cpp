@@ -245,6 +245,7 @@ bool Pointer::IsEscapingAlias(const Inst *inst)
             case Opcode::Monitor:
             case Opcode::FillConstArray:
             case Opcode::GetInstanceClass:
+            case Opcode::ResolveByName:
                 break;
             case Opcode::Phi:
             case Opcode::CatchPhi:

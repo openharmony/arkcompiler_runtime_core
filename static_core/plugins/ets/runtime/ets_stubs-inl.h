@@ -127,6 +127,15 @@ inline void LookUpException(ark::Class *klass, Field *rawField)
                       panda_file_items::class_descriptors::LINKER_UNRESOLVED_FIELD_ERROR.data(), errorMsg);
 }
 
+inline void LookUpException(ark::Class *klass, ark::Method *rawMethod)
+{
+    auto rawMethodName = (rawMethod == nullptr) ? "null" : utf::Mutf8AsCString(rawMethod->GetName().data);
+    auto errorMsg =
+        "Class " + ark::ConvertToString(klass->GetName()) + " does not have method with name " + rawMethodName;
+    ThrowEtsException(EtsCoroutine::GetCurrent(),
+                      panda_file_items::class_descriptors::LINKER_UNRESOLVED_METHOD_ERROR.data(), errorMsg);
+}
+
 template <bool IS_GETTER>
 ALWAYS_INLINE Field *GetFieldByName(InterpreterCache::Entry *entry, ark::Method *method, Field *rawField,
                                     const uint8_t *address, ark::Class *klass)
@@ -288,6 +297,126 @@ ALWAYS_INLINE inline ark::Method *LookupSetterByName(panda_file::File::StringDat
         return &m;
     }
     return nullptr;
+}
+
+ALWAYS_INLINE inline Method *GetMethodFromCache(ETSStubCacheInfo const &cache, ark::Class *klass)
+{
+    auto *res = cache.GetItem();
+    auto resUint = reinterpret_cast<uint64_t>(res);
+    bool cacheExists = (res != nullptr) && ((resUint & METHOD_FLAG_MASK) == 1);
+    auto methodPtr = reinterpret_cast<Method *>(resUint & ~METHOD_FLAG_MASK);
+    if (LIKELY(cacheExists && (methodPtr->GetClass()->IsAssignableFrom(klass)))) {
+        auto methods = klass->GetVTable();
+        return methods[methodPtr->GetVTableIndex()];
+    }
+    return nullptr;
+}
+
+// CC-OFFNXT(C_RULE_ID_INLINE_FUNCTION_SIZE) Perf critical common runtime code stub
+// CC-OFFNXT(G.FUD.06) perf critical
+ALWAYS_INLINE inline bool MethodIsSupertypeOf(ClassLinker *linker, Method *superm, Method *subm)
+{
+    Method::ProtoId const &super = superm->GetProtoId();
+    Method::ProtoId const &sub = subm->GetProtoId();
+
+    auto subPDA = panda_file::ProtoDataAccessor(sub.GetPandaFile(), sub.GetEntityId());
+    auto superPDA = panda_file::ProtoDataAccessor(super.GetPandaFile(), super.GetEntityId());
+    if (superPDA.GetNumElements() != subPDA.GetNumElements()) {
+        return false;
+    }
+    if (superPDA.GetReturnType() != subPDA.GetReturnType()) {
+        return false;
+    }
+
+    uint32_t numArgs = subPDA.GetNumArgs();
+
+    for (uint32_t i = 0, refIdx = 0; i < numArgs; ++i) {
+        if (superPDA.GetArgType(i) != subPDA.GetArgType(i)) {
+            return false;
+        }
+        if (superPDA.GetArgType(i).IsReference()) {
+            auto subRef = linker->GetClass(*subm, subPDA.GetReferenceType(refIdx));
+            if (UNLIKELY(subRef == nullptr)) {
+                return false;
+            }
+            auto superRef = linker->GetClass(*superm, superPDA.GetReferenceType(refIdx));
+            if (UNLIKELY(superRef == nullptr)) {
+                return false;
+            }
+            if (!subRef->IsAssignableFrom(superRef)) {
+                return false;
+            }
+            refIdx++;
+        }
+    }
+    return true;
+}
+
+// CC-OFFNXT(C_RULE_ID_INLINE_FUNCTION_SIZE) Perf critical common runtime code stub
+// CC-OFFNXT(G.FUD.06) perf critical
+ALWAYS_INLINE inline Method *ResolveCompatibleVMethodInClass(EtsCoroutine *coro, const ark::Class *klass,
+                                                             Method *lookupTarget)
+{
+    auto linker = Runtime::GetCurrent()->GetClassLinker();
+
+    // CC-OFFNXT(C_RULE_ID_POINTER_DECLARE_FOLLOW_NAME) project code style
+    // CC-OFFNXT(G.FMT.14-CPP) project code style
+    auto lookupFromIndex = [coro, linker, klass, lookupTarget](size_t from) -> Method * {
+        auto methods = klass->GetVTable();
+        for (size_t idx = from; idx < methods.size(); ++idx) {
+            auto vmethod = methods[idx];
+            if (LIKELY(lookupTarget->GetName() != vmethod->GetName())) {
+                continue;
+            }
+            if (MethodIsSupertypeOf(linker, vmethod, lookupTarget)) {
+                ASSERT(vmethod->GetVTableIndex() == idx);
+                return vmethod;
+            }
+            if (UNLIKELY(coro->HasPendingException())) {
+                return nullptr;
+            }
+        }
+        return nullptr;
+    };
+
+    size_t vtStart = 0;
+
+    Method *matched = lookupFromIndex(vtStart);
+    if (matched == nullptr) {
+        // not found
+        return nullptr;
+    }
+    if (lookupFromIndex(matched->GetVTableIndex() + 1) != nullptr) {
+        // inconsistent
+        return nullptr;
+    }
+    return matched;
+}
+
+ALWAYS_INLINE inline Method *ResolveCompatibleVMethod(EtsCoroutine *coro, ark::Class *klass, Method *lookupTarget)
+{
+    for (Class *t = klass; t != nullptr; t = t->GetBase()) {
+        Method *resolved = ResolveCompatibleVMethodInClass(coro, t, lookupTarget);
+        if (resolved != nullptr) {
+            return resolved;
+        }
+    }
+    return nullptr;
+}
+
+ALWAYS_INLINE inline Method *GetMethodByName(EtsCoroutine *coro, ETSStubCacheInfo const &cache, Method *rawMethod,
+                                             ark::Class *klass)
+{
+    Method *callee = GetMethodFromCache(cache, klass);
+    if (callee != nullptr) {
+        return callee;
+    }
+    callee = ResolveCompatibleVMethod(coro, klass, rawMethod);
+    if (callee != nullptr) {
+        cache.UpdateItem(callee);
+        return callee;
+    }
+    return callee;
 }
 
 }  // namespace ark::ets

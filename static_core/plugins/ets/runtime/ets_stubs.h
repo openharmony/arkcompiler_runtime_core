@@ -47,6 +47,8 @@ bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj);
 template <bool IS_GETTER>
 inline void LookUpException(ark::Class *klass, Field *rawField);
 
+inline void LookUpException(ark::Class *klass, ark::Method *rawMethod);
+
 template <bool IS_GETTER = true>
 inline Field *GetFieldByName(InterpreterCache::Entry *entry, ark::Method *method, Field *rawField,
                              const uint8_t *address, ark::Class *klass);
@@ -63,6 +65,31 @@ inline ark::Method *LookupGetterByName(panda_file::File::StringData name, const 
 template <panda_file::Type::TypeId FIELD_TYPE>
 inline ark::Method *LookupSetterByName(panda_file::File::StringData name, const ark::Class *klass);
 
+struct ETSStubCacheInfo {
+public:
+    ETSStubCacheInfo(InterpreterCache::Entry *entry, Method *instMethod, const uint8_t *instAddress)
+        : entry_(entry), instMethod_(instMethod), instAddress_(instAddress)
+    {
+    }
+
+    void *GetItem() const
+    {
+        return entry_->item;
+    }
+
+    void UpdateItem(void *value) const
+    {
+        auto mUint = reinterpret_cast<uint64_t>(value);
+        *entry_ = {instAddress_, instMethod_, reinterpret_cast<Method *>(mUint | METHOD_FLAG_MASK)};
+    }
+
+private:
+    InterpreterCache::Entry *entry_ {};
+    Method *instMethod_ {};
+    const uint8_t *instAddress_ {};
+};
+
+Method *GetMethodByName(EtsCoroutine *coro, ETSStubCacheInfo const &cache, Method *rawMethod, ark::Class *klass);
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_STUBS_H
