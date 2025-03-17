@@ -50,15 +50,6 @@
 #23596
 03.types/06.value_types/01.integer_types_and_operations/bitwise_complement/bitwise_complement_char_3.ets
 
-#23599
-03.types/06.value_types/01.integer_types_and_operations/equal/equal_char_4.ets
-03.types/06.value_types/01.integer_types_and_operations/left_shift/left_shift_char_7.ets
-03.types/06.value_types/01.integer_types_and_operations/less_than/less_than_char_3.ets
-03.types/06.value_types/01.integer_types_and_operations/multiplication/multiplication_char_7.ets
-03.types/06.value_types/01.integer_types_and_operations/right_shift/right_shift_long_10.ets
-03.types/06.value_types/01.integer_types_and_operations/unsigned_right_shift/unsigned_right_shift_byte_7.ets
-03.types/06.value_types/01.integer_types_and_operations/unsigned_right_shift/unsigned_right_shift_short_7.ets
-
 #24030
 03.types/08.type_object/class_methods_0.ets
 03.types/08.type_object/class_methods_2.ets
