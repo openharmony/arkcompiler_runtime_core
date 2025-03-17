@@ -16,8 +16,21 @@
 namespace anyns {
     export let intValue: int = 3;
     export let floatValue: float = 3.14;
+    export let sum: float;
+    class A {
+        static val1: float = 1.5;
+        static val2: float = 2.5;
+        public static add(): float {
+            sum = A.val1 + A.val2;
+            return sum;
+        }
+    }
+
+    namespace second {
+        export let aValue: float = 5.0;
+    }
 }
 
-function checkFloatValue(value: float): boolean {
-    return anyns.floatValue == value;
+namespace anyns {
+    export let testValue: float = 3.14;
 }

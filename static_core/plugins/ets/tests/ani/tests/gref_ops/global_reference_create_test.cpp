@@ -105,4 +105,15 @@ TEST_F(GlobalReferenceCreateTest, invalid_result)
     ASSERT_EQ(env_->GlobalReference_Create(ref, nullptr), ANI_INVALID_ARGS);
 }
 
+TEST_F(GlobalReferenceCreateTest, global_reference_create_test)
+{
+    auto ref = CallEtsFunction<ani_ref>("GetObject");
+    ani_ref gref;
+    ASSERT_EQ(env_->GlobalReference_Create(ref, &gref), ANI_OK);
+
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("CheckObject", ref, gref), ANI_TRUE);
+
+    ASSERT_EQ(env_->GlobalReference_Delete(gref), ANI_OK);
+}
+
 }  // namespace ark::ets::ani::testing

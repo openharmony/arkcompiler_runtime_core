@@ -81,12 +81,25 @@ TEST_F(StringNewUtf16Test, StringNewUtf16_MixedString)
 TEST_F(StringNewUtf16Test, StringNewUtf16_TooLongString)
 {
     const uint16_t strSize = 1000U;
-    uint16_t example[strSize];
+    uint16_t example[strSize] = {0x0000};
     std::fill(std::begin(example), std::end(example), 0x0048);
     ani_string result = nullptr;
     auto status = env_->String_NewUTF16(example, strSize, &result);
     ASSERT_EQ(status, ANI_OK);
     ASSERT_NE(result, nullptr);
+}
+
+TEST_F(StringNewUtf16Test, StringNewUtf16_Repeat)
+{
+    ani_string result = nullptr;
+    const uint16_t example[] = {0x0048, 0x0065, 0x006C, 0x006C, 0x006F, 0x0000};
+    size_t length = sizeof(example) / sizeof(example[0U]);
+    const int32_t loopCount = 3;
+    for (int32_t i = 0; i < loopCount; ++i) {
+        auto status = env_->String_NewUTF16(example, length, &result);
+        ASSERT_EQ(status, ANI_OK);
+        ASSERT_NE(result, nullptr);
+    }
 }
 }  // namespace ark::ets::ani::testing
 

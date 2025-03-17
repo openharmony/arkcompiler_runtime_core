@@ -16,8 +16,21 @@
 namespace anyns {
     export let aChar: char = 'A';
     export let aDouble: double = 3.0;
+    export let sum: char;
+    class A {
+        static val1: char = 'C';
+        static val2: char = 2;
+        public static add(): char {
+            sum = A.val1 + A.val2;
+            return sum;
+        }
+    }
+
+    namespace second {
+        export let aValue: char = 'W';
+    }
 }
 
-function checkCharValue(value: char): boolean {
-    return anyns.aChar == value;
+namespace anyns {
+    export let testValue: char = 'M';
 }

@@ -16,8 +16,21 @@
 namespace anyns {
     export let longValue: long = 3;
     export let floatValue: float = 3.14;
+    export let sum: long;
+    class A {
+        static val1: long = 1;
+        static val2: long = 2;
+        public static add(): long {
+            sum = A.val1 + A.val2;
+            return sum;
+        }
+    }
+
+    namespace second {
+        export let aValue: long = 10;
+    }
 }
 
-function checkLongValue(value: long): boolean {
-    return anyns.longValue == value;
+namespace anyns {
+    export let testValue: long = 30;
 }

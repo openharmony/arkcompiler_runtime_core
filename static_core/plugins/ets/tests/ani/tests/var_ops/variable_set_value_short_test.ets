@@ -16,8 +16,21 @@
 namespace anyns {
     export let shortValue: short = 3;
     export let floatValue: float = 3.14;
+    export let sum: short;
+    class A {
+        static val1: short = 1;
+        static val2: short = 2;
+        public static add(): short {
+            sum = (A.val1 + A.val2) as short;
+            return sum;
+        }
+    }
+
+    namespace second {
+        export let aValue: short = 10;
+    }
 }
 
-function checkshortValue(value: short): boolean {
-    return anyns.shortValue == value;
+namespace anyns {
+    export let testValue: short = 30;
 }

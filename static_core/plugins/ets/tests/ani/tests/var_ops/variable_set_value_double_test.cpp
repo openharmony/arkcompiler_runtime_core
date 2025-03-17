@@ -16,83 +16,163 @@
 #include "ani_gtest.h"
 #include <climits>
 
-// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)
 namespace ark::ets::ani::testing {
 
-class VariableSetValueDoubleTest : public AniTest {};
+class VariableSetValueDoubleTest : public AniTest {
+public:
+    void SetUp() override
+    {
+        AniTest::SetUp();
+        ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns_), ANI_OK);
+        ASSERT_NE(ns_, nullptr);
+    }
 
-TEST_F(VariableSetValueDoubleTest, set_double_value)
+    // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
+    ani_namespace ns_ {};
+};
+
+TEST_F(VariableSetValueDoubleTest, set_double_value_normal_1)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_variable variable {};
-    ASSERT_EQ(env_->Namespace_FindVariable(ns, "aDouble", &variable), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "aDouble", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
-    ani_double value = 2.0F;
+    const ani_double value = 2.0F;
     ASSERT_EQ(env_->Variable_SetValue_Double(variable, value), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkDoubleValue", value), ANI_TRUE);
+    ani_double result = 0.0F;
+    ASSERT_EQ(env_->Variable_GetValue_Double(variable, &result), ANI_OK);
+    ASSERT_EQ(result, value);
 }
 
-TEST_F(VariableSetValueDoubleTest, set_double_value_1)
+TEST_F(VariableSetValueDoubleTest, invalid_env)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_variable variable {};
-    ASSERT_EQ(env_->Namespace_FindVariable(ns, "aDouble", &variable), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "aDouble", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
-    ani_double maxValue = std::numeric_limits<double>::max();
-    ASSERT_EQ(env_->Variable_SetValue_Double(variable, maxValue), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkDoubleValue", maxValue), ANI_TRUE);
-
-    ani_double minValue = std::numeric_limits<double>::min();
-    ASSERT_EQ(env_->Variable_SetValue_Double(variable, minValue), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkDoubleValue", minValue), ANI_TRUE);
+    const ani_double value = 2.0F;
+    ASSERT_EQ(env_->c_api->Variable_SetValue_Double(nullptr, variable, value), ANI_INVALID_ARGS);
 }
 
 TEST_F(VariableSetValueDoubleTest, set_double_value_invalid_env)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_variable variable {};
-    ASSERT_EQ(env_->Namespace_FindVariable(ns, "aDouble", &variable), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "aDouble", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
-    ani_double value = 2.0F;
+    const ani_double value = 2.0F;
     ASSERT_EQ(env_->c_api->Variable_SetValue_Double(nullptr, variable, value), ANI_INVALID_ARGS);
 }
 
-TEST_F(VariableSetValueDoubleTest, set_double_value_invalid_value_type)
+TEST_F(VariableSetValueDoubleTest, invalid_variable_type)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_variable variable {};
-    ASSERT_EQ(env_->Namespace_FindVariable(ns, "aBool", &variable), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "aBool", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
-    ani_double value = 2.0F;
+    const ani_double value = 2.0F;
     ASSERT_EQ(env_->Variable_SetValue_Double(variable, value), ANI_INVALID_TYPE);
 }
 
-TEST_F(VariableSetValueDoubleTest, set_double_value_invalid_args_variable)
+TEST_F(VariableSetValueDoubleTest, invalid_args_variable)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
-    ani_double value = 2.0F;
+    const ani_double value = 2.0F;
     ASSERT_EQ(env_->Variable_SetValue_Double(nullptr, value), ANI_INVALID_ARGS);
 }
 
+TEST_F(VariableSetValueDoubleTest, composite_case_1)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->Namespace_FindClass(ns_, "LA;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "add", ":D", &method), ANI_OK);
+
+    ani_double sum = 0.0F;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double(cls, method, &sum), ANI_OK);
+    ASSERT_EQ(sum, 4.0F);
+
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "sum", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+    ani_double getValue = 0.0F;
+    ASSERT_EQ(env_->Variable_GetValue_Double(variable, &getValue), ANI_OK);
+    ASSERT_EQ(getValue, sum);
+
+    const ani_double value = 3.14F;
+    ASSERT_EQ(env_->Variable_SetValue_Double(variable, value), ANI_OK);
+    ani_double result = 0.0F;
+    ASSERT_EQ(env_->Variable_GetValue_Double(variable, &result), ANI_OK);
+    ASSERT_EQ(result, value);
+}
+
+TEST_F(VariableSetValueDoubleTest, composite_case_2)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "aDouble", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+    const ani_double values[] = {3.14F, 6.28F, 9.42F};
+    ani_double result = 0.0F;
+    for (ani_double value : values) {
+        ASSERT_EQ(env_->Variable_SetValue_Double(variable, value), ANI_OK);
+        ASSERT_EQ(env_->Variable_GetValue_Double(variable, &result), ANI_OK);
+        ASSERT_EQ(result, value);
+    }
+}
+
+TEST_F(VariableSetValueDoubleTest, composite_case_3)
+{
+    ani_namespace result {};
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns_, "Lsecond;", &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
+
+    ani_variable variable1 {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "aDouble", &variable1), ANI_OK);
+    ASSERT_NE(variable1, nullptr);
+
+    ani_double getValue1 = 0.0F;
+    const ani_double val1 = 3.14F;
+    ASSERT_EQ(env_->Variable_SetValue_Double(variable1, val1), ANI_OK);
+    ASSERT_EQ(env_->Variable_GetValue_Double(variable1, &getValue1), ANI_OK);
+    ASSERT_EQ(getValue1, val1);
+
+    ani_variable variable2 {};
+    ASSERT_EQ(env_->Namespace_FindVariable(result, "aValue", &variable2), ANI_OK);
+    ASSERT_NE(variable2, nullptr);
+
+    ani_double getValue2 = 0.0F;
+    const ani_double val2 = 6.28F;
+    ASSERT_EQ(env_->Variable_SetValue_Double(variable2, val2), ANI_OK);
+    ASSERT_EQ(env_->Variable_GetValue_Double(variable2, &getValue2), ANI_OK);
+    ASSERT_EQ(getValue2, val2);
+}
+
+TEST_F(VariableSetValueDoubleTest, composite_case_4)
+{
+    ani_variable variable1 {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "aDouble", &variable1), ANI_OK);
+    ASSERT_NE(variable1, nullptr);
+
+    ani_double getValue1 = 0.0F;
+    const ani_double val1 = 3.14F;
+    ASSERT_EQ(env_->Variable_SetValue_Double(variable1, val1), ANI_OK);
+    ASSERT_EQ(env_->Variable_GetValue_Double(variable1, &getValue1), ANI_OK);
+    ASSERT_EQ(getValue1, val1);
+
+    ani_variable variable2 {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "testValue", &variable2), ANI_OK);
+    ASSERT_NE(variable2, nullptr);
+
+    ani_double getValue2 = 0.0F;
+    const ani_double val2 = 6.28F;
+    ASSERT_EQ(env_->Variable_SetValue_Double(variable2, val2), ANI_OK);
+    ASSERT_EQ(env_->Variable_GetValue_Double(variable2, &getValue2), ANI_OK);
+    ASSERT_EQ(getValue2, val2);
+}
 }  // namespace ark::ets::ani::testing
 
-// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
+// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)

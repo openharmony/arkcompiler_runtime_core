@@ -15,6 +15,7 @@
 
 #include "ani_gtest.h"
 
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
 namespace ark::ets::ani::testing {
 
 class CreateLocalScopeTest : public AniTest {};
@@ -23,7 +24,9 @@ class CreateLocalScopeTest : public AniTest {};
 constexpr ani_size SPECIFIED_CAPACITY = 60;
 constexpr ani_size MAX_CAPACITY = 32000000;
 constexpr ani_size MIN_CAPACITY = 1;
-constexpr size_t TEST_STRING_LENGTH = 4;
+constexpr ani_size REF_NUM = 10;
+constexpr ani_size LOOP_COUNT = 3;
+constexpr std::string_view TEST_STRING = "test";
 
 TEST_F(CreateLocalScopeTest, create_local_scope_test)
 {
@@ -46,7 +49,7 @@ TEST_F(CreateLocalScopeTest, create_local_scope_test)
     }
 
     // Create another string to confirm that string creation still works
-    ani_status res = env_->String_NewUTF8("test", TEST_STRING_LENGTH, &string);
+    ani_status res = env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &string);
     ASSERT_EQ(res, ANI_OK);
 
     // Destroy the local scope after string creation
@@ -80,7 +83,7 @@ TEST_F(CreateLocalScopeTest, create_escape_local_scope)
     }
 
     // Create another string to confirm it still works
-    ani_status res = env_->String_NewUTF8("test", TEST_STRING_LENGTH, &string);
+    ani_status res = env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &string);
     ASSERT_EQ(res, ANI_OK);
 
     ani_ref result;
@@ -103,7 +106,7 @@ TEST_F(CreateLocalScopeTest, destroy_local_scope)
 
     ani_string string = nullptr;
     // Attempt to create a new string
-    ASSERT_EQ(env_->String_NewUTF8("test", TEST_STRING_LENGTH, &string), ANI_OK);
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &string), ANI_OK);
 
     // Destroy the local scope after string creation
     ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
@@ -116,7 +119,7 @@ TEST_F(CreateLocalScopeTest, destroy_escape_local_scope)
 
     ani_string string = nullptr;
     // Create a string to test with
-    ASSERT_EQ(env_->String_NewUTF8("test", TEST_STRING_LENGTH, &string), ANI_OK);
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &string), ANI_OK);
 
     ani_ref result;
     // Destroy the escape local scope and retrieve the final reference
@@ -150,4 +153,225 @@ TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_undefinde)
     ASSERT_EQ(isUndefined, ANI_TRUE);
 }
 
+TEST_F(CreateLocalScopeTest, create_local_scope_test1)
+{
+    for (ani_size i = 1; i <= LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->CreateLocalScope(SPECIFIED_CAPACITY), ANI_OK);
+        ani_ref objectRef {};
+        ASSERT_EQ(
+            env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
+            ANI_OK);
+    }
+}
+
+TEST_F(CreateLocalScopeTest, create_local_scope_test2)
+{
+    for (ani_size i = 1; i <= LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->CreateLocalScope(MIN_CAPACITY), ANI_OK);
+        for (ani_size j = 1; j <= SPECIFIED_CAPACITY; j++) {
+            ani_ref objectRef {};
+            ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(),
+                                           reinterpret_cast<ani_string *>(&objectRef)),
+                      ANI_OK);
+        }
+    }
+}
+
+TEST_F(CreateLocalScopeTest, create_local_scope_test3)
+{
+    for (ani_size i = 1; i <= LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->CreateLocalScope(SPECIFIED_CAPACITY), ANI_OK);
+        ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
+    }
+}
+
+TEST_F(CreateLocalScopeTest, create_local_scope_test4)
+{
+    for (ani_size i = 1; i <= LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->CreateLocalScope(SPECIFIED_CAPACITY), ANI_OK);
+        ani_ref objectRef {};
+        ASSERT_EQ(
+            env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
+            ANI_OK);
+        ASSERT_EQ(env_->Reference_Delete(objectRef), ANI_OK);
+    }
+}
+
+TEST_F(CreateLocalScopeTest, create_local_scope_test5)
+{
+    for (ani_size i = 1; i <= LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->CreateLocalScope(SPECIFIED_CAPACITY), ANI_OK);
+    }
+}
+
+TEST_F(CreateLocalScopeTest, destroy_local_scope_test2)
+{
+    ASSERT_EQ(env_->CreateLocalScope(SPECIFIED_CAPACITY), ANI_OK);
+    ASSERT_EQ(env_->CreateLocalScope(SPECIFIED_CAPACITY), ANI_OK);
+    ASSERT_EQ(env_->CreateLocalScope(SPECIFIED_CAPACITY), ANI_OK);
+    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
+}
+
+TEST_F(CreateLocalScopeTest, destroy_local_scope_test3)
+{
+    for (ani_size i = 1; i <= LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->CreateLocalScope(SPECIFIED_CAPACITY), ANI_OK);
+        ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
+    }
+}
+
+TEST_F(CreateLocalScopeTest, create_escape_local_scope_test1)
+{
+    ASSERT_EQ(env_->CreateEscapeLocalScope(SPECIFIED_CAPACITY), ANI_OK);
+
+    ani_ref objectRef {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
+              ANI_OK);
+}
+
+TEST_F(CreateLocalScopeTest, create_escape_local_scope_test2)
+{
+    ASSERT_EQ(env_->CreateEscapeLocalScope(MIN_CAPACITY), ANI_OK);
+
+    for (ani_size i = 1; i <= SPECIFIED_CAPACITY; i++) {
+        ani_ref objectRef {};
+        ASSERT_EQ(
+            env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
+            ANI_OK);
+    }
+}
+
+TEST_F(CreateLocalScopeTest, create_escape_local_scope_test3)
+{
+    ASSERT_EQ(env_->CreateEscapeLocalScope(SPECIFIED_CAPACITY), ANI_OK);
+
+    ani_ref objectRef {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
+              ANI_OK);
+    ani_ref result {};
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRef, &result), ANI_OK);
+}
+
+TEST_F(CreateLocalScopeTest, create_escape_local_scope_test4)
+{
+    ASSERT_EQ(env_->CreateEscapeLocalScope(SPECIFIED_CAPACITY), ANI_OK);
+
+    ani_ref objectRef {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
+              ANI_OK);
+    ASSERT_EQ(env_->Reference_Delete(objectRef), ANI_OK);
+}
+
+TEST_F(CreateLocalScopeTest, create_escape_local_scope_test5)
+{
+    for (ani_size i = 1; i <= LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->CreateEscapeLocalScope(SPECIFIED_CAPACITY), ANI_OK);
+    }
+}
+
+TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_test1)
+{
+    ASSERT_EQ(env_->CreateEscapeLocalScope(SPECIFIED_CAPACITY), ANI_OK);
+    ASSERT_EQ(env_->CreateEscapeLocalScope(SPECIFIED_CAPACITY), ANI_OK);
+    ASSERT_EQ(env_->CreateEscapeLocalScope(SPECIFIED_CAPACITY), ANI_OK);
+
+    ani_ref objectRef {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
+              ANI_OK);
+
+    ani_ref result {};
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRef, &result), ANI_OK);
+}
+
+TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_test2)
+{
+    for (ani_size i = 1; i <= LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->CreateEscapeLocalScope(SPECIFIED_CAPACITY), ANI_OK);
+        ani_ref objectRef {};
+        ASSERT_EQ(
+            env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
+            ANI_OK);
+
+        ani_ref result {};
+        ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRef, &result), ANI_OK);
+    }
+}
+
+TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_test3)
+{
+    ASSERT_EQ(env_->CreateEscapeLocalScope(SPECIFIED_CAPACITY), ANI_OK);
+
+    ani_ref objectRefA {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRefA)),
+              ANI_OK);
+
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("LOperations;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_ref result {};
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(cls, &result), ANI_OK);
+
+    ani_static_method method {};
+    auto classA = reinterpret_cast<ani_class>(result);
+    ASSERT_EQ(env_->Class_FindStaticMethod(classA, "or", "ZZ:Z", &method), ANI_OK);
+    ASSERT_NE(method, nullptr);
+
+    ani_boolean res = ANI_FALSE;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Boolean(classA, method, &res, ANI_TRUE, ANI_FALSE), ANI_OK);
+    ASSERT_EQ(res, ANI_TRUE);
+}
+
+TEST_F(CreateLocalScopeTest, scope_test1)
+{
+    ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
+    ani_ref objectRef {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
+              ANI_OK);
+
+    ani_ref result {};
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRef, &result), ANI_OK);
+
+    ani_size size = 0U;
+    ASSERT_EQ(env_->String_GetUTF8Size(static_cast<ani_string>(result), &size), ANI_OK);
+    ASSERT_EQ(size, TEST_STRING.size());
+}
+
+TEST_F(CreateLocalScopeTest, scope_test2)
+{
+    ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
+    ani_ref objectRef {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
+              ANI_OK);
+
+    ani_ref result {};
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRef, &result), ANI_OK);
+
+    ani_boolean isEquals = ANI_FALSE;
+    ASSERT_EQ(env_->Reference_Equals(objectRef, result, &isEquals), ANI_OK);
+    ASSERT_EQ(isEquals, ANI_TRUE);
+
+    isEquals = ANI_FALSE;
+    ASSERT_EQ(env_->Reference_StrictEquals(objectRef, result, &isEquals), ANI_OK);
+    ASSERT_EQ(isEquals, ANI_TRUE);
+}
+
+TEST_F(CreateLocalScopeTest, scope_test3)
+{
+    ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
+
+    ASSERT_EQ(env_->CreateLocalScope(REF_NUM), ANI_OK);
+
+    ani_ref objectRefA {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRefA)),
+              ANI_OK);
+
+    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
+
+    ani_ref result {};
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRefA, &result), ANI_OK);
+}
+
 }  // namespace ark::ets::ani::testing
+
+// NOLINTEND(cppcoreguidelines-pro-type-vararg)

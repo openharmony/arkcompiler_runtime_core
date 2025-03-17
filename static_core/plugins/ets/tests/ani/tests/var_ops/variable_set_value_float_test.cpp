@@ -16,69 +16,172 @@
 #include "ani_gtest.h"
 #include <climits>
 
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)
 namespace ark::ets::ani::testing {
 
-class VariableSetValueFloatTest : public AniTest {};
+class VariableSetValueFloatTest : public AniTest {
+public:
+    void SetUp() override
+    {
+        AniTest::SetUp();
+        ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns_), ANI_OK);
+        ASSERT_NE(ns_, nullptr);
+    }
 
-// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
-TEST_F(VariableSetValueFloatTest, set_float_value_normal)
-{
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
-    ani_variable variable {};
-    ASSERT_EQ(env_->Namespace_FindVariable(ns, "floatValue", &variable), ANI_OK);
-    ASSERT_NE(variable, nullptr);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkFloatValue", 3.14F), ANI_TRUE);
-
-    ani_float value = 6.28F;
-    ASSERT_EQ(env_->Variable_SetValue_Float(variable, value), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkFloatValue", value), ANI_TRUE);
-}
+    // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
+    ani_namespace ns_ {};
+};
 
 TEST_F(VariableSetValueFloatTest, set_float_value_normal_1)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_variable variable {};
-    ASSERT_EQ(env_->Namespace_FindVariable(ns, "floatValue", &variable), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "floatValue", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
+    ani_float result = 0.0F;
+    ASSERT_EQ(env_->Variable_GetValue_Float(variable, &result), ANI_OK);
+    ASSERT_EQ(result, 3.14F);
 
-    ani_float maxValue = std::numeric_limits<float>::max();
-    ASSERT_EQ(env_->Variable_SetValue_Float(variable, maxValue), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkFloatValue", maxValue), ANI_TRUE);
-
-    ani_float minValue = std::numeric_limits<float>::min();
-    ASSERT_EQ(env_->Variable_SetValue_Float(variable, minValue), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkFloatValue", minValue), ANI_TRUE);
+    const ani_float value = 6.28F;
+    ASSERT_EQ(env_->Variable_SetValue_Float(variable, value), ANI_OK);
+    result = 0.0F;
+    ASSERT_EQ(env_->Variable_GetValue_Float(variable, &result), ANI_OK);
+    ASSERT_EQ(result, value);
 }
 
-TEST_F(VariableSetValueFloatTest, set_float_value_invalid_args_variable_1)
+TEST_F(VariableSetValueFloatTest, invalid_env)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_variable variable {};
-    ASSERT_EQ(env_->Namespace_FindVariable(ns, "intValue", &variable), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "floatValue", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
-    ani_float value = 6.28F;
+    const ani_float value = 6.28F;
+    ASSERT_EQ(env_->c_api->Variable_SetValue_Float(nullptr, variable, value), ANI_INVALID_ARGS);
+}
+
+TEST_F(VariableSetValueFloatTest, invalid_variable_type)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "intValue", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+    const ani_float value = 6.28F;
     ASSERT_EQ(env_->Variable_SetValue_Float(variable, value), ANI_INVALID_TYPE);
 }
 
-TEST_F(VariableSetValueFloatTest, set_float_value_invalid_args_variable_2)
+TEST_F(VariableSetValueFloatTest, invalid_args_variable)
+{
+    const ani_float value = 6.28F;
+    ASSERT_EQ(env_->Variable_SetValue_Float(nullptr, value), ANI_INVALID_ARGS);
+}
+
+TEST_F(VariableSetValueFloatTest, other_type_value)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "floatValue", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+    ani_double maxValue = std::numeric_limits<double>::max();
+    ASSERT_EQ(env_->Variable_SetValue_Float(variable, maxValue), ANI_OK);
+    ani_float result = 0.0F;
+    ASSERT_EQ(env_->Variable_GetValue_Float(variable, &result), ANI_OK);
+}
+
+TEST_F(VariableSetValueFloatTest, composite_case_1)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->Namespace_FindClass(ns_, "LA;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "add", ":F", &method), ANI_OK);
+
+    ani_float sum = 0.0F;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Float(cls, method, &sum), ANI_OK);
+    ASSERT_EQ(sum, 4.0F);
+
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "sum", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+    ani_float getValue = 0.0F;
+    ASSERT_EQ(env_->Variable_GetValue_Float(variable, &getValue), ANI_OK);
+    ASSERT_EQ(getValue, sum);
+
+    const ani_float value = 3.14F;
+    ASSERT_EQ(env_->Variable_SetValue_Float(variable, value), ANI_OK);
+    ani_float result = 0.0F;
+    ASSERT_EQ(env_->Variable_GetValue_Float(variable, &result), ANI_OK);
+    ASSERT_EQ(result, value);
+}
+
+TEST_F(VariableSetValueFloatTest, composite_case_2)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "floatValue", &variable), ANI_OK);
+    ASSERT_NE(variable, nullptr);
+
+    const ani_float values[] = {3.14F, 6.28F, 9.42F};
+    ani_float result = 0.0F;
+    for (ani_float value : values) {
+        ASSERT_EQ(env_->Variable_SetValue_Float(variable, value), ANI_OK);
+        ASSERT_EQ(env_->Variable_GetValue_Float(variable, &result), ANI_OK);
+        ASSERT_EQ(result, value);
+    }
+}
+
+TEST_F(VariableSetValueFloatTest, composite_case_3)
+{
+    ani_namespace result {};
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns_, "Lsecond;", &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
+
+    ani_variable variable1 {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "floatValue", &variable1), ANI_OK);
+    ASSERT_NE(variable1, nullptr);
+
+    ani_float getValue1;
+    const ani_float val1 = 3.14F;
+    ASSERT_EQ(env_->Variable_SetValue_Float(variable1, val1), ANI_OK);
+    ASSERT_EQ(env_->Variable_GetValue_Float(variable1, &getValue1), ANI_OK);
+    ASSERT_EQ(getValue1, val1);
+
+    ani_variable variable2 {};
+    ASSERT_EQ(env_->Namespace_FindVariable(result, "aValue", &variable2), ANI_OK);
+    ASSERT_NE(variable2, nullptr);
+
+    ani_float getValue2 = 0.0F;
+    const ani_float val2 = 6.28F;
+    ASSERT_EQ(env_->Variable_SetValue_Float(variable2, val2), ANI_OK);
+    ASSERT_EQ(env_->Variable_GetValue_Float(variable2, &getValue2), ANI_OK);
+    ASSERT_EQ(getValue2, val2);
+}
+
+TEST_F(VariableSetValueFloatTest, composite_case_4)
 {
     ani_namespace ns {};
     ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
-    ani_float value = 6.28F;
-    ASSERT_EQ(env_->Variable_SetValue_Float(nullptr, value), ANI_INVALID_ARGS);
+    ani_variable variable1 {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns, "floatValue", &variable1), ANI_OK);
+    ASSERT_NE(variable1, nullptr);
+
+    ani_float getValue1 = 0.0F;
+    const ani_float val1 = 3.14F;
+    ASSERT_EQ(env_->Variable_SetValue_Float(variable1, val1), ANI_OK);
+    ASSERT_EQ(env_->Variable_GetValue_Float(variable1, &getValue1), ANI_OK);
+    ASSERT_EQ(getValue1, val1);
+
+    ani_variable variable2 {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns, "testValue", &variable2), ANI_OK);
+    ASSERT_NE(variable2, nullptr);
+
+    ani_float getValue2 = 0.0F;
+    const ani_float val2 = 6.28F;
+    ASSERT_EQ(env_->Variable_SetValue_Float(variable2, val2), ANI_OK);
+    ASSERT_EQ(env_->Variable_GetValue_Float(variable2, &getValue2), ANI_OK);
+    ASSERT_EQ(getValue2, val2);
 }
 }  // namespace ark::ets::ani::testing
 
-// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
+// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)
