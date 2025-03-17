@@ -256,3 +256,212 @@ class Generic1<Type extends Object> extends Generic0<Type> {
         return 2
     }
 }
+
+namespace test002A {
+    namespace test002B {
+        class TestA002 {
+            public sum(a0: int, a1: int): int
+            {
+                return a0 + a1;
+            }
+        }
+    }
+}
+
+class TestA003 {
+    constructor(l: int, w: int)
+    {
+        this.length = l;
+        this.width = w;
+    }
+
+    public int_method(a0: int, a1: int): int
+    {
+        return a0 * a1;
+    }
+
+    protected float_method(a0: float, a1: float): float
+    {
+        return a0 + a1;
+    }
+
+    private bool_method(a0: boolean, a1: boolean): boolean
+    {
+        return a0 || a1;
+    }
+
+    private length: int;
+    private width: int;
+}
+
+class TestA004 {
+    constructor(l: int, w: int)
+    {
+        this.length = l;
+        this.width = w;
+    }
+
+    int_method(a0: int, a1: int): int
+    {
+        return a0 * a1;
+    }
+
+    float_method(a0: float, a1: float): float
+    {
+        return a0 + a1;
+    }
+
+    bool_method(a0: boolean, a1: boolean): boolean
+    {
+        return a0 || a1;
+    }
+
+    private length: int;
+    private width: int;
+}
+
+final class TestA005 {
+    constructor() {
+    }
+
+    public int_method(a0: int, a1: int): int
+    {
+        return a0 + a1;
+    }
+}
+
+abstract class Person {
+    public abstract add_method(a0: int, a1: int): int;
+};
+
+class Student extends Person {
+    public override add_method(a0: int, a1: int): int
+    {
+        return a0 + a1;
+    }
+};
+
+class Child extends Student {
+    public override add_method(a0: int, a1: int): int
+    {
+        return a0 * a1;
+    }
+};
+
+class TestA008 {
+    int_method(a: TestA008): int
+    {
+        return 55;
+    }
+};
+
+class TestB008 extends TestA008 {
+    int_method(a: TestA008): int
+    {
+        return 66;
+    }
+};
+
+abstract class CombineA {
+    public abstract func(a: int, b: int): int;
+}
+
+class CombineB extends CombineA {
+    public override func(a: int, b: int): int {
+        return a - b;
+    }
+}
+
+final class AF extends CombineA {
+    public override func(a: int, b: int): int {
+        return a + b;
+    }
+}
+
+class CombineC extends CombineB {
+    public override func(a: int, b: int): int {
+        return a - b - 1;
+    }
+}
+
+namespace nsa {
+    namespace nsb {
+        class A {
+            public func(a: int, b: int): int {
+                return a + b;
+            }
+        }
+    }
+}
+
+class Phone {
+    static get_button_names(): string[] {
+        return ["up", "down"]
+    }
+};
+
+final class Operations {
+    static sum(a0: int, a1: int): int {
+        return a0 + a1;
+    }
+};
+
+class ClassA {
+    static calculateSquareArea(length: int, wide: int, height: int): int {
+        return length * wide * height;
+    }
+    static calculateSquareArea(length: int, wide: int): int {
+        return length * wide;
+    }
+    calculateSquareArea(length: int): int {
+        return length;
+    }
+
+    static sumA(a0: int, a1: int): int {
+        return a0 + a1;
+    }
+
+    static sumB(a0: int, a1: int, a2: int): int {
+        return a2 + ClassA.sumA(a0, a1);
+    }
+};
+
+class ClassB extends ClassA {
+    static or(a0: boolean, a1: boolean): boolean {
+        return a0 || a1;
+    }
+};
+
+interface ICalculator {
+    add(x: int, y: int): int;
+    subtract(x: int, y: int): int;
+};
+ 
+class BasicCalculator implements ICalculator {
+    add(x: int, y: int): int {
+        return x + y;
+    }
+    subtract(x: int, y: int): int {
+        return x - y;
+    }
+    static multiply(x: int, y: int): int {
+        return x * y;
+    }
+};
+
+class SubCalculator extends BasicCalculator {
+    constructor(a: int, b: int) {
+        this.width = a;
+        this.height = b;
+    }
+
+    sum(x: int, y: int): int {
+        return x + y;
+    }
+
+    static divide(x: int, y: int): int {
+        return x / y;
+    }
+    private width: int;
+    private height: int;
+};

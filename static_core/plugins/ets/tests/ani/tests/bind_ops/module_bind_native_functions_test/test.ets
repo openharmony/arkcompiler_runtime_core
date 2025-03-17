@@ -23,3 +23,12 @@ function checkSum(): boolean {
 function checkConcat(): boolean {
     return concat("abc", "def") == "abcdef";
 }
+
+namespace test001A {
+    class TestA001 {
+        constructor() {
+        }
+        public native foo(): int;
+        public native long_foo(): long;
+    }
+}

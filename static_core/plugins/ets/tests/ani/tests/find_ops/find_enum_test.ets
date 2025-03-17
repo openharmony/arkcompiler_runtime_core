@@ -13,33 +13,51 @@
  * limitations under the License.
  */
 
-namespace geometry {
-    class Point {
-        x: int;
-        y: int;
-    };
+enum Color {
+    RED,
+    GREEN,
+    BLUE
 }
 
-namespace nameA {
-    namespace nameB {
-        function int_method(a0: int, a1: int): int
-        {
-            return a0 + a1;
+enum ColorInt {
+    REDINT = 5,
+    GREENINT = 77,
+    BLUEINT = 999
+}
+
+enum ColorString {
+    REDSTR = "str_red",
+    GREENSTR = "str_green",
+    BLUESTR = "str_blue"
+}
+
+enum EnumA001 {
+    RED,
+    GREEN,
+    BLUE
+}
+
+namespace test003A {
+    namespace test003B {
+        enum EnumA003 {
+            RED,
+            GREEN,
+            BLUE
         }
     }
 }
 
-namespace spaceA {
-    namespace spaceB {
-        function int_method(a0: int, a1: int): int
-        {
-            return a0 + a1;
+namespace test004A {
+    namespace test004B {
+        enum EnumA004 {
+            BLUE,
+            RED,
+            GREEN
         }
-        namespace spaceC {
-            function int_method(a0: int, a1: int): int
-            {
-                return a0 * a1;
-            }
-        }
+    }
+    enum EnumA004 {
+        RED,
+        GREEN,
+        BLUE
     }
 }

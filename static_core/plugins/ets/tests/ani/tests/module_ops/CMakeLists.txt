@@ -38,3 +38,15 @@ ETS_NAMED_MODE
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_namespace_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_namespace_test.ets
 )
+
+# NOTE(ypigunova) enable tests. Issue: #23593
+if (PANDA_TARGET_ARM32)
+    return()
+endif()
+
+ani_add_gtest(ani_test_module_find_enum
+ETS_NAMED_MODE
+    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_enum_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_enum_test.ets
+)

@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -15,9 +15,14 @@
 
 #include "ani_gtest.h"
 
+// NOLINTBEGIN(modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class FindNamespaceTest : public AniTest {};
+class FindNamespaceTest : public AniTest {
+public:
+    static constexpr ani_int VAL1 = 5;
+    static constexpr ani_int VAL2 = 6;
+};
 
 TEST_F(FindNamespaceTest, has_namespace)
 {
@@ -50,4 +55,41 @@ TEST_F(FindNamespaceTest, DISABLED_namespace_is_not_class)
     ASSERT_EQ(env_->FindClass("Lgeometry;", &cls), ANI_NOT_FOUND);
 }
 
+TEST_F(FindNamespaceTest, find_namespace_combine_scenes_002)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("LnameA/nameB;", &ns), ANI_OK);
+    ASSERT_NE(ns, nullptr);
+
+    ani_function fn {};
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "int_method", "II:I", &fn), ANI_OK);
+    ASSERT_NE(fn, nullptr);
+
+    ani_value args[2U];
+    args[0].i = VAL1;
+    args[1].i = VAL2;
+    ani_int value = 0;
+    ASSERT_EQ(env_->Function_Call_Int_A(fn, &value, args), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+}
+
+TEST_F(FindNamespaceTest, find_namespace_combine_scenes_003)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("LspaceA/spaceB/spaceC;", &ns), ANI_OK);
+    ASSERT_NE(ns, nullptr);
+
+    ani_function fn {};
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "int_method", "II:I", &fn), ANI_OK);
+    ASSERT_NE(fn, nullptr);
+
+    ani_value args[2U];
+    args[0].i = VAL1;
+    args[1].i = VAL2;
+    ani_int value = 0;
+    ASSERT_EQ(env_->Function_Call_Int_A(fn, &value, args), ANI_OK);
+    ASSERT_EQ(value, VAL1 * VAL2);
+}
 }  // namespace ark::ets::ani::testing
+
+// NOLINTEND(modernize-avoid-c-arrays)

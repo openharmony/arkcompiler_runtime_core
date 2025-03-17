@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-class Phone {
-    static get_button_names(): string[] {
-        return ["up", "down"]
-    }
-};
+function sum(a0: int, a1: int): int
+{
+    return a0 + a1;
+}
+

@@ -16,3 +16,23 @@
 class A {}
 
 class B extends A {}
+
+class Person {
+    add_method(a0: int, a1: int): int {
+        return a0 + a1;
+    }
+};
+
+class Student extends Person {
+    add_method(a0: int, a1: int): int
+    {
+        return a0 - a1;
+    }
+};
+
+class Child extends Student {
+    add_method(a0: int, a1: int): int
+    {
+        return a0 * a1;
+    }
+};

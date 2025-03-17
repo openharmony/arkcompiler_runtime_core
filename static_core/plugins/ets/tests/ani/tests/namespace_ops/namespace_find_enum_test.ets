@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,14 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-interface I {}
-
-class A implements I {}
-
-class B extends A {}
-
-class BaseA {}
-class SubB extends BaseA {}
-class SubC extends SubB {}
-class D {}
+ 
+namespace test002A {
+    enum EnumA002 {
+        RED,
+        GREEN,
+        BLUE
+    }
+}

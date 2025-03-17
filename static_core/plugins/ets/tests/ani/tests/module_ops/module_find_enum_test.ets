@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-enum ToFind {
+enum Color {
     RED,
-    GREEN,
-    BLUE
+    BLUE,
+    GREEN
 }
 
-enum ToFindInt {
-    REDINT = 5,
-    GREENINT = 77,
-    BLUEINT = 999
+enum ColorInt {
+    RED = 5,
+    BLUE = 77,
+    GREEN = 9999
 }
 
-enum ToFindString {
-    REDSTR = "str_red",
-    GREENSTR = "str_green",
-    BLUESTR = "str_blue"
+enum ColorString {
+    RED = "str_red",
+    BLUE = "str_blue",
+    GREEN = "str_green"
 }
