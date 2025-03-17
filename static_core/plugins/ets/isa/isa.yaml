@@ -224,7 +224,7 @@ groups:
           end
           acc = call(method, args)
       else
-          throw NullPointerException
+          throw_ets_exception(no_such_method_error)
       end
     namespace: ets
     instructions:
@@ -232,17 +232,14 @@ groups:
         acc: out:top
         format: [pref_op_v1_4_v2_4_id_16]
         prefix: ets
-        intrinsic_name: INTRINSIC_COMPILER_ETS_CALL_BY_NAME_SHORT
       - sig: ets.call.name method_id, v1:in:top, v2:in:top, v3:in:top, v4:in:top
         acc: out:top
         format: [pref_op_v1_4_v2_4_v3_4_v4_4_id_16]
         prefix: ets
-        intrinsic_name: INTRINSIC_COMPILER_ETS_CALL_BY_NAME
       - sig: ets.call.name.range method_id, v:in:top
         acc: out:top
         format: [pref_op_v_8_id_16]
         prefix: ets
-        intrinsic_name: INTRINSIC_COMPILER_ETS_CALL_BY_NAME_RANGE
 
   - title: Load 'nullvalue' reference into accumulator
     description: >

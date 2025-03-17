@@ -890,6 +890,13 @@ instructions:
     flags: []
     description: Expand known intrinsics using Encoder
 
+  - opcode: ResolveByName
+    base: ResolveVirtualInst
+    signature: [d-ptr, ref-nc, save_state]
+    flags: [can_throw, barrier, require_state, runtime_call]
+    abckit_flags: [can_throw, barrier, runtime_call]
+    description: Prepare a method address for CallResolvedVirtual by method name. First input is an object reference.
+
     ##############################################################################
     # Low-level instructions
     #

@@ -414,6 +414,11 @@ LOCATIONS_BUILDER(void)::VisitStoreStatic([[maybe_unused]] GraphVisitor *visitor
     }
 }
 
+LOCATIONS_BUILDER(void)::VisitResolveByName([[maybe_unused]] GraphVisitor *visitor, Inst *inst)
+{
+    inst->CastToResolveByName()->SetDstLocation(GetLocationForReturn(inst));
+}
+
 template <Arch ARCH>
 Location LocationsBuilder<ARCH>::GetLocationForReturn(Inst *inst)
 {

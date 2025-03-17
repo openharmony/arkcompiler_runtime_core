@@ -59,51 +59,29 @@
 
 #23823
 03.types/19.union_types/02.access_to_common_union_members/cm_fld2_11.ets
+03.types/19.union_types/02.access_to_common_union_members/cm_fld3_0.ets
+03.types/19.union_types/02.access_to_common_union_members/cm_fld3_1.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_fld3_11.ets
+03.types/19.union_types/02.access_to_common_union_members/cm_fld3_12.ets
+03.types/19.union_types/02.access_to_common_union_members/cm_fld3_2.ets
+03.types/19.union_types/02.access_to_common_union_members/cm_fld3_4.ets
+03.types/19.union_types/02.access_to_common_union_members/cm_fld3_5.ets
+03.types/19.union_types/02.access_to_common_union_members/cm_fld3_6.ets
+03.types/19.union_types/02.access_to_common_union_members/cm_fld3_7.ets
+03.types/19.union_types/02.access_to_common_union_members/cm_fld3_8.ets
+03.types/19.union_types/02.access_to_common_union_members/cm_fld3_9.ets
+03.types/19.union_types/02.access_to_common_union_members/cm_fld3_10.ets
 
 #20935 Runtime aborts on access to common field with generics
 03.types/19.union_types/02.access_to_common_union_members/cm_fld1_11.ets
 
 #20936 Access to common union method doesn't work
-03.types/19.union_types/02.access_to_common_union_members/cm_spec_0.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth1_0.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth1_1.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth1_10.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth1_11.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth1_12.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth1_2.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth1_3.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth1_4.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth1_5.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth1_6.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth1_7.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth1_8.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth1_9.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth2_0.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth2_1.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth2_10.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_11.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth2_12.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth2_2.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_3.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_4.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth2_5.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_6.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth2_7.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth2_8.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth2_9.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth3_0.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth3_1.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth3_10.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth3_11.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth3_12.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth3_2.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth3_4.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth3_5.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth3_6.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth3_7.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth3_8.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth3_9.ets
 
 #24598
 03.types/19.union_types/03.keyof_types/keyof_class_15.ets

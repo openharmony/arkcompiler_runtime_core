@@ -53,3 +53,10 @@
     handle_ets_typeof(vreg_value(op[0]).ref)
   when "ETS_ISTRUE_PREF_V8"
     handle_ets_istrue(vreg_value(op[0]).ref)
+
+  when "ETS_CALL_NAME_SHORT_PREF_V4_V4_ID16"
+    handle_ets_call_name_short(op[1], op[2], as_id(op[0]), i.format.size)
+  when "ETS_CALL_NAME_PREF_V4_V4_V4_V4_ID16"
+    handle_ets_call_name_long(op[1], op[2], op[3], op[4], as_id(op[0]), i.format.size)
+  when "ETS_CALL_NAME_RANGE_PREF_V8_ID16"
+    handle_ets_call_name_range(op[1], as_id(op[0]), i.format.size)

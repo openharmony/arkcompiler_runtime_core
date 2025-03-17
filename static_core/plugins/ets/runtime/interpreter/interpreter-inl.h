@@ -31,6 +31,7 @@
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_stubs.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
+#include "runtime/include/class_linker-inl.h"
 
 namespace ark::ets {
 template <class RuntimeIfaceT, bool IS_DYNAMIC, bool IS_DEBUG, bool IS_PROFILE_ENABLED>
@@ -325,39 +326,73 @@ public:
         }
     }
 
+    template <BytecodeInstruction::Format FORMAT, bool IS_RANGE = false>
+    ALWAYS_INLINE void HandleEtsMethodCallName()
+    {
+        auto id = this->GetInst().template GetId<FORMAT>();
+        uint16_t vs = this->GetInst().template GetVReg<FORMAT, 0>();
+        ObjectHeader *obj = this->GetFrame()->GetVReg(vs).GetReference();
+        if (UNLIKELY(obj == nullptr)) {
+            RuntimeIfaceT::ThrowNullPointerException();
+            this->MoveToExceptionHandler();
+            return;
+        }
+        auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+        auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+        auto caller = this->GetFrame()->GetMethod();
+        auto rawMethod = classLinker->GetMethod(*caller, caller->GetClass()->ResolveMethodIndex(id.AsIndex()));
+        if (UNLIKELY(rawMethod == nullptr)) {
+            HandlePendingException();
+            this->MoveToExceptionHandler();
+            return;
+        }
+        InterpreterCache *cache = this->GetThread()->GetInterpreterCache();
+        ETSStubCacheInfo cacheInfo {cache->GetEntry(this->GetInst().GetAddress()), caller,
+                                    this->GetInst().GetAddress()};
+        ark::Method *method = GetMethodByName(GetCoro(), cacheInfo, rawMethod, klass);
+        if (UNLIKELY(method == nullptr)) {
+            LookUpException(klass, rawMethod);
+            this->MoveToExceptionHandler();
+            return;
+        }
+        if (method->IsAbstract()) {
+            RuntimeIfaceT::ThrowAbstractMethodError(method);
+            this->MoveToExceptionHandler();
+            return;
+        }
+        this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT, false, IS_RANGE, false, false, false>(
+            method);
+    }
+
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleEtsCallNameShort()
     {
-        auto id = this->GetInst().template GetId<FORMAT>();
         LOG_INST() << "ets.call.name.short v" << this->GetInst().template GetVReg<FORMAT, 0>() << ", v"
-                   << this->GetInst().template GetVReg<FORMAT, 1>() << ", " << std::hex << "0x" << id;
-        // NOTE issue(21892) support callbyname
-        // This stub should be replaced with appropriate handler
-        this->MoveToExceptionHandler();
+                   << this->GetInst().template GetVReg<FORMAT, 1>() << ", " << std::hex << "0x"
+                   << this->GetInst().template GetId<FORMAT>();
+
+        HandleEtsMethodCallName<FORMAT>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleEtsCallName()
     {
-        auto id = this->GetInst().template GetId<FORMAT>();
         LOG_INST() << "ets.call.name v" << this->GetInst().template GetVReg<FORMAT, 0>() << ", v"
                    << this->GetInst().template GetVReg<FORMAT, 1>() << ", v"
                    << this->GetInst().template GetVReg<FORMAT, 2>() << ", v"
-                   << this->GetInst().template GetVReg<FORMAT, 3>() << ", " << std::hex << "0x" << id;
-        // NOTE issue(21892) support callbyname
-        // This stub should be replaced with appropriate handler
-        this->MoveToExceptionHandler();
+                   << this->GetInst().template GetVReg<FORMAT, 3>() << ", " << std::hex << "0x"
+                   << this->GetInst().template GetId<FORMAT>();
+
+        HandleEtsMethodCallName<FORMAT>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleEtsCallNameRange()
     {
-        auto id = this->GetInst().template GetId<FORMAT>();
         LOG_INST() << "ets.call.name.range v" << this->GetInst().template GetVReg<FORMAT, 0>() << ", " << std::hex
-                   << "0x" << id;
-        // NOTE issue(21892) support callbyname
-        // This stub should be replaced with appropriate handler
-        this->MoveToExceptionHandler();
+                   << "0x" << this->GetInst().template GetId<FORMAT>();
+
+        HandleEtsMethodCallName<FORMAT, true>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
