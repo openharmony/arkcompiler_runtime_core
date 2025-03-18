@@ -1828,12 +1828,6 @@
 #21157
 13.compilation_units/03.import_directives/05.type_binding/type_binding_class_same_name_2.ets
 
-#22881
-13.compilation_units/05.declaration_modules/declaration_modules_3.ets
-13.compilation_units/05.declaration_modules/declaration_modules_4.ets
-13.compilation_units/05.declaration_modules/declaration_modules_6.ets
-13.compilation_units/05.declaration_modules/declaration_modules_7.ets
-
 #23440
 13.compilation_units/05.declaration_modules/declaration_modules_8.ets
 13.compilation_units/05.declaration_modules/declaration_modules_9.ets
