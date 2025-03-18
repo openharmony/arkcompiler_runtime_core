@@ -17,66 +17,168 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
+static constexpr int32_t LOOP_COUNT = 3;
 
-class ClassGetStaticFieldByNameCharTest : public AniTest {};
+class ClassGetStaticFieldByNameCharTest : public AniTest {
+public:
+    void GetFieldValue(const char *className, const char *fieldName)
+    {
+        ani_class cls {};
+        const ani_char setTarget = 2U;
+        ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
+
+        ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, fieldName, setTarget), ANI_OK);
+        ani_char resultValue = ' ';
+        ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, fieldName, &resultValue), ANI_OK);
+        ASSERT_EQ(resultValue, setTarget);
+    }
+};
 
 TEST_F(ClassGetStaticFieldByNameCharTest, get_static_field_char_capi)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("LGetCharStatic;", &cls), ANI_OK);
-    ani_char name;
+    ani_char name = 'c';
     ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_Char(env_, cls, "name", &name), ANI_OK);
-    ASSERT_EQ(name, ani_char('b'));
+    ASSERT_EQ(name, static_cast<ani_char>('b'));
 }
 
 TEST_F(ClassGetStaticFieldByNameCharTest, get_static_field_char)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("LGetCharStatic;", &cls), ANI_OK);
-    ani_char name;
+    ani_char name = 'c';
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "name", &name), ANI_OK);
-    ASSERT_EQ(name, ani_char('b'));
+    ASSERT_EQ(name, static_cast<ani_char>('b'));
 }
 
 TEST_F(ClassGetStaticFieldByNameCharTest, not_found)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("LGetCharStatic;", &cls), ANI_OK);
-    ani_char name;
+    ani_char name = 'c';
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "nameChar", &name), ANI_NOT_FOUND);
 }
 
 TEST_F(ClassGetStaticFieldByNameCharTest, get_static_field_char_invalid_field_type)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("LGetCharStatic;", &cls), ANI_OK);
 
-    ani_char name;
+    ani_char name = 'c';
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "age", &name), ANI_INVALID_TYPE);
 }
 
 TEST_F(ClassGetStaticFieldByNameCharTest, invalid_argument1)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("LGetCharStatic;", &cls), ANI_OK);
-    ani_char name;
+    ani_char name = 'c';
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(nullptr, "name", &name), ANI_INVALID_ARGS);
 }
 
 TEST_F(ClassGetStaticFieldByNameCharTest, invalid_argument2)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("LGetCharStatic;", &cls), ANI_OK);
-    ani_char name;
+    ani_char name = 'c';
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, nullptr, &name), ANI_INVALID_ARGS);
 }
 
 TEST_F(ClassGetStaticFieldByNameCharTest, invalid_argument3)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("LGetCharStatic;", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "name", nullptr), ANI_INVALID_ARGS);
 }
 
+TEST_F(ClassGetStaticFieldByNameCharTest, invalid_argument4)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("LGetCharStatic;", &cls), ANI_OK);
+    ani_char name = 'c';
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "", &name), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "\n", &name), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_Char(nullptr, cls, "name", &name), ANI_INVALID_ARGS);
+}
+
+TEST_F(ClassGetStaticFieldByNameCharTest, special_values)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("LGetCharStatic;", &cls), ANI_OK);
+    ani_char single = 'c';
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "specia2", &single), ANI_INVALID_TYPE);
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "specia3", &single), ANI_INVALID_TYPE);
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "specia4", &single), ANI_INVALID_TYPE);
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "specia5", &single), ANI_OK);
+    ASSERT_EQ(single, static_cast<ani_char>('\n'));
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "specia6", &single), ANI_OK);
+    ASSERT_EQ(single, static_cast<ani_char>('\r'));
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "specia7", &single), ANI_OK);
+    ASSERT_EQ(single, static_cast<ani_char>('\t'));
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "specia8", &single), ANI_OK);
+    ASSERT_EQ(single, static_cast<ani_char>('\b'));
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "specia12", &single), ANI_OK);
+    ASSERT_EQ(single, static_cast<ani_char>('\0'));
+
+    ani_char maxValue = std::numeric_limits<ani_char>::max();
+    ani_char minValue = std::numeric_limits<ani_char>::min();
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "charMin", &single), ANI_OK);
+    ASSERT_EQ(single, static_cast<ani_char>(minValue));
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "charMax", &single), ANI_OK);
+    ASSERT_EQ(single, static_cast<ani_char>(maxValue));
+}
+
+TEST_F(ClassGetStaticFieldByNameCharTest, combination_test1)
+{
+    ani_class cls {};
+    const ani_char setTarget = 2U;
+    const ani_char setTarget2 = 3U;
+    ani_char single = 'c';
+    ASSERT_EQ(env_->FindClass("LGetCharStatic;", &cls), ANI_OK);
+    for (int32_t i = 0; i < LOOP_COUNT - 1; i++) {
+        ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "name", setTarget2), ANI_OK);
+        ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "name", &single), ANI_OK);
+        ASSERT_EQ(single, setTarget2);
+    }
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "name", setTarget), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "name", &single), ANI_OK);
+    ASSERT_EQ(single, setTarget);
+}
+
+TEST_F(ClassGetStaticFieldByNameCharTest, combination_test2)
+{
+    ani_class cls {};
+    const ani_char setTarget = 2U;
+    ASSERT_EQ(env_->FindClass("LGetCharStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "name", setTarget), ANI_OK);
+    ani_char single = 'c';
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "name", &single), ANI_OK);
+        ASSERT_EQ(single, setTarget);
+    }
+}
+
+TEST_F(ClassGetStaticFieldByNameCharTest, combination_test3)
+{
+    ani_class cls;
+    const ani_char target = 'b';
+    ASSERT_EQ(env_->FindClass("LGetCharStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "name", target), ANI_OK);
+    ani_char resultValue = ' ';
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "name", &resultValue), ANI_OK);
+    ASSERT_EQ(resultValue, target);
+}
+
+TEST_F(ClassGetStaticFieldByNameCharTest, combination_test4)
+{
+    GetFieldValue("LCharStaticA;", "char_value");
+}
+
+TEST_F(ClassGetStaticFieldByNameCharTest, combination_test5)
+{
+    GetFieldValue("LCharStaticFinal;", "char_value");
+}
 }  // namespace ark::ets::ani::testing
+
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

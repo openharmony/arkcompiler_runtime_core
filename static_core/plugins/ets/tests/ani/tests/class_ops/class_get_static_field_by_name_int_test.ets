@@ -16,4 +16,18 @@
 class GetIntStatic {
     static name: String = "Bob";
     static age: int = 20;
+    static specia1: int = 0;
+    static specia3: string = "";
+    static specia4: null = null;
+    static specia5: undefined  = undefined ;
+    static min: int = -2147483648;
+    static max: int = 2147483647;
+}
+
+class PackstaticA extends GetIntStatic {
+    static int_value: int = 0;
+}
+
+final class PackstaticFinal extends GetIntStatic {
+    static int_value: int = 0;
 }

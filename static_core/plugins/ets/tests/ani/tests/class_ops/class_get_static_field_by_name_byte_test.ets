@@ -14,6 +14,27 @@
  */
 
 class GetbyteStatic {
-    static name: String = "Bob";
+    static name: string = "Bob";
     static age: byte = 0;
+    static specia2: string = "";
+    static specia3: null = null;
+    static specia4: undefined  = undefined ;
+    static specia5: string = '\n';
+    static specia6: string = '\r';
+    static specia7: string = '\t';
+    static specia8: string = '\b';
+    static specia9: string = '\a';
+    static specia10: string = '\f';
+    static specia11: string = '\v';
+    static specia12: string = '\0';
+    static byteMin: byte = -128;
+    static byteMax: byte = 127;
+}
+
+class ByteStaticA extends GetbyteStatic {
+    static byte_value: byte = 0;
+}
+
+final class ByteStaticFinal extends GetbyteStatic {
+    static byte_value: byte = 0;
 }

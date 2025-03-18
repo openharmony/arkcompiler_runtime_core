@@ -16,4 +16,20 @@
 class GetBoolStatic {
     static name: String = "Bob";
     static single: boolean = false;
+    static specia1: int = 0;
+    static specia3: String = "";
+    static specia4: null = null;
+    static specia5: undefined  = undefined ;
+    static specia6: boolean = !'s';
+    static specia7: boolean = !0;
+    static specia8: boolean = true;
+    static specia9: boolean = false;
+}
+
+class BoolStaticA extends GetBoolStatic {
+    static bool_value: boolean = false;
+}
+
+final class BoolStaticFinal extends GetBoolStatic {
+    static bool_value: boolean = false;
 }
