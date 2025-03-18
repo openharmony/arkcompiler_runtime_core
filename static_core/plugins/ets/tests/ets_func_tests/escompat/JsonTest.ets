@@ -141,7 +141,7 @@ class CycleB {
 function testCheckParse(): int {
     let errors = 0
     errors += test(!JSON.isCorrectForParsing(Type.of(new NoConstructor(10.0) as Object)), "No constructor")
-    errors += test(!JSON.isCorrectForParsing(Type.of(new ForbiddenPrimitives() as Object)), "Forbidden primitives")
+    errors += test(JSON.isCorrectForParsing(Type.of(new ForbiddenPrimitives() as Object)), "Forbidden primitives")
     // #21831: CycleA is nullable
     // errors += test(!JSON.isCorrectForParsing(Type.of(new CycleA() as Object)), "Cycle") // NOTE(pantos) StackOverflowError
     return errors
@@ -411,6 +411,27 @@ function testStringifyUnicodeStrings(): int {
     return testResult
 }
 
+class A {
+    integerValue: int = 0;
+    longValue: long = 1;
+    shortValue: short = 1;
+    floatValue: float = 1.2;
+    byteValue: byte = 1;
+}
+
+function testJSONParse(): int {
+    let testResult: int = 0
+    let text:string = `{\"integerValue\":12, \"longValue\": 2, \"appname\": \"test\", \"shortValue\":3, \"floatValue\":1.5, \"byteValue\": 7}`
+    let classType = Type.of(new A())
+    let parsingResult = JSON.parse<A>(text, classType) as A
+    assertEQ(parsingResult.integerValue, 12)
+    assertEQ(parsingResult.longValue, 2)
+    assertEQ(parsingResult.shortValue, 3)
+    assertEQ(parsingResult.floatValue, 1.5)
+    assertEQ(parsingResult.byteValue, 7)
+    return testResult
+}
+
 function main(): int {
     let failures = 0
     failures += testNull()
@@ -438,6 +459,7 @@ function main(): int {
     failures += testStringifyEnum()
     failures += testStringifyNullUndefined()
     failures += testStringifyUnicodeStrings()
+    failures += testJSONParse()
 
     if (failures == 0) {
         console.println("PASSED: All tests run")
