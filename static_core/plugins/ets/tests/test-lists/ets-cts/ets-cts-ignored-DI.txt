@@ -1,5 +1,5 @@
 #20935 Runtime aborts on access to common field with generics
-03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_11.ets
+03.types/19.union_types/02.access_to_common_union_members/cm_fld1_11.ets
 
 07.expressions/03.qualified_name/qualified_name_0.ets
 07.expressions/03.qualified_name/qualified_name_1.ets
