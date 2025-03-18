@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,22 @@
  * limitations under the License.
  */
 
-const { SubsetValueSet, string, createSubsetValueSetClass } = require('setter.test.js');
+const etsVm = globalThis.gtest.etsVm;
+const string = 'string';
+const SubsetValueSet = etsVm.getClass('Lsetter/test/SubsetValueSet;');
+const createSubsetValueSetClass = etsVm.getFunction('Lsetter/test/ETSGLOBAL;', 'create_subset_value_set_class');
+
 
 function checkSetterSubsetValue() {
 	const subsetValueSet = new SubsetValueSet();
 
-	ASSERT_EQ(typeof string, typeof subsetValueSet.value);
+	ASSERT_TRUE(string === subsetValueSet.value);
 }
 
 function checkSetterSubsetValueClassFromEts() {
 	const subsetValueSet = createSubsetValueSetClass();
 
-	ASSERT_EQ(typeof string, typeof subsetValueSet.value);
+	ASSERT_TRUE(string === subsetValueSet.value);
 }
 
 checkSetterSubsetValue();

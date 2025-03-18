@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,52 +18,56 @@
 
 namespace ark::ets::interop::js::testing {
 
-class EtsGetterEtsToTsTest : public EtsInteropTest {};
+class EtsGetterEtsToJsTest : public EtsInteropTest {};
 
-// NOTE: issues (17842) getter undefined
-TEST_F(EtsGetterEtsToTsTest, DISABLED_check_public_getter_class)
+TEST_F(EtsGetterEtsToJsTest, check_public_getter_class)
 {
     ASSERT_TRUE(RunJsTestSuite("check_public_getter_class.js"));
 }
-// NOTE: issues (17842) getter undefined
-TEST_F(EtsGetterEtsToTsTest, DISABLED_check_protected_getter_class)
+
+TEST_F(EtsGetterEtsToJsTest, check_protected_getter_class)
 {
     ASSERT_TRUE(RunJsTestSuite("check_protected_getter_class.js"));
 }
-// NOTE: issues (17842) getter undefined
-TEST_F(EtsGetterEtsToTsTest, DISABLED_check_protected_getter_inheritance_class)
+
+TEST_F(EtsGetterEtsToJsTest, check_protected_getter_inheritance_class)
 {
     ASSERT_TRUE(RunJsTestSuite("check_protected_getter_inheritance_class.js"));
 }
-// NOTE: issues (17842) getter undefined
-TEST_F(EtsGetterEtsToTsTest, DISABLED_check_private_getter_class)
+
+TEST_F(EtsGetterEtsToJsTest, check_private_getter_class)
 {
     ASSERT_TRUE(RunJsTestSuite("check_private_getter_class.js"));
 }
-// NOTE: issues (17842) getter undefined
-TEST_F(EtsGetterEtsToTsTest, DISABLED_check_private_getter_inheritance_class)
+
+TEST_F(EtsGetterEtsToJsTest, check_private_getter_inheritance_class)
 {
     ASSERT_TRUE(RunJsTestSuite("check_private_getter_inheritance_class.js"));
 }
-// NOTE: issues (17842) getter undefined
-TEST_F(EtsGetterEtsToTsTest, DISABLED_check_union_type_getter_class)
+
+TEST_F(EtsGetterEtsToJsTest, check_union_type_getter_class)
 {
     ASSERT_TRUE(RunJsTestSuite("check_union_type_getter_class.js"));
 }
-// NOTE: issues (17842) getter undefined
-TEST_F(EtsGetterEtsToTsTest, DISABLED_check_any_type_getter_class)
+
+TEST_F(EtsGetterEtsToJsTest, check_any_type_getter_class)
 {
     ASSERT_TRUE(RunJsTestSuite("check_any_type_getter_class.js"));
 }
-// NOTE: issues (17842) getter undefined
-TEST_F(EtsGetterEtsToTsTest, DISABLED_check_subset_by_ref_getter_class)
+
+TEST_F(EtsGetterEtsToJsTest, check_subset_by_ref_getter_class)
 {
     ASSERT_TRUE(RunJsTestSuite("check_subset_by_ref_getter_class.js"));
 }
-// NOTE: issues (17842) getter undefined
-TEST_F(EtsGetterEtsToTsTest, DISABLED_check_subset_by_value_getter_class)
+
+TEST_F(EtsGetterEtsToJsTest, check_subset_by_value_getter_class)
 {
     ASSERT_TRUE(RunJsTestSuite("check_subset_by_value_getter_class.js"));
+}
+
+TEST_F(EtsGetterEtsToJsTest, DISABLED_check_static_getter_class)
+{
+    ASSERT_TRUE(RunJsTestSuite("check_static_getter_class.js"));
 }
 
 }  // namespace ark::ets::interop::js::testing

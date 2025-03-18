@@ -447,12 +447,19 @@ std::vector<napi_property_descriptor> EtsClassWrapper::BuildJSProperties(Span<Fi
     etsMethodWrappers_ = std::make_unique<LazyEtsMethodWrapperLink[]>(numMethods_);
     Span<LazyEtsMethodWrapperLink> etsMethodWrappers(etsMethodWrappers_.get(), numMethods_);
     size_t methodIdx = 0;
-
+    GetterSetterPropsMap propMap;
     for (auto &method : methods) {
         ASSERT(!method->IsConstructor());
         auto lazyLink = &etsMethodWrappers[methodIdx++];
         lazyLink->Set(method);
         jsProps.emplace_back(EtsMethodWrapper::MakeNapiProperty(method, lazyLink));
+        if (method->IsGetter() || method->IsSetter()) {
+            BuildGetterSetterFieldProperties(propMap, method);
+        }
+    }
+    jsProps.reserve(jsProps.size() + propMap.size());
+    for (auto &item : propMap) {
+        jsProps.emplace_back(item.second);
     }
 
     if (UNLIKELY(!IsEtsGlobalClass() && etsCtorLink_.GetUnresolved() == nullptr)) {
@@ -460,6 +467,26 @@ std::vector<napi_property_descriptor> EtsClassWrapper::BuildJSProperties(Span<Fi
     }
 
     return jsProps;
+}
+
+void EtsClassWrapper::BuildGetterSetterFieldProperties(GetterSetterPropsMap &propMap, EtsMethodSet *method)
+{
+    auto ptr = reinterpret_cast<uintptr_t>(method->GetName());
+    const char *fieldName = reinterpret_cast<char *>(ptr + strlen(SETTER_BEGIN));
+    const std::string key(fieldName);
+    auto result = propMap.find(key);
+    if (result != propMap.end()) {
+        EtsMethodWrapper::AttachGetterSetterToProperty(method, result->second);
+    } else {
+        napi_property_descriptor prop {};
+        auto fieldWrapper = std::make_unique<EtsFieldWrapper>(this);
+        prop.utf8name = fieldName;
+        prop.attributes = method->IsStatic() ? EtsClassWrapper::STATIC_FIELD_ATTR : EtsClassWrapper::FIELD_ATTR;
+        prop.data = fieldWrapper.get();
+        EtsMethodWrapper::AttachGetterSetterToProperty(method, prop);
+        propMap.insert({key, prop});
+        getterSetterFieldWrappers_.push_back(std::move(fieldWrapper));
+    }
 }
 
 EtsClassWrapper *EtsClassWrapper::LookupBaseWrapper(EtsClass *klass)
