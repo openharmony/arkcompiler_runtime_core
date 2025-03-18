@@ -1582,9 +1582,6 @@
 09.classes/03.class_members/acc/pkgmod_13.ets
 09.classes/03.class_members/acc/pkgmod_14.ets
 
-#20724
-09.classes/05.field_declarations/04.overriding_fields/sample.ets
-
 #23050
 09.classes/05.field_declarations/04.overriding_fields/overriding_fields_1.ets
 
