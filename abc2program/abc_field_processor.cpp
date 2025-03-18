@@ -46,6 +46,7 @@ void AbcFieldProcessor::FillFieldName()
 {
     panda_file::File::EntityId field_name_id = field_data_accessor_->GetNameId();
     field_.name = GetStringById(field_name_id);
+    type_converter_.EntityContainer().ModifyPkgNameForFieldName(field_.name);
 }
 
 void AbcFieldProcessor::FillFieldType()
