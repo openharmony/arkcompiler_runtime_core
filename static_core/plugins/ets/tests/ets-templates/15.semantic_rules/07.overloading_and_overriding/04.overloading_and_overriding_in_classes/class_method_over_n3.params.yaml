@@ -172,7 +172,7 @@ cases:
           new Derived<A, B>().foo(new A());
           assertEQ( res, 21);
           Derived.foo<A, B>(new A(), new B());
-          assertEQ( res, 11);
+          assertEQ( res, 12);
           Derived.foo<A>(new A());
           assertEQ( res, 22);
 
