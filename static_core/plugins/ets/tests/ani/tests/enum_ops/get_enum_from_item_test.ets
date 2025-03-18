@@ -13,8 +13,19 @@
  * limitations under the License.
  */
 
-enum ToFind {
+enum Color {
     RED,
     GREEN,
     BLUE
+}
+
+enum ColorString {
+    REDSTR = "str_red",
+    GREENSTR = "str_green",
+    BLUESTR = "str_blue",
+    ONEMORERED = "str_red"
+}
+
+enum OneItem {
+    ONE
 }

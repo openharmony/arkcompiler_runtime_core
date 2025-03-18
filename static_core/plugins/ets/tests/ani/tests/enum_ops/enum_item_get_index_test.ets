@@ -13,8 +13,12 @@
  * limitations under the License.
  */
 
-enum ToFind {
+enum Color {
     RED,
     GREEN,
     BLUE
+}
+
+enum OneItem {
+    ONE
 }
