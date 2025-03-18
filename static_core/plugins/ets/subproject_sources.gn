@@ -202,7 +202,6 @@ if (ark_ets_interop_js) {
     "runtime/interop_js/intrinsics_api_impl.cpp",
     "runtime/interop_js/jsbacktrace/backtrace.cpp",
     "runtime/interop_js/js_job_queue.cpp",
-    "runtime/interop_js/js_remote_promise_resolver.cpp",
     "runtime/interop_js/js_proxy/js_proxy.cpp",
     "runtime/interop_js/js_refconvert.cpp",
     "runtime/interop_js/js_refconvert_builtin.cpp",

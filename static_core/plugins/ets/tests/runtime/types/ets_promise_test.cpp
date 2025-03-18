@@ -66,7 +66,6 @@ public:
             MIRROR_FIELD_INFO(EtsPromise, interopObject_, "interopObject"),
             MIRROR_FIELD_INFO(EtsPromise, linkedPromise_, "linkedPromise"),
             MIRROR_FIELD_INFO(EtsPromise, queueSize_, "queueSize"),
-            MIRROR_FIELD_INFO(EtsPromise, remotePromiseResolver_, "remotePromiseResolver"),
             MIRROR_FIELD_INFO(EtsPromise, state_, "state"),
         };
     }
