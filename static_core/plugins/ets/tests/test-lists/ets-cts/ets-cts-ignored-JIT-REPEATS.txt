@@ -1,2 +1,2 @@
 #17445
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-wd_6.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_arr/comp-arr-wd_6.ets
