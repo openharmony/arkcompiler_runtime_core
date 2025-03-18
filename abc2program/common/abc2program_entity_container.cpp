@@ -65,11 +65,37 @@ std::string Abc2ProgramEntityContainer::GetFullRecordNameById(const panda_file::
  */
 void Abc2ProgramEntityContainer::ModifyRecordName(std::string &record_name)
 {
+    if (!modify_pkg_name_.empty()) {
+        ModifyPkgNameForRecordName(record_name);
+    }
+
     if (bundle_name_.empty()) {
         return;
     }
     if (IsSourceFileRecord(record_name)) {
         record_name = bundle_name_ + record_name;
+    }
+}
+
+void Abc2ProgramEntityContainer::ModifyPkgNameForRecordName(std::string &record_name)
+{
+    std::vector<std::string> pkg_names = Split(modify_pkg_name_, COLON_SEPARATOR);
+    std::string orginal = NORMALIZED_OHMURL_SEPARATOR + pkg_names[ORIGINAL_PKG_NAME_POS];
+    std::string target = NORMALIZED_OHMURL_SEPARATOR + pkg_names[TARGET_PKG_NAME_POS];
+    if (record_name.find(orginal) == 0) {
+        record_name.replace(0, orginal.length(), target);
+    }
+}
+
+void Abc2ProgramEntityContainer::ModifyPkgNameForFieldName(std::string &field_name)
+{
+    if (modify_pkg_name_.empty()) {
+        return;
+    }
+    std::vector<std::string> pkg_names = Split(modify_pkg_name_, COLON_SEPARATOR);
+    std::string orginal = FIELD_NAME_PREFIX + pkg_names[ORIGINAL_PKG_NAME_POS];
+    if (field_name == orginal) {
+        field_name = FIELD_NAME_PREFIX + pkg_names[TARGET_PKG_NAME_POS];
     }
 }
 

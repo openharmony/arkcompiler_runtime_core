@@ -37,7 +37,12 @@ constexpr std::string_view CONCURRENT_MODULE_REQUEST_RECORD_NAME = "_ESConcurren
 constexpr std::string_view SLOT_NUMBER_RECORD_NAME = "_ESSlotNumberAnnotation";
 constexpr std::string_view EXPECTED_PROPERTY_COUNT_RECORD_NAME = "_ESExpectedPropertyCountAnnotation";
 constexpr std::string_view DOT = ".";
+constexpr char AT_SEPARATOR = '@';
+constexpr char COLON_SEPARATOR = ':';
 constexpr char NORMALIZED_OHMURL_SEPARATOR = '&';
+constexpr uint8_t ORIGINAL_PKG_NAME_POS = 0;
+constexpr uint8_t TARGET_PKG_NAME_POS = 1;
+const std::string FIELD_NAME_PREFIX = "pkgName@";
 
 // attribute constant
 constexpr std::string_view ABC_ATTR_EXTERNAL = "external";
@@ -71,6 +76,7 @@ constexpr uint8_t LITERAL_NUMS[] = {
     LITERAL_NUM_OF_STAR_EXPORT
 };
 
+std::vector<std::string> Split(const std::string &str, const char delimiter);
 class AbcFileUtils {
 public:
     static bool IsGlobalTypeName(const std::string &type_name);
