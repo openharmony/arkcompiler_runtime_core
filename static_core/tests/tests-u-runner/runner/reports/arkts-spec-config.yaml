@@ -92,104 +92,98 @@
     status: No testable assertions
 '3.1':
     title: Predefined Types
-    status: ''
+    status: No testable assertions
 3.1.1:
     title: Primitive Types
-    status: ''
-3.1.2:
-    title: Boxed Types
-    status: ''
-3.1.3:
-    title: Numeric Types
     status: No testable assertions
+3.1.2:
+    title: Numeric Types
+    status: Finished
 '3.2':
     title: User-Defined Types
     status: No testable assertions
 '3.3':
-    title: Types by Category
+    title: Using Types
     status: No testable assertions
 '3.4':
-    title: Using Types
-    status: ''
-'3.5':
     title: Named Types
-    status: ''
-'3.6':
+    status: No testable assertions
+'3.5':
     title: Type References
     status: ''
-'3.7':
+'3.6':
     title: Value Types
     status: No testable assertions
-3.7.1:
+3.6.1:
     title: Integer Types and Operations
     status: Finished
-3.7.2:
+3.6.2:
     title: Floating-Point Types and Operations
     status: Finished
-3.7.3:
-    title: Numeric Types Hierarchy
-    status: Finished
-3.7.4:
+3.6.3:
     title: Boolean Types and Operations
     status: Finished
-'3.8':
+'3.7':
     title: Reference Types
     status: No testable assertions
-'3.9':
+'3.8':
     title: Type Object
     status: Finished
-'3.10':
+'3.9':
     title: Type never
     status: Finished
-'3.11':
+'3.10':
     title: Type void
     status: Finished
-'3.12':
+'3.11':
     title: Type undefined
     status: Finished
-'3.13':
+'3.12':
     title: Type null
     status: Finished
-'3.14':
+'3.13':
     title: Type string
     status: Finished
-'3.15':
+'3.14':
     title: Type bigint
     status: Finished
-'3.16':
+'3.15':
     title: Literal Types
     status: Finished
-3.16.1:
+3.15.1:
     title: Supertypes of Literal Types
     status: ''
-3.16.2:
+3.15.2:
     title: Operations on Literal Types
     status: ''
-'3.17':
+'3.16':
     title: Array Types
     status: Finished
-3.17.1:
+3.16.1:
     title: Resizable Array Types
     status: ''
-'3.18':
+'3.17':
     title: Tuple Types
     status: Finished
-'3.19':
+'3.18':
     title: Function Types
     status: Finished
-'3.20':
+'3.19':
     title: Union Types
     status: Finished
-3.20.1:
+3.19.1:
     title: Union Types Normalization
     status: Finished
-3.20.2:
+3.19.2:
     title: Access to Common Union Members
     status: Finished
-'3.21':
+3.19.3:
+    title: Keyof Types
+    status: ''
+'3.20':
     title: Nullish Types
     status: Finished
-'3.22':
+'3.21':
     title: Default Values for Types
     status: Finished
 '4':
@@ -352,36 +346,30 @@
     title: Constant Narrowing Integer Conversions
     status: Finished
 6.5.4:
-    title: Boxing Conversions
-    status: Finished
-6.5.5:
-    title: Unboxing Conversions
-    status: Finished
-6.5.6:
     title: Widening Union Conversions
     status: Finished
-6.5.7:
+6.5.5:
     title: Widening Reference Conversions
     status: Finished
-6.5.8:
+6.5.6:
     title: Character to String Conversions
     status: Finished
-6.5.9:
+6.5.7:
     title: Constant String to Character Conversions
     status: Finished
-6.5.10:
+6.5.8:
     title: Function Types Conversions
     status: Finished
-6.5.11:
+6.5.9:
     title: Tuple Types Conversions
     status: Finished
-6.5.12:
+6.5.10:
     title: Enumeration to Constants Type Conversions
     status: Finished
-6.5.13:
+6.5.11:
     title: Constant to Enumeration Conversions
     status: ''
-6.5.14:
+6.5.12:
     title: Literal Type to its Supertype Conversions
     status: ''
 '7':
@@ -1089,6 +1077,9 @@
 17.8.4:
     title: Declaration Distinguishable by Signatures
     status: ''
+17.8.5:
+    title: TypeScript Overload Signatures
+    status: Finished
 '17.9':
     title: Native Functions and Methods
     status: No testable assertions
@@ -1138,69 +1129,39 @@
     title: Trailing Lambdas
     status: Finished
 '17.14':
-    title: Enumeration Types Conversions
-    status: ''
-'17.15':
     title: Enumeration Methods
     status: ''
-17.15.1:
+17.14.1:
     title: Errors and Initialization Expression
     status: ''
-'17.16':
+'17.15':
     title: Coroutines
-    status: No testable assertions
-17.16.1:
-    title: Create and Launch a Coroutine
-    status: Finished
-17.16.2:
-    title: Awaiting a Promise
-    status: Finished
-17.16.3:
-    title: Promise<T> Class
-    status: Finished
-'17.17':
+    status: ''
+'17.16':
     title: Async Functions and Methods
     status: No testable assertions
-17.17.1:
+17.16.1:
     title: Async Functions
     status: Finished
-17.17.2:
+17.16.2:
     title: Experimental Async Methods
     status: Finished
-'17.18':
-    title: DynamicObject Type
-    status: ''
-17.18.1:
-    title: DynamicObject Field Access
-    status: ''
-17.18.2:
-    title: DynamicObject Method Call
-    status: ''
-17.18.3:
-    title: DynamicObject Indexing Access
-    status: ''
-17.18.4:
-    title: DynamicObject New Expression
-    status: ''
-17.18.5:
-    title: DynamicObject Cast Expression
-    status: ''
-'17.19':
+'17.17':
     title: Packages
     status: ''
-17.19.1:
+17.17.1:
     title: Internal Access Modifier
-    status: ''
-17.19.2:
-    title: Package Initializer
-    status: ''
-17.19.3:
-    title: Import and Overloading of Function Names
     status: Finished
-'17.20':
+17.17.2:
+    title: Package Initializer
+    status: Finished
+17.17.3:
+    title: Import and Overloading of Function Names
+    status: ''
+'17.18':
     title: Generics Experimental
-    status: No testable assertions
-17.20.1:
+    status: ''
+17.18.1:
     title: NonNullish Type Parameter
     status: ''
 '18':
@@ -1246,77 +1207,23 @@
     title: How to Get Type Via Reflection
     status: ''
 '20.4':
-    title: Methods for T[] Types
-    status: ''
-'20.5':
     title: Generic and Function Types Peculiarities
     status: No testable assertions
-'20.6':
+'20.5':
     title: Keyword struct and ArkUI
     status: ''
-'21':
-    title: ArkTS-TypeScript compatibility
-    status: No testable assertions
-'21.1':
-    title: Reserved Names of TypeScript Types
+'20.6':
+    title: OutOfMemoryError for Primitive Type Operations
     status: ''
-'21.2':
-    title: Undefined is Not a Universal Value
-    status: ''
-'21.3':
-    title: Numeric Semantics
-    status: ''
-'21.4':
-    title: Covariant Overriding
-    status: ''
-'21.5':
-    title: Function Types Compatibility
-    status: ''
-'21.6':
-    title: Compatibility for Utility Types
-    status: ''
-'21.7':
-    title: TypeScript Overload Signatures
-    status: ''
-'21.8':
-    title: Class Fields While Inheriting
-    status: ''
-'21.9':
-    title: Overriding for Primitive Types
-    status: ''
-'21.10':
-    title: Type void Compatibility
-    status: ''
-'21.11':
-    title: Invariant Array Assignment
-    status: ''
-'21.12':
-    title: Tuples and Arrays
-    status: ''
-'21.13':
-    title: Extending Class Object
-    status: ''
-'21.14':
-    title: Syntax of extends and implements Clauses
-    status: ''
-'21.15':
+'20.7':
     title: Uniqueness of Functional Objects
     status: ''
-'21.16':
-    title: Functional Objects for Methods
-    status: ''
-'21.17':
-    title: Differences in Namespaces
-    status: ''
-'21.18':
-    title: Differences in Math.pow
-    status: ''
-'22':
+'21':
     title: Grammar Summary
     status: No testable assertions
-'23':
+'22':
     title: Contributors
     status: No testable assertions
-'24':
+'23':
     title: Index
-    status: ''
+    status: No testable assertions
