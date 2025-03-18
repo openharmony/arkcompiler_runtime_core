@@ -14,13 +14,71 @@
  */
 
 class A {
-    public static new_A()
+    public static newA()
     {
         return new A();
     }
 
-    public byte_method(a0: byte, a1: byte): byte
+    public byteMethod(a0: byte, a1: byte): byte
     {
         return a0 > a1 ? a0 : a1;
+    }
+
+    public byteMethodVoidParam(): byte
+    {
+        return 5 as byte;
+    }
+
+    public byteMethodMultipleParam(a0: byte, a1: boolean, a2: float, a3: float, a4: byte): byte
+    {
+        if (a1) {
+            return a4;
+        } else if (a2 > a3) {
+            return a0;
+        } else {
+            return (a4 + a0) as byte;
+        }
+    }
+
+    public nestedMethod(data1: byte, data2: byte): byte
+    {
+        let method = (value1: byte, value2: byte): byte => {
+            return (value1 + value2) as byte;
+        }
+
+        return method(data1, data2);
+    }
+
+    public recursionMethod(a0: byte): byte
+    {
+        if (a0 > 100) {
+            return a0 as byte;
+        } else {
+            return this.recursionMethod((a0 + 10) as byte);
+        }
+    }
+}
+
+final class B extends A {
+
+    public subByteMethodVoidParam(): byte
+    {
+        return 8 as byte;
+    }
+}
+
+abstract class C {
+    public abstract func(a: byte, b: byte): byte;
+}
+
+class D extends C {
+    public override func(a: byte, b: byte): byte {
+        return (a + b) as byte;
+    }
+}
+
+class E extends D {
+    public override func(a: byte, b: byte): byte {
+        return (a - b) as byte;
     }
 }

@@ -14,13 +14,71 @@
  */
 
 class A {
-    public static new_A()
+    public static newA()
     {
         return new A();
     }
 
-    public char_method(a0: char, a1: char): char
+    public charMethod(a0: char, a1: char): char
     {
         return a0 > a1 ? a0 : a1;
+    }
+
+    public charMethodVoidParam(): char
+    {
+        return 'A';
+    }
+
+    public charMethodMultipleParam(a0: byte, a1: boolean, a2: float, a3: float, a4: byte): char
+    {
+        if (a1) {
+            return 'A';
+        } else if (a2 > a3) {
+            return 'B';
+        } else {
+            return 'C';
+        }
+    }
+
+    public nestedMethod(data1: char, data2: int): char
+    {
+        let method = (value1: char, value2: int): char => {
+            return (value1 + value2) as char;
+        }
+
+        return method(data1, data2);
+    }
+
+    public recursionMethod(a0: char): char
+    {
+        if (a0 > 100) {
+            return a0 as char;
+        } else {
+            return this.recursionMethod((a0 + 5) as char);
+        }
+    }
+}
+
+final class B extends A {
+
+    public subCharMethodVoidParam(): char
+    {
+        return 'W';
+    }
+}
+
+abstract class C {
+    public abstract func(a: char, b: byte): char;
+}
+
+class D extends C {
+    public override func(a: char, b: byte): char {
+        return (a + b) as char;
+    }
+}
+
+class E extends D {
+    public override func(a: char, b: byte): char {
+        return (a - b) as char;
     }
 }

@@ -14,12 +14,83 @@
  */
 
 class A {
-    public static new_A(): A {
+    public static newA()
+    {
         return new A();
     }
 
-    boolean_method(a0: int, a1: int): boolean {
+    public booleanMethod(a0: int, a1: int): boolean {
         if (a0 + a1 > 10) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public booleanMethodVoidParam(): boolean
+    {
+        return true;
+    }
+
+    public booleanMethodMultipleParam(a0: byte, a1: float, a2:float, a3:byte): boolean
+    {
+        if (a0 > a3) {
+            return true;
+        } else if (a1 > a2) {
+            return false;
+        } else {
+            return false;
+        }
+    }
+
+    public nestedMethod(data1: byte, data2: byte): boolean
+    {
+        let method = (value1: byte, value2: byte): boolean => {
+            if (value1 > value2) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        return method(data1, data2);
+    }
+
+    public recursionMethod(a0: int): boolean
+    {
+        if (a0 > 100) {
+            return true;
+        } else {
+            return this.recursionMethod(a0 + 10);
+        }
+    }
+}
+
+final class B extends A {
+
+    public subBooleanMethodVoidParam(): boolean
+    {
+        return false;
+    }
+}
+
+abstract class C {
+    public abstract func(a: int, b: int): boolean;
+}
+
+class D extends C {
+    public override func(a: int, b: int): boolean {
+        if (a > b) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
+class E extends D {
+    public override func(a: int, b: int): boolean {
+        if (a + b > 10) {
             return true;
         } else {
             return false;
