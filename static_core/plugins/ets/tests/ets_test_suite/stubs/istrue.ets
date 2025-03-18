@@ -37,87 +37,87 @@ function foo(n: number): Klass | undefined {
 enum Color { Red, Green, Blue }
 
 function testNormal() {
-    assert(!istrue(new Byte(0 as byte)));
-    assert(istrue(new Byte(1 as byte)));
-    assert(!istrue(new Short(0 as short)));
-    assert(istrue(new Short(1 as short)));
-    assert(!istrue(new Int(0)));
-    assert(istrue(new Int(1)));
-    assert(!istrue(new Long(0)));
-    assert(istrue(new Long(1)));
-    assert(!istrue(new Float(0.0)));
-    assert(istrue(new Float(0.5)));
-    assert(!istrue(new Double(0.0)));
-    assert(istrue(new Double(0.5)));
-    assert(!istrue(new Char(0 as char)));
-    assert(istrue(new Char('0')));
-    assert(!istrue(""));
-    assert(istrue("Hello"));
-    assert(!istrue(false));
-    assert(istrue(true));
-    assert(!istrue(null));
-    assert(!istrue(undefined));
-    assert(!istrue(NaN));
-    assert(!istrue(new bigint(0)));
-    assert(istrue(new bigint(1)));
-    assert(!istrue(foo(0)));
-    assert(istrue(foo(1)));
-    assert(istrue(Color.Red));
+    assertTrue(!istrue(new Byte(0 as byte)));
+    assertTrue(istrue(new Byte(1 as byte)));
+    assertTrue(!istrue(new Short(0 as short)));
+    assertTrue(istrue(new Short(1 as short)));
+    assertTrue(!istrue(new Int(0)));
+    assertTrue(istrue(new Int(1)));
+    assertTrue(!istrue(new Long(0)));
+    assertTrue(istrue(new Long(1)));
+    assertTrue(!istrue(new Float(0.0)));
+    assertTrue(istrue(new Float(0.5)));
+    assertTrue(!istrue(new Double(0.0)));
+    assertTrue(istrue(new Double(0.5)));
+    assertTrue(!istrue(new Char(0 as char)));
+    assertTrue(istrue(new Char('0')));
+    assertTrue(!istrue(""));
+    assertTrue(istrue("Hello"));
+    assertTrue(!istrue(false));
+    assertTrue(istrue(true));
+    assertTrue(!istrue(null));
+    assertTrue(!istrue(undefined));
+    assertTrue(!istrue(NaN));
+    assertTrue(!istrue(new bigint(0)));
+    assertTrue(istrue(new bigint(1)));
+    assertTrue(!istrue(foo(0)));
+    assertTrue(istrue(foo(1)));
+    assertTrue(istrue(Color.Red));
     let a: bigint | null = 0n;
-    assert(istrue(!a));
+    assertTrue(istrue(!a));
 }
 
 function testErase() {
-    assert(!istrue(erase(new Byte(0 as byte))));
-    assert(istrue(erase(new Byte(1 as byte))));
-    assert(!istrue(erase(new Short(0 as short))));
-    assert(istrue(erase(new Short(1 as short))));
-    assert(!istrue(erase(new Int(0))));
-    assert(istrue(erase(new Int(1))));
-    assert(!istrue(erase(new Long(0))));
-    assert(istrue(erase(new Long(1))));
-    assert(!istrue(erase(new Float(0.0))));
-    assert(istrue(erase(new Float(0.5))));
-    assert(!istrue(erase(new Double(0.0))));
-    assert(istrue(erase(new Double(0.5))));
-    assert(!istrue(erase(new Char(0 as char))));
-    assert(istrue(erase(new Char('0'))));
-    assert(!istrue(erase("")));
-    assert(istrue(erase("Hello")));
-    assert(!istrue(erase(false)));
-    assert(istrue(erase(true)));
-    assert(!istrue(erase(null)));
-    assert(!istrue(erase(undefined)));
-    assert(!istrue(erase(NaN)));
-    assert(!istrue(erase(new bigint(0))));
-    assert(istrue(erase(new bigint(1))));
-    assert(!istrue(erase(foo(0))));
-    assert(istrue(erase(foo(1))));
-    assert(istrue(erase(Color.Red)));
+    assertTrue(!istrue(erase(new Byte(0 as byte))));
+    assertTrue(istrue(erase(new Byte(1 as byte))));
+    assertTrue(!istrue(erase(new Short(0 as short))));
+    assertTrue(istrue(erase(new Short(1 as short))));
+    assertTrue(!istrue(erase(new Int(0))));
+    assertTrue(istrue(erase(new Int(1))));
+    assertTrue(!istrue(erase(new Long(0))));
+    assertTrue(istrue(erase(new Long(1))));
+    assertTrue(!istrue(erase(new Float(0.0))));
+    assertTrue(istrue(erase(new Float(0.5))));
+    assertTrue(!istrue(erase(new Double(0.0))));
+    assertTrue(istrue(erase(new Double(0.5))));
+    assertTrue(!istrue(erase(new Char(0 as char))));
+    assertTrue(istrue(erase(new Char('0'))));
+    assertTrue(!istrue(erase("")));
+    assertTrue(istrue(erase("Hello")));
+    assertTrue(!istrue(erase(false)));
+    assertTrue(istrue(erase(true)));
+    assertTrue(!istrue(erase(null)));
+    assertTrue(!istrue(erase(undefined)));
+    assertTrue(!istrue(erase(NaN)));
+    assertTrue(!istrue(erase(new bigint(0))));
+    assertTrue(istrue(erase(new bigint(1))));
+    assertTrue(!istrue(erase(foo(0))));
+    assertTrue(istrue(erase(foo(1))));
+    assertTrue(istrue(erase(Color.Red)));
     let a: bigint | null = 0n;
-    assert(istrue(erase(!a)));
+    assertTrue(istrue(erase(!a)));
 }
 
 function testConditions() {
     if (istrue(0)) {
-        assert(false);
+        assertTrue(false);
     } else {
-        assert(true);
+        assertTrue(true);
     }
 
     if (istrue(1)) {
-        assert(true);
+        assertTrue(true);
     } else {
-        assert(false);
+        assertTrue(false);
     }
 }
 
 
 function testFunction() {
     if (istrue((() => { let x: number = 0; return x })())) {
-        assert(false);
+        assertTrue(false);
     } else {
-        assert(true);
+        assertTrue(true);
     }
 }
 
