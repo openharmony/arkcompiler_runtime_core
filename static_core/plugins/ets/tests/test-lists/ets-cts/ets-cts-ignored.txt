@@ -2176,8 +2176,6 @@
 #18884 Cannot propagate an exception from callable type with instantiate method
 17.experimental_features/06.callable_types/02.callable_types_with_instantiate_method/ct_inst_17.ets
 
-#18856 Order of static methods makes a difference
-17.experimental_features/06.callable_types/01.callable_types_with_invoke_method/ct_invoke_17.ets
 
 #15475 Cannot use enum array in for-of statement
 17.experimental_features/07.statements/01.for-of_type_annotation/for_of_10.ets
