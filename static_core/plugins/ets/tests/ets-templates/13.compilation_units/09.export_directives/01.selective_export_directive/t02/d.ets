@@ -14,12 +14,13 @@
  */
 
 /*---
-desc: Re-export directive, new names should be available
-files: ['./module_all_renamed.ets', './module_a.ets']
+desc: Single export directive allows specifying the declaration to be exported from the current compilation unit.
+files: ['./a.ets', './b.ets', './c.ets']
 ---*/
 
-import { NewClassA, NewInterfaceA, newFoo, NEW_BAR } from './module_all_renamed'
+import A from "./c"
 
 function main() {
-    assertEQ(NEW_BAR, 146)
+    let a = new A
+    assertTrue(a instanceof A)
 }

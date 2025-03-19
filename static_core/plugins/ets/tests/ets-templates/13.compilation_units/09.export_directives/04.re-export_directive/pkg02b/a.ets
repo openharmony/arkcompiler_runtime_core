@@ -14,12 +14,9 @@
  */
 
 /*---
-desc: Re-export directive, new names should be available
-files: ['./module_all_renamed.ets', './module_a.ets']
+tags: [not-a-test, compile-only]
 ---*/
 
-import { NewClassA, NewInterfaceA, newFoo, NEW_BAR } from './module_all_renamed'
+package pkg02b;
 
-function main() {
-    assertEQ(NEW_BAR, 146)
-}
+export { ClassA as NewClassA, InterfaceA as NewInterfaceA, foo as newFoo, BAR as NEW_BAR } from '../pkg02a'  // re-export from package module

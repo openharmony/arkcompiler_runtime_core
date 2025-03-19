@@ -14,12 +14,8 @@
  */
 
 /*---
-desc: Re-export directive, new names should be available
-files: ['./module_all_renamed.ets', './module_a.ets']
+tags: [not-a-test, compile-only]
 ---*/
 
-import { NewClassA, NewInterfaceA, newFoo, NEW_BAR } from './module_all_renamed'
-
-function main() {
-    assertEQ(NEW_BAR, 146)
-}
+export class TestType {
+};
