@@ -21,12 +21,12 @@ class ClassTest {
     }
 }
 
-const stsArr: int[] = [];
-const stsArrCopy: int[] = stsArr;
-const stsArrOther: int[] = [];
-const stsArrowFunction = () => { };
-const stsArrowFunctionCopy = stsArrowFunction;
-const stsArrowFunctionOther = () => { };
+const etsArr: int[] = [];
+const etsArrCopy: int[] = etsArr;
+const etsArrOther: int[] = [];
+const etsArrowFunction = () => { };
+const etsArrowFunctionCopy = etsArrowFunction;
+const etsArrowFunctionOther = () => { };
 function foo() { }
 function fooOther() { }
 
@@ -51,17 +51,17 @@ class EqualityExtraA2a {
     test(): number {
         //NOTE: issue(19194) enable below after fix compare arrays
         if (false) {
-            this.comparison(stsArr, stsArr, this.equal, 'array ');
-            this.comparison(stsArr, stsArrCopy, this.equal, 'array by link ');
+            this.comparison(etsArr, etsArr, this.equal, 'array ');
+            this.comparison(etsArr, etsArrCopy, this.equal, 'array by link ');
         }
 
-        this.comparison(stsArr, stsArrOther, this.noEqual, 'different arrays ');
+        this.comparison(etsArr, etsArrOther, this.noEqual, 'different arrays ');
 
-        this.comparison(stsArrowFunction, stsArrowFunction, this.equal, 'arrow function ');
+        this.comparison(etsArrowFunction, etsArrowFunction, this.equal, 'arrow function ');
 
-        this.comparison(stsArrowFunction, stsArrowFunctionCopy, this.equal, 'arrow function by link ');
+        this.comparison(etsArrowFunction, etsArrowFunctionCopy, this.equal, 'arrow function by link ');
 
-        this.comparison(stsArrowFunction, stsArrowFunctionOther, this.noEqual, 'different arrows ');
+        this.comparison(etsArrowFunction, etsArrowFunctionOther, this.noEqual, 'different arrows ');
 
         //NOTE: issue (19133) enable below after fix comparison functions
         if (false) {

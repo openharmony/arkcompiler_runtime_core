@@ -14,7 +14,7 @@
  */
 
 export class TestImport {
-    stsNumber: number = 1;
+    etsNumber: number = 1;
 
     testFunction(): number {
         return this.etsNumber;

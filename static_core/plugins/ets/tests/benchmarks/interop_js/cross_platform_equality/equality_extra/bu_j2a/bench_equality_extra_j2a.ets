@@ -22,12 +22,12 @@ class Test {
 }
 
 export class EqualityExtraJ2a {
-   stsArr: int[] = [];
-   stsArrCopy: int[] = this.etsArr;
-   stsArrOther: int[] = [];
-   stsArrowFunction = () => { };
-   stsArrowFunctionCopy = this.etsArrowFunction;
-   stsArrowFunctionOther = () => { };
+   etsArr: int[] = [];
+   etsArrCopy: int[] = this.etsArr;
+   etsArrOther: int[] = [];
+   etsArrowFunction = () => { };
+   etsArrowFunctionCopy = this.etsArrowFunction;
+   etsArrowFunctionOther = () => { };
 }
 
 export function foo() { }

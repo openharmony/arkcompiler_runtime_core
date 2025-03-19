@@ -34,7 +34,7 @@ export class GetStringA2j {
      * @Benchmark
      */
     test(): object {
-        const stsString = jsString;
+        const etsString = jsString;
         return jsString;
     }
 }

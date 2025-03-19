@@ -52,5 +52,5 @@ export class GetStringA2a {
 }
 
 export class ValueHolder {
-     stsString: string = 'Test';
+     etsString: string = 'Test';
 }

@@ -12,7 +12,10 @@ promiseJ2j_test
 
 # 1943 issues with VMB or Panda build cause benchmarks failures
 GetSpecificA2a_test
+getSpecificJ2a_test
 GetStringA2a_test
+getStringJ2a_test
+getNumericJ2a_test
 
 # 19307 Panda issue
 CallImportFunctionA2a_test

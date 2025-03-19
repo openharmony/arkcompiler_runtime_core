@@ -43,11 +43,11 @@ class GetNumericA2a {
 }
 
 export class ValueHolder {
-    stsNumber: number = 1;
-    stsByte: byte = 123;
-    stsShort: short = 123;
-    stsInt: int = 123;
-    stsLong: long = 123;
-    stsFloat: float = 12.34;
-    stsDouble: double = 12.34;
+    etsNumber: number = 1;
+    etsByte: byte = 123;
+    etsShort: short = 123;
+    etsInt: int = 123;
+    etsLong: long = 123;
+    etsFloat: float = 12.34;
+    etsDouble: double = 12.34;
 }
