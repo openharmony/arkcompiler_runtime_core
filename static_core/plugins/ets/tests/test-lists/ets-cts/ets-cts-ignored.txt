@@ -40,15 +40,6 @@
 02.lexical_elements/09.literals/04.bigint_literals/bigint_func_4.ets
 02.lexical_elements/09.literals/04.bigint_literals/bigint_func_5.ets
 
-#20367
-03.types/01.predefined_types/01.primitive_types/pt_type_1.ets
-03.types/01.predefined_types/01.primitive_types/pt_type_2.ets
-03.types/01.predefined_types/01.primitive_types/pt_type_3.ets
-03.types/01.predefined_types/01.primitive_types/pt_type_4.ets
-03.types/01.predefined_types/01.primitive_types/pt_type_5.ets
-03.types/01.predefined_types/01.primitive_types/pt_type_6.ets
-03.types/01.predefined_types/01.primitive_types/pt_type_8.ets
-
 #not implemented
 03.types/01.predefined_types/class_types_declaration_2.ets
 03.types/03.using_types/array_value_types_declaration_18.ets
@@ -280,9 +271,6 @@
 
 #19720
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_8.ets
-
-#20367
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_4.ets
 
 #23134
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_16.ets
