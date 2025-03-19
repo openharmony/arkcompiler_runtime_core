@@ -15,6 +15,7 @@ limitations under the License.
 
 /*---
 desc: Readonly simple form fo interface property
+tags: [negative, compile-only]
 ---*/
 
 interface I {

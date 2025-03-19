@@ -15,6 +15,7 @@ limitations under the License.
 
 /*---
 desc: Implementing getter from interface
+tags: [negative, compile-only]
 ---*/
 
 interface I {
