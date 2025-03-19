@@ -2357,6 +2357,16 @@ intrinsics:
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdFinalizationRegistryRegisterInstance
 
+  - name: StdFinalizationRegistryFinishCleanup
+    space: ets
+    class_name: std.core.FinalizationRegistry
+    method_name: finishCleanup
+    static: true
+    signature:
+      ret: void
+      args: [ ]
+    impl: ark::ets::intrinsics::StdFinalizationRegistryFinishCleanup
+
 ########################
 # std.core.Job #
 ########################

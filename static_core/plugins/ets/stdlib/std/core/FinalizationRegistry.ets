@@ -48,6 +48,7 @@ export final class FinalizationRegistry<T> {
             }
         } finally {
             FinalizationRegistry.finalizationRegistryLock.unlock();
+            FinalizationRegistry.finishCleanup();
         }
     }
 
@@ -156,12 +157,12 @@ export final class FinalizationRegistry<T> {
      * this registred callback if provided
      */
     public register(object: Object, callbackArg: T, token?: Object): void {
+        let refObject = new WeakRef<Object>(object);
+        let refToken?: WeakRef<Object> | undefined = undefined;
+        if (token != undefined) {
+            refToken = new WeakRef<Object>(token);
+        }
         this.mutex.lockGuard(() => {
-            let refObject = new WeakRef<Object>(object);
-            let refToken?: WeakRef<Object>;
-            if (token != undefined) {
-                refToken = new WeakRef<Object>(token);
-            }
             let free_index = this.allocTrimplet();
             // NOTE: GC and thus cleanup function can be triggered here after JIT/AOT optimizations
             this.setTrimplet(free_index, refObject, callbackArg, refToken);
@@ -267,5 +268,6 @@ export final class FinalizationRegistry<T> {
     }
 
     private static native registerInstance(object: Object): void;
+    private static native finishCleanup(): void;
 
 }

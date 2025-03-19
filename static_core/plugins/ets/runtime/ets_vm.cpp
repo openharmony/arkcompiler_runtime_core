@@ -373,7 +373,7 @@ void PandaEtsVM::HandleGCRoutineInMutator()
     auto coroutine = EtsCoroutine::GetCurrent();
     auto *coroManager = coroutine->GetCoroutineManager();
 
-    if (finRegLastIndex_ != 0) {
+    if (finRegLastIndex_ != 0 && UpdateFinRegCoroCountAndCheckIfCleanupNeeded()) {
         auto *objArray =
             EtsObjectArray::FromCoreType(GetGlobalObjectStorage()->Get(registeredFinalizationRegistryInstancesRef_));
         auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
