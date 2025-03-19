@@ -167,7 +167,7 @@ private:
                                           StackfulCoroutineWorker::ScheduleLoopType wType, PandaString workerName);
 
     /* coroutine registry management */
-    void AddToRegistry(Coroutine *co);
+    void AddToRegistry(Coroutine *co) REQUIRES(coroListLock_);
     void RemoveFromRegistry(Coroutine *co) REQUIRES(coroListLock_);
 
     /// call to check if we are done executing managed code and set appropriate member flags
