@@ -3150,6 +3150,7 @@ NO_UB_SANITIZE static ani_status ExistUnhandledError(ani_env *env, ani_boolean *
     CHECK_PTR_ARG(result);
 
     PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
+    ScopedManagedCodeFix s(pandaEnv);
     *result = pandaEnv->HasPendingException() ? ANI_TRUE : ANI_FALSE;
     return ANI_OK;
 }
