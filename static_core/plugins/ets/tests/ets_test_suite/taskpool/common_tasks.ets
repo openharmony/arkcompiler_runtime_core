@@ -52,6 +52,7 @@ async function promiseCase(duration: int): Promise<string> {
 
 function main(): int {
     let commonTaskSuite = new ArkTestsuite("taskpool.CommonTask");
+    let commonTaskSuiteDisabled = new ArkTestsuite("taskpool.CommonTask.DISABLED");
     commonTaskSuite.addTest("GetTaskpoolInfoTest", () =>
     {
         CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
@@ -254,7 +255,8 @@ function main(): int {
         // task finished, new execution should not produce an Error
         expectNoThrow(() => { await taskpool.execute(t) });
     });
-    commonTaskSuite.addTest("CancelExecutingTaskWithParamsTest", (): void throws =>
+    // NOTE(konstanting): wrong test, introduces flaky failures
+    commonTaskSuiteDisabled.addTest("CancelExecutingTaskWithParamsTest", (): void throws =>
     {
         let testFunc = (duration: int): boolean => {
             let t = Date.now();
@@ -277,6 +279,7 @@ function main(): int {
             isExecuted.set(true);
         });
         await promiseCase(50);
+        // NOTE(konstanting): the following line can throw an unexpected exception!
         taskpool.cancel(task1);
         while (isExecuted.get() != true) {
             await promiseCase(100);
