@@ -208,7 +208,12 @@ private:
 % end
 
     static std::string GetExeDir(const std::string &exe_path) {
-        auto pos = exe_path.find_last_of('/');
+#ifdef PANDA_TARGET_WINDOWS
+        const char preferred_separator = '\\';
+#else
+        const char preferred_separator = '/';
+#endif
+        auto pos = exe_path.find_last_of(preferred_separator);
         if (pos == std::string::npos) {
             return ".";
         }
