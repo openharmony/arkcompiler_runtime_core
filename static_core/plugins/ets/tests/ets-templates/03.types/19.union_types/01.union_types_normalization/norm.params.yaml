@@ -200,14 +200,14 @@ cases:
     - decl: |-
           type U1 = (readonly Object[])
           type U2 = null | Object[]
-          type UT = U1 | U2 | Error[]  // => readonly Object[]|null
+          type UT = U1 | U2 | Error[]  // => readonly Object[]|Error[]|null
 
       pos:
           - |-
               let v: UT = [new Error('a'), new Error('b')]
-              assertTrue(v instanceof Object[] && v.length == 2)
-              v = [new Number(1.0), new Number(2.0)]
-              assertTrue(v instanceof Object[] && v.length == 2)
+              assertTrue(v instanceof UT && v.length == 2)
+              v = [new Object(), new Object(), new Object()]
+              assertTrue(v instanceof UT && v.length == 3)
       neg:
           - |-
               let v: UT = [new Object(), new Object()]

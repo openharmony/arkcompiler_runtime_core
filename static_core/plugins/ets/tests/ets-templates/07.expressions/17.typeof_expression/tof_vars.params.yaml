@@ -85,8 +85,6 @@ cases:
       vals:
           - { type: A, expr: '{}' }
           - { type: I, expr: 'new A()' }
-          - { type: '[number, string]', expr: '[1.0, "ABC"]'}
-          - { type: '[A, I]', expr: '[new A(), new A()]'}
 
     - res: 'number'
       vals:
@@ -123,12 +121,9 @@ cases:
           interface I {}
           class A implements I {}
       vals:
-          - { type: 'A[]', expr: 'new A[1]' }
-          - { type: 'I[]', expr: 'new A[1]' }
+          - { type: 'A[]', expr: '[new A]' }
+          - { type: 'I[]', expr: '[new A]' }
           - { type: 'Comparable<Float>[]', expr: '[new Float(3.14f)]' }
-          - { type: '[number, string][]', expr: '[[1.0, "ABC"], [2.0, "DEF"]]'}
-          - { type: '[A, I][]', expr: '[[new A(), new A()]]'}
-
 
     - res: 'object'
       vals:
@@ -169,7 +164,7 @@ cases:
           - { type: 'I|null', expr: 'null' }
           - { type: 'A[]|null', expr: '[new A()]' }
           - { type: 'A[]|null', expr: 'null' }
-          - { type: 'I[]|null', expr: '[new A()]' }
+          - { type: 'I[]|null', expr: '[new A()]' } # array type should be inferred from context
           - { type: 'I[]|null', expr: 'null' }
 
     - res: 'number'

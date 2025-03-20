@@ -20,6 +20,7 @@ desc: >-
     have the same name but different signatures that are not
     override-equivalent, then the function name is said to be overloaded.
 params: {{c.type}}
+tags: [{{c.tags}}]
 ---*/
 
 function foo(a: byte): int {

@@ -17,6 +17,7 @@
 desc: >-
     A narrowing reference casting conversion converts an expression of
     a supertype (superclass or superinterface) to a subclass or subinterface.
+tags: [compile-only, negative]
 ---*/
 class Base {}
 class Derived extends Base {}

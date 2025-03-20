@@ -33,7 +33,7 @@ cases:
     # 3
     - sig1: 'p1: A3[], p2: B3[]'
       arg1: '[new A3(), new A3()], [new B3(), new B3()]'
-      arg2: '[new A3(), new A3()], [new A3(), new A3()]'
+      arg2: '[new A3(), new A3()], [new Object(), new Object()]'
       decl: |-
           import { A3, B3 } from './pkg_a/pkg_3.ets'
 

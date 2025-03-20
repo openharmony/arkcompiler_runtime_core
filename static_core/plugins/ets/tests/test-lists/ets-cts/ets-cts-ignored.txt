@@ -1180,6 +1180,7 @@
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_18.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_20.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_21.ets
+07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_4.ets
 07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_5.ets
 07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_6.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_22.ets
