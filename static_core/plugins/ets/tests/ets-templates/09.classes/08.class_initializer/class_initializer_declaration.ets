@@ -14,8 +14,7 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Class initializer declaration.
-assert: A class initializer declared in a class is executed when the class is initialized. Together with any field initializers for class variables, class initializers may be used to initialize the class variables of the class.
+desc: When a class is initialized, the class initializer declared in the class is executed
 ---*/
 
 class A {

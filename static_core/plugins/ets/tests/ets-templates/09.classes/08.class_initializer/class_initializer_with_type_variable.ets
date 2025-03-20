@@ -14,8 +14,9 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Class initializer with type variable declared outside the class initializer.
-assert: It is a compile-time error if the keyword this or the keyword super or any type variable declared outside the class initializer, appears anywhere within a class initializer.
+desc:  >-
+      In addition, a compile-time error occurs if a class initializer contains the following:
+      - Any type of a variable declared outside the class initializer.
 tags: [compile-only, negative]
 ---*/
 

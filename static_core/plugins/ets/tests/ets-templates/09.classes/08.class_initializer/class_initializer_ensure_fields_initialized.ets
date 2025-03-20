@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,21 +15,12 @@ limitations under the License.
 
 /*---
 desc: >-
-      In addition, a compile-time error occurs if a class initializer contains the following:
-      - Keyword super (see Method Call Expression and Field Access Expression);
+    Class initializers (along with field initializers for static fields as described in Field Initialization) ensure that all
+    static fields receive their initial values before they are used for the first time.
 tags: [compile-only, negative]
 ---*/
 
 class A {
-  public foo(): int {
-    return 5;
-  }
-}
-
-class B extends A {
-  public static x: int;
-
-  static {
-    x = 5 + super.foo();
-  }
+  static a: Object
+  static {}
 }
