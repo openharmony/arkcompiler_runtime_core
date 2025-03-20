@@ -17,11 +17,10 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
-static constexpr int32_t LOOP_COUNT = 3;
 
 class ClassGetStaticFieldByNameBoolTest : public AniTest {
 public:
-    void GetFieldValue(const char *className, const char *fieldName)
+    void CheckFieldValue(const char *className, const char *fieldName)
     {
         ani_class cls {};
         ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
@@ -117,7 +116,8 @@ TEST_F(ClassGetStaticFieldByNameBoolTest, combination_test1)
 {
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("LGetBoolStatic;", &cls), ANI_OK);
-    for (int32_t i = 0; i < LOOP_COUNT - 1; i++) {
+    const int32_t loopCount = 3;
+    for (int32_t i = 0; i < loopCount; i++) {
         ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "single", ANI_TRUE), ANI_OK);
         ani_boolean single = ANI_FALSE;
         ASSERT_EQ(env_->Class_GetStaticFieldByName_Boolean(cls, "single", &single), ANI_OK);
@@ -131,35 +131,17 @@ TEST_F(ClassGetStaticFieldByNameBoolTest, combination_test1)
 
 TEST_F(ClassGetStaticFieldByNameBoolTest, combination_test2)
 {
-    ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetBoolStatic;", &cls), ANI_OK);
-    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "single", ANI_FALSE), ANI_OK);
-    ani_boolean single = ANI_TRUE;
-    for (int32_t i = 0; i < LOOP_COUNT; i++) {
-        ASSERT_EQ(env_->Class_GetStaticFieldByName_Boolean(cls, "single", &single), ANI_OK);
-        ASSERT_EQ(single, ANI_FALSE);
-    }
+    CheckFieldValue("LGetBoolStatic;", "single");
 }
 
 TEST_F(ClassGetStaticFieldByNameBoolTest, combination_test3)
 {
-    ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetBoolStatic;", &cls), ANI_OK);
-
-    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "single", ANI_TRUE), ANI_OK);
-    ani_boolean resultValue = ANI_FALSE;
-    ASSERT_EQ(env_->Class_GetStaticFieldByName_Boolean(cls, "single", &resultValue), ANI_OK);
-    ASSERT_EQ(resultValue, ANI_TRUE);
+    CheckFieldValue("LBoolStaticA;", "bool_value");
 }
 
 TEST_F(ClassGetStaticFieldByNameBoolTest, combination_test4)
 {
-    GetFieldValue("LBoolStaticA;", "bool_value");
-}
-
-TEST_F(ClassGetStaticFieldByNameBoolTest, combination_test5)
-{
-    GetFieldValue("LBoolStaticFinal;", "bool_value");
+    CheckFieldValue("LBoolStaticFinal;", "bool_value");
 }
 }  // namespace ark::ets::ani::testing
 

@@ -18,11 +18,10 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
-static constexpr int32_t LOOP_COUNT = 3;
 
 class ClassGetStaticFieldByNameIntTest : public AniTest {
 public:
-    void GetFieldValue(const char *className, const char *fieldName)
+    void CheckFieldValue(const char *className, const char *fieldName)
     {
         ani_class cls {};
         const ani_int setTarget = 2U;
@@ -120,7 +119,8 @@ TEST_F(ClassGetStaticFieldByNameIntTest, combination_test1)
     const ani_int setTarget2 = 3U;
     ani_int single = 0;
     ASSERT_EQ(env_->FindClass("LGetIntStatic;", &cls), ANI_OK);
-    for (int32_t i = 0; i < LOOP_COUNT - 1; i++) {
+    const int32_t loopCount = 3;
+    for (int32_t i = 0; i < loopCount; i++) {
         ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(cls, "age", setTarget2), ANI_OK);
         ASSERT_EQ(env_->Class_GetStaticFieldByName_Int(cls, "age", &single), ANI_OK);
         ASSERT_EQ(single, setTarget2);
@@ -132,36 +132,17 @@ TEST_F(ClassGetStaticFieldByNameIntTest, combination_test1)
 
 TEST_F(ClassGetStaticFieldByNameIntTest, combination_test2)
 {
-    ani_class cls {};
-    const ani_int setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("LGetIntStatic;", &cls), ANI_OK);
-    ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(cls, "age", setTarget), ANI_OK);
-    ani_int single = 0;
-    for (int32_t i = 0; i < LOOP_COUNT; i++) {
-        ASSERT_EQ(env_->Class_GetStaticFieldByName_Int(cls, "age", &single), ANI_OK);
-        ASSERT_EQ(single, setTarget);
-    }
+    CheckFieldValue("LGetIntStatic;", "age");
 }
 
 TEST_F(ClassGetStaticFieldByNameIntTest, combination_test3)
 {
-    ani_class cls {};
-    const ani_int setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("LGetIntStatic;", &cls), ANI_OK);
-    ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(cls, "age", setTarget), ANI_OK);
-    ani_int single = 0;
-    ASSERT_EQ(env_->Class_GetStaticFieldByName_Int(cls, "age", &single), ANI_OK);
-    ASSERT_EQ(single, setTarget);
+    CheckFieldValue("LPackstaticA;", "int_value");
 }
 
 TEST_F(ClassGetStaticFieldByNameIntTest, combination_test4)
 {
-    GetFieldValue("LPackstaticA;", "int_value");
-}
-
-TEST_F(ClassGetStaticFieldByNameIntTest, combination_test5)
-{
-    GetFieldValue("LPackstaticFinal;", "int_value");
+    CheckFieldValue("LPackstaticFinal;", "int_value");
 }
 }  // namespace ark::ets::ani::testing
 

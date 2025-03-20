@@ -18,19 +18,40 @@
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
 namespace ark::ets::ani::testing {
 
-class ClassGetStaticFieldByNameRefTest : public AniTest {};
+class ClassGetStaticFieldByNameRefTest : public AniTest {
+public:
+    void CheckFieldValue(const char *className, const char *fieldName)
+    {
+        ani_class cls {};
+        ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
+
+        ani_string string {};
+        ASSERT_EQ(env_->String_NewUTF8("abcdef", 6U, &string), ANI_OK);
+
+        ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, fieldName, string), ANI_OK);
+        ani_ref resultValue = nullptr;
+        ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, fieldName, &resultValue), ANI_OK);
+
+        auto name = static_cast<ani_string>(resultValue);
+        std::array<char, 7U> buffer {};
+        ani_size resSize = 0U;
+        ASSERT_EQ(env_->String_GetUTF8SubString(name, 0U, 6U, buffer.data(), buffer.size(), &resSize), ANI_OK);
+        ASSERT_EQ(resSize, 6U);
+        ASSERT_STREQ(buffer.data(), "abcdef");
+    }
+};
 
 TEST_F(ClassGetStaticFieldByNameRefTest, get_static_field_ref_capi)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("LMan;", &cls), ANI_OK);
 
-    ani_ref nameRef;
+    ani_ref nameRef = nullptr;
     ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_Ref(env_, cls, "name", &nameRef), ANI_OK);
 
     auto name = static_cast<ani_string>(nameRef);
     std::array<char, 6U> buffer {};
-    ani_size nameSize;
+    ani_size nameSize = 0U;
     ASSERT_EQ(env_->String_GetUTF8SubString(name, 0U, 3U, buffer.data(), buffer.size(), &nameSize), ANI_OK);
     ASSERT_EQ(nameSize, 3U);
     ASSERT_STREQ(buffer.data(), "Bob");
@@ -38,15 +59,15 @@ TEST_F(ClassGetStaticFieldByNameRefTest, get_static_field_ref_capi)
 
 TEST_F(ClassGetStaticFieldByNameRefTest, get_static_field_ref)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("LMan;", &cls), ANI_OK);
 
-    ani_ref nameRef;
+    ani_ref nameRef = nullptr;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "name", &nameRef), ANI_OK);
 
     auto name = static_cast<ani_string>(nameRef);
     std::array<char, 6U> buffer {};
-    ani_size nameSize;
+    ani_size nameSize = 0U;
     ASSERT_EQ(env_->String_GetUTF8SubString(name, 0U, 3U, buffer.data(), buffer.size(), &nameSize), ANI_OK);
     ASSERT_EQ(nameSize, 3U);
     ASSERT_STREQ(buffer.data(), "Bob");
@@ -54,33 +75,88 @@ TEST_F(ClassGetStaticFieldByNameRefTest, get_static_field_ref)
 
 TEST_F(ClassGetStaticFieldByNameRefTest, get_static_field_ref_invalid_field_type)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("LMan;", &cls), ANI_OK);
-    ani_ref nameRef;
+    ani_ref nameRef = nullptr;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "age", &nameRef), ANI_INVALID_TYPE);
 }
 
 TEST_F(ClassGetStaticFieldByNameRefTest, invalid_argument1)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("LMan;", &cls), ANI_OK);
-    ani_ref nameRef;
+    ani_ref nameRef = nullptr;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(nullptr, "name", &nameRef), ANI_INVALID_ARGS);
 }
 
 TEST_F(ClassGetStaticFieldByNameRefTest, invalid_argument2)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("LMan;", &cls), ANI_OK);
-    ani_ref nameRef;
+    ani_ref nameRef = nullptr;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, nullptr, &nameRef), ANI_INVALID_ARGS);
 }
 
 TEST_F(ClassGetStaticFieldByNameRefTest, invalid_argument3)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("LMan;", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "name", nullptr), ANI_INVALID_ARGS);
 }
+
+TEST_F(ClassGetStaticFieldByNameRefTest, invalid_argument4)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("LMan;", &cls), ANI_OK);
+    ani_ref nameRef = nullptr;
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "", &nameRef), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "\n", &nameRef), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_Ref(nullptr, cls, "name", &nameRef), ANI_INVALID_ARGS);
+}
+
+TEST_F(ClassGetStaticFieldByNameRefTest, combination_test1)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("LMan;", &cls), ANI_OK);
+    ani_ref resultValue = nullptr;
+    ani_string string {};
+    ani_string string2 {};
+    ani_size resSize = 0U;
+    ASSERT_EQ(env_->String_NewUTF8("abcdef", 6U, &string), ANI_OK);
+    ASSERT_EQ(env_->String_NewUTF8("fedcba", 6U, &string2), ANI_OK);
+    const int32_t loopCount = 3;
+    for (int32_t i = 0; i < loopCount - 1; i++) {
+        ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "name", string), ANI_OK);
+        ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "name", &resultValue), ANI_OK);
+        auto name = static_cast<ani_string>(resultValue);
+        std::array<char, 30U> buffer {};
+        ASSERT_EQ(env_->String_GetUTF8SubString(name, 0U, 6U, buffer.data(), buffer.size(), &resSize), ANI_OK);
+        ASSERT_EQ(resSize, 6U);
+        ASSERT_STREQ(buffer.data(), "abcdef");
+    }
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "name", string2), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "name", &resultValue), ANI_OK);
+    auto name = static_cast<ani_string>(resultValue);
+    std::array<char, 30U> buffer {};
+    ASSERT_EQ(env_->String_GetUTF8SubString(name, 0U, 6U, buffer.data(), buffer.size(), &resSize), ANI_OK);
+    ASSERT_EQ(resSize, 6U);
+    ASSERT_STREQ(buffer.data(), "fedcba");
+}
+
+TEST_F(ClassGetStaticFieldByNameRefTest, combination_test2)
+{
+    CheckFieldValue("LMan;", "name");
+}
+
+TEST_F(ClassGetStaticFieldByNameRefTest, combination_test3)
+{
+    CheckFieldValue("LBoxStaticA;", "string_value");
+}
+
+TEST_F(ClassGetStaticFieldByNameRefTest, combination_test4)
+{
+    CheckFieldValue("LBoxStaticFinal;", "string_value");
+}
 }  // namespace ark::ets::ani::testing
+
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

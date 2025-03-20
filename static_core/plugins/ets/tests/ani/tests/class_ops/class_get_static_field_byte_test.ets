@@ -15,4 +15,26 @@
 class TestByte {
     static byte_value: byte = 126;
     static string_value: String = "true";
+    static age: byte = 0;
+    static special1: string = "";
+    static special2: null = null;
+    static special3: undefined  = undefined ;
+    static special4: string = "\n";
+    static special5: string = "\r";
+    static special6: string = "\t";
+    static special7: string = "\b";
+    static special8: string = "\a";
+    static special9: string = "\f";
+    static special10: string = "\v";
+    static special11: string = "\0";
+    static byteMin: byte = -128;
+    static byteMax: byte = 127;
+}
+
+class TestByteA extends TestByte {
+    static byte_value: byte = 126;
+}
+
+final class TestByteFinal extends TestByte {
+    static byte_value: byte = 126;
 }
