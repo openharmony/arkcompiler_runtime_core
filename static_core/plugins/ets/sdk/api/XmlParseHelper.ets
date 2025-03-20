@@ -23,35 +23,15 @@ export namespace xml {
         name?: string
         attributes?: Attributes
         content?: string
-        children?: Array<XmlNode>
         lineNumber?: number
         columnNumber?: number
+        pos?: number
         depth?: number
         prefix?: string
         namespace_?: string
         type?: EventType
         isSelfClose?: boolean
-    }
-
-    class ParseAllResult {
-        children: Array<XmlNode> = {}
-        strLeft: string
-        lineNumber: number = 0
-        columnNumber: number = 0
-        depth: number = 0
-    }
-
-    class ParseTagResult {
-        type: 'selfClose' | 'normal' = 'normal'
-        name: string = ''
-        content: NodeParseResult | string = ''
-    }
-
-    class NodeParseResult {
-        outer: string = ""
-        attrs: string = ""
-        inner: string = ""
-        pos: number = 0
+        isServiceTagNode?: boolean
     }
 
     export class XmlParseHelper {
@@ -63,6 +43,7 @@ export namespace xml {
         public tokenFunc_?: (eventType: EventType, value: ParseInfo) => boolean
 
         private strXml_ : string = " "
+        private nodeMap = new Map<number, XmlNode>(); 
 
         constructor(str: string) {
             this.strXml_ = str
@@ -77,12 +58,13 @@ export namespace xml {
         private static readonly const XMLNS_PREFIX = 'xmlns:'
         private static readonly const lineEndRegExp = new RegExp("\n", "m")
         private static readonly const selfCloseTagRegExp = new RegExp("<([\\w:]+)([^<^>])*?/>", "m")
-        private static readonly const normalTagRegExp = new RegExp("<([\\w:]+)[\\s\\S]*?>[\\s\\S]*?<\*?>", "m")
-        private static readonly const startTagRegExp = new RegExp("<([\\w:.-]+)\\s*","m")
-        private static readonly const selfCloseTagParamRegExp = (tagName: string) => { return new RegExp(`<${tagName}[^<^>]*?\/>`,'m') }
-        private static readonly const normalTagParamRegExp = (tagName: string) => { return new RegExp(`<${tagName}([\\s\\S]*?)>([\\s\\S]*?)<\/${tagName}>`,'gm') }
+        private static readonly const startTagRegExp = new RegExp("<([\\w:]+)[\\s\\S]*?>", "m")
+        private static readonly const closeTagRegExp = new RegExp("</([\\w:]+)([^<^>])*?>", "m")
+        private static readonly const textTagRegExp = new RegExp(">[&|\\w:|\\s][^<>]+<", "m")
         private static readonly const attributeRegExp = new RegExp("([\\w:-]+)\\s*=\\s*(\"[^\"]*\"|'[^']*'|\\w+)\\s*", "m")
         private static readonly const stripRegExp = new RegExp("^['\"]|['\"]$","g")
+        private static readonly const entityRegExp = new RegExp("<!ENTITY (?<name>\\w+) ('|\")(?<value>.*?)('|\")>", "gm")
+        private static readonly const nodeNameRegExp = new RegExp("^[\\w:]+$", "gm")
 
         private static readonly const serviceTagRegExpMap = new Map<EventType, RegExp>([
             [EventType.INSTRUCTION, new RegExp("<\\?[^>]+?>","g")],
@@ -92,13 +74,68 @@ export namespace xml {
             [EventType.CDSECT, new RegExp("<!\\[CDATA\\[[\\s\\S]*?\]\]>","gm")]
         ])
 
+        private static readonly const xmlEscapeChars = new Map<string, string>([
+            ["&quot;", "\""],
+            ["&amp;", "&"],
+            ["&lt;", "<"],
+            ["&gt;", ">"],
+            ["&apos;", "'"]
+        ])
+
+        private replaceEntities(node: XmlNode): XmlNode {
+            let str = (node.content != undefined) ? node.content! : ""
+            if (str == "") {
+                return node
+            }
+            if (this.supportDoctype && str.includes("&")) {
+                this.documentEntities.forEach((value: string, key: string) => {
+                    let entityRef = new StringBuilder().append("&").append(key).toString()
+                    if (str.includes(entityRef)) {
+                        str = str.replace(entityRef, value)
+                        node.type = EventType.ENTITY_REFERENCE
+                        node.name = key
+                        node.content = str
+                    }
+                })
+            }
+            return node
+        }
+
+        private replaceXmlSpecChars(str: string): string {
+            for (let key of XmlParseHelper.xmlEscapeChars.keys()) {
+                str = str.replace(key, XmlParseHelper.xmlEscapeChars.get(key!) as string)
+            }
+
+            return str
+        }
+
+        private removeSpecTags(str: string): string {
+            if (str.includes("CDATA")) {
+                str = str.replace("<![CDATA[", "").replace("]]>", "")
+            }
+            if (str.includes("<!--")) {
+                str = str.replace("<!--", "").replace("-->", "")
+            }
+            if (str.includes("<?")) {
+                str = str.replace("<?", "").replace("?>", "")
+            }
+            if (str.includes("<!ENTITY")) {
+                str = str.replace("<!ENTITY","").replace(">", "")
+            }
+            if (str.includes("<!DOCTYPE")) {
+                str = str.replace("<!DOCTYPE","").replace(">", "")
+            }
+            return str
+        }
+
         public calcPosition(str: string, node: XmlNode) {
             let lineEndMatch: NullishType
-            let pos: number = 0
-            let end = str.length > 1 ? str.length - 1 : 0
+            let pos: number = 1
+            let end = str.length > 1 ? str.length + 1 : 1
             let lineChanged: boolean = false
-            node.lineNumber = 0
-            node.columnNumber = 0
+            node.lineNumber = 1
+            node.columnNumber = 1
+            node.pos = end
             while ((pos < end) && (lineEndMatch = XmlParseHelper.lineEndRegExp.exec(str.substr(pos)))) {
                 node.lineNumber!++
                 pos += lineEndMatch!.index + 1
@@ -111,24 +148,25 @@ export namespace xml {
                 node.columnNumber = end
             }
         }
-        
+
         private parseToken(node: XmlNode): ParseInfo {
 
             let info = new ParseInfoImpl()
-            info.depth = node.depth ? node.depth! : 0
-            info.columnNumber = node.columnNumber ? node.columnNumber! : 0
-            info.lineNumber = node.lineNumber ? node.lineNumber! : 0
-            info.attributeCount = node.attributes ? node.attributes!.size : 0
-            info.emptyElementTag = node.isSelfClose ? (node.isSelfClose!) : false
-            info.whitespace = node.content ? (node.content! == " " || node.content! == "") : true
-            info.namespace_ = node.namespace_ ? node.namespace_! : ""
-            info.name = node.name ? node.name! : ""
-            info.prefix = node.prefix ? node.prefix! : ""
-            info.text = node.content ? node.content! : ""
+            info.depth = (node.depth != undefined) ? node.depth! : 0
+            info.columnNumber = (node.columnNumber != undefined) ? node.columnNumber! : 0
+            info.lineNumber = (node.lineNumber != undefined) ? node.lineNumber! : 0
+            info.attributeCount = (node.attributes != undefined) ? node.attributes!.size : 0
+            info.emptyElementTag = (node.isSelfClose != undefined) ? (node.isSelfClose!) : false
+            info.whitespace = (node.content != undefined) ? (node.content! == " " || node.content! == "") : true
+            info.namespace_ = (node.namespace_ != undefined) ? node.namespace_! : ""
+            info.name = (node.name != undefined) ? node.name! : ""
+            info.prefix = (node.prefix != undefined) ? node.prefix! : ""
+            info.text = (node.content != undefined) ? this.replaceXmlSpecChars(node.content!) : ""
 
             return info
         }
-
+        private startDocumentFound: boolean = false
+        private documentEntities = new Map<string,string>()
         private processServiceTag(regexp: RegExp, type: EventType) {
             let m : NullishType
             let pos: number = 0
@@ -138,216 +176,200 @@ export namespace xml {
                     let resType = type
                     if (type == EventType.INSTRUCTION && item.substr(0, XmlParseHelper.XML.length) == XmlParseHelper.XML) {
                         resType = EventType.START_DOCUMENT
+                        pos = 1
+                    } else if (type == EventType.INSTRUCTION) { 
+                        pos += item.length
+                    }
+                    if (this.supportDoctype && (type == EventType.ENTITY_REFERENCE)) {
+                        let match = XmlParseHelper.entityRegExp.exec(item)
+                        if (match && match.result.length > 3) {
+                            let entityName = match.result[1]
+                            let entityValue = match.result[3]
+                            this.documentEntities.set(entityName, entityValue)
+                        }
                     }
                     let node : XmlNode = {
                         type: resType,
-                        content: item
+                        content: this.removeSpecTags(item),
+                        isServiceTagNode: true,
+                        isSelfClose: false,
+                        pos: pos
                     }
-                    let index = m!.index
-                    this.calcPosition(this.strXml_.substr(0, index), node)
+                    this.calcPosition(this.strXml_.substr(0, pos), node)
                     if (resType == EventType.START_DOCUMENT) {
                         if (item != undefined) {
                             node.attributes = this.getAttributes(item, node)
                         }
+                        this.startDocumentFound = true
                     }
                     if ((type != EventType.DOCDECL) || this.supportDoctype) {
-                        this.processNode(node)
+                        this.nodeMap.set(node!.pos!, node!)
                     }
+                }
+            }
+        }
+
+        private processAllStartTags() {
+            let pos: number = 0
+            let m : NullishType
+            while (m = XmlParseHelper.startTagRegExp.exec(this.strXml_.substr(pos))) {
+                pos += m!.index
+                let item = m!.result[0]
+                pos += item.length
+                if (item && !item.match(XmlParseHelper.selfCloseTagRegExp)) {
+                    let name = item.substr(1, item.length - 2).split(" ")[0]
+                    if (!this.isNodeNameValid(name)) {
+                        throw new BusinessError('The node name contains invalid characters')
+                    }
+                    let node = {
+                        pos: pos,
+                        type: EventType.START_TAG,
+                        name: name,
+                        isSelfClose: false
+                    } as XmlNode
+                    node.attributes = this.getAttributes(item, node)
+                    this.processNameSpace(node)
+                    this.calcPosition(this.strXml_.substr(0, pos), node!)
+                    this.nodeMap.set(node!.pos!, node!)
+                }
+            }
+        }
+
+        private isNodeNameValid(name: string): boolean {
+            let m = name.match(XmlParseHelper.nodeNameRegExp)
+            if (m && m.result) {
+                return m.result.length > 0
+            }
+            return false
+        }
+
+        private processAllEndTags() {
+            let pos: number = 0
+            let m : NullishType
+            while (m = XmlParseHelper.closeTagRegExp.exec(this.strXml_.substr(pos))) {
+                pos += m!.index
+                let item = m!.result[0]
+                pos += item.length
+                let name = item.substr(2, item.length - 3)
+                if (!this.isNodeNameValid(name)) {
+                    throw new BusinessError('The node name contains invalid characters')
+                }
+                if (item) {
+                    let node = {
+                        pos: pos,
+                        name: name,
+                        isSelfClose: false
+                    } as XmlNode
+                    node!.type = EventType.END_TAG 
+                    this.processNameSpace(node)
+                    this.calcPosition(this.strXml_.substr(0, pos), node!)
+                    this.nodeMap.set(node!.pos!, node!)
+                }
+            }
+        }
+
+        private processAllSelfCloseTags() {
+            let m : NullishType
+            let pos: number = 0
+            while (m = XmlParseHelper.selfCloseTagRegExp.exec(this.strXml_.substr(pos))) {
+                pos += m!.index
+                let item = m!.result[0]
+                if (item) {
+                    pos += item.length
+                    let name = item.substr(1, item.length - 3).split(" ")[0]
+                    if (!this.isNodeNameValid(name)) {
+                        throw new BusinessError('The node name contains invalid characters')
+                    }
+                    let node = {
+                        pos: pos,
+                        type: EventType.START_TAG,
+                        name: name,
+                        isSelfClose: true
+                    } as XmlNode
+                    node.attributes = this.getAttributes(item, node)
+                    this.processNameSpace(node) 
+                    this.calcPosition(this.strXml_.substr(0, pos), node!)
+                    this.nodeMap.set(pos - 1, node)
+                    let endNode = {
+                        pos: pos,
+                        type: EventType.END_TAG,
+                        name: name,
+                        isSelfClose: true,
+                        columnNumber: node.columnNumber,
+                        lineNumber: node.lineNumber,
+                        prefix: node.prefix,
+                        namespace_: node.namespace_
+                    } as XmlNode
+                    this.nodeMap.set(pos, endNode)
+                }
+            }
+        }
+
+        private processAllTextTags() {
+            let m : NullishType
+            let pos:number = 0
+            while (m = XmlParseHelper.textTagRegExp.exec(this.strXml_.substr(pos))) {
+                pos += m!.index
+                for (let item of m!.result) {
+                    pos += item.length
+                    let content = item.substr(1, item.length - 2)
+                    let node = {
+                        pos: pos,
+                        content: this.removeSpecTags(content)
+                    } as XmlNode
+                    node!.type = (node!.content!.replaceAll(" ", "") == "") ? EventType.WHITESPACE : EventType.TEXT 
+                    this.calcPosition(this.strXml_.substr(0, pos - 1), node!)
+                    this.nodeMap.set(node!.pos!, node!)
                 }
             }
         }
 
         public parse(): void {
+            if (this.strXml_ == "") {
+                return
+            }
 
             XmlParseHelper.serviceTagRegExpMap.forEach((value: RegExp, key: EventType) => {
                 this.processServiceTag(value, key)
             })
 
-            let xml = this.strXml_
-            let parsed = this.parseNodeRecursive(xml)
-            if (parsed) {
-                if ((parsed.children.length === 1) && !(parsed.children[0] instanceof String)) {
+            this.processAllStartTags()
+            this.processAllSelfCloseTags()
+            this.processAllTextTags()
+            this.processAllEndTags()
 
-                    let endNode: XmlNode = {
-                        name: '',
-                        type: EventType.END_DOCUMENT,
-                        depth: 0
-                    }
-                    this.calcPosition(this.strXml_, endNode)
-                    this.processNode(endNode)
+            let keys = Array.from(this.nodeMap.keys()).sort((a, b) => a - b)
 
-                } else {
-                    //NOTE(ekaterinazaytseva): should be replaced with BusinessError
-                    throw new Error('Failed to parse XML')
+            let name = ""
+            let depth = 0
+            let res = true
+            keys.forEach((key: number) => {
+                let node = this.nodeMap.get(key)!
+                if (node.type == EventType.START_TAG) {
+                    name = node!.name!
+                    ++depth
                 }
+                if (node.type == EventType.END_TAG && (depth > 1)) {
+                    --depth
+                }
+                node.depth = depth
+                if (res) {
+                    node = this.replaceEntities(node)
+                    res = this.processNode(node)
+                }
+            })
+
+            let endNode: XmlNode = {
+                name: '',
+                type: EventType.END_DOCUMENT,
+                depth: 0
             }
+            this.calcPosition(this.strXml_, endNode)
+            this.processNode(endNode)
         }
 
         private isNullish(obj: NullishType): boolean {
             return (obj == undefined)
-        }
-
-        private parseNodeRecursive(str: string, depth: number = 0, pos: number = 0): ParseAllResult | undefined {
-            let all = new Array<XmlNode>
-            
-            let firstTag: ParseTagResult | undefined
-            while (!this.isNullish(firstTag = this.getStartTag(str, pos))) {
-                let targetStr : string = ''
-                let node : XmlNode | undefined = undefined
-                if (firstTag!.type === 'selfClose') {
-                    targetStr = firstTag!.content as string
-                    pos += this.strXml_.substr(pos).search(targetStr)
-                    node = this.parseNode(targetStr, firstTag!.name, true, depth + 1, "", pos)
-                } else if (firstTag!.type === 'normal') {
-                    let parseRes = (firstTag!.content as NodeParseResult)
-                    targetStr = parseRes.outer
-                    pos += this.strXml_.substr(pos).search(targetStr)
-                    node = this.parseNode(firstTag!.content, firstTag!.name, false, depth + 1, str, pos)
-                }
-                if (!this.isNullish(node)) {
-                    all.push(node!)
-                }
-                str = str.replace(targetStr, '')
-            }
-            if (all.length === 0) {
-                return undefined
-            } else {
-                return {
-                    children: all,
-                    strLeft: str
-                } as ParseAllResult
-            }
-        }
-
-        private parseNode(target: string | NodeParseResult, tagName: string ,isSelfClose: boolean, depth: number = 0, originStr: string = "", pos: number = 0): XmlNode | undefined {
-            let node: XmlNode = {
-                name: tagName,
-                depth: depth + 1
-            }
-            if (isSelfClose) {
-                node = this.parseSelfCloseTag(target as string, node)
-                node.isSelfClose = true
-                node.type = EventType.START_TAG
-                this.calcPosition(this.strXml_.substr(0, pos), node)
-                this.processNode(node)
-            } else {
-                let t: NodeParseResult = target as NodeParseResult
-                node = this.parseNormalTag(t, node)
-
-                let startNode = {type: EventType.START_TAG, name: node.name, depth: depth} as XmlNode
-                startNode.content = (target as NodeParseResult).inner
-                startNode.attributes = node.attributes
-                this.calcPosition(this.strXml_.substr(0, pos), startNode)
-                this.processNode(startNode)
-
-                node.content = startNode.content
-                node.type = (node.content == " " || node.content == "") ? EventType.WHITESPACE : EventType.TEXT 
-                // process text
-                const startTagText = new StringBuilder().append("<").append(node.name!).append(t.attrs!).append(">").toString()
-                this.calcPosition(this.strXml_.substr(0, pos + startTagText.length), node)
-                this.processNode(node)
-
-                let endTagNode = {
-                    name: "/" + node.name, 
-                    namespace_: node.namespace_,
-                    prefix: node.prefix, 
-                    content: "",
-                    type: EventType.END_TAG, 
-                    depth: depth
-                } as XmlNode
-                this.calcPosition(this.strXml_.substr(0, pos + startTagText.length + node.content!.length), endTagNode)
-                this.processNode(endTagNode)
-            }
-            return node
-        }
-
-        private parseSelfCloseTag(str: string, node: XmlNode) : XmlNode {
-            if (str != undefined) {
-                node.attributes = this.getAttributes(str, node)
-                this.processNameSpace(node)
-                return node
-            }
-            return {}
-        }
-
-        private parseNormalTag(parseResult: NodeParseResult, node: XmlNode): XmlNode {
-            if (parseResult.attrs != undefined) {
-                node.attributes = this.getAttributes(parseResult.attrs, node)
-            }
-            let str = parseResult.inner
-            this.processNameSpace(node)
-
-            let selfCloseTagMatch = str.match(XmlParseHelper.selfCloseTagRegExp)
-            let normalTagMatch = str.match(XmlParseHelper.normalTagRegExp)
-
-            if (!this.isNullish(selfCloseTagMatch) || !this.isNullish(normalTagMatch)) {
-                let res = this.parseNodeRecursive(str, node.depth!, parseResult.pos)
-                if (res) {
-                    if (res.children && res.children.length > 0) {
-                        node.children = res.children
-                    }
-                    if (res.strLeft !== '') {
-                        node.content = res.strLeft
-                    }
-                }
-            } else {
-                if (str != '') {
-                    node.content = str 
-                }
-            }
-            
-            return node
-        }
-
-        private getStartTag(str: string, pos: number): ParseTagResult | undefined {
-            let startTagMatch = str.match(XmlParseHelper.startTagRegExp)
-            if (!startTagMatch) {
-                return undefined
-            }
-            let tagName = startTagMatch.result[1]
-            if (tagName == undefined) {
-                return undefined
-            }
-            pos += startTagMatch.index
-            let selfCloseStr = this.getSelfCloseNode(str, tagName)
-            if (selfCloseStr) {
-                return {
-                    type: 'selfClose',
-                    name: tagName,
-                    content: selfCloseStr
-                }  as ParseTagResult
-            }
-            let normalContent = this.getNormalNode(str, tagName, pos)
-            if (normalContent) {
-                return {
-                    type: 'normal',
-                    name: tagName,
-                    content: normalContent
-                } as ParseTagResult
-            }
-            return undefined
-        }
-
-        private getSelfCloseNode(str: string, tagName: string): string | undefined {
-            let selfCloseTagMatch = str.match(XmlParseHelper.selfCloseTagParamRegExp(tagName))
-            if (selfCloseTagMatch) {
-                return selfCloseTagMatch.result[0]
-            }
-            return undefined
-        }
-
-        private getNormalNode(str: string, tagName: string, pos: number): NodeParseResult | undefined {
-            let normalTagMatch = XmlParseHelper.normalTagParamRegExp(tagName).exec(str)
-            if (normalTagMatch) {
-                pos += normalTagMatch.index + pos
-                return {
-                    outer: normalTagMatch.result[0],
-                    attrs: normalTagMatch.result[1],
-                    inner: normalTagMatch.result[2],
-                    pos: pos
-                } as NodeParseResult
-            }
-            return undefined
         }
 
         private getAttributes(str: string, node: XmlNode): Map<string, string> {
@@ -357,7 +379,8 @@ export namespace xml {
                 if (node.attributes) {
                     attributes = node.attributes!
                 }
-                attributes!.set(keyValueMatch!.result[1] as string, this.strip(keyValueMatch!.result[2] as string))
+                attributes!.set(this.replaceXmlSpecChars(keyValueMatch!.result[1] as string),
+                    this.replaceXmlSpecChars(this.strip(keyValueMatch!.result[2] as string)))
                 str = str.replace(keyValueMatch!.result[0] as string,'')
             }
             return attributes
@@ -401,33 +424,39 @@ export namespace xml {
             }
         }
 
-        private onlyStartTag(node: XmlNode) {
+        private onlyStartTag(node: XmlNode): boolean {
             return !(node.type == EventType.END_TAG || node.type == EventType.TEXT || node.type == EventType.WHITESPACE)
         }
 
-        private processNode(node: XmlNode) {
-            if (!this.isNullish(this.tagFunc_) && !(this.isNullish(node.name) && this.isNullish(node.content))
-            && this.onlyStartTag(node)) {
-                if (!this.tagFunc_!(node.name ? node.name! : "", node.content ? node.content!: "")) {
-                    return
+        private isStartOrEndDocument(node: XmlNode): boolean {
+            return node.type == EventType.START_DOCUMENT || node.type == EventType.END_DOCUMENT
+        }
+
+        private processNode(node: XmlNode): boolean {
+
+            if (!this.isNullish(this.tagFunc_) && !(this.isNullish(node.name) && this.isNullish(node.content)) && !this.isStartOrEndDocument(node)) {
+                if (!this.tagFunc_!(node.name ? node.name! : "", node.content ? this.replaceXmlSpecChars(node.content!) : "")) {
+                    return false
                 }
             }
             if (!this.isNullish(this.tokenFunc_)) {
-                if (!this.tokenFunc_!(node.type ? node.type! : ((node.content == " ") ? EventType.WHITESPACE : EventType.TEXT), //this.info)) {
-                this.parseToken(node))) {
-                    return
+                let info = this.parseToken(node)
+                if (!this.tokenFunc_!(node.type ? node.type! : ((node.content == " ") ? EventType.WHITESPACE : EventType.TEXT), info)) {
+                    return false
                 }
             }
             if (!this.isNullish(this.attrFunc_) && (!this.isNullish(node.attributes)) && (node.attributes!.size > 0)
-            && this.onlyStartTag(node)) {
+            && this.onlyStartTag(node) && !this.isStartOrEndDocument(node)) {
                 let res = true
-                node.attributes!.forEach((key: string, value: string) => { 
+                node.attributes!.forEach((value: string, key: string) => { 
                     if (res && !this.attrFunc_!(key, value)) {
                         res = false
                         return
                     }
                 })
+                return res
             }
+            return true
         }
     }
 }
