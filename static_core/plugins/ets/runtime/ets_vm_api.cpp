@@ -103,6 +103,10 @@ bool CreateRuntime(std::function<bool(base_options::Options *, RuntimeOptions *)
         LOG(ERROR, RUNTIME) << "GC type must be g1-gc and no-async-jit option must be false";
         return false;
     }
+    // NOTE(audovichenko): Remove this #24045
+    if (!runtimeOptions.WasSetGcTriggerType("ets")) {
+        runtimeOptions.SetGcTriggerType("heap-trigger");
+    }
 #endif
 
     if (!ark::Runtime::Create(runtimeOptions)) {
