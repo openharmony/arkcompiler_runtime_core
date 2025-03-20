@@ -293,10 +293,10 @@
 # ES2PANDA_NEG_FAIL
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_3.ets
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_7.ets
-04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.type_compatibility_with_initializer/initializer_compatibility_n_8.ets
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.assignability_with_initializer/initializer_compatibility_n_8.ets
 
 #not implemented
-04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.type_compatibility_with_initializer/initializer_compatibility_8.ets
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.assignability_with_initializer/initializer_compatibility_8.ets
 
 #23643
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_12.ets
@@ -347,7 +347,6 @@
 
 #19926 FailKind.ES2PANDA_FAIL not implemented yet
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_2.ets
-04.names_declarations_and_scopes/08.function_declarations/09.function_overload_signatures/overload.ets
 
 #23138, 23364 Does not work for primitives and enum
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_39.ets
@@ -645,16 +644,16 @@
 06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/union_type_from_object_1.ets
 
 #18118 No ClassCastError on casting to a wrong function type
-06.contexts_and_conversions/04.casting_contexts_and_conversions/04.casting_conversions_from_union/cce_5.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/06.casting_conversions_from_union/cce_5.ets
 
 #18115 CTE on a union type variable in instanceof
-06.contexts_and_conversions/04.casting_contexts_and_conversions/04.casting_conversions_from_union/un2_0.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/06.casting_conversions_from_union/un2_0.ets
 
 #20483 es2panda aborts on literal type conversion in field initialization expression
-06.contexts_and_conversions/05.implicit_conversions/14.literal_type_conversions/decl_field/decl-field2_0.ets
-06.contexts_and_conversions/05.implicit_conversions/14.literal_type_conversions/decl_field/decl-field2_2.ets
-06.contexts_and_conversions/05.implicit_conversions/14.literal_type_conversions/decl_field/decl-field2_4.ets
-06.contexts_and_conversions/05.implicit_conversions/14.literal_type_conversions/decl_field/decl-field2_6.ets
+06.contexts_and_conversions/05.implicit_conversions/12.literal_type_conversions/decl_field/decl-field2_0.ets
+06.contexts_and_conversions/05.implicit_conversions/12.literal_type_conversions/decl_field/decl-field2_2.ets
+06.contexts_and_conversions/05.implicit_conversions/12.literal_type_conversions/decl_field/decl-field2_4.ets
+06.contexts_and_conversions/05.implicit_conversions/12.literal_type_conversions/decl_field/decl-field2_6.ets
 
 #15238 Cannot cast tuple to Object
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/cce_5.ets
@@ -759,7 +758,7 @@
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_var/decl-var_8.ets
 
 #23583
-06.contexts_and_conversions/05.implicit_conversions/08.char_to_string_conversion/comp-clss.ets
+06.contexts_and_conversions/05.implicit_conversions/06.char_to_string_conversions/comp-clss.ets
 
 #23137
 06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd-nan_2.ets
@@ -784,131 +783,131 @@
 06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_2_9.ets
 
 #19926 union of literals is not supported yet
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/assn_var/assn-var-lit_0.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/assn_var/assn-var-lit_1.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/assn_var/assn-var-lit_2.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/assn_var/assn-var-lit_3.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/assn_var/assn-var-lit_4.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/assn_var/assn-var-lit_7.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_func/call-func-lit_0.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_func/call-func-lit_1.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_func/call-func-lit_2.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_func/call-func-lit_3.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_func/call-func-lit_4.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_func/call-func-lit_7.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_lmbd/call-lmbd-lit_0.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_lmbd/call-lmbd-lit_1.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_lmbd/call-lmbd-lit_2.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_lmbd/call-lmbd-lit_3.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_lmbd/call-lmbd-lit_4.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_lmbd/call-lmbd-lit_7.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_meth/call-meth-lit_0.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_meth/call-meth-lit_1.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_meth/call-meth-lit_2.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_meth/call-meth-lit_3.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_meth/call-meth-lit_4.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_meth/call-meth-lit_7.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-lit_0.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-lit_1.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-lit_2.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-lit_3.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-lit_4.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-lit_7.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_obj/comp-obj-lit_0.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_obj/comp-obj-lit_1.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_obj/comp-obj-lit_2.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_obj/comp-obj-lit_3.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_obj/comp-obj-lit_4.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_obj/comp-obj-lit_5.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_obj/comp-obj-lit_6.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_obj/comp-obj-lit_7.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_field/decl-field-lit_0.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_field/decl-field-lit_1.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_field/decl-field-lit_2.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_field/decl-field-lit_3.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_field/decl-field-lit_4.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_field/decl-field-lit_7.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var-lit_0.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var-lit_1.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var-lit_2.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var-lit_3.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var-lit_4.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var-lit_7.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_cons/call-cons-lit_0.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_cons/call-cons-lit_1.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_cons/call-cons-lit_2.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_cons/call-cons-lit_3.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_cons/call-cons-lit_4.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/call_cons/call-cons-lit_7.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/spec8.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/spec2.ets
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/spec5b.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/assn_var/assn-var-lit_0.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/assn_var/assn-var-lit_1.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/assn_var/assn-var-lit_2.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/assn_var/assn-var-lit_3.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/assn_var/assn-var-lit_4.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/assn_var/assn-var-lit_7.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_func/call-func-lit_0.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_func/call-func-lit_1.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_func/call-func-lit_2.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_func/call-func-lit_3.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_func/call-func-lit_4.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_func/call-func-lit_7.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_lmbd/call-lmbd-lit_0.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_lmbd/call-lmbd-lit_1.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_lmbd/call-lmbd-lit_2.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_lmbd/call-lmbd-lit_3.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_lmbd/call-lmbd-lit_4.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_lmbd/call-lmbd-lit_7.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_meth/call-meth-lit_0.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_meth/call-meth-lit_1.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_meth/call-meth-lit_2.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_meth/call-meth-lit_3.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_meth/call-meth-lit_4.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_meth/call-meth-lit_7.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_arr/comp-arr-lit_0.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_arr/comp-arr-lit_1.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_arr/comp-arr-lit_2.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_arr/comp-arr-lit_3.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_arr/comp-arr-lit_4.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_arr/comp-arr-lit_7.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_0.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_1.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_2.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_3.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_4.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_5.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_6.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_7.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_0.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_1.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_2.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_3.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_4.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_7.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_var/decl-var-lit_0.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_var/decl-var-lit_1.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_var/decl-var-lit_2.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_var/decl-var-lit_3.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_var/decl-var-lit_4.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_var/decl-var-lit_7.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_0.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_1.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_2.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_3.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_4.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-lit_7.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/spec8.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/spec2.ets
+06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/spec5b.ets
 
 #19809
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_21.ets
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/decl_field/decl-field_21.ets
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-clss_21.ets
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/decl_var/decl-var_21.ets
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/assn_var/assn-var_21.ets
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/decl_const/decl-const_21.ets
+06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/comp_obj/comp-intf_21.ets
+06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/decl_field/decl-field_21.ets
+06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/comp_obj/comp-clss_21.ets
+06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/decl_var/decl-var_21.ets
+06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/assn_var/assn-var_21.ets
+06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/decl_const/decl-const_21.ets
 
 #enum cannot be assigned to type Object - not yet implemented
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/call_func/call-func_21.ets
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_arr/comp-arr_21.ets
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/call_meth/call-meth_21.ets
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/call_lmbd/call-lmbd_21.ets
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/call_cons/call-cons_21.ets
+06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/call_func/call-func_21.ets
+06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/comp_arr/comp-arr_21.ets
+06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/call_meth/call-meth_21.ets
+06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/call_lmbd/call-lmbd_21.ets
+06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/call_cons/call-cons_21.ets
 
 #23113
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/decl_var/decl-var_6.ets
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/assn_var/assn-var_6.ets
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/decl_field/decl-field_6.ets
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/call_func/call-func_6.ets
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/call_cons/call-cons_6.ets
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/call_lmbd/call-lmbd_6.ets
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/call_meth/call-meth_6.ets
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr_6.ets
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_obj/comp-clss_6.ets
+06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/decl_var/decl-var_6.ets
+06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/assn_var/assn-var_6.ets
+06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/decl_field/decl-field_6.ets
+06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/call_func/call-func_6.ets
+06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/call_cons/call-cons_6.ets
+06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/call_lmbd/call-lmbd_6.ets
+06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/call_meth/call-meth_6.ets
+06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/comp_arr/comp-arr_6.ets
+06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/comp_obj/comp-clss_6.ets
 
 #22339
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_2.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_3.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_4.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_5.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_6.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_7.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_8.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_9.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_2.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_3.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_4.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_5.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_6.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_7.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_8.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_9.ets
 
 #23761
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_func/call-func_0.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_lmbd/call-lmbd_0.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_meth/call-meth_0.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/call_func/call-func_0.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/call_lmbd/call-lmbd_0.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/call_meth/call-meth_0.ets
 
 #23762
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_lmbd/call-lmbd_9.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/call_lmbd/call-lmbd_9.ets
 
 #23760 Tuples types values are not recognized while passing arguments to functions without explicit 'as'
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_0.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_1.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_4.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_5.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_6.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_7.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_8.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_9.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/comp_obj/comp-obj_0.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/comp_obj/comp-obj_1.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/comp_obj/comp-obj_4.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/comp_obj/comp-obj_5.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/comp_obj/comp-obj_6.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/comp_obj/comp-obj_7.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/comp_obj/comp-obj_8.ets
+06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/comp_obj/comp-obj_9.ets
 
 #20766 - not yet implemented
-06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_0.ets
-06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_1.ets
-06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_2.ets
-06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_3.ets
-06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_4.ets
-06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_5.ets
-06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_6.ets
-06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_7.ets
-06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_8.ets
-06.contexts_and_conversions/05.implicit_conversions/13.constant_to_enum_conversions/int2enum_9.ets
+06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_0.ets
+06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_1.ets
+06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_2.ets
+06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_3.ets
+06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_4.ets
+06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_5.ets
+06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_6.ets
+06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_7.ets
+06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_8.ets
+06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_9.ets
 
 #23592
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/ase1.ets
