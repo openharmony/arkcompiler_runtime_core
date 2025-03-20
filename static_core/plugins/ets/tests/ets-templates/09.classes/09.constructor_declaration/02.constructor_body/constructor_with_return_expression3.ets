@@ -26,8 +26,8 @@ class A {}
 class X {
     res: number = 5
     constructor(v?: A) {
-        while (v != undefined) {
-            while (this.res > 0) {
+        if (v != undefined) {
+            if (this.res > 0) {
                 this.res--;
                 return;
             }
