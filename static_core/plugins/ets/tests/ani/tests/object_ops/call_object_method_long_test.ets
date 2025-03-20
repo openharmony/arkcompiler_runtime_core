@@ -13,13 +13,82 @@
  * limitations under the License.
  */
 
-class C {
-    public static new_C()
+class A {
+    public static newA()
     {
-        return new C();
+        return new A();
     }
 
-    public long_method(a: long, b: int): long {
-        return 0;
+    public longMethod(a: long, b: long): long {
+        return a + b;
+    }
+
+    public longMethodVoidParam(): long
+    {
+        return 5 as long;
+    }
+
+    public longMethodMultipleParam(a0: long, a1: boolean, a2:float, a3:long, a4:float): long
+    {
+        if (a1) {
+            return a0 + a3;
+        } else if (a4 > a2) {
+            return a0;
+        } else {
+            return a0 - a3;
+        }
+    }
+
+    public nestedMethod(data1: long, data2: long): long
+    {
+        let method = (value1: long, value2: long): long => {
+            return value1 + value2;
+        }
+
+        return method(data1, data2);
+    }
+
+    public recursionMethod(a0: long): long
+    {
+        if (a0 > 100) {
+            return a0;
+        } else {
+            return this.recursionMethod(a0 + 10);
+        }
+    }
+}
+
+final class B extends A {
+
+    public subLongMethodVoidParam(): long
+    {
+        return 8 as int;
+    }
+
+    public subMethodMultipleParam(a0: long, a1: boolean, a2:float, a3:long, a4:float): long
+    {
+        if (a1) {
+            return a0 + a3;
+        } else if (a4 > a2) {
+            return a0;
+        } else {
+            return a0 - a3;
+        }
+    }
+}
+
+abstract class C {
+    public abstract func(a: long, b: long): long;
+}
+
+class D extends C {
+    public override func(a: long, b: long): long {
+        return (a + b) as long;
+    }
+}
+
+class E extends D {
+    public override func(a: long, b: long): long {
+        return (a - b) as long;
     }
 }
