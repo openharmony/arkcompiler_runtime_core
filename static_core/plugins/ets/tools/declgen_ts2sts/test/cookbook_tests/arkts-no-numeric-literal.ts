@@ -13,6 +13,32 @@
  * limitations under the License.
  */
 
-export interface I1 {}
 
-export class C1 {}
+let intNum: 15; 
+
+let intNum2: -15;
+
+let floatNum: 3.14; 
+
+let binaryNum: 0b101; 
+
+let octalNum: 0o17; 
+
+let hexNum: 0xFF; 
+
+let specificNum: 5 = 5; 
+
+function add(a: 3, b: 4): 7 {
+    return 7;
+}
+
+const result = add(3, 4); 
+
+const numbers: number[] = [1, 2, 3]; 
+
+const tuple: [1, 2, 3] = [1, 2, 3]; 
+
+const person = {
+    age: 25,
+    height: 175
+};

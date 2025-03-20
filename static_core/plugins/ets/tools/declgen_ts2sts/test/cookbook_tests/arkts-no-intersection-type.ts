@@ -13,6 +13,38 @@
  * limitations under the License.
  */
 
-export interface I1 {}
+export type A = string & number;
 
-export class C1 {}
+interface Person {
+    name: string;
+    age: number;
+}
+
+interface Employee {
+    employeeId: string;
+    department: string;
+}
+
+export type PersonEmployee = Person & Employee;
+
+class Logger {
+    log(message: string) {
+      console.log(message);
+    }
+  }
+
+class Validator {
+    validate(data: any) {
+      return typeof data === 'number';
+    }
+}
+
+export type LoggerValidator = Logger & Validator;
+
+type Status = 'active' | 'inactive';
+type User = {
+  id: number;
+  name: string;
+};
+
+export type ActiveUser = User & { status: 'active' };

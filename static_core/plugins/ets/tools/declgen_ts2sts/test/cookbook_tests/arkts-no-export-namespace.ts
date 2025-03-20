@@ -13,6 +13,20 @@
  * limitations under the License.
  */
 
-export interface I1 {}
+export declare namespace A {
+    export namespace B {
+        export namespace C {
+            export namespace D {
+                export interface User {
+                    id: number;
+                    name: string;
+                }
+            }
+        }
+    }
 
-export class C1 {}
+}
+
+export class Foo {
+    f(user: A.B.C.D.User): void { }
+}

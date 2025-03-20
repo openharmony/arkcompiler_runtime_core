@@ -17,12 +17,12 @@ declare class C {
     b: number;
     static c: string;
     static d: string;
-    protected e: Map<any, any>;
+    protected e: Map<JSValue, JSValue>;
     protected static f: Map<string, string>;
     j(): number;
     k(): number;
     static l(): string;
     static m(): string;
-    protected o(): Map<any, any>;
+    protected o(): Map<JSValue, JSValue>;
     protected static p(): Map<string, string>;
 }

@@ -405,24 +405,8 @@ export default tseslint.config(
       '@typescript-eslint/naming-convention': [
         'error',
         {
-          selector: 'default',
-          format: ['camelCase']
-        },
-        {
-          selector: 'enumMember',
-          format: ['UPPER_CASE']
-        },
-        {
-          selector: 'variable',
-          format: ['camelCase', 'UPPER_CASE']
-        },
-        {
           selector: 'typeLike',
           format: ['PascalCase']
-        },
-        {
-          selector: 'memberLike',
-          format: ['camelCase']
         }
       ]
     }

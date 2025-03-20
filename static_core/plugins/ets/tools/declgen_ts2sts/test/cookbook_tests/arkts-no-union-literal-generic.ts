@@ -13,6 +13,18 @@
  * limitations under the License.
  */
 
-export interface I1 {}
-
-export class C1 {}
+class SomeType1 { }
+class Base<T = 5> { }
+class Base1<T = true> { }
+class Point1<T extends boolean> {
+}
+class Point2<T extends number | 'a'> {
+}
+class Point3<T extends false | 'a'> {
+}
+class Point4<T extends boolean | 'a'> {
+}
+class Point5<T extends false | true, D extends SomeType1> {
+}
+class Point6<T extends false | true, D = 5> {
+}

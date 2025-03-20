@@ -13,6 +13,33 @@
  * limitations under the License.
  */
 
-export interface I1 {}
 
-export class C1 {}
+export interface Calculator {
+  add(a: number, b: number): number;
+}
+
+export interface Calculator {
+  subtract(a: number, b: number): number;
+}
+
+export interface I {
+  foo(a: number):void;
+}
+
+export interface I {
+  foo(a?: number):void;
+}
+
+export interface I {
+  setAge(age: number): void;
+}
+
+export namespace A {
+  export interface I {
+      clone(arg0: string): string;
+  }
+  export interface I {
+      name: string
+  }
+}
+

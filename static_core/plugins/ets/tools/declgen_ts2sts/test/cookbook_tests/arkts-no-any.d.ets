@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export interface I1 {}
-
-export class C1 {}
+export declare let cat: JSValue;
+export declare const dog: JSValue;
+export declare function foo(d: JSValue): JSValue;

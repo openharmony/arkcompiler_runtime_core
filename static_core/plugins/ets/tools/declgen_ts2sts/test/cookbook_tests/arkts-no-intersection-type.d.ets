@@ -12,7 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export interface I1 {}
-
-export class C1 {}
+export type A = JSValue;
+export type PersonEmployee = JSValue;
+export type LoggerValidator = JSValue;
+type User = JSValue;
+export type ActiveUser = JSValue;
+export {};
+interface Person {
+    name: string;
+    age: number;
+}
+interface Employee {
+    employeeId: string;
+    department: string;
+}
+declare class Logger {
+    log(message: string): void;
+}
+declare class Validator {
+    validate(data: JSValue): boolean;
+}

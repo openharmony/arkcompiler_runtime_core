@@ -13,6 +13,32 @@
  * limitations under the License.
  */
 
-export interface I1 {}
+export function foo1(arg: Object) {}
 
-export class C1 {}
+export function foo2(obj: Object) {
+    console.log(obj.toString())
+}
+
+export let a: Object = 1
+
+export function foo3(): Object { return '123' }
+
+class A {}
+
+export function foo4(arg: Object) {
+  return arg instanceof A
+}
+
+export function foo5(arg: Object) {
+    arg as A
+}
+
+export function foo6(arg: Object) {
+    return typeof arg
+}
+
+export function foo7(arg: Function) {
+    return typeof Function
+}
+
+export let b: Function = () => {}

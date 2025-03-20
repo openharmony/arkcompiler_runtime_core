@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
-export interface I1 {}
-
-export class C1 {}
+export function* foo() {
+    yield 1;
+   }
+   
+export function* bar(arg:any) {
+     yield arg
+}

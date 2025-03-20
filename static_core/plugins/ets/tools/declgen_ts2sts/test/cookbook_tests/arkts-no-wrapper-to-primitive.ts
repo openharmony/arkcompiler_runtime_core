@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
-export interface I1 {}
-
-export class C1 {}
+export let a = new Number(123)
+export let b = 123
+export let b1: BigInt = BigInt("456");
+export let c = Symbol(1)
+export let d = new String("hello")
+export let e = new Boolean()
+export let sym: symbol = Symbol("mySymbol");

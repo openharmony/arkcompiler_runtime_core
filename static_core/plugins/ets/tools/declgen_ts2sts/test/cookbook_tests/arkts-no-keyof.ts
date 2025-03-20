@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
-export interface I1 {}
+class A { x: number; y: number}
+type N = keyof A;  // 'x' | 'y'
 
-export class C1 {}
+const test11 = { a: 1, b: 2 };
+const key: keyof typeof test11 = "a"; 

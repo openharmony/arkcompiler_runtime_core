@@ -12,7 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export interface I1 {}
-
-export class C1 {}
+export declare namespace A {
+    export interface I {
+        clone(arg0: string): string;
+        name: string;
+    }
+}
+export interface Calculator {
+    add(a: number, b: number): number;
+    subtract(a: number, b: number): number;
+}
+export interface I {
+    foo(a: number): void;
+    foo(a?: number): void;
+    setAge(age: number): void;
+}

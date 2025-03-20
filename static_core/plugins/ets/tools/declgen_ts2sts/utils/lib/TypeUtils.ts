@@ -13,6 +13,5 @@
  * limitations under the License.
  */
 
-export interface I1 {}
-
-export class C1 {}
+export const JSValue: string = 'JSValue';
+export const KitPrefix: string[] = ['@kit.', '@ohos.'];

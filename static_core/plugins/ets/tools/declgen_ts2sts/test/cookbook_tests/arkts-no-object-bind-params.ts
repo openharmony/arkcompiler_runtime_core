@@ -13,6 +13,27 @@
  * limitations under the License.
  */
 
-export interface I1 {}
+export declare function getFullName({ firstName, lastName }: {
+    firstName: any;
+    lastName: any;
+}, { fff, asdsadsda }: {
+    fff: any;
+    asdsadsda: any;
+}): void;
 
-export class C1 {}
+export function* foo() {
+    yield 1;
+}
+
+export function* bar(arg: any) {
+    yield arg;
+}
+
+export function UserInfo(name: string, age: number): void {
+    name = 'xiao';
+    age = 18;
+}
+
+export function gwtUserName(code: number): string {
+    return code === 1 ? 'xiao' : 'zhu'
+}

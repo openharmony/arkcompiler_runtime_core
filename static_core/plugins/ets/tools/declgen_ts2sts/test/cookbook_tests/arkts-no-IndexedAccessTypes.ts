@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
-export interface I1 {}
+type Person = {
+    age: number;
+    name: string;
+    alive: boolean;
+}
 
-export class C1 {}
+type Age = Person["age"];

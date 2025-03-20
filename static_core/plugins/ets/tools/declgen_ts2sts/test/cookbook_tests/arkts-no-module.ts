@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
-export interface I1 {}
-
-export class C1 {}
+module A {
+    export function C<T>(x: T) { return x; }
+    export module B {
+        export var x = 1;
+    }
+}
+console.log(A.B.x); 
+const result = A.C(10);
