@@ -730,4 +730,41 @@ void PromiseInteropReject(EtsObject *value, EtsLong deferred)
     SettleJsPromise(value, reinterpret_cast<napi_deferred>(deferred), EtsPromise::STATE_REJECTED);
 }
 
+JSValue *JSRuntimeGetPropertyJSValueyByKey(JSValue *objectValue, JSValue *keyValue)
+{
+    ASSERT(objectValue != nullptr);
+    ASSERT(keyValue != nullptr);
+
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    auto env = ctx->GetJSEnv();
+
+    NapiScope jsHandleScope(env);
+
+    napi_value objectNapiValue = JSConvertJSValue::Wrap(env, objectValue);
+    napi_value keyNapiValue = JSConvertJSValue::Wrap(env, keyValue);
+
+    napi_value result;
+    auto status = napi_get_property(env, objectNapiValue, keyNapiValue, &result);
+    if (UNLIKELY(status == napi_object_expected || NapiThrownGeneric(status))) {
+        if (NapiIsExceptionPending(env)) {
+            ctx->ForwardJSException(coro);
+        }
+        ASSERT(ctx->SanityETSExceptionPending());
+        return nullptr;
+    }
+    INTEROP_FATAL_IF(status != napi_ok);
+
+    auto res = JSConvertJSValue::UnwrapWithNullCheck(ctx, env, result);
+    if (UNLIKELY(!res)) {
+        if (NapiIsExceptionPending(env)) {
+            ctx->ForwardJSException(coro);
+        }
+        ASSERT(ctx->SanityETSExceptionPending());
+        return nullptr;
+    }
+
+    return res.value();
+}
+
 }  // namespace ark::ets::interop::js

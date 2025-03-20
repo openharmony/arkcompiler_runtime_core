@@ -72,6 +72,11 @@ JSValue *JSRuntimeGetPropertyJSValueIntrinsic(JSValue *etsJsValue, EtsString *et
     return JSValueNamedGetter<JSConvertJSValue>(etsJsValue, etsPropName);
 }
 
+JSValue *JSRuntimeGetPropertyJSValueyByKeyIntrinsic(JSValue *objectValue, JSValue *keyValue)
+{
+    return JSRuntimeGetPropertyJSValueyByKey(objectValue, keyValue);
+}
+
 double JSRuntimeGetPropertyDoubleIntrinsic(JSValue *etsJsValue, EtsString *etsPropName)
 {
     return JSValueNamedGetter<JSConvertF64>(etsJsValue, etsPropName);
