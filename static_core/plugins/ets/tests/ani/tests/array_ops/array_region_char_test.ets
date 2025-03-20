@@ -40,3 +40,8 @@ function compareCharArrays(a: char[], b: char[]): int {
     }
     return 0;
 }
+
+function GetSpecialArray(): char[] {
+    let aChar : char[] = ['\0', '\0', '\n', '\r', '\t', '\b', '\a', '\v', '\f', '\0']
+    return aChar
+}

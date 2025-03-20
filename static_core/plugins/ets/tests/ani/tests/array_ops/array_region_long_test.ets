@@ -40,3 +40,10 @@ function GetArray(): long[] {
 function CheckArray(a: long[]): boolean {
     return a[0] == 1 && a[1] == 2 && a[2] == 30 && a[3] == 40 && a[4] == 50
 }
+
+function GetSpecialArray(): long[] {
+	let min: long  = new Long(-9223372036854775808)
+	let max: long  = new Long(9223372036854775807)
+    let a : long[] = [min, max, 0, 0, 0]
+    return a
+}

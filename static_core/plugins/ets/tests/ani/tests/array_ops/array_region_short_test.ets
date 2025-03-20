@@ -40,3 +40,10 @@ function GetArray(): short[] {
 function CheckArray(a: short[]): boolean {
     return a[0] == 1 && a[1] == 2 && a[2] == 30 && a[3] == 40 && a[4] == 50
 }
+
+function GetSpecialArray(): short[] {
+	let min: short = -32768
+	let max: short = 32767
+    let a : short[] = [min, max, 0, 0, 0]
+    return a
+}

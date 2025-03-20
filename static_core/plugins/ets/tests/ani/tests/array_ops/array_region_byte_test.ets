@@ -40,3 +40,10 @@ function GetArray(): byte[] {
 function CheckArray(a: byte[]): boolean {
     return a[0] == 1 && a[1] == 2 && a[2] == 30 && a[3] == 40 && a[4] == 50
 }
+
+function GetSpecialArray(): byte[] {
+	let min: byte = -128
+	let max: byte = 127
+    let a : byte[] = [min, max, 0, 0, 0]
+    return a
+}
