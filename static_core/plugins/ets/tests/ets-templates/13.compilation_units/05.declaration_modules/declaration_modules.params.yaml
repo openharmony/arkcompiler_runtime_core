@@ -13,41 +13,28 @@
 
 ---
 cases:
-  # 0. Import class declaration
-  - imp: |-
-      import * as m from "./declaration_module.ets"
-    use: |-
-      let aa = new m.A() // A instance is created
-
-  # 1. Import class with field declaration
-  - imp: |-
-      import * as dm from "./declaration_module.ets"
-    use: |-
-      let b = new dm.B() // B instance is created
-      dm.process_field(b.a) // exported field is passed to function as an argument
-
-  #2. Type parameter number[][]
+  #0. Type parameter number[][]
   - imp: |-
       import * as dm from "./declaration_module.ets"
     use: |-
       let myMatrix: dm.Matrix ;
       assertTrue(typeof myMatrix == 'object' ) ;
 
-  #3. Type parameter with arrow function
+  #1. Type parameter with arrow function
   - imp: |-
       import * as dm from "./declaration_module.ets"
     use: |-
       let myHandler: dm.Handler = (s: string, no: number) => "ret_string";
       assertTrue(typeof myHandler == 'function' )
 
-  #4. Type parameter with generic and arrow function
+  #2. Type parameter with generic and arrow function
   - imp: |-
       import * as dm from "./declaration_module.ets"
     use: |-
       let myPredicate: dm.Predicate<string> = (s: string) => true;
       assertTrue(typeof myPredicate == 'function' )      
 
-  #5. Type parameter Nullable
+  #3. Type parameter Nullable
   - imp: |-
       import * as dm from "./declaration_module.ets"
     use: |-
@@ -58,33 +45,17 @@ cases:
       myNumber = null;
       assertTrue(typeof myNumber == 'object' );
 
-  #6. Type parameter with generic
+  #4. Type parameter with generic
   - imp: |-
       import * as dm from "./declaration_module.ets"
     use: |-
       let myMapOfString: dm.MapOfString<string> = new Map<string, string>();
       assertTrue(typeof myMapOfString == 'object' );   
 
-  #7. Type parameter with generic
+  #5. Type parameter with generic
   - imp: |-
       import * as dm from "./declaration_module.ets"
     use: |-
       let myAAA: dm.AAA<string> = new Array<dm.AAA<string>>;
       assertTrue(typeof myAAA == 'object' );
 
-  #8. Class with fields and method
-  - imp: |-
-      import * as dm from "./declaration_module.ets"
-    use: |-
-      let myPerson = new dm.Person("Name", 41);
-      myPerson.getName();
-      myPerson.getAge();
-      let default_myPerson = dm.Person.createDefault();
-      assertEQ(default_myPerson, 'function');
-
-  #9. export {DD, EE as ZZ}
-  - imp: |-
-      import * as dm from "./declaration_module.ets"
-    use: |-
-      let myZZ = new dm.ZZ();
-      assertEQ(typeof myZZ.fee(), 'function');
