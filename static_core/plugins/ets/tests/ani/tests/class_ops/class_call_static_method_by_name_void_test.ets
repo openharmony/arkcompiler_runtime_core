@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,4 +87,83 @@ class B extends A{
 
     static count: int = 0;
 };
+}
+
+class A {
+    static funcA(a0: int, a1: int): void {
+        A.count = 0;
+        A.count += a0;
+        A.count += a1;
+    }
+    
+    static getCount(): int {
+        return A.count;
+    }
+
+    static funcA(a0: short, a1: short): short {
+        return a1 - a0 as short;
+    }
+
+    static funcB(a0: int, a1: int): void {
+        A.funcA(a0, a1);
+    }
+
+    static count: int = 0;
+};
+class B extends A{
+    static funcB(a0: int, a1: int): void {
+        A.count = 0;
+        A.count += a1;
+        A.count -= a0;
+    }
+};
+class C extends A{
+};
+class D extends A{
+    static funcA(a0: int, a1: int): void {
+        A.count = 0;
+        A.count += a1;
+        A.count -= a0;
+    }
+};
+class E extends A{
+    static funcA(a0: int, a1: int): void {
+        A.funcA(a0, a1);
+    }
+};
+class F {
+    static increment(a0: int, a1: int): void {
+        F.count = 0;
+        F.count += a0;
+        F.count += a1;
+    }
+
+    static getCount(): int {
+        return F.count;
+    }
+
+    static count: int = 0;
+}
+class G {
+    public static publicMethod(a0: int, a1: int): void {
+        G.count = 0;
+        G.count += a1;
+        G.count += a0;
+    }
+
+    private static privateMethod(a0: int, a1: int): void {
+        G.count = 0;
+        G.count += a1;
+        G.count -= a0;
+    }
+
+    static callPrivateMethod(a0: int, a1: int): void {
+        G.privateMethod(a0, a1);
+    }
+
+    static getCount(): int {
+        return G.count;
+    }
+
+    static count: int = 0;
 }

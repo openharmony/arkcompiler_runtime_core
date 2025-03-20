@@ -36,6 +36,23 @@ public:
         ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_V(cls, name, "SS:S", value, args), ANI_OK);
         va_end(args);
     }
+
+    void TestCombineScene(const char *className, const char *methodName, ani_short expectedValue)
+    {
+        ani_class cls {};
+        ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
+
+        ani_short value = 0;
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Short(cls, methodName, "SS:S", &value, VAL1, VAL2), ANI_OK);
+        ASSERT_EQ(value, expectedValue);
+
+        ani_value args[2U];
+        args[0U].s = VAL1;
+        args[1U].s = VAL2;
+        ani_short valueA = 0;
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(cls, methodName, "SS:S", &valueA, args), ANI_OK);
+        ASSERT_EQ(valueA, expectedValue);
+    }
 };
 
 TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short)
@@ -97,6 +114,8 @@ TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_er
     ani_short value = 0;
     ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Short(env_, cls, "aa", nullptr, &value, VAL1, VAL2),
               ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short(cls, "", nullptr, &value, VAL1, VAL2), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short(cls, "\n", nullptr, &value, VAL1, VAL2), ANI_NOT_FOUND);
 }
 
 TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_null_result)
@@ -171,6 +190,8 @@ TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_A_
     args[1U].s = VAL2;
     ani_short value = 0;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(cls, "aa", nullptr, &value, args), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(cls, "", nullptr, &value, args), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(cls, "\n", nullptr, &value, args), ANI_NOT_FOUND);
 }
 
 TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_A_null_result)
@@ -205,8 +226,8 @@ TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_co
     ASSERT_EQ(value, VAL1 + VAL2);
 
     ani_value args[2U];
-    args[0U].l = VAL1;
-    args[1U].l = VAL2;
+    args[0U].s = VAL1;
+    args[1U].s = VAL2;
     ani_short valueA = 0;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(cls, "funcA", "SS:S", &valueA, args), ANI_OK);
     ASSERT_EQ(valueA, VAL1 + VAL2);
@@ -230,8 +251,8 @@ TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_co
     ASSERT_EQ(value, VAL1 + VAL2);
 
     ani_value args[2U];
-    args[0U].l = VAL1;
-    args[1U].l = VAL2;
+    args[0U].s = VAL1;
+    args[1U].s = VAL2;
     ani_short valueA = 0;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(cls, "funcA", "SS:S", &valueA, args), ANI_OK);
     ASSERT_EQ(valueA, VAL1 + VAL2);
@@ -253,8 +274,8 @@ TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_co
     ASSERT_EQ(value, VAL1 + VAL2);
 
     ani_value args[2U];
-    args[0U].l = VAL1;
-    args[1U].l = VAL2;
+    args[0U].s = VAL1;
+    args[1U].s = VAL2;
     ani_short valueA = 0;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(cls, "funcA", "SS:S", &valueA, args), ANI_OK);
     ASSERT_EQ(valueA, VAL1 + VAL2);
@@ -282,8 +303,8 @@ TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_co
     ASSERT_EQ(value, VAL2 - VAL1);
 
     ani_value args[2U];
-    args[0U].l = VAL1;
-    args[1U].l = VAL2;
+    args[0U].s = VAL1;
+    args[1U].s = VAL2;
     ani_short valueA = 0;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(cls, "funcA", "SS:S", &valueA, args), ANI_OK);
     ASSERT_EQ(valueA, VAL2 - VAL1);
@@ -291,6 +312,123 @@ TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_co
     ani_short valueV = 0;
     TestFuncV(cls, "funcA", &valueV, VAL1, VAL2);
     ASSERT_EQ(valueV, VAL2 - VAL1);
+}
+
+TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_null_env)
+{
+    ani_class cls {};
+    GetClassData(&cls);
+
+    ani_short value = 0;
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Short(nullptr, cls, "or", nullptr, &value, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ani_value args[2U];
+    args[0U].s = VAL1;
+    args[1U].s = VAL2;
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Short_A(nullptr, cls, "or", nullptr, &value, args),
+              ANI_INVALID_ARGS);
+}
+
+TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_combine_scenes_5)
+{
+    ani_class clsA {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_short_test/A;", &clsA), ANI_OK);
+    ani_class clsB {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_short_test/B;", &clsB), ANI_OK);
+
+    ani_short valueA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short(clsA, "funcA", "SS:S", &valueA, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(valueA, VAL1 + VAL2);
+    ani_short valueB = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short(clsB, "funcB", "SS:S", &valueB, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(valueB, VAL2 - VAL1);
+
+    ani_value args[2U];
+    args[0U].s = VAL1;
+    args[1U].s = VAL2;
+    ani_short valueAA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(clsA, "funcA", "SS:S", &valueAA, args), ANI_OK);
+    ASSERT_EQ(valueAA, VAL1 + VAL2);
+    ani_short valueBA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(clsB, "funcB", "SS:S", &valueBA, args), ANI_OK);
+    ASSERT_EQ(valueBA, VAL2 - VAL1);
+}
+
+TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_combine_scenes_6)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_short_test/A;", &cls), ANI_OK);
+    ani_short value = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short(cls, "funcA", "SS:S", &value, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+
+    ani_value args[2U];
+    args[0U].s = VAL1;
+    args[1U].s = VAL2;
+    ani_short valueA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(cls, "funcA", "SS:S", &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, VAL1 + VAL2);
+
+    ani_int value2 = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int(cls, "funcA", "II:I", &value2, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(value2, VAL2 - VAL1);
+}
+
+TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_combine_scenes_7)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_short_test/A;", "funcB", VAL1 + VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_combine_scenes_8)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_short_test/C;", "funcA", VAL1 + VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_combine_scenes_9)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_short_test/D;", "funcA", VAL2 - VAL1);
+}
+
+TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_combine_scenes_10)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_short_test/E;", "funcA", VAL1 + VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_combine_scenes_11)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_short_test/F;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "increment", nullptr, VAL1, VAL2), ANI_OK);
+    ani_short value = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short(cls, "getCount", nullptr, &value), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+
+    ani_value args[2U];
+    args[0U].s = VAL1;
+    args[1U].s = VAL2;
+    ani_short valueA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(cls, "getCount", nullptr, &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, VAL1 + VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameShortTest, call_static_method_by_name_short_combine_scenes_12)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_short_test/G;", &cls), ANI_OK);
+    ani_short value = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short(cls, "publicMethod", "SS:S", &value, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(value, VAL1 + VAL2);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short(cls, "callPrivateMethod", "SS:S", &value, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(value, VAL2 - VAL1);
+
+    ani_value args[2U];
+    args[0U].s = VAL1;
+    args[1U].s = VAL2;
+    ani_short valueA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(cls, "publicMethod", "SS:S", &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, VAL1 + VAL2);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short_A(cls, "callPrivateMethod", "SS:S", &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, VAL2 - VAL1);
 }
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

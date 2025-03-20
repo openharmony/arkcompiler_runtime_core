@@ -17,7 +17,7 @@ class Operations {
     static or(a0: boolean, a1: boolean): boolean {
         return a0 || a1;
     }
-}; 
+}
 
 namespace na {
 class A {
@@ -27,7 +27,7 @@ class A {
     static funcA(a0: int, a1: int): int {
         return a0 + a1 as int;
     }
-};
+}
 }
 
 namespace nb {
@@ -36,7 +36,7 @@ class A {
     static funcA(a0: boolean, a1: boolean): boolean {
         return a0 || a1;
     }
-};
+}
 }
 }
 
@@ -45,10 +45,73 @@ class A {
     static funcA(a0: boolean, a1: boolean): boolean {
         return a0 || a1;
     }
-};
+}
+
 class B extends A{
     static funcA(a0: boolean, a1: boolean): boolean {
         return a0 && a1;
     }
-};
+}
+}
+
+class A {
+    static funcA(a0: boolean, a1: boolean): boolean {
+        return a0 || a1;
+    }
+
+    static funcA(a0: int, a1: int): int {
+        return a0 + a1 as int;
+    }
+
+    static funcB(a0: boolean, a1: boolean): boolean {
+        return A.funcA(a0, a1);
+    }
+}
+
+class B extends A{
+    static funcB(a0: boolean, a1: boolean): boolean {
+        return a0 && a1;
+    }
+}
+
+class C extends A{
+}
+
+class D extends A{
+    static funcA(a0: boolean, a1: boolean): boolean {
+        return a0 && a1;
+    }
+}
+
+class E extends A{
+    static funcA(a0: boolean, a1: boolean): boolean {
+        return A.funcA(a0, a1);
+    }
+}
+
+class F {
+    static increment(a0: boolean, a1: boolean): void {
+        F.count &= a0;
+        F.count &= a1;
+    }
+
+    static getCount(): boolean {
+        return F.count;
+    }
+
+    static count: boolean = false;
+}
+
+class G {
+    public static publicMethod(a0: boolean, a1: boolean): boolean {
+        return a0 || a1;
+    }
+
+    private static privateMethod(a0: boolean, a1: boolean): boolean {
+        return a0 && a1;
+    }
+
+    static callPrivateMethod(a0: boolean, a1: boolean): boolean {
+        return G.privateMethod(a0, a1);
+    }
 }

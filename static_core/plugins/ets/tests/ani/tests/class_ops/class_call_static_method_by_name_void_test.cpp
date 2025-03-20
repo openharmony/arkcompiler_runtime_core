@@ -41,6 +41,25 @@ public:
     {
         ASSERT_EQ(env_->Class_CallStaticMethodByName_Int(cls, "getCount", ":I", value), ANI_OK);
     }
+
+    void TestCombineScene(const char *className, const char *methodName, ani_int expectedValue)
+    {
+        ani_class cls {};
+        ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
+
+        ani_int value = 0;
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, methodName, "II:V", VAL1, VAL2), ANI_OK);
+        GetCount(cls, &value);
+        ASSERT_EQ(value, expectedValue);
+
+        ani_value args[2U];
+        args[0U].i = VAL1;
+        args[1U].i = VAL2;
+        ani_int valueA = 0;
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, methodName, "II:V", args), ANI_OK);
+        GetCount(cls, &valueA);
+        ASSERT_EQ(valueA, expectedValue);
+    }
 };
 
 TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_a)
@@ -87,6 +106,8 @@ TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_v_in
 
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, nullptr, nullptr, VAL1, VAL2), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "sum_not_exist", nullptr, VAL1, VAL2), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "", nullptr, VAL1, VAL2), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "\n", nullptr, VAL1, VAL2), ANI_NOT_FOUND);
 }
 
 TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_v_invalid_class)
@@ -104,6 +125,8 @@ TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_a_in
 
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, nullptr, nullptr, args), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "sum_not_exist", nullptr, args), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "", nullptr, args), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "\n", nullptr, args), ANI_NOT_FOUND);
 }
 
 TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_a_invalid_class)
@@ -136,8 +159,8 @@ TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_comb
     ASSERT_EQ(value, VAL1 + VAL2);
 
     ani_value args[2U];
-    args[0U].l = VAL1;
-    args[1U].l = VAL2;
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "funcA", "II:V", args), ANI_OK);
     ani_int valueA = 0;
     GetCount(cls, &valueA);
@@ -164,8 +187,8 @@ TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_comb
     ASSERT_EQ(value, VAL1 + VAL2);
 
     ani_value args[2U];
-    args[0U].l = VAL1;
-    args[1U].l = VAL2;
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "funcA", "II:V", args), ANI_OK);
     ani_int valueA = 0;
     GetCount(cls, &valueA);
@@ -190,8 +213,8 @@ TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_comb
     ASSERT_EQ(value, VAL1 + VAL2);
 
     ani_value args[2U];
-    args[0U].l = VAL1;
-    args[1U].l = VAL2;
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "funcA", "II:V", args), ANI_OK);
     ani_int valueA = 0;
     GetCount(cls, &valueA);
@@ -222,8 +245,8 @@ TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_comb
     ASSERT_EQ(value, VAL2 - VAL1);
 
     ani_value args[2U];
-    args[0U].l = VAL1;
-    args[1U].l = VAL2;
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "funcA", "II:V", args), ANI_OK);
     ani_int valueA = 0;
     GetCount(cls, &valueA);
@@ -233,6 +256,132 @@ TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_comb
     ani_int valueV = 0;
     GetCount(cls, &valueV);
     ASSERT_EQ(valueV, valueA + VAL2 - VAL1);
+}
+
+TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_null_env)
+{
+    ani_class cls {};
+    GetMethodData(&cls);
+
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Void(nullptr, cls, "or", nullptr, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Void_A(nullptr, cls, "or", nullptr, args), ANI_INVALID_ARGS);
+}
+
+TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_combine_scenes_5)
+{
+    ani_class clsA {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_void_test/A;", &clsA), ANI_OK);
+    ani_class clsB {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_void_test/B;", &clsB), ANI_OK);
+
+    ani_int valueA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(clsA, "funcA", "II:V", VAL1, VAL2), ANI_OK);
+    GetCount(clsA, &valueA);
+    ASSERT_EQ(valueA, VAL1 + VAL2);
+    ani_int valueB = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(clsB, "funcB", "II:V", VAL1, VAL2), ANI_OK);
+    GetCount(clsB, &valueB);
+    ASSERT_EQ(valueB, VAL2 - VAL1);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+    ani_int valueAA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(clsA, "funcA", "II:V", args), ANI_OK);
+    GetCount(clsA, &valueAA);
+    ASSERT_EQ(valueAA, VAL1 + VAL2);
+    ani_int valueBA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(clsB, "funcB", "II:V", args), ANI_OK);
+    GetCount(clsB, &valueBA);
+    ASSERT_EQ(valueBA, VAL2 - VAL1);
+}
+
+TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_combine_scenes_6)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_void_test/A;", &cls), ANI_OK);
+    ani_int value = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "funcA", "II:V", VAL1, VAL2), ANI_OK);
+    GetCount(cls, &value);
+    ASSERT_EQ(value, VAL1 + VAL2);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+    ani_int valueA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "funcA", "II:V", args), ANI_OK);
+    GetCount(cls, &valueA);
+    ASSERT_EQ(valueA, VAL1 + VAL2);
+
+    ani_short value2 = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Short(cls, "funcA", "SS:S", &value2, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(value2, VAL2 - VAL1);
+}
+
+TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_combine_scenes_7)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_void_test/A;", "funcB", VAL1 + VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_combine_scenes_8)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_void_test/C;", "funcA", VAL1 + VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_combine_scenes_9)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_void_test/D;", "funcA", VAL2 - VAL1);
+}
+
+TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_combine_scenes_10)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_void_test/E;", "funcA", VAL1 + VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_combine_scenes_11)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_void_test/F;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "increment", nullptr, VAL1, VAL2), ANI_OK);
+    ani_int value = 0;
+    GetCount(cls, &value);
+    ASSERT_EQ(value, VAL1 + VAL2);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "increment", nullptr, args), ANI_OK);
+    ani_int valueA = 0;
+    GetCount(cls, &valueA);
+    ASSERT_EQ(valueA, VAL1 + VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_combine_scenes_12)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_void_test/G;", &cls), ANI_OK);
+    ani_int value = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "publicMethod", "II:V", VAL1, VAL2), ANI_OK);
+    GetCount(cls, &value);
+    ASSERT_EQ(value, VAL1 + VAL2);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "callPrivateMethod", "II:V", VAL1, VAL2), ANI_OK);
+    GetCount(cls, &value);
+    ASSERT_EQ(value, VAL2 - VAL1);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+    ani_int valueA = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "publicMethod", "II:V", args), ANI_OK);
+    GetCount(cls, &valueA);
+    ASSERT_EQ(valueA, VAL1 + VAL2);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "callPrivateMethod", "II:V", args), ANI_OK);
+    GetCount(cls, &valueA);
+    ASSERT_EQ(valueA, VAL2 - VAL1);
 }
 }  // namespace ark::ets::ani::testing
 
