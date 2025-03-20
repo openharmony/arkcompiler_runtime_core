@@ -18,7 +18,99 @@ class A {
         return new A();
     }
 
-    int_by_name_method(a0: int, a1: int): int {
+    intByNameMethod(a0: int, a1: int): int {
         return a0 + a1 as int;
+    }
+}
+
+interface ji {
+    jf(value: int): int;
+}
+
+class B implements ji {
+    constructor(data: int) {
+        this.data = data;
+    }
+
+    data: int;
+
+    public intMethod(value1: int, value2: int): int {
+        if (this.data > value1 + value2) {
+            return this.data;
+        } else {
+            return value1 + value2 as int;
+        }
+    }
+
+    public intMethod(value: int): int {
+        if (this.data > value) {
+            return this.data;
+        } else {
+            return value;
+        }
+    }
+
+    protected protectedMethod(value: int): int {
+        return this.data + value as int;
+    }
+
+    private privateMethod(value: int): int {
+        return this.data - value as int;
+    }
+
+    public nestedMethod(value: int): int {
+        let lambdaMethod: (p1: int, p2: int) => int =
+            (param1: int, param2: int): int => {
+                return param1 + param2 as int;
+        };
+        return lambdaMethod(this.data, value);
+    }
+
+    public recursiveMethod(value: int): int {
+        if (value <= 0) {
+            return 1;
+        } else {
+            return value * this.recursiveMethod(value - 1) as int;
+        }
+    }
+
+    calculateSum(value1: int, value2: char, value3: double): int {
+        let aChar: char = 'A';
+        if (value2 == aChar) {
+            return this.data - value1 as int;
+        }
+        if (value3 == 1.0) {
+            return value1;
+        }
+        return this.data + value1 as int;
+    }
+
+    public jf(value: int): int {
+        return this.data - value as int;
+    }
+}
+
+final class C extends B {
+    constructor(data1: int) {
+        super(data1);
+        this.data1 = data1;
+    }
+
+    data1: int;
+
+    public intAddMethod(value1: int, value2: int): int {
+        return this.data1 + value1 + value2 as int;
+    }
+
+    public override intMethod(value1: int, value2: int): int {
+        return this.data1 - value1 - value2 as int;
+    }
+
+    public callProtected(value: int): int {
+        return this.protectedMethod(value) as int;
+    }
+
+    public jf(value: int): int {
+        return this.data1 + value as int;
     }
 }
