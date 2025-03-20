@@ -26,7 +26,7 @@ function Test_indirect_call_type_value_number_call(): boolean {
 function Test_indirect_call_type_value_number_apply(): boolean {
     const EXPECTED = 2;
 
-    let result = js.indirectCallTypeByValueNumber.apply(null, [1]) as int;
+    let result = js.indirectCallTypeByValueNumber.apply(null, [1] as FixedArray<int>) as int;
     assertTrue(result == EXPECTED);
 
     return true;
@@ -64,7 +64,7 @@ function Test_indirect_call_type_value_string_apply(): boolean {
     const ARG = 'foo'
     const EXPECTED = ''.concat(ARG, ARG);
 
-    let result = js.indirectCallTypeByValueString.apply(null, [ARG]) as string;
+    let result = js.indirectCallTypeByValueString.apply(null, [ARG] as FixedArray<string>) as string;
     assertTrue(result == EXPECTED);
 
     return true;
@@ -104,7 +104,7 @@ function Test_indirect_call_type_value_boolean_apply(): boolean {
     const ARG = true;
     const EXPECTED = !ARG;
 
-    let result = js.indirectCallTypeByValueBoolean.apply(null, [ARG]) as boolean;
+    let result = js.indirectCallTypeByValueBoolean.apply(null, [ARG] as FixedArray<boolean>) as boolean;
     assertTrue(result == EXPECTED);
 
     return true;

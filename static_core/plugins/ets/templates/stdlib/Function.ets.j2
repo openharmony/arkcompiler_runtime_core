@@ -40,14 +40,14 @@ P{{i + 1}}, {{""}}
 ({% for i in range(narg) -%}
 p{{i + 1}}: P{{i + 1}}{% if not loop.last or rest %}, {% endif %}
 {%- endfor -%}
-{%- if rest %}...r: PR[]{% endif %}): R
+{%- if rest %}...r: FixedArray<PR>{% endif %}): R
 {%- endmacro %}
 
 {%- macro erasedSignature(narg, rest) -%}
 ({% for i in range(narg) -%}
 p{{i + 1}}: __T{% if not loop.last or rest %}, {% endif %}
 {%- endfor -%}
-{%- if rest %}...r: __T[]{% endif %}): __T
+{%- if rest %}...r: FixedArray<__T>{% endif %}): __T
 {%- endmacro %}
 
 {%- macro listArgs(from, to) -%}
@@ -67,11 +67,11 @@ r[{{i}}]{% if not loop.last %}, {% endif %}
 type __T = object | null | undefined;
 
 export interface Function {
-    unsafeCall(...r: __T[]): __T
+    unsafeCall(...r: FixedArray<__T>): __T
 }
 
 export interface FunctionN<R> extends Function {
-    invokeN(...r: __T[]): R;
+    invokeN(...r: FixedArray<__T>): R;
 }
 
 export interface __FunctionN extends FunctionN<__T> {}
@@ -102,11 +102,11 @@ export interface Function{{ narg }}{{ typeParamsDeclList(narg) }}
 {{ defineLambdaHelper("LambdaR", "FunctionR", narg) }} {
     abstract {{invokeName(narg, "R")}}{{erasedSignature(narg, True)}};
 {%- if narg == 0 %}
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         return this.{{invokeName(narg, "R")}}(...r)
     }
 {%- else %}
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < {{narg}}) { throw new ArgumentsUnderapplicationError() }
         return this.{{invokeName(narg, "R")}}({{listArgArrayLoads(narg)}}{{", " if narg != 0 }}
             ...Runtime.removeFrontElementsStub(r, {{narg}}))
@@ -121,7 +121,7 @@ export interface Function{{ narg }}{{ typeParamsDeclList(narg) }}
 }
 {{ defineLambdaHelper("Lambda", "Function", narg) }} {
     abstract {{invokeName(narg)}}{{erasedSignature(narg)}};
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < {{narg}}) { throw new ArgumentsUnderapplicationError() }
         return this.{{invokeName(narg)}}({{listArgArrayLoads(narg)}})
     }

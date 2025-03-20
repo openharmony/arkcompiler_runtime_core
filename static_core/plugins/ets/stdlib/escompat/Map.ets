@@ -128,7 +128,7 @@ type MapBucket<K, V> = Array<MapEntry<K, V>> | undefined
 export class Map<K, V> implements ReadonlyMap<K, V> {
     private headEntry?: MapEntry<K, V>
 
-    private buckets: MapBucket<K, V>[] = []
+    private buckets: MapBucket<K, V>[]
     private sizeVal: int = 0
 
     private static readonly ENTRY_KEY = 0
@@ -147,7 +147,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         const keyHash: int = k!.$_hashCode()
         const t = keyHash >> 31
 
-        return ((keyHash ^ t) - t) & (this.buckets.length - 1)
+        return ((keyHash ^ t) - t) & (this.buckets.actualLength - 1)
     }
 
     private getInitialBucketsCount(entriesCount: int): int {
@@ -179,7 +179,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
                 this.set(e[Map.ENTRY_KEY], e[Map.ENTRY_VAL])
             })
         } else {
-            const bucketsCount = this.getInitialBucketsCount(entries.length)
+            const bucketsCount = this.getInitialBucketsCount(entries.actualLength)
             this.buckets = new MapBucket<K, V>[bucketsCount]
             for (let i = 0; i < entries.length; ++i) {
                 if (entries[i] == null) {
@@ -219,7 +219,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     // NOTE(templin.konstantin): Temporary workaround due #20944 internal issue
     //  if we remove this constructor we got error on "readonly (readonly [K,V])[]"
     //  branch at constructor from union type
-    constructor(values: [K, V][]) {
+    constructor(values: FixedArray<[K, V]>) {
         const bucketsCount = this.getInitialBucketsCount(values.length)
         this.buckets = new MapBucket<K, V>[bucketsCount]
         for (let i = 0; i < values.length; ++i) {

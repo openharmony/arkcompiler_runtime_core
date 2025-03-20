@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-let numberArray: number[] = [1, 2, 3];
-let boolArray: boolean[] = [true, false, true];
+let numberArray: FixedArray<number> = [1, 2, 3];
+let boolArray: FixedArray<boolean> = [true, false, true];
 class Obj {}
-let objArray:Obj[] = [new Obj(), new Obj(), new Obj()];
+let objArray:FixedArray<Obj> = [new Obj(), new Obj(), new Obj()];
 let str: string = 'ABC';
 class Foo {
-    data: number[] = [1, 2, 3, 4, 5];
+    data: FixedArray<number> = [1, 2, 3, 4, 5];
     $_iterator() : FooIterator {
         return new FooIterator(this);
     }

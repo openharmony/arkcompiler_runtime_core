@@ -17,7 +17,7 @@ package std.interop.js;
 
 export type StaticOrESObject = ESObject | Object | null | undefined
 export type ESObjectCallbackData = object
-export type ESObjectCallback = (argThis: ESObject, argNewTgt: ESObject, args: ESObject[], data?: ESObjectCallbackData) => ESObject
+export type ESObjectCallback = (argThis: ESObject, argNewTgt: ESObject, args: FixedArray<ESObject>, data?: ESObjectCallbackData) => ESObject
 export declare class ESObjectPropertyDescriptor {
     key: string | ESObject
     call?: ESObjectCallback
@@ -209,8 +209,8 @@ export final class ESObject {
         return ESObject.areEqualSafe(this, other);
     }
 
-    public instantiate(...args: StaticOrESObject[]): ESObject {
-        let argJSVal: JSValue[] = new JSValue[args.length];
+    public instantiate(...args: FixedArray<StaticOrESObject>): ESObject {
+        let argJSVal: FixedArray<JSValue> = new JSValue[args.length];
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESObject) {
                 let arg = args[i] as ESObject;
@@ -313,8 +313,8 @@ export final class ESObject {
         return JSRuntime.hasOwnProperty(this.eo, name);
     }
 
-    public invoke(...args: StaticOrESObject[]): ESObject {
-        let argJSVal: JSValue[] = new JSValue[args.length];
+    public invoke(...args: FixedArray<StaticOrESObject>): ESObject {
+        let argJSVal: FixedArray<JSValue> = new JSValue[args.length];
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESObject) {
                 let arg = args[i] as ESObject;
@@ -326,8 +326,8 @@ export final class ESObject {
         return new ESObject(JSRuntime.invoke(ESObject.getGlobal().eo, this.eo, ...argJSVal));
     }
 
-    internal invokeWithRecv(recv: ESObject, ...args: StaticOrESObject[]): ESObject {
-        let argJSVal: JSValue[] = new JSValue[args.length];
+    internal invokeWithRecv(recv: ESObject, ...args: FixedArray<StaticOrESObject>): ESObject {
+        let argJSVal: FixedArray<JSValue> = new JSValue[args.length];
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESObject) {
                 let arg = args[i] as ESObject;
@@ -339,12 +339,12 @@ export final class ESObject {
         return new ESObject(JSRuntime.invoke(recv.eo, this.eo, ...argJSVal));
     }
 
-    public invokeMethod(method: string, ...args: StaticOrESObject[]): ESObject {
+    public invokeMethod(method: string, ...args: FixedArray<StaticOrESObject>): ESObject {
         let callable = this.getPropertySafe(method);
         if (callable.isUndefined()) {
             throw Error("failed to get property");
         }
-        let argJSVal: JSValue[] = new JSValue[args.length];
+        let argJSVal: FixedArray<JSValue> = new JSValue[args.length];
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESObject) {
                 let arg = args[i] as ESObject;
@@ -427,7 +427,7 @@ export final class ESObject {
         name: String,
         ctor: ESObjectCallback,
         data?: ESObjectCallbackData,
-        properties?: ESObjectPropertyDescriptor[],
+        properties?: FixedArray<ESObjectPropertyDescriptor>,
         superC?: ESObject
     ): ESObject {
         throw Error("not implemented yet");

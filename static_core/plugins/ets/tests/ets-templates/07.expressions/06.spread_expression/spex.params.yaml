@@ -44,7 +44,7 @@ cases:
           // spread of char array
           let a: char[] = [c'b', c'c']
           let r = [c'a', ...a, c'd']
-          assertTrue(r.length == 4 && (new String(r) == "abcd"))
+          assertTrue(r.length == 4 && (new String(r) == "a,b,c,d"))
 
     - use: |-
           // spread of byte array

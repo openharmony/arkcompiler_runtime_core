@@ -27,7 +27,7 @@ function checkRange(arrLen: int, startIndex: int, endIndex: int): boolean {
     return ((0 <= startIndex) && (startIndex <= endIndex) && (endIndex <= arrLen));
 }
 
-native function __alloc_array<T>(len: int, ofType: Object | null): T[]
+native function __alloc_array<T>(len: int, ofType: Object | null): FixedArray<T>
 
 class BuiltinArrayKeysIterator implements IterableIterator<number> {
     private len: int
@@ -66,7 +66,7 @@ class BuiltinArrayKeysIterator implements IterableIterator<number> {
 % primitive_types = ['boolean', 'byte', 'short', 'int', 'long', 'float', 'double', 'char']
 % # NOTE(kprokopenko): primitive_types + ['T']
 % (primitive_types).each { |el_type|
-%   ctx.this_type = "#{el_type}[]"
+%   ctx.this_type = "FixedArray<#{el_type}>"
 %   ctx.this_arg = "self: #{ctx.this_type}, "
 %   ctx.this_return_type = ctx.this_type
 %   ctx.el_type = el_type
@@ -82,8 +82,9 @@ class BuiltinArrayKeysIterator implements IterableIterator<number> {
 %       "new #{elt}[#{l}]"
 %     end
 %   }
+%   ctx.make_fixed_array = "FixedArray<#{el_type}>"
 %   ctx.from_buffer = Proc.new { |b, elt| b }
-%   ctx.array_of_type = Proc.new { |t| "#{t}[]" }
+%   ctx.array_of_type = Proc.new { |t| "FixedArray<#{t}>" }
 %   ctx.this_generic = ''
 %   ctx.this_generic_one = ''
 %   ctx.this_iterator_generic = ''
@@ -94,7 +95,7 @@ class BuiltinArrayKeysIterator implements IterableIterator<number> {
 %   end
 % ctx.this_call = Proc.new { |f| "#{f}#{ctx.this_generic}(self, " }
 function cloneArray<%= ctx.this_generic %>(self: <%= ctx.this_type %>): <%= ctx.this_type %> {
-    const ret = <%= ctx.make_buffer.('self.length') %>;;
+    const ret : <%= ctx.make_fixed_array %> = <%= ctx.make_buffer.('self.length') %>;;
     for (let i = 0; i < self.length; i++) {
         ret[i] = self[i];
     }
@@ -127,7 +128,7 @@ function cloneArray<%= ctx.this_generic %>(self: <%= ctx.this_type %>): <%= ctx.
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter<%= ctx.this_generic %>(<%= ctx.this_arg %>fn: (v: <%= ctx.el_type %>, k: number, array: <%= ctx.this_type %>) => boolean): <%= ctx.this_type %> {
-    const mask = new boolean[<%= ctx.this_len_int %>]
+    const mask : FixedArray<boolean> = new boolean[<%= ctx.this_len_int %>]
     let cnt = 0
 
     for (let i: int = 0; i < <%= ctx.this_len_int %>; i++) {
@@ -137,7 +138,7 @@ export function filter<%= ctx.this_generic %>(<%= ctx.this_arg %>fn: (v: <%= ctx
             cnt++;
         }
     }
-    const res = <%= ctx.make_buffer.('cnt') %>;
+    const res : <%= ctx.make_fixed_array %> = <%= ctx.make_buffer.('cnt') %>;
     let idx_store = 0;
     for (let i: int = 0; i < <%= ctx.this_len_int %>; i++) {
         if (mask[i]) {
@@ -147,13 +148,13 @@ export function filter<%= ctx.this_generic %>(<%= ctx.this_arg %>fn: (v: <%= ctx
     return <%= ctx.from_buffer.('res') %>;
 }
 
-export function concat<%= ctx.this_generic %>(self: <%= ctx.this_type %>, fst: <%= ctx.this_type %>, ...more: <%= ctx.this_type %>[]): <%= ctx.this_type %> {
+export function concat<%= ctx.this_generic %>(self: <%= ctx.this_type %>, fst: <%= ctx.this_type %>, ...more: FixedArray<<%= ctx.this_type %>>): <%= ctx.this_type %> {
     const lnMin = self.length + fst.length;
     let ln = lnMin;
     for (let i = 0; i < more.length; i++) {
         ln += more[i].length
     }
-    const r = <%= ctx.make_buffer.('ln', ctx.el_type) %>;
+    const r : <%= ctx.make_fixed_array %> = <%= ctx.make_buffer.('ln', ctx.el_type) %>;
     try {
         copyTo(self, r, 0, 0, self.length);
         copyTo(fst, r, self.length, 0, fst.length);
@@ -178,7 +179,7 @@ export function concat<%= ctx.this_generic %>(self: <%= ctx.this_type %>, fst: <
 export function sort<%= ctx.this_generic %>(<%= ctx.this_arg %>comparator: (a: <%= ctx.el_type %>, b: <%= ctx.el_type %>) => number): <%= ctx.this_return_type %> {
 %   sort_elem_type = ctx.el_type == 'T' ? 'NullishType' : ctx.el_type
 %   from_sort_elem_type = ctx.el_type == 'T' ? ' as T' : ''
-    sort_subarray(self<%= ctx.el_type == 'T' ? ' as NullishType[]' : '' %>, 0, self.length, (l: <%= sort_elem_type %>, r: <%= sort_elem_type %>): boolean => {
+    sort_subarray(self<%= ctx.el_type == 'T' ? ' as FixedArray<NullishType>' : '' %>, 0, self.length, (l: <%= sort_elem_type %>, r: <%= sort_elem_type %>): boolean => {
         return comparator(l<%= from_sort_elem_type %>, r <%= from_sort_elem_type %>) < 0;
     });
     return self;
@@ -193,7 +194,7 @@ export function sort<%= ctx.this_generic %>(<%= ctx.this_arg %>comparator: (a: <
  */
 export function sort<%= ctx.this_generic %>(<%= ctx.this_arg.chomp(', ') %>): <%= ctx.this_return_type %> {
 % if !primitive_types.include?(ctx.el_type)
-    sort_subarray(self<%= ctx.el_type == 'T' ? ' as NullishType[]' : '' %>, 0, self.length, (l: <%= sort_elem_type %>, r: <%= sort_elem_type %>): boolean => {
+    sort_subarray(self<%= ctx.el_type == 'T' ? ' as FixedArray<NullishType>' : '' %>, 0, self.length, (l: <%= sort_elem_type %>, r: <%= sort_elem_type %>): boolean => {
         return new String(l).compareTo(new String(r)) < 0;
     });
 % else
@@ -211,7 +212,7 @@ export function keys<%= ctx.this_generic %>(self: <%= ctx.this_type %>): Iterabl
 
 % }
 
-function builtin_insertion_sort<T>(arr: T[], startIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
+function builtin_insertion_sort<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
     for (let i = startIndex + 1; i < endIndex; i++) {
         const tmp = arr[i];
         if (comp(tmp, arr[startIndex]) as int < 0) {
@@ -230,11 +231,11 @@ function builtin_insertion_sort<T>(arr: T[], startIndex: int, endIndex: int, com
     }
 }
 
-function perform_merge<T>(arr: T[], startIndex: int, midIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
+function perform_merge<T>(arr: FixedArray<T>, startIndex: int, midIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
-    let left = new (T | undefined)[len1];
-    let right = new (T | undefined)[len2];
+    let left : FixedArray<T | undefined> = new (T | undefined)[len1];
+    let right : FixedArray<T | undefined> = new (T | undefined)[len2];
     for (let i = 0; i < len1; i++) {
         left[i] = arr[startIndex + i];
     }
@@ -266,7 +267,7 @@ function perform_merge<T>(arr: T[], startIndex: int, midIndex: int, endIndex: in
     }
 }
 
-export function sort_stable<T>(arr: T[], startIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
+export function sort_stable<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
     if (endIndex <= startIndex) {
         return;
     }
@@ -298,7 +299,7 @@ function defaultComparatorStr(a: String, b: String): number {
 }
 
 type buffStr = String | undefined
-function stringified_insertion_sort<T>(arr: T[], arrStr: buffStr[], startIndex: int, endIndex: int): void {
+function stringified_insertion_sort<T>(arr: FixedArray<T>, arrStr: FixedArray<buffStr>, startIndex: int, endIndex: int): void {
     for (let i = startIndex + 1; i < endIndex; i++) {
         const tmp = arr[i]
         const tmpStr = arrStr[i];
@@ -322,14 +323,14 @@ function stringified_insertion_sort<T>(arr: T[], arrStr: buffStr[], startIndex: 
     }
 }
 
-function stringified_perform_merge<T>(arr: T[], arrStr: buffStr[], startIndex: int, midIndex: int, endIndex: int): void {
+function stringified_perform_merge<T>(arr: FixedArray<T>, arrStr: FixedArray<buffStr>, startIndex: int, midIndex: int, endIndex: int): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
     type buffType = T | undefined
-    let left = new buffType[len1]
-    let right = new buffType[len2]
-    let leftStr = new buffStr[len1]
-    let rightStr = new buffStr[len2]
+    let left : FixedArray<buffType> = new buffType[len1]
+    let right : FixedArray<buffType> = new buffType[len2]
+    let leftStr : FixedArray<buffStr> = new buffStr[len1]
+    let rightStr : FixedArray<buffStr> = new buffStr[len2]
     for (let i = 0; i < len1; i++) {
         left[i] = arr[startIndex + i]
         leftStr[i] = arrStr[startIndex + i]
@@ -367,7 +368,7 @@ function stringified_perform_merge<T>(arr: T[], arrStr: buffStr[], startIndex: i
     }
 }
 
-export function sort_default<T>(arr: T[], arrStr: buffStr[], startIndex: int, endIndex: int): void {
+export function sort_default<T>(arr: FixedArray<T>, arrStr: FixedArray<buffStr>, startIndex: int, endIndex: int): void {
     if (endIndex <= startIndex) {
         return;
     }
@@ -392,4 +393,21 @@ export function sort_default<T>(arr: T[], arrStr: buffStr[], startIndex: int, en
             }
         }
     }
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce<U, T>(self: Array<U>, callbackfn: (previousValue: T, currentValue: U, index: number, array: Array<U>) => T, initialValue: T): T {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i as number, self)
+    }
+    return acc
 }

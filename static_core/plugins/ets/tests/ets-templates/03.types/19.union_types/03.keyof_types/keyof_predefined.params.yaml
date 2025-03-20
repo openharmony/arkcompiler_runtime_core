@@ -28,3 +28,9 @@ cases:
       enum NUM {A, B, C}
     check: |-
       type t = keyof NUM
+
+  - decl: |-
+      class A {}
+      interface I {}
+    check: |-
+      type t = keyof ( A | I )[]

@@ -24,7 +24,7 @@ tags: [compile-only, negative]
 
 function main(): int {
   let v: {{c.type}} = {{c.val}};
-  let arr: {{c.type}}[] = new {{c.type}}[{{c.len}} + 1];
+  let arr: FixedArray<{{c.type}}> = new {{c.type}}[{{c.len}} + 1];
   arr[v] = v;
   return 0;
 }

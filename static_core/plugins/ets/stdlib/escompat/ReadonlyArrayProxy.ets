@@ -44,7 +44,7 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
 		this.handler = handler
 	}
 
-    override concat(...items: ConcatArray<T>[]): Array<T> {
+    override concat(...items: FixedArray<ConcatArray<T>>): Array<T> {
     	return this.target.concat(...items)
     }
 

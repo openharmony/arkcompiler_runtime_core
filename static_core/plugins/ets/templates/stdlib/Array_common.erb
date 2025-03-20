@@ -39,13 +39,13 @@
 //     throw new Error("not implemented")
 // }
 
-<%= access_public %> concat<%= this_generic %>(<%= this_arg %>...items: ConcatArray<<%= el_type %>>[]): <%= this_type %> {
+<%= access_public %> concat<%= this_generic %>(<%= this_arg %>...items: FixedArray<ConcatArray<<%= el_type %>>>): <%= this_type %> {
     let totalAdd = <%= this_len_int %>;
     for (let i = 0; i < items.length; i++) {
         totalAdd += items[i].length as int
     }
 
-    const buf = <%= make_buffer.('totalAdd') %>;
+    const buf : <%= make_fixed_array %> = <%= make_buffer.('totalAdd') %>;
 
     for (let i = 0; i < <%= this_len_int %>; i++) {
         buf[i] = <%= get_unsafe.(this, 'i') %>;
@@ -438,7 +438,7 @@
     if (count < 0) {
         count = 0;
     }
-    let res = <%= make_buffer.('count') %>
+    let res : <%= make_fixed_array %> = <%= make_buffer.('count') %>
     for (let i = 0; i < count; i++) {
         res[i] = <%= get_unsafe.(this, 'relStart + i') %>;
     }
@@ -704,7 +704,7 @@
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-<%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start: number, delete: number, ...items: <%= el_type %>[]): <%= this_type %> {
+<%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start: number, delete: number, ...items: FixedArray<<%= el_type %>>): <%= this_type %> {
     const len = <%= this_len_int %>;
     return <%= this_call.('toSpliced') %>start as int, delete as int, ...items)
 }
@@ -718,7 +718,7 @@
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-<%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start: int, delete: int, ...items: <%= el_type %>[]): <%= this_type %> {
+<%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start: int, delete: int, ...items: FixedArray<<%= el_type %>>): <%= this_type %> {
     const len = <%= this_len_int %>;
     start = normalizeIndex(start, len);
     if (delete < 0) {
@@ -729,7 +729,7 @@
     if (start > len - delete) {
         delete = len - start
     }
-    const res = <%= make_buffer.('len - delete + items.length') %>;
+    const res : <%= make_fixed_array %> = <%= make_buffer.('len - delete + items.length') %>;
     for (let i = 0; i < start; i++) {
         res[i] = <%= get_unsafe.(this, 'i') %>
     }
@@ -916,7 +916,7 @@
  * @returns reversed copy of the current Array
  */
 <%= access_public %> toReversed<%= this_generic %>(<%= this_arg.chomp(', ') %>): <%= this_type %> {
-    let arr = <%= make_buffer.(this_len_int) %>
+    let arr : <%= make_fixed_array %> = <%= make_buffer.(this_len_int) %>
     for (let i = 0; i < <%= this_len_int %>; i++) {
         arr[<%= this_len_int %> - 1 - i] = <%= get_unsafe.(this, 'i') %>
     }

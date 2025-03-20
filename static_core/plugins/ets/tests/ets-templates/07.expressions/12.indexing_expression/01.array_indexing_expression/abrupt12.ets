@@ -25,7 +25,7 @@ let index: int = 300
 function main(): int {
     try {
         assertTrue( arr[index] == 0 )
-    } catch (e: ArrayIndexOutOfBoundsError) {
+    } catch (e: RangeError) {
         return 0
     }
     return 1

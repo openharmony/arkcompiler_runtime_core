@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    const uncompressable_chars_table: char[][] = [
+    const uncompressable_chars_table: FixedArray<char>[] = [
         [c'\u00b0'],
         [c'\u00b0', c'\u00b1'],
         [c'\u00b0', c'\u00b1', c'\u00b2'],
@@ -33,7 +33,7 @@ function main(): int {
         [c'\u00b0', c'\u00b1', c'\u00b2', c'\u00b3', c'\u00b4', c'\u00b5', c'\u00b6', c'\u00b7', c'\u00b8', c'\u00b9', c'\u00ba', c'\u00bb', c'\u00bc', c'\u00bd', c'\u00be', c'\u00bf']
     ];
 
-    const uncompressable_strings_table: String[] = [
+    const uncompressable_strings_table: FixedArray<String> = [
         '\u00b0',
         '\u00b0\u00b1',
         '\u00b0\u00b1\u00b2',
@@ -52,7 +52,7 @@ function main(): int {
         '\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8\u00b9\u00ba\u00bb\u00bc\u00bd\u00be\u00bf'
     ];
 
-    let compressable_chars_table: char[][] = [
+    let compressable_chars_table: FixedArray<char>[] = [
         [c'0'],
         [c'0', c'1'],
         [c'0', c'1', c'2'],
@@ -76,7 +76,7 @@ function main(): int {
         [c'0', c'1', c'2', c'3', c'4', c'5', c'6', c'7', c'8', c'9', c'a', c'b', c'c', c'd', c'e', c'f', c'g', c'h', c'i', c'j', c'k']
     ];
 
-    let compressable_strings_table: String[] = [
+    let compressable_strings_table: FixedArray<String> = [
         "0",
         "01",
         "012",

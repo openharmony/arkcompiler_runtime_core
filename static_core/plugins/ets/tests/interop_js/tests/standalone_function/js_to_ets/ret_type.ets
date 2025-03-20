@@ -96,7 +96,7 @@ function TestFunctionReturnTypeClass(): boolean {
 }
 
 function TestFunctionReturnTypeArray(): boolean {
-    let arr: int[] = functionReturnTypeArray() as int[];
+    let arr: FixedArray<int> = functionReturnTypeArray() as FixedArray<int>;
     return arr[0] == 1;
 }
 

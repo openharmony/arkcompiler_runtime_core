@@ -14,8 +14,8 @@
 ---
 cases:
   - use: |-
-      let a = [3, 4, 5]
+      let a : FixedArray<int> = [3, 4, 5]
       a[-1] = 7 // ES2PANDA_FAIL Index value cannot be less than zero.
   - use: |-
-      let a = [3, 4, 5]
+      let a : FixedArray<int> = [3, 4, 5]
       a[9999999999999999] = 7 // ES2PANDA_FAIL Type 'long' cannot be used as an index type. Only primitive or unboxable integral types can be used as index.

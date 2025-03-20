@@ -252,7 +252,7 @@ function chain_reserve35() : String {
 function more_types_reserve36() : String {
     const emptyString = "";
     let nullString: String = new String(null);
-    let chArray: char[] = [c'!', c'@', c'#', c'$', c'%'];
+    let chArray: FixedArray<char> = [c'!', c'@', c'#', c'$', c'%'];
 
     let sb: StringBuilder = new StringBuilder(chArray);
     sb.append(' ')
@@ -300,7 +300,7 @@ function store_reserve39() : string {
 }
 
 function chain_reserve40() : String {
-    let chars = new char[1]
+    let chars:FixedArray<char> = new char[1]
     chars[0] = c'0'
     return new StringBuilder(chars).append(1).append(2).toString()   // applied
 }

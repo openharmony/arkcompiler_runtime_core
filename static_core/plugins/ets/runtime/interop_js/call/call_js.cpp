@@ -155,7 +155,22 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertVarargsAndC
 {
     auto *ref = readVal(helpers::TypeIdentity<ObjectHeader *>());
     auto *klass = ref->template ClassAddr<Class>();
-    ASSERT(klass->IsArrayClass());
+    if (!klass->IsArrayClass()) {
+        ASSERT(klass == ctx_->GetArrayClass());
+        VMHandle<EtsArrayObject<EtsObject>> etsArr(coro_, ref);
+        auto allJsArgs = ctx_->GetTempArgs<napi_value>(etsArr->GetActualLength() + jsargs.size());
+        for (uint32_t el = 0; el < jsargs.size(); ++el) {
+            allJsArgs[el] = jsargs[el];
+        }
+        for (uint32_t el = 0; el < etsArr->GetActualLength(); ++el) {
+            EtsObject *etsElem = nullptr;
+            etsArr->GetRef(el, &etsElem);
+            auto refConv = JSRefConvertResolve<true>(ctx_, etsElem->GetClass()->GetRuntimeClass());
+            allJsArgs[el + jsargs.size()] = refConv->Wrap(ctx_, etsElem);
+        }
+        return CallConverted<IS_NEWCALL>(*allJsArgs);
+    }
+
     LocalObjectHandle<coretypes::Array> etsArr(coro_, ref);
     auto compTy = klass->GetComponentType();
     // compTy comes from parameter type, thus maybe uninitialized

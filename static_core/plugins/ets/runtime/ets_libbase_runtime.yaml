@@ -790,7 +790,7 @@ intrinsics:
   - name: StdCoreStringGetChars
     space: ets
     class_name: std.core.String
-    method_name: getChars
+    method_name: getCharsImpl
     static: false
     signature:
       ret: u16[]
@@ -808,7 +808,7 @@ intrinsics:
   - name: StdCoreStringGetBytes
     space: ets
     class_name: std.core.String
-    method_name: getBytes
+    method_name: getBytesImpl
     static: false
     signature:
       ret: i8[]
@@ -3836,7 +3836,7 @@ intrinsics:
   - name: StdCoreAbcFileLoadFromMemory
     space: ets
     class_name: std.core.AbcFile
-    method_name: loadFromMemory
+    method_name: loadFromMemoryImpl
     static: true
     signature:
       ret: std.core.AbcFile

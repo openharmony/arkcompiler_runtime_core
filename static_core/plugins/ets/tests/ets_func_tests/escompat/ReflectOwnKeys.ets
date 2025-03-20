@@ -66,9 +66,8 @@ function reflectOwnKeys(): int {
     let fl: float = 50.0
     let dou: double = 60.0
 
-    let arr: number[] = [10, 20, 30]
-    let emptyarr: number[] = []
-
+    let arr: FixedArray<number> = [10, 20, 30]
+    let emptyarr: FixedArray<number> = []
     let str: string = "abc"
     let emptystr: string = ""
 

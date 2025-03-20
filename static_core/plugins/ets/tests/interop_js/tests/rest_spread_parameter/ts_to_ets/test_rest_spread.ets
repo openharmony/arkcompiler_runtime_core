@@ -15,7 +15,7 @@
 
 const etsVm = globalThis.gtest.etsVm;
 
-function compareArraysAreEqual<T>(arr1: T[], arr2: T[]) {
+function compareArraysAreEqual<T>(arr1: FixedArray<T>, arr2: FixedArray<T>) {
     if(arr1.length !== arr2.length) {
         return false;
     }
@@ -41,17 +41,17 @@ let checkRestofUnion = etsVm.getFunction('Lrest_spread/test/ETSGLOBAL;', 'checkR
 let checkRestOfJSValue = etsVm.getFunction('Lrest_spread/test/ETSGLOBAL;', 'checkRestOfJSValue');
 
 function testRestOfNumber() {
-    let tmpFun = (obj: number[], ...nums: number[]) => compareArraysAreEqual<number>(obj, nums);
+    let tmpFun = (obj: FixedArray<number>, ...nums: FixedArray<number>) => compareArraysAreEqual<number>(obj, nums);
    ASSERT_TRUE(checkRestOfNumber(tmpFun));
 }
 
 function testRestOfString() {
-    let tmpFun = (obj: string[], ...strs: string[]) => compareArraysAreEqual(obj, strs);
+    let tmpFun = (obj: FixedArray<string>, ...strs: FixedArray<string>) => compareArraysAreEqual(obj, strs);
     ASSERT_TRUE(checkRestOfString(tmpFun));
 }
 
 function testRestOfObject() {
-    let tmpFun = (obj: object[], ...objs: object[]) => compareArraysAreEqual(obj, objs);
+    let tmpFun = (obj: FixedArray<object>, ...objs: FixedArray<object>) => compareArraysAreEqual(obj, objs);
     ASSERT_TRUE(checkRestOfObject(tmpFun));
 }
 
@@ -61,12 +61,12 @@ function testRestOfTuple() {
 }
 
 function testRestofUnion() {
-    let tmpFun = (obj: (number | string | boolean)[], ...unionArr: (number | string | boolean)[]) => compareArraysAreEqual(obj, unionArr);
+    let tmpFun = (obj: FixedArray<number | string | boolean>, ...unionArr: FixedArray<number | string | boolean>) => compareArraysAreEqual(obj, unionArr);
     ASSERT_TRUE(checkRestofUnion(tmpFun));
 }
 
 function testRestOfJSValue() {
-    let tmpFun = (obj: object[], ...jsvalArr: object[]) => compareArraysAreEqual(obj, jsvalArr);
+    let tmpFun = (obj: FixedArray<object>, ...jsvalArr: FixedArray<object>) => compareArraysAreEqual(obj, jsvalArr);
     ASSERT_TRUE(checkRestOfJSValue(tmpFun));
 }
 

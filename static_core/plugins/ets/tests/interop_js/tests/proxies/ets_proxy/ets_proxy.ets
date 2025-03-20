@@ -126,16 +126,16 @@ class ReferencesAccess {
     public setfString(v?: String): void { this.fString = v; }
     public setfJSValue(v?: JSValue): void { this.fJSValue = v; }
     public setfPromise(v?: Promise<Object>): void { this.fPromise = v; }
-    public setfAString(v?: String[]): void { this.fAString = v; }
-    public setfAUClass1(v?: UClass1[]): void { this.fAUClass1 = v; }
+    public setfAString(v?: FixedArray<String>): void { this.fAString = v; }
+    public setfAUClass1(v?: FixedArray<UClass1>): void { this.fAUClass1 = v; }
 
     public fUClass1?: UClass1 = new UClass1();
     public fUClass2?: UClass2 = new UClass2();
     public fString?: String = new String();
     public fJSValue?: JSValue = '0' as JSValue;
     public fPromise?: Promise<Object> = new Promise<Object>(foo);
-    public fAString?: String[] = [];
-    public fAUClass1?: UClass1[] = [];
+    public fAString?: FixedArray<String> = [];
+    public fAUClass1?: FixedArray<UClass1> = [];
 };
 
 class ReferencesAccessStatic {

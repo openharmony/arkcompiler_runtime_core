@@ -41,7 +41,7 @@ const FAST_TO_STRING_HANDLER_MAP: ToStringHandlerMap = () => {
  */
 export final class BigInt {
 
-    private readonly bytes: int[]
+    private readonly bytes: FixedArray<int>
     private readonly sign: int
 
     private static readonly shiftSys: long = 32 as long
@@ -51,18 +51,18 @@ export final class BigInt {
     private static readonly BITS_PER_1024_DEC = 3402
     private static readonly BIGINT64_MASK = new BigInt(0xffffffffffffffff)
 
-    internal static resetBytes(b: int[]):void {
+    internal static resetBytes(b: FixedArray<int>):void {
         for (let i = 0; i<b.length; i++) {
             b[i] = 0
         }
     }
 
-    internal static fromLongHelper(val: long, bitLen: int, sign: int): int[] {
+    internal static fromLongHelper(val: long, bitLen: int, sign: int): FixedArray<int> {
         // get required array of Ints' size to store whole value
         // split by suported mode (baseSys)
         let size: int = (bitLen < BigInt.shiftSys ? 1 : (bitLen / BigInt.shiftSys + 1) as int)
 
-        let digits: int[] = new int[size]
+        let digits: FixedArray<int> = new int[size]
         for (let i = 0; i < size; i++) {
             let d: long = val & BigInt.maskSys
             val = val >> BigInt.shiftSys
@@ -83,22 +83,22 @@ export final class BigInt {
 
     constructor(d: byte) {
         this.sign = d < 0 ? -1 : (d == 0 ? 0 : 1)
-        this.bytes = this.sign == 0 ? [] as int[] : BigInt.fromLongHelper(d as long, 8, this.sign)
+        this.bytes = this.sign == 0 ? [] as FixedArray<int> : BigInt.fromLongHelper(d as long, 8, this.sign)
     }
 
     constructor(d: short) {
         this.sign = d < 0 ? -1 : (d == 0 ? 0 : 1)
-        this.bytes = this.sign == 0 ? [] as int [] : BigInt.fromLongHelper(d as long, 16, this.sign)
+        this.bytes = this.sign == 0 ? [] as FixedArray<int> : BigInt.fromLongHelper(d as long, 16, this.sign)
     }
 
     constructor(d: int) {
         this.sign = d < 0 ? -1 : (d == 0 ? 0 : 1)
-        this.bytes = this.sign == 0 ? [] as int [] : BigInt.fromLongHelper(d as long, 32, this.sign)
+        this.bytes = this.sign == 0 ? [] as FixedArray<int> : BigInt.fromLongHelper(d as long, 32, this.sign)
     }
 
     constructor(d: long) {
         this.sign = d < 0 ? -1 : (d == 0 ? 0 : 1)
-        this.bytes = this.sign == 0 ? [] as int[] : BigInt.fromLongHelper(d as long, 64, this.sign)
+        this.bytes = this.sign == 0 ? [] as FixedArray<int> : BigInt.fromLongHelper(d as long, 64, this.sign)
     }
 
     constructor(d: double) {
@@ -118,7 +118,7 @@ export final class BigInt {
         const oz = d ? 1 : 0
         this.sign = oz
         this.bytes = this.sign == 0
-            ? [] as int[]
+            ? [] as FixedArray<int>
             : BigInt.fromLongHelper(oz as long, 1, this.sign)
     }
 
@@ -126,7 +126,7 @@ export final class BigInt {
         this(d.bytes, d.sign)
     }
 
-    constructor(v: int[], sign: int) {
+    constructor(v: FixedArray<int>, sign: int) {
         this.bytes = BigInt.stripLeadingZeros(v)
         this.sign = this.bytes.length == 0 ? 0 : sign
     }
@@ -269,14 +269,14 @@ export final class BigInt {
         return result.toString()
     }
 
-    private sliceToBinaryChunks(chunkSize: Number): string[] {
+    private sliceToBinaryChunks(chunkSize: Number): FixedArray<string> {
         let binaryRepresentation: string = this.toStringAsBinary()
         if (binaryRepresentation.length % chunkSize != 0) {
             let requiredLength: Number = binaryRepresentation.length + (chunkSize - binaryRepresentation.length % chunkSize)
             binaryRepresentation = binaryRepresentation.padStart(requiredLength, '0')
         }
         let chunksCount: int = (binaryRepresentation.length / chunkSize) as int
-        let result = new string[chunksCount]
+        let result: FixedArray<string> = new string[chunksCount]
         for (let index: int = 0, offset: int = 0; index < chunksCount; ++index, offset += chunkSize) {
             result[index] = binaryRepresentation.substring(offset, offset + chunkSize)
         }
@@ -337,7 +337,7 @@ export final class BigInt {
     }
 
     // remove leading 0x0
-    private static stripLeadingZeros(d: int[]): int[] {
+    private static stripLeadingZeros(d: FixedArray<int>): FixedArray<int> {
         let i = d.length - 1
 
         if (i < 0 || d[i] != 0) {
@@ -346,7 +346,7 @@ export final class BigInt {
 
         for (; i >= 0 && d[i] == 0; --i) {}
 
-        let result = new int[i+1]
+        let result: FixedArray<int> = new int[i+1]
 
         for (; i >= 0; --i) {
             result[i] = d[i]
@@ -357,8 +357,8 @@ export final class BigInt {
 
     public operatorAdd(other: BigInt): BigInt {
         let max_len = max(this.length(), other.length()) as int + 1
-        let lhs: int[] = this.bytes
-        let rhs: int[] = other.bytes
+        let lhs: FixedArray<int> = this.bytes
+        let rhs: FixedArray<int> = other.bytes
 
         if (this.negative() != other.negative()) {
            if (this.negative()) {
@@ -371,7 +371,7 @@ export final class BigInt {
 
         let carry: long = 0
         let sum: long = 0
-        let res: int[] = new int[max_len]
+        let res: FixedArray<int> = new int[max_len]
         for (let i = 0; i < max_len; i++) {
             sum = carry
             carry = 0
@@ -417,7 +417,7 @@ export final class BigInt {
 
         // we're little endian, means digits at our vector
         // are stored as little-endian manner
-        let product: int[] = new int[lhs.bytes.length + rhs.bytes.length + 1]
+        let product: FixedArray<int> = new int[lhs.bytes.length + rhs.bytes.length + 1]
         for (let i = 0; i < lhs.bytes.length; i++) {
             BigInt.resetBytes(product)
             let div: long = 0
@@ -504,12 +504,12 @@ export final class BigInt {
         return [cnt, res2]
     }
 
-    private doDivide(other: BigInt): [int[], int[]] {
+    private doDivide(other: BigInt): [FixedArray<int>, FixedArray<int>] {
         let divisor = other.negative() ? other.negate() : other
 
-        let bytes = new int[divisor.bytes.length]
+        let bytes: FixedArray<int> = new int[divisor.bytes.length]
         let idx = this.bytes.length - 1
-        let res = new int[this.bytes.length]
+        let res: FixedArray<int> = new int[this.bytes.length]
         for (let i=0; i < divisor.bytes.length && idx >= 0; i++, idx--) {
             bytes[divisor.bytes.length - i - 1] = this.bytes[idx]
         }
@@ -535,7 +535,7 @@ export final class BigInt {
             }
         } while(idx-- >= 0)
 
-        let result: int[] = new int[position]
+        let result: FixedArray<int> = new int[position]
         for (let i = 0; i < position; i++) {
            result[i] = res[position - i - 1]
         }
@@ -553,8 +553,8 @@ export final class BigInt {
         }
 
         let div_res = this.doDivide(other)
-        let quot: int[] = div_res[0]
-        let rem: int[] = div_res[1]
+        let quot: FixedArray<int> = div_res[0]
+        let rem: FixedArray<int> = div_res[1]
 
         let quotent: BigInt = new BigInt(quot, this.negative() != other.negative() ? -1 : 1)
         let remainder: BigInt = new BigInt(rem, this.negative() ? -1 : 1)
@@ -572,10 +572,10 @@ export final class BigInt {
 
     private bitwiseHelper(other:BigInt, fn:(a:int, b:int)=>int): BigInt {
         let max_len = max(this.length(), other.length())
-        let lhs: int[] = this.as2sComplementBytes(max_len - this.length())
-        let rhs: int[] = other.as2sComplementBytes(max_len - other.length())
+        let lhs: FixedArray<int> = this.as2sComplementBytes(max_len - this.length())
+        let rhs: FixedArray<int> = other.as2sComplementBytes(max_len - other.length())
 
-        let res = new int[max_len + 1]
+        let res: FixedArray<int> = new int[max_len + 1]
 
         for (let i = 0; i <= max_len; i++) {
             res[i] = fn(lhs[i], rhs[i])
@@ -711,7 +711,7 @@ export final class BigInt {
         return this - new BigInt("1")
     }
 
-    private static invertBytes(bytes: int[]): void{
+    private static invertBytes(bytes: FixedArray<int>): void{
         for (let i = 0; i < bytes.length; i++) {
             bytes[i] = (~bytes[i]) & BigInt.maskSys as int
         }
@@ -719,7 +719,7 @@ export final class BigInt {
 
     public operatorBitwiseNot(): BigInt {
         let len = this.length() + 1
-        let res = new int[len]
+        let res: FixedArray<int> = new int[len]
 
         for (let i = 0; i<len; i++) {
             res[i] = i < this.length() ? this.bytes[i] : 0
@@ -749,8 +749,8 @@ export final class BigInt {
         return new BigInt(this.bytes, 1)
     }
 
-    private asBytes(): int[] {
-        let bytes = new int[this.length()]
+    private asBytes(): FixedArray<int> {
+        let bytes: FixedArray<int> = new int[this.length()]
         for (let i = 0; i < this.length(); i++) {
             bytes[i] = this.bytes[i]
         }
@@ -758,13 +758,13 @@ export final class BigInt {
         return bytes
     }
 
-    private as2sComplementBytes(): int[] {
+    private as2sComplementBytes(): FixedArray<int> {
         return this.as2sComplementBytes(0)
     }
 
-    private as2sComplementBytes(pad: int): int[] {
+    private as2sComplementBytes(pad: int): FixedArray<int> {
         let size = this.length() + pad + 1
-        let bytes = new int[size]
+        let bytes: FixedArray<int> = new int[size]
 
         for (let i = 0; i < size; i++) {
             bytes[i] = i<this.length() ? this.bytes[i] : 0
@@ -773,11 +773,11 @@ export final class BigInt {
         return this.negative() ? BigInt.to2sComplement(bytes) : bytes
     }
 
-    private bytesToDigits(input: int[]): int[] {
+    private bytesToDigits(input: FixedArray<int>): FixedArray<int> {
 
         let rbytes = BigInt.reverse(input)
-        let digits: int[] = []
-        let mask: int[] = []
+        let digits: FixedArray<int> = []
+        let mask: FixedArray<int> = []
         if (BigInt.shiftSys == 8) {
             mask = [2, 5, 6]
         } else if (BigInt.shiftSys == 16) {
@@ -792,7 +792,7 @@ export final class BigInt {
         for (let i = 0; i < rbytes.length; i++) {
             digits = BigInt.multiplyDigits(digits, mask)
             let b = (((rbytes[i] as long) & BigInt.maskSys) as Long).toString()
-            let temp = new int[b.length as int]
+            let temp: FixedArray<int> = new int[b.length as int]
             for (let j = 0; j < b.length; j++) {
                 temp[j] = b.charAt(j) - c'0'
             }
@@ -803,7 +803,7 @@ export final class BigInt {
         return digits
     }
 
-    private static parseFromString(s: string): [int[], int] {
+    private static parseFromString(s: string): [FixedArray<int>, int] {
         if (s.isEmpty()) {
             // Return 0 when provided string is empty
             s = "0"
@@ -877,10 +877,10 @@ export final class BigInt {
         return sign * value
     }
 
-    private static toBytes(digits: Array<Int>): int[] {
+    private static toBytes(digits: Array<Int>): FixedArray<int> {
         // 3402 bits per each 1024 symbols for decimal number in string
         let chunkSize = (((digits.length * BigInt.BITS_PER_1024_DEC) >>> 10) + BigInt.shiftSys) >>> 5
-        let bytes = new int[chunkSize as int]
+        let bytes: FixedArray<int> = new int[chunkSize as int]
         let position = 0
         while (!(digits.length == 0)) {
             let carry: long = 0
@@ -934,28 +934,28 @@ export final class BigInt {
         return true
     }
 
-    private static multiplyDigits(lhs: int[], rhs: int[]): int[] {
+    private static multiplyDigits(lhs: FixedArray<int>, rhs: FixedArray<int>): FixedArray<int> {
         if ((lhs.length == 0) || (rhs.length == 0)) {
-            let r = new int[1]
+            let r: FixedArray<int> = new int[1]
             r[0] = 0
             return r
         }
 
         if (lhs.length == 1 && lhs[0] == 0) {
-            let r = new int[1]
+            let r: FixedArray<int> = new int[1]
             r[0] = 0
             return r
         }
 
         if (rhs.length == 0 && rhs[0] == 0) {
-            let r = new int[1]
+            let r: FixedArray<int> = new int[1]
             r[0] = 0
             return r
         }
 
         let len1: int = lhs.length as int
         let len2: int = rhs.length as int
-        let product = new int[len1 + len2]
+        let product: FixedArray<int> = new int[len1 + len2]
         BigInt.resetBytes(product)
 
         for (let i = len1 - 1; i >= 0; i--) {
@@ -978,7 +978,7 @@ export final class BigInt {
 
         if (!(product.length == 0)) {
             if (product[0] == 0) {
-               let res = new int[product.length - 1]
+               let res: FixedArray<int> = new int[product.length - 1]
                for (let i = 1; i < product.length; i++ ) {
                    res[i - 1] = product[i]
                }
@@ -989,8 +989,8 @@ export final class BigInt {
         return product
     }
 
-    private static reverse(input: int[]): int[] {
-        let result = new int[input.length]
+    private static reverse(input: FixedArray<int>): FixedArray<int> {
+        let result: FixedArray<int> = new int[input.length]
         let j = 0
         for (let i = input.length - 1; i >= 0; --i) {
             result[j++] = input[i]
@@ -999,7 +999,7 @@ export final class BigInt {
         return result
     }
 
-    private static to2sComplement(input: int[]): int[] {
+    private static to2sComplement(input: FixedArray<int>): FixedArray<int> {
         // Perform 2's complement for negative numbers.
         let carry: long = 1
         for (let i = 0; i < input.length; i++) {
@@ -1011,9 +1011,9 @@ export final class BigInt {
         return input
     }
 
-    private static addDigits(lhs: int[], rhs: int[]): int[] {
+    private static addDigits(lhs: FixedArray<int>, rhs: FixedArray<int>): FixedArray<int> {
         let max_len = max(lhs.length, rhs.length) as int
-        let result = new int[max_len]
+        let result: FixedArray<int> = new int[max_len]
 
         let carry: int = 0
         for (let i: int = 0; i < max_len; i++) {

@@ -251,12 +251,12 @@ export class Segmenter {
     private segmentWith(doc: string, granularity: 'grapheme' | 'word' | 'sentence'): Cluster[] {
         switch (granularity) {
         case "word":
-            return Segmenter.wordClusters(doc, this._locale)
+            return Array.from<Cluster>(Segmenter.wordClusters(doc, this._locale))
         case "sentence":
-            return Segmenter.sentenceClusters(doc, this._locale)
+            return Array.from<Cluster>(Segmenter.sentenceClusters(doc, this._locale))
         case "grapheme":
         default:
-            return Segmenter.graphemeClusters(doc, this._locale)
+            return Array.from<Cluster>(Segmenter.graphemeClusters(doc, this._locale))
         }
     }
 

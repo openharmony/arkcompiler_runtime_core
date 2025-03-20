@@ -152,10 +152,10 @@ export final class Runtime {
 
     native static __getTypeInfo(o: NullishType): Class|undefined;
 
-    native static allocSameTypeArray<T extends NullishType[]>(type: Class, length: int): T;
+    native static allocSameTypeArray<T extends FixedArray<NullishType>>(type: Class, length: int): T;
 
-    static addFrontElementsStub(original: __T[], front: __T[]): __T[] {
-        let res = Runtime.allocSameTypeArray<__T[]>(Class.of(original), original.length + front.length)
+    static addFrontElementsStub(original: FixedArray<__T>, front: FixedArray<__T>): FixedArray<__T> {
+        let res = Runtime.allocSameTypeArray<FixedArray<__T>>(Class.of(original), original.length + front.length)
         for (let i: int = 0; i < front.length; ++i) {
             res[i] = front[i]
         }
@@ -165,19 +165,19 @@ export final class Runtime {
         return res
     }
 
-    static removeFrontElementsStub(original: __T[], count: int): __T[] {
-        let res = Runtime.allocSameTypeArray<__T[]>(Class.of(original), original.length - count)
+    static removeFrontElementsStub(original: FixedArray<__T>, count: int): FixedArray<__T> {
+        let res = Runtime.allocSameTypeArray<FixedArray<__T>>(Class.of(original), original.length - count)
         for (let i: int = count; i < original.length; ++i) {
             res[i - count] = original[i]
         }
         return res
     }
 
-    static restArgumentsUnderapplicationStub(rest: __T[], required: int): __T[] {
+    static restArgumentsUnderapplicationStub(rest: FixedArray<__T>, required: int): FixedArray<__T> {
         if (rest.length >= required) {
             return rest
         }
-        let newRest = new __T[required]
+        let newRest : FixedArray<__T> = new __T[required]
         for (let i: int = 0; i < rest.length; ++i) {
             newRest[i] = rest[i]
         }

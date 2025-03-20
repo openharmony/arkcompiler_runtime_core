@@ -68,7 +68,7 @@ cases:
     - decl: |-
           class A {
               fld: int
-              foo(): this[] {  // CTE, 'this' cannot be used as type of array
+              foo(): FixedArray<this> {  // CTE, 'this' cannot be used as type of array
                   if (this.fld == 0) {
                       return [this, this]
                   }

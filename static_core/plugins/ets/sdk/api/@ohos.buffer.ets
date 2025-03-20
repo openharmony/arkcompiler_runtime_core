@@ -1462,20 +1462,20 @@ Received value is: ${value}`, TypeErrorCodeId);
         endings: 'transparent'|'native'
     };
 
-    type SrcType = string[] | ArrayBuffer[] | TypedArray[] | DataView[] | Blob[]
+    type SrcType = FixedArray<string> | FixedArray<ArrayBuffer> | FixedArray<TypedArray> | FixedArray<DataView> | FixedArray<Blob>
     type SrcItemType = string | ArrayBuffer | TypedArray | DataView | Blob
     type ArrSrcType = Array<string> | Array<ArrayBuffer> | Array<TypedArray> | Array<DataView> | Array<Blob>
 
     function typeKey(sources: SrcType): string {
-        if (sources instanceof string[]) {
+        if (sources instanceof FixedArray<string>) {
             return "string"
-        } else if (sources instanceof ArrayBuffer[]) {
+        } else if (sources instanceof FixedArray<ArrayBuffer>) {
             return "ArrayBuffer"
-        } else if (sources instanceof TypedArray[]) {
+        } else if (sources instanceof FixedArray<TypedArray>) {
             return "TypedArray"
-        } else if (sources instanceof DataView[]) {
+        } else if (sources instanceof FixedArray<DataView>) {
             return "DataView"
-        } else if (sources instanceof Blob[]) {
+        } else if (sources instanceof FixedArray<Blob>) {
             return "Blob"
         }
         return ""
@@ -1502,10 +1502,10 @@ Received value is: ${value}`, TypeErrorCodeId);
          * Creates a new Blob object containing a concatenation of the given sources.
          * <ArrayBuffer>, <TypedArray>, <DataView>, and <Buffer> sources are copied into the 'Blob' and can therefore be safely modified after the 'Blob' is created.
          * String sources are encoded as UTF-8 byte sequences and copied into the Blob. Unmatched surrogate pairs within each string part will be replaced by Unicode U+FFFD replacement characters.
-         * @param {string[] | ArrayBuffer[] | TypedArray[] | DataView[] | Blob[]} [sources] - An array of string, <ArrayBuffer>, <TypedArray>, <DataView>, or <Blob> objects, or any mix of such objects, that will be stored within the Blob.
+         * @param {FixedArray<string> | FixedArray<ArrayBuffer> | FixedArray<TypedArray> | FixedArray<DataView> | FixedArray<Blob>} [sources] - An array of string, <ArrayBuffer>, <TypedArray>, <DataView>, or <Blob> objects, or any mix of such objects, that will be stored within the Blob.
          * @param {BlobOptions} [options] - options
          */
-        constructor(sources: string[] | ArrayBuffer[] | TypedArray[] | DataView[] | Blob[], options?: BlobOptions) {
+        constructor(sources: FixedArray<string> | FixedArray<ArrayBuffer> | FixedArray<TypedArray> | FixedArray<DataView> | FixedArray<Blob>, options?: BlobOptions) {
             this.typeKey = typeKey(sources)
             this.createArray(sources)
             if (options != undefined) {
@@ -1569,19 +1569,19 @@ Received value is: ${value}`, TypeErrorCodeId);
         private createArray(sources: SrcType) {
             switch (this.typeKey) {
                 case "string": {
-                    this.arr = Array.from(sources as string[])
+                    this.arr = Array.from(sources as FixedArray<string>)
                 } break
                 case "ArrayBuffer": {
-                    this.arr = Array.from(sources as ArrayBuffer[])
+                    this.arr = Array.from(sources as FixedArray<ArrayBuffer>)
                 } break
                 case "TypedArray": {
-                    this.arr = Array.from(sources as TypedArray[])
+                    this.arr = Array.from(sources as FixedArray<TypedArray>)
                 } break
                 case "DataView": {
-                    this.arr = Array.from(sources as DataView[])
+                    this.arr = Array.from(sources as FixedArray<DataView>)
                 } break
                 case "Blob": {
-                    this.arr = Array.from(sources as Blob[])
+                    this.arr = Array.from(sources as FixedArray<Blob>)
                 } break
             }
         }

@@ -197,7 +197,7 @@ export final class Promise<out T> implements PromiseLike<T> {
         return p;
     }
 
-    static all<U>(promises: (U|PromiseLike<U>|undefined)[]): Promise<Array<U>> {
+    static all<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<Array<U>> {
         return new Promise<Array<U>>((resolve: (value: Array<U>) => void, reject: (error: NullishType) => void): void => {
             new AllPromiseConcurrency<U>(resolve, reject).all(promises);
         });
@@ -211,7 +211,7 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
-    static allSettled<U>(promises: (U|PromiseLike<U>|undefined)[]): Promise<PromiseSettledResult<U>[]> {
+    static allSettled<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<PromiseSettledResult<U>[]> {
         return new Promise<PromiseSettledResult<U>[]>((resolve: (value: PromiseSettledResult<U>[]) => void, reject: (error: NullishType) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
             new AllSettledPromiseConcurrency<U>(resolve, reject).allSettled(promises);
@@ -226,7 +226,7 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
-    static any<U>(promises: (U|PromiseLike<U>|undefined)[]): Promise<U> {
+    static any<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<U> {
         return new Promise<U>((resolve: (value: U) => void, reject: (error: NullishType) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
             new AnyPromiseConcurrency<U>(resolve, reject).any(promises);
@@ -241,7 +241,7 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
-    static race<U>(promises: (U|PromiseLike<U>|undefined)[]): Promise<U> {
+    static race<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<U> {
         return new Promise<U>((resolve: (value: U) => void, reject: (error: NullishType) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
             new RacePromiseConcurrency<U>(resolve, reject).race(promises);
@@ -256,13 +256,13 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
-    private static toArray<U>(values: Iterable<U>): (U | undefined)[] {
+    private static toArray<U>(values: Iterable<U>): FixedArray<U | undefined> {
         let it = values.$_iterator();
         let v = it.next();
         if (v.done) {
             return new (U | undefined)[0];
         }
-        let array = new (U | undefined)[1];
+        let array : FixedArray<U | undefined> = new (U | undefined)[1];
         array[0] = v.value!;
         let len = 1;
         while (true) {
@@ -276,22 +276,22 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
-    private static trim<U>(array: U[], length: int): (U | undefined)[] {
+    private static trim<U>(array: FixedArray<U>, length: int): FixedArray<U | undefined> {
         if (array.length == length) {
             return array;
         }
-        let result = new (U | undefined)[length];
+        let result : FixedArray<U | undefined> = new (U | undefined)[length];
         for (let i = 0; i < length; ++i) {
             result[i] = array[i];
         }
         return result;
     }
 
-    private static ensureCapacity<U>(queue: U[], size: int): (U | undefined)[] {
+    private static ensureCapacity<U>(queue: FixedArray<U>, size: int): FixedArray<U | undefined> {
         if (size <= queue.length) {
             return queue;
         }
-        let newQueue = new (U | undefined)[size * 2];
+        let newQueue : FixedArray<U | undefined> = new (U | undefined)[size * 2];
         for (let i = 0; i < queue.length; ++i) {
             newQueue[i] = queue[i];
         }
@@ -382,7 +382,7 @@ class AllPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         this.reject = reject;
     }
 
-    all(promises: (T|PromiseLike<T>|undefined)[]): void {
+    all(promises: FixedArray<T|PromiseLike<T>|undefined>): void {
         if (promises.length == 0) {
             this.resolve(this.values);
             return;
@@ -420,7 +420,7 @@ class AllSettledPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         this.reject = reject;
     }
 
-    allSettled(promises: (T|PromiseLike<T>|undefined)[]): void {
+    allSettled(promises: FixedArray<T|PromiseLike<T>|undefined>): void {
         this.values = new PromiseSettledResultBase[promises.length];
         if (promises.length == 0) {
             this.resolve(this.getValues());
@@ -475,7 +475,7 @@ class AnyPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         this.reject = reject;
     }
 
-    any(promises: (T|PromiseLike<T>|undefined)[]): void {
+    any(promises: FixedArray<T|PromiseLike<T>|undefined>): void {
         this.errors = new Error[promises.length];
         if (promises.length == 0) {
             this.reject(new AggregateError(this.errors!, "All promises are rejected"));
@@ -527,7 +527,7 @@ class RacePromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         this.reject = reject;
     }
 
-    race(promises: (T|PromiseLike<T>|undefined)[]): void {
+    race(promises: FixedArray<T|PromiseLike<T>|undefined>): void {
         for (let i = 0; i < promises.length; ++i) {
             let idx = i;
             this.toPromiseLike(promises[idx]!).then<void, void>((value: T): void => {

@@ -319,9 +319,9 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an Int8Array from number[]
+     * Creates an Int8Array from FixedArray<number>
      */
-    public constructor(numbers: number[]) {
+    public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as byte)
@@ -329,9 +329,9 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an Int8Array from int[]
+     * Creates an Int8Array from FixedArray<int>
      */
-    public constructor(numbers: int[]) {
+    public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as byte)
@@ -753,7 +753,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
 
     /**
      * Assigns val as element on insertPos.
-     * @description Added to avoid (un)packing a single value into array to use overloaded set(byte[], insertPos)
+     * @description Added to avoid (un)packing a single value into array to use overloaded set(FixedArray<byte>, insertPos)
      *
      * @param val value to set
      *
@@ -765,7 +765,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
 
     /**
      * Assigns val as element on insertPos.
-     * @description Added to avoid (un)packing a single value into array to use overloaded set(byte[], insertPos)
+     * @description Added to avoid (un)packing a single value into array to use overloaded set(FixedArray<byte>, insertPos)
      *
      * @param val value to set
      *
@@ -784,7 +784,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: number[], insertPos: number): void {
+    public set(arr: FixedArray<number>, insertPos: number): void {
         const offset = insertPos as int
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
@@ -804,7 +804,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: byte[], insertPos: int): void {
+    public set(arr: FixedArray<byte>, insertPos: int): void {
         const offset = insertPos as int
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
@@ -820,7 +820,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param arr array to copy data from
      */
-    public set(arr: number[]): void {
+    public set(arr: FixedArray<number>): void {
         this.set(arr, 0 as number)
     }
 
@@ -829,7 +829,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param arr array to copy data from
      */
-    public set(arr: byte[]): void {
+    public set(arr: FixedArray<byte>): void {
         this.set(arr, 0 as int)
     }
 
@@ -862,7 +862,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array
      */
-    public static of(...items: number[]): Int8Array {
+    public static of(...items: FixedArray<number>): Int8Array {
         let res = new Int8Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, res.zeroIfInfinity(items[i]) as byte)
@@ -877,7 +877,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array
      */
-    public static of(...items: int[]): Int8Array {
+    public static of(...items: FixedArray<int>): Int8Array {
         let res = new Int8Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i] as byte)
@@ -892,7 +892,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array
      */
-    public static of(...items: byte[]): Int8Array {
+    public static of(...items: FixedArray<byte>): Int8Array {
         let res = new Int8Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i])
@@ -956,7 +956,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Int8Array(6)
-        let index = new int[1]
+        let index : FixedArray<int> = new int[1]
         index[0] = 0
 
         iteratorForEach<number>(iter, (x: number): void => {
@@ -988,7 +988,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int8Array {
         let res = new Int8Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx = new int[1]
+        const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             res.setUnsafe(idx[0] as int, res.zeroIfInfinity(mapfn(x as T, idx[0] as number)) as byte)
@@ -1248,7 +1248,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     *
     * @returns a new Int8Array from data
     */
-    public of(data: Object[]): Int8Array {
+    public of(data: FixedArray<Object>): Int8Array {
         throw new Error("Int8Array.of: not implemented")
     }
 
@@ -1613,7 +1613,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns sorted Int8Array
      */
     public sort(compareFn?: (a: number, b: number) => number): this {
-        let arr: byte[] = new byte[this.lengthInt]
+        let arr: FixedArray<byte> = new byte[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
@@ -1790,7 +1790,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Int8Array with elements from current Int8Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number, array: Int8Array) => boolean): Int8Array {
-        let markers = new boolean[this.lengthInt]
+        let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn(this.getUnsafe(i) as number, i as number, this)
@@ -2300,9 +2300,9 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an Int16Array from number[]
+     * Creates an Int16Array from FixedArray<number>
      */
-    public constructor(numbers: number[]) {
+    public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as short)
@@ -2310,9 +2310,9 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an Int16Array from int[]
+     * Creates an Int16Array from FixedArray<int>
      */
-    public constructor(numbers: int[]) {
+    public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as short)
@@ -2734,7 +2734,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
 
     /**
      * Assigns val as element on insertPos.
-     * @description Added to avoid (un)packing a single value into array to use overloaded set(short[], insertPos)
+     * @description Added to avoid (un)packing a single value into array to use overloaded set(FixedArray<short>, insertPos)
      *
      * @param val value to set
      *
@@ -2746,7 +2746,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
 
     /**
      * Assigns val as element on insertPos.
-     * @description Added to avoid (un)packing a single value into array to use overloaded set(short[], insertPos)
+     * @description Added to avoid (un)packing a single value into array to use overloaded set(FixedArray<short>, insertPos)
      *
      * @param val value to set
      *
@@ -2765,7 +2765,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: number[], insertPos: number): void {
+    public set(arr: FixedArray<number>, insertPos: number): void {
         const offset = insertPos as int
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
@@ -2785,7 +2785,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: short[], insertPos: int): void {
+    public set(arr: FixedArray<short>, insertPos: int): void {
         const offset = insertPos as int
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
@@ -2801,7 +2801,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param arr array to copy data from
      */
-    public set(arr: number[]): void {
+    public set(arr: FixedArray<number>): void {
         this.set(arr, 0 as number)
     }
 
@@ -2810,7 +2810,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param arr array to copy data from
      */
-    public set(arr: short[]): void {
+    public set(arr: FixedArray<short>): void {
         this.set(arr, 0 as int)
     }
 
@@ -2843,7 +2843,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array
      */
-    public static of(...items: number[]): Int16Array {
+    public static of(...items: FixedArray<number>): Int16Array {
         let res = new Int16Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, res.zeroIfInfinity(items[i]) as short)
@@ -2858,7 +2858,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array
      */
-    public static of(...items: int[]): Int16Array {
+    public static of(...items: FixedArray<int>): Int16Array {
         let res = new Int16Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i] as short)
@@ -2873,7 +2873,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array
      */
-    public static of(...items: short[]): Int16Array {
+    public static of(...items: FixedArray<short>): Int16Array {
         let res = new Int16Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i])
@@ -2937,7 +2937,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Int16Array(6)
-        let index = new int[1]
+        let index : FixedArray<int> = new int[1]
         index[0] = 0
 
         iteratorForEach<number>(iter, (x: number): void => {
@@ -2969,7 +2969,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int16Array {
         let res = new Int16Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx = new int[1]
+        const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             res.setUnsafe(idx[0] as int, res.zeroIfInfinity(mapfn(x as T, idx[0] as number)) as short)
@@ -3229,7 +3229,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     *
     * @returns a new Int16Array from data
     */
-    public of(data: Object[]): Int16Array {
+    public of(data: FixedArray<Object>): Int16Array {
         throw new Error("Int16Array.of: not implemented")
     }
 
@@ -3594,7 +3594,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns sorted Int16Array
      */
     public sort(compareFn?: (a: number, b: number) => number): this {
-        let arr: short[] = new short[this.lengthInt]
+        let arr: FixedArray<short> = new short[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
@@ -3771,7 +3771,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Int16Array with elements from current Int16Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number, array: Int16Array) => boolean): Int16Array {
-        let markers = new boolean[this.lengthInt]
+        let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn(this.getUnsafe(i) as number, i as number, this)
@@ -4285,9 +4285,9 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an Int32Array from number[]
+     * Creates an Int32Array from FixedArray<number>
      */
-    public constructor(numbers: number[]) {
+    public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as int)
@@ -4295,9 +4295,9 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an Int32Array from int[]
+     * Creates an Int32Array from FixedArray<int>
      */
-    public constructor(numbers: int[]) {
+    public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as int)
@@ -4692,7 +4692,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
 
     /**
      * Assigns val as element on insertPos.
-     * @description Added to avoid (un)packing a single value into array to use overloaded set(int[], insertPos)
+     * @description Added to avoid (un)packing a single value into array to use overloaded set(FixedArray<int>, insertPos)
      *
      * @param val value to set
      *
@@ -4704,7 +4704,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
 
     /**
      * Assigns val as element on insertPos.
-     * @description Added to avoid (un)packing a single value into array to use overloaded set(int[], insertPos)
+     * @description Added to avoid (un)packing a single value into array to use overloaded set(FixedArray<int>, insertPos)
      *
      * @param val value to set
      *
@@ -4723,7 +4723,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: number[], insertPos: number): void {
+    public set(arr: FixedArray<number>, insertPos: number): void {
         const offset = insertPos as int
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
@@ -4743,7 +4743,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: int[], insertPos: int): void {
+    public set(arr: FixedArray<int>, insertPos: int): void {
         const offset = insertPos as int
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
@@ -4759,7 +4759,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param arr array to copy data from
      */
-    public set(arr: number[]): void {
+    public set(arr: FixedArray<number>): void {
         this.set(arr, 0 as number)
     }
 
@@ -4768,7 +4768,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param arr array to copy data from
      */
-    public set(arr: int[]): void {
+    public set(arr: FixedArray<int>): void {
         this.set(arr, 0 as int)
     }
 
@@ -4801,7 +4801,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int32Array
      */
-    public static of(...items: number[]): Int32Array {
+    public static of(...items: FixedArray<number>): Int32Array {
         let res = new Int32Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, res.zeroIfInfinity(items[i]) as int)
@@ -4816,7 +4816,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int32Array
      */
-    public static of(...items: int[]): Int32Array {
+    public static of(...items: FixedArray<int>): Int32Array {
         let res = new Int32Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i])
@@ -4880,7 +4880,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Int32Array(6)
-        let index = new int[1]
+        let index : FixedArray<int> = new int[1]
         index[0] = 0
 
         iteratorForEach<number>(iter, (x: number): void => {
@@ -4912,7 +4912,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int32Array {
         let res = new Int32Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx = new int[1]
+        const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             res.setUnsafe(idx[0] as int, res.zeroIfInfinity(mapfn(x as T, idx[0] as number)) as int)
@@ -5172,7 +5172,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     *
     * @returns a new Int32Array from data
     */
-    public of(data: Object[]): Int32Array {
+    public of(data: FixedArray<Object>): Int32Array {
         throw new Error("Int32Array.of: not implemented")
     }
 
@@ -5537,7 +5537,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns sorted Int32Array
      */
     public sort(compareFn?: (a: number, b: number) => number): this {
-        let arr: int[] = new int[this.lengthInt]
+        let arr: FixedArray<int> = new int[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
@@ -5714,7 +5714,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Int32Array with elements from current Int32Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number, array: Int32Array) => boolean): Int32Array {
-        let markers = new boolean[this.lengthInt]
+        let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn(this.getUnsafe(i) as number, i as number, this)
@@ -6228,9 +6228,9 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     }
 
     /**
-     * Creates an BigInt64Array from number[]
+     * Creates an BigInt64Array from FixedArray<number>
      */
-    public constructor(numbers: number[]) {
+    public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, this.zeroIfInfinity(numbers[i] as long))
@@ -6238,9 +6238,9 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     }
 
     /**
-     * Creates an BigInt64Array from int[]
+     * Creates an BigInt64Array from FixedArray<int>
      */
-    public constructor(numbers: int[]) {
+    public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, this.zeroIfInfinity(numbers[i] as long))
@@ -6248,9 +6248,9 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     }
 
     /**
-     * Creates an BigInt64Array from bigint[]
+     * Creates an BigInt64Array from FixedArray<bigint>
      */
-    public constructor(numbers: bigint[]) {
+    public constructor(numbers: FixedArray<bigint>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, numbers[i].getLong())
@@ -6673,7 +6673,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
 
     /**
      * Assigns val as element on insertPos.
-     * @description Added to avoid (un)packing a single value into array to use overloaded set(long[], insertPos)
+     * @description Added to avoid (un)packing a single value into array to use overloaded set(FixedArray<long>, insertPos)
      *
      * @param val value to set
      *
@@ -6685,7 +6685,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
 
     /**
      * Assigns val as element on insertPos.
-     * @description Added to avoid (un)packing a single value into array to use overloaded set(long[], insertPos)
+     * @description Added to avoid (un)packing a single value into array to use overloaded set(FixedArray<long>, insertPos)
      *
      * @param val value to set
      *
@@ -6704,7 +6704,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: BigInt[], insertPos: number): void {
+    public set(arr: FixedArray<BigInt>, insertPos: number): void {
         const offset = insertPos as int
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
@@ -6724,7 +6724,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: long[], insertPos: int): void {
+    public set(arr: FixedArray<long>, insertPos: int): void {
         const offset = insertPos as int
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
@@ -6740,7 +6740,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @param arr array to copy data from
      */
-    public set(arr: BigInt[]): void {
+    public set(arr: FixedArray<BigInt>): void {
         this.set(arr, 0 as number)
     }
 
@@ -6749,7 +6749,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @param arr array to copy data from
      */
-    public set(arr: long[]): void {
+    public set(arr: FixedArray<long>): void {
         this.set(arr, 0 as int)
     }
 
@@ -6782,7 +6782,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array
      */
-    public static of(...items: number[]): BigInt64Array {
+    public static of(...items: FixedArray<number>): BigInt64Array {
         let res = new BigInt64Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             const isInfinity = (items[i] == Infinity) || (items[i] == -Infinity)
@@ -6798,7 +6798,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array
      */
-    public static of(...items: int[]): BigInt64Array {
+    public static of(...items: FixedArray<int>): BigInt64Array {
         let res = new BigInt64Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i] as long)
@@ -6813,7 +6813,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array
      */
-    public static of(...items: long[]): BigInt64Array {
+    public static of(...items: FixedArray<long>): BigInt64Array {
         let res = new BigInt64Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i])
@@ -6828,7 +6828,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array
      */
-    public static of(...items: bigint[]): BigInt64Array {
+    public static of(...items: FixedArray<bigint>): BigInt64Array {
         let res = new BigInt64Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i].getLong())
@@ -6892,7 +6892,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new BigInt64Array(6)
-        let index = new int[1]
+        let index : FixedArray<int> = new int[1]
         index[0] = 0
 
         iteratorForEach<BigInt>(iter, (x: BigInt): void => {
@@ -6924,7 +6924,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => BigInt): BigInt64Array {
         let res = new BigInt64Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx = new int[1]
+        const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             res.setUnsafe(idx[0] as int, mapfn(x as T, idx[0] as number).getLong())
@@ -7175,7 +7175,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     *
     * @returns a new BigInt64Array from data
     */
-    public of(data: Object[]): BigInt64Array {
+    public of(data: FixedArray<Object>): BigInt64Array {
         throw new Error("BigInt64Array.of: not implemented")
     }
 
@@ -7540,7 +7540,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns sorted BigInt64Array
      */
     public sort(compareFn?: (a: BigInt, b: BigInt) => number | BigInt): this {
-        let arr: long[] = new long[this.lengthInt]
+        let arr: FixedArray<long> = new long[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
@@ -7721,7 +7721,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns a new BigInt64Array with elements from current BigInt64Array that satisfy condition fn
      */
     public filter(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): BigInt64Array {
-        let markers = new boolean[this.lengthInt]
+        let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn(new BigInt(this.getUnsafe(i)), i as number, this)
@@ -8235,9 +8235,9 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an Float32Array from number[]
+     * Creates an Float32Array from FixedArray<number>
      */
-    public constructor(numbers: number[]) {
+    public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, numbers[i] as float)
@@ -8245,9 +8245,9 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an Float32Array from int[]
+     * Creates an Float32Array from FixedArray<int>
      */
-    public constructor(numbers: int[]) {
+    public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, numbers[i] as float)
@@ -8647,7 +8647,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
 
     /**
      * Assigns val as element on insertPos.
-     * @description Added to avoid (un)packing a single value into array to use overloaded set(float[], insertPos)
+     * @description Added to avoid (un)packing a single value into array to use overloaded set(FixedArray<float>, insertPos)
      *
      * @param val value to set
      *
@@ -8659,7 +8659,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
 
     /**
      * Assigns val as element on insertPos.
-     * @description Added to avoid (un)packing a single value into array to use overloaded set(float[], insertPos)
+     * @description Added to avoid (un)packing a single value into array to use overloaded set(FixedArray<float>, insertPos)
      *
      * @param val value to set
      *
@@ -8678,7 +8678,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: number[], insertPos: number): void {
+    public set(arr: FixedArray<number>, insertPos: number): void {
         const offset = insertPos as int
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
@@ -8697,7 +8697,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: float[], insertPos: int): void {
+    public set(arr: FixedArray<float>, insertPos: int): void {
         const offset = insertPos as int
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
@@ -8712,7 +8712,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param arr array to copy data from
      */
-    public set(arr: number[]): void {
+    public set(arr: FixedArray<number>): void {
         this.set(arr, 0 as number)
     }
 
@@ -8721,7 +8721,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param arr array to copy data from
      */
-    public set(arr: float[]): void {
+    public set(arr: FixedArray<float>): void {
         this.set(arr, 0 as int)
     }
 
@@ -8753,7 +8753,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float32Array
      */
-    public static of(...items: number[]): Float32Array {
+    public static of(...items: FixedArray<number>): Float32Array {
         let res = new Float32Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i] as float)
@@ -8768,7 +8768,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float32Array
      */
-    public static of(...items: int[]): Float32Array {
+    public static of(...items: FixedArray<int>): Float32Array {
         let res = new Float32Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i] as float)
@@ -8783,7 +8783,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float32Array
      */
-    public static of(...items: float[]): Float32Array {
+    public static of(...items: FixedArray<float>): Float32Array {
         let res = new Float32Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i])
@@ -8847,7 +8847,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Float32Array(6)
-        let index = new int[1]
+        let index : FixedArray<int> = new int[1]
         index[0] = 0
 
         iteratorForEach<number>(iter, (x: number): void => {
@@ -8879,7 +8879,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Float32Array {
         let res = new Float32Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx = new int[1]
+        const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             res.setUnsafe(idx[0] as int, mapfn(x as T, idx[0] as number) as float)
@@ -9145,7 +9145,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     *
     * @returns a new Float32Array from data
     */
-    public of(data: Object[]): Float32Array {
+    public of(data: FixedArray<Object>): Float32Array {
         throw new Error("Float32Array.of: not implemented")
     }
 
@@ -9510,7 +9510,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns sorted Float32Array
      */
     public sort(compareFn?: (a: number, b: number) => number): this {
-        let arr: float[] = new float[this.lengthInt]
+        let arr: FixedArray<float> = new float[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
@@ -9687,7 +9687,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Float32Array with elements from current Float32Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number, array: Float32Array) => boolean): Float32Array {
-        let markers = new boolean[this.lengthInt]
+        let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn(this.getUnsafe(i) as number, i as number, this)
@@ -10201,9 +10201,9 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an Float64Array from number[]
+     * Creates an Float64Array from FixedArray<number>
      */
-    public constructor(numbers: number[]) {
+    public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, numbers[i] as double)
@@ -10211,9 +10211,9 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an Float64Array from int[]
+     * Creates an Float64Array from FixedArray<int>
      */
-    public constructor(numbers: int[]) {
+    public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, numbers[i] as double)
@@ -10527,7 +10527,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
 
     /**
      * Assigns val as element on insertPos.
-     * @description Added to avoid (un)packing a single value into array to use overloaded set(double[], insertPos)
+     * @description Added to avoid (un)packing a single value into array to use overloaded set(FixedArray<double>, insertPos)
      *
      * @param val value to set
      *
@@ -10539,7 +10539,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
 
     /**
      * Assigns val as element on insertPos.
-     * @description Added to avoid (un)packing a single value into array to use overloaded set(double[], insertPos)
+     * @description Added to avoid (un)packing a single value into array to use overloaded set(FixedArray<double>, insertPos)
      *
      * @param val value to set
      *
@@ -10558,7 +10558,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: number[], insertPos: number): void {
+    public set(arr: FixedArray<number>, insertPos: number): void {
         const offset = insertPos as int
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
@@ -10577,7 +10577,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: double[], insertPos: int): void {
+    public set(arr: FixedArray<double>, insertPos: int): void {
         const offset = insertPos as int
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
@@ -10592,7 +10592,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param arr array to copy data from
      */
-    public set(arr: double[]): void {
+    public set(arr: FixedArray<double>): void {
         this.set(arr, 0 as int)
     }
 
@@ -10624,7 +10624,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float64Array
      */
-    public static of(...items: number[]): Float64Array {
+    public static of(...items: FixedArray<number>): Float64Array {
         let res = new Float64Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i])
@@ -10639,7 +10639,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float64Array
      */
-    public static of(...items: int[]): Float64Array {
+    public static of(...items: FixedArray<int>): Float64Array {
         let res = new Float64Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i] as double)
@@ -10703,7 +10703,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Float64Array(6)
-        let index = new int[1]
+        let index : FixedArray<int> = new int[1]
         index[0] = 0
 
         iteratorForEach<number>(iter, (x: number): void => {
@@ -10735,7 +10735,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Float64Array {
         let res = new Float64Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx = new int[1]
+        const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             res.setUnsafe(idx[0] as int, mapfn(x as T, idx[0] as number) as double)
@@ -10975,7 +10975,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     *
     * @returns a new Float64Array from data
     */
-    public of(data: Object[]): Float64Array {
+    public of(data: FixedArray<Object>): Float64Array {
         throw new Error("Float64Array.of: not implemented")
     }
 
@@ -11340,7 +11340,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns sorted Float64Array
      */
     public sort(compareFn?: (a: number, b: number) => number): this {
-        let arr: double[] = new double[this.lengthInt]
+        let arr: FixedArray<double> = new double[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
@@ -11517,7 +11517,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a new Float64Array with elements from current Float64Array that satisfy condition fn
      */
     public filter(fn: (val: number, index: number, array: Float64Array) => boolean): Float64Array {
-        let markers = new boolean[this.lengthInt]
+        let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn(this.getUnsafe(i) as number, i as number, this)

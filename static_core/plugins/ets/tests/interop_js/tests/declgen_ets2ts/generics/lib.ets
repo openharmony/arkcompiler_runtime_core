@@ -18,7 +18,7 @@ export function Identity<T>(x: T): T {
     return x;
 }
 
-export function ForEach<T extends Object>(a: T[], cb: (e: T, idx: int) => void) {
+export function ForEach<T extends Object>(a: FixedArray<T>, cb: (e: T, idx: int) => void) {
     for (let i = 0; i < a.length; i++) {
         cb(a[i], i);
     }

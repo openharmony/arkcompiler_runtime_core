@@ -60,7 +60,7 @@ export namespace taskpool {
          * @param name The name of task
          * @param func Concurrent function to execute in the taskpool
          */
-        constructor(name: string, func: Function, ...args: NullishType[]) {
+        constructor(name: string, func: Function, ...args: FixedArray<NullishType>) {
             this.name = name;
             this.f = (): NullishType => {
                 return func.unsafeCall(...args);
@@ -80,7 +80,7 @@ export namespace taskpool {
          *
          * @param func Concurrent function to execute in the taskpool
          */
-        constructor(func: Function, ...args: NullishType[]) {
+        constructor(func: Function, ...args: FixedArray<NullishType>) {
             this("", func, ...args);
         }
 
@@ -500,7 +500,7 @@ export namespace taskpool {
          * @param name The name of long task
          * @param func Concurrent function to execute in the taskpool
          */
-        constructor(name: string, func: Function, ...args: NullishType[]) {
+        constructor(name: string, func: Function, ...args: FixedArray<NullishType>) {
             super(name, func, ...args);
         }
 
@@ -508,7 +508,7 @@ export namespace taskpool {
          * Create a LongTask instance
          * @param func Concurrent function to execute in the taskpool
          */
-        constructor(func: Function, ...args: NullishType[]) {
+        constructor(func: Function, ...args: FixedArray<NullishType>) {
             super("", func, ...args);
         }
 
@@ -546,7 +546,7 @@ export namespace taskpool {
          *
          * @param func the concurrent function to add to the task group
          */
-        addTask(func: Function, ...args: NullishType[]): void {
+        addTask(func: Function, ...args: FixedArray<NullishType>): void {
             this.addTask(new Task(func, ...args));
         }
 
@@ -708,7 +708,7 @@ export namespace taskpool {
 
     // NOTE(ipetrov, #16281): Temporary solution, make as namespace when namespaces will be supported
 
-    export function execute(func: Function, ...args: NullishType[]): Promise<NullishType> {
+    export function execute(func: Function, ...args: FixedArray<NullishType>): Promise<NullishType> {
         return launchPromise(func, ...args);
     }
 
@@ -1043,7 +1043,7 @@ export namespace taskpool {
     const workerToTasks: Map<WorkerId, Set<Task>> = new Map<WorkerId, Set<Task>>();
 }
 
-function launchPromise(f: Function, ...args: NullishType[]): Promise<NullishType> {
+function launchPromise(f: Function, ...args: FixedArray<NullishType>): Promise<NullishType> {
     let resolver: (((v: NullishType | PromiseLike<NullishType>) => void) | undefined) = undefined;
     let rejecter: (((error: NullishType) => void) | undefined) = undefined;
     let p = new Promise<NullishType>((res, rej) => {
@@ -1062,4 +1062,4 @@ function launchPromise(f: Function, ...args: NullishType[]): Promise<NullishType
     return p;
 }
 
-native function launchInternalPromiseNative<F>(func: F, args: NullishType[]): Promise<NullishType>;
+native function launchInternalPromiseNative<F>(func: F, args: FixedArray<NullishType>): Promise<NullishType>;

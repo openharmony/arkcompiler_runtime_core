@@ -24,14 +24,14 @@ export class RegExpExecArray /*extends Array<String>*/ {
     /** true if match present */
     readonly isCorrect: boolean
     /** result itself */
-    private result_: String[]
+    private result_: FixedArray<String>
     /** The 0-based index of the match in the string */
     public index: number
     /** The original string that was matched against */
     public input: String
 
     // NOTE(shumilov-petr): Make nullable when #14813 will be fixed
-    readonly indices: number[][]
+    readonly indices: FixedArray<FixedArray<number>>;
 
     /** named groups names and indeces as JSON */
     private groupsRaw_: String = ""
@@ -101,11 +101,11 @@ export class RegExpExecArray /*extends Array<String>*/ {
     }
 
     get length(): int {
-        return this.result_.length;
+        return this.result_.length as int;
     }
 
     public get result(): String[] {
-        return this.result_
+        return Array.from<String>(this.result_)
     }
 
     /**
@@ -151,7 +151,7 @@ export class RegExpExecArray /*extends Array<String>*/ {
      */
     public push(newElem: string): void {
         // NOTE(kparshukov): improve speed when T[] <=> Arrat<T>
-        const copy = new String[this.result_.length + 1]
+        const copy : FixedArray<String> = new String[this.result_.length + 1]
         for (let i = 0; i < this.result_.length; i++) {
             copy[i] = this.result_[i]
         }
@@ -173,7 +173,7 @@ export class RegExpExecArray /*extends Array<String>*/ {
         const lastIndex = this.result_.length - 1;
         const last = this.result_[lastIndex];
 
-        let newResult = new String[lastIndex];
+        let newResult: FixedArray<String> = new String[lastIndex];
         for (let i = 0; i < lastIndex; i++) {
             newResult[i] = this.result_[i];
         }
@@ -183,7 +183,7 @@ export class RegExpExecArray /*extends Array<String>*/ {
         return last;
     }
 
-    constructor(index: int, input: String, result: String[], indices: number[][]) {
+    constructor(index: int, input: String, result: FixedArray<String>, indices: FixedArray<FixedArray<number>>) {
         this.isCorrect = true
         this.index = index
         this.input = input
@@ -191,7 +191,7 @@ export class RegExpExecArray /*extends Array<String>*/ {
         this.indices = indices
     }
 
-    constructor(index: number, input: String, result: String[]) {
+    constructor(index: number, input: String, result: FixedArray<String>) {
         this.isCorrect = true
         this.index = index
         this.input = input
@@ -199,7 +199,7 @@ export class RegExpExecArray /*extends Array<String>*/ {
         this.indices = []
     }
 
-    constructor(index: number, input: String, result: String[], indices: number[][]) {
+    constructor(index: number, input: String, result: FixedArray<String>, indices: FixedArray<FixedArray<number>>) {
         this(index as int, input, result, indices)
     }
 }
@@ -731,7 +731,7 @@ export class RegExp extends Object {
                 if (n == 0) {
                     return null
                 }
-                return new RegExpMatchArray(-1, "", matches.toArray() as String[])
+                return new RegExpMatchArray(-1, "", matches.toFixedArray())
             }
             else {
                 let matchStr = result.$_get(0)

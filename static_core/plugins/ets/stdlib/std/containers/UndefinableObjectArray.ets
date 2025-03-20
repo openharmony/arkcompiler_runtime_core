@@ -63,7 +63,7 @@ export class UndefinableObjectArray {
      */
     public reserve(capacity: int): void {
         if (this.data.length < capacity) {
-            let newData = new UndefinableObject[capacity]
+            let newData : FixedArray<UndefinableObject> = new UndefinableObject[capacity]
             for (let i = 0; i < this.curSize; ++i) {
                newData[i] = this.data[i]
             }
@@ -102,7 +102,7 @@ export class UndefinableObjectArray {
      */
     public pushBack(e: UndefinableObject): void {
         if (this.curSize == this.data.length) {
-            let newData = new UndefinableObject[UndefinableObjectArray.getNewCapacity(this.data.length)]
+            let newData : FixedArray<UndefinableObject> = new UndefinableObject[UndefinableObjectArray.getNewCapacity(this.data.length)]
             for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i]
             }
@@ -152,6 +152,6 @@ export class UndefinableObjectArray {
         this.data[index] = e
     }
 
-    private data: UndefinableObject[] = []
+    private data: FixedArray<UndefinableObject> = []
     private curSize: int
 }

@@ -417,7 +417,7 @@ function toString9(str: String): String {
 function toString10(str: String): String {
     let sb = new StringBuilder(str);
     sb.toString();                              // applied
-    let strings: string[] = ["1"]               // insert NegativeCheck, BoundsCheck, RefTypeCheck instructions
+    let strings: FixedArray<string> = ["1"]               // insert NegativeCheck, BoundsCheck, RefTypeCheck instructions
     sb.toString();                              // applied
     sb.append(strings[0]);
     return sb.toString();                       // not applied, due to dominating append()-call

@@ -187,7 +187,7 @@ function testSelectWithOptions() {
 }
 
 function runSupportedLocalesTest(
-    locales: string | string[],
+    locales: string | FixedArray<string>,
     options: Intl.SupportedLocalesOfOptions | undefined,
     expected: string[])
 {

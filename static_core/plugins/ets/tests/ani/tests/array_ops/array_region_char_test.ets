@@ -23,7 +23,7 @@ function checkArray(a: char[]): boolean {
     return compareCharArrays(a, b) == 0
 }
 
-function changeArray(arr: char[]): char[] {
+function changeArray(arr: FixedArray<char>): FixedArray<char> {
     arr[0] = 'a';
     arr[1] = 'b';
     arr[2] = 'x';

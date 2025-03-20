@@ -17,6 +17,6 @@ package std.core;
 
 export native function exit(code: int): void
 export native function printStackTrace(): void
-export function stackTraceLines(): String[] {
+export function stackTraceLines(): FixedArray<String> {
     return new String[0];
 }

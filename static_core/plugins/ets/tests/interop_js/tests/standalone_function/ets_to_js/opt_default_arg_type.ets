@@ -72,7 +72,7 @@ function functionOptDefaultArgTypeClassEts(arg: ClassWithMethodEts = defaultClas
     return arg.methodInClass();
 }
 
-function functionOptDefaultArgTypeArrayEts(arg: string[] = ['one', 'two']): string[] {
+function functionOptDefaultArgTypeArrayEts(arg: FixedArray<string> = ['one', 'two']): FixedArray<string> {
     return arg;
 }
 

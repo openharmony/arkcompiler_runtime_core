@@ -31,7 +31,7 @@ class Config {
 }
 
 class ApplicationLogger {
-    private static features: string[] = [
+    private static features: FixedArray<string> = [
         "authentication",
         "authorization",
         "caching",

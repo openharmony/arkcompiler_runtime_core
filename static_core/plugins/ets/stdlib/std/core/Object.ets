@@ -81,7 +81,7 @@ export class Object {
      * @returns an array of strings representing the given record's property names
      */
     public static keys(rec: Record<PropertyKey, NullishType>): string[] {
-        const keys = new string[rec.size as int]
+        const keys: string[] = new string[rec.size as int]
 
         let i = 0
         for (const key of rec.keys()) {
@@ -118,7 +118,7 @@ export class Object {
             if (len == 0) {
                 return new string[0]
             }
-            let res = new string[len]
+            let res: string[] = new string[len]
             for (let i = 0; i < len; i++) {
                 // NOTE(shumilov-petr): need to apply more effective way for int to String conversion
                 res[i] = new Int(i).toString()
@@ -138,7 +138,7 @@ export class Object {
                     n++
                 }
             }
-            let res = new string[n]
+            let res: string[] = new string[n]
             let j: int = 0
             for (let i = 0; i < fnum; i++) {
                 let f = ct.getField(i)
@@ -154,7 +154,7 @@ export class Object {
             if (len == 0) {
                 return new string[0]
             }
-            let res = new string[len as int]
+            let res: string[] = new string[len as int]
             for (let i = 0; i < len; i++) {
                 // NOTE(shumilov-petr): need to apply more effective way for int to String conversion
                 res[i] = new Int(i).toString()
@@ -177,7 +177,7 @@ export class Object {
     }
 
     public static values(rec: Record<PropertyKey, NullishType>): NullishType[] {
-        const vals = new NullishType[rec.size as int]
+        const vals: NullishType[] = new NullishType[rec.size as int]
 
         let i = 0
         for (let val of rec.values()) {
@@ -212,7 +212,7 @@ export class Object {
             if (len == 0) {
                 return new NullishType[0]
             }
-            let res = new NullishType[len]
+            let res: NullishType[] = new NullishType[len]
             for (let i = 0; i < len; i++) {
                 // NOTE(shumilov-petr): must be replaced by `sv.charAt(i) as string` when #15731 will be fixed
                 res[i] = new Char(sv.charAt(i)).toString()
@@ -227,7 +227,7 @@ export class Object {
             }
             const keys = Object.keys(o)
             const len = keys.length
-            let res = new NullishType[len]
+            let res: NullishType[] = new NullishType[len]
             for (let i = 0; i < len; i++) {
                 res[i] = cv.getFieldByName(keys[i]).getData()
             }
@@ -238,7 +238,7 @@ export class Object {
             if (len == 0) {
                 return new NullishType[0]
             }
-            let res = new NullishType[len as int]
+            let res: NullishType[] = new NullishType[len as int]
             for (let i = 0; i < len; i++) {
                 res[i] = av.getElement(i).getData()
             }
@@ -267,7 +267,7 @@ export class Object {
     * @returns array representation of key/value
     */
     public static entries(rec: Record<PropertyKey, NullishType>): NullishEntryType[] {
-        const entries = new NullishEntryType[rec.size as int]
+        const entries: NullishEntryType[] = new NullishEntryType[rec.size as int]
 
         let i = 0
         for (const entry of rec.entries()) {
@@ -302,7 +302,7 @@ export class Object {
             if (len == 0) {
                 return new NullishEntryType[0]
             }
-            let res = new NullishEntryType[len]
+            let res: NullishEntryType[] = new NullishEntryType[len]
             for (let i = 0; i < len; i++) {
                 res[i] = [new Int(i).toString(), new Char(sv.charAt(i)).toString()] as EntryType
             }
@@ -316,7 +316,7 @@ export class Object {
             }
             const keys = Object.keys(o)
             const len = keys.length
-            let res = new NullishEntryType[len]
+            let res: NullishEntryType[] = new NullishEntryType[len]
             for (let i = 0; i < len; i++) {
                 res[i] = [keys[i], cv.getFieldByName(keys[i]).getData()] as EntryType
             }
@@ -327,7 +327,7 @@ export class Object {
             if (len == 0) {
                 return new NullishEntryType[0]
             }
-            let res = new NullishEntryType[len as int]
+            let res: NullishEntryType[] = new NullishEntryType[len as int]
             for (let i = 0; i < len; i++) {
                 res[i] = [new Int(i).toString(), av.getElement(i).getData()] as EntryType
             }
@@ -374,7 +374,7 @@ export class Object {
         if (t instanceof StringType || t instanceof ArrayType) {
             const keys = Object.keys(o)
             const len = keys.length
-            let res = new string[len + 1]
+            let res: string[] = new string[len + 1]
             for (let i = 0; i < len; i++) {
                 res[i] = keys[i]
             }
@@ -510,7 +510,7 @@ export class Object {
     *
     * @returns the modified target Record
     */
-    public static assign(target: Record<PropertyKey, NullishType>,  ...source: Object[]): Record<PropertyKey, NullishType> {
+    public static assign(target: Record<PropertyKey, NullishType>,  ...source: FixedArray<Object>): Record<PropertyKey, NullishType> {
         for (const s of source) {
             const entries = Object.entries(s)
             for (const e of entries) {

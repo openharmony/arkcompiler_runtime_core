@@ -21,7 +21,7 @@ type TupleT = [int, boolean];
 const etsInt = 1;
 const etsString = 'string';
 const etsBool = true;
-const etsArr: int[] = [etsInt];
+const etsArr: FixedArray<int> = [etsInt];
 const etsObj: object = {};
 const etsUnion: Union = etsInt;
 const etsTuple: TupleT = [etsInt, etsBool];
@@ -56,8 +56,8 @@ function anyTypeParameterExplicitCallFromEtsBool(): boolean {
     return anyTypeParameter<boolean>(etsBool);
 }
 
-function anyTypeParameterExplicitCallFromEtsArr(): int[] {
-    return anyTypeParameter<int[]>(etsArr);
+function anyTypeParameterExplicitCallFromEtsArr(): FixedArray<int> {
+    return anyTypeParameter<FixedArray<int>>(etsArr);
 }
 
 function anyTypeParameterExplicitCallFromEtsObj(): object {
@@ -85,7 +85,7 @@ function genericDefaultBool<T = boolean>(arg: T): T {
     return arg;
 }
 
-function genericDefaultArr<T = int[]>(arg: T): T {
+function genericDefaultArr<T = FixedArray<int>>(arg: T): T {
     return arg;
 }
 
@@ -113,8 +113,8 @@ function genericDefaultBoolCallFromEts(): boolean {
     return genericDefaultBool<boolean>(etsBool);
 }
 
-function genericDefaultArrCallFromEts(): int[] {
-    return genericDefaultArr<int[]>(etsArr);
+function genericDefaultArrCallFromEts(): FixedArray<int> {
+    return genericDefaultArr<FixedArray<int>>(etsArr);
 }
 
 function genericDefaultObjCallFromEts(): object {
@@ -181,11 +181,11 @@ function genericExtendClassFromEts(): User {
     return genericExtendClass(obj as User);
 }
 
-function tupleGeneric<T, U>(arg: (T|U)[]): [U, T] {
+function tupleGeneric<T, U>(arg: FixedArray<T|U>): [U, T] {
     return [arg[1] as U, arg[0] as T]
 }
 
-function collectGeneric<T>(...args: T[]): T[] {
+function collectGeneric<T>(...args: FixedArray<T>): FixedArray<T> {
     return args;
 }
 

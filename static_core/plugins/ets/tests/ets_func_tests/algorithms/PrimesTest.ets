@@ -14,7 +14,7 @@
  */
 
 
-function cmp(x: long[], y: long[]): boolean {
+function cmp(x: FixedArray<long>, y: FixedArray<long>): boolean {
     if (x.length != y.length) {
         return false;
     }
@@ -26,8 +26,8 @@ function cmp(x: long[], y: long[]): boolean {
     return true;
 }
 
-function prime_factors_trivial(n0: long): long[] {
-    let primes: long[] = []
+function prime_factors_trivial(n0: long): FixedArray<long> {
+    let primes: FixedArray<long> = []
     let factor: long = 2
     let n = n0;
     while (n > 1 && factor < n0) {
@@ -41,8 +41,8 @@ function prime_factors_trivial(n0: long): long[] {
     return primes;
 }
 
-function prime_factors_trivial_plus(n0: long): long[] {
-    let primes: long[] = [];
+function prime_factors_trivial_plus(n0: long): FixedArray<long> {
+    let primes: FixedArray<long> = [];
     let factor: long = 3;
     let n: long = n0;
     while (n % 2 == 0) {
@@ -63,9 +63,9 @@ function prime_factors_trivial_plus(n0: long): long[] {
     return primes;
 }
 
-function sieve_primes(n: int): long[] {
-    let is_prime: boolean[] = new boolean[n+1];
-    let primes: long[] = [];
+function sieve_primes(n: int): FixedArray<long> {
+    let is_prime: FixedArray<boolean> = new boolean[n+1];
+    let primes: FixedArray<long> = [];
     fill(is_prime, true);
     // 0 and 1 are not primes
     for (let i = 2; i < n+1; i++) {
@@ -94,7 +94,7 @@ function test(result: boolean, name: String): int {
 
 function main(): int {
     let failures: int = 0;
-    const empty: long[] = [];
+    const empty: FixedArray<long> = [];
     failures += test(
         cmp(prime_factors_trivial(1234567), [127 as long, 9721]),
         "Trivial factorisation of 1234567");

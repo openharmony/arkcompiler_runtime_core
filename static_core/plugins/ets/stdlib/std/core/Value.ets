@@ -261,35 +261,35 @@ export abstract class Value extends Object {
 
     // -----
 
-    public static of(v: boolean[]): Value {
+    public static of(v: FixedArray<boolean>): Value {
         return new ArrayValue(ArrayType.BOOLEAN_VAL, v)
     }
 
-    public static of(v: char[]): Value {
+    public static of(v: FixedArray<char>): Value {
         return new ArrayValue(ArrayType.CHAR_VAL, v)
     }
 
-    public static of(v: byte[]): Value {
+    public static of(v: FixedArray<byte>): Value {
         return new ArrayValue(ArrayType.BYTE_VAL, v)
     }
 
-    public static of(v: short[]): Value {
+    public static of(v: FixedArray<short>): Value {
         return new ArrayValue(ArrayType.SHORT_VAL, v)
     }
 
-    public static of(v: int[]): Value {
+    public static of(v: FixedArray<int>): Value {
         return new ArrayValue(ArrayType.INT_VAL, v)
     }
 
-    public static of(v: long[]): Value {
+    public static of(v: FixedArray<long>): Value {
         return new ArrayValue(ArrayType.LONG_VAL, v)
     }
 
-    public static of(v: float[]): Value {
+    public static of(v: FixedArray<float>): Value {
         return new ArrayValue(ArrayType.FLOAT_VAL, v)
     }
 
-    public static of(v: double[]): Value {
+    public static of(v: FixedArray<double>): Value {
         return new ArrayValue(ArrayType.DOUBLE_VAL, v)
     }
 

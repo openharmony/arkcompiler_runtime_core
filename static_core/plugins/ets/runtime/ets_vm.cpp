@@ -45,7 +45,7 @@
 #include "plugins/ets/stdlib/native/init_native_methods.h"
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_finalizable_weak_ref_list.h"
-
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 
 #include "plugins/ets/runtime/ets_object_state_table.h"
@@ -826,20 +826,19 @@ ClassLinkerContext *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector
     auto *klass = PlatformTypes(this)->coreAbcRuntimeLinker;
     EtsHandle<EtsAbcRuntimeLinker> linkerHandle(coro, EtsAbcRuntimeLinker::FromEtsObject(EtsObject::Create(klass)));
 
-    EtsHandle<EtsObjectArray> pathsHandle(
-        coro, EtsObjectArray::Create(classLinker_->GetClassRoot(EtsClassRoot::STRING), abcFiles.size()));
+    EtsHandle<EtsArrayObject<EtsObject>> pathsHandle(coro, EtsArrayObject<EtsObject>::Create(abcFiles.size()));
     for (size_t idx = 0; idx < abcFiles.size(); ++idx) {
         auto *str = EtsString::CreateFromMUtf8(abcFiles[idx].data(), abcFiles[idx].length());
         if (UNLIKELY(str == nullptr)) {
             // Handle possible OOM
             exceptionHandler();
         }
-        pathsHandle->Set(idx, str->AsObject());
+        pathsHandle->SetRef(idx, str->AsObject());
     }
     std::array args {Value(linkerHandle->GetCoreType()), Value(nullptr), Value(pathsHandle->GetCoreType())};
 
     auto *ctor =
-        klass->GetDirectMethod(GetLanguageContext().GetCtorName(), "Lstd/core/RuntimeLinker;[Lstd/core/String;:V");
+        klass->GetDirectMethod(GetLanguageContext().GetCtorName(), "Lstd/core/RuntimeLinker;Lescompat/Array;:V");
     ASSERT(ctor != nullptr);
     ctor->GetPandaMethod()->InvokeVoid(coro, args.data());
     if (coro->HasPendingException()) {

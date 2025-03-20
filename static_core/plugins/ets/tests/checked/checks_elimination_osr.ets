@@ -21,7 +21,7 @@
 // now try-catch doesn't work in osr mode. when it will be supported, there should be 3 NullCheck instructions
 // because NullCheck from try block do not dominate another one, which should not be deleted by ChecksElimination
 
-function find(arr: byte[], indexes: byte[], elem: int): int {
+function find(arr: FixedArray<byte>, indexes: FixedArray<byte>, elem: int): int {
   let x : int = 0;
   try {
     __noinline__foo(arr.length, elem); // can throw exception
@@ -47,7 +47,7 @@ function __noinline__foo(length: int, elem: int) : void throws
 }
 
 function main(): int {
-  const byteArr: byte[] = [10, 14, 7, 4, 0, 9, 6, 15, 3, 12,  2,  8,  5, 11, 13,  1];
-  const indArr: byte[] =  [ 0,  1, 2, 3, 4, 5, 6,  7, 8,  9, 10, 11, 12, 13, 14, 15];
+  const byteArr: FixedArray<byte> = [10, 14, 7, 4, 0, 9, 6, 15, 3, 12,  2,  8,  5, 11, 13,  1];
+  const indArr: FixedArray<byte> =  [ 0,  1, 2, 3, 4, 5, 6,  7, 8,  9, 10, 11, 12, 13, 14, 15];
   return find(byteArr, indArr, 2) - 10;
 }

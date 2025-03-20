@@ -225,7 +225,7 @@ cases:
           }
       use: |-
           // select function with rest parameter and default parameter
-          assertEQ( foo(0.0), "nR" )
+          assertEQ( foo(0.0), "ND1" )
           assertEQ( foo(new Number()), "ND1" )
 
 
@@ -241,7 +241,7 @@ cases:
           }
       use: |-
           // select function with rest parameter and undefined parameter
-          assertEQ( foo(0.0), "nR" )
+          assertEQ( foo(0.0), "ND2" )
           assertEQ( foo(new Number()), "ND2" )
 
 
@@ -284,10 +284,10 @@ cases:
           function foo(p: Number): string {
               return "N"
           }
-          function foo(...p: number[]): string {
+          function foo(...p: FixedArray<number>): string {
               return "nR"
           }
-          function foo(...p: Number[]): string {
+          function foo(...p: FixedArray<Number>): string {
               return "NR"
           }
       use: |-

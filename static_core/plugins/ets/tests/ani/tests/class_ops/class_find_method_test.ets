@@ -116,7 +116,7 @@ class C implements I {
         return 4
     }
 
-    public method_rest(...numbers: int[]): int
+    public method_rest(...numbers: FixedArray<int>): int
     {
         let res = 0
         for (let n of numbers) {

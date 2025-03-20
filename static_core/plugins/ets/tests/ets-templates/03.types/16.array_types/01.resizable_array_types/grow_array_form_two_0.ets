@@ -16,7 +16,7 @@
 
 /*---
 desc: Resizable array types
-tags: [compile-only, negative]
+tags: [negative]
 
 ---*/
 

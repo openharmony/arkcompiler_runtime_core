@@ -523,7 +523,7 @@ export function setTimeout(func: Function): number {
  * @param ...args: NullishType[] - parameters passed to func.
  * @returns number - timer id
  */
-export function setTimeout(func: Function, delayMs: number, ...args: NullishType[]): number {
+export function setTimeout(func: Function, delayMs: number, ...args: FixedArray<NullishType>): number {
     return startTimer(():void => {
         func.unsafeCall(...args)
     }, delayMs, true);
@@ -581,7 +581,7 @@ export function setInterval(func: Function): number {
  * @param ...args: NullishType[] - parameters passed to func.
  * @returns number - timer id
  */
-export function setInterval(func: Function, delayMs: number, ...args: NullishType[]): number {
+export function setInterval(func: Function, delayMs: number, ...args: FixedArray<NullishType>): number {
     return startTimer(():void => {
         func.unsafeCall(...args)
     }, delayMs, false);

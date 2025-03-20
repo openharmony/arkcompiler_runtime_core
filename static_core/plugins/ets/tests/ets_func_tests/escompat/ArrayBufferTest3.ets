@@ -38,7 +38,7 @@ function createResizableArrayBuffer(): void {
     expectThrow((): void throws => { let a1 = new ArrayBuffer(11, 10) }, errorCheck)
 }
 
-function checkCreatedArrayBuffer(a: ArrayBuffer, bytes: byte[]): void {
+function checkCreatedArrayBuffer(a: ArrayBuffer, bytes: FixedArray<byte>): void {
     assertEQ(a.byteLength, bytes.length)
     assertFalse(a.resizable)
     assertFalse(a.detached)
@@ -52,7 +52,7 @@ function checkCreatedArrayBuffer(a: ArrayBuffer, bytes: byte[]): void {
  * Check ArrayBuffer created using various factory methods
  */
 function createArrayBufferFrom(): void {
-    let bytes = new byte[0]
+    let bytes : FixedArray<byte> = new byte[0]
     let a = ArrayBuffer.from(bytes)
     checkCreatedArrayBuffer(a, bytes)
 
@@ -67,7 +67,7 @@ function createArrayBufferFrom(): void {
     checkCreatedArrayBuffer(a, bytes)
 
     a = ArrayBuffer.from(a, 1, 1)
-    const expectedBytes: byte[] = [bytes[1]]
+    const expectedBytes: FixedArray<byte> = [bytes[1]]
     checkCreatedArrayBuffer(a, expectedBytes)
 }
 

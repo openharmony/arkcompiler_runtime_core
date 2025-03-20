@@ -17,8 +17,8 @@ class ArrayClass {
     public static array: float[] = [1.0, 2.0, 3.0, 4.0, 5.0];
 
     public static ChangeStaticArray() {
-        ArrayClass.array[2] = 22.0;
-        ArrayClass.array[4] = 44.0;
+        ArrayClass.array[2] = 22.0 as float;
+        ArrayClass.array[4] = 44.0 as float;
     }
 
     public static CheckStaticArray(): boolean {

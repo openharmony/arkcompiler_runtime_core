@@ -107,7 +107,7 @@ function findMethodsByName(type: ClassType, names: Array<string>): Array<Method 
     return methods
 }
 
-function findMethodsByName(type: ClassType, ...names: string[]): Array<Method | null> {
+function findMethodsByName(type: ClassType, ...names: Array<string>): Array<Method | null> {
     const methodNames = new Array<string>()
     methodNames.push(...names)
     return findMethodsByName(type, methodNames)
@@ -306,9 +306,9 @@ function testMake(): int {
     let pt = Type.of(new Point()) as ClassType
     let wt = Type.of(new HTMLWriter(0)) as ClassType
     let p3t = Type.of(new Point3D(10)) as ClassType
-    let point = pt.make([new Double(1.0), new Double(2.0)] as NullishType[]) as Point
-    let point3D = p3t.make([new Double(1.0), new Double(2.0), new Double(3.0)] as NullishType[]) as Point3D
-    let writer = wt.make([new Int(10)] as NullishType[]) as HTMLWriter
+    let point = pt.make([new Double(1.0), new Double(2.0)] as FixedArray<NullishType>) as Point
+    let point3D = p3t.make([new Double(1.0), new Double(2.0), new Double(3.0)] as FixedArray<NullishType>) as Point3D
+    let writer = wt.make([new Int(10)] as FixedArray<NullishType>) as HTMLWriter
     failures += test(point.serialize() == "{1,2}", "Point")
     failures += test(point3D.serialize() == "{1,2}" && point3D.z == 3, "Point3D")
     failures += test(writer.getState() == 10, "HTMLWriter" )

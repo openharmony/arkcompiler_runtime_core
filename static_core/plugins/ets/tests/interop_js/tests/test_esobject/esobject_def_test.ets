@@ -293,7 +293,7 @@ function checkTypeOf(): boolean {
     return jsType == "string"
 }
 
-// public invoke(...args: ESObject[]): ESObject
+// public invoke(...args: FixedArray<ESObject>): ESObject
 function checkInvokeNoParam(): boolean {
     let result = jsFunc.invoke();
     if (!result.isNumber()) {
@@ -302,10 +302,10 @@ function checkInvokeNoParam(): boolean {
     return result.toNumber() == 6;
 }
 
-// public invoke(...args: ESObject[]): ESObject
+// public invoke(...args: FixedArray<ESObject>): ESObject
 function checkInvokeHasParam(): boolean {
-    let args = [ESObject.wrapDouble(2), ESObject.wrapDouble(3)];
-    let result = jsFuncWithParam.invoke(...args);
+    let args: FixedArray<(Object|null|undefined)> = [ESObject.wrapDouble(2), ESObject.wrapDouble(3)];
+    let result: ESObject = jsFuncWithParam.invoke(...args);
     if (!result.isNumber()) {
         return false;
     }
@@ -321,7 +321,7 @@ function checkInvokeMethod(): boolean {
 }
 
 function checkInvokeMethodHasParam(): boolean {
-    let args = [ESObject.wrapString("abc"), ESObject.wrapString("def")];
+    let args: FixedArray<ESObject> = [ESObject.wrapString("abc"), ESObject.wrapString("def")];
     let result = jsObjWithFuncParam.invokeMethod("hello", ...args);
     if (!result.isString()) {
         return false;

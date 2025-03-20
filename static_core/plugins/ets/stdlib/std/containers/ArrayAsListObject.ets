@@ -59,7 +59,7 @@ export class ArrayAsListObject implements ListObject {
      */
     public reserve(capacity: int): void {
         if (this.data.length < capacity) {
-            let newData = new Object[capacity];
+            let newData : FixedArray<Object> = new Object[capacity];
             for (let i = 0; i < this.curSize; ++i) {
                newData[i] = this.data[i];
             }
@@ -132,7 +132,7 @@ export class ArrayAsListObject implements ListObject {
      */
     public override pushBack(e: Object): void {
         if (this.curSize == this.data.length) {
-            let newData = new Object[ArrayAsListObject.getNewCapacity(this.data.length)];
+            let newData : FixedArray<Object> = new Object[ArrayAsListObject.getNewCapacity(this.data.length)];
             for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i];
             }
@@ -305,6 +305,6 @@ export class ArrayAsListObject implements ListObject {
     }
 
 */
-    private data: Object[] = [];
+    private data: FixedArray<Object> = [];
     private curSize: int;
 }

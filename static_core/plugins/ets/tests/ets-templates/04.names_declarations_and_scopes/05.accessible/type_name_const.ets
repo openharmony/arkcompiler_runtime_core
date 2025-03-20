@@ -94,11 +94,11 @@ function foo(i: Boolean) {
     return 19;
 }
 
-function foo(i: int[]) {
+function foo(i: FixedArray<int>) {
     return 21;
 }
 
-function foo(i: Int[][]) {
+function foo(i: FixedArray<FixedArray<Int>>) {
     return 22;
 }
 

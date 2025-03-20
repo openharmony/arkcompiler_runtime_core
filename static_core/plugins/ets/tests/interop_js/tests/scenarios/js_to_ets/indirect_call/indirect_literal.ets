@@ -28,7 +28,7 @@ function Test_indirect_call_type_literal_apply(): boolean {
     const ARG = 'foo';
     const EXPECTED_RESULT = 'foobar'
 
-    let result: string = js.indirectCallTypeLiteral.apply(null, [ARG]);
+    let result: string = js.indirectCallTypeLiteral.apply(null, [ARG] as FixedArray<string>);
     assertTrue(result == EXPECTED_RESULT);
 
     return true;

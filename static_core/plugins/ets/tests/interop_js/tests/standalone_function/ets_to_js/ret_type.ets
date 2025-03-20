@@ -83,8 +83,8 @@ function functionRetTypeClassEts(): ClassWithMethodEts {
     return x;
 }
 
-function functionRetTypeArrayEts(): string[] {
-    let x: string[] = ['one', 'two'];
+function functionRetTypeArrayEts(): FixedArray<string> {
+    let x: FixedArray<string> = ['one', 'two'];
     return x;
 }
 

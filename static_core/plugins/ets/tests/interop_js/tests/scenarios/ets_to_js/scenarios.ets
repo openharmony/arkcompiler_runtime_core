@@ -158,7 +158,7 @@ function genericTypeParameterEts<T>(arg: T): String {
 }
 
 function genericTypeReturnValueEts<T>(arg: int, value: T): T {
-    let arr: T[] = [value, value, value];
+    let arr: FixedArray<T> = [value, value, value];
     return arr[arg];
 }
 
@@ -233,7 +233,7 @@ function functionReturnTypePrimitive(): number {
     return 1;
 }
 
-function etsSumRestParams(...args: number[]): number {
+function etsSumRestParams(...args: FixedArray<number>): number {
     let sum = 0;
     for (let n of args) {
         sum += n;
@@ -241,7 +241,7 @@ function etsSumRestParams(...args: number[]): number {
     return sum;
 }
 
-function etsMultiplyLargBySumRestParams(arg0: number, ...args: number[]): number {
+function etsMultiplyLargBySumRestParams(arg0: number, ...args: FixedArray<number>): number {
     let sum = 0;
     for (let n of args) {
         sum += n;
@@ -249,7 +249,7 @@ function etsMultiplyLargBySumRestParams(arg0: number, ...args: number[]): number
     return arg0 * sum;
 }
 
-function etsMultiplySum2argsBySumRestParams(arg0: number, arg1: number, ...args: number[]): number {
+function etsMultiplySum2argsBySumRestParams(arg0: number, arg1: number, ...args: FixedArray<number>): number {
     let sum = 0;
     for (let n of args) {
         sum += n;
@@ -262,7 +262,7 @@ class RestParamsTest {
     foo() {
         return 1;
     }
-    sumInts(...args: Int[]) {
+    sumInts(...args: FixedArray<Int>) {
         let sum = 0;
         for (let n of args) {
             sum += n;
@@ -271,7 +271,7 @@ class RestParamsTest {
     }
 };
 
-function etsCallFooRestParams(...args: RestParamsTest[]): number {
+function etsCallFooRestParams(...args: FixedArray<RestParamsTest>): number {
     let sum = 0;
     for (let s of args) {
         sum += s.foo();
@@ -280,7 +280,7 @@ function etsCallFooRestParams(...args: RestParamsTest[]): number {
     return sum;
 }
 
-function etsConcatStringsRestParams(...args: String[]): String {
+function etsConcatStringsRestParams(...args: FixedArray<String>): String {
     let str = "";
     for (let s of args) {
         str += s;
@@ -432,15 +432,15 @@ function genericFunctionWithUnionEts<T extends string | number>(arg: T): T {
     return arg;
 }
 
-function functionRestParams(...numbers: number[]): string {
+function functionRestParams(...numbers: FixedArray<number>): string {
     return numbers.toString();
 }
 
-function functionSpreadParams(arr: number[]): string {
+function functionSpreadParams(arr: FixedArray<number>): string {
     return functionRestParams(...arr)
 }
 
-function functionRestParamsUnion(...restParams: (number | string)[]): string {
+function functionRestParamsUnion(...restParams: FixedArray<(number | string)>): string {
     return restParams.toString();
 }
 
@@ -493,7 +493,7 @@ function functionReturnOmittedValue(): void {
     return;
 }
 
-function functionRestParameter(...arg: number[]): number {
+function functionRestParameter(...arg: FixedArray<number>): number {
     return arg[0];
 }
 

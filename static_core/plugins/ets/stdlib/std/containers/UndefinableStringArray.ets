@@ -63,7 +63,7 @@ export class UndefinableStringArray {
      */
     public reserve(capacity: int): void {
         if (this.data.length < capacity) {
-            let newData = new UndefinableString[capacity]
+            let newData : FixedArray<UndefinableString> = new UndefinableString[capacity]
             for (let i = 0; i < this.curSize; ++i) {
                newData[i] = this.data[i]
             }
@@ -84,6 +84,15 @@ export class UndefinableStringArray {
         return newData
     }
 
+    public toFixedArray(): FixedArray<String> {
+        let newData: FixedArray<String> = new String[this.curSize]
+        for (let i = 0; i < this.curSize; ++i) {
+            newData[i] = this.data[i]!
+        }
+        return newData
+    }
+
+
     private static getNewCapacity(currentCapacity: int): int {
         const fastGrowThreshold = 8192
         const multiplier = 2
@@ -102,7 +111,7 @@ export class UndefinableStringArray {
      */
     public pushBack(e: UndefinableString): void {
         if (this.curSize == this.data.length) {
-            let newData = new UndefinableString[UndefinableStringArray.getNewCapacity(this.data.length)]
+            let newData : FixedArray<UndefinableString> = new UndefinableString[UndefinableStringArray.getNewCapacity(this.data.length)]
             for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i]
             }
@@ -152,6 +161,6 @@ export class UndefinableStringArray {
         this.data[index] = e
     }
 
-    private data: UndefinableString[] = []
+    private data: FixedArray<UndefinableString> = []
     private curSize: int
 }

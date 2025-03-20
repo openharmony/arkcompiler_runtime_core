@@ -20,6 +20,6 @@ tags:
 - not-a-test
 ---*/
 
-export function foo(i: Number[]): int {
+export function foo(i: FixedArray<Number>): int {
     return 1;
 }

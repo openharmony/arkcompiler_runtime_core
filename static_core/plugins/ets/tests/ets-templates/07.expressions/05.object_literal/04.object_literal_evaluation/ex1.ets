@@ -28,7 +28,7 @@ function main(): int {
   let a: A|null = null;
   try {
       a = { name: "Bob", age: t[5] } as A
-  } catch (e: ArrayIndexOutOfBoundsError) {
+  } catch (e: RangeError) {
       assertTrue( a == null );
       return 0;
   }

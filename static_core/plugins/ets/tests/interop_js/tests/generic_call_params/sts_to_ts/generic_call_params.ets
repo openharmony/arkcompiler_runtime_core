@@ -64,7 +64,7 @@ function genericExtendsClassCallFromSts(arg: Vector): Vector {
 }
 
 
-function applyFunctionGenericArray<T>(values: T[], func: (accumulator: T, currentValue: T) => T): T {
+function applyFunctionGenericArray<T>(values: FixedArray<T>, func: (accumulator: T, currentValue: T) => T): T {
     let result = values[0];
     for (let i = 1; i < values.length; i++) {
         result = func(result, values[i]);
@@ -72,7 +72,7 @@ function applyFunctionGenericArray<T>(values: T[], func: (accumulator: T, curren
     return result;
 }
 
-function applyFunctionGenericArrayCallFromSts(array: Int[]): int {
+function applyFunctionGenericArrayCallFromSts(array: FixedArray<Int>): int {
 
     return applyFunctionGenericArray(array, add);
 }

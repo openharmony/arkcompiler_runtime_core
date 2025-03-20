@@ -477,7 +477,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: boolean[]): Type {
+    public static of(v: FixedArray<boolean>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.BOOLEAN)
     }
 
@@ -488,7 +488,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: char[]): Type {
+    public static of(v: FixedArray<char>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.CHAR)
     }
 
@@ -499,7 +499,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: byte[]): Type {
+    public static of(v: FixedArray<byte>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.BYTE)
     }
 
@@ -510,7 +510,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: short[]): Type {
+    public static of(v: FixedArray<short>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.SHORT)
     }
 
@@ -521,7 +521,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: int[]): Type {
+    public static of(v: FixedArray<int>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.INT)
     }
 
@@ -532,7 +532,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: long[]): Type {
+    public static of(v: FixedArray<long>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.LONG)
     }
 
@@ -543,7 +543,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: float[]): Type {
+    public static of(v: FixedArray<float>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.FLOAT)
     }
 
@@ -554,7 +554,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: double[]): Type {
+    public static of(v: FixedArray<double>): Type {
         return ArrayType.getInstance(Class.of(v), ValueTypeDesc.DOUBLE)
     }
 
@@ -567,7 +567,7 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: Object[]): Type {
+    public static of(v: FixedArray<Object>): Type {
         return ArrayType.getInstance(Class.of(v))
     }
 
@@ -1956,7 +1956,7 @@ export final class ClassType extends Type {
     }
 
     // todo(kprokopenko): make varargs
-    public make(args: NullishType[]): Object {
+    public make(args: FixedArray<NullishType>): Object {
         const argTypes = new Array<Type>(args.length)
         for (let i = 0; i < args.length; i++) {
             argTypes[i] = Type.of(args[i])

@@ -59,7 +59,7 @@ export class ArrayAsListString implements ListString {
      */
     public reserve(capacity: int): void {
         if (this.data.length < capacity) {
-            let newData = new String[capacity];
+            let newData : FixedArray<String> = new String[capacity];
             for (let i = 0; i < this.curSize; ++i) {
                newData[i] = this.data[i];
             }
@@ -132,7 +132,7 @@ export class ArrayAsListString implements ListString {
      */
     public override pushBack(e: String): void {
         if (this.curSize == this.data.length) {
-            let newData = new String[ArrayAsListString.getNewCapacity(this.data.length)];
+            let newData : FixedArray<String> = new String[ArrayAsListString.getNewCapacity(this.data.length)];
             for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i];
             }
@@ -305,6 +305,6 @@ export class ArrayAsListString implements ListString {
     }
 
 */
-    private data: String[] = [];
+    private data: FixedArray<String> = [];
     private curSize: int;
 }

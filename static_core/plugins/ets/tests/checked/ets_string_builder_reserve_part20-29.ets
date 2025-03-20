@@ -206,7 +206,7 @@ function types_reserve24() : string {
 }
 
 function lenArray_reserve25() : string {
-    let strings: string[] = ["0", "1", "2"]
+    let strings: FixedArray<string> = ["0", "1", "2"]
     let sb = new StringBuilder()            // applied, due loop is countable
     for (let i = 0; i < strings.length; ++i)
         sb.append(strings[i])
@@ -214,21 +214,21 @@ function lenArray_reserve25() : string {
 }
 
 function lenArray_reserve26() : string {
-    let strings: string[] = ["0", "1", "2"]
+    let strings: FixedArray<string> = ["0", "1", "2"]
     let sb = new StringBuilder()            // applied, due loop is countable
     for (let s : string of strings)
         sb.append(s)
     return sb.toString()
 }
 
-function lenArray_reserve27(strings: string[]) : string {
+function lenArray_reserve27(strings: FixedArray<string>) : string {
     let sb = new StringBuilder()            // not applied, due loop is uncountable
     for (let i = 0; i < strings.length; ++i)
         sb.append(strings[i])
     return sb.toString()
 }
 
-function lenArray_reserve28(strings: string[]) : string {
+function lenArray_reserve28(strings: FixedArray<string>) : string {
     let sb = new StringBuilder()            // not applied, due loop is uncountable
     for (let s : string of strings)
         sb.append(s)

@@ -244,13 +244,13 @@ function checkOptionalArgWithOneArgs(): boolean {
 // uncomment function in checkSpreadOperatorArgWithAllArgs
 
 // function checkSpreadOperatorArgWithAllArgs(): boolean {
-//     const arr: (WithoutOptionalMethodClass | withoutOptionalMethodInstanceClass)[] = [withOptionalMethodInstanceClass, withoutOptionalMethodInstanceClass];
+//     const arr: FixedArray<WithoutOptionalMethodClass | withoutOptionalMethodInstanceClass> = [withOptionalMethodInstanceClass, withoutOptionalMethodInstanceClass];
 //     const result = optionalArgArray(...arr);
 //     return !!result.with && !!result.without;
 // }
 
 // function checkSpreadOperatorArgWithOneArgs(): boolean {
-//     const arr: (WithoutOptionalMethodClass | WithoutOptionalMethodClass)[] = [withOptionalMethodInstanceClass];
+//     const arr: FixedArray<WithoutOptionalMethodClass | WithoutOptionalMethodClass> = [withOptionalMethodInstanceClass];
 //     const result = optionalArgArray(...arr);
 //     return !!result.with;
 // }

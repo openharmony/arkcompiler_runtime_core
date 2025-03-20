@@ -18,7 +18,7 @@ package escompat;
 export interface ReadonlyArray<out T> extends ConcatArray<T> {
     // concat(...items: (T | ConcatArray<T>)[]): T[];
     // concat(...items: (T | ConcatArray<T>)[]): Array<T>;
-    concat(...items: ConcatArray<T>[]): Array<T>;
+    concat(...items: FixedArray<ConcatArray<T>>): Array<T>;
     // Typing and previous overload have to cover it
 
     entries(): IterableIterator<[number, T]>;

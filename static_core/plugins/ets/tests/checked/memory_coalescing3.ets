@@ -24,7 +24,7 @@
 //! INST_NOT     "LoadPairPart"
 //! INST_NOT     "StoreArrayPair"
 //! PASS_AFTER   "MemoryCoalescing"
-//! INST         "LoadArrayPair"
+//! INST_NOT     "LoadArrayPair"
 //! INST         "LoadPairPart"
 //! INST_NOT     "StoreArrayPair"
 //! INST_NOT     "StoreObjectPair"

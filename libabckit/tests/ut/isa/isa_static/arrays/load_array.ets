@@ -15,7 +15,7 @@
 // Before AOP:
 
 function get_element() {
-    let a = [1, 2, 3];
+    let a : FixedArray<number> = [1, 2, 3];
     return a[0];
 }
 

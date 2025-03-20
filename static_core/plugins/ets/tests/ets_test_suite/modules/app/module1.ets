@@ -108,7 +108,7 @@ function testStdCoreProxy() {
 }
 
 function testArrayClass() {
-    const arr = new foo.Dummy[0]
+    const arr: FixedArray<foo.Dummy> = new foo.Dummy[0]
     const arrClass = Class.of(arr);
     assertNE(arrClass, undefined);
 

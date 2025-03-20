@@ -133,8 +133,6 @@ ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
 ObjectHeader **CallETSHandler::ConvertRestParams(Span<napi_value> restArgs)
 {
     ASSERT(protoReader_.GetType().IsReference());
-    ASSERT(protoReader_.GetClass()->IsArrayClass());
-
     return PackRestParameters(coro_, ctx_, protoReader_, restArgs);
 }
 

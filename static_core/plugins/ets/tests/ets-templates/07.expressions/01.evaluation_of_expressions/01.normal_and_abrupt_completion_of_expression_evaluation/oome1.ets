@@ -25,7 +25,7 @@ const ARRAY_SIZE = 1_000_000;
 
 function main(): int {
   try {
-    let v: Object[] = new Object[ARRAY_SIZE];
+    let v: FixedArray<Object> = new Object[ARRAY_SIZE];
 
     for (let i: int = 0; i < ARRAY_SIZE; i++) {
         let w = new Double[ARRAY_SIZE];

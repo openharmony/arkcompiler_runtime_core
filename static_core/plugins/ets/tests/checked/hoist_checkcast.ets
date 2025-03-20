@@ -38,11 +38,11 @@
 class A {}
 class B {}
 
-function set(arr: A[], i: int, value : A | B) {
+function set(arr: FixedArray<A>, i: int, value : A | B) {
     arr[i] = value as A;
 }
 
-function test(arr: A[], value: A | B) : int {
+function test(arr: FixedArray<A>, value: A | B) : int {
     let iters = 0;
     try {
         for (let i: int = 0; i < arr.length; ++i) {
@@ -57,7 +57,7 @@ function test(arr: A[], value: A | B) : int {
 }
 
 function main(): int {
-    let arr = new A[5];
+    let arr: FixedArray<A> = new A[5];
     if (test(arr, new A()) != 5) {
         return 1;
     }
@@ -96,7 +96,7 @@ function main(): int {
 //! CHECKER      Check stacktrace for starr_obj with wrong type, irtoc interpreter
 //! RUN          options: "--compiler-enable-jit=false --interpreter-type=irtoc", entry: "hoist_checkcast.ETSGLOBAL::main2"
 
-function test2(arr: Object[], value: A | B) : int {
+function test2(arr: FixedArray<Object>, value: A | B) : int {
     let iters = 0;
     try {
         for (let i: int = 0; i < arr.length; ++i) {
@@ -112,7 +112,7 @@ function test2(arr: Object[], value: A | B) : int {
 }
 
 function main2(): int {
-    let arr = new A[5];
+    let arr: FixedArray<A> = new A[5];
     if (test2(arr, new A()) != 5) {
         return 1;
     }

@@ -1090,7 +1090,7 @@ function concat_loop3(a: String, n: int): String {
     return str;
 }
 
-function concat_loop4(strings: String[]): String {
+function concat_loop4(strings: FixedArray<string>): String {
     let str: String = "";
     for (let i = 0; i < strings.length; ++i) {
         str += strings[i];                          // applied
@@ -1098,7 +1098,7 @@ function concat_loop4(strings: String[]): String {
     return str;
 }
 
-function concat_loop5(strings: String[]): String {
+function concat_loop5(strings: FixedArray<string>): String {
     let str: String = "";
     for (let i = 0; i < strings.length; ++i) {
         str += strings[0] + strings[i];             // applied
@@ -1487,7 +1487,7 @@ function reuse_concat_loop5(a: String, n: int): String {
     return str;
 }
 
-function args_concat_loop0(x: double, y: boolean, ...p: char[]): string
+function args_concat_loop0(x: double, y: boolean, ...p: FixedArray<char>): string
 {
     let res: string = "" + x + y + p.length;    // not replaced by intrinsic due to concatenating float, bool, int
     for (let ch of p) res += ch;                // not applied due to exit block not dominated by preheader
@@ -1671,7 +1671,7 @@ function bugfix_concat_loop2() {
 
 function bugfix_concat_loop3() {
     let str = "";
-    let a2 : string[] = ["ddd"]
+    let a2 : FixedArray<string> = ["ddd"]
     let idx2 : string | boolean;
     for (idx2 of a2) {
         let c2 = idx2

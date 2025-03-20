@@ -190,7 +190,7 @@ export final class GC {
      *
      * @returns pinned array of boolean
      */
-    public static native allocatePinnedBooleanArray(length: long): boolean[] throws;
+    public static native allocatePinnedBooleanArray(length: long): FixedArray<boolean> throws;
 
     /**
      * Allocate array of byte and pin (GC will not move pinned array)
@@ -205,7 +205,7 @@ export final class GC {
      *
      * @returns pinned array of byte
      */
-    public static native allocatePinnedByteArray(length: long): byte[] throws;
+    public static native allocatePinnedByteArray(length: long): FixedArray<byte> throws;
 
     /**
      * Allocate array of char and pin (GC will not move pinned array)
@@ -220,7 +220,7 @@ export final class GC {
      *
      * @returns pinned array of char
      */
-    public static native allocatePinnedCharArray(length: long): char[] throws;
+    public static native allocatePinnedCharArray(length: long): FixedArray<char> throws;
 
     /**
      * Allocate array of short and pin (GC will not move pinned array)
@@ -235,7 +235,7 @@ export final class GC {
      *
      * @returns pinned array of short
      */
-    public static native allocatePinnedShortArray(length: long): short[] throws;
+    public static native allocatePinnedShortArray(length: long): FixedArray<short> throws;
 
     /**
      * Allocate array of int and pin (GC will not move pinned array)
@@ -250,7 +250,7 @@ export final class GC {
      *
      * @returns pinned array of int
      */
-    public static native allocatePinnedIntArray(length: long): int[] throws;
+    public static native allocatePinnedIntArray(length: long): FixedArray<int> throws;
 
     /**
      * Allocate array of long and pin (GC will not move pinned array)
@@ -265,7 +265,7 @@ export final class GC {
      *
      * @returns pinned array of long
      */
-    public static native allocatePinnedLongArray(length: long): long[] throws;
+    public static native allocatePinnedLongArray(length: long): FixedArray<long> throws;
 
     /**
      * Allocate array of float and pin (GC will not move pinned array)
@@ -280,7 +280,7 @@ export final class GC {
      *
      * @returns pinned array of float
      */
-    public static native allocatePinnedFloatArray(length: long): float[] throws;
+    public static native allocatePinnedFloatArray(length: long): FixedArray<float> throws;
 
     /**
      * Allocate array of double and pin (GC will not move pinned array)
@@ -295,7 +295,7 @@ export final class GC {
      *
      * @returns pinned array of double
      */
-    public static native allocatePinnedDoubleArray(length: long): double[] throws;
+    public static native allocatePinnedDoubleArray(length: long): FixedArray<double> throws;
 
     /**
      * Returns encoded space type

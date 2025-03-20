@@ -296,7 +296,7 @@ function if_chain_with_scopes(x: int): JSValue {
     return cons(x, list);
 }
 
-function compare_lists(list: JSValue, expected: int[]): boolean {
+function compare_lists(list: JSValue, expected: FixedArray<int>): boolean {
     for (let i: int of expected) {
         if (car(list) as int != i) {
             return false;
