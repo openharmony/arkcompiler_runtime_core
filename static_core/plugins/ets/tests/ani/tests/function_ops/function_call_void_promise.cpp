@@ -41,9 +41,9 @@ public:
     }
 
 protected:
-    std::vector<std::string> GetExtraVmOptions() override
+    std::vector<ani_option> GetExtraAniOptions() override
     {
-        return {"--coroutine-enable-features:ani-drain-queue"};
+        return {ani_option {"--ext:coroutine-enable-features:ani-drain-queue", nullptr}};
     }
 };
 

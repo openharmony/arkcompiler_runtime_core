@@ -80,9 +80,12 @@ public:
         env->Class_CallStaticMethod_Void(cls, mtd, std::forward<Args>(args)...);
     }
 
-    std::vector<std::string> GetExtraVmOptions() override
+    std::vector<ani_option> GetExtraAniOptions() override
     {
-        return {{"--gc-type=g1-gc"}, {"--compiler-enable-jit"}};
+        return {
+            ani_option {"--gc-type=g1-gc", nullptr},
+            ani_option {"--compiler-enable-jit", nullptr},
+        };
     }
 
 private:

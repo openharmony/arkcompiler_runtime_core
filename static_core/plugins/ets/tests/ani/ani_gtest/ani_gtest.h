@@ -33,10 +33,8 @@ public:
         const char *stdlib = std::getenv("ARK_ETS_STDLIB_PATH");
         ASSERT_NE(stdlib, nullptr);
 
-        const std::string optionPrefix = "--ext:";
-
         // Create boot-panda-files options
-        std::string bootFileString = optionPrefix + "--boot-panda-files=" + stdlib;
+        std::string bootFileString = "--ext:boot-panda-files=" + std::string(stdlib);
         const char *abcPath = std::getenv("ANI_GTEST_ABC_PATH");
         if (abcPath != nullptr) {
             bootFileString += ":";
@@ -48,13 +46,8 @@ public:
         std::vector<ani_option> options;
         options.push_back(bootFileOption);
 
-        // add extra test-specific VM options
-        std::vector<std::string> extraVmAniStrings;
-        for (auto &opt : GetExtraVmOptions()) {
-            extraVmAniStrings.push_back(optionPrefix + opt);
-        }
-        for (auto &aniOptStr : extraVmAniStrings) {
-            ani_option aniOpt = {aniOptStr.data(), nullptr};
+        // Add extra test-specific ANI options
+        for (auto &aniOpt : GetExtraAniOptions()) {
             options.push_back(aniOpt);
         }
 
@@ -146,7 +139,7 @@ public:
     }
 
 protected:
-    virtual std::vector<std::string> GetExtraVmOptions()
+    virtual std::vector<ani_option> GetExtraAniOptions()
     {
         return {};
     }

@@ -32,6 +32,18 @@
 #define ANI_FALSE 0
 #define ANI_TRUE 1
 
+// Logger interface:
+//   typedef void (*ani_logger)(FILE *stream, int log_level, const char *component, const char *message);
+//   ani_option:
+//     'option': "--logger"
+//     'extra': ani_logger
+//   where 'log_level' can have the following values:
+#define ANI_LOGLEVEL_FATAL 0
+#define ANI_LOGLEVEL_ERROR 1
+#define ANI_LOGLEVEL_WARNING 2
+#define ANI_LOGLEVEL_INFO 3
+#define ANI_LOGLEVEL_DEBUG 4
+
 typedef size_t ani_size;
 
 // Primitive types:

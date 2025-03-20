@@ -82,9 +82,13 @@ protected:
         ASSERT_EQ(env_->GetUndefined(&undefinedRef_), ANI_OK);
     }
 
-    std::vector<std::string> GetExtraVmOptions() override
+    std::vector<ani_option> GetExtraAniOptions() override
     {
-        return {"--gc-type=g1-gc", "--run-gc-in-place", "--gc-trigger-type=debug-never"};
+        return {
+            ani_option {"--ext:gc-type=g1-gc", nullptr},
+            ani_option {"--ext:run-gc-in-place", nullptr},
+            ani_option {"--ext:gc-trigger-type=debug-never", nullptr},
+        };
     }
 
 private:
