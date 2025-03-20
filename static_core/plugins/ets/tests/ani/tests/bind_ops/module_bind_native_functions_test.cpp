@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -17,7 +17,7 @@
 #include <array>
 #include <iostream>
 
-// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)
 namespace ark::ets::ani::testing {
 
 class ModuleBindNativeFunctionsTest : public AniTest {};
@@ -27,16 +27,23 @@ static ani_int Sum([[maybe_unused]] ani_env *env, ani_int a, ani_int b)
     return a + b;
 }
 
-static ani_string Concat(ani_env *env, ani_string s0, ani_string s1)
+static ani_int SumA([[maybe_unused]] ani_env *env, ani_int a, ani_int b, ani_int c)
 {
-    std::string str0;
+    return a + b + c;
+}
+
+static ani_string ConcatA(ani_env *env, ani_string s0, ani_string s1, ani_string s2)
+{
+    std::string str0 {};
     AniTest::GetStdString(env, s0, str0);
-    std::string str1;
+    std::string str1 {};
     AniTest::GetStdString(env, s1, str1);
+    std::string str2 {};
+    AniTest::GetStdString(env, s2, str2);
 
-    std::string newStr = str0 + str1;
+    std::string newStr = str0 + str1 + str2;
 
-    ani_string result;
+    ani_string result {};
     ani_status status = env->String_NewUTF8(newStr.c_str(), newStr.length(), &result);
     if (status != ANI_OK) {
         std::cerr << "Cannot create new utf8 string" << std::endl;
@@ -45,57 +52,80 @@ static ani_string Concat(ani_env *env, ani_string s0, ani_string s1)
     return result;
 }
 
+static ani_string Concat(ani_env *env, ani_string s0, ani_string s1)
+{
+    std::string str0 {};
+    AniTest::GetStdString(env, s0, str0);
+    std::string str1 {};
+    AniTest::GetStdString(env, s1, str1);
+
+    std::string newStr = str0 + str1;
+
+    ani_string result {};
+    ani_status status = env->String_NewUTF8(newStr.c_str(), newStr.length(), &result);
+    if (status != ANI_OK) {
+        std::cerr << "Cannot create new utf8 string" << std::endl;
+        std::abort();
+    }
+    return result;
+}
+
+static const char *CONCAT_SIGNATURE = "Lstd/core/String;Lstd/core/String;:Lstd/core/String;";
+static const char *CONCAT_SIGNATURE_A = "Lstd/core/String;Lstd/core/String;Lstd/core/String;:Lstd/core/String;";
+static const char *MODULE_NAME = "L@defModule/module_bind_native_functions_test;";
+static const char *MODULE_DESCRIPTOR = "@defModule/module_bind_native_functions_test";
+static const ani_native_function NATIVE_FUNC_SUM = {"sum", "II:I", reinterpret_cast<void *>(Sum)};
+static const ani_native_function NATIVE_FUNC_SUM_A = {"sum", "III:I", reinterpret_cast<void *>(SumA)};
+static const ani_native_function NATIVE_FUNC_CONCAT = {"concat", CONCAT_SIGNATURE, reinterpret_cast<void *>(Concat)};
+static const ani_native_function NATIVE_FUNC_CONCAT_A = {"concat", CONCAT_SIGNATURE_A,
+                                                         reinterpret_cast<void *>(ConcatA)};
+
 TEST_F(ModuleBindNativeFunctionsTest, bind_native_functions)
 {
-    ani_module module;
-    ASSERT_EQ(env_->FindModule("L@abcModule/test;", &module), ANI_OK);
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
-    const char *concatSignature = "Lstd/core/String;Lstd/core/String;:Lstd/core/String;";
     std::array functions = {
-        ani_native_function {"sum", "II:I", reinterpret_cast<void *>(Sum)},
-        ani_native_function {"concat", concatSignature, reinterpret_cast<void *>(Concat)},
+        NATIVE_FUNC_SUM,
+        NATIVE_FUNC_CONCAT,
     };
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
 
-    const char *moduleDescriptor = "@abcModule/test";
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(moduleDescriptor, "checkSum"), ANI_TRUE);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(moduleDescriptor, "checkConcat"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSum"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcat"), ANI_TRUE);
 }
 
 TEST_F(ModuleBindNativeFunctionsTest, already_binded_function)
 {
-    ani_module module;
-    ASSERT_EQ(env_->FindModule("L@abcModule/test;", &module), ANI_OK);
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
-    const char *concatSignature = "Lstd/core/String;Lstd/core/String;:Lstd/core/String;";
     std::array functions = {
-        ani_native_function {"sum", "II:I", reinterpret_cast<void *>(Sum)},
-        ani_native_function {"concat", concatSignature, reinterpret_cast<void *>(Concat)},
+        NATIVE_FUNC_SUM,
+        NATIVE_FUNC_CONCAT,
     };
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_ALREADY_BINDED);
 
-    const char *moduleDescriptor = "@abcModule/test";
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(moduleDescriptor, "checkSum"), ANI_TRUE);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(moduleDescriptor, "checkConcat"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSum"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcat"), ANI_TRUE);
 }
 
 TEST_F(ModuleBindNativeFunctionsTest, invalid_arg_module)
 {
-    const char *concatSignature = "Lstd/core/String;Lstd/core/String;:Lstd/core/String;";
     std::array functions = {
-        ani_native_function {"sum", "II:I", reinterpret_cast<void *>(Sum)},
-        ani_native_function {"concat", concatSignature, reinterpret_cast<void *>(Concat)},
+        NATIVE_FUNC_SUM,
+        NATIVE_FUNC_CONCAT,
     };
     ASSERT_EQ(env_->Module_BindNativeFunctions(nullptr, functions.data(), functions.size()), ANI_INVALID_ARGS);
 }
 
 TEST_F(ModuleBindNativeFunctionsTest, invalid_arg_functions)
 {
-    ani_module module;
-    ASSERT_EQ(env_->FindModule("L@abcModule/test;", &module), ANI_OK);
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, nullptr, 1), ANI_INVALID_ARGS);
@@ -103,14 +133,13 @@ TEST_F(ModuleBindNativeFunctionsTest, invalid_arg_functions)
 
 TEST_F(ModuleBindNativeFunctionsTest, function_not_found)
 {
-    ani_module module;
-    ASSERT_EQ(env_->FindModule("L@abcModule/test;", &module), ANI_OK);
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
-    const char *concatSignature = "Lstd/core/String;Lstd/core/String;:Lstd/core/String;";
     std::array functions = {
         ani_native_function {"sum", "II:I", reinterpret_cast<void *>(Sum)},
-        ani_native_function {"concatX", concatSignature, reinterpret_cast<void *>(Concat)},
+        ani_native_function {"concatX", CONCAT_SIGNATURE, reinterpret_cast<void *>(Concat)},
     };
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_NOT_FOUND);
 }
@@ -132,7 +161,7 @@ static ani_long NativeMethodsLongFooNative(ani_env *, ani_class)
 TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace ns {};
@@ -178,7 +207,7 @@ TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001
 TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001_not_found)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace ns {};
@@ -200,7 +229,7 @@ TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001
 TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001_already_binded)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace ns {};
@@ -218,6 +247,54 @@ TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_ALREADY_BINDED);
 }
+
+TEST_F(ModuleBindNativeFunctionsTest, module_bind_native_functions_001)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    std::array functions = {NATIVE_FUNC_SUM, NATIVE_FUNC_SUM_A, NATIVE_FUNC_CONCAT_A, NATIVE_FUNC_CONCAT};
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
+
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSum"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSumA"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcatA"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcat"), ANI_TRUE);
+}
+
+TEST_F(ModuleBindNativeFunctionsTest, module_bind_native_functions_002)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    std::array functions = {NATIVE_FUNC_SUM, NATIVE_FUNC_SUM_A, NATIVE_FUNC_CONCAT_A, NATIVE_FUNC_CONCAT};
+    ASSERT_EQ(env_->c_api->Module_BindNativeFunctions(nullptr, module, functions.data(), functions.size()),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Module_BindNativeFunctions(nullptr, functions.data(), functions.size()), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, nullptr, functions.size()), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), 0), ANI_OK);
+}
+
+TEST_F(ModuleBindNativeFunctionsTest, module_bind_native_functions_003)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, &NATIVE_FUNC_SUM, 1), ANI_OK);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSum"), ANI_TRUE);
+
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, &NATIVE_FUNC_SUM_A, 1), ANI_OK);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSumA"), ANI_TRUE);
+
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, &NATIVE_FUNC_CONCAT_A, 1), ANI_OK);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcatA"), ANI_TRUE);
+
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, &NATIVE_FUNC_CONCAT, 1), ANI_OK);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcat"), ANI_TRUE);
+}
 }  // namespace ark::ets::ani::testing
 
-// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
+// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)

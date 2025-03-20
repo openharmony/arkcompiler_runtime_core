@@ -14,10 +14,20 @@
  */
 
 export native function sum(a: int, b: int): int;
+export native function sum(a: int, b: int, c: int): int;
+export native function concat(s0: String, s1: String, s2: String): String;
 export native function concat(s0: String, s1: String): String;
 
 function checkSum(): boolean {
     return sum(8, 16) == 24;
+}
+
+function checkSumA(): boolean {
+    return sum(8, 16, 6) == 30;
+}
+
+function checkConcatA(): boolean {
+    return concat("abc", "def", "ghi") == "abcdefghi";
 }
 
 function checkConcat(): boolean {

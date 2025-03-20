@@ -15,11 +15,16 @@
 
 namespace ops {
 export native function sum(a: int, b: int): int;
+export native function sum(a: int, b: int, c: int): int;
 export native function concat(s0: String, s1: String): String;
 }
 
 function checkSum(): boolean {
     return ops.sum(8, 16) == 24;
+}
+
+function checkSumA(): boolean {
+    return ops.sum(8, 16, 6) == 30;
 }
 
 function checkConcat(): boolean {
