@@ -39,6 +39,17 @@ function longFunc(duration: int): string {
     return "success";
 }
 
+function testCancelFunc(duration: int): boolean {
+    let t = Date.now();
+    while((Date.now() - t) < duration) {
+        continue;
+    }
+    if (taskpool.Task.isCanceled()) {
+        return false;
+    }
+    return true;
+}
+
 async function promiseCase(duration: int): Promise<string> {
     let p: Promise<string> = new Promise<string>((resolve: (value: string) => void, reject: (reason: Error) => void) => {
         let t = Date.now();
@@ -243,35 +254,21 @@ function main(): int {
     });
     commonTaskSuite.addTest("CancelExecutingTaskTest", (): void throws =>
     {
-        let t = new taskpool.Task(returnAbc);
-        let p = taskpool.execute(t);
+        let task1 = new taskpool.Task(returnAbc);
+        let p1 = taskpool.execute(task1);
         try {
-            taskpool.cancel(t);
+            taskpool.cancel(task1);
         } catch(e: Error) {
             assertEQ(e.message, "taskpool:: task is not executed or has been executed");
             return;
         }
-        expectError(() => { await p }, new Error("taskpool:: task has been canceled"));
+        expectError(() => { await p1 }, new Error("taskpool:: task has been canceled"));
         // task finished, new execution should not produce an Error
-        expectNoThrow(() => { await taskpool.execute(t) });
-    });
-    // NOTE(konstanting): wrong test, introduces flaky failures
-    commonTaskSuiteDisabled.addTest("CancelExecutingTaskWithParamsTest", (): void throws =>
-    {
-        let testFunc = (duration: int): boolean => {
-            let t = Date.now();
-            while((Date.now() - t) < duration) {
-                continue;
-            }
-            if (taskpool.Task.isCanceled()) {
-                return false;
-            }
-            return true;
-        };
-        let task1 = new taskpool.Task(testFunc, 300);
+        expectNoThrow(() => { await taskpool.execute(task1) });
+        let task2 = new taskpool.Task(testCancelFunc, 300);
         let val: int = 0;
         let isExecuted: AtomicFlag = new AtomicFlag(false);
-        taskpool.execute(task1).then((value: boolean): void => {
+        taskpool.execute(task2).then((value: boolean): void => {
             val = 1;
             isExecuted.set(true);
         }).catch((e: object): void => {
@@ -279,30 +276,64 @@ function main(): int {
             isExecuted.set(true);
         });
         await promiseCase(50);
-        // NOTE(konstanting): the following line can throw an unexpected exception!
-        taskpool.cancel(task1);
+        try {
+            taskpool.cancel(task2);
+        } catch(e: Error) {
+            assertEQ(e.message, "taskpool:: task is not executed or has been executed");
+            return;
+        }
         while (isExecuted.get() != true) {
             await promiseCase(100);
         }
-        assertEQ(task1.isDone(), true);
+        assertEQ(task2.isDone(), true);
         // The canceled task result returns through the catch branch, not the then branch.
         assertEQ(val, 2);
-        let task2 = new taskpool.Task(testFunc, 200);
-        let p2 = taskpool.execute(task2);
-        await promiseCase(100);
-        // If isDone is false, cancel the task will not throw an error.
-        if (!task2.isDone()) {
-            taskpool.cancel(task2);
-        }
-        expectError(() => { await p2; }, new Error("taskpool:: task has been canceled"));
-        let task3 = new taskpool.Task(testFunc, 100);
+    });
+    commonTaskSuite.addTest("CheckIsDoneAndCancelTaskTest", (): void throws =>
+    {
+        let isCanceled: AtomicFlag = new AtomicFlag(false);
+        let isRunning: AtomicFlag = new AtomicFlag(false);
+        let waitCancel: AtomicFlag = new AtomicFlag(true);
+        let funcForTask = (duration: int): boolean => {
+            isRunning.set(true);
+            while(waitCancel.get()) {}
+            // mock time-consuming operation
+            longFunc(duration);
+            if (taskpool.Task.isCanceled()) {
+                isCanceled.set(true);
+                isRunning.set(false);
+                return false;
+            }
+            // mock time-consuming operation
+            longFunc(duration);
+            isRunning.set(false);
+            return true;
+        };
+        CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
+        let task1 = new taskpool.Task(funcForTask, 50);
+        let p1 = taskpool.execute(task1);
+        while (!isRunning.get()) {}
+        // Cancel the executing task will not throw an error.
+        expectNoThrow(() => {
+            if (!task1.isDone()) {
+                taskpool.cancel(task1);
+            } else {
+                throw new Error("The task isDone status is wrong.");
+            }
+        });
+        waitCancel.set(false);
+        while (isRunning.get()) {}
+        assertEQ(isCanceled.get(), true);
+        expectError(() => { await p1 }, new Error("taskpool:: task has been canceled"));
+        let task2 = new taskpool.Task(testCancelFunc, 100);
         expectError(() => {
-            await taskpool.execute(task3);
+            await taskpool.execute(task2);
             // If isDone is true, cancel the task will throw an error.
-            if (task3.isDone()) {
-                taskpool.cancel(task3);
+            if (task2.isDone()) {
+                taskpool.cancel(task2);
             }
         }, new Error("taskpool:: task is not executed or has been executed"));
+        CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_DEFAULT);
     });
     commonTaskSuite.addTest("DependentTasksTest", (): void throws =>
     {
@@ -501,7 +532,12 @@ function main(): int {
         task.onReceiveData(recvCallback);
         let p = taskpool.execute(task);
         await promiseCase(100);
-        taskpool.cancel(task);
+        try {
+            taskpool.cancel(task);
+        } catch(e: Error) {
+            assertEQ(e.message, "taskpool:: task is not executed or has been executed");
+            return;
+        }
         expectError(() => { await p }, new Error("taskpool:: task has been canceled"));
         // When the task is canceled, recvCallback will no longer be executed.
         assertEQ(value, 0);
