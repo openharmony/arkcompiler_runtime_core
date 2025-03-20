@@ -131,4 +131,16 @@ TEST_F(WeakReferenceGetReferenceTest, invalid_ref_result)
     ASSERT_EQ(env_->WeakReference_GetReference(wref, &wasReleased, nullptr), ANI_INVALID_ARGS);
 }
 
+TEST_F(WeakReferenceGetReferenceTest, invalid_ref_env)
+{
+    ani_ref undefinedRef;
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
+    ani_wref wref {};
+    ASSERT_EQ(env_->WeakReference_Create(undefinedRef, &wref), ANI_OK);
+
+    ani_boolean wasReleased = ANI_FALSE;
+    ani_ref ref {};
+    ASSERT_EQ(env_->c_api->WeakReference_GetReference(nullptr, wref, &wasReleased, &ref), ANI_INVALID_ARGS);
+}
+
 }  // namespace ark::ets::ani::testing

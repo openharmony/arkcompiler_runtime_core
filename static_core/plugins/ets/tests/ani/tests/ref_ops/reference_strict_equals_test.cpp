@@ -79,4 +79,21 @@ TEST_F(ReferenceStrictEqualsTest, invalid_argument)
     ASSERT_EQ(env_->Reference_StrictEquals(ref, ref, nullptr), ANI_INVALID_ARGS);
 }
 
+TEST_F(ReferenceStrictEqualsTest, invalid_env)
+{
+    ani_ref undefinedRef;
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
+
+    ani_boolean isEquals = ANI_FALSE;
+    ASSERT_EQ(env_->c_api->Reference_StrictEquals(nullptr, undefinedRef, undefinedRef, &isEquals), ANI_INVALID_ARGS);
+}
+
+TEST_F(ReferenceStrictEqualsTest, invalid_result)
+{
+    ani_ref undefinedRef;
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
+
+    ASSERT_EQ(env_->Reference_StrictEquals(undefinedRef, undefinedRef, nullptr), ANI_INVALID_ARGS);
+}
+
 }  // namespace ark::ets::ani::testing

@@ -27,6 +27,17 @@ TEST_F(StringGetUtf16SizeTest, StringGetUtf16Size_NullString)
     ASSERT_EQ(status, ANI_INVALID_ARGS);
 }
 
+TEST_F(StringGetUtf16SizeTest, StringGetUtf16Size_NullEnv)
+{
+    const std::string example {"example"};
+    ani_string string = nullptr;
+    auto status = env_->String_NewUTF8(example.c_str(), example.size(), &string);
+    ASSERT_EQ(status, ANI_OK);
+    ani_size result = 0U;
+    auto status2 = env_->c_api->String_GetUTF16Size(nullptr, string, &result);
+    ASSERT_EQ(status2, ANI_INVALID_ARGS);
+}
+
 TEST_F(StringGetUtf16SizeTest, StringGetUtf16Size_NullResultPointer)
 {
     const std::string example {"example"};

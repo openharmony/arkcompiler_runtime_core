@@ -18,3 +18,17 @@ class Operations {
         return a0 || a1;
     }
 };
+
+class Student {
+    constructor(age: int) {
+        this.age = age;
+        this.name = 'Peter'; 
+    }
+
+    getName(): string {
+        return this.name;
+    }
+
+    age: int;
+    name: String;
+};
