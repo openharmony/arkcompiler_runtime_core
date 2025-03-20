@@ -20,16 +20,16 @@
 escompat/ArrayTest.ets
 
 # 17744 Tests creating BigInt from Double.MAX_VALUE don't fit in 300 sec timeout
-03.types/08.reference_types/14.type_bigint/bint_8.ets
-03.types/08.reference_types/14.type_bigint/bint_args_8.ets
-03.types/08.reference_types/14.type_bigint/bint_arr_8.ets
-03.types/08.reference_types/14.type_bigint/bint_clss_8.ets
-03.types/08.reference_types/14.type_bigint/bint_fdef_8.ets
-03.types/08.reference_types/14.type_bigint/bint_fld_8.ets
-03.types/08.reference_types/14.type_bigint/bint_fld_gen_8.ets
-03.types/08.reference_types/14.type_bigint/bint_lmbd_8.ets
-03.types/08.reference_types/14.type_bigint/bint_tup_8.ets
-03.types/08.reference_types/14.type_bigint/bint_un_8.ets
+03.types/14.type_bigint/bint_8.ets
+03.types/14.type_bigint/bint_args_8.ets
+03.types/14.type_bigint/bint_arr_8.ets
+03.types/14.type_bigint/bint_clss_8.ets
+03.types/14.type_bigint/bint_fdef_8.ets
+03.types/14.type_bigint/bint_fld_8.ets
+03.types/14.type_bigint/bint_fld_gen_8.ets
+03.types/14.type_bigint/bint_lmbd_8.ets
+03.types/14.type_bigint/bint_tup_8.ets
+03.types/14.type_bigint/bint_un_8.ets
 
 # Aborts with ERRNO: 11 (Resource temporarily unavailable)
 09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_23.ets
