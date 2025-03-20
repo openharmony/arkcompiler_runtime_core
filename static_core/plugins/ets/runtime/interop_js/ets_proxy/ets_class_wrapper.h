@@ -170,6 +170,8 @@ private:
     bool needProxy_ = false;
     napi_ref jsProxyCtorRef_ {};
     napi_ref jsProxyHandlerRef_ {};
+
+    static constexpr const char *INTERFACE_ITERABLE_NAME = "escompat.IterableIterator";
 };
 
 }  // namespace ark::ets::interop::js::ets_proxy

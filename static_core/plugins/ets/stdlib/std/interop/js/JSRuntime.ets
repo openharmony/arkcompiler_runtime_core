@@ -19,6 +19,31 @@ package std.interop.js;
 // TODO(ivagin): This is a workaround and should be removed if the future
 class Shareable { private internal_ : long; };
 
+class MimicJSValueIteratableIterator implements IterableIterator<Object> {
+    private iterator: JSValue;
+    private nextMethod: JSValue;
+
+    constructor(jsIterator: JSValue) {
+        this.iterator = jsIterator;
+        this.nextMethod = JSRuntime.getPropertyJSValue(jsIterator, 'next');
+        if (this.nextMethod === undefined) {
+            throw new Error('Can not retrieve [Symbol.iterator] from given object, object is not iterable.');
+        }
+    }
+
+    override next(): IteratorResult<Object> {
+        const nextObj = JSRuntime.invoke(this.iterator, this.nextMethod);
+        if (JSRuntime.getPropertyJSValue(nextObj, 'done') as boolean) {
+            return new IteratorResult<Object>();
+        }
+        const iterValue = JSRuntime.getPropertyJSValue(nextObj, 'value');
+        if (iterValue == undefined) {
+            throw new Error('`value` field is expected in IteratorResult.');
+        }
+        return new IteratorResult<Object>(JSRuntime.getValueObject(iterValue, Class.of(new Object())));
+    }
+}
+
 export final class JSRuntime {
     // ==================
     // newJSValue<TYPE>()
@@ -429,4 +454,8 @@ export final class JSRuntime {
     // the correct finreg values during their initialization. But of course we should keep all the finreg references
     // here and use the tests to verify that they function correctly.
     private static finQueue: FinalizationRegistry<Object> | null = null;
+
+    public static CreateIterator(val: JSValue): MimicJSValueIteratableIterator {
+        return new MimicJSValueIteratableIterator(val);
+    }
 }

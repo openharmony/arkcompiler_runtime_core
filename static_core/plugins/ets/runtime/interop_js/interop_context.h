@@ -289,6 +289,11 @@ public:
         return &refconvertCache_;
     }
 
+    Class *GetJSRuntimeClass() const
+    {
+        return sharedEtsVmState_->jsRuntimeClass;
+    }
+
     Class *GetJSValueClass() const
     {
         return sharedEtsVmState_->jsValueClass;

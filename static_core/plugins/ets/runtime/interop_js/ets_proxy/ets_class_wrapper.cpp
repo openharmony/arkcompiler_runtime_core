@@ -227,13 +227,55 @@ public:
         return ret;
     }
 
+protected:
+    template <typename D>
+    explicit JSRefConvertInterface(Class *klass, D *instance) : JSRefConvert(instance), klass_(klass)
+    {
+        ASSERT(klass->IsInterface());
+    }
+    Class *GetKlass()
+    {
+        return klass_;
+    }
+
 private:
     Class *klass_;
 };
+
+class JSRefConvertInterfaceIterator : public JSRefConvertInterface {
+public:
+    explicit JSRefConvertInterfaceIterator(Class *klass) : JSRefConvertInterface(klass, this)
+    {
+        ASSERT(klass->IsInterface());
+    }
+
+    EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value jsValue)
+    {
+        auto objectConverter =
+            ctx->GetEtsClassWrappersCache()->Lookup(EtsClass::FromRuntimeClass(ctx->GetObjectClass()));
+        auto ret = objectConverter->Unwrap(ctx, jsValue);
+
+        std::array args = {Value {ret->GetCoreType()}};
+        auto *method = EtsClass::FromRuntimeClass(ctx->GetJSRuntimeClass())->GetMethod("CreateIterator");
+        auto *coro = EtsCoroutine::GetCurrent();
+        auto resObject = method->GetPandaMethod()->Invoke(coro, args.data());
+        ret = EtsObject::FromCoreType(resObject.GetAs<ObjectHeader *>());
+        if (!ret->IsInstanceOf(EtsClass::FromRuntimeClass(GetKlass()))) {
+            ctx->ThrowJSTypeError(ctx->GetJSEnv(), "object of type " + ret->GetClass()->GetRuntimeClass()->GetName() +
+                                                       " is not a assignable to " + GetKlass()->GetName());
+            return nullptr;
+        }
+        return ret;
+    }
+};
+
 /*static*/
 std::unique_ptr<JSRefConvert> EtsClassWrapper::CreateJSRefConvertEtsInterface([[maybe_unused]] InteropCtx *ctx,
                                                                               Class *klass)
 {
+    if (klass->GetName() == INTERFACE_ITERABLE_NAME) {
+        return std::make_unique<JSRefConvertInterfaceIterator>(klass);
+    }
     return std::make_unique<JSRefConvertInterface>(klass);
 }
 
