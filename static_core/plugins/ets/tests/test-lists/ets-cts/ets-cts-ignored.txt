@@ -1526,9 +1526,6 @@
 #22989
 07.expressions/17.typeof_expression/tof_obj_21.ets
 
-#18152 Bad operand type, the type of the operand must be boolean type
-07.expressions/18.ensure-not-nullish_expression/undefined_4.ets
-
 #23441
 07.expressions/20.unary_expressions/08.logical_complement/logical_complement_char.ets
 
