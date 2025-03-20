@@ -52,6 +52,13 @@ void NativeCallOptimization::VisitCallStatic(GraphVisitor *v, Inst *inst)
         return;
     }
 
+    // NOTE: workaround, need to enable back after fixing stack walker & gc roots issue
+    if (runtime->IsNecessarySwitchThreadState(callInst->GetCallMethod())) {
+        COMPILER_LOG(DEBUG, NATIVE_CALL_OPT)
+            << "CallStatic with id=" << callInst->GetId() << " needs to switch exec state, skip (workaround)";
+        return;
+    }
+
     if (runtime->CanNativeMethodUseObjects(callInst->GetCallMethod())) {
         ASSERT(callInst->GetCanNativeException());
         OptimizeNativeCallWithObjects(v, callInst);
