@@ -142,7 +142,7 @@ public:
         return EtsReference::CastFromReference(PopLocalFrame(EtsReference::CastToReference(result)));
     }
 
-    bool EnsureLocalEtsCapacity(size_t capacity)
+    bool EnsureLocalEtsCapacity(uint32_t capacity)
     {
         return EnsureLocalCapacity(capacity);
     }

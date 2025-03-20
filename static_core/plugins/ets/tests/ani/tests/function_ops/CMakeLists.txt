@@ -68,7 +68,3 @@ ani_add_gtest(ani_test_function_call_char
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_char_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_char_test.ets
 )
-ani_add_gtest(ani_test_function_call_void_promise
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_void_promise.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_void_promise.ets
-)

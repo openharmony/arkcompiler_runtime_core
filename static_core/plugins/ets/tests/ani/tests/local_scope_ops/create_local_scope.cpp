@@ -153,6 +153,19 @@ TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_undefinde)
     ASSERT_EQ(isUndefined, ANI_TRUE);
 }
 
+TEST_F(CreateLocalScopeTest, testHugeNrRefs)
+{
+    ASSERT_EQ(env_->CreateLocalScope(ani_size(std::numeric_limits<uint32_t>::max()) - 1), ANI_OUT_OF_MEMORY);
+    ASSERT_EQ(env_->CreateLocalScope(ani_size(std::numeric_limits<uint32_t>::max()) - 0), ANI_OUT_OF_MEMORY);
+    ASSERT_EQ(env_->CreateLocalScope(ani_size(std::numeric_limits<ani_size>::max()) - 1), ANI_OUT_OF_MEMORY);
+    ASSERT_EQ(env_->CreateLocalScope(ani_size(std::numeric_limits<ani_size>::max()) - 0), ANI_OUT_OF_MEMORY);
+
+    ASSERT_EQ(env_->CreateEscapeLocalScope(ani_size(std::numeric_limits<uint32_t>::max()) - 1), ANI_OUT_OF_MEMORY);
+    ASSERT_EQ(env_->CreateEscapeLocalScope(ani_size(std::numeric_limits<uint32_t>::max()) - 0), ANI_OUT_OF_MEMORY);
+    ASSERT_EQ(env_->CreateEscapeLocalScope(ani_size(std::numeric_limits<ani_size>::max()) - 1), ANI_OUT_OF_MEMORY);
+    ASSERT_EQ(env_->CreateEscapeLocalScope(ani_size(std::numeric_limits<ani_size>::max()) - 0), ANI_OUT_OF_MEMORY);
+}
+
 TEST_F(CreateLocalScopeTest, create_local_scope_test1)
 {
     for (ani_size i = 1; i <= LOOP_COUNT; i++) {
