@@ -51,13 +51,6 @@
 03.types/19.union_types/01.union_types_normalization/norm_34.ets
 03.types/19.union_types/01.union_types_normalization/norm_35.ets
 
-#23823
-03.types/19.union_types/02.access_to_common_union_members/cm_fld2_11.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_fld3_11.ets
-
-#20935 Runtime aborts on access to common field with generics
-03.types/19.union_types/02.access_to_common_union_members/cm_fld1_11.ets
-
 #20936 Access to common union method doesn't work
 03.types/19.union_types/02.access_to_common_union_members/cm_meth1_0.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_11.ets
