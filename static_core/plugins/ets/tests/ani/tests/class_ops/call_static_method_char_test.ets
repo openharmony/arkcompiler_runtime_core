@@ -23,7 +23,7 @@ class Operations {
         }
         return c as char;
     }
-};
+}
 
 class A {
     static funcA(a0: char, a1: char): char {
@@ -43,11 +43,64 @@ class A {
     static funcB(a0: char, a1: char): char {
         return A.funcA(a0, a1);
     }
-};
+}
+
 class B extends A{
     static funcB(a0: char, a1: char): char {
         let c: Char = new Char('0');
         c = a0 + a1 as Char;
         return c as char;
     }
-};
+}
+
+class C extends A{
+}
+
+class D extends A{
+    static funcA(a0: char, a1: char): char {
+        let c: Char = new Char('0');
+        c = a0 + a1 as char;
+        return c as char;
+    }
+}
+
+class E extends A{
+    static funcA(a0: char, a1: char): char {
+        return A.funcA(a0, a1);
+    }
+}
+
+class F {
+    static increment(a0: char, a1: char): void {
+        F.count = F.count + a0 as char;
+        F.count = F.count + a1 as char;
+    }
+
+    static getCount(): char {
+        return F.count;
+    }
+
+    static count: char = '\0';
+}
+
+class G {
+    public static publicMethod(a0: char, a1: char): char {
+        let c: Char = new Char('0');
+        c = a0 + a1 as char;
+        return c as char;
+    }
+
+    private static privateMethod(a0: char, a1: char): char {
+        let c: Char = new Char('0');
+        if (a0 > a1) {
+            c = a0 - a1 as char;
+        } else {
+            c = a1 - a0 as char;
+        }
+        return c as char;
+    }
+
+    static callPrivateMethod(a0: char, a1: char): char {
+        return G.privateMethod(a0, a1);
+    }
+}

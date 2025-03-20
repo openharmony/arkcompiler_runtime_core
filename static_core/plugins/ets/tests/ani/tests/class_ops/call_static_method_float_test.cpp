@@ -38,6 +38,25 @@ public:
         *clsResult = cls;
         *methodResult = method;
     }
+
+    void TestCombineScene(const char *className, ani_float val1, ani_float val2, ani_float expectedValue)
+    {
+        ani_class cls {};
+        ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
+        ani_static_method method {};
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "FF:F", &method), ANI_OK);
+
+        ani_float value = 0.0;
+        ASSERT_EQ(env_->Class_CallStaticMethod_Float(cls, method, &value, val1, val2), ANI_OK);
+        ASSERT_EQ(value, expectedValue);
+
+        ani_value args[2U];
+        args[0U].f = val1;
+        args[1U].f = val2;
+        ani_float valueA = 0.0;
+        ASSERT_EQ(env_->Class_CallStaticMethod_Float_A(cls, method, &valueA, args), ANI_OK);
+        ASSERT_EQ(valueA, expectedValue);
+    }
 };
 
 TEST_F(CallStaticMethodTest, call_static_method_float)
@@ -231,6 +250,81 @@ TEST_F(CallStaticMethodTest, call_static_method_float_combine_scenes_3)
     ani_float valueA = 0;
     ASSERT_EQ(env_->Class_CallStaticMethod_Float_A(cls, method, &valueA, args), ANI_OK);
     ASSERT_EQ(valueA, FLOAT_VAL1 + FLOAT_VAL2);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_float_null_env)
+{
+    ani_class cls {};
+    ani_static_method method {};
+    GetMethodData(&cls, &method);
+
+    ani_float value = 0.0;
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Float(nullptr, cls, method, &value, FLOAT_VAL1, FLOAT_VAL2),
+              ANI_INVALID_ARGS);
+    ani_value args[2U];
+    args[0U].f = FLOAT_VAL1;
+    args[1U].f = FLOAT_VAL2;
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Float_A(nullptr, cls, method, &value, args), ANI_INVALID_ARGS);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_float_combine_scenes_4)
+{
+    TestCombineScene("Lcall_static_method_float_test/C;", FLOAT_VAL1, FLOAT_VAL2, FLOAT_VAL1 + FLOAT_VAL2);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_float_combine_scenes_5)
+{
+    TestCombineScene("Lcall_static_method_float_test/D;", FLOAT_VAL1, FLOAT_VAL2, FLOAT_VAL2 - FLOAT_VAL1);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_float_combine_scenes_6)
+{
+    TestCombineScene("Lcall_static_method_float_test/E;", FLOAT_VAL1, FLOAT_VAL2, FLOAT_VAL1 + FLOAT_VAL2);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_float_combine_scenes_7)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lcall_static_method_float_test/F;", &cls), ANI_OK);
+    ani_static_method method1 {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "increment", nullptr, &method1), ANI_OK);
+    ani_static_method method2 {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "getCount", nullptr, &method2), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethod_Void(cls, method1, FLOAT_VAL1, FLOAT_VAL2), ANI_OK);
+    ani_float value = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Float(cls, method2, &value), ANI_OK);
+    ASSERT_EQ(value, FLOAT_VAL1 + FLOAT_VAL2);
+
+    ani_value args[2U];
+    args[0U].f = FLOAT_VAL1;
+    args[1U].f = FLOAT_VAL2;
+    ani_float valueA = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Float_A(cls, method2, &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, FLOAT_VAL1 + FLOAT_VAL2);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_float_combine_scenes_8)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lcall_static_method_float_test/G;", &cls), ANI_OK);
+    ani_static_method method1 {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "publicMethod", "FF:F", &method1), ANI_OK);
+    ani_static_method method2 {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "callPrivateMethod", "FF:F", &method2), ANI_OK);
+    ani_float value = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Float(cls, method1, &value, FLOAT_VAL1, FLOAT_VAL2), ANI_OK);
+    ASSERT_EQ(value, FLOAT_VAL1 + FLOAT_VAL2);
+    ASSERT_EQ(env_->Class_CallStaticMethod_Float(cls, method2, &value, FLOAT_VAL1, FLOAT_VAL2), ANI_OK);
+    ASSERT_EQ(value, FLOAT_VAL2 - FLOAT_VAL1);
+
+    ani_value args[2U];
+    args[0U].f = FLOAT_VAL1;
+    args[1U].f = FLOAT_VAL2;
+    ani_float valueA = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Float_A(cls, method1, &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, FLOAT_VAL1 + FLOAT_VAL2);
+    ASSERT_EQ(env_->Class_CallStaticMethod_Float_A(cls, method2, &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, FLOAT_VAL2 - FLOAT_VAL1);
 }
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
