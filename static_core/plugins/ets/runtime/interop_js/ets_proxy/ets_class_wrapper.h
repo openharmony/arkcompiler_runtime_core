@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,6 +120,11 @@ private:
     std::vector<napi_property_descriptor> BuildJSProperties(Span<Field *> fields, Span<EtsMethodSet *> methods);
     EtsClassWrapper *LookupBaseWrapper(EtsClass *klass);
 
+    void SetUpMimicHandler(napi_env env);
+    static napi_value CreateProxy(napi_env env, napi_value jsCtor, EtsClassWrapper *thisWrapper);
+    static napi_value MimicGetHandler(napi_env env, napi_callback_info info);
+    static napi_value MimicSetHandler(napi_env env, napi_callback_info info);
+
     static napi_value JSCtorCallback(napi_env env, napi_callback_info cinfo);
     bool CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_value jsThis, Span<napi_value> jsArgs);
 
@@ -153,6 +158,10 @@ private:
     std::vector<std::unique_ptr<EtsMethodSet>> etsMethods_;
     uint32_t numMethods_ {};
     uint32_t numFields_ {};
+
+    bool needProxy_ = false;
+    napi_ref jsProxyCtorRef_ {};
+    napi_ref jsProxyHandlerRef_ {};
 };
 
 }  // namespace ark::ets::interop::js::ets_proxy
