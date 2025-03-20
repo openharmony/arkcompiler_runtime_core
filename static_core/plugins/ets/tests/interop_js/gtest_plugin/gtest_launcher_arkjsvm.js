@@ -81,11 +81,11 @@ function main() {
 	globalThis.require = require;
 
 	let argv = helper.getArgv();
-	const arkJsNapiCliLastArgIdx = 4;
+	const arkJsNapiCliLastArgIdx = 5;
 
 	let gtestName = argv[arkJsNapiCliLastArgIdx];
 	if (gtestName === undefined) {
-		print(`Usage: ${argv[0]} ${argv[1]} ${argv[2]} ${argv[3]} <test name>`);
+		print(`Usage: ${argv[0]} ${argv[1]} ${argv[2]} ${argv[3]} ${argv[4]} <test name>`);
 		return 1;
 	}
 

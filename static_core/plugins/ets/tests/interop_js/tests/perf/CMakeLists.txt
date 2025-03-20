@@ -42,9 +42,10 @@ foreach(TEST ${PERF_TESTS})
     set(ETS_VERIFICATOR_ERRORS "NodeHasParent,EveryChildHasValidParent,VariableHasScope,NodeHasType,IdentifierHasVariable,ReferenceTypeAnnotationIsNull,ArithmeticOperationValid,SequenceExpressionHasLastType,ForLoopCorrectlyInitialized,VariableHasEnclosingScope,ModifierAccessValid")
     # NOTE(dkofanov): `ImportExportAccessValid` need to be fixed
     # set(ETS_VERIFICATOR_ERRORS "${ETS_VERIFICATOR_ERRORS}:ImportExportAccessValid")
-    panda_ets_interop_js_test_nodevm(ets_interop_js_perf_test_frontend_${TEST}
+    panda_ets_interop_js_test_arkjsvm(ets_interop_js_perf_test_frontend_${TEST}
         ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_frontend.ets
         JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_test.js
+        JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/code.js
         LAUNCHER_ARGS ${TEST} ${WARMUP} ${ITERS}
         ETS_CONFIG ${ETS_CONFIG}
         ETS_VERIFICATOR_ERRORS ${ETS_VERIFICATOR_ERRORS}

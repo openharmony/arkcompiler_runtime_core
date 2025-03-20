@@ -33,7 +33,7 @@ function runTest(test) {
     if (!etsVmRes) {
         throw Error(`Failed to create ETS runtime`);
     }
-    
+
     if (test === 'hash_to_info') {
         hashToInfo(etsVm);
     } else {
@@ -51,7 +51,7 @@ function hashToInfo(etsVm) {
     }
 }
 
-const testNameNum = 5;
+const testNameNum = 6;
 let args = helper.getArgv();
 if (args.length !== testNameNum) {
 	throw Error('Expected test name');

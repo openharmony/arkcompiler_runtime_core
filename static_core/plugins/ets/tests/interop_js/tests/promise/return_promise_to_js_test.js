@@ -72,5 +72,5 @@ function runTest(test, iter) {
 }
 
 let args = helper.getArgv();
-expectedValue = args[5];
-runTest(args[4]);
+expectedValue = args[6];
+runTest(args[5]);
