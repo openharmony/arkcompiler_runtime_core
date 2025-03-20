@@ -308,32 +308,32 @@ cannot be used as identifiers:
 +--------------------+-------------------+------------------+------------------+
 |                    |                   |                  |                  |
 +====================+===================+==================+==================+
-|   ``abstract``     |   ``else``        |   ``internal``   |   ``static``     |
+|   ``abstract``     |   ``else``        |   ``internal``   |   ``switch``     |
 +--------------------+-------------------+------------------+------------------+
-|   ``as``           |   ``enum``        |   ``launch``     |   ``switch``     |
+|   ``as``           |   ``enum``        |   ``let``        |   ``super``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``async``        |   ``export``      |   ``let``        |   ``super``      |
+|   ``async``        |   ``export``      |   ``native``     |   ``this``       |
 +--------------------+-------------------+------------------+------------------+
-|   ``await``        |   ``extends``     |   ``native``     |   ``this``       |
+|   ``await``        |   ``extends``     |   ``new``        |   ``throw``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``break``        |   ``false``       |   ``new``        |   ``throw``      |
+|   ``break``        |   ``false``       |   ``null``       |   ``true``       |
 +--------------------+-------------------+------------------+------------------+
-|   ``case``         |   ``final``       |   ``null``       |   ``true``       |
+|   ``case``         |   ``final``       |   ``override``   |   ``try``        |
 +--------------------+-------------------+------------------+------------------+
-|   ``class``        |   ``for``         |   ``override``   |   ``try``        |
+|   ``class``        |   ``for``         |   ``package``    |   ``undefined``  |
 +--------------------+-------------------+------------------+------------------+
-|   ``const``        |   ``function``    |   ``package``    |   ``undefined``  |
+|   ``const``        |   ``function``    |   ``private``    |   ``while``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``constructor``  |   ``if``          |   ``private``    |   ``while``      |
+|   ``constructor``  |   ``if``          |   ``protected``  |                  |
 +--------------------+-------------------+------------------+------------------+
-|   ``continue``     |   ``implements``  |   ``protected``  |                  |
+|   ``continue``     |   ``implements``  |   ``public``     |                  |
 +--------------------+-------------------+------------------+------------------+
-|   ``default``      |   ``import``      |   ``public``     |                  |
+|   ``default``      |   ``import``      |   ``return``     |                  |
 +--------------------+-------------------+------------------+------------------+
-|   ``do``           |   ``interface``   |   ``return``     |                  |
+|   ``do``           |   ``interface``   |   ``static``     |                  |
 +--------------------+-------------------+------------------+------------------+
 
-2. Names of primitive built-in types as well as their boxed versions
+2. Names of primitive built-in types as well as their aliases
 also are *hard keywords*, and cannot be used as identifiers:
 
 +---------------+---------------+---------------+---------------+---------------+---------------+
@@ -384,12 +384,6 @@ the future use (or used in |TS|):
 +===============+===============+===============+===============+================+
 |   ``keyof``   |    ``is``     |   ``struct``  |    ``var``    |  ``yield``     |
 +---------------+---------------+---------------+---------------+----------------+
-
-5. The following words cannot be used as user-defined type names but are not
-otherwise restricted: see :ref:`Reserved Names of TS Types`.
-
-.. index::
-   user-defined type name
 
 |
 

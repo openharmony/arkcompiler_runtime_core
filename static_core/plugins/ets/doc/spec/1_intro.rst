@@ -538,8 +538,8 @@ as used in other languages, application areas, or industries.
      and signature.
 
    truthiness
-     -- concept that extends the Boolean logic to operands and results
-     of non-Boolean types, and allows handling the value of a valid
+     -- concept that extends the boolean logic to operands and results
+     of non-boolean types, and allows handling the value of a valid
      expression of a non-void type as ``Truthy`` or ``Falsy``, depending on
      the kind of the value type.
 

@@ -240,10 +240,6 @@ Assignment-like contexts allow using of one of the following:
 
 - :ref:`Constant Narrowing Integer Conversions`;
 
-- :ref:`Boxing Conversions`;
-
-- :ref:`Unboxing Conversions`;
-
 - :ref:`Widening Union Conversions`;
 
 - :ref:`Widening Reference Conversions`;
@@ -268,7 +264,6 @@ Assignment-like contexts allow using of one of the following:
    widening
    narrowing
    constant
-   boxing conversion
    constant
    string
    enumeration
@@ -647,8 +642,7 @@ is to be specified as *target type*.
           p as () => void       // OK
           p as T                // OK
           p as S                // OK
-          p as number // compile-time error, cast to value type
-          p as Number // OK use this cast instead of the cast above
+          p as number           // OK
        }
     }
 
@@ -757,7 +751,7 @@ to the target type:
     let d: Derived1 | Derived2 = ...
     let b: Base = d // OK, as Derived1 and Derived2 are assignable to Base
 
-    let x: Double | Base = ...
+    let x: double | Base = ...
     let y: double = x // Compile-time error, as Base cannot be converted to double
 
 .. index::
@@ -821,7 +815,7 @@ execution. A runtime error occurs if a check fails.
        if (some_condition)
           return 1 // Valid enum constant value
        else
-          return 666 // Invalid enum constant value - will cause runtime error
+          return 42 // Invalid enum constant value - will cause runtime error
     }
 
 
@@ -843,7 +837,7 @@ execution. A runtime error occurs if a check fails.
        if (some_condition)
           return "AA" // Valid enum constant value
        else
-          return "666" // Invalid enum constant value - will cause runtime error
+          return "DD" // Invalid enum constant value - will cause runtime error
     }
 
 
@@ -891,19 +885,13 @@ Primitive Types Conversions
 
 - :ref:`Widening Primitive Conversions`;
 
-- :ref:`Constant Narrowing Integer Conversions`;
-
-- :ref:`Boxing Conversions`;
-
-- :ref:`Unboxing Conversions`.
+- :ref:`Constant Narrowing Integer Conversions`.
 
 .. index::
    primitive type conversion
    primitive type
    narrowing
    widening
-   boxing conversion
-   unboxing conversion
 
 |
 
@@ -918,7 +906,7 @@ Widening Primitive Conversions
 *Widening primitive conversions* convert the following:
 
 - Values of a smaller numeric type to a larger type (see
-  :ref:`Numeric Types Hierarchy`);
+  :ref:`Numeric Types`);
 
 - Values of type ``byte`` to type ``char`` (see :ref:`Character Type and Operations`);
 
@@ -1015,86 +1003,6 @@ These conversions never cause runtime errors.
 
 |
 
-.. _Boxing Conversions:
-
-Boxing Conversions
-==================
-
-.. meta:
-    frontend_status: Done
-
-*Boxing conversions* handle primitive type expressions as expressions of a
-corresponding reference type.
-
-If the unboxed *target type* is larger than the expression type, then a
-*widening primitive conversion* is performed as the first step of a *boxing
-conversion* of numeric types and type ``char``.
-For example, a *boxing conversion* converts *i* of primitive value type ``int``
-to a reference *n* of class type ``Number`` as follows:
-
-.. code-block-meta:
-   not-subset
-
-.. code-block:: typescript
-   :linenos:
-
-    let i: int = 1
-    let n: Number = i // int -> number -> Number
-
-    let c: char = 'a'
-    let l: Long = c // char -> long  -> Long
-
-*Boxing conversions* can cause ``OutOfMemoryError`` to be thrown if the storage
-available to create a new instance of the reference type is not sufficient.
-
-.. index::
-   widening conversion
-   boxing conversion
-   reference type
-   target type
-   expression
-   widening
-
-|
-
-.. _Unboxing Conversions:
-
-Unboxing Conversions
-====================
-
-.. meta:
-    frontend_status: Done
-
-*Unboxing conversions* handle reference type expressions as expressions of
-a corresponding primitive type.
-
-If the *target type* is larger than the unboxed expression type, then a
-*widening primitive conversion* is performed as the second step of
-the *unboxing conversion* of numeric types and type ``char``.
-For example, the *unboxing conversion* converts *i* of reference type ``Int``
-to type ``long`` as follows:
-
-.. code-block-meta:
-   not-subset
-
-.. code-block:: typescript
-   :linenos:
-
-    let i: Int = 1
-    let l: long = i // Int -> int -> long
-
-*Unboxing conversions* never cause runtime errors.
-
-.. index::
-   unboxing conversion
-   expression
-   primitive type
-   target type
-   widening
-   primitive conversion
-
-|
-
 .. _Widening Union Conversions:
 
 Widening Union Conversions
@@ -1144,7 +1052,7 @@ This concept is illustrated by the example below:
    :linenos:
 
     let u1: string | number | boolean = true
-    let u2: string | number = 666
+    let u2: string | number = 42
     u1 = u2 // OK
     u2 = u1 // compile-time error as type of u1 is not compatible with type of u2
 

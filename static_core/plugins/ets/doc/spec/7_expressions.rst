@@ -20,15 +20,13 @@ Expressions
 
 This chapter describes the meanings of expressions and the rules for the
 evaluation of expressions, except the expressions related to coroutines
-(see :ref:`Create and Launch a Coroutine` for ``launch`` expressions, and
-:ref:`Awaiting a Coroutine` for ``await`` expressions) and expressions
+(see :ref:`Coroutines`) and expressions
 described as experimental (see :ref:`Lambda Expressions with Receiver`).
 
 .. index::
    evaluation
    expression
    coroutine
-   launch expression
    await expression
 
 .. code-block:: abnf
@@ -47,7 +45,6 @@ described as experimental (see :ref:`Lambda Expressions with Receiver`).
         | stringInterpolation
         | lambdaExpression
         | lambdaExpressionWithReceiver
-        | launchExpression
         | awaitExpression
         ;
     primaryExpression:
@@ -240,14 +237,6 @@ follows:
 -  If the right-hand operand expression has the zero value, then integer
    division (see :ref:`Division`), or integer remainder (see :ref:`Remainder`)
    operators throw ``ArithmeticError``.
--  If the boxing conversion (see :ref:`Boxing Conversions`) occurs while
-   performing an assignment to an array element of a reference type, then a
-   method call expression (see :ref:`Method Call Expression`), or prefix/postfix
-   increment/decrement (see :ref:`Unary Expressions`) operators can throw
-   ``OutOfMemoryError``.
--  If the type of an array element is not compatible with the value that is
-   being assigned, then assignment to an array element of a reference type
-   throws ``ArrayStoreError``.
 
 .. index::
    predefined operator
@@ -275,7 +264,6 @@ follows:
    array element type
    cast
    assignment
-   boxing conversion
 
 Possible hard-to-predict and hard-to-handle linkage and virtual machine errors
 can cause errors during the evaluation of an expression.
@@ -596,6 +584,9 @@ Type of a *named reference* is the type of an expression.
 
 **Note**. When a *named reference* is of a function type, then a new function
 object is always created as specified in :ref:`Uniqueness of Functional Objects`.
+Also when a *named reference* refers to a member of some class or interface
+which is a non-static method it is boundned with the object of that class or
+interface.
 
 .. index::
    simple name
@@ -613,8 +604,14 @@ object is always created as specified in :ref:`Uniqueness of Functional Objects`
 
     import * as compilationUnitName from "someFile"
 
-    class Type {}
-
+    class Type {
+      static method() {}
+      method () {
+         let local = this.method // Qualified name referring an instance method
+      }
+    }
+    const m1 = Type.method  // Qualified name referring a static method
+    const m2 = (new Type).method
 
     function foo (parameter: Type) {
       let local: Type = parameter /* 'parameter' here is the
@@ -639,6 +636,17 @@ object is always created as specified in :ref:`Uniqueness of Functional Objects`
     let instantiation = generic_function<string> /* type of 'instantiation' is
          a function type derived from the signature of instantiated function
          'generic_function<string> ()' */
+
+    
+    class aClass {
+        field = 123
+        method(): number { return this.field }
+    }
+    const anObject = new aClass
+    const aMethod = anObject.method
+    anObject.field = 42
+    console.log (aMethod()) // Outputs 42
+
 
 |
 
@@ -759,21 +767,9 @@ Array Literal Type Inference from Context
 .. meta:
     frontend_status: Done
 
-Type of an array literal can be inferred from the context, including
+Type of an array literal can be inferred from the *context*, including
 explicit type annotation of a variable declaration, left-hand part type
 of an assignment, call parameter type, or type of a cast expression:
-
-.. index::
-   type inference
-   context
-   array type
-   array literal
-   type
-   type annotation
-   variable declaration
-   assignment
-   call parameter type
-   cast expression
 
 .. code-block:: typescript
    :linenos:
@@ -796,10 +792,44 @@ of an assignment, call parameter type, or type of a cast expression:
 
     class aClass {}
     let b1: Array <aClass> = [new aClass, new aClass]
-    let b2: Array <Number> = [1, 2, 3]
+    let b2: Array <number> = [1, 2, 3]
     let b3: FixedArray<number> = [1, 2]
       /* Type of literal is inferred from the context
          taken from b1, b2 and b3 declarations */
+
+
+.. index::
+   literal
+   string literal
+   instance
+   error
+   assignability
+   inheritance
+   context
+   array
+   tuple
+
+The following example illustrates the possible kinds of context:
+
+.. code-block:: typescript
+   :linenos:
+
+    let array: number[] = [1, 2, 3]   // assignment context
+    function foo (array: number[]) {}
+    foo ([1, 2, 3])                   // call context
+    [1, 2, 3] as number[]             // casting conversion
+
+.. index::
+   type inference
+   context
+   array type
+   array literal
+   type
+   type annotation
+   variable declaration
+   assignment
+   call parameter type
+   cast expression
 
 All valid conversions are applied to the initializer expression, i.e., each
 initializer expression type must be assignable (see :ref:`Assignability`)
@@ -816,44 +846,6 @@ to the array element type. Otherwise, a :index:`compile-time error` occurs.
 
     let value: number = 2
     let list: Object[] = [1, value, "hello", new Error()] // ok
-
-In the example above, the first literal and 'value' are implicitly boxed to
-``Number``, and types of a string literal and the instance of type
-``Error`` are assignable (see :ref:`Assignability`) to ``Object``
-because the corresponding classes are inherited from Object.
-
-**Note**. There are cases when every array or tuple element of primitive type
-is boxed (see :ref:`Boxing Conversions`) according to the type of the context
-that creates a new array or tuple. Such transformation is performed at compile
-time to ensure that the new array or tuple fits the type of the context.
-
-.. code-block:: typescript
-   :linenos:
-
-    let array: Number[] = [1, 2, 3]   // assignment context
-    function foo (array: Number[]) {}
-    foo ([1, 2, 3])                   // call context
-    [1, 2, 3] as Number[]             // casting conversion
-
-    let tuple: [Number, Boolean] = [1, true]    // assignment context
-    bar ([1, true])                             // call context
-    function bar (tuple: [Number, Boolean]) {}
-    [1, true] as [Number, Boolean]              // casting conversion
-
-.. index::
-   literal
-   boxing
-   boxed type
-   string literal
-   instance
-   error
-   assignability
-   inheritance
-   context
-   transformation
-   array
-   tuple
-
 
 If the type used in the context is a *tuple type* (see :ref:`Tuple Types`),
 and types of all literal expressions are compatible with tuple type elements
@@ -1192,12 +1184,12 @@ object literal. Otherwise, a :index:`compile-time error` occurs:
     class OK {
         set attr (attr: number) {}
     }
-    const a: OK = {attr: 666} // OK, as the setter be called
+    const a: OK = {attr: 42} // OK, as the setter be called
 
-    class CTE {
-        get attr (): number { return 666 }
+    class Err {
+        get attr (): number { return 42 }
     }
-    const b: CTE = {attr: 666} // compile-time error - no setter for 'attr'
+    const b: Err = {attr: 42} // compile-time error - no setter for 'attr'
 
 .. index::
    accessor
@@ -1287,13 +1279,13 @@ property, and the property is used in an object literal, then a
     interface I1 {
         set attr (attr: number)
     }
-    const a: I1 = {attr: 666} /* compile-time error - 'attr' cannot be used
+    const a: I1 = {attr: 42} /* compile-time error - 'attr' cannot be used
                                  in object literal */
 
     interface I2 {
         get attr (): number
     }
-    const b: I2 = {attr: 666} /* compile-time error - 'attr' cannot be used
+    const b: I2 = {attr: 42} /* compile-time error - 'attr' cannot be used
                                  in object literal */
 
 .. index::
@@ -1514,9 +1506,9 @@ A sequence of types of these values is the type of the *spread expression*.
       console.log (array)
     }
 
-    run_time_spread_application1 (array1, array2) // prints [1, 2, 3, 666, 4, 5]
+    run_time_spread_application1 (array1, array2) // prints [1, 2, 3, 42, 4, 5]
     function run_time_spread_application1 (a1: number[], a2: number[]) {
-      console.log ([...a1, 666, ...a2])
+      console.log ([...a1, 42, ...a2])
         // array literal will be built at runtime
     }
 
@@ -1531,9 +1523,9 @@ A sequence of types of these values is the type of the *spread expression*.
       console.log (tuple)
     }
 
-    run_time_spread_application2 (tuple1, tuple2) // prints [1, "2", true, 666, 4, "5"]
+    run_time_spread_application2 (tuple1, tuple2) // prints [1, "2", true, 42, 4, "5"]
     function run_time_spread_application2 (a1: [number, string, boolean], a2: [number, string]) {
-      console.log ([...a1, 666, ...a2])
+      console.log ([...a1, 42, ...a2])
         // such array literal will be built at runtime
     }
 
@@ -1815,9 +1807,9 @@ denotes a field.
     }
     class Derived extends Base {
        get property(): number { return super.property } // OK
-       set property(p: number) { super.property = 666 } // OK
+       set property(p: number) { super.property = 42 } // OK
        foo () {
-          super.field = 666          // compile-time error
+          super.field = 42          // compile-time error
           console.log (super.field)  // compile-time error
        }
     }
@@ -2267,13 +2259,13 @@ array elements can be modified by changing the resultant variable fields:
     console.log(name[1]) // prints Martin
 
     class RefType {
-        field: number = 666
+        field: number = 42
     }
     const objects: RefType[] = [new RefType(), new RefType()]
     const object = objects [1]
     object.field = 777            // change the field in the array element
-    console.log(objects[0].filed) // prints 666
-    console.log(objects[1].filed) // prints 777
+    console.log(objects[0].field) // prints 42
+    console.log(objects[1].field) // prints 777
 
     let an_array = [1, 2, 3]
     let element = an_array [3.5] // Compile-time error
@@ -2797,14 +2789,12 @@ of a ``typeof`` expression cannot be determined. Otherwise, the value of a
 +---------------------------------+-------------------------+-----------------------------+
 |     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
 +=================================+=========================+=============================+
-| ``number``/``Number``           | "number"                | .. code-block:: typescript  |
+| ``number``                      | "number"                | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  let n: number = ...        |
 |                                 |                         |  typeof n                   |
-|                                 |                         |  let N: Number = ...        |
-|                                 |                         |  typeof N                   |
 +---------------------------------+-------------------------+-----------------------------+
-| ``string``/``String``           | "string"                | .. code-block:: typescript  |
+| ``string``                      | "string"                | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  let s: string = ...        |
 |                                 |                         |  typeof s                   |
@@ -2815,19 +2805,15 @@ of a ``typeof`` expression cannot be determined. Otherwise, the value of a
 +---------------------------------+-------------------------+-----------------------------+
 |     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
 +=================================+=========================+=============================+
-| ``boolean``/``Boolean``         | "boolean"               | .. code-block:: typescript  |
+| ``boolean``                     | "boolean"               | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  let b: boolean = ...       |
 |                                 |                         |  typeof b                   |
-|                                 |                         |  let B: Boolean = ...       |
-|                                 |                         |  typeof B                   |
 +---------------------------------+-------------------------+-----------------------------+
-| ``bigint``/``BigInt``           | "bigint"                | .. code-block:: typescript  |
+| ``bigint``                      | "bigint"                | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  let b: bigint = ...        |
 |                                 |                         |  typeof b                   |
-|                                 |                         |  let B: BigInt = ...        |
-|                                 |                         |  typeof B                   |
 +---------------------------------+-------------------------+-----------------------------+
 | any class or interface          | "object"                | .. code-block:: typescript  |
 |                                 |                         |                             |
@@ -2859,14 +2845,11 @@ of a ``typeof`` expression cannot be determined. Otherwise, the value of a
 |                                 |                         |  let c: C = ...             |
 |                                 |                         |  typeof c                   |
 +---------------------------------+-------------------------+-----------------------------+
-| All high-performance numeric    | "number"                | .. code-block:: typescript  |
-| value types and their boxed     |                         |                             |
-| versions:                       |                         |  let x: byte = ...          |
+| Numeric types:                  | "number"                | .. code-block:: typescript  |
+|                                 |                         |                             |
+|                                 |                         |  let x: byte = ...          |
 | ``byte``, ``short``, ``int``,   |                         |  typeof x                   |
-| ``long``, ``float``, ``double``,|                         |  ...                        |
-| ``Byte``, ``Short``, ``Int``,   |                         |                             |
-| ``long``, ``Long``, ``Float``,  |                         |                             |
-| ``Double``, ``char``, ``Char``  |                         |                             |
+| ``long``, ``float``, ``double`` |                         |  ...                        |
 +---------------------------------+-------------------------+-----------------------------+
 
 |
@@ -3481,14 +3464,11 @@ Logical Complement
 '``!``'.
 
 Type of the operand *expression* with the unary '``!``' operator must be
-``boolean`` or ``Boolean`` or type mentioned in
+``boolean`` or type mentioned in
 :ref:`Extended Conditional Expressions`. Otherwise, a
 :index:`compile-time error` occurs.
 
 The unary logical complement expression’s type is ``boolean``.
-
-The unboxing conversion (see :ref:`Unboxing Conversions`) is
-performed on the operand at runtime if needed.
 
 The value of a unary logical complement expression is ``true`` if the (possibly
 converted) operand value is ``false``, and ``false`` if the operand value
@@ -3502,11 +3482,8 @@ converted) operand value is ``false``, and ``false`` if the operand value
    operator
    unary operator
    boolean type
-   Boolean type
    compile-time error
    unary logical complement expression
-   unboxing conversion
-   boxing conversion
    predefined numeric types conversion
 
 |
@@ -3585,7 +3562,7 @@ Integer multiplication is associative when all operands are of the same type.
 Floating-point multiplication is not associative.
 
 Type of a *multiplication expression* is the 'heaviest' (see
-:ref:`Numeric Types Hierarchy`) type of its operands.
+:ref:`Numeric Types`) type of its operands.
 
 If overflow occurs during integer multiplication, then:
 
@@ -3960,7 +3937,7 @@ Type of each operand of the binary operator '``-``' must be convertible
 occurs.
 
 Type of *Additive expression* is ``string`` or the 'heaviest' (see
-:ref:`Numeric Types Hierarchy`) type of its operands.
+:ref:`Numeric Types`) type of its operands.
 
 
 .. index::
@@ -4029,7 +4006,7 @@ The binary operator '``-``' performs subtraction and produces the difference
 of two numeric operands.
 
 Type of an additive expression performed on numeric operands is the
-largest type (see :ref:`Numeric Types Hierarchy`) to which operands of that
+largest type (see :ref:`Numeric Types`) to which operands of that
 expression are converted.
 
 If the promoted type is ``int`` or ``long``, then integer arithmetic is
@@ -4566,7 +4543,7 @@ The variant of equality evaluation to be used depends on types of the
 operands used as follows:
 
 -  *Value equality* is applied to entities of primitive types
-   (see :ref:`Value Types`), their boxed versions (see :ref:`Boxed Types`),
+   (see :ref:`Primitive Types`),
    type ``string`` (see :ref:`Type string`), type ``bigint`` (see
    :ref:`Type bigint`), and enumeration types (see :ref:`Enumerations`).
 -  *Reference Equality based on actual (dynamic) type* is applied to values of
@@ -4590,14 +4567,13 @@ operands used as follows:
 Operators '``===``' and '``==``', or '``!==``' and '``!=``' are used for:
 
 - :ref:`Numerical Equality Operators` if operands are of numeric types (see
-  :ref:`Numeric Types`), type ``char``, or the boxed version of numeric types;
+  :ref:`Numeric Types`), or type ``char``;
 
 - :ref:`String Equality Operators` if both operands are of type ``string``;
 
 - :ref:`Bigint Equality Operators` if both operands are of type ``bigint``;
 
-- :ref:`Boolean Equality Operators` if both operands are of type ``boolean``
-  or ``Boolean``;
+- :ref:`Boolean Equality Operators` if both operands are of type ``boolean``;
 
 - :ref:`Enumeration Equality Operators` if both operands are of enumeration type;
 
@@ -4655,7 +4631,7 @@ Otherwise, a :index:`compile-time error` occurs.
 
 A widening conversion can occur (see :ref:`Widening Primitive Conversions`)
 if type of one operand is smaller than type of the other operand (see
-:ref:`Numeric Types Hierarchy`).
+:ref:`Numeric Types`).
 
 If the converted type of the operands is ``int`` or ``long``, then an
 integer equality test is performed.
@@ -4719,7 +4695,6 @@ The following example illustrates *numerical equality*:
    5 == new Number(5) // true
    5 === new Number(5) // true
 
-   new Number(5) == new Number(5) // true
    5 == 5.0 // true
 
 .. index::
@@ -4778,8 +4753,7 @@ Bigint Equality Operators
 .. meta:
     frontend_status: Done
 
-*Boolean equality* is used for operands of types ``bigint`` or
-``BigInt``.
+*Bigint equality* is used for operands of type ``bigint``.
 
 Two ``bigints`` are equal if they have the same value:
 
@@ -4808,13 +4782,9 @@ Boolean Equality Operators
 .. meta:
     frontend_status: Done
 
-*Boolean equality* is used for operands of types ``boolean`` or
-``Boolean``.
+*Boolean equality* is used for operands of type ``boolean``.
 
-If an operand is of type ``Boolean``, then the unboxing conversion must be
-performed (see :ref:`Primitive Types Conversions`).
-
-If both operands (after the unboxing conversion is performed if required) are
+If both operands are
 either ``true`` or ``false``, then the result of ':math:`==`' or ':math:`===`'
 is ``true``. Otherwise, the result is ``false``.
 
@@ -4824,13 +4794,11 @@ or '``!==``' is ``false``. Otherwise, the result is ``true``.
 .. index::
    value equality
    boolean type
-   Boolean type
    boolean equality
    boolean equality operator
    equality operator
    value equality operator
    operand
-   unboxing conversion
 
 |
 
@@ -4914,7 +4882,6 @@ The following example illustrates an equality with a value of type ``Object``:
 
     equ(1, 1) // true, numerical equality
     equ(1, 2) // false, numerical equality
-    equ(1, new Number(1)) // true, numerical equality
 
     equ("aa", "aa") // true, string equality
     equ(1, "aa") // false, not compatible types
@@ -4939,7 +4906,7 @@ The following example illustrates an equality with a value of type ``Object``:
 
     function check(a: Object) {}
 
-    class G<A, B extends Number> {
+    class G<A, B extends number> {
         foo(x: A, y: B) {
             check(x) // compile-type error, A is not assignable to Object
             check(y) // ok, B is assignable to Object (as it is, at least, Number)
@@ -5296,10 +5263,8 @@ Boolean Logical Operators
 .. meta:
     frontend_status: Done
 
-Type of the bitwise operator expression is ``boolean`` if both operands of
-operator '``&``', '``^``', or '``|``' are of type ``boolean`` or ``Boolean``.
-In any case, the unboxing conversion (see :ref:`Unboxing Conversions`) is
-performed on the operands if required.
+Type of the bitwise operator expression is ``boolean``. Both operands of
+operator '``&``', '``^``', or '``|``' must be of type ``boolean``.
 
 If both operand values are ``true``, then the resultant value of '``&``' is
 ``true``. Otherwise, the result is ``false``.
@@ -5314,10 +5279,8 @@ Thus, *boolean logical expression* is of the boolean type.
 
 .. index::
    boolean operator
-   Boolean operator
    logical operator
    bitwise operator expression
-   unboxing conversion
    conversion
    numeric types conversion
    numeric type
@@ -5372,30 +5335,25 @@ A *conditional-and* expression with extended semantics can be of the first
 expression type.
 
 Each operand of the *conditional-and* operator must be of type ``boolean``,
-``Boolean``, or of a type mentioned in :ref:`Extended Conditional Expressions`.
+or of a type mentioned in :ref:`Extended Conditional Expressions`.
 Otherwise, a :index:`compile-time error` occurs.
 
-The left-hand-side operand expression is first evaluated at runtime. If the
-result is of type ``Boolean``, then the unboxing conversion (see
-:ref:`Unboxing Conversions`) is performed as follows:
+The left-hand-side operand expression is first evaluated at runtime.
 
--  If the resultant value is ``false``, then the value of the *conditional-and*
-   expression is ``false``. The evaluation of the right-hand-side operand
-   expression is omitted.
+If the resultant value is ``false``, then the value of the *conditional-and*
+expression is ``false``. The evaluation of the right-hand-side operand
+expression is omitted.
 
--  If the value of the left-hand-side operand is ``true``, then the
-   right-hand-side expression is evaluated. If the result of the evaluation is
-   of type ``Boolean``, then the unboxing conversion (see :ref:`Unboxing Conversions`)
-   is performed. The resultant value is the value of the *conditional-and*
-   expression.
+If the value of the left-hand-side operand is ``true``, then the
+right-hand-side expression is evaluated. 
+The resultant value is the value of the *conditional-and*
+expression.
 
 .. index::
    conditional-and expression
    conditional-and operator
    compile-time error
    boolean type
-   Boolean type
-   unboxing conversion
    predefined numeric types conversion
    numeric types conversion
    numeric type
@@ -5447,22 +5405,19 @@ expression type.
    boolean type
    extended semantics
 
-Each operand of the *conditional-or* operator must be of type ``boolean`` or
-``Boolean`` or type mentioned in :ref:`Extended Conditional Expressions`.
+Each operand of the *conditional-or* operator must be of type ``boolean``
+or type mentioned in :ref:`Extended Conditional Expressions`.
 Otherwise, a :index:`compile-time error` occurs.
 
-The left-hand-side operand expression is first evaluated at runtime. If the
-result is of type ``Boolean``, then the *unboxing conversion ()* is performed as
-follows:
+The left-hand-side operand expression is first evaluated at runtime. 
 
--  If the resultant value is ``true``, then the value of the *conditional-or*
-   expression is ``true``, and the evaluation of the right-hand-side operand
-   expression is omitted.
+If the resultant value is ``true``, then the value of the *conditional-or*
+expression is ``true``, and the evaluation of the right-hand-side operand
+expression is omitted.
 
--  If the resultant value is ``false``, then the right-hand-side expression is
-   evaluated. If the result of the evaluation is of type ``Boolean``, then the
-   *unboxing conversion* is performed (see :ref:`Unboxing Conversions`). The
-   resultant value is the value of the *conditional-or* expression.
+If the resultant value is ``false``, then the right-hand-side expression is
+evaluated. 
+The resultant value is the value of the *conditional-or* expression.
 
 The computation results of '``||``' and '``|``' on ``boolean`` operands are
 the same, but the right-hand-side operand in '``||``' cannot be evaluated.
@@ -5472,8 +5427,6 @@ the same, but the right-hand-side operand in '``||``' cannot be evaluated.
    conditional-or operator
    runtime
    boolean type
-   Boolean type
-   unboxing conversion
    expression
    boolean operand
    numeric types conversion
@@ -5617,17 +5570,6 @@ one of the following ways:
         The result of the conversion is stored into the array element.
       - If ``TC`` is a reference type, then ``SC`` can be the same as ``TC`` or
         a type that extends or implements ``TC``.
-
-        If the |LANG| compiler cannot guarantee at compile time that the array
-        element is exactly of type ``TC``, then a check must be performed
-        at runtime to ensure that class ``RC`` is assignable to the actual
-        type ``SC`` of the array element (see
-        :ref:`Assignability with Initializer`). Class ``RC`` is the class
-        of the object referred to by the value of the right-hand-side operand at
-        runtime. If class ``RC`` is not assignable to type ``SC``, then
-        ``ArrayStoreError`` is thrown, and the assignment does not occur.
-        Otherwise, the reference value of the right-hand-side operand is stored
-        in the selected array element.
 
 .. index::
    operand
@@ -5990,7 +5932,7 @@ with the separators '``?``' between the first and the second expression, and
 '``:``' between the second and the third expression.
 
 A :index:`compile-time error` occurs if the first expression is not of type
-``boolean``, ``Boolean``, or a type mentioned in
+``boolean``, or a type mentioned in
 :ref:`Extended Conditional Expressions`.
 
 .. index::
@@ -6002,7 +5944,6 @@ A :index:`compile-time error` occurs if the first expression is not of type
    operand expression
    separator
    boolean type
-   Boolean type
    extended conditional expression
 
 Type of the conditional expression is determined as the union of types of the
@@ -6015,9 +5956,6 @@ The following steps are performed as the evaluation of a conditional expression
 occurs at runtime:
 
 #. The operand expression of a conditional expression is evaluated first.
-   The unboxing conversion (see :ref:`Unboxing Conversions`) is performed on
-   the result if necessary. If the unboxing conversion fails, then so does the
-   evaluation of the conditional expression.
 
 #. If the value of the first operand is ``true``, then the second operand
    expression is evaluated. Otherwise, the third operand expression is
@@ -6036,7 +5974,7 @@ The examples below represent different scenarios with standalone expressions:
 
     condition ? 5 : 6             // int
 
-    condition ? "5" : 6           // "5" | Int
+    condition ? "5" : 6           // "5" | int
 
 .. index::
    conditional expression
@@ -6044,7 +5982,6 @@ The examples below represent different scenarios with standalone expressions:
    union type
    evaluation
    operand expression
-   unboxing conversion
    conversion
    standalone expression
 
@@ -6454,15 +6391,12 @@ variable is implied to change:
 In order to make lambdas behave as required, the language implementation
 can act as follows:
 
--  Replace primitive type for the corresponding boxed type (x: int to x: Int)
-   if the captured variable is of primitive type;
-
 -  Replace the captured variable’s type for a proxy class that contains an
    original reference (x: T for x: Proxy<T>; x.ref = original-ref) if that
    captured variable is of non-primitive type.
 
-If the captured variable is defined as ``const``, then neither boxing nor
-proxying is required.
+If the captured variable is defined as ``const``, then 
+proxying is not required.
 
 If the captured formal parameter can be neither boxed nor proxied, then
 the implementation can require addition of a local variable as follows:
@@ -6471,12 +6405,10 @@ the implementation can require addition of a local variable as follows:
    lambda
    implementation
    primitive type
-   boxed type
    proxy class
    captured variable
    captured variable type
    non-primitive type
-   boxing
    proxying
    local variable
    variable
@@ -6514,14 +6446,17 @@ compile time.
         ;
 
 A *constant expression* is an expression of a primitive type (see
-:ref:`Primitive Types`), or of type ``string`` that completes normally while
-being composed only of the following:
+:ref:`Primitive Types`), or of type ``string``, or of enum type (see
+:ref:`Enumerations`) that completes normally while being composed only of the
+following:
 
 -  Literals of a primitive type, and literals of type ``string`` (see
    :ref:`Literals`);
 
 -  Conversions to primitive types and conversions to type ``string`` (see
    :ref:`Cast Expressions`);
+
+-  Enumeration type constants;
 
 -  Unary operators '``+``', '``-``', '``~``', and '``!``', but not '``++``'
    or '``--``' (see :ref:`Unary Plus`, :ref:`Unary Minus`,
@@ -6559,6 +6494,7 @@ being composed only of the following:
    constant expression
    primitive type
    string type
+   enumeration type
    conversion
    normal completion
    literal

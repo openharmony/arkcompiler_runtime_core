@@ -173,7 +173,7 @@ an instance of an abstract class:
       field: number
       constructor (p: number) { this.field = p }
    }
-   let x = new X (666)
+   let x = new X(42)
      // Compile-time error: Cannot create an instance of an abstract class.
 
 Subclasses of an abstract class can be abstract or non-abstract.
@@ -585,7 +585,7 @@ implementation of the property in the form of a ``readonly`` field causes a
 
     function write_into_read_only (s: Style) {
       s.color = "Black"
-      s.writable = 666
+      s.writable = 42
     }
 
     write_into_read_only (new StyleClassTwo)
@@ -615,11 +615,11 @@ form as follows:
 
     function how_to_write (s: Style) {
       s.color = "Black" // compile-time error
-      s.readable = 666 // compile-time error
+      s.readable = 42 // compile-time error
       if (s instanceof StyleClassThree) {
         let s1 = s as StyleClassThree
         s1.color = "Black" // OK!
-        s1.readable = 666 // OK!
+        s1.readable = 42 // OK!
       }
     }
 
@@ -1199,7 +1199,7 @@ circular dependencies are identified:
         f1 = this.f2 + this.f3 
            // Compile-time error: circular dependency between 'f1' and 'f2'
         f2 = this.f1 + this.f3
-        f3 = 666
+        f3 = 42
 
     }
 
@@ -1231,9 +1231,8 @@ required. The new declaration acts as redeclaration. The type of the overriding
 field is to be the same as the type of the overridden field. Otherwise a
 :index:`compile-time error` occurs. Initialization process presumes calls to
 all initializers starting from the super ones.
-If the field was not delcared in a superclass as *readonly* it is a
-:index:`compile-time error` if overrding field is marked as *readonly*.
-
+If the field was not declared in a superclass as *readonly* it is a
+:index:`compile-time error` if overriding field is marked as *readonly*.
 
 .. code-block:: typescript
    :linenos:
@@ -1252,7 +1251,7 @@ If the field was not delcared in a superclass as *readonly* it is a
         field = init_in_derived() // overriding 'field' and providing new initial value
         private init_in_derived() {
            console.log ("Derived field initialization")
-           return 666
+           return 42
         }
     }
     new Derived()  
@@ -1267,7 +1266,6 @@ If the field was not delcared in a superclass as *readonly* it is a
    field overriding
    superclass
    superinterface
-
 
 |
 
@@ -1892,10 +1890,16 @@ If the only constructor is declared inaccessible, then no class instance
 can be created.
 
 A :index:`compile-time error` occurs if two constructors in a class are
-declared, and have identical signatures.
+declared, and have identical signatures (see
+:ref:`Distinguishable Declarations`).
 
-Constructors marked with the keyword ``native`` are discussed as an experimental
-feature in :ref:`Native Constructors`.
+A ``native`` constructor (an experimental feature described in 
+:ref:`Native Constructors`) must have no *constructorBody*, otherwise a
+:index:`compile-time error` occurs.
+
+A non-``native`` constructor must have *constructorBody*, otherwise a
+:index:`compile-time error` occurs
+
 
 .. index::
    constructor
@@ -1935,23 +1939,18 @@ Constructor Body
     frontend_status: Done
 
 *Constructor body* is a block of code that implements a constructor.
-A semicolon, or an empty body (i.e., no body at all) indicates the absence
-of implementation.
 
-A native constructor (see :ref:`Native Constructors`) must have an empty body.
+.. code-block:: abnf
 
-A :index:`compile-time error` occurs in particular if:
+    constructorBody:
+        '{' statement* '}'
+        ;
 
--  The body of a native constructor declaration is a block.
--  The constructor declaration is not native, but its body
-   is either empty or a semicolon.
 
 .. index::
    constructor body
    block
    constructor
-   semicolon
-   constructor declaration
 
 The constructor body must provide correct initialization of new class instances.
 Constructors have two variations:
@@ -1960,19 +1959,6 @@ Constructors have two variations:
 
 - *Secondary constructor* that uses another same-class constructor to initialize
   its instance fields.
-
-Both variations have the same syntax:
-
-.. code-block:: abnf
-
-    constructorBody:
-        '{' statement* constructorCall? statement* '}'
-        ;
-
-    constructorCall:
-        'this' arguments
-        | 'super' arguments
-        ;
 
 .. index::
    constructor body
@@ -1984,7 +1970,8 @@ The high-level sequence of a *primary constructor* body includes the following:
 1. Optional arbitrary code that does not use ``this`` or ``super``.
 
 2. Mandatory call to ``super(`` *arguments* ``)`` (see :ref:`Explicit Constructor Call`)
-   if a class has an extension clause (see :ref:`Class Extension Clause`).
+   if a class has an extension clause (see :ref:`Class Extension Clause`) on all
+   execution paths of the constructor body.
 
 3. Implicitly added compiler-generated code that:
 
@@ -2036,11 +2023,29 @@ The example below represents *primary constructors*:
       }
     }
 
+    class Base {
+       field: string
+       constructor(field: string) {
+          this.field = field
+       }       
+    }
+    class Derived extends Base {
+      constructor(condition: boolean) {
+        console.log ("Code which does not use this")
+        // zone where super() is called
+        if (condition) { super ("abc") }
+        else { super ("cba") }
+        console.log ("Any code as this was initialized")  
+      }
+    }
+
+
 The high-level sequence of a *secondary constructor* body includes the following:
 
 1. Optional arbitrary code that does not use ``this`` or ``super``.
 
-2. Call to another same-class constructor ``this(`` *arguments* ``)`` with arguments.
+2. Call to another same-class constructor ``this(`` *arguments_if_any* ``)`` on all
+   execution paths of the constructor body.
 
 3. Optional arbitrary code.
 
@@ -2066,6 +2071,23 @@ The example below represents *primary* and *secondary* constructors:
         this(0, 0, color)
       }
     }
+
+    class ClasWithTwoConstructors {
+       field: string
+       constructor(field: string) {
+          this.field = field
+       }       
+      constructor(condition: boolean) {
+        console.log ("Code which does not use this or super")
+        // zone where this() is called
+        if (condition) { this ("abc") }
+        else { this ("cba") }
+        console.log ("Any code as this was initialized")  
+      }
+    }
+
+
+
 
 .. index::
    constructor body

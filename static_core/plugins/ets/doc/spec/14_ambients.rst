@@ -53,6 +53,7 @@ Ambient functions, methods, and constructors have no bodies.
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
         | 'const'? enumDeclaration
+        | typeAlias
         )
         ;
 
@@ -476,7 +477,7 @@ top-level statements of the current module.
     // File1.d.ets
     export declare namespace A { // namespace itself must be exported
         function foo(): void
-        type X = Array<Number>
+        type X = Array<number>
     }
 
     // File2.ets

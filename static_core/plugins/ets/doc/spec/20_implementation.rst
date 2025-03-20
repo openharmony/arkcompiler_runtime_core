@@ -130,34 +130,6 @@ be any valid type.
 
 |
 
-.. _Methods for T[] Types:
-
-Methods for ``T[]`` Types
-*************************
-
-Some methods defined for ``Array<T>`` can be used for ``T[]`` (e.g., ``at``).
-It does not mean that ``T[]`` is a class type, but rather that the compiler
-supports the syntactical form of the method call for the ``T[]`` variables.
-The list of supported methods is defined by the compiler implementation.
-
-.. code-block:: typescript
-   :linenos:
-
-    let built_in_array: number[] = [1,2,3]
-    built_in_array.at (0) // That will be a valid call
-
-.. index::
-   method
-   type
-   array
-   class type
-   compiler
-   method call
-   variable
-   implementation
-
-|
-
 .. _Generic and Function Types Peculiarities:
 
 Generic and Function Types Peculiarities
@@ -165,9 +137,7 @@ Generic and Function Types Peculiarities
 
 Current compiler and runtime implementations use type erasure, and thus affect
 the manner of behavior of generics and function types. It is expected to change
-in the future. The compiler applies boxing (see :ref:`Boxing Conversions`) to
-any parameter and return type of primitive types when dealing with variables
-of function types. A particular example can be found under the last bullet of
+in the future. A particular example can be found under the last bullet of
 the compile-time errors list in :ref:`InstanceOf Expression`.
 
 .. index::
@@ -175,10 +145,7 @@ the compile-time errors list in :ref:`InstanceOf Expression`.
    function type
    compiler
    runtime implementation
-   boxing
    conversion
-   variable
-   primitive type
 
 |
 
@@ -191,7 +158,7 @@ Keyword ``struct`` and ArkUI
     frontend_status: Done
 
 The current compiler reserves the keyword ``struct``
-because it is used in legacy ArkUI code. 
+because it is used in legacy ArkUI code.
 This keyword can be used as a replacement for the keyword ``class``
 in :ref:`Class declarations`.
 Class declarations marked with the keyword ``struct``
@@ -203,6 +170,47 @@ and replaced with class declarations that use specific ArkUI types.
    struct
    ArkUI
    compiler plugin
+
+|
+
+.. OutOfMemoryError for Primitive Type Operations:
+
+``OutOfMemoryError`` for Primitive Type Operations
+**************************************************
+
+Execution of some primitive type operations (like
+increment, decrement and assignment)
+can throw ``OutOfMemoryError`` (see :ref:`Error Handling`)
+if allocation of new object is required
+but the available memory is not sufficient to perform it.
+
+.. _Uniqueness of Functional Objects:
+
+Uniqueness of Functional Objects
+********************************
+
+.. meta:
+    frontend_status: Done
+
+|TS| and |LANG| handle function objects differently, and the equality test can
+perform differently. The difference can be eliminated in the future versions of
+|LANG|.
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo() {}
+    foo == foo  // true in Typescript while may be false in ArkTS
+    const f1 = foo
+    const f2 = foo
+    f1 == f2 // true in Typescript while may be false in ArkTS
+
+
+.. index::
+   function object
+   equality test
+
+|
 
 .. raw:: pdf
 

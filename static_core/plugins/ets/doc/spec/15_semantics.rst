@@ -421,7 +421,7 @@ allow operations that are specific to the type so narrowed:
 .. code-block:: typescript
    :linenos:
 
-    let a: number | string = 666
+    let a: number | string = 42
     a++ /* Here we know for sure that type of 'a' is number and number-specific
            operations are type-safe */
 
@@ -556,7 +556,7 @@ See :ref:`Overloading for Functions`,
 Overload-Equivalent Signatures
 ==============================
 
-Signatures *S*:sub:`1` with *n* parameters, and *S*:sub:`2` with 
+Signatures *S*:sub:`1` with *n* parameters, and *S*:sub:`2` with
 the same number of parameters are *overload-equivalent* if:
 
 #. Parameter type at some position in *S*:sub:`1` is a *type parameter*
@@ -570,13 +570,13 @@ the same number of parameters are *overload-equivalent* if:
    parameter type at the same position in *S*:sub:`2` is also ``G`` with any
    list of :ref:`Type Arguments` or a *union type* that contains ``G``;
 
-#. Parameter types at some position in *S*:sub:`1` and *S*:sub:`2` 
-   are *union types* 
+#. Parameter types at some position in *S*:sub:`1` and *S*:sub:`2`
+   are *union types*
    that contain types falling under the cases 1. or 2. above;
 
 #. All other parameter types in *S*:sub:`1` are identical
    (see :ref:`Type Identity`) to parameter types
-   in the same positions in *S*:sub:`2` and both parameters are 
+   in the same positions in *S*:sub:`2` and both parameters are
    of the same kind, so they both are *required* or *optional* or ``rest``.
 
 Parameter names and return types do not influence *overload equivalence*.
@@ -617,7 +617,7 @@ Signatures are *overload-equivalent*  in the following examples:
    :linenos:
 
    class G<T>
-   (y: Number): void
+   (y: number): void
    (x: T): void
 
 .. code-block-meta:
@@ -626,7 +626,7 @@ Signatures are *overload-equivalent*  in the following examples:
    :linenos:
 
    class G<T>
-   (y: G<Number>): void
+   (y: G<number>): void
    (x: G<T>): void
 
 
@@ -683,8 +683,8 @@ Signatures are not *overload-equivalent* in the following examples:
    :linenos:
 
    class G<T>
-   (y: G<Number>): void
-   (x: G<String>): void
+   (y: G<number>): void
+   (x: G<string>): void
 
 
 |
@@ -888,7 +888,6 @@ The semantics is illustrated by the example below:
        // Overriding kinds for return type
        kinds_of_return_type01(): Derived // Covariant return type
        kinds_of_return_type02(): (q: Base)=> Derived // Contravariant parameter type, covariant return type
-       //kinds_of_return_type03(): Number // Compile-time error: return type is not override-compatible
        //kinds_of_return_type04(): number // Compile-time error: return type is not override-compatible
        kinds_of_return_type05<T extends Base, U extends BaseSuperType>(): T | U
        //kinds_of_return_type06(): E2 // CTE
@@ -930,7 +929,6 @@ The example below illustrates override-compatibility with ``Object``:
        ): void
     }
 
-
     interface Derived1 extends Base {
        kinds_of_return_type(): Base // Valid overriding
     }
@@ -938,21 +936,18 @@ The example below illustrates override-compatibility with ``Object``:
        kinds_of_return_type(): (q: Derived)=> Base // Valid overriding
     }
     interface Derived3 extends Base {
-       kinds_of_return_type(): number // Compile-time error: number and Object are not override-compatible
+       kinds_of_return_type(): number // Valid overriding
     }
     interface Derived4 extends Base {
-       kinds_of_return_type(): Number // Valid overriding
-    }
-    interface Derived5 extends Base {
        kinds_of_return_type(): number | string // Valid overriding
     }
-    interface Derived6 extends Base {
+    interface Derived5 extends Base {
        kinds_of_return_type(): E1 // Valid overriding
     }
-    interface Derived7 extends Base {
+    interface Derived6 extends Base {
        kinds_of_return_type(): Base[] // Valid overriding
     }
-    interface Derived8 extends Base {
+    interface Derived7 extends Base {
        kinds_of_return_type(): [Base, Base] // Valid overriding
     }
 
@@ -1358,10 +1353,7 @@ The examples of transformations are presented below:
    :linenos:
 
    function foo1(x: number) {}
-   foo1(1) // implicit conversion int -> double
-
-   function foo2(x: Int) {}
-   foo2(1) // implicit boxing
+   foo1(1) // implicit conversion int -> number, meaning double
 
    function foo3(x?: string) {}
    foo3() // passing default value -> foo(undefined)
@@ -1382,6 +1374,8 @@ transformation:
    function foo(i: int)    // #1
    function foo(n: number) // #2
 
+   foo(1) // #1 - is the best candidate, no transformations
+
    function max(a: number, b: number)  // #1
    function max(...args: number[]) // #2
 
@@ -1398,8 +1392,9 @@ argument (taking default values for optional parameters
 and arguments of ``rest`` parameter into the account)
 by calculating partial *better* relation.
 
-If for the argument, parameter types and parameter kinds (optional or rest)
-are the same, this argument is skipped from comparison. Otherwise:
+If for the argument, parameter types and parameter kinds
+(required, optional or rest) are the same,
+this argument is skipped from comparison. Otherwise:
 
 **Case 1**. No argument is *better* than default value for optional parameter
 and empty list for ``rest`` parameter.
@@ -1412,10 +1407,9 @@ then the first one is *better*.
 **Case 3**. No transformation for an argument is *better* than any transformation.
 
 **Case 4**. If argument type is of a numeric type (see :ref:`Numeric Types`),
-char, or its boxed counterpart, then the candidate with a *shorter* conversion
+or char then the candidate with a *shorter* conversion
 is *better*. E.g., the conversion of ``int`` to ``float`` is *better* than
-``int`` to ``double``, and ``int`` to ``Int`` is *better* than ``int`` to
-``Long``.
+``int`` to ``double``.
 
 **Case 5**. If transformations are applied to the argument for both first and second
 candidates, then both candidates are not *best candidates*.
@@ -1425,7 +1419,6 @@ candidates, then both candidates are not *best candidates*.
    argument transformation
    numeric type
    char
-   boxing
    conversion
    parameter
 
@@ -1441,7 +1434,7 @@ candidates, then both candidates are not *best candidates*.
    function bar(...args: number[])  // #1
    function bar()                   // #2
 
-   bar(1) // #2 is better, less parameters
+   bar() // #2 is better, less parameters
 
    // Case 2:
    function foo(sum: number, a: number, b: number)  // #1
@@ -1473,7 +1466,7 @@ one argument or several arguments and
 other arguments were skipped from comparison,
 then this is the *best candidate*.
 
-A index:`compile-time error` occurs:
+A :index:`compile-time error` occurs:
 
 -  if no candidate is the *best candidate*.
 
@@ -1592,7 +1585,7 @@ to ensure better |TS| alignment. It affects the semantics of the following:
 versions of |LANG|.
 
 The extended semantics approach is based on the concept of *truthiness* that
-extends the Boolean logic to operands of non-Boolean types.
+extends the boolean logic to operands of non-boolean types.
 
 Depending on the type kind of a valid expression, the value of such valid
 expression can be handled as ``true`` or ``false`` as described in the table
@@ -1608,7 +1601,6 @@ below:
    for statement
    if statement
    truthiness
-   Boolean
 
 +--------------------------------------+-----------------------------+------------------------------+------------------------------------+
 | Value Type Kind                      | When ``false``              | When ``true``                | |LANG| Code Example to Check       |
@@ -1633,9 +1625,6 @@ below:
 +--------------------------------------+-----------------------------+------------------------------+------------------------------------+
 | Union types                          | when value is ``falsy``     | when value is ``truthy``     | ``x != null`` or ``x != undefined``|
 |                                      |                             |                              | for union types with nullish types |
-+--------------------------------------+-----------------------------+------------------------------+------------------------------------+
-| Boxed primitive type                 | primitive type is ``falsy`` | primitive type is ``truthy`` | ``new Boolean(true) == true``      |
-| (``Boolean``, ``Char``, ``Int`` ...) |                             |                              | ``new Int (0) == 0``               |
 +--------------------------------------+-----------------------------+------------------------------+------------------------------------+
 | any other nonNullish type            | ``never``                   | ``always``                   | ``new SomeType != null``           |
 +--------------------------------------+-----------------------------+------------------------------+------------------------------------+

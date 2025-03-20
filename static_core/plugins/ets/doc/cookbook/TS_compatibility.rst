@@ -13,7 +13,7 @@
 .. _|LANG| |TS| compatibility:
 
 |LANG|-|TS| compatibility
-#########################
+=========================
 
 .. meta:
     frontend_status: None
@@ -23,72 +23,10 @@ between |LANG| and |TS|.
 
 |
 
-.. _Reserved Names of TS Types:
-
-Reserved Names of |TS| Types
-****************************
-
-The following tables list words that are reserved and cannot be used as
-user-defined type names, but are not otherwise restricted.
-
-.. index::
-   reserved names of |TS| types
-   compatibility
-   user-defined type name
-
-1. The following names of |TS| utility types are not supported by |LANG|:
-
-+---------------------------+-----------------------+-----------------------+
-|                           |                       |                       |
-+===========================+=======================+=======================+
-| ``Awaited``               | ``NoInfer``           | ``Pick``              |
-+---------------------------+-----------------------+-----------------------+
-| ``ConstructorParameters`` | ``NonNullable``       | ``ReturnType``        |
-+---------------------------+-----------------------+-----------------------+
-| ``Exclude``               | ``Omit``              | ``ThisParameterType`` |
-+---------------------------+-----------------------+-----------------------+
-| ``Extract``               | ``OmitThisParameter`` | ``ThisType``          |
-+---------------------------+-----------------------+-----------------------+
-| ``InstanceType``          | ``Parameters``        |                       |
-+---------------------------+-----------------------+-----------------------+
-
-2. The following names of |TS| utility string types are not supported by |LANG|:
-
-+----------------+-------------------+
-|                |                   |
-+================+===================+
-| ``Capitalize`` | ``Uncapitalize``  |
-+----------------+-------------------+
-| ``Lowercase``  | ``Uppercase``     |
-+----------------+-------------------+
-
-3. The following class names from |TS| standard library that are not supported by |LANG|
-standard library:
-
-+---------------------------+-------------------------+-----------------------------+
-|                           |                         |                             |
-+===========================+=========================+=============================+
-| ``ArrayBufferTypes``      | ``Function``            | ``Proxy``                   |
-+---------------------------+-------------------------+-----------------------------+
-| ``AsyncGenerator``        | ``Generator``           | ``ProxyHandler``            |
-+---------------------------+-------------------------+-----------------------------+
-| ``AsyncGeneratorFunction``| ``GeneratorFunction``   | ``Symbol``                  |
-+---------------------------+-------------------------+-----------------------------+
-| ``AsyncIterable``         | ``IArguments``          | ``TemplateStringsArray``    |
-+---------------------------+-------------------------+-----------------------------+
-| ``AsyncIterableIterator`` | ``IteratorYieldResult`` | ``TypedPropertyDescriptor`` |
-+---------------------------+-------------------------+-----------------------------+
-| ``AsyncIterator``         | ``NewableFunction``     |                             |
-+---------------------------+-------------------------+-----------------------------+
-| ``CallableFunction``      | ``PropertyDescriptor``  |                             |
-+---------------------------+-------------------------+-----------------------------+
-
-|
-
 .. _No undefined as universal value:
 
 Undefined is Not a Universal Value
-**********************************
+----------------------------------
 
 .. meta:
     frontend_status: Done
@@ -119,7 +57,7 @@ Undefined is Not a Universal Value
 .. _Numeric semantics:
 
 Numeric Semantics
-*****************
+-----------------
 
 .. meta:
     frontend_status: Done
@@ -153,7 +91,7 @@ on the context and can produce different results:
 .. _Covariant overriding:
 
 Covariant Overriding
-********************
+--------------------
 
 .. meta:
     frontend_status: Done
@@ -162,7 +100,7 @@ Covariant Overriding
 non-existing property is accessed from an object during program execution.
 
 |LANG| allows generating highly efficient code that relies on an objects'
-layout known at compile time. Covariant overriding (see :ref:`Invariance, Covariance and Contravariance`)
+layout known at compile time. Covariant overriding
 is prohibited because it violates type-safety:
 
 .. code-block:: typescript
@@ -177,9 +115,9 @@ is prohibited because it violates type-safety:
        {
            console.log ("p.field unassigned = ", p.field)
               // TypeScript will print 'p.field unassigned =  undefined'
-           p.field = 666 // Access the field
+           p.field = 42 // Access the field
            console.log ("p.field assigned   = ", p.field)
-              // TypeScript will print 'p.field assigned   =  666'
+              // TypeScript will print 'p.field assigned   =  42'
            p.method() // Call the method
               // TypeScript will generate runtime error: p.method is not a function
        }
@@ -204,13 +142,13 @@ is prohibited because it violates type-safety:
 .. _Function Types Compatibility:
 
 Function Types Compatibility
-****************************
+----------------------------
 
 .. meta:
     frontend_status: Done
 
 |TS| allows more relaxed assignments into variables of function type.
-|LANG| follows stricter rules as stated in :ref:`Function Types Conversions`.
+|LANG| follows stricter rules (see the |LANG| specification for details).
 
 .. code-block:: typescript
    :linenos:
@@ -231,13 +169,13 @@ Function Types Compatibility
 .. _Compatibility for utility types:
 
 Compatibility for Utility Types
-*******************************
+-------------------------------
 
 .. meta:
     frontend_status: Done
 
-Utility type ``Partial<T>`` in |LANG| is not assignable to ``T`` (see
-:ref:`Assignability`). Variables of this type are to be initialized
+Utility type ``Partial<T>`` in |LANG| is not assignable to ``T``.
+Variables of this type are to be initialized
 with object literals only.
 
 .. code-block:: typescript
@@ -258,7 +196,7 @@ with object literals only.
 .. _TS Overload Signatures:
 
 |TS| Overload Signatures
-************************
+------------------------
 
 .. meta:
     frontend_status: Done
@@ -281,8 +219,7 @@ The following code is valid in |TS| but causes a compile-time error in |LANG|:
         /*body*/
     }
 
-The following code is valid in |LANG|
-(see :ref:`Function, Method and Constructor Overloading`):
+The following code is valid in |LANG|:
 
 .. code-block-meta:
    not-subset
@@ -302,7 +239,7 @@ The following code is valid in |LANG|
 .. _Class Fields While Inheriting:
 
 Class Fields While Inheriting
-*****************************
+-----------------------------
 
 .. meta:
     frontend_status: None
@@ -346,8 +283,6 @@ The situations are illustrated by the following examples:
        field: Number 
    }
 
-
-
 .. index::
    class field
    inheritance
@@ -361,36 +296,10 @@ The situations are illustrated by the following examples:
 
 |
 
-.. _Overriding for Primitive Types:
-
-Overriding for Primitive Types
-******************************
-
-|TS| allows overriding class type version of a primitive type into a pure
-primitive type. |LANG| does not allow such overriding. This situation is
-represented by the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base {
-     foo(): Number { return 5 }
-   }
-   class Derived extends Base {
-     foo(): number { return 5 } // Such overriding is prohibited
-   }
-
-.. index::
-   overriding
-   primitive type
-   class type
-
-|
-
 .. _Type void Compatibility:
 
 Type ``void`` Compatibility
-***************************
+---------------------------
 
 .. meta:
     frontend_status: Done
@@ -404,13 +313,12 @@ in union types. This situation is represented by the example below:
    type UnionWithVoid = void | number
      // Such type is OK for Typescript, but leads to a compile-time error for ArkTS
 
-
 |
 
 .. _Invariant Array Assignment:
 
 Invariant Array Assignment
-**************************
+--------------------------
 
 .. meta:
     frontend_status: None
@@ -446,7 +354,7 @@ Invariant Array Assignment
 .. _Tuples and Arrays:
 
 Tuples and Arrays
-*****************
+-----------------
 
 .. meta:
     frontend_status: None
@@ -469,7 +377,7 @@ situation is represented by the folowing example:
 .. _Extending Class Object:
 
 Extending Class Object
-**********************
+----------------------
 
 .. meta:
     frontend_status: Done
@@ -503,7 +411,7 @@ listed explicitly in the ``extends`` clause of a class. |LANG| allows this as
 .. _Syntax of extends and implements Clauses:
 
 Syntax of ``extends`` and ``implements`` Clauses
-************************************************
+------------------------------------------------
 
 .. meta:
     frontend_status: Done
@@ -529,7 +437,7 @@ but *type references*:
 .. _Uniqueness of Functional Objects:
 
 Uniqueness of Functional Objects
-********************************
+--------------------------------
 
 .. meta:
     frontend_status: Done
@@ -552,33 +460,64 @@ perform differently. The difference can be eliminated in the future versions of
    function object
    equality test
 
-
 |
 
 .. _Functional Objects for Methods:
 
 Functional Objects for Methods
-******************************
+------------------------------
 
 .. meta:
     frontend_status: None
 
-|TS| allows creating function objects for methods. |LANG| does not allow
-creating function objects for methods. This difference can be elimiated in
-the future versions of |LANG|.
+|TS| and |LANG| handle function objects differently, and the sematics of the 
+work with 'this' is different. |TS| supports *undefined* as a value of 'this',
+while |LANG| has 'this' always attached to a valid object.
 
 .. code-block:: typescript
    :linenos:
 
-    class C {
-      method() {
-         let method_ref = this.method // compile-time error in ArkTS
-      }
+    class A {
+      method() { console.log (this) }
+    }
+    const a = new A
+    const method = a.method
+    method() // Typescript output: undefined, while ArkTS output: object 'a' content
+
+
+.. index::
+   function object
+   this
+
+
+|
+
+.. _Absence of Type Function:
+
+Absence of Type ``Function``
+----------------------------
+
+.. meta:
+    frontend_status: Done
+
+|TS| has a supertype for all function types called *Function*. |LANG| does not
+have such type.
+
+.. code-block:: typescript
+   :linenos:
+
+    // Typescript code style: type unsafe
+    function calls (functor: Function) {
+        functor ()
+        functor (1)
+        functor (1, true, "some string")
     }
 
-    interface I { method(): void }
-    function bar (i: I) {
-      let method_ref = i.method // compile-time error in ArkTS
+    // ArkTS code style: type safe
+    function calls (functor: Object) {
+        if (functor instanceof (()=>void)) functor ()
+        if (functor instanceof ((p: number)=>void)) functor (1)
+        if (functor instanceof ((p: number)=>void)) functor (1, true, "some string")
     }
 
 
@@ -587,7 +526,7 @@ the future versions of |LANG|.
 .. _Differences in Namespaces:
 
 Differences in Namespaces
-*************************
+-------------------------
 
 .. meta:
     frontend_status: Done
@@ -595,30 +534,31 @@ Differences in Namespaces
 |TS| allows having non-exported entities with the same name in two or more
 different declarations of a namespace, because these entities are local to a
 particular declaration of the namespace. Such situations are forbidden in
-|LANG|, because this language merges all declarations into one:
+|LANG|, because this language merges all declarations into one and declarations
+become non-distinguishable:
 
 
 .. code-block:: typescript
    :linenos:
 
     // Typescript accepts such code, while ArkTS will report a compile-time error
+    // as signatures of foo() from the 1st namespace A is identical to the signature
+    // of foo() from the 2nd namespace A
     namespace A {
        function foo() { console.log ("foo() from the 1st namespace A declaration") }
-       export bar () { foo() }
+       export function bar () { foo() }
     }
     namespace A {
        function foo() { console.log ("foo() from the 2nd namespace A declaration") }
-       export bar_bar() { foo() }
+       export function bar_bar() { foo() }
     }
-    A.bar()
-    A.bar_bar()
 
 |
 
 .. _Differences in Math.pow:
 
 Differences in Math.pow
-***********************
+-----------------------
 
 .. meta:
     frontend_status: Done
@@ -636,3 +576,27 @@ IEEE 754-2019 standard. The same calls as listed above produce ``NaN`` in |TS|.
 
 .. index::
    IEEE 754
+
+|
+
+.. _Differences in Constructor Body:
+
+Differences in Constructor Body
+-------------------------------
+
+Work is in progress to have support for the corner cases of mandatory calls to
+*super()* or *this()* in the compiler for |LANG|. So, the code below will be
+temporarily rejected. Compiler requires call to *super()* or *this()* to be
+not embedded into other constructions.
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {
+       constructor (p: number) {}
+       constructor (p: boolean) {  // Compile_time error: incorrect constructor body
+           if (p) { this (1) }
+           else { this (2) }
+       }     
+    }
+

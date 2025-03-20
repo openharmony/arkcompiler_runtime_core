@@ -86,7 +86,8 @@ concurrently.
 There is a basic set of language constructs that support concurrency. A function
 to be launched asynchronously is marked by adding the modifier ``async``
 to its declaration. In addition, any function---or lambda expression---can be
-launched as a separate thread explicitly by using the launch expression.
+launched as a separate thread explicitly by using the launch function from
+the standard library.
 
 .. index::
    construct
@@ -94,18 +95,14 @@ launched as a separate thread explicitly by using the launch expression.
    channel
    function
    async modifier
-   launch expression
-   launch
    lambda expression
    concurrency
    async modifier
 
-The ``await`` statement is introduced to synchronize functions launched as
-threads. The generic class ``Promise<T>`` from the standard library (see
-:ref:`Standard Library`) is used to exchange information between threads.
-The class can be handled as an implementation of the channel mechanism.
-The class provides a number of methods to manipulate the values produced
-by threads.
+The ``await`` statement is introduced to await Promise resolving.
+The generic class ``Promise<T>`` from the standard library (see
+:ref:`Standard Library`) is used to access result of Promise resolving or
+``async`` function execution.
 
 Section :ref:`Packages` discusses a well-known and proven language feature
 intended to organize large pieces of software that typically consist of many
@@ -116,7 +113,6 @@ that is appropriate for independent teams to work in parallel.
 .. index::
    await statement
    function
-   launch
    generic class
    standard library
    implementation
@@ -657,7 +653,7 @@ used in generic classes and interfaces for better flexibility. A
     }
 
     let x: IndexableByNumber<boolean> = new BadClass
-    x[666] = true // This will be dispatched at runtime to the overridden
+    x[42] = true // This will be dispatched at runtime to the overridden
        // version of the $_set method
     x.$_get (15)  // $_get and $_set can be called as ordinary
        // methods
@@ -1210,6 +1206,50 @@ that cause a :index:`compile-time error`:
 
 |
 
+.. _TS Overload Signatures:
+
+|TS| Overload Signatures
+========================
+
+.. meta:
+    frontend_status: None
+
+|LANG| does not support overload signatures in |TS|-style where several function
+headers are followed by a single body. Each overloaded function, method, or
+constructor is required to have a separate body.
+
+The following code is valid in |TS| but causes a compile-time error in |LANG|:
+
+.. code-block-meta:
+   expect-cte
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(): void 
+    function foo(x: string): void
+    function foo(x?: string): void {
+        /*body*/
+    }
+
+The following code is valid in |LANG|
+(see :ref:`Function, Method and Constructor Overloading`):
+
+.. code-block-meta:
+   not-subset
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(): void {
+      /*body1*/
+    }
+    function foo(x: string): void {
+      /*body2*/
+    }
+
+|
+
 
 .. _Native Functions and Methods:
 
@@ -1427,7 +1467,7 @@ usage of functions so added looks the same as if they are methods and accessors
 of these types. The mechanism is called :ref:`Functions with Receiver`
 and :ref:`Accessors with Receiver`. This feature is often used to add new
 functionality to a class or interface without having to inherit from this class
-or implement this interface. However, it can be used not only for classes and 
+or implement this interface. However, it can be used not only for classes and
 interfaces but also for other types.
 
 Moreover, :ref:`Function Types with Receiver` and
@@ -1545,8 +1585,8 @@ unit:
       a.foo() // Ordinary class method is called
       a.bar() // Function with receiver is called
 
-A :index:`compile-time error` occurs is the name of a *function with receiver* 
-is the same as the name of an accessible instance method or field 
+A :index:`compile-time error` occurs is the name of a *function with receiver*
+is the same as the name of an accessible instance method or field
 of the receiver type.
 It means that a *function with receiver* cannot overload a method
 defined for the receiver type.
@@ -1560,7 +1600,7 @@ defined for the receiver type.
 
       function foo(this: A) { ... } // Compile-time error
 
-A function with reciever can overload a global function with 
+A function with reciever can overload a global function with
 the same name. A compile-time error occurs if signatures of
 a function with receiver is overload-equivalent
 (see Overload-Equivalent Signatures) to such overloaded function.
@@ -2053,44 +2093,6 @@ argument (see :ref:`Optional Parameters`).
 
 |
 
-.. _Enumeration Types Conversions:
-
-Enumeration Types Conversions
-*****************************
-
-.. meta:
-    frontend_status: Partly
-
-Every *enum* type is subtype of type ``Object`` (see
-:ref:`Subtyping`). Every variable of type ``enum`` can thus be
-assigned into a variable of type ``Object``. The ``instanceof`` check can
-be used to get an enumeration variable back by applying the casting conversion
-as follows:
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-    enum Commands { Open = "fopen", Close = "fclose" }
-    let c: Commands = Commands.Open
-    let o: Object = c // Autoboxing of enum type to its reference version
-    // Such reference version type has no name, but can be detected by instanceof
-    if (o instanceof Commands) {
-       c = o as Commands // And cast back by cast operator
-    }
-
-.. index::
-   enum type
-   enumeration type
-   conversion
-   assignment
-   Object
-   variable
-   compatibility
-
-|
-
 .. _Enumeration Methods:
 
 Enumeration Methods
@@ -2206,236 +2208,18 @@ Coroutines
 
 .. meta:
     frontend_status: Partly
-    todo: rename valueOf(string) to getValueOf(string), implement valueOf()
 
 A function or lambda can be a *coroutine*. |LANG| supports *basic coroutines*,
 *structured coroutines*.
 Basic coroutines are used to create and launch a coroutine; the result is then
 to be awaited.
 
+See :ref:`Standard Library`.
+
 .. index::
    structured coroutine
    basic coroutine
-   function
-   lambda
    coroutine
-   communication channel
-   launch
-
-|
-
-.. _Create and Launch a Coroutine:
-
-Create and Launch a Coroutine
-=============================
-
-.. meta:
-    frontend_status: Done
-
-The following expression is used to create and launch a coroutine based on
-a function call, a lambda call (see :ref:`Function Call Expression`), or a
-method call (see :ref:`Method Call Expression`):
-
-.. code-block:: abnf
-
-      launchExpression:
-        'launch' functionCallExpression | methodCallExpression;
-
-.. code-block:: typescript
-   :linenos:
-
-      let res = launch cof(10)
-
-      // where 'cof' can be defined as:
-      function cof(a: int): int {
-        let res: int
-        // Do something
-        return res
-      }
-
-Lambda can be used in a launch expression as a part of a function call:
-
-.. code-block:: typescript
-   :linenos:
-
-      let res = launch ((n: int) => { /* lambda body */ })(7)
-
-.. index::
-   expression
-   coroutine
-   launch
-   function call expression
-   lambda
-   launch expression
-
-The result of the launch expression is of type ``Promise<T>``, where ``T`` is
-the return type of the function being called:
-
-.. code-block:: typescript
-   :linenos:
-
-      function foo(): int { return 0 }
-      function bar() {}
-      let foo_result = launch foo()
-      let bar_result = launch bar()
-
-In the example above the type of ``foo_result`` is ``Promise<int>``, and the
-type of ``bar_result`` is ``Promise<void>``.
-
-Similarly to |TS|, |LANG| supports the launching of a coroutine by calling
-the function ``async`` (see :ref:`Async Functions`). No restrictions apply as
-to from what scope to call the function ``async``:
-
-.. index::
-   launch expression
-   return type
-   function call
-   coroutine
-   async function
-   restriction
-
-.. code-block:: typescript
-   :linenos:
-
-      async function foo(): Promise<int> {}
-
-      // This will create and launch coroutine
-      let foo_result = foo()
-
-|
-
-.. _Awaiting a Coroutine:
-
-Awaiting a Promise
-==================
-
-.. meta:
-    frontend_status: Done
-
-The ``await`` expressions are used while an ``async`` function called previously
-finishes and returns a value:
-
-.. code-block:: abnf
-
-      awaitExpression:
-        'await' expression
-        ;
-
-A :index:`compile-time error` occurs if ``await`` is called not from the
-``async`` function. A :index:`compile-time error` occurs if the expression
-type is not ``Promise<T>``.
-
-.. index::
-   expression await
-   launch
-   coroutine
-   expression type
-
-.. code-block:: typescript
-   :linenos:
-
-      let promise = launch (): int { return 1 } ()
-      console.log(await promise) // output: 1
-
-If the coroutine result is ignored, then the expression statement ``await`` is
-used:
-
-.. code-block:: typescript
-   :linenos:
-
-      function foo() { /* do something */ }
-      let promise = launch foo()
-      await promise
-
-The ``await`` never returns ``Promise<T>`` or union type that contains
-``Promise<T>``. If the actual type argument of ``T`` in ``Promise<T>`` contains
-``Promise``, then the compiler eliminates any such usage.
-
-Return types of ``await`` expressions are represented in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-       // if p has type Promise<Promise<string>>,
-       // await p returns string
-       let x : string = await p;
-
-       // if p2 has type Promise<Promise<string> | number>,
-       // await p2 returns string | number
-       let y : string | number = await p2;
-
-       // if p3 has type Promise<string>|Promise<number>,
-       // await p2 returns string | number
-       let z : string | number = await p3;
-
-.. index::
-   coroutine
-   expression statement
-   union type
-   type argument
-   await expression
-
-|
-
-.. _Promise<T> Class:
-
-``Promise<T>`` Class
-====================
-
-.. meta:
-    frontend_status: Done
-
-The class ``Promise<T>`` represents the values returned by launch expressions
-(see :ref:`Create and Launch a Coroutine`). It belongs to the core packages of
-the standard library (see :ref:`Standard Library`), and can be used without
-any qualification.
-
-The methods are used as follows:
-
--  ``then`` takes two arguments (the first argument is used as callback if the
-   promise is fulfilled, and the second if it is rejected), and returns
-   ``Promise<U>``.
-
-.. index::
-   class
-   value
-   launch expression
-   import expression
-   argument
-   callback
-   package
-   standard library
-   method
-
-.. code-block:: typescript
-
-        Promise<U> Promise<T>::then<U>(fulfillCallback :
-            function
-        <T>(val: T) : Promise<U>, rejectCallback : (err: Object)
-        : Promise<U>)
-
--  ``catch`` is the alias for ``Promise<T>.then<U>((value: T) : U => {}``, ``onRejected)``.
-
-.. code-block-meta:
-
-.. code-block:: typescript
-
-        Promise<U> Promise<T>::catch<U>(rejectCallback : (err:
-            Object) : Promise<U>)
-
--  ``finally`` takes one argument (the callback called after ``promise`` is
-   either fulfilled or rejected) and returns ``Promise<T>``.
-
-.. index::
-   alias
-   callback
-   call
-
-.. code-block:: typescript
-
-        Promise<U> Promise<T>::finally<U>(finallyCallback : (
-            Object:
-        T) : Promise<U>)
 
 |
 
@@ -2459,8 +2243,8 @@ Async Functions and Methods
 ``Async`` functions are implicit coroutines that can be called as regular
 functions. ``Async`` functions can be neither ``abstract`` nor ``native``.
 
-The return type of an ``async`` function must be ``Promise<T>`` (see
-:ref:`Promise<T> Class`). Returning values of types ``Promise<T>`` and ``T``
+The return type of an ``async`` function must be ``Promise<T>``. 
+Returning values of types ``Promise<T>`` and ``T``
 from ``async`` functions is allowed.
 
 Using return statement without an expression is allowed if the return type
@@ -2497,8 +2281,8 @@ Experimental ``Async`` Methods
 The method ``async`` is an implicit coroutine that can be called as a regular
 method. ``Async`` methods can be neither ``abstract`` nor ``native``.
 
-The return type of an ``async`` method must be ``Promise<T>`` (see
-:ref:`Promise<T> Class`). Returning values of types ``Promise<T>`` and ``T``
+The return type of an ``async`` method must be ``Promise<T>``. 
+Returning values of types ``Promise<T>`` and ``T``
 from ``async`` methods is allowed.
 
 Using return statement without an expression is allowed if the return type
@@ -2520,258 +2304,6 @@ is supported for the sake of backward |TS| compatibility only.
    annotation
    abstract method
    native method
-
-|
-
-.. _DynamicObject Type:
-
-DynamicObject Type
-******************
-
-.. meta:
-    frontend_status: Partly
-
-The interface ``DynamicObject`` is used to provide seamless interoperability
-with dynamic languages (e.g., |JS| and |TS|). This interface (defined in
-:ref:`Standard Library`) is common for a set of wrappers (also defined in
-:ref:`Standard Library`) that provide access to underlying objects.
-
-An instance of ``DynamicObject`` cannot be created directly. Only an
-instance of a specific wrapper object can be instantiated.
-
-``DynamicObject`` is a predefined type. The following operations applied to an
-object of type ``DynamicObject`` are handled by the compiler in a special manner:
-
-- Field access;
-- Method call;
-- Indexing access;
-- New; and
-- Cast.
-
-.. index::
-   interface
-   interoperability
-   interface
-   wrapper
-   access
-   underlying object
-   instantiation
-   export
-   entity
-   import
-   predefined type
-   field access
-   indexing access
-   method call
-   cast
-
-|
-
-.. _DynamicObject Field Access:
-
-``DynamicObject`` Field Access
-==============================
-
-.. meta:
-    frontend_status: Partly
-    todo: now it supports only JSValue, need to add full abstract support
-
-The field access expression *D.F*, where *D* is of type ``DynamicObject``,
-is handled as an access to a property of an underlying object.
-
-If the value of a field access is used, then it is wrapped in the instance of
-``DynamicObject``, since the actual type of the field is not known at compile
-time.
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(d: DynamicObject) {
-      console.log(d.f1) // access of the property named "f1" of underlying object
-      d.f1 = 5 // set a value of the property named "f1"
-      let y = d.f1 // 'y' is of type DynamicObject
-   }
-
-The wrapper can raise an error if:
-
-- No property with the specified name exists in the underlying object; or
-- Field access is in the right-hand-side part of the assignment, and the
-  type of the assigned value is not assignable to the type of the property
-  (see :ref:`Assignability`).
-
-.. index::
-   wrapper
-   underlying object
-   field access
-   field access expression
-   compile time
-   property
-   instance
-   assignment
-   assigned value
-
-|
-
-.. _DynamicObject Method Call:
-
-``DynamicObject`` Method Call
-=============================
-
-.. meta:
-    frontend_status: Partly
-    todo: now it supports only JSValue, need to add full abstract support
-
-The method call expression *D.F(arguments)*, where *D* is of type
-``DynamicObject``, is handled as a call of the instance method of an
-underlying object.
-
-If the result of a method call is used, then it is wrapped in the instance
-of ``DynamicObject``, since the actual type of the returned value is not known
-at compile time.
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(d: DynamicObject) {
-      d.foo() // call of a method "foo" of underlying object
-      let y = d.goo() // 'y' is of type DynamicObject
-   }
-
-The wrapper must raise an error if:
-
-- No method with the specified name exists in the underlying object; or
-- Signature of the method is not compatible with the types of call
-  arguments.
-
-.. index::
-   DynamicObject
-   wrapper
-   method
-   field access
-   property
-   instance
-   method
-
-|
-
-.. _DynamicObject Indexing Access:
-
-``DynamicObject`` Indexing Access
-=================================
-
-.. meta:
-    frontend_status: Partly
-    todo: now it supports only JSValue, need to add full abstract support
-
-The indexing access expression *D[index]*, where *D* is of type
-``DynamicObject``, is handled as an indexing access to an underlying object.
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(d: DynamicObject) {
-      let x = d[0]
-   }
-
-The wrapper must raise an error if:
-
-- Indexing access is not supported by the underlying object;
-- Type of the *index* expression is not supported by the underlying object.
-
-.. index::
-   indexing access expression
-   index expression
-   wrapper
-   access
-   underlying object
-
-|
-
-.. _DynamicObject New Expression:
-
-``DynamicObject`` New Expression
-================================
-
-.. meta:
-    frontend_status: Partly
-    todo: now it supports only JSValue, need to add full abstract support
-
-The new expression *new D(arguments)* (see :ref:`New Expressions`), where
-*D* is of type ``DynamicObject``, is handled as a new expression (constructor
-call) applied to the underlying object.
-
-The result of the expression is wrapped in an instance of ``DynamicObject``,
-as the actual type of the returned value is not known at compile time.
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(d: DynamicObject) {
-      let x = new d()
-   }
-
-The wrapper must raise an error if:
-
-- New expression is not supported by the underlying object; or
-- Signature of the constructor of the underlying object is not compatible
-  with the types of call arguments.
-
-.. index::
-   expression
-   constructor call
-   constructor
-   wrapper
-   returned value
-   compatibility
-   call argument
-   property
-   instance
-
-|
-
-.. _DynamicObject Cast Expression:
-
-``DynamicObject`` Cast Expression
-=================================
-
-.. meta:
-    frontend_status: None
-
-The cast expression *D as T* (see :ref:`Cast Expressions`), where *D* is of
-type ``DynamicObject``, is handled as an attempt to cast the underlying object
-to a static type ``T``.
-
-A :index:`compile-time error` occurs if ``T`` is not a class or interface type.
-
-The result of a cast expression is an instance of type ``T``.
-
-.. code-block:: typescript
-   :linenos:
-
-   interface I {
-      bar()
-   }
-
-   function foo(d: DynamicObject) {
-      let x = d as I
-      x.bar() // a call of interface method (not dynamic)
-   }
-
-The wrapper must raise an error if an underlying object cannot be cast to the
-target type specified by the cast expression.
-
-.. index::
-   wrapper
-   underlying object
-   cast expression
-   interface type
-   instance
-   type
-   conversion
-   target type
-   cast operator
 
 |
 

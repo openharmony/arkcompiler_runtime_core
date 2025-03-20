@@ -201,7 +201,7 @@ certain conditions:
         statement
         ;
 
-Type of expression must be ``boolean``, ``Boolean``, or a type mentioned in
+Type of expression must be ``boolean``, or a type mentioned in
 :ref:`Extended Conditional Expressions`. Otherwise, a
 :index:`compile-time error` occurs.
 
@@ -300,7 +300,7 @@ the statement:
         : 'do' statement 'while' '(' expression ')'
         ;
 
-Type of expression must be ``boolean``, ``Boolean``, or a type mentioned in
+Type of expression must be ``boolean``, or a type mentioned in
 :ref:`Extended Conditional Expressions`.
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -341,7 +341,7 @@ Otherwise, a :index:`compile-time error` occurs.
         expressionSequence
         ;
 
-Type of *forContinue* expression must be ``boolean``, ``Boolean``, or a type
+Type of *forContinue* expression must be ``boolean``, or a type
 mentioned in :ref:`Extended Conditional Expressions`. Otherwise, a
 :index:`compile-time error` occurs.
 
@@ -681,7 +681,7 @@ result of successful evaluation of the value of a ``switch`` expression.
         ;
 
 The ``switch`` expression type must be of type ``char``, ``byte``, ``short``,
-``int``, ``long``, ``Char``, ``Byte``, ``Short``, ``Int``, ``Long``, ``string``,
+``int``, ``long``, ``string``,
 or ``enum``.
 
 .. index::
@@ -693,11 +693,6 @@ or ``enum``.
    short
    int
    long
-   Char
-   Byte
-   Short
-   Int
-   Long
 
 A :index:`compile-time error` occurs if not **all** of the following is true:
 
@@ -737,29 +732,28 @@ A :index:`compile-time error` occurs if not **all** of the following is true:
     }
 
 The execution of a ``switch`` statement starts from the evaluation of the
-``switch`` expression. If the evaluation result is of type ``Char``, ``Byte``,
-``Short``, ``Int``, or ``Long``, then the unboxing conversion (see
-:ref:`Unboxing Conversions`) follows.
+``switch`` expression.
 
-Otherwise, the value of the ``switch`` expression is compared repeatedly to the
-value of each case expression.
-
-If a case expression value equals the value of the ``switch`` expression in
-terms of the operator '``==``', then the case label *matches*.
-
-However, if the expression value is a ``string``, then the equality for strings
+The value of the ``switch`` expression is compared repeatedly to the
+value of case expressions starting from the top till the first *match*. The
+*match* means that particular case expression value equals the value of the
+``switch`` expression in terms of the operator '``==``'.  However, if the
+expression value is of type  ``string``, then the equality for strings
 determines the equality.
+
+So, in case of *match* execution is transferred to the set of statements of
+the *caseClause* where match occurred. If this set of statements executes
+*break* statement then the whole ``switch`` statement terminates. If no *break*
+statement was executed then execution continues through all remaining
+*caseClause*s as well as *defaultClause* at last if it is present.
+If no *match* occurred and *defaultClause* is present then it is executed.
+
 
 .. index::
    execution
    switch statement
    expression
    evaluation
-   Char
-   Byte
-   Short
-   Int
-   unboxing conversion
    constant
    operator
    string
