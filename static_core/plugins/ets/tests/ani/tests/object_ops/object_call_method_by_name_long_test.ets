@@ -13,13 +13,105 @@
  * limitations under the License.
  */
 
- class A {
+class A {
     public static new_A(): A {
         return new A();
     }
 
-	public long_method(value1: long, value2: long): long
+	public longMethod(value1: long, value2: long): long
     {
         return value1 + value2;
+    }
+}
+
+interface ji {
+    jf(value: long): long;
+}
+
+class B implements ji {
+    constructor(data: long) {
+        this.data = data;
+    }
+
+    data: long;
+
+    public longMethod(value1: long, value2: long): long {
+        if (this.data > value1 + value2) {
+            return this.data;
+        } else {
+            return value1 + value2 as long;
+        }
+    }
+
+    public longMethod(value: long): long {
+        if (this.data > value) {
+            return this.data;
+        } else {
+            return value;
+        }
+    }
+
+    protected protectedMethod(value: long): long {
+        return this.data + value as long;
+    }
+
+    private privateMethod(value: long): long {
+        return this.data - value as long;
+    }
+
+    public nestedMethod(value: long): long {
+        let lambdaMethod: (p1: long, p2: long) => long =
+            (param1: long, param2: long): long => {
+                return param1 + param2 as long;
+        };
+        return lambdaMethod(this.data, value);
+    }
+
+    public recursiveMethod(value: int): long {
+        if (value <= 0) {
+            return 1;
+        } else {
+            return value * this.recursiveMethod(value - 1) as long;
+        }
+    }
+
+    calculateSum(value1: long, value2: char, value3: int): long {
+        let aChar: char = 'A';
+        if (value2 == aChar) {
+            return this.data - value1 as long;
+        }
+        if (value3 == 1) {
+            return value1;
+        }
+        return this.data + value1 as long;
+    }
+
+    public jf(value: long): long {
+        return this.data - value as long;
+    }
+}
+
+final class C extends B {
+    constructor(data1: long) {
+        super(data1);
+        this.data1 = data1;
+    }
+
+    data1: long;
+
+    public longAddMethod(value1: long, value2: long): long {
+        return this.data1 + value1 + value2 as long;
+    }
+
+    public override longMethod(value1: long, value2: long): long {
+        return this.data1 - value1 - value2 as long;
+    }
+
+    public callProtected(value: long): long {
+        return this.protectedMethod(value) as long;
+    }
+
+    public jf(value: long): long {
+        return this.data1 + value as long;
     }
 }
