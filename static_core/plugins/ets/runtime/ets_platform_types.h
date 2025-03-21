@@ -37,6 +37,8 @@ public:
     EtsClass *coreFloat;
     EtsClass *coreDouble;
 
+    EtsClass *coreObject;
+
     EtsClass *escompatBigint;
     EtsClass *coreFunction;
 
