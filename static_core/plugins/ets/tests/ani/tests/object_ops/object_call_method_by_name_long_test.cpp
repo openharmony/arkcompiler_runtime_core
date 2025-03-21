@@ -469,6 +469,73 @@ TEST_F(CallObjectMethodByNamelongTest, object_call_method_by_name_long_011)
     ASSERT_EQ(env_->Object_CallMethodByName_Long_A(obj, "longMethod", "JJ:J", &sum, args2), ANI_OK);
     ASSERT_EQ(sum, value3 + value2);
 }
+
+TEST_F(CallObjectMethodByNamelongTest, object_call_method_by_name_long_012)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].l = VAL1;
+    args[1U].l = VAL2;
+
+    ani_long res = 0;
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Long(nullptr, object, "longMethod", "JJ:J", &res, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Long_A(nullptr, object, "longMethod", "JJ:J", &res, args),
+              ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Long(nullptr, "longMethod", "JJ:J", &res, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Long_A(nullptr, "longMethod", "JJ:J", &res, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Long(object, nullptr, "JJ:J", &res, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Long_A(object, nullptr, "JJ:J", &res, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Long(object, "longMethod", nullptr, &res, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Long_A(object, "longMethod", nullptr, &res, args), ANI_OK);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Long(object, "longMethod", "JJ:J", nullptr, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Long_A(object, "longMethod", "JJ:J", nullptr, args), ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodByNamelongTest, object_call_method_by_name_long_013)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].l = VAL1;
+    args[1U].l = VAL2;
+
+    ani_long res = 0;
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Long(object, methodName.data(), "JJ:J", &res, VAL1, VAL2),
+                  ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Long_A(object, methodName.data(), "JJ:J", &res, args), ANI_NOT_FOUND);
+    }
+}
+
+TEST_F(CallObjectMethodByNamelongTest, object_call_method_by_name_long_014)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].l = VAL1;
+    args[1U].l = VAL2;
+
+    ani_long res = 0;
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Long(object, "longMethod", methodName.data(), &res, VAL1, VAL2),
+                  ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Long_A(object, "longMethod", methodName.data(), &res, args),
+                  ANI_NOT_FOUND);
+    }
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

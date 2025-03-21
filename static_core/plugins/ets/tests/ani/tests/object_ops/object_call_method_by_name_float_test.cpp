@@ -480,6 +480,74 @@ TEST_F(CallObjectMethodByNamefloatTest, object_call_method_by_name_float_011)
     ASSERT_EQ(env_->Object_CallMethodByName_Float_A(obj, "floatMethod", "FF:F", &sum, args2), ANI_OK);
     ASSERT_EQ(sum, value3 + value2);
 }
+
+TEST_F(CallObjectMethodByNamefloatTest, object_call_method_by_name_float_012)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].f = VAL1;
+    args[1U].f = VAL2;
+
+    ani_float res = 0.0F;
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Float(nullptr, object, "floatMethod", "FF:F", &res, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Float_A(nullptr, object, "floatMethod", "FF:F", &res, args),
+              ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Float(nullptr, "floatMethod", "FF:F", &res, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Float_A(nullptr, "floatMethod", "FF:F", &res, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Float(object, nullptr, "FF:F", &res, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Float_A(object, nullptr, "FF:F", &res, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Float(object, "floatMethod", nullptr, &res, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Float_A(object, "floatMethod", nullptr, &res, args), ANI_OK);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Float(object, "floatMethod", "FF:F", nullptr, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Float_A(object, "floatMethod", "FF:F", nullptr, args), ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodByNamefloatTest, object_call_method_by_name_float_013)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].f = VAL1;
+    args[1U].f = VAL2;
+
+    ani_float res = 0.0F;
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Float(object, methodName.data(), "FF:F", &res, VAL1, VAL2),
+                  ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Float_A(object, methodName.data(), "FF:F", &res, args), ANI_NOT_FOUND);
+    }
+}
+
+TEST_F(CallObjectMethodByNamefloatTest, object_call_method_by_name_float_014)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].f = VAL1;
+    args[1U].f = VAL2;
+
+    ani_float res = 0.0F;
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Float(object, "floatMethod", methodName.data(), &res, VAL1, VAL2),
+                  ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Float_A(object, "floatMethod", methodName.data(), &res, args),
+                  ANI_NOT_FOUND);
+    }
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

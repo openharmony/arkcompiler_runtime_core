@@ -403,6 +403,81 @@ TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_010
     ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(obj, "jf", "I:Z", &res, args), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 }
+
+TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_011)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+
+    ani_boolean res = ANI_FALSE;
+    ASSERT_EQ(
+        env_->c_api->Object_CallMethodByName_Boolean(nullptr, object, "booleanByNameMethod", "II:Z", &res, VAL1, VAL2),
+        ANI_INVALID_ARGS);
+    ASSERT_EQ(
+        env_->c_api->Object_CallMethodByName_Boolean_A(nullptr, object, "booleanByNameMethod", "II:Z", &res, args),
+        ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(nullptr, "booleanByNameMethod", "II:Z", &res, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(nullptr, "booleanByNameMethod", "II:Z", &res, args),
+              ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, nullptr, "II:Z", &res, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(object, nullptr, "II:Z", &res, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, "booleanByNameMethod", nullptr, &res, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(object, "booleanByNameMethod", nullptr, &res, args), ANI_OK);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, "booleanByNameMethod", "II:Z", nullptr, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(object, "booleanByNameMethod", "II:Z", nullptr, args),
+              ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_012)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    ani_boolean res = ANI_FALSE;
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Boolean(object, methodName.data(), "II:Z", &res, VAL1, VAL2),
+                  ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(object, methodName.data(), "II:Z", &res, args),
+                  ANI_NOT_FOUND);
+    }
+}
+
+TEST_F(CallObjectMethodBooleanByNameTest, object_call_method_by_name_boolean_013)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    ani_boolean res = ANI_FALSE;
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(
+            env_->Object_CallMethodByName_Boolean(object, "booleanByNameMethod", methodName.data(), &res, VAL1, VAL2),
+            ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Boolean_A(object, "booleanByNameMethod", methodName.data(), &res, args),
+                  ANI_NOT_FOUND);
+    }
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

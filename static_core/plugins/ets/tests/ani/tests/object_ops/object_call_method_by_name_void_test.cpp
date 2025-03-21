@@ -477,6 +477,64 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_010)
     ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
     ASSERT_EQ(res, arg + value);
 }
+
+TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_011)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].l = VAL1;
+    args[1U].l = VAL2;
+
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void(nullptr, object, "voidMethod", "JJ:V", VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void_A(nullptr, object, "voidMethod", "JJ:V", args),
+              ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(nullptr, "voidMethod", "JJ:V", VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(nullptr, "voidMethod", "JJ:V", args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(object, nullptr, "JJ:V", VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, nullptr, "JJ:V", args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(object, "voidMethod", nullptr, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, "voidMethod", nullptr, args), ANI_OK);
+}
+
+TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_012)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].l = VAL1;
+    args[1U].l = VAL2;
+
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Void(object, methodName.data(), "JJ:V", VAL1, VAL2), ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, methodName.data(), "JJ:V", args), ANI_NOT_FOUND);
+    }
+}
+
+TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_013)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].l = VAL1;
+    args[1U].l = VAL2;
+
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Void(object, methodName.data(), "", VAL1, VAL2), ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, methodName.data(), "", args), ANI_NOT_FOUND);
+    }
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
