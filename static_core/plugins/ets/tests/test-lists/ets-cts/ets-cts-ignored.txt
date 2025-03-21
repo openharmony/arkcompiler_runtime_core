@@ -858,17 +858,6 @@
 06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/call_lmbd/call-lmbd_21.ets
 06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/call_cons/call-cons_21.ets
 
-#23113
-06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/decl_var/decl-var_6.ets
-06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/assn_var/assn-var_6.ets
-06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/decl_field/decl-field_6.ets
-06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/call_func/call-func_6.ets
-06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/call_cons/call-cons_6.ets
-06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/call_lmbd/call-lmbd_6.ets
-06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/call_meth/call-meth_6.ets
-06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/comp_arr/comp-arr_6.ets
-06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/comp_obj/comp-clss_6.ets
-
 #22339
 06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_2.ets
 06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_3.ets
