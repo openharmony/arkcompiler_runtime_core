@@ -123,6 +123,7 @@ export enum FaultID {
   LiteralType,
   LimitImport,
   NoInitializer,
+  DuplicatedEnum,
   // this should always be last enum
   LAST_ID
 }
