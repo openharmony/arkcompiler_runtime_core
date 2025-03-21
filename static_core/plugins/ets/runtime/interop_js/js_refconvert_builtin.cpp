@@ -294,7 +294,15 @@ private:
         if (isInstanceof) {
             NotImplemented("DataView");
         }
-        // NOTE(vpukhov): Boolean, Number...
+        if (IsConstructor(env, jsValue, CONSTRUCTOR_NAME_NUMBER)) {
+            return BuiltinConvert<JSConvertStdlibDouble>(ctxx, env, jsValue);
+        }
+        if (IsConstructor(env, jsValue, CONSTRUCTOR_NAME_BOOLEAN)) {
+            return BuiltinConvert<JSConvertStdlibBoolean>(ctxx, env, jsValue);
+        }
+        if (IsConstructor(env, jsValue, CONSTRUCTOR_NAME_STRING)) {
+            return BuiltinConvert<JSConvertString>(ctxx, env, jsValue);
+        }
         return BuiltinConvert<JSConvertJSValue>(ctxx, env, jsValue);
     }
 

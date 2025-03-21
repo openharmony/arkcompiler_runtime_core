@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_H
 
 #include "js_convert_base.h"
+#include "js_convert_stdlib.h"
 
 namespace ark::ets::interop::js {
 
@@ -42,22 +43,28 @@ struct JSConvertNumeric : public JSConvertBase<JSConvertNumeric<Cpptype>, Cpptyp
     static std::enable_if_t<std::is_integral_v<P>, std::optional<Cpptype>> UnwrapImpl([[maybe_unused]] InteropCtx *ctx,
                                                                                       napi_env env, napi_value jsVal)
     {
-        if (UNLIKELY(GetValueType(env, jsVal) != napi_number)) {
+        napi_valuetype valueType = GetValueType(env, jsVal);
+        napi_value result = jsVal;
+        if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_NUMBER, &result)) {
+            JSConvertNumeric::TypeCheckFailed();
+            return {};
+        }
+        if (UNLIKELY(GetValueType(env, result) != napi_number)) {
             JSConvertNumeric::TypeCheckFailed();
             return {};
         }
         Cpptype etsVal;
         if constexpr (sizeof(Cpptype) >= sizeof(int32_t)) {
             int64_t val;
-            NAPI_CHECK_FATAL(napi_get_value_int64(env, jsVal, &val));
+            NAPI_CHECK_FATAL(napi_get_value_int64(env, result, &val));
             etsVal = static_cast<Cpptype>(val);
         } else if constexpr (std::is_signed_v<Cpptype>) {
             int32_t val;
-            NAPI_CHECK_FATAL(napi_get_value_int32(env, jsVal, &val));
+            NAPI_CHECK_FATAL(napi_get_value_int32(env, result, &val));
             etsVal = static_cast<Cpptype>(val);
         } else {
             uint32_t val;
-            NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsVal, &val));
+            NAPI_CHECK_FATAL(napi_get_value_uint32(env, result, &val));
             etsVal = static_cast<Cpptype>(val);
         }
         return etsVal;
@@ -75,12 +82,18 @@ struct JSConvertNumeric : public JSConvertBase<JSConvertNumeric<Cpptype>, Cpptyp
     static std::enable_if_t<std::is_floating_point_v<P>, std::optional<Cpptype>> UnwrapImpl(
         [[maybe_unused]] InteropCtx *ctx, napi_env env, napi_value jsVal)
     {
-        if (UNLIKELY(GetValueType(env, jsVal) != napi_number)) {
+        napi_valuetype valueType = GetValueType(env, jsVal);
+        napi_value result = jsVal;
+        if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_NUMBER, &result)) {
+            JSConvertNumeric::TypeCheckFailed();
+            return {};
+        }
+        if (UNLIKELY(GetValueType(env, result) != napi_number)) {
             JSConvertNumeric::TypeCheckFailed();
             return {};
         }
         double val;
-        NAPI_CHECK_FATAL(napi_get_value_double(env, jsVal, &val));
+        NAPI_CHECK_FATAL(napi_get_value_double(env, result, &val));
         return val;
     }
 };
@@ -88,7 +101,6 @@ struct JSConvertNumeric : public JSConvertBase<JSConvertNumeric<Cpptype>, Cpptyp
 using JSConvertI8 = JSConvertNumeric<int8_t>;
 using JSConvertU8 = JSConvertNumeric<uint8_t>;
 using JSConvertI16 = JSConvertNumeric<int16_t>;
-using JSConvertU16 = JSConvertNumeric<uint16_t>;
 using JSConvertI32 = JSConvertNumeric<int32_t>;
 using JSConvertU32 = JSConvertNumeric<uint32_t>;
 using JSConvertI64 = JSConvertNumeric<int64_t>;
@@ -105,170 +117,41 @@ JSCONVERT_WRAP(U1)
 }
 JSCONVERT_UNWRAP(U1)
 {
-    if (UNLIKELY(GetValueType(env, jsVal) != napi_boolean)) {
+    if (IsUndefined(env, jsVal)) {
         TypeCheckFailed();
         return {};
     }
-    bool val;
-    NAPI_CHECK_FATAL(napi_get_value_bool(env, jsVal, &val));
-    return val;
+    auto objVal = JSConvertStdlibBoolean::UnwrapWithNullCheck(ctx, env, jsVal);
+    if (!objVal || (objVal.has_value() && objVal.value() == nullptr)) {
+        return {};
+    }
+    if (objVal.has_value()) {
+        return EtsBoxPrimitive<EtsBoolean>::FromCoreType(objVal.value())->GetValue();
+    }
+    return {};
 }
 
-JSCONVERT_DEFINE_TYPE(StdlibBoolean, EtsObject *);
-JSCONVERT_WRAP(StdlibBoolean)
+JSCONVERT_DEFINE_TYPE(U16, char16_t);
+JSCONVERT_WRAP(U16)
 {
-    auto *val = reinterpret_cast<EtsBoxPrimitive<EtsBoolean> *>(etsVal);
     napi_value jsVal;
-    NAPI_CHECK_FATAL(napi_get_boolean(env, val->GetValue(), &jsVal));
+    NAPI_CHECK_FATAL(napi_create_string_utf16(env, &etsVal, 1, &jsVal));
     return jsVal;
 }
-JSCONVERT_UNWRAP(StdlibBoolean)
+JSCONVERT_UNWRAP(U16)
 {
-    bool val;
-    NAPI_CHECK_FATAL(napi_get_value_bool(env, jsVal, &val));
-    return EtsBoxPrimitive<EtsBoolean>::Create(EtsCoroutine::GetCurrent(), static_cast<EtsBoolean>(val));
-}
-
-JSCONVERT_DEFINE_TYPE(StdlibByte, EtsObject *);
-JSCONVERT_WRAP(StdlibByte)
-{
-    auto *val = reinterpret_cast<EtsBoxPrimitive<EtsByte> *>(etsVal);
-    napi_value jsVal;
-    NAPI_CHECK_FATAL(napi_create_int32(env, val->GetValue(), &jsVal));
-    return jsVal;
-}
-JSCONVERT_UNWRAP(StdlibByte)
-{
-    int32_t val;
-    NAPI_CHECK_FATAL(napi_get_value_int32(env, jsVal, &val));
-    if (val < std::numeric_limits<EtsByte>::min() || val > std::numeric_limits<EtsByte>::max()) {
+    if (IsUndefined(env, jsVal)) {
         TypeCheckFailed();
         return {};
     }
-    return EtsBoxPrimitive<EtsByte>::Create(EtsCoroutine::GetCurrent(), val);
-}
-
-JSCONVERT_DEFINE_TYPE(StdlibChar, EtsObject *);
-JSCONVERT_WRAP(StdlibChar)
-{
-    auto *val = reinterpret_cast<EtsBoxPrimitive<EtsChar> *>(etsVal);
-    napi_value jsVal;
-    std::array<char16_t, 2U> str = {static_cast<char16_t>(val->GetValue()), 0};
-    NAPI_CHECK_FATAL(napi_create_string_utf16(env, str.data(), 1, &jsVal));
-    return jsVal;
-}
-JSCONVERT_UNWRAP(StdlibChar)
-{
-    napi_valuetype type;
-    napi_typeof(env, jsVal, &type);
-    EtsChar val;
-    if (type == napi_number) {
-        int32_t ival;
-        NAPI_CHECK_FATAL(napi_get_value_int32(env, jsVal, &ival));
-        if (ival < 0 || ival > std::numeric_limits<EtsChar>::max()) {
-            TypeCheckFailed();
-            return {};
-        }
-        val = static_cast<uint16_t>(ival);
-    } else if (type == napi_string) {
-        size_t len = 0;
-        NAPI_CHECK_FATAL(napi_get_value_string_utf16(env, jsVal, nullptr, 0, &len));
-        if (len != 1) {
-            TypeCheckFailed();
-            return {};
-        }
-        char16_t cval;
-        NAPI_CHECK_FATAL(napi_get_value_string_utf16(env, jsVal, &cval, 1, &len));
-        val = static_cast<EtsChar>(cval);
-    } else {
-        TypeCheckFailed();
+    auto objVal = JSConvertStdlibChar::UnwrapWithNullCheck(ctx, env, jsVal);
+    if (!objVal || (objVal.has_value() && objVal.value() == nullptr)) {
         return {};
     }
-    return EtsBoxPrimitive<EtsChar>::Create(EtsCoroutine::GetCurrent(), val);
-}
-
-JSCONVERT_DEFINE_TYPE(StdlibShort, EtsObject *);
-JSCONVERT_WRAP(StdlibShort)
-{
-    auto *val = reinterpret_cast<EtsBoxPrimitive<EtsShort> *>(etsVal);
-    napi_value jsVal;
-    NAPI_CHECK_FATAL(napi_create_int32(env, val->GetValue(), &jsVal));
-    return jsVal;
-}
-JSCONVERT_UNWRAP(StdlibShort)
-{
-    int32_t val;
-    NAPI_CHECK_FATAL(napi_get_value_int32(env, jsVal, &val));
-    if (val < std::numeric_limits<EtsShort>::min() || val > std::numeric_limits<EtsShort>::max()) {
-        TypeCheckFailed();
-        return {};
+    if (objVal.has_value()) {
+        return EtsBoxPrimitive<EtsChar>::FromCoreType(objVal.value())->GetValue();
     }
-    return EtsBoxPrimitive<EtsShort>::Create(EtsCoroutine::GetCurrent(), static_cast<EtsShort>(val));
-}
-
-JSCONVERT_DEFINE_TYPE(StdlibInt, EtsObject *);
-JSCONVERT_WRAP(StdlibInt)
-{
-    auto *val = reinterpret_cast<EtsBoxPrimitive<EtsInt> *>(etsVal);
-    napi_value jsVal;
-    NAPI_CHECK_FATAL(napi_create_int32(env, val->GetValue(), &jsVal));
-    return jsVal;
-}
-JSCONVERT_UNWRAP(StdlibInt)
-{
-    EtsInt val;
-    NAPI_CHECK_FATAL(napi_get_value_int32(env, jsVal, &val));
-    return EtsBoxPrimitive<EtsInt>::Create(EtsCoroutine::GetCurrent(), val);
-}
-
-JSCONVERT_DEFINE_TYPE(StdlibLong, EtsObject *);
-JSCONVERT_WRAP(StdlibLong)
-{
-    auto *val = reinterpret_cast<EtsBoxPrimitive<EtsLong> *>(etsVal);
-    napi_value jsVal;
-    NAPI_CHECK_FATAL(napi_create_int64(env, val->GetValue(), &jsVal));
-    return jsVal;
-}
-JSCONVERT_UNWRAP(StdlibLong)
-{
-    EtsLong val;
-    NAPI_CHECK_FATAL(napi_get_value_int64(env, jsVal, &val));
-    return EtsBoxPrimitive<EtsLong>::Create(EtsCoroutine::GetCurrent(), val);
-}
-
-JSCONVERT_DEFINE_TYPE(StdlibFloat, EtsObject *);
-JSCONVERT_WRAP(StdlibFloat)
-{
-    auto *val = reinterpret_cast<EtsBoxPrimitive<EtsFloat> *>(etsVal);
-    napi_value jsVal;
-    NAPI_CHECK_FATAL(napi_create_double(env, static_cast<double>(val->GetValue()), &jsVal));
-    return jsVal;
-}
-JSCONVERT_UNWRAP(StdlibFloat)
-{
-    double val;
-    NAPI_CHECK_FATAL(napi_get_value_double(env, jsVal, &val));
-    auto fval = static_cast<EtsFloat>(val);
-    if (fval != val) {
-        TypeCheckFailed();
-        return {};
-    }
-    return EtsBoxPrimitive<EtsFloat>::Create(EtsCoroutine::GetCurrent(), fval);
-}
-
-JSCONVERT_DEFINE_TYPE(StdlibDouble, EtsObject *);
-JSCONVERT_WRAP(StdlibDouble)
-{
-    auto *val = reinterpret_cast<EtsBoxPrimitive<EtsDouble> *>(etsVal);
-    napi_value jsVal;
-    NAPI_CHECK_FATAL(napi_create_double(env, val->GetValue(), &jsVal));
-    return jsVal;
-}
-JSCONVERT_UNWRAP(StdlibDouble)
-{
-    EtsDouble val;
-    NAPI_CHECK_FATAL(napi_get_value_double(env, jsVal, &val));
-    return EtsBoxPrimitive<EtsDouble>::Create(EtsCoroutine::GetCurrent(), val);
+    return {};
 }
 
 JSCONVERT_DEFINE_TYPE(String, EtsString *);
@@ -287,13 +170,20 @@ JSCONVERT_WRAP(String)
 }
 JSCONVERT_UNWRAP(String)
 {
-    if (UNLIKELY(GetValueType(env, jsVal) != napi_string)) {
+    napi_value result = jsVal;
+    napi_valuetype valueType = GetValueType(env, jsVal);
+    if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_STRING, &result)) {
         TypeCheckFailed();
         return {};
     }
-    std::string value = GetString(env, jsVal);
+    if (UNLIKELY(GetValueType(env, result) != napi_string)) {
+        TypeCheckFailed();
+        return {};
+    }
+    std::string value = GetString(env, result);
     return EtsString::CreateFromUtf8(value.data(), value.length());
 }
+
 JSCONVERT_DEFINE_TYPE(BigInt, EtsBigInt *);
 JSCONVERT_WRAP(BigInt)
 {

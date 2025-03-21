@@ -32,6 +32,10 @@
 
 namespace ark::ets::interop::js {
 
+static constexpr const char *CONSTRUCTOR_NAME_BOOLEAN = "Boolean";
+static constexpr const char *CONSTRUCTOR_NAME_NUMBER = "Number";
+static constexpr const char *CONSTRUCTOR_NAME_STRING = "String";
+
 template <typename T>
 inline EtsObject *AsEtsObject(T *obj)
 {
@@ -50,6 +54,26 @@ void JSConvertTypeCheckFailed(const char *typeName);
 inline void JSConvertTypeCheckFailed(const std::string &s)
 {
     JSConvertTypeCheckFailed(s.c_str());
+}
+
+static bool IsConstructor(napi_env &env, napi_value &jsValue, const char *constructorName)
+{
+    napi_value constructor;
+    bool isInstanceof;
+    NAPI_CHECK_FATAL(napi_get_named_property(env, GetGlobal(env), constructorName, &constructor));
+    NAPI_CHECK_FATAL(napi_instanceof(env, jsValue, constructor, &isInstanceof));
+    return isInstanceof;
+}
+
+static bool GetValueByValueOf(napi_env env, napi_value &jsValue, const char *constructorName, napi_value *result)
+{
+    if (!IsConstructor(env, jsValue, constructorName)) {
+        return false;
+    }
+    napi_value method;
+    NAPI_CHECK_FATAL(napi_get_named_property(env, jsValue, "valueOf", &method));
+    NAPI_CHECK_FATAL(napi_call_function(env, jsValue, method, 0, nullptr, result));
+    return true;
 }
 
 // Base mixin class of JSConvert interface
