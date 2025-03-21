@@ -30,7 +30,7 @@ class Bar<T> {
 
 function main() {
     let x : Bar<Int> = new Bar<Int>([new Int(1), new Int(2), new Int(3)] );
-    assertEQ(x[1], 1)
+    assertEQ(x[1], 2)
     x[1] = 7;
     assertEQ(x[1], 7)
     return 0;

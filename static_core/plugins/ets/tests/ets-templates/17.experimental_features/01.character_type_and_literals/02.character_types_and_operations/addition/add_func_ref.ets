@@ -16,17 +16,17 @@
 /*---
 desc: >-
     ArkTS provides a number of operators to act on character values:
-    Character operators that produce a value of type char.
+    Character operators are identical to integer operators, so produce a value of type int.
 ---*/
 
 function add(p: Char, q: Char): Char {
-    return p + q  // unboxing/boxing is expected here
+    return (p + q) as Char
 }
 
 function main() {
     const v1 = new Char({{v.v1}})
     const v2 = new Char({{v.v2}})
 
-    assertEQ( ({{v.exp}}), {{v.r}} )
+    assertEQ(({{v.exp}}), {{v.r}})
 }
 {%- endfor %}

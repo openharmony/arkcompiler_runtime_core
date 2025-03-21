@@ -16,17 +16,17 @@
 /*---
 desc: >-
     ArkTS provides a number of operators to act on character values:
-    Character operators that produce a value of type char.
+    Character operators are identical to integer operators, so produce a value of type int.
 ---*/
 
 function sub(p: char, q: char): char {
-    return p - q
+    return (p - q) as char
 }
 
 function main() {
     const v1 = {{v.v1}}
     const v2 = {{v.v2}}
 
-    assertTrue( ({{v.exp}}) == {{v.r}} )
+    assertEQ({{v.exp}}, {{v.r}})
 }
 {%- endfor %}

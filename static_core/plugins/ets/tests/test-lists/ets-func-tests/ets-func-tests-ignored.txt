@@ -328,10 +328,6 @@ spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_04.ets
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s01-0030.ets
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s01-0080.ets
 
-#23724
-spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0020.ets
-spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0030.ets
-
 #19716
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s03-0000.ets
 

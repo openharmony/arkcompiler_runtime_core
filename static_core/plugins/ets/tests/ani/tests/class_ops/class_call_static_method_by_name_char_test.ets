@@ -17,9 +17,9 @@ class Operations {
     static sub(c0: char, c1: char): char {
         let c: Char = new Char('0');
         if (c0 > c1) {
-            c = c0 - c1;
+            c = c0 - c1 as Char;
         } else {
-            c = c1 - c0;
+            c = c1 - c0 as Char;
         }
         return c as char;
     }
@@ -30,9 +30,9 @@ class A {
     static funcA(c0: char, c1: char): char {
         let c: Char = new Char('0');
         if (c0 > c1) {
-            c = c0 - c1;
+            c = c0 - c1 as Char;
         } else {
-            c = c1 - c0;
+            c = c1 - c0 as Char;
         }
         return c as char;
     }
@@ -48,9 +48,9 @@ class A {
     static funcA(c0: char, c1: char): char {
         let c: Char = new Char('0');
         if (c0 > c1) {
-            c = c0 - c1;
+            c = c0 - c1 as Char;
         } else {
-            c = c1 - c0;
+            c = c1 - c0 as Char;
         }
         return c as char;
     }
@@ -63,9 +63,9 @@ class A {
     static funcA(c0: char, c1: char): char {
         let c: Char = new Char('0');
         if (c0 > c1) {
-            c = c0 - c1;
+            c = c0 - c1 as Char;
         } else {
-            c = c1 - c0;
+            c = c1 - c0 as Char;
         }
         return c as char;
     }
@@ -73,7 +73,7 @@ class A {
 class B extends A{
     static funcA(c0: char, c1: char): char {
         let c: Char = new Char('0');
-        c = c0 + c1;
+        c = c0 + c1 as Char;
         return c as char;
     }
 };

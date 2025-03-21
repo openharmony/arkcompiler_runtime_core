@@ -19,7 +19,7 @@ vals:
 
     - v1: c'\u0020'
       v2: c'\u0001'
-      exp: "add(v1, v2) + c' '"
+      exp: "(add(v1, v2) + c' ') as Char"
       r: c'A'
 
     - v1: c'\uFFFF'
@@ -39,7 +39,7 @@ vals:
 
     - v1: c'\u1010'
       v2: c'\u0101'
-      exp: "add(v1 + c'\\u1010', v2 + c'\\u0101')"
+      exp: "add((v1 + c'\\u1010') as Char, (v2 + c'\\u0101') as Char)"
       r: c'\u2222'
 
     - v1: c'∫'
