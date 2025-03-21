@@ -33,7 +33,10 @@ export class Autofixer {
       ts.SyntaxKind.VariableDeclarationList,
       [this[FaultID.VarDeclaration].bind(this), this[FaultID.VarDeclarationAssignment].bind(this)]
     ],
-    [ts.SyntaxKind.PropertyDeclaration, [this[FaultID.PrivateIdentifier].bind(this)]],
+    [
+      ts.SyntaxKind.PropertyDeclaration,
+      [this[FaultID.PrivateIdentifier].bind(this), this[FaultID.NoInitializer].bind(this)]
+    ],
     [
       ts.SyntaxKind.SourceFile,
       [
@@ -707,6 +710,35 @@ export class Autofixer {
     }
     return node;
   }
+
+  /**
+   * Rule: `arkts-no-initializer`
+   */
+  private [FaultID.NoInitializer](node: ts.Node): ts.VisitResult<ts.Node> {
+    
+    /**
+     * For member variables with initial assignment, convert literals to their corresponding data types.
+     */
+
+    if (!ts.isPropertyDeclaration(node)) {
+      return node;
+    }
+
+    const nodeType = inferNodeTypeFromInitializer(node, this.context);
+
+    if (nodeType !== undefined) {
+      return this.context.factory.updatePropertyDeclaration(
+        node,
+        node.modifiers,
+        node.name,
+        undefined,
+        nodeType,
+        undefined
+      );
+    }
+
+    return node;
+  }
 }
 
 /**
@@ -1356,4 +1388,36 @@ function createTypeParameterDeclaration(
   context: ts.TransformationContext
 ): ts.TypeParameterDeclaration {
   return context.factory.createTypeParameterDeclaration(undefined, node.name, constraint, defaultType);
+}
+
+/***
+ * Handle initializes are not allowed in the environment content
+ */
+function inferNodeTypeFromInitializer(
+  node: ts.PropertyDeclaration,
+  context: ts.TransformationContext
+): ts.TypeNode | undefined {
+  if (node.initializer !== undefined) {
+    switch (node.initializer.kind) {
+      case ts.SyntaxKind.FalseKeyword:
+      case ts.SyntaxKind.TrueKeyword:
+        return context.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
+      case ts.SyntaxKind.NumericLiteral:
+        return context.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
+      case ts.SyntaxKind.BigIntLiteral:
+        return context.factory.createKeywordTypeNode(ts.SyntaxKind.BigIntKeyword);
+      case ts.SyntaxKind.StringLiteral:
+        return context.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
+      default:
+        return undefined;
+    }
+  } else if (node.type !== undefined && ts.isLiteralTypeNode(node.type)) {
+    if (isBooleanType(node.type)) {
+      return context.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
+    } else if (isBigintType(node.type)) {
+      return context.factory.createKeywordTypeNode(ts.SyntaxKind.BigIntKeyword);
+    }
+  }
+
+  return undefined;
 }

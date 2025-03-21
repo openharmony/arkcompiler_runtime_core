@@ -122,6 +122,7 @@ export enum FaultID {
   VarDeclarationAssignment,
   LiteralType,
   LimitImport,
+  NoInitializer,
   // this should always be last enum
   LAST_ID
 }
