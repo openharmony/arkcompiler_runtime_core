@@ -36,13 +36,6 @@ export namespace Intl {
     export type RelativeTimeFormatUnit = "year" | "years" | "quarter" | "quarters" | "month" | "months" | "week" | "weeks" | "day" | "days" | "hour" | "hours" | "minute" | "minutes"| "second" | "seconds"
     export type RelativeTimeFormatUnitSingular =  "year" | "quarter" | "month" | "week" | "day" | "hour" | "minute" | "second"
     export type UnicodeBCP47LocaleIdentifier = string;
+    export type DateTimeFormatPartTypes = "day" | "dayPeriod" | "era" | "fractionalSecond" | "hour" | "literal" | "minute" | "month" | "second" | "timeZoneName" | "unknown" | "weekday" | "year";
 
-
-export class RelativeTimeFormatPart {
-    type: ES2018NumberFormatPartType = "literal"
-    value: string = ""
-    unit?: RelativeTimeFormatUnitSingular
-
-        public constructor() {}
-    }
 }
