@@ -21,10 +21,10 @@ class ObjectSetFieldIntTest : public AniTest {
 public:
     void GetTestData(ani_object *packResult, ani_field *fieldIntResult, ani_field *fieldStringResult)
     {
-        auto packRef = CallEtsFunction<ani_ref>("newPackObject");
+        auto packRef = CallEtsFunction<ani_ref>("object_set_field_int_test", "newPackObject");
 
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("LPack;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("Lobject_set_field_int_test/Pack;", &cls), ANI_OK);
 
         ani_field fieldInt {};
         ASSERT_EQ(env_->Class_FindField(cls, "int_value", &fieldInt), ANI_OK);
@@ -47,19 +47,19 @@ TEST_F(ObjectSetFieldIntTest, set_field_int)
     const ani_int value2 = 3;
     GetTestData(&pack, &fieldInt, &fieldString);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkIntValue", pack, 0), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_int_test", "checkIntValue", pack, 0), ANI_TRUE);
 
     const int32_t loopCount = 3;
     for (int i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetField_Int(pack, fieldInt, value1), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkIntValue", pack, value1), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_int_test", "checkIntValue", pack, value1), ANI_TRUE);
 
         ani_int result = 0;
         ASSERT_EQ(env_->Object_GetField_Int(pack, fieldInt, &result), ANI_OK);
         ASSERT_EQ(result, value1);
 
         ASSERT_EQ(env_->Object_SetField_Int(pack, fieldInt, value2), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkIntValue", pack, value2), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_int_test", "checkIntValue", pack, value2), ANI_TRUE);
 
         ASSERT_EQ(env_->Object_GetField_Int(pack, fieldInt, &result), ANI_OK);
         ASSERT_EQ(result, value2);

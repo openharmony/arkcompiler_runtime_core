@@ -24,7 +24,7 @@ class ArrayGetRefTest : public AniTest {};
 // ninja ani_test_array_getref_gtests
 TEST_F(ArrayGetRefTest, GetRefErrorTests)
 {
-    auto array = static_cast<ani_array_ref>(CallEtsFunction<ani_ref>("GetArray"));
+    auto array = static_cast<ani_array_ref>(CallEtsFunction<ani_ref>("array_get_ref_test", "GetArray"));
     ani_ref ref = nullptr;
     const ani_size index = 0;
     const ani_size invalidIndex = 5;
@@ -35,7 +35,7 @@ TEST_F(ArrayGetRefTest, GetRefErrorTests)
 
 TEST_F(ArrayGetRefTest, GetRefOkTests)
 {
-    auto array = static_cast<ani_array_ref>(CallEtsFunction<ani_ref>("GetArray"));
+    auto array = static_cast<ani_array_ref>(CallEtsFunction<ani_ref>("array_get_ref_test", "GetArray"));
     const ani_size index1 = 1;
     const ani_size index2 = 2;
     ani_ref ref1 = nullptr;

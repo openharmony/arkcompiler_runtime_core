@@ -21,7 +21,7 @@ class ClassSetStaticFieldCharTest : public AniTest {};
 TEST_F(ClassSetStaticFieldCharTest, set_char)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetChar;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_char_test/TestSetChar;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "char_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -38,7 +38,7 @@ TEST_F(ClassSetStaticFieldCharTest, set_char)
 TEST_F(ClassSetStaticFieldCharTest, set_char_c_api)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetChar;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_char_test/TestSetChar;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "char_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -55,7 +55,7 @@ TEST_F(ClassSetStaticFieldCharTest, set_char_c_api)
 TEST_F(ClassSetStaticFieldCharTest, set_invalid_field_type)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetChar;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_char_test/TestSetChar;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -66,7 +66,7 @@ TEST_F(ClassSetStaticFieldCharTest, set_invalid_field_type)
 TEST_F(ClassSetStaticFieldCharTest, invalid_argument1)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetChar;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_char_test/TestSetChar;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "char_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -81,7 +81,7 @@ TEST_F(ClassSetStaticFieldCharTest, invalid_argument1)
 TEST_F(ClassSetStaticFieldCharTest, invalid_argument2)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetChar;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_char_test/TestSetChar;", &cls), ANI_OK);
     const ani_char setTar = 'c';
     ASSERT_EQ(env_->Class_SetStaticField_Char(cls, nullptr, setTar), ANI_INVALID_ARGS);
 }

@@ -109,7 +109,7 @@ TEST_F(ArrayBufferCreateTest, CreateForManaged)
     byteData[1U] = 2U;
     byteData[2U] = 3U;
 
-    auto ok = CallEtsFunction<ani_boolean>("CheckArrayBuffer", arrayBuffer);
+    auto ok = CallEtsFunction<ani_boolean>("arraybuffer_create_test", "CheckArrayBuffer", arrayBuffer);
     ASSERT_EQ(ok, ANI_TRUE);
 }
 

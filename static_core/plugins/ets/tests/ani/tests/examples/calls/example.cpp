@@ -25,7 +25,7 @@ TEST_F(ExampleTest, EtsFunctionCall)
     ets_double p1 = 5.0;
     ets_double p2 = 6.0;
 
-    auto res = CallEtsFunction<ets_double>("exampleFunction", p1, p2);
+    auto res = CallEtsFunction<ets_double>("example", "exampleFunction", p1, p2);
     ASSERT_EQ(res, p1 + p2);
 }
 
@@ -43,7 +43,7 @@ TEST_F(ExampleTest, CallNativeFunction)
     ets_long p2 = -123;
 
     // Generic call
-    auto res = CallEtsNativeMethod<ets_long>(fn, p1, p2);
+    auto res = CallEtsNativeMethod<ets_long>("example", fn, p1, p2);
     ASSERT_EQ(res, p1 * p2);
 }
 // NOLINTEND(readability-magic-numbers)

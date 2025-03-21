@@ -23,7 +23,7 @@ class ClassSetStaticFieldRefTest : public AniTest {};
 TEST_F(ClassSetStaticFieldRefTest, set_ref)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_ref_test/TestSetRef;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -45,7 +45,7 @@ TEST_F(ClassSetStaticFieldRefTest, set_ref)
 TEST_F(ClassSetStaticFieldRefTest, set_ref_c_api)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_ref_test/TestSetRef;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -67,7 +67,7 @@ TEST_F(ClassSetStaticFieldRefTest, set_ref_c_api)
 TEST_F(ClassSetStaticFieldRefTest, set_invalid_field_type)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_ref_test/TestSetRef;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -81,7 +81,7 @@ TEST_F(ClassSetStaticFieldRefTest, set_invalid_field_type)
 TEST_F(ClassSetStaticFieldRefTest, invalid_argument1)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_ref_test/TestSetRef;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -95,7 +95,7 @@ TEST_F(ClassSetStaticFieldRefTest, invalid_argument1)
 TEST_F(ClassSetStaticFieldRefTest, invalid_argument2)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_ref_test/TestSetRef;", &cls), ANI_OK);
 
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8("testString", 6U, &string), ANI_OK);

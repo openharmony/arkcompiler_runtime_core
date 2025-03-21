@@ -58,9 +58,9 @@ TEST_F(ModuleBindNativeFunctionsTest, bind_native_functions)
     };
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
 
-    const char *className = "@abcModule/test/ETSGLOBAL";
-    ASSERT_EQ(CallEtsClassStaticMethod<ani_boolean>(className, "checkSum"), ANI_TRUE);
-    ASSERT_EQ(CallEtsClassStaticMethod<ani_boolean>(className, "checkConcat"), ANI_TRUE);
+    const char *className = "@abcModule/test";
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(className, "checkSum"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(className, "checkConcat"), ANI_TRUE);
 }
 
 TEST_F(ModuleBindNativeFunctionsTest, already_binded_function)
@@ -77,9 +77,9 @@ TEST_F(ModuleBindNativeFunctionsTest, already_binded_function)
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_ALREADY_BINDED);
 
-    const char *className = "@abcModule/test/ETSGLOBAL";
-    ASSERT_EQ(CallEtsClassStaticMethod<ani_boolean>(className, "checkSum"), ANI_TRUE);
-    ASSERT_EQ(CallEtsClassStaticMethod<ani_boolean>(className, "checkConcat"), ANI_TRUE);
+    const char *className = "@abcModule/test";
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(className, "checkSum"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(className, "checkConcat"), ANI_TRUE);
 }
 
 TEST_F(ModuleBindNativeFunctionsTest, invalid_arg_module)

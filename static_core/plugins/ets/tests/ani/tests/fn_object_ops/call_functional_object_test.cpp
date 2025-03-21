@@ -34,7 +34,7 @@ protected:
 
 TEST_F(CallFunctionalObjectTest, functional_object_call_invalid_args)
 {
-    auto fnObj = reinterpret_cast<ani_fn_object>(CallEtsFunction<ani_ref>("GetFnObj"));
+    auto fnObj = reinterpret_cast<ani_fn_object>(CallEtsFunction<ani_ref>("call_functional_object_test", "GetFnObj"));
     ani_ref result;
     ASSERT_EQ(env_->FunctionalObject_Call(nullptr, 0, nullptr, &result), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->FunctionalObject_Call(fnObj, 0, nullptr, nullptr), ANI_INVALID_ARGS);
@@ -42,13 +42,14 @@ TEST_F(CallFunctionalObjectTest, functional_object_call_invalid_args)
     const size_t argsSize = 16;
     std::vector<ani_ref> args(argsSize, nullptr);
     ASSERT_EQ(env_->FunctionalObject_Call(fnObj, args.size(), args.data(), &result), ANI_INVALID_ARGS);
-    auto nonFnObj = reinterpret_cast<ani_fn_object>(CallEtsFunction<ani_ref>("GetNonFnObj"));
+    auto nonFnObj =
+        reinterpret_cast<ani_fn_object>(CallEtsFunction<ani_ref>("call_functional_object_test", "GetNonFnObj"));
     ASSERT_EQ(env_->FunctionalObject_Call(nonFnObj, 0, nullptr, &result), ANI_INVALID_TYPE);
 }
 
 TEST_F(CallFunctionalObjectTest, functional_object_call)
 {
-    auto fnObj = reinterpret_cast<ani_fn_object>(CallEtsFunction<ani_ref>("GetFnObj"));
+    auto fnObj = reinterpret_cast<ani_fn_object>(CallEtsFunction<ani_ref>("call_functional_object_test", "GetFnObj"));
     const std::string str = "test";
     ani_string arg1 = {};
     ASSERT_EQ(env_->String_NewUTF8(str.c_str(), str.size(), &arg1), ANI_OK);
@@ -60,7 +61,8 @@ TEST_F(CallFunctionalObjectTest, functional_object_call)
 
 TEST_F(CallFunctionalObjectTest, functional_object_call_with_closure)
 {
-    auto fnObjWithClosure = reinterpret_cast<ani_fn_object>(CallEtsFunction<ani_ref>("GetFnObjWithClosure"));
+    auto fnObjWithClosure =
+        reinterpret_cast<ani_fn_object>(CallEtsFunction<ani_ref>("call_functional_object_test", "GetFnObjWithClosure"));
     const std::string str = "test";
     ani_string arg1 = {};
     ASSERT_EQ(env_->String_NewUTF8(str.c_str(), str.size(), &arg1), ANI_OK);

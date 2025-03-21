@@ -60,28 +60,28 @@ class FindGetterSetterTest : public AniTest {};
 
 TEST_F(FindSetterTest, has_set_methods)
 {
-    CheckClassFindSetter<true>("LExplicitMethods;", "age");
-    CheckClassFindSetter<true>("LStyledRectangle;", "color");
-    CheckClassFindSetter<true>("LOnlySet;", "field");
+    CheckClassFindSetter<true>("Lclass_find_setter_getter_test/ExplicitMethods;", "age");
+    CheckClassFindSetter<true>("Lclass_find_setter_getter_test/StyledRectangle;", "color");
+    CheckClassFindSetter<true>("Lclass_find_setter_getter_test/OnlySet;", "field");
 }
 
 TEST_F(FindGetterTest, has_get_method)
 {
-    CheckClassFindGetter<true>("LExplicitMethods;", "age");
-    CheckClassFindGetter<true>("LStyledRectangle;", "color");
-    CheckClassFindGetter<true>("LOnlyGet;", "field");
+    CheckClassFindGetter<true>("Lclass_find_setter_getter_test/ExplicitMethods;", "age");
+    CheckClassFindGetter<true>("Lclass_find_setter_getter_test/StyledRectangle;", "color");
+    CheckClassFindGetter<true>("Lclass_find_setter_getter_test/OnlyGet;", "field");
 }
 
 TEST_F(FindSetterTest, no_set_method)
 {
-    CheckClassFindSetter<false>("LImplicitMethods;", "field");
-    CheckClassFindSetter<false>("LOnlyGet;", "field");
+    CheckClassFindSetter<false>("Lclass_find_setter_getter_test/ImplicitMethods;", "field");
+    CheckClassFindSetter<false>("Lclass_find_setter_getter_test/OnlyGet;", "field");
 }
 
 TEST_F(FindGetterTest, no_get_method)
 {
-    CheckClassFindGetter<false>("LImplicitMethods;", "field");
-    CheckClassFindGetter<false>("LOnlySet;", "field");
+    CheckClassFindGetter<false>("Lclass_find_setter_getter_test/ImplicitMethods;", "field");
+    CheckClassFindGetter<false>("Lclass_find_setter_getter_test/OnlySet;", "field");
 }
 
 TEST_F(FindGetterSetterTest, invalid_args)

@@ -44,7 +44,8 @@ TEST_F(ArraySetGetRegionBooleanTest, GetBooleanArrayRegionErrorTests)
 
 TEST_F(ArraySetGetRegionBooleanTest, GetRegionBooleanTest)
 {
-    const auto array = static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("GetArray"));
+    const auto array =
+        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "GetArray"));
     ani_boolean nativeBuffer[LENGTH_5] = {ANI_FALSE};
     ASSERT_EQ(env_->Array_GetRegion_Boolean(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
     ASSERT_EQ(nativeBuffer[0U], ANI_TRUE);
@@ -56,16 +57,17 @@ TEST_F(ArraySetGetRegionBooleanTest, GetRegionBooleanTest)
 
 TEST_F(ArraySetGetRegionBooleanTest, SetRegionBooleanTest)
 {
-    const auto array = static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("GetArray"));
+    const auto array =
+        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "GetArray"));
     const ani_boolean nativeBuffer1[LENGTH_5] = {ANI_TRUE, ANI_FALSE, ANI_TRUE};
     ASSERT_EQ(env_->Array_SetRegion_Boolean(array, OFFSET_2, LENGTH_3, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("CheckArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_boolean_test", "CheckArray", array), ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionBooleanTest, CheckChangeFromManagedRegionBooleanTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Larray_region_boolean_test/ArrayClass;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -94,7 +96,7 @@ TEST_F(ArraySetGetRegionBooleanTest, CheckChangeFromManagedRegionBooleanTest)
 TEST_F(ArraySetGetRegionBooleanTest, CheckChangeFromApiRegionBooleanTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Larray_region_boolean_test/ArrayClass;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;

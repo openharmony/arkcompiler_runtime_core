@@ -23,7 +23,7 @@ public:
     void GetClassData(ani_class *clsResult)
     {
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("LOperations;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_char_test/Operations;", &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
         *clsResult = cls;
     }
@@ -228,7 +228,7 @@ TEST_F(ClassCallStaticMethodByNameTest, call_static_method_by_name_char_A_null_a
 TEST_F(ClassCallStaticMethodByNameTest, call_static_method_by_name_char_combine_scenes_1)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lna;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lclass_call_static_method_by_name_char_test/na;", &ns), ANI_OK);
     ani_class cls {};
     ASSERT_EQ(env_->Namespace_FindClass(ns, "LA;", &cls), ANI_OK);
 
@@ -251,7 +251,7 @@ TEST_F(ClassCallStaticMethodByNameTest, call_static_method_by_name_char_combine_
 TEST_F(ClassCallStaticMethodByNameTest, call_static_method_by_name_char_combine_scenes_2)
 {
     ani_namespace nb {};
-    ASSERT_EQ(env_->FindNamespace("Lnb;", &nb), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lclass_call_static_method_by_name_char_test/nb;", &nb), ANI_OK);
     ani_namespace nc {};
     ASSERT_EQ(env_->Namespace_FindNamespace(nb, "Lnc;", &nc), ANI_OK);
     ani_class cls {};
@@ -276,7 +276,7 @@ TEST_F(ClassCallStaticMethodByNameTest, call_static_method_by_name_char_combine_
 TEST_F(ClassCallStaticMethodByNameTest, call_static_method_by_name_char_combine_scenes_3)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lna;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lclass_call_static_method_by_name_char_test/na;", &ns), ANI_OK);
     ani_class cls {};
     ASSERT_EQ(env_->Namespace_FindClass(ns, "LA;", &cls), ANI_OK);
 
@@ -305,7 +305,7 @@ TEST_F(ClassCallStaticMethodByNameTest, call_static_method_by_name_char_combine_
 TEST_F(ClassCallStaticMethodByNameTest, call_static_method_by_name_char_combine_scenes_4)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnd;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lclass_call_static_method_by_name_char_test/nd;", &ns), ANI_OK);
     ani_class cls {};
     ASSERT_EQ(env_->Namespace_FindClass(ns, "LB;", &cls), ANI_OK);
     ani_char value = '\0';

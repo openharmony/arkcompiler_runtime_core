@@ -23,7 +23,7 @@ class ClassGetStaticFieldRefTest : public AniTest {};
 TEST_F(ClassGetStaticFieldRefTest, get_ref)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_ref_test/TestRef;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -40,7 +40,7 @@ TEST_F(ClassGetStaticFieldRefTest, get_ref)
 TEST_F(ClassGetStaticFieldRefTest, get_ref_c_api)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_ref_test/TestRef;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -57,7 +57,7 @@ TEST_F(ClassGetStaticFieldRefTest, get_ref_c_api)
 TEST_F(ClassGetStaticFieldRefTest, get_invalid_field_type)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_ref_test/TestRef;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -68,7 +68,7 @@ TEST_F(ClassGetStaticFieldRefTest, get_invalid_field_type)
 TEST_F(ClassGetStaticFieldRefTest, invalid_argument1)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_ref_test/TestRef;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -79,7 +79,7 @@ TEST_F(ClassGetStaticFieldRefTest, invalid_argument1)
 TEST_F(ClassGetStaticFieldRefTest, invalid_argument2)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_ref_test/TestRef;", &cls), ANI_OK);
     ani_ref result = nullptr;
     ASSERT_EQ(env_->Class_GetStaticField_Ref(cls, nullptr, &result), ANI_INVALID_ARGS);
 }
@@ -87,7 +87,7 @@ TEST_F(ClassGetStaticFieldRefTest, invalid_argument2)
 TEST_F(ClassGetStaticFieldRefTest, invalid_argument3)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_ref_test/TestRef;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);

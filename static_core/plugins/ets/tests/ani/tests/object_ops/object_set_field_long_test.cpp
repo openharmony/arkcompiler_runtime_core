@@ -21,10 +21,10 @@ class ObjectSetFieldLongTest : public AniTest {
 public:
     void GetTestData(ani_object *packResult, ani_field *fieldLongResult, ani_field *fieldStringResult)
     {
-        auto packRef = CallEtsFunction<ani_ref>("newPackageObject");
+        auto packRef = CallEtsFunction<ani_ref>("object_set_field_long_test", "newPackageObject");
 
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("LPackage;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("Lobject_set_field_long_test/Package;", &cls), ANI_OK);
 
         ani_field fieldLong {};
         ASSERT_EQ(env_->Class_FindField(cls, "long_value", &fieldLong), ANI_OK);
@@ -47,19 +47,24 @@ TEST_F(ObjectSetFieldLongTest, set_field_long)
     ani_long longValue1 = 7L;
     GetTestData(&pack, &fieldLong, &fieldString);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkLongValue", pack, ani_long(0)), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_long_test", "checkLongValue", pack, ani_long(0)),
+              ANI_TRUE);
 
     const int32_t loopCount = 3;
     for (int i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetField_Long(pack, fieldLong, longValue), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkLongValue", pack, ani_long(longValue)), ANI_TRUE);
+        ASSERT_EQ(
+            CallEtsFunction<ani_boolean>("object_set_field_long_test", "checkLongValue", pack, ani_long(longValue)),
+            ANI_TRUE);
 
         ani_long value {};
         ASSERT_EQ(env_->Object_GetField_Long(pack, fieldLong, &value), ANI_OK);
         ASSERT_EQ(value, longValue);
 
         ASSERT_EQ(env_->Object_SetField_Long(pack, fieldLong, longValue1), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkLongValue", pack, ani_long(longValue1)), ANI_TRUE);
+        ASSERT_EQ(
+            CallEtsFunction<ani_boolean>("object_set_field_long_test", "checkLongValue", pack, ani_long(longValue1)),
+            ANI_TRUE);
 
         ASSERT_EQ(env_->Object_GetField_Long(pack, fieldLong, &value), ANI_OK);
         ASSERT_EQ(value, longValue1);

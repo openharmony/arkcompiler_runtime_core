@@ -22,7 +22,7 @@ class GetEnumFromItemTest : public AniTest {};
 TEST_F(GetEnumFromItemTest, get_enum_from_item)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("LToFind;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lget_enum_from_item_test/ToFind;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -59,7 +59,7 @@ TEST_F(GetEnumFromItemTest, get_enum_from_item)
 TEST_F(GetEnumFromItemTest, invalid_arg_enum)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("LToFind;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lget_enum_from_item_test/ToFind;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};

@@ -23,7 +23,7 @@ class ClassSetStaticFieldByNameLongTest : public AniTest {};
 TEST_F(ClassSetStaticFieldByNameLongTest, set_static_field_by_name_long_capi)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LPackageStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_long_test/PackageStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Long(env_, cls, "long_value", 8L), ANI_OK);
     ani_long resultValue;
@@ -34,7 +34,7 @@ TEST_F(ClassSetStaticFieldByNameLongTest, set_static_field_by_name_long_capi)
 TEST_F(ClassSetStaticFieldByNameLongTest, set_static_field_by_name_long)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LPackageStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_long_test/PackageStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, "long_value", 8L), ANI_OK);
     ani_long resultValue;
@@ -45,7 +45,7 @@ TEST_F(ClassSetStaticFieldByNameLongTest, set_static_field_by_name_long)
 TEST_F(ClassSetStaticFieldByNameLongTest, set_static_field_by_name_long_invalid_field_type)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LPackageStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_long_test/PackageStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, "string_value", 8L), ANI_INVALID_TYPE);
 }
@@ -53,7 +53,7 @@ TEST_F(ClassSetStaticFieldByNameLongTest, set_static_field_by_name_long_invalid_
 TEST_F(ClassSetStaticFieldByNameLongTest, set_static_field_by_name_long_invalid_args_object)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LPackageStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_long_test/PackageStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(nullptr, "long_value", 8L), ANI_INVALID_ARGS);
 }
@@ -61,7 +61,7 @@ TEST_F(ClassSetStaticFieldByNameLongTest, set_static_field_by_name_long_invalid_
 TEST_F(ClassSetStaticFieldByNameLongTest, set_static_field_by_name_long_invalid_args_field)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LPackageStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_long_test/PackageStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, nullptr, 8L), ANI_INVALID_ARGS);
 }

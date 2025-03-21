@@ -24,12 +24,13 @@ TEST_F(ConstructorNativeLibraryTest, call_ANI_Constructor)
     ani_boolean unhandledError;
 
     // Call native library constructor
-    auto calcRef = CallEtsFunction<ani_ref>("new_Calc");
+    auto calcRef = CallEtsFunction<ani_ref>("constructor_native_library_test", "new_Calc");
     ASSERT_EQ(env_->ExistUnhandledError(&unhandledError), ANI_OK);
     ASSERT_EQ(unhandledError, ANI_FALSE) << "Cannot load native library";
 
     // Call native method
-    auto sum = CallEtsFunction<ani_int>("Calc_sum", static_cast<ani_object>(calcRef), 2U, 4U);
+    auto sum = CallEtsFunction<ani_int>("constructor_native_library_test", "Calc_sum", static_cast<ani_object>(calcRef),
+                                        2U, 4U);
     ASSERT_EQ(env_->ExistUnhandledError(&unhandledError), ANI_OK);
     ASSERT_EQ(unhandledError, ANI_FALSE) << "Cannot call native method";
 

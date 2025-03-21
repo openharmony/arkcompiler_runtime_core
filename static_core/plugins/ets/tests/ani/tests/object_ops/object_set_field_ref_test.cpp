@@ -21,10 +21,10 @@ class ObjectSetFieldRefTest : public AniTest {
 public:
     void GetTestData(ani_object *boxResult, ani_field *fieldIntResult, ani_field *fieldStringResult)
     {
-        auto boxRef = CallEtsFunction<ani_ref>("newBoxObject");
+        auto boxRef = CallEtsFunction<ani_ref>("object_set_field_ref_test", "newBoxObject");
 
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("LBoxx;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("Lobject_set_field_ref_test/Boxx;", &cls), ANI_OK);
 
         ani_field fieldInt {};
         ASSERT_EQ(env_->Class_FindField(cls, "int_value", &fieldInt), ANI_OK);
@@ -51,7 +51,7 @@ TEST_F(ObjectSetFieldRefTest, set_field_ref)
     const int32_t loopCount = 3;
     for (int i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetField_Ref(box, fieldString, string), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkStringValue", box, string), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_ref_test", "checkStringValue", box, string), ANI_TRUE);
 
         ani_ref nameRef {};
         ASSERT_EQ(env_->Object_GetField_Ref(box, fieldString, &nameRef), ANI_OK);
@@ -67,7 +67,8 @@ TEST_F(ObjectSetFieldRefTest, set_field_ref)
         ASSERT_EQ(env_->String_NewUTF8("abcdefg", 7U, &string1), ANI_OK);
 
         ASSERT_EQ(env_->Object_SetField_Ref(box, fieldString, string1), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkStringValue", box, string1), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_ref_test", "checkStringValue", box, string1),
+                  ANI_TRUE);
 
         ani_ref nameRef1 {};
         ASSERT_EQ(env_->Object_GetField_Ref(box, fieldString, &nameRef1), ANI_OK);
@@ -83,10 +84,10 @@ TEST_F(ObjectSetFieldRefTest, set_field_ref)
 
 TEST_F(ObjectSetFieldRefTest, set_field_ref2)
 {
-    auto boxc = static_cast<ani_object>(CallEtsFunction<ani_ref>("newBoxcObject"));
+    auto boxc = static_cast<ani_object>(CallEtsFunction<ani_ref>("object_set_field_ref_test", "newBoxcObject"));
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LBoxc;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_set_field_ref_test/Boxc;", &cls), ANI_OK);
 
     ani_field fieldInt {};
     ASSERT_EQ(env_->Class_FindField(cls, "int_value", &fieldInt), ANI_OK);
@@ -101,13 +102,13 @@ TEST_F(ObjectSetFieldRefTest, set_field_ref2)
     ASSERT_EQ(env_->String_NewUTF8("abcdef", 6U, &string), ANI_OK);
 
     ASSERT_EQ(env_->Object_SetField_Ref(boxc, fieldString, string), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkStringValue", boxc, string), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_ref_test", "checkStringValue", boxc, string), ANI_TRUE);
 
     ani_string str {};
     ASSERT_EQ(env_->String_NewUTF8("fedcba", 6U, &str), ANI_OK);
 
     ASSERT_EQ(env_->Object_SetField_Ref(boxc, fieldStr, str), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkStrValue", boxc, str), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_ref_test", "checkStrValue", boxc, str), ANI_TRUE);
 }
 
 TEST_F(ObjectSetFieldRefTest, set_field_ref_invalid_field_type)

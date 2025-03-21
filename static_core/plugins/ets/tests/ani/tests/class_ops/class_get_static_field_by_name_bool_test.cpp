@@ -35,7 +35,7 @@ public:
 TEST_F(ClassGetStaticFieldByNameBoolTest, get_static_field_bool_c_api_capi)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetBoolStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_bool_test/GetBoolStatic;", &cls), ANI_OK);
     ani_boolean single = ANI_TRUE;
     ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_Boolean(env_, cls, "single", &single), ANI_OK);
     ASSERT_EQ(single, ANI_FALSE);
@@ -44,7 +44,7 @@ TEST_F(ClassGetStaticFieldByNameBoolTest, get_static_field_bool_c_api_capi)
 TEST_F(ClassGetStaticFieldByNameBoolTest, get_static_field_bool)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetBoolStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_bool_test/GetBoolStatic;", &cls), ANI_OK);
     ani_boolean single = ANI_TRUE;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Boolean(cls, "single", &single), ANI_OK);
     ASSERT_EQ(single, ANI_FALSE);
@@ -53,7 +53,7 @@ TEST_F(ClassGetStaticFieldByNameBoolTest, get_static_field_bool)
 TEST_F(ClassGetStaticFieldByNameBoolTest, get_static_field_bool_invalid_field_type)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetBoolStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_bool_test/GetBoolStatic;", &cls), ANI_OK);
 
     ani_boolean single = ANI_TRUE;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Boolean(cls, "name", &single), ANI_INVALID_TYPE);
@@ -62,7 +62,7 @@ TEST_F(ClassGetStaticFieldByNameBoolTest, get_static_field_bool_invalid_field_ty
 TEST_F(ClassGetStaticFieldByNameBoolTest, invalid_argument1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetBoolStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_bool_test/GetBoolStatic;", &cls), ANI_OK);
     ani_boolean single = ANI_TRUE;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Boolean(nullptr, "name", &single), ANI_INVALID_ARGS);
 }
@@ -70,7 +70,7 @@ TEST_F(ClassGetStaticFieldByNameBoolTest, invalid_argument1)
 TEST_F(ClassGetStaticFieldByNameBoolTest, invalid_argument2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetBoolStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_bool_test/GetBoolStatic;", &cls), ANI_OK);
     ani_boolean single = ANI_TRUE;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Boolean(cls, nullptr, &single), ANI_INVALID_ARGS);
 }
@@ -78,14 +78,14 @@ TEST_F(ClassGetStaticFieldByNameBoolTest, invalid_argument2)
 TEST_F(ClassGetStaticFieldByNameBoolTest, invalid_argument3)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetBoolStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_bool_test/GetBoolStatic;", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Boolean(cls, "name", nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(ClassGetStaticFieldByNameBoolTest, invalid_argument4)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetBoolStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_bool_test/GetBoolStatic;", &cls), ANI_OK);
     ani_boolean single = ANI_TRUE;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Boolean(cls, "", &single), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Boolean(cls, "\n", &single), ANI_NOT_FOUND);
@@ -95,7 +95,7 @@ TEST_F(ClassGetStaticFieldByNameBoolTest, invalid_argument4)
 TEST_F(ClassGetStaticFieldByNameBoolTest, special_values)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetBoolStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_bool_test/GetBoolStatic;", &cls), ANI_OK);
     ani_boolean single = ANI_TRUE;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Boolean(cls, "specia1", &single), ANI_INVALID_TYPE);
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Boolean(cls, "specia3", &single), ANI_INVALID_TYPE);
@@ -115,7 +115,7 @@ TEST_F(ClassGetStaticFieldByNameBoolTest, special_values)
 TEST_F(ClassGetStaticFieldByNameBoolTest, combination_test1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetBoolStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_bool_test/GetBoolStatic;", &cls), ANI_OK);
     const int32_t loopCount = 3;
     for (int32_t i = 0; i < loopCount; i++) {
         ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "single", ANI_TRUE), ANI_OK);
@@ -131,17 +131,17 @@ TEST_F(ClassGetStaticFieldByNameBoolTest, combination_test1)
 
 TEST_F(ClassGetStaticFieldByNameBoolTest, combination_test2)
 {
-    CheckFieldValue("LGetBoolStatic;", "single");
+    CheckFieldValue("Lclass_get_static_field_by_name_bool_test/GetBoolStatic;", "single");
 }
 
 TEST_F(ClassGetStaticFieldByNameBoolTest, combination_test3)
 {
-    CheckFieldValue("LBoolStaticA;", "bool_value");
+    CheckFieldValue("Lclass_get_static_field_by_name_bool_test/BoolStaticA;", "bool_value");
 }
 
 TEST_F(ClassGetStaticFieldByNameBoolTest, combination_test4)
 {
-    CheckFieldValue("LBoolStaticFinal;", "bool_value");
+    CheckFieldValue("Lclass_get_static_field_by_name_bool_test/BoolStaticFinal;", "bool_value");
 }
 }  // namespace ark::ets::ani::testing
 

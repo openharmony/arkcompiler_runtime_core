@@ -23,11 +23,11 @@ public:
     void GetMethodData(ani_object *objectResult, ani_method *voidMethodResult, ani_method *getMethodResult)
     {
         ani_class cls;
-        ASSERT_EQ(env_->FindClass("LA;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("Lcall_object_method_void_test/A;", &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_static_method newMethod;
-        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_A", ":LA;", &newMethod), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_A", ":Lcall_object_method_void_test/A;", &newMethod), ANI_OK);
         ani_ref ref;
         ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
 

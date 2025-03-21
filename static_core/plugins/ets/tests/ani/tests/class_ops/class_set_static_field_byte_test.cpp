@@ -21,7 +21,7 @@ class ClassSetStaticFieldByteTest : public AniTest {};
 TEST_F(ClassSetStaticFieldByteTest, set_byte)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetByte;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_byte_test/TestSetByte;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "byte_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -38,7 +38,7 @@ TEST_F(ClassSetStaticFieldByteTest, set_byte)
 TEST_F(ClassSetStaticFieldByteTest, set_byte_c_api)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetByte;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_byte_test/TestSetByte;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "byte_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -55,7 +55,7 @@ TEST_F(ClassSetStaticFieldByteTest, set_byte_c_api)
 TEST_F(ClassSetStaticFieldByteTest, set_invalid_field_type)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetByte;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_byte_test/TestSetByte;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -66,7 +66,7 @@ TEST_F(ClassSetStaticFieldByteTest, set_invalid_field_type)
 TEST_F(ClassSetStaticFieldByteTest, invalid_argument2)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetByte;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_byte_test/TestSetByte;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "byte_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -81,7 +81,7 @@ TEST_F(ClassSetStaticFieldByteTest, invalid_argument2)
 TEST_F(ClassSetStaticFieldByteTest, invalid_argument3)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetByte;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_byte_test/TestSetByte;", &cls), ANI_OK);
     const ani_byte setTar = 127;
     ASSERT_EQ(env_->Class_SetStaticField_Byte(cls, nullptr, setTar), ANI_INVALID_ARGS);
 }

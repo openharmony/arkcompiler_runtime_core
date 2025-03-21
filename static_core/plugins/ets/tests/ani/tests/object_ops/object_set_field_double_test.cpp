@@ -21,10 +21,10 @@ class ObjectSetFieldDoubleTest : public AniTest {
 public:
     void GetTestData(ani_object *packResult, ani_field *fieldDoubleResult, ani_field *fieldStringResult)
     {
-        auto packRef = CallEtsFunction<ani_ref>("newPackObject");
+        auto packRef = CallEtsFunction<ani_ref>("object_set_field_double_test", "newPackObject");
 
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("LPack;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("Lobject_set_field_double_test/Pack;", &cls), ANI_OK);
 
         ani_field fieldDouble {};
         ASSERT_EQ(env_->Class_FindField(cls, "double_value", &fieldDouble), ANI_OK);
@@ -46,11 +46,11 @@ TEST_F(ObjectSetFieldDoubleTest, set_field_double)
     GetTestData(&pack, &fieldDouble, &fieldString);
     const double zero = 0.0;
     const double pi = 3.14159;
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkDoubleValue", pack, zero), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_double_test", "checkDoubleValue", pack, zero), ANI_TRUE);
 
     ASSERT_EQ(env_->Object_SetField_Double(pack, fieldDouble, pi), ANI_OK);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkDoubleValue", pack, pi), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_double_test", "checkDoubleValue", pack, pi), ANI_TRUE);
 }
 
 TEST_F(ObjectSetFieldDoubleTest, set_field_double_negative_value)
@@ -62,7 +62,9 @@ TEST_F(ObjectSetFieldDoubleTest, set_field_double_negative_value)
     const double eulersNumberNegative = -2.71828;
     ASSERT_EQ(env_->Object_SetField_Double(pack, fieldDouble, eulersNumberNegative), ANI_OK);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkDoubleValue", pack, eulersNumberNegative), ANI_TRUE);
+    ASSERT_EQ(
+        CallEtsFunction<ani_boolean>("object_set_field_double_test", "checkDoubleValue", pack, eulersNumberNegative),
+        ANI_TRUE);
 }
 
 TEST_F(ObjectSetFieldDoubleTest, set_field_double_boundary_values)
@@ -79,20 +81,24 @@ TEST_F(ObjectSetFieldDoubleTest, set_field_double_boundary_values)
     const int32_t loopCount = 3;
     for (int i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetField_Double(pack, fieldDouble, numbeR1), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkDoubleValue", pack, numbeR1), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_double_test", "checkDoubleValue", pack, numbeR1),
+                  ANI_TRUE);
 
         ani_double num {};
         ASSERT_EQ(env_->Object_GetField_Double(pack, fieldDouble, &num), ANI_OK);
         ASSERT_EQ(num, numbeR1);
 
         ASSERT_EQ(env_->Object_SetField_Double(pack, fieldDouble, numbeR2), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkDoubleValue", pack, numbeR2), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_double_test", "checkDoubleValue", pack, numbeR2),
+                  ANI_TRUE);
 
         ASSERT_EQ(env_->Object_GetField_Double(pack, fieldDouble, &num), ANI_OK);
         ASSERT_EQ(num, numbeR2);
 
         ASSERT_EQ(env_->Object_SetField_Double(pack, fieldDouble, minusMaxNumber), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkDoubleValue", pack, minusMaxNumber), ANI_TRUE);
+        ASSERT_EQ(
+            CallEtsFunction<ani_boolean>("object_set_field_double_test", "checkDoubleValue", pack, minusMaxNumber),
+            ANI_TRUE);
 
         ASSERT_EQ(env_->Object_GetField_Double(pack, fieldDouble, &num), ANI_OK);
         ASSERT_EQ(num, minusMaxNumber);

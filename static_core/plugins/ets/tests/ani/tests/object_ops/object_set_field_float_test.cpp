@@ -21,10 +21,10 @@ class ObjectSetFieldFloatTest : public AniTest {
 public:
     void GetTestData(ani_object *packResult, ani_field *fieldFloatResult, ani_field *fieldStringResult)
     {
-        auto packRef = CallEtsFunction<ani_ref>("newPackObject");
+        auto packRef = CallEtsFunction<ani_ref>("object_set_field_float_test", "newPackObject");
 
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("LPack;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("Lobject_set_field_float_test/Pack;", &cls), ANI_OK);
 
         ani_field fieldFloat {};
         ASSERT_EQ(env_->Class_FindField(cls, "float_value", &fieldFloat), ANI_OK);
@@ -47,12 +47,13 @@ TEST_F(ObjectSetFieldFloatTest, set_field_float)
     const ani_float value1 = 2.71F;
     GetTestData(&pack, &fieldFloat, &fieldString);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkFloatValue", pack, 0.0F), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_float_test", "checkFloatValue", pack, 0.0F), ANI_TRUE);
 
     const int32_t loopCount = 3;
     for (int i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetField_Float(pack, fieldFloat, value), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkFloatValue", pack, value), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_float_test", "checkFloatValue", pack, value),
+                  ANI_TRUE);
 
         ani_float result = 0.0F;
         ASSERT_EQ(env_->Object_GetField_Float(pack, fieldFloat, &result), ANI_OK);
@@ -60,7 +61,8 @@ TEST_F(ObjectSetFieldFloatTest, set_field_float)
 
         ASSERT_EQ(env_->Object_SetField_Float(pack, fieldFloat, value1), ANI_OK);
 
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkFloatValue", pack, value1), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_float_test", "checkFloatValue", pack, value1),
+                  ANI_TRUE);
 
         ASSERT_EQ(env_->Object_GetField_Float(pack, fieldFloat, &result), ANI_OK);
         ASSERT_EQ(result, value1);
@@ -76,7 +78,7 @@ TEST_F(ObjectSetFieldFloatTest, set_field_float_negative_value)
 
     ASSERT_EQ(env_->Object_SetField_Float(pack, fieldFloat, -2.71F), ANI_OK);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkFloatValue", pack, -2.71F), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_float_test", "checkFloatValue", pack, -2.71F), ANI_TRUE);
 }
 
 TEST_F(ObjectSetFieldFloatTest, set_field_float_invalid_field_type)
@@ -117,10 +119,12 @@ TEST_F(ObjectSetFieldFloatTest, set_field_float_boundary_values)
     GetTestData(&pack, &fieldFloat, &fieldString);
 
     ASSERT_EQ(env_->Object_SetField_Float(pack, fieldFloat, 3.4028235e+38F), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkFloatValue", pack, 3.4028235e+38F), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_float_test", "checkFloatValue", pack, 3.4028235e+38F),
+              ANI_TRUE);
 
     ASSERT_EQ(env_->Object_SetField_Float(pack, fieldFloat, -3.4028235e+38F), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkFloatValue", pack, -3.4028235e+38F), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_float_test", "checkFloatValue", pack, -3.4028235e+38F),
+              ANI_TRUE);
 }
 
 }  // namespace ark::ets::ani::testing

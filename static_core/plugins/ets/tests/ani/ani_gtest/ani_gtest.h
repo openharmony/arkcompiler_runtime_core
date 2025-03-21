@@ -83,9 +83,10 @@ public:
 
     /// Call function with name `fnName` from ETSGLOBAL
     template <typename R, typename... Args>
-    R CallEtsFunction(const std::string &fnName, Args &&...args)
+    R CallEtsFunction(const std::string &moduleName, const std::string &fnName, Args &&...args)
     {
-        return CallEtsClassStaticMethod<R>("ETSGLOBAL", fnName, std::forward<Args>(args)...);
+        std::string etsGlobalName(moduleName + "/ETSGLOBAL");
+        return CallEtsClassStaticMethod<R>(etsGlobalName, fnName, std::forward<Args>(args)...);
     }
 
     class NativeFunction {
@@ -112,11 +113,11 @@ public:
     };
 
     template <typename R, typename... Args>
-    R CallEtsNativeMethod(const NativeFunction &fn, Args &&...args)
+    R CallEtsNativeMethod(const std::string &moduleName, const NativeFunction &fn, Args &&...args)
     {
         std::optional<R> result;
 
-        CallEtsNativeMethodImpl(&result, fn, std::forward<Args>(args)...);
+        CallEtsNativeMethodImpl(&result, moduleName, fn, std::forward<Args>(args)...);
 
         if constexpr (!std::is_same_v<R, void>) {
             return result.value();
@@ -164,7 +165,7 @@ private:
                              Args &&...args)
     {
         ets_class cls = etsEnv_->FindClass(className.c_str());
-        ASSERT_NE(cls, nullptr) << GetFindClassFailureMsg(className);
+        ASSERT_NE(cls, nullptr) << GetFindClassFailureMsg(className) << " " << fnName;
 
         ets_method fn = etsEnv_->GetStaticp_method(cls, fnName.data(), nullptr);
         ASSERT_NE(fn, nullptr) << GetFindMethodFailureMsg(className, fnName);
@@ -173,12 +174,12 @@ private:
     }
 
     template <typename R, typename... Args>
-    void CallEtsNativeMethodImpl(std::optional<R> *result, const NativeFunction &fn, Args &&...args)
+    void CallEtsNativeMethodImpl(std::optional<R> *result, const std::string &moduleName, const NativeFunction &fn,
+                                 Args &&...args)
     {
         auto functionName = fn.GetName();
-        auto className = "ETSGLOBAL";
-
-        auto cls = etsEnv_->FindClass(className);
+        std::string className(moduleName + "/ETSGLOBAL");
+        auto cls = etsEnv_->FindClass(className.c_str());
         ASSERT_NE(cls, nullptr) << GetFindClassFailureMsg(className);
 
         auto mtd = etsEnv_->GetStaticp_method(cls, functionName, nullptr);

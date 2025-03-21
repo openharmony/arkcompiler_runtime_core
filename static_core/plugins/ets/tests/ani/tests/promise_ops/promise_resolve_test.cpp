@@ -33,7 +33,7 @@ TEST_F(PromiseResolveTest, ResolvePromise)
 
     ASSERT_EQ(env_->PromiseResolver_Resolve(resolver, resolution), ANI_OK);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkResolve", promise, resolution), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("promise_resolve_test", "checkResolve", promise, resolution), ANI_TRUE);
 }
 
 }  // namespace ark::ets::ani::testing

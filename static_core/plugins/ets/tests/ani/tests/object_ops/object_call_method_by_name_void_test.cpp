@@ -26,11 +26,12 @@ public:
     void GetMethodData(ani_object *objectResult)
     {
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("LA;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/A;", &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_static_method newMethod {};
-        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_A", ":LA;", &newMethod), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_A", ":Lobject_call_method_by_name_void_test/A;", &newMethod),
+                  ANI_OK);
         ani_ref ref {};
         ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
         *objectResult = static_cast<ani_object>(ref);
@@ -156,7 +157,7 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_invalid_m
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_001)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LB;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/B;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -184,7 +185,7 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_001)
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_002)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LB;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/B;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -210,7 +211,7 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_002)
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_003)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LC;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/C;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -238,7 +239,7 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_003)
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_004)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LC;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/C;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -266,7 +267,7 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_004)
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_005)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LB;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/B;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -299,7 +300,7 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_005)
     ASSERT_EQ(res1, value1);
 
     const ani_int value2 = 5;
-    ASSERT_EQ(env_->FindClass("LC;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/C;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", nullptr, &method), ANI_OK);
     ASSERT_EQ(env_->Object_New(cls, method, &obj, arg), ANI_OK);
@@ -317,7 +318,7 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_005)
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_006)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LB;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/B;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -343,7 +344,7 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_006)
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_007)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LB;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/B;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -370,7 +371,7 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_007)
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_008)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LB;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/B;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -410,7 +411,7 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_008)
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_009)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LB;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/B;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -454,7 +455,7 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_009)
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_010)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LC;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/C;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};

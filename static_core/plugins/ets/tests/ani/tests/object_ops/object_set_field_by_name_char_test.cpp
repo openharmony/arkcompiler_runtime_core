@@ -21,7 +21,7 @@ class ObjectSetFieldByNameCharTest : public AniTest {
 public:
     ani_object NewAnimal()
     {
-        auto animalRef = CallEtsFunction<ani_ref>("newAnimalObject");
+        auto animalRef = CallEtsFunction<ani_ref>("object_set_field_by_name_char_test", "newAnimalObject");
         return static_cast<ani_object>(animalRef);
     }
 };
@@ -32,19 +32,25 @@ constexpr char SET_VALUE = 'b';
 TEST_F(ObjectSetFieldByNameCharTest, set_field)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_char>(CMP_VALUE)), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_by_name_char_test", "checkObjectField", animal,
+                                           static_cast<ani_char>(CMP_VALUE)),
+              ANI_TRUE);
 
     const int32_t loopCount = 3;
     for (int i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetFieldByName_Char(animal, "index", static_cast<ani_char>(SET_VALUE)), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_char>(SET_VALUE)), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_by_name_char_test", "checkObjectField", animal,
+                                               static_cast<ani_char>(SET_VALUE)),
+                  ANI_TRUE);
 
         ani_char index {};
         ASSERT_EQ(env_->Object_GetFieldByName_Char(animal, "index", &index), ANI_OK);
         ASSERT_EQ(index, SET_VALUE);
 
         ASSERT_EQ(env_->Object_SetFieldByName_Char(animal, "index", static_cast<ani_char>(CMP_VALUE)), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_char>(CMP_VALUE)), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_by_name_char_test", "checkObjectField", animal,
+                                               static_cast<ani_char>(CMP_VALUE)),
+                  ANI_TRUE);
 
         ASSERT_EQ(env_->Object_GetFieldByName_Char(animal, "index", &index), ANI_OK);
         ASSERT_EQ(index, CMP_VALUE);

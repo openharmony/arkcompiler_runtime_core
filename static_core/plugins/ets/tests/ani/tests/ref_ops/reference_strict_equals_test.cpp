@@ -21,8 +21,8 @@ class ReferenceStrictEqualsTest : public AniTest {};
 
 TEST_F(ReferenceStrictEqualsTest, check_null_and_null)
 {
-    auto nullRef1 = CallEtsFunction<ani_ref>("GetNull");
-    auto nullRef2 = CallEtsFunction<ani_ref>("GetNull");
+    auto nullRef1 = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetNull");
+    auto nullRef2 = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetNull");
     ani_boolean isEquals;
     ASSERT_EQ(env_->Reference_StrictEquals(nullRef1, nullRef2, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_TRUE);
@@ -30,8 +30,8 @@ TEST_F(ReferenceStrictEqualsTest, check_null_and_null)
 
 TEST_F(ReferenceStrictEqualsTest, check_null_and_undefined)
 {
-    auto nullRef = CallEtsFunction<ani_ref>("GetNull");
-    auto undefinedRef = CallEtsFunction<ani_ref>("GetUndefined");
+    auto nullRef = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetNull");
+    auto undefinedRef = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetUndefined");
     ani_boolean isEquals;
     ASSERT_EQ(env_->Reference_StrictEquals(nullRef, undefinedRef, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_FALSE);
@@ -39,8 +39,8 @@ TEST_F(ReferenceStrictEqualsTest, check_null_and_undefined)
 
 TEST_F(ReferenceStrictEqualsTest, check_null_and_object)
 {
-    auto nullRef = CallEtsFunction<ani_ref>("GetNull");
-    auto objectRef = CallEtsFunction<ani_ref>("GetObject");
+    auto nullRef = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetNull");
+    auto objectRef = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetObject");
     ani_boolean isEquals;
     ASSERT_EQ(env_->Reference_StrictEquals(nullRef, objectRef, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_FALSE);
@@ -48,8 +48,8 @@ TEST_F(ReferenceStrictEqualsTest, check_null_and_object)
 
 TEST_F(ReferenceStrictEqualsTest, check_undefined_and_undefined)
 {
-    auto undefinedRef1 = CallEtsFunction<ani_ref>("GetUndefined");
-    auto undefinedRef2 = CallEtsFunction<ani_ref>("GetUndefined");
+    auto undefinedRef1 = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetUndefined");
+    auto undefinedRef2 = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetUndefined");
     ani_boolean isEquals;
     ASSERT_EQ(env_->Reference_StrictEquals(undefinedRef1, undefinedRef2, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_TRUE);
@@ -57,8 +57,8 @@ TEST_F(ReferenceStrictEqualsTest, check_undefined_and_undefined)
 
 TEST_F(ReferenceStrictEqualsTest, check_undefined_and_object)
 {
-    auto undefinedRef = CallEtsFunction<ani_ref>("GetUndefined");
-    auto objectRef = CallEtsFunction<ani_ref>("GetObject");
+    auto undefinedRef = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetUndefined");
+    auto objectRef = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetObject");
     ani_boolean isEquals;
     ASSERT_EQ(env_->Reference_StrictEquals(undefinedRef, objectRef, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_FALSE);
@@ -66,8 +66,8 @@ TEST_F(ReferenceStrictEqualsTest, check_undefined_and_object)
 
 TEST_F(ReferenceStrictEqualsTest, check_object_and_object)
 {
-    auto objectRef1 = CallEtsFunction<ani_ref>("GetObject");
-    auto objectRef2 = CallEtsFunction<ani_ref>("GetObject");
+    auto objectRef1 = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetObject");
+    auto objectRef2 = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetObject");
     ani_boolean isEquals;
     ASSERT_EQ(env_->Reference_StrictEquals(objectRef1, objectRef2, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_TRUE);
@@ -75,7 +75,7 @@ TEST_F(ReferenceStrictEqualsTest, check_object_and_object)
 
 TEST_F(ReferenceStrictEqualsTest, invalid_argument)
 {
-    auto ref = CallEtsFunction<ani_ref>("GetNull");
+    auto ref = CallEtsFunction<ani_ref>("reference_strict_equals_test", "GetNull");
     ASSERT_EQ(env_->Reference_StrictEquals(ref, ref, nullptr), ANI_INVALID_ARGS);
 }
 

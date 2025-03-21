@@ -22,7 +22,7 @@ class GetEnumItemTest : public AniTest {};
 TEST_F(GetEnumItemTest, get_enum_item_by_name)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("LToFind;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lget_enum_item_test/ToFind;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
     ani_enum_item red {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnum, "RED", &red), ANI_OK);
@@ -32,7 +32,7 @@ TEST_F(GetEnumItemTest, get_enum_item_by_name)
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnum, "BLUE", &blue), ANI_OK);
 
     ani_enum aniEnumInt {};
-    ASSERT_EQ(env_->FindEnum("LToFindInt;", &aniEnumInt), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lget_enum_item_test/ToFindInt;", &aniEnumInt), ANI_OK);
     ASSERT_NE(aniEnumInt, nullptr);
     ani_enum_item redInt {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnumInt, "REDINT", &redInt), ANI_OK);
@@ -42,7 +42,7 @@ TEST_F(GetEnumItemTest, get_enum_item_by_name)
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnumInt, "BLUEINT", &blueInt), ANI_OK);
 
     ani_enum aniEnumStr {};
-    ASSERT_EQ(env_->FindEnum("LToFindString;", &aniEnumStr), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lget_enum_item_test/ToFindString;", &aniEnumStr), ANI_OK);
     ASSERT_NE(aniEnumStr, nullptr);
     ani_enum_item redStr {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnumStr, "REDSTR", &redStr), ANI_OK);
@@ -52,7 +52,7 @@ TEST_F(GetEnumItemTest, get_enum_item_by_name)
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnumStr, "BLUESTR", &blueStr), ANI_OK);
 
     ani_enum aniEnumBig {};
-    ASSERT_EQ(env_->FindEnum("LToFindBig;", &aniEnumBig), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lget_enum_item_test/ToFindBig;", &aniEnumBig), ANI_OK);
     ASSERT_NE(aniEnumBig, nullptr);
     ani_enum_item zero {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnumBig, "ZERO", &zero), ANI_OK);
@@ -63,7 +63,7 @@ TEST_F(GetEnumItemTest, get_enum_item_by_name)
 TEST_F(GetEnumItemTest, get_wrong_enum_item_by_name)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("LToFind;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lget_enum_item_test/ToFind;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -80,7 +80,7 @@ TEST_F(GetEnumItemTest, get_wrong_enum_item_by_name)
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnum, "BLUESTR", &blue), ANI_NOT_FOUND);
 
     ani_enum aniEnumBig {};
-    ASSERT_EQ(env_->FindEnum("LToFindBig;", &aniEnumBig), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lget_enum_item_test/ToFindBig;", &aniEnumBig), ANI_OK);
     ASSERT_NE(aniEnumBig, nullptr);
     ani_enum_item minus {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnumBig, "MINUSONE", &minus), ANI_NOT_FOUND);
@@ -91,7 +91,7 @@ TEST_F(GetEnumItemTest, get_wrong_enum_item_by_name)
 TEST_F(GetEnumItemTest, get_enum_item_by_index)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("LToFind;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lget_enum_item_test/ToFind;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
     ani_enum_item red {};
     ASSERT_EQ(env_->Enum_GetEnumItemByIndex(aniEnum, 0U, &red), ANI_OK);
@@ -101,7 +101,7 @@ TEST_F(GetEnumItemTest, get_enum_item_by_index)
     ASSERT_EQ(env_->Enum_GetEnumItemByIndex(aniEnum, 2U, &blue), ANI_OK);
 
     ani_enum aniEnumInt {};
-    ASSERT_EQ(env_->FindEnum("LToFindInt;", &aniEnumInt), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lget_enum_item_test/ToFindInt;", &aniEnumInt), ANI_OK);
     ASSERT_NE(aniEnumInt, nullptr);
     ani_enum_item redInt {};
     ASSERT_EQ(env_->Enum_GetEnumItemByIndex(aniEnumInt, 0U, &redInt), ANI_OK);
@@ -111,7 +111,7 @@ TEST_F(GetEnumItemTest, get_enum_item_by_index)
     ASSERT_EQ(env_->Enum_GetEnumItemByIndex(aniEnumInt, 2U, &blueInt), ANI_OK);
 
     ani_enum aniEnumStr {};
-    ASSERT_EQ(env_->FindEnum("LToFindString;", &aniEnumStr), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lget_enum_item_test/ToFindString;", &aniEnumStr), ANI_OK);
     ASSERT_NE(aniEnumStr, nullptr);
     ani_enum_item redStr {};
     ASSERT_EQ(env_->Enum_GetEnumItemByIndex(aniEnumStr, 0U, &redStr), ANI_OK);
@@ -121,7 +121,7 @@ TEST_F(GetEnumItemTest, get_enum_item_by_index)
     ASSERT_EQ(env_->Enum_GetEnumItemByIndex(aniEnumStr, 2U, &blueStr), ANI_OK);
 
     ani_enum aniEnumBig {};
-    ASSERT_EQ(env_->FindEnum("LToFindBig;", &aniEnumBig), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lget_enum_item_test/ToFindBig;", &aniEnumBig), ANI_OK);
     ASSERT_NE(aniEnumBig, nullptr);
     ani_enum_item zero {};
     ASSERT_EQ(env_->Enum_GetEnumItemByIndex(aniEnumBig, 0U, &zero), ANI_OK);
@@ -132,7 +132,7 @@ TEST_F(GetEnumItemTest, get_enum_item_by_index)
 TEST_F(GetEnumItemTest, get_wrong_enum_item_by_index)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("LToFind;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lget_enum_item_test/ToFind;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item item {};
@@ -143,7 +143,7 @@ TEST_F(GetEnumItemTest, get_wrong_enum_item_by_index)
     ASSERT_EQ(env_->Enum_GetEnumItemByIndex(aniEnum, -1 * 42U, &item), ANI_NOT_FOUND);
 
     ani_enum aniEnumBig {};
-    ASSERT_EQ(env_->FindEnum("LToFindBig;", &aniEnumBig), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lget_enum_item_test/ToFindBig;", &aniEnumBig), ANI_OK);
     ASSERT_NE(aniEnumBig, nullptr);
     ani_enum_item minus {};
     ASSERT_EQ(env_->Enum_GetEnumItemByIndex(aniEnumBig, -1, &minus), ANI_NOT_FOUND);
@@ -154,7 +154,7 @@ TEST_F(GetEnumItemTest, get_wrong_enum_item_by_index)
 TEST_F(GetEnumItemTest, get_item_name_index_equal)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("LToFind;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lget_enum_item_test/ToFind;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item redName {};
@@ -185,7 +185,7 @@ TEST_F(GetEnumItemTest, get_item_name_index_equal)
 TEST_F(GetEnumItemTest, invalid_arg_enum)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("LToFind;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lget_enum_item_test/ToFind;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};

@@ -36,15 +36,15 @@ void RetrieveStringFromAni(ani_env *env, ani_string string, std::string &resStri
 TEST_F(EnumFindTest, find_enum)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("LColor;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lfind_enum_test/Color;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum aniEnumInt {};
-    ASSERT_EQ(env_->FindEnum("LColorInt;", &aniEnumInt), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lfind_enum_test/ColorInt;", &aniEnumInt), ANI_OK);
     ASSERT_NE(aniEnumInt, nullptr);
 
     ani_enum aniEnumString {};
-    ASSERT_EQ(env_->FindEnum("LColorString;", &aniEnumString), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lfind_enum_test/ColorString;", &aniEnumString), ANI_OK);
     ASSERT_NE(aniEnumString, nullptr);
 }
 
@@ -53,19 +53,19 @@ TEST_F(EnumFindTest, invalid_arg_enum)
     ani_enum en {};
     ASSERT_EQ(env_->FindEnum(nullptr, &en), ANI_INVALID_ARGS);
 
-    ASSERT_EQ(env_->FindEnum("LColor;", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FindEnum("Lfind_enum_test/Color;", nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(EnumFindTest, invalid_arg_name)
 {
     ani_enum en {};
-    ASSERT_EQ(env_->FindEnum("LNotFound;", &en), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindEnum("Lfind_enum_test/NotFound;", &en), ANI_NOT_FOUND);
 }
 
 TEST_F(EnumFindTest, find_enum_combine_scenes_001)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("LEnumA001;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lfind_enum_test/EnumA001;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -120,7 +120,7 @@ TEST_F(EnumFindTest, find_enum_combine_scenes_001)
 TEST_F(EnumFindTest, find_enum_combine_scenes_001_1)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("LEnumA001;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lfind_enum_test/EnumA001;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -171,7 +171,7 @@ TEST_F(EnumFindTest, find_enum_combine_scenes_001_1)
 TEST_F(EnumFindTest, find_enum_combine_scenes_003)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Ltest003A;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lfind_enum_test/test003A;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace result {};
@@ -213,7 +213,7 @@ TEST_F(EnumFindTest, find_enum_combine_scenes_003)
 TEST_F(EnumFindTest, find_enum_combine_scenes_004)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Ltest004A;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lfind_enum_test/test004A;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_enum aniEnum {};

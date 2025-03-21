@@ -70,7 +70,7 @@ protected:
     void SetUp() override
     {
         AniTest::SetUp();
-        callbackClassName_ = "L" + GetModulePrefix() + "CallbackHolder;";
+        callbackClassName_ = "Lfin_reg_test/" + GetModulePrefix() + "CallbackHolder;";
         ASSERT_EQ(env_->FindClass(callbackClassName_.c_str(), &nativeCallbackClass_), ANI_OK);
 
         ani_native_function fn {"invoke", "Lstd/core/Object;:V", reinterpret_cast<void *>(NativeCallbackInvoke)};
@@ -180,7 +180,7 @@ TEST_F(FinalizationRegistryTest, test_native_finalizer)
 
 static std::string GetFinalizationMarkerClassDescriptor()
 {
-    return "L" + FinalizationRegistryTest::GetModulePrefix() + "FinalizationMarker;";
+    return "Lfin_reg_test/" + FinalizationRegistryTest::GetModulePrefix() + "FinalizationMarker;";
 }
 
 static void FinalizeWithManagedMark(ani_env *env, ani_object cbArg)

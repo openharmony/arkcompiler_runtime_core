@@ -22,7 +22,7 @@ class EnumItemGetValueTest : public AniTest {};
 TEST_F(EnumItemGetValueTest, enum_item_get_value_int)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("LToFind;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lenum_item_get_value_test/ToFind;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
     ani_enum_item red {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnum, "RED", &red), ANI_OK);
@@ -41,7 +41,7 @@ TEST_F(EnumItemGetValueTest, enum_item_get_value_int)
     ASSERT_EQ(blueValInt, 2U);
 
     ani_enum aniEnumInt {};
-    ASSERT_EQ(env_->FindEnum("LToFindInt;", &aniEnumInt), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lenum_item_get_value_test/ToFindInt;", &aniEnumInt), ANI_OK);
     ASSERT_NE(aniEnumInt, nullptr);
     ani_enum_item redInt {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnumInt, "REDINT", &redInt), ANI_OK);
@@ -63,7 +63,7 @@ TEST_F(EnumItemGetValueTest, enum_item_get_value_int)
 TEST_F(EnumItemGetValueTest, wrong_enum_item_get_value_int)
 {
     ani_enum aniEnumStr {};
-    ASSERT_EQ(env_->FindEnum("LToFindString;", &aniEnumStr), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lenum_item_get_value_test/ToFindString;", &aniEnumStr), ANI_OK);
     ASSERT_NE(aniEnumStr, nullptr);
     ani_enum_item redStr {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnumStr, "REDSTR", &redStr), ANI_OK);
@@ -98,7 +98,7 @@ TEST_F(EnumItemGetValueTest, enum_item_get_value_string_1)
     std::string enumVal;
 
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("LToFind;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lenum_item_get_value_test/ToFind;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
     ani_enum_item red {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnum, "RED", &red), ANI_OK);
@@ -120,7 +120,7 @@ TEST_F(EnumItemGetValueTest, enum_item_get_value_string_1)
     ASSERT_STREQ(enumVal.data(), "2");
 
     ani_enum aniEnumInt {};
-    ASSERT_EQ(env_->FindEnum("LToFindInt;", &aniEnumInt), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lenum_item_get_value_test/ToFindInt;", &aniEnumInt), ANI_OK);
     ASSERT_NE(aniEnumInt, nullptr);
     ani_enum_item redInt {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnumInt, "REDINT", &redInt), ANI_OK);
@@ -147,7 +147,7 @@ TEST_F(EnumItemGetValueTest, enum_item_get_value_string_2)
     std::string enumVal;
 
     ani_enum aniEnumStr {};
-    ASSERT_EQ(env_->FindEnum("LToFindString;", &aniEnumStr), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lenum_item_get_value_test/ToFindString;", &aniEnumStr), ANI_OK);
     ASSERT_NE(aniEnumStr, nullptr);
     ani_enum_item redStr {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnumStr, "REDSTR", &redStr), ANI_OK);
@@ -172,7 +172,7 @@ TEST_F(EnumItemGetValueTest, enum_item_get_value_string_2)
 TEST_F(EnumItemGetValueTest, invalid_arg_enum)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("LToFind;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("Lenum_item_get_value_test/ToFind;", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
     ani_enum_item red {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnum, "RED", &red), ANI_OK);

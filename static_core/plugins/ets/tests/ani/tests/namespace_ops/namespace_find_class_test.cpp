@@ -22,7 +22,7 @@ class NamespaceFindClassTest : public AniTest {};
 TEST_F(NamespaceFindClassTest, find_class01)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_class_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_class result {};
@@ -33,7 +33,7 @@ TEST_F(NamespaceFindClassTest, find_class01)
 TEST_F(NamespaceFindClassTest, find_class02)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_class_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_class result {};
@@ -44,7 +44,7 @@ TEST_F(NamespaceFindClassTest, find_class02)
 TEST_F(NamespaceFindClassTest, find_class03)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_class_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_class result {};
@@ -54,7 +54,7 @@ TEST_F(NamespaceFindClassTest, find_class03)
 TEST_F(NamespaceFindClassTest, find_class04)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_class_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_class result {};
@@ -64,7 +64,7 @@ TEST_F(NamespaceFindClassTest, find_class04)
 TEST_F(NamespaceFindClassTest, find_class05)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_class_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_class result {};
@@ -74,7 +74,7 @@ TEST_F(NamespaceFindClassTest, find_class05)
 TEST_F(NamespaceFindClassTest, find_class06)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_class_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_class result {};
@@ -84,7 +84,7 @@ TEST_F(NamespaceFindClassTest, find_class06)
 TEST_F(NamespaceFindClassTest, find_class07)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_class_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ASSERT_EQ(env_->Namespace_FindClass(ns, "LtestA;", nullptr), ANI_INVALID_ARGS);

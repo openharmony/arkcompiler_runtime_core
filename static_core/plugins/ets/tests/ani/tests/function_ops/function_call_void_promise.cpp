@@ -23,7 +23,7 @@ public:
     void GetMethod(ani_namespace *nsResult, ani_function *fnResult1, ani_function *fnResult2, ani_function *fnResult3)
     {
         ani_namespace ns {};
-        ASSERT_EQ(env_->FindNamespace("Lops;", &ns), ANI_OK);
+        ASSERT_EQ(env_->FindNamespace("Lfunction_call_void_promise/ops;", &ns), ANI_OK);
 
         ani_function fn1 {};
         ASSERT_EQ(env_->Namespace_FindFunction(ns, "callLaunch", ":V", &fn1), ANI_OK);

@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "Lcall_object_method_char_test/icense");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -34,7 +34,7 @@ TEST_F(CallObjectMethodCharTest, object_call_method_char_a)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "charMethod", "CC:C", &object, &method);
+    GetMethodAndObject("Lcall_object_method_char_test/A;", "charMethod", "CC:C", &object, &method);
 
     ani_value args[2U];
     ani_char arg1 = VAL1;
@@ -51,7 +51,7 @@ TEST_F(CallObjectMethodCharTest, call_method_char_a_invalid_args)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "charMethod", "CC:C", &object, &method);
+    GetMethodAndObject("Lcall_object_method_char_test/A;", "charMethod", "CC:C", &object, &method);
 
     ani_char result = '0';
     ASSERT_EQ(env_->Object_CallMethod_Char_A(object, method, &result, nullptr), ANI_INVALID_ARGS);
@@ -61,7 +61,7 @@ TEST_F(CallObjectMethodCharTest, object_call_method_char_v)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "charMethod", "CC:C", &object, &method);
+    GetMethodAndObject("Lcall_object_method_char_test/A;", "charMethod", "CC:C", &object, &method);
 
     ani_char result = '0';
     ani_char arg1 = VAL1;
@@ -74,7 +74,7 @@ TEST_F(CallObjectMethodCharTest, object_call_method_char)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "charMethod", "CC:C", &object, &method);
+    GetMethodAndObject("Lcall_object_method_char_test/A;", "charMethod", "CC:C", &object, &method);
 
     ani_char result = '0';
     ani_char arg1 = VAL1;
@@ -87,7 +87,7 @@ TEST_F(CallObjectMethodCharTest, call_method_char_v_invalid_env)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "charMethod", "CC:C", &object, &method);
+    GetMethodAndObject("Lcall_object_method_char_test/A;", "charMethod", "CC:C", &object, &method);
 
     ani_char result = '0';
     ani_char arg1 = VAL1;
@@ -99,7 +99,7 @@ TEST_F(CallObjectMethodCharTest, call_method_char_v_invalid_object)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "charMethod", "CC:C", &object, &method);
+    GetMethodAndObject("Lcall_object_method_char_test/A;", "charMethod", "CC:C", &object, &method);
 
     ani_char result = '0';
     ani_char arg1 = VAL1;
@@ -110,7 +110,7 @@ TEST_F(CallObjectMethodCharTest, call_method_char_v_invalid_method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "charMethod", "CC:C", &object, &method);
+    GetMethodAndObject("Lcall_object_method_char_test/A;", "charMethod", "CC:C", &object, &method);
 
     ani_char result = '0';
     ani_char arg1 = VAL1;
@@ -122,7 +122,7 @@ TEST_F(CallObjectMethodCharTest, call_method_char_v_invalid_result)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "charMethod", "CC:C", &object, &method);
+    GetMethodAndObject("Lcall_object_method_char_test/A;", "charMethod", "CC:C", &object, &method);
 
     ani_char arg1 = VAL1;
     ani_char arg2 = VAL2;
@@ -133,7 +133,7 @@ TEST_F(CallObjectMethodCharTest, call_Void_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "charMethodVoidParam", ":C", &object, &method);
+    GetMethodAndObject("Lcall_object_method_char_test/A;", "charMethodVoidParam", ":C", &object, &method);
 
     ani_char result = 0U;
     ASSERT_EQ(env_->Object_CallMethod_Char(object, method, &result), ANI_OK);
@@ -148,7 +148,7 @@ TEST_F(CallObjectMethodCharTest, call_Multiple_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "charMethodMultipleParam", "BZFFB:C", &object, &method);
+    GetMethodAndObject("Lcall_object_method_char_test/A;", "charMethodMultipleParam", "BZFFB:C", &object, &method);
 
     ani_value args[5U] = {};
     ani_byte arg1 = 2U;
@@ -174,7 +174,7 @@ TEST_F(CallObjectMethodCharTest, call_Parent_Class_Void_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LB;", "charMethodVoidParam", ":C", &object, &method);
+    GetMethodAndObject("Lcall_object_method_char_test/B;", "charMethodVoidParam", ":C", &object, &method);
 
     ani_char result = '0';
     ASSERT_EQ(env_->Object_CallMethod_Char(object, method, &result), ANI_OK);
@@ -188,7 +188,7 @@ TEST_F(CallObjectMethodCharTest, call_Parent_Class_Void_Param_Method)
 TEST_F(CallObjectMethodCharTest, call_Parent_Class_Method)
 {
     ani_class clsC {};
-    ASSERT_EQ(env_->FindClass("LC;", &clsC), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lcall_object_method_char_test/C;", &clsC), ANI_OK);
     ASSERT_NE(clsC, nullptr);
 
     ani_method method {};
@@ -196,7 +196,7 @@ TEST_F(CallObjectMethodCharTest, call_Parent_Class_Method)
     ASSERT_NE(method, nullptr);
 
     ani_class clsD {};
-    ASSERT_EQ(env_->FindClass("LD;", &clsD), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lcall_object_method_char_test/D;", &clsD), ANI_OK);
     ASSERT_NE(clsD, nullptr);
     ani_method ctor {};
     ASSERT_EQ(env_->Class_FindMethod(clsD, "<ctor>", ":V", &ctor), ANI_OK);
@@ -222,7 +222,7 @@ TEST_F(CallObjectMethodCharTest, call_Sub_Class_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LE;", "func", "CB:C", &object, &method);
+    GetMethodAndObject("Lcall_object_method_char_test/E;", "func", "CB:C", &object, &method);
 
     ani_char result = '0';
     ani_value args[2U] = {};
@@ -241,7 +241,7 @@ TEST_F(CallObjectMethodCharTest, multiple_Call_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "charMethod", "CC:C", &object, &method);
+    GetMethodAndObject("Lcall_object_method_char_test/A;", "charMethod", "CC:C", &object, &method);
 
     ani_char result = '0';
     ani_value args[2U] = {};
@@ -262,7 +262,7 @@ TEST_F(CallObjectMethodCharTest, call_Nested_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "nestedMethod", "CI:C", &object, &method);
+    GetMethodAndObject("Lcall_object_method_char_test/A;", "nestedMethod", "CI:C", &object, &method);
 
     ani_char result = '0';
     ani_value args[2U] = {};
@@ -282,7 +282,7 @@ TEST_F(CallObjectMethodCharTest, call_Recursion_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "recursionMethod", "C:C", &object, &method);
+    GetMethodAndObject("Lcall_object_method_char_test/A;", "recursionMethod", "C:C", &object, &method);
 
     ani_char result = '0';
     ani_value args[1U] = {};

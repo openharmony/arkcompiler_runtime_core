@@ -22,7 +22,7 @@ class ClassFindFieldTest : public AniTest {};
 TEST_F(ClassFindFieldTest, get_point_field)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LPoint;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_find_field_test/Point;", &cls), ANI_OK);
 
     ani_field fieldX;
     ASSERT_EQ(env_->Class_FindField(cls, "x", &fieldX), ANI_OK);
@@ -40,7 +40,7 @@ TEST_F(ClassFindFieldTest, get_point_field)
 TEST_F(ClassFindFieldTest, point_field_not_found)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LPoint;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_find_field_test/Point;", &cls), ANI_OK);
 
     ani_field fieldZ = nullptr;
     ASSERT_EQ(env_->Class_FindField(cls, "z", &fieldZ), ANI_NOT_FOUND);
@@ -50,7 +50,7 @@ TEST_F(ClassFindFieldTest, point_field_not_found)
 TEST_F(ClassFindFieldTest, get_extended_point_field)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LExtendedPoint;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_find_field_test/ExtendedPoint;", &cls), ANI_OK);
 
     ani_field fieldX;
     ASSERT_EQ(env_->Class_FindField(cls, "x", &fieldX), ANI_OK);
@@ -72,7 +72,7 @@ TEST_F(ClassFindFieldTest, get_extended_point_field)
 TEST_F(ClassFindFieldTest, get_vector_field)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LVector;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_find_field_test/Vector;", &cls), ANI_OK);
 
     ani_field fieldP1;
     ASSERT_EQ(env_->Class_FindField(cls, "p1", &fieldP1), ANI_OK);
@@ -90,7 +90,7 @@ TEST_F(ClassFindFieldTest, get_vector_field)
 TEST_F(ClassFindFieldTest, get_circle_field)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LCircle;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_find_field_test/Circle;", &cls), ANI_OK);
 
     ani_field fieldPoints;
     ASSERT_EQ(env_->Class_FindField(cls, "points", &fieldPoints), ANI_OK);
@@ -112,7 +112,7 @@ TEST_F(ClassFindFieldTest, get_circle_field)
 TEST_F(ClassFindFieldTest, get_sphere_field)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LSphere;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_find_field_test/Sphere;", &cls), ANI_OK);
 
     ani_field fieldPoints;
     ASSERT_EQ(env_->Class_FindField(cls, "points", &fieldPoints), ANI_OK);
@@ -134,7 +134,7 @@ TEST_F(ClassFindFieldTest, get_sphere_field)
 TEST_F(ClassFindFieldTest, get_space_field)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LSpace;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_find_field_test/Space;", &cls), ANI_OK);
 
     ani_field fieldObjects;
     ASSERT_EQ(env_->Class_FindField(cls, "objects", &fieldObjects), ANI_OK);
@@ -152,7 +152,7 @@ TEST_F(ClassFindFieldTest, get_space_field)
 TEST_F(ClassFindFieldTest, get_partial_field)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LUniversalFigureHandler;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_find_field_test/UniversalFigureHandler;", &cls), ANI_OK);
 
     ani_field fieldFigure;
     ASSERT_EQ(env_->Class_FindField(cls, "figure", &fieldFigure), ANI_OK);
@@ -162,7 +162,7 @@ TEST_F(ClassFindFieldTest, get_partial_field)
 TEST_F(ClassFindFieldTest, get_required_field)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LNamedSpaceHandler;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_find_field_test/NamedSpaceHandler;", &cls), ANI_OK);
 
     ani_field fieldSpace;
     ASSERT_EQ(env_->Class_FindField(cls, "space", &fieldSpace), ANI_OK);
@@ -178,7 +178,7 @@ TEST_F(ClassFindFieldTest, invalid_argument1)
 TEST_F(ClassFindFieldTest, invalid_argument2)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LPoint;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_find_field_test/Point;", &cls), ANI_OK);
 
     ani_field field;
     ASSERT_EQ(env_->Class_FindField(cls, nullptr, &field), ANI_INVALID_ARGS);
@@ -187,7 +187,7 @@ TEST_F(ClassFindFieldTest, invalid_argument2)
 TEST_F(ClassFindFieldTest, invalid_argument3)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LPoint;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_find_field_test/Point;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_FindField(cls, "x", nullptr), ANI_INVALID_ARGS);
 }

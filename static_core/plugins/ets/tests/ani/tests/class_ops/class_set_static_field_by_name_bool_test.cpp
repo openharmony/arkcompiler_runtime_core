@@ -23,7 +23,7 @@ class ClassSetStaticFieldByNameBoolTest : public AniTest {};
 TEST_F(ClassSetStaticFieldByNameBoolTest, set_static_field_by_name_bool_capi)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LBoolStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_bool_test/BoolStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Boolean(env_, cls, "bool_value", ANI_TRUE), ANI_OK);
     ani_boolean resultValue = ANI_FALSE;
@@ -34,7 +34,7 @@ TEST_F(ClassSetStaticFieldByNameBoolTest, set_static_field_by_name_bool_capi)
 TEST_F(ClassSetStaticFieldByNameBoolTest, set_static_field_by_name_bool)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LBoolStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_bool_test/BoolStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "bool_value", ANI_TRUE), ANI_OK);
     ani_boolean resultValue = ANI_FALSE;
@@ -45,7 +45,7 @@ TEST_F(ClassSetStaticFieldByNameBoolTest, set_static_field_by_name_bool)
 TEST_F(ClassSetStaticFieldByNameBoolTest, set_static_field_by_name_bool_invalid_field_type)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LBoolStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_bool_test/BoolStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "string_value", ANI_TRUE), ANI_INVALID_TYPE);
 }
@@ -53,7 +53,7 @@ TEST_F(ClassSetStaticFieldByNameBoolTest, set_static_field_by_name_bool_invalid_
 TEST_F(ClassSetStaticFieldByNameBoolTest, set_static_field_by_name_bool_invalid_args_object)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LBoolStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_bool_test/BoolStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(nullptr, "bool_value", ANI_TRUE), ANI_INVALID_ARGS);
 }
@@ -61,7 +61,7 @@ TEST_F(ClassSetStaticFieldByNameBoolTest, set_static_field_by_name_bool_invalid_
 TEST_F(ClassSetStaticFieldByNameBoolTest, set_static_field_by_name_bool_invalid_args_field)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LBoolStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_bool_test/BoolStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, nullptr, ANI_TRUE), ANI_INVALID_ARGS);
 }

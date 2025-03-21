@@ -21,7 +21,7 @@ class GlobalReferenceCreateTest : public AniTest {};
 
 TEST_F(GlobalReferenceCreateTest, from_null_ref)
 {
-    auto ref = CallEtsFunction<ani_ref>("GetNull");
+    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "GetNull");
     ani_ref gref;
     ASSERT_EQ(env_->GlobalReference_Create(ref, &gref), ANI_OK);
 
@@ -32,7 +32,7 @@ TEST_F(GlobalReferenceCreateTest, from_null_ref)
 
 TEST_F(GlobalReferenceCreateTest, from_undefined_ref)
 {
-    auto ref = CallEtsFunction<ani_ref>("GetUndefined");
+    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "GetUndefined");
     ani_ref gref;
     ASSERT_EQ(env_->GlobalReference_Create(ref, &gref), ANI_OK);
 
@@ -43,16 +43,16 @@ TEST_F(GlobalReferenceCreateTest, from_undefined_ref)
 
 TEST_F(GlobalReferenceCreateTest, from_object_ref)
 {
-    auto ref = CallEtsFunction<ani_ref>("GetObject");
+    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "GetObject");
     ani_ref gref;
     ASSERT_EQ(env_->GlobalReference_Create(ref, &gref), ANI_OK);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("CheckObject", ref, gref), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("global_reference_create_test", "CheckObject", ref, gref), ANI_TRUE);
 }
 
 TEST_F(GlobalReferenceCreateTest, from_null_gref)
 {
-    auto ref = CallEtsFunction<ani_ref>("GetNull");
+    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "GetNull");
     ani_ref gref;
     ASSERT_EQ(env_->GlobalReference_Create(ref, &gref), ANI_OK);
 
@@ -66,7 +66,7 @@ TEST_F(GlobalReferenceCreateTest, from_null_gref)
 
 TEST_F(GlobalReferenceCreateTest, from_undefined_gref)
 {
-    auto ref = CallEtsFunction<ani_ref>("GetUndefined");
+    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "GetUndefined");
     ani_ref gref;
     ASSERT_EQ(env_->GlobalReference_Create(ref, &gref), ANI_OK);
 
@@ -80,19 +80,19 @@ TEST_F(GlobalReferenceCreateTest, from_undefined_gref)
 
 TEST_F(GlobalReferenceCreateTest, from_object_gref)
 {
-    auto ref = CallEtsFunction<ani_ref>("GetObject");
+    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "GetObject");
     ani_ref gref;
     ASSERT_EQ(env_->GlobalReference_Create(ref, &gref), ANI_OK);
 
     ani_ref gref2;
     ASSERT_EQ(env_->GlobalReference_Create(ref, &gref2), ANI_OK);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("CheckObject", ref, gref2), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("global_reference_create_test", "CheckObject", ref, gref2), ANI_TRUE);
 }
 
 TEST_F(GlobalReferenceCreateTest, delete_as_local_ref)
 {
-    auto ref = CallEtsFunction<ani_ref>("GetObject");
+    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "GetObject");
     ani_ref gref;
     ASSERT_EQ(env_->GlobalReference_Create(ref, &gref), ANI_OK);
 
@@ -101,17 +101,17 @@ TEST_F(GlobalReferenceCreateTest, delete_as_local_ref)
 
 TEST_F(GlobalReferenceCreateTest, invalid_result)
 {
-    auto ref = CallEtsFunction<ani_ref>("GetObject");
+    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "GetObject");
     ASSERT_EQ(env_->GlobalReference_Create(ref, nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(GlobalReferenceCreateTest, global_reference_create_test)
 {
-    auto ref = CallEtsFunction<ani_ref>("GetObject");
+    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "GetObject");
     ani_ref gref;
     ASSERT_EQ(env_->GlobalReference_Create(ref, &gref), ANI_OK);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("CheckObject", ref, gref), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("global_reference_create_test", "CheckObject", ref, gref), ANI_TRUE);
 
     ASSERT_EQ(env_->GlobalReference_Delete(gref), ANI_OK);
 }

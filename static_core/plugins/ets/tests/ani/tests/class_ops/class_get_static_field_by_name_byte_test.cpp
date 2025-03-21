@@ -35,7 +35,7 @@ public:
 TEST_F(ClassGetStaticFieldByNameByteTest, get_static_field_byte_capi)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetbyteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_byte_test/GetbyteStatic;", &cls), ANI_OK);
     ani_byte age;
     ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_Byte(env_, cls, "age", &age), ANI_OK);
     ASSERT_EQ(age, static_cast<ani_byte>(0));
@@ -44,7 +44,7 @@ TEST_F(ClassGetStaticFieldByNameByteTest, get_static_field_byte_capi)
 TEST_F(ClassGetStaticFieldByNameByteTest, get_static_field_byte)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetbyteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_byte_test/GetbyteStatic;", &cls), ANI_OK);
     ani_byte age;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Byte(cls, "age", &age), ANI_OK);
     ASSERT_EQ(age, static_cast<ani_byte>(0));
@@ -53,7 +53,7 @@ TEST_F(ClassGetStaticFieldByNameByteTest, get_static_field_byte)
 TEST_F(ClassGetStaticFieldByNameByteTest, get_static_field_byte_invalid_field_type)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetbyteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_byte_test/GetbyteStatic;", &cls), ANI_OK);
 
     ani_byte age;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Byte(cls, "name", &age), ANI_INVALID_TYPE);
@@ -62,7 +62,7 @@ TEST_F(ClassGetStaticFieldByNameByteTest, get_static_field_byte_invalid_field_ty
 TEST_F(ClassGetStaticFieldByNameByteTest, invalid_argument1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetbyteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_byte_test/GetbyteStatic;", &cls), ANI_OK);
     ani_byte age;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Byte(nullptr, "name", &age), ANI_INVALID_ARGS);
 }
@@ -70,7 +70,7 @@ TEST_F(ClassGetStaticFieldByNameByteTest, invalid_argument1)
 TEST_F(ClassGetStaticFieldByNameByteTest, invalid_argument2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetbyteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_byte_test/GetbyteStatic;", &cls), ANI_OK);
     ani_byte age;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Byte(cls, nullptr, &age), ANI_INVALID_ARGS);
 }
@@ -78,14 +78,14 @@ TEST_F(ClassGetStaticFieldByNameByteTest, invalid_argument2)
 TEST_F(ClassGetStaticFieldByNameByteTest, invalid_argument3)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetbyteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_byte_test/GetbyteStatic;", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Byte(cls, "name", nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(ClassGetStaticFieldByNameByteTest, invalid_argument4)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetbyteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_byte_test/GetbyteStatic;", &cls), ANI_OK);
     ani_byte age;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Byte(cls, "", &age), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Byte(cls, "\n", &age), ANI_NOT_FOUND);
@@ -95,7 +95,7 @@ TEST_F(ClassGetStaticFieldByNameByteTest, invalid_argument4)
 TEST_F(ClassGetStaticFieldByNameByteTest, special_values)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LGetbyteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_byte_test/GetbyteStatic;", &cls), ANI_OK);
     ani_byte single = 1U;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Byte(cls, "specia2", &single), ANI_INVALID_TYPE);
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Byte(cls, "specia3", &single), ANI_INVALID_TYPE);
@@ -123,7 +123,7 @@ TEST_F(ClassGetStaticFieldByNameByteTest, combination_test1)
     const ani_byte setTarget = 2U;
     const ani_byte setTarget2 = 3U;
     ani_byte single = 1U;
-    ASSERT_EQ(env_->FindClass("LGetbyteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_byte_test/GetbyteStatic;", &cls), ANI_OK);
     const int32_t loopCount = 3;
     for (int32_t i = 0; i < loopCount; i++) {
         ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(cls, "age", setTarget2), ANI_OK);
@@ -137,17 +137,17 @@ TEST_F(ClassGetStaticFieldByNameByteTest, combination_test1)
 
 TEST_F(ClassGetStaticFieldByNameByteTest, combination_test2)
 {
-    CheckFieldValue("LGetbyteStatic;", "age");
+    CheckFieldValue("Lclass_get_static_field_by_name_byte_test/GetbyteStatic;", "age");
 }
 
 TEST_F(ClassGetStaticFieldByNameByteTest, combination_test3)
 {
-    CheckFieldValue("LByteStaticA;", "byte_value");
+    CheckFieldValue("Lclass_get_static_field_by_name_byte_test/ByteStaticA;", "byte_value");
 }
 
 TEST_F(ClassGetStaticFieldByNameByteTest, combination_test4)
 {
-    CheckFieldValue("LByteStaticFinal;", "byte_value");
+    CheckFieldValue("Lclass_get_static_field_by_name_byte_test/ByteStaticFinal;", "byte_value");
 }
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

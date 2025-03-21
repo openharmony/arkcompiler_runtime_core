@@ -34,7 +34,7 @@ TEST_F(CallObjectMethodDoubleTest, object_call_method_double_a)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "doubleMethod", "DD:D", &object, &method);
+    GetMethodAndObject("Lcall_object_method_double_test/A;", "doubleMethod", "DD:D", &object, &method);
 
     ani_value args[2U];
     ani_double arg1 = VAL;
@@ -51,7 +51,7 @@ TEST_F(CallObjectMethodDoubleTest, object_call_method_double_v)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "doubleMethod", "DD:D", &object, &method);
+    GetMethodAndObject("Lcall_object_method_double_test/A;", "doubleMethod", "DD:D", &object, &method);
 
     ani_double sum = INIT_VALUE;
     ani_double arg1 = VAL;
@@ -64,7 +64,7 @@ TEST_F(CallObjectMethodDoubleTest, object_call_method_double)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "doubleMethod", "DD:D", &object, &method);
+    GetMethodAndObject("Lcall_object_method_double_test/A;", "doubleMethod", "DD:D", &object, &method);
 
     ani_double sum = INIT_VALUE;
     ani_double arg1 = VAL;
@@ -77,7 +77,7 @@ TEST_F(CallObjectMethodDoubleTest, call_method_double_v_invalid_env)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "doubleMethod", "DD:D", &object, &method);
+    GetMethodAndObject("Lcall_object_method_double_test/A;", "doubleMethod", "DD:D", &object, &method);
 
     ani_double sum = INIT_VALUE;
     ani_double arg1 = VAL;
@@ -89,7 +89,7 @@ TEST_F(CallObjectMethodDoubleTest, call_method_double_v_invalid_method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "doubleMethod", "DD:D", &object, &method);
+    GetMethodAndObject("Lcall_object_method_double_test/A;", "doubleMethod", "DD:D", &object, &method);
 
     ani_double sum = INIT_VALUE;
     ani_double arg1 = VAL;
@@ -101,7 +101,7 @@ TEST_F(CallObjectMethodDoubleTest, call_method_double_v_invalid_result)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "doubleMethod", "DD:D", &object, &method);
+    GetMethodAndObject("Lcall_object_method_double_test/A;", "doubleMethod", "DD:D", &object, &method);
 
     ani_double arg1 = VAL;
     ani_double arg2 = VAL1;
@@ -112,7 +112,7 @@ TEST_F(CallObjectMethodDoubleTest, call_method_double_v_invalid_object)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "doubleMethod", "DD:D", &object, &method);
+    GetMethodAndObject("Lcall_object_method_double_test/A;", "doubleMethod", "DD:D", &object, &method);
 
     ani_double sum = INIT_VALUE;
     ani_double arg1 = VAL;
@@ -124,7 +124,7 @@ TEST_F(CallObjectMethodDoubleTest, call_method_double_a_invalid_args)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "doubleMethod", "DD:D", &object, &method);
+    GetMethodAndObject("Lcall_object_method_double_test/A;", "doubleMethod", "DD:D", &object, &method);
 
     ani_double sum = INIT_VALUE;
     ASSERT_EQ(env_->Object_CallMethod_Double_A(object, method, &sum, nullptr), ANI_INVALID_ARGS);
@@ -134,7 +134,7 @@ TEST_F(CallObjectMethodDoubleTest, call_Void_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "doubleMethodVoidParam", ":D", &object, &method);
+    GetMethodAndObject("Lcall_object_method_double_test/A;", "doubleMethodVoidParam", ":D", &object, &method);
 
     ani_double result = INIT_VALUE;
     ASSERT_EQ(env_->Object_CallMethod_Double(object, method, &result), ANI_OK);
@@ -149,7 +149,7 @@ TEST_F(CallObjectMethodDoubleTest, call_Multiple_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "doubleMethodMultipleParam", "SZDSD:D", &object, &method);
+    GetMethodAndObject("Lcall_object_method_double_test/A;", "doubleMethodMultipleParam", "SZDSD:D", &object, &method);
 
     ani_value args[5U] = {};
     ani_short arg1 = 2U;
@@ -175,7 +175,7 @@ TEST_F(CallObjectMethodDoubleTest, call_Parent_Class_Void_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LB;", "doubleMethodVoidParam", ":D", &object, &method);
+    GetMethodAndObject("Lcall_object_method_double_test/B;", "doubleMethodVoidParam", ":D", &object, &method);
 
     ani_double result = INIT_VALUE;
     ASSERT_EQ(env_->Object_CallMethod_Double(object, method, &result), ANI_OK);
@@ -189,7 +189,7 @@ TEST_F(CallObjectMethodDoubleTest, call_Parent_Class_Void_Param_Method)
 TEST_F(CallObjectMethodDoubleTest, call_Parent_Class_Method)
 {
     ani_class clsC {};
-    ASSERT_EQ(env_->FindClass("LC;", &clsC), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lcall_object_method_double_test/C;", &clsC), ANI_OK);
     ASSERT_NE(clsC, nullptr);
 
     ani_method method {};
@@ -197,7 +197,7 @@ TEST_F(CallObjectMethodDoubleTest, call_Parent_Class_Method)
     ASSERT_NE(method, nullptr);
 
     ani_class clsD {};
-    ASSERT_EQ(env_->FindClass("LD;", &clsD), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lcall_object_method_double_test/D;", &clsD), ANI_OK);
     ASSERT_NE(clsD, nullptr);
     ani_method ctor {};
     ASSERT_EQ(env_->Class_FindMethod(clsD, "<ctor>", ":V", &ctor), ANI_OK);
@@ -223,7 +223,7 @@ TEST_F(CallObjectMethodDoubleTest, call_Sub_Class_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LE;", "func", nullptr, &object, &method);
+    GetMethodAndObject("Lcall_object_method_double_test/E;", "func", nullptr, &object, &method);
 
     ani_double result = 0U;
     ani_value args[2U] = {};
@@ -242,7 +242,7 @@ TEST_F(CallObjectMethodDoubleTest, multiple_Call_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "doubleMethod", "DD:D", &object, &method);
+    GetMethodAndObject("Lcall_object_method_double_test/A;", "doubleMethod", "DD:D", &object, &method);
 
     ani_double result = INIT_VALUE;
     ani_value args[2U] = {};
@@ -263,7 +263,7 @@ TEST_F(CallObjectMethodDoubleTest, call_Nested_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "nestedMethod", "DD:D", &object, &method);
+    GetMethodAndObject("Lcall_object_method_double_test/A;", "nestedMethod", "DD:D", &object, &method);
 
     ani_double result = INIT_VALUE;
     ani_value args[2U] = {};
@@ -283,7 +283,7 @@ TEST_F(CallObjectMethodDoubleTest, call_Recursion_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "recursionMethod", "D:D", &object, &method);
+    GetMethodAndObject("Lcall_object_method_double_test/A;", "recursionMethod", "D:D", &object, &method);
 
     ani_double result = INIT_VALUE;
     ani_value args[1U] = {};

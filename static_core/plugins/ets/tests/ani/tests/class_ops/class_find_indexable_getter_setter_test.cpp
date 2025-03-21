@@ -25,11 +25,11 @@ class FindIndexableSetterGetterTest : public AniTest {};
 TEST_F(FindIndexableGetterTest, get_method)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LA;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_find_indexable_getter_setter_test/A;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method;
-    ASSERT_EQ(env_->Class_FindIndexableGetter(cls, "D:LA;", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindIndexableGetter(cls, "D:Lclass_find_indexable_getter_setter_test/A;", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     ASSERT_EQ(env_->Class_FindIndexableGetter(cls, "D:I", &method), ANI_NOT_FOUND);
@@ -38,7 +38,7 @@ TEST_F(FindIndexableGetterTest, get_method)
 TEST_F(FindIndexableGetterTest, set_method)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LA;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_find_indexable_getter_setter_test/A;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method stringSetter;

@@ -46,7 +46,7 @@ static ani_string Concat(ani_env *env, ani_string s0, ani_string s1)
 TEST_F(NamespaceBindNativeFunctionsTest, bind_native_functions)
 {
     ani_namespace ns;
-    ASSERT_EQ(env_->FindNamespace("Lops;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_bind_native_functions_test/ops;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     const char *concatSignature = "Lstd/core/String;Lstd/core/String;:Lstd/core/String;";
@@ -56,14 +56,14 @@ TEST_F(NamespaceBindNativeFunctionsTest, bind_native_functions)
     };
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_OK);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkSum"), ANI_TRUE);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkConcat"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("namespace_bind_native_functions_test", "checkSum"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("namespace_bind_native_functions_test", "checkConcat"), ANI_TRUE);
 }
 
 TEST_F(NamespaceBindNativeFunctionsTest, already_binded_function)
 {
     ani_namespace ns;
-    ASSERT_EQ(env_->FindNamespace("Lops;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_bind_native_functions_test/ops;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     const char *concatSignature = "Lstd/core/String;Lstd/core/String;:Lstd/core/String;";
@@ -74,8 +74,8 @@ TEST_F(NamespaceBindNativeFunctionsTest, already_binded_function)
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_OK);
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_ALREADY_BINDED);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkSum"), ANI_TRUE);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkConcat"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("namespace_bind_native_functions_test", "checkSum"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("namespace_bind_native_functions_test", "checkConcat"), ANI_TRUE);
 }
 
 TEST_F(NamespaceBindNativeFunctionsTest, invalid_ns)
@@ -101,7 +101,7 @@ TEST_F(NamespaceBindNativeFunctionsTest, invalid_functions)
 TEST_F(NamespaceBindNativeFunctionsTest, function_not_found)
 {
     ani_namespace ns;
-    ASSERT_EQ(env_->FindNamespace("Lops;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_bind_native_functions_test/ops;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     const char *concatSignature = "Lstd/core/String;Lstd/core/String;:Lstd/core/String;";

@@ -41,7 +41,7 @@ TEST_F(ModuleFindNamespaceTest, invalid_arg_class)
 
     ani_namespace ns {};
     ASSERT_EQ(env_->Module_FindNamespace(module, "ops;", &ns), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Module_FindNamespace(module, "Lops", &ns), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "Lmodule_find_class_test/ops", &ns), ANI_NOT_FOUND);
 }
 
 TEST_F(ModuleFindNamespaceTest, invalid_arg_result)
@@ -49,7 +49,7 @@ TEST_F(ModuleFindNamespaceTest, invalid_arg_result)
     ani_module module;
     ASSERT_EQ(env_->FindModule("L@abcModule/module_find_namespace_test;", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LATest;", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "Lmodule_find_class_test/ATest;", nullptr), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing

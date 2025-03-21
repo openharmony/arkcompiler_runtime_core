@@ -24,7 +24,7 @@ TEST_F(ClassSetStaticFieldByNameDoubleTest, set_static_field_by_name_double_capi
 {
     ani_class cls;
     const ani_double age = 2.0;
-    ASSERT_EQ(env_->FindClass("LDoubleStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_double_test/DoubleStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Double(env_, cls, "double_value", age), ANI_OK);
     ani_double resultValue;
@@ -36,7 +36,7 @@ TEST_F(ClassSetStaticFieldByNameDoubleTest, set_static_field_by_name_double)
 {
     ani_class cls;
     const ani_double age = 2.0;
-    ASSERT_EQ(env_->FindClass("LDoubleStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_double_test/DoubleStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Double(cls, "double_value", age), ANI_OK);
     ani_double resultValue;
@@ -48,7 +48,7 @@ TEST_F(ClassSetStaticFieldByNameDoubleTest, set_static_field_by_name_double_inva
 {
     ani_class cls;
     const ani_double age = 2.0;
-    ASSERT_EQ(env_->FindClass("LDoubleStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_double_test/DoubleStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Double(cls, "string_value", age), ANI_INVALID_TYPE);
 }
@@ -57,7 +57,7 @@ TEST_F(ClassSetStaticFieldByNameDoubleTest, set_static_field_by_name_double_inva
 {
     ani_class cls;
     const ani_double age = 2.0;
-    ASSERT_EQ(env_->FindClass("LDoubleStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_double_test/DoubleStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Double(nullptr, "double_value", age), ANI_INVALID_ARGS);
 }
@@ -66,7 +66,7 @@ TEST_F(ClassSetStaticFieldByNameDoubleTest, set_static_field_by_name_double_inva
 {
     ani_class cls;
     const ani_double age = 2.0;
-    ASSERT_EQ(env_->FindClass("LDoubleStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_double_test/DoubleStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Double(cls, nullptr, age), ANI_INVALID_ARGS);
 }
