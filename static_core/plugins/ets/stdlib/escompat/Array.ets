@@ -817,7 +817,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns an Array with deleted elements
      */
     public splice(start: number, delete: Number | undefined, ...items: T[]): Array<T> {
-        return this.splice(start as int, asIntOrDefault(delete, this.actualLength), ...items)
+        return this.splice(start as int, asIntOrDefault(delete, 0), ...items)
     }
 
     /**

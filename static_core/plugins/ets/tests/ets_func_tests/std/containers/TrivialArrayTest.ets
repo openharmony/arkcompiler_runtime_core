@@ -63,11 +63,13 @@ function test_splice_1(): void {
     }
 
     other.splice(1, undefined, 6, 7, 8);
-    assertEQ( other.length, 4)
+    assertEQ( other.length, 6)
     assertEQ( other.$_get(0), 1)
     assertEQ( other.$_get(1), 6)
     assertEQ( other.$_get(2), 7)
     assertEQ( other.$_get(3), 8)
+    assertEQ( other.$_get(4), 2)
+    assertEQ( other.$_get(5), 3)
 }
 
 function test_unshift(): void {
