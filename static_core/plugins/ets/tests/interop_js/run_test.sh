@@ -23,6 +23,7 @@ WORKING_DIR=""
 declare -a MODULES
 ETSSTDLIB=""
 CMD=""
+declare TEST_LOG_FILE="log.txt"
 
 ARG=$1
 while [ ! -z "${ARG}" ]; do
@@ -75,7 +76,8 @@ done
 ln -sf "${ETSSTDLIB}" "${WORKING_DIR}"
 
 cd "${WORKING_DIR}"
-if ! ${CMD} ; then
+if ! ${CMD} &> "${TEST_LOG_FILE}" ; then
+    cat "${TEST_LOG_FILE}"
     echo "To reproduce test do the following ..."
     echo "cd $(pwd)"
     echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH} ${CMD}"
