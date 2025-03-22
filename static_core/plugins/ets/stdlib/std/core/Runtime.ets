@@ -152,13 +152,23 @@ export final class Runtime {
 
     native static __getTypeInfo(o: NullishType): Class|undefined;
 
-    static prependRestArgumentsStub(original: __T[], prepend: __T[]): __T[] {
-        let res = new __T[original.length + prepend.length]
-        for (let i: int = 0; i < prepend.length; ++i) {
-            res[i] = prepend[i]
+    native static allocSameTypeArray<T extends NullishType[]>(type: Class, length: int): T;
+
+    static addFrontElementsStub(original: __T[], front: __T[]): __T[] {
+        let res = Runtime.allocSameTypeArray<__T[]>(Class.of(original), original.length + front.length)
+        for (let i: int = 0; i < front.length; ++i) {
+            res[i] = front[i]
         }
         for (let i: int = 0; i < original.length; ++i) {
-            res[i + prepend.length] = original[i]
+            res[i + front.length] = original[i]
+        }
+        return res
+    }
+
+    static removeFrontElementsStub(original: __T[], count: int): __T[] {
+        let res = Runtime.allocSameTypeArray<__T[]>(Class.of(original), original.length - count)
+        for (let i: int = count; i < original.length; ++i) {
+            res[i - count] = original[i]
         }
         return res
     }

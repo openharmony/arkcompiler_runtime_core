@@ -69,4 +69,15 @@ EtsClass *StdCoreRuntimeGetTypeInfo([[maybe_unused]] EtsObject *header)
     return nullptr;
 }
 
+ObjectHeader *StdCoreRuntimeAllocSameTypeArray(EtsClass *cls, int32_t length)
+{
+    if (UNLIKELY(!cls->IsArrayClass())) {
+        // should not appear for the optimized version of intrinsic, which is always inlined
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::ERROR,
+                          "class is not an array");
+        return nullptr;
+    }
+    return coretypes::Array::Create(cls->GetRuntimeClass(), length);
+}
+
 }  // namespace ark::ets::intrinsics

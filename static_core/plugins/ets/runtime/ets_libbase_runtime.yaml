@@ -3437,6 +3437,17 @@ intrinsics:
     clear_flags: [ heap_inv, no_dce ]
     peephole_func: PeepholeGetTypeInfo
 
+  - name: StdCoreRuntimeAllocSameTypeArray
+    space: ets
+    class_name: std.core.Runtime
+    method_name: allocSameTypeArray
+    static: true
+    signature:
+      ret: std.core.Object[]
+      args: [ std.core.Class, i32 ]
+    impl: ark::ets::intrinsics::StdCoreRuntimeAllocSameTypeArray
+    clear_flags: [ ]
+
 ##################
 # std.core.Class #
 ##################

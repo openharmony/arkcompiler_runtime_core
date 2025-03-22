@@ -206,3 +206,9 @@ export class CoroutinesLimitExceedError extends Error {
         super("CoroutinesLimitExceedError", message, options)
     }
 }
+
+export class ArgumentsUnderapplicationError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("ArgumentsUnderapplicationError", message, options)
+    }
+}
