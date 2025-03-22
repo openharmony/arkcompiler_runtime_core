@@ -26,4 +26,41 @@ namespace fnns {
     function overloaded(): int {
         return 1
     }
+    function getInitialDoubleValue(): double {
+        return 1.00;
+    }
+
+    abstract class B {
+        abstract function getInitialDoubleValue(): double;
+    }
+
+    class A extends B {
+        constructor(){};
+        static function B(): double {
+            return 1.00;
+        };
+        function getInitialDoubleValue(): double {
+            return 1.00;
+        }
+
+        function getInitialIntValue(): int {
+            return 0;
+        }
+        function getInitialIntValue(a: int, b: int): int {
+            return a + b;
+        }
+    }
+
+    async function C(a: int): Promise<int>{
+        return a;
+    };
+
+}
+
+namespace testA {
+    namespace A {
+        function B (): int {
+            return 1;
+        }
+    }
 }

@@ -30,3 +30,27 @@ enum ColorString {
     BLUE = "str_blue",
     GREEN = "str_green"
 }
+
+enum ColorA {
+    RED,
+    BLUE,
+    GREEN
+}
+enum ColorB {
+    RED,
+    BLUE,
+    GREEN
+}
+enum ColorC {
+    RED,
+    BLUE,
+    GREEN
+}
+
+namespace ops {
+    enum ColorAA {
+    RED = 5,
+    BLUE,
+    GREEN
+}
+}
