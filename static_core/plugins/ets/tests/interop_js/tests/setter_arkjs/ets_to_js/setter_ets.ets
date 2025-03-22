@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,11 +41,11 @@ class InterfaceSetter implements ISetter {
    _value: string = "";
 
    set value(arg: string) {
-      this.value = arg;
+      this._value = arg;
    }
 
    get value(): string {
-      return this.value;
+      return this._value;
    }
 }
 

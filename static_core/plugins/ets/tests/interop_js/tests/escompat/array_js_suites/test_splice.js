@@ -25,7 +25,7 @@ const TestJSSplice = etsMod.getFunction('Array_TestJSSplice');
 const FIXES_IMPLEMENTED = false;
 
 // NOTE(kprokopenko): change to `x.length` when interop support properties
-const etsArrLen = (x) => x['<get>length'].call(x);
+const etsArrLen = (x) => x.length;
 
 {
 	// Test JS Array<FooClass>

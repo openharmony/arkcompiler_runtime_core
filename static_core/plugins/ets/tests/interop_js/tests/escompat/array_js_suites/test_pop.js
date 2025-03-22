@@ -22,7 +22,7 @@ const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSPop = etsMod.getFunction('Array_TestJSPop');
 
 // NOTE(kprokopenko): change to `x.length` when interop support properties
-const etsArrLen = (x) => x['<get>length'].call(x);
+const etsArrLen = (x) => x.length;
 
 {
 	// Test JS Array<FooClass>

@@ -22,7 +22,7 @@ const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSToSpliced = etsMod.getFunction('Array_TestJSToSpliced');
 
 // NOTE(kprokopenko): change to `x.length` when interop support properties
-const etsArrLen = (x) => x['<get>length'].call(x);
+const etsArrLen = (x) => x.length;
 
 // NOTE(oignatenko) enable after interop will be supported for this method signature
 const FIXES_IMPLEMENTED = false;

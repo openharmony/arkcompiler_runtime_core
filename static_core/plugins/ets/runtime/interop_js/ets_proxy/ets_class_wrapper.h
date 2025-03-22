@@ -1,5 +1,6 @@
 /**
  * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,6 +110,7 @@ private:
 
     using PropsMap =
         std::unordered_map<uint8_t const *, std::variant<EtsMethodSet *, Field *>, utf::Mutf8Hash, utf::Mutf8Equal>;
+    using GetterSetterPropsMap = std::unordered_map<std::string, napi_property_descriptor>;
     using FieldsVec = std::vector<Field *>;
     using MethodsVec = std::vector<EtsMethodSet *>;
 
@@ -119,7 +121,7 @@ private:
     std::pair<FieldsVec, MethodsVec> CalculateFieldsAndMethods(const PropsMap &props);
     std::vector<napi_property_descriptor> BuildJSProperties(Span<Field *> fields, Span<EtsMethodSet *> methods);
     EtsClassWrapper *LookupBaseWrapper(EtsClass *klass);
-
+    void BuildGetterSetterFieldProperties(GetterSetterPropsMap &propMap, EtsMethodSet *method);
     void SetUpMimicHandler(napi_env env);
     static napi_value CreateProxy(napi_env env, napi_value jsCtor, EtsClassWrapper *thisWrapper);
     static napi_value MimicGetHandler(napi_env env, napi_callback_info info);
@@ -156,6 +158,7 @@ private:
     std::unique_ptr<LazyEtsMethodWrapperLink[]> etsMethodWrappers_;  // NOLINT(modernize-avoid-c-arrays)
     std::unique_ptr<EtsFieldWrapper[]> etsFieldWrappers_;            // NOLINT(modernize-avoid-c-arrays)
     std::vector<std::unique_ptr<EtsMethodSet>> etsMethods_;
+    std::vector<std::unique_ptr<EtsFieldWrapper>> getterSetterFieldWrappers_;
     uint32_t numMethods_ {};
     uint32_t numFields_ {};
 

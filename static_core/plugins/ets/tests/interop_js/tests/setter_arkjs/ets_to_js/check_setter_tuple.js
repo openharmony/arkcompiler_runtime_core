@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,19 @@
  * limitations under the License.
  */
 
-const { TupleSet, num, string, createTupleSetClass } = require('setter.test.js');
+const etsVm = globalThis.gtest.etsVm;
+const num = 1;
+const string = 'string';
+const TupleSet = etsVm.getClass('Lsetter/test/TupleSet;');
+const createTupleSetClass = etsVm.getFunction('Lsetter/test/ETSGLOBAL;', 'create_tuple_set_class');
 
 function checkSetterTuple() {
 	const tupleSet = new TupleSet();
 	const arr = [num, string];
 	tupleSet.value = arr;
 
-	ASSERT_EQ(arr, tupleSet.value);
+	ASSERT_TRUE(arr[0] === tupleSet.value[0]);
+	ASSERT_TRUE(arr[1] === tupleSet.value[1]);
 }
 
 function checkSetterTupleClassFromEts() {
@@ -28,7 +33,8 @@ function checkSetterTupleClassFromEts() {
 	const arr = [num, string];
 	tupleSet.value = arr;
 
-	ASSERT_EQ(arr, tupleSet.value);
+	ASSERT_TRUE(arr[0] === tupleSet.value[0]);
+	ASSERT_TRUE(arr[1] === tupleSet.value[1]);
 }
 
 checkSetterTuple();

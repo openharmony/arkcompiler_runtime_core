@@ -70,6 +70,92 @@ napi_property_descriptor EtsMethodWrapper::MakeNapiProperty(EtsMethodSet *method
     return prop;
 }
 
+void EtsMethodWrapper::AttachGetterSetterToProperty(EtsMethodSet *method, napi_property_descriptor &property)
+{
+    napi_callback callback {};
+    if (method->IsStatic()) {
+        callback = EtsMethodWrapper::GetterSetterCallHandler<true>;
+    } else {
+        callback = EtsMethodWrapper::GetterSetterCallHandler<false>;
+    }
+    auto fieldWrapper = reinterpret_cast<EtsFieldWrapper *>(property.data);
+    if (method->IsGetter()) {
+        property.getter = callback;
+        fieldWrapper->SetGetterMethod(method);
+    } else {
+        property.setter = callback;
+        fieldWrapper->SetSetterMethod(method);
+    }
+}
+
+template <bool IS_STATIC>
+/*static*/
+napi_value EtsMethodWrapper::GetterSetterCallHandler(napi_env env, napi_callback_info cinfo)
+{
+    FindMethodFunc findMethodFunc = [](void *data, size_t argc) {
+        auto fieldWrapper = reinterpret_cast<EtsFieldWrapper *>(data);
+        if (fieldWrapper == nullptr) {
+            return EtsMethodAndClassWrapper(nullptr, "method didn't bind a EtsFieldWrapper", nullptr);
+        }
+        auto etsMethodSet = fieldWrapper->GetGetterSetterMethod(argc);
+        return EtsMethodAndClassWrapper(etsMethodSet->GetMethod(argc), nullptr, fieldWrapper->GetOwner());
+    };
+
+    return EtsMethodWrapper::DoEtsMethodCall<IS_STATIC>(env, cinfo, findMethodFunc);
+}
+
+template <bool IS_STATIC>
+/*static*/
+napi_value EtsMethodWrapper::DoEtsMethodCall(napi_env env, napi_callback_info cinfo, FindMethodFunc &findMethodFunc)
+{
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(coro);
+
+    INTEROP_CODE_SCOPE_JS(coro);
+    size_t argc;
+    napi_value jsThis;
+    void *data;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, nullptr, nullptr, nullptr));
+    auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, jsArgs->data(), &jsThis, &data));
+
+    auto [etsMethod, errorMessage, etsClassWrapper] = findMethodFunc(data, argc);
+
+    ASSERT(nullptr != etsMethod || nullptr != errorMessage || etsClassWrapper != nullptr);
+    if (UNLIKELY(nullptr == etsMethod || nullptr == etsClassWrapper)) {
+        ctx->ThrowJSTypeError(env, errorMessage);
+        return nullptr;
+    }
+
+    Method *method = etsMethod->GetPandaMethod();
+
+    if constexpr (IS_STATIC) {
+        EtsClass *etsClass = etsMethod->GetClass();
+        ASSERT(method->GetClass() == etsClass->GetRuntimeClass());
+        if (UNLIKELY(!coro->GetPandaVM()->GetClassLinker()->InitializeClass(coro, etsClass))) {
+            ctx->ForwardEtsException(coro);
+            return nullptr;
+        }
+        return CallETSStatic(coro, ctx, method, *jsArgs);
+    }
+
+    if (UNLIKELY(IsNullOrUndefined(env, jsThis))) {
+        ctx->ThrowJSTypeError(env, "ets this in instance method cannot be null or undefined");
+        return nullptr;
+    }
+
+    EtsObject *etsThis = etsClassWrapper->UnwrapEtsProxy(ctx, jsThis);
+    if (UNLIKELY(etsThis == nullptr)) {
+        if (coro->HasPendingException()) {
+            ctx->ForwardEtsException(coro);
+        }
+        ASSERT(ctx->SanityJSExceptionPending());
+        return nullptr;
+    }
+
+    return CallETSInstance(coro, ctx, method, *jsArgs, etsThis);
+}
+
 static std::tuple<EtsMethod *, const char *> FindSuitableMethod(const EtsMethodSet *methodSet, uint32_t parametersNum)
 {
     if (nullptr == methodSet) {
@@ -104,60 +190,31 @@ napi_value EtsMethodWrapper::EtsMethodCallHandler(napi_env env, napi_callback_in
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
 
-    INTEROP_CODE_SCOPE_JS(coro);
-    size_t argc;
-    napi_value jsThis;
-    void *data;
-    NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, nullptr, nullptr, nullptr));
-    auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
-    NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, jsArgs->data(), &jsThis, &data));
-
-    EtsMethodWrapper *_this;  // NOLINT(readability-identifier-naming)
-
-    auto lazyLink = reinterpret_cast<LazyEtsMethodWrapperLink *>(data);
-    _this = EtsMethodWrapper::ResolveLazyLink(ctx, *lazyLink);
-    if (UNLIKELY(_this == nullptr)) {
-        return nullptr;
-    }
-
-    auto [etsMethod, errorMessage] = FindSuitableMethod(_this->etsMethodSet_, argc);
-    ASSERT(nullptr != etsMethod || nullptr != errorMessage);
-    if (UNLIKELY(nullptr == etsMethod)) {
-        ctx->ThrowJSTypeError(env, errorMessage);
-        return nullptr;
-    }
-
-    Method *method = etsMethod->GetPandaMethod();
-
-    if constexpr (IS_STATIC) {
-        EtsClass *etsClass = etsMethod->GetClass();
-        ASSERT(method->GetClass() == etsClass->GetRuntimeClass());
-        if (UNLIKELY(!coro->GetPandaVM()->GetClassLinker()->InitializeClass(coro, etsClass))) {
-            ctx->ForwardEtsException(coro);
-            return nullptr;
+    FindMethodFunc findMethodFunc = [&](void *data, size_t argc) {
+        auto lazyLink = reinterpret_cast<LazyEtsMethodWrapperLink *>(data);
+        auto methodWrapper = EtsMethodWrapper::ResolveLazyLink(ctx, *lazyLink);
+        if (methodWrapper == nullptr) {
+            return EtsMethodAndClassWrapper(nullptr, "method didn't bind a LazyEtsMethodWrapperLink", nullptr);
         }
-        return CallETSStatic(coro, ctx, method, *jsArgs);
-    }
-
-    if (UNLIKELY(IsNullOrUndefined(env, jsThis))) {
-        ctx->ThrowJSTypeError(env, "ets this in instance method cannot be null or undefined");
-        return nullptr;
-    }
-
-    EtsObject *etsThis = _this->owner_->UnwrapEtsProxy(ctx, jsThis);
-    if (UNLIKELY(etsThis == nullptr)) {
-        if (coro->HasPendingException()) {
-            ctx->ForwardEtsException(coro);
+        auto result = FindSuitableMethod(methodWrapper->etsMethodSet_, argc);
+        auto etsMethod = std::get<0>(result);
+        auto errorMessage = std::get<1>(result);
+        auto classWrapper = methodWrapper->owner_;
+        if (etsMethod == nullptr) {
+            return EtsMethodAndClassWrapper(nullptr, errorMessage, nullptr);
         }
-        ASSERT(ctx->SanityJSExceptionPending());
-        return nullptr;
-    }
+        return EtsMethodAndClassWrapper(etsMethod, errorMessage, classWrapper);
+    };
 
-    return CallETSInstance(coro, ctx, method, *jsArgs, etsThis);
+    return EtsMethodWrapper::DoEtsMethodCall<IS_STATIC>(env, cinfo, findMethodFunc);
 }
 
 // Explicit instantiation
 template napi_value EtsMethodWrapper::EtsMethodCallHandler<false>(napi_env, napi_callback_info);
 template napi_value EtsMethodWrapper::EtsMethodCallHandler<true>(napi_env, napi_callback_info);
+
+// Explicit instantiation
+template napi_value EtsMethodWrapper::GetterSetterCallHandler<false>(napi_env, napi_callback_info);
+template napi_value EtsMethodWrapper::GetterSetterCallHandler<true>(napi_env, napi_callback_info);
 
 }  // namespace ark::ets::interop::js::ets_proxy

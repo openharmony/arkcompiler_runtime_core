@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,23 @@
  * limitations under the License.
  */
 
-const { UnionSetter, num, createUnionClass } = require('setter.test.js');
+const etsVm = globalThis.gtest.etsVm;
+const num = 1;
+const UnionSetter = etsVm.getClass('Lsetter/test/UnionSetter;');
+const createUnionClass = etsVm.getFunction('Lsetter/test/ETSGLOBAL;', 'create_union_class');
 
 function checkSetterUnion() {
 	const unionSetter = new UnionSetter();
 	unionSetter.value = num;
 
-	ASSERT_EQ(num, setterUnion.value);
+	ASSERT_TRUE(num === unionSetter.value);
 }
 
 function checkSetterUnionClassFromEts() {
 	const unionSetter = createUnionClass();
 	unionSetter.value = num;
 
-	ASSERT_EQ(num, setterUnion.value);
+	ASSERT_TRUE(num === unionSetter.value);
 }
 
 checkSetterUnion();

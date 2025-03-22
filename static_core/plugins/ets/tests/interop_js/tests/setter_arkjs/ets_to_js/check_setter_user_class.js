@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,24 @@
  * limitations under the License.
  */
 
-const { BaseClass, createBaseClass, string } = require('setter.test.js');
+const etsVm = globalThis.gtest.etsVm;
+const string = 'string';
+const BaseClass = etsVm.getClass('Lsetter/test/BaseClass;');
+const createBaseClass = etsVm.getFunction('Lsetter/test/ETSGLOBAL;', 'create_base_class');
+
 
 function checkSetterUserClass() {
 	const userClass = new BaseClass();
 	userClass.value = string;
 
-	ASSERT_EQ(typeof string, typeof userClass.value);
+	ASSERT_TRUE(string === userClass.value);
 }
 
 function checkSetterUserClassFromEts() {
 	const userClass = createBaseClass();
 	userClass.value = string;
 
-	ASSERT_EQ(typeof string, typeof userClass.value);
+	ASSERT_TRUE(string === userClass.value);
 }
 
 checkSetterUserClass();

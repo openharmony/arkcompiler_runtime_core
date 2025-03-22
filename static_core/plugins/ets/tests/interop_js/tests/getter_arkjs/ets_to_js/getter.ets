@@ -15,11 +15,18 @@
 
 package getter.test;
 
-const ts_string = 'string';
-const ts_number = 1;
+import {
+    public_getter_class_value,
+    public_getter_override_class_value,
+    protected_getter_class_value,
+    protected_getter_override_class_value,
+    private_getter_class_value,
+    private_getter_override_class_value,
+    public_static_getter_class_value
+} from 'constant_js'
 
 class PublicGetterClass {
-    _value = ts_string;
+    _value = public_getter_class_value;
 
     get value(): string {
         return this._value;
@@ -30,8 +37,18 @@ function create_public_getter_class_from_ets(): PublicGetterClass {
     return new PublicGetterClass();
 }
 
+class PublicGetterOverrideClass extends PublicGetterClass {
+    public get value(): string {
+        return public_getter_override_class_value;
+    }
+}
+
+function create_public_getter_override_class_from_ets(): PublicGetterOverrideClass {
+    return new PublicGetterOverrideClass();
+}
+
 class ProtectedGetterOrigenClass {
-    protected _value = ts_string;
+    protected _value = protected_getter_class_value;
 
     public get value(): string {
         return this._value;
@@ -48,8 +65,18 @@ function create_protected_getter_inheritance_class_from_ets(): ProtectedGetterIn
     return new ProtectedGetterInheritanceClass();
 }
 
+class ProtectedGetterOverrideClass extends ProtectedGetterOrigenClass {
+    public get value(): string {
+        return protected_getter_override_class_value;
+    }
+}
+
+function create_protected_getter_override_class_from_ets(): ProtectedGetterOverrideClass {
+    return new ProtectedGetterOverrideClass();
+}
+
 class PrivateGetterClass {
-    private _value = ts_string;
+    private _value = private_getter_class_value;
 
     public get value(): string {
         return this._value;
@@ -64,6 +91,16 @@ class PrivateGetterInheritanceClass extends PrivateGetterClass { }
 
 function create_private_getter_inheritance_class_from_ets(): PrivateGetterInheritanceClass {
     return new PrivateGetterInheritanceClass();
+}
+
+class PrivateGetterOverrideClass extends PrivateGetterClass {
+    public get value(): string {
+        return private_getter_override_class_value;
+    }
+}
+
+function create_private_getter_override_class_from_ets(): PrivateGetterOverrideClass {
+    return new PrivateGetterOverrideClass();
 }
 
 type Union = int | string;
@@ -83,24 +120,6 @@ class UnionTypeClass {
 function create_union_type_getter_class_from_ets(arg: Union): UnionTypeClass {
     return new UnionTypeClass(arg);
 }
-
-// type LiteralValue = 1 | 'string';
-
-// class LiteralClass {
-//     private _value: LiteralValue;
-
-//     constructor(value: LiteralValue) {
-//         this._value = value;
-//     }
-
-//     public get value(): LiteralValue {
-//         return this._value;
-//     }
-// }
-
-// function create_literal_type_getter_class_from_ets(arg: LiteralValue): LiteralClass {
-//     return new LiteralClass(arg);
-// }
 
 type Tuple = [number, string];
 
@@ -130,6 +149,55 @@ class AnyTypeClass<T> {
     public get value(): T {
         return this._value;
     }
+
+    public set value(val: T) {
+        this._value = val;
+    }
+
+}
+
+class StaticClass<T> {
+    public _value: T;
+    public static _static_value: string = '';
+
+    constructor(value: T) {
+        this.value = value;
+    }
+
+    public get value(): T {
+        return this._value;
+    }
+
+    public set value(val: T) {
+        this._value = val;
+    }
+
+    public static get value(): string {
+        return StaticClass._static_value;
+    }
+
+    public static set value(val: string) {
+        StaticClass._static_value = val;
+    }
+
+}
+
+class StaticPublicFieldClass {
+    public value: string;
+    public static _static_value: string = '';
+
+    constructor(value: string) {
+        this.value = value;
+    }
+
+    public static get value(): string {
+        return StaticPublicFieldClass._static_value;
+    }
+
+    public static set value(val: string) {
+        StaticPublicFieldClass._static_value = val;
+    }
+
 }
 
 function create_any_type_getter_class_from_ets_string(arg: string): AnyTypeClass<string> {
@@ -190,6 +258,5 @@ class SubsetByValueClass {
 
 function create_subset_by_value_getter_class_from_ets(): SubsetByValueClass {
     const GClass = new PublicGetterClass();
-
     return new SubsetByValueClass(GClass.value);
 }
