@@ -14,13 +14,13 @@
  */
 
 class TestClass {
-    stsNumber: number;
-    stsByte: byte;
-    stsShort: short;
-    stsInt: int;
-    stsLong: long;
-    stsFloat: float;
-    stsDouble: double;
+    etsNumber: number;
+    etsByte: byte;
+    etsShort: short;
+    etsInt: int;
+    etsLong: long;
+    etsFloat: float;
+    etsDouble: double;
       
     constructor() {
       this.etsNumber;

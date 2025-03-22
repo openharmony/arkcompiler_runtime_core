@@ -48,5 +48,5 @@ class BenchA2a {
 }
 
 export class ValueHolder {
-    stsNumber: number = 1;
+    etsNumber: number = 1;
 }

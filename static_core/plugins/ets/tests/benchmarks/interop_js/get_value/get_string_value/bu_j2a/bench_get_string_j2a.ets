@@ -14,7 +14,7 @@
  */
 
 class TestClass {
-    stsString: string;
+    etsString: string;
 
     constructor() {
       this.etsString = 'Test';

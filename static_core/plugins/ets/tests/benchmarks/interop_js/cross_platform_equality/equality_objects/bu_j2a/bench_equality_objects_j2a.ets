@@ -22,8 +22,8 @@ class Test {
 }
 
 export class EqualityObjectsJ2a {
-   stsNum = 1;
-   stsObj = new Test(this.etsNum);
-   stsObjCopy: Test = this.etsObj;
-   stsObjOther: Test = new Test(this.etsNum);
+   etsNum = 1;
+   etsObj = new Test(this.etsNum);
+   etsObjCopy: Test = this.etsObj;
+   etsObjOther: Test = new Test(this.etsNum);
 }
