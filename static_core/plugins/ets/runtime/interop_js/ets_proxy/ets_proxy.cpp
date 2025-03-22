@@ -60,7 +60,7 @@ napi_value GetETSClass(napi_env env, std::string_view classDescriptor)
     InteropCtx *ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_JS(coro);
 
-    EtsClass *etsKlass = coro->GetPandaVM()->GetClassLinker()->GetClass(classDescriptor.data());
+    EtsClass *etsKlass = coro->GetPandaVM()->GetClassLinker()->GetClass(classDescriptor.data(), true, ctx->LinkerCtx());
     if (UNLIKELY(etsKlass == nullptr)) {
         InteropCtx::ThrowJSError(env, "GetETSClass: unresolved klass " + std::string(classDescriptor));
         return nullptr;

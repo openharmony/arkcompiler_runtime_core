@@ -187,7 +187,7 @@ public:
 
     ClassLinkerContext *LinkerCtx() const
     {
-        return sharedEtsVmState_->linkerCtx;
+        return SharedEtsVmState::linkerCtx_;
     }
 
     JSValueStringStorage *GetStringStor()
@@ -402,6 +402,8 @@ public:
     static void ThrowJSTypeError(napi_env env, const std::string &msg);
     static void ThrowJSValue(napi_env env, napi_value val);
 
+    static void InitializeDefaultLinkerCtxIfNeeded(EtsRuntimeLinker *linker);
+
     void ForwardEtsException(EtsCoroutine *coro);
     void ForwardJSException(EtsCoroutine *coro);
 
@@ -540,8 +542,6 @@ private:
         PandaSet<Class *> functionalInterfaces {};
         Method *promiseInteropConnectMethod = nullptr;
         PandaEtsVM *pandaEtsVm = nullptr;
-        // NOTE(konstanting): do we REALLY want to cache the classlinker context?
-        ClassLinkerContext *linkerCtx {};
         PandaUniquePtr<ets_proxy::SharedReferenceStorage> etsProxyRefStorage {};
         PandaUniquePtr<arkplatform::STSVMInterface> stsVMInterface {};
 
@@ -553,10 +553,13 @@ private:
         PandaMap<EtsClass *, PandaUniquePtr<js_proxy::JSProxy>> jsProxies_;
 
         static std::shared_ptr<SharedEtsVmState> instance_;
+        static ClassLinkerContext *linkerCtx_;
+        static ark::mem::Reference *refToDefaultLinker_;
         static os::memory::Mutex mutex_;
 
         // Allocator calls our private ctor
         friend class mem::Allocator;
+        friend class InteropCtx;
     };
     // NOLINTEND(misc-non-private-member-variables-in-classes)
     std::shared_ptr<SharedEtsVmState> sharedEtsVmState_;
