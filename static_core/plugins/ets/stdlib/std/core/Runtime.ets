@@ -187,8 +187,8 @@ export final class Runtime {
         return newRest
     }
 }
-
-export const runtime = new Runtime();
+// initialized in _initializerBlock_.ets
+export const runtime:Runtime;
 
 export function __runtimeEquals(o1: NullishType, o2: NullishType): boolean {
     return runtime.equals(o1, o2)

@@ -20,4 +20,5 @@ export final class Coroutine {
     public static native Schedule(): void
 }
 
-export const coroutine = new Coroutine();
+// initialized in _initializerBlock_.ets
+export const coroutine: Coroutine;

@@ -19,7 +19,10 @@ type Union = string | int;
 const etsString = 'string';
 const etsInt = 1;
 const privateEtsInt = 2;
-const add = (a: int, b: int): int => a + b;
+const add:(a: int, b: int) => int;
+static {
+    add = (a: int, b: int): int => a + b;
+}
 
 function applyFunctionGenericUnion<T extends Union>(value1: T, value2: T, func: (a: T, b: T) => T): T {
     return func(value1, value2);

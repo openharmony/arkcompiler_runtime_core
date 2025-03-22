@@ -19,7 +19,8 @@ package escompat
 // NOTE(kprokopenko): placing into std.core.Runtime breaks frontend
 native function RuntimeGetPlatformIsLittleEndian(): boolean
 
-const IS_LITTLE_ENDIAN = RuntimeGetPlatformIsLittleEndian()
+// initialized in _initializerBlock_.ets
+const IS_LITTLE_ENDIAN: boolean;
 
 {%- for element in [{'name': 'Uint8Clamped', 'subsetType': 'number', 'subsetTypeValues': 'Number', 'primitiveType': 'int', 'bytes': 1, 'primitiveTypeWide': 'short', 'max': 255, 'min': 0, 'clamped': True},
                     {'name': 'Uint8',        'subsetType': 'number', 'subsetTypeValues': 'Number', 'primitiveType': 'int', 'bytes': 1, 'primitiveTypeWide': 'short'},

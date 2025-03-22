@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
-package sealed_function.test;
+/*---
+desc: >-
+    Among all package modules there can be one to contain a code that performs initialization actions (e.g., setting
+    initial values for variables across all package modules) as described in detail in Compilation Unit Initialization
+    and in Initializer Block
+files: [init3_2.ets]
+tags: [compile-only]
+---*/
 
-const arrow_func: (x: double) => double;
+package p3
+
+export let var1:int;
 static {
-    arrow_func = (x: double) => x * x
+    var1 = 5
 }
 
-function sum_double(v0: double, v1: double): double {
-    return v0 + v1;
-}
-
-function foo(): int {
-    return 42;
-}
+function foo() {}

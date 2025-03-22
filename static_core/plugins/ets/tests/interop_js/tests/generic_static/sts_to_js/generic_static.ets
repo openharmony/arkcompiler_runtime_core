@@ -25,7 +25,10 @@ class Base {
     a = stsInt;
 }
 type ArrayInt = Array<Int>;
-const BaseObj: Base = { a: stsInt };
+const BaseObj: Base;
+static {
+    BaseObj = { a: stsInt };
+}
 
 // NOTE: issue (1835) fix Literal type
 // type Literal = 'start' | 'stop';

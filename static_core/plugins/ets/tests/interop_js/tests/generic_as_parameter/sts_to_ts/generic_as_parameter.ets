@@ -21,10 +21,16 @@ type TupleT = [int, boolean];
 const etsInt = 1;
 const etsString = 'string';
 const etsBool = true;
-const etsArr: FixedArray<int> = [etsInt];
-const etsObj: object = {};
-const etsUnion: Union = etsInt;
-const etsTuple: TupleT = [etsInt, etsBool];
+const etsArr: FixedArray<int>;
+const etsObj: object;
+const etsUnion: Union;
+const etsTuple: TupleT;
+static {
+    etsArr = [etsInt];
+    etsObj = {};
+    etsUnion = etsInt;
+    etsTuple = [etsInt, etsBool];
+}
 
 
 // NOTE: issue (1835) enable this after fix Literal type

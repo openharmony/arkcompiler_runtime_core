@@ -15,8 +15,8 @@
 
 package escompat
 
-
-const BigIntType: Type = Type.of(new BigInt())
+// initialized in _initializerBlock_.ets
+const BigIntType: Type;
 
 export class JSON {
     /**

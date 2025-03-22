@@ -733,7 +733,7 @@
 10.interfaces/06.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets
 10.interfaces/07.interface_inheritance/inheritance_method_with_declared_signature.ets
 
-#21888 no support for package initializer
+#24200 test behavior need to corrected for JIT mode.
 13.compilation_units/06.compilation_unit_initialization/package/init_once/test.ets
 
 #23856
@@ -956,13 +956,8 @@
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_17.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_22.ets
 
-#24404
-17.experimental_features/17.packages/02.package_initializer/p1/init1_1.ets
-17.experimental_features/17.packages/02.package_initializer/p2/init2_1.ets
-17.experimental_features/17.packages/02.package_initializer/p4/init4_1.ets
-17.experimental_features/17.packages/02.package_initializer/p6/init6_1.ets
-
-#21301 ETSFunction has in AssemblyType only identifier name and number parameters + rest/not rest
+#24118
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_5.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_6.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_6.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_6.ets

@@ -76,7 +76,7 @@ class AsyncLockManager {
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
 }
 
-const asyncLockManager = new AsyncLockManager();
+const asyncLockManager: AsyncLockManager;
 
 /**
  * Information about all lock operations on the AsyncLock instance.

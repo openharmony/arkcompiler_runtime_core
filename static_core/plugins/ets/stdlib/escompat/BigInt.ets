@@ -22,19 +22,11 @@ export type bigint = BigInt
 
 type ToStringHandlerMap = Record<int, (instance: BigInt) => string>
 
-const MAX_REGULAR_INTEGER = new BigInt(Number.MAX_SAFE_INTEGER)
+// initialized in _initializerBlock_.ets
+const MAX_REGULAR_INTEGER: BigInt;
 // NOTE(@aendrewpolyakov, #19830): Rewrite using object literal of record type
-const FAST_TO_STRING_HANDLER_MAP: ToStringHandlerMap = () => {
-        let result = new ToStringHandlerMap
-        result[2] = (instance: BigInt):string => { return instance.toStringAsBinary() }
-        result[4] = (instance: BigInt):string => { return instance.toStringAsPowerOfTwoRadix(4) }
-        result[8] = (instance: BigInt):string => { return instance.toStringAsPowerOfTwoRadix(8) }
-        result[10] = (instance: BigInt):string => { return instance.toStringAsDecimal() }
-        result[16] = (instance: BigInt):string => { return instance.toStringAsPowerOfTwoRadix(16) }
-        result[32] = (instance: BigInt):string => { return instance.toStringAsPowerOfTwoRadix(32) }
-        return result
-}()
-
+// initialized in _initializerBlock_.ets
+const FAST_TO_STRING_HANDLER_MAP: ToStringHandlerMap;
 
 /**
  * BigInt class stub

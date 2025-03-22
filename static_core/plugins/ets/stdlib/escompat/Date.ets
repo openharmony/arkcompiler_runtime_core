@@ -59,20 +59,17 @@ const maxDaysInMonth = 31;
  */
 const maxDateOffset: long = 8.64e15;
 
+// initialized in _initializerBlock_.ets
 /** Day names */
-const dayNames: String[] = [
-    "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
-];
+const dayNames: String[];
 
 /** Month names */
-const monthNames: String[] = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-];
+const monthNames: String[];
 
 /** First day of a month in a year */
-const firstDayInMonthNormal: int[] = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+const firstDayInMonthNormal: int[];
 /** First day of a month in a leap year */
-const firstDayInMonthLeap: int[]   = [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335];
+const firstDayInMonthLeap: int[];
 
 /**
  * Returns first day with respect to year and month

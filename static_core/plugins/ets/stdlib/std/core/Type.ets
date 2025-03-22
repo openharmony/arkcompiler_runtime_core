@@ -161,7 +161,8 @@ class ValueTypeDesc {
     private constructor() {}
 }
 
-export const ObjectType: ClassType = Type.of(new Object()) as ClassType
+// initialized in _initializerBlock_.ets
+export const ObjectType: ClassType;
 
 export class Attributes {
     public static readonly STATIC: int      = 1 << 0  // Field, Method

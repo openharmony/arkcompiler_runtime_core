@@ -62,9 +62,14 @@ class TestObject {
     constructor() {}
 }
 
-let g_obj: TestObject = new TestObject();
-let g_inlineObj: TestObject = new TestObject();
-let g_array = new Array<Object>();
+let g_obj: TestObject;
+let g_inlineObj: TestObject;
+let g_array: Array<Object>;
+static {
+    g_obj = new TestObject();
+    g_inlineObj = new TestObject();
+    g_array = new Array<Object>();
+}
 let g_weakRef1: WeakRef<Object>;
 let g_weakRef2: WeakRef<Object>;
 let g_weakRef3: WeakRef<Object>;
