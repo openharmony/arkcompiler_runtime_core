@@ -55,8 +55,7 @@ static bool ReplaceTypeofWithIsInstance(IntrinsicInst *intrinsic)
         return false;
     }
     auto typeId = loadString->CastToLoadString()->GetTypeId();
-    auto bb = intrinsic->GetBasicBlock();
-    auto graph = bb->GetGraph();
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
     auto runtime = graph->GetRuntime();
     auto method = graph->GetMethod();
 
@@ -75,6 +74,7 @@ static bool ReplaceTypeofWithIsInstance(IntrinsicInst *intrinsic)
     auto loadClass =
         graph->CreateInstLoadClass(DataType::REFERENCE, pc, saveState, TypeIdMixin {ktypeId, method}, nullptr);
     loadClass->SetClass(klass);
+    auto *bb = saveState->GetBasicBlock();
     bb->InsertAfter(loadClass, saveState);
     auto isInstance = graph->CreateInstIsInstance(DataType::BOOL, pc, typeOf->GetInput(0).GetInst(), loadClass,
                                                   saveState, TypeIdMixin {typeId, method}, ClassType::FINAL_CLASS);

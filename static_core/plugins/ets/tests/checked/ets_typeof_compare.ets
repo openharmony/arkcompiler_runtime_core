@@ -21,14 +21,17 @@
 //! INST_COUNT   "Intrinsic.CompilerEtsTypeof",1
 //! INST_NOT     "IsInstance"
 //! PASS_BEFORE  "LocationsBuilder"
-//! INST_NOT     "Intrinsic.CompilerEtsTypeof"
+//! INST_COUNT   "Intrinsic.CompilerEtsTypeof",1
 //! INST_COUNT   "IsInstance",1
 
 function __noinline__process_typeof(u: string|number): int {
-   if (typeof (u) == "string") {
+  let t = typeof (u)
+   if (t == "number") {
+     return 2;
+   } else if (t == "string") {
      return 1;
    } else {
-     return 2;
+     return 0;
    }
 }
 
