@@ -656,7 +656,7 @@ napi_value EtsClassWrapper::MimicSetHandler(napi_env env, napi_callback_info inf
     ASSERT(storage != nullptr);
     ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsArgs[0]);
     if (sharedRef == nullptr) {
-        InteropFatal("MimicGetHandler sharedRef is empty");
+        InteropFatal("MimicSetHandler sharedRef is empty");
     }
 
     auto *etsThis = sharedRef->GetEtsObject();

@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "baseUrl": "${PANDA_ROOT}",
+        "paths": {
+            "escompat": [
+                "${PANDA_ROOT}/plugins/ets/stdlib/escompat"
+            ],
+            "std": [
+                "${PANDA_ROOT}/plugins/ets/stdlib/std"
+            ],
+            "special_function_ts": [
+                "${CMAKE_CURRENT_BINARY_DIR}/special_function.abc"
+            ]
+        },
+        "dynamicPaths": {
+            "${CMAKE_CURRENT_BINARY_DIR}/special_function.abc": {
+                "language": "js",
+                "hasDecl": false
+            }
+        }
+    }
+}

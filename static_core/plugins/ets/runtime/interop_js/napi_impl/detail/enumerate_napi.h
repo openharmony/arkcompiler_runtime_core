@@ -106,6 +106,7 @@
     FN_MACRO(napi_escape_handle, napi_env, env, napi_escapable_handle_scope, scope, napi_value, escapee, napi_value *, \
              result)                                                                                                   \
     FN_MACRO(napi_set_named_property, napi_env, env, napi_value, object, const char *, utf8name, napi_value, value)    \
+    FN_MACRO(napi_set_property, napi_env, env, napi_value, object, napi_value, name, napi_value, value)                \
     FN_MACRO(napi_wrap, napi_env, env, napi_value, js_object, void *, native_object, napi_finalize, finalize_cb,       \
              void *, finalize_hint, napi_ref *, result)                                                                \
     FN_MACRO(napi_get_cb_info, napi_env, env, napi_callback_info, cbinfo, size_t *, argc, napi_value *, argv,          \
