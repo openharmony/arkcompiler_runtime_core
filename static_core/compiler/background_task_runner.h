@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -193,9 +193,6 @@ FakeCopyable<T> MakeFakeCopyable(T &&t)
 
 class BackgroundCompilerTaskRunner : public ark::TaskRunner<BackgroundCompilerTaskRunner, BackgroundCompilerContext> {
 public:
-    static constexpr taskmanager::TaskProperties TASK_PROPERTIES = {
-        taskmanager::TaskType::JIT, taskmanager::VMType::STATIC_VM, taskmanager::TaskExecutionMode::BACKGROUND};
-
     BackgroundCompilerTaskRunner(taskmanager::TaskQueueInterface *compilerQueue, Thread *compilerThread,
                                  RuntimeInterface *runtimeIface)
         : compilerQueue_(compilerQueue), compilerThread_(compilerThread), runtimeIface_(runtimeIface)
@@ -221,9 +218,7 @@ public:
             nextTask(std::move(nextRunner));
             runtimeIface->SetCurrentThread(nullptr);
         };
-        // We use MakeFakeCopyable becuase std::function can't wrap a lambda that has captured non-copyable object
-        auto task = taskmanager::Task::Create(TASK_PROPERTIES, copy_hooks::MakeFakeCopyable(std::move(callback)));
-        compilerQueue->AddTask(std::move(task));
+        compilerQueue->AddBackgroundTask(copy_hooks::MakeFakeCopyable(std::move(callback)));
     }
 
 private:

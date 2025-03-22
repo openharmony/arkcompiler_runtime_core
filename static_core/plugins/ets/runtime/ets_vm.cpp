@@ -53,6 +53,7 @@
 #include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
 
 #include "plugins/ets/runtime/ets_object_state_table.h"
+#include "libpandabase/taskmanager/task_manager.h"
 
 namespace ark::ets {
 // Create MemoryManager by RuntimeOptions
@@ -83,13 +84,10 @@ static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &opti
 /* static */
 bool PandaEtsVM::CreateTaskManagerIfNeeded(const RuntimeOptions &options)
 {
-    if (options.GetWorkersType() == "taskmanager" && Runtime::GetTaskScheduler() == nullptr) {
-        auto *taskScheduler = taskmanager::TaskScheduler::Create(
-            options.GetTaskmanagerWorkersCount(), taskmanager::StringToTaskTimeStats(options.GetTaskStatsType()));
-        if (taskScheduler == nullptr) {
-            return false;
-        }
-        Runtime::SetTaskScheduler(taskScheduler);
+    if (options.GetWorkersType() == "taskmanager" && !Runtime::IsTaskManagerUsed()) {
+        taskmanager::TaskManager::Start(options.GetTaskmanagerWorkersCount(),
+                                        taskmanager::StringToTaskTimeStats(options.GetTaskStatsType()));
+        Runtime::SetTaskManagerUsed(true);
     }
     return true;
 }
@@ -178,7 +176,7 @@ PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::Mem
 
     runtimeIface_ = allocator->New<EtsRuntimeInterface>();
     if (options.IsIncrementalProfilesaverEnabled()) {
-        if (taskmanager::TaskScheduler::GetTaskScheduler() == nullptr) {
+        if (!taskmanager::TaskManager::IsUsed()) {
             LOG(WARNING, RUNTIME)
                 << "[profile_saver] Cannot get current taskScheduler, disable incremental profile saver.";
         } else {
@@ -362,10 +360,16 @@ void PandaEtsVM::PreZygoteFork()
 
     mm_->PreZygoteFork();
     compiler_->PreZygoteFork();
+
     if (saverWorker_ != nullptr) {
         saverWorker_->PreZygoteFork();
     }
     coroutineManager_->PreZygoteFork();
+
+    if (taskmanager::TaskManager::IsUsed()) {
+        preForkWorkerCount_ = taskmanager::TaskManager::GetWorkersCount();
+        taskmanager::TaskManager::SetWorkersCount(0U);
+    }
 }
 
 void PandaEtsVM::PostZygoteFork()
@@ -374,6 +378,9 @@ void PandaEtsVM::PostZygoteFork()
     ASSERT(mm_ != nullptr);
     ASSERT(coroutineManager_ != nullptr);
 
+    if (taskmanager::TaskManager::IsUsed()) {
+        taskmanager::TaskManager::SetWorkersCount(preForkWorkerCount_);
+    }
     coroutineManager_->PostZygoteFork();
     compiler_->PostZygoteFork();
     mm_->PostZygoteFork();

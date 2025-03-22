@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,8 +27,7 @@ bool GCWorkersTaskQueue::TryAddTask(GCWorkersTask &&task)
     auto gcTaskRunner = [this, gcWorkerTask = std::move(task)]() mutable {  // NOLINT(performance-move-const-arg)
         this->RunGCWorkersTask(&gcWorkerTask);
     };
-    auto gcTask = taskmanager::Task::Create(GC_TASK_PROPERTIES, gcTaskRunner);
-    GetGC()->GetWorkersTaskQueue()->AddTask(std::move(gcTask));
+    GetGC()->GetWorkersTaskQueue()->AddForegroundTask(gcTaskRunner);
     return true;
 }
 
@@ -36,7 +35,7 @@ void GCWorkersTaskQueue::RunInCurrentThread()
 {
     size_t executed = 0;
     do {
-        executed = taskmanager::TaskScheduler::GetTaskScheduler()->HelpWorkersWithTasks(GC_TASK_PROPERTIES);
+        executed = GetGC()->GetWorkersTaskQueue()->ExecuteForegroundTask();
     } while (executed != 0);
 }
 

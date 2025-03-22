@@ -476,6 +476,8 @@ private:
     RunEventLoopFunction runEventLoop_ = nullptr;
     WalkEventLoopFunction walkEventLoop_ = nullptr;
 
+    size_t preForkWorkerCount_ = 0;
+
     NO_MOVE_SEMANTIC(PandaEtsVM);
     NO_COPY_SEMANTIC(PandaEtsVM);
 

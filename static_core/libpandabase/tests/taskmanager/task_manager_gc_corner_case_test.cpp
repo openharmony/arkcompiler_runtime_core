@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libpandabase/taskmanager/task_scheduler.h"
+#include "libpandabase/taskmanager/task_manager.h"
 #include <chrono>
 #include <gtest/gtest.h>
 #include <cmath>
@@ -38,10 +38,7 @@ public:
 
     static constexpr size_t CALCULATION_BASE = 0x777777;
 
-    static constexpr TaskProperties FOREGROUND_TASK = {TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::FOREGROUND};
-    static constexpr TaskProperties BACKGROUND_TASK = {TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::BACKGROUND};
-
-    TaskManagerGCCornerCaseTest() : counter_(0) {}
+    TaskManagerGCCornerCaseTest() = default;
     ~TaskManagerGCCornerCaseTest() override = default;
 
     NO_COPY_SEMANTIC(TaskManagerGCCornerCaseTest);
@@ -60,7 +57,7 @@ public:
     void GetAndRunForegroundTasks()
     {
         while (true) {
-            size_t count = TaskScheduler::GetTaskScheduler()->HelpWorkersWithTasks(FOREGROUND_TASK);
+            size_t count = queue_->ExecuteForegroundTask();
             if (count == 0) {
                 break;
             }
@@ -69,82 +66,76 @@ public:
 
     void BigGcTask(bool needAdditionalTasks)
     {
-        LoadForegroundTasks(FIRST_GC_STAGE_TASK_COUNT, [this]() { LoadRunner(FIRST_GC_STAGE_TASK_DURATION); });
+        LoadForegroundTasks(FIRST_GC_STAGE_TASK_COUNT, []() { LoadRunner(FIRST_GC_STAGE_TASK_DURATION); });
         GetAndRunForegroundTasks();
-        TaskScheduler::GetTaskScheduler()->WaitForFinishAllTasksWithProperties(FOREGROUND_TASK);
+        queue_->WaitForegroundTasks();
 
-        LoadForegroundTasks(SECOND_GC_STAGE_TASK_COUNT, [this]() { LoadRunner(SECOND_GC_STAGE_TASK_DURATION); });
+        LoadForegroundTasks(SECOND_GC_STAGE_TASK_COUNT, []() { LoadRunner(SECOND_GC_STAGE_TASK_DURATION); });
         GetAndRunForegroundTasks();
-        TaskScheduler::GetTaskScheduler()->WaitForFinishAllTasksWithProperties(FOREGROUND_TASK);
+        queue_->WaitForegroundTasks();
 
-        LoadForegroundTasks(THIRD_GC_STAGE_TASK_COUNT, [this]() { LoadRunner(THIRD_GC_STAGE_TASK_DURATION); });
+        LoadForegroundTasks(THIRD_GC_STAGE_TASK_COUNT, []() { LoadRunner(THIRD_GC_STAGE_TASK_DURATION); });
         GetAndRunForegroundTasks();
-        TaskScheduler::GetTaskScheduler()->WaitForFinishAllTasksWithProperties(FOREGROUND_TASK);
+        queue_->WaitForegroundTasks();
 
         if (needAdditionalTasks) {
             LoadForegroundTasks(ADDITIONAL_GC_STAGE_TASK_COUNT,
-                                [this]() { LoadRunner(ADDITIONAL_GC_STAGE_TASK_DURATION); });
+                                []() { LoadRunner(ADDITIONAL_GC_STAGE_TASK_DURATION); });
             GetAndRunForegroundTasks();
-            TaskScheduler::GetTaskScheduler()->WaitForFinishAllTasksWithProperties(FOREGROUND_TASK);
+            queue_->WaitForegroundTasks();
         }
     }
 
     void LoadForegroundTasks(size_t count, const std::function<void()> &runner)
     {
         for (size_t i = 0; i < count; i++) {
-            queue_->AddTask(Task::Create(FOREGROUND_TASK, runner));
+            queue_->AddForegroundTask(runner);
         }
     }
 
-    void LoadRunner(std::chrono::nanoseconds time)
+    static void LoadRunner(std::chrono::nanoseconds time)
     {
         const auto startTime = std::chrono::system_clock::now();
+        volatile size_t counter = 0;
         do {
             // just calculations for load
-            counter_ += std::log(CALCULATION_BASE * time.count());
-        } while ((std::chrono::system_clock::now() - startTime) < time);
+            counter += std::log(CALCULATION_BASE * time.count()) + 1;
+        } while ((std::chrono::system_clock::now() - startTime) < time && counter > 1);
     }
 
     void SetUp() override
     {
-        TaskScheduler::Create(COUNT_OF_WORKERS, TaskTimeStatsType::NO_STATISTICS);
+        TaskManager::Start(COUNT_OF_WORKERS, TaskTimeStatsType::NO_STATISTICS);
     }
 
     void TearDown() override
     {
-        TaskScheduler::Destroy();
+        TaskManager::Finish();
     }
 
 private:
     TaskQueueInterface *queue_ {nullptr};
-    std::atomic_size_t counter_;
 };
 
 TEST_F(TaskManagerGCCornerCaseTest, TriggerGcInMainThread)
 {
-    auto *tm = TaskScheduler::GetTaskScheduler();
-    auto *queue = tm->CreateAndRegisterTaskQueue(TaskType::GC, VMType::STATIC_VM, TaskQueueInterface::DEFAULT_PRIORITY);
+    auto *queue = TaskManager::CreateTaskQueue();
     SetQueue(queue);
-    tm->Initialize();
     for (size_t i = 0; i < REPETITION_COUNT; i++) {
         BigGcTask(false);
     }
-    tm->Finalize();
-    tm->UnregisterAndDestroyTaskQueue(queue);
+    TaskManager::DestroyTaskQueue(queue);
 }
 
 TEST_F(TaskManagerGCCornerCaseTest, TriggerGcInTaskManager)
 {
-    auto *tm = TaskScheduler::GetTaskScheduler();
-    auto *queue = tm->CreateAndRegisterTaskQueue(TaskType::GC, VMType::STATIC_VM, TaskQueueInterface::DEFAULT_PRIORITY);
+    auto *queue = TaskManager::CreateTaskQueue();
     SetQueue(queue);
-    tm->Initialize();
     for (size_t i = 0; i < REPETITION_COUNT; i++) {
-        queue->AddTask(Task::Create(BACKGROUND_TASK, [this]() { BigGcTask(true); }));
-        tm->WaitForFinishAllTasksWithProperties(BACKGROUND_TASK);
+        queue->AddBackgroundTask([this]() { BigGcTask(true); });
+        queue->WaitTasks();
     }
-    tm->Finalize();
-    tm->UnregisterAndDestroyTaskQueue(queue);
+    TaskManager::DestroyTaskQueue(queue);
 }
 
 }  // namespace ark::taskmanager
