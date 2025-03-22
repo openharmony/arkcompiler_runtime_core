@@ -628,8 +628,7 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
         InteropCtx::Current()->GetJSEnv(), [](void *) { ark::Runtime::Destroy(); }, nullptr);
 
     [[maybe_unused]] bool xgcCreated = XGC::Create(mainCoro);
-    ASSERT(xgcCreated);
-    return true;
+    return xgcCreated;
 }
 
 }  // namespace ark::ets::interop::js

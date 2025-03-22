@@ -26,7 +26,7 @@ function runTest(test) {
 		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
 		'coroutine-enable-external-scheduling': 'true',
 	};
-	if (!etsVm.createRuntimeViaAni(etsOpts)) {
+	if (!etsVm.createRuntime(etsOpts)) {
 		throw Error('Cannot create ETS runtime');
 	}
 	const runTestImpl = etsVm.getFunction('LETSGLOBAL;', test);

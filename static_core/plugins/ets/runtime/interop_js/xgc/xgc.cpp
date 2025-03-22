@@ -105,6 +105,14 @@ static auto CreateXObjectHandler(ets_proxy::SharedReferenceStorage *storage, STS
 /* static */
 bool XGC::Create(EtsCoroutine *mainCoro)
 {
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+    auto gcType = mainCoro->GetVM()->GetGC()->GetType();
+    if (gcType != mem::GCType::G1_GC || Runtime::GetOptions().IsNoAsyncJit()) {
+        // XGC is not implemented for other GC types
+        LOG(ERROR, RUNTIME) << "XGC requires GC type to be g1-gc and no-async-jit option must be false";
+        return false;
+    }
+#endif /* PANDA_JS_ETS_HYBRID_MODE */
     if (instance_ != nullptr) {
         return false;
     }
