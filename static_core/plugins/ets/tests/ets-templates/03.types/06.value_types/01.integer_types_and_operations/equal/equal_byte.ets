@@ -21,7 +21,7 @@ desc: check equality of two bytes
 function main(): void {
   const a: byte = {{v.left}}
   const b: byte = {{v.right}}
-  assertTrue( (a == b) == {{v.result}})
+  assertEQ( (a == b), {{v.result}})
 }
 
 {% endfor %}

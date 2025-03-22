@@ -21,7 +21,7 @@ desc: check less than operation for long integer
 function main(): void {
   const a: long = {{v.left}}
   const b: long = {{v.right}}
-  assertTrue( (a < b) == {{v.result}})
+  assertEQ( (a < b), {{v.result}})
 }
 
 {% endfor %}

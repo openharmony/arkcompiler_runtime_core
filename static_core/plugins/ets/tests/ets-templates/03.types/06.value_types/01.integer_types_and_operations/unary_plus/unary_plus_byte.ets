@@ -20,7 +20,7 @@ desc: check unary plus operation for byte operand
 
 function main(): void {
   const v: byte = {{v.value}}
-  assertTrue( +(v) == {{v.result}})
+  assertEQ( +(v), {{v.result}})
 }
 
 {% endfor %}

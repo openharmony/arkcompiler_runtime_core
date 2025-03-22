@@ -21,8 +21,8 @@ desc: check prefix decrement for char operand
 function main(): void {
   let value: char = {{v.value}}
   let result: char = --value
-  assertTrue( value == {{v.result}})
-  assertTrue( result == {{v.result}})
+  assertEQ( value, {{v.result}})
+  assertEQ( result, {{v.result}})
 }
 
 {% endfor %}

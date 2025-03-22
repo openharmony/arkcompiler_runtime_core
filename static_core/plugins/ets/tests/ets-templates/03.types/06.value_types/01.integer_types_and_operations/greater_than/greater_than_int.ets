@@ -21,7 +21,7 @@ desc: check greater operation for two integers
 function main(): void {
   const a: int = {{v.left}}
   const b: int = {{v.right}}
-  assertTrue( (a > b) == {{v.result}})
+  assertEQ( (a > b), {{v.result}})
 }
 
 {% endfor %}
