@@ -52,7 +52,7 @@ function checkDoubleToNumber() {
 }
 
 function checkCharToNumber() {
-    ASSERT_TRUE(typeof deferentTypes.char === 'number');
+    ASSERT_TRUE(typeof deferentTypes.char === 'string');
 }
 
 function checkByteToNumber() {
