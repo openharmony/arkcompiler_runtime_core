@@ -1,0 +1,143 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+types:
+  - abstract class
+  - final class
+  - class
+
+cases:
+  # combinations of empty final/abstract/common classes
+  - decl: |-
+      class A {}
+      class B extends A {}
+    check: |-
+      assertEQ( keyof A, never )
+      assertEQ( keyof A, keyof B )
+  - decl: |-
+      abstract class A {}
+      class B extends A {}
+    check: |-
+      assertEQ( keyof A, never )
+      assertEQ( keyof A, keyof B )
+  - decl: |-
+      abstract class A {}
+      abstract class B extends A {}
+    check: |-
+      assertEQ( keyof A, never )
+      assertEQ( keyof A, keyof B )
+  - decl: |-
+      class A {}
+      final class B extends A {}
+    check: |-
+      assertEQ( keyof A, never )
+      assertEQ( keyof A, keyof B )
+  - decl: |-
+      abstract class A {}
+      final class B extends A {}
+    check: |-
+      assertEQ( keyof A, never )
+      assertEQ( keyof A, keyof B )
+  # Interfaces
+  - decl: |-
+      interface I {}
+      interface II extends I {}
+    check: |-
+      assertEQ( keyof I, never )
+      assertEQ( keyof I, keyof II )
+  - decl: |-
+      interface I {
+        foo: int
+        jay()
+      }
+      interface II extends I {
+        bar: str
+        jay(i: number)
+      }
+    check: |-
+      assertEQ( keyof I, "foo" | "jay" )
+      assertEQ( keyof II, "bar" | "foo" | "jay" )
+  # Interfaces + class
+  - decl: |-
+      interface I {}
+      class A implements I {}
+    check: |-
+      assertEQ( keyof I, never )
+      assertEQ( keyof A, keyof I )
+  - decl: |-
+      interface I {
+        foo: int
+        bar()
+      }
+      class A implements I {
+        bar() {}
+        bar(i: int) {}
+        jay(i: number)
+        raf = true
+        foo = 1
+      }
+    check: |-
+      assertEQ( keyof I, "bar" | "foo" )
+      assertEQ( keyof A, "bar" | "foo" | "jay" | "raf" )
+  - decl: |-
+      interface I {
+        foo: int
+        bar()
+      }
+      abstract class A implements I {
+        bar1()
+        foo1: boolean
+      }
+    check: |-
+      assertEQ( keyof I, "bar" | "foo" )
+      assertEQ( keyof A, "bar" | "bar1" | "foo" | "foo1" )
+  - decl: |-
+      interface I {
+        foo: int
+        bar()
+      }
+      final class A implements I {
+        bar() {}
+        bar1() {}
+        foo1: boolean = true
+        foo = 2
+      }
+    check: |-
+      assertEQ( keyof I, "bar" | "foo" )
+      assertEQ( keyof A, "bar" | "bar1" | "foo" | "foo1" )
+# empty interface|non-empty class
+  - decl: |-
+      interface I { }
+      final class A implements I {
+        bar()
+        foo = true
+      }
+    check: |-
+      assertEQ( keyof I, never )
+      assertEQ( keyof A, "bar" | "foo" )
+  # empty class|non-empty interface
+  - decl: |-
+      interface I {
+        foo: int
+        bar()
+      }
+      abstract class A implements I { }
+    check: |-
+      assertEQ( keyof I, "bar" | "foo" )
+      assertEQ( keyof A, keyof I )
+
+
+
+      generic
+      module
+      getter/setter
