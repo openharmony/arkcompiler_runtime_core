@@ -165,7 +165,7 @@ function apply_patches() {
 function process_manifest() {
     local manifest="$1"
 
-    while read -r component
+    while read -r component || [[ -n $component ]] # '-n' check for case if we forgot new line at the end of file
     do
         component=$(echo "$component" | perl -lane 'chomp; s/^\s+//; s/\s+$//; print $_')
 
