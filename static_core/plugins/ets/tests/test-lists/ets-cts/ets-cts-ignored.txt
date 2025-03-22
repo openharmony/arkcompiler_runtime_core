@@ -963,11 +963,6 @@
 06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_8.ets
 06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_9.ets
 
-#23761
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/call_func/call-func_0.ets
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/call_lmbd/call-lmbd_0.ets
-06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/call_meth/call-meth_0.ets
-
 #23762
 06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/call_lmbd/call-lmbd_9.ets
 
