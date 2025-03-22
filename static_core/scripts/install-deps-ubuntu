@@ -109,6 +109,10 @@ function print_help
     --install=test               | -i=test                Install python dependencies for tests running
 
     --install=vmb                | -i=vmb                 Installs VMB framework to run benchmarks from CLI
+    
+    --install=llvm-prebuilts     | -i=llvm-prebuilts      Install deps for use llvm prebuilts.
+
+    --install=ohos-sdk           | -i=ohos-sdk            Install ohos SDK.
     "
 
     if [[ -n "${EXTRA_OPTIONS}" ]]
@@ -313,6 +317,8 @@ INSTALL_DOC_DEV=no
 INSTALL_TEST=no
 INSTALL_VMB=no
 ADD_TOOLCHAIN_REPOS=no
+INSTALL_LLVM_PREBUILTS=no
+INSTALL_OHOS_SDK=no
 SRC_LIST_STR='# This file is generated automatically by Panda install-deps-ubuntu script. DO NOT EDIT!!!\n'
 
 for i in "$@"
@@ -342,6 +348,12 @@ do
         fi
         if [[ $FLAG_ARG == "windows" ]] ; then
             INSTALL_CROSS_WINDOWS=yes
+        fi
+        if [[ $FLAG_ARG == "ohos-sdk" ]] ; then
+            INSTALL_OHOS_SDK=yes
+        fi
+        if [[ $FLAG_ARG == "llvm-prebuilts" ]] ; then
+            INSTALL_LLVM_PREBUILTS=yes
         fi
         if [[ $FLAG_ARG == "arm-dev" ]] ; then
             if [[ $INSTALL_DEV == "yes" ]] ; then
@@ -476,6 +488,14 @@ fi
 
 if [[ "x$INSTALL_CROSS_WINDOWS" == "xyes" ]] ; then
     install_dep "$SCRIPT_DIR/dep-lists/$UBUNTU_NAME-cross-windows"
+fi
+
+if [[ "x$INSTALL_OHOS_SDK" == "xyes" ]] ; then
+    "${SCRIPT_DIR}/install-ohos-sdk"
+fi
+
+if [[ "x$INSTALL_LLVM_PREBUILTS" == "xyes" ]] ; then
+    "${SCRIPT_DIR}/install-llvm-prebuilts"
 fi
 
 if [[ "x$INSTALL_CROSS_ARM_ALL" == "xyes" ]] ; then
