@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,22 +14,16 @@ limitations under the License.
 ---*/
 
 /*---
-desc: >-
-      In addition, a compile-time error occurs if a class initializer contains the following:
-      - Keyword super (see Method Call Expression and Field Access Expression);
+desc: Class initializer with return statement.
+assert: It is a compile-time error if a return statement appears anywhere within a class initializer. Abstract class case.
 tags: [compile-only, negative]
 ---*/
 
-class A {
-  public foo(): int {
-    return 5;
-  }
-}
-
-class B extends A {
+abstract class A {
   public static x: int;
 
-  static {
-    x = 5 + super.foo();
+  static { 
+    x = 5;
+    return true;
   }
 }
