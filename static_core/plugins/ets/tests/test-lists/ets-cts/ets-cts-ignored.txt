@@ -1634,10 +1634,6 @@
 #22513
 08.statements/12.return_statements/return_4.ets
 
-#22525
-08.statements/13.switch_statements/switch_negative_3.ets
-08.statements/13.switch_statements/switch_negative_4.ets
-
 #19926 FailKind.ES2PANDA_FAIL not implemented yet
 08.statements/14.throw_statements/throw_neg2.ets
 
