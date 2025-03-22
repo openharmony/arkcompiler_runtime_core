@@ -34,7 +34,7 @@ TEST_F(CallObjectMethodFloatTest, object_call_method_float_a)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "floatMethod", "FF:F", &object, &method);
+    GetMethodAndObject("Lcall_object_method_float_test/A;", "floatMethod", "FF:F", &object, &method);
 
     ani_value args[2U];
     ani_float arg1 = VAL;
@@ -51,7 +51,7 @@ TEST_F(CallObjectMethodFloatTest, object_call_method_float_v)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "floatMethod", "FF:F", &object, &method);
+    GetMethodAndObject("Lcall_object_method_float_test/A;", "floatMethod", "FF:F", &object, &method);
 
     ani_float sum = INIT_VALUE;
     ani_float arg1 = VAL;
@@ -64,7 +64,7 @@ TEST_F(CallObjectMethodFloatTest, object_call_method_float)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "floatMethod", "FF:F", &object, &method);
+    GetMethodAndObject("Lcall_object_method_float_test/A;", "floatMethod", "FF:F", &object, &method);
 
     ani_float sum = INIT_VALUE;
     ani_float arg1 = VAL;
@@ -77,7 +77,7 @@ TEST_F(CallObjectMethodFloatTest, object_call_method_float_v_invalid_env)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "floatMethod", "FF:F", &object, &method);
+    GetMethodAndObject("Lcall_object_method_float_test/A;", "floatMethod", "FF:F", &object, &method);
 
     ani_float sum = INIT_VALUE;
     ani_float arg1 = VAL;
@@ -89,7 +89,7 @@ TEST_F(CallObjectMethodFloatTest, call_method_float_v_invalid_method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "floatMethod", "FF:F", &object, &method);
+    GetMethodAndObject("Lcall_object_method_float_test/A;", "floatMethod", "FF:F", &object, &method);
 
     ani_float sum = INIT_VALUE;
     ani_float arg1 = VAL;
@@ -101,7 +101,7 @@ TEST_F(CallObjectMethodFloatTest, call_method_float_v_invalid_result)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "floatMethod", "FF:F", &object, &method);
+    GetMethodAndObject("Lcall_object_method_float_test/A;", "floatMethod", "FF:F", &object, &method);
 
     ani_float arg1 = VAL;
     ani_float arg2 = VAL1;
@@ -112,7 +112,7 @@ TEST_F(CallObjectMethodFloatTest, call_method_float_v_invalid_object)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "floatMethod", "FF:F", &object, &method);
+    GetMethodAndObject("Lcall_object_method_float_test/A;", "floatMethod", "FF:F", &object, &method);
 
     ani_float sum = INIT_VALUE;
     ani_float arg1 = VAL;
@@ -124,7 +124,7 @@ TEST_F(CallObjectMethodFloatTest, call_method_float_a_invalid_args)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "floatMethod", "FF:F", &object, &method);
+    GetMethodAndObject("Lcall_object_method_float_test/A;", "floatMethod", "FF:F", &object, &method);
 
     ani_float sum = INIT_VALUE;
     ASSERT_EQ(env_->Object_CallMethod_Float_A(object, method, &sum, nullptr), ANI_INVALID_ARGS);
@@ -134,7 +134,7 @@ TEST_F(CallObjectMethodFloatTest, call_Void_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "floatMethodVoidParam", ":F", &object, &method);
+    GetMethodAndObject("Lcall_object_method_float_test/A;", "floatMethodVoidParam", ":F", &object, &method);
 
     ani_float result = INIT_VALUE;
     ASSERT_EQ(env_->Object_CallMethod_Float(object, method, &result), ANI_OK);
@@ -149,7 +149,7 @@ TEST_F(CallObjectMethodFloatTest, call_Multiple_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "floatMethodMultipleParam", "SZFSF:F", &object, &method);
+    GetMethodAndObject("Lcall_object_method_float_test/A;", "floatMethodMultipleParam", "SZFSF:F", &object, &method);
 
     ani_value args[5U] = {};
     ani_short arg1 = 2U;
@@ -175,7 +175,7 @@ TEST_F(CallObjectMethodFloatTest, call_Parent_Class_Void_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LB;", "floatMethodVoidParam", ":F", &object, &method);
+    GetMethodAndObject("Lcall_object_method_float_test/B;", "floatMethodVoidParam", ":F", &object, &method);
 
     ani_float result = INIT_VALUE;
     ASSERT_EQ(env_->Object_CallMethod_Float(object, method, &result), ANI_OK);
@@ -189,7 +189,7 @@ TEST_F(CallObjectMethodFloatTest, call_Parent_Class_Void_Param_Method)
 TEST_F(CallObjectMethodFloatTest, call_Parent_Class_Method)
 {
     ani_class clsC {};
-    ASSERT_EQ(env_->FindClass("LC;", &clsC), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lcall_object_method_float_test/C;", &clsC), ANI_OK);
     ASSERT_NE(clsC, nullptr);
 
     ani_method method {};
@@ -197,7 +197,7 @@ TEST_F(CallObjectMethodFloatTest, call_Parent_Class_Method)
     ASSERT_NE(method, nullptr);
 
     ani_class clsD {};
-    ASSERT_EQ(env_->FindClass("LD;", &clsD), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lcall_object_method_float_test/D;", &clsD), ANI_OK);
     ASSERT_NE(clsD, nullptr);
     ani_method ctor {};
     ASSERT_EQ(env_->Class_FindMethod(clsD, "<ctor>", ":V", &ctor), ANI_OK);
@@ -223,7 +223,7 @@ TEST_F(CallObjectMethodFloatTest, call_Sub_Class_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LE;", "func", nullptr, &object, &method);
+    GetMethodAndObject("Lcall_object_method_float_test/E;", "func", nullptr, &object, &method);
 
     ani_float result = 0U;
     ani_value args[2U] = {};
@@ -242,7 +242,7 @@ TEST_F(CallObjectMethodFloatTest, multiple_Call_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "floatMethod", "FF:F", &object, &method);
+    GetMethodAndObject("Lcall_object_method_float_test/A;", "floatMethod", "FF:F", &object, &method);
 
     ani_float result = 0U;
     ani_value args[2U] = {};
@@ -263,7 +263,7 @@ TEST_F(CallObjectMethodFloatTest, call_Nested_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "nestedMethod", "FF:F", &object, &method);
+    GetMethodAndObject("Lcall_object_method_float_test/A;", "nestedMethod", "FF:F", &object, &method);
 
     ani_float result = INIT_VALUE;
     ani_value args[2U] = {};
@@ -283,7 +283,7 @@ TEST_F(CallObjectMethodFloatTest, call_Recursion_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("LA;", "recursionMethod", "F:F", &object, &method);
+    GetMethodAndObject("Lcall_object_method_float_test/A;", "recursionMethod", "F:F", &object, &method);
 
     ani_float result = INIT_VALUE;
     ani_value args[1U] = {};

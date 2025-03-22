@@ -57,19 +57,19 @@ TEST_F(ObjectInstanceOfTest, object_instance_of)
 {
     ani_object objectA {};
     ani_class classA {};
-    GetMethodData(&objectA, &classA, "LA;", "new_A", ":LA;");
+    GetMethodData(&objectA, &classA, "Lobject_instance_of_test/A;", "new_A", ":Lobject_instance_of_test/A;");
 
     ani_object objectB {};
     ani_class classB {};
-    GetMethodData(&objectB, &classB, "LB;", "new_B", ":LB;");
+    GetMethodData(&objectB, &classB, "Lobject_instance_of_test/B;", "new_B", ":Lobject_instance_of_test/B;");
 
     ani_object objectC {};
     ani_class classC {};
-    GetMethodData(&objectC, &classC, "LC;", "new_C", ":LC;");
+    GetMethodData(&objectC, &classC, "Lobject_instance_of_test/C;", "new_C", ":Lobject_instance_of_test/C;");
 
     ani_object objectD {};
     ani_class classD {};
-    GetMethodData(&objectD, &classD, "LD;", "new_D", ":LD;");
+    GetMethodData(&objectD, &classD, "Lobject_instance_of_test/D;", "new_D", ":Lobject_instance_of_test/D;");
 
     ani_type typeRefC = classC;
     ani_type typeRefA = classA;
@@ -97,7 +97,7 @@ TEST_F(ObjectInstanceOfTest, invalid_parameter)
     ani_object objectA {};
     ani_class classA {};
     ani_boolean res = ANI_FALSE;
-    GetMethodData(&objectA, &classA, "LA;", "new_A", ":LA;");
+    GetMethodData(&objectA, &classA, "Lobject_instance_of_test/A;", "new_A", ":Lobject_instance_of_test/A;");
 
     ani_type type = nullptr;
     ASSERT_EQ(env_->Object_InstanceOf(objectA, type, &res), ANI_INVALID_ARGS);
@@ -112,15 +112,15 @@ TEST_F(ObjectInstanceOfTest, object_instance_of_loop)
 {
     ani_object objectA {};
     ani_class classA {};
-    GetMethodData(&objectA, &classA, "LA;", "new_A", ":LA;");
+    GetMethodData(&objectA, &classA, "Lobject_instance_of_test/A;", "new_A", ":Lobject_instance_of_test/A;");
 
     ani_object objectB {};
     ani_class classB {};
-    GetMethodData(&objectB, &classB, "LB;", "new_B", ":LB;");
+    GetMethodData(&objectB, &classB, "Lobject_instance_of_test/B;", "new_B", ":Lobject_instance_of_test/B;");
 
     ani_object objectC {};
     ani_class classC {};
-    GetMethodData(&objectC, &classC, "LC;", "new_C", ":LC;");
+    GetMethodData(&objectC, &classC, "Lobject_instance_of_test/C;", "new_C", ":Lobject_instance_of_test/C;");
 
     ani_type typeRefC = classC;
     ani_type typeRefA = classA;

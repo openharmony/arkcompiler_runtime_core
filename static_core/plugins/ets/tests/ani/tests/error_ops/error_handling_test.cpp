@@ -30,7 +30,7 @@ public:
     static std::string GetTraceLine(std::string_view functionName)
     {
         std::stringstream ss;
-        ss << "at " << NAMESPACE_NAME << '.' << functionName;
+        ss << "at error_handling_test." << NAMESPACE_NAME << '.' << functionName;
         return ss.str();
     }
 
@@ -68,7 +68,7 @@ private:
 };
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-const std::string ErrorHandlingTest::NAMESPACE_DESCRIPTOR = "L" + std::string(NAMESPACE_NAME) + ";";
+const std::string ErrorHandlingTest::NAMESPACE_DESCRIPTOR = "Lerror_handling_test/" + std::string(NAMESPACE_NAME) + ";";
 
 TEST_F(ErrorHandlingTest, exist_unhandled_error_test)
 {

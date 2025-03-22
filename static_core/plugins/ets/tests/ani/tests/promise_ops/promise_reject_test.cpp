@@ -33,7 +33,7 @@ TEST_F(PromiseRejectTest, ResolvePromise)
 
     ASSERT_EQ(env_->PromiseResolver_Reject(resolver, reinterpret_cast<ani_error>(rejection)), ANI_OK);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkReject", promise, rejection), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("promise_reject_test", "checkReject", promise, rejection), ANI_TRUE);
 }
 
 }  // namespace ark::ets::ani::testing

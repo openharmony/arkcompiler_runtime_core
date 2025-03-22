@@ -21,7 +21,7 @@ class ClassSetStaticFieldDoubleTest : public AniTest {};
 TEST_F(ClassSetStaticFieldDoubleTest, set_double)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetDouble;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_double_test/TestSetDouble;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "double_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -38,7 +38,7 @@ TEST_F(ClassSetStaticFieldDoubleTest, set_double)
 TEST_F(ClassSetStaticFieldDoubleTest, set_double_c_api)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetDouble;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_double_test/TestSetDouble;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "double_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -55,7 +55,7 @@ TEST_F(ClassSetStaticFieldDoubleTest, set_double_c_api)
 TEST_F(ClassSetStaticFieldDoubleTest, set_invalid_field_type)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetDouble;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_double_test/TestSetDouble;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -66,7 +66,7 @@ TEST_F(ClassSetStaticFieldDoubleTest, set_invalid_field_type)
 TEST_F(ClassSetStaticFieldDoubleTest, invalid_argument2)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetDouble;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_double_test/TestSetDouble;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "double_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -81,7 +81,7 @@ TEST_F(ClassSetStaticFieldDoubleTest, invalid_argument2)
 TEST_F(ClassSetStaticFieldDoubleTest, invalid_argument3)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetDouble;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_double_test/TestSetDouble;", &cls), ANI_OK);
     const ani_double setTar = 28.0;
     ASSERT_EQ(env_->Class_SetStaticField_Double(cls, nullptr, setTar), ANI_INVALID_ARGS);
 }

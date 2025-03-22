@@ -22,14 +22,14 @@ class FindClassTest : public AniTest {};
 TEST_F(FindClassTest, has_class)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LPoint;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lfind_class_test/Point;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 }
 
 TEST_F(FindClassTest, class_not_found)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("bla-bla-bla", &cls), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindClass("find_class_test/bla-bla-bla", &cls), ANI_NOT_FOUND);
 }
 
 TEST_F(FindClassTest, invalid_argument_1)
@@ -40,14 +40,14 @@ TEST_F(FindClassTest, invalid_argument_1)
 
 TEST_F(FindClassTest, invalid_argument_2)
 {
-    ASSERT_EQ(env_->FindClass("LPoint;", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FindClass("Lfind_class_test/Point;", nullptr), ANI_INVALID_ARGS);
 }
 
 // Enable when #22400 is resolved.
 TEST_F(FindClassTest, DISABLED_class_is_not_namespace)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("LPoint;", &ns), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindNamespace("Lfind_class_test/Point;", &ns), ANI_NOT_FOUND);
 }
 
 }  // namespace ark::ets::ani::testing

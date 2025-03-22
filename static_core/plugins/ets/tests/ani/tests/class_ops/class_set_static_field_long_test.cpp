@@ -21,7 +21,7 @@ class ClassSetStaticFieldLongTest : public AniTest {};
 TEST_F(ClassSetStaticFieldLongTest, set_long)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetLong;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_long_test/TestSetLong;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "long_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -36,7 +36,7 @@ TEST_F(ClassSetStaticFieldLongTest, set_long)
 TEST_F(ClassSetStaticFieldLongTest, set_long_c_api)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetLong;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_long_test/TestSetLong;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "long_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -51,7 +51,7 @@ TEST_F(ClassSetStaticFieldLongTest, set_long_c_api)
 TEST_F(ClassSetStaticFieldLongTest, set_invalid_field_type)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetLong;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_long_test/TestSetLong;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -61,7 +61,7 @@ TEST_F(ClassSetStaticFieldLongTest, set_invalid_field_type)
 TEST_F(ClassSetStaticFieldLongTest, invalid_argument2)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetLong;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_long_test/TestSetLong;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "long_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -74,7 +74,7 @@ TEST_F(ClassSetStaticFieldLongTest, invalid_argument2)
 TEST_F(ClassSetStaticFieldLongTest, invalid_argument3)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetLong;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_long_test/TestSetLong;", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_SetStaticField_Long(cls, nullptr, 30L), ANI_INVALID_ARGS);
 }
 }  // namespace ark::ets::ani::testing

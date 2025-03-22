@@ -21,11 +21,11 @@ class ObjectGetFieldFloatTest : public AniTest {
 public:
     void GetTestData(ani_object *objectResult, ani_field *fieldNameResult, ani_field *fieldAgeResult)
     {
-        auto sarahRef = CallEtsFunction<ani_ref>("newSarahObject");
+        auto sarahRef = CallEtsFunction<ani_ref>("object_get_field_float_test", "newSarahObject");
         auto sarah = static_cast<ani_object>(sarahRef);
 
         ani_class cls;
-        ASSERT_EQ(env_->FindClass("LWoman;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("Lobject_get_field_float_test/Woman;", &cls), ANI_OK);
 
         ani_field fieldName;
         ASSERT_EQ(env_->Class_FindField(cls, "name", &fieldName), ANI_OK);

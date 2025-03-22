@@ -100,7 +100,7 @@ TEST_F(StringGetUtf8StringTest, StringGetUtf8_BufferTooSmall)
 
 TEST_F(StringGetUtf8StringTest, StringGetUtf8_Managed)
 {
-    const auto string = static_cast<ani_string>(CallEtsFunction<ani_ref>("GetString"));
+    const auto string = static_cast<ani_string>(CallEtsFunction<ani_ref>("string_get_utf8_test", "GetString"));
     const uint32_t bufferSize = 10U;
     char utfBuffer[bufferSize] = {0U};  // NOLINT(modernize-avoid-c-arrays)
     ani_size result = 0U;

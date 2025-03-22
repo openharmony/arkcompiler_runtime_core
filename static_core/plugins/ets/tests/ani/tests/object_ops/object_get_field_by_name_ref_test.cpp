@@ -21,7 +21,7 @@ class ObjectGetFieldByNameRefTest : public AniTest {
 public:
     ani_object NewAnimal()
     {
-        auto animalRef = CallEtsFunction<ani_ref>("newAnimalObject");
+        auto animalRef = CallEtsFunction<ani_ref>("object_get_field_by_name_ref_test", "newAnimalObject");
         return static_cast<ani_object>(animalRef);
     }
 };

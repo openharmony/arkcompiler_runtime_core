@@ -23,7 +23,7 @@ class ClassSetStaticFieldByNameByteTest : public AniTest {};
 TEST_F(ClassSetStaticFieldByNameByteTest, set_static_field_by_name_byte_capi)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LByteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_byte_test/ByteStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Byte(env_, cls, "byte_value", 2U), ANI_OK);
     ani_byte resultValue;
@@ -34,7 +34,7 @@ TEST_F(ClassSetStaticFieldByNameByteTest, set_static_field_by_name_byte_capi)
 TEST_F(ClassSetStaticFieldByNameByteTest, set_static_field_by_name_byte)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LByteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_byte_test/ByteStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(cls, "byte_value", 2U), ANI_OK);
     ani_byte resultValue;
@@ -45,7 +45,7 @@ TEST_F(ClassSetStaticFieldByNameByteTest, set_static_field_by_name_byte)
 TEST_F(ClassSetStaticFieldByNameByteTest, set_static_field_by_name_byte_invalid_field_type)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LByteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_byte_test/ByteStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(cls, "string_value", 2U), ANI_INVALID_TYPE);
 }
@@ -53,7 +53,7 @@ TEST_F(ClassSetStaticFieldByNameByteTest, set_static_field_by_name_byte_invalid_
 TEST_F(ClassSetStaticFieldByNameByteTest, set_static_field_by_name_byte_invalid_args_object)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LByteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_byte_test/ByteStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(nullptr, "byte_value", 2U), ANI_INVALID_ARGS);
 }
@@ -61,7 +61,7 @@ TEST_F(ClassSetStaticFieldByNameByteTest, set_static_field_by_name_byte_invalid_
 TEST_F(ClassSetStaticFieldByNameByteTest, set_static_field_by_name_byte_invalid_args_field)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LByteStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_byte_test/ByteStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Byte(cls, nullptr, 2U), ANI_INVALID_ARGS);
 }

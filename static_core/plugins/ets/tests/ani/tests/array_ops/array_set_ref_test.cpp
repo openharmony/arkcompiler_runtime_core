@@ -34,23 +34,24 @@ TEST_F(ArraySetRefTest, SetRefErrorTests)
     const ani_size invalidIndex = 5;
     ASSERT_EQ(env_->Array_Set_Ref(nullptr, index, ref), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Array_Set_Ref(array, invalidIndex, ref), ANI_OUT_OF_RANGE);
-    auto num = static_cast<ani_ref>(CallEtsFunction<ani_ref>("GetNumber"));
+    auto num = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNumber"));
     ASSERT_EQ(env_->Array_Set_Ref(array, 0, num), ANI_INVALID_TYPE);
 }
 
 TEST_F(ArraySetRefTest, SetRefOkTests)
 {
-    auto array = static_cast<ani_array_ref>(CallEtsFunction<ani_ref>("GetArray"));
+    auto array = static_cast<ani_array_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetArray"));
 
-    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("GetNewString1"));
+    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString1"));
     const ani_size index1 = 0;
     ASSERT_EQ(env_->Array_Set_Ref(array, index1, newValue1), ANI_OK);
 
-    auto newValue2 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("GetNewString2"));
+    auto newValue2 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString2"));
     const ani_size index2 = 2;
     ASSERT_EQ(env_->Array_Set_Ref(array, index2, newValue2), ANI_OK);
 
-    ani_boolean result = static_cast<ani_boolean>(CallEtsFunction<ani_boolean>("CheckArray", array));
+    ani_boolean result =
+        static_cast<ani_boolean>(CallEtsFunction<ani_boolean>("array_set_ref_test", "CheckArray", array));
     ASSERT_EQ(result, ANI_TRUE);
 }
 
@@ -73,7 +74,7 @@ TEST_F(ArraySetRefTest, SetGetUnionToArrayTest)
     ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
     ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH_3, nullptr, &array), ANI_OK);
 
-    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("GetNewString1"));
+    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString1"));
     const ani_size index1 = 1;
     ASSERT_EQ(env_->Array_Set_Ref(array, index1, newValue1), ANI_OK);
     ani_ref ref1 = nullptr;
@@ -91,7 +92,7 @@ TEST_F(ArraySetRefTest, SetGetUnionToArrayTest)
     ASSERT_STREQ(result.c_str(), "New String 1!");
 
     const ani_size index2 = 2;
-    auto newValue2 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("GetNewString2"));
+    auto newValue2 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString2"));
     ASSERT_EQ(env_->Array_Set_Ref(array, index1, newValue1), ANI_OK);
     ASSERT_EQ(env_->Array_Set_Ref(array, index2, newValue2), ANI_OK);
     for (ani_int i = 0; i < LOOP_COUNT; i++) {
@@ -122,7 +123,7 @@ TEST_F(ArraySetRefTest, SetGetStabilityToArrayTest)
     ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
     ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH_3, nullptr, &array), ANI_OK);
     ani_ref ref1 = nullptr;
-    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("GetNewString1"));
+    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString1"));
     const ani_size index1 = 1;
     for (ani_int i = 0; i < LOOP_COUNT; i++) {
         ASSERT_EQ(env_->Array_Set_Ref(array, index1, newValue1), ANI_OK);

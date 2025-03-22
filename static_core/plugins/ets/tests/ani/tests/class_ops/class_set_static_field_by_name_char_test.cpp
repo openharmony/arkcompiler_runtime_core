@@ -24,7 +24,7 @@ TEST_F(ClassSetStaticFieldByNameCharTest, set_static_field_by_name_char_capi)
 {
     ani_class cls;
     const ani_char target = 'b';
-    ASSERT_EQ(env_->FindClass("LCharStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_char_test/CharStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Char(env_, cls, "char_value", target), ANI_OK);
     ani_char resultValue;
@@ -36,7 +36,7 @@ TEST_F(ClassSetStaticFieldByNameCharTest, set_static_field_by_name_char)
 {
     ani_class cls;
     const ani_char target = 'b';
-    ASSERT_EQ(env_->FindClass("LCharStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_char_test/CharStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "char_value", target), ANI_OK);
     ani_char resultValue;
@@ -48,7 +48,7 @@ TEST_F(ClassSetStaticFieldByNameCharTest, not_found)
 {
     ani_class cls;
     const ani_char target = 'b';
-    ASSERT_EQ(env_->FindClass("LCharStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_char_test/CharStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "charValue", target), ANI_NOT_FOUND);
 }
@@ -56,7 +56,7 @@ TEST_F(ClassSetStaticFieldByNameCharTest, not_found)
 TEST_F(ClassSetStaticFieldByNameCharTest, set_static_field_by_name_char_invalid_field_type)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LCharStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_char_test/CharStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "string_value", 'b'), ANI_INVALID_TYPE);
 }
@@ -64,7 +64,7 @@ TEST_F(ClassSetStaticFieldByNameCharTest, set_static_field_by_name_char_invalid_
 TEST_F(ClassSetStaticFieldByNameCharTest, set_static_field_by_name_char_invalid_args_object)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LCharStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_char_test/CharStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(nullptr, "char_value", 'b'), ANI_INVALID_ARGS);
 }
@@ -72,7 +72,7 @@ TEST_F(ClassSetStaticFieldByNameCharTest, set_static_field_by_name_char_invalid_
 TEST_F(ClassSetStaticFieldByNameCharTest, set_static_field_by_name_char_invalid_args_field)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LCharStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_char_test/CharStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, nullptr, 'b'), ANI_INVALID_ARGS);
 }

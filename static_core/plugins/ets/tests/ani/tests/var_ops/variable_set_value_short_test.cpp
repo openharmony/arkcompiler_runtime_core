@@ -24,7 +24,7 @@ public:
     void SetUp() override
     {
         AniTest::SetUp();
-        ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns_), ANI_OK);
+        ASSERT_EQ(env_->FindNamespace("Lvariable_set_value_short_test/anyns;", &ns_), ANI_OK);
         ASSERT_NE(ns_, nullptr);
     }
 

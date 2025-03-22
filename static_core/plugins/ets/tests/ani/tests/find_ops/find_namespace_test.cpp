@@ -27,14 +27,14 @@ public:
 TEST_F(FindNamespaceTest, has_namespace)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lgeometry;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lfind_namespace_test/geometry;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 }
 
 TEST_F(FindNamespaceTest, namespace_not_found)
 {
     ani_namespace ns;
-    ASSERT_EQ(env_->FindNamespace("bla-bla-bla", &ns), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindNamespace("Lfind_namespace_test/bla-bla-bla", &ns), ANI_NOT_FOUND);
 }
 
 TEST_F(FindNamespaceTest, invalid_argument_1)
@@ -45,20 +45,20 @@ TEST_F(FindNamespaceTest, invalid_argument_1)
 
 TEST_F(FindNamespaceTest, invalid_argument_2)
 {
-    ASSERT_EQ(env_->FindNamespace("Lgeometry;", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FindNamespace("Lfind_namespace_test/geometry;", nullptr), ANI_INVALID_ARGS);
 }
 
 // Enable when #22400 is resolved.
 TEST_F(FindNamespaceTest, DISABLED_namespace_is_not_class)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lgeometry;", &cls), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindClass("Lfind_namespace_test/geometry;", &cls), ANI_NOT_FOUND);
 }
 
 TEST_F(FindNamespaceTest, find_namespace_combine_scenes_002)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("LnameA/nameB;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lfind_namespace_test/nameA/nameB;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};
@@ -76,7 +76,7 @@ TEST_F(FindNamespaceTest, find_namespace_combine_scenes_002)
 TEST_F(FindNamespaceTest, find_namespace_combine_scenes_003)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("LspaceA/spaceB/spaceC;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lfind_namespace_test/spaceA/spaceB/spaceC;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};

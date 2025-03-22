@@ -12,28 +12,24 @@
 # limitations under the License.
 
 ani_add_gtest(ani_test_module_find_function
-ETS_NAMED_MODE
     ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_function_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_function_test.ets
 )
 
 ani_add_gtest(ani_test_module_find_variable
-ETS_NAMED_MODE
     ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_variable_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_variable_test.ets
 )
 
 ani_add_gtest(ani_test_module_find_class
-ETS_NAMED_MODE
     ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_class_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_class_test.ets
 )
 
 ani_add_gtest(ani_test_module_find_namespace
-ETS_NAMED_MODE
     ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_namespace_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_namespace_test.ets

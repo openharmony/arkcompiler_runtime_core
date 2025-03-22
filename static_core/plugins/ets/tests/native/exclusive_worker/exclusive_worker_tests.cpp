@@ -114,7 +114,7 @@ private:
     static ani_static_method ResolveMethod(ani_class *cls, ani_env *env, std::string_view methodName,
                                            std::string_view signature)
     {
-        [[maybe_unused]] auto status = env->FindClass("LETSGLOBAL;", cls);
+        [[maybe_unused]] auto status = env->FindClass("Lexclusive_worker_tests/ETSGLOBAL;", cls);
         ASSERT(status == ANI_OK);
         ani_static_method mtd;
         status = env->Class_FindStaticMethod(*cls, methodName.data(), signature.data(), &mtd);

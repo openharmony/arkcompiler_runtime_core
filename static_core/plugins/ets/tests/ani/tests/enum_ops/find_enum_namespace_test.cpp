@@ -22,7 +22,7 @@ class EnumFindInNamespaceTest : public AniTest {};
 TEST_F(EnumFindInNamespaceTest, find_enum)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lenumns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lfind_enum_namespace_test/enumns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_enum aniEnum {};
@@ -41,7 +41,7 @@ TEST_F(EnumFindInNamespaceTest, find_enum)
 TEST_F(EnumFindInNamespaceTest, invalid_arg_enum)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lenumns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lfind_enum_namespace_test/enumns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_enum en {};
@@ -55,7 +55,7 @@ TEST_F(EnumFindInNamespaceTest, invalid_arg_enum)
 TEST_F(EnumFindInNamespaceTest, invalid_arg_name)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lenumns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lfind_enum_namespace_test/enumns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_enum en {};

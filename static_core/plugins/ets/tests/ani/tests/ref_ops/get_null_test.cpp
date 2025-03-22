@@ -24,7 +24,7 @@ TEST_F(GetNullTest, get_null)
     ani_ref ref;
     ASSERT_EQ(env_->GetNull(&ref), ANI_OK);
 
-    auto isNull = CallEtsFunction<ani_boolean>("isNull", ref);
+    auto isNull = CallEtsFunction<ani_boolean>("get_null_test", "isNull", ref);
     ASSERT_EQ(isNull, ANI_TRUE);
 }
 

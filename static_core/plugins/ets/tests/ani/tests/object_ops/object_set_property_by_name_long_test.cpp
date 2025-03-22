@@ -21,19 +21,19 @@ class ObjectSetPropertyByNameLongTest : public AniTest {
 public:
     ani_object NewCar()
     {
-        auto carRef = CallEtsFunction<ani_ref>("newCarObject");
+        auto carRef = CallEtsFunction<ani_ref>("object_set_property_by_name_long_test", "newCarObject");
         return static_cast<ani_object>(carRef);
     }
 
     ani_object NewC1()
     {
-        auto c1Ref = CallEtsFunction<ani_ref>("newC1");
+        auto c1Ref = CallEtsFunction<ani_ref>("object_set_property_by_name_long_test", "newC1");
         return static_cast<ani_object>(c1Ref);
     }
 
     ani_object NewC2()
     {
-        auto c2Ref = CallEtsFunction<ani_ref>("newC2");
+        auto c2Ref = CallEtsFunction<ani_ref>("object_set_property_by_name_long_test", "newC2");
         return static_cast<ani_object>(c2Ref);
     }
 };

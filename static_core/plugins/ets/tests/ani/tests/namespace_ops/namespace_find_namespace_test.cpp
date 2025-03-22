@@ -22,7 +22,7 @@ class NamespaceFindNamespaceTest : public AniTest {};
 TEST_F(NamespaceFindNamespaceTest, find_namespace01)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace result {};
@@ -33,7 +33,7 @@ TEST_F(NamespaceFindNamespaceTest, find_namespace01)
 TEST_F(NamespaceFindNamespaceTest, find_namespace02)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace result {};
@@ -43,7 +43,7 @@ TEST_F(NamespaceFindNamespaceTest, find_namespace02)
 TEST_F(NamespaceFindNamespaceTest, find_namespace03)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace result {};
@@ -53,7 +53,7 @@ TEST_F(NamespaceFindNamespaceTest, find_namespace03)
 TEST_F(NamespaceFindNamespaceTest, find_namespace04)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace tmp {};
@@ -68,7 +68,7 @@ TEST_F(NamespaceFindNamespaceTest, find_namespace04)
 TEST_F(NamespaceFindNamespaceTest, find_namespace05)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace tmp {};
@@ -81,7 +81,7 @@ TEST_F(NamespaceFindNamespaceTest, find_namespace05)
 TEST_F(NamespaceFindNamespaceTest, find_namespace06)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace tmp {};
@@ -95,7 +95,7 @@ TEST_F(NamespaceFindNamespaceTest, find_namespace06)
 TEST_F(NamespaceFindNamespaceTest, find_namespace07)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace result {};
@@ -105,7 +105,7 @@ TEST_F(NamespaceFindNamespaceTest, find_namespace07)
 TEST_F(NamespaceFindNamespaceTest, find_namespace08)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace result {};
@@ -115,7 +115,7 @@ TEST_F(NamespaceFindNamespaceTest, find_namespace08)
 TEST_F(NamespaceFindNamespaceTest, find_namespace09)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace result {};
@@ -125,7 +125,7 @@ TEST_F(NamespaceFindNamespaceTest, find_namespace09)
 TEST_F(NamespaceFindNamespaceTest, find_namespace10)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ASSERT_EQ(env_->Namespace_FindNamespace(ns, "Ltest;", nullptr), ANI_INVALID_ARGS);
@@ -134,7 +134,7 @@ TEST_F(NamespaceFindNamespaceTest, find_namespace10)
 TEST_F(NamespaceFindNamespaceTest, find_namespace11)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace result {};

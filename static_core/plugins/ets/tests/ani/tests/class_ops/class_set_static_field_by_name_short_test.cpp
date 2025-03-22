@@ -23,7 +23,7 @@ class ClassSetStaticFieldByNameShortTest : public AniTest {};
 TEST_F(ClassSetStaticFieldByNameShortTest, set_static_field_by_name_long_capi)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LShortStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_short_test/ShortStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Short(env_, cls, "short_value", 2U), ANI_OK);
     ani_short resultValue;
@@ -34,7 +34,7 @@ TEST_F(ClassSetStaticFieldByNameShortTest, set_static_field_by_name_long_capi)
 TEST_F(ClassSetStaticFieldByNameShortTest, set_static_field_by_name_long)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LShortStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_short_test/ShortStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Short(cls, "short_value", 2U), ANI_OK);
     ani_short resultValue;
@@ -45,7 +45,7 @@ TEST_F(ClassSetStaticFieldByNameShortTest, set_static_field_by_name_long)
 TEST_F(ClassSetStaticFieldByNameShortTest, set_static_field_by_name_long_invalid_field_type)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LShortStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_short_test/ShortStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Short(cls, "string_value", 2U), ANI_INVALID_TYPE);
 }
@@ -53,7 +53,7 @@ TEST_F(ClassSetStaticFieldByNameShortTest, set_static_field_by_name_long_invalid
 TEST_F(ClassSetStaticFieldByNameShortTest, set_static_field_by_name_long_invalid_args_object)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LShortStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_short_test/ShortStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Short(nullptr, "short_value", 2U), ANI_INVALID_ARGS);
 }
@@ -61,7 +61,7 @@ TEST_F(ClassSetStaticFieldByNameShortTest, set_static_field_by_name_long_invalid
 TEST_F(ClassSetStaticFieldByNameShortTest, set_static_field_by_name_long_invalid_args_field)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LShortStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_short_test/ShortStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Short(cls, nullptr, 2U), ANI_INVALID_ARGS);
 }

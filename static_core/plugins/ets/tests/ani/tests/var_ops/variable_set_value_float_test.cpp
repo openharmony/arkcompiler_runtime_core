@@ -24,7 +24,7 @@ public:
     void SetUp() override
     {
         AniTest::SetUp();
-        ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns_), ANI_OK);
+        ASSERT_EQ(env_->FindNamespace("Lvariable_set_value_float_test/anyns;", &ns_), ANI_OK);
         ASSERT_NE(ns_, nullptr);
     }
 
@@ -159,7 +159,7 @@ TEST_F(VariableSetValueFloatTest, composite_case_3)
 TEST_F(VariableSetValueFloatTest, composite_case_4)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lvariable_set_value_float_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_variable variable1 {};

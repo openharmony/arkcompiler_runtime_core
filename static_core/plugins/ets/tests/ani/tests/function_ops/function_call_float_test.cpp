@@ -27,7 +27,7 @@ public:
     void GetMethod(ani_namespace *nsResult, ani_function *fnResult)
     {
         ani_namespace ns {};
-        ASSERT_EQ(env_->FindNamespace("Lops;", &ns), ANI_OK);
+        ASSERT_EQ(env_->FindNamespace("Lfunction_call_float_test/ops;", &ns), ANI_OK);
 
         ani_function fn {};
         ASSERT_EQ(env_->Namespace_FindFunction(ns, "sum", "FF:F", &fn), ANI_OK);

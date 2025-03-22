@@ -53,7 +53,7 @@ TEST_F(ObjectGetTypeTest, class_obect_type)
 {
     ani_class classA {};
     ani_object objectA {};
-    GetMethodData(&objectA, &classA, "LA;", "new_A", ":LA;");
+    GetMethodData(&objectA, &classA, "Lobject_get_type_test/A;", "new_A", ":Lobject_get_type_test/A;");
 
     ani_type type {};
     ani_boolean res = ANI_FALSE;
@@ -100,7 +100,7 @@ TEST_F(ObjectGetTypeTest, class_obect_type_loop)
 {
     ani_class classA {};
     ani_object objectA {};
-    GetMethodData(&objectA, &classA, "LA;", "new_A", ":LA;");
+    GetMethodData(&objectA, &classA, "Lobject_get_type_test/A;", "new_A", ":Lobject_get_type_test/A;");
 
     ani_type type {};
     ani_boolean res = ANI_FALSE;

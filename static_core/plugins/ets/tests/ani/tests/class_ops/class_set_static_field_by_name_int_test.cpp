@@ -23,7 +23,7 @@ class ClassSetStaticFieldByNameIntTest : public AniTest {};
 TEST_F(ClassSetStaticFieldByNameIntTest, set_static_field_by_name_int_capi)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LPackstatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_int_test/Packstatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Int(env_, cls, "int_value", 2U), ANI_OK);
     ani_int resultValue = 0;
@@ -34,7 +34,7 @@ TEST_F(ClassSetStaticFieldByNameIntTest, set_static_field_by_name_int_capi)
 TEST_F(ClassSetStaticFieldByNameIntTest, set_static_field_by_name_int)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LPackstatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_int_test/Packstatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(cls, "int_value", 2U), ANI_OK);
     ani_int resultValue = 0;
@@ -45,7 +45,7 @@ TEST_F(ClassSetStaticFieldByNameIntTest, set_static_field_by_name_int)
 TEST_F(ClassSetStaticFieldByNameIntTest, set_static_field_by_name_int_invalid_field_type)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LPackstatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_int_test/Packstatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(cls, "string_value", 1), ANI_INVALID_TYPE);
 }
@@ -53,7 +53,7 @@ TEST_F(ClassSetStaticFieldByNameIntTest, set_static_field_by_name_int_invalid_fi
 TEST_F(ClassSetStaticFieldByNameIntTest, set_static_field_by_name_int_invalid_args_object)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LPackstatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_int_test/Packstatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(nullptr, "int_value", 2U), ANI_INVALID_ARGS);
 }
@@ -61,7 +61,7 @@ TEST_F(ClassSetStaticFieldByNameIntTest, set_static_field_by_name_int_invalid_ar
 TEST_F(ClassSetStaticFieldByNameIntTest, set_static_field_by_name_int_invalid_args_field)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LPackstatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_int_test/Packstatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(cls, nullptr, 2U), ANI_INVALID_ARGS);
 }

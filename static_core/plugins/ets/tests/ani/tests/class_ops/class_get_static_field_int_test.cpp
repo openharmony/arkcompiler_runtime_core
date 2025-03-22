@@ -23,7 +23,7 @@ class ClassGetStaticFieldIntTest : public AniTest {};
 TEST_F(ClassGetStaticFieldIntTest, get_int)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestInt;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_int_test/TestInt;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -35,7 +35,7 @@ TEST_F(ClassGetStaticFieldIntTest, get_int)
 TEST_F(ClassGetStaticFieldIntTest, get_int_c_api)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestInt;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_int_test/TestInt;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -47,7 +47,7 @@ TEST_F(ClassGetStaticFieldIntTest, get_int_c_api)
 TEST_F(ClassGetStaticFieldIntTest, get_invalid_field_type)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestInt;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_int_test/TestInt;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -58,7 +58,7 @@ TEST_F(ClassGetStaticFieldIntTest, get_invalid_field_type)
 TEST_F(ClassGetStaticFieldIntTest, invalid_argument1)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestInt;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_int_test/TestInt;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -69,7 +69,7 @@ TEST_F(ClassGetStaticFieldIntTest, invalid_argument1)
 TEST_F(ClassGetStaticFieldIntTest, invalid_argument2)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestInt;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_int_test/TestInt;", &cls), ANI_OK);
     ani_int result = 0;
     ASSERT_EQ(env_->Class_GetStaticField_Int(cls, nullptr, &result), ANI_INVALID_ARGS);
 }
@@ -77,7 +77,7 @@ TEST_F(ClassGetStaticFieldIntTest, invalid_argument2)
 TEST_F(ClassGetStaticFieldIntTest, invalid_argument3)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestInt;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_int_test/TestInt;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);

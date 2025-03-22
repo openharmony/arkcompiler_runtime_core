@@ -306,7 +306,7 @@ TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_test3)
               ANI_OK);
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LOperations;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lcreate_local_scope/Operations;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref result {};

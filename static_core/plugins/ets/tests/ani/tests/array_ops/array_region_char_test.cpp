@@ -44,7 +44,7 @@ TEST_F(ArraySetGetRegionCharTest, GetCharArrayRegionErrorTests)
 
 TEST_F(ArraySetGetRegionCharTest, GetRegionCharTest)
 {
-    const auto array = static_cast<ani_array_char>(CallEtsFunction<ani_ref>("getArray"));
+    const auto array = static_cast<ani_array_char>(CallEtsFunction<ani_ref>("array_region_char_test", "getArray"));
 
     ani_char nativeBuffer[LENGTH_5] = {0};
     ASSERT_EQ(env_->Array_GetRegion_Char(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
@@ -57,10 +57,10 @@ TEST_F(ArraySetGetRegionCharTest, GetRegionCharTest)
 
 TEST_F(ArraySetGetRegionCharTest, SetRegionCharTest)
 {
-    const auto array = static_cast<ani_array_char>(CallEtsFunction<ani_ref>("getArray"));
+    const auto array = static_cast<ani_array_char>(CallEtsFunction<ani_ref>("array_region_char_test", "getArray"));
     ani_char nativeBuffer1[LENGTH_5] = {'x', 'y', 'z'};
     ASSERT_EQ(env_->Array_SetRegion_Char(array, OFFSET_2, LENGTH_3, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_char_test", "checkArray", array), ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionCharTest, SetRegionCharChangeTest)
@@ -68,7 +68,8 @@ TEST_F(ArraySetGetRegionCharTest, SetRegionCharChangeTest)
     ani_array_char array = nullptr;
     ASSERT_EQ(env_->Array_New_Char(LENGTH_5, &array), ANI_OK);
 
-    const auto changedArray = static_cast<ani_array_char>(CallEtsFunction<ani_ref>("changeArray", array));
+    const auto changedArray =
+        static_cast<ani_array_char>(CallEtsFunction<ani_ref>("array_region_char_test", "changeArray", array));
     ani_char nativeBuffer[LENGTH_5] = {0};
     const ani_size offset = 0;
     const ani_size len = LENGTH_5;
@@ -83,7 +84,8 @@ TEST_F(ArraySetGetRegionCharTest, SetRegionCharChangeTest)
 
 TEST_F(ArraySetGetRegionCharTest, GetSpecialValueToArrayTest)
 {
-    const auto array = static_cast<ani_array_char>(CallEtsFunction<ani_ref>("GetSpecialArray"));
+    const auto array =
+        static_cast<ani_array_char>(CallEtsFunction<ani_ref>("array_region_char_test", "GetSpecialArray"));
     std::array<ani_char, LENGTH_10> nativeBuffer = {};
     ASSERT_EQ(env_->Array_GetRegion_Char(array, OFFSET_0, LENGTH_10, nativeBuffer.data()), ANI_OK);
     ASSERT_EQ(nativeBuffer[1U], '\0');

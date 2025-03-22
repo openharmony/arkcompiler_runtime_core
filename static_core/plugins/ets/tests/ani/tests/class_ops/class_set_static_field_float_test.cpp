@@ -21,7 +21,7 @@ class ClassSetStaticFieldFloatTest : public AniTest {};
 TEST_F(ClassSetStaticFieldFloatTest, set_float)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetFloat;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_float_test/TestSetFloat;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "float_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -38,7 +38,7 @@ TEST_F(ClassSetStaticFieldFloatTest, set_float)
 TEST_F(ClassSetStaticFieldFloatTest, set_float_c_api)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetFloat;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_float_test/TestSetFloat;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "float_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -55,7 +55,7 @@ TEST_F(ClassSetStaticFieldFloatTest, set_float_c_api)
 TEST_F(ClassSetStaticFieldFloatTest, set_invalid_field_type)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetFloat;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_float_test/TestSetFloat;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     const ani_float setTar = 28.0F;
@@ -65,7 +65,7 @@ TEST_F(ClassSetStaticFieldFloatTest, set_invalid_field_type)
 TEST_F(ClassSetStaticFieldFloatTest, invalid_argument2)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetFloat;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_float_test/TestSetFloat;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "float_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -80,7 +80,7 @@ TEST_F(ClassSetStaticFieldFloatTest, invalid_argument2)
 TEST_F(ClassSetStaticFieldFloatTest, invalid_argument3)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetFloat;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_float_test/TestSetFloat;", &cls), ANI_OK);
     const ani_float setTar = 28.0F;
     ASSERT_EQ(env_->Class_SetStaticField_Float(cls, nullptr, setTar), ANI_INVALID_ARGS);
 }

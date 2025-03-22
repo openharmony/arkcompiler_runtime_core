@@ -21,7 +21,7 @@ class ObjectGetPropertyByNameRefTest : public AniTest {
 public:
     ani_object NewPerson()
     {
-        auto personRef = CallEtsFunction<ani_ref>("newPersonObject");
+        auto personRef = CallEtsFunction<ani_ref>("object_get_property_by_name_ref_test", "newPersonObject");
         return static_cast<ani_object>(personRef);
     }
 };

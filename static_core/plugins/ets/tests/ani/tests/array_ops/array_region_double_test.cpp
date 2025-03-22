@@ -59,7 +59,7 @@ TEST_F(ArraySetGetRegionDoubleTest, GetDoubleArrayRegionErrorTests)
 
 TEST_F(ArraySetGetRegionDoubleTest, GetRegionDoubleTest)
 {
-    const auto array = static_cast<ani_array_double>(CallEtsFunction<ani_ref>("GetArray"));
+    const auto array = static_cast<ani_array_double>(CallEtsFunction<ani_ref>("array_region_double_test", "GetArray"));
 
     ani_double nativeBuffer[LENGTH_5] = {0.0};
     const double epsilon = 1e-6;  // Define acceptable tolerance
@@ -74,16 +74,16 @@ TEST_F(ArraySetGetRegionDoubleTest, GetRegionDoubleTest)
 
 TEST_F(ArraySetGetRegionDoubleTest, SetRegionDoubleTest)
 {
-    const auto array = static_cast<ani_array_double>(CallEtsFunction<ani_ref>("GetArray"));
+    const auto array = static_cast<ani_array_double>(CallEtsFunction<ani_ref>("array_region_double_test", "GetArray"));
     ani_double nativeBuffer1[LENGTH_5] = {TEST_UPDATE_1, TEST_UPDATE_2, TEST_UPDATE_3};
     ASSERT_EQ(env_->Array_SetRegion_Double(array, OFFSET_2, LENGTH_3, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("CheckArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_double_test", "CheckArray", array), ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionDoubleTest, CheckChangeFromManagedRegionDoubleTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Larray_region_double_test/ArrayClass;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -115,7 +115,7 @@ TEST_F(ArraySetGetRegionDoubleTest, CheckChangeFromManagedRegionDoubleTest)
 TEST_F(ArraySetGetRegionDoubleTest, CheckChangeFromApiRegionDoubleTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Larray_region_double_test/ArrayClass;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -133,7 +133,8 @@ TEST_F(ArraySetGetRegionDoubleTest, CheckChangeFromApiRegionDoubleTest)
 
 TEST_F(ArraySetGetRegionDoubleTest, GetSpecialValueToArrayTest)
 {
-    const auto array = static_cast<ani_array_double>(CallEtsFunction<ani_ref>("GetSpecialArray"));
+    const auto array =
+        static_cast<ani_array_double>(CallEtsFunction<ani_ref>("array_region_double_test", "GetSpecialArray"));
     const ani_double max = 4.9406564584124654e-324;
     const ani_double min = 1.79769313486231570e+308;
     const ani_double minPositive = -1.79769313486231570e+308;

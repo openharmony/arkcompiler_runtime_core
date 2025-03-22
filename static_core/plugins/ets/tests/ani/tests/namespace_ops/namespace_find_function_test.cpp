@@ -22,7 +22,7 @@ class NamespaceFindFunctionTest : public AniTest {};
 TEST_F(NamespaceFindFunctionTest, find_int_function)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lfnns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_function_test/fnns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};
@@ -33,7 +33,7 @@ TEST_F(NamespaceFindFunctionTest, find_int_function)
 TEST_F(NamespaceFindFunctionTest, find_ref_function)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lfnns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_function_test/fnns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};
@@ -51,7 +51,7 @@ TEST_F(NamespaceFindFunctionTest, invalid_arg_namespace)
 TEST_F(NamespaceFindFunctionTest, invalid_arg_name)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lfnns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_function_test/fnns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};
@@ -61,7 +61,7 @@ TEST_F(NamespaceFindFunctionTest, invalid_arg_name)
 TEST_F(NamespaceFindFunctionTest, invalid_arg_result)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lfnns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_function_test/fnns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ASSERT_EQ(env_->Namespace_FindFunction(ns, "getInitialStringValue", ":Lstd/core/String;", nullptr),

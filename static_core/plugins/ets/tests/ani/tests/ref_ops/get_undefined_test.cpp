@@ -24,7 +24,7 @@ TEST_F(GetUndefinedTest, get_undefined)
     ani_ref ref;
     ASSERT_EQ(env_->GetUndefined(&ref), ANI_OK);
 
-    auto isUndefined = CallEtsFunction<ani_boolean>("isUndefined", ref);
+    auto isUndefined = CallEtsFunction<ani_boolean>("get_undefined_test", "isUndefined", ref);
     ASSERT_EQ(isUndefined, ANI_TRUE);
 }
 

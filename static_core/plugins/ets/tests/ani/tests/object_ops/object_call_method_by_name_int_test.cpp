@@ -26,11 +26,12 @@ public:
     void GetMethodData(ani_object *objectResult)
     {
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("LA;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_int_test/A;", &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_static_method newMethod {};
-        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_A", ":LA;", &newMethod), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_A", ":Lobject_call_method_by_name_int_test/A;", &newMethod),
+                  ANI_OK);
         ani_ref ref {};
         ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
         *objectResult = static_cast<ani_object>(ref);
@@ -122,7 +123,7 @@ TEST_F(CallObjectMethodIntByNameTest, object_call_method_int_a_invalid_args)
 TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_001)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LB;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_int_test/B;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -146,7 +147,7 @@ TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_001)
 TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_002)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LB;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_int_test/B;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -170,7 +171,7 @@ TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_002)
 TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_003)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LC;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_int_test/C;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -194,7 +195,7 @@ TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_003)
 TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_004)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LC;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_int_test/C;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -218,7 +219,7 @@ TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_004)
 TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_005)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LB;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_int_test/B;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -242,7 +243,7 @@ TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_005)
     ASSERT_EQ(env_->Object_CallMethodByName_Int_A(obj, "privateMethod", "I:I", &num, args), ANI_OK);
     ASSERT_EQ(num, arg - value);
 
-    ASSERT_EQ(env_->FindClass("LC;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_int_test/C;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
     ASSERT_EQ(env_->Object_New(cls, method, &obj, arg), ANI_OK);
@@ -255,7 +256,7 @@ TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_005)
 TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_006)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LB;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_int_test/B;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -279,7 +280,7 @@ TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_006)
 TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_007)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LB;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_int_test/B;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -304,7 +305,7 @@ TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_007)
 TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_008)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LB;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_int_test/B;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -337,7 +338,7 @@ TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_008)
 TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_009)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LB;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_int_test/B;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
@@ -376,7 +377,7 @@ TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_009)
 TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_010)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LC;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_int_test/C;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};

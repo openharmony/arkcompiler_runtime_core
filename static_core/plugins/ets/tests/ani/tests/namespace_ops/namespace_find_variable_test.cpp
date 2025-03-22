@@ -22,7 +22,7 @@ class NamespaceFindVariableTest : public AniTest {};
 TEST_F(NamespaceFindVariableTest, get_int_variable_1)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_variable_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_variable variable {};
@@ -33,7 +33,7 @@ TEST_F(NamespaceFindVariableTest, get_int_variable_1)
 TEST_F(NamespaceFindVariableTest, variable_env)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_variable_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_variable variable {};
@@ -43,7 +43,7 @@ TEST_F(NamespaceFindVariableTest, variable_env)
 TEST_F(NamespaceFindVariableTest, get_ref_variable)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_variable_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_variable variable {};
@@ -54,7 +54,7 @@ TEST_F(NamespaceFindVariableTest, get_ref_variable)
 TEST_F(NamespaceFindVariableTest, get_ref_invalid_variable_name)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_variable_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_variable variable {};
@@ -70,7 +70,7 @@ TEST_F(NamespaceFindVariableTest, invalid_args_ns)
 TEST_F(NamespaceFindVariableTest, invalid_args_name)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_variable_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_variable variable {};
@@ -80,7 +80,7 @@ TEST_F(NamespaceFindVariableTest, invalid_args_name)
 TEST_F(NamespaceFindVariableTest, invalid_args_result)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lanyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_variable_test/anyns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ASSERT_EQ(env_->Namespace_FindVariable(ns, "s", nullptr), ANI_INVALID_ARGS);

@@ -39,7 +39,7 @@ static ani_long NativeMethodsLongFooNative(ani_env *, ani_class)
 TEST_F(ClassBindNativeMethodsTest, RegisterNativesTest)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LRegisteringNativeMethodsTest;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_bind_native_methods_test/RegisteringNativeMethodsTest;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -52,7 +52,7 @@ TEST_F(ClassBindNativeMethodsTest, RegisterNativesTest)
 TEST_F(ClassBindNativeMethodsTest, already_binded_method)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LRegisteringNativeMethodsTest;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_bind_native_methods_test/RegisteringNativeMethodsTest;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -66,7 +66,7 @@ TEST_F(ClassBindNativeMethodsTest, already_binded_method)
 TEST_F(ClassBindNativeMethodsTest, RegisterNativesErrorTest)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LRegisteringNativeMethodsTest;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_bind_native_methods_test/RegisteringNativeMethodsTest;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -81,7 +81,7 @@ TEST_F(ClassBindNativeMethodsTest, RegisterNativesErrorTest)
 TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_002)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Ltest002A;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lclass_bind_native_methods_test/test002A;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace result {};
@@ -126,7 +126,7 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_002)
 TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_003)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LTestB003;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_bind_native_methods_test/TestB003;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -163,7 +163,7 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_003)
 TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_004)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LTestA004;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_bind_native_methods_test/TestA004;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -200,7 +200,7 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_004)
 TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_005)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LTestA005;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_bind_native_methods_test/TestA005;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {

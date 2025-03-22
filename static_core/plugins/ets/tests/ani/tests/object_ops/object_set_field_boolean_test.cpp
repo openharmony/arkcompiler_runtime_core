@@ -21,10 +21,10 @@ class ObjectSetFieldBooleanTest : public AniTest {
 public:
     void GetTestData(ani_object *packResult, ani_field *fieldBoolResult, ani_field *fieldStringResult)
     {
-        auto packRef = CallEtsFunction<ani_ref>("newPackObject");
+        auto packRef = CallEtsFunction<ani_ref>("object_set_field_boolean_test", "newPackObject");
 
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("LPack;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("Lobject_set_field_boolean_test/Pack;", &cls), ANI_OK);
 
         ani_field fieldBool {};
         ASSERT_EQ(env_->Class_FindField(cls, "bool_value", &fieldBool), ANI_OK);
@@ -46,11 +46,13 @@ TEST_F(ObjectSetFieldBooleanTest, set_field_boolean_success)
     GetTestData(&pack, &fieldBool, &fieldString);
     const int32_t loopCount = 3;
     for (int i = 1; i <= loopCount; i++) {
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkBooleanValue", pack, ANI_FALSE), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_boolean_test", "checkBooleanValue", pack, ANI_FALSE),
+                  ANI_TRUE);
 
         ASSERT_EQ(env_->Object_SetField_Boolean(pack, fieldBool, ANI_TRUE), ANI_OK);
 
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkBooleanValue", pack, ANI_TRUE), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_boolean_test", "checkBooleanValue", pack, ANI_TRUE),
+                  ANI_TRUE);
 
         ani_boolean married = ANI_FALSE;
         ASSERT_EQ(env_->Object_GetField_Boolean(pack, fieldBool, &married), ANI_OK);
@@ -58,7 +60,8 @@ TEST_F(ObjectSetFieldBooleanTest, set_field_boolean_success)
 
         ASSERT_EQ(env_->Object_SetField_Boolean(pack, fieldBool, ANI_FALSE), ANI_OK);
 
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkBooleanValue", pack, ANI_FALSE), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_boolean_test", "checkBooleanValue", pack, ANI_FALSE),
+                  ANI_TRUE);
 
         ASSERT_EQ(env_->Object_GetField_Boolean(pack, fieldBool, &married), ANI_OK);
         ASSERT_EQ(married, false);
@@ -106,7 +109,8 @@ TEST_F(ObjectSetFieldBooleanTest, set_field_boolean_false)
 
     ASSERT_EQ(env_->Object_SetField_Boolean(pack, fieldBool, ANI_FALSE), ANI_OK);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkBooleanValue", pack, ANI_FALSE), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_boolean_test", "checkBooleanValue", pack, ANI_FALSE),
+              ANI_TRUE);
 }
 
 }  // namespace ark::ets::ani::testing

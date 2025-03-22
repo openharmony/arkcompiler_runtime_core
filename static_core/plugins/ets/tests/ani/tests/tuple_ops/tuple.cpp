@@ -29,7 +29,7 @@ protected:
 private:
     void GetTupleWithCheckImpl(std::string_view tupleGetterName, ani_tuple_value *tuple)
     {
-        *tuple = CallEtsFunction<ani_tuple_value>(tupleGetterName.data());
+        *tuple = CallEtsFunction<ani_tuple_value>("tuple", tupleGetterName.data());
         ani_boolean isUndefined;
         ASSERT_EQ(env_->Reference_IsUndefined(*tuple, &isUndefined), ANI_OK);
         ASSERT_EQ(isUndefined, ANI_FALSE);

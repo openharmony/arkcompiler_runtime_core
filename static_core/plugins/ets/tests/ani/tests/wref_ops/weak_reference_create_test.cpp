@@ -76,7 +76,7 @@ TEST_F(WeakReferenceCreateTest, weak_reference_case2)
     const ani_int weight = 200;
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LMobilePhone;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lweak_reference_create_test/MobilePhone;", &cls), ANI_OK);
 
     ani_method ctor {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;I:V", &ctor), ANI_OK);
@@ -136,8 +136,8 @@ TEST_F(WeakReferenceCreateTest, weak_reference_case3)
 
 TEST_F(WeakReferenceCreateTest, weak_reference_case4)
 {
-    auto refObjectA = CallEtsFunction<ani_ref>("getObjectA");
-    auto refObjectB = CallEtsFunction<ani_ref>("getObjectB");
+    auto refObjectA = CallEtsFunction<ani_ref>("weak_reference_create_test", "getObjectA");
+    auto refObjectB = CallEtsFunction<ani_ref>("weak_reference_create_test", "getObjectB");
 
     ani_wref wrefa {};
     ASSERT_EQ(env_->WeakReference_Create(refObjectA, &wrefa), ANI_OK);
@@ -162,7 +162,7 @@ TEST_F(WeakReferenceCreateTest, weak_reference_case4)
 
 TEST_F(WeakReferenceCreateTest, weak_reference_case5)
 {
-    auto refObjectA = CallEtsFunction<ani_ref>("getObjectA");
+    auto refObjectA = CallEtsFunction<ani_ref>("weak_reference_create_test", "getObjectA");
     ani_ref refObjectB {};
     ASSERT_EQ(env_->String_NewUTF8("x", 1, reinterpret_cast<ani_string *>(&refObjectB)), ANI_OK);
 

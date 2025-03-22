@@ -23,7 +23,7 @@ class ClassSetStaticFieldByNameFloatTest : public AniTest {};
 TEST_F(ClassSetStaticFieldByNameFloatTest, set_static_field_by_name_long_capi)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LFloatStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_float_test/FloatStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Float(env_, cls, "float_value", 2.0F), ANI_OK);
     ani_float resultValue;
@@ -34,7 +34,7 @@ TEST_F(ClassSetStaticFieldByNameFloatTest, set_static_field_by_name_long_capi)
 TEST_F(ClassSetStaticFieldByNameFloatTest, set_static_field_by_name_long)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LFloatStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_float_test/FloatStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, "float_value", 2.0F), ANI_OK);
     ani_float resultValue;
@@ -45,7 +45,7 @@ TEST_F(ClassSetStaticFieldByNameFloatTest, set_static_field_by_name_long)
 TEST_F(ClassSetStaticFieldByNameFloatTest, set_static_field_by_name_long_invalid_field_type)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LFloatStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_float_test/FloatStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, "string_value", 2.0F), ANI_INVALID_TYPE);
 }
@@ -53,7 +53,7 @@ TEST_F(ClassSetStaticFieldByNameFloatTest, set_static_field_by_name_long_invalid
 TEST_F(ClassSetStaticFieldByNameFloatTest, set_static_field_by_name_long_invalid_args_object)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LFloatStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_float_test/FloatStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(nullptr, "float_value", 2.0F), ANI_INVALID_ARGS);
 }
@@ -61,7 +61,7 @@ TEST_F(ClassSetStaticFieldByNameFloatTest, set_static_field_by_name_long_invalid
 TEST_F(ClassSetStaticFieldByNameFloatTest, set_static_field_by_name_long_invalid_args_field)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LFloatStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_float_test/FloatStatic;", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Float(cls, nullptr, 2.0F), ANI_INVALID_ARGS);
 }

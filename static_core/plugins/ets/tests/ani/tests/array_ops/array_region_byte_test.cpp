@@ -58,7 +58,7 @@ TEST_F(ArraySetGetRegionByteTest, GetByteArrayRegionErrorTests)
 
 TEST_F(ArraySetGetRegionByteTest, GetRegionByteTest)
 {
-    const auto array = static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("GetArray"));
+    const auto array = static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("array_region_byte_test", "GetArray"));
 
     ani_byte nativeBuffer[LENGTH_5] = {0};
     const ani_size offset3 = 0;
@@ -72,16 +72,16 @@ TEST_F(ArraySetGetRegionByteTest, GetRegionByteTest)
 
 TEST_F(ArraySetGetRegionByteTest, SetRegionByteTest)
 {
-    const auto array = static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("GetArray"));
+    const auto array = static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("array_region_byte_test", "GetArray"));
     ani_byte nativeBuffer1[LENGTH_5] = {TEST_UPDATE_1, TEST_UPDATE_2, TEST_UPDATE_3};
     ASSERT_EQ(env_->Array_SetRegion_Byte(array, OFFSET_2, LENGTH_3, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("CheckArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_byte_test", "CheckArray", array), ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionByteTest, CheckChangeFromManagedRegionByteTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Larray_region_byte_test/ArrayClass;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -112,7 +112,7 @@ TEST_F(ArraySetGetRegionByteTest, CheckChangeFromManagedRegionByteTest)
 TEST_F(ArraySetGetRegionByteTest, CheckChangeFromApiRegionByteTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Larray_region_byte_test/ArrayClass;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -130,7 +130,8 @@ TEST_F(ArraySetGetRegionByteTest, CheckChangeFromApiRegionByteTest)
 
 TEST_F(ArraySetGetRegionByteTest, GetSpecialValueToArrayTest)
 {
-    const auto array = static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("GetSpecialArray"));
+    const auto array =
+        static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("array_region_byte_test", "GetSpecialArray"));
     std::array<ani_byte, LENGTH_5> nativeBuffer = {};
 
     ASSERT_EQ(env_->Array_GetRegion_Byte(array, OFFSET_0, LENGTH_5, nativeBuffer.data()), ANI_OK);

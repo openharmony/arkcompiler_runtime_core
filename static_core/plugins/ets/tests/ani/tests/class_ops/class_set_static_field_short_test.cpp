@@ -21,7 +21,7 @@ class ClassSetStaticFieldShortTest : public AniTest {};
 TEST_F(ClassSetStaticFieldShortTest, set_short)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetShort;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_short_test/TestSetShort;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "short_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -36,7 +36,7 @@ TEST_F(ClassSetStaticFieldShortTest, set_short)
 TEST_F(ClassSetStaticFieldShortTest, set_short_c_api)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetShort;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_short_test/TestSetShort;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "short_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -51,7 +51,7 @@ TEST_F(ClassSetStaticFieldShortTest, set_short_c_api)
 TEST_F(ClassSetStaticFieldShortTest, set_invalid_field_type)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetShort;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_short_test/TestSetShort;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -61,7 +61,7 @@ TEST_F(ClassSetStaticFieldShortTest, set_invalid_field_type)
 TEST_F(ClassSetStaticFieldShortTest, invalid_argument2)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetShort;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_short_test/TestSetShort;", &cls), ANI_OK);
     ani_static_field field;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "short_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -74,7 +74,7 @@ TEST_F(ClassSetStaticFieldShortTest, invalid_argument2)
 TEST_F(ClassSetStaticFieldShortTest, invalid_argument3)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LTestSetShort;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_short_test/TestSetShort;", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_SetStaticField_Short(cls, nullptr, 7U), ANI_INVALID_ARGS);
 }
 }  // namespace ark::ets::ani::testing

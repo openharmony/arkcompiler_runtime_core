@@ -45,28 +45,28 @@ public:
 
 TEST_F(IsAssignableFromTest, is_assignable)
 {
-    CheckIsAssignableFrom<true>("LA;", "LA;");
-    CheckIsAssignableFrom<true>("LB;", "LA;");
-    CheckIsAssignableFrom<true>("LA;", "Lstd/core/Object;");
-    CheckIsAssignableFrom<true>("LB;", "Lstd/core/Object;");
-    CheckIsAssignableFrom<true>("LA;", "LI;");
-    CheckIsAssignableFrom<true>("LB;", "LI;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/A;", "Lis_assignable_from_test/A;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/B;", "Lis_assignable_from_test/A;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/A;", "Lstd/core/Object;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/B;", "Lstd/core/Object;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/A;", "Lis_assignable_from_test/I;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/B;", "Lis_assignable_from_test/I;");
 }
 
 TEST_F(IsAssignableFromTest, not_assignable)
 {
-    CheckIsAssignableFrom<false>("LA;", "LB;");
-    CheckIsAssignableFrom<false>("Lstd/core/Object;", "LA;");
-    CheckIsAssignableFrom<false>("Lstd/core/Object;", "LB;");
-    CheckIsAssignableFrom<false>("LI;", "LB;");
-    CheckIsAssignableFrom<false>("LI;", "LA;");
+    CheckIsAssignableFrom<false>("Lis_assignable_from_test/A;", "Lis_assignable_from_test/B;");
+    CheckIsAssignableFrom<false>("Lstd/core/Object;", "Lis_assignable_from_test/A;");
+    CheckIsAssignableFrom<false>("Lstd/core/Object;", "Lis_assignable_from_test/B;");
+    CheckIsAssignableFrom<false>("Lis_assignable_from_test/I;", "Lis_assignable_from_test/B;");
+    CheckIsAssignableFrom<false>("Lis_assignable_from_test/I;", "Lis_assignable_from_test/A;");
 }
 
 TEST_F(IsAssignableFromTest, ani_invalid_args)
 {
     ani_class clsA;
 
-    ASSERT_EQ(env_->FindClass("LA;", &clsA), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lis_assignable_from_test/A;", &clsA), ANI_OK);
     ASSERT_NE(clsA, nullptr);
 
     ani_boolean result;
@@ -77,20 +77,20 @@ TEST_F(IsAssignableFromTest, ani_invalid_args)
 
 TEST_F(IsAssignableFromTest, is_assignable_combind_scenes_001)
 {
-    CheckIsAssignableFrom<true>("LBaseA;", "LBaseA;");
-    CheckIsAssignableFrom<true>("LSubB;", "LSubB;");
-    CheckIsAssignableFrom<true>("LSubB;", "LBaseA;");
-    CheckIsAssignableFrom<true>("LSubC;", "LSubC;");
-    CheckIsAssignableFrom<true>("LSubC;", "LSubB;");
-    CheckIsAssignableFrom<true>("LSubC;", "LBaseA;");
-    CheckIsAssignableFrom<true>("LD;", "LD;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/BaseA;", "Lis_assignable_from_test/BaseA;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/SubB;", "Lis_assignable_from_test/SubB;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/SubB;", "Lis_assignable_from_test/BaseA;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/SubC;", "Lis_assignable_from_test/SubC;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/SubC;", "Lis_assignable_from_test/SubB;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/SubC;", "Lis_assignable_from_test/BaseA;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/D;", "Lis_assignable_from_test/D;");
 
-    CheckIsAssignableFrom<false>("LBaseA;", "LSubB;");
-    CheckIsAssignableFrom<false>("LBaseA;", "LSubC;");
-    CheckIsAssignableFrom<false>("LSubB;", "LSubC;");
-    CheckIsAssignableFrom<false>("LSubC;", "LD;");
-    CheckIsAssignableFrom<false>("LSubB;", "LD;");
-    CheckIsAssignableFrom<false>("LBaseA;", "LD;");
+    CheckIsAssignableFrom<false>("Lis_assignable_from_test/BaseA;", "Lis_assignable_from_test/SubB;");
+    CheckIsAssignableFrom<false>("Lis_assignable_from_test/BaseA;", "Lis_assignable_from_test/SubC;");
+    CheckIsAssignableFrom<false>("Lis_assignable_from_test/SubB;", "Lis_assignable_from_test/SubC;");
+    CheckIsAssignableFrom<false>("Lis_assignable_from_test/SubC;", "Lis_assignable_from_test/D;");
+    CheckIsAssignableFrom<false>("Lis_assignable_from_test/SubB;", "Lis_assignable_from_test/D;");
+    CheckIsAssignableFrom<false>("Lis_assignable_from_test/BaseA;", "Lis_assignable_from_test/D;");
 }
 }  // namespace ark::ets::ani::testing
 

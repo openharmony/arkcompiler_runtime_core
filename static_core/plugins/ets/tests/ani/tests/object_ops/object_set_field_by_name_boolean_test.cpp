@@ -21,7 +21,7 @@ class ObjectSetFieldByNameBooleanTest : public AniTest {
 public:
     ani_object NewAnimal()
     {
-        auto animalRef = CallEtsFunction<ani_ref>("newAnimalObject");
+        auto animalRef = CallEtsFunction<ani_ref>("object_set_field_by_name_boolean_test", "newAnimalObject");
         return static_cast<ani_object>(animalRef);
     }
 };
@@ -29,19 +29,25 @@ public:
 TEST_F(ObjectSetFieldByNameBooleanTest, set_field)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, ANI_TRUE), ANI_TRUE);
+    ASSERT_EQ(
+        CallEtsFunction<ani_boolean>("object_set_field_by_name_boolean_test", "checkObjectField", animal, ANI_TRUE),
+        ANI_TRUE);
 
     const int32_t loopCount = 3;
     for (int i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetFieldByName_Boolean(animal, "value", ANI_FALSE), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, ANI_FALSE), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_by_name_boolean_test", "checkObjectField", animal,
+                                               ANI_FALSE),
+                  ANI_TRUE);
 
         ani_boolean mammal {};
         ASSERT_EQ(env_->Object_GetFieldByName_Boolean(animal, "value", &mammal), ANI_OK);
         ASSERT_EQ(mammal, false);
 
         ASSERT_EQ(env_->Object_SetFieldByName_Boolean(animal, "value", ANI_TRUE), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, ANI_TRUE), ANI_TRUE);
+        ASSERT_EQ(
+            CallEtsFunction<ani_boolean>("object_set_field_by_name_boolean_test", "checkObjectField", animal, ANI_TRUE),
+            ANI_TRUE);
 
         ASSERT_EQ(env_->Object_GetFieldByName_Boolean(animal, "value", &mammal), ANI_OK);
         ASSERT_EQ(mammal, true);

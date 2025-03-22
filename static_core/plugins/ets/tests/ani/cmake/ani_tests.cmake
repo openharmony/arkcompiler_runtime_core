@@ -17,7 +17,6 @@ add_custom_target(ani_tests COMMENT "Common target to run ANI ETS tests")
 #
 # Example usage:
 #   ani_add_gtest(test_name
-#     ETS_NAMED_MODE
 #     ETS_CONFIG path/to/arktsconfig.json
 #     CPP_SOURCES
 #       tests/unit1_test.cpp
@@ -31,15 +30,13 @@ add_custom_target(ani_tests COMMENT "Common target to run ANI ETS tests")
 function(ani_add_gtest TARGET)
     cmake_parse_arguments(
         ARG # give prefix `ARG` to each argument
-        "ETS_NAMED_MODE"
+        ""
         "ETS_CONFIG"
         "CPP_SOURCES;ETS_SOURCES;LIBRARIES"
         ${ARGN}
     )
-
-    if(${ARG_ETS_NAMED_MODE})
-        set(ETS_NAMED_MODE "ETS_NAMED_MODE")
-    endif()
+    # set named for all ani  ets_package.cmake
+    set(ETS_NAMED_MODE "ETS_NAMED_MODE")
     if(NOT DEFINED ARG_CPP_SOURCES)
         message(FATAL_ERROR "CPP_SOURCES is not defined")
     endif()

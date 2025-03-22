@@ -21,7 +21,7 @@ class ObjectSetFieldByNameLongTest : public AniTest {
 public:
     ani_object NewAnimal()
     {
-        auto animalRef = CallEtsFunction<ani_ref>("newAnimalObject");
+        auto animalRef = CallEtsFunction<ani_ref>("object_set_field_by_name_long_test", "newAnimalObject");
         return static_cast<ani_object>(animalRef);
     }
 };
@@ -32,10 +32,14 @@ constexpr int64_t SET_VALUE = -9007199254740991;
 TEST_F(ObjectSetFieldByNameLongTest, set_field01)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_long>(CMP_VALUE)), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_by_name_long_test", "checkObjectField", animal,
+                                           static_cast<ani_long>(CMP_VALUE)),
+              ANI_TRUE);
 
     ASSERT_EQ(env_->Object_SetFieldByName_Long(animal, "value", static_cast<ani_long>(0)), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_long>(0)), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_by_name_long_test", "checkObjectField", animal,
+                                           static_cast<ani_long>(0)),
+              ANI_TRUE);
 
     ani_long value = 0L;
     ASSERT_EQ(env_->Object_GetFieldByName_Long(animal, "value", &value), ANI_OK);
@@ -45,19 +49,25 @@ TEST_F(ObjectSetFieldByNameLongTest, set_field01)
 TEST_F(ObjectSetFieldByNameLongTest, set_field02)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_long>(CMP_VALUE)), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_by_name_long_test", "checkObjectField", animal,
+                                           static_cast<ani_long>(CMP_VALUE)),
+              ANI_TRUE);
 
     const int32_t loopCount = 3;
     for (int i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetFieldByName_Long(animal, "value", static_cast<ani_long>(SET_VALUE)), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_long>(SET_VALUE)), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_by_name_long_test", "checkObjectField", animal,
+                                               static_cast<ani_long>(SET_VALUE)),
+                  ANI_TRUE);
 
         ani_long value = 0L;
         ASSERT_EQ(env_->Object_GetFieldByName_Long(animal, "value", &value), ANI_OK);
         ASSERT_EQ(value, SET_VALUE);
 
         ASSERT_EQ(env_->Object_SetFieldByName_Long(animal, "value", static_cast<ani_long>(CMP_VALUE)), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_long>(CMP_VALUE)), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_by_name_long_test", "checkObjectField", animal,
+                                               static_cast<ani_long>(CMP_VALUE)),
+                  ANI_TRUE);
 
         ASSERT_EQ(env_->Object_GetFieldByName_Long(animal, "value", &value), ANI_OK);
         ASSERT_EQ(value, CMP_VALUE);

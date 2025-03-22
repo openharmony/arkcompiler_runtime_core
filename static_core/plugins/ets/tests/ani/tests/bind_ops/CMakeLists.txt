@@ -17,7 +17,6 @@ ani_add_gtest(ani_test_bind_ops_class_bind_native_methods
 )
 
 ani_add_gtest(ani_test_bind_ops_module_bind_native_functions
-    ETS_NAMED_MODE
     ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/module_bind_native_functions_test/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_bind_native_functions_test/test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_bind_native_functions_test/test.ets

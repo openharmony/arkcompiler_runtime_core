@@ -24,7 +24,7 @@ public:
 
 TEST_F(ReferenceIsNullTest, check_null)
 {
-    auto ref = CallEtsFunction<ani_ref>("GetNull");
+    auto ref = CallEtsFunction<ani_ref>("reference_is_null_test", "GetNull");
     ani_boolean isNull = ANI_FALSE;
     ASSERT_EQ(env_->Reference_IsNull(ref, &isNull), ANI_OK);
     ASSERT_EQ(isNull, ANI_TRUE);
@@ -32,7 +32,7 @@ TEST_F(ReferenceIsNullTest, check_null)
 
 TEST_F(ReferenceIsNullTest, check_undefined)
 {
-    auto ref = CallEtsFunction<ani_ref>("GetUndefined");
+    auto ref = CallEtsFunction<ani_ref>("reference_is_null_test", "GetUndefined");
     ani_boolean isNull = ANI_TRUE;
     ASSERT_EQ(env_->Reference_IsNull(ref, &isNull), ANI_OK);
     ASSERT_EQ(isNull, ANI_FALSE);
@@ -40,7 +40,7 @@ TEST_F(ReferenceIsNullTest, check_undefined)
 
 TEST_F(ReferenceIsNullTest, check_object)
 {
-    auto ref = CallEtsFunction<ani_ref>("GetObject");
+    auto ref = CallEtsFunction<ani_ref>("reference_is_null_test", "GetObject");
     ani_boolean isNull = ANI_TRUE;
     ASSERT_EQ(env_->Reference_IsNull(ref, &isNull), ANI_OK);
     ASSERT_EQ(isNull, ANI_FALSE);
@@ -48,7 +48,7 @@ TEST_F(ReferenceIsNullTest, check_object)
 
 TEST_F(ReferenceIsNullTest, invalid_argument)
 {
-    auto ref = CallEtsFunction<ani_ref>("GetNull");
+    auto ref = CallEtsFunction<ani_ref>("reference_is_null_test", "GetNull");
     ASSERT_EQ(env_->Reference_IsNull(ref, nullptr), ANI_INVALID_ARGS);
     ani_boolean isNull = ANI_FALSE;
     ASSERT_EQ(env_->c_api->Reference_IsNull(nullptr, ref, &isNull), ANI_INVALID_ARGS);
@@ -57,7 +57,7 @@ TEST_F(ReferenceIsNullTest, invalid_argument)
 TEST_F(ReferenceIsNullTest, check_null_loop)
 {
     for (int32_t i = 0; i < LOOP_COUNT; i++) {
-        auto ref = CallEtsFunction<ani_ref>("GetNull");
+        auto ref = CallEtsFunction<ani_ref>("reference_is_null_test", "GetNull");
         ani_boolean isNull = ANI_FALSE;
         ASSERT_EQ(env_->Reference_IsNull(ref, &isNull), ANI_OK);
         ASSERT_EQ(isNull, ANI_TRUE);
@@ -66,12 +66,12 @@ TEST_F(ReferenceIsNullTest, check_null_loop)
 
 TEST_F(ReferenceIsNullTest, mix_test)
 {
-    auto ref = CallEtsFunction<ani_ref>("GetNull");
+    auto ref = CallEtsFunction<ani_ref>("reference_is_null_test", "GetNull");
     ani_boolean isNull = ANI_FALSE;
     ASSERT_EQ(env_->Reference_IsNull(ref, &isNull), ANI_OK);
     ASSERT_EQ(isNull, ANI_TRUE);
 
-    auto objectRef = CallEtsFunction<ani_ref>("GetObject");
+    auto objectRef = CallEtsFunction<ani_ref>("reference_is_null_test", "GetObject");
     ASSERT_EQ(env_->Reference_IsNull(objectRef, &isNull), ANI_OK);
     ASSERT_EQ(isNull, ANI_FALSE);
 

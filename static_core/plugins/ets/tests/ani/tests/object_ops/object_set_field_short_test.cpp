@@ -26,10 +26,10 @@ class ObjectSetFieldShortTest : public AniTest {
 public:
     void GetTestData(ani_object *packResult, ani_field *fieldShortResult, ani_field *fieldStringResult)
     {
-        auto packRef = CallEtsFunction<ani_ref>("newPackObject");
+        auto packRef = CallEtsFunction<ani_ref>("object_set_field_short_test", "newPackObject");
 
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("LPack;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("Lobject_set_field_short_test/Pack;", &cls), ANI_OK);
 
         ani_field fieldShort {};
         ASSERT_EQ(env_->Class_FindField(cls, "short_value", &fieldShort), ANI_OK);
@@ -54,7 +54,8 @@ TEST_F(ObjectSetFieldShortTest, set_field_short)
     for (int i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetField_Short(pack, fieldShort, G_USHORTVAL100), ANI_OK);
 
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkShortValue", pack, G_USHORTVAL100), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_short_test", "checkShortValue", pack, G_USHORTVAL100),
+                  ANI_TRUE);
 
         ani_short sh {};
         ASSERT_EQ(env_->Object_GetField_Short(pack, fieldShort, &sh), ANI_OK);
@@ -62,7 +63,8 @@ TEST_F(ObjectSetFieldShortTest, set_field_short)
 
         ASSERT_EQ(env_->Object_SetField_Short(pack, fieldShort, VAL200), ANI_OK);
 
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkShortValue", pack, VAL200), ANI_TRUE);
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_short_test", "checkShortValue", pack, VAL200),
+                  ANI_TRUE);
 
         ASSERT_EQ(env_->Object_GetField_Short(pack, fieldShort, &sh), ANI_OK);
         ASSERT_EQ(sh, VAL200);
@@ -78,7 +80,8 @@ TEST_F(ObjectSetFieldShortTest, set_field_short_negative_value)
 
     ASSERT_EQ(env_->Object_SetField_Short(pack, fieldShort, G_MINUSSHORTVAL300), ANI_OK);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkShortValue", pack, G_MINUSSHORTVAL300), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_short_test", "checkShortValue", pack, G_MINUSSHORTVAL300),
+              ANI_TRUE);
 
     ani_short sh {};
     ASSERT_EQ(env_->Object_GetField_Short(pack, fieldShort, &sh), ANI_OK);

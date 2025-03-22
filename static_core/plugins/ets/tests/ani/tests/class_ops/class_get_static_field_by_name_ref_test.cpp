@@ -44,7 +44,7 @@ public:
 TEST_F(ClassGetStaticFieldByNameRefTest, get_static_field_ref_capi)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LMan;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_ref_test/Man;", &cls), ANI_OK);
 
     ani_ref nameRef = nullptr;
     ASSERT_EQ(env_->c_api->Class_GetStaticFieldByName_Ref(env_, cls, "name", &nameRef), ANI_OK);
@@ -60,7 +60,7 @@ TEST_F(ClassGetStaticFieldByNameRefTest, get_static_field_ref_capi)
 TEST_F(ClassGetStaticFieldByNameRefTest, get_static_field_ref)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LMan;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_ref_test/Man;", &cls), ANI_OK);
 
     ani_ref nameRef = nullptr;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "name", &nameRef), ANI_OK);
@@ -76,7 +76,7 @@ TEST_F(ClassGetStaticFieldByNameRefTest, get_static_field_ref)
 TEST_F(ClassGetStaticFieldByNameRefTest, get_static_field_ref_invalid_field_type)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LMan;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_ref_test/Man;", &cls), ANI_OK);
     ani_ref nameRef = nullptr;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "age", &nameRef), ANI_INVALID_TYPE);
 }
@@ -84,7 +84,7 @@ TEST_F(ClassGetStaticFieldByNameRefTest, get_static_field_ref_invalid_field_type
 TEST_F(ClassGetStaticFieldByNameRefTest, invalid_argument1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LMan;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_ref_test/Man;", &cls), ANI_OK);
     ani_ref nameRef = nullptr;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(nullptr, "name", &nameRef), ANI_INVALID_ARGS);
 }
@@ -92,7 +92,7 @@ TEST_F(ClassGetStaticFieldByNameRefTest, invalid_argument1)
 TEST_F(ClassGetStaticFieldByNameRefTest, invalid_argument2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LMan;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_ref_test/Man;", &cls), ANI_OK);
     ani_ref nameRef = nullptr;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, nullptr, &nameRef), ANI_INVALID_ARGS);
 }
@@ -100,14 +100,14 @@ TEST_F(ClassGetStaticFieldByNameRefTest, invalid_argument2)
 TEST_F(ClassGetStaticFieldByNameRefTest, invalid_argument3)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LMan;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_ref_test/Man;", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "name", nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(ClassGetStaticFieldByNameRefTest, invalid_argument4)
 {
     ani_class cls;
-    ASSERT_EQ(env_->FindClass("LMan;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_ref_test/Man;", &cls), ANI_OK);
     ani_ref nameRef = nullptr;
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "", &nameRef), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Ref(cls, "\n", &nameRef), ANI_NOT_FOUND);
@@ -117,7 +117,7 @@ TEST_F(ClassGetStaticFieldByNameRefTest, invalid_argument4)
 TEST_F(ClassGetStaticFieldByNameRefTest, combination_test1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LMan;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_by_name_ref_test/Man;", &cls), ANI_OK);
     ani_ref resultValue = nullptr;
     ani_string string {};
     ani_string string2 {};
@@ -145,17 +145,17 @@ TEST_F(ClassGetStaticFieldByNameRefTest, combination_test1)
 
 TEST_F(ClassGetStaticFieldByNameRefTest, combination_test2)
 {
-    CheckFieldValue("LMan;", "name");
+    CheckFieldValue("Lclass_get_static_field_by_name_ref_test/Man;", "name");
 }
 
 TEST_F(ClassGetStaticFieldByNameRefTest, combination_test3)
 {
-    CheckFieldValue("LBoxStaticA;", "string_value");
+    CheckFieldValue("Lclass_get_static_field_by_name_ref_test/BoxStaticA;", "string_value");
 }
 
 TEST_F(ClassGetStaticFieldByNameRefTest, combination_test4)
 {
-    CheckFieldValue("LBoxStaticFinal;", "string_value");
+    CheckFieldValue("Lclass_get_static_field_by_name_ref_test/BoxStaticFinal;", "string_value");
 }
 }  // namespace ark::ets::ani::testing
 

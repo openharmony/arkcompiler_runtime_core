@@ -21,7 +21,7 @@ class ObjectSetFieldByNameDoubleTest : public AniTest {
 public:
     ani_object NewAnimal()
     {
-        auto animalRef = CallEtsFunction<ani_ref>("newAnimalObject");
+        auto animalRef = CallEtsFunction<ani_ref>("object_set_field_by_name_double_test", "newAnimalObject");
         return static_cast<ani_object>(animalRef);
     }
 };
@@ -33,10 +33,14 @@ TEST_F(ObjectSetFieldByNameDoubleTest, set_field)
 {
     const ani_double tmpValue = 1.12;
     ani_object animal = NewAnimal();
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_double>(SET_VALUE)), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_by_name_double_test", "checkObjectField", animal,
+                                           static_cast<ani_double>(SET_VALUE)),
+              ANI_TRUE);
 
     ASSERT_EQ(env_->Object_SetFieldByName_Double(animal, "age", static_cast<ani_double>(tmpValue)), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_double>(tmpValue)), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_by_name_double_test", "checkObjectField", animal,
+                                           static_cast<ani_double>(tmpValue)),
+              ANI_TRUE);
 
     ani_double value {};
     ASSERT_EQ(env_->Object_GetFieldByName_Double(animal, "age", &value), ANI_OK);
@@ -50,7 +54,8 @@ TEST_F(ObjectSetFieldByNameDoubleTest, set_field01)
     const int32_t loopCount = 3;
     for (int i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetFieldByName_Double(animal, "age", static_cast<ani_double>(CMP_VALUE)), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_double>(CMP_VALUE)),
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_by_name_double_test", "checkObjectField", animal,
+                                               static_cast<ani_double>(CMP_VALUE)),
                   ANI_TRUE);
 
         ani_double value {};
@@ -58,7 +63,8 @@ TEST_F(ObjectSetFieldByNameDoubleTest, set_field01)
         ASSERT_EQ(value, CMP_VALUE);
 
         ASSERT_EQ(env_->Object_SetFieldByName_Double(animal, "age", static_cast<ani_double>(SET_VALUE)), ANI_OK);
-        ASSERT_EQ(CallEtsFunction<ani_boolean>("checkObjectField", animal, static_cast<ani_double>(SET_VALUE)),
+        ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_by_name_double_test", "checkObjectField", animal,
+                                               static_cast<ani_double>(SET_VALUE)),
                   ANI_TRUE);
 
         ASSERT_EQ(env_->Object_GetFieldByName_Double(animal, "age", &value), ANI_OK);

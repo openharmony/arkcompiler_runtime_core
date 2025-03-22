@@ -96,7 +96,7 @@ TEST_F(ArrayBufferGetInfoTest, GetInfoFromEmptyBuffer)
 
 TEST_F(ArrayBufferGetInfoTest, GetInfoFromManagedBuffer)
 {
-    auto array = static_cast<ani_arraybuffer>(CallEtsFunction<ani_ref>("GetArrayBuffer"));
+    auto array = static_cast<ani_arraybuffer>(CallEtsFunction<ani_ref>("arraybuffer_get_info_test", "GetArrayBuffer"));
     ASSERT_NE(array, nullptr);
 
     void *data = nullptr;

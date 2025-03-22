@@ -59,7 +59,7 @@ TEST_F(ArraySetGetRegionLongTest, GetLongArrayRegionErrorTests)
 
 TEST_F(ArraySetGetRegionLongTest, GetRegionLongTest)
 {
-    const auto array = static_cast<ani_array_long>(CallEtsFunction<ani_ref>("GetArray"));
+    const auto array = static_cast<ani_array_long>(CallEtsFunction<ani_ref>("array_region_long_test", "GetArray"));
 
     ani_long nativeBuffer[LENGTH_5] = {0};
     ASSERT_EQ(env_->Array_GetRegion_Long(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
@@ -72,16 +72,16 @@ TEST_F(ArraySetGetRegionLongTest, GetRegionLongTest)
 
 TEST_F(ArraySetGetRegionLongTest, SetRegionLongTest)
 {
-    const auto array = static_cast<ani_array_long>(CallEtsFunction<ani_ref>("GetArray"));
+    const auto array = static_cast<ani_array_long>(CallEtsFunction<ani_ref>("array_region_long_test", "GetArray"));
     ani_long nativeBuffer1[LENGTH_5] = {TEST_UPDATE1, TEST_UPDATE2, TEST_UPDATE3};
     ASSERT_EQ(env_->Array_SetRegion_Long(array, OFFSET_2, LENGTH_3, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("CheckArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_long_test", "CheckArray", array), ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionLongTest, CheckChangeFromManagedRegionLongTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Larray_region_long_test/ArrayClass;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -109,7 +109,7 @@ TEST_F(ArraySetGetRegionLongTest, CheckChangeFromManagedRegionLongTest)
 TEST_F(ArraySetGetRegionLongTest, CheckChangeFromApiRegionLongTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Larray_region_long_test/ArrayClass;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -127,7 +127,8 @@ TEST_F(ArraySetGetRegionLongTest, CheckChangeFromApiRegionLongTest)
 
 TEST_F(ArraySetGetRegionLongTest, GetSpecialValueToArrayTest)
 {
-    const auto array = static_cast<ani_array_long>(CallEtsFunction<ani_ref>("GetSpecialArray"));
+    const auto array =
+        static_cast<ani_array_long>(CallEtsFunction<ani_ref>("array_region_long_test", "GetSpecialArray"));
 
     std::array<ani_long, LENGTH_5> nativeBuffer = {};
     ani_long max = std::numeric_limits<int64_t>::max();

@@ -40,12 +40,12 @@ public:
 
 TEST_F(GetSuperClassTest, get_super_class_A)
 {
-    CheckGetSuperClass<true>("LA;");
+    CheckGetSuperClass<true>("Lget_super_class_test/A;");
 }
 
 TEST_F(GetSuperClassTest, get_super_class_B)
 {
-    CheckGetSuperClass<true>("LB;");
+    CheckGetSuperClass<true>("Lget_super_class_test/B;");
 }
 
 TEST_F(GetSuperClassTest, try_get_object_superclass)
@@ -62,7 +62,7 @@ TEST_F(GetSuperClassTest, ani_invalid_args)
 TEST_F(GetSuperClassTest, get_super_class_combine_scenes_001)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("LStudent;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lget_super_class_test/Student;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_type typeRef = cls;
