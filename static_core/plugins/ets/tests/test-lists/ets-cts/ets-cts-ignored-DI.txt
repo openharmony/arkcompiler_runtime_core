@@ -5,9 +5,6 @@
 07.expressions/03.named_reference/qualified_name_1.ets
 07.expressions/25.equality_expressions/eq_19.ets
 
-#22846
-13.compilation_units/08.namespace_declarations/pack1/namespace_package3.ets
-
 #21834 cannot overload a function from a package
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_0.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_1.ets
