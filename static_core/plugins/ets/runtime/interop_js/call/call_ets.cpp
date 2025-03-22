@@ -105,7 +105,11 @@ ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
 
     if (protoReader_.GetMethod()->HasVarArgs()) {
         const auto restIdx = numArgs - 1;
-        etsBoxedArgs[restIdx] = ConvertRestParams(jsargv_.SubSpan(restIdx));
+        auto restParams = ConvertRestParams(jsargv_.SubSpan(restIdx));
+        if (UNLIKELY(restParams == nullptr)) {
+            return false;
+        }
+        etsBoxedArgs[restIdx] = restParams;
     }
 
     // Unbox values
@@ -131,10 +135,7 @@ ObjectHeader **CallETSHandler::ConvertRestParams(Span<napi_value> restArgs)
     ASSERT(protoReader_.GetType().IsReference());
     ASSERT(protoReader_.GetClass()->IsArrayClass());
 
-    ObjectHeader **restParamsSlot = PackRestParameters(coro_, ctx_, protoReader_, restArgs);
-    ASSERT(restParamsSlot != nullptr);
-
-    return restParamsSlot;
+    return PackRestParameters(coro_, ctx_, protoReader_, restArgs);
 }
 
 bool CallETSHandler::CheckNumArgs(size_t numArgs) const
