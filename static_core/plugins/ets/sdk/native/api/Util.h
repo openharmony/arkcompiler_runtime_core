@@ -16,13 +16,13 @@
 #ifndef PANDA_PLUGINS_ETS_SDK_NATIVE_CORE_UTIL_H
 #define PANDA_PLUGINS_ETS_SDK_NATIVE_CORE_UTIL_H
 
-#include "plugins/ets/runtime/napi/ets_napi.h"
+#include <ani.h>
 
 extern "C" {
 namespace ark::ets::sdk::util {
 
-ETS_EXPORT ets_string ETS_CALL ETSApiUtilHelperGenerateRandomUUID(EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                                                  ets_boolean entropyCache);
+ANI_EXPORT ani_string ETSApiUtilHelperGenerateRandomUUID(ani_env *env, [[maybe_unused]] ani_class klass,
+                                                         ani_boolean entropyCache);
 
 }  // namespace ark::ets::sdk::util
 }

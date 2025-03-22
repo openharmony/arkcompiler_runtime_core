@@ -26,6 +26,6 @@ panda_add_library(ets_sdk_native SHARED ${ETS_SDK_NATIVE_SRC})
 panda_target_sources(ets_sdk_native PRIVATE ${ETS_SDK_NATIVE_SRC})
 set_target_properties(ets_sdk_native PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${ETS_SDK_SO_LOC})
 panda_target_link_libraries(ets_sdk_native arkruntime)
-panda_target_include_directories(ets_sdk_native PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/napi)
+panda_target_include_directories(ets_sdk_native PRIVATE ${PANDA_ROOT}/plugins/ets/runtime/ani/)
 
 add_dependencies(ets_sdk_prereqs ets_sdk_native)

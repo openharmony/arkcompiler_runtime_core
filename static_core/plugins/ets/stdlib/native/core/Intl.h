@@ -16,11 +16,11 @@
 #ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTL_H
 #define PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTL_H
 
-#include "plugins/ets/runtime/napi/ets_napi.h"
+#include <ani.h>
 
 namespace ark::ets::stdlib::intl {
 
-ets_int InitCoreIntl(EtsEnv *env);
+ani_status InitCoreIntl(ani_env *env);
 
 }  // namespace ark::ets::stdlib::intl
 

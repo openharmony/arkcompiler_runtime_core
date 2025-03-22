@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,22 +17,53 @@
 
 #include "runtime/compiler.h"
 #include "runtime/include/thread.h"
-#include "plugins/ets/runtime/napi/ets_scoped_objects_fix.h"
+#include "plugins/ets/runtime/ani/ani.h"
+#include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
+#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 
 extern "C" {
-namespace ark::ets::napi {
+namespace ark::ets::ani {
 // NOLINTNEXTLINE(readability-identifier-naming)
-ETS_EXPORT ets_int ETS_CALL ETS_ETSGLOBAL_compileMethod([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class cls,
-                                                        [[maybe_unused]] ets_string name)
+ANI_EXPORT ani_int CompileMethodImpl([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class cls,
+                                     [[maybe_unused]] ani_string name)
 {
     if (!Runtime::GetCurrent()->IsJitEnabled()) {
         return 1;
     }
-    ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
+    ScopedManagedCodeFix s(env);
     auto str = s.ToInternalType(name);
     return ark::CompileMethodImpl(str->GetCoreType(), panda_file::SourceLang::ETS);
 }
-}  // namespace ark::ets::napi
+
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+{
+    ani_env *env;
+    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+        std::cerr << "Unsupported ANI_VERSION_1" << std::endl;
+        return ANI_ERROR;
+    }
+
+    static const char *className = "LETSGLOBAL;";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        auto msg = std::string("Cannot find \"") + className + std::string("\" class!");
+        ark::ets::stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", msg.data(), "Lstd/core/String;:V");
+        return ANI_ERROR;
+    }
+
+    const auto methods = std::array {
+        ani_native_function {"compileMethod", "Lstd/core/String;:I", reinterpret_cast<void *>(CompileMethodImpl)}};
+
+    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+        std::cerr << "Cannot bind native methods to '" << className << "'" << std::endl;
+        return ANI_ERROR;
+    };
+
+    *result = ANI_VERSION_1;
+    return ANI_OK;
+}
+
+}  // namespace ark::ets::ani
 
 }  // extern "C"
 #endif

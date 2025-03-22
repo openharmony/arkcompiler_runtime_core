@@ -270,7 +270,7 @@ bool PandaEtsVM::Initialize()
     if (Runtime::GetOptions().ShouldInitializeIntrinsics()) {
         // NOTE(ksarychev, #18135): Implement napi module registration via loading a separate
         // library
-        EtsEnv *env = EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
+        ani_env *env = EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
         ark::ets::stdlib::InitNativeMethods(env);
     }
 

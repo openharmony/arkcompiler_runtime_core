@@ -21,7 +21,7 @@ export class LocaleMatch {
 }
 
 export function localesToString(locale: Intl.BCP47LanguageTag[]): string {
-    return string.join(locale, ",")  
+    return string.join(locale, ",")
 }
 
 export function localesToString(locale: Intl.BCP47LanguageTag): string {
@@ -46,6 +46,6 @@ export function intlLookUpLocale(locale: Intl.BCP47LanguageTag | Intl.BCP47Langu
     return LocaleMatch.lookupLocale(tagList)
 }
 
-export function intlBestFitLocale(locale: Intl.BCP47LanguageTag | Intl.BCP47LanguageTag[]): string {  
+export function intlBestFitLocale(locale: Intl.BCP47LanguageTag | Intl.BCP47LanguageTag[]): string {
     return LocaleMatch.bestFitLocale(localesToString(locale))
 }

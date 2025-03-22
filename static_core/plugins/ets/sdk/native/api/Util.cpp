@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "Util.h"
 #include <cstdint>
 #include <cstdlib>
 #include <array>
@@ -21,7 +20,9 @@
 #include <securec.h>
 #include <sys/types.h>
 #include <random>
-#include "napi/ets_napi.h"
+
+#include "Util.h"
+#include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
 
 namespace ark::ets::sdk::util {
 
@@ -41,7 +42,7 @@ S GenRandUint()
     return range(randomGenerator);
 }
 
-std::string GenUuid4(EtsEnv *env)
+std::string GenUuid4(ani_env *env)
 {
     std::array<char, UUID_LEN> uuidStr = {0};
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -50,7 +51,7 @@ std::string GenUuid4(EtsEnv *env)
         GenRandUint<uint16_t>(), (GenRandUint<uint16_t>() & NULL_FOUR_HIGH_BITS_IN_16) | RFC4122_UUID_VERSION_MARKER,
         (GenRandUint<uint16_t>() & NULL_TWO_HIGH_BITS_IN_16) | RFC4122_UUID_RESERVED_BITS, GenRandUint<uint64_t>());
     if ((n < 0) || (n > static_cast<int>(UUID_LEN))) {
-        env->ThrowErrorNew(env->FindClass("std/core/RuntimeException"), "GenerateRandomUUID failed");
+        stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", "GenerateRandomUUID failed", "Lstd/core/String;:V");
         return std::string();
     }
     std::stringstream res;
@@ -60,15 +61,15 @@ std::string GenUuid4(EtsEnv *env)
 }
 
 extern "C" {
-ETS_EXPORT ets_string ETS_CALL ETSApiUtilHelperGenerateRandomUUID(EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                                                  ets_boolean entropyCache)
+ANI_EXPORT ani_string ETSApiUtilHelperGenerateRandomUUID(ani_env *env, [[maybe_unused]] ani_class klass,
+                                                         ani_boolean entropyCache)
 {
     static std::string lastGeneratedUUID;
-    if (entropyCache != ETS_TRUE || lastGeneratedUUID.empty()) {
+    if (entropyCache != ANI_TRUE || lastGeneratedUUID.empty()) {
         lastGeneratedUUID = GenUuid4(env);
     }
+    return stdlib::CreateUtf8String(env, lastGeneratedUUID.data(), lastGeneratedUUID.size());
+}
+}  // extern "C"
 
-    return env->NewStringUTF(lastGeneratedUUID.c_str());
-}
-}
 }  // namespace ark::ets::sdk::util

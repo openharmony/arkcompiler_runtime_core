@@ -16,11 +16,11 @@
 #ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLLOCALE_H
 #define PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLLOCALE_H
 
-#include "plugins/ets/runtime/napi/ets_napi.h"
+#include <ani.h>
 
 namespace ark::ets::stdlib::intl {
 
-ets_int RegisterIntlLocaleNativeMethods(EtsEnv *env);
+ani_status RegisterIntlLocaleNativeMethods(ani_env *env);
 
 }  // namespace ark::ets::stdlib::intl
 

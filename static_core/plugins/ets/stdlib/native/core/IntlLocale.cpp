@@ -14,6 +14,7 @@
  */
 #include "plugins/ets/stdlib/native/core/IntlLocale.h"
 #include "plugins/ets/stdlib/native/core/IntlCommon.h"
+#include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
 #include <unicode/locid.h>
 #include <unicode/numsys.h>
 #include <unicode/localpointer.h>
@@ -86,31 +87,31 @@ std::string Set2String(std::set<std::string> &inSet)
     return outList;
 }
 
-ets_string StdCoreIntlLocaleDefaultLang(EtsEnv *env, [[maybe_unused]] ets_class klass)
+ani_string StdCoreIntlLocaleDefaultLang(ani_env *env, [[maybe_unused]] ani_class klass)
 {
     const std::string lang = icu::Locale::getDefault().getLanguage();
-    return StdStrToEts(env, lang);
+    return StdStrToAni(env, lang);
 }
 
-ets_string StdCoreIntlLocaleRegionList(EtsEnv *env, [[maybe_unused]] ets_class klass)
+ani_string StdCoreIntlLocaleRegionList(ani_env *env, [[maybe_unused]] ani_class klass)
 {
     std::string regionsList = Set2String(GetLocaleCheckInfo().regions);
-    return StdStrToEts(env, regionsList);
+    return StdStrToAni(env, regionsList);
 }
 
-ets_string StdCoreIntlLocaleLangList(EtsEnv *env, [[maybe_unused]] ets_class klass)
+ani_string StdCoreIntlLocaleLangList(ani_env *env, [[maybe_unused]] ani_class klass)
 {
     std::string langsList = Set2String(GetLocaleCheckInfo().langs);
-    return StdStrToEts(env, langsList);
+    return StdStrToAni(env, langsList);
 }
 
-ets_string StdCoreIntlLocaleScriptList(EtsEnv *env, [[maybe_unused]] ets_class klass)
+ani_string StdCoreIntlLocaleScriptList(ani_env *env, [[maybe_unused]] ani_class klass)
 {
     std::string scriptList = Set2String(GetLocaleCheckInfo().scripts);
-    return StdStrToEts(env, scriptList);
+    return StdStrToAni(env, scriptList);
 }
 
-ets_string StdCoreIntlLocaleNumberingSystemList(EtsEnv *env, [[maybe_unused]] ets_class klass)
+ani_string StdCoreIntlLocaleNumberingSystemList(ani_env *env, [[maybe_unused]] ani_class klass)
 {
     UErrorCode success = U_ZERO_ERROR;
     std::unique_ptr<icu::StringEnumeration> numberingSystemList(icu::NumberingSystem::getAvailableNames(success));
@@ -127,12 +128,12 @@ ets_string StdCoreIntlLocaleNumberingSystemList(EtsEnv *env, [[maybe_unused]] et
         nsList += str;
     }
 
-    return StdStrToEts(env, nsList);
+    return StdStrToAni(env, nsList);
 }
 
-ets_string StdCoreIntlLocaleInfo(EtsEnv *env, [[maybe_unused]] ets_class klass, ets_string lang)
+ani_string StdCoreIntlLocaleInfo(ani_env *env, [[maybe_unused]] ani_class klass, ani_string lang)
 {
-    std::string langKey = EtsToStdStr(env, lang);
+    std::string langKey = ConvertFromAniString(env, lang);
 
     UErrorCode success = U_ZERO_ERROR;
     auto l = icu::Locale::forLanguageTag(langKey, success);
@@ -149,12 +150,12 @@ ets_string StdCoreIntlLocaleInfo(EtsEnv *env, [[maybe_unused]] ets_class klass, 
     result += ",";
     result += l.getScript();
 
-    return StdStrToEts(env, result);
+    return StdStrToAni(env, result);
 }
 
-ets_int StdCoreIntlLocaleIsTagValid(EtsEnv *env, [[maybe_unused]] ets_class klass, ets_string tag)
+ani_int StdCoreIntlLocaleIsTagValid(ani_env *env, [[maybe_unused]] ani_class klass, ani_string tag)
 {
-    std::string tagKey = EtsToStdStr(env, tag);
+    std::string tagKey = ConvertFromAniString(env, tag);
 
     UErrorCode success = U_ZERO_ERROR;
     icu::Locale::forLanguageTag(tagKey, success);
@@ -164,15 +165,36 @@ ets_int StdCoreIntlLocaleIsTagValid(EtsEnv *env, [[maybe_unused]] ets_class klas
     return 0;
 }
 
-ets_string StdCoreIntlLocaleParseTag(EtsEnv *env, [[maybe_unused]] ets_class klass, ets_string tag)
+static int UnicodeKeyToLocaleInfo(const std::string &unicodeKey)
+{
+    int keyIndex = -1;
+    if (unicodeKey == "ca") {
+        keyIndex = LocaleInfo::U_CA;
+    } else if (unicodeKey == "co") {
+        keyIndex = LocaleInfo::U_CO;
+    } else if (unicodeKey == "kf") {
+        keyIndex = LocaleInfo::U_KF;
+    } else if (unicodeKey == "hc") {
+        keyIndex = LocaleInfo::U_HC;
+    } else if (unicodeKey == "nu") {
+        keyIndex = LocaleInfo::U_NU;
+    } else if (unicodeKey == "kn") {
+        keyIndex = LocaleInfo::U_KN;
+    }
+    return keyIndex;
+}
+
+ani_ref StdCoreIntlLocaleParseTag(ani_env *env, [[maybe_unused]] ani_class klass, ani_string tag)
 {
     std::vector<std::string> data = GetLocaleInfo();
-    std::string tagKey = EtsToStdStr(env, tag);
+    std::string tagKey = ConvertFromAniString(env, tag);
     UErrorCode success = U_ZERO_ERROR;
 
     auto l = icu::Locale::forLanguageTag(tagKey, success);
     if (UNLIKELY(U_FAILURE(success))) {
-        return ets_string();
+        std::string message = "Failed to find locale from tag";
+        ThrowNewError(env, "Lstd/core/RuntimeException;", message.c_str(), "Lstd/core/String;:V");
+        return nullptr;
     }
 
     data[LocaleInfo::LANG] = l.getLanguage();
@@ -186,23 +208,11 @@ ets_string StdCoreIntlLocaleParseTag(EtsEnv *env, [[maybe_unused]] ets_class kla
     for (auto &unicodeKey : keyWordsSet) {
         auto unicodeKeywordValue = l.getUnicodeKeywordValue<std::string>(unicodeKey, success);
         if (UNLIKELY(U_FAILURE(success))) {
-            return ets_string();
+            std::string message = "Failed to getUnicodeKeywordValue";
+            ThrowNewError(env, "Lstd/core/RuntimeException;", message.c_str(), "Lstd/core/String;:V");
+            return nullptr;
         }
-        int keyIndex = -1;
-        if (unicodeKey == "ca") {
-            keyIndex = LocaleInfo::U_CA;
-        } else if (unicodeKey == "co") {
-            keyIndex = LocaleInfo::U_CO;
-        } else if (unicodeKey == "kf") {
-            keyIndex = LocaleInfo::U_KF;
-        } else if (unicodeKey == "hc") {
-            keyIndex = LocaleInfo::U_HC;
-        } else if (unicodeKey == "nu") {
-            keyIndex = LocaleInfo::U_NU;
-        } else if (unicodeKey == "kn") {
-            keyIndex = LocaleInfo::U_KN;
-        }
-
+        int keyIndex = UnicodeKeyToLocaleInfo(unicodeKey);
         if (keyIndex >= LocaleInfo::U_CA && keyIndex < LocaleInfo::COUNT) {
             data[keyIndex] = unicodeKeywordValue;
         }
@@ -217,25 +227,30 @@ ets_string StdCoreIntlLocaleParseTag(EtsEnv *env, [[maybe_unused]] ets_class kla
         res.resize(res.length() - 1);
     }
 
-    return StdStrToEts(env, res);
+    return StdStrToAni(env, res);
 }
 
-ets_int RegisterIntlLocaleNativeMethods(EtsEnv *env)
+ani_status RegisterIntlLocaleNativeMethods(ani_env *env)
 {
     const auto methods = std::array {
-        EtsNativeMethod {"initLocale", nullptr, reinterpret_cast<void *>(StdCoreIntlLocaleFillCheckInfo)},
-        EtsNativeMethod {"maximizeInfo", nullptr, reinterpret_cast<void *>(StdCoreIntlLocaleInfo)},
-        EtsNativeMethod {"regionList", nullptr, reinterpret_cast<ets_string *>(StdCoreIntlLocaleRegionList)},
-        EtsNativeMethod {"langList", nullptr, reinterpret_cast<ets_string *>(StdCoreIntlLocaleLangList)},
-        EtsNativeMethod {"scriptList", nullptr, reinterpret_cast<ets_string *>(StdCoreIntlLocaleScriptList)},
-        EtsNativeMethod {"numberingSystemList", nullptr,
-                         reinterpret_cast<ets_string *>(StdCoreIntlLocaleNumberingSystemList)},
-        EtsNativeMethod {"defaultLang", nullptr, reinterpret_cast<ets_string *>(StdCoreIntlLocaleDefaultLang)},
-        EtsNativeMethod {"isTagValid", nullptr, reinterpret_cast<ets_int *>(StdCoreIntlLocaleIsTagValid)},
-        EtsNativeMethod {"parseTagImpl", nullptr, reinterpret_cast<ets_string *>(StdCoreIntlLocaleParseTag)}};
+        ani_native_function {"initLocale", ":V", reinterpret_cast<void *>(StdCoreIntlLocaleFillCheckInfo)},
+        ani_native_function {"maximizeInfo", "Lstd/core/String;:Lstd/core/String;",
+                             reinterpret_cast<void *>(StdCoreIntlLocaleInfo)},
+        ani_native_function {"regionList", ":Lstd/core/String;", reinterpret_cast<void *>(StdCoreIntlLocaleRegionList)},
+        ani_native_function {"langList", ":Lstd/core/String;", reinterpret_cast<void *>(StdCoreIntlLocaleLangList)},
+        ani_native_function {"scriptList", ":Lstd/core/String;", reinterpret_cast<void *>(StdCoreIntlLocaleScriptList)},
+        ani_native_function {"numberingSystemList", ":Lstd/core/String;",
+                             reinterpret_cast<void *>(StdCoreIntlLocaleNumberingSystemList)},
+        ani_native_function {"defaultLang", ":Lstd/core/String;",
+                             reinterpret_cast<void *>(StdCoreIntlLocaleDefaultLang)},
+        ani_native_function {"isTagValid", "Lstd/core/String;:I",
+                             reinterpret_cast<void *>(StdCoreIntlLocaleIsTagValid)},
+        ani_native_function {"parseTagImpl", "Lstd/core/String;:Lstd/core/String;",
+                             reinterpret_cast<void *>(StdCoreIntlLocaleParseTag)}};
 
-    ets_class localeClass = env->FindClass("std/core/Intl/Locale");
-    return env->RegisterNatives(localeClass, methods.data(), methods.size());
+    ani_class localeClass;
+    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/Locale;", &localeClass));
+    return env->Class_BindNativeMethods(localeClass, methods.data(), methods.size());
 }
 
 }  // namespace ark::ets::stdlib::intl

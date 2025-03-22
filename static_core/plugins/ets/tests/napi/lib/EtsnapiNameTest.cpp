@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,8 @@
 #include "EtsnapiNameTest.h"
 #include "libpandabase/macros.h"
 #include <iostream>
+
+#include "plugins/ets/runtime/ani/ani.h"
 
 // NOLINTBEGIN(readability-magic-numbers, readability-named-parameter)
 
@@ -72,6 +74,14 @@ ETS_EXPORT ets_int ETS_CALL ETS_EtsnapiNameTest_methodOverloaded__([[maybe_unuse
                                                                    [[maybe_unused]] ets_class)
 {
     return 1;
+}
+
+extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+{
+    (void)vm;
+    *result = ANI_VERSION_1;
+    // No need to do anything, symbols are already mangled and can be called.
+    return ANI_OK;
 }
 
 }  // extern "C"

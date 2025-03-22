@@ -16,11 +16,11 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_STD_CORE_INTL_COLLATOR_H
 #define PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_STD_CORE_INTL_COLLATOR_H
 
-#include "plugins/ets/runtime/napi/ets_napi.h"
+#include <ani.h>
 
 namespace ark::ets::stdlib::intl {
 
-ets_int RegisterIntlCollator(EtsEnv *env);
+ani_status RegisterIntlCollator(ani_env *env);
 
 }  // namespace ark::ets::stdlib::intl
 

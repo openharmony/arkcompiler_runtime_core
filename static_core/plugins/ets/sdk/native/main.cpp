@@ -13,29 +13,38 @@
  * limitations under the License.
  */
 
-#include "api/Util.h"
+#include <ani.h>
 #include <array>
-#include <cstddef>
 #include <string>
-#include "ets_napi.h"
-#include "libpandabase/macros.h"
 
-extern "C" {
-ETS_EXPORT ets_int ETS_CALL EtsNapiOnLoad(EtsEnv *env)
+#include "api/Util.h"
+#include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
+
+extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
-    ASSERT(env != nullptr);
-    const auto methods = std::array {
-        EtsNativeMethod {"generateRandomUUID", nullptr,
-                         reinterpret_cast<void *>(ark::ets::sdk::util::ETSApiUtilHelperGenerateRandomUUID)}};
-
-    auto hlpCls = std::string("api/util/UtilHelper");
-    ets_class cls = env->FindClass(hlpCls.data());
-    if (UNLIKELY(!cls)) {
-        auto msg = std::string("Cannot find \"") + hlpCls + std::string("\" class!");
-        env->ThrowErrorNew(env->FindClass("std/core/RuntimeException"), msg.data());
-        return ETS_ERR;
+    ani_env *env;
+    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+        std::cerr << "Unsupported ANI_VERSION_1" << std::endl;
+        return ANI_ERROR;
     }
-    auto res = env->RegisterNatives(cls, methods.data(), methods.size());
-    return res == ETS_OK ? ETS_NAPI_VERSION_1_0 : ETS_ERR;
-}
+
+    constexpr static const char *CLASS_NAME = "Lapi/util/UtilHelper;";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(CLASS_NAME, &cls)) {
+        auto msg = std::string("Cannot find \"") + CLASS_NAME + std::string("\" class!");
+        ark::ets::stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", msg.data(), "Lstd/core/String;:V");
+        return ANI_ERROR;
+    }
+
+    const auto methods = std::array {
+        ani_native_function {"generateRandomUUID", "Z:Lstd/core/String;",
+                             reinterpret_cast<void *>(ark::ets::sdk::util::ETSApiUtilHelperGenerateRandomUUID)}};
+
+    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+        std::cerr << "Cannot bind native methods to '" << CLASS_NAME << "'" << std::endl;
+        return ANI_ERROR;
+    };
+
+    *result = ANI_VERSION_1;
+    return ANI_OK;
 }
