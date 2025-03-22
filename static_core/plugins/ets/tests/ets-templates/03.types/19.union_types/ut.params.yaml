@@ -553,3 +553,23 @@ cases:
           assertTrue(c.a == 'A' && c.b == 33.0)
           c.b2a()
           assertTrue(c.a == 33.0 && c.b == 33.0)
+
+  # Examples from Specification
+    - decl: |-
+        type GoodUnion1 = int | double
+      use: ''
+
+    - decl: |-
+        type GoodUnion2 = Int | Double
+      use: ''
+
+    - decl: |-
+        type GoodUnion3 = int | Double
+      use: ''
+
+    - decl: |-
+        function cond(): boolean {
+            return true
+        }
+      use: |-
+        let x = cond() ? new Int(): new Double()

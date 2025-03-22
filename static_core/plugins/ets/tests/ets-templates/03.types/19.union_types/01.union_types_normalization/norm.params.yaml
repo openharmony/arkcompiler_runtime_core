@@ -279,9 +279,9 @@ cases:
           type U2 = short | undefined
           type U3 = int | undefined
           type U4 = long | undefined
-          type UT = U1 | U2 | U3 | U4   // CTE
+          type UT = U1 | U2 | U3 | U4
           let v: UT
-      neg:
+      pos:
           - |-
               v = new Byte()
 
