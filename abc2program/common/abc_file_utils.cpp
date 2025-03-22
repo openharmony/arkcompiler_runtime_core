@@ -17,6 +17,22 @@
 
 namespace panda::abc2program {
 
+std::vector<std::string> Split(const std::string &str, const char delimiter)
+{
+    std::vector<std::string> items;
+    size_t start = 0;
+    size_t pos = str.find(delimiter);
+    while (pos != std::string::npos) {
+        std::string item = str.substr(start, pos - start);
+        items.emplace_back(item);
+        start = pos + 1;
+        pos = str.find(delimiter, start);
+    }
+    std::string tail = str.substr(start);
+    items.emplace_back(tail);
+    return items;
+}
+
 bool AbcFileUtils::IsGlobalTypeName(const std::string &type_name)
 {
     return (type_name == GLOBAL_TYPE_NAME);
