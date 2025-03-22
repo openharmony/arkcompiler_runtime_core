@@ -104,7 +104,7 @@ private:
     bool RunnableCoroutinesExist();
 
     /* coroutine registry management */
-    void AddToRegistry(Coroutine *co);
+    void AddToRegistry(Coroutine *co) REQUIRES(coroListLock_);
     void RemoveFromRegistry(Coroutine *co) REQUIRES(coroListLock_);
 
     void DeleteCoroutineInstance(Coroutine *co);

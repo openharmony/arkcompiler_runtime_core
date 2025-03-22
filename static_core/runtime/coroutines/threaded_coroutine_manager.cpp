@@ -88,7 +88,6 @@ size_t ThreadedCoroutineManager::GetCoroutineCountLimit()
 
 void ThreadedCoroutineManager::AddToRegistry(Coroutine *co)
 {
-    os::memory::LockHolder lock(coroListLock_);
     co->GetVM()->GetGC()->OnThreadCreate(co);
     coroutines_.insert(co);
     coroutineCount_++;
@@ -109,7 +108,25 @@ void ThreadedCoroutineManager::DeleteCoroutineInstance(Coroutine *co)
 
 void ThreadedCoroutineManager::RegisterCoroutine(Coroutine *co)
 {
+    os::memory::LockHolder lock(coroListLock_);
     AddToRegistry(co);
+    // Propagate SUSPEND_REQUEST flag to the new coroutine to avoid the following situation:
+    // * Main coro holds read lock of the MutatorLock.
+    // * GC thread calls SuspendAll nad set SUSPEND_REQUEST flag to the main coro and
+    //   tries to acquire write lock of the MutatorLock.
+    // * Main coro creates a new coro and adds it to the coroutines_ list.
+    // * SUSPEND_REQUEST is not set in the new coroutine
+    // * New coro starts execution, acquires read lock of the MutatorLock and enters a long loop
+    // * Main coro checks SUSPEND_REQUEST flag and blocks
+    // * GC will not start becuase the new coro has no SUSPEND_REQUEST flag and it will never release the MutatorLock
+    //
+    // We need to propagate SUSPEND_REQUEST under the coroListLock_.
+    // It guarantees that the flag is already set for the current coro and we need to propagate it
+    // or GC will see the new coro in EnumerateAllThreads.
+    if (Thread::GetCurrent() != nullptr && Coroutine::GetCurrent() != nullptr &&
+        Coroutine::GetCurrent()->IsSuspended() && !co->IsSuspended()) {
+        co->SuspendImpl(true);
+    }
 }
 
 bool ThreadedCoroutineManager::TerminateCoroutine(Coroutine *co)
