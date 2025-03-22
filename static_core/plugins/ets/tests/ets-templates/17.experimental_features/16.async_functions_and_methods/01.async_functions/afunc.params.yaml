@@ -468,7 +468,7 @@ cases:
           }
       use: |-
           // Launch in trailing lambda
-          let r = await foo() { launch ((): string => s)() }
+          let r = await foo() { return launch ((): string => s)() }
           assertTrue(r == 'ABC')
 
     - decl: |-
@@ -478,7 +478,7 @@ cases:
           }
       use: |-
           // Launch in trailing lambda
-          let r = await foo() { launch ((): string => s)() }
+          let r = await foo() { return launch ((): string => s)() }
           assertTrue(r == 'ABC')
 
     - decl: |-

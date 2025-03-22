@@ -332,5 +332,5 @@ cases:
           }
       use: |-
           // Launch in trailing lambda
-          let r = new A().foo() { launch ((): string => s)() }
+          let r = new A().foo() { return launch ((): string => s)() }
           assertTrue(r == 'ABC')

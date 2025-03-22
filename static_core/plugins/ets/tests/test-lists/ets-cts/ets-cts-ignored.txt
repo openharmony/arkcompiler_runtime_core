@@ -2285,18 +2285,6 @@
 17.experimental_features/15.exceptions/03.rethrowing_functions/rethrowing_function_declaration.ets
 17.experimental_features/15.exceptions/03.rethrowing_functions/rethrowing_function_with_non_throwing_function.ets
 
-#23825 #19583
-17.experimental_features/15.coroutines/create_and_launch_coroutine/c_func_19.ets
-17.experimental_features/15.coroutines/create_and_launch_coroutine/c_func_20.ets
-17.experimental_features/15.coroutines/create_and_launch_coroutine/c_func_24.ets
-17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_18.ets
-17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_19.ets
-17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_23.ets
-17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_43.ets
-17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_44.ets
-17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_43.ets
-17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_44.ets
-
 #23378 Promise<void> should resolve as undefined
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_func_0.ets
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_0.ets
