@@ -20,7 +20,6 @@
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_proxy.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
-#include "plugins/ets/runtime/interop_js/ts2ets_copy.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 
 #include "generated/base_options.h"
@@ -46,14 +45,9 @@ static napi_value Version(napi_env env, [[maybe_unused]] napi_callback_info info
     return result;
 }
 
-static napi_value Fatal([[maybe_unused]] napi_env env, [[maybe_unused]] napi_callback_info info)
-{
-    InteropCtx::Fatal("etsVm.Fatal");
-}
-
 static napi_value GetEtsFunction(napi_env env, napi_callback_info info)
 {
-    ASSERT_SCOPED_NATIVE_CODE();
+    // Note(srokashevich, #23042): after fix assert `ASSERT_SCOPED_NATIVE_CODE()` should be here
 
     size_t jsArgc = 0;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
@@ -110,67 +104,6 @@ static napi_value GetEtsClass(napi_env env, napi_callback_info info)
 
     std::string classDescriptor = GetString(env, jsClassDescriptor);
     return ets_proxy::GetETSClass(env, classDescriptor);
-}
-
-static napi_value CallEtsFunctionImpl(EtsCoroutine *coro, InteropCtx *ctx, Span<napi_value> jsargv)
-{
-    auto env = ctx->GetJSEnv();
-
-    if (UNLIKELY(jsargv.Empty())) {
-        InteropCtx::ThrowJSError(env, "CallEtsFunction: method name required");
-        return nullptr;
-    }
-    if (UNLIKELY(GetValueType(env, jsargv[0]) != napi_string)) {
-        InteropCtx::ThrowJSError(env, "CallEtsFunction: method name is not a string");
-        return nullptr;
-    }
-
-    auto callTarget = GetString(env, jsargv[0]);
-    INTEROP_LOG(DEBUG) << "CallEtsFunction: method name: " << callTarget;
-
-    auto methodRes = ResolveEntryPoint(ctx, callTarget);
-    if (UNLIKELY(!methodRes)) {
-        InteropCtx::ThrowJSError(env, "CallEtsFunction: " + callTarget + " " + std::string(methodRes.Error()));
-        return nullptr;
-    }
-    return CallETSStatic(coro, ctx, methodRes.Value(), jsargv.SubSpan(1));
-}
-
-static napi_value Call(napi_env env, napi_callback_info info)
-{
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS(coro);
-
-    size_t argc = 0;
-    [[maybe_unused]] napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
-    ASSERT(status == napi_ok);
-
-    auto argv = ctx->GetTempArgs<napi_value>(argc);
-    napi_value thisArg {};
-    void *data = nullptr;
-    status = napi_get_cb_info(env, info, &argc, argv->data(), &thisArg, &data);
-    ASSERT(status == napi_ok);
-
-    return CallEtsFunctionImpl(coro, ctx, *argv);
-}
-
-static napi_value CallWithCopy(napi_env env, napi_callback_info info)
-{
-    ASSERT_SCOPED_NATIVE_CODE();
-
-    size_t argc = 0;
-    [[maybe_unused]] napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
-    ASSERT(status == napi_ok);
-
-    auto coro = EtsCoroutine::GetCurrent();
-    auto argv = InteropCtx::Current(coro)->GetTempArgs<napi_value>(argc);
-    napi_value thisArg {};
-    void *data = nullptr;
-    status = napi_get_cb_info(env, info, &argc, argv->data(), &thisArg, &data);
-    ASSERT(status == napi_ok);
-
-    return InvokeEtsMethodImpl(env, argv->data(), argc, false);
 }
 
 static std::optional<std::vector<std::string>> GetArgStrings(napi_env env, napi_value options,
@@ -360,9 +293,6 @@ static napi_value Init(napi_env env, napi_value exports)
 {
     const std::array desc = {
         napi_property_descriptor {"version", 0, Version, 0, 0, 0, napi_enumerable, 0},
-        napi_property_descriptor {"fatal", 0, Fatal, 0, 0, 0, napi_enumerable, 0},
-        napi_property_descriptor {"call", 0, Call, 0, 0, 0, napi_enumerable, 0},
-        napi_property_descriptor {"callWithCopy", 0, CallWithCopy, 0, 0, 0, napi_enumerable, 0},
         // NOTE(konstanting, #23205): to be deleted
         napi_property_descriptor {"createRuntime", 0, CreateRuntimeLegacy, 0, 0, 0, napi_enumerable, 0},
         // NOTE(konstanting, #23205): to be renamed once migration is complete

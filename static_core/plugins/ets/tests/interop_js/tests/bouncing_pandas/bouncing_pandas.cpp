@@ -22,9 +22,7 @@ class EtsInteropJsBouncingPandasTest : public EtsInteropTest {};
 
 TEST_F(EtsInteropJsBouncingPandasTest, BouncingPandasTest)
 {
-    // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsFunction<bool>("bouncing_pandas_test", "Test1");
-    ASSERT_EQ(ret, true);
+    ASSERT_TRUE(RunJsTestSuite("bouncing_pandas.js"));
 }
 
 }  // namespace ark::ets::interop::js::testing

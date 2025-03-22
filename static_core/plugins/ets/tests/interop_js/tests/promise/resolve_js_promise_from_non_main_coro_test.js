@@ -36,11 +36,13 @@ async function runTest(test) {
         throw Error('Cannot create ETS runtime');
     }
     let valueToResolveWith = 42;
-    let promise = etsVm.call(test, valueToResolveWith);
+    const runTestImpl = etsVm.getFunction('LETSGLOBAL;', test);
+    let promise = runTestImpl(valueToResolveWith);
     if (promise == null) {
         throw Error('Function returned null');
     }
-    etsVm.call('.signalPromiseInJs');
+    const signalPromiseInJs = etsVm.getFunction('LETSGLOBAL;', 'signalPromiseInJs');
+    signalPromiseInJs();
     try {
         let result = await promise;
         if (result !== valueToResolveWith) {

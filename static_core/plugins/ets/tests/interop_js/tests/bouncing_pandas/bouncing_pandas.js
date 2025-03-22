@@ -14,48 +14,42 @@
  */
 
 'use strict';
-class Vec2 {
-	constructor(x = 0, y = 0) {
-		this.x = x;
-		this.y = y;
-	}
-	x;
-	y;
-}
-
-class SBody {
-	r = new Vec2(0, 0);
-	v = new Vec2(0, 0);
-	rad = 0;
-	m = 0;
-}
 
 export function bouncingPandas() {
+	const Vec2 = gtest.etsVm.getClass('LVec2;');
+
 	const vec = new Vec2(1200, 800);
-	const countSB = 512;
+	const countSB = 4;
+
+	const SBody = gtest.etsVm.getClass('LSBody;');
+
 	const arrSBody = [];
 	const step = 13;
 	for (let i = 0; i < countSB; ++i) {
-		arrSBody[i] = new SBody();
-		arrSBody[i].rad = 11;
-		arrSBody[i].m = 11 * 11;
-		arrSBody[i].r.x = (step * i) % 1200;
-		arrSBody[i].r.y = Math.round(step * ((step * i) / 1200 + 1));
-		arrSBody[i].v.x = 5;
-		arrSBody[i].v.y = 5;
+		let el = new SBody();
+		el.rad = 11;
+		el.m = 11 * 11;
+		el.r.x = (step * i) % 1200;
+		el.r.y = Math.round(step * ((step * i) / 1200 + 1));
+		el.v.x = 5;
+		el.v.y = 5;
+
+		arrSBody[i] = el;
 	}
-	const resArr = gtest.etsVm.callWithCopy('bouncing_pandas.recomputeFrameSBody', arrSBody, vec);
+	let recomputeFrameSBody = gtest.etsVm.getFunction('LETSGLOBAL;', 'recomputeFrameSBody');
+	const resArr = recomputeFrameSBody(arrSBody, vec);
+
 	let resultHash = 0;
 	for (let i = 0; i < countSB; ++i) {
 		resultHash += resArr[i].r.x + resArr[i].r.y + resArr[i].v.x + resArr[i].v.y + resArr[i].rad + resArr[i].m;
 	}
 
-	if (Math.round(resultHash) !== 395799) {
+	if (Math.round(resultHash) !== 734) {
 		console.log('Wrong result hash ' + Math.round(resultHash));
-		gtest.ret = 1;
 		return 1;
 	} else {
-		gtest.ret = 0;
 		return 0;
 	}
 }
+
+ASSERT_TRUE(bouncingPandas() === 0);

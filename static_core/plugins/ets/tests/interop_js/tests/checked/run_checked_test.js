@@ -30,7 +30,8 @@ function runTest(test, pandaOptions) {
 		return 1;
 	}
 	try {
-		let res = etsVm.call('.' + test);
+		const runTestImpl = etsVm.getFunction('LETSGLOBAL;', test);
+		let res = runTestImpl();
 		if (res !== 0) {
 			throw 'test failed: ' + res;
 		}

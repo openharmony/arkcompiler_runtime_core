@@ -35,7 +35,8 @@ function init() {
 }
 
 function callEts(etsVm) {
-	let res = etsVm.call('.testReturnPendingPromise');
+	const testReturnPendingPromise = etsVm.getFunction('LETSGLOBAL;', 'testReturnPendingPromise');
+	let res = testReturnPendingPromise();
 	if (typeof res !== 'object') {
 		throw Error('Result is not an object');
 	}
@@ -74,7 +75,8 @@ function queueTasks(etsVm) {
 		if (testSuccess) {
 			throw Error('Promise must not be resolved');
 		}
-		if (!etsVm.call('.resolvePendingPromise')) {
+		const resolvePendingPromise = etsVm.getFunction('LETSGLOBAL;', 'resolvePendingPromise');
+		if (!resolvePendingPromise()) {
 			throw Error("Call of 'resolvePendingPromise' return false");
 		}
         tId = helper.setInterval(queueTasksHelper, 0);

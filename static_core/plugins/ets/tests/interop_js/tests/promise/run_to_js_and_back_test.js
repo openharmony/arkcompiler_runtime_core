@@ -29,8 +29,10 @@ function runTest() {
 	if (!etsVm.createRuntime(etsOpts)) {
 		throw Error('Cannot create ETS runtime');
 	}
-	let promise = etsVm.call('.getPromise');
-	etsVm.call('.setAndCheckPromise', promise);
+	const getPromise = etsVm.getFunction('LETSGLOBAL;', 'getPromise');
+	let promise = getPromise();
+	const setAndCheckPromise = etsVm.getFunction('LETSGLOBAL;', 'setAndCheckPromise');
+	setAndCheckPromise(promise);
 }
 
 runTest();

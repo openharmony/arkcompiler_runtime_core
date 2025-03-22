@@ -211,7 +211,6 @@ if (ark_ets_interop_js) {
     "runtime/interop_js/stack_info.cpp",
     "runtime/interop_js/sts_vm_interface_impl.cpp",
     "runtime/interop_js/timer_module.cpp",
-    "runtime/interop_js/ts2ets_copy.cpp",
     "runtime/interop_js/xgc/xgc.cpp",
   ]
 

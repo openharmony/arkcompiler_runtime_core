@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,13 +35,14 @@ function runTest(test, warmup, iters) {
 	}
 
 	globalThis.jsCode = require('./code.js');
-	if (warmup > 0 && etsVm) {
-		etsVm.call(test, warmup);
+	const runTestImpl = etsVm.getFunction('LETSGLOBAL;', test);
+	if (warmup > 0) {
+		runTestImpl(warmup);
 	}
 
 	const MS2NS = 1000000;
 	let start = Date.now();
-	etsVm.call(test, iters);
+	runTestImpl(iters);
 	let timeNs = (Date.now() - start) * MS2NS;
 	console.log('js interop test ' + test + ': ' + timeNs / iters + ' ns/iter, iters: ' + iters);
 

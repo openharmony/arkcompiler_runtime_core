@@ -32,6 +32,7 @@ exports.runTest = function (module, stsFile, testFn) {
     }
     test.setup();
     testFn(etsVm);
-    etsVm.call('.xgc');
+    const xgc = etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'xgc');
+    xgc();
     test.check();
 };

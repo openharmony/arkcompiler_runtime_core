@@ -44,7 +44,8 @@ function runTest(test, iter) {
 	if (!etsVm.createRuntime(etsOpts)) {
 		throw Error('Cannot create ETS runtime');
 	}
-	let res = etsVm.call(test);
+	const runTestImpl = etsVm.getFunction('LETSGLOBAL;', test);
+	let res = runTestImpl();
 	if (typeof res !== 'object') {
 		throw Error('Result is not an object');
 	}

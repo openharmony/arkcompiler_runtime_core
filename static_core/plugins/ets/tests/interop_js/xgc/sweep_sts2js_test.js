@@ -16,7 +16,8 @@ const testRunner = require('./test_utils.js');
 
 function sts2js(etsVm) {
     let p = Promise.resolve();
-    etsVm.call('.ignoreArg', p);
+    const ignoreArg = etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'ignoreArg');
+    ignoreArg(p);
 }
 
 testRunner.runTest('sweep_sts2js_test_module', 'xgc_tests.abc', sts2js);

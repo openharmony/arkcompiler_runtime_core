@@ -16,8 +16,9 @@ const testRunner = require('./test_utils.js');
 
 let objects = new Array();
 function js2sts(etsVm) {
+    const js2sts = etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'js2sts');
     for (let i = 0; i < 3; ++i) {
-        objects.push(etsVm.call('.js2sts'));
+        objects.push(js2sts());
     }
 }
 

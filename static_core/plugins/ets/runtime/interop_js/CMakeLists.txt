@@ -74,7 +74,6 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/napi_impl/napi_impl.cpp
         ${ETS_EXT_SOURCES}/interop_js/interop_common.cpp
         ${ETS_EXT_SOURCES}/interop_js/timer_module.cpp
-        ${ETS_EXT_SOURCES}/interop_js/ts2ets_copy.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_job_queue.cpp
         ${ETS_EXT_SOURCES}/interop_js/stack_info.cpp
         ${ETS_EXT_SOURCES}/interop_js/sts_vm_interface_impl.cpp

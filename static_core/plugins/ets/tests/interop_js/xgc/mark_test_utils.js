@@ -38,7 +38,8 @@ function init(module, stsFile) {
 }
 
 function triggerXGC() {
-    g_etsVm.call('.xgc');
+    const xgc = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'xgc');
+    xgc();
 }
 
 function checkXRefsNumber(jsNum, stsNum) {

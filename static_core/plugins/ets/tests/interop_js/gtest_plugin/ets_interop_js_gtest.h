@@ -23,6 +23,10 @@
 
 #include "libpandabase/macros.h"
 #include "interop_test_helper.h"
+#include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/runtime/interop_js/call/call.h"
+#include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "utils/span.h"
 
 namespace ark::ets::interop::js::testing {
 
@@ -351,79 +355,30 @@ private:
         return jsObject;
     }
 
-    [[nodiscard]] static bool CallEtsFunctionViaJs(napi_env env, napi_value jsFunctionName,
-                                                   const std::initializer_list<napi_value> &napiArgs)
-    {
-        napi_value jsGtestObject = GetJsGtestObject(env);
-
-        napi_value jsUndefined;
-        [[maybe_unused]] napi_status status = napi_get_undefined(env, &jsUndefined);
-        ASSERT(status == napi_ok);
-
-        napi_value jsEtsVm;
-        status = napi_get_named_property(env, jsGtestObject, "etsVm", &jsEtsVm);
-        ASSERT(status == napi_ok);
-
-        napi_value jsEtsVmCall;
-        status = napi_get_named_property(env, jsEtsVm, "call", &jsEtsVmCall);
-        ASSERT(status == napi_ok);
-
-        auto argc = napiArgs.size() + 1;
-        std::vector<napi_value> argv;
-        argv.reserve(argc);
-        argv.push_back(jsFunctionName);
-        argv.insert(argv.end(), napiArgs.begin(), napiArgs.end());
-
-        napi_value jsResult;
-        status = napi_call_function(env, jsUndefined, jsEtsVmCall, argc, argv.data(), &jsResult);
-        if (status != napi_ok) {
-            return false;
-        }
-
-        status = napi_set_named_property(env, jsGtestObject, "ret", jsResult);
-        return status == napi_ok;
-    }
-
     template <typename R, typename... Args>
     [[nodiscard]] static std::optional<R> DoCallEtsFunction(std::string_view package, std::string_view fnName,
                                                             napi_env env, Args &&...args)
     {
-        [[maybe_unused]] napi_status status;
-
-        // Get globalThis.gtest
-        napi_value jsGtestObject = GetJsGtestObject(env);
-
-        // Set globalThis.gtest.functionName
         std::string qualifiedName = std::string(package) + '.' + fnName.data();
-        napi_value jsFunctionName;
-        status = napi_create_string_utf8(env, qualifiedName.data(), qualifiedName.length(), &jsFunctionName);
-        ASSERT(status == napi_ok);
-        status = napi_set_named_property(env, jsGtestObject, "functionName", jsFunctionName);
-        ASSERT(status == napi_ok);
+        std::vector<napi_value> napiArgs = {MakeJsArg(env, args)...};
+        Span<napi_value> jsargv(napiArgs);
 
-        // Set globalThis.gtest.args
-        std::initializer_list<napi_value> napiArgs = {MakeJsArg(env, args)...};
-        napi_value jsArgs;
-        status = napi_create_array_with_length(env, napiArgs.size(), &jsArgs);
-        ASSERT(status == napi_ok);
-        uint32_t i = 0;
-        for (auto arg : napiArgs) {
-            status = napi_set_element(env, jsArgs, i++, arg);
-            ASSERT(status == napi_ok);
+        auto coro = EtsCoroutine::GetCurrent();
+        auto ctx = InteropCtx::Current(coro);
+        INTEROP_CODE_SCOPE_JS(coro);
+
+        auto methodRes = ResolveEntryPoint(ctx, qualifiedName);
+        if (UNLIKELY(!methodRes)) {
+            InteropCtx::ThrowJSError(env, "CallEtsFunction: " + qualifiedName + " " + std::string(methodRes.Error()));
+            return std::nullopt;
         }
-        status = napi_set_named_property(env, jsGtestObject, "args", jsArgs);
-        ASSERT(status == napi_ok);
 
-        auto res = CallEtsFunctionViaJs(env, jsFunctionName, napiArgs);
+        auto res = CallETSStatic(coro, ctx, methodRes.Value(), jsargv);
         if (!res) {
             return std::nullopt;
         }
 
-        // Get globalThis.gtest.ret
-        napi_value jsRetValue {};
-        status = napi_get_named_property(env, jsGtestObject, "ret", &jsRetValue);
-        ASSERT(status == napi_ok);
-        return GetRetValue<R>(env, jsRetValue);
+        return GetRetValue<R>(env, res);
     }
 
     template <typename R, typename... Args>

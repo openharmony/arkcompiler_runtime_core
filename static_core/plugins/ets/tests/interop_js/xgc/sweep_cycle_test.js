@@ -16,7 +16,8 @@ const testRunner = require('./test_utils.js');
 
 function cycle(etsVm) {
     let p = Promise.resolve();
-    p.ref = etsVm.call('.forgetCycle', p);
+    const forgetCycle = etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'forgetCycle');
+    p.ref = forgetCycle(p);
 }
 
 testRunner.runTest('sweep_cycle_test_module', 'xgc_tests.abc', cycle);

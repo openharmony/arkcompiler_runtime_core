@@ -29,14 +29,17 @@ function runTest(test) {
 	if (!etsVm.createRuntime(etsOpts)) {
 		throw Error('Cannot create ETS runtime');
 	}
-	let res = etsVm.call(test);
+	const runTestImpl = etsVm.getFunction('LETSGLOBAL;', test);
+	let res = runTestImpl();
 	let tId = 0;
 	let checkFn = () => {
-		if (etsVm.call('.is_unset')) {
+		const is_unset = etsVm.getFunction('LETSGLOBAL;', 'is_unset');
+		if (is_unset()) {
 			return;
 		}
 		helper.clearInterval(tId);
-		etsVm.call('.check');
+		const check = etsVm.getFunction('LETSGLOBAL;', 'check');
+		check();
 	};
 	tId = helper.setInterval(checkFn, 0);
 }

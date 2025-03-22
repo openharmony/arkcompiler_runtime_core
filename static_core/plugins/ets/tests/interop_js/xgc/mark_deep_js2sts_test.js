@@ -16,7 +16,8 @@ const testRunner = require('./test_utils.js');
 
 let object = undefined;
 function js2sts(etsVm) {
-    object = etsVm.call('.js2stsDeep');
+    const js2stsDeep = etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'js2stsDeep');
+    object = js2stsDeep();
 }
 
 testRunner.runTest('mark_deep_js2sts_test_module', 'xgc_tests.abc', js2sts);

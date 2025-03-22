@@ -26,14 +26,14 @@ if (HEAVY_RUN)
 endif()
 
 list(APPEND PERF_TESTS
-    ".voidCall"
-    ".voidCall10str"
-    ".voidCall10dbl"
-    ".strCall"
-    ".anystrCall"
-    ".dblCall"
-    ".anydblCall"
-    ".anyobjCall"
+    "voidCall"
+    "voidCall10str"
+    "voidCall10dbl"
+    "strCall"
+    "anystrCall"
+    "dblCall"
+    "anydblCall"
+    "anyobjCall"
 )
 
 add_custom_target(ets_interop_js_frontend_tests)

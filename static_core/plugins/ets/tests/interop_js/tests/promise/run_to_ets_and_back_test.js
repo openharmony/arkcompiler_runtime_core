@@ -30,7 +30,8 @@ function runTest() {
 		throw Error('Cannot create ETS runtime');
 	}
 	let jsPromise = Promise.resolve();
-	let etsPromise = etsVm.call('.getTheSamePromise', jsPromise);
+	const getTheSamePromise = etsVm.getFunction('LETSGLOBAL;', 'getTheSamePromise');
+	let etsPromise = getTheSamePromise(jsPromise);
 	if (jsPromise !== etsPromise) {
 		throw Error('Test ' + test + ' failed: expected jsPromise and etsPromise are the same but actually they differs');
 	}
