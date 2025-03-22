@@ -20,24 +20,21 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/tests/interop_js/xgc/test_xgc_vm_adaptor.h"
 
 namespace ark::ets::interop::js {
-class TestEcmaVMInterface : public arkplatform::EcmaVMInterface {
-public:
-    bool StartXRefMarking() override
-    {
-        return true;
-    }
-
-    void MarkFromObject([[maybe_unused]] void *obj) {}
-
+struct TestXGCEcmaAdaptorValues {
     std::vector<std::string> GetErrors()
     {
-        return std::vector<std::string>();
+        return {};
     }
 };
+static TestXGCEcmaAdaptorValues g_xgcAdaptorValues;
 
-static TestEcmaVMInterface g_ecmaVMIface;
+class TestXGCEcmaVmAdaptor : public TestXGCVmAdaptor {
+public:
+    TestXGCEcmaVmAdaptor(napi_env env, [[maybe_unused]] TestXGCEcmaAdaptorValues *value) : TestXGCVmAdaptor(env) {}
+};
 
 class TestGCListener : public mem::GCListener {
 public:

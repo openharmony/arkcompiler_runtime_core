@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/interop_js/handshake.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "hybrid/ecma_vm_interface.h"
 
 #include "interfaces/inner_api/napi/native_node_api.h"
 
@@ -47,7 +48,7 @@ void Handshake::VmHandshake(napi_env env, [[maybe_unused]] EtsCoroutine *coro, a
         InteropCtx::ThrowJSError(env, "Handshake error: got wrong VMInterfaceType");
         return;
     }
-    ctx->SetEcmaVMInterface(reinterpret_cast<arkplatform::EcmaVMInterface *>(jsvmIface));
+    ctx->CreateXGCVmAdaptor<XGCVmAdaptor>(env, static_cast<arkplatform::EcmaVMInterface *>(jsvmIface));
 }
 
 }  // namespace ark::ets::interop::js

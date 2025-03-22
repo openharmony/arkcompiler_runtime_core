@@ -24,6 +24,7 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/tests/interop_js/xgc/test_xgc_vm_adaptor.h"
 
 namespace ark::ets::interop::js {
 

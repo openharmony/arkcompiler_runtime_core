@@ -20,44 +20,52 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/tests/interop_js/xgc/test_xgc_vm_adaptor.h"
 
 namespace ark::ets::interop::js {
 
-class TestEcmaVMInterface : public arkplatform::EcmaVMInterface {
-public:
-    void MarkFromObject(void *obj)
+struct TestXGCEcmaAdaptorValues {
+    void SetExpectedJsObject(napi_ref obj)
     {
-        markFromObjectCalled_ = true;
-        if (obj != expectedJsObject_) {
-            std::stringstream err;
-            err << "MarkFromObject called with " << obj << ", but expected " << expectedJsObject_;
-            errors_.push_back(err.str());
-            return;
-        }
-    }
-
-    void SetExpectedJsObject(void *obj)
-    {
-        expectedJsObject_ = obj;
+        expectedJsObject = obj;
     }
 
     std::vector<std::string> GetErrors()
     {
-        if (!markFromObjectCalled_) {
+        if (!markFromObjectCalled) {
             std::stringstream err;
             err << "MarkFromObject was not called";
-            errors_.insert(errors_.begin(), err.str());
+            errors.insert(errors.begin(), err.str());
         }
-        return errors_;
+        return errors;
+    }
+
+    std::vector<std::string> errors;
+    napi_ref expectedJsObject = nullptr;
+    bool markFromObjectCalled = false;
+};
+static TestXGCEcmaAdaptorValues g_xgcAdaptorValues;
+
+class TestXGCEcmaVmAdaptor : public TestXGCVmAdaptor {
+public:
+    explicit TestXGCEcmaVmAdaptor(napi_env env, TestXGCEcmaAdaptorValues *value) : TestXGCVmAdaptor(env), values_(value)
+    {
+    }
+
+    void MarkFromObject(napi_ref obj) override
+    {
+        values_->markFromObjectCalled = true;
+        if (obj != values_->expectedJsObject) {
+            std::stringstream err;
+            err << "MarkFromObject called with " << obj << ", but expected " << values_->expectedJsObject;
+            values_->errors.push_back(err.str());
+            return;
+        }
     }
 
 private:
-    std::vector<std::string> errors_;
-    void *expectedJsObject_ = nullptr;
-    bool markFromObjectCalled_ = false;
+    TestXGCEcmaAdaptorValues *values_ = nullptr;
 };
-
-static TestEcmaVMInterface g_ecmaVMIface;
 
 class TestGCListener : public mem::GCListener {
 public:
@@ -95,7 +103,7 @@ public:
                     return;
                 }
                 sts2jsRef = true;
-                g_ecmaVMIface.SetExpectedJsObject(xref->GetJsRef());
+                g_xgcAdaptorValues.SetExpectedJsObject(xref->GetJsRef());
             }
         });
     }

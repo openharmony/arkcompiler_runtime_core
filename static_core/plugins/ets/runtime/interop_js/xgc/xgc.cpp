@@ -69,9 +69,7 @@ ALWAYS_INLINE static void MarkJsObject(ets_proxy::SharedReference *ref, STSVMInt
 {
     ASSERT(ref->HasJSFlag());
     LOG_XGC(DEBUG) << "napi_mark_from_object for ref " << ref;
-#ifdef PANDA_JS_ETS_HYBRID_MODE
-    napi_mark_from_object(ref->GetCtx()->GetJSEnv(), ref->GetJsRef());
-#endif  // PANDA_JS_ETS_HYBRID_MODE
+    ref->GetCtx()->GetXGCVmAdaptor()->MarkFromObject(ref->GetJsRef());
     LOG_XGC(DEBUG) << "Notify to JS waiters";
     stsVmIface->NotifyWaiters();
 }
@@ -309,9 +307,8 @@ bool XGC::Trigger(mem::GC *gc, PandaUniquePtr<GCTask> task)
     ASSERT(ctx != nullptr);
     // NOTE(audovichenko): Need a way to wait for the gc. May be Promise? :) // NOTE(ipetrov): Please, no!
     // NOTE(audovichenko): Handle the situation when the function create several equal tasks
-    // NOTE(audovichenko): Handle the situation when GC is triggered in one VM but cannot be triggered in another
-    // VM.
-    if (!ctx->GetEcmaVMInterface()->StartXRefMarking()) {
+    // NOTE(audovichenko): Handle the situation when GC is triggered in one VM but cannot be triggered in another VM.
+    if (!ctx->GetXGCVmAdaptor()->StartXRefMarking()) {
         ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR, "Cannot start ArkJS XGC");
         return false;
     }
