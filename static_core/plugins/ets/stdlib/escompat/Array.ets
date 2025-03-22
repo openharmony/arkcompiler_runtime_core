@@ -64,7 +64,7 @@ const FROM_BUFFER = new FromBuffer()
  * Represents JS API-compatible Array
  */
 export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
-    private buffer: NullishType[]
+    private buffer: FixedArray<NullishType>
     internal actualLength: int
 
     override get length(): number {
