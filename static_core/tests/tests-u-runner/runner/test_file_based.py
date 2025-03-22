@@ -103,7 +103,6 @@ class TestFileBased(Test):
             params = deepcopy(params)
             profraw_file, profdata_file = self.test_env.coverage.get_uniq_profraw_profdata_file_paths()
             params.env['LLVM_PROFILE_FILE'] = profraw_file
-
         cmd = self.test_env.cmd_prefix + [params.executor]
         cmd.extend(params.flags)
 

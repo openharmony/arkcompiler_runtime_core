@@ -31,6 +31,8 @@ YAML_EXTENSIONS = [".yaml", ".yml"]
 TEMPLATE_EXTENSION = ".ets"
 OUT_EXTENSION = ".ets"
 JAR_EXTENSION = ".jar"
+TEMPLATE_EXTENSION_TS = ".ts"
+OUT_EXTENSION_TS = ".ts"
 
 # Prefixes
 LIST_PREFIX = "list."
