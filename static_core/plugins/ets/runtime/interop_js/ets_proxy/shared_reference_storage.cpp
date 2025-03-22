@@ -14,7 +14,9 @@
  */
 
 #include <cstring>
+#include <string>
 
+#include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
@@ -170,7 +172,11 @@ napi_value SharedReferenceStorage::GetJsObject(EtsObject *etsObject, napi_env en
             return jsValue;
         }
         uint32_t index = currentRef->flags_.GetNextIndex();
-        ASSERT_PRINT(index != 0U, "No JS Object for SharedReference (" << this << ") and napi_env: " << env);
+        if (index == 0U) {
+            // NOTE(MockMockBlack, #24062): to be replaced with a runtime exception
+            InteropFatal("No JS Object for SharedReference (" + std::to_string(reinterpret_cast<std::uintptr_t>(this)) +
+                         ") and napi_env: " + std::to_string(reinterpret_cast<std::uintptr_t>(env)));
+        }
         currentRef = GetItemByIndex(index);
     } while (true);
 }
