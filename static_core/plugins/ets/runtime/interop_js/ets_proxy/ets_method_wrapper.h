@@ -89,6 +89,9 @@ public:
     static napi_property_descriptor MakeNapiProperty(EtsMethodSet *method, LazyEtsMethodWrapperLink *lazyLinkSpace);
     static void AttachGetterSetterToProperty(EtsMethodSet *method, napi_property_descriptor &property);
 
+    static napi_property_descriptor MakeNapiIteratorProperty(napi_value &iterator, EtsMethodSet *method,
+                                                             LazyEtsMethodWrapperLink *lazyLinkSpace);
+
     template <bool IS_STATIC>
     static napi_value EtsMethodCallHandler(napi_env env, napi_callback_info cinfo);
 

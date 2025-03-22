@@ -127,6 +127,7 @@
     FN_MACRO(napi_is_date, napi_env, env, napi_value, value, bool *, is_date)                                          \
     FN_MACRO(napi_get_and_clear_last_exception, napi_env, env, napi_value *, result)                                   \
     FN_MACRO(napi_create_string_utf8, napi_env, env, const char *, str, size_t, length, napi_value *, result)          \
+    FN_MACRO(napi_create_symbol, napi_env, env, napi_value, value, napi_value *, result)                               \
     FN_MACRO(napi_get_value_double, napi_env, env, napi_value, value, double *, result)                                \
     FN_MACRO(napi_is_arraybuffer, napi_env, env, napi_value, value, bool *, result)                                    \
     FN_MACRO(napi_close_handle_scope, napi_env, env, napi_handle_scope, scope)                                         \
