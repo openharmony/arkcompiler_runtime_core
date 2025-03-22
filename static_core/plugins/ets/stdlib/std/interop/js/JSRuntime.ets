@@ -62,6 +62,10 @@ export final class JSRuntime {
     public static newJSValueObject(value: Object): JSValue {
         JSRuntime.checkIntrinsicMethod();
     }
+    
+    public static newJSValueBigInt(bi: BigInt): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+    }
 
     // ================
     // getValue<TYPE>()
@@ -176,6 +180,40 @@ export final class JSRuntime {
     // ===================
     //
     // ===================
+    public static hasProperty(object: JSValue, name: String): boolean {
+        JSRuntime.checkIntrinsicMethod();
+    }
+    public static hasPropertyJSValue(object: JSValue, property: JSValue): boolean {
+        JSRuntime.checkIntrinsicMethod();
+    }
+    public static hasElement(object: JSValue, index: int): boolean {
+        JSRuntime.checkIntrinsicMethod();
+    }
+    public static hasOwnProperty(object: JSValue, name: String): boolean {
+        JSRuntime.checkIntrinsicMethod();
+    }
+    public static hasOwnPropertyJSValue(object: JSValue, property: JSValue): boolean {
+        JSRuntime.checkIntrinsicMethod();
+    }
+    public static getProperty(object: JSValue, property: JSValue): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+    }
+    public static typeOf(object: JSValue): string {
+        JSRuntime.checkIntrinsicMethod();
+    }
+    public static isPromise(object: JSValue): boolean {
+        JSRuntime.checkIntrinsicMethod();
+    }
+    public static invoke(recv: JSValue, func: JSValue, ...args: JSValue[]): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+    }
+    public static instanceOfStaticType(recv: JSValue, type: Type): boolean {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
+    // ===================
+    //
+    // ===================
     public static getUndefined(): JSValue {
         JSRuntime.checkIntrinsicMethod();
     }
@@ -189,6 +227,10 @@ export final class JSRuntime {
     }
 
     public static createObject(): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
+    public static createArray(): JSValue {
         JSRuntime.checkIntrinsicMethod();
     }
 
@@ -240,6 +282,10 @@ export final class JSRuntime {
     }
 
     public static getElementJSValue(object: JSValue, index: int): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
+    public static instantiate(callable: JSValue, ...args: JSValue[]): JSValue {
         JSRuntime.checkIntrinsicMethod();
     }
 

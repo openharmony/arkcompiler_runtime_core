@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License") \;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,6 +69,9 @@
     FN_MACRO(napi_get_new_target, napi_env, env, napi_callback_info, cbinfo, napi_value *, result)                     \
     FN_MACRO(napi_get_undefined, napi_env, env, napi_value *, result)                                                  \
     FN_MACRO(napi_strict_equals, napi_env, env, napi_value, lhs, napi_value, rhs, bool *, result)                      \
+    FN_MACRO(napi_has_property, napi_env, env, napi_value, property, napi_value, name, bool *, result)                 \
+    FN_MACRO(napi_has_element, napi_env, env, napi_value, property, uint32_t, index, bool *, result)                   \
+    FN_MACRO(napi_has_own_property, napi_env, env, napi_value, property, napi_value, name, bool *, result)             \
     FN_MACRO(napi_throw_error, napi_env, env, const char *, code, const char *, msg)                                   \
     FN_MACRO(napi_instanceof, napi_env, env, napi_value, object, napi_value, constructor, bool *, result)              \
     FN_MACRO(napi_reject_deferred, napi_env, env, napi_deferred, deferred, napi_value, rejection)                      \
@@ -81,6 +84,7 @@
     FN_MACRO(napi_create_promise, napi_env, env, napi_deferred *, deferred, napi_value *, promise)                     \
     FN_MACRO(napi_create_reference, napi_env, env, napi_value, value, uint32_t, initial_refcount, napi_ref *, result)  \
     FN_MACRO(napi_create_array_with_length, napi_env, env, size_t, length, napi_value *, result)                       \
+    FN_MACRO(napi_create_array, napi_env, env, napi_value *, result)                                                   \
     FN_MACRO(napi_is_promise, napi_env, env, napi_value, value, bool *, is_promise)                                    \
     FN_MACRO(napi_get_value_string_utf16, napi_env, env, napi_value, value, char16_t *, buf, size_t, bufsize,          \
              size_t *, result)                                                                                         \

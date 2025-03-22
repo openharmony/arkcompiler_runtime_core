@@ -47,6 +47,11 @@ JSValue *JSRuntimeNewJSValueObjectIntrinsic(EtsObject *v)
     return JSRuntimeNewJSValueObject(v);
 }
 
+JSValue *JSRuntimeNewJSValueBigIntIntrinsic(EtsBigInt *v)
+{
+    return JSRuntimeNewJSValueBigInt(v);
+}
+
 double JSRuntimeGetValueDoubleIntrinsic(JSValue *etsJsValue)
 {
     return JSRuntimeGetValueDouble(etsJsValue);
@@ -112,6 +117,11 @@ void JSRuntimeSetPropertyBooleanIntrinsic(JSValue *etsJsValue, EtsString *etsPro
     JSValueNamedSetter<JSConvertU1>(etsJsValue, etsPropName, static_cast<bool>(value));
 }
 
+void JSRuntimeSetElementJSValueIntrinsic(JSValue *etsJsValue, int32_t index, JSValue *value)
+{
+    JSValueIndexedSetter<JSConvertJSValue>(etsJsValue, index, value);
+}
+
 JSValue *JSRuntimeGetElementJSValueIntrinsic(JSValue *etsJsValue, int32_t index)
 {
     return JSValueIndexedGetter<JSConvertJSValue>(etsJsValue, index);
@@ -142,6 +152,11 @@ JSValue *JSRuntimeCreateObjectIntrinsic()
     return JSRuntimeCreateObject();
 }
 
+JSValue *JSRuntimeCreateArrayIntrinsic()
+{
+    return JSRuntimeCreateArray();
+}
+
 uint8_t JSRuntimeInstanceOfDynamicIntrinsic(JSValue *object, JSValue *ctor)
 {
     return JSRuntimeInstanceOfDynamic(object, ctor);
@@ -170,6 +185,60 @@ JSValue *JSRuntimeLoadModuleIntrinsic(EtsString *module)
 uint8_t JSRuntimeStrictEqualIntrinsic(JSValue *lhs, JSValue *rhs)
 {
     return JSRuntimeStrictEqual(lhs, rhs);
+}
+
+uint8_t JSRuntimeHasPropertyIntrinsic(JSValue *object, EtsString *name)
+{
+    return JSRuntimeHasProperty(object, name);
+}
+
+JSValue *JSRuntimeGetPropertyIntrinsic(JSValue *object, JSValue *property)
+{
+    return JSRuntimeGetProperty(object, property);
+}
+
+uint8_t JSRuntimeHasPropertyJSValueIntrinsic(JSValue *object, JSValue *property)
+{
+    return JSRuntimeHasPropertyJSValue(object, property);
+}
+
+uint8_t JSRuntimeHasElementIntrinsic(JSValue *object, int index)
+{
+    return JSRuntimeHasElement(object, index);
+}
+
+uint8_t JSRuntimeHasOwnPropertyIntrinsic(JSValue *object, EtsString *name)
+{
+    return JSRuntimeHasOwnProperty(object, name);
+}
+
+uint8_t JSRuntimeHasOwnPropertyJSValueIntrinsic(JSValue *object, JSValue *property)
+{
+    return JSRuntimeHasOwnPropertyJSValue(object, property);
+}
+
+EtsString *JSRuntimeTypeOfIntrinsic(JSValue *object)
+{
+    return JSRuntimeTypeOf(object);
+}
+
+uint8_t JSRuntimeIsPromiseIntrinsic(JSValue *object)
+{
+    return JSRuntimeIsPromise(object);
+}
+
+uint8_t JSRuntimeInstanceOfStaticTypeIntrinsic(JSValue *object, EtsTypeAPIType *paramType)
+{
+    return JSRuntimeInstanceOfStaticType(object, paramType);
+}
+
+JSValue *JSRuntimeInvokeIntrinsic(JSValue *recv, JSValue *func, ObjectHeader *args)
+{
+    return JSRuntimeInvoke(recv, func, reinterpret_cast<EtsArray *>(args));
+}
+JSValue *JSRuntimeInstantiateIntrinsic(JSValue *callable, ObjectHeader *args)
+{
+    return JSRuntimeInstantiate(callable, reinterpret_cast<EtsArray *>(args));
 }
 
 EtsLong JSRuntimeXgcStartIntrinsic()

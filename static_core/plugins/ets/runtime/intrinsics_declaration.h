@@ -24,6 +24,7 @@
 #include "plugins/ets/runtime/types/ets_arraybuffer.h"
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"
 #include "plugins/ets/runtime/types/ets_typeapi_type.h"
+#include "plugins/ets/runtime/types/ets_bigint.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_declaration.h"
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_DECLARATION_H_
