@@ -28,4 +28,4 @@ cases:
  - tags: negative, compile-only
    run: |-
       let a: A = new A(1);
-      let b = a;
+      let b: B = a;

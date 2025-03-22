@@ -94,7 +94,7 @@ cases:
       }
     params: override-incompatible parameter (contravariance)
 
-  - tags: 'negative, compile-only'
+  - tags: 'compile-only'
     base: |-
       foo( i: (j: Derived) => Derived ): void {
           res = 1
@@ -103,6 +103,10 @@ cases:
       foo(i: (j: Base) => Derived): void {
           res = 2
       }
+    call: |-
+      let func = (j: Base) : Derived => new Derived()
+      new Derived().foo(func)
+      assertEQ(res, 2)
     params: override-incompatible parameter, overloading is also unavailable
 
   - tags: 'negative, compile-only'

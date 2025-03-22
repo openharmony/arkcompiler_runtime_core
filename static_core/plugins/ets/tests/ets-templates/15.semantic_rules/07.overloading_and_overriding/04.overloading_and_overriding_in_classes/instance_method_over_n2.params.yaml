@@ -38,7 +38,7 @@ cases:
   # overload, retval is incompatible
   - { base: "i: FUN_AB", derived: "i: FUN_AC", call: "faa", res: 0, tags: "compile-only, negative" }
   # overload as retval is covariant
-  - { base: "i: FUN_AB", derived: "i: FUN_AC", call: "fab", res: 1 }
+  - { base: "i: FUN_AB", derived: "i: FUN_AC", call: "fab", res: 2 }
   - { base: "i: FUN_AB", derived: "i: FUN_AC", call: "fac", res: 2 }
   # overload, paramval is incompatible
   - { base: "i: FUN_AB", derived: "i: FUN_AC", call: "fbb", res: 0, tags: "compile-only, negative" }
