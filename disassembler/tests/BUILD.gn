@@ -227,6 +227,7 @@ script_sources = [
 module_sources = [
   "disassembler_module_literal_test.cpp",
   "disassembler_system_annotations_test.cpp",
+  "utils.cpp",
 ]
 
 disasm_module_test_action_files = [
