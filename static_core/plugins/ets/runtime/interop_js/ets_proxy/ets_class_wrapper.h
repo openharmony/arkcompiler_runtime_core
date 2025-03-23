@@ -59,6 +59,7 @@ public:
 
     static std::unique_ptr<JSRefConvert> CreateJSRefConvertEtsProxy(InteropCtx *ctx, Class *klass);
     static std::unique_ptr<JSRefConvert> CreateJSRefConvertJSProxy(InteropCtx *ctx, Class *klass);
+    static std::unique_ptr<JSRefConvert> CreateJSRefConvertEtsInterface(InteropCtx *ctx, Class *klass);
 
     bool IsEtsGlobalClass() const
     {

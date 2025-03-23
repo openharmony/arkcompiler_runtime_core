@@ -198,6 +198,45 @@ std::unique_ptr<JSRefConvert> EtsClassWrapper::CreateJSRefConvertJSProxy([[maybe
     return std::make_unique<JSRefConvertJSProxy>();
 }
 
+class JSRefConvertInterface : public JSRefConvert {
+public:
+    explicit JSRefConvertInterface(Class *klass) : JSRefConvert(this), klass_(klass)
+    {
+        ASSERT(klass->IsInterface());
+    }
+
+    napi_value WrapImpl(InteropCtx *ctx, EtsObject *etsObject)
+    {
+        auto realConverter = JSRefConvertResolve(ctx, etsObject->GetClass()->GetRuntimeClass());
+        if (realConverter == nullptr) {
+            InteropFatal("Cannot get ref converter for object");
+        }
+        return realConverter->Wrap(ctx, etsObject);
+    }
+
+    EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value jsValue)
+    {
+        auto objectConverter =
+            ctx->GetEtsClassWrappersCache()->Lookup(EtsClass::FromRuntimeClass(ctx->GetObjectClass()));
+        auto ret = objectConverter->Unwrap(ctx, jsValue);
+        if (!ret->IsInstanceOf(EtsClass::FromRuntimeClass(klass_))) {
+            ctx->ThrowJSTypeError(ctx->GetJSEnv(), "object of type " + ret->GetClass()->GetRuntimeClass()->GetName() +
+                                                       " is not assignable to " + klass_->GetName());
+            return nullptr;
+        }
+        return ret;
+    }
+
+private:
+    Class *klass_;
+};
+/*static*/
+std::unique_ptr<JSRefConvert> EtsClassWrapper::CreateJSRefConvertEtsInterface([[maybe_unused]] InteropCtx *ctx,
+                                                                              Class *klass)
+{
+    return std::make_unique<JSRefConvertInterface>(klass);
+}
+
 EtsMethodSet *EtsClassWrapper::GetMethod(const std::string &name) const
 {
     for (const auto &item : etsMethods_) {
