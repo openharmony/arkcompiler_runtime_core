@@ -52,6 +52,16 @@ EtsMethodWrapper *EtsMethodWrapper::GetMethod(InteropCtx *ctx, EtsMethodSet *ets
 }
 
 /* static */
+napi_property_descriptor EtsMethodWrapper::MakeNapiIteratorProperty(napi_value &iterator, EtsMethodSet *method,
+                                                                    LazyEtsMethodWrapperLink *lazyLink)
+{
+    napi_property_descriptor prop = MakeNapiProperty(method, lazyLink);
+    prop.utf8name = nullptr;
+    prop.name = iterator;
+    return prop;
+}
+
+/* static */
 napi_property_descriptor EtsMethodWrapper::MakeNapiProperty(EtsMethodSet *method, LazyEtsMethodWrapperLink *lazyLink)
 {
     napi_callback callback {};

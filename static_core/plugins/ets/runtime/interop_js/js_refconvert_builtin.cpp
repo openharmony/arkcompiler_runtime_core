@@ -360,6 +360,7 @@ public:
         RegisterExceptions();
 
         wDate_ = RegisterClassWithLeafMatcher(descriptors::DATE, "Date");
+        RegisterClassWithLeafMatcher(descriptors::ITERATOR_RESULT, nullptr);
 
         RegisterArray();
 

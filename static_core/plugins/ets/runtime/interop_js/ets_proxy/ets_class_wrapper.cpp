@@ -417,11 +417,11 @@ std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapp
     return {fields, methods};
 }
 
-std::vector<napi_property_descriptor> EtsClassWrapper::BuildJSProperties(Span<Field *> fields,
+std::vector<napi_property_descriptor> EtsClassWrapper::BuildJSProperties(napi_env &env, Span<Field *> fields,
                                                                          Span<EtsMethodSet *> methods)
 {
     std::vector<napi_property_descriptor> jsProps;
-    jsProps.reserve(fields.size() + methods.size());
+    jsProps.reserve(fields.size() + methods.size() + 1);
 
     // Process fields
     numFields_ = fields.size();
@@ -453,6 +453,10 @@ std::vector<napi_property_descriptor> EtsClassWrapper::BuildJSProperties(Span<Fi
         auto lazyLink = &etsMethodWrappers[methodIdx++];
         lazyLink->Set(method);
         jsProps.emplace_back(EtsMethodWrapper::MakeNapiProperty(method, lazyLink));
+        if (strcmp(method->GetName(), ITERATOR_METHOD) == 0) {
+            auto iterator = EtsClassWrapper::GetGlobalSymbolIterator(env);
+            jsProps.emplace_back(EtsMethodWrapper::MakeNapiIteratorProperty(iterator, method, lazyLink));
+        }
         if (method->IsGetter() || method->IsSetter()) {
             BuildGetterSetterFieldProperties(propMap, method);
         }
@@ -487,6 +491,19 @@ void EtsClassWrapper::BuildGetterSetterFieldProperties(GetterSetterPropsMap &pro
         propMap.insert({key, prop});
         getterSetterFieldWrappers_.push_back(std::move(fieldWrapper));
     }
+}
+
+/* static */
+napi_value EtsClassWrapper::GetGlobalSymbolIterator(napi_env &env)
+{
+    napi_value global;
+    napi_value symbol;
+    napi_value iterator;
+    NAPI_CHECK_FATAL(napi_get_global(env, &global));
+    NAPI_CHECK_FATAL(napi_get_named_property(env, global, "Symbol", &symbol));
+    NAPI_CHECK_FATAL(napi_get_named_property(env, symbol, "iterator", &iterator));
+
+    return iterator;
 }
 
 EtsClassWrapper *EtsClassWrapper::LookupBaseWrapper(EtsClass *klass)
@@ -550,7 +567,7 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
         }
     }
 
-    auto jsProps = _this->BuildJSProperties({fields.data(), fields.size()}, {methods.data(), methods.size()});
+    auto jsProps = _this->BuildJSProperties(env, {fields.data(), fields.size()}, {methods.data(), methods.size()});
 
     // NOTE(vpukhov): fatal no-public-fields check when escompat adopt accessors
     if (_this->HasBuiltin() && !fields.empty()) {

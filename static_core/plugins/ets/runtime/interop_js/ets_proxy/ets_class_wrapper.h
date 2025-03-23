@@ -119,7 +119,11 @@ private:
     void CollectConstructors(PropsMap *props);
     void CollectClassMethods(PropsMap *props, const OverloadsMap *overloads);
     std::pair<FieldsVec, MethodsVec> CalculateFieldsAndMethods(const PropsMap &props);
-    std::vector<napi_property_descriptor> BuildJSProperties(Span<Field *> fields, Span<EtsMethodSet *> methods);
+    std::vector<napi_property_descriptor> BuildJSProperties(napi_env &env, Span<Field *> fields,
+                                                            Span<EtsMethodSet *> methods);
+
+    static napi_value GetGlobalSymbolIterator(napi_env &env);
+
     EtsClassWrapper *LookupBaseWrapper(EtsClass *klass);
     void BuildGetterSetterFieldProperties(GetterSetterPropsMap &propMap, EtsMethodSet *method);
     void SetUpMimicHandler(napi_env env);
