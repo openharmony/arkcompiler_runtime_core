@@ -730,6 +730,13 @@ void PandaEtsVM::UpdateVmRefs()
         return true;
     });
 
+    objStateTable_->EnumerateObjectStates([](EtsObjectStateInfo *info) {
+        auto *obj = info->GetEtsObject()->GetCoreType();
+        if (obj->IsForwarded()) {
+            info->SetEtsObject(EtsObject::FromCoreType(ark::mem::GetForwardAddress(obj)));
+        }
+    });
+
     {
         os::memory::LockHolder lock(rootProviderlock_);
         for (auto *rootProvider : rootProviders_) {

@@ -2561,7 +2561,8 @@ bool G1GC<LanguageConfig>::ShouldRunTenuredGC(const GCTask &task)
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::OnWaitForIdleFail()
 {
-    if (this->GetGCPhase() == GCPhase::GC_PHASE_MARK) {
+    // NOTE(ipetrov, #22715): Don't interrupt XGC while it is not support in another
+    if (this->GetGCPhase() == GCPhase::GC_PHASE_MARK && this->GetLastGCCause() != GCTaskCause::CROSSREF_CAUSE) {
         // Atomic with release order reason: write to this variable should become visible in concurrent marker check
         interruptConcurrentFlag_.store(true, std::memory_order_release);
         if (this->GetSettings()->G1EnablePauseTimeGoal()) {

@@ -32,6 +32,9 @@ class InteropCtx;
 namespace ark::ets::interop::js::ets_proxy {
 // Forward declaration
 class SharedReferenceStorage;
+namespace testing {
+class SharedReferenceStorage1GTest;
+}  // namespace testing
 
 class SharedReference {
 public:
@@ -63,17 +66,6 @@ public:
     {
         ASSERT(ctx_ != nullptr);
         return ctx_;
-    }
-
-    static bool HasReference(EtsObject *etsObject)
-    {
-        return etsObject->HasInteropIndex();
-    }
-
-    static uint32_t ExtractMaybeIndex(EtsObject *etsObject)
-    {
-        ASSERT(HasReference(etsObject));
-        return etsObject->GetInteropIndex();
     }
 
     bool HasETSFlag() const
@@ -181,6 +173,7 @@ public:
 private:
     friend class SharedReferenceSanity;
     friend class SharedReferenceStorage;
+    friend class testing::SharedReferenceStorage1GTest;
 
     void InitRef(InteropCtx *ctx, EtsObject *etsObject, napi_ref jsRef, uint32_t refIdx);
 
@@ -188,6 +181,17 @@ private:
     {
         ASSERT(obj != nullptr);
         etsRef_ = obj;
+    }
+
+    static bool HasReference(EtsObject *etsObject)
+    {
+        return etsObject->HasInteropIndex();
+    }
+
+    static uint32_t ExtractMaybeIndex(EtsObject *etsObject)
+    {
+        ASSERT(HasReference(etsObject));
+        return etsObject->GetInteropIndex();
     }
 
     /// Unset mark flag from the reference

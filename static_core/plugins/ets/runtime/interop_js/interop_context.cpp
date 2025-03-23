@@ -224,6 +224,9 @@ InteropCtx::SharedEtsVmState::SharedEtsVmState(PandaEtsVM *vm)
 
     // xgc-related things
     stsVMInterface = MakePandaUnique<STSVMInterfaceImpl>();
+    [[maybe_unused]] bool xgcCreated =
+        XGC::Create(vm, etsProxyRefStorage.get(), static_cast<STSVMInterfaceImpl *>(stsVMInterface.get()));
+    ASSERT(xgcCreated);
 
     // the event loop framework is per-EtsVM. Further on, it uses local InteropCtx instances
     // to access the JSVM-specific data
@@ -597,7 +600,8 @@ void InteropCtx::Init(EtsCoroutine *coro, napi_env env)
     worker->GetLocalStorage().Set<CoroutineWorker::DataIdx::INTEROP_CTX_PTR>(ctx, Destroy);
     worker->GetLocalStorage().Set<CoroutineWorker::DataIdx::EXTERNAL_IFACES>(&ctx->interfaceTable_);
 #ifdef PANDA_JS_ETS_HYBRID_MODE
-    Handshake::VmHandshake(env, coro, ctx->sharedEtsVmState_->stsVMInterface.get());
+    Handshake::VmHandshake(env, ctx);
+    XGC::GetInstance()->OnAttach(ctx);
     auto rType = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
     if (Runtime::GetOptions().IsCoroutineEnableExternalScheduling(rType)) {
         auto workerPoster = coro->GetPandaVM()->CreateCallbackPoster();
@@ -605,13 +609,39 @@ void InteropCtx::Init(EtsCoroutine *coro, napi_env env)
         worker->SetCallbackPoster(std::move(workerPoster));
         worker->SetExternalSchedulingEnabled();
     }
-#endif
+#endif  // PANDA_JS_ETS_HYBRID_MODE
+}
+
+void InteropCtx::Destroy(void *ptr)
+{
+    auto *instance = static_cast<InteropCtx *>(ptr);
+#if defined(PANDA_JS_ETS_HYBRID_MODE)
+    XGC::GetInstance()->OnDetach(instance);
+#endif  // PANDA_JS_ETS_HYBRID_MODE
+    Runtime::GetCurrent()->GetInternalAllocator()->Delete(instance);
+    SharedEtsVmState::TryReleaseInstance();
+}
+
+static bool CheckRuntimeOptions([[maybe_unused]] const ark::ets::EtsCoroutine *mainCoro)
+{
+#if defined(PANDA_JS_ETS_HYBRID_MODE)
+    auto gcType = mainCoro->GetVM()->GetGC()->GetType();
+    if (gcType != mem::GCType::G1_GC || Runtime::GetOptions().IsNoAsyncJit()) {
+        // XGC is not implemented for other GC types
+        LOG(ERROR, RUNTIME) << "XGC requires GC type to be g1-gc and no-async-jit option must be false";
+        return false;
+    }
+#endif  // PANDA_JS_ETS_HYBRID_MODE
+    return true;
 }
 
 // The external interface for ANI
 bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
 {
     ASSERT(mainCoro->GetCoroutineManager()->GetMainThread() == mainCoro);
+    if (!CheckRuntimeOptions(mainCoro)) {
+        return false;
+    }
     {
         ScopedManagedCodeThread sm(mainCoro);
         InteropCtx::Init(mainCoro, static_cast<napi_env>(napiEnv));
@@ -626,9 +656,7 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
     // In the hybrid mode with JSVM=leading VM, we are binding the EtsVM lifetime to the JSVM's env lifetime
     napi_add_env_cleanup_hook(
         InteropCtx::Current()->GetJSEnv(), [](void *) { ark::Runtime::Destroy(); }, nullptr);
-
-    [[maybe_unused]] bool xgcCreated = XGC::Create(mainCoro);
-    return xgcCreated;
+    return true;
 }
 
 }  // namespace ark::ets::interop::js

@@ -29,12 +29,10 @@ napi_vm_handshake([[maybe_unused]] napi_env env, [[maybe_unused]] void *stsIface
 
 namespace ark::ets::interop::js {
 
-void Handshake::VmHandshake(napi_env env, [[maybe_unused]] EtsCoroutine *coro, arkplatform::STSVMInterface *stsVmIface)
+void Handshake::VmHandshake(napi_env env, InteropCtx *ctx)
 {
-    auto ctx = InteropCtx::Current();
-    void *jsvmIface = nullptr;
-    ASSERT(coro != nullptr);
-    auto status = napi_vm_handshake(env, stsVmIface, &jsvmIface);
+    void *jsvmIface;
+    auto status = napi_vm_handshake(env, ctx->GetSTSVMInterface(), &jsvmIface);
     if (status != napi_status::napi_ok) {
         InteropCtx::ThrowJSError(env, "Handshake error: napi_vm_handshake failed");
         return;
@@ -43,7 +41,7 @@ void Handshake::VmHandshake(napi_env env, [[maybe_unused]] EtsCoroutine *coro, a
         InteropCtx::ThrowJSError(env, "Handshake error: got null VMInterfaceType");
         return;
     }
-    auto iface = reinterpret_cast<arkplatform::VMInterface *>(jsvmIface);
+    auto *iface = static_cast<arkplatform::VMInterface *>(jsvmIface);
     if (iface->GetVMType() != arkplatform::VMInterface::VMInterfaceType::ECMA_VM_IFACE) {
         InteropCtx::ThrowJSError(env, "Handshake error: got wrong VMInterfaceType");
         return;

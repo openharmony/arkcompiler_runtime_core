@@ -43,11 +43,13 @@ public:
 
     using PreInitJSObjectCallback = std::function<napi_value(SharedReference **)>;
 
+    /// @return current storage size
     size_t Size() const
     {
         return SharedReferencePool::Size();
     }
 
+    /// @return maximum possible storage size
     size_t MaxSize() const
     {
         return SharedReferencePool::MaxSize();
@@ -78,6 +80,13 @@ public:
 
     /// Remove all unmarked refs after XGC (can be run concurrently)
     void SweepUnmarkedRefs();
+
+    /**
+     * Delete all shared references with specific context from the storage
+     * @param ctx interop context
+     * @remark interop context calls the method on destruction
+     */
+    void DeleteAllReferencesWithCtx(const InteropCtx *ctx);
 
     /// Clear mark bit for all shared references
     PANDA_PUBLIC_API void UnmarkAll();
@@ -126,6 +135,21 @@ private:
      * @note the method should be called under the storage write-lock
      */
     void DeleteJSRefAndRemoveReference(SharedReference *sharedRef) REQUIRES(storageLock_);
+
+    /**
+     * Delete one reference by predicate from references chain related with passed reference
+     * @param sharedRef non-empty shared reference from processing references chain
+     * @param deletePredicate predicate with condition for a reference deleting
+     * @return true if chain contains reference for removing by predicate and the reference was deleted from the chain,
+     * false - otherwise
+     */
+    bool DeleteReference(SharedReference *sharedRef,
+                         const std::function<bool(const SharedReference *sharedRef)> &deletePredicate)
+        REQUIRES(storageLock_);
+
+    /// Helper method for DeleteReference
+    void DeleteReferenceFromChain(EtsObject *etsObject, SharedReference *prevRef, SharedReference *removingRef,
+                                  uint32_t nextIndex) REQUIRES(storageLock_);
 
     bool HasReferenceWithCtx(SharedReference *ref, InteropCtx *ctx) const;
 
