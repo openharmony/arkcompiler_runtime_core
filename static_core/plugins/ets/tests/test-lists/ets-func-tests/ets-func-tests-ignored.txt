@@ -48,9 +48,6 @@ koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
 koala-related-benchmarks/arkts-phase1.ets
 ### End of Koala
 ### Feature: Rest Params
-### Issue 19926
-spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Parameter/BadTypeError.ets
-### Issue 19926 end
 ### Issue 19952
 spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Parameter/RestParamsTest_PassInterfaceArgs.ets
 spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Parameter/RestParamsTest_PassLambdas_0.ets
@@ -333,8 +330,10 @@ spec/10.Interfaces/method_overload6.ets
 spec/10.Interfaces/method_overload7.ets
 ### Issue 19727 end
 
-### Issue 19926
+#23988
 std/core/std_core_typedarrays_bignum__BigInt64Array.ets
+
+#23989
 std/core/std_core_typedarrays_bignum__BigUint64Array.ets
 
 ### Failures #23827
