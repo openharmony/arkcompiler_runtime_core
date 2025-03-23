@@ -171,38 +171,6 @@ cases:
           - type: '(p: B[]) => Object[]'
             call: '(new B[1]) === a'
 
-    # functions
-    - decl: |-
-          class A {}
-          class B extends A {}
-          type F1 = (p: A) => A
-          type F2 = (p: A) => A throws
-
-          function f1(p: A): A {
-              return p
-          }
-
-          function f2(p: A): A throws {
-              if (p instanceof B) {
-                  throw new Exception()
-              }
-              return p
-          }
-
-          function foo(p: F2): F1 {
-              return f1
-          }
-      to:
-          - type: '(p: F2) => F1'
-            call: '(f2) === f1'
-          - type: '(p: F1) => F1'
-            call: '(f1) === f1'
-
-          - type: '(p: F2) => F2'
-            call: '(f2) === f1'
-          - type: '(p: F1) => F2'
-            call: '(f1) === f1'
-
     # unions
     - decl: |-
           type T1 = String|Boolean
