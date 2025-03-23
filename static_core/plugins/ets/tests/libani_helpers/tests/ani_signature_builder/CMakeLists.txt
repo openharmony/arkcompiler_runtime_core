@@ -11,6 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_add_library(ani_helpers SHARED concurrency_helpers.cpp ani_signature_builder.cpp)
-
-panda_target_include_directories(ani_helpers PUBLIC ${PANDA_ROOT}/plugins/ets/runtime/ani)
+ani_helpers_add_gtest(ani_helpers_test_ani_signature_builder
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ani_signature_builder_test.cpp
+)
