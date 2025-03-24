@@ -96,4 +96,9 @@ export namespace Intl {
 
         private locale: String;
     }
+
+    export interface NumberRangeFormatPart {
+        source: "startRange" | "endRange" | "shared"
+    }
+
 }
