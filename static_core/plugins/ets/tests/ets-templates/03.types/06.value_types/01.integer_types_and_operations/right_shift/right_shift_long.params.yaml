@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,7 +23,7 @@ values:
 - { left: Long.MIN_VALUE, right: 31, result: '0xffffffff00000000' }
 - { left: Long.MAX_VALUE, right: 1, result: '0x3fffffffffffffff' }
 - { left: Long.MAX_VALUE, right: 30, result: '0x1ffffffff' }
-- { left: Long.MAX_VALUE, right: 31, result: '0xffffffff' }
+- { left: Long.MAX_VALUE, right: 31, result: 4294967295 }
 - { left: Long.MAX_VALUE, right: 62, result: 1 }
 - { left: '0x3fffffffffffffff', right: 2, result: '0xfffffffffffffff' }
 - { left: 1, right: 0, result: 1 }
