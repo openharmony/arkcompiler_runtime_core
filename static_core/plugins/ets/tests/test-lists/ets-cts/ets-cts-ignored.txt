@@ -1871,15 +1871,6 @@
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_28.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_29.ets
 
-#23378 Promise<void> should resolve as undefined
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_ref_8.ets
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_7.ets
-17.experimental_features/15.coroutines/create_and_launch_coroutine/c_func_0.ets
-17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_0.ets
-17.experimental_features/15.coroutines/create_and_launch_coroutine/c_lamb_0.ets
-17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_0.ets
-17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_0.ets
-
 #24009
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_val_6.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_val_7.ets
@@ -1897,6 +1888,8 @@
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_func_val_7.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_func_val_8.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_func_val_9.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_ref_8.ets
+17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_7.ets
 
 #15704
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/addition/add_arr_val_2.ets
