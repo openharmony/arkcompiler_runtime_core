@@ -14,12 +14,14 @@
  */
 
 /*---
-desc: Re-export directive, new names should be available
-files: ['./module_all_renamed.ets', './module_a.ets']
+desc: Top-level declarations can be made exported by using a selective export directive.
+files: ['./ambient01/file.ets']
 ---*/
 
-import { NewClassA, NewInterfaceA, newFoo, NEW_BAR } from './module_all_renamed'
+import { foo, A, bar } from './ambient01/file.d.ets'
 
 function main() {
-    assertEQ(NEW_BAR, 146)
+    assertEQ(foo(), 142)
+    assertEQ(bar, 42)
+    assertEQ(new A().fld, "abc")
 }

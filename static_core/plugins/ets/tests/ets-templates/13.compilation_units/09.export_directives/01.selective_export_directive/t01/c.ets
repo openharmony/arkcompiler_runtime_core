@@ -14,12 +14,12 @@
  */
 
 /*---
-desc: Re-export directive, new names should be available
-files: ['./module_all_renamed.ets', './module_a.ets']
+desc: Top-level declarations can be made exported by using a selective export directive.
+files: ['./a.ets', './b.ets']
 ---*/
 
-import { NewClassA, NewInterfaceA, newFoo, NEW_BAR } from './module_all_renamed'
+import { describe } from "./b";
 
 function main() {
-    assertEQ(NEW_BAR, 146)
+    assertEQ(describe, 1)
 }

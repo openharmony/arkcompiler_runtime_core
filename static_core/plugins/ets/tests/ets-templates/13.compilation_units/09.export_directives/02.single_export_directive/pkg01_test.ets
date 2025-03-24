@@ -14,12 +14,12 @@
  */
 
 /*---
-desc: Re-export directive, new names should be available
-files: ['./module_all_renamed.ets', './module_a.ets']
+desc: Single export directive allows specifying the declaration to be exported from the current compilation unit
+files: ['./pkg01/a.ets', './pkg01/b.ets', './pkg01/c.ets', './pkg01/d.ets']
 ---*/
 
-import { NewClassA, NewInterfaceA, newFoo, NEW_BAR } from './module_all_renamed'
+import { ClassA, InterfaceA, foo, BAR } from './pkg01'
 
 function main() {
-    assertEQ(NEW_BAR, 146)
+    assertEQ(BAR, 146)
 }

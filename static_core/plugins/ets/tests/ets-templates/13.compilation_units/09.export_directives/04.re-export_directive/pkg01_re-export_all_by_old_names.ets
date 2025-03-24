@@ -14,12 +14,12 @@
  */
 
 /*---
-desc: Re-export directive, new names should be available
-files: ['./module_all_renamed.ets', './module_a.ets']
+desc: Re-export directive, old names should be available
+files: ['./pkg01a/a.ets', './pkg01b/a.ets']
 ---*/
 
-import { NewClassA, NewInterfaceA, newFoo, NEW_BAR } from './module_all_renamed'
+import { ClassA, InterfaceA, foo, BAR } from './pkg01b'
 
 function main() {
-    assertEQ(NEW_BAR, 146)
+    assertEQ(BAR, 146)
 }
