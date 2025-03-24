@@ -30,30 +30,39 @@ TEST_F(ObjectGetFieldByNameFloatTest, get_field)
 {
     ani_object animal = NewAnimal();
 
-    ani_float age;
+    ani_float age = 0.0F;
     ASSERT_EQ(env_->Object_GetFieldByName_Float(animal, "age", &age), ANI_OK);
     ASSERT_EQ(age, 2.0F);
+}
+
+TEST_F(ObjectGetFieldByNameFloatTest, invalid_env)
+{
+    ani_object animal = NewAnimal();
+
+    ani_float age = 0.0F;
+    ASSERT_EQ(env_->c_api->Object_GetFieldByName_Float(nullptr, animal, "age", &age), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectGetFieldByNameFloatTest, not_found)
 {
     ani_object animal = NewAnimal();
 
-    ani_float age;
+    ani_float age = 0.0F;
     ASSERT_EQ(env_->Object_GetFieldByName_Float(animal, "x", &age), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_GetFieldByName_Float(animal, "", &age), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectGetFieldByNameFloatTest, invalid_type)
 {
     ani_object animal = NewAnimal();
 
-    ani_float age;
+    ani_float age = 0.0F;
     ASSERT_EQ(env_->Object_GetFieldByName_Float(animal, "name", &age), ANI_INVALID_TYPE);
 }
 
 TEST_F(ObjectGetFieldByNameFloatTest, invalid_object)
 {
-    ani_float age;
+    ani_float age = 0.0F;
     ASSERT_EQ(env_->Object_GetFieldByName_Float(nullptr, "age", &age), ANI_INVALID_ARGS);
 }
 
@@ -61,7 +70,7 @@ TEST_F(ObjectGetFieldByNameFloatTest, invalid_name)
 {
     ani_object animal = NewAnimal();
 
-    ani_float age;
+    ani_float age = 0.0F;
     ASSERT_EQ(env_->Object_GetFieldByName_Float(animal, nullptr, &age), ANI_INVALID_ARGS);
 }
 

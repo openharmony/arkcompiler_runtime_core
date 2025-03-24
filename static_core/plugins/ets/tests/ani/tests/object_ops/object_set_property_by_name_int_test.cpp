@@ -38,30 +38,82 @@ public:
     }
 };
 
+TEST_F(ObjectSetPropertyByNameIntTest, set_field)
+{
+    ani_object car = NewCar();
+
+    ani_int highPerformance = 0U;
+    ASSERT_EQ(env_->Object_GetPropertyByName_Int(car, "highPerformance", &highPerformance), ANI_OK);
+    ASSERT_EQ(highPerformance, 0U);
+
+    const ani_int value = 0;
+    const ani_int value1 = 1;
+    ASSERT_EQ(env_->Object_SetPropertyByName_Int(car, "highPerformance", value), ANI_OK);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Int(car, "highPerformance", &highPerformance), ANI_OK);
+    ASSERT_EQ(highPerformance, value);
+
+    ASSERT_EQ(env_->Object_SetPropertyByName_Int(car, "ecoFriendly", value1), ANI_OK);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Int(car, "ecoFriendly", &highPerformance), ANI_OK);
+    ASSERT_EQ(highPerformance, value1);
+}
+
 TEST_F(ObjectSetPropertyByNameIntTest, set_field_property)
 {
     ani_object car = NewCar();
 
-    ani_int highPerformance;
+    ani_int highPerformance = 0U;
     ASSERT_EQ(env_->Object_GetPropertyByName_Int(car, "highPerformance", &highPerformance), ANI_OK);
     ASSERT_EQ(highPerformance, 0U);
 
-    ASSERT_EQ(env_->Object_SetPropertyByName_Int(car, "highPerformance", 1U), ANI_OK);
-    ASSERT_EQ(env_->Object_GetPropertyByName_Int(car, "highPerformance", &highPerformance), ANI_OK);
-    ASSERT_EQ(highPerformance, 1U);
+    const int32_t loopCount = 3;
+    const ani_int value = -2147483648;
+    const ani_int value1 = 2147483647;
+    for (int32_t i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetPropertyByName_Int(car, "highPerformance", value), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Int(car, "highPerformance", &highPerformance), ANI_OK);
+        ASSERT_EQ(highPerformance, value);
+
+        ASSERT_EQ(env_->Object_SetPropertyByName_Int(car, "highPerformance", value1), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Int(car, "highPerformance", &highPerformance), ANI_OK);
+        ASSERT_EQ(highPerformance, value1);
+    }
 }
 
 TEST_F(ObjectSetPropertyByNameIntTest, set_setter_property)
 {
     ani_object car = NewCar();
 
-    ani_int ecoFriendly;
+    ani_int ecoFriendly = 0U;
     ASSERT_EQ(env_->Object_GetPropertyByName_Int(car, "ecoFriendly", &ecoFriendly), ANI_OK);
     ASSERT_EQ(ecoFriendly, 0U);
 
-    ASSERT_EQ(env_->Object_SetPropertyByName_Int(car, "ecoFriendly", 1U), ANI_OK);
-    ASSERT_EQ(env_->Object_GetPropertyByName_Int(car, "ecoFriendly", &ecoFriendly), ANI_OK);
-    ASSERT_EQ(ecoFriendly, 1U);
+    const int32_t loopCount = 3;
+    const ani_int value = -2147483648;
+    const ani_int value1 = 2147483647;
+    for (int32_t i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetPropertyByName_Int(car, "ecoFriendly", value), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Int(car, "ecoFriendly", &ecoFriendly), ANI_OK);
+        ASSERT_EQ(ecoFriendly, value);
+
+        ASSERT_EQ(env_->Object_SetPropertyByName_Int(car, "ecoFriendly", value1), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Int(car, "ecoFriendly", &ecoFriendly), ANI_OK);
+        ASSERT_EQ(ecoFriendly, value1);
+    }
+}
+
+TEST_F(ObjectSetPropertyByNameIntTest, invalid_env)
+{
+    ani_object car = NewCar();
+
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_Int(nullptr, car, "ecoFriendly", 1U), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectSetPropertyByNameIntTest, invalid_parameter)
+{
+    ani_object car = NewCar();
+
+    ASSERT_EQ(env_->Object_SetPropertyByName_Int(car, "ecoFriendlyA", 1U), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_SetPropertyByName_Int(car, "", 1U), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectSetPropertyByNameIntTest, invalid_argument)
@@ -90,7 +142,7 @@ TEST_F(ObjectSetPropertyByNameIntTest, set_interface_field)
 {
     ani_object c1 = NewC1();
 
-    ani_int prop;
+    ani_int prop = 0U;
     ASSERT_EQ(env_->Object_GetPropertyByName_Int(c1, "prop", &prop), ANI_OK);
     ASSERT_EQ(prop, 0U);
 
@@ -103,7 +155,7 @@ TEST_F(ObjectSetPropertyByNameIntTest, set_interface_property)
 {
     ani_object c2 = NewC2();
 
-    ani_int prop;
+    ani_int prop = 0U;
     ASSERT_EQ(env_->Object_SetPropertyByName_Int(c2, "prop", 0U), ANI_OK);
     ASSERT_EQ(env_->Object_GetPropertyByName_Int(c2, "prop", &prop), ANI_OK);
     ASSERT_EQ(prop, 0U);

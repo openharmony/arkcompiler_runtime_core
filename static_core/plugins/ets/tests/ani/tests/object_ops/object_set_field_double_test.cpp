@@ -79,7 +79,7 @@ TEST_F(ObjectSetFieldDoubleTest, set_field_double_boundary_values)
     const double numbeR2 = 2.2250738585072014e-308;
 
     const int32_t loopCount = 3;
-    for (int i = 1; i <= loopCount; i++) {
+    for (int32_t i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetField_Double(pack, fieldDouble, numbeR1), ANI_OK);
         ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_double_test", "checkDoubleValue", pack, numbeR1),
                   ANI_TRUE);
@@ -103,6 +103,17 @@ TEST_F(ObjectSetFieldDoubleTest, set_field_double_boundary_values)
         ASSERT_EQ(env_->Object_GetField_Double(pack, fieldDouble, &num), ANI_OK);
         ASSERT_EQ(num, minusMaxNumber);
     }
+}
+
+TEST_F(ObjectSetFieldDoubleTest, set_field_double_invalid_args_env)
+{
+    ani_object pack {};
+    ani_field fieldDouble {};
+    ani_field fieldString {};
+    GetTestData(&pack, &fieldDouble, &fieldString);
+
+    const double pi = 3.14159;
+    ASSERT_EQ(env_->c_api->Object_SetField_Double(nullptr, pack, fieldDouble, pi), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectSetFieldDoubleTest, set_field_double_invalid_field_type)

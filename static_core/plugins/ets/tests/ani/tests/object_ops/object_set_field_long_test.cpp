@@ -51,7 +51,7 @@ TEST_F(ObjectSetFieldLongTest, set_field_long)
               ANI_TRUE);
 
     const int32_t loopCount = 3;
-    for (int i = 1; i <= loopCount; i++) {
+    for (int32_t i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetField_Long(pack, fieldLong, longValue), ANI_OK);
         ASSERT_EQ(
             CallEtsFunction<ani_boolean>("object_set_field_long_test", "checkLongValue", pack, ani_long(longValue)),
@@ -69,6 +69,16 @@ TEST_F(ObjectSetFieldLongTest, set_field_long)
         ASSERT_EQ(env_->Object_GetField_Long(pack, fieldLong, &value), ANI_OK);
         ASSERT_EQ(value, longValue1);
     }
+}
+
+TEST_F(ObjectSetFieldLongTest, set_field_long_invalid_args_env)
+{
+    ani_object pack {};
+    ani_field fieldLong {};
+    ani_field fieldString {};
+    GetTestData(&pack, &fieldLong, &fieldString);
+
+    ASSERT_EQ(env_->c_api->Object_SetField_Long(nullptr, pack, fieldLong, 5U), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectSetFieldLongTest, set_field_long_invalid_field_type)

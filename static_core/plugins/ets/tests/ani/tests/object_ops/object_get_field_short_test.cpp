@@ -46,9 +46,20 @@ TEST_F(ObjectGetFieldShortTest, get_field_short)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_short age {};
+    ani_short age = 0U;
     ASSERT_EQ(env_->Object_GetField_Short(sarah, fieldAge, &age), ANI_OK);
     ASSERT_EQ(age, 24U);
+}
+
+TEST_F(ObjectGetFieldShortTest, get_field_short_invalid_env)
+{
+    ani_object sarah {};
+    ani_field field {};
+    ani_field fieldAge {};
+    GetTestData(&sarah, &field, &fieldAge);
+
+    ani_short age = 0U;
+    ASSERT_EQ(env_->c_api->Object_GetField_Short(nullptr, sarah, fieldAge, &age), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectGetFieldShortTest, get_field_short_invalid_field_type)
@@ -58,7 +69,7 @@ TEST_F(ObjectGetFieldShortTest, get_field_short_invalid_field_type)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_short age {};
+    ani_short age = 0U;
     ASSERT_EQ(env_->Object_GetField_Short(sarah, field, &age), ANI_INVALID_TYPE);
 }
 
@@ -69,7 +80,7 @@ TEST_F(ObjectGetFieldShortTest, invalid_argument1)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_short age {};
+    ani_short age = 0U;
     ASSERT_EQ(env_->Object_GetField_Short(nullptr, field, &age), ANI_INVALID_ARGS);
 }
 
@@ -80,7 +91,7 @@ TEST_F(ObjectGetFieldShortTest, invalid_argument2)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_short age {};
+    ani_short age = 0U;
     ASSERT_EQ(env_->Object_GetField_Short(sarah, nullptr, &age), ANI_INVALID_ARGS);
 }
 

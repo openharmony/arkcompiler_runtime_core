@@ -30,7 +30,7 @@ TEST_F(ObjectGetPropertyByNameByteTest, get_field_property)
 {
     ani_object car = NewCar();
 
-    ani_byte carAge;
+    ani_byte carAge {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "carAge", &carAge), ANI_OK);
     ASSERT_EQ(carAge, 61U);
 }
@@ -39,16 +39,33 @@ TEST_F(ObjectGetPropertyByNameByteTest, get_getter_property)
 {
     ani_object car = NewCar();
 
-    ani_byte price;
+    ani_byte price {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "price", &price), ANI_OK);
     ASSERT_EQ(price, 100U);
+}
+
+TEST_F(ObjectGetPropertyByNameByteTest, invalid_env)
+{
+    ani_object car = NewCar();
+
+    ani_byte type {};
+    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_Byte(nullptr, car, "price", &type), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectGetPropertyByNameByteTest, invalid_parameter)
+{
+    ani_object car = NewCar();
+
+    ani_byte model {};
+    ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "priceA", &model), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "", &model), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectGetPropertyByNameByteTest, invalid_argument)
 {
     ani_object car = NewCar();
 
-    ani_byte carAge;
+    ani_byte carAge {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Byte(nullptr, "carAge", &carAge), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, nullptr, &carAge), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "carAge", nullptr), ANI_INVALID_ARGS);
@@ -58,7 +75,7 @@ TEST_F(ObjectGetPropertyByNameByteTest, get_field_property_invalid_type)
 {
     ani_object car = NewCar();
 
-    ani_byte manufacturer;
+    ani_byte manufacturer {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "manufacturer", &manufacturer), ANI_INVALID_TYPE);
 }
 
@@ -66,7 +83,7 @@ TEST_F(ObjectGetPropertyByNameByteTest, get_getter_property_invalid_type)
 {
     ani_object car = NewCar();
 
-    ani_byte model;
+    ani_byte model {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "model", &model), ANI_INVALID_TYPE);
 }
 

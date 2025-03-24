@@ -30,12 +30,12 @@ TEST_F(ObjectGetPropertyByNameRefTest, get_field_property)
 {
     ani_object person = NewPerson();
 
-    ani_ref nameRef;
+    ani_ref nameRef {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Ref(person, "name", &nameRef), ANI_OK);
 
     auto name = static_cast<ani_string>(nameRef);
     std::array<char, 6U> buffer {};
-    ani_size nameSize;
+    ani_size nameSize = 0;
     ASSERT_EQ(env_->String_GetUTF8SubString(name, 0U, 3U, buffer.data(), buffer.size(), &nameSize), ANI_OK);
     ASSERT_EQ(nameSize, 3U);
     ASSERT_STREQ(buffer.data(), "Max");
@@ -45,20 +45,37 @@ TEST_F(ObjectGetPropertyByNameRefTest, get_getter_property)
 {
     ani_object person = NewPerson();
 
-    ani_ref surnameRef;
+    ani_ref surnameRef {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Ref(person, "surname", &surnameRef), ANI_OK);
 
     auto surname = static_cast<ani_string>(surnameRef);
     std::array<char, 6U> buffer {};
-    ani_size surnameSize;
+    ani_size surnameSize = 0;
     ASSERT_EQ(env_->String_GetUTF8SubString(surname, 0U, 4U, buffer.data(), buffer.size(), &surnameSize), ANI_OK);
     ASSERT_EQ(surnameSize, 4U);
     ASSERT_STREQ(buffer.data(), "Pain");
 }
 
+TEST_F(ObjectGetPropertyByNameRefTest, invalid_env)
+{
+    ani_object person = NewPerson();
+
+    ani_ref surnameRef {};
+    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_Ref(nullptr, person, "surname", &surnameRef), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectGetPropertyByNameRefTest, invalid_parameter)
+{
+    ani_object person = NewPerson();
+
+    ani_ref surnameRef {};
+    ASSERT_EQ(env_->Object_GetPropertyByName_Ref(person, "surnameA", &surnameRef), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Ref(person, "", &surnameRef), ANI_NOT_FOUND);
+}
+
 TEST_F(ObjectGetPropertyByNameRefTest, invalid_argument1)
 {
-    ani_ref nameRef;
+    ani_ref nameRef {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Ref(nullptr, "name", &nameRef), ANI_INVALID_ARGS);
 }
 
@@ -66,7 +83,7 @@ TEST_F(ObjectGetPropertyByNameRefTest, invalid_argument2)
 {
     ani_object person = NewPerson();
 
-    ani_ref nameRef;
+    ani_ref nameRef {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Ref(person, nullptr, &nameRef), ANI_INVALID_ARGS);
 }
 
@@ -81,7 +98,7 @@ TEST_F(ObjectGetPropertyByNameRefTest, get_field_property_invalid_type)
 {
     ani_object person = NewPerson();
 
-    ani_ref nameRef;
+    ani_ref nameRef {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Ref(person, "age", &nameRef), ANI_INVALID_TYPE);
 }
 
@@ -89,7 +106,7 @@ TEST_F(ObjectGetPropertyByNameRefTest, get_getter_property_invalid_type)
 {
     ani_object person = NewPerson();
 
-    ani_ref nameRef;
+    ani_ref nameRef {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Ref(person, "realAge", &nameRef), ANI_INVALID_TYPE);
 }
 

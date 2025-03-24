@@ -30,30 +30,39 @@ TEST_F(ObjectGetFieldByNameByteTest, get_field)
 {
     ani_object animal = NewAnimal();
 
-    ani_byte age;
+    ani_byte age = 0;
     ASSERT_EQ(env_->Object_GetFieldByName_Byte(animal, "age", &age), ANI_OK);
     ASSERT_EQ(age, 2U);
+}
+
+TEST_F(ObjectGetFieldByNameByteTest, invalid_env)
+{
+    ani_object animal = NewAnimal();
+
+    ani_byte age = 0;
+    ASSERT_EQ(env_->c_api->Object_GetFieldByName_Byte(nullptr, animal, "age", &age), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectGetFieldByNameByteTest, not_found)
 {
     ani_object animal = NewAnimal();
 
-    ani_byte age;
+    ani_byte age = 0;
     ASSERT_EQ(env_->Object_GetFieldByName_Byte(animal, "x", &age), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_GetFieldByName_Byte(animal, "", &age), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectGetFieldByNameByteTest, invalid_type)
 {
     ani_object animal = NewAnimal();
 
-    ani_byte age;
+    ani_byte age = 0;
     ASSERT_EQ(env_->Object_GetFieldByName_Byte(animal, "name", &age), ANI_INVALID_TYPE);
 }
 
 TEST_F(ObjectGetFieldByNameByteTest, invalid_object)
 {
-    ani_byte age;
+    ani_byte age = 0;
     ASSERT_EQ(env_->Object_GetFieldByName_Byte(nullptr, "age", &age), ANI_INVALID_ARGS);
 }
 
@@ -61,7 +70,7 @@ TEST_F(ObjectGetFieldByNameByteTest, invalid_name)
 {
     ani_object animal = NewAnimal();
 
-    ani_byte age;
+    ani_byte age = 0;
     ASSERT_EQ(env_->Object_GetFieldByName_Byte(animal, nullptr, &age), ANI_INVALID_ARGS);
 }
 

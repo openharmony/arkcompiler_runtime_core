@@ -30,31 +30,40 @@ TEST_F(ObjectGetFieldByNameCharTest, get_field)
 {
     ani_object animal = NewAnimal();
 
-    ani_char index;
+    ani_char index = '\0';
     ani_char xx = 'a';
     ASSERT_EQ(env_->Object_GetFieldByName_Char(animal, "index", &index), ANI_OK);
     ASSERT_EQ(index, xx);
+}
+
+TEST_F(ObjectGetFieldByNameCharTest, invalid_env)
+{
+    ani_object animal = NewAnimal();
+
+    ani_char index = '\0';
+    ASSERT_EQ(env_->c_api->Object_GetFieldByName_Char(nullptr, animal, "index", &index), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectGetFieldByNameCharTest, not_found)
 {
     ani_object animal = NewAnimal();
 
-    ani_char index;
+    ani_char index = '\0';
     ASSERT_EQ(env_->Object_GetFieldByName_Char(animal, "x", &index), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_GetFieldByName_Char(animal, "", &index), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectGetFieldByNameCharTest, invalid_type)
 {
     ani_object animal = NewAnimal();
 
-    ani_char index;
+    ani_char index = '\0';
     ASSERT_EQ(env_->Object_GetFieldByName_Char(animal, "name", &index), ANI_INVALID_TYPE);
 }
 
 TEST_F(ObjectGetFieldByNameCharTest, invalid_object)
 {
-    ani_char index;
+    ani_char index = '\0';
     ASSERT_EQ(env_->Object_GetFieldByName_Char(nullptr, "index", &index), ANI_INVALID_ARGS);
 }
 
@@ -62,7 +71,7 @@ TEST_F(ObjectGetFieldByNameCharTest, invalid_name)
 {
     ani_object animal = NewAnimal();
 
-    ani_char index;
+    ani_char index = '\0';
     ASSERT_EQ(env_->Object_GetFieldByName_Char(animal, nullptr, &index), ANI_INVALID_ARGS);
 }
 

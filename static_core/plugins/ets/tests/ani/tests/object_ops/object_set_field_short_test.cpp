@@ -51,7 +51,7 @@ TEST_F(ObjectSetFieldShortTest, set_field_short)
     GetTestData(&pack, &fieldShort, &fieldString);
 
     const int32_t loopCount = 3;
-    for (int i = 1; i <= loopCount; i++) {
+    for (int32_t i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetField_Short(pack, fieldShort, G_USHORTVAL100), ANI_OK);
 
         ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_short_test", "checkShortValue", pack, G_USHORTVAL100),
@@ -86,6 +86,16 @@ TEST_F(ObjectSetFieldShortTest, set_field_short_negative_value)
     ani_short sh {};
     ASSERT_EQ(env_->Object_GetField_Short(pack, fieldShort, &sh), ANI_OK);
     ASSERT_EQ(sh, G_MINUSSHORTVAL300);
+}
+
+TEST_F(ObjectSetFieldShortTest, set_field_short_invalid_args_env)
+{
+    ani_object pack {};
+    ani_field fieldShort {};
+    ani_field fieldString {};
+    GetTestData(&pack, &fieldShort, &fieldString);
+
+    ASSERT_EQ(env_->c_api->Object_SetField_Short(nullptr, pack, fieldShort, USHORT_VAL123), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectSetFieldShortTest, set_field_short_invalid_field_type)
