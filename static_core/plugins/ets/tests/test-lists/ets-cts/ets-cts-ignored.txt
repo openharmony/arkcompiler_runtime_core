@@ -89,14 +89,6 @@
 #23975
 03.types/17.tuple_types/tt2_31.ets
 
-#23981
-03.types/18.function_types/function_type_2.ets
-03.types/18.function_types/function_type_3.ets
-03.types/18.function_types/function_type_4.ets
-03.types/18.function_types/function_type_5.ets
-03.types/18.function_types/function_type_6.ets
-03.types/18.function_types/function_type_7.ets
-
 #23998
 03.types/19.union_types/02.access_to_common_union_members/cm_fld1_6.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_fld2_6.ets
