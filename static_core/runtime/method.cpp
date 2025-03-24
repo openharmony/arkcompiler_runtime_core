@@ -583,6 +583,7 @@ void Method::StartProfiling()
         }
     }
     EVENT_INTERP_PROFILING(events::InterpProfilingAction::START, GetFullName(), vcalls.size());
+    Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->TryAddMethodToProfile(this);
 }
 
 void Method::StopProfiling()
