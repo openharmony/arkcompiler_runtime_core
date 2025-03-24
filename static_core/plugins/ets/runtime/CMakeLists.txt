@@ -113,6 +113,7 @@ set(ETS_RUNTIME_SOURCES
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlCollator.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLocale.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlPluralRules.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlSegmenter.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/stdlib_ani_helpers.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlDateTimeFormat.cpp
 )
