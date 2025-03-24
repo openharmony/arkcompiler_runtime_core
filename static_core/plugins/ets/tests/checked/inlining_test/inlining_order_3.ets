@@ -51,7 +51,6 @@ function test_loops(): void {
         try {
             for (;;) {
                 arr[i + N] = hot_inf(i);
-                if (false) { break; }
             }
         } catch (e) {
             arr[i] += hot_catch(i);

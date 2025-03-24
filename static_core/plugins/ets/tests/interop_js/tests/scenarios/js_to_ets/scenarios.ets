@@ -30,8 +30,6 @@ import {
     singleRequired,
 } from "decl_js"
 
-// NOTE(nikitayegorov) #17339 enable after rest\spread is fixed
-const FIXED_17339 = false;
 
 function testOptionals() {
     // #22991
@@ -278,10 +276,9 @@ function testFunctionRestParameter(): boolean {
 }
 
 function Test_function_spread_parameter(): boolean {
-    if (FIXED_17339) {
-        const arr = [1, 1];
-        return functionSpreadParameter(...arr) as int == 2;
-    }
+    // NOTE(nikitayegorov, DZ) uncomment 2 lines below after rest\spread is fixed (#17339)
+    // const arr = [1, 1];
+    // return functionSpreadParameter(...arr) as int == 2;
     return false;
 }
 
