@@ -635,6 +635,13 @@
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.class_or_interface_casting_conversions/neg_1a.ets
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.class_or_interface_casting_conversions/pos_2a.ets
 
+
+#14001
+06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_access_10.ets
+06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_access_7.ets
+06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_access_8.ets
+06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_access_9.ets
+
 #22450 - should throw an exception
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.class_or_interface_casting_conversions/cce_5.ets
 
@@ -919,10 +926,7 @@
 07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_6.ets
 
 #23902
-07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe1.ets
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe2.ets
-07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe3.ets
-07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_by_super_of_generic.ets
 
 #24035
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/aioobe4.ets
@@ -1353,9 +1357,6 @@
 
 #23200: Verifier fails on some interface overloading and overriding cases
 07.expressions/09.field_access_expressions/01.accessing_current_object_fields/nullable_reference_type.ets
-
-#23901
-07.expressions/09.field_access_expressions/02.accessing_superclass_fields/super_in_object.ets
 
 #23996
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_17.ets

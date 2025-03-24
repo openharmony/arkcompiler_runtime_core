@@ -21,16 +21,13 @@ desc: NullPointerError is thrown by an array access expression
 function main(): int {
   let a = 1;
   let b = 1;
-  let x: String[]|null = ["A", "B", "C"];
+  let foo = (i: int): String[]|null => { return i <= 0 ? null : ["A", "B", "C"] };
 
   try {
-    let v: String = "" + (x = null) + (a = 2) + x[1] + (b = 2);
+    let v: String = "" + (a = 2) + foo(-1)![1] + (b = 2);
     return 1;
   } catch (e: NullPointerError) {
     if (a != 2 || b != 1) return 1;
     return 0;
-  } catch {
-    return 1;
   }
-  return 1;
 }
