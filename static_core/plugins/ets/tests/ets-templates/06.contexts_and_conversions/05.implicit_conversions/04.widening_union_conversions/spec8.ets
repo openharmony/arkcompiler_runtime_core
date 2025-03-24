@@ -15,6 +15,7 @@
 
 /*---
 desc: Conversion from a union type that consists of literals only to a non-union type.
+tags: [compile-only, negative]
 ---*/
 
 function main() {

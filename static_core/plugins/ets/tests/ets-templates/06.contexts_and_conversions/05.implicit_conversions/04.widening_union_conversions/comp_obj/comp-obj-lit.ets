@@ -32,8 +32,8 @@ class A {
 
 function main() {
 {%- for t in c['values'] %}
-    let a: A = { fld: s{{loop.index}} }
-    assertTrue( a.fld == {{t.expr|safe}} )
+    let a{{loop.index}}: A = { fld: s{{loop.index}} }
+    assertTrue( a{{loop.index}}.fld == {{t.expr|safe}} )
 {%- endfor %}
 }
 {%- endfor %}
