@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,42 +22,42 @@ class EtsConversionHexadecimalTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsConversionHexadecimalTsToEtsTest, checkConversionHexadecimalToInt)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionHexadecimalToInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionHexadecimalToInt"));
 }
 
 TEST_F(EtsConversionHexadecimalTsToEtsTest, checkConversionHexadecimalToNumber)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionHexadecimalToNumber"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionHexadecimalToNumber"));
 }
 
 TEST_F(EtsConversionHexadecimalTsToEtsTest, checkConversionHexadecimalToFloat)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionHexadecimalToFloat"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionHexadecimalToFloat"));
 }
 
 TEST_F(EtsConversionHexadecimalTsToEtsTest, checkConversionHexadecimalToByte)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionHexadecimalToByte"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionHexadecimalToByte"));
 }
 
 TEST_F(EtsConversionHexadecimalTsToEtsTest, checkConversionHexadecimalToShort)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionHexadecimalToShort"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionHexadecimalToShort"));
 }
 
 TEST_F(EtsConversionHexadecimalTsToEtsTest, checkConversionHexadecimalToLong)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionHexadecimalToLong"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionHexadecimalToLong"));
 }
 
 TEST_F(EtsConversionHexadecimalTsToEtsTest, checkConversionHexadecimalToDouble)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionHexadecimalToDouble"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionHexadecimalToDouble"));
 }
 
 TEST_F(EtsConversionHexadecimalTsToEtsTest, checkConversionHexadecimalToChar)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionHexadecimalToChar"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionHexadecimalToChar"));
 }
 
 }  // namespace ark::ets::interop::js::testing

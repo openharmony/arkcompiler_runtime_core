@@ -27,7 +27,7 @@ function promiseJ2a() {
         console.log('Starting...');
         let stsVm = initEtsVm();
 
-        this.promise = stsVm.getFunction('LETSGLOBAL;', 'promise');
+        this.promise = stsVm.getFunction('Lbench_promise_j2a/ETSGLOBAL;', 'promise');
 
         return 0;
     };

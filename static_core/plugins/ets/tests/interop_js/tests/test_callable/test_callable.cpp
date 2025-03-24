@@ -23,21 +23,21 @@ class EtsInteropCallableTest : public EtsInteropTest {};
 TEST_F(EtsInteropCallableTest, TestNamedFunction)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestNamedFunction");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestNamedFunction");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropCallableTest, TestAnonymousFunction)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestAnonymousFunction");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestAnonymousFunction");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropCallableTest, TestArrowFunction)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestArrowFunction");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestArrowFunction");
     ASSERT_EQ(ret, true);
 }
 
@@ -45,14 +45,14 @@ TEST_F(EtsInteropCallableTest, TestArrowFunction)
 TEST_F(EtsInteropCallableTest, DISABLED_TestConstructedFunction)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestConstructedFunction");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestConstructedFunction");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropCallableTest, TestCallBoundFunction)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestCallBoundFunction");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestCallBoundFunction");
     ASSERT_EQ(ret, true);
 }
 

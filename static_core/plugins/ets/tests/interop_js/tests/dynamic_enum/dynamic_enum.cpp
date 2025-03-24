@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,37 +22,37 @@ class EtsInteropEnum : public EtsInteropTest {};
 
 TEST_F(EtsInteropEnum, Test1)
 {
-    auto ret = CallEtsMethod<bool>("Test1");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test1");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropEnum, Test2)
 {
-    auto ret = CallEtsMethod<bool>("Test2");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test2");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropEnum, Test3)
 {
-    auto ret = CallEtsMethod<bool>("Test3");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test3");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropEnum, Test4)
 {
-    auto ret = CallEtsMethod<bool>("Test4");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test4");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropEnum, Test5)
 {
-    auto ret = CallEtsMethod<bool>("Test5");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test5");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropEnum, Test6)
 {
-    auto ret = CallEtsMethod<bool>("Test6");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test6");
     ASSERT_EQ(ret, true);
 }
 

@@ -17,19 +17,19 @@ const etsVm = globalThis.gtest.etsVm;
 const datestr = '2025-03-01T01:02:03.000Z';
 const timestamp = 1609459200000;
 
-let FunDateInstanceof = etsVm.getFunction('LETSGLOBAL;', 'FunDateInstanceof');
-let FunDatetypeof = etsVm.getFunction('LETSGLOBAL;', 'FunDatetypeof');
-let FunDategetFullYear = etsVm.getFunction('LETSGLOBAL;', 'FunDategetFullYear');
-let FunDategetMonth = etsVm.getFunction('LETSGLOBAL;', 'FunDategetMonth');
-let FunDategetDate = etsVm.getFunction('LETSGLOBAL;', 'FunDategetDate');
-let FunDategetDay = etsVm.getFunction('LETSGLOBAL;', 'FunDategetDay');
-let FunDategetHours = etsVm.getFunction('LETSGLOBAL;', 'FunDategetHours');
-let FunDategetMinutes = etsVm.getFunction('LETSGLOBAL;', 'FunDategetMinutes');
-let FunDategetSeconds = etsVm.getFunction('LETSGLOBAL;', 'FunDategetSeconds');
-let FunDategetMilliseconds = etsVm.getFunction('LETSGLOBAL;', 'FunDategetMilliseconds');
-let FunDatetoISOString = etsVm.getFunction('LETSGLOBAL;', 'FunDatetoISOString');
-let FunDategetTime = etsVm.getFunction('LETSGLOBAL;', 'FunDategetTime');
-let FunObject = etsVm.getFunction('LETSGLOBAL;', 'FunObject');
+let FunDateInstanceof = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDateInstanceof');
+let FunDatetypeof = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDatetypeof');
+let FunDategetFullYear = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetFullYear');
+let FunDategetMonth = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetMonth');
+let FunDategetDate = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetDate');
+let FunDategetDay = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetDay');
+let FunDategetHours = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetHours');
+let FunDategetMinutes = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetMinutes');
+let FunDategetSeconds = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetSeconds');
+let FunDategetMilliseconds = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetMilliseconds');
+let FunDatetoISOString = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDatetoISOString');
+let FunDategetTime = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetTime');
+let FunObject = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunObject');
 
 
 let datestring = new Date(datestr);

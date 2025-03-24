@@ -22,7 +22,7 @@ class EtsInteropScenariosJsCastNullUndefined : public EtsInteropTest {};
 
 TEST_F(EtsInteropScenariosJsCastNullUndefined, tst1)
 {
-    auto ret = CallEtsMethod<bool>("TestFuncCallArg");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFuncCallArg");
     ASSERT_EQ(ret, true);
 }
 

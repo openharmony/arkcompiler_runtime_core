@@ -14,7 +14,7 @@
  */
 
 const etsVm = globalThis.gtest.etsVm;
-let A = etsVm.getClass('LA;');
+let A = etsVm.getClass('Linstanceof/A;');
 
 export class AValue {}
 export class ADeclared {}

@@ -19,6 +19,7 @@ endif()
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_backtracetest
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/backtrace_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/backtrace_test.ets
+    PACKAGE_NAME "Test"
 )
 
 # Build rules for call_backtrace native shared library

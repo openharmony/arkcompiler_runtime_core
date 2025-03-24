@@ -22,17 +22,17 @@ class EtsForOfSimpleArrayTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsForOfSimpleArrayTsToEtsTest, checkEmptyArray)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkEmptyArray"));
+    ASSERT_EQ(true, CallEtsFunction<bool>("simple_array", "checkEmptyArray"));
 }
 
 TEST_F(EtsForOfSimpleArrayTsToEtsTest, checkNumberArray)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkNumberArray"));
+    ASSERT_EQ(true, CallEtsFunction<bool>("simple_array", "checkNumberArray"));
 }
 
 TEST_F(EtsForOfSimpleArrayTsToEtsTest, checkStringArray)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkStringArray"));
+    ASSERT_EQ(true, CallEtsFunction<bool>("simple_array", "checkStringArray"));
 }
 
 }  // namespace ark::ets::interop::js::testing

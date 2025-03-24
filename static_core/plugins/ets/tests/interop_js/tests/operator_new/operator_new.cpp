@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,68 +22,68 @@ class EtsOperatorNew : public EtsInteropTest {};
 
 TEST_F(EtsOperatorNew, noArgsClass)
 {
-    auto ret = CallEtsMethod<bool>("noArgsClass");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "noArgsClass");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsOperatorNew, noArgsClassBrackes)
 {
-    auto ret = CallEtsMethod<bool>("noArgsClassBrackes");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "noArgsClassBrackes");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsOperatorNew, oneArgsClass)
 {
-    auto ret = CallEtsMethod<bool>("oneArgsClass");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "oneArgsClass");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsOperatorNew, twoArgsClass)
 {
-    auto ret = CallEtsMethod<bool>("twoArgsClass");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "twoArgsClass");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsOperatorNew, manyArgsClass)
 {
-    auto ret = CallEtsMethod<bool>("manyArgsClass");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "manyArgsClass");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsOperatorNew, newWithSubClass)
 {
-    auto ret = CallEtsMethod<bool>("newWithSubClass");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "newWithSubClass");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsOperatorNew, newWithException)
 {
-    auto ret = CallEtsMethod<bool>("newWithException");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "newWithException");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsOperatorNew, newWithFunction)
 {
-    auto ret = CallEtsMethod<bool>("newWithFunction");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "newWithFunction");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsOperatorNew, newWithArrey)
 {
-    auto ret = CallEtsMethod<bool>("newWithArrey");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "newWithArrey");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsOperatorNew, newWithPrototype)
 {
-    auto ret = CallEtsMethod<bool>("newWithPrototype");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "newWithPrototype");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsOperatorNew, newWithJustFunction)
 {
-    auto ret = CallEtsMethod<bool>("newWithJustFunction");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "newWithJustFunction");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsOperatorNew, newWithObj)
 {
-    auto ret = CallEtsMethod<bool>("newWithObj");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "newWithObj");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsOperatorNew, newWithPrimitive)
 {
-    auto ret = CallEtsMethod<bool>("newWithPrimitive");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "newWithPrimitive");
     ASSERT_EQ(ret, true);
 }
 

@@ -27,7 +27,7 @@ function getSpecificJ2a() {
         console.log('Starting...');
         let stsVm = initEtsVm();
 
-        this.getObj = stsVm.getFunction('LETSGLOBAL;', 'getStsObj');
+        this.getObj = stsVm.getFunction('Lbench_get_specific_j2a/ETSGLOBAL;', 'getStsObj');
 
         return 0;
     };

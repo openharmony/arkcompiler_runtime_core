@@ -22,43 +22,43 @@ class EtsEsObjectStringLiteralKeyTest : public EtsInteropTest {};
 
 TEST_F(EtsEsObjectStringLiteralKeyTest, check_field_access_by_dot)
 {
-    auto ret = CallEtsMethod<int64_t>("check_field_access_by_dot");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "check_field_access_by_dot");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsEsObjectStringLiteralKeyTest, check_esobject_with_string_literal)
 {
-    auto ret = CallEtsMethod<int64_t>("check_esobject_with_string_literal");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "check_esobject_with_string_literal");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsEsObjectStringLiteralKeyTest, check_esobject_with_string_key)
 {
-    auto ret = CallEtsMethod<int64_t>("check_esobject_with_string_key");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "check_esobject_with_string_key");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsEsObjectStringLiteralKeyTest, check_esobject_with_string_from_foo)
 {
-    auto ret = CallEtsMethod<int64_t>("check_esobject_with_string_from_foo");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "check_esobject_with_string_from_foo");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsEsObjectStringLiteralKeyTest, check_esobject_with_expression)
 {
-    auto ret = CallEtsMethod<int64_t>("check_esobject_with_expression");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "check_esobject_with_expression");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsEsObjectStringLiteralKeyTest, check_esobject_with_expression_str_literals)
 {
-    auto ret = CallEtsMethod<int64_t>("check_esobject_with_expression");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "check_esobject_with_expression");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsEsObjectStringLiteralKeyTest, check_esobject_with_expression_strings)
 {
-    auto ret = CallEtsMethod<int64_t>("check_esobject_with_expression");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "check_esobject_with_expression");
     ASSERT_EQ(ret, 0);
 }
 }  // namespace ark::ets::interop::js::testing

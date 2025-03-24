@@ -22,27 +22,27 @@ class EtsMimicSpecialFunctionEtsToTsTest : public EtsInteropTest {};
 
 TEST_F(EtsMimicSpecialFunctionEtsToTsTest, testMimicArrAdd)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testMimicArrAdd"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testMimicArrAdd"));
 }
 
 TEST_F(EtsMimicSpecialFunctionEtsToTsTest, testMimicArrLength)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testMimicArrLength"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testMimicArrLength"));
 }
 
 TEST_F(EtsMimicSpecialFunctionEtsToTsTest, testGetArray)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testGetArray"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testGetArray"));
 }
 
 TEST_F(EtsMimicSpecialFunctionEtsToTsTest, testSetArray)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testSetArray"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testSetArray"));
 }
 
 TEST_F(EtsMimicSpecialFunctionEtsToTsTest, testCustomizeType)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testCustomizeType"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testCustomizeType"));
 }
 
 }  // namespace ark::ets::interop::js::testing

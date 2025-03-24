@@ -33,7 +33,7 @@ function getNumericJ2a() {
             return 1;
         }
 
-        this.getObj = stsVm.getFunction('LETSGLOBAL;', 'getStsObj');
+        this.getObj = stsVm.getFunction('Lbench_get_numeric_j2a/ETSGLOBAL;', 'getStsObj');
 
         return 0;
     };

@@ -22,25 +22,25 @@ class EtsInteropUndefinedTest : public EtsInteropTest {};
 
 TEST_F(EtsInteropUndefinedTest, DISABLED_TestPassUndefinedToEts)
 {
-    auto ret = CallEtsMethod<bool>("TestPassUndefinedToEts");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestPassUndefinedToEts");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropUndefinedTest, TestPassUndefinedFromEts)
 {
-    auto ret = CallEtsMethod<bool>("TestPassUndefinedFromEts");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestPassUndefinedFromEts");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropUndefinedTest, TestPassNullToEts)
 {
-    auto ret = CallEtsMethod<bool>("TestPassNullToEts");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestPassNullToEts");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropUndefinedTest, TestPassNullFromEts)
 {
-    auto ret = CallEtsMethod<bool>("TestPassNullFromEts");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestPassNullFromEts");
     ASSERT_EQ(ret, true);
 }
 

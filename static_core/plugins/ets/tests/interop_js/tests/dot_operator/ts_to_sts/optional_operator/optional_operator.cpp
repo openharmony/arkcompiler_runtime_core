@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,62 +22,63 @@ class EtsOptionalOperatorTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsOptionalOperatorTsToEtsTest, checkOptionalOperatorWithValue)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkOptionalOperatorWithValue"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkOptionalOperatorWithValue"));
 }
 // NOTE (17745) - enable after fix alias undefined
 TEST_F(EtsOptionalOperatorTsToEtsTest, DISABLED_checkOptionalOperatorReturnUndefined)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkOptionalOperatorReturnUndefined"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkOptionalOperatorReturnUndefined"));
 }
 // NOTE: (alexanderpolenov) issue(18238) access by string index
 TEST_F(EtsOptionalOperatorTsToEtsTest, DISABLED_check_optional_operator_with_value_by_string_index)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_optional_operator_with_value_by_string_index"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "check_optional_operator_with_value_by_string_index"));
 }
 // NOTE: (alexanderpolenov) issue(18238) access by string index
 TEST_F(EtsOptionalOperatorTsToEtsTest, DISABLED_checkOptionalOperatorReturnUndefined_by_string_index)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkOptionalOperatorReturnUndefined_by_string_index"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkOptionalOperatorReturnUndefined_by_string_index"));
 }
 
 TEST_F(EtsOptionalOperatorTsToEtsTest, checkOptionalOperatorInsideObjectWithValue)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkOptionalOperatorInsideObjectWithValue"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkOptionalOperatorInsideObjectWithValue"));
 }
 // NOTE (17745) - enable after fix alias undefined
 TEST_F(EtsOptionalOperatorTsToEtsTest, DISABLED_checkOptionalOperatorInsideObjectReturnUndefined)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkOptionalOperatorInsideObjectReturnUndefined"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkOptionalOperatorInsideObjectReturnUndefined"));
 }
 // NOTE: (alexanderpolenov) issue(18238) access by string index
 TEST_F(EtsOptionalOperatorTsToEtsTest, DISABLED_checkOptionalOperatorInsideObjectWithValueByStringIndex)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkOptionalOperatorInsideObjectWithValueByStringIndex"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkOptionalOperatorInsideObjectWithValueByStringIndex"));
 }
 // NOTE: (alexanderpolenov) issue(18238) access by string index
 TEST_F(EtsOptionalOperatorTsToEtsTest, DISABLED_checkOptionalOperatorInsideReturnUndefinedByStringIndex)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkOptionalOperatorInsideReturnUndefinedByStringIndex"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkOptionalOperatorInsideReturnUndefinedByStringIndex"));
 }
 // NOTE  (alexanderpolenov) issue(18447) enable after fix call function with ?. operator
 TEST_F(EtsOptionalOperatorTsToEtsTest, DISABLED_checkOptionalOperatorFunction)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkOptionalOperatorFunction"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkOptionalOperatorFunction"));
 }
 
 TEST_F(EtsOptionalOperatorTsToEtsTest, checkOptionalOperatorFunctionUndefined)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkOptionalOperatorFunctionUndefined"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkOptionalOperatorFunctionUndefined"));
 }
 // NOTE: (alexanderpolenov) issue(18238) access by string index
 TEST_F(EtsOptionalOperatorTsToEtsTest, DISABLED_checkOptionalOperatorFunctionByStringIndex)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkOptionalOperatorFunctionByStringIndex"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkOptionalOperatorFunctionByStringIndex"));
 }
 // NOTE: (alexanderpolenov) issue(18238) access by string index
 TEST_F(EtsOptionalOperatorTsToEtsTest, DISABLED_checkOptionalOperatorFunctionReturnUndefinedByStringIndex)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkOptionalOperatorFunctionReturnUndefinedByStringIndex"));
+    ASSERT_EQ(true,
+              CallEtsFunction<bool>(GetPackageName(), "checkOptionalOperatorFunctionReturnUndefinedByStringIndex"));
 }
 
 }  // namespace ark::ets::interop::js::testing

@@ -21,13 +21,13 @@ class BackTraceTest : public EtsInteropTest {};
 
 TEST_F(BackTraceTest, simple_call)
 {
-    auto success = CallEtsFunction<int>("Test", "TestBacktrace_entry_simple");
+    auto success = CallEtsFunction<int>(GetPackageName(), "TestBacktrace_entry_simple");
     ASSERT_EQ(success, 1);
 }
 
 TEST_F(BackTraceTest, complex_call)
 {
-    auto success = CallEtsFunction<int>("Test", "TestBacktrace_entry_complex");
+    auto success = CallEtsFunction<int>(GetPackageName(), "TestBacktrace_entry_complex");
     ASSERT_EQ(success, 1);
 }
 

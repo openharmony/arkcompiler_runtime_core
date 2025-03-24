@@ -12,7 +12,6 @@
 # limitations under the License.
 
 ani_add_gtest(ani_test_example_calls
-    ETS_NAMED_MODE
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/example.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/example.ets
 )

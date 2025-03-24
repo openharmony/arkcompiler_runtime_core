@@ -22,197 +22,197 @@ class ArrayTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(ArrayTsToEtsTest, indexAccess)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("indexAccess"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "indexAccess"));
 }
 
 TEST_F(ArrayTsToEtsTest, testLength)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testLength"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testLength"));
 }
 
 TEST_F(ArrayTsToEtsTest, testArrayTypeof)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("typeofArray"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "typeofArray"));
 }
 
 TEST_F(ArrayTsToEtsTest, testInstanceof)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("instanceofArray"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "instanceofArray"));
 }
 
 TEST_F(ArrayTsToEtsTest, testInstanceofObj)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("instanceofArrayObject"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "instanceofArrayObject"));
 }
 
 TEST_F(ArrayTsToEtsTest, testAt)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testAt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testAt"));
 }
 
 TEST_F(ArrayTsToEtsTest, testConcat)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testConcat"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testConcat"));
 }
 
 TEST_F(ArrayTsToEtsTest, testCopyWithin)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testCopyWithin"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testCopyWithin"));
 }
 
 TEST_F(ArrayTsToEtsTest, testEvery)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testEvery"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testEvery"));
 }
 
 TEST_F(ArrayTsToEtsTest, testFill)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testFill"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testFill"));
 }
 
 TEST_F(ArrayTsToEtsTest, testFilter)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testFilter"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testFilter"));
 }
 
 TEST_F(ArrayTsToEtsTest, testFind)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testFind"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testFind"));
 }
 
 TEST_F(ArrayTsToEtsTest, testFindIndex)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testFindIndex"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testFindIndex"));
 }
 
 TEST_F(ArrayTsToEtsTest, testFindLast)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testFindLast"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testFindLast"));
 }
 
 TEST_F(ArrayTsToEtsTest, testFindLastIndex)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testFindLastIndex"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testFindLastIndex"));
 }
 
 TEST_F(ArrayTsToEtsTest, testFlat)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testFlat"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testFlat"));
 }
 
 TEST_F(ArrayTsToEtsTest, testFlatMap)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testFlatMap"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testFlatMap"));
 }
 
 TEST_F(ArrayTsToEtsTest, testForEach)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testForEach"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testForEach"));
 }
 
 TEST_F(ArrayTsToEtsTest, testIncludes)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testIncludes"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testIncludes"));
 }
 
 TEST_F(ArrayTsToEtsTest, testIndexOf)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testIndexOf"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testIndexOf"));
 }
 
 TEST_F(ArrayTsToEtsTest, testJoin)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testJoin"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testJoin"));
 }
 
 TEST_F(ArrayTsToEtsTest, testLastIndexOf)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testLastIndexOf"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testLastIndexOf"));
 }
 
 TEST_F(ArrayTsToEtsTest, testMap)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testMap"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testMap"));
 }
 
 TEST_F(ArrayTsToEtsTest, testPop)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testPop"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testPop"));
 }
 
 TEST_F(ArrayTsToEtsTest, testPush)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testPush"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testPush"));
 }
 
 TEST_F(ArrayTsToEtsTest, testReduce)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testReduce"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testReduce"));
 }
 
 TEST_F(ArrayTsToEtsTest, testReduceRight)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testReduceRight"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testReduceRight"));
 }
 
 TEST_F(ArrayTsToEtsTest, testReverse)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testReverse"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testReverse"));
 }
 
 TEST_F(ArrayTsToEtsTest, testShift)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testShift"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testShift"));
 }
 
 TEST_F(ArrayTsToEtsTest, testSlice)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testSlice"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testSlice"));
 }
 
 TEST_F(ArrayTsToEtsTest, testSome)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testSome"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testSome"));
 }
 
 TEST_F(ArrayTsToEtsTest, testSort)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testSort"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testSort"));
 }
 
 TEST_F(ArrayTsToEtsTest, testSplice)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testSplice"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testSplice"));
 }
 
 TEST_F(ArrayTsToEtsTest, testToLocaleString)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testToLocaleString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testToLocaleString"));
 }
 
 TEST_F(ArrayTsToEtsTest, testToReversed)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testToReversed"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testToReversed"));
 }
 
 TEST_F(ArrayTsToEtsTest, testToSorted)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testToSorted"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testToSorted"));
 }
 
 TEST_F(ArrayTsToEtsTest, testToSpliced)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testToSpliced"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testToSpliced"));
 }
 
 TEST_F(ArrayTsToEtsTest, testUnShift)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testUnShift"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testUnShift"));
 }
 
 TEST_F(ArrayTsToEtsTest, testWith)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testWith"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWith"));
 }
 
 }  // namespace ark::ets::interop::js::testing

@@ -15,32 +15,32 @@
 
 const etsVm = globalThis.gtest.etsVm;
 
-const getBooleanPrimitive = etsVm.getFunction('LETSGLOBAL;', 'getBooleanPrimitive');
-const getBooleanBoxed = etsVm.getFunction('LETSGLOBAL;', 'getBooleanBoxed');
-const getBytePrimitive = etsVm.getFunction('LETSGLOBAL;', 'getBytePrimitive');
-const getByteBoxed = etsVm.getFunction('LETSGLOBAL;', 'getByteBoxed');
-const getShortPrimitive = etsVm.getFunction('LETSGLOBAL;', 'getShortPrimitive');
-const getShortBoxed = etsVm.getFunction('LETSGLOBAL;', 'getShortBoxed');
-const getIntPrimitive = etsVm.getFunction('LETSGLOBAL;', 'getIntPrimitive');
-const getIntBoxed = etsVm.getFunction('LETSGLOBAL;', 'getIntBoxed');
-const getLongPrimitive = etsVm.getFunction('LETSGLOBAL;', 'getLongPrimitive');
-const getLongBoxed = etsVm.getFunction('LETSGLOBAL;', 'getLongBoxed');
-const getFloatPrimitive = etsVm.getFunction('LETSGLOBAL;', 'getFloatPrimitive');
-const getFloatBoxed = etsVm.getFunction('LETSGLOBAL;', 'getFloatBoxed');
-const getNumberPrimitive = etsVm.getFunction('LETSGLOBAL;', 'getNumberPrimitive');
-const getNumberBoxed = etsVm.getFunction('LETSGLOBAL;', 'getNumberBoxed');
-const getDoublePrimitive = etsVm.getFunction('LETSGLOBAL;', 'getDoublePrimitive');
-const getDoubleBoxed = etsVm.getFunction('LETSGLOBAL;', 'getDoubleBoxed');
-const getStringPrimitive = etsVm.getFunction('LETSGLOBAL;', 'getStringPrimitive');
-const getStringBoxed = etsVm.getFunction('LETSGLOBAL;', 'getStringBoxed');
-const getCharPrimitive = etsVm.getFunction('LETSGLOBAL;', 'getCharPrimitive');
-const getCharPrimitiveNumber = etsVm.getFunction('LETSGLOBAL;', 'getCharPrimitiveNumber');
-const getCharBoxed = etsVm.getFunction('LETSGLOBAL;', 'getCharBoxed');
-const getCharBoxedNumber = etsVm.getFunction('LETSGLOBAL;', 'getCharBoxedNumber');
-const getBigIntPrimitive = etsVm.getFunction('LETSGLOBAL;', 'getBigIntPrimitive');
-const getBigIntBoxed = etsVm.getFunction('LETSGLOBAL;', 'getBigIntBoxed');
-const getNullPrimitive = etsVm.getFunction('LETSGLOBAL;', 'getNullPrimitive');
-const getUndefinedPrimitive = etsVm.getFunction('LETSGLOBAL;', 'getUndefinedPrimitive');
+const getBooleanPrimitive = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getBooleanPrimitive');
+const getBooleanBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getBooleanBoxed');
+const getBytePrimitive = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getBytePrimitive');
+const getByteBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getByteBoxed');
+const getShortPrimitive = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getShortPrimitive');
+const getShortBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getShortBoxed');
+const getIntPrimitive = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getIntPrimitive');
+const getIntBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getIntBoxed');
+const getLongPrimitive = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getLongPrimitive');
+const getLongBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getLongBoxed');
+const getFloatPrimitive = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getFloatPrimitive');
+const getFloatBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getFloatBoxed');
+const getNumberPrimitive = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getNumberPrimitive');
+const getNumberBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getNumberBoxed');
+const getDoublePrimitive = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getDoublePrimitive');
+const getDoubleBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getDoubleBoxed');
+const getStringPrimitive = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getStringPrimitive');
+const getStringBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getStringBoxed');
+const getCharPrimitive = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getCharPrimitive');
+const getCharPrimitiveNumber = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getCharPrimitiveNumber');
+const getCharBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getCharBoxed');
+const getCharBoxedNumber = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getCharBoxedNumber');
+const getBigIntPrimitive = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getBigIntPrimitive');
+const getBigIntBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getBigIntBoxed');
+const getNullPrimitive = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getNullPrimitive');
+const getUndefinedPrimitive = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'getUndefinedPrimitive');
 
 
 function testGetBooleanPrimitive(): void {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,17 +22,17 @@ class EtsClassMethodUserClassTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsClassMethodUserClassTsToEtsTest, checkUserClassMethod)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkUserClassMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkUserClassMethod"));
 }
 
 TEST_F(EtsClassMethodUserClassTsToEtsTest, checkCreateUserClassFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateUserClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateUserClassFromTs"));
 }
 
 TEST_F(EtsClassMethodUserClassTsToEtsTest, checkInstanceUserClass)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceUserClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceUserClass"));
 }
 
 }  // namespace ark::ets::interop::js::testing
