@@ -5417,6 +5417,16 @@ intrinsics:
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsEventFire
 
+  - name: stdConcurrencyNativeAsyncWorkHelperAsyncWorkNativeInvoke
+    space: ets
+    class_name: std.concurrency.NativeAsyncWorkHelper
+    method_name: asyncWorkNativeInvoke
+    static: true
+    signature:
+      ret: void
+      args: [ i64, i64, u1 ]
+    impl: ark::ets::intrinsics::AsyncWorkNativeInvoke
+
 ###############################
 # std.core.ExclusiveLauncher #
 ###############################

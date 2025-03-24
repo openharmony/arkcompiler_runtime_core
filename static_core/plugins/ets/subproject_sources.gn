@@ -130,6 +130,7 @@ srcs_runtime = [
   "runtime/intrinsics/std_core_StackTrace.cpp",
   "runtime/intrinsics/escompat_Atomics.cpp",
   "runtime/intrinsics/gc_task_tracker.cpp",
+  "runtime/intrinsics/std_core_AniHelpers.cpp",
   "runtime/intrinsics/std_core_Runtime.cpp",
   "runtime/intrinsics/std_core_SyncPrimitives.cpp",
   "runtime/intrinsics/std_core_String.cpp",
