@@ -96,11 +96,11 @@ export namespace util {
             let bytes: Array<number> = new Array<number>();
 
             for (let i = 0; i < cleaned.length; i++) {
-                let char: string = cleaned[i];
-                if (char == "=") {
+                let ch: string = cleaned[i];
+                if (ch == "=") {
                     break;
                 }
-                let index: int = table.indexOf(char) as int;
+                let index: int = table.indexOf(ch) as int;
                 if (index == -1) {
                     continue;
                 }

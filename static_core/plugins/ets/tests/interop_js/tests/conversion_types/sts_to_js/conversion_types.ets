@@ -48,21 +48,21 @@ static {
 class DeferentIntTypes {
     systemHexadecimal = 16;
     systemBinary = 2;
-    int: int = 1;
+    num: int = 1;
     numb: number = 1;
     bigInt: BigInt = 1n;
-    float: float = 1.1;
+    fl: float = 1.1;
     intString: string = '1';
-    long: long = 1;
-    double: double = 1;
-    char: char = 1;
-    byte = dataView.getUint8(0);
+    l: long = 1;
+    doub: double = 1;
+    ch: char = 1;
+    by = dataView.getUint8(0);
 }
 
 class DeferentStringTypes {
-    char: char = 'a';
-    string: string = "hello";
-    literal: "one" | "two" = "one";
+    ch: char = 'a';
+    str: string = "hello";
+    lit: "one" | "two" = "one";
 }
 
 class NullAndUndefinedTypes {

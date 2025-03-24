@@ -20,7 +20,7 @@ import { charToNumberToString } from 'test_import';
  * @Tags interop, bu_a2j
  */
 class ConversionCharA2j {
-    char: string = "A";
+    ch: string = "A";
     result: string = '';
 
     /**
@@ -34,7 +34,7 @@ class ConversionCharA2j {
      * @Benchmark
      */
     test(): string {
-        this.result = charToNumberToString(this.char)
+        this.result = charToNumberToString(this.ch)
         return this.result;
     }
 }
