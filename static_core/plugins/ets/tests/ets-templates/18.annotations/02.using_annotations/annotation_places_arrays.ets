@@ -40,7 +40,7 @@ const c: string = "some_string"
 @SomeAnnotation({field1: {{ case.value1 }} })
 let l: number = 1
 
-type SomeType<T> = T[]
+type SomeType<T> = FixedArray<T>
 
 @SomeAnnotation({field1: {{ case.value1 }}, field2: {{ case.value2 }} })
 const t: SomeType<number> = [100, 200]

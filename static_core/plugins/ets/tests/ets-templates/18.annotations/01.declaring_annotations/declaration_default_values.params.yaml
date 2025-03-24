@@ -31,18 +31,18 @@ cases:
       MyEnum.EnumField1
 
   - type: |-
-      int[]
+      FixedArray<int>
     value: |-
       [1 + 1 , 2 - 1, 3 / 1]
   - type: |-
-      boolean[]
+      FixedArray<boolean>
     value: |-
       [1 == 1, 1 != 1]
   - type: |-
-      string[]
+      FixedArray<string>
     value: |-
       ['some string' + 'another string', 'some string2' + 'another string2']
   - type: |-
-      MyEnum[]
+      FixedArray<MyEnum>
     value: |-
       [MyEnum.EnumField1, MyEnum.EnumField2]

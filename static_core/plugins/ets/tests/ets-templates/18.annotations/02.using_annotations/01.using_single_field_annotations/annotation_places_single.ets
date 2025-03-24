@@ -34,7 +34,7 @@ const c: string = "some_string"
 @SomeAnnotation({{ case.value }})
 let l: number = 1
 
-type SomeType<T> = T[]
+type SomeType<T> = FixedArray<T>
 
 @SomeAnnotation({{ case.value }})
 const t: SomeType<number> = [100, 200]
