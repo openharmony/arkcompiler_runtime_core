@@ -103,6 +103,7 @@ class {{N}}ArrayIteratorEntries implements IterableIterator<{{subsetTypeValuesEn
  */
 export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLike<{{subsetTypeValues}}> {
     public static readonly BYTES_PER_ELEMENT: number = {{S}}
+    public readonly BYTES_PER_ELEMENT: number = {{N}}Array.BYTES_PER_ELEMENT
     internal readonly lengthInt: int
 
     /**
@@ -1804,7 +1805,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns sorted {{N}}Array
      */
-    public sort(compareFn?: (a: {{elType}}, b: {{elType}}) => number): this {
+    {%- if N == 'BigInt64' %}
+    {%- set sortCompareFnRetTy = 'number | BigInt' %}
+    {%- else %}
+    {%- set sortCompareFnRetTy = 'number' %}
+    {%- endif %}
+    public sort(compareFn?: (a: {{elType}}, b: {{elType}}) => {{sortCompareFnRetTy}}): this {
         let arr: {{T}}[] = new {{T}}[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
@@ -1814,7 +1820,16 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             }
         if (compareFn != undefined) {
             cmp = (l: {{T}}, r: {{T}}): number => {
-                return compareFn!({{asElementCompat % 'l'}}, {{asElementCompat % 'r'}})
+                const result = compareFn!({{asElementCompat % 'l'}}, {{asElementCompat % 'r'}})
+                {%- if N == 'BigInt64' %}
+                if (result instanceof BigInt) {
+                    return (result as BigInt).getLong()
+                } else {
+                    return result as number
+                }
+                {%- else %}
+                return result
+                {%- endif %}
             }
         }
         sort(arr, cmp)
