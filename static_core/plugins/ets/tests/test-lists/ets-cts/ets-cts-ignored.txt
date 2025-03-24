@@ -1674,13 +1674,6 @@
 #22788 ES2PANDA_FAIL - fails of negative, compile-only
 09.classes/11.local_classes_and_interfaces/local_class_out_of_visibility_area_7.ets
 
-#17313
-10.interfaces/01.interface_declarations/empty_interface_declaration_negative_8.ets
-10.interfaces/01.interface_declarations/empty_interface_declaration_negative_9.ets
-10.interfaces/01.interface_declarations/empty_interface_declaration_negative_10.ets
-10.interfaces/01.interface_declarations/empty_interface_declaration_negative_11.ets
-
-
 #23530
 10.interfaces/05.interface_properties/external_interface_with_property_1.ets
 
