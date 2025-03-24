@@ -209,12 +209,25 @@ export namespace url {
         return trimHead.substring(0, i + 1);
     }
 
-    function isAlpha(char: string): boolean {
-        return char.length == 1 && ((char[0] >= c'a' && char[0] <= c'z') || (char[0] >= c'A' && char[0] <= c'Z'));
+    function deleteTabOrNewline(input: string): string {
+        let res = "";
+        for (let i = 0; i < input.length; i++) {
+            let ch = input[i];
+            if (ch == c'\t' || ch == c'\n' || ch == c'\r') {
+                continue;
+            } else {
+                res += ch;
+            }
+        }
+        return res;
     }
 
-    function isNum(char: string): boolean {
-        return char.length == 1 && (char[0] >= c'0' && char[0] <= c'9');
+    function isAlpha(ch: string): boolean {
+        return ch.length == 1 && ((ch[0] >= c'a' && ch[0] <= c'z') || (ch[0] >= c'A' && ch[0] <= c'Z'));
+    }
+
+    function isNum(ch: string): boolean {
+        return ch.length == 1 && (ch[0] >= c'0' && ch[0] <= c'9');
     }
 
     function isAlphaNum(ch: string): boolean {

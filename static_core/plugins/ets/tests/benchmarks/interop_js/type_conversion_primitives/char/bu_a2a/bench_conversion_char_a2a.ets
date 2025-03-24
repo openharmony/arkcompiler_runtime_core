@@ -19,7 +19,7 @@
  */
 class ConversionCharA2a {
     seed: number = 123;
-    char: string = 'A';
+    ch: string = 'A';
     result: string = '';
 
     charToNumberToString(chr: string): string {
@@ -38,7 +38,7 @@ class ConversionCharA2a {
      * @Benchmark
      */
     test(): string {
-        this.result = this.charToNumberToString(this.char);
+        this.result = this.charToNumberToString(this.ch);
         return this.result;
     }
 }

@@ -1,22 +1,3 @@
-#23500 Successful compilation instead of CTE
-02.lexical_elements/07.keywords/hard_16.ets
-02.lexical_elements/07.keywords/hard_29.ets
-02.lexical_elements/07.keywords/hard_41.ets
-02.lexical_elements/07.keywords/types_1.ets
-02.lexical_elements/07.keywords/types_2.ets
-02.lexical_elements/07.keywords/types_4.ets
-02.lexical_elements/07.keywords/types_6.ets
-02.lexical_elements/07.keywords/types_8.ets
-02.lexical_elements/07.keywords/types_10.ets
-02.lexical_elements/07.keywords/types_12.ets
-02.lexical_elements/07.keywords/types_14.ets
-02.lexical_elements/07.keywords/types_20.ets
-02.lexical_elements/07.keywords/types_24.ets
-
-#24028 not implemented
-03.types/01.predefined_types/class_types_declaration_2.ets
-03.types/03.using_types/array_value_types_declaration_18.ets
-
 #23596
 03.types/06.value_types/01.integer_types_and_operations/bitwise_complement/bitwise_complement_char_3.ets
 
