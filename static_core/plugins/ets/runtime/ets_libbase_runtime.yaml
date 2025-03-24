@@ -3644,7 +3644,7 @@ intrinsics:
     static: false
     signature:
       ret: escompat.RegExpExecArray
-      args: [ std.core.String ]
+      args: [ std.core.String, std.core.String, std.core.String ]
     impl: ark::ets::intrinsics::EscompatRegExpExec
 
 ####################

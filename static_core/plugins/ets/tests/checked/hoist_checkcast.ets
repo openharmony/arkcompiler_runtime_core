@@ -105,7 +105,7 @@ function test2(arr: Object[], value: A | B) : int {
         }
     } catch (e: ArrayStoreError) {
         // NOTE: line number is invalid in interpreter, see #17098
-        assertNE(e.toString().match('ArrayStoreError: B cannot be stored in an array of type [LA;'), null);
+        assertNE(e.toString().match('ArrayStoreError: B cannot be stored in an array of type \\[LA;'), null);
         return -iters;
     }
     return iters;
