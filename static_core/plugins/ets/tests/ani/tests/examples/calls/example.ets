@@ -23,6 +23,12 @@ class Test {
         return this.a + this.b;
     }
 
+    @ani.unsafe.Quick
+    public static native quickMethod(s: string, l: long): string;
+
+    @ani.unsafe.Direct
+    public static native directMethod(b0: boolean, i0: byte, i1: char, i2: short, i3: int, i4: long, f0: float, f1: double): int;
+
     private a: double;
     private b: double;
 };
