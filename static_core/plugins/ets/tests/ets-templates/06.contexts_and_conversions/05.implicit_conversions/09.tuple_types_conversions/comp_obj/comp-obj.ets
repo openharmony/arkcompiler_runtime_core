@@ -22,7 +22,7 @@ desc: >-
 {{c.decl}}
 
 class Z {
-    fld: [{% for t in c['values'] %}{{t.type}}{% if not loop.last %}, {% endif %}{% endfor %}] = [{% for t in c['values'] %}{{t.init_value}}{% if not loop.last %}, {% endif %}{% endfor %}]
+    fld: [{% for t in c['values'] %}{{t.type}}{% if not loop.last %}, {% endif %}{% endfor %}] = [{% for t in c['values'] %}{{t.expr|safe}}{% if not loop.last %}, {% endif %}{% endfor %}]
 }
 
 function main() {

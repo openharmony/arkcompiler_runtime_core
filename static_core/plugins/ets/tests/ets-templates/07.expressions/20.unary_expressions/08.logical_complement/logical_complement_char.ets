@@ -22,7 +22,7 @@ params: 1 => false
 function main(): void {
   let c: char | undefined = undefined
   assertEQ(!c, true, "Undefined is false")
-  c = c'0'
+  c = c'\u0000'
   assertEQ(!c, true, "Char '0' is false")
   c = c'A'
   assertEQ(!c, false, "Char not '0' is true")

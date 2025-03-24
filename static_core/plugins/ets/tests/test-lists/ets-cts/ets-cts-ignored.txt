@@ -1385,9 +1385,6 @@
 #23900
 07.expressions/20.unary_expressions/06.unary_minus/unary_minus_corner_0.ets
 
-#23441
-07.expressions/20.unary_expressions/08.logical_complement/logical_complement_char.ets
-
 #19951
 07.expressions/18.ensure-not-nullish_expression/null_check.ets
 07.expressions/23.shift_expressions/rshift_int_1.ets
