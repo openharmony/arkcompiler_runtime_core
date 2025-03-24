@@ -18,7 +18,7 @@ limitations under the License.
 /*---
 desc: Predefined type name {{i}} using in name of the field.
 params: {{i}}
-tags: [compile-only]
+tags: [negative, compile-only]
 ---*/
 
 let {{i}}: {{i}};
