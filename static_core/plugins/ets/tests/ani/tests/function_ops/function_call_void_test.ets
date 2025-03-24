@@ -21,4 +21,86 @@ function sum(a0: int, a1: int): void {
 function getCount(): int {
     return count as int;
 }
-};
+}
+
+export let intExport: int = 3;
+export let charExport: char = "a";
+function moduleFunction(value1: int, value2: int): void {
+    intExport = value1 + value2;
+}
+
+function moduleFunction(value: char): void {
+    charExport = value;
+}
+
+function getIntExport(): int
+{
+    return intExport;
+}
+
+function getCharExport(): char
+{
+    return charExport;
+}
+
+namespace A {
+	let intValue: int = 0;
+	let doubleValue: double = 0.0;
+	let charValue: char;
+
+    function getIntValue(): int
+    {
+        return intValue;
+    }
+
+    function getDoubleValue(): double
+    {
+        return doubleValue;
+    }
+
+    function getCharValue(): char
+    {
+        return charValue;
+    }
+
+    function voidFunctionA(value1: int, value2: int): void {
+        intValue = value1 + value2;
+    }
+
+    function voidFunctionA(value: char): void {
+        charValue = value;
+    }
+
+    function nestedFunction(value1: int, value2: int): void {
+        let lambdaFunction: (p1: int, p2: int) => int =
+            (param1: int, param2: int): int => {
+                return param1 + param2 as int;
+        };
+        intValue = lambdaFunction(value1, value2);
+    }
+    
+    export function recursiveFunction(value: int): void {
+        if (value <= 0) {
+            return ;
+        }
+        intValue += value;
+        recursiveFunction(value - 1);
+    }
+
+    function calculateSum(value1: int, value2: char, value3: double): void {
+        intValue = value1;
+        charValue = value2;
+        doubleValue = value3;
+    }
+
+    namespace B {
+        let intValueB: int = 0;
+        function getIntValueB(): int
+        {
+            return intValueB;
+        }
+        function voidFunctionB(value1: int, value2: int): void {
+            intValueB = value1 + value2;
+        }
+    }
+}
