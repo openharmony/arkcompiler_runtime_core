@@ -18,7 +18,6 @@ desc: >-
     Character to string conversion converts a value of type char to type
     string. The resultant new string has the length equal to 1.
     Composite context. Object.
-tags: [negative, compile-only]
 ---*/
 {%- for v in chars %}
 let c{{loop.index}}: char = {{v.char}}

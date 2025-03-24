@@ -761,9 +761,6 @@
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_var/decl-var_5.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_var/decl-var_8.ets
 
-#24132
-06.contexts_and_conversions/05.implicit_conversions/06.char_to_string_conversions/comp-clss.ets
-
 #23137
 06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd-nan_2.ets
 06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_2_0.ets
