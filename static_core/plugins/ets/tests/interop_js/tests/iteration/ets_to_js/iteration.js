@@ -15,11 +15,11 @@
 
 const etsVm = globalThis.gtest.etsVm;
 
-let numberArray = etsVm.getClass('LETSGLOBAL;').numberArray;
-let boolArray = etsVm.getClass('LETSGLOBAL;').boolArray;
-let objArray = etsVm.getClass('LETSGLOBAL;').objArray;
-let str = etsVm.getClass('LETSGLOBAL;').str;
-let foo = etsVm.getClass('LETSGLOBAL;').foo;
+let numberArray = etsVm.getClass('Ltest_iteration/ETSGLOBAL;').numberArray;
+let boolArray = etsVm.getClass('Ltest_iteration/ETSGLOBAL;').boolArray;
+let objArray = etsVm.getClass('Ltest_iteration/ETSGLOBAL;').objArray;
+let str = etsVm.getClass('Ltest_iteration/ETSGLOBAL;').str;
+let foo = etsVm.getClass('Ltest_iteration/ETSGLOBAL;').foo;
 
 function doIterate(iterableObj) {
     for (let item of iterableObj) {

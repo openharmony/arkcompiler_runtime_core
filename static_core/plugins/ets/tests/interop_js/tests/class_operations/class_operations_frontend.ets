@@ -23,7 +23,7 @@ import {
 } from 'module';
 
 //! CHECKER      jscallEmpty JIT
-//! RUN          force_jit: true, entry: "jscallEmpty", options: "--compiler-regex=ETSGLOBAL::jscallEmpty"
+//! RUN          force_jit: true, entry: "jscallEmpty", options: "--compiler-regex=class_operations_frontend.ETSGLOBAL::jscallEmpty"
 //! METHOD       "jscallEmpty"
 //! PASS_AFTER   "IrBuilder"
 
@@ -34,7 +34,7 @@ function jscallEmpty(): int {
 }
 
 //! CHECKER      jsnewEmpty JIT
-//! RUN          force_jit: true, entry: "jsnewEmpty", options: "--compiler-regex=ETSGLOBAL::jsnewEmpty"
+//! RUN          force_jit: true, entry: "jsnewEmpty", options: "--compiler-regex=class_operations_frontend.ETSGLOBAL::jsnewEmpty"
 //! METHOD       "jsnewEmpty"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     "Intrinsic.JSRuntimeGetPropertyJSValue"
@@ -55,7 +55,7 @@ function jsnewEmpty(): int {
 }
 
 //! CHECKER      jscallStaticMethodEmpty JIT
-//! RUN          force_jit: true, entry: "jscallStaticMethodEmpty", options: "--compiler-regex=ETSGLOBAL::jscallStaticMethodEmpty"
+//! RUN          force_jit: true, entry: "jscallStaticMethodEmpty", options: "--compiler-regex=class_operations_frontend.ETSGLOBAL::jscallStaticMethodEmpty"
 //! METHOD       "jscallStaticMethodEmpty"
 //! PASS_AFTER   "IrBuilder"
 
@@ -66,7 +66,7 @@ function jscallStaticMethodEmpty(): int {
 }
 
 //! CHECKER      jscallObject JIT
-//! RUN          force_jit: true, entry: "jscallObject", options: "--compiler-regex=ETSGLOBAL::jscallObject"
+//! RUN          force_jit: true, entry: "jscallObject", options: "--compiler-regex=class_operations_frontend.ETSGLOBAL::jscallObject"
 //! METHOD       "jscallObject"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "Intrinsic.JSRuntimeGetPropertyDouble"
@@ -87,7 +87,7 @@ function jscallObject(): int {
 }
 
 //! CHECKER      jsnewObject JIT
-//! RUN          force_jit: true, entry: "jsnewObject", options: "--compiler-regex=ETSGLOBAL::jsnewObject"
+//! RUN          force_jit: true, entry: "jsnewObject", options: "--compiler-regex=class_operations_frontend.ETSGLOBAL::jsnewObject"
 //! METHOD       "jsnewObject"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyJSValue", 2
@@ -106,7 +106,7 @@ function jsnewObject(): int {
 }
 
 //! CHECKER      jsnewSetPropertyObject JIT
-//! RUN          force_jit: true, entry: "jsnewSetPropertyObject", options: "--compiler-regex=ETSGLOBAL::jsnewSetPropertyObject"
+//! RUN          force_jit: true, entry: "jsnewSetPropertyObject", options: "--compiler-regex=class_operations_frontend.ETSGLOBAL::jsnewSetPropertyObject"
 //! METHOD       "jsnewSetPropertyObject"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.JSRuntimeSetPropertyJSValue", 2
@@ -128,7 +128,7 @@ function jsnewSetPropertyObject(): int {
 }
 
 //! CHECKER      jscallMethodObject JIT
-//! RUN          force_jit: true, entry: "jscallMethodObject", options: "--compiler-regex=ETSGLOBAL::jscallMethodObject"
+//! RUN          force_jit: true, entry: "jscallMethodObject", options: "--compiler-regex=class_operations_frontend.ETSGLOBAL::jscallMethodObject"
 //! METHOD       "jscallMethodObject"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 2
@@ -146,7 +146,7 @@ function jscallMethodObject(): int {
 }
 
 //! CHECKER      jscallMethodSimple JIT
-//! RUN          force_jit: true, entry: "jscallMethodSimple", options: "--compiler-regex=ETSGLOBAL::jscallMethodSimple"
+//! RUN          force_jit: true, entry: "jscallMethodSimple", options: "--compiler-regex=class_operations_frontend.ETSGLOBAL::jscallMethodSimple"
 //! METHOD       "jscallMethodSimple"
 //! PASS_AFTER   "IrBuilder"
 
@@ -161,7 +161,7 @@ function jscallMethodSimple(): int {
 }
 
 //! CHECKER      jscallString JIT
-//! RUN          force_jit: true, entry: "jscallString", options: "--compiler-regex=ETSGLOBAL::jscallString"
+//! RUN          force_jit: true, entry: "jscallString", options: "--compiler-regex=class_operations_frontend.ETSGLOBAL::jscallString"
 //! METHOD       "jscallString"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "Intrinsic.JSRuntimeGetValueString"
@@ -179,7 +179,7 @@ function jscallString(): int {
 }
 
 //! CHECKER      jsnewString JIT
-//! RUN          force_jit: true, entry: "jsnewString", options: "--compiler-regex=ETSGLOBAL::jsnewString"
+//! RUN          force_jit: true, entry: "jsnewString", options: "--compiler-regex=class_operations_frontend.ETSGLOBAL::jsnewString"
 //! METHOD       "jsnewString"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyString", 2
@@ -200,7 +200,7 @@ function jsnewString(): int {
 }
 
 //! DISABLED_CHECKER      jsnewSetPropertyString JIT
-//! RUN          force_jit: true, entry: "jsnewSetPropertyString", options: "--compiler-regex=ETSGLOBAL::jsnewSetPropertyString"
+//! RUN          force_jit: true, entry: "jsnewSetPropertyString", options: "--compiler-regex=class_operations_frontend.ETSGLOBAL::jsnewSetPropertyString"
 //! METHOD       "jsnewSetPropertyString"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     "Intrinsic.JSRuntimeSetPropertyJSValue"
@@ -228,7 +228,7 @@ function jsnewSetPropertyString(): int {
 }
 
 //! CHECKER      jscallStaticMethodString JIT
-//! RUN          force_jit: true, entry: "jscallStaticMethodString", options: "--compiler-regex=ETSGLOBAL::jscallStaticMethodString"
+//! RUN          force_jit: true, entry: "jscallStaticMethodString", options: "--compiler-regex=class_operations_frontend.ETSGLOBAL::jscallStaticMethodString"
 //! METHOD       "jscallStaticMethodString"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     "Intrinsic.JSRuntimeNewJSValueString"

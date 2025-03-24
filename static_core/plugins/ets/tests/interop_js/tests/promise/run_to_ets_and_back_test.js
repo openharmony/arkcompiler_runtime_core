@@ -17,6 +17,11 @@ function runTest() {
 	const helper = requireNapiPreview('libinterop_test_helper.so', false);
 	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
 	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+	const packageName = helper.getEnvironmentVar('PACKAGE_NAME');
+	if (!packageName) {
+		throw Error('PACKAGE_NAME is not set');
+	}
+	const globalName = 'L' + packageName + '/ETSGLOBAL;';
 
 	let test = 'toEtsAndBack';
 	print('Running test ' + test);
@@ -31,7 +36,7 @@ function runTest() {
 		throw Error('Cannot create ETS runtime');
 	}
 	let jsPromise = Promise.resolve();
-	const getTheSamePromise = etsVm.getFunction('LETSGLOBAL;', 'getTheSamePromise');
+	const getTheSamePromise = etsVm.getFunction(globalName, 'getTheSamePromise');
 	let etsPromise = getTheSamePromise(jsPromise);
 	if (jsPromise !== etsPromise) {
 		throw Error('Test ' + test + ' failed: expected jsPromise and etsPromise are the same but actually they differs');

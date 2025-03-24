@@ -22,6 +22,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__class_composite
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_composite.ets
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/js/index.js
     ETS_CONFIG ${ETS_CONFIG}
+    PACKAGE_NAME "class_composite"
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__class_composite_decl
@@ -29,4 +30,5 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__class_composite_decl
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_composite_decl.ets
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/js/index.js
     ETS_CONFIG ${ETS_CONFIG_DECL}
+    PACKAGE_NAME "class_composite_decl"
 )

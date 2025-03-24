@@ -23,25 +23,25 @@ class EtsInteropNumberSubtypesTest : public EtsInteropTest {};
 % (@integral_primitives + @float_primitives).each do |primitive|
 TEST_F(EtsInteropNumberSubtypesTest, TestJSCall<%= primitive.getName.capitalize() %>)
 {
-    auto jscallRet = CallEtsMethod<int64_t>("jscall<%= primitive.getName.capitalize() %>");
+    auto jscallRet = CallEtsFunction<int64_t>(GetPackageName(), "jscall<%= primitive.getName.capitalize() %>");
     ASSERT_EQ(jscallRet, 0);
 }
 
 TEST_F(EtsInteropNumberSubtypesTest, TestjsnewGetProperty<%= primitive.getName.capitalize() %>)
 {
-    auto jsnewRet = CallEtsMethod<int64_t>("jsnewGetProperty<%= primitive.getName.capitalize() %>");
+    auto jsnewRet = CallEtsFunction<int64_t>(GetPackageName(), "jsnewGetProperty<%= primitive.getName.capitalize() %>");
     ASSERT_EQ(jsnewRet, 0);
 }
 
 TEST_F(EtsInteropNumberSubtypesTest, TestjsnewSetProperty<%= primitive.getName.capitalize() %>)
 {
-    auto jsnewRet = CallEtsMethod<int64_t>("jsnewSetProperty<%= primitive.getName.capitalize() %>");
+    auto jsnewRet = CallEtsFunction<int64_t>(GetPackageName(), "jsnewSetProperty<%= primitive.getName.capitalize() %>");
     ASSERT_EQ(jsnewRet, 0);
 }
 
 TEST_F(EtsInteropNumberSubtypesTest, TestJSCallStatic<%= primitive.getName.capitalize() %>)
 {
-    auto jscallStaticMethodRet = CallEtsMethod<int64_t>("jscallStaticMethod<%= primitive.getName.capitalize() %>");
+    auto jscallStaticMethodRet = CallEtsFunction<int64_t>(GetPackageName(), "jscallStaticMethod<%= primitive.getName.capitalize() %>");
     ASSERT_EQ(jscallStaticMethodRet, 0);
 }
 

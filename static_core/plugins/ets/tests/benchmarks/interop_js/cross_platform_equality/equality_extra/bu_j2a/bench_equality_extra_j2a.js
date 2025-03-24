@@ -34,8 +34,8 @@ function equalityExtraJ2a() {
 
         const State = stsVm.getClass('Lbench_equality_extra_j2a/EqualityExtraJ2a;');
 
-        this.foo = stsVm.getFunction('LETSGLOBAL;', 'foo');
-        this.fooOther = stsVm.getFunction('LETSGLOBAL;', 'fooOther');
+        this.foo = stsVm.getFunction('Lbench_equality_extra_j2a/ETSGLOBAL;', 'foo');
+        this.fooOther = stsVm.getFunction('Lbench_equality_extra_j2a/ETSGLOBAL;', 'fooOther');
 
         this.bench = new State();
 

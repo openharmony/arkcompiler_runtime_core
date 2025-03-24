@@ -19,8 +19,8 @@ Object.defineProperty(exports, '__esModule', { value: true });
 (function __startup() {
 	const etsVm = globalThis.etsVm;
 	module.exports = {
-		FooClass: etsVm.getClass('LFooClass;'),
-		FooFunction: etsVm.getFunction('LETSGLOBAL;', 'FooFunction'),
-		BarFunction: etsVm.getFunction('LETSGLOBAL;', 'BarFunction'),
+		FooClass: etsVm.getClass('Lfoo/FooClass;'),
+		FooFunction: etsVm.getFunction('Lfoo/ETSGLOBAL;', 'FooFunction'),
+		BarFunction: etsVm.getFunction('Lfoo/ETSGLOBAL;', 'BarFunction'),
 	};
 })();

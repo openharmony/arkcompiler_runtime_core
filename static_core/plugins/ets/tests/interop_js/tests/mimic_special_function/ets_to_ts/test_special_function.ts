@@ -15,12 +15,12 @@
 
 const etsVm = globalThis.gtest.etsVm;
 
-let GetNumArr = etsVm.getFunction('LETSGLOBAL;', 'GetNumArr');
-let GetStrArr = etsVm.getFunction('LETSGLOBAL;', 'GetStrArr');
-let GetBooArr = etsVm.getFunction('LETSGLOBAL;', 'GetBooArr');
-const numArr = etsVm.getClass('LETSGLOBAL;').numArr;
-const strArr = etsVm.getClass('LETSGLOBAL;').strArr;
-const booArr = etsVm.getClass('LETSGLOBAL;').booArr;
+let GetNumArr = etsVm.getFunction('Lspecial_function/ETSGLOBAL;', 'GetNumArr');
+let GetStrArr = etsVm.getFunction('Lspecial_function/ETSGLOBAL;', 'GetStrArr');
+let GetBooArr = etsVm.getFunction('Lspecial_function/ETSGLOBAL;', 'GetBooArr');
+const numArr = etsVm.getClass('Lspecial_function/ETSGLOBAL;').numArr;
+const strArr = etsVm.getClass('Lspecial_function/ETSGLOBAL;').strArr;
+const booArr = etsVm.getClass('Lspecial_function/ETSGLOBAL;').booArr;
 
 const INSERT_NUMBER1: number = 9999;
 const INSERT_NUMBER2: number = 888;

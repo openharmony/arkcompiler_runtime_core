@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,13 +22,13 @@ class EtsInteropClassCompositeTest : public EtsInteropTest {};
 
 TEST_F(EtsInteropClassCompositeTest, Test1)
 {
-    auto ret = CallEtsMethod<int64_t>("Test1");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "Test1");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassCompositeTest, Test2)
 {
-    auto ret = CallEtsMethod<int64_t>("Test2");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "Test2");
     ASSERT_EQ(ret, 0);
 }
 

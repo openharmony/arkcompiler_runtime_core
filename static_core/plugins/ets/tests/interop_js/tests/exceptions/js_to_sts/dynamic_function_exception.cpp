@@ -22,43 +22,43 @@ class EtsDynumicFunctionException : public EtsInteropTest {};
 
 TEST_F(EtsDynumicFunctionException, CheckUserExceptionError)
 {
-    auto ret = CallEtsMethod<bool>("CheckUserExceptionError");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "CheckUserExceptionError");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsDynumicFunctionException, CheckNameUserExceptionError)
 {
-    auto ret = CallEtsMethod<bool>("CheckNameUserExceptionError");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "CheckNameUserExceptionError");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsDynumicFunctionException, CheckMessageUserExceptionError)
 {
-    auto ret = CallEtsMethod<bool>("CheckMessageUserExceptionError");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "CheckMessageUserExceptionError");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsDynumicFunctionException, CatchUserException)
 {
-    auto ret = CallEtsMethod<bool>("CatchUserException");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "CatchUserException");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsDynumicFunctionException, CatchBuiltinException)
 {
-    auto ret = CallEtsMethod<bool>("CatchBuiltinException");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "CatchBuiltinException");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsDynumicFunctionException, CheckNameBuiltinException)
 {
-    auto ret = CallEtsMethod<bool>("CheckNameBuiltinException");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "CheckNameBuiltinException");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsDynumicFunctionException, CheckMessageBuiltinException)
 {
-    auto ret = CallEtsMethod<bool>("CheckMessageBuiltinException");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "CheckMessageBuiltinException");
     ASSERT_EQ(ret, true);
 }
 

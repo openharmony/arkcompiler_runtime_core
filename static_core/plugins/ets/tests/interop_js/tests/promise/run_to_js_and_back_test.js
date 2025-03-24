@@ -17,6 +17,11 @@ function runTest() {
 	const helper = requireNapiPreview('libinterop_test_helper.so', false);
 	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
 	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+	const packageName = helper.getEnvironmentVar('PACKAGE_NAME');
+	if (!packageName) {
+		throw Error('PACKAGE_NAME is not set');
+	}
+	const globalName = 'L' + packageName + '/ETSGLOBAL;';
 
 	let test = 'toJsAndBack';
 	print('Running test ' + test);
@@ -30,9 +35,9 @@ function runTest() {
 	if (!etsVm.createRuntime(etsOpts)) {
 		throw Error('Cannot create ETS runtime');
 	}
-	const getPromise = etsVm.getFunction('LETSGLOBAL;', 'getPromise');
+	const getPromise = etsVm.getFunction(globalName, 'getPromise');
 	let promise = getPromise();
-	const setAndCheckPromise = etsVm.getFunction('LETSGLOBAL;', 'setAndCheckPromise');
+	const setAndCheckPromise = etsVm.getFunction(globalName, 'setAndCheckPromise');
 	setAndCheckPromise(promise);
 }
 

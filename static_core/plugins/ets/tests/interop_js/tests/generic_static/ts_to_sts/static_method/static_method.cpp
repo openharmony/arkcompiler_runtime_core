@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,42 +22,42 @@ class EtsStaticMethodTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsStaticMethodTsToEtsTest, checkGenericStaticInt)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericStaticInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGenericStaticInt"));
 }
 
 TEST_F(EtsStaticMethodTsToEtsTest, checkGenericStaticString)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericStaticString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGenericStaticString"));
 }
 
 TEST_F(EtsStaticMethodTsToEtsTest, checkGenericStaticBool)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericStaticBool"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGenericStaticBool"));
 }
 
 TEST_F(EtsStaticMethodTsToEtsTest, checkGenericStaticArr)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericStaticArr"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGenericStaticArr"));
 }
 
 TEST_F(EtsStaticMethodTsToEtsTest, checkGenericStaticMethodCallFromTsInt)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericStaticMethodCallFromTsInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGenericStaticMethodCallFromTsInt"));
 }
 
 TEST_F(EtsStaticMethodTsToEtsTest, checkGenericStaticMethodCallFromTsString)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericStaticMethodCallFromTsString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGenericStaticMethodCallFromTsString"));
 }
 
 TEST_F(EtsStaticMethodTsToEtsTest, checkGenericStaticMethodCallFromTsBool)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericStaticMethodCallFromTsBool"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGenericStaticMethodCallFromTsBool"));
 }
 
 TEST_F(EtsStaticMethodTsToEtsTest, checkGenericStaticMethodCallFromTsArr)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericStaticMethodCallFromTsArr"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGenericStaticMethodCallFromTsArr"));
 }
 
 }  // namespace ark::ets::interop::js::testing

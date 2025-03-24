@@ -27,7 +27,7 @@ function stringifyArrayJ2a() {
         console.log('Starting...');
         let stsVm = initEtsVm();
 
-        const getArray = stsVm.getFunction('LETSGLOBAL;', 'getArray');
+        const getArray = stsVm.getFunction('Lbench_stringify_array_j2a/ETSGLOBAL;', 'getArray');
 
         this.array = getArray();
 

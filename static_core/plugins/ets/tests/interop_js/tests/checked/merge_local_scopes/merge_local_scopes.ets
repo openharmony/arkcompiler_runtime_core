@@ -18,7 +18,7 @@ import { cons, car, cdr, vundefined }
     from "checked/js_call/js_call.js"
 
 //! CHECKER      Tree of js function calls JIT
-//! RUN          force_jit: true, entry: "test_call_tree", options: "--compiler-regex=ETSGLOBAL::call_tree --compiler-interop-try-single-scope=false"
+//! RUN          force_jit: true, entry: "test_call_tree", options: "--compiler-regex=merge_local_scopes.ETSGLOBAL::call_tree --compiler-interop-try-single-scope=false"
 //! METHOD       "call_tree"
 //! PASS_AFTER   "IrBuilder"
 //! PASS_BEFORE  "InteropIntrinsicOptimization"
@@ -67,7 +67,7 @@ function test_call_tree(): int {
 }
 
 //! CHECKER      JS function calls in tree leaves, create common scope start JIT
-//! RUN          force_jit: true, entry: "test_call_hoist_scope_start", options: "--compiler-regex=ETSGLOBAL::call_hoist_scope_start --compiler-interop-try-single-scope=false"
+//! RUN          force_jit: true, entry: "test_call_hoist_scope_start", options: "--compiler-regex=merge_local_scopes.ETSGLOBAL::call_hoist_scope_start --compiler-interop-try-single-scope=false"
 //! METHOD       "call_hoist_scope_start"
 //! PASS_AFTER   "IrBuilder"
 //! PASS_BEFORE  "InteropIntrinsicOptimization"
@@ -105,7 +105,7 @@ function test_call_hoist_scope_start(): int {
 }
 
 //! CHECKER      ETS loop (not countable) between JS function calls
-//! RUN          force_jit: true, entry: "loop_into_scope", options: "--compiler-regex=ETSGLOBAL::loop_into_scope --compiler-interop-try-single-scope=false"
+//! RUN          force_jit: true, entry: "loop_into_scope", options: "--compiler-regex=merge_local_scopes.ETSGLOBAL::loop_into_scope --compiler-interop-try-single-scope=false"
 //! METHOD       "loop_into_scope"
 //! PASS_AFTER   "IrBuilder"
 //! PASS_BEFORE  "InteropIntrinsicOptimization"
@@ -138,7 +138,7 @@ function loop_into_scope(): int {
 }
 
 //! CHECKER      Fully unrolled and not unrolled countable loops with JS calls
-//! RUN          force_jit: true, entry: "small_loop_with_scopes", options: "--compiler-regex=ETSGLOBAL::small_loop_with_scopes --compiler-interop-try-single-scope=false"
+//! RUN          force_jit: true, entry: "small_loop_with_scopes", options: "--compiler-regex=merge_local_scopes.ETSGLOBAL::small_loop_with_scopes --compiler-interop-try-single-scope=false"
 //! METHOD       "small_loop_with_scopes"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 4
@@ -180,7 +180,7 @@ function small_loop_with_scopes(): int {
 }
 
 //! CHECKER      Countable loop with JS calls moved into one scope
-//! RUN          force_jit: true, entry: "large_loop_with_scopes", options: "--compiler-regex=ETSGLOBAL::large_loop_with_scopes --compiler-loop-unroll=false --compiler-interop-try-single-scope=false"
+//! RUN          force_jit: true, entry: "large_loop_with_scopes", options: "--compiler-regex=merge_local_scopes.ETSGLOBAL::large_loop_with_scopes --compiler-loop-unroll=false --compiler-interop-try-single-scope=false"
 //! METHOD       "large_loop_with_scopes"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 5
@@ -219,7 +219,7 @@ function large_loop_with_scopes(): int {
 }
 
 //! CHECKER      ETS if chain between JS function calls
-//! RUN          force_jit: true, entry: "test_if_chain_into_scope", options: "--compiler-regex=ETSGLOBAL::if_chain_into_scope --compiler-interop-try-single-scope=false"
+//! RUN          force_jit: true, entry: "test_if_chain_into_scope", options: "--compiler-regex=merge_local_scopes.ETSGLOBAL::if_chain_into_scope --compiler-interop-try-single-scope=false"
 //! METHOD       "if_chain_into_scope"
 //! PASS_AFTER   "IrBuilder"
 //! PASS_BEFORE  "InteropIntrinsicOptimization"
@@ -262,7 +262,7 @@ function test_if_chain_into_scope(): int {
 }
 
 //! CHECKER      ETS if chain with JS function calls
-//! RUN          force_jit: true, entry: "test_if_chain_with_scopes", options: "--compiler-regex=ETSGLOBAL::if_chain_with_scopes --compiler-interop-try-single-scope=false"
+//! RUN          force_jit: true, entry: "test_if_chain_with_scopes", options: "--compiler-regex=merge_local_scopes.ETSGLOBAL::if_chain_with_scopes --compiler-interop-try-single-scope=false"
 //! METHOD       "if_chain_with_scopes"
 //! PASS_AFTER   "IrBuilder"
 //! PASS_BEFORE  "InteropIntrinsicOptimization"

@@ -22,27 +22,27 @@ class EtsMimicIteratorEtsToTsTest : public EtsInteropTest {};
 
 TEST_F(EtsMimicIteratorEtsToTsTest, testMimicIteratorNumberForOf)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testMimicIteratorNumberForOf"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testMimicIteratorNumberForOf"));
 }
 
 TEST_F(EtsMimicIteratorEtsToTsTest, testMimicIteratorNumberKeys)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testMimicIteratorNumberKeys"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testMimicIteratorNumberKeys"));
 }
 
 TEST_F(EtsMimicIteratorEtsToTsTest, testMimicIteratorNumberValues)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testMimicIteratorNumberValues"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testMimicIteratorNumberValues"));
 }
 
 TEST_F(EtsMimicIteratorEtsToTsTest, testMimicIteratorString)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testMimicIteratorString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testMimicIteratorString"));
 }
 
 TEST_F(EtsMimicIteratorEtsToTsTest, testMimicIteratorBoolean)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testMimicIteratorBoolean"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testMimicIteratorBoolean"));
 }
 
 }  // namespace ark::ets::interop::js::testing

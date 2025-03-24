@@ -86,7 +86,13 @@ function runAwaitTest(name, promiseCreator, promiseResolver) {
 	let etsVm = init();
 	let promise = promiseCreator();
 	// similar to async JS function call. Returns a Promise instance
-	const testAwaitJsPromise = etsVm.getFunction('LETSGLOBAL;', 'testAwaitJsPromise');
+	let packageName = '';
+	if (helper.getEnvironmentVar('PACKAGE_NAME')) {
+		packageName = helper.getEnvironmentVar('PACKAGE_NAME') + '/';
+	} else {
+		throw Error('PACKAGE_NAME not set');
+	}
+	const testAwaitJsPromise = etsVm.getFunction('L' + packageName + 'ETSGLOBAL;', 'testAwaitJsPromise');
 	let res = testAwaitJsPromise(promise);
 	msg('Called testAwaitJsPromise OK, result:', INFO);
 	msg(res, INFO);
