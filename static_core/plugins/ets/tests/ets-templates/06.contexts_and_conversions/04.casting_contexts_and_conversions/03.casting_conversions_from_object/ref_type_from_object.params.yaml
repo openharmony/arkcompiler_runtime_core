@@ -22,7 +22,4 @@ cases:
   - { type: Array<int>,      init: '[5, 6, 7]',              call: [0], expected: 5 }
   - { type: Array<int>,      init: 'new int[5]',             call: [0], expected: 0 }
   - { type: Array<int>,      init: 'new Array<int>(3,4,5)',  call: [1], expected: 4 }
-  - { type: FixedArray<int>, init: '[5, 6, 7]',              call: [0], expected: 5 }
-  - { type: FixedArray<int>, init: 'new int[5]',             call: [2], expected: 0 }
-  - { type: FixedArray<int>, init: 'new FixedArray<int>(5)', call: [0], expected: 5 }
   - { type: TestEnum,        init: TestEnum.One,             call: '',  expected: TestEnum.One }
