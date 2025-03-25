@@ -25,7 +25,7 @@ cases:
     - to_type: |- 
         [int, long, double]
       value: |-
-        [0b0 as short, Int.MIN_VALUE, 3.4028234663852886e38 as float]
+        [0b0 as short, Byte.MIN_VALUE, 3.4028234663852886e38 as float]
       result: 
         - 0
         - -128 as long
