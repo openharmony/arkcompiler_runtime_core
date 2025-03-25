@@ -15,6 +15,7 @@
 
 /*---
 desc: Null interface inherits an interface containing an this type.
+tags: [compile-only, negative]
 ---*/
 
 interface ParentInterface {
