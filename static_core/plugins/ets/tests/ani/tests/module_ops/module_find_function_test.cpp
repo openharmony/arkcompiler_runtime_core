@@ -103,4 +103,14 @@ TEST_F(ModuleFindFunctionTest, invalid_arg_result)
               ANI_INVALID_ARGS);
 }
 
+TEST_F(ModuleFindFunctionTest, duplicate_no_signature)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_function_test;", &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ani_function fn {};
+    ASSERT_EQ(env_->Module_FindFunction(module, "overloaded", nullptr, &fn), ANI_AMBIGUOUS);
+}
+
 }  // namespace ark::ets::ani::testing

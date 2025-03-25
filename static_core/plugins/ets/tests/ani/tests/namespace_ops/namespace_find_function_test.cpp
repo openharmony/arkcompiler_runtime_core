@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "ani/ani.h"
 #include "ani_gtest.h"
 
 namespace ark::ets::ani::testing {
@@ -66,6 +67,16 @@ TEST_F(NamespaceFindFunctionTest, invalid_arg_result)
 
     ASSERT_EQ(env_->Namespace_FindFunction(ns, "getInitialStringValue", ":Lstd/core/String;", nullptr),
               ANI_INVALID_ARGS);
+}
+
+TEST_F(NamespaceFindFunctionTest, duplicate_no_signature)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_function_test/fnns;", &ns), ANI_OK);
+    ASSERT_NE(ns, nullptr);
+
+    ani_function fn {};
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "overloaded", nullptr, &fn), ANI_AMBIGUOUS);
 }
 
 }  // namespace ark::ets::ani::testing

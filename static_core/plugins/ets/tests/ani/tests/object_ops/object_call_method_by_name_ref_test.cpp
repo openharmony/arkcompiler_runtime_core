@@ -260,7 +260,7 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_001)
 
     std::string result {};
     ani_ref ref = nullptr;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", nullptr, &ref, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "II:Lstd/core/String;", &ref, VAL1, VAL2), ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
@@ -268,7 +268,7 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_001)
     ani_value args[2U];
     args[0U].i = VAL1;
     args[1U].i = VAL2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", nullptr, &ref, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "II:Lstd/core/String;", &ref, args), ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
@@ -347,7 +347,8 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_004)
     ani_ref ref = nullptr;
     const ani_int value1 = 5;
     const ani_int value2 = 8;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", nullptr, &ref, value1, value2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "II:Lstd/core/String;", &ref, value1, value2),
+              ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
@@ -355,7 +356,7 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_004)
     ani_value args[2U];
     args[0U].i = value1;
     args[1U].i = value2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", nullptr, &ref, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "II:Lstd/core/String;", &ref, args), ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
@@ -529,13 +530,15 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_009)
     ani_ref ref = nullptr;
     const ani_int value1 = 5;
     const ani_int value2 = 6;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", nullptr, &ref, value1, value2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "II:Lstd/core/String;", &ref, value1, value2),
+              ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
 
     const ani_int value3 = 7;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", nullptr, &ref, value1, value3), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "II:Lstd/core/String;", &ref, value1, value3),
+              ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
@@ -544,19 +547,21 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_009)
     ani_value args[3U];
     args[0U].i = value1;
     args[1U].i = value4;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", nullptr, &ref, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "II:Lstd/core/String;", &ref, args), ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
 
     const ani_int value5 = 5;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", nullptr, &ref, value1, value5), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "II:Lstd/core/String;", &ref, value1, value5),
+              ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Equality");
 
     const ani_int value6 = 12;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", nullptr, &ref, value1, value6), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "II:Lstd/core/String;", &ref, value1, value6),
+              ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");

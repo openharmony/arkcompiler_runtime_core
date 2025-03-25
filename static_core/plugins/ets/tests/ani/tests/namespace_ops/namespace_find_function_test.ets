@@ -20,4 +20,10 @@ namespace fnns {
     function getInitialStringValue(): String {
         return "";
     }
+    function overloaded(i: int): int {
+        return 0
+    }
+    function overloaded(): int {
+        return 1
+    }
 }

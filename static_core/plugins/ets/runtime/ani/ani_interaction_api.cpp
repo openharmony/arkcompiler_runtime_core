@@ -515,10 +515,27 @@ static ani_status DoFind(ani_env *env, const char *name, T *result)
     return DoFind(pandaEnv, name, s, result);
 }
 
+static bool CheckUniqueMethod(EtsClass *klass, const char *name)
+{
+    size_t nameCounter = 0;
+    for (auto &method : klass->GetMethods()) {
+        if (::strcmp(method->GetName(), name) == 0) {
+            if (++nameCounter == 2U) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 template <bool IS_STATIC_METHOD>
 static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char *signature, EtsMethod **result)
 {
     ASSERT_MANAGED_CODE();
+    if (signature == nullptr && !CheckUniqueMethod(klass, name)) {
+        return ANI_AMBIGUOUS;
+    }
+
     EtsMethod *method = (signature == nullptr ? klass->GetMethod(name) : klass->GetMethod(name, signature));
     if (method == nullptr || method->IsStatic() != IS_STATIC_METHOD) {
         return ANI_NOT_FOUND;
