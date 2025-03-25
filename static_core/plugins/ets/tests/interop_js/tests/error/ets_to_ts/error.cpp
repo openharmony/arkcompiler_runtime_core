@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,16 @@
  * limitations under the License.
  */
 
-export interface CustomErrorTypeA extends Error {
-    message: string;
-    code: number;
+#include <gtest/gtest.h>
+#include "ets_interop_js_gtest.h"
+
+namespace ark::ets::interop::js::testing {
+
+class EtsToTsErrorTest : public EtsInteropTest {};
+
+TEST_F(EtsToTsErrorTest, check_error_ets_to_ts)
+{
+    ASSERT_TRUE(RunJsTestSuite("error.ts"));
 }
 
-export class CustomErrorA extends Error implements CustomErrorTypeA {
-    code: number;
-
-    constructor(message: string, code: number) {
-        super(message); 
-        this.name = 'CustomErrorA'; 
-        this.code = code; 
-    }
-};
-
-export function createCustomErrorA(message: string, code: number): CustomErrorA {
-    return new CustomErrorA(message, code);
-}
+}  // namespace ark::ets::interop::js::testing

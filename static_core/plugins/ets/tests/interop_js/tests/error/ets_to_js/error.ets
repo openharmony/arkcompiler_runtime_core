@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,31 @@
  * limitations under the License.
  */
 
-package std.interop.js;
+package error.test;
 
-export final class JSError extends Error {
-    constructor(value: JSValue) {
-        this("", value);
+import {
+    foo0,
+    foo1
+} from "org_error_js"
+
+export function bar0(): void {
+    try {
+        foo0()
+    } catch (e: Error) {
+        let errObj: ESObject = (e as ESError).getValue()
+        console.log("e ets: " + errObj.toNumber())
+        throw e
     }
+}
 
-    constructor(msg: String, value: JSValue) {
-        super("JSError", msg, new ErrorOptions(value as Object));
-    }
+export function bar1(): void {
+    foo0()
+}
 
-    public getValue(): JSValue {
-        return this.cause as JSValue;
+export function bar2(): void {
+    try {
+        foo1()
+    } catch (originalError) {
+        throw new Error('current error', { cause: originalError })
     }
 }

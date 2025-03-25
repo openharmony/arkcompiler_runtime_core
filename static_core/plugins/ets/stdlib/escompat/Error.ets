@@ -24,15 +24,15 @@ export class ErrorOptions {
 }
 
 /**
- * Strores information about stacktrace and cause in case of an error.
+ * Stores information about stacktrace and cause in case of an error.
  * Serves as a base class for all error classes.
  */
 export class Error {
-    cause: Object | undefined
-    message: String
-    name: String
+    private name_: string
+    private message_: string
     private stackLines: StackTraceElement[] = []
     private stack_?: String
+    private cause_?: Object
 
     /**
     * Constructs a new error instance with provided message and cause
@@ -56,10 +56,58 @@ export class Error {
     * @param options options of the error
     */
     constructor(name: String, message: String | undefined, options: ErrorOptions | undefined) {
-        this.message = (message == undefined) ? "" : message
-        this.cause = (options == undefined) ? undefined : options.cause
-        this.name = name
+        this.message_ = (message == undefined) ? "" : message
+        this.cause_ = (options == undefined) ? undefined : options.cause
+        this.name_ = name
         this.stackLines = StackTrace.provisionStackTrace()
+    }
+
+    /**
+     * Gets the name of the error.
+     * @returns The error name.
+     */
+    get name(): string {
+        return this.name_
+    }
+
+    /**
+     * Sets the name of the error.
+     * @param val The new name of the error.
+     */
+    set name(val: string) {
+        this.name_ = val
+    }
+
+    /**
+     * Gets the message of the error.
+     * @returns The error message.
+     */
+    get message(): string {
+        return this.message_
+    }
+
+    /**
+     * Sets the message of the error.
+     * @param val The new message of the error.
+     */
+    set message(val: string) {
+        this.message_ = val
+    }
+
+    /**
+     * Gets the cause of the error.
+     * @returns The cause object.
+     */
+    get cause(): Object | undefined {
+        return this.cause_
+    }
+
+    /**
+     * Sets the cause of the error.
+     * @param val The cause object.
+     */
+    set cause(val: Object | undefined) {
+        this.cause_ = val
     }
 
     static $_invoke(message?: String, options?: ErrorOptions): Error {

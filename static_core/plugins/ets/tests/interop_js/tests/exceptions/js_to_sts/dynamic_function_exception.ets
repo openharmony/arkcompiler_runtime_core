@@ -13,48 +13,43 @@
  * limitations under the License.
  */
  
-import { dynamicFunctionWithUserException, dynamicFunctionWithCustomObject, dynamicFunctionWithBuiltinException } from "dynamic_function_exception";
+import {
+    dynamicFunctionWithUserException,
+    dynamicFunctionWithCustomObject,
+    dynamicFunctionWithBuiltinException
+} from "dynamic_function_exception";
 
 // 1. Dynamic function throws user-defined exception E that extends Error (catch clause with E)
 
-
-
 // Test 1.1 Catch exception and check Error
 function CheckUserExceptionError():boolean{
-    try{
+    try {
         dynamicFunctionWithUserException()
         return false
-
-    }catch(e){
-        const exceptionEntries = Object.entries(e)
-        return exceptionEntries[2]![1] === 'JSError'
+    } catch(e: Error) {
+        return e instanceof ESError
     }
 
 }
 
 // Test 1.2 Check exception name
 function CheckNameUserExceptionError():boolean{
-    try{
+    try {
         dynamicFunctionWithUserException()
         return false
-    }catch(e){
-         const exceptionEntries = Object.entries(e)
-         const cause = exceptionEntries[0]![1] as string;
-         return cause.includes('CustomError1')
+    } catch(e: Error) {
+         return e.name == 'CustomError1'
 
     }
 }
 
 // Test 1.3 Check exception message
-
 function CheckMessageUserExceptionError():boolean{
-    try{
+    try {
         dynamicFunctionWithUserException()
         return false
-    }catch(e){
-         const exceptionEntries = Object.entries(e)
-         const cause = exceptionEntries[0]![1] as string;
-         return cause.includes('This is a custom error')
+    } catch(e: Error) {
+         return e.message == 'This is a custom error'
 
     }
 }
@@ -62,15 +57,14 @@ function CheckMessageUserExceptionError():boolean{
 // 2 Dynamic function throws object that isn't extend Error
 
 //Test 2.1 Catch exception and check Error
-
 function CatchUserException():boolean{
-    try{
+    try {
         dynamicFunctionWithCustomObject()
         return false
 
-    }catch(e){
-        const exceptionEntries = Object.entries(e)
-        return exceptionEntries[2]![1] ==='JSError'
+    } catch(e: Error) {
+        return e instanceof ESError && e.name ==='UnknownError' &&
+               e.message == 'This is a custom object error'
     }
 
 }
@@ -79,43 +73,34 @@ function CatchUserException():boolean{
 //3 Dynamic function throws builtin exception E
 
 //Test 3.1 Catch exception and check Error
-
 function CatchBuiltinException():boolean{
-    try{
+    try {
         dynamicFunctionWithBuiltinException()
         return false
 
-    }catch(e){
-        const exceptionEntries = Object.entries(e)
-        return exceptionEntries[2]![1] ==='JSError'
+    } catch(e: Error) {
+        return e instanceof ESError
     }
 
 }
 
 // Test 3.2 Check exception name
 function CheckNameBuiltinException():boolean{
-    try{
+    try {
         dynamicFunctionWithBuiltinException()
         return false
-    }catch(e){
-         const exceptionEntries = Object.entries(e)
-         const cause = exceptionEntries[0]![1] as string;
-         return cause.includes('TypeError')
-
+    } catch(e: Error) {
+        return e.name ==='TypeError'
     }
 }
 
 // Test 3.3 Check exception message
-
 function CheckMessageBuiltinException():boolean{
-    try{
+    try {
         dynamicFunctionWithBuiltinException()
         return false
-    }catch(e){
-         const exceptionEntries = Object.entries(e)
-         const cause = exceptionEntries[0]![1] as string;
-         return cause.includes('This is a TypeError')
-
+    } catch(e: Error) {
+        return e.message == 'This is a TypeError'
     }
 }
 

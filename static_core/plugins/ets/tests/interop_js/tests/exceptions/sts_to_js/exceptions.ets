@@ -17,12 +17,12 @@
 package exceptions.test;
 
 function throwErrorFromSts(): void {
-    throw new Error("Throw Error from sts!");
+    throw new Error("Throw Error from ets!");
 }
 
 function throwErrorWithCauseFromSts(): void {
     let cause: ErrorOptions = new ErrorOptions("Test cause");
-    throw new Error("Throw Error with cause from sts!", cause);
+    throw new Error("Throw Error with cause from ets!", cause);
 }
 
 class CustomError extends Error {
@@ -35,11 +35,11 @@ class CustomError extends Error {
 }
 
 function throwCustomErrorFromSts(): void {
-    throw new CustomError("Throw Custom Error from sts!", 12345);
+    throw new CustomError("Throw Custom Error from ets!", 12345);
 }
 
 function throwExceptionFromSts(): void throws {
-    throw new Exception("Throw Exception from sts!");
+    throw new Exception("Throw Exception from ets!");
 }
 
 class ExceptionCause {
@@ -48,7 +48,7 @@ class ExceptionCause {
 
 function throwExceptionWithCauseFromSts(): void throws {
     let cause: ExceptionCause = { reason: "Test cause" };
-    throw new Exception("Throw Exception with cause from sts!", cause);
+    throw new Exception("Throw Exception with cause from ets!", cause);
 }
 
 class CustomException extends Exception {
@@ -60,5 +60,5 @@ class CustomException extends Exception {
 }
 
 function throwCustomExceptionFromSts(): void throws {
-    throw new CustomException("Throw Custom Exception from sts!", 54321);
+    throw new CustomException("Throw Custom Exception from ets!", 54321);
 }

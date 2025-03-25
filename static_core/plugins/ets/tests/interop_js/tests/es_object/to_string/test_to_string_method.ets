@@ -56,7 +56,7 @@ function jsvalObjectToStr(): String {
     try {
         let z: String = x.toString();
         assert(false);
-    } catch (z: JSError) {
+    } catch (z: ESError) {
         let y = castToObject(x);
         return y + "A";
     }
@@ -85,8 +85,8 @@ function testNanCall() : String {
 function testThrowing() : String {
     try {
         return Throwing() + "A";
-    } catch (e: JSError) {
-        return e.getValue() + "A";
+    } catch (e: ESError) {
+        return e.getJsError() + "A";
     }
 }
 

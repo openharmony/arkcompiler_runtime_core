@@ -17,23 +17,23 @@
 //Dynamic function throws builtin exception E
 
 // CC-OFFNXT(G.MET.08) test specific
-const dynamicFunctionWithBuiltinException = new Function(`
+export function dynamicFunctionWithBuiltinException() {
     throw new TypeError('This is a TypeError');
-`);
+}
 
 
 // Dynamic function throws object that isn't extend Error
 // CC-OFFNXT(G.MET.08) test specific
-const dynamicFunctionWithCustomObject = new Function(`
+export function dynamicFunctionWithCustomObject() {
     throw { message: 'This is a custom object error', code: 123 };
-`);
+}
 
 
 
 //  Dynamic function throws user-defined exception E that extends Error (catch clause with E)
 
 
-class CustomError extends Error {
+export class CustomError extends Error {
     constructor(message) {
         super(message);
         this.name = 'CustomError1';
@@ -46,9 +46,4 @@ const createDynamicFunction = (CustomError) => {
     };
 };
 
-const dynamicFunctionWithUserException = createDynamicFunction(CustomError);
-
-exports.dynamicFunctionWithBuiltinException = dynamicFunctionWithBuiltinException;
-exports.dynamicFunctionWithCustomObject = dynamicFunctionWithCustomObject;
-exports.dynamicFunctionWithUserException = dynamicFunctionWithUserException;
-exports.CustomError = CustomError;
+export const dynamicFunctionWithUserException = createDynamicFunction(CustomError);

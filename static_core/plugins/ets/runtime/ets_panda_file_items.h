@@ -143,7 +143,7 @@ static constexpr std::string_view LONG_TO_STRING_CACHE_ELEMENT         = "Lstd/c
 // interop/js
 static constexpr std::string_view JS_RUNTIME                           = "Lstd/interop/js/JSRuntime;";
 static constexpr std::string_view JS_VALUE                             = "Lstd/interop/js/JSValue;";
-static constexpr std::string_view JS_ERROR                             = "Lstd/interop/js/JSError;";
+static constexpr std::string_view ES_ERROR                             = "Lstd/interop/js/ESError;";
 
 static constexpr std::string_view ARRAY                                = "Lescompat/Array;";
 static constexpr std::string_view ARRAY_AS_LIST_INT                    = "Lstd/containers/ArrayAsListInt;";

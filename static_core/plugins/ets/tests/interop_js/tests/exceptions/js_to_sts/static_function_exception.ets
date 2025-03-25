@@ -13,101 +13,92 @@
  * limitations under the License.
  */
  
-import {staticFunctionWithCustomException, staticFunctionWithBuiltinException, CustomError, createError } from "static_function_exception";
-import { CustomErrorTypeA, createCustomErrorA } from "ts_custom_exception";
+import {
+    staticFunctionWithCustomException,
+    staticFunctionWithBuiltinException,
+    CustomError,
+    createError
+} from "static_function_exception";
+
+import {
+    CustomErrorTypeA,
+    createCustomErrorA
+} from "ts_custom_exception";
+
 //1 Static function throws user-defined exception E
 
 //Test 1.1 catch and check  
-
 function CheckCustomException():boolean{
-    try{
+    try {
         staticFunctionWithCustomException()
         return false
-
-    }catch(e){
-        const exceptionEntries = Object.entries(e)
-        return exceptionEntries[2]![1] === 'JSError'
+    } catch(e: Error) {
+        return e instanceof ESError
     }
 
 }
 
 // Test 1.2 Check exception name
 function CheckNameCustomException():boolean{
-    try{
+    try {
         staticFunctionWithCustomException()
         return false
-    }catch(e){
-         const exceptionEntries = Object.entries(e)
-         const cause = exceptionEntries[0]![1] as string;
-         return cause.includes('CustomErrorA')
+    } catch(e: Error) {
+        return e.name == 'CustomErrorA'
 
     }
 }
 
 // Test 1.3 Check exception message
-
 function CheckMessageCustomException():boolean{
-    try{
+    try {
         staticFunctionWithCustomException()
         return false
-    }catch(e){
-         const exceptionEntries = Object.entries(e)
-         const cause = exceptionEntries[0]![1] as string;
-         return cause.includes('This is a custom error(from static function)')
-
+    } catch(e: Error) {
+        return e.message == 'This is a custom error(from static function)'
     }
 }
 
 // 2 Static function throws builtin exception
 
 //Test 2.1 catch and check  
-
 function CheckBuiltinExceptionInStatic():boolean{
-    try{
+    try {
         staticFunctionWithBuiltinException()
         return false
-
-    }catch(e){
-        const exceptionEntries = Object.entries(e)
-        return exceptionEntries[2]![1] ==='JSError'
+    } catch(e: Error) {
+        return e instanceof ESError
     }
 
 }
 
 // Test 2.2 Check exception name
 function CheckNameBuiltinExceptionInStatic():boolean{
-    try{
+    try {
         staticFunctionWithBuiltinException()
         return false
-    }catch(e){
-         const exceptionEntries = Object.entries(e)
-         const cause = exceptionEntries[0]![1] as string;
-         return cause.includes('TypeError')
-
+    } catch(e: Error) {
+        return e.name == 'TypeError'
     }
 }
 
 // Test 2.3 Check exception message
 
 function CheckMessageBuiltinExceptionInStatic():boolean{
-    try{
+    try {
         staticFunctionWithBuiltinException()
         return false
-    }catch(e){
-         const exceptionEntries = Object.entries(e)
-         const cause = exceptionEntries[0]![1] as string;
-         return cause.includes('This is a TypeError')
-
+    } catch(e: Error) {
+        return e.message == 'This is a TypeError'
     }
 }
 
 // 3 Throw imported custom error
 
 function ThrowCustomError():boolean{
-    try{
+    try {
         throw new CustomError('This is a custom error(from static function)') as Error
-        
-    }catch(e){
+    } catch(e: Error) {
         return true
     }
 }
@@ -116,23 +107,22 @@ function ThrowCustomError():boolean{
 
 const myError = createError('NewError', 'New error message')
 
-function CheckThrowNewError():boolean{
-    try{
+function CheckThrowNewError(): boolean {
+    try {
         throw myError as Error
-    }catch(e){
+    } catch(e: Error) {
         return true
     }
 }
 
 // 5 Throwing an exception with an imported function and an imported type
 
-const myErrorA:CustomErrorTypeA = createCustomErrorA('NewError', 500)
+const myErrorA: CustomErrorTypeA = createCustomErrorA('NewError', 500)
 
-function throwTSCustomExceptionWithImportType():boolean{
-    try{
+function throwTSCustomExceptionWithImportType():boolean {
+    try {
         throw myErrorA as Error
-
-    }catch(e){
+    } catch(e: Error) {
         return true
     }
 }

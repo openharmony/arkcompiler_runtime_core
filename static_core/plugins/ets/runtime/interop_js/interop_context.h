@@ -294,9 +294,9 @@ public:
         return sharedEtsVmState_->jsValueClass;
     }
 
-    Class *GetJSErrorClass() const
+    Class *GetESErrorClass() const
     {
-        return sharedEtsVmState_->jsErrorClass;
+        return sharedEtsVmState_->esErrorClass;
     }
 
     Class *GetObjectClass() const
@@ -384,7 +384,7 @@ public:
         sharedEtsVmState_->SetJsProxyInstance(cls, proxy);
     }
 
-    EtsObject *CreateETSCoreJSError(EtsCoroutine *coro, JSValue *jsvalue);
+    EtsObject *CreateETSCoreESError(EtsCoroutine *coro, JSValue *jsvalue);
 
     static void ThrowETSError(EtsCoroutine *coro, napi_value val);
     static void ThrowETSError(EtsCoroutine *coro, const char *msg);
@@ -518,7 +518,7 @@ private:
         // Maybe its worth to add some e.g. VmState() method to the InteropCtx and move all its accessors here
         Class *jsRuntimeClass {};
         Class *jsValueClass {};
-        Class *jsErrorClass {};
+        Class *esErrorClass {};
         Class *objectClass {};
         Class *stringClass {};
         Class *bigintClass {};

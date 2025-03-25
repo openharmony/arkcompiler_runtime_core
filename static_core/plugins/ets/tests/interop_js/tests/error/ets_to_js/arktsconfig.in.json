@@ -1,0 +1,22 @@
+{
+	"compilerOptions": {
+		"baseUrl": "${CMAKE_CURRENT_SOURCE_DIR}",
+		"paths": {
+			"escompat": [
+                "${PANDA_ROOT}/plugins/ets/stdlib/escompat"
+            ],
+			"std": [
+                "${PANDA_ROOT}/plugins/ets/stdlib/std"
+            ],
+			"org_error_js": [
+                "${CMAKE_CURRENT_BINARY_DIR}/org_error.abc"
+            ]
+		},
+		"dynamicPaths": {
+			"${CMAKE_CURRENT_BINARY_DIR}/org_error.abc": {
+				"language": "js",
+				"hasDecl": false
+			}
+		}
+	}
+}

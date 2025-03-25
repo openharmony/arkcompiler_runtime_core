@@ -109,7 +109,6 @@ TEST_F(EtsInteropJsIntrinsTest, test_lambda_proxy)
 TEST_F(EtsInteropJsIntrinsTest, test_exception_forwarding)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("testExceptionForwardingFromjs"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("testExceptionForwardingFromets"));
     ASSERT_EQ(true, CallEtsMethod<bool>("testExceptionForwardingRecursive"));
     ASSERT_EQ(true, CallEtsMethod<bool>("testCoreErrorForwarding"));
 }

@@ -250,7 +250,7 @@ private:
             }
         }
         // NOTE(vpukhov): compat: remove when compat/Error is implemented
-        return BuiltinConvert<JSConvertJSError>(ctxx, env, jsValue);
+        return BuiltinConvert<JSConvertESError>(ctxx, env, jsValue);
 
         if (CheckInstanceof(env, jsValue, ctorTypeError_)) {
             NotImplemented("TypeError");
@@ -423,7 +423,7 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
     auto ptypes = PlatformTypes(coro);
 
     RegisterBuiltinRefConvertor<JSConvertJSValue>(cache, ctx->GetJSValueClass());
-    RegisterBuiltinRefConvertor<JSConvertJSError>(cache, ctx->GetJSErrorClass());
+    RegisterBuiltinRefConvertor<JSConvertESError>(cache, ctx->GetESErrorClass());
     RegisterBuiltinRefConvertor<JSConvertString>(cache, ctx->GetStringClass());
     RegisterBuiltinRefConvertor<JSConvertBigInt>(cache, ctx->GetBigIntClass());
     RegisterBuiltinRefConvertor<JSConvertPromise>(cache, ctx->GetPromiseClass());

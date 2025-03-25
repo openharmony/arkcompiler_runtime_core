@@ -498,7 +498,7 @@ Interop rules
 ^^^^^^^^^^^^^
 
 - JS Error and escompat Error classes are mapped as reference proxy-classes
-- If JS throws a value which is not an Error instance, the Error is boxed into JSError/RewrappedESObjectError 2.0 internal class
+- If JS throws a value which is not an Error instance, the Error is boxed into ESError 2.0 internal class
 
 .. code-block:: javascript
     :linenos:
@@ -524,7 +524,7 @@ Interop rules
 Limitations & Solutions
 """""""""""""""""""""""
 
-- If JS throws a value which is not an Error instance, the Error is boxed into JSError/RewrappedESObjectError 2.0 internal class
+- If JS throws a value which is not an Error instance, the Error is boxed into ESError 2.0 internal class
 
 .. code-block:: javascript
     :linenos:
