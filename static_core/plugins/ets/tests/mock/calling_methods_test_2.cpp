@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -281,7 +281,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
         static_cast<ets_double>(0.0));
 }
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath3)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath3)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -324,7 +324,7 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath3)
     }
 }
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath4)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath4)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
     {

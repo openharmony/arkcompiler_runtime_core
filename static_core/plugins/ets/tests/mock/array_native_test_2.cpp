@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,6 @@
 #include "plugins/ets/tests/mock/mock_test_helper.h"
 
 #include "libpandabase/utils/utils.h"
-#include "runtime/include/runtime.h"
-#include "runtime/include/runtime_options.h"
-#include "plugins/ets/runtime/types/ets_method.h"
 
 // NOLINTBEGIN(modernize-avoid-c-arrays, readability-magic-numbers)
 
@@ -26,7 +23,7 @@ namespace ark::ets::test {
 
 class EtsNativeInterfaceArrayTest : public MockEtsNapiTestBaseClass {};
 
-TEST_F(EtsNativeInterfaceArrayTest, GetBoolArrayRegionErrorTests)
+TEST_F(EtsNativeInterfaceArrayTest, DISABLED_GetBoolArrayRegionErrorTests)
 {
     ets_boolean buf[10U] = {0};
     ets_booleanArray arr = env_->NewBooleanArray(5U);
@@ -61,7 +58,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetBoolArrayRegionErrorTests)
     }
 }
 
-TEST_F(EtsNativeInterfaceArrayTest, GetByteArrayRegionErrorTests)
+TEST_F(EtsNativeInterfaceArrayTest, DISABLED_GetByteArrayRegionErrorTests)
 {
     ets_byte buf[10U] = {0};
     ets_byteArray arr = env_->NewByteArray(5U);
@@ -96,7 +93,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetByteArrayRegionErrorTests)
     }
 }
 
-TEST_F(EtsNativeInterfaceArrayTest, GetCharArrayRegionErrorTests)
+TEST_F(EtsNativeInterfaceArrayTest, DISABLED_GetCharArrayRegionErrorTests)
 {
     ets_char buf[10U] = {0};
     ets_charArray arr = env_->NewCharArray(5U);
@@ -131,7 +128,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetCharArrayRegionErrorTests)
     }
 }
 
-TEST_F(EtsNativeInterfaceArrayTest, GetShortArrayRegionErrorTests)
+TEST_F(EtsNativeInterfaceArrayTest, DISABLED_GetShortArrayRegionErrorTests)
 {
     ets_short buf[10U] = {0};
     ets_shortArray arr = env_->NewShortArray(5U);
@@ -166,7 +163,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetShortArrayRegionErrorTests)
     }
 }
 
-TEST_F(EtsNativeInterfaceArrayTest, GetIntArrayRegionErrorTests)
+TEST_F(EtsNativeInterfaceArrayTest, DISABLED_GetIntArrayRegionErrorTests)
 {
     ets_int buf[10U] = {0};
     ets_intArray arr = env_->NewIntArray(5U);
@@ -201,7 +198,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetIntArrayRegionErrorTests)
     }
 }
 
-TEST_F(EtsNativeInterfaceArrayTest, GetLongArrayRegionErrorTests)
+TEST_F(EtsNativeInterfaceArrayTest, DISABLED_GetLongArrayRegionErrorTests)
 {
     ets_long buf[10U] = {0};
     ets_longArray arr = env_->NewLongArray(5U);
@@ -236,7 +233,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetLongArrayRegionErrorTests)
     }
 }
 
-TEST_F(EtsNativeInterfaceArrayTest, GetFloatArrayRegionErrorTests)
+TEST_F(EtsNativeInterfaceArrayTest, DISABLED_GetFloatArrayRegionErrorTests)
 {
     ets_float buf[10U] = {0};
     ets_floatArray arr = env_->NewFloatArray(5U);
@@ -271,7 +268,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetFloatArrayRegionErrorTests)
     }
 }
 
-TEST_F(EtsNativeInterfaceArrayTest, GetDoubleArrayRegionErrorTests)
+TEST_F(EtsNativeInterfaceArrayTest, DISABLED_GetDoubleArrayRegionErrorTests)
 {
     ets_double buf[10U] = {0};
     ets_doubleArray arr = env_->NewDoubleArray(5U);

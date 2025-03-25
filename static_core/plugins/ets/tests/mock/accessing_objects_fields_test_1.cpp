@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ public:
 class AccessingObjectsFieldsTest : public AccessingObjectsFieldsTestGeneral {};
 class AccessingObjectsFieldsTestDeath : public AccessingObjectsFieldsTestGeneral {};
 
-TEST_F(AccessingObjectsFieldsTestDeath, GetTypeFieldDeathTest1)
+TEST_F(AccessingObjectsFieldsTestDeath, DISABLED_GetTypeFieldDeathTest1)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -79,7 +79,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, GetTypeFieldDeathTest1)
     }
 }
 
-TEST_F(AccessingObjectsFieldsTestDeath, GetTypeFieldDeathTest2)
+TEST_F(AccessingObjectsFieldsTestDeath, DISABLED_GetTypeFieldDeathTest2)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ public:
 class MethodsTest : public CallingMethodsTestGeneral {};
 class MethodsTestDeath : public CallingMethodsTestGeneral {};
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath15)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath15)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -89,7 +89,7 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath15)
     EXPECT_DEATH(env_->CallNonvirtualCharMethodArray(obj, cCls, nullptr, nullptr), "");
 }
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath16)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath16)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 

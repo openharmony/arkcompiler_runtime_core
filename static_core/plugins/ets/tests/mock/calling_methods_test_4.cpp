@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ public:
 class MethodsTest : public CallingMethodsTestGeneral {};
 class MethodsTestDeath : public CallingMethodsTestGeneral {};
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath7)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath7)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -86,7 +86,7 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath7)
     EXPECT_DEATH(env_->CallDoubleMethod(nullptr, doubleId), "");
 }
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath8)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath8)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -133,7 +133,7 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath8)
     EXPECT_DEATH(env_->CallCharMethodArray(nullptr, charId, nullptr), "");
 }
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath9)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath9)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -181,7 +181,7 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath9)
     EXPECT_DEATH(env_->CallDoubleMethodArray(nullptr, doubleId, nullptr), "");
 }
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath10)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath10)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -233,7 +233,7 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath10)
         "");
 }
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath11)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath11)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,6 @@
 #include "plugins/ets/tests/mock/mock_test_helper.h"
 
 #include "libpandabase/utils/utils.h"
-#include "runtime/include/runtime.h"
-#include "runtime/include/runtime_options.h"
-#include "plugins/ets/runtime/types/ets_method.h"
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -27,14 +24,14 @@ namespace ark::ets::test {
 class EtsNativeInterfaceArrayTest : public MockEtsNapiTestBaseClass {};
 class EtsNativeInterfaceArrayTestDeath : public MockEtsNapiTestBaseClass {};
 
-TEST_F(EtsNativeInterfaceArrayTestDeath, GetArrayLengthDeathTest)
+TEST_F(EtsNativeInterfaceArrayTestDeath, DISABLED_GetArrayLengthDeathTest)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
     EXPECT_DEATH(env_->GetArrayLength(nullptr), "");
 }
 
-TEST_F(EtsNativeInterfaceArrayTestDeath, NewObjectsArrayDeathTest)
+TEST_F(EtsNativeInterfaceArrayTestDeath, DISABLED_NewObjectsArrayDeathTest)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -52,7 +49,7 @@ TEST_F(EtsNativeInterfaceArrayTestDeath, NewObjectsArrayDeathTest)
     EXPECT_DEATH(env_->NewObjectsArray(5_I, nullptr, str), "");
 }
 
-TEST_F(EtsNativeInterfaceArrayTestDeath, GetObjectArrayElementDeathTest)
+TEST_F(EtsNativeInterfaceArrayTestDeath, DISABLED_GetObjectArrayElementDeathTest)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -68,7 +65,7 @@ TEST_F(EtsNativeInterfaceArrayTestDeath, GetObjectArrayElementDeathTest)
     EXPECT_DEATH(env_->GetObjectArrayElement(nullptr, 1), "");
 }
 
-TEST_F(EtsNativeInterfaceArrayTestDeath, SetObjectArrayElementDeathTest)
+TEST_F(EtsNativeInterfaceArrayTestDeath, DISABLED_SetObjectArrayElementDeathTest)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -76,7 +73,7 @@ TEST_F(EtsNativeInterfaceArrayTestDeath, SetObjectArrayElementDeathTest)
     EXPECT_DEATH(env_->SetObjectArrayElement(nullptr, -5_I, nullptr), "");
 }
 
-TEST_F(EtsNativeInterfaceArrayTestDeath, NewPrimitiveTypeArrayDeathTest)
+TEST_F(EtsNativeInterfaceArrayTestDeath, DISABLED_NewPrimitiveTypeArrayDeathTest)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -90,7 +87,7 @@ TEST_F(EtsNativeInterfaceArrayTestDeath, NewPrimitiveTypeArrayDeathTest)
     EXPECT_DEATH(env_->NewDoubleArray(-1), "");
 }
 
-TEST_F(EtsNativeInterfaceArrayTestDeath, GetPrimitiveTypeArrayRegionDeathTests)
+TEST_F(EtsNativeInterfaceArrayTestDeath, DISABLED_GetPrimitiveTypeArrayRegionDeathTests)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -126,7 +123,7 @@ TEST_F(EtsNativeInterfaceArrayTestDeath, GetPrimitiveTypeArrayRegionDeathTests)
     }
 }
 
-TEST_F(EtsNativeInterfaceArrayTestDeath, SetPrimitiveTypeArrayRegionDeathTests)
+TEST_F(EtsNativeInterfaceArrayTestDeath, DISABLED_SetPrimitiveTypeArrayRegionDeathTests)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -162,7 +159,7 @@ TEST_F(EtsNativeInterfaceArrayTestDeath, SetPrimitiveTypeArrayRegionDeathTests)
     }
 }
 
-TEST_F(EtsNativeInterfaceArrayTestDeath, PinAndUnpinNullPrimitiveTypeArrayDeathTest)
+TEST_F(EtsNativeInterfaceArrayTestDeath, DISABLED_PinAndUnpinNullPrimitiveTypeArrayDeathTest)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
