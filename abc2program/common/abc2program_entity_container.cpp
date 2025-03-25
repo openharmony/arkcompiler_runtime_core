@@ -82,7 +82,8 @@ void Abc2ProgramEntityContainer::ModifyPkgNameForRecordName(std::string &record_
     std::vector<std::string> pkg_names = Split(modify_pkg_name_, COLON_SEPARATOR);
     std::string orginal = NORMALIZED_OHMURL_SEPARATOR + pkg_names[ORIGINAL_PKG_NAME_POS];
     std::string target = NORMALIZED_OHMURL_SEPARATOR + pkg_names[TARGET_PKG_NAME_POS];
-    if (record_name.find(orginal) == 0) {
+    std::string pkg_name = GetPkgNameFromRecordName(record_name);
+    if (pkg_name == pkg_names[ORIGINAL_PKG_NAME_POS]) {
         record_name.replace(0, orginal.length(), target);
     }
 }
