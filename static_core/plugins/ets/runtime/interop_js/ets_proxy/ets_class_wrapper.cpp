@@ -312,15 +312,20 @@ std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapp
     }
     // Select preferred overloads
     if (overloads != nullptr) {
-        for (auto &[name, signature] : *overloads) {
-            Method *method = etsClass_->GetDirectMethod(name, signature)->GetPandaMethod();
+        for (auto &[name, signaturePair] : *overloads) {
+            Method *method = etsClass_->GetDirectMethod(name, signaturePair.first)->GetPandaMethod();
             if (UNLIKELY(method == nullptr)) {
-                fatalNoMethod(klass, name, signature);
+                fatalNoMethod(klass, name, signaturePair.first);
             }
             auto etsMethodSet = std::make_unique<EtsMethodSet>(EtsMethodSet::Create(method));
             auto it = props.insert({method->GetName().data, etsMethodSet.get()});
-            etsMethods_.push_back(std::move(etsMethodSet));
-            INTEROP_FATAL_IF(!it.second);
+            if (!it.second && std::holds_alternative<EtsMethodSet *>(it.first->second)) {
+                // Possible correct method overloading: merge to existing entry
+                auto addedMethods = std::get<EtsMethodSet *>(it.first->second);
+                addedMethods->MergeWith(*etsMethodSet.get());
+            } else {
+                etsMethods_.push_back(std::move(etsMethodSet));
+            }
         }
     }
 
@@ -370,9 +375,10 @@ void EtsClassWrapper::CollectClassMethods(EtsClassWrapper::PropsMap *props, cons
         if (m.IsPrivate()) {
             continue;
         }
-        auto name = m.GetName().data;
-        if (overloads != nullptr && overloads->find(name) != overloads->end()) {
-            continue;
+        if (overloads != nullptr) {
+            if (HasOverloadsMethod(overloads, &m)) {
+                continue;
+            }
         }
         auto methodSet = std::make_unique<EtsMethodSet>(EtsMethodSet::Create(&m));
         auto it = props->insert({m.GetName().data, methodSet.get()});
@@ -388,6 +394,20 @@ void EtsClassWrapper::CollectClassMethods(EtsClassWrapper::PropsMap *props, cons
             etsMethods_.push_back(std::move(methodSet));
         }
     }
+}
+
+bool EtsClassWrapper::HasOverloadsMethod(const OverloadsMap *overloads, Method *m)
+{
+    auto name = m->GetName().data;
+    auto range = overloads->equal_range(name);
+    EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(m);
+    for (auto iter = range.first; iter != range.second; ++iter) {
+        if (iter->second.second ==
+            etsMethod->GetNumArgs() - static_cast<unsigned int>(etsMethod->GetPandaMethod()->HasVarArgs())) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void EtsClassWrapper::UpdatePropsWithBaseClasses(EtsClassWrapper::PropsMap *props)
