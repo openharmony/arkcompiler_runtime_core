@@ -21,8 +21,8 @@ desc: check prefix decrement for byte operand
 function main(): void {
   let value: byte = {{v.value}}
   let result: byte = --value
-  assertTrue( value == {{v.result}})
-  assertTrue( result == {{v.result}})
+  assertEQ( value, {{v.result}})
+  assertEQ( result, {{v.result}})
 }
 
 {% endfor %}

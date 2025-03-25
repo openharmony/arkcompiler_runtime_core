@@ -22,7 +22,7 @@ function main(): void {
     const a: byte = {{v.condition}}
     const b: byte = {{v.ifTrue}}
     const c: byte = {{v.ifFalse}}
-    assertTrue( (a ? b : c) == {{v.result}})
+    assertEQ( (a ? b : c), {{v.result}})
 }
 
 {% endfor %}

@@ -21,7 +21,7 @@ desc: check equality of two chars
 function main(): void {
   const a: char = {{v.left}}
   const b: char = {{v.right}}
-  assertTrue( (a == b) == {{v.result}})
+  assertEQ( (a == b), {{v.result}})
 }
 
 {% endfor %}

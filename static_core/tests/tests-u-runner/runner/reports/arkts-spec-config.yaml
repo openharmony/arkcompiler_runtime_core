@@ -89,7 +89,7 @@
     status: Finished
 '3':
     title: Types
-    status: No testable assertions
+    status: Finished
 '3.1':
     title: Predefined Types
     status: No testable assertions

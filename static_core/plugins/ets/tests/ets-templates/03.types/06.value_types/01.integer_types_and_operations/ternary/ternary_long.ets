@@ -22,7 +22,7 @@ function main(): void {
     const a: long = {{v.condition}}
     const b: long = {{v.ifTrue}}
     const c: long = {{v.ifFalse}}
-    assertTrue( (a ? b : c) == {{v.result}})
+    assertEQ( (a ? b : c), {{v.result}})
 }
 
 {% endfor %}

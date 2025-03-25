@@ -21,8 +21,8 @@ desc: check prefix decrement for short integer operand
 function main(): void {
   let value: short = {{v.value}}
   let result: short = --value
-  assertTrue( value == {{v.result}})
-  assertTrue( result == {{v.result}})
+  assertEQ( value, {{v.result}})
+  assertEQ( result, {{v.result}})
 }
 
 {% endfor %}

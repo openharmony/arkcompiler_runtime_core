@@ -21,7 +21,7 @@ desc: check concatenation of string and integer
 function main(): void {
     const a: {{v.left}}
     const b: {{v.right}}
-    assertTrue( (a + b) == {{v.result}})
+    assertEQ( (a + b), {{v.result}})
 }
 
 {% endfor %}

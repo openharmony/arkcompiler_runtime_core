@@ -20,7 +20,7 @@ desc: check unary minus operation for short integer operand
 
 function main(): void {
   const value: short = {{v.value}}
-  assertTrue( -(value) == {{v.result}})
+  assertEQ( -(value), {{v.result}})
 }
 
 {% endfor %}

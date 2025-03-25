@@ -21,7 +21,7 @@ desc: check right shift operation for char
 function main(): void {
     const a: char = {{v.left}}
     const b: int = {{v.right}}
-    assertTrue( (a >> b) == {{v.result}})
+    assertEQ( (a >> b), {{v.result}})
 }
 
 {% endfor %}

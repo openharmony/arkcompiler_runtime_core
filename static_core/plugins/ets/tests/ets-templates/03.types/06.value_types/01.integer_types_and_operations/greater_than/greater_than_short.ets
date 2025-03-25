@@ -21,7 +21,7 @@ desc: check greater operation for two short integers
 function main(): void {
   const a: short = {{v.left}}
   const b: short = {{v.right}}
-  assertTrue( (a > b) == {{v.result}})
+  assertEQ( (a > b), {{v.result}})
 }
 
 {% endfor %}

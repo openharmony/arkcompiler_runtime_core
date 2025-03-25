@@ -21,7 +21,7 @@ desc: check right shift operation for integer
 function main(): void {
     const a: int = {{v.left}}
     const b: int = {{v.right}}
-    assertTrue( (a >> b) == {{v.result}})
+    assertEQ( (a >> b), {{v.result}})
 }
 
 {% endfor %}
