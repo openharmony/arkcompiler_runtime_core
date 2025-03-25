@@ -55,7 +55,7 @@ class BenchGenerator:
     def search_test_files_in_dir(d: Path,
                                  root: Path,
                                  ext: Iterable[str] = (),
-                                 allowed_dir_name: str = None) -> List[SrcPath]:
+                                 allowed_dir_name: Optional[str] = None) -> List[SrcPath]:
         if allowed_dir_name:
             log.trace('Search test files, allowed dir name: %s', allowed_dir_name)
         files = []
@@ -68,12 +68,12 @@ class BenchGenerator:
                 log.trace('Src: %s', str(p))
                 full = p.resolve()
                 files.append(
-                    SrcPath(full, full.parent.relative_to(root)))
+                    SrcPath(full, full.parent.relative_to(root.resolve())))
         return files
 
     @staticmethod
     def process_test_list(lst: Path, ext: Iterable[str] = (),
-                          allowed_dir_name: str = None) -> List[SrcPath]:
+                          allowed_dir_name: Optional[str] = None) -> List[SrcPath]:
         cwd = Path.cwd().resolve()
         paths = [cwd.joinpath(p) for p in read_list_file(lst)]
         files = []
@@ -85,7 +85,7 @@ class BenchGenerator:
     @staticmethod
     def search_test_files(paths: List[Path],
                           ext: Iterable[str] = (),
-                          allowed_dir_name: str = None) -> List[SrcPath]:
+                          allowed_dir_name: Optional[str] = None) -> List[SrcPath]:
         """Collect all src files to gen process.
 
         Returns flat list of (Full, Relative) paths
@@ -366,7 +366,7 @@ def tags_workaround(bus: List[BenchUnit], mode: str) -> List[BenchUnit]:
 
 
 @log_time
-def generate_main_interop(generator: BenchGenerator = None, arkjs_suffix: str = '') -> List[BenchUnit]:
+def generate_main_interop(generator: BenchGenerator, arkjs_suffix: str = '') -> List[BenchUnit]:
     """Command: Generate benches from doclets."""
     log.info("Starting interop GEN phase...",)
     bus: List[BenchUnit] = []
