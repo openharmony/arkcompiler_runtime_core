@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,6 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 import pytz
 
@@ -61,7 +60,7 @@ class RunnerStandardFlow(RunnerFileBased):
         self.test_root = self.test_env.work_dir.gen
 
         cpu_mask = self.config.test_suite.get_parameter("mask")
-        self.cpu_mask: Optional[CPUMask] = CPUMask(cpu_mask) \
+        self.cpu_mask: CPUMask | None = CPUMask(cpu_mask) \
             if cpu_mask is not None and isinstance(cpu_mask, str) else None
 
     @property

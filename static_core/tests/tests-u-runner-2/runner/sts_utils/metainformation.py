@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,23 +19,23 @@
 # The entrypoint is the 'find_all_metas' function
 
 import re
-from typing import Tuple, List, Dict
 
 import yaml
 
+from runner.common_exceptions import RunnerException
 from runner.sts_utils.constants import META_END_PATTERN, META_END_STRING, META_START_PATTERN, META_START_STRING
 
-ParsedMeta = Dict
-MetaInText = Tuple[int, int, ParsedMeta]
+ParsedMeta = dict
+MetaInText = tuple[int, int, ParsedMeta]
 
 
-class InvalidMetaException(Exception):
+class InvalidMetaException(RunnerException):
     def __init__(self, msg: str) -> None:
         super().__init__()
         self.message = msg
 
 
-def find_all_metas(text: str) -> List[MetaInText]:
+def find_all_metas(text: str) -> list[MetaInText]:
     """
     Given a text of the whole test, this function:
     1) Find all metas in this text
@@ -54,7 +54,7 @@ def find_all_metas(text: str) -> List[MetaInText]:
     if len(start_indices) != len(end_indices) or len(start_indices) == 0:
         raise InvalidMetaException("Invalid meta or meta doesn't exist")
 
-    meta_bounds = list(zip(start_indices, end_indices))
+    meta_bounds = list(zip(start_indices, end_indices, strict=False))
 
     # verify meta bounds
     for i in range(1, len(meta_bounds)):
@@ -70,7 +70,7 @@ def find_all_metas(text: str) -> List[MetaInText]:
     return result
 
 
-def __parse_meta(meta: str) -> Dict:
+def __parse_meta(meta: str) -> dict:
     """
     Given a meta, a string that starts with '/*---', ends with '---*/' and contains a valid YAML in between,
     this function parses that meta and validating it.

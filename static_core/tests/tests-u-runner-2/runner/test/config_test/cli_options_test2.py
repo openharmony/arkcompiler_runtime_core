@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,8 @@ import unittest
 
 from runner.common_exceptions import InvalidConfiguration
 from runner.options.cli_options import CliOptions
-from runner.test.test_utils import MethodType, get_method as gm
+from runner.test.test_utils import MethodType
+from runner.test.test_utils import get_method as gm
 
 
 class CliOptionsTest2(unittest.TestCase):

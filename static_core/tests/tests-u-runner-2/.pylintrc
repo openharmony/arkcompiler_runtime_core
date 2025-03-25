@@ -13,7 +13,7 @@
 
 [MAIN]
 ignore=.git
-py-version=3.8
+py-version=3.10
 recursive=yes
 
 [MESSAGES CONTROL]
@@ -33,7 +33,8 @@ disable=missing-module-docstring,
         too-many-arguments,
         logging-format-interpolation,
         logging-fstring-interpolation,
-        too-few-public-methods
+        too-few-public-methods,
+
 
 [FORMAT]
 max-line-length=120

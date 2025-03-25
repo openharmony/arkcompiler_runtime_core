@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,12 +20,17 @@ import re
 from glob import glob
 from os import path
 from pathlib import Path
-from typing import Optional, List, Union, cast
+from typing import cast
 
 from runner import utils
 from runner.common_exceptions import InvalidConfiguration
-from runner.enum_types.configuration_kind import SanitizerKind, ArchitectureKind, BuildTypeKind, OSKind, \
-    ConfigurationKind
+from runner.enum_types.configuration_kind import (
+    ArchitectureKind,
+    BuildTypeKind,
+    ConfigurationKind,
+    OSKind,
+    SanitizerKind,
+)
 from runner.enum_types.params import TestEnv
 from runner.logger import Log
 from runner.utils import correct_path
@@ -37,16 +42,16 @@ class TestLists:
     def __init__(self, list_root: Path, test_env: TestEnv):
         self.list_root = list_root
         self.config = test_env.config
-        self.explicit_list: Optional[Path] = (
+        self.explicit_list: Path | None = (
             correct_path(self.list_root, self.config.test_suite.test_lists.explicit_list)
             if self.config.test_suite.test_lists.explicit_list is not None and self.list_root is not None
             else None
         )
-        self.explicit_test: Optional[Path] = None
-        self.excluded_lists: List[Path] = []
-        self.ignored_lists: List[Path] = []
+        self.explicit_test: Path | None = None
+        self.excluded_lists: list[Path] = []
+        self.ignored_lists: list[Path] = []
 
-        self.cache: List[str] = self.__cmake_cache()
+        self.cache: list[str] = self.__cmake_cache()
         self.sanitizer = self.search_sanitizer()
         self.architecture = self.search_architecture()
         self.operating_system = self.detect_operating_system()
@@ -63,30 +68,30 @@ class TestLists:
         return OSKind.MAC
 
     @staticmethod
-    def __search_option_in_list(option: str, arg_list: Optional[List[str]]) -> List[str]:
+    def __search_option_in_list(option: str, arg_list: list[str] | None) -> list[str]:
         if arg_list is None:
             return []
         return [arg for arg in arg_list if arg.startswith(option)]
 
     @staticmethod
-    def __to_bool(value: Optional[str]) -> Optional[bool]:
+    def __to_bool(value: str | None) -> bool | None:
         true_list = ("on", "true")
         false_list = ("on", "false")
         return value in true_list if value and value in true_list + false_list else None
 
-    def collect_excluded_test_lists(self, extra_list: Optional[List[str]] = None,
-                                    test_name: Optional[str] = None) -> None:
+    def collect_excluded_test_lists(self, extra_list: list[str] | None = None,
+                                    test_name: str | None = None) -> None:
         self.excluded_lists.extend(self.collect_test_lists("excluded", extra_list, test_name))
 
-    def collect_ignored_test_lists(self, extra_list: Optional[List[str]] = None,
-                                   test_name: Optional[str] = None) -> None:
+    def collect_ignored_test_lists(self, extra_list: list[str] | None = None,
+                                   test_name: str | None = None) -> None:
         self.ignored_lists.extend(self.collect_test_lists("ignored", extra_list, test_name))
 
     def collect_test_lists(
             self,
-            kind: str, extra_lists: Optional[List[str]] = None,
-            test_name: Optional[str] = None
-    ) -> List[Path]:
+            kind: str, extra_lists: list[str] | None = None,
+            test_name: str | None = None
+    ) -> list[Path]:
         test_lists = extra_lists[:] if extra_lists else []
         test_name = test_name if test_name else self.config.test_suite.suite_name
 
@@ -146,13 +151,13 @@ class TestLists:
         return self.config.test_suite.test_lists.architecture
 
     def is_aot(self) -> bool:
-        aot_args = cast(Optional[list], self.config.workflow.get_value("parameters.aot-args"))
-        aot_full_args = cast(Optional[list], self.config.workflow.get_value("parameters.aot-full-args"))
+        aot_args = cast(list | None, self.config.workflow.get_value("parameters.aot-args"))
+        aot_full_args = cast(list | None, self.config.workflow.get_value("parameters.aot-full-args"))
         return (aot_args is not None and len(aot_args) > 0) or (aot_full_args is not None and len(aot_full_args) > 0)
 
     def is_aot_full(self) -> bool:
-        aot_args = cast(Optional[List[str]], self.config.workflow.get_value("parameters.aot-args"))
-        aot_full_args = cast(Optional[List[str]], self.config.workflow.get_value("parameters.aot-full-args"))
+        aot_args = cast(list[str] | None, self.config.workflow.get_value("parameters.aot-args"))
+        aot_full_args = cast(list[str] | None, self.config.workflow.get_value("parameters.aot-full-args"))
         is_full1 = len(self.__search_option_in_list("--compiler-inline-full-intrinsics=true", aot_args)) > 0
         is_full2 = len(self.__search_option_in_list("--compiler-inline-full-intrinsics=true", aot_full_args)) > 0
         return is_full1 or is_full2
@@ -162,7 +167,7 @@ class TestLists:
         return jit.lower() == "true"
 
     def is_jit_with_repeats(self) -> bool:
-        jit_with_repeats = cast(Optional[str], self.config.workflow.get_parameter("with-repeats"))
+        jit_with_repeats = cast(str | None, self.config.workflow.get_parameter("with-repeats"))
         return utils.to_bool(jit_with_repeats) if jit_with_repeats is not None else False
 
     def get_interpreter(self) -> str:
@@ -198,18 +203,18 @@ class TestLists:
         args = self.config.workflow.get_parameter("es2panda-extra-args")
         return len(self.__search_option_in_list("--verifier-all-checks", args)) > 0
 
-    def __cmake_cache(self) -> List[str]:
+    def __cmake_cache(self) -> list[str]:
         cmake_cache_txt = "CMakeCache.txt"
         cmake_cache: Path = self.config.general.build / cmake_cache_txt
         if not cmake_cache.exists():
             raise InvalidConfiguration(
                 f"Incorrect build folder {self.config.general.build}. Cannot find '{cmake_cache_txt}' file")
-        with open(cmake_cache, "r", encoding="utf-8") as file_handler:
+        with open(cmake_cache, encoding="utf-8") as file_handler:
             cache = [line.strip()
                      for line in file_handler.readlines()
                      if line.strip() and not line.strip().startswith("#") and not line.strip().startswith("//")]
             return sorted(cache)
 
-    def __search(self, variable: str) -> Optional[str]:
-        found: List[str] = [var for var in self.cache if var.startswith(variable)]
+    def __search(self, variable: str) -> str | None:
+        found: list[str] = [var for var in self.cache if var.startswith(variable)]
         return str(found[0].split("=")[-1].lower()) if found else None

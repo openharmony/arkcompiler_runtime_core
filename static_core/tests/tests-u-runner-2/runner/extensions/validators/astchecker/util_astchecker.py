@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,20 +22,21 @@ import re
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Tuple, Optional, List, Dict, Any, Set
+from typing import Any, ClassVar
 
+from runner.common_exceptions import RunnerException
 from runner.logger import Log
 
 _LOGGER = Log.get_logger(__file__)
-AstCheckerError = Tuple[str, str]
-AstCheckerErrorsSet = Set[AstCheckerError]
-LocationType = Tuple[int, int]
+AstCheckerError = tuple[str, str]
+AstCheckerErrorsSet = set[AstCheckerError]
+LocationType = tuple[int, int]
 
 
 class UtilASTChecker:
-    skip_options = {'SkipErrors': False, 'SkipWarnings': False}
+    skip_options: ClassVar[dict[str, bool]] = {'SkipErrors': False, 'SkipWarnings': False}
 
-    class AstCheckerException(Exception):
+    class AstCheckerException(RunnerException):
         pass
 
     class _TestType(Enum):
@@ -56,7 +57,7 @@ class UtilASTChecker:
         Class for storing test case parsed from test file
         """
 
-        def __init__(self, name: Optional[str], pattern: UtilASTChecker._Pattern, checks: dict) -> None:
+        def __init__(self, name: str | None, pattern: UtilASTChecker._Pattern, checks: dict) -> None:
             self.name = name
             self.line = pattern.line
             self.col = pattern.col
@@ -99,7 +100,7 @@ class UtilASTChecker:
         self.reset_skips()
 
     @staticmethod
-    def create_test_case(name: Optional[str], pattern: UtilASTChecker._Pattern) -> UtilASTChecker._TestCase:
+    def create_test_case(name: str | None, pattern: UtilASTChecker._Pattern) -> UtilASTChecker._TestCase:
         pattern_parsed = {'error': pattern.pattern}
         if pattern.pattern_type == UtilASTChecker._TestType.NODE:
             try:
@@ -160,8 +161,8 @@ class UtilASTChecker:
         return self.skip_options["SkipWarnings"]
 
     def parse_define_statement(self, match: re.Match[str],
-                               link_defs_map: Dict[str, List[Tuple[UtilASTChecker._TestType, str]]],
-                               link_sources_map: Dict[str, re.Match[str]]) -> Optional[UtilASTChecker._TestCase]:
+                               link_defs_map: dict[str, list[tuple[UtilASTChecker._TestType, str]]],
+                               link_sources_map: dict[str, re.Match[str]]) -> UtilASTChecker._TestCase | None:
         """
         Parses `@<id> <pattern-type> <pattern>`
         """
@@ -188,8 +189,8 @@ class UtilASTChecker:
         return None
 
     def parse_match_statement(self, match: re.Match[str],
-                              link_defs_map: Dict[str, List[Tuple[UtilASTChecker._TestType, str]]],
-                              link_sources_map: Dict[str, re.Match[str]]) -> List[UtilASTChecker._TestCase]:
+                              link_defs_map: dict[str, list[tuple[UtilASTChecker._TestType, str]]],
+                              link_sources_map: dict[str, re.Match[str]]) -> list[UtilASTChecker._TestCase]:
         """
         Parses `<pattern-type> <pattern>` and `<id>`
         """
@@ -279,8 +280,8 @@ class UtilASTChecker:
         Takes .ets file with tests and parses them into a list of TestCases.
         """
         self.reset_skips()
-        link_defs_map: Dict[str, List[Tuple[UtilASTChecker._TestType, str]]] = {}
-        link_sources_map: Dict[str, re.Match[str]] = {}
+        link_defs_map: dict[str, list[tuple[UtilASTChecker._TestType, str]]] = {}
+        link_sources_map: dict[str, re.Match[str]] = {}
         test_cases = set()
         matches = list(re.finditer(self.regex, test_text))
         for match in matches:
@@ -305,7 +306,7 @@ class UtilASTChecker:
         test_case_list.skip_warnings = self.check_skip_warning()
         return test_case_list
 
-    def find_nodes_by_start_location(self, root: dict, line: int, col: int) -> List[dict]:
+    def find_nodes_by_start_location(self, root: dict, line: int, col: int) -> list[dict]:
         """
         Finds all descendants of `root` with location starting at `loc`
         """

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ import os
 import unittest
 from pathlib import Path
 
-from runner.options.options_general import GeneralOptions
-from runner.test.config_test import data_test_suite0
 from runner.options.options import IOptions
+from runner.options.options_general import GeneralOptions
 from runner.options.options_test_suite import TestSuiteOptions
 from runner.options.options_workflow import WorkflowOptions
+from runner.test.config_test import data_test_suite0
 
 
 class TestSuiteConfigTest0(unittest.TestCase):

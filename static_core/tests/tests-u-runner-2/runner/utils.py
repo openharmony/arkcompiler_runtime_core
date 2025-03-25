@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 
-import argparse
 import importlib
 import os
 import random
@@ -24,20 +23,27 @@ import shutil
 import subprocess
 import threading
 import zipfile
+from collections.abc import Callable, Iterator
 from concurrent.futures import Future
 from dataclasses import dataclass
 from filecmp import cmp
-from itertools import tee
+from itertools import pairwise
 from os import makedirs, path, remove
 from pathlib import Path
 from types import ModuleType
-from typing import Callable, Optional, Type, Union, Any, List, Iterator, Tuple, Iterable, Dict
+from typing import Any
 from urllib import request
 from urllib.error import URLError
 
 import yaml
 
-from runner.common_exceptions import DownloadException, UnzipException
+from runner.common_exceptions import (
+    DownloadException,
+    FileNotFoundException,
+    InvalidConfiguration,
+    UnzipException,
+    YamlException,
+)
 from runner.enum_types.base_enum import EnumT
 from runner.logger import Log
 
@@ -79,8 +85,8 @@ ProcessCopy = Callable[[Path, Path], None]
 
 
 def download_and_generate(name: str, url: str, revision: str, download_root: Path, generated_root: Path, *,
-                          stamp_name: Optional[str] = None, test_subdir: str = "test", show_progress: bool = False,
-                          process_copy: Optional[ProcessCopy] = None, force_download: bool = False) -> Path:
+                          stamp_name: str | None = None, test_subdir: str = "test", show_progress: bool = False,
+                          process_copy: ProcessCopy | None = None, force_download: bool = False) -> Path:
     _LOGGER.summary("Prepare test files")
     stamp_name = f'{name}-{revision}' if not stamp_name else stamp_name
     dest_path = generated_root / stamp_name
@@ -122,7 +128,7 @@ def download_and_generate(name: str, url: str, revision: str, download_root: Pat
 def copy(source_path: Path, dest_path: Path, remove_if_exist: bool = True) -> None:
     if not source_path.exists():
         error = f"Source path {source_path} does not exist! Cannot process this collection"
-        raise FileNotFoundError(error)
+        raise FileNotFoundException(error)
     if source_path == dest_path:
         return
     if dest_path.exists() and remove_if_exist:
@@ -130,13 +136,13 @@ def copy(source_path: Path, dest_path: Path, remove_if_exist: bool = True) -> No
     shutil.copytree(source_path, dest_path, dirs_exist_ok=not remove_if_exist)
 
 
-def read_file(file_path: Union[Path, str]) -> str:
+def read_file(file_path: Path | str) -> str:
     with os.fdopen(os.open(file_path, os.O_RDONLY, 0o755), "r", encoding='utf8') as f_handle:
         text = f_handle.read()
     return text
 
 
-def write_2_file(file_path: Union[Path, str], content: str) -> None:
+def write_2_file(file_path: Path | str, content: str) -> None:
     """
     write content to file if file exists it will be truncated. if file does not exist it wil be created
     """
@@ -149,7 +155,7 @@ def purify(line: str) -> str:
     return line.strip(" \n").replace(" ", "")
 
 
-def get_all_enum_values(enum_cls: Type[EnumT], *, delim: str = ", ", quotes: str = "'") -> str:
+def get_all_enum_values(enum_cls: type[EnumT], *, delim: str = ", ", quotes: str = "'") -> str:
     result = []
     for enum_value in enum_cls:
         result.append(f"{quotes}{enum_value.value}{quotes}")
@@ -168,7 +174,7 @@ def wrap_with_function(code: str, jit_preheat_repeats: int) -> str:
     """
 
 
-def iter_files(dirpath: Union[Path, str], allowed_ext: List[str]) -> Iterator[Tuple[str, str]]:
+def iter_files(dirpath: Path | str, allowed_ext: list[str]) -> Iterator[tuple[str, str]]:
     dirpath_gen = ((name, path.join(str(dirpath), name)) for name in os.listdir(str(dirpath)))
     for name, path_value in dirpath_gen:
         if not path.isfile(path_value):
@@ -200,16 +206,9 @@ def get_group_number(test_id: str, total_groups: int) -> int:
     return random.randint(1, total_groups)
 
 
-# from itertools import pairwise when switching to python version >= 3.10
-def pair_wise(iterable: Iterable[Path]) -> Iterator[Tuple[Path, Path]]:
-    a, b = tee(iterable)
-    next(b, None)
-    return zip(a, b)
-
-
-def compare_files(files: List[Path]) -> bool:
-    for f1, f2 in pair_wise(files):
-        if not cmp(f1, f2):
+def compare_files(files: list[Path]) -> bool:
+    for file1, file2 in pairwise(files):
+        if not cmp(file1, file2):
             return False
     return True
 
@@ -233,37 +232,37 @@ def has_macro(prop_value: str) -> bool:
     return match is not None
 
 
-def get_all_macros(prop_value: str) -> List[str]:
+def get_all_macros(prop_value: str) -> list[str]:
     pattern = r"\$\{([^\}]+)\}"
-    result: List[str] = []
-    for m in re.finditer(pattern, prop_value):
-        result.append(m.group(1))
+    result: list[str] = []
+    for match in re.finditer(pattern, prop_value):
+        result.append(match.group(1))
     return result
 
 
 def replace_macro(prop_value: str, macro: str, replacing_value: str) -> str:
     pattern = r"\$\{" + macro + r"\}"
     if macro in prop_value:
-        match = re.sub(pattern, replacing_value, prop_value, 0, re.IGNORECASE)
+        match = re.sub(pattern, replacing_value, prop_value, count=0, flags=re.IGNORECASE)
         return match
     return prop_value
 
 
-def expand_file_name(arg: str) -> Optional[str]:
+def expand_file_name(arg: str) -> str | None:
     if arg is None or arg.startswith("${"):
         return arg
     return path.abspath(path.expanduser(arg))
 
 
 def is_directory(arg: str, create_if_not_exist: bool = False) -> str:
-    expanded: Optional[str] = expand_file_name(arg)
+    expanded: str | None = expand_file_name(arg)
     if expanded is None:
-        raise argparse.ArgumentTypeError(f"The directory {arg} does not exist")
+        raise InvalidConfiguration(f"The directory {arg} does not exist")
     if not path.isdir(expanded):
         if create_if_not_exist:
             makedirs(expanded)
         else:
-            raise argparse.ArgumentTypeError(f"The directory {arg} does not exist")
+            raise InvalidConfiguration(f"The directory {arg} does not exist")
 
     return str(expanded)
 
@@ -297,9 +296,9 @@ def make_dir_if_not_exist(arg: str) -> str:
 
 
 def is_file(arg: str) -> str:
-    expanded: Optional[str] = expand_file_name(arg)
+    expanded: str | None = expand_file_name(arg)
     if expanded is None or not path.isfile(expanded):
-        raise argparse.ArgumentTypeError(f"The file {arg} does not exist")
+        raise InvalidConfiguration(f"The file {arg} does not exist")
 
     return str(expanded)
 
@@ -307,7 +306,7 @@ def is_file(arg: str) -> str:
 def check_int(value: str, value_name: str, *, is_zero_allowed: bool = False) -> int:
     ivalue = int(value)
     if ivalue < 0 or (not is_zero_allowed and ivalue == 0):
-        raise argparse.ArgumentTypeError(f"{value} is an invalid {value_name} value")
+        raise InvalidConfiguration(f"{value} is an invalid {value_name} value")
 
     return ivalue
 
@@ -320,21 +319,21 @@ def convert_underscore(line: str) -> str:
     return line.replace("_", "-")
 
 
-def remove_prefix(s: str, prefix: str) -> str:
+def remove_prefix(line: str, prefix: str) -> str:
     """Strip prefix from string."""
-    return s[len(prefix):] if s.startswith(prefix) else s
+    return line[len(prefix):] if line.startswith(prefix) else line
 
 
 def pretty_divider(length: int = 100) -> str:
     return '=' * length
 
 
-def get_class_by_name(clazz: str) -> Type:
+def get_class_by_name(clazz: str) -> type:
     last_dot = clazz.rfind(".")
     class_path = clazz[:last_dot]
     class_name = clazz[last_dot + 1:]
     class_module_runner: ModuleType = importlib.import_module(class_path)
-    class_obj: Type = getattr(class_module_runner, class_name)
+    class_obj: type = getattr(class_module_runner, class_name)
     return class_obj
 
 
@@ -351,19 +350,19 @@ def get_config_test_suite_folder() -> Path:
     return get_config_folder().joinpath("test-suites")
 
 
-def load_config(config_path: Optional[str]) -> Dict[str, Any]:
+def load_config(config_path: str | None) -> dict[str, Any]:
     __cfg_type = "type"
     config_from_file = {}
     if config_path is not None:
-        with open(config_path, "r", encoding="utf-8") as stream:
+        with open(config_path, encoding="utf-8") as stream:
             try:
                 config_from_file = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
                 message = f"{exc}, {yaml.YAMLError}"
-                raise yaml.YAMLError(message)
+                raise YamlException(message) from exc
         if __cfg_type not in config_from_file:
             error = f"Cannot detect type of config '{config_path}'. Have you specified key '{__cfg_type}'?"
-            raise yaml.YAMLError(error)
+            raise YamlException(error)
     return config_from_file
 
 
@@ -372,7 +371,7 @@ def to_bool(value: Any) -> bool:
         return value
     if isinstance(value, str) and str(value).lower() in ("true", "false"):
         return str(value).lower() == "true"
-    raise ValueError(f"'{value}' cannot be converted to 'bool'")
+    raise InvalidConfiguration(f"'{value}' cannot be converted to 'bool'")
 
 
 def extract_parameter_name(param_name: str) -> str:
@@ -383,7 +382,7 @@ def extract_parameter_name(param_name: str) -> str:
     return param_name
 
 
-def correct_path(root: Union[str, Path], test_list: Union[str, Path]) -> Path:
+def correct_path(root: str | Path, test_list: str | Path) -> Path:
     if isinstance(test_list, str):
         test_list = Path(test_list)
     if isinstance(root, str):
@@ -396,7 +395,7 @@ def get_test_id(file: Path, start_directory: Path) -> str:
     return str(relpath)
 
 
-def prepend_list(pre_list: List[Any], post_list: List[Any]) -> List[Any]:
+def prepend_list(pre_list: list[Any], post_list: list[Any]) -> list[Any]:
     result = pre_list[:]
     result.extend(post_list)
     return result
@@ -404,4 +403,4 @@ def prepend_list(pre_list: List[Any], post_list: List[Any]) -> List[Any]:
 
 def check_obligatory_env(var_name: str) -> None:
     if os.getenv(var_name) is None:
-        raise EnvironmentError(f"Obligatory environment variable '{var_name}' is not set")
+        raise InvalidConfiguration(f"Obligatory environment variable '{var_name}' is not set")

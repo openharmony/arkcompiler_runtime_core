@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,5 +21,5 @@ from runner.logger import Log
 _LOGGER = Log.get_logger(__file__)
 
 
-class IFlow(ABC):
+class IFlow(ABC):  # noqa: B024
     pass

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,6 @@ from datetime import datetime
 from functools import cached_property
 from os import environ
 from pathlib import Path
-from typing import List, Dict, Optional
 
 import pytz
 
@@ -64,7 +63,7 @@ class RunnerFileBased(Runner):
 
         self.__set_test_list_options()
 
-        self.test_env: Optional[TestEnv] = None
+        self.test_env: TestEnv | None = None
 
     @property
     @abstractmethod
@@ -72,7 +71,7 @@ class RunnerFileBased(Runner):
         pass
 
     @staticmethod
-    def _set_cmd_prefix(config: Config) -> List[str]:
+    def _set_cmd_prefix(config: Config) -> list[str]:
         if config.general.qemu == QemuKind.ARM64:
             return ["qemu-aarch64", "-L", "/usr/aarch64-linux-gnu/"]
 
@@ -132,18 +131,19 @@ class RunnerFileBased(Runner):
 
         return self.failed
 
-    def __results_analysis(self, results):
+    def __results_analysis(self, results: list[Test]) -> \
+            tuple[list[Test], list[Test], list[Test], list[Test], dict[str, list[Test]]]:
         self.failed = 0
         self.ignored = 0
         self.passed = 0
         self.excluded_after = 0
         self.excluded = 0 if self.update_excluded else self.excluded
 
-        ignored_still_failed: List[TestStandardFlow] = []
-        ignored_but_passed: List[TestStandardFlow] = []
-        excluded_still_failed: List[TestStandardFlow] = []
-        excluded_but_passed: List[TestStandardFlow] = []
-        fail_lists: Dict[str, List[Test]] = {}
+        ignored_still_failed: list[Test] = []
+        ignored_but_passed: list[Test] = []
+        excluded_still_failed: list[Test] = []
+        excluded_but_passed: list[Test] = []
+        fail_lists: dict[str, list[Test]] = {}
         for test_result in results:
             if not isinstance(test_result, TestStandardFlow):
                 raise UnknownException(f"Incorrect type of test {type(test_result)}. Expected: TestStandardFlow")
@@ -167,7 +167,7 @@ class RunnerFileBased(Runner):
             # we don't want to interpret asan failures as SyntaxErrors
             self.cmd_env[san] = ":exitcode=255"
 
-    def __generate_detailed_report(self, results: List[Test]) -> None:
+    def __generate_detailed_report(self, results: list[Test]) -> None:
         if self.config.general.detailed_report:
             detailed_report = DetailedReport(
                 results,
@@ -176,8 +176,8 @@ class RunnerFileBased(Runner):
                 self.config.general.detailed_report_file)
             detailed_report.populate_report()
 
-    def _process_failed(self, test_result: TestStandardFlow, ignored_still_failed: List[Test],
-                        excluded_still_failed: List[Test], fail_lists: Dict[str, List[Test]]) -> None:
+    def _process_failed(self, test_result: TestStandardFlow, ignored_still_failed: list[Test],
+                        excluded_still_failed: list[Test], fail_lists: dict[str, list[Test]]) -> None:
         if test_result.ignored:
             self.ignored += 1
             ignored_still_failed.append(test_result)

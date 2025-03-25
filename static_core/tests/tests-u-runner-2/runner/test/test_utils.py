@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -- coding: utf-8 --
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,16 +15,16 @@
 # limitations under the License.
 
 import unittest
-from typing import Dict, Any, Union, TypeVar, Type
-
+from typing import Any, TypeVar
 
 from runner import utils
+from runner.common_exceptions import InvalidConfiguration
 
 MethodType = Any
 CLASSTYPE = TypeVar("CLASSTYPE", bound='object')
 
 
-def compare_dicts(test_case: unittest.TestCase, actual_dict: Dict[str, Any], expected_dict: Dict[str, Any]) -> None:
+def compare_dicts(test_case: unittest.TestCase, actual_dict: dict[str, Any], expected_dict: dict[str, Any]) -> None:
     test_case.assertEqual(len(actual_dict), len(expected_dict),
                           f"Actual dict: {actual_dict.keys()}, Expected dict: {expected_dict.keys()}")
     for key in actual_dict:
@@ -52,7 +52,7 @@ def compare_dicts(test_case: unittest.TestCase, actual_dict: Dict[str, Any], exp
                 f"actual value = {actual_value}. Expected to be equal")
 
 
-def try_to_cast_one_type(value1: str, value2: Any) -> Union[int, bool, str]:
+def try_to_cast_one_type(value1: str, value2: Any) -> int | bool | str:
     if isinstance(value2, int):
         return int(value1)
     if isinstance(value2, bool):
@@ -60,8 +60,8 @@ def try_to_cast_one_type(value1: str, value2: Any) -> Union[int, bool, str]:
     return value1
 
 
-def get_method(cls: Type[CLASSTYPE], name: str) -> MethodType:
+def get_method(cls: type[CLASSTYPE], name: str) -> MethodType:
     for key, value in cls.__dict__.items():
         if key in [name, f"_{cls.__name__}{name}"] and callable(value):
             return value
-    raise ValueError(f"Cannot find method '{name}' at class CliOptions")
+    raise InvalidConfiguration(f"Cannot find method '{name}' at class CliOptions")

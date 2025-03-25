@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +18,11 @@ import argparse
 import multiprocessing
 from functools import cached_property
 from pathlib import Path
-from typing import Optional, Dict, Any, cast
+from typing import Any, cast
 
 from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.qemu import QemuKind
-from runner.enum_types.verbose_format import VerboseKind, VerboseFilter
+from runner.enum_types.verbose_format import VerboseFilter, VerboseKind
 from runner.options.macros import Macros
 from runner.options.options import IOptions
 from runner.options.options_coverage import CoverageOptions
@@ -55,9 +55,9 @@ class GeneralOptions(IOptions):
     __SHOW_PROGRESS = "show-progress"
     __QEMU = "qemu"
 
-    def __init__(self, data: Dict[str, Any], parent: IOptions):
+    def __init__(self, data: dict[str, Any], parent: IOptions):
         super().__init__(data)
-        self.__parameters: Dict[str, Any] = {}
+        self.__parameters: dict[str, Any] = {}
         self._parent = parent
         for param_name, param_value in data.items():
             if param_name.startswith(self.__CFG_RUNNER):
@@ -127,7 +127,7 @@ class GeneralOptions(IOptions):
     def build(self) -> Path:
         build_path = Macros.expand_macros_in_path("${PANDA_BUILD}", self)
         if build_path is None:
-            raise InvalidConfiguration(f"Build path is not set.")
+            raise InvalidConfiguration("Build path is not set.")
         return Path(build_path).expanduser()
 
     @cached_property
@@ -153,7 +153,7 @@ class GeneralOptions(IOptions):
         return cast(bool, self.__parameters.get(self.__DETAILED_REPORT, self.__DEFAULT_DETAILED_REPORT))
 
     @cached_property
-    def detailed_report_file(self) -> Optional[Path]:
+    def detailed_report_file(self) -> Path | None:
         path_str = self.__parameters.get(self.__DETAILED_REPORT_FILE, self.__DEFAULT_DETAILED_REPORT_FILE)
         if path_str:
             return Path(cast(str, path_str))
@@ -164,21 +164,21 @@ class GeneralOptions(IOptions):
         kind = self.__parameters.get(self.__VERBOSE, self.__DEFAULT_VERBOSE)
         if isinstance(kind, VerboseKind):
             return kind
-        raise ValueError("Verbose kind has incorrect value")
+        raise InvalidConfiguration("Verbose kind has incorrect value")
 
     @cached_property
     def verbose_filter(self) -> VerboseFilter:
         kind = self.__parameters.get(self.__VERBOSE_FILTER, self.__DEFAULT_VERBOSE_FILTER)
         if isinstance(kind, VerboseFilter):
             return kind
-        raise ValueError("Verbose filter has incorrect value")
+        raise InvalidConfiguration("Verbose filter has incorrect value")
 
     @cached_property
     def qemu(self) -> QemuKind:
         kind = self.__parameters.get(self.__QEMU, self.__DEFAULT_QEMU)
         if isinstance(kind, QemuKind):
             return kind
-        raise ValueError("Qemu kind has incorrect value")
+        raise InvalidConfiguration("Qemu kind has incorrect value")
 
     @cached_property
     def aot_check(self) -> bool:
