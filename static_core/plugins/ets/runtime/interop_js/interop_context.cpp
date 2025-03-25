@@ -78,17 +78,21 @@ static Class *CacheClass(EtsClassLinker *etsClassLinker, std::string_view descri
 
 static bool RegisterTimerModule(napi_env jsEnv)
 {
-    EtsVM *vm = nullptr;
-    ets_size count = 0;
+    ani_vm *vm = nullptr;
+    ani_size count = 0;
     // NOTE(konstanting, #23205): port to ANI ASAP
-    ETS_GetCreatedVMs(&vm, 1, &count);
+    [[maybe_unused]] auto status = ANI_GetCreatedVMs(&vm, 1, &count);
+    ASSERT(status == ANI_OK);
+
     if (count != 1) {
         INTEROP_LOG(ERROR) << "RegisterTimerModule: No VM found";
         return false;
     }
-    EtsEnv *etsEnv = nullptr;
-    vm->GetEnv(&etsEnv, ETS_NAPI_VERSION_1_0);
-    return TimerModule::Init(etsEnv, jsEnv);
+
+    ani_env *aniEnv = nullptr;
+    status = vm->GetEnv(ANI_VERSION_1, &aniEnv);
+    ASSERT(status == ANI_OK);
+    return TimerModule::Init(aniEnv, jsEnv);
 }
 
 static void RegisterEventLoopModule(EtsCoroutine *coro)
