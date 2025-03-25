@@ -27,6 +27,136 @@ export namespace Intl {
         private readonly options: DateTimeFormatOptions
         private readonly pattern: string
 
+        public constructor(locales?: string | string[], options?: DateTimeFormatOptions) {
+            if (locales !== undefined) {
+                const lookupLocale = options != null && options!.localeMatcher == "lookup"
+                this.locale = lookupLocale ? intlLookUpLocale(locales) : intlBestFitLocale(locales)
+            } else {
+                this.locale = undefined
+            }
+
+            if (options === undefined || DateTimeFormatOptions.isEmpty(options)) {
+                this.options = DateTimeFormat.DEFAULT_OPTIONS
+            } else {
+                this.options = this.getResolvedOptions(options!)
+            }
+
+            this.pattern = this.getPattern()
+        }
+
+        public static $_invoke(locales?: string | string[], options?: DateTimeFormatOptions): DateTimeFormat {
+            return new DateTimeFormat(locales, options)
+        }
+
+        public format(date?: Date | number): string {
+            if (date === undefined) {
+                return this.formatImpl(Date.now())
+            }
+            if (date instanceof Date) {
+                return this.formatImpl(date.getTime())
+            }
+            return this.formatImpl(date!)
+        }
+
+        public formatToParts(date?: Date | number): DateTimeFormatPart[] {
+            if (date === undefined) {
+                return this.formatToPartsImpl(Date.now())
+            }
+            if (date instanceof Date) {
+                return this.formatToPartsImpl(date.getTime())
+            }
+            return this.formatToPartsImpl(date!)
+        }
+
+        public formatRange(startDate: Date | number, endDate: Date | number): string {
+            const startDateTime = this.getDateTime(startDate)
+            const endDateTime = this.getDateTime(endDate)
+            return this.formatRangeImpl(startDateTime, endDateTime)
+        }
+
+        public formatRangeToParts(startDate: Date | number, endDate: Date | number): DateTimeRangeFormatPart[] {
+            const startDateTime = this.getDateTime(startDate)
+            const endDateTime = this.getDateTime(endDate)
+            return this.formatRangeToPartsImpl(startDateTime, endDateTime)
+        }
+
+        public resolvedOptions(): ResolvedDateTimeFormatOptions {
+            const resolvedOptions = this.resolvedOptionsImpl()
+
+            if (resolvedOptions.hourCycle === undefined) {
+                const hourCycleOpt = this.options.hourCycle
+                resolvedOptions.hourCycle = hourCycleOpt ? hourCycleOpt : this.getLocaleHourCycle()
+            }
+
+            resolvedOptions.hour12 = resolvedOptions.hourCycle == "h11" || resolvedOptions.hourCycle == "h12"
+
+            resolvedOptions.dateStyle = this.options.dateStyle
+            resolvedOptions.day = this.options.day
+            resolvedOptions.dayPeriod = this.options.dayPeriod
+            resolvedOptions.era = this.options.era
+            resolvedOptions.fractionalSecondDigits = this.options.fractionalSecondDigits
+            resolvedOptions.hour = this.options.hour
+            resolvedOptions.minute = this.options.minute
+            resolvedOptions.month = this.options.month
+            resolvedOptions.second = this.options.second
+            resolvedOptions.timeStyle = this.options.timeStyle
+            resolvedOptions.timeZoneName = this.options.timeZoneName
+            resolvedOptions.weekday = this.options.weekday
+            resolvedOptions.year = this.options.year
+
+            return resolvedOptions
+        }
+
+        public static supportedLocalesOf(locales: string | Locale | readonly (string | Locale)[]): string[] {
+            const supportedLocales = new Array<string>()
+
+            if (locales instanceof string[]) {
+                return DateTimeFormat.bestFitLocales(Array.from(locales))
+            } else if (locales instanceof Locale[]) {
+                return DateTimeFormat.bestFitLocales(Array.from(locales, (loc: Locale) => loc.toString()))
+            } else if (locales instanceof string) {
+                return DateTimeFormat.bestFitLocales(Array.of(locales))
+            } else if (locales instanceof Locale) { 
+                return DateTimeFormat.bestFitLocales(Array.of(locales).map((loc: Locale) => loc.toString()))
+            } else {
+                throw new TypeError("'locales' parameter has invalid type")
+            }
+        }
+
+        private static bestFitLocales(locales: Array<string>): string[] {
+            const bestFitLocales = new Array<string>()
+
+            for (const locale of locales) {
+                const bestFitLocale = intlBestFitLocale(locale)
+                if (locale.startsWith(bestFitLocale)) {
+                    bestFitLocales.push(locale)
+                }
+            }
+
+            const result: string[] = new string[bestFitLocales.length]
+            for (let i = 0; i < result.length; i++) {
+                result[i] = bestFitLocales[i]
+            }
+
+            return result
+        }
+
+        private native formatImpl(timestamp: number): string
+
+        private native formatToPartsImpl(timestamp: number): Intl.DateTimeFormatPart[]
+
+        private native formatRangeImpl(start: number, end: number): string
+
+        private native formatRangeToPartsImpl(start: number, end: number): Intl.DateTimeRangeFormatPart[]
+
+        private native getLocaleHourCycle(): HourCycle | undefined
+
+        private native resolvedOptionsImpl(): ResolvedDateTimeFormatOptions
+
+        private getDateTime(date: Date | number): number {
+            return date instanceof Date ? date.getTime() : date
+        }
+
         private getResolvedOptions(options: DateTimeFormatOptions): DateTimeFormatOptions {
             if (options.hour12 !== undefined) {
                 let hourCycle = this.getLocaleHourCycle()
@@ -68,44 +198,10 @@ export namespace Intl {
             }
         }
 
-        public constructor(locales?: string | string[], options?: DateTimeFormatOptions) {
-            if (locales !== undefined) {
-                const lookupLocale = options != null && options!.localeMatcher == "lookup"
-                this.locale = lookupLocale ? intlLookUpLocale(locales) : intlBestFitLocale(locales)
-            } else {
-                this.locale = undefined
-            }
-
-            if (options === undefined || DateTimeFormatOptions.isEmpty(options)) {
-                this.options = DateTimeFormat.DEFAULT_OPTIONS
-            } else {
-                this.options = this.getResolvedOptions(options!)
-            }
-
-            this.pattern = this.getPattern()
-        }
-
-        public format(date?: Date | number): string {
-            if (date instanceof Date) {
-                return this.formatImpl(date.getTime())
-            } else {
-                return this.formatImpl(date!)
-            }
-        }
-
         private getPattern(): string {
             const datePattern = this.getDatePattern()
             const timePattern = this.getTimePattern()
-
-            if (datePattern.isEmpty()) {
-                return timePattern
-            } else {
-                if (timePattern.isEmpty()) {
-                    return datePattern
-                } else {
-                    return datePattern + timePattern
-                }
-            }
+            return datePattern + timePattern
         }
 
         private getDatePattern(): string {
@@ -115,6 +211,7 @@ export namespace Intl {
             this.appendMonthPattern(datePattern)
             this.appendWeekdayPattern(datePattern)
             this.appendDayPattern(datePattern)
+            this.appendDayPeriodPattern(datePattern)
             this.appendEraPattern(datePattern)
 
             return datePattern.toString()
@@ -188,6 +285,13 @@ export namespace Intl {
             }
         }
 
+        private appendDayPeriodPattern(pattern: StringBuilder): void {
+            const dayPeriod = this.options.dayPeriod
+            if (dayPeriod) {
+                pattern.append("B")
+            }
+        }
+
         private appendEraPattern(pattern: StringBuilder): void {
             const optEra = this.options.era
             if (optEra) {
@@ -211,6 +315,8 @@ export namespace Intl {
             this.appendHourPattern(timePattern)
             this.appendMinutePattern(timePattern)
             this.appendSecondPattern(timePattern)
+            this.appendFractionalSecondPattern(timePattern)
+            this.appendTimeZoneNamePattern(timePattern)
             
             return timePattern.toString()
         }
@@ -258,17 +364,52 @@ export namespace Intl {
             }
         }
 
-        private native formatImpl(timestamp: number): string
+        private appendFractionalSecondPattern(pattern: StringBuilder): void {
+            const optFractionalSecond = this.options.fractionalSecondDigits
+            if (optFractionalSecond) {
+                if (optFractionalSecond < 1 || optFractionalSecond > 3) {
+                    throw new RangeError("invalid digits value: " + optFractionalSecond)
+                }
+                pattern.append("S".repeat(optFractionalSecond))
+            }
+        }
 
-        private native getLocaleHourCycle(): HourCycle| undefined
+        private appendTimeZoneNamePattern(pattern: StringBuilder): void {
+            const optTimeZoneName = this.options.timeZoneName
+            if (optTimeZoneName) {
+                switch (optTimeZoneName) {
+                    case "short":
+                        pattern.append("O");
+                        break
+                    case "long":
+                        pattern.append("zzzz")
+                        break
+                    case "shortGeneric":
+                        pattern.append("VVVV")
+                        break
+                    case "shortOffset":
+                        pattern.append("O")
+                        break
+                    case "longGeneric":
+                        pattern.append("vvvv")
+                        break
+                    case "longOffset":
+                        pattern.append("OOOO")
+                        break
+                }
+            }
+        }
     }
 
     type HourCycle = "h11" | "h12" | "h23" | "h24"
     type DateStyle = "full" | "long" | "medium" | "short"
     type TimeStyle = "full" | "long" | "medium" | "short"
     type TimeZoneName = "short" | "long" | "shortOffset" | "longOffset" | "shortGeneric" | "longGeneric"
+    type DayPeriod = "narrow" | "short" | "long"
+    type FormatMatcher = "basic" | "best fit"
 
     export class DateTimeFormatOptions {
+        calendar?: string
         localeMatcher?: "lookup" | "best fit"
         dateStyle?: DateStyle
         day?: "numeric" | "2-digit"
@@ -277,7 +418,7 @@ export namespace Intl {
         formatMatcher?: "basic" | "best fit"
         // NOTE(cheezzario) 'number' literal types are not supported #23963
         // fractionalSecondsDigits?: 1 | 2 | 3
-        fractionalSecondsDigits?: number
+        fractionalSecondDigits?: number
         hour12?: boolean
         hour?: "numeric" | "2-digit"
         hourCycle?: "h11" | "h12" | "h23" | "h24"
@@ -298,7 +439,7 @@ export namespace Intl {
                     && options.dayPeriod === undefined 
                     && options.era === undefined
                     && options.formatMatcher === undefined 
-                    && options.fractionalSecondsDigits === undefined 
+                    && options.fractionalSecondDigits === undefined 
                     && options.hour12 === undefined 
                     && options.hour === undefined 
                     && options.hourCycle === undefined 
@@ -312,5 +453,232 @@ export namespace Intl {
                     && options.weekday === undefined 
                     && options.year === undefined
         }
+
+        public toString(): string {
+            return JSON.stringify(this)
+        }
     }
-}
+
+    class DateTimeFormatPartImpl implements DateTimeFormatPart {
+        private _type: DateTimeFormatPartTypes
+        private _value: String
+
+        constructor() {
+            this._type = "literal"
+            this._value = ""
+        }
+
+        constructor(type: DateTimeFormatPartTypes, value: string) {
+            this._type = type
+            this._value = value
+        }
+
+        get type(): DateTimeFormatPartTypes {
+            return this._type
+        }
+
+        set type(value: DateTimeFormatPartTypes) {
+            this._type = value
+        }
+
+        get value(): string {
+            return this._value
+        }
+
+        set value(value: string) {
+            this._value = value
+        }
+    }
+
+    class DateTimeRangeFormatPartImpl extends DateTimeFormatPartImpl implements DateTimeRangeFormatPart {
+        private  _source: DateTimeRangeFormatPartSource
+
+        constructor() {
+            this._source = "shared"
+        }
+
+        constructor(type: DateTimeFormatPartTypes, value: string, source: DateTimeRangeFormatPartSource) {
+            super(type, value)
+            this._source = source
+        }
+
+        get source(): DateTimeRangeFormatPartSource {
+            return this._source
+        }
+
+        set source(source: DateTimeRangeFormatPartSource) {
+            this._source = source
+        }
+    }
+
+    class ResolvedDateTimeFormatOptionsImpl implements ResolvedDateTimeFormatOptions {
+        private _calendar: string
+        private _dateStyle?: DateStyle
+        private _day?: string
+        private _dayPeriod?: DayPeriod
+        private _era?: string
+        private _formatMatcher?: FormatMatcher
+        private _fractionalSecondDigits?: number
+        private _hour12?: boolean
+        private _hour?: string
+        private _hourCycle?: HourCycle
+        private _locale: string
+        private _minute?: string
+        private _month?: string
+        private _numberingSystem: string
+        private _second?: string
+        private _timeStyle?: TimeStyle
+        private _timeZone: string
+        private _timeZoneName?: string
+        private _weekday?: string
+        private _year?: string
+
+        constructor(locale: string, calendar: string, numberingSystem: string, timeZone: string) {
+            this._locale = locale
+            this._calendar = calendar
+            this._numberingSystem = numberingSystem
+            this._timeZone = timeZone
+        }
+
+        get calendar(): string {
+            return this._calendar
+        }
+        set calendar(calendar: string) {
+            this._calendar = calendar
+        }
+
+        get dateStyle(): DateStyle | undefined {
+            return this._dateStyle
+        }
+        set dateStyle(dateStyle?: DateStyle) {
+            this._dateStyle = dateStyle
+        }
+
+        get day(): string | undefined {
+            return this._day
+        }
+        set day(day?: string) {
+            this._day = day
+        }
+
+        get dayPeriod(): DayPeriod | undefined {
+            return this._dayPeriod
+        }
+        set dayPeriod(dayPeriod?: DayPeriod) {
+            this._dayPeriod = dayPeriod
+        }
+
+        get era(): string | undefined {
+            return this._era
+        }
+        set era(era?: string) {
+            this._era = era
+        }
+
+        get formatMatcher(): FormatMatcher | undefined {
+            return this._formatMatcher
+        }
+        set formatMatcher(formatMatcher?: FormatMatcher) {
+            this._formatMatcher = formatMatcher
+        }
+
+        get fractionalSecondDigits(): number | undefined {
+            return this._fractionalSecondDigits
+        }
+        set fractionalSecondDigits(fractionalSecondDigits?: number) {   
+            this._fractionalSecondDigits = fractionalSecondDigits
+        }
+
+        get hour12(): boolean | undefined {
+            return this._hour12
+        }
+        set hour12(hour12?: boolean) {
+            this._hour12 = hour12
+        }
+
+        get hour(): string | undefined {
+            return this._hour
+        }
+        set hour(hour?: string) {   
+            this._hour = hour
+        }
+
+        get hourCycle(): HourCycle | undefined {
+            return this._hourCycle
+        }
+        set hourCycle(hourCycle?: HourCycle) {
+            this._hourCycle = hourCycle
+        }
+
+        get locale(): string {
+            return this._locale
+        }
+        set locale(locale: string) {
+            this._locale = locale
+        }
+
+        get minute(): string | undefined {
+            return this._minute
+        }
+        set minute(minute?: string) {   
+            this._minute = minute
+        }
+
+        get month(): string | undefined {
+            return this._month
+        }
+        set month(month?: string) {   
+            this._month = month
+        }
+
+        get numberingSystem(): string {
+            return this._numberingSystem
+        }
+        set numberingSystem(numberingSystem: string) {   
+            this._numberingSystem = numberingSystem
+        }
+
+        get second(): string | undefined {
+            return this._second
+        }
+        set second(second?: string) {   
+            this._second = second
+        }
+
+        get timeStyle(): TimeStyle | undefined {
+            return this._timeStyle
+        }
+        set timeStyle(timeStyle?: TimeStyle) {   
+            this._timeStyle = timeStyle
+        }
+
+        get timeZone(): string {
+            return this._timeZone
+        }
+        set timeZone(timeZone: string) {   
+            this._timeZone = timeZone
+        }
+
+        get timeZoneName(): string | undefined {
+            return this._timeZoneName
+        }
+        set timeZoneName(timeZoneName?: string) {   
+            this._timeZoneName = timeZoneName
+        }
+
+        get weekday(): string | undefined {
+            return this._weekday
+        }
+        set weekday(weekday?: string) {   
+            this._weekday = weekday
+        }
+
+        get year(): string | undefined {
+            return this._year
+        }
+        set year(year?: string) {   
+            this._year = year
+        }
+    }
+
+} // namespace Intl

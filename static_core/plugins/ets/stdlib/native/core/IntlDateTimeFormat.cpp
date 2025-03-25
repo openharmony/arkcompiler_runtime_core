@@ -16,21 +16,30 @@
 #include <array>
 #include <vector>
 #include <cstring>
+#include <regex>
 
 #include "unicode/locid.h"
 #include "unicode/unistr.h"
 #include "unicode/datefmt.h"
 #include "unicode/dtptngen.h"
 #include "unicode/smpdtfmt.h"
+#include "unicode/msgfmt.h"
+#include <unicode/dtitvfmt.h>
+#include <unicode/numsys.h>
 
 #include "libpandabase/macros.h"
 #include "plugins/ets/stdlib/native/core/IntlDateTimeFormat.h"
 
-#include "ani/ani_checkers.h"
+#include "stdlib_ani_helpers.h"
 
 namespace ark::ets::stdlib::intl {
 constexpr const char *FORMAT_HOUR_SYMBOLS = "hHkK";
+constexpr const char *FORMAT_AM_PM_SYMBOLS = "a";
 
+constexpr const char *OPTIONS_FIELD_HOUR_CYCLE = "hourCycle";
+
+constexpr const char *LOCALE_KEYWORD_HOUR_CYCLE = "hours";
+constexpr const char *LOCALE_KEYWORD_CALENDAR = "calendar";
 constexpr const char *HOUR_CYCLE_11 = "h11";
 constexpr const char *HOUR_CYCLE_12 = "h12";
 constexpr const char *HOUR_CYCLE_23 = "h23";
@@ -41,112 +50,113 @@ constexpr const char *STYLE_LONG = "long";
 constexpr const char *STYLE_MEDIUM = "medium";
 constexpr const char *STYLE_SHORT = "short";
 
-static ani_status ThrowError(ani_env *env, const char *errorClassName, const std::string &message)
-{
-    ani_status aniStatus = ANI_OK;
+constexpr const char *ERROR_CTOR_SIGNATURE = "Lstd/core/String;:V";
+constexpr const char *DTF_PART_IMPL_CTOR_SIGNATURE = "Lstd/core/String;Lstd/core/String;:V";
+constexpr const char *DTRF_PART_IMPL_CTOR_SIGNATURE = "Lstd/core/String;Lstd/core/String;Lstd/core/String;:V";
+constexpr const char *RESOLVED_OPTS_CTOR_SIGNATURE =
+    "Lstd/core/String;Lstd/core/String;Lstd/core/String;Lstd/core/String;:V";
 
+constexpr const char *DTF_PART_LITERAL_TYPE = "literal";
+constexpr const char *DTRF_PART_SOURCE_SHARED = "shared";
+
+constexpr std::array<const char *, 25> DTF_PART_TYPES = {"era",
+                                                         "year",
+                                                         "month",
+                                                         "day",
+                                                         "hourDay1",
+                                                         "hourDay0",
+                                                         "minute",
+                                                         "second",
+                                                         "fractionalSecond",
+                                                         "weekday",
+                                                         "dayOfYear",
+                                                         "dayOfWeekInMonth",
+                                                         "weekOfYear",
+                                                         "weekOfMonth",
+                                                         "dayPeriod",
+                                                         "hour",
+                                                         "hour0",
+                                                         "timeZoneName",
+                                                         "yearWoy",
+                                                         "dowLocal",
+                                                         "extYear",
+                                                         "julianDay",
+                                                         "msInDay",
+                                                         "timezone",
+                                                         "timezoneGeneric"};
+
+constexpr std::array<const char *, 3> DTRF_PART_SOURCES = {"startRange", "endRange"};
+
+static void ThrowRangeError(ani_env *env, const std::string &message)
+{
     ani_class errorClass = nullptr;
-    aniStatus = env->FindClass(errorClassName, &errorClass);
-    ANI_CHECK_RETURN_IF_NE(aniStatus, ANI_OK, aniStatus);
+    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/RangeError;", &errorClass));
 
-    ani_method errorCtor;
-    aniStatus = env->Class_FindMethod(errorClass, "<ctor>", "Lstd/core/String;:V", &errorCtor);
-    ANI_CHECK_RETURN_IF_NE(aniStatus, ANI_OK, aniStatus);
-
-    ani_string errorMsg;
-    aniStatus = env->String_NewUTF8(message.data(), message.size(), &errorMsg);
-    ANI_CHECK_RETURN_IF_NE(aniStatus, ANI_OK, aniStatus);
-
-    ani_object errorObj;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    aniStatus = env->Object_New(errorClass, errorCtor, &errorObj, errorMsg);
-    ANI_CHECK_RETURN_IF_NE(aniStatus, ANI_OK, aniStatus);
-
-    return env->ThrowError(static_cast<ani_error>(errorObj));
+    ThrowNewError(env, errorClass, message, ERROR_CTOR_SIGNATURE);
 }
 
-static ani_status ThrowRangeError(ani_env *env, const std::string &message)
+static std::nullptr_t ThrowInternalError(ani_env *env, const std::string &message)
 {
-    return ThrowError(env, "Lstd/core/RangeError;", message);
+    ani_class errorClass = nullptr;
+    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/InternalError;", &errorClass));
+
+    ThrowNewError(env, errorClass, message, ERROR_CTOR_SIGNATURE);
+    return nullptr;
 }
 
-static ani_status ThrowInternalError(ani_env *env, const std::string &message)
+static ani_array_ref ANIArrayNewRef(ani_env *env, const char *elemClsName, ani_size size)
 {
-    return ThrowError(env, "Lstd/core/InternalError;", message);
+    ani_class elemCls = nullptr;
+    ANI_FATAL_IF_ERROR(env->FindClass(elemClsName, &elemCls));
+
+    ani_ref undefRef = nullptr;
+    ANI_FATAL_IF_ERROR(env->GetUndefined(&undefRef));
+
+    ani_array_ref arrRef = nullptr;
+    ANI_FATAL_IF_ERROR(env->Array_New_Ref(elemCls, size, undefRef, &arrRef));
+
+    return arrRef;
 }
 
-static std::unique_ptr<icu::Locale> ToIcuLocale(ani_env *env, ani_object self)
+static std::unique_ptr<icu::Locale> ToICULocale(ani_env *env, ani_object self)
 {
     ani_ref localeRef = nullptr;
-    ani_status aniStatus = env->Object_GetFieldByName_Ref(self, "locale", &localeRef);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "Failed to get DateTimeFormat.locale field");
-        return nullptr;
-    }
-
-    auto locale = static_cast<ani_string>(localeRef);
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(self, "locale", &localeRef));
 
     ani_boolean localeIsUndefined = ANI_FALSE;
-    aniStatus = env->Reference_IsUndefined(locale, &localeIsUndefined);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "DateTimeFormat.locale != undefined check failed");
-        return nullptr;
-    }
+    ANI_FATAL_IF_ERROR(env->Reference_IsUndefined(localeRef, &localeIsUndefined));
 
     if (localeIsUndefined == ANI_TRUE) {
         return std::make_unique<icu::Locale>(icu::Locale::getDefault());
     }
 
+    auto locale = static_cast<ani_string>(localeRef);
     ASSERT(locale != nullptr);
-    ani_size localeStrSize = 0;
-    aniStatus = env->String_GetUTF8Size(locale, &localeStrSize);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "Failed to get locale string size");
-        return nullptr;
+
+    std::string localeStr = ConvertFromAniString(env, locale);
+
+    UErrorCode status = U_ZERO_ERROR;
+    auto icuLocale = std::make_unique<icu::Locale>(icu::Locale::forLanguageTag(localeStr.data(), status));
+    if (U_FAILURE(status) == TRUE) {
+        return ThrowInternalError(env, std::string("failed to create locale by lang tag: ") + u_errorName(status));
     }
 
-    ani_size copiedCharsCount = 0;
-    std::vector<char> localeStrBuf(localeStrSize + 1);
-
-    aniStatus = env->String_GetUTF8(locale, localeStrBuf.data(), localeStrBuf.size(), &copiedCharsCount);
-    ASSERT(localeStrSize == copiedCharsCount);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "Failed to get locale string");
-        return nullptr;
-    }
-
-    return std::make_unique<icu::Locale>(localeStrBuf.data());
+    return icuLocale;
 }
 
-static icu::DateFormat::EStyle ToICUDateTimeStyle(ani_env *env, ani_string style, ani_status &aniStatus)
+static icu::DateFormat::EStyle ToICUDateTimeStyle(ani_env *env, ani_string style)
 {
-    ani_size styleStrSize = 0;
-    aniStatus = env->String_GetUTF8Size(style, &styleStrSize);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "failed to get format style string size");
-        return icu::DateFormat::NONE;
-    }
-
-    ani_size copiedCharsCount = 0;
-    std::vector<char> styleStrBuf(styleStrSize + 1);
-
-    aniStatus = env->String_GetUTF8(style, styleStrBuf.data(), styleStrBuf.size(), &copiedCharsCount);
-    ASSERT(copiedCharsCount == styleStrSize);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "failed to get format style string");
-        return icu::DateFormat::NONE;
-    }
-
-    if (strcmp(styleStrBuf.data(), STYLE_FULL) == 0) {
+    std::string styleStr = ConvertFromAniString(env, style);
+    if (styleStr == STYLE_FULL) {
         return icu::DateFormat::FULL;
     }
-    if (strcmp(styleStrBuf.data(), STYLE_LONG) == 0) {
+    if (styleStr == STYLE_LONG) {
         return icu::DateFormat::LONG;
     }
-    if (strcmp(styleStrBuf.data(), STYLE_MEDIUM) == 0) {
+    if (styleStr == STYLE_MEDIUM) {
         return icu::DateFormat::MEDIUM;
     }
-    if (strcmp(styleStrBuf.data(), STYLE_SHORT) == 0) {
+    if (styleStr == STYLE_SHORT) {
         return icu::DateFormat::SHORT;
     }
 
@@ -156,33 +166,26 @@ static icu::DateFormat::EStyle ToICUDateTimeStyle(ani_env *env, ani_string style
 static ani_status DateFormatSetTimeZone(ani_env *env, icu::DateFormat *dateFormat, ani_object options)
 {
     ani_ref timeZoneRef = nullptr;
-    ani_status aniStatus = env->Object_GetFieldByName_Ref(options, "timeZone", &timeZoneRef);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "failed to get options.timeZone field");
-        return ANI_PENDING_ERROR;
-    }
-
-    auto timeZone = static_cast<ani_string>(timeZoneRef);
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "timeZone", &timeZoneRef));
 
     ani_boolean timeZoneUndefined = ANI_FALSE;
-    aniStatus = env->Reference_IsUndefined(timeZone, &timeZoneUndefined);
-    ANI_CHECK_RETURN_IF_NE(aniStatus, ANI_OK, aniStatus);
+    ANI_FATAL_IF_ERROR(env->Reference_IsUndefined(timeZoneRef, &timeZoneUndefined));
 
     if (timeZoneUndefined == ANI_TRUE) {
         return ANI_OK;
     }
 
+    auto timeZone = static_cast<ani_string>(timeZoneRef);
     ASSERT(timeZone != nullptr);
+
     ani_size timeZoneStrSize = 0;
-    aniStatus = env->String_GetUTF16Size(timeZone, &timeZoneStrSize);
-    ANI_CHECK_RETURN_IF_NE(aniStatus, ANI_OK, aniStatus);
+    ANI_FATAL_IF_ERROR(env->String_GetUTF16Size(timeZone, &timeZoneStrSize));
 
     ani_size copiedCharsCount = 0;
     std::vector<uint16_t> timeZoneStr(timeZoneStrSize + 1);
 
-    aniStatus = env->String_GetUTF16(timeZone, timeZoneStr.data(), timeZoneStr.size(), &copiedCharsCount);
+    ANI_FATAL_IF_ERROR(env->String_GetUTF16(timeZone, timeZoneStr.data(), timeZoneStr.size(), &copiedCharsCount));
     ASSERT(copiedCharsCount == timeZoneStrSize);
-    ANI_CHECK_RETURN_IF_NE(aniStatus, ANI_OK, aniStatus);
 
     icu::UnicodeString timeZoneId(timeZoneStr.data(), timeZoneStrSize);
     std::unique_ptr<icu::TimeZone> icuTimeZone(icu::TimeZone::createTimeZone(timeZoneId));
@@ -194,9 +197,7 @@ static ani_status DateFormatSetTimeZone(ani_env *env, icu::DateFormat *dateForma
         std::string errorMessage = "Invalid time zone specified: ";
         errorMessage += invalidTimeZoneId;
 
-        aniStatus = ThrowRangeError(env, errorMessage);
-        ANI_CHECK_RETURN_IF_NE(aniStatus, ANI_OK, aniStatus);
-
+        ThrowRangeError(env, errorMessage);
         return ANI_PENDING_ERROR;
     }
 
@@ -207,7 +208,7 @@ static ani_status DateFormatSetTimeZone(ani_env *env, icu::DateFormat *dateForma
 
 static ani_string StdCoreIntlDateTimeFormatGetLocaleHourCycle(ani_env *env, ani_object self)
 {
-    std::unique_ptr<icu::Locale> icuLocale = ToIcuLocale(env, self);
+    std::unique_ptr<icu::Locale> icuLocale = ToICULocale(env, self);
     if (!icuLocale) {
         return nullptr;
     }
@@ -216,15 +217,13 @@ static ani_string StdCoreIntlDateTimeFormatGetLocaleHourCycle(ani_env *env, ani_
     std::unique_ptr<icu::DateTimePatternGenerator> hourCycleResolver(
         icu::DateTimePatternGenerator::createInstance(*icuLocale, icuStatus));
 
-    if (U_FAILURE(icuStatus) != 0) {
-        ThrowInternalError(env, "Locale hour cycle resolver instance creation failed");
-        return nullptr;
+    if (U_FAILURE(icuStatus) == TRUE) {
+        return ThrowInternalError(env, "Locale hour cycle resolver instance creation failed");
     }
 
     UDateFormatHourCycle localeHourCycle = hourCycleResolver->getDefaultHourCycle(icuStatus);
-    if (U_FAILURE(icuStatus) != 0) {
-        ThrowInternalError(env, "Failed to resolve locale hour cycle");
-        return nullptr;
+    if (U_FAILURE(icuStatus) == TRUE) {
+        return ThrowInternalError(env, "Failed to resolve locale hour cycle");
     }
 
     const char *resolvedHourCycle = nullptr;
@@ -244,183 +243,296 @@ static ani_string StdCoreIntlDateTimeFormatGetLocaleHourCycle(ani_env *env, ani_
     }
 
     if (resolvedHourCycle == nullptr) {
-        ThrowInternalError(env, "Failed to resolve locale hour cycle");
-        return nullptr;
+        return ThrowInternalError(env, "Failed to resolve locale hour cycle");
     }
 
-    ani_string result = nullptr;
-    ani_status aniStatus = env->String_NewUTF8(resolvedHourCycle, strlen(resolvedHourCycle), &result);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "Resolved hour cycle string creation failed");
-        return nullptr;
-    }
-
-    return result;
-}
-
-static char GetFormatHourSymbol(const char *hourCycle)
-{
-    if (strcmp(hourCycle, HOUR_CYCLE_11) == 0) {
-        return 'K';
-    }
-    if (strcmp(hourCycle, HOUR_CYCLE_12) == 0) {
-        return 'h';
-    }
-    if (strcmp(hourCycle, HOUR_CYCLE_23) == 0) {
-        return 'H';
-    }
-    if (strcmp(hourCycle, HOUR_CYCLE_24) == 0) {
-        return 'k';
-    }
-
-    return 'H';
-}
-
-static ani_status AlignPatternWithHourCycle(ani_env *env, icu::UnicodeString *pattern, ani_string hourCycle)
-{
-    ani_size hourCycleStrSize = 0;
-    ani_status aniStatus = env->String_GetUTF8Size(hourCycle, &hourCycleStrSize);
-    ANI_CHECK_RETURN_IF_NE(aniStatus, ANI_OK, aniStatus);
-
-    ani_size copiedCharsCount = 0;
-    std::vector<char> hourCycleStrBuf(hourCycleStrSize + 1);
-
-    aniStatus = env->String_GetUTF8(hourCycle, hourCycleStrBuf.data(), hourCycleStrBuf.size(), &copiedCharsCount);
-    ASSERT(copiedCharsCount == hourCycleStrSize);
-    ANI_CHECK_RETURN_IF_NE(aniStatus, ANI_OK, aniStatus);
-
-    std::string patternStr;
-    pattern->toUTF8String(patternStr);
-
-    auto hourFmtStartIdx = patternStr.find_first_of(FORMAT_HOUR_SYMBOLS);
-    auto hourFmtEndIdx = patternStr.find_last_of(FORMAT_HOUR_SYMBOLS);
-
-    if (hourFmtStartIdx != std::string::npos) {
-        auto hourFmtSize = hourFmtEndIdx - hourFmtStartIdx + 1;
-        char formatHourSymbol = GetFormatHourSymbol(hourCycleStrBuf.data());
-        patternStr.replace(hourFmtStartIdx, hourFmtSize, hourFmtSize, formatHourSymbol);
-
-        *pattern = icu::UnicodeString(patternStr.data());
-    }
-
-    return ANI_OK;
+    return CreateUtf8String(env, resolvedHourCycle, strlen(resolvedHourCycle));
 }
 
 static std::unique_ptr<icu::DateFormat> CreateSkeletonBasedDateFormat(ani_env *env, const icu::Locale &locale,
-                                                                      const icu::UnicodeString &skeleton,
-                                                                      ani_object options)
+                                                                      const icu::UnicodeString &skeleton)
 {
     UErrorCode icuStatus = U_ZERO_ERROR;
 
     std::unique_ptr<icu::DateTimePatternGenerator> dateTimePatternGen(
         icu::DateTimePatternGenerator::createInstance(locale, icuStatus));
 
-    if (U_FAILURE(icuStatus) != 0) {
-        ThrowInternalError(env, "DateTimePatternGenerator instance creation failed");
-        return nullptr;
+    if (U_FAILURE(icuStatus) == TRUE) {
+        return ThrowInternalError(env, "DateTimePatternGenerator instance creation failed");
     }
 
     icu::UnicodeString datePattern = dateTimePatternGen->getBestPattern(
         skeleton, UDateTimePatternMatchOptions::UDATPG_MATCH_HOUR_FIELD_LENGTH, icuStatus);
 
-    if (U_FAILURE(icuStatus) != 0) {
-        ThrowInternalError(env, "DateFormat pattern creation failed");
-        return nullptr;
-    }
-
-    ani_ref hourCycleRef = nullptr;
-    ani_status aniStatus = env->Object_GetFieldByName_Ref(options, "hourCycle", &hourCycleRef);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "failed to get options.hourCycle field");
-        return nullptr;
-    }
-
-    auto hourCycle = static_cast<ani_string>(hourCycleRef);
-    ani_boolean hourCycleUndefined = ANI_FALSE;
-    aniStatus = env->Reference_IsUndefined(hourCycle, &hourCycleUndefined);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "hourCycle reference check failed");
-        return nullptr;
-    }
-
-    if (hourCycleUndefined != ANI_TRUE) {
-        ASSERT(hourCycle != nullptr);
-        aniStatus = AlignPatternWithHourCycle(env, &datePattern, hourCycle);
-        if (aniStatus != ANI_OK) {
-            ThrowInternalError(env, "failed to align DateFormat pattern with hourCycle");
-            return nullptr;
-        }
+    if (U_FAILURE(icuStatus) == TRUE) {
+        return ThrowInternalError(env, "DateFormat pattern creation failed");
     }
 
     auto icuDateFormat = std::make_unique<icu::SimpleDateFormat>(datePattern, locale, icuStatus);
-    if (U_FAILURE(icuStatus) != 0) {
-        ThrowInternalError(env, "DateFormat instance creation failed");
-        return nullptr;
+    if (U_FAILURE(icuStatus) == TRUE) {
+        return ThrowInternalError(env, "DateFormat instance creation failed");
     }
 
     return icuDateFormat;
+}
+
+static ani_status ConfigureLocaleCalendar(ani_env *env, icu::Locale *locale, ani_object options)
+{
+    ani_ref calendarRef = nullptr;
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "calendar", &calendarRef));
+
+    ani_boolean calendarUndefined = ANI_FALSE;
+    ANI_FATAL_IF_ERROR(env->Reference_IsUndefined(calendarRef, &calendarUndefined));
+    if (calendarUndefined == TRUE) {
+        return ANI_OK;
+    }
+
+    auto calendar = static_cast<ani_string>(calendarRef);
+    std::string calendarStr = ConvertFromAniString(env, calendar);
+
+    UErrorCode icuStatus = U_ZERO_ERROR;
+    locale->setKeywordValue(LOCALE_KEYWORD_CALENDAR, calendarStr.data(), icuStatus);
+    if (U_FAILURE(icuStatus) == TRUE) {
+        ThrowInternalError(env, std::string("failed to set locale 'calendar' keyword: ") + u_errorName(icuStatus));
+        return ANI_PENDING_ERROR;
+    }
+
+    return ANI_OK;
+}
+
+static ani_status ConfigureLocaleOptions(ani_env *env, icu::Locale *locale, ani_object options)
+{
+    ani_status aniStatus = ConfigureLocaleCalendar(env, locale, options);
+    if (aniStatus != ANI_OK) {
+        if (aniStatus != ANI_PENDING_ERROR) {
+            ThrowInternalError(env, "failed to configure locale calendar!");
+        }
+
+        return ANI_PENDING_ERROR;
+    }
+
+    ani_ref hourCycleRef = nullptr;
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, OPTIONS_FIELD_HOUR_CYCLE, &hourCycleRef));
+
+    ani_boolean hourCycleUndefined = ANI_FALSE;
+    ANI_FATAL_IF_ERROR(env->Reference_IsUndefined(hourCycleRef, &hourCycleUndefined));
+
+    UErrorCode icuStatus = U_ZERO_ERROR;
+    if (hourCycleUndefined == ANI_TRUE) {
+        if (*locale != icu::Locale::getChinese()) {
+            return ANI_OK;
+        }
+
+        // applying chinese locale hourCycle fix: h12 -> h23
+        locale->setKeywordValue(LOCALE_KEYWORD_HOUR_CYCLE, HOUR_CYCLE_23, icuStatus);
+        if (U_FAILURE(icuStatus) == TRUE) {
+            ThrowInternalError(env, std::string("failed to fix chinese locale hourCycle: ") + u_errorName(icuStatus));
+            return ANI_PENDING_ERROR;
+        }
+
+        return ANI_OK;
+    }
+
+    ASSERT(hourCycleRef != nullptr);
+
+    auto hourCycle = static_cast<ani_string>(hourCycleRef);
+    std::string hourCycleStr = ConvertFromAniString(env, hourCycle);
+
+    locale->setKeywordValue(LOCALE_KEYWORD_HOUR_CYCLE, hourCycleStr.data(), icuStatus);
+    if (U_FAILURE(icuStatus) == TRUE) {
+        ThrowInternalError(env, std::string("failed to set locale 'hours' keyword: ") + u_errorName(icuStatus));
+        return ANI_PENDING_ERROR;
+    }
+
+    return ANI_OK;
+}
+
+static icu::UnicodeString GetLocaleDateTimeFormat(const icu::Locale &locale,
+                                                  const icu::DateTimePatternGenerator &patternGenerator,
+                                                  icu::DateFormat::EStyle dateStyle, UErrorCode &icuStatus)
+{
+    if (locale == icu::Locale::getUS()) {
+        // en-LR locale uses 'correct' ( 'at' instead of ',' ) date-time separator
+        icu::Locale fixLocale("en-LR");
+        std::unique_ptr<icu::DateTimePatternGenerator> fixPatternGen(
+            icu::DateTimePatternGenerator::createInstance(fixLocale, icuStatus));
+        if (U_FAILURE(icuStatus) == TRUE) {
+            return icu::UnicodeString();
+        }
+
+        return fixPatternGen->getDateTimeFormat(static_cast<UDateFormatStyle>(dateStyle), icuStatus);
+    }
+
+    return patternGenerator.getDateTimeFormat(static_cast<UDateFormatStyle>(dateStyle), icuStatus);
+}
+
+static bool RemoveExplicitHourCycleSymbolsFromTimeFormatSkeleton(icu::UnicodeString *skeleton)
+{
+    std::string skeletonStr;
+    skeleton->toUTF8String(skeletonStr);
+
+    bool skeletonUpdated = false;
+
+    // removing AM/PM related symbols from time format skeleton
+    std::size_t amPmStartIdx = skeletonStr.find_first_of(FORMAT_AM_PM_SYMBOLS);
+    std::size_t amPmEndIdx = skeletonStr.find_last_of(FORMAT_AM_PM_SYMBOLS);
+    if (amPmStartIdx != std::string::npos && amPmEndIdx != std::string::npos) {
+        skeletonStr.erase(amPmStartIdx, amPmEndIdx - amPmStartIdx + 1);
+        skeletonUpdated = true;
+    }
+
+    // replacing strict hour format symbols with locale aware 'j'
+    std::size_t hourStartIdx = skeletonStr.find_first_of(FORMAT_HOUR_SYMBOLS);
+    std::size_t hourEndIdx = skeletonStr.find_last_of(FORMAT_HOUR_SYMBOLS);
+    if (hourStartIdx != std::string::npos && hourEndIdx != std::string::npos) {
+        auto hourPatternSize = hourEndIdx - hourStartIdx + 1;
+        skeletonStr.replace(hourStartIdx, hourPatternSize, hourPatternSize, 'j');
+        skeletonUpdated = true;
+    }
+
+    if (skeletonUpdated) {
+        *skeleton = icu::UnicodeString(skeletonStr.data());
+    }
+
+    return skeletonUpdated;
+}
+
+static std::unique_ptr<icu::UnicodeString> CreateDateTimeFormatPattern(ani_env *env,
+                                                                       const icu::UnicodeString &datePattern,
+                                                                       const icu::UnicodeString &timePattern,
+                                                                       const icu::UnicodeString &localeDateTimeFormat,
+                                                                       const icu::Locale &locale)
+{
+    std::array formatPatterns {icu::Formattable(timePattern), icu::Formattable(datePattern)};
+
+    UErrorCode icuStatus = U_ZERO_ERROR;
+    icu::MessageFormat messageFormat(localeDateTimeFormat, locale, icuStatus);
+    if (U_FAILURE(icuStatus) == TRUE) {
+        return ThrowInternalError(env, "locale aligned date+time format creation failed");
+    }
+
+    // creating combined date + time format pattern
+    auto dateTimeFormatPattern = std::make_unique<icu::UnicodeString>();
+    icu::FieldPosition fieldPos = 0;
+    messageFormat.format(formatPatterns.data(), formatPatterns.size(), *dateTimeFormatPattern, fieldPos, icuStatus);
+    if (U_FAILURE(icuStatus) == TRUE) {
+        return ThrowInternalError(env, "locale aligned date+time format pattern creation failed");
+    }
+
+    return dateTimeFormatPattern;
+}
+
+static std::unique_ptr<icu::DateFormat> CreateStyleBasedDateFormatAlignedWithLocale(ani_env *env,
+                                                                                    icu::DateFormat::EStyle dateStyle,
+                                                                                    icu::DateFormat::EStyle timeStyle,
+                                                                                    const icu::Locale &locale)
+{
+    if (timeStyle == icu::DateFormat::NONE) {
+        return std::unique_ptr<icu::DateFormat>(icu::DateFormat::createDateInstance(dateStyle, locale));
+    }
+
+    std::unique_ptr<icu::DateFormat> timeFormat(icu::DateFormat::createTimeInstance(timeStyle, locale));
+
+    icu::UnicodeString timeFormatPattern;
+    static_cast<icu::SimpleDateFormat *>(timeFormat.get())->toPattern(timeFormatPattern);
+
+    UErrorCode icuStatus = U_ZERO_ERROR;
+
+    // transforming time format pattern to more generic time format skeleton
+    icu::UnicodeString timeFormatSkeleton =
+        icu::DateTimePatternGenerator::staticGetSkeleton(timeFormatPattern, icuStatus);
+    if (U_FAILURE(icuStatus) == TRUE) {
+        return ThrowInternalError(env, "style format pattern -> style format skeleton transformation failed");
+    }
+
+    RemoveExplicitHourCycleSymbolsFromTimeFormatSkeleton(&timeFormatSkeleton);
+
+    // generating updated time format pattern based on updated time format skeleton
+    std::unique_ptr<icu::DateTimePatternGenerator> patternGen(
+        icu::DateTimePatternGenerator::createInstance(locale, icuStatus));
+    if (U_FAILURE(icuStatus) == TRUE) {
+        return ThrowInternalError(env, "DateTimePatternGenerator instance creation failed");
+    }
+
+    UDateTimePatternMatchOptions matchOpts = UDateTimePatternMatchOptions::UDATPG_MATCH_HOUR_FIELD_LENGTH;
+    icu::UnicodeString alignedTimeFormatPattern = patternGen->getBestPattern(timeFormatSkeleton, matchOpts, icuStatus);
+    if (U_FAILURE(icuStatus) == TRUE) {
+        return ThrowInternalError(env, "locale aligned style based format pattern generation failed");
+    }
+
+    if (dateStyle == icu::DateFormat::NONE) {
+        // dateStyle is not specified, so returning time pattern only based format
+        auto alignedTimeFormat = std::make_unique<icu::SimpleDateFormat>(alignedTimeFormatPattern, locale, icuStatus);
+        if (U_FAILURE(icuStatus) == TRUE) {
+            return ThrowInternalError(env, "locale aligned style based time formatter creation failed");
+        }
+
+        return alignedTimeFormat;
+    }
+
+    std::unique_ptr<icu::DateFormat> dateFormat(icu::DateFormat::createDateInstance(dateStyle, locale));
+
+    icu::UnicodeString dateFormatPattern;
+    static_cast<icu::SimpleDateFormat *>(dateFormat.get())->toPattern(dateFormatPattern);
+
+    // resolving locale specific date + time format
+    const icu::UnicodeString localeDateTimeFormat = GetLocaleDateTimeFormat(locale, *patternGen, dateStyle, icuStatus);
+    if (U_FAILURE(icuStatus) == TRUE) {
+        return ThrowInternalError(env, "failed to resolve locale specific date+time format");
+    }
+
+    std::unique_ptr<icu::UnicodeString> alignedFormatPattern =
+        CreateDateTimeFormatPattern(env, dateFormatPattern, alignedTimeFormatPattern, localeDateTimeFormat, locale);
+    if (!alignedFormatPattern) {
+        return nullptr;
+    }
+
+    auto alignedDateTimeFormat = std::make_unique<icu::SimpleDateFormat>(*alignedFormatPattern, locale, icuStatus);
+    if (U_FAILURE(icuStatus) == TRUE) {
+        return ThrowInternalError(env, "locale aligned style based date+time formatter creation failed");
+    }
+
+    return alignedDateTimeFormat;
 }
 
 static std::unique_ptr<icu::DateFormat> CreateStyleBasedDateFormat(ani_env *env, const icu::Locale &locale,
                                                                    ani_object options)
 {
     ani_ref dateStyleRef = nullptr;
-    ani_status aniStatus = env->Object_GetFieldByName_Ref(options, "dateStyle", &dateStyleRef);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "failed to get options.dateStyle field");
-        return nullptr;
-    }
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "dateStyle", &dateStyleRef));
 
     ani_ref timeStyleRef = nullptr;
-    aniStatus = env->Object_GetFieldByName_Ref(options, "timeStyle", &timeStyleRef);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "failed to get options.timeStyle field");
-        return nullptr;
-    }
-
-    auto dateStyle = static_cast<ani_string>(dateStyleRef);
-    auto timeStyle = static_cast<ani_string>(timeStyleRef);
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "timeStyle", &timeStyleRef));
 
     ani_boolean dateStyleUndefined = ANI_FALSE;
-    aniStatus = env->Reference_IsUndefined(dateStyle, &dateStyleUndefined);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "dateStyle reference check failed");
-        return nullptr;
-    }
+    ANI_FATAL_IF_ERROR(env->Reference_IsUndefined(dateStyleRef, &dateStyleUndefined));
 
     icu::DateFormat::EStyle icuDateStyle = icu::DateFormat::NONE;
     if (dateStyleUndefined != ANI_TRUE) {
-        ASSERT(dateStyle != nullptr);
-        icuDateStyle = ToICUDateTimeStyle(env, dateStyle, aniStatus);
-        ANI_CHECK_RETURN_IF_NE(aniStatus, ANI_OK, nullptr);
+        ASSERT(dateStyleRef != nullptr);
+
+        auto dateStyle = static_cast<ani_string>(dateStyleRef);
+        icuDateStyle = ToICUDateTimeStyle(env, dateStyle);
     }
 
     ani_boolean timeStyleUndefined = ANI_FALSE;
-    aniStatus = env->Reference_IsUndefined(timeStyle, &timeStyleUndefined);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "timeStyle reference check failed");
-        return nullptr;
-    }
+    ANI_FATAL_IF_ERROR(env->Reference_IsUndefined(timeStyleRef, &timeStyleUndefined));
 
     icu::DateFormat::EStyle icuTimeStyle = icu::DateFormat::NONE;
     if (timeStyleUndefined != ANI_TRUE) {
-        ASSERT(timeStyle != nullptr);
-        icuTimeStyle = ToICUDateTimeStyle(env, timeStyle, aniStatus);
-        ANI_CHECK_RETURN_IF_NE(aniStatus, ANI_OK, nullptr);
+        ASSERT(timeStyleRef != nullptr);
+
+        auto timeStyle = static_cast<ani_string>(timeStyleRef);
+        icuTimeStyle = ToICUDateTimeStyle(env, timeStyle);
     }
 
-    return std::unique_ptr<icu::DateFormat>(
-        icu::DateFormat::createDateTimeInstance(icuDateStyle, icuTimeStyle, locale));
+    return CreateStyleBasedDateFormatAlignedWithLocale(env, icuDateStyle, icuTimeStyle, locale);
 }
 
 static ani_object DateTimeFormatGetOptions(ani_env *env, ani_object self)
 {
     ani_ref optionsRef = nullptr;
-    ani_status aniStatus = env->Object_GetFieldByName_Ref(self, "options", &optionsRef);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "failed to DateTimeFormat.options field");
-        return nullptr;
-    }
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(self, "options", &optionsRef));
 
     return static_cast<ani_object>(optionsRef);
 }
@@ -428,42 +540,30 @@ static ani_object DateTimeFormatGetOptions(ani_env *env, ani_object self)
 static std::unique_ptr<icu::UnicodeString> DateTimeFormatGetPatternSkeleton(ani_env *env, ani_object self)
 {
     ani_ref patternRef;
-    ani_status aniStatus = env->Object_GetFieldByName_Ref(self, "pattern", &patternRef);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "failed to get options.pattern field");
-        return nullptr;
-    }
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(self, "pattern", &patternRef));
 
     auto pattern = static_cast<ani_string>(patternRef);
 
     ani_size patternSize = 0;
-    aniStatus = env->String_GetUTF16Size(pattern, &patternSize);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "Failed to get pattern skeleton string size");
-        return nullptr;
-    }
+    ANI_FATAL_IF_ERROR(env->String_GetUTF16Size(pattern, &patternSize));
 
     ani_size copiedCharsCount = 0;
     std::vector<uint16_t> patternBuf(patternSize + 1);
 
-    aniStatus = env->String_GetUTF16(pattern, patternBuf.data(), patternBuf.size(), &copiedCharsCount);
-    ASSERT(copiedCharsCount == patternSize);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "Failed to get pattern skeleton string");
-        return nullptr;
-    }
+    ANI_FATAL_IF_ERROR(env->String_GetUTF16(pattern, patternBuf.data(), patternBuf.size(), &copiedCharsCount));
+    ANI_FATAL_IF(copiedCharsCount != patternSize);
 
     return std::make_unique<icu::UnicodeString>(patternBuf.data(), patternSize);
 }
 
-static ani_string StdCoreIntlDateTimeFormatFormatImpl(ani_env *env, ani_object self, ani_double timestamp)
+static std::unique_ptr<icu::DateFormat> CreateICUDateFormat(ani_env *env, ani_object self)
 {
     ani_object options = DateTimeFormatGetOptions(env, self);
     if (options == nullptr) {
         return nullptr;
     }
 
-    std::unique_ptr<icu::Locale> icuLocale = ToIcuLocale(env, self);
+    std::unique_ptr<icu::Locale> icuLocale = ToICULocale(env, self);
     if (!icuLocale) {
         return nullptr;
     }
@@ -473,9 +573,14 @@ static ani_string StdCoreIntlDateTimeFormatFormatImpl(ani_env *env, ani_object s
         return nullptr;
     }
 
+    ani_status aniStatus = ConfigureLocaleOptions(env, icuLocale.get(), options);
+    if (aniStatus != ANI_OK) {
+        return nullptr;
+    }
+
     std::unique_ptr<icu::DateFormat> icuDateFormat;
     if (patternSkeleton->isEmpty() == FALSE) {
-        icuDateFormat = CreateSkeletonBasedDateFormat(env, *icuLocale, *patternSkeleton, options);
+        icuDateFormat = CreateSkeletonBasedDateFormat(env, *icuLocale, *patternSkeleton);
     } else {
         icuDateFormat = CreateStyleBasedDateFormat(env, *icuLocale, options);
     }
@@ -485,47 +590,328 @@ static ani_string StdCoreIntlDateTimeFormatFormatImpl(ani_env *env, ani_object s
         return nullptr;
     }
 
-    ani_status aniStatus = DateFormatSetTimeZone(env, icuDateFormat.get(), options);
+    aniStatus = DateFormatSetTimeZone(env, icuDateFormat.get(), options);
     if (aniStatus != ANI_OK) {
         if (aniStatus != ANI_PENDING_ERROR) {
             ThrowInternalError(env, "DateFormat time zone initialization failed");
         }
+        return nullptr;
+    }
 
+    return icuDateFormat;
+}
+
+static ani_string StdCoreIntlDateTimeFormatFormatImpl(ani_env *env, ani_object self, ani_double timestamp)
+{
+    std::unique_ptr<icu::DateFormat> icuDateFormat = CreateICUDateFormat(env, self);
+    if (!icuDateFormat) {
         return nullptr;
     }
 
     icu::UnicodeString icuFormattedDate;
     icuDateFormat->format(timestamp, icuFormattedDate);
 
-    ani_string formattedDate = nullptr;
     auto formattedDateChars = reinterpret_cast<const uint16_t *>(icuFormattedDate.getBuffer());
-    aniStatus = env->String_NewUTF16(formattedDateChars, icuFormattedDate.length(), &formattedDate);
-    if (aniStatus != ANI_OK) {
-        ThrowInternalError(env, "Formatted date string instance creation failed");
+    return CreateUtf16String(env, formattedDateChars, icuFormattedDate.length());
+}
+
+static ani_array_ref StdCoreIntlDateTimeFormatFormatToPartsImpl(ani_env *env, ani_object self, ani_double timestamp)
+{
+    std::unique_ptr<icu::DateFormat> dateFormat = CreateICUDateFormat(env, self);
+    if (!dateFormat) {
+        // DateFormat creation failed ( check for pending error )
         return nullptr;
     }
 
-    return formattedDate;
+    UErrorCode status = U_ZERO_ERROR;
+
+    icu::UnicodeString formattedDate;
+    icu::FieldPositionIterator fieldPosIter;
+
+    dateFormat->format(timestamp, formattedDate, &fieldPosIter, status);
+    if (U_FAILURE(status) == TRUE) {
+        return ThrowInternalError(env, std::string("DateFormat.format() failed: ") + u_errorName(status));
+    }
+
+    int32_t prevFieldEndIdx = 0;
+    const icu::UnicodeString literalType(DTF_PART_LITERAL_TYPE);
+
+    icu::FieldPosition fieldPos;
+    std::vector<std::pair<icu::UnicodeString, icu::UnicodeString>> parts;
+    while (fieldPosIter.next(fieldPos) == TRUE) {
+        if (fieldPos.getBeginIndex() > prevFieldEndIdx) {
+            icu::UnicodeString literalValue;
+            formattedDate.extractBetween(prevFieldEndIdx, fieldPos.getBeginIndex(), literalValue);
+
+            parts.emplace_back(literalType, literalValue);
+        }
+
+        const char *partType = DTF_PART_TYPES.at(fieldPos.getField());
+
+        icu::UnicodeString fieldValue;
+        formattedDate.extractBetween(fieldPos.getBeginIndex(), fieldPos.getEndIndex(), fieldValue);
+
+        parts.emplace_back(partType, fieldValue);
+
+        prevFieldEndIdx = fieldPos.getEndIndex();
+    }
+
+    ani_class fmtPartImplCls = nullptr;
+    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/DateTimeFormatPartImpl;", &fmtPartImplCls));
+
+    ani_method fmtPartImplCtor;
+    ANI_FATAL_IF_ERROR(env->Class_FindMethod(fmtPartImplCls, "<ctor>", DTF_PART_IMPL_CTOR_SIGNATURE, &fmtPartImplCtor));
+
+    ani_array_ref formattedDateParts = ANIArrayNewRef(env, "Lstd/core/Intl/DateTimeFormatPart;", parts.size());
+    for (size_t partIdx = 0; partIdx < parts.size(); partIdx++) {
+        const auto &part = parts[partIdx];
+
+        auto partTypeChars = reinterpret_cast<const uint16_t *>(part.first.getBuffer());
+        ani_string partType = CreateUtf16String(env, partTypeChars, part.first.length());
+
+        auto partValueChars = reinterpret_cast<const uint16_t *>(part.second.getBuffer());
+        ani_string partValue = CreateUtf16String(env, partValueChars, part.second.length());
+
+        ani_object fmtPartImpl = nullptr;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        ANI_FATAL_IF_ERROR(env->Object_New(fmtPartImplCls, fmtPartImplCtor, &fmtPartImpl, partType, partValue));
+        ANI_FATAL_IF_ERROR(env->Array_Set_Ref(formattedDateParts, partIdx, fmtPartImpl));
+    }
+
+    return formattedDateParts;
+}
+
+using UStr = icu::UnicodeString;
+
+static ani_object StdCoreIntlDateTimeFormatFormatResolvedOptionsImpl(ani_env *env, ani_object self)
+{
+    std::unique_ptr<icu::DateFormat> dateFormat = CreateICUDateFormat(env, self);
+    if (!dateFormat) {
+        return nullptr;
+    }
+
+    auto dateFormatImpl = static_cast<icu::SimpleDateFormat *>(dateFormat.get());
+    const icu::Locale &locale = dateFormatImpl->getSmpFmtLocale();
+
+    UErrorCode status = U_ZERO_ERROR;
+
+    auto langTagStr = locale.toLanguageTag<std::string>(status);
+    if (U_FAILURE(status) == TRUE) {
+        return ThrowInternalError(env, std::string("failed to get locale lang tag: ") + u_errorName(status));
+    }
+    ani_string langTag = CreateUtf8String(env, langTagStr.data(), langTagStr.size());
+
+    const char *calendarType = dateFormat->getCalendar()->getType();
+    ani_string calendar = CreateUtf8String(env, calendarType, strlen(calendarType));
+
+    std::unique_ptr<icu::NumberingSystem> numSys(icu::NumberingSystem::createInstance(locale, status));
+    if (U_FAILURE(status) == TRUE) {
+        return ThrowInternalError(env, std::string("NumberingSystem creation failed: ") + u_errorName(status));
+    }
+
+    ani_string numSysName = CreateUtf8String(env, numSys->getName(), strlen(numSys->getName()));
+
+    icu::UnicodeString timeZoneId;
+    dateFormat->getTimeZone().getID(timeZoneId);
+
+    auto timeZoneIdChars = reinterpret_cast<const uint16_t *>(timeZoneId.getBuffer());
+    ani_string timeZone = CreateUtf16String(env, timeZoneIdChars, timeZoneId.length());
+
+    ani_class optsClass = nullptr;
+    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/ResolvedDateTimeFormatOptionsImpl;", &optsClass));
+
+    ani_method optsCtor = nullptr;
+    ANI_FATAL_IF_ERROR(env->Class_FindMethod(optsClass, "<ctor>", RESOLVED_OPTS_CTOR_SIGNATURE, &optsCtor));
+
+    ani_object resolvedOpts = nullptr;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    env->Object_New(optsClass, optsCtor, &resolvedOpts, langTag, calendar, numSysName, timeZone);
+
+    auto localeHours = locale.getKeywordValue<std::string>(LOCALE_KEYWORD_HOUR_CYCLE, status);
+    if (U_FAILURE(status) == TRUE) {
+        return ThrowInternalError(env, std::string("failed to get locale 'hours' keyword: ") + u_errorName(status));
+    }
+
+    if (!localeHours.empty()) {
+        ani_string hourCycle = CreateUtf8String(env, localeHours.data(), localeHours.size());
+
+        ani_method setter = nullptr;
+        ANI_FATAL_IF_ERROR(env->Class_FindSetter(optsClass, OPTIONS_FIELD_HOUR_CYCLE, &setter));
+
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        ANI_FATAL_IF_ERROR(env->Object_CallMethod_Void(resolvedOpts, setter, hourCycle));
+    }
+
+    return resolvedOpts;
+}
+
+static void FillDateTimeRangeFormatPartArray(ani_env *env, ani_array_ref partsArr,
+                                             const std::vector<std::tuple<UStr, UStr, UStr>> &parts)
+{
+    ani_class partImplCls = nullptr;
+    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/DateTimeRangeFormatPartImpl;", &partImplCls));
+
+    ani_method partImplCtor = nullptr;
+    ANI_FATAL_IF_ERROR(env->Class_FindMethod(partImplCls, "<ctor>", DTRF_PART_IMPL_CTOR_SIGNATURE, &partImplCtor));
+
+    for (size_t partIdx = 0; partIdx < parts.size(); partIdx++) {
+        const auto &[partType, partValue, partSource] = parts[partIdx];
+
+        auto partTypeChars = reinterpret_cast<const uint16_t *>(partType.getBuffer());
+        ani_string partTypeStr = CreateUtf16String(env, partTypeChars, partType.length());
+
+        auto partValueChars = reinterpret_cast<const uint16_t *>(partValue.getBuffer());
+        ani_string partValStr = CreateUtf16String(env, partValueChars, partValue.length());
+
+        auto partSourceChars = reinterpret_cast<const uint16_t *>(partSource.getBuffer());
+        ani_string partSrcStr = CreateUtf16String(env, partSourceChars, partSource.length());
+
+        ani_object partImpl = nullptr;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        ANI_FATAL_IF_ERROR(env->Object_New(partImplCls, partImplCtor, &partImpl, partTypeStr, partValStr, partSrcStr));
+        ANI_FATAL_IF_ERROR(env->Array_Set_Ref(partsArr, partIdx, partImpl));
+    }
+}
+
+static std::unique_ptr<icu::FormattedDateInterval> FormatDateInterval(ani_env *env, ani_object self, ani_double start,
+                                                                      ani_double end)
+{
+    std::unique_ptr<icu::DateFormat> dateFmt = CreateICUDateFormat(env, self);
+    if (!dateFmt) {
+        return nullptr;
+    }
+
+    auto dateFmtImpl = static_cast<icu::SimpleDateFormat *>(dateFmt.get());
+
+    UStr pattern;
+    dateFmtImpl->toPattern(pattern);
+
+    UErrorCode status = U_ZERO_ERROR;
+    UStr skeleton = icu::DateTimePatternGenerator::staticGetSkeleton(pattern, status);
+    if (U_FAILURE(status) == TRUE) {
+        return ThrowInternalError(env, std::string("Failed to get skeleton: ") + u_errorName(status));
+    }
+
+    const icu::Locale &locale = dateFmtImpl->getSmpFmtLocale();
+    std::unique_ptr<icu::DateIntervalFormat> intervalFmt(
+        icu::DateIntervalFormat::createInstance(skeleton, locale, status));
+    if (U_FAILURE(status) == TRUE) {
+        return ThrowInternalError(env, std::string("Failed to create DateIntervalFormat: ") + u_errorName(status));
+    }
+
+    auto interval = std::make_unique<icu::DateInterval>(start, end);
+
+    icu::FormattedDateInterval formattedIntervalVal = intervalFmt->formatToValue(*interval, status);
+    if (U_FAILURE(status) == TRUE) {
+        return ThrowInternalError(env, std::string("DateIntervalFormat::formatToValue failed: ") + u_errorName(status));
+    }
+
+    return std::make_unique<icu::FormattedDateInterval>(std::move(formattedIntervalVal));
+}
+
+enum DateIntervalPartSource { OUT_OF_RANGE = -1, START_RANGE = 0, END_RANGE = 1 };
+
+static ani_string StdCoreIntlDateTimeFormatFormatRangeImpl(ani_env *env, ani_object self, ani_double start,
+                                                           ani_double end)
+{
+    auto formattedIntervalVal = FormatDateInterval(env, self, start, end);
+
+    UErrorCode status = U_ZERO_ERROR;
+    UStr formattedInterval = formattedIntervalVal->toString(status);
+    if (U_FAILURE(status) == TRUE) {
+        return ThrowInternalError(env, std::string("FormattedDateInterval::toString failed: ") + u_errorName(status));
+    }
+
+    auto formattedIntervalChars = reinterpret_cast<const uint16_t *>(formattedInterval.getBuffer());
+    return CreateUtf16String(env, formattedIntervalChars, formattedInterval.length());
+}
+
+static ani_array_ref StdCoreIntlDateTimeFormatFormatRangeToPartsImpl(ani_env *env, ani_object self, ani_double start,
+                                                                     ani_double end)
+{
+    auto formattedIntervalVal = FormatDateInterval(env, self, start, end);
+
+    UErrorCode status = U_ZERO_ERROR;
+    UStr formattedInterval = formattedIntervalVal->toString(status);
+    if (U_FAILURE(status) == TRUE) {
+        return ThrowInternalError(env, std::string("FormattedDateInterval::toString failed: ") + u_errorName(status));
+    }
+
+    std::vector<std::tuple<UStr, UStr, UStr>> parts;
+    icu::ConstrainedFieldPosition partPos;
+    DateIntervalPartSource partSource = OUT_OF_RANGE;
+    int32_t prevPartEndIdx = 0;
+    int32_t prevSpanEndIdx = 0;
+    const UStr partLiteralType = DTF_PART_LITERAL_TYPE;
+    const UStr partSourceShared = DTRF_PART_SOURCE_SHARED;
+
+    while (formattedIntervalVal->nextPosition(partPos, status) == TRUE) {
+        if (U_FAILURE(status) == TRUE) {
+            return ThrowInternalError(env, std::string("FormattedDateInterval::nextPos failed:") + u_errorName(status));
+        }
+
+        if (partPos.getCategory() == UFIELD_CATEGORY_DATE_INTERVAL_SPAN) {
+            partSource = static_cast<DateIntervalPartSource>(partSource + 1);
+
+            if (partPos.getStart() > prevSpanEndIdx) {
+                UStr literalValue;
+                formattedInterval.extractBetween(prevSpanEndIdx, partPos.getStart(), literalValue);
+
+                parts.emplace_back(partLiteralType, literalValue, partSourceShared);
+            }
+
+            prevSpanEndIdx = partPos.getLimit(), prevPartEndIdx = partPos.getStart();
+
+            continue;
+        }
+        if (partPos.getCategory() == UFIELD_CATEGORY_DATE) {
+            const char *partSourceName = DTRF_PART_SOURCES.at(partSource);
+            if (partPos.getStart() > prevPartEndIdx) {
+                UStr literalValue;
+                formattedInterval.extractBetween(prevPartEndIdx, partPos.getStart(), literalValue);
+
+                parts.emplace_back(partLiteralType, literalValue, UStr(partSourceName));
+            }
+
+            UStr partValue;
+            formattedInterval.extractBetween(partPos.getStart(), partPos.getLimit(), partValue);
+
+            parts.emplace_back(UStr(DTF_PART_TYPES.at(partPos.getField())), partValue, UStr(partSourceName));
+
+            prevPartEndIdx = partPos.getLimit();
+        } else {
+            UNREACHABLE();
+        }
+    }
+
+    ani_array_ref partsArr = ANIArrayNewRef(env, "Lstd/core/Intl/DateTimeRangeFormatPart;", parts.size());
+    FillDateTimeRangeFormatPartArray(env, partsArr, parts);
+
+    return partsArr;
 }
 
 ani_status RegisterIntlDateTimeFormatMethods(ani_env *env)
 {
     ani_class dtfClass;
-    ani_status status = env->FindClass("Lstd/core/Intl/DateTimeFormat;", &dtfClass);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/DateTimeFormat;", &dtfClass));
 
     std::array dtfMethods {
         ani_native_function {"formatImpl", "D:Lstd/core/String;",
                              reinterpret_cast<void *>(StdCoreIntlDateTimeFormatFormatImpl)},
+        ani_native_function {"formatToPartsImpl", "D:[Lstd/core/Intl/DateTimeFormatPart;",
+                             reinterpret_cast<void *>(StdCoreIntlDateTimeFormatFormatToPartsImpl)},
+        ani_native_function {"formatRangeImpl", "DD:Lstd/core/String;",
+                             reinterpret_cast<void *>(StdCoreIntlDateTimeFormatFormatRangeImpl)},
+        ani_native_function {"formatRangeToPartsImpl", "DD:[Lstd/core/Intl/DateTimeRangeFormatPart;",
+                             reinterpret_cast<void *>(StdCoreIntlDateTimeFormatFormatRangeToPartsImpl)},
+        ani_native_function {"resolvedOptionsImpl", ":Lstd/core/Intl/ResolvedDateTimeFormatOptions;",
+                             reinterpret_cast<void *>(StdCoreIntlDateTimeFormatFormatResolvedOptionsImpl)},
         ani_native_function {"getLocaleHourCycle", ":Lstd/core/String;",
                              reinterpret_cast<void *>(StdCoreIntlDateTimeFormatGetLocaleHourCycle)},
     };
 
-    status = env->Class_BindNativeMethods(dtfClass, dtfMethods.data(), dtfMethods.size());
-    if (status != ANI_OK) {
-        if (status == ANI_ALREADY_BINDED) {
-            return ANI_OK;
-        }
+    ani_status status = env->Class_BindNativeMethods(dtfClass, dtfMethods.data(), dtfMethods.size());
+    if (!(status == ANI_OK || status == ANI_ALREADY_BINDED)) {
         return status;
     }
 
