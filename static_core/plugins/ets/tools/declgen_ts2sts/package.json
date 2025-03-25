@@ -41,10 +41,5 @@
     "rimraf": "^3.0.2",
     "webpack": "5.72.1",
     "webpack-cli": "5.0.2"
-  },
-  "bundleDependencies": [
-    "typescript",
-    "log4js",
-    "commander"
-  ]
+  }
 }
