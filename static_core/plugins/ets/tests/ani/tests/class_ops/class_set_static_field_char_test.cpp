@@ -17,12 +17,32 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
-class ClassSetStaticFieldCharTest : public AniTest {};
+
+class ClassSetStaticFieldCharTest : public AniTest {
+public:
+    void CheckFieldValue(const char *className, const char *fieldName)
+    {
+        ani_class cls {};
+        ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
+        ani_static_field field {};
+        ASSERT_EQ(env_->Class_FindStaticField(cls, fieldName, &field), ANI_OK);
+        ASSERT_NE(field, nullptr);
+        ani_char result = '\0';
+        const ani_char target = 'a';
+        ASSERT_EQ(env_->Class_GetStaticField_Char(cls, field, &result), ANI_OK);
+        ASSERT_EQ(result, target);
+        const ani_char setTar = 'b';
+        ASSERT_EQ(env_->Class_SetStaticField_Char(cls, field, setTar), ANI_OK);
+        ASSERT_EQ(env_->Class_GetStaticField_Char(cls, field, &result), ANI_OK);
+        ASSERT_EQ(result, setTar);
+    }
+};
+
 TEST_F(ClassSetStaticFieldCharTest, set_char)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_char_test/TestSetChar;", &cls), ANI_OK);
-    ani_static_field field;
+    ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "char_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
     ani_char result = '\0';
@@ -37,9 +57,9 @@ TEST_F(ClassSetStaticFieldCharTest, set_char)
 
 TEST_F(ClassSetStaticFieldCharTest, set_char_c_api)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_char_test/TestSetChar;", &cls), ANI_OK);
-    ani_static_field field;
+    ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "char_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
     ani_char result = '\0';
@@ -54,9 +74,9 @@ TEST_F(ClassSetStaticFieldCharTest, set_char_c_api)
 
 TEST_F(ClassSetStaticFieldCharTest, set_invalid_field_type)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_char_test/TestSetChar;", &cls), ANI_OK);
-    ani_static_field field;
+    ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
     const ani_char setTar = 'c';
@@ -65,9 +85,9 @@ TEST_F(ClassSetStaticFieldCharTest, set_invalid_field_type)
 
 TEST_F(ClassSetStaticFieldCharTest, invalid_argument1)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_char_test/TestSetChar;", &cls), ANI_OK);
-    ani_static_field field;
+    ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "char_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
     ani_char result = '\0';
@@ -80,10 +100,77 @@ TEST_F(ClassSetStaticFieldCharTest, invalid_argument1)
 
 TEST_F(ClassSetStaticFieldCharTest, invalid_argument2)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_char_test/TestSetChar;", &cls), ANI_OK);
     const ani_char setTar = 'c';
     ASSERT_EQ(env_->Class_SetStaticField_Char(cls, nullptr, setTar), ANI_INVALID_ARGS);
 }
+
+TEST_F(ClassSetStaticFieldCharTest, invalid_argument3)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_char_test/TestSetChar;", &cls), ANI_OK);
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "char_value", &field), ANI_OK);
+    ASSERT_NE(field, nullptr);
+    const ani_char setTar = 'c';
+    ASSERT_EQ(env_->c_api->Class_SetStaticField_Char(nullptr, cls, field, setTar), ANI_INVALID_ARGS);
+}
+
+TEST_F(ClassSetStaticFieldCharTest, special_values)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_char_test/TestSetChar;", &cls), ANI_OK);
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "char_value", &field), ANI_OK);
+    ASSERT_NE(field, nullptr);
+    ani_char single = 'c';
+    ani_char maxValue = std::numeric_limits<ani_char>::max();
+    ASSERT_EQ(env_->Class_SetStaticField_Char(cls, field, maxValue), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticField_Char(cls, field, &single), ANI_OK);
+    ASSERT_EQ(single, maxValue);
+
+    ani_char minValue = std::numeric_limits<ani_char>::min();
+    ASSERT_EQ(env_->Class_SetStaticField_Char(cls, field, minValue), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticField_Char(cls, field, &single), ANI_OK);
+    ASSERT_EQ(single, minValue);
+}
+
+TEST_F(ClassSetStaticFieldCharTest, combination_test1)
+{
+    ani_class cls {};
+    ani_static_field field {};
+    const ani_char setTarget = 'c';
+    const ani_char setTarget2 = 'b';
+    ani_char single = '\0';
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_char_test/TestSetChar;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "char_value", &field), ANI_OK);
+    ASSERT_NE(field, nullptr);
+    const int32_t loopNum = 3;
+    for (int32_t i = 0; i < loopNum - 1; i++) {
+        ASSERT_EQ(env_->Class_SetStaticField_Char(cls, field, setTarget), ANI_OK);
+        ASSERT_EQ(env_->Class_GetStaticField_Char(cls, field, &single), ANI_OK);
+        ASSERT_EQ(single, setTarget);
+    }
+    ASSERT_EQ(env_->Class_SetStaticField_Char(cls, field, setTarget2), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticField_Char(cls, field, &single), ANI_OK);
+    ASSERT_EQ(single, setTarget2);
+}
+
+TEST_F(ClassSetStaticFieldCharTest, combination_test2)
+{
+    CheckFieldValue("Lclass_set_static_field_char_test/TestSetChar;", "char_value");
+}
+
+TEST_F(ClassSetStaticFieldCharTest, combination_test3)
+{
+    CheckFieldValue("Lclass_set_static_field_char_test/TestSetCharA;", "char_value");
+}
+
+TEST_F(ClassSetStaticFieldCharTest, combination_test4)
+{
+    CheckFieldValue("Lclass_set_static_field_char_test/TestSetCharFinal;", "char_value");
+}
 }  // namespace ark::ets::ani::testing
-   // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
+
+// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
