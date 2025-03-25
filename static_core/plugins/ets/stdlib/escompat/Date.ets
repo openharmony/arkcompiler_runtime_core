@@ -407,7 +407,9 @@ function ecmaInLeapYear(year: int): byte {
 export class Date {
     /** Stored value of Date, milliseconds */
     private ms: long;
-    private TZOffset: long;
+    private get TZOffset(): long {
+        return Date.getLocalTimezoneOffset(this.ms as long);
+    }
 
     /**
      * The `parseDateFromString()` static method parses a string representation of a date,
@@ -560,7 +562,6 @@ export class Date {
      */
     constructor() {
         this.ms = Date.now() as long;
-        this.TZOffset = Date.getLocalTimezoneOffset(this.ms as long)
     }
 
     /**
@@ -578,7 +579,6 @@ export class Date {
 
         if (value instanceof Date) {
             this.ms = trunc((value as Date).valueOf() as number) as long
-            this.TZOffset = (value as Date).getTimezoneOffset() as long
         }
         else if (typeof value == "string") {
             this.ms = (Date.parseDateFromString(value as string) as long);
@@ -586,7 +586,6 @@ export class Date {
         else {
             this.ms = trunc(value as number) as long;
         }
-        this.TZOffset = Date.getLocalTimezoneOffset(this.ms as long);
     }
 
     /**
@@ -625,7 +624,6 @@ export class Date {
                 ms != undefined ? ms as number : 0
             )
         );
-        this.TZOffset = Date.getLocalTimezoneOffset(this.ms as long);
         this.ms += this.TZOffset * msPerMinute
     }
 
@@ -1573,17 +1571,6 @@ export class Date {
      */
     public setTimezoneOffset(value: number): number {
         return this.setTimezoneOffset(value as int) as number
-    }
-
-    /**
-     * Sets the difference, in minutes, between a date as
-     * evaluated in the UTC time zone, and the same date as evaluated in the local time zone.
-     *
-     * @param value new timezone offset
-     */
-    public setTimezoneOffset(value: int): long {
-        this.TZOffset = value;
-        return this.TZOffset
     }
 
     /**
