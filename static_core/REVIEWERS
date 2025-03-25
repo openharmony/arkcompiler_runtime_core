@@ -129,7 +129,7 @@ static_core/plugins/ets/templates/stdlib/                                     ^a
 static_core/plugins/ets/tests/benchmarks/ani                                  @ignatenkooleg @v-cherkashin @Prof1983 @asidorov
 static_core/plugins/ets/tests/benchmarks/interop_js                           @semenovaleksandr @ignatenkooleg @Prof1983
 static_core/plugins/ets/tests/checked/                                        @Prof1983
-static_core/plugins/ets/tests/ets-templates/                                  @Prof1983 @igelhaus @ragnvald ^amate ^sergeyandreev @maksim-khramov
+static_core/plugins/ets/tests/ets-templates/                                  @Prof1983 @igelhaus @ragnvald @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets_es_checked/                                 ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
 static_core/plugins/ets/tests/ets_sdk/                                        ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
 static_core/plugins/ets/tests/interop_js/                                     ^igelhaus @semenovaleksandr ^rokashevichsvetlana ^kurnevichstanislav
@@ -154,9 +154,9 @@ static_core/plugins/ets/stdlib/std/core/Promise.sts                           ^d
 static_core/plugins/ets/stdlib/std/core/Type*                                 @aleksander-sotov ^anton-sysoev
 static_core/plugins/ets/stdlib/std/core/UnionCase.sts                         @aleksander-sotov ^anton-sysoev
 static_core/plugins/ets/stdlib/std/core/Value.sts                             @aleksander-sotov ^anton-sysoev
-static_core/plugins/ets/tests/ets-templates/17.experimental_features/         @dmitriitr @Prof1983 @igelhaus @ragnvald ^amate ^sergeyandreev @maksim-khramov
-static_core/plugins/ets/tests/ets-templates/7.expressions/                    @dmitriitr @Prof1983 @igelhaus @ragnvald ^amate ^sergeyandreev @maksim-khramov
-static_core/plugins/ets/tests/ets-templates/9.classes/                        @dmitriitr @Prof1983 @igelhaus @ragnvald ^amate ^sergeyandreev @maksim-khramov
+static_core/plugins/ets/tests/ets-templates/17.experimental_features/         @dmitriitr @Prof1983 @igelhaus @ragnvald @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
+static_core/plugins/ets/tests/ets-templates/7.expressions/                    @dmitriitr @Prof1983 @igelhaus @ragnvald @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
+static_core/plugins/ets/tests/ets-templates/9.classes/                        @dmitriitr @Prof1983 @igelhaus @ragnvald @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets_func_tests/escompat/                        ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
 static_core/plugins/ets/tests/ets_func_tests/std/                             ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
 static_core/plugins/ets/tests/ets_test_suite/atomics/                         @konstanting
