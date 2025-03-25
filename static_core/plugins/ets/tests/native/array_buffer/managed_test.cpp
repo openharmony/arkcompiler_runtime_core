@@ -50,7 +50,7 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferCreate)
     auto status = env_->ArrayBufferCreate(0, &data, &arrayBuffer);
     ASSERT_EQ(status, ETS_OKAY);
 
-    ets_int length;
+    ets_int length = 0;
     CallEtsFuntion(&length, "getLength", arrayBuffer);
     ASSERT_EQ(length, 0);
 }
@@ -62,7 +62,7 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferCreateWithLength)
     auto status = env_->ArrayBufferCreate(TWENTY_FOUR, &data, &arrayBuffer);
     ASSERT_EQ(status, ETS_OKAY);
 
-    ets_int length;
+    ets_int length = 0;
     CallEtsFuntion(&length, "getLength", arrayBuffer);
     ASSERT_EQ(length, TWENTY_FOUR);
 }
@@ -77,7 +77,7 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferGet)
     data[ELEVEN] = HUNDRED_TWENTY_FOUR;
     data[TWELVE] = FOURTY_TWO;
 
-    ets_int value;
+    ets_int value = 0;
     CallEtsFuntion(&value, "getByte", arrayBuffer, ELEVEN);
     ASSERT_EQ(value, HUNDRED_TWENTY_FOUR);
     CallEtsFuntion(&value, "getByte", arrayBuffer, TWELVE);
@@ -91,7 +91,7 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferSet)
     auto status = env_->ArrayBufferCreate(TWENTY_FOUR, reinterpret_cast<void **>(&data), &arrayBuffer);
     ASSERT_EQ(status, ETS_OKAY);
 
-    ets_int value;
+    ets_int value = 0;
     CallEtsFuntion(&value, "setByte", arrayBuffer, ELEVEN, -HUNDRED_TWENTY_FOUR);
     ASSERT_EQ(data[ELEVEN], -HUNDRED_TWENTY_FOUR);
     CallEtsFuntion(&value, "setByte", arrayBuffer, TWELVE, -FOURTY_TWO);
@@ -105,9 +105,9 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferSlice)
     auto status = env_->ArrayBufferCreate(HUNDRED_TWENTY_FOUR, &data, &arrayBuffer);
     ASSERT_EQ(status, ETS_OKAY);
 
-    ets_arraybuffer sliced;
+    ets_arraybuffer sliced {};
     CallEtsFuntion(&sliced, "createSlicedArrayBuffer", arrayBuffer, TWENTY_FOUR, HUNDRED);
-    ets_int length;
+    ets_int length = 0;
     CallEtsFuntion(&length, "getLength", sliced);
     ASSERT_EQ(length, HUNDRED - TWENTY_FOUR);
 }
@@ -119,7 +119,7 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferExternalCreate)
     auto status = env_->ArrayBufferCreateExternal(data, 0, TestFinalizer, nullptr, &arrayBuffer);
     ASSERT_EQ(status, ETS_OKAY);
 
-    ets_int length;
+    ets_int length = 0;
     CallEtsFuntion(&length, "getLength", arrayBuffer);
     ASSERT_EQ(length, 0);
 }
@@ -131,7 +131,7 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferExternalCreateWithLength)
     auto status = env_->ArrayBufferCreateExternal(data, TWENTY_FOUR, TestFinalizer, nullptr, &arrayBuffer);
     ASSERT_EQ(status, ETS_OKAY);
 
-    ets_int length;
+    ets_int length = 0;
     CallEtsFuntion(&length, "getLength", arrayBuffer);
     ASSERT_EQ(length, TWENTY_FOUR);
 }
@@ -146,7 +146,7 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferExternalGet)
     data[ELEVEN] = HUNDRED_TWENTY_FOUR;
     data[TWELVE] = FOURTY_TWO;
 
-    ets_int value;
+    ets_int value = 0;
     CallEtsFuntion(&value, "getByte", arrayBuffer, ELEVEN);
     ASSERT_EQ(value, HUNDRED_TWENTY_FOUR);
     CallEtsFuntion(&value, "getByte", arrayBuffer, TWELVE);
@@ -160,7 +160,7 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferExternalSet)
     auto status = env_->ArrayBufferCreateExternal(data, TWENTY_FOUR, TestFinalizer, nullptr, &arrayBuffer);
     ASSERT_EQ(status, ETS_OKAY);
 
-    ets_int value;
+    ets_int value = 0;
     CallEtsFuntion(&value, "setByte", arrayBuffer, ELEVEN, -HUNDRED_TWENTY_FOUR);
     ASSERT_EQ(data[ELEVEN], -HUNDRED_TWENTY_FOUR);
     CallEtsFuntion(&value, "setByte", arrayBuffer, TWELVE, -FOURTY_TWO);
@@ -174,9 +174,9 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferExternalSlice)
     auto status = env_->ArrayBufferCreateExternal(data, HUNDRED_TWENTY_FOUR, TestFinalizer, nullptr, &arrayBuffer);
     ASSERT_EQ(status, ETS_OKAY);
 
-    ets_arraybuffer sliced;
+    ets_arraybuffer sliced {};
     CallEtsFuntion(&sliced, "createSlicedArrayBuffer", arrayBuffer, TWENTY_FOUR, HUNDRED);
-    ets_int length;
+    ets_int length = 0;
     CallEtsFuntion(&length, "getLength", sliced);
     ASSERT_EQ(length, HUNDRED - TWENTY_FOUR);
 }
@@ -186,8 +186,8 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferManagedCreate)
     ets_arraybuffer arrayBuffer = nullptr;
     CallEtsFuntion(&arrayBuffer, "createArrayBuffer", 0);
 
-    void *data;
-    size_t length;
+    void *data = nullptr;
+    size_t length = 0;
     auto status = env_->ArrayBufferGetInfo(arrayBuffer, &data, &length);
     ASSERT_EQ(status, ETS_OKAY);
     // data is accepted to be an arbitrary pointer even on zero length
@@ -199,8 +199,8 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferManagedCreateWithLength)
     ets_arraybuffer arrayBuffer = nullptr;
     CallEtsFuntion(&arrayBuffer, "createArrayBuffer", TWENTY_FOUR);
 
-    void *data;
-    size_t length;
+    void *data = nullptr;
+    size_t length = 0;
     auto status = env_->ArrayBufferGetInfo(arrayBuffer, &data, &length);
     ASSERT_EQ(status, ETS_OKAY);
     ASSERT_NE(data, nullptr);
@@ -212,15 +212,15 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferManagedGet)
     ets_arraybuffer arrayBuffer = nullptr;
     CallEtsFuntion(&arrayBuffer, "createArrayBuffer", TWENTY_FOUR);
 
-    int8_t *data;
-    size_t length;
+    int8_t *data = nullptr;
+    size_t length = 0;
     auto status = env_->ArrayBufferGetInfo(arrayBuffer, reinterpret_cast<void **>(&data), &length);
     ASSERT_EQ(status, ETS_OKAY);
 
     data[ELEVEN] = HUNDRED_ELEVEN;
     data[TWELVE] = HUNDRED_TWENTY_FOUR;
 
-    ets_int value;
+    ets_int value = 0;
     CallEtsFuntion(&value, "getByte", arrayBuffer, ELEVEN);
     ASSERT_EQ(value, HUNDRED_ELEVEN);
     CallEtsFuntion(&value, "getByte", arrayBuffer, TWELVE);
@@ -232,12 +232,12 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferManagedSet)
     ets_arraybuffer arrayBuffer = nullptr;
     CallEtsFuntion(&arrayBuffer, "createArrayBuffer", TWENTY_FOUR);
 
-    int8_t *data;
-    size_t length;
+    int8_t *data = nullptr;
+    size_t length = 0;
     auto status = env_->ArrayBufferGetInfo(arrayBuffer, reinterpret_cast<void **>(&data), &length);
     ASSERT_EQ(status, ETS_OKAY);
 
-    ets_int value;
+    ets_int value = 0;
     CallEtsFuntion(&value, "setByte", arrayBuffer, ELEVEN, FOURTY_TWO);
     CallEtsFuntion(&value, "setByte", arrayBuffer, TWELVE, FOURTY_THREE);
 
@@ -250,7 +250,7 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferManagedDetachEmpty)
     ets_arraybuffer arrayBuffer = nullptr;
     CallEtsFuntion(&arrayBuffer, "createArrayBuffer", 0);
 
-    bool result;
+    bool result = false;
     auto status = env_->ArrayBufferIsDetached(arrayBuffer, &result);
     ASSERT_EQ(status, ETS_OKAY);
     ASSERT_EQ(status, false);
@@ -264,7 +264,7 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferManagedDetach)
     ets_arraybuffer arrayBuffer = nullptr;
     CallEtsFuntion(&arrayBuffer, "createArrayBuffer", TWENTY_FOUR);
 
-    bool result;
+    bool result = false;
     auto status = env_->ArrayBufferIsDetached(arrayBuffer, &result);
     ASSERT_EQ(status, ETS_OKAY);
     ASSERT_EQ(status, false);
@@ -291,7 +291,7 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferGetInvalidArgs)
     ASSERT_EQ(status, ETS_OKAY);
 
     auto coro = Coroutine::GetCurrent();
-    ets_int value;
+    ets_int value = 0;
     CallEtsFuntion(&value, "getByte", arrayBuffer, -1);
     ASSERT_TRUE(coro->HasPendingException());
     coro->ClearException();
@@ -313,7 +313,7 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferSetInvalidArgs)
     ASSERT_EQ(status, ETS_OKAY);
 
     auto coro = Coroutine::GetCurrent();
-    ets_int value;
+    ets_int value = 0;
     CallEtsFuntion(&value, "setByte", arrayBuffer, -1, 1);
     ASSERT_TRUE(coro->HasPendingException());
     coro->ClearException();

@@ -14,11 +14,14 @@
  */
 
 #include "array_buffer_helper.h"
+
 #include <array>
 #include <iomanip>
 #include <algorithm>
 #include <cstdlib>
 #include <cctype>
+
+#include "plugins/ets/runtime/types/ets_arraybuffer.h"
 
 namespace ark::ets::intrinsics::helpers {
 
@@ -200,10 +203,13 @@ constexpr std::array UTF16_ENCODINGS = {"utf16le"sv, "ucs2"sv, "ucs-2"sv};  // U
 constexpr std::array BASE64_ENCODINGS = {"base64"sv, "base64url"sv};        // Base64 variants
 constexpr std::array LATIN_ENCODINGS = {"latin1"sv, "binary"sv};            // Latin1/binary encodings
 
-[[nodiscard]] Result<bool> ValidateBuffer(const void *buffer) noexcept
+[[nodiscard]] Result<bool> ValidateBuffer(const EtsEscompatArrayBuffer *buffer) noexcept
 {
     if (buffer == nullptr) {
         return Err<PandaString>(PandaString("Buffer is null"));
+    }
+    if (buffer->WasDetached()) {
+        return Err<PandaString>(PandaString("Buffer was detached"));
     }
     return true;
 }

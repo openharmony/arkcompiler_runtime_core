@@ -367,6 +367,7 @@ JSCONVERT_WRAP(ArrayBuffer)
 {
     napi_value buf;
     void *data;
+    // NOTE(dslynko, #23919): finalize semantics of resizable ArrayBuffers
     NAPI_CHECK_FATAL(napi_create_arraybuffer(env, etsVal->GetByteLength(), &data, &buf));
     std::copy_n(reinterpret_cast<const uint8_t *>(etsVal->GetData()), etsVal->GetByteLength(),
                 reinterpret_cast<uint8_t *>(data));
@@ -383,6 +384,7 @@ JSCONVERT_UNWRAP(ArrayBuffer)
     }
     void *data = nullptr;
     size_t byteLength = 0;
+    // NOTE(dslynko, #23919): finalize semantics of resizable ArrayBuffers
     NAPI_CHECK_FATAL(napi_get_arraybuffer_info(env, jsVal, &data, &byteLength));
     auto *currentCoro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope s(currentCoro);

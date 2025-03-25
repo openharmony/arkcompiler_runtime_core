@@ -15,7 +15,8 @@
 
 #include "ani_gtest.h"
 
-// NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic,
+// readability-magic-numbers,cppcoreguidelines-pro-type-vararg)
 namespace ark::ets::ani::testing {
 
 class ArrayBufferGetInfoTest : public AniTest {
@@ -25,6 +26,21 @@ public:
     static constexpr const ani_size ONE = 1U;
     static constexpr const ani_size TWO = 2U;
     static constexpr const ani_size THREE = 3U;
+
+public:
+    void SetUp() override
+    {
+        AniTest::SetUp();
+        ASSERT_EQ(env_->GetUndefined(&undefinedRef_), ANI_OK);
+    }
+
+    ani_ref GetUndefined()
+    {
+        return undefinedRef_;
+    }
+
+private:
+    ani_ref undefinedRef_ {};
 };
 
 TEST_F(ArrayBufferGetInfoTest, InvalidArgs)
@@ -96,7 +112,8 @@ TEST_F(ArrayBufferGetInfoTest, GetInfoFromEmptyBuffer)
 
 TEST_F(ArrayBufferGetInfoTest, GetInfoFromManagedBuffer)
 {
-    auto array = static_cast<ani_arraybuffer>(CallEtsFunction<ani_ref>("arraybuffer_get_info_test", "GetArrayBuffer"));
+    auto array = static_cast<ani_arraybuffer>(
+        CallEtsFunction<ani_ref>("arraybuffer_get_info_test", "GetArrayBuffer", GetUndefined()));
     ASSERT_NE(array, nullptr);
 
     void *data = nullptr;
@@ -113,6 +130,42 @@ TEST_F(ArrayBufferGetInfoTest, GetInfoFromManagedBuffer)
     ASSERT_EQ(byteData[2U], THREE);
 }
 
+TEST_F(ArrayBufferGetInfoTest, GetInfoFromResizableBuffer)
+{
+    ani_class boxedIntClass {};
+    ASSERT_EQ(env_->FindClass("Lstd/core/Int;", &boxedIntClass), ANI_OK);
+    ani_ref maxByteLength {};
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(boxedIntClass, "valueOf", "I:Lstd/core/Int;", &maxByteLength,
+                                                     static_cast<ani_int>(EXPECTED_SIZE)),
+              ANI_OK);
+
+    auto array = static_cast<ani_arraybuffer>(
+        CallEtsFunction<ani_ref>("arraybuffer_get_info_test", "GetArrayBuffer", maxByteLength));
+    ASSERT_NE(array, nullptr);
+
+    void *data = nullptr;
+    ani_size length = 0;
+    auto resultStatus = env_->ArrayBuffer_GetInfo(array, &data, &length);
+    ASSERT_EQ(resultStatus, ANI_OK);
+    ASSERT_NE(data, nullptr);
+    ASSERT_EQ(length, EXPECTED_SIZE);
+
+    // Verify data values
+    auto byteData = static_cast<uint8_t *>(data);
+    ASSERT_EQ(byteData[0U], ONE);
+    ASSERT_EQ(byteData[1U], TWO);
+    ASSERT_EQ(byteData[2U], THREE);
+
+    ani_class arrayBufferClass {};
+    ASSERT_EQ(env_->FindClass("Lescompat/ArrayBuffer;", &arrayBufferClass), ANI_OK);
+    ani_method resizableGetter {};
+    ASSERT_EQ(env_->Class_FindGetter(arrayBufferClass, "resizable", &resizableGetter), ANI_OK);
+    ani_boolean isResizable = ANI_FALSE;
+    ASSERT_EQ(env_->Object_CallMethod_Boolean(array, resizableGetter, &isResizable), ANI_OK);
+    ASSERT_EQ(isResizable, ANI_TRUE);
+}
+
 }  // namespace ark::ets::ani::testing
 
-// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
+// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic,
+// readability-magic-numbers,cppcoreguidelines-pro-type-vararg)

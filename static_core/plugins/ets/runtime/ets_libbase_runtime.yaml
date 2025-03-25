@@ -1548,6 +1548,17 @@ intrinsics:
       args: [ i32 ]
     impl: ark::ets::intrinsics::EtsEscompatArrayBufferAllocateNonMovable
 
+  - name: EscompatArrayBufferGetAddress
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: getAddress
+    static: true
+    signature:
+      ret: i64
+      args:
+        - i8[]
+    impl: ark::ets::intrinsics::EtsEscompatArrayBufferGetAddress
+
   - name: EscompatArrayBufferFromEncodedString
     space: ets
     class_name: escompat.ArrayBuffer

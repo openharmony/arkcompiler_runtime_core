@@ -32,8 +32,10 @@ static constexpr int TWENTY_FOUR = 24;
 static constexpr int HUNDRED_TWENTY_THREE = 123;
 static constexpr int TWO_HUNDRED_THIRTY_FOUR = 234;
 static constexpr int THREE_HUNDRED_FOURTY_FIVE = 345;
+static constexpr const char *CHECK_ARRAY_BUFFER_FUNCTION = "checkCreatedArrayBuffer";
+static constexpr const char *IS_DETACHED = "isDetached";
 
-void TestFinalizer(void *data, [[maybe_unused]] void *finalizerHint)
+static void TestFinalizer(void *data, [[maybe_unused]] void *finalizerHint)
 {
     delete[] reinterpret_cast<int64_t *>(data);
 }
@@ -97,6 +99,10 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferCreateExternalEmpty)
     ASSERT_EQ(resultStatus, ETS_OKAY);
     ASSERT_EQ(resultData, data);
     ASSERT_EQ(resultLength, 0);
+
+    ets_boolean bufferIsExpected = ETS_FALSE;
+    CallEtsFuntion(&bufferIsExpected, CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, 0);
+    ASSERT_EQ(bufferIsExpected, ETS_TRUE);
 }
 
 TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferCreateExternalWithLength)
@@ -121,6 +127,10 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferCreateExternalWithLength)
     ASSERT_EQ(resultData[0], HUNDRED_TWENTY_THREE);
     ASSERT_EQ(resultData[1], TWO_HUNDRED_THIRTY_FOUR);
     ASSERT_EQ(resultData[TWO], THREE_HUNDRED_FOURTY_FIVE);
+
+    ets_boolean bufferIsExpected = ETS_FALSE;
+    CallEtsFuntion(&bufferIsExpected, CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, TWENTY_FOUR);
+    ASSERT_EQ(bufferIsExpected, ETS_TRUE);
 }
 
 TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferDetachNonDetachable)
@@ -143,6 +153,10 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferDetachNonDetachable)
     auto resultstatus2 = env_->ArrayBufferIsDetached(arrayBuffer, &result);
     ASSERT_EQ(resultstatus2, ETS_OKAY);
     ASSERT_EQ(result, false);
+
+    ets_boolean isDetached = ETS_FALSE;
+    CallEtsFuntion(&isDetached, IS_DETACHED, arrayBuffer);
+    ASSERT_EQ(isDetached, ETS_FALSE);
 }
 
 TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferDetachDetachable)
@@ -154,6 +168,10 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferDetachDetachable)
     ASSERT_EQ(status, ETS_OKAY);
     ASSERT_NE(arrayBuffer, nullptr);
     ASSERT_FALSE(env_->ErrorOccurred());
+
+    ets_boolean bufferIsExpected = ETS_FALSE;
+    CallEtsFuntion(&bufferIsExpected, CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, TWENTY_FOUR);
+    ASSERT_EQ(bufferIsExpected, ETS_TRUE);
 
     bool result = false;
     auto resultStatus = env_->ArrayBufferIsDetached(arrayBuffer, &result);
@@ -167,8 +185,15 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferDetachDetachable)
     ASSERT_EQ(resultstatus2, ETS_OKAY);
     ASSERT_EQ(result, true);
 
+    ets_boolean isDetached = ETS_FALSE;
+    CallEtsFuntion(&isDetached, IS_DETACHED, arrayBuffer);
+    ASSERT_EQ(isDetached, ETS_TRUE);
+
     auto resultstatus3 = env_->ArrayBufferDetach(arrayBuffer);
     ASSERT_EQ(resultstatus3, ETS_DETACHABLE_ARRAYBUFFER_EXPECTED);
+
+    CallEtsFuntion(&isDetached, IS_DETACHED, arrayBuffer);
+    ASSERT_EQ(isDetached, ETS_TRUE);
 }
 
 TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferInvalidArgs)

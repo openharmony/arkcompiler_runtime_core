@@ -13,12 +13,10 @@
  * limitations under the License.
  */
 
-function GetArrayBuffer(maxByteLength?: int) : ArrayBuffer
-{
-    let arrayBuffer = new ArrayBuffer(10, maxByteLength);
-    let vals : byte[] = [1, 2, 3];
-    arrayBuffer.set(0, vals[0]);
-    arrayBuffer.set(1, vals[1]);
-    arrayBuffer.set(2, vals[2]);
-    return arrayBuffer;
+export function checkCreatedArrayBuffer(ab: ArrayBuffer, expectedLength: int): boolean {
+    return !ab.resizable && !ab.detached && ab.getByteLength() == expectedLength
+}
+
+export function isDetached(ab: ArrayBuffer): boolean {
+    return ab.detached
 }

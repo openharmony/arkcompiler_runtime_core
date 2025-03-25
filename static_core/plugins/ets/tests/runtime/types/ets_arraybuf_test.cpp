@@ -58,9 +58,8 @@ public:
     {
         return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, managedData_, "data"),
                                              MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, byteLength_, "_byteLength"),
-                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, nativeData_, "dataExternal"),
-                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, isExternal_, "isExternal"),
-                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, wasDetached_, "wasDetached")};
+                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, nativeData_, "dataAddress"),
+                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, isResizable_, "isResizable")};
     }
 
 protected:
