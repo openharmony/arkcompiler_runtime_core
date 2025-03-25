@@ -1,3 +1,6 @@
+#24419
+03.types/19.union_types/ut_9.ets
+
 #17445
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_arr/comp-arr-wd_6.ets
 
