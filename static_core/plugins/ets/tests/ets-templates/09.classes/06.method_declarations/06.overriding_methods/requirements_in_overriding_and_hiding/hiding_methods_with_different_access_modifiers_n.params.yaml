@@ -15,4 +15,9 @@
 modifiers:
   - {m1: "public", m2: "protected"}
   - {m1: "public", m2: "private"}
+  - {m1: "public", m2: "internal"}
   - {m1: "protected", m2: "private"}
+  - {m1: "protected", m2: "internal"}
+  - {m1: "internal", m2: "public"}
+  - {m1: "internal", m2: "protected"}
+  - {m1: "internal", m2: "private"}

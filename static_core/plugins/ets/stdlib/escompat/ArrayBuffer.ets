@@ -100,7 +100,7 @@ export class ArrayBuffer extends Buffer
             || obj instanceof BigUint64Array)
     }
 
-    internal override sliceInternal(begin: int, end: int): Buffer {
+    override sliceInternal(begin: int, end: int): Buffer {
         const byteLength = this.getByteLength()
 
         const startIndex = normalizeIndex(begin, byteLength)
@@ -555,7 +555,7 @@ export class SharedArrayBuffer extends Buffer {
         return this.sharedMemory
     }
 
-    internal override getByteLength(): int {
+    override getByteLength(): int {
         return this.sharedMemory.getByteLength()
     }
 
@@ -567,7 +567,7 @@ export class SharedArrayBuffer extends Buffer {
      *
      * @returns byte at index
      */
-    internal override at(i: int): byte {
+    override at(i: int): byte {
         return this.sharedMemory.at(i)
     }
 
@@ -579,11 +579,11 @@ export class SharedArrayBuffer extends Buffer {
      *
      * @param i index
      */
-    internal override set(i: int, b: byte) {
+    override set(i: int, b: byte) {
         this.sharedMemory.set(i, b)
     }
 
-    internal override sliceInternal(begin: int, end: int): Buffer {
+    override sliceInternal(begin: int, end: int): Buffer {
         // TODO(egor-porsev): code duplication
         let byteLength = this.getByteLength()
         if (begin < -byteLength) {

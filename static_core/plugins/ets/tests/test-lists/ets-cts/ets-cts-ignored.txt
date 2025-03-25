@@ -1525,14 +1525,19 @@
 
 #23810 PROPERTY_NOT_VISIBLE_HERE, ASTVerifier found broken invariants but es2panda returns 0
 09.classes/03.class_members/met/sepmod_6.ets
+09.classes/03.class_members/met/sepmod_7.ets
 09.classes/03.class_members/met/sepmod_8.ets
 09.classes/03.class_members/met/sepmod_9.ets
 09.classes/03.class_members/met/sepmod_10.ets
 09.classes/03.class_members/met/pkgmod_6.ets
+09.classes/03.class_members/met/pkgmod_7.ets
 09.classes/03.class_members/met/pkgmod_8.ets
+09.classes/03.class_members/met/pkgmod_9.ets
 09.classes/03.class_members/met/pkgmod_10.ets
 09.classes/03.class_members/met/pkgmod_11.ets
 09.classes/03.class_members/met/pkgmod_12.ets
+09.classes/03.class_members/met/pkgmod_13.ets
+09.classes/03.class_members/met/pkgmod_14.ets
 09.classes/03.class_members/fld/sepmod_6.ets
 09.classes/03.class_members/fld/sepmod_8.ets
 09.classes/03.class_members/fld/sepmod_9.ets
@@ -1586,9 +1591,6 @@
 #21929 - should fail, but compiles
 09.classes/06.method_declarations/03.abstract_methods/instance_method_overridden_by_abstract.ets
 09.classes/06.method_declarations/06.overriding_methods/overriding_by_instance_methods/abstract_method_overridden_by_instance.ets
-
-#15095
-09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/hiding_methods_with_different_access_modifiers_2.ets
 
 #23726
 09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_2.ets
