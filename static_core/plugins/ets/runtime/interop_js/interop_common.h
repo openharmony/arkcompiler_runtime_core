@@ -63,6 +63,14 @@ std::vector<EtsInt> ConvertBigIntArrayFromJsToEts(SmallVector<uint64_t, 4U> &jsA
         }                                          \
     } while (0)
 
+#define INTEROP_RETURN_IF(expr) \
+    do {                        \
+        bool _expr = (expr);    \
+        if (UNLIKELY(_expr)) {  \
+            return false;       \
+        }                       \
+    } while (0)
+
 #ifndef NDEBUG
 void InteropTrace(const char *func, const char *file, int line);
 #define INTEROP_TRACE()                             \
@@ -90,6 +98,14 @@ void InteropTrace(const char *func, const char *file, int line);
             InteropFatal("NAPI_CHECK_FATAL: " #status, _status); \
             UNREACHABLE();                                       \
         }                                                        \
+    } while (0)
+
+#define NAPI_CHECK_RETURN(status)           \
+    do {                                    \
+        napi_status _status = (status);     \
+        if (UNLIKELY(_status != napi_ok)) { \
+            return false;                   \
+        }                                   \
     } while (0)
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
