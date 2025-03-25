@@ -1460,7 +1460,8 @@ NO_UB_SANITIZE static ani_status Class_BindNativeMethods(ani_env *env, ani_class
     for (ani_size i = 0; i < nrMethods; ++i) {
         ani_native_function m = methods[i];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         const char *signature = m.signature;
-        EtsMethod *method = signature == nullptr ? klass->GetMethod(m.name) : klass->GetMethod(m.name, signature);
+        EtsMethod *method =
+            signature == nullptr ? klass->GetDirectMethod(m.name) : klass->GetDirectMethod(m.name, signature);
         etsMethods.push_back(method);
     }
     return DoBindNative<false>(s, etsMethods, methods, nrMethods);
