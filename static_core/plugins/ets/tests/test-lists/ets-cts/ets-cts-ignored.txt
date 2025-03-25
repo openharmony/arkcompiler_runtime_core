@@ -541,11 +541,6 @@
 #15709
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_23.ets
 
-#23717 ES2PANDA_NEG_FAIL
-05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_21.ets
-05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_10.ets
-05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_11.ets
-
 #23754
 05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_0.ets
 05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_1.ets
