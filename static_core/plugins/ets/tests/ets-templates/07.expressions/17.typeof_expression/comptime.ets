@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,24 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 {%- for c in cases %}
 
 /*---
-desc: >-
-    If the expression evaluation causes exception or error, then
-    the control of the execution is transferred to a proper catch
-    section of the runtime system. The result of the typeof expression
-    cannot be determined in that case.
+desc: |-
+    Types defined at compile time
+    {{c.desc}} - "{{c.name}}"
 ---*/
+
+assertEQ(t, "{{c.name}}")
+
 {{c.decl}}
 
-function main(): int {
-    let t: string = "init-val"
-    try {
-        t = typeof {{c.expr}}
-        return 1
-    } catch (e) {
-        return t == "init-val" ? 0 : 1
-    }
-}
+const t = typeof c
+
+// Auxiliary stuff
+enum EN { a, b, c }
+enum ES { a = "a", b = "b", c = "c" }
+
+interface I {}
+class C implements I {}
+
 {%- endfor %}

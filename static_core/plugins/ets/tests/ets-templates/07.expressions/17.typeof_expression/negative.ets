@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,31 +12,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 {%- for c in cases %}
 
 /*---
-desc: >-
-    Any typeof expression is of type string. The typeof expression values of
-    the types below are predefined, and the expressions require no evaluation.
+desc: If evaluation causes an error, then the result of a typeof expression cannot be determined.
 ---*/
 
-class A {}
-class B {}
-class C<T> {
-    fld: T
-    constructor(p: T) {
-        this.fld = p
-    }
-    meth(): string {
-        return typeof this.fld
-    }
-}
+//tags: [negative]
 
 {{c.decl}}
 
 function main() {
-{%- for v in c['vals'] %}
-    assertEQ( {{v.expr}}, "{{v.type}}" )
-{%- endfor %}
+    let t = "initial value"
+
+    try {
+        t = typeof {{c.exp}}
+    }catch (error) {
+        // do nothing
+    }
+
+    assertEQ(t, "initial value")
 }
+
 {%- endfor %}
