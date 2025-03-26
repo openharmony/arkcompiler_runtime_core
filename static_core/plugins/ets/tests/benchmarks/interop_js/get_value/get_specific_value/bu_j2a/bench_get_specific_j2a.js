@@ -25,19 +25,7 @@ function getSpecificJ2a() {
      */
     this.setup = function () {
         console.log('Starting...');
-        let penv = process.env;
-        console.log('penv.MODULE_PATH: ' + penv.MODULE_PATH);
-        let stsVm = require(penv.MODULE_PATH + '/ets_interop_js_napi.node');
-        console.log(penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH);
-        const stsRT = stsVm.createRuntime({
-            'boot-panda-files': penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-            'panda-files': penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH
-        });
-
-        if (!stsRT) {
-            console.error('Failed to create ETS runtime');
-            return 1;
-        }
+        let stsVm = initEtsVm();
 
         this.getObj = stsVm.getFunction('LETSGLOBAL;', 'getStsObj');
 

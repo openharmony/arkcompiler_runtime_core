@@ -320,7 +320,7 @@ def generate_main_regular(args: Args,
 
 def generate_mode(mode: str, lang: str,
                   generator: BenchGenerator,
-                  settings: Optional[GenSettings] = None) -> List[BenchUnit]:
+                  settings: Optional[GenSettings] = None, arkjs_suffix: str = '') -> List[BenchUnit]:
     """Generate benchmark sources for requested language."""
     log.trace("Interop GEN for mode: %s", mode)
     bus: List[BenchUnit] = []
@@ -338,12 +338,12 @@ def generate_mode(mode: str, lang: str,
             bu = generator.add_bu(bus, template, lang_impl, src,
                                   variant, settings, out_ext)
             if mode == 'bu_a2j' and lang == 'ets':
-                create_interop_runner(generator, variant, bu)
+                create_interop_runner(generator, variant, bu, arkjs_suffix=arkjs_suffix)
     return tags_workaround(bus, mode)
 
 
-def create_interop_runner(generator: BenchGenerator, variant: TemplateVars, bu: BenchUnit):
-    runner_template = generator.get_template('TemplateInteropA2J.js')
+def create_interop_runner(generator: BenchGenerator, variant: TemplateVars, bu: BenchUnit, arkjs_suffix: str = ''):
+    runner_template = generator.get_template('TemplateInteropA2J' + arkjs_suffix + '.js')
     runner_js = runner_template.substitute({'METHOD': variant.method_name,
                                             'STATE': variant.state_name,
                                             'NAME': variant.bench_name})
@@ -366,7 +366,7 @@ def tags_workaround(bus: List[BenchUnit], mode: str) -> List[BenchUnit]:
 
 
 @log_time
-def generate_main_interop(generator: BenchGenerator = None) -> List[BenchUnit]:
+def generate_main_interop(generator: BenchGenerator = None, arkjs_suffix: str = '') -> List[BenchUnit]:
     """Command: Generate benches from doclets."""
     log.info("Starting interop GEN phase...",)
     bus: List[BenchUnit] = []
@@ -381,9 +381,9 @@ def generate_main_interop(generator: BenchGenerator = None) -> List[BenchUnit]:
     bus += generate_mode('bu_a2j', 'ets', generator, settings=GenSettings(src={'.ets'},
                          template='Template.ets',
                          out='.ets',
-                         link_to_src=False))
+                         link_to_src=False), arkjs_suffix=arkjs_suffix)
     bus += generate_mode('bu_j2a', 'js', generator, settings=GenSettings(src={'.js'},
-                         template='Template.js',
+                         template='TemplateInteropJ2A' + arkjs_suffix + '.js',
                          out='.js',
                          link_to_src=False))
     bus += generate_mode('bu_j2j', 'js', generator, settings=GenSettings(src={'.js'},
@@ -396,8 +396,11 @@ def generate_main_interop(generator: BenchGenerator = None) -> List[BenchUnit]:
 
 def generate_main(args: Args,
                   settings: Optional[GenSettings] = None) -> List[BenchUnit]:
-    return generate_main_interop(BenchGenerator(args)) if args.langs and 'interop' in args.langs\
-        else generate_main_regular(args, settings)
+    if args.langs and 'interop' in args.langs:
+        return generate_main_interop(BenchGenerator(args))
+    if args.langs and 'interop_arkjs' in args.langs:
+        return generate_main_interop(BenchGenerator(args), arkjs_suffix='_arkjs')
+    return generate_main_regular(args, settings)
 
 
 if __name__ == '__main__':

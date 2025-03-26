@@ -25,8 +25,12 @@ const DEFAULT_ITERATIONS = 100000;
 
 globalThis.require = require;
 
+// Note #23757 this needs to be further tested and possibly adjusted
+const helper = requireNapiPreview('libinterop_test_helper.so', false);
+
 class Benchmark {
-    #ark = require(MODULE_PATH + '/ets_interop_js_napi.node');
+    let modulePath = helper.getEnvironmentVar('MODULE_PATH');
+    #ark = requireNapiPreview(modulePath + 'lib/ets_interop_js_napi_arkjsvm.so', false);
     #benchmark;
     #passedTime = BigInt(0);
     #binaries = [];
@@ -36,10 +40,14 @@ class Benchmark {
     }
 
     #__init() {
+        // Note #23757 this needs to be further tested and possibly adjusted
+        let stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+        let etsVmOpts = helper.getEnvironmentVar('ETS_VM_OPTS');
+
         const isOk = this.#ark.createRuntime(Object.assign({
-            'boot-panda-files': [ARK_ETS_STDLIB_PATH, ...this.#binaries].join(':'),
+            'boot-panda-files': [stdlibPath, ...this.#binaries].join(':'),
             'panda-files': this.#binaries.join(':')
-       }, JSON.parse(ETS_VM_OPTS)));
+        }, JSON.parse(etsVmOpts)));
 
         if (!isOk) {
             throw new Error('Failed to initialize');

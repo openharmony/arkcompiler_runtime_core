@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,7 +20,7 @@ import logging
 import shutil
 import json
 from pathlib import Path
-from typing import Optional, Iterable, Tuple
+from typing import Optional, Iterable, Tuple, List, Dict
 from abc import ABC, abstractmethod
 from enum import Flag, auto
 from subprocess import TimeoutExpired
@@ -86,6 +86,7 @@ class ToolBase(CrossShell, ABC):
         self._target = target
         self.flags = flags
         self.custom = custom
+        self.custom_opts: Dict[str, List[str]] = {}
 
     def __call__(self, bu: BenchUnit) -> None:
         self.exec(bu)
@@ -198,3 +199,6 @@ class ToolBase(CrossShell, ABC):
                     flags |= OptFlags.DISABLE_INLINING
                 aot_opts = conf_data.get('aot_opts', '')
         return flags, aot_opts
+
+    def set_custom_opts(self, custom_opts: Dict[str, List[str]]):
+        self.custom_opts = custom_opts
