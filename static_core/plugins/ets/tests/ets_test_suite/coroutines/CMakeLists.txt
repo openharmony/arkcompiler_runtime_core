@@ -360,7 +360,6 @@ add_ets_coroutines_test(FILE scale_workers_pool.ets
                         MODE "INT"
 )
 
-if (NOT PANDA_ENABLE_THREAD_SANITIZER)
 add_ets_coroutines_test(FILE await_migrate.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
@@ -368,4 +367,3 @@ add_ets_coroutines_test(FILE await_migrate.ets
                         WORKERS "AUTO"
                         MODE "INT"
 )
-endif()
