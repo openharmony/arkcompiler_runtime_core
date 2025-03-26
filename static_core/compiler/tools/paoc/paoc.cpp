@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,7 +100,13 @@ public:
             paoc_->PrintUsage(paParser);
             return 1;
         }
-        if (!os::IsDirExists(os::GetParentDir(paoc_->paocOptions_->GetPaocOutput()))) {
+
+        const std::string parentDir = os::GetParentDir(paoc_->paocOptions_->GetPaocOutput());
+        if (!os::IsDirExists(parentDir) && !paoc_->paocOptions_->GetPaocZipPandaFile().empty()) {
+            os::CreateDirectories(parentDir);
+        }
+
+        if (!os::IsDirExists(parentDir)) {
             std::cerr << "Error: directory for output file \"" << paoc_->paocOptions_->GetPaocOutput()
                       << "\" doesn't exist "
                       << "\n";
@@ -436,7 +442,12 @@ bool Paoc::TryLoadPandaFile(const std::string &fileName, PandaVM *vm)
     if (preloadedFiles_.find(filePath) != preloadedFiles_.end()) {
         pfile = preloadedFiles_[filePath];
     } else {
-        auto file = vm->OpenPandaFile(fileName);
+        std::unique_ptr<const panda_file::File> file;
+        if (paocOptions_->GetPaocZipPandaFile().empty()) {
+            file = vm->OpenPandaFile(fileName);
+        } else {
+            file = TryLoadZipPandaFile(fileName);
+        }
         if (!file) {
             if (!ShouldIgnoreFailures()) {
                 LOG_PAOC(FATAL) << "Can not open file: " << fileName;
@@ -462,6 +473,26 @@ bool Paoc::TryLoadPandaFile(const std::string &fileName, PandaVM *vm)
         aotBuilder_->EndFile();
     }
     return !errorOccurred || ShouldIgnoreFailures();
+}
+
+std::unique_ptr<const panda_file::File> Paoc::TryLoadZipPandaFile(const std::string &fileName)
+{
+    std::string zipPandaFilePath = paocOptions_->GetPaocZipPandaFile();
+    size_t pos = fileName.rfind(zipPandaFilePath);
+    if (pos == std::string::npos) {
+        LOG_PAOC(FATAL) << "Invalid zip panda file path";
+        return nullptr;
+    }
+
+    std::string location = fileName.substr(0, pos - 1);  // 1: for '/'
+    FILE *fp = fopen(location.c_str(), "rbe");
+    if (fp == nullptr) {
+        LOG_PAOC(ERROR) << "Can't fopen location: " << location;
+        return nullptr;
+    }
+    std::unique_ptr<const panda_file::File> file = panda_file::OpenZipPandaFile(fp, fileName, zipPandaFilePath);
+    fclose(fp);
+    return file;
 }
 
 /**

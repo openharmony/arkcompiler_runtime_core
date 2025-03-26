@@ -439,6 +439,12 @@ std::unique_ptr<const File> OpenPandaFileFromMemory(const void *buffer, size_t s
 std::unique_ptr<const File> OpenPandaFileFromSecureMemory(uint8_t *buffer, size_t size);
 
 /*
+ * OpenZipPandaFile from the location zip.
+ */
+std::unique_ptr<const File> OpenZipPandaFile(FILE *fp, std::string_view location, std::string_view archiveFilename,
+                                             panda_file::File::OpenMode openMode = panda_file::File::READ_ONLY);
+
+/*
  * OpenPandaFile from location which specicify the name.
  */
 PANDA_PUBLIC_API std::unique_ptr<const File> OpenPandaFile(

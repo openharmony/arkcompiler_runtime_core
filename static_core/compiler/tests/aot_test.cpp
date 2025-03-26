@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "events/events.h"
 #include "mem/gc/gc_types.h"
 #include "runtime/include/file_manager.h"
+#include "zip_archive.h"
 
 #include <regex>
 
@@ -801,6 +802,54 @@ TEST_F(AotTest, PandaFiles)
             inlineAttempt |= std::regex_match(line, rgx);
         }
         ASSERT_TRUE(inlineAttempt);
+    }
+}
+
+TEST_F(AotTest, PandaZipFile)
+{
+    if (RUNTIME_ARCH != Arch::X86_64) {
+        GTEST_SKIP();
+    }
+
+    std::vector<uint8_t> pfData {};
+    {
+        pandasm::Parser p;
+
+        auto source = R"(
+            .record Z {}
+            .function i32 Z.zoo() <static> {
+            ldai 45
+            return
+            }
+        )";
+
+        std::string srcFilename = "src.pa";
+        auto res = p.Parse(source, srcFilename);
+        ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT_NE(pf, nullptr);
+
+        const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+    }
+
+    const char *archivename = "__TestPaocOpenZipPandaFile__.zip";
+    const char *pandaFilename = "test.abc";
+    const char *filename = "__TestPaocOpenZipPandaFile__.zip/test.abc";
+
+    int ret = CreateOrAddFileIntoZip(archivename, pandaFilename, &pfData, APPEND_STATUS_CREATE, Z_NO_COMPRESSION);
+    if (ret != 0) {
+        ASSERT_EQ(1, 0) << "CreateOrAddFileIntoZip failed!";
+        return;
+    }
+
+    {
+        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", filename, "--paoc-zip-panda-file", pandaFilename,
+                                  "--paoc-location", "./");
+        ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
+        ASSERT_EQ(res.Value(), 0U);
     }
 }
 // NOLINTEND(readability-magic-numbers)

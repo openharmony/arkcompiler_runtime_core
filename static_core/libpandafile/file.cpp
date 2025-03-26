@@ -187,9 +187,9 @@ std::unique_ptr<const panda_file::File> HandleArchive(ZipArchiveHandle &handle, 
     return file;
 }
 
-static std::unique_ptr<const panda_file::File> OpenZipPandaFile(FILE *fp, std::string_view location,
-                                                                std::string_view archiveFilename,
-                                                                panda_file::File::OpenMode openMode)
+std::unique_ptr<const panda_file::File> OpenZipPandaFile(FILE *fp, std::string_view location,
+                                                         std::string_view archiveFilename,
+                                                         panda_file::File::OpenMode openMode)
 {
     // Open Zipfile and do the extraction.
     ZipArchiveHandle zipfile = nullptr;
