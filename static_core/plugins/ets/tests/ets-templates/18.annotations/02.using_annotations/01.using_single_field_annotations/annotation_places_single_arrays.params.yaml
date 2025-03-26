@@ -14,40 +14,40 @@
 
 cases:
   - type: |-
-      number[]
+      FixedArray<number>
     value: |-
       [100, 200, 300]
   - type: |-
-      MyEnum[]
+      FixedArray<MyEnum>
     value: |-
       [MyEnum.EnumField1, MyEnum.EnumField2]
     decl: |-
       enum MyEnum { EnumField1, EnumField2 }
   - type: |-
-      boolean[]
+      FixedArray<boolean>
     value: |-
       [true, false]
   - type: |-
-      string[] 
+      FixedArray<string> 
     value: |-
       ["some_string", "some_other_string"]
 
 # multidimensional arrays
   - type: |-
-      number[][]
+      FixedArray<FixedArray<number>>
     value: |-
       [[100, 200, 300], [100, 200, 300]]
   - type: |-
-      MyEnum[][]
+      FixedArray<FixedArray<MyEnum>>
     value: |-
       [[MyEnum.EnumField1, MyEnum.EnumField2], [MyEnum.EnumField1, MyEnum.EnumField2]]
     decl: |-
       enum MyEnum { EnumField1, EnumField2 }
   - type: |-
-      boolean[][]
+      FixedArray<FixedArray<boolean>>
     value: |-
       [[true, false], [true, false]]
   - type: |-
-      string[][] 
+      FixedArray<FixedArray<string>> 
     value: |-
       [["some_string", "some_other_string"], ["some_string", "some_other_string"]]

@@ -14,17 +14,17 @@
 
 cases:
   - type1: |-
-      number[]
+      FixedArray<number>
     type2: |-
-      string[] 
+      FixedArray<string> 
     value1: |-
       [100, 200, 300]
     value2: |-
       ["some_string", "some_other_string"]
   - type1: |-
-      MyEnum[]
+      FixedArray<MyEnum>
     type2: |-
-      string[] 
+      FixedArray<string> 
     value1: |-
       [MyEnum.EnumField1, MyEnum.EnumField2]
     value2: |-
@@ -32,9 +32,9 @@ cases:
     decl: |-
       enum MyEnum { EnumField1, EnumField2 }
   - type1: |-
-      boolean[]
+      FixedArray<boolean>
     type2: |-
-      string[] 
+      FixedArray<string> 
     value1: |-
       [true, false]
     value2: |-
@@ -42,17 +42,17 @@ cases:
 
 # multidimensional arrays
   - type1: |-
-      number[][]
+      FixedArray<FixedArray<number>>
     type2: |-
-      string[][] 
+      FixedArray<FixedArray<string>> 
     value1: |-
       [[100, 200, 300], [100, 200, 300]]
     value2: |-
       [["some_string", "some_other_string"], ["some_string", "some_other_string"]]
   - type1: |-
-      MyEnum[][]
+      FixedArray<FixedArray<MyEnum>>
     type2: |-
-      string[][] 
+      FixedArray<FixedArray<string>> 
     value1: |-
       [[MyEnum.EnumField1, MyEnum.EnumField2], [MyEnum.EnumField1, MyEnum.EnumField2]]
     value2: |-
@@ -60,9 +60,9 @@ cases:
     decl: |-
       enum MyEnum { EnumField1, EnumField2 }
   - type1: |-
-      boolean[][]
+      FixedArray<FixedArray<boolean>>
     type2: |-
-      string[][] 
+      FixedArray<FixedArray<string>> 
     value1: |-
       [[true, false], [true, false]]
     value2: |-

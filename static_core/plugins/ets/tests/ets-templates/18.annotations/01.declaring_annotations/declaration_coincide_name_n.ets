@@ -28,7 +28,7 @@ class ClassName {}
 
 interface InterfaceName {}
 
-type TypeName = number[]
+type TypeName = FixedArray<number>
 
 enum EnumName {EnumField1, EnumField2}
 
