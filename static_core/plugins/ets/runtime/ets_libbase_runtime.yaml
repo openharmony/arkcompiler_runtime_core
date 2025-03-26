@@ -36,6 +36,9 @@ coretypes:
 - managed_class: std.core.Job
   mirror_class: ark::ets::EtsJob
 
+- managed_class: std.core.CompletableJob
+  mirror_class: ark::ets::EtsJob
+
 - managed_class: Array
   mirror_class: ark::ets::EtsCharArray
 
@@ -2452,6 +2455,26 @@ intrinsics:
       ret: std.core.Object
       args: []
     impl: ark::ets::intrinsics::EtsAwaitJob
+
+  - name: StdJobFinish
+    space: ets
+    class_name: std.core.CompletableJob
+    method_name: finishImpl
+    static: false
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsFinishJob
+
+  - name: StdJobFail
+    space: ets
+    class_name: std.core.CompletableJob
+    method_name: failImpl
+    static: false
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsFailJob
 
 ######################
 # std.core.Promise #

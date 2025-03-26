@@ -38,7 +38,7 @@ export class ExclusiveLauncher {
 
 /**
  * Helper class for ExclusiveLauncher that allows to use
- * the same exclusive worker for several tasks 
+ * the same exclusive worker for several tasks
  */
 export class EAWorker {
     private worker: InternalWorker;
@@ -51,24 +51,25 @@ export class EAWorker {
      * Run task in EAWorker
      * Note: it has no effect if EAWorker was stoped
      */
-    public run<T>(task: () => T): Promise<T> {
-        return this.worker.run(task);
+    public run<R> (task: Function, ...args: NullishType[]): Job<R> {
+        return this.worker.run<R>(task, ...args);
     }
 
     /**
      * Stop EAWorker
      * This method closes run queue and detaches worker
-     * Note: it's required to call stop for EAWorker 
+     * Note: it's required to call join for EAWorker
      */
-    public stop() {
-        this.worker.stop();
+    public join() {
+        this.worker.join();
     }
 };
 
 interface InternalWorker {
-    run<T>(task: () => T): Promise<T>;
 
-    stop();
+    run<R>(task:Function, ...args: NullishType[]): Job<R>;
+
+    join();
 }
 
 class TaskPoster {
@@ -109,20 +110,26 @@ class InteropWorker implements InternalWorker {
         this.initEvent = new Event();
         ExclusiveLauncher.elaunch(() => this.body(), true);
     }
-    
-    public run<T>(task: () => T): Promise<T> {
-        let resolveFn: (val: T) => void;
-        let p = new Promise<T>((resolve: (val: T) => void) => {
-            resolveFn = resolve;
-        });
+
+    public run<R>(task:Function, ...args:NullishType[]):Job<R> {
+        let job = new CompletableJob<R>();
         this.initEvent.wait();
+        let wrapperTask = ():R => {
+            return task.unsafeCall(args) as R;
+        }
         this.poster!.post((): void => {
-            InteropWorker.asyncCall(() => { resolveFn(task()); });
+            InteropWorker.asyncCall(() => {
+                try {
+                    job.finish(wrapperTask());
+                } catch(e : Error) {
+                    job.fail(e);
+                }
+            });
         });
-        return p;
+        return job;
     }
 
-    public stop() {
+    public join() {
         this.initEvent.wait();
         this.poster!.destroy();
     }
@@ -146,24 +153,22 @@ class StaticWorker implements InternalWorker {
         ExclusiveLauncher.elaunch(() => this.body(), false);
     }
 
-    public run<T>(task: () => T): Promise<T> {
-        let resolveFn: (val: T) => void;
-        let rejectFn: (error: NullishType) => void;
-        let p = new Promise<T>((resolve: (val: T) => void, reject: (error: NullishType) => void) => {
-            resolveFn = resolve;
-            rejectFn = reject;
-        });
+    public run<T>(task: Function, ...args:(Object | null | undefined)[]): Job<T> {
+        let job = new CompletableJob<T>();
+        let wrapperTask = ():T => {
+            return task.unsafeCall(args) as T;
+        }
         this.tasks.push((): void => {
             try {
-                resolveFn(task());
-            } catch(e){
-                rejectFn(e);
+                job.finish(wrapperTask());
+            } catch(e : Error){
+                job.fail(e);
             }
         });
-        return p;
+        return job;
     }
 
-    public stop() {
+    public join() {
         this.tasks.push(StaticWorker.closingTask);
     }
 

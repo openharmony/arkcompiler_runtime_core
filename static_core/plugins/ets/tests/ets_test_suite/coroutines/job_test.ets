@@ -14,18 +14,16 @@
  */
 
 function main() {
-    let exceptionWasCatched = false;
-    let eaWorkers = new Array<EAWorker>();
+    let job1 = new CompletableJob<int>();
+    job1.finish(1);
+
+    assertEQ(job1.Await(), 1);
+
+    let job2 = new CompletableJob<int>();
+    job2.fail(new Error("Test error"));
     try {
-        while (true) {
-            eaWorkers.push(new EAWorker());
-        }
+        job2.Await();
     } catch (e) {
-        assertEQ(e.toString(), "CoroutinesLimitExceedError: The limit of Exclusive Workers has been reached");
-        exceptionWasCatched = true;
+        assertEQ(e.toString(), "Error: Test error");
     }
-    eaWorkers.forEach((eaWorker: EAWorker) => {
-        eaWorker.join();
-    });
-    assertTrue(exceptionWasCatched);
 }
