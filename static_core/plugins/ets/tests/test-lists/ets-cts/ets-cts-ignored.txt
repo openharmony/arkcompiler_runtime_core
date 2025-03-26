@@ -1298,13 +1298,6 @@
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_23.ets
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_24.ets
 
-#23062
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_22.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_23.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_24.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_25.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_26.ets
-
 #19951
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_0.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_17.ets
@@ -1313,8 +1306,8 @@
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_21.ets
 07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_5.ets
 07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_6.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_27.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_28.ets
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1_22.ets
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1_23.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_6.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_8.ets
 

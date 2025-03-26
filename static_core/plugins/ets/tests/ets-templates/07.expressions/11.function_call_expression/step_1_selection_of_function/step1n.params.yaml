@@ -84,3 +84,90 @@ cases:
           // duplicate functions
           assertEQ( foo(new Number()), "N" )
 
+
+    - decl: |-
+          function foo(p: number): string {
+              return "n"
+          }
+          function foo(p: Number): string {
+          return "N"
+          }
+          function foo(p: number, q: number = 0.0): string {
+              return "nD1"
+          }
+          function foo(p: Number, q: number = 0.0): string {
+              return "ND1"
+          }
+      use: |-
+          // select function without boxing/unboxing and without default parameter
+          assertEQ( foo(0.0), "n" )
+          assertEQ( foo(new Number()), "N" )
+
+
+    - decl: |-
+          function foo(p: number): string {
+              return "n"
+          }
+          function foo(p: number, q: number = 0.0): string {
+              return "nD1"
+          }
+          function foo(p: Number, q: number = 0.0): string {
+              return "ND1"
+          }
+      use: |-
+          // select function with unboxing and without default parameter
+          assertEQ( foo(0.0), "n" )
+          assertEQ( foo(new Number()), "n" )
+
+
+    - decl: |-
+          function foo(p: Number): string {
+              return "N"
+          }
+          function foo(p: number, q: number = 0.0): string {
+              return "nD1"
+          }
+          function foo(p: Number, q: number = 0.0): string {
+              return "ND1"
+          }
+      use: |-
+          // select function with boxing and without default parameter
+          assertEQ( foo(0.0), "N" )
+          assertEQ( foo(new Number()), "N" )
+
+
+    - decl: |-
+          function foo(p: number): string {
+              return "n"
+          }
+          function foo(p: Number): string {
+              return "N"
+          }
+          function foo(p: number, q?: Number): string {
+              return "nD2"
+          }
+          function foo(p: Number, q?: Number): string {
+              return "ND2"
+          }
+      use: |-
+          // select function without boxing/unboxing and without undefined parameter
+          assertEQ( foo(0.0), "n" )
+          assertEQ( foo(new Number()), "N" )
+
+
+    - decl: |-
+          function foo(p: number): string {
+              return "n"
+          }
+          function foo(p: number, q?: Number): string {
+              return "nD2"
+          }
+          function foo(p: Number, q?: Number): string {
+              return "ND2"
+          }
+      use: |-
+          // select function with unboxing and without undefined parameter
+          assertEQ( foo(0.0), "n" )
+          assertEQ( foo(new Number()), "n" )
+
+
