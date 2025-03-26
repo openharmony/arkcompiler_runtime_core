@@ -1852,7 +1852,8 @@ void GraphChecker::VisitNewObject([[maybe_unused]] GraphVisitor *v, Inst *inst)
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v,
                                         opcode == Opcode::LoadAndInitClass || opcode == Opcode::LoadRuntimeClass ||
                                             opcode == Opcode::UnresolvedLoadAndInitClass ||
-                                            opcode == Opcode::LoadImmediate,
+                                            opcode == Opcode::LoadImmediate || opcode == Opcode::Phi ||
+                                            opcode == Opcode::Select,
                                         (std::cerr << "The first input for the NewObject should be LoadAndInitClass or "
                                                       "UnresolvedLoadAndInitClass or LoadRuntimeClass or LoadImmediate",
                                          inst->Dump(&std::cerr), initInst->Dump(&std::cerr)));

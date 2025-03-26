@@ -23,6 +23,7 @@
 #include "compiler_options.h"
 #include "optimizer/ir/analysis.h"
 #include "optimizer/ir/graph_visitor.h"
+#include "utils/arena_containers.h"
 
 namespace ark::compiler {
 
@@ -34,7 +35,7 @@ class PANDA_PUBLIC_API Peepholes : public Optimization, public GraphVisitor {
     using Optimization::Optimization;
 
 public:
-    explicit Peepholes(Graph *graph) : Optimization(graph) {}
+    explicit Peepholes(Graph *graph) : Optimization(graph), inputs_(graph->GetLocalAllocator()->Adapter()) {}
 
     NO_MOVE_SEMANTIC(Peepholes);
     NO_COPY_SEMANTIC(Peepholes);
@@ -183,6 +184,7 @@ private:
     static bool CreateCompareInsteadOfXorAdd(Inst *oldInst);
 
     bool OptimizeLenArrayForMultiArray(Inst *lenArray, Inst *inst, size_t indexSize);
+    bool TryOptimizeLenArrayForPhi(Inst *lenArray, PhiInst *phi);
     static bool TryEliminatePhi(PhiInst *phi);
     // It is check can we use this peephole in OSR or not
     static bool SkipThisPeepholeInOSR(Inst *inst, Inst *newInput);
@@ -241,6 +243,7 @@ private:
     uint32_t applyIndex_ {0};
 
     bool isApplied_ {false};
+    ArenaVector<Inst *> inputs_;
 };
 }  // namespace ark::compiler
 

@@ -54,7 +54,6 @@ function sum(...values: number[]): number {
 }
 
 // Temporary must be removed, after inlining sum
-// NOTE(schernykh): It must be removed, but now - not, because of incorrect visit for SaveStateDeoptimize
 function test1(): number {
     return sum(6, 5, 4, 3, 2, 1, 0);
 }
@@ -62,7 +61,6 @@ function test1(): number {
 let gValues: number[]; 
 
 // Tmp array creation must be moved to if branch.
-// NOTE(schernykh): It must be removed, but now - not, because of incorrect visit for SaveStateDeoptimize
 function test2(flag: boolean): number {
     let values = [1, 2, 3, 4];
     let sum = values[0];

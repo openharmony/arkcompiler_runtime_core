@@ -1160,6 +1160,41 @@ void Codegen::CreateDebugRuntimeCallsForNewObject(Inst *inst, [[maybe_unused]] R
     }
 }
 
+bool Codegen::CheckPhiClassInputsAreEqual(Inst *phi)
+{
+    ASSERT(phi->IsPhi());
+    // We can omit runtime call only if all inputs are of the same class,
+    // see checks in CreateNewObjCall below.
+    auto inputOpcode = phi->GetInput(0).GetInst()->GetOpcode();
+
+    auto checkOpcode = [](Opcode op) {
+        // Fastpath only works for these opcodes
+        return op == Opcode::LoadAndInitClass || op == Opcode::LoadImmediate;
+    };
+    if (!checkOpcode(inputOpcode)) {
+        return false;
+    }
+
+    auto getClass = [](Inst *inst) {
+        if (inst->GetOpcode() == Opcode::LoadAndInitClass) {
+            return inst->CastToLoadAndInitClass()->GetClass();
+        }
+        return inst->CastToLoadImmediate()->GetClass();
+    };
+
+    auto klass = getClass(phi->GetInput(0).GetInst());
+    for (auto &input : phi->GetInputs().SubSpan(1)) {
+        if (!checkOpcode(input.GetInst()->GetOpcode())) {
+            return false;
+        }
+        // We don't care about opcode equality, if klass is the same
+        if (klass != getClass(input.GetInst())) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void Codegen::CreateNewObjCall(NewObjectInst *newObj)
 {
     auto dst = ConvertRegister(newObj->GetDstReg(), newObj->GetType());
@@ -1167,6 +1202,10 @@ void Codegen::CreateNewObjCall(NewObjectInst *newObj)
     auto initClass = newObj->GetInput(0).GetInst();
     auto srcClass = ConvertRegister(newObj->GetSrcReg(0), DataType::POINTER);
     auto runtime = GetRuntime();
+
+    if (initClass->IsPhi() && CheckPhiClassInputsAreEqual(initClass)) {
+        initClass = initClass->GetInput(0).GetInst();
+    }
 
     auto maxTlabSize = runtime->GetTLABMaxSize();
     if (maxTlabSize == 0 ||

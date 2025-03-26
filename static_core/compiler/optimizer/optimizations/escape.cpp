@@ -14,6 +14,12 @@
  */
 
 #include <algorithm>
+#include <cstddef>
+#include <iostream>
+#include <utility>
+#include <variant>
+#include "macros.h"
+#include "mem/arena_allocator.h"
 #include "optimizer/ir/analysis.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/optimizations/escape.h"
@@ -30,14 +36,23 @@ constexpr ZeroInst *ZERO_INST {nullptr};
 using BasicBlockState = EscapeAnalysis::BasicBlockState;
 
 class VirtualState {
+    using Fields = ArenaMap<Field, StateOwner, FieldComporator>;
+
 public:
     VirtualState(Inst *inst, StateId id, ArenaAllocator *alloc)
-        : inst_(inst), id_(id), fields_(alloc->Adapter()), aliases_(alloc->Adapter())
+        : inst_(inst), id_(id), fields_(alloc->Adapter()), aliases_(alloc->Adapter()), inputs_(alloc->Adapter())
     {
         AddAlias(inst);
+        if (!IsPhi()) {
+            newAlloc_ = inst->Clone(inst->GetBasicBlock()->GetGraph());
+            for (size_t i = 0; i < inst->GetInputsCount() - 1; ++i) {
+                inputs_.push_back(inst->GetInput(i).GetInst());
+            }
+            ASSERT(inputs_.size() == inst->GetInputsCount() - 1);
+        }
         if (IsNewArray()) {
-            arrayComponentType_ =
-                inst->GetBasicBlock()->GetGraph()->GetRuntime()->GetArrayComponentType(GetArrayComponentClass());
+            SetArrayComponentType(
+                inst->GetBasicBlock()->GetGraph()->GetRuntime()->GetArrayComponentType(GetArrayComponentClass()));
         }
     }
 
@@ -47,26 +62,38 @@ public:
 
     bool IsNewObject() const
     {
-        ASSERT(inst_->GetOpcode() == Opcode::NewObject || inst_->GetOpcode() == Opcode::NewArray);
-        return inst_->GetOpcode() == Opcode::NewObject;
+        return inst_->Is(Opcode::NewObject);
     }
 
     bool IsNewArray() const
     {
-        return !IsNewObject();
+        return inst_->Is(Opcode::NewArray);
+    }
+
+    bool IsPhi() const
+    {
+        return inst_->Is(Opcode::Phi);
     }
 
     ClassPtr GetArrayComponentClass() const
     {
-        ASSERT(IsNewArray());
-        return GetClass(inst_->GetDataFlowInput(0));
+        ASSERT(IsNewArray() || (IsPhi() && GetNewAlloc()->Is(Opcode::NewArray)));
+        return GetClass(IsPhi() ? inst_ : inst_->GetDataFlowInput(0));
     }
 
     DataType::Type GetArrayComponentType() const
     {
-        ASSERT(IsNewArray());
+        ASSERT(IsNewArray() || (IsPhi() && GetNewAlloc()->Is(Opcode::NewArray)));
         ASSERT(arrayComponentType_ != DataType::NO_TYPE);
         return arrayComponentType_;
+    }
+
+    void SetArrayComponentType(DataType::Type type)
+    {
+        ASSERT(IsNewArray() || (IsPhi() && GetNewAlloc()->Is(Opcode::NewArray)));
+        ASSERT(arrayComponentType_ == DataType::NO_TYPE);
+        ASSERT(type != DataType::NO_TYPE);
+        arrayComponentType_ = type;
     }
 
     void SetField(Field field, StateOwner inst)
@@ -83,7 +110,7 @@ public:
         return it->second;
     }
 
-    const ArenaMap<Field, StateOwner, FieldComporator> &GetFields() const
+    const Fields &GetFields() const
     {
         return fields_;
     }
@@ -103,6 +130,9 @@ public:
             copy->SetField(ptr, id);
         }
         copy->aliases_ = aliases_;
+        copy->newAlloc_ = newAlloc_;
+        copy->inputs_ = inputs_;
+        copy->arrayComponentType_ = arrayComponentType_;
         return copy;
     }
 
@@ -120,14 +150,29 @@ public:
         aliases_.push_back(inst);
     }
 
-    bool Equals(const VirtualState *other) const
+    bool Equals(const Fields &lhs, const Fields &rhs, Marker mrk) const
+    {
+        if (lhs.size() != rhs.size()) {
+            return false;
+        }
+        for (const auto &[field, lso] : lhs) {
+            if (rhs.find(field) == rhs.end()) {
+                return false;
+            }
+            if (!EscapeAnalysis::Equals(lso, rhs.at(field), mrk)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool Equals(const VirtualState *other, Marker mrk) const
     {
         if (other == nullptr) {
             return false;
         }
-        if (fields_ == other->fields_) {
-            ASSERT(aliases_ == other->aliases_);
-            return true;
+        if (Equals(fields_, other->fields_, mrk)) {
+            return aliases_ == other->aliases_;
         }
         return false;
     }
@@ -137,41 +182,78 @@ public:
         return aliases_;
     }
 
+    void SetNewAlloc(Inst *newAlloc)
+    {
+        ASSERT(newAlloc != nullptr);
+        newAlloc_ = newAlloc;
+    }
+
+    Inst *GetNewAlloc() const
+    {
+        ASSERT(newAlloc_ != nullptr);
+        return newAlloc_;
+    }
+
+    void AppendInput(Inst *inst)
+    {
+        ASSERT(inst != nullptr);
+        ASSERT((IsNewObject() && inputs_.empty()) || ((IsNewArray() || IsPhi()) && inputs_.size() < 2U));
+        inputs_.push_back(inst);
+    }
+
+    const ArenaVector<Inst *> &GetInputs() const
+    {
+        return inputs_;
+    }
+
     void Dump()
     {
         if (inst_ == nullptr) {
             return;
         }
-        std::cerr << "  Ptr: " << this << "\n";
-        std::cerr << "    VS for " << (IsNewObject() ? "object " : "array ") << inst_->GetId() << "\n";
+        std::cerr << "    VS " << id_ << " for " << (IsNewObject() ? "object " : (IsNewArray() ? "array " : "phi "))
+                  << inst_->GetId() << "\n";
         std::cerr << "      Aliases: ";
         for (auto alias : aliases_) {
             std::cerr << alias->GetId() << ", ";
         }
         std::cerr << "\n      Fields: ";
         for (auto [field, stateOwner] : fields_) {
+            std::cerr << "{";
             if (std::holds_alternative<FieldPtr>(field)) {
-                std::cerr << std::get<FieldPtr>(field) << ",";
+                const auto &f = std::get<FieldPtr>(field);
+                std::cerr << f;
             } else {
-                std::cerr << std::get<Index>(field).index << ",";
+                const auto &f = std::get<Index>(field).index;
+                std::cerr << f;
             }
+            std::cerr << ", ";
+            EscapeAnalysis::DumpStateOwner(stateOwner);
+            std::cerr << "}, ";
+        }
+        std::cerr << "\n";
+        std::cerr << "      Inputs: ";
+        for (auto inst : inputs_) {
+            std::cerr << inst->GetId() << ", ";
         }
         std::cerr << "\n";
     }
 
 private:
     Inst *inst_;
+    Inst *newAlloc_ {nullptr};
     StateId id_;
-    ArenaMap<Field, StateOwner, FieldComporator> fields_;
+    Fields fields_;
     ArenaVector<Inst *> aliases_;
+    ArenaVector<Inst *> inputs_;
     DataType::Type arrayComponentType_ {DataType::NO_TYPE};
 };
 
-class PhiState {
+class PhiState : public MarkerSet {
 public:
     PhiState(ArenaAllocator *alloc, DataType::Type type) : inputs_(alloc->Adapter()), type_(type) {}
 
-    ~PhiState() = default;
+    ~PhiState() override = default;
     NO_COPY_SEMANTIC(PhiState);
     NO_MOVE_SEMANTIC(PhiState);
 
@@ -199,6 +281,39 @@ public:
     DataType::Type GetType() const
     {
         return type_;
+    }
+
+    bool Equals(const PhiState *rhs, Marker mrk)
+    {
+        if (SetMarker(mrk)) {
+            return true;
+        }
+        if (type_ != rhs->type_) {
+            return false;
+        }
+        if (inputs_.size() != rhs->inputs_.size()) {
+            return false;
+        }
+        for (size_t i = 0; i != inputs_.size(); ++i) {
+            if (!EscapeAnalysis::Equals(inputs_[i], rhs->inputs_[i], mrk)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void Dump()
+    {
+        std::cerr << "{ Type: " << DataType::ToString(type_) << ", inputs: ";
+        for (auto &so : inputs_) {
+            if (std::holds_alternative<PhiState *>(so)) {
+                std::cerr << "PhiState(" << this << "), ";
+            } else {
+                EscapeAnalysis::DumpStateOwner(so);
+                std::cerr << ", ";
+            }
+        }
+        std::cerr << "}";
     }
 
 private:
@@ -328,33 +443,20 @@ public:
         return copy;
     }
 
-    bool Equals(const BasicBlockState *other) const
+    bool Equals(const BasicBlockState *other, Marker mrk) const
     {
-        if (states_ != other->states_) {
+        std::vector<VirtualState *> copy;
+        std::copy_if(stateValues_.begin(), stateValues_.end(), std::back_inserter(copy),
+                     [](VirtualState *v) { return v != nullptr; });
+        std::vector<VirtualState *> otherCopy;
+        std::copy_if(other->stateValues_.begin(), other->stateValues_.end(), std::back_inserter(otherCopy),
+                     [](VirtualState *v) { return v != nullptr; });
+        if (copy.size() != otherCopy.size()) {
             return false;
         }
 
-        StateId id;
-        for (id = 0; id < std::min<size_t>(stateValues_.size(), other->stateValues_.size()); ++id) {
-            auto v = stateValues_[id];
-            auto otherState = other->stateValues_[id];
-            if ((v == nullptr) != (otherState == nullptr)) {
-                return false;
-            }
-            if (v == nullptr) {
-                continue;
-            }
-            if (!v->Equals(otherState)) {
-                return false;
-            }
-        }
-        for (; id < stateValues_.size(); ++id) {
-            if (stateValues_[id] != nullptr) {
-                return false;
-            }
-        }
-        for (; id < other->stateValues_.size(); ++id) {
-            if (other->stateValues_[id] != nullptr) {
+        for (StateId id = 0; id < copy.size(); ++id) {
+            if (!copy[id]->Equals(otherCopy[id], mrk)) {
                 return false;
             }
         }
@@ -376,6 +478,39 @@ private:
     ArenaMap<Inst *, StateId> states_;
     ArenaVector<VirtualState *> stateValues_;
 };
+
+bool EscapeAnalysis::Equals(const StateOwner &lso, const StateOwner &rso, Marker mrk)
+{
+    if (std::holds_alternative<const ZeroInst *>(lso)) {
+        return std::holds_alternative<const ZeroInst *>(rso);
+    }
+    if (std::holds_alternative<Inst *>(lso)) {
+        if (!std::holds_alternative<Inst *>(rso)) {
+            return false;
+        }
+        return std::get<Inst *>(lso) == std::get<Inst *>(rso);
+    }
+    if (std::holds_alternative<PhiState *>(lso)) {
+        if (!std::holds_alternative<PhiState *>(rso)) {
+            return false;
+        }
+        return std::get<PhiState *>(lso)->Equals(std::get<PhiState *>(rso), mrk);
+    }
+    UNREACHABLE();
+    return false;
+}
+
+void EscapeAnalysis::DumpStateOwner(const StateOwner &stateOwner)
+{
+    if (std::holds_alternative<const ZeroInst *>(stateOwner)) {
+        std::cerr << "ZeroInst";
+    } else if (std::holds_alternative<Inst *>(stateOwner)) {
+        std::cerr << std::get<Inst *>(stateOwner)->GetId();
+    } else {
+        ASSERT(std::holds_alternative<PhiState *>(stateOwner));
+        std::get<PhiState *>(stateOwner)->Dump();
+    }
+}
 
 void EscapeAnalysis::DumpVStates()
 {
@@ -400,7 +535,11 @@ void EscapeAnalysis::DumpMStates()
         }
         for (auto [inst, vstate] : instVstates) {
             std::cerr << "    Inst: " << inst->GetId() << "\n";
-            vstate->Dump();
+            if (vstate == nullptr) {
+                std::cerr << "      Nullptr\n";
+            } else {
+                vstate->Dump();
+            }
         }
     }
 }
@@ -410,7 +549,6 @@ void EscapeAnalysis::DumpAliases()
     std::cerr << "Dump Aliases info\n";
     for (auto &[inst, stateOwner] : aliases_) {
         std::cerr << "  Inst: " << *inst << "\n";
-        std::cerr << "  Aliases: " << *std::get<Inst *>(stateOwner) << "\n";
     }
 }
 
@@ -419,6 +557,11 @@ void EscapeAnalysis::Dump()
     DumpVStates();
     DumpMStates();
     DumpAliases();
+    std::cerr << "Dump virtualizable allocations: ";
+    for (auto inst : virtualizableAllocations_) {
+        std::cerr << inst->GetId() << ",";
+    }
+    std::cerr << "\n";
 }
 
 bool EscapeAnalysis::DecomposeAnalysis::Decompose()
@@ -525,7 +668,7 @@ bool EscapeAnalysis::DecomposeAnalysis::SplitOneBlock(BasicBlock *&deoptBb)
     // Replace conditional deoptimize with compare + ifimm instruction.
     ReplaceDeopt(deoptBb, succBb, deopt, newDeopt);
 
-    CloneSaveStatesToSucc(deoptBb, succBb);
+    CloneSaveStatesToSucc(deoptBb, succBb, emptyBb);
     if (!ss->HasUsers()) {
         ss->ClearFlag(inst_flags::NO_DCE);
     }
@@ -677,27 +820,51 @@ void EscapeAnalysis::DecomposeAnalysis::RecoverDeopt(BasicBlock *deoptBb, DeoptI
     }
 }
 
-void EscapeAnalysis::DecomposeAnalysis::CloneSaveStatesToSucc(BasicBlock *bb, BasicBlock *succBb)
+void EscapeAnalysis::DecomposeAnalysis::CloneSaveStatesToSucc(BasicBlock *bb, BasicBlock *succBb, BasicBlock *newBb)
 {
+    auto isInlinedInst = [](Inst *inst) {
+        return inst->GetOpcode() == Opcode::ReturnInlined ||
+               (inst->IsCall() && static_cast<CallInst *>(inst)->IsInlined());
+    };
+    auto isSafeToReplaceInlinedInput = [bb, newBb](Inst *inst) {
+        auto *instBb = inst->GetBasicBlock();
+        return instBb != bb && instBb != newBb;
+    };
+    auto isSafeToReplaceInput = [succBb](Inst *inst) { return inst->GetBasicBlock() == succBb; };
+
     for (Inst *saveState : bb->AllInstsSafeReverse()) {
         if (!saveState->IsSaveState()) {
             continue;
         }
 
-        ArenaVector<User *> seperatedUsers(graph_->GetLocalAllocator()->Adapter());
+        ArenaVector<User *> separatedUsers(graph_->GetLocalAllocator()->Adapter());
+        ArenaVector<User *> inlinedUsers(graph_->GetLocalAllocator()->Adapter());
+        bool safeToReplaceInlined = true;
+        size_t numUsers = 0;
         for (auto &user : saveState->GetUsers()) {
-            if (user.GetInst()->GetBasicBlock() != succBb || user.GetInst()->GetOpcode() == Opcode::ReturnInlined ||
-                (user.GetInst()->IsCall() && static_cast<CallInst *>(user.GetInst())->IsInlined())) {
-                continue;
+            numUsers++;
+            auto *userInst = user.GetInst();
+            if (isInlinedInst(userInst) && isSafeToReplaceInlinedInput(userInst)) {
+                // Save Call*.Inlined and ReturnInlined, if they will be dominated by the new SaveState
+                inlinedUsers.push_back(&user);
+            } else if (isInlinedInst(userInst)) {
+                // This Call*.Inlined or ReturnInlined won't be dominated, leave inlined SaveState structure as-is
+                safeToReplaceInlined = false;
+            } else if (isSafeToReplaceInput(userInst)) {
+                // Other insts must be in the same block as their input SaveState (c) @haizaibali
+                separatedUsers.push_back(&user);
             }
-            seperatedUsers.push_back(&user);
         }
-        if (seperatedUsers.empty()) {
+        if (safeToReplaceInlined && (!separatedUsers.empty() || inlinedUsers.size() == numUsers)) {
+            // If creating new SaveState anyway, or old one has no other users, replace in *Inlined users as well
+            separatedUsers.insert(separatedUsers.end(), inlinedUsers.begin(), inlinedUsers.end());
+        }
+        if (separatedUsers.empty()) {
             continue;
         }
 
         auto saveStateClone = CopySaveState(graph_, static_cast<SaveStateInst *>(saveState));
-        for (auto &user : seperatedUsers) {
+        for (auto &user : separatedUsers) {
             user->GetInst()->ReplaceInput(saveState, saveStateClone);
         }
         succBb->PrependInst(saveStateClone);
@@ -708,6 +875,7 @@ void EscapeAnalysis::DecomposeAnalysis::CloneSaveStatesToSucc(BasicBlock *bb, Ba
 // states of its predecessors.
 void EscapeAnalysis::MergeProcessor::MergeStates(BasicBlock *block)
 {
+    COMPILER_LOG(DEBUG, PEA_EXT) << "MergeStates " << block->GetId();
     if (block->GetPredsBlocks().empty()) {
         return;
     }
@@ -741,17 +909,115 @@ void EscapeAnalysis::MergeProcessor::MergeStates(BasicBlock *block)
     MaterializeObjectsAtTheBeginningOfBlock(block);
 }
 
+bool EscapeAnalysis::MergeProcessor::NeedToMaterialize(Inst *phi)
+{
+    if (GetClass(phi) == nullptr) {
+        COMPILER_LOG(DEBUG, PEA_EXT) << "Phi's inputs have diffferent or unknown classes";
+        return true;
+    }
+    auto inputBb = phi->CastToPhi()->GetPhiInputBb(0);
+    auto phiInput = phi->GetInput(0).GetInst();
+    if (phiInput->IsDominate(phi)) {
+        return true;
+    }
+    auto commonId = parent_->GetState(inputBb)->GetStateId(phiInput);
+    bool materialize = commonId == EscapeAnalysis::MATERIALIZED_ID;
+    if (materialize) {
+        COMPILER_LOG(DEBUG, PEA_EXT) << "Already materialized";
+        return true;
+    }
+    for (size_t inputIdx = 1; inputIdx < phi->GetInputsCount(); ++inputIdx) {
+        inputBb = phi->CastToPhi()->GetPhiInputBb(inputIdx);
+        auto phiInputBB = phi->GetInput(inputIdx).GetInst();
+        if (phiInputBB->IsDominate(phi)) {
+            return true;
+        }
+        auto predId = parent_->GetState(inputBb)->GetStateId(phiInputBB);
+        if (predId == EscapeAnalysis::MATERIALIZED_ID) {
+            COMPILER_LOG(DEBUG, PEA_EXT) << "Input already materialized";
+            return true;
+        }
+    }
+    if (phiInput->Is(Opcode::NewArray)) {
+        auto lenArray = phiInput->GetDataFlowInput(1);
+        for (size_t inputIdx = 1; inputIdx < phi->GetInputsCount(); ++inputIdx) {
+            auto phiInputBB = phi->GetInput(inputIdx).GetInst();
+            ASSERT(phiInputBB->Is(Opcode::NewArray));
+            if (lenArray != phiInputBB->GetDataFlowInput(1)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void EscapeAnalysis::MergeProcessor::MaterializePhi(BasicBlockState *newState, Inst *phi)
+{
+    for (size_t inputIdx = 0; inputIdx < phi->GetInputsCount(); ++inputIdx) {
+        auto inputBb = phi->CastToPhi()->GetPhiInputBb(inputIdx);
+        auto inputInst = phi->GetInput(inputIdx).GetInst();
+        parent_->Materialize(inputInst, inputBb);
+        parent_->RemoveVirtualizableAllocation(inputInst);
+    }
+    newState->Materialize(phi);
+    parent_->RemoveVirtualizableAllocation(phi);
+}
+
+void EscapeAnalysis::MergeProcessor::VirtualizePhi(BasicBlock *block, BasicBlockState *newState, Inst *phi)
+{
+    auto vstate = parent_->CreateVState(phi);
+    newState->SetState(phi, vstate);
+    statesToMerge_.clear();
+    for (size_t inputIdx = 0; inputIdx < phi->GetInputsCount(); ++inputIdx) {
+        auto bb = phi->CastToPhi()->GetPhiInputBb(inputIdx);
+        auto input = phi->GetInput(inputIdx).GetInst();
+        statesToMerge_.push_back(parent_->GetState(bb)->GetState(input));
+    }
+    MergeNewAlloc(vstate);
+    MergeFields<false>(block, newState, vstate);
+    parent_->AddVirtualizableAllocation(phi);
+}
+
+void EscapeAnalysis::MergeProcessor::MergeNewAlloc(VirtualState *vstate)
+{
+    Inst *alloc = statesToMerge_.front()->GetNewAlloc();
+    PhiInst *klassPhi = parent_->GetGraph()->CreateInstPhi(DataType::REFERENCE, vstate->GetInst()->GetPc());
+    for (auto state : statesToMerge_) {
+        ASSERT(state != nullptr);
+        ASSERT(state->GetNewAlloc()->Is(alloc->GetOpcode()));
+        klassPhi->AppendInput(state->GetInputs()[0]);
+    }
+    vstate->GetInst()->InsertBefore(klassPhi);
+    vstate->AppendInput(klassPhi);
+    if (alloc->Is(Opcode::NewObject)) {
+        auto newObj = alloc->CastToNewObject();
+        vstate->SetNewAlloc(
+            parent_->GetGraph()->CreateInstNewObject(DataType::REFERENCE, vstate->GetInst()->GetPc(), nullptr, nullptr,
+                                                     TypeIdMixin {newObj->GetTypeId(), newObj->GetMethod()}));
+    } else {
+        ASSERT(alloc->Is(Opcode::NewArray));
+        auto newArr = alloc->CastToNewArray();
+        vstate->SetNewAlloc(
+            parent_->GetGraph()->CreateInstNewArray(DataType::REFERENCE, vstate->GetInst()->GetPc(), nullptr, nullptr,
+                                                    nullptr, TypeIdMixin {newArr->GetTypeId(), newArr->GetMethod()}));
+        vstate->AppendInput(statesToMerge_.front()->GetInputs()[1]);
+        vstate->SetArrayComponentType(
+            parent_->GetGraph()->GetRuntime()->GetArrayComponentType(statesToMerge_.front()->GetArrayComponentClass()));
+    }
+}
+
 void EscapeAnalysis::MergeProcessor::ProcessPhis(BasicBlock *block, BasicBlockState *newState)
 {
     for (auto phi : block->PhiInsts()) {
         if (!DataType::IsReference(phi->GetType())) {
             continue;
         }
-        for (size_t inputIdx = 0; inputIdx < phi->GetInputsCount(); ++inputIdx) {
-            auto bb = phi->CastToPhi()->GetPhiInputBb(inputIdx);
-            parent_->Materialize(phi->GetInput(inputIdx).GetInst(), bb);
+        COMPILER_LOG(DEBUG, PEA_EXT) << "Visit " << *phi;
+        if (NeedToMaterialize(phi)) {
+            MaterializePhi(newState, phi);
+        } else {
+            VirtualizePhi(block, newState, phi);
         }
-        newState->Materialize(phi);
     }
 }
 
@@ -773,6 +1039,7 @@ void EscapeAnalysis::MergeProcessor::CollectInstructionsToMerge(BasicBlock *bloc
 
 bool EscapeAnalysis::MergeProcessor::MergeState(StateOwner inst, BasicBlock *block, BasicBlockState *newState)
 {
+    COMPILER_LOG(DEBUG, PEA_EXT) << "MergeState in block " << block->GetId() << " for state owner ";
     auto &predsBlocks = block->GetPredsBlocks();
     auto commonId = parent_->GetState(predsBlocks.front())->GetStateId(inst);
     // Materialization is required if predecessors have different
@@ -802,22 +1069,39 @@ bool EscapeAnalysis::MergeProcessor::MergeState(StateOwner inst, BasicBlock *blo
         return false;
     }
 
-    auto vstate = parent_->CreateVState(
-        parent_->GetState(block->GetPredsBlocks().front())->GetStateById(commonId)->GetInst(), commonId);
-    newMaterialization = MergeFields(block, newState, commonId, vstate, pendingInsts_);
+    statesToMerge_.clear();
+    for (auto predBlock : predsBlocks) {
+        statesToMerge_.push_back(parent_->GetState(predBlock)->GetStateById(commonId));
+    }
+
+    auto parentState = parent_->GetState(block->GetPredsBlocks().front())->GetStateById(commonId);
+    auto vstate = parent_->CreateVState(parentState->GetInst(), commonId);
+
+    if (parentState->IsPhi()) {
+        vstate->SetNewAlloc(parentState->GetNewAlloc());
+        if (vstate->GetNewAlloc()->Is(Opcode::NewArray)) {
+            vstate->SetArrayComponentType(parentState->GetArrayComponentType());
+        }
+        for (auto input : parentState->GetInputs()) {
+            vstate->AppendInput(input);
+        }
+    }
+
+    newMaterialization = MergeFields(block, newState, vstate);
     newState->SetState(inst, vstate);
     // if inst is an alias then we also need to process original inst
     pendingInsts_.push_back(vstate->GetInst());
     return newMaterialization;
 }
 
-bool EscapeAnalysis::MergeProcessor::MergeFields(BasicBlock *block, BasicBlockState *blockState, StateId stateToMerge,
-                                                 VirtualState *vstate, ArenaVector<StateOwner> &mergeQueue)
+template <bool NO_NEED_MERGE>
+bool EscapeAnalysis::MergeProcessor::MergeFields(BasicBlock *block, BasicBlockState *blockState, VirtualState *vstate)
 {
+    COMPILER_LOG(DEBUG, PEA_EXT) << "MergeFields for vstate " << vstate->GetId();
     allFields_.clear();
-    for (auto pred : block->GetPredsBlocks()) {
-        ASSERT(parent_->GetState(pred)->GetStateById(stateToMerge) != nullptr);
-        for (auto &field : parent_->GetState(pred)->GetStateById(stateToMerge)->GetFields()) {
+    for (auto predState : statesToMerge_) {
+        ASSERT(predState != nullptr);
+        for (auto &field : predState->GetFields()) {
             allFields_.push_back(field.first);
         }
     }
@@ -830,24 +1114,21 @@ bool EscapeAnalysis::MergeProcessor::MergeFields(BasicBlock *block, BasicBlockSt
         // Use ZERO_INST as a placeholder for a field that was not set.
         // When it'll come to scalar replacement this placeholder will be
         // replaced with actual zero or nullptr const.
-        auto mergeState = parent_->GetState(block->GetPredsBlocks().front())->GetStateById(stateToMerge);
+        auto mergeState = statesToMerge_.front();
         ASSERT(mergeState != nullptr);
         StateOwner commonId = mergeState->GetFieldOrDefault(field, ZERO_INST);
         bool needMerge = false;
-        for (auto predBlock : block->GetPredsBlocks()) {
-            auto predState = parent_->GetState(predBlock)->GetStateById(stateToMerge);
+        for (auto predState : statesToMerge_) {
             ASSERT(predState != nullptr);
             auto predFieldValue = predState->GetFieldOrDefault(field, ZERO_INST);
-            if (commonId != predFieldValue) {
-                needMerge = true;
-            }
+            needMerge |= commonId != predFieldValue;
             fieldsMergeBuffer_.push_back(predFieldValue);
         }
-        if (!needMerge) {
+        if (NO_NEED_MERGE && !needMerge) {
             vstate->SetField(field, commonId);
             // enqueue inst id for state copying
             if (!blockState->HasState(commonId)) {
-                mergeQueue.push_back(commonId);
+                pendingInsts_.push_back(commonId);
             }
             continue;
         }
@@ -903,7 +1184,6 @@ void EscapeAnalysis::Initialize()
         phis_.emplace_back(GetLocalAllocator()->Adapter());
     }
 
-    PropagateLoadObjectsUpwards();
     if (!GetGraph()->IsAnalysisValid<LoopAnalyzer>()) {
         GetGraph()->RunPass<LoopAnalyzer>();
     }
@@ -912,87 +1192,12 @@ void EscapeAnalysis::Initialize()
     }
 }
 
-/*
- * Propagate upwards the LoadObjects that are users of a ref Phi
- *
- * Requirements:
- * - the phi has NewObject instructions as it's inputs
- * - all the phi users are LoadObject instructions
-
- considering the above we can remove the original phi after propagating
- all the load instructions upwards and adding corresponding phi instructions
- for them in the original phi's basic block
-
- for each user in users(phi) do
-   create new phi of type(user)
-   for each input in inputs(phi) do
-     create load instuction of type(user)
-     insert load before bb(input).last
-     set load input to input(phi, bb(input))
-     add load to new phi inputs
-   end
-   add users(user) to the new phi instruction
-   remove user
- end
- remove phi
-
- BB 1            BB 2
- 1.NewObject     2.NewObject
-      |               |
-      ----Phi(1, 2)----
-               |
-      t1.LoadObject(Phi, f1)
-      t2.LoadObject(Phi, f2)
-
-
- BB 1                     BB 2
- 1.NewObject              2.NewObject
- 10.t1.LoadObject(1, f1)  20.t1.LoadObject(2, f1)
- 11.t2.LoadObject(1, f2)  21.t2.LoadObject(2, f2)
-      |                            |
-      ----------t1.Phi(10,20)-------
-                t2.Phi(11,21)
-*/
-
-static bool PhiHasLoadObjToPropagate(Inst *phi)
-{
-    if (!DataType::IsReference(phi->GetType())) {
-        return false;
-    }
-
-    ObjectTypeInfo typeinfo = {};
-    for (auto input : phi->GetInputs()) {
-        auto inst = input.GetInst();
-        if (inst->GetOpcode() != Opcode::NewObject) {
-            return false;
-        }
-        if (!typeinfo) {
-            typeinfo = inst->GetObjectTypeInfo();
-            continue;
-        }
-        if (inst->GetObjectTypeInfo() != typeinfo) {
-            return false;
-        }
-    }
-
-    if (!typeinfo) {
-        return false;
-    }
-
-    for (auto &user : phi->GetUsers()) {
-        if (user.GetInst()->GetOpcode() != Opcode::LoadObject) {
-            return false;
-        }
-    }
-    return true;
-}
-
 #ifndef NDEBUG
 bool EscapeAnalysis::EnsureLoadsRemoval()
 {
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         for (auto inst : bb->Insts()) {
-            if (inst->GetOpcode() == Opcode::LoadObject && inst->IsMarked(removableLoads_)) {
+            if (inst->Is(Opcode::LoadObject) && inst->IsMarked(removableLoads_)) {
                 return false;
             }
         }
@@ -1000,44 +1205,6 @@ bool EscapeAnalysis::EnsureLoadsRemoval()
     return true;
 }
 #endif
-
-void EscapeAnalysis::CreateTemporaryLoads(Inst *phi)
-{
-    for (auto &user : phi->GetUsers()) {
-        auto ld = user.GetInst();
-        auto type = ld->GetType();
-        auto newPhi = GetGraph()->CreateInstPhi(type, phi->GetPc());
-        for (size_t i = 0; i < phi->GetInputsCount(); ++i) {
-            auto ldClone = ld->Clone(GetGraph());
-            ldClone->SetInput(0, phi->GetInput(i).GetInst());
-            auto insertAt = phi->CastToPhi()->GetPhiInputBb(i)->GetLastInst();
-            insertAt = insertAt->IsControlFlow() ? insertAt->GetPrev() : insertAt;
-            insertAt->InsertAfter(ldClone);
-            newPhi->AppendInput(ldClone);
-            newPhi->SetPhiInputBbNum(i, phi->CastToPhi()->GetPhiInputBbNum(i));
-        }
-        ld->ReplaceUsers(newPhi);
-        phi->InsertAfter(newPhi);
-        phi->RemoveUser(&user);
-        ld->GetBasicBlock()->RemoveInst(ld);
-#ifndef NDEBUG
-        ld->SetMarker(removableLoads_);
-#endif
-    }
-}
-
-void EscapeAnalysis::PropagateLoadObjectsUpwards()
-{
-    for (auto bb : GetGraph()->GetBlocksRPO()) {
-        for (auto phi : bb->PhiInstsSafe()) {
-            if (!PhiHasLoadObjToPropagate(phi)) {
-                continue;
-            }
-            CreateTemporaryLoads(phi);
-            phi->GetBasicBlock()->RemoveInst(phi);
-        }
-    }
-}
 
 bool EscapeAnalysis::RunImpl()
 {
@@ -1239,8 +1406,7 @@ void EscapeAnalysis::Materialize(StateOwner inst, Inst *before)
         // instruction is Compare. To avoid materialization in between (which may prevent other optimizations)
         // use previous instruction as materialization point.
         auto prev = before->GetPrev();
-        if ((before->GetOpcode() == Opcode::If || before->GetOpcode() == Opcode::IfImm) &&
-            prev->GetOpcode() == Opcode::Compare) {
+        if ((before->IsOneOf(Opcode::If, Opcode::IfImm)) && prev->Is(Opcode::Compare)) {
             res = before->GetPrev();
         }
     }
@@ -1328,15 +1494,12 @@ void EscapeAnalysis::RegisterVirtualObjectFieldsForMaterialization(Inst *ss)
 
 VirtualState *EscapeAnalysis::CreateVState(Inst *inst)
 {
-    auto vstate = GetLocalAllocator()->New<VirtualState>(inst, stateId_++, GetLocalAllocator());
-    if (vstate == nullptr) {
-        UNREACHABLE();
-    }
-    return vstate;
+    return CreateVState(inst, stateId_++);
 }
 
 VirtualState *EscapeAnalysis::CreateVState(Inst *inst, StateId id)
 {
+    COMPILER_LOG(DEBUG, PEA_EXT) << "Create VState " << id << " for " << *inst;
     auto vstate = GetLocalAllocator()->New<VirtualState>(inst, id, GetLocalAllocator());
     if (vstate == nullptr) {
         UNREACHABLE();
@@ -1384,7 +1547,7 @@ void EscapeAnalysis::VisitAllocation(Inst *inst)
         }
         if (!materialize) {
             RuntimeInterface::ClassPtr klassPtr;
-            if (klassInput->GetOpcode() == Opcode::LoadImmediate) {
+            if (klassInput->Is(Opcode::LoadImmediate)) {
                 klassPtr = klassInput->CastToLoadImmediate()->GetObject();
             } else {
                 klassPtr = static_cast<ClassInst *>(klassInput)->GetClass();
@@ -1481,7 +1644,7 @@ void EscapeAnalysis::HandleMaterializationSite(Inst *inst)
 
     for (auto &t : instsMap) {
         // skip aliases
-        if (!LiveInAnalysis::IsAllocInst(t.first) || t.first == inst) {
+        if ((!LiveInAnalysis::IsAllocInst(t.first) && !t.first->IsPhi())) {
             continue;
         }
         auto candidateInst = t.first;
@@ -1668,6 +1831,7 @@ void EscapeAnalysis::VisitSaveStateUser(Inst *inst)
 
 bool EscapeAnalysis::ProcessBlock(BasicBlock *block, size_t depth)
 {
+    COMPILER_LOG(DEBUG, PEA_EXT) << "Process block " << block->GetId();
     if (block->IsMarked(visited_)) {
         return true;
     }
@@ -1691,6 +1855,7 @@ bool EscapeAnalysis::ProcessLoop(BasicBlock *header, size_t depth)
     if (depth >= MAX_NESTNESS) {
         return false;
     }
+    COMPILER_LOG(DEBUG, PEA_EXT) << "Process loop " << header->GetLoop()->GetId();
     auto &rpo = GetGraph()->GetBlocksRPO();
     auto startIt = find(rpo.begin(), rpo.end(), header);
     // There should be only one visited predecessor.
@@ -1698,12 +1863,6 @@ bool EscapeAnalysis::ProcessLoop(BasicBlock *header, size_t depth)
     auto headerPred = *std::find_if(header->GetPredsBlocks().begin(), header->GetPredsBlocks().end(),
                                     [marker = visited_](auto b) { return b->IsMarked(marker); });
     auto headerState = GetState(headerPred)->Copy(GetGraph()->GetLocalAllocator());
-    // Set materialized states for all phis
-    for (auto phi : header->PhiInsts()) {
-        if (DataType::IsReference(phi->GetType())) {
-            headerState->Materialize(phi);
-        }
-    }
     blockStates_[header->GetId()] = headerState;
     // Copy header's initial state to compare it after loop processing
     headerState = headerState->Copy(GetGraph()->GetLocalAllocator());
@@ -1733,7 +1892,10 @@ bool EscapeAnalysis::ProcessLoop(BasicBlock *header, size_t depth)
         ASSERT(AllPredecessorsVisited(header));
         mergeProcessor_.MergeStates(header);
         // Check if merged state differs from previous loop header's state
-        stateChanged = !headerState->Equals(GetState(header));
+        {
+            MarkerHolder equalMrkHolder(GetGraph());
+            stateChanged = !headerState->Equals(GetState(header), equalMrkHolder.GetMarker());
+        }
         if (stateChanged) {
             headerState = GetState(header)->Copy(GetLocalAllocator());
         }
@@ -1768,24 +1930,48 @@ void ScalarReplacement::CreatePhis()
         if (bb == nullptr) {
             continue;
         }
-        for (auto &t : phis_.at(bb->GetId())) {
-            auto state = t.second;
-            auto phiInst = graph_->CreateInstPhi(state->GetType(), bb->GetGuestPc());
-            allocatedPhis_[state] = phiInst;
-            bb->AppendPhi(phiInst);
+        CreatePhisAndInsertToBB(*bb);
+    }
+}
+
+void ScalarReplacement::CreatePhisAndInsertToBB(BasicBlock &bb)
+{
+    for (auto &t : phis_.at(bb.GetId())) {
+        auto state = t.second;
+        auto phiInst = graph_->CreateInstPhi(state->GetType(), bb.GetGuestPc());
+        allocatedPhis_[state] = phiInst;
+        bb.AppendPhi(phiInst);
+        COMPILER_LOG(DEBUG, PEA_EXT) << "Create Phi " << phiInst->GetId() << " at bb " << bb.GetId();
+    }
+}
+
+void ScalarReplacement::ErasePhiInputsFromVState(ArenaMap<Inst *, VirtualState *> &state)
+{
+    ArenaVector<Inst *> inputsToRemove {graph_->GetLocalAllocator()->Adapter()};
+    for (const auto &kv : state) {
+        auto inst = kv.first;
+        if (inst->IsPhi()) {
+            for (auto &input : inst->GetInputs()) {
+                inputsToRemove.push_back(input.GetInst());
+            }
         }
+    }
+    for (auto inst : inputsToRemove) {
+        state.erase(inst);
     }
 }
 
 void ScalarReplacement::MaterializeObjects()
 {
     for (auto &[site, state] : materializationSites_) {
+        ErasePhiInputsFromVState(state);
         if (std::holds_alternative<BasicBlock *>(site)) {
             MaterializeInEmptyBlock(std::get<BasicBlock *>(site), state);
             continue;
         }
         auto siteInst = std::get<Inst *>(site);
-        if (siteInst->GetOpcode() == Opcode::SaveState) {
+        ASSERT(siteInst->GetBasicBlock() != nullptr);
+        if (siteInst->Is(Opcode::SaveState)) {
             MaterializeAtExistingSaveState(siteInst->CastToSaveState(), state);
         } else {
             MaterializeAtNewSaveState(siteInst, state);
@@ -1798,7 +1984,7 @@ void ScalarReplacement::MaterializeAtExistingSaveState(SaveStateInst *saveState,
 {
     auto previousSaveState = saveState;
     for (auto t : state) {
-        if (t.second == nullptr || !LiveInAnalysis::IsAllocInst(t.first)) {
+        if (t.second == nullptr || (!LiveInAnalysis::IsAllocInst(t.first) && !t.first->IsPhi())) {
             continue;
         }
         auto origAlloc = t.first;
@@ -1815,7 +2001,8 @@ void ScalarReplacement::MaterializeAtNewSaveState(Inst *site, ArenaMap<Inst *, V
     auto block = site->GetBasicBlock();
     auto ssInsertionPoint = site;
     for (auto t : state) {
-        if (t.second == nullptr || !LiveInAnalysis::IsAllocInst(t.first) || t.first == site) {
+        if (t.second == nullptr ||
+            (!LiveInAnalysis::IsAllocInst(t.first) && !t.first->IsPhi()) /*|| t.first == site*/) {
             continue;
         }
         auto origAlloc = t.first;
@@ -1829,7 +2016,7 @@ void ScalarReplacement::MaterializeAtNewSaveState(Inst *site, ArenaMap<Inst *, V
         } else {
             currSs->SetMethod(graph_->GetMethod());
         }
-        block->InsertBefore(currSs, ssInsertionPoint);
+        block->InsertBefore(currSs, !ssInsertionPoint->IsPhi() ? ssInsertionPoint : block->GetFirstInst());
         ssInsertionPoint = currSs;
 
         Materialize(origAlloc, currSs, site, t.second);
@@ -1840,7 +2027,7 @@ void ScalarReplacement::MaterializeInEmptyBlock(BasicBlock *block, ArenaMap<Inst
 {
     ASSERT(block->IsEmpty());
     for (auto t : state) {
-        if (t.second == nullptr || !LiveInAnalysis::IsAllocInst(t.first)) {
+        if (t.second == nullptr || (!LiveInAnalysis::IsAllocInst(t.first) && !t.first->IsPhi())) {
             continue;
         }
         auto origAlloc = t.first;
@@ -1860,41 +2047,20 @@ void ScalarReplacement::MaterializeInEmptyBlock(BasicBlock *block, ArenaMap<Inst
     }
 }
 
-void ScalarReplacement::Materialize(Inst *originalInst, Inst *ssAlloc, Inst *ssInit, VirtualState *state)
+Inst *ScalarReplacement::Materialize(Inst *originalInst, Inst *ssAlloc, Inst *ssInit, VirtualState *state)
 {
-    Inst *newAlloc {nullptr};
-    auto &allocs = materializedObjects_.try_emplace(originalInst, graph_->GetLocalAllocator()->Adapter()).first->second;
-    if (originalInst->GetOpcode() == Opcode::NewObject) {
-        newAlloc = CreateNewObject(originalInst, ssAlloc);
-    } else {
-        ASSERT(originalInst->GetOpcode() == Opcode::NewArray);
-        newAlloc = CreateNewArray(originalInst, ssAlloc);
+    Inst *newAlloc = state->GetNewAlloc()->Clone(graph_);
+    ASSERT(newAlloc != nullptr);
+    size_t i = 0;
+    for (; i < state->GetInputs().size(); ++i) {
+        newAlloc->SetInput(i, state->GetInputs()[i]);
     }
-    InitializeObject(newAlloc, ssInit, state);
+    newAlloc->SetInput(i, ssAlloc);
+    ssAlloc->InsertAfter(newAlloc);
+    auto &allocs = materializedObjects_.try_emplace(originalInst, graph_->GetLocalAllocator()->Adapter()).first->second;
+    InitializeObject(newAlloc, ssInit, state, newAlloc);
     allocs.push_back(newAlloc);
-}
-
-Inst *ScalarReplacement::CreateNewObject(Inst *originalInst, Inst *saveState)
-{
-    ASSERT(originalInst->GetOpcode() == Opcode::NewObject);
-    auto newAlloc = graph_->CreateInstNewObject(
-        originalInst->GetType(), originalInst->GetPc(), originalInst->GetInput(0).GetInst(), saveState,
-        TypeIdMixin {originalInst->CastToNewObject()->GetTypeId(), originalInst->CastToNewObject()->GetMethod()});
-    saveState->GetBasicBlock()->InsertAfter(newAlloc, saveState);
-    COMPILER_LOG(DEBUG, PEA) << "Materialized " << originalInst->GetId() << " at SavePoint " << saveState->GetId()
-                             << " as " << *newAlloc;
-    return newAlloc;
-}
-
-Inst *ScalarReplacement::CreateNewArray(Inst *originalInst, Inst *saveState)
-{
-    ASSERT(originalInst->GetOpcode() == Opcode::NewArray);
-    auto newAlloc = graph_->CreateInstNewArray(
-        originalInst->GetType(), originalInst->GetPc(), originalInst->GetInput(0).GetInst(),
-        originalInst->GetInput(1).GetInst(), saveState,
-        TypeIdMixin {originalInst->CastToNewArray()->GetTypeId(), originalInst->CastToNewArray()->GetMethod()});
-    saveState->InsertAfter(newAlloc);
-    COMPILER_LOG(DEBUG, PEA) << "Materialized " << originalInst->GetId() << " at SavePoint " << saveState->GetId()
+    COMPILER_LOG(DEBUG, PEA) << "Materialized " << originalInst->GetId() << " at SavePoint " << ssAlloc->GetId()
                              << " as " << *newAlloc;
     return newAlloc;
 }
@@ -1906,10 +2072,13 @@ CallInst *ScalarReplacement::FindCallerInst(BasicBlock *target, Inst *start)
     while (block != nullptr) {
         auto iter = InstBackwardIterator<IterationType::INST>(*block, start);
         for (auto inst : iter) {
+            if (inst == nullptr) {
+                return nullptr;
+            }
             if (inst == start) {
                 continue;
             }
-            if (inst->GetOpcode() == Opcode::ReturnInlined) {
+            if (inst->Is(Opcode::ReturnInlined)) {
                 depth++;
             }
             if (!inst->IsCall()) {
@@ -1930,7 +2099,7 @@ CallInst *ScalarReplacement::FindCallerInst(BasicBlock *target, Inst *start)
     return nullptr;
 }
 
-void ScalarReplacement::InitializeObject(Inst *alloc, Inst *instBefore, VirtualState *state)
+void ScalarReplacement::InitializeObject(Inst *alloc, Inst *instBefore, VirtualState *state, Inst *newAlloc)
 {
     for (auto &[fieldVariant, fieldSource] : state->GetFields()) {
         Inst *fieldSourceInst {nullptr};
@@ -1961,9 +2130,17 @@ void ScalarReplacement::InitializeObject(Inst *alloc, Inst *instBefore, VirtualS
                                                  fieldSourceInst, DataType::IsReference(type));
         }
         if (instBefore != nullptr) {
-            instBefore->GetBasicBlock()->InsertBefore(store, instBefore);
+            if (!state->IsPhi()) {
+                instBefore->GetBasicBlock()->InsertBefore(store, instBefore);
+            } else {
+                instBefore->GetBasicBlock()->InsertAfter(store, newAlloc);
+            }
+            COMPILER_LOG(DEBUG, PEA_EXT) << "Created inst " << *store << " before inst " << *instBefore << " at bb "
+                                         << instBefore->GetBasicBlock()->GetId();
         } else {
             alloc->GetBasicBlock()->AppendInst(store);
+            COMPILER_LOG(DEBUG, PEA_EXT) << "Created inst " << *store << " at the end of bb "
+                                         << alloc->GetBasicBlock()->GetId();
         }
     }
 }
@@ -2012,7 +2189,7 @@ void ScalarReplacement::ReplaceAliases()
         }
 
         bool replaced = false;
-        if (replacement != nullptr && inst->GetOpcode() == Opcode::LoadObject &&
+        if (replacement != nullptr && inst->Is(Opcode::LoadObject) &&
             DataType::NeedCastForTypes(graph_->GetArch(), replacement->GetType(), inst->GetType())) {
             // In case of loads/stores explicit casts could be eliminated before scalar replacement.
             // To use correct values after load's replacement with a value stored into a field we
@@ -2057,6 +2234,7 @@ void ScalarReplacement::ResolvePhiInputs()
                 inputInst = ResolveAllocation(inputInst, preds[idx]);
             }
             inst->AppendInput(inputInst);
+            COMPILER_LOG(DEBUG, PEA_EXT) << "Append input " << inputInst->GetId() << " in phi " << inst->GetId();
         }
     }
 }
@@ -2115,7 +2293,7 @@ void ScalarReplacement::UpdateAllocationUsers()
             // the one dominating current user.
             auto userBlock =
                 userInst->IsPhi() ? userInst->CastToPhi()->GetPhiInputBb(user.GetIndex()) : userInst->GetBasicBlock();
-            COMPILER_LOG(DEBUG, PEA) << "User block = " << userBlock->GetId();
+            COMPILER_LOG(DEBUG, PEA_EXT) << "User block = " << userBlock->GetId();
             auto replacementIt = std::find_if(newAllocs.begin(), newAllocs.end(), [userBlock](auto newAlloc) {
                 return newAlloc->GetBasicBlock()->IsDominate(userBlock);
             });
@@ -2174,7 +2352,7 @@ void ScalarReplacement::FixPhiInputTypes()
             /* constants are taken care of by constprop and existing
              * phis have to be properly casted already */
             if (LIKELY(phiSize == DataType::GetTypeSize(input->GetType(), arch) ||
-                       input->GetOpcode() == Opcode::Constant || input->GetOpcode() == Opcode::Phi)) {
+                       input->IsOneOf(Opcode::Constant, Opcode::Phi))) {
                 continue;
             }
             /* replace the wider-than-phi-type input with the cast */
@@ -2189,6 +2367,7 @@ void ScalarReplacement::ProcessRemovalQueue()
 {
     for (auto inst : removalQueue_) {
         COMPILER_LOG(DEBUG, PEA) << "Removing inst " << inst->GetId();
+        inst->RemoveUsers<true>();
         inst->GetBasicBlock()->RemoveInst(inst);
     }
     FixPhiInputTypes();
@@ -2202,12 +2381,12 @@ void ScalarReplacement::Apply(ArenaSet<Inst *> &candidates)
     ReplaceAliases();
     ResolvePhiInputs();
     UpdateSaveStates();
-    UpdateAllocationUsers();
-    PatchSaveStates();
     for (auto candidate : candidates) {
         EnqueueForRemoval(candidate);
     }
+    UpdateAllocationUsers();
     ProcessRemovalQueue();
+    PatchSaveStates();
     graph_->EraseMarker(removeInstMarker_);
 }
 
@@ -2231,6 +2410,9 @@ void ScalarReplacement::FillLiveInsts(BasicBlock *block, ArenaSet<Inst *> &liveI
     for (auto succ : block->GetSuccsBlocks()) {
         liveIns.insert(liveness[succ->GetId()].begin(), liveness[succ->GetId()].end());
         for (auto phiInst : succ->PhiInsts()) {
+            if (IsEnqueuedForRemoval(phiInst) || !HasUsageOutsideBlock(phiInst, block)) {
+                continue;
+            }
             auto phiInput = phiInst->CastToPhi()->GetPhiInput(block);
             if (DataType::IsReference(phiInput->GetType())) {
                 liveIns.insert(phiInput);

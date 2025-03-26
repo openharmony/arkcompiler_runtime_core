@@ -4371,6 +4371,15 @@ void LLVMIrConstructor::VisitPhi(GraphVisitor *v, Inst *inst)
     auto ltype = ctor->GetExactType(inst->GetType());
     auto block = ctor->GetCurrentBasicBlock();
 
+    for (size_t i = 0; i < inst->GetInputsCount(); i++) {
+        auto srcOp = inst->GetInput(i).GetInst()->GetOpcode();
+        if (inst->GetInput(i).GetInst()->IsClassInst() || srcOp == Opcode::LoadImmediate) {
+            ASSERT(ltype == ctor->builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
+            ltype = ctor->builder_.getPtrTy();
+            break;
+        }
+    }
+
     // PHI need adjusted insert point if ValueMapAdd already created coerced values for other PHIs
     auto nonPhi = block->getFirstNonPHI();
     if (nonPhi != nullptr) {
