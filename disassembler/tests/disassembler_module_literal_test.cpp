@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 #include <string>
 #include "disassembler.h"
+#include "file.h"
+#include "utils.h"
 
 using namespace testing::ext;
 
@@ -160,5 +162,37 @@ HWTEST_F(DisassemblerModuleLiteralTest, disassembler_module_literal_test_006, Te
     std::vector<std::string> module_literals = disasm.GetModuleLiterals();
     bool has_module_literal = ValidateModuleLiteral(module_literals, expected_module_literals);
     EXPECT_TRUE(has_module_literal);
+}
+
+/**
+ * @tc.name: disassembler_module_literal_test_007
+ * @tc.desc: test module reuqire index.
+ * @tc.type: FUNC
+ * @tc.require: file path
+ */
+HWTEST_F(DisassemblerModuleLiteralTest, disassembler_module_literal_test_007, TestSize.Level1)
+{
+    std::vector<std::string> expected_module_literals = {
+        "\tMODULE_REQUEST_ARRAY: {\n\t\t0 : ./module-export-file.js,\n\t}",
+        "\tModuleTag: REGULAR_IMPORT, local_name: a, import_name: a, module_request: ./module-export-file.js"};
+
+    const std::string file_name = GRAPH_TEST_ABC_DIR "module-regular-import.abc";
+    std::ifstream baseFile(file_name, std::ios::binary);
+    EXPECT_TRUE(baseFile.is_open());
+
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(baseFile), {});
+    // change module request idx
+    buffer[680] = 0xff;
+    buffer[681] = 0xff;
+
+    const std::string targetFileName = GRAPH_TEST_ABC_DIR "module-regular-import-001.abc";
+    GenerateModifiedAbc(buffer, targetFileName);
+    baseFile.close();
+
+    panda::disasm::Disassembler disasm {};
+    disasm.Disassemble(targetFileName, false, false);
+    std::vector<std::string> module_literals = disasm.GetModuleLiterals();
+    bool has_module_literal = ValidateModuleLiteral(module_literals, expected_module_literals);
+    EXPECT_FALSE(has_module_literal);
 }
 }

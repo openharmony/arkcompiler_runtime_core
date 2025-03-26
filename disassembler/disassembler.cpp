@@ -435,36 +435,39 @@ std::vector<std::string> Disassembler::GetModuleLiteralArray(panda_file::File::E
     }
     module_requests_stringstream << "\t}";
     module_literal_array.push_back(module_requests_stringstream.str());
-    mda.EnumerateModuleRecord([&](panda_file::ModuleTag tag, uint32_t export_name_offset,
-                                  uint32_t request_module_idx, uint32_t import_name_offset,
-                                  uint32_t local_name_offset) {
+    mda.EnumerateModuleRecord([&](panda_file::ModuleTag tag, uint32_t export_name_offset, uint32_t request_module_idx,
+                                  uint32_t import_name_offset, uint32_t local_name_offset) {
         std::stringstream ss;
         ss << "\tModuleTag: " << ModuleTagToString(tag);
         if (tag == panda_file::ModuleTag::REGULAR_IMPORT ||
             tag == panda_file::ModuleTag::NAMESPACE_IMPORT || tag == panda_file::ModuleTag::LOCAL_EXPORT) {
             if (!IsValidOffset(local_name_offset)) {
-                LOG(FATAL, DISASSEMBLER) << "Get invalid local name offset!" << std::endl;
+                LOG(ERROR, DISASSEMBLER) << "Get invalid local name offset!" << std::endl;
+                return;
             }
             ss << ", local_name: " << GetStringByOffset(local_name_offset);
         }
         if (tag == panda_file::ModuleTag::LOCAL_EXPORT || tag == panda_file::ModuleTag::INDIRECT_EXPORT) {
             if (!IsValidOffset(export_name_offset)) {
-                LOG(FATAL, DISASSEMBLER) << "Get invalid export name offset!" << std::endl;
+                LOG(ERROR, DISASSEMBLER) << "Get invalid export name offset!" << std::endl;
+                return;
             }
             ss << ", export_name: " << GetStringByOffset(export_name_offset);
         }
         if (tag == panda_file::ModuleTag::REGULAR_IMPORT || tag == panda_file::ModuleTag::INDIRECT_EXPORT) {
             if (!IsValidOffset(import_name_offset)) {
-                LOG(FATAL, DISASSEMBLER) << "Get invalid import name offset!" << std::endl;
+                LOG(ERROR, DISASSEMBLER) << "Get invalid import name offset!" << std::endl;
+                return;
             }
             ss << ", import_name: " << GetStringByOffset(import_name_offset);
         }
-        auto request_module_offset = request_modules_offset[request_module_idx];
         if (tag != panda_file::ModuleTag::LOCAL_EXPORT) {
-            if (request_module_idx >= request_modules_offset.size() || !IsValidOffset(request_module_offset)) {
-                LOG(FATAL, DISASSEMBLER) << "Get invalid request module offset!" << std::endl;
+            if (request_module_idx >= request_modules_offset.size() ||
+                !IsValidOffset(request_modules_offset[request_module_idx])) {
+                LOG(ERROR, DISASSEMBLER) << "Get invalid request module offset!" << std::endl;
+                return;
             }
-            ss << ", module_request: " << GetStringByOffset(request_module_offset);
+            ss << ", module_request: " << GetStringByOffset(request_modules_offset[request_module_idx]);
         }
         module_literal_array.push_back(ss.str());
     });
