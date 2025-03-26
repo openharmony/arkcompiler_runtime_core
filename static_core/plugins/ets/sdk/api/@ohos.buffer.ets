@@ -191,5 +191,101 @@ export namespace buffer {
         public at(index: int): byte {
             return this.buffer.at(index);
         }
+
+        /**
+         * Checks if the buffer includes the given value.
+         *
+         * @param {string | number | Buffer | Uint8Array} value - The value to search for
+         * @param {number} [byteOffset=0] - The byte position to start searching from
+         * @param {BufferEncoding} [encoding='utf8'] - Encoding to use if `value` is a string
+         * @returns {boolean} `true` if the value is found, otherwise `false`
+         */
+        public includes(value: string | number | Buffer | Uint8Array, byteOffset?: number, encoding?: BufferEncoding): boolean {
+            return this.indexOf(value, byteOffset ?? 0, encoding ?? "utf8") != -1;
+        }
+
+        /**
+         * Returns the first index where `value` is found in the buffer.
+         *
+         * @param {string | number | Buffer | Uint8Array} value - The value to search for
+         * @param {number} [byteOffset=0] - The byte position to start searching from.
+         *   - If negative, it is counted from the end of the buffer (`len + byteOffset`).
+         *   - If out of bounds (`>= buffer length`), returns `-1`.
+         * @param {BufferEncoding} [encoding='utf8'] - Encoding to use if `value` is a string
+         * @returns {number} The index of the first occurrence of `value`, or -1 if not found
+         */
+        public indexOf(value: string | number | Buffer | Uint8Array, byteOffset?: number, encoding?: BufferEncoding): number {
+            const searchBuffer = this.normalizeValueToBuffer(value, encoding ?? "utf8");
+            const len = this.length;
+            const searchLen = searchBuffer.length;
+            let startIndex = byteOffset ?? 0;
+
+            if (startIndex < 0) {
+                startIndex = Math.max(0, len + startIndex);
+            } else if (startIndex >= len) {
+                return -1;
+            }
+            for (let i = startIndex; i <= len - searchLen; i++) {
+                if (this.compareSubarray(i, searchBuffer)) return i;
+            }
+            return -1;
+        }
+
+        /**
+         * Returns the last index where `value` is found in the buffer.
+         *
+         * @param {string | number | Buffer | Uint8Array} value - The value to search for
+         * @param {number} [byteOffset=buffer length] - The byte position to start searching from (backwards).
+         *   - If negative, it is counted from the end of the buffer (`len + byteOffset`).
+         *   - If out of bounds (`>= buffer length`), it is clamped to `buffer length - searchLen`.
+         * @param {BufferEncoding} [encoding='utf8'] - Encoding to use if `value` is a string
+         * @returns {number} The index of the last occurrence of `value`, or -1 if not found
+         */
+        public lastIndexOf(value: string | number | Buffer | Uint8Array, byteOffset?: number , encoding?: BufferEncoding): number {
+            const searchBuffer = this.normalizeValueToBuffer(value, encoding ?? "utf8");
+            const searchLen = searchBuffer.length;
+            const len = this.length;
+
+            if (searchLen == 0 || len < searchLen) {
+                return -1;
+            }
+            let endIndex = byteOffset ?? len; 
+            if (endIndex < 0) {
+                endIndex = Math.max(0, len + endIndex);
+            } else if (endIndex >= len) {
+                endIndex = len - searchLen;
+            }
+            for (let i = endIndex; i >= 0; i--) {
+                if (this.compareSubarray(i, searchBuffer)) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        private normalizeValueToBuffer(value: string | number | Buffer | Uint8Array, encoding: BufferEncoding): Buffer {
+            if (value instanceof string) {
+                return buffer.from(value, encoding ?? "utf8");
+            } else if (value instanceof Number) {
+                const arr: number[] = [value];
+                return buffer.from(arr);
+            } else if (value instanceof Buffer) {
+                return value;
+            } else {
+                return buffer.from(value);
+            }
+        }
+
+        private compareSubarray(startIndex: number, searchBuffer: Buffer): boolean {
+            if (startIndex + searchBuffer.length > this.length){
+                return false;
+            }
+            for (let j: int = 0; j < searchBuffer.length; j++) {
+                if (this.at(startIndex as int + j) != searchBuffer.at(j)) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }
