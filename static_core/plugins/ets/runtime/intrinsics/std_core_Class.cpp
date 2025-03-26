@@ -28,6 +28,10 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "runtime/handle_scope-inl.h"
 
+#ifdef PANDA_ETS_INTEROP_JS
+#include "plugins/ets/runtime/interop_js/interop_context.h"
+#endif /* PANDA_ETS_INTEROP_JS */
+
 namespace ark::ets::intrinsics {
 
 EtsString *StdCoreClassGetNameInternal(EtsClass *cls)
@@ -97,6 +101,12 @@ void EtsRuntimeLinkerInitializeContext(EtsRuntimeLinker *runtimeLinker)
         runtimeLinker->SetClassLinkerContext(ctx);
         return ctx;
     });
+#ifdef PANDA_ETS_INTEROP_JS
+    // At first call to ets from js, no available class linker context on the stack
+    // Thus, register the first available application class linker context as default class linker context for interop
+    // Tracked in #24199
+    interop::js::InteropCtx::InitializeDefaultLinkerCtxIfNeeded(runtimeLinker);
+#endif /* PANDA_ETS_INTEROP_JS */
 }
 
 EtsClass *EtsBootRuntimeLinkerFindAndLoadClass(ObjectHeader *runtimeLinker, EtsString *clsName, EtsBoolean init)

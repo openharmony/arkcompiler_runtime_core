@@ -23,6 +23,7 @@
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/interop_js/sts_vm_interface_impl.h"
+#include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "runtime/include/runtime.h"
 #include "runtime/mem/local_object_handle.h"
@@ -210,7 +211,9 @@ InteropCtx::SharedEtsVmState::SharedEtsVmState(PandaEtsVM *vm)
 {
     EtsClassLinker *etsClassLinker = vm->GetClassLinker();
     pandaEtsVm = vm;
-    linkerCtx = etsClassLinker->GetEtsClassLinkerExtension()->GetBootContext();
+    if (linkerCtx_ == nullptr) {
+        linkerCtx_ = etsClassLinker->GetEtsClassLinkerExtension()->GetBootContext();
+    }
     CacheClasses(etsClassLinker);
     etsProxyRefStorage = ets_proxy::SharedReferenceStorage::Create(pandaEtsVm);
     ASSERT(etsProxyRefStorage.get() != nullptr);
@@ -269,6 +272,8 @@ void InteropCtx::SharedEtsVmState::CacheClasses(EtsClassLinker *etsClassLinker)
 // NOLINTBEGIN(fuchsia-statically-constructed-objects)
 std::shared_ptr<InteropCtx::SharedEtsVmState> InteropCtx::SharedEtsVmState::instance_ {nullptr};
 os::memory::Mutex InteropCtx::SharedEtsVmState::mutex_;
+ClassLinkerContext *InteropCtx::SharedEtsVmState::linkerCtx_ {nullptr};
+ark::mem::Reference *InteropCtx::SharedEtsVmState::refToDefaultLinker_ {nullptr};
 // NOLINTEND(fuchsia-statically-constructed-objects)
 
 void InteropCtx::InitExternalInterfaces()
@@ -438,6 +443,22 @@ void InteropCtx::ThrowJSValue(napi_env env, napi_value val)
     // When UT migrates to ArkJS VM, this branch needs to be removed
     NAPI_CHECK_FATAL(napi_throw(env, val));
 #endif
+}
+
+void InteropCtx::InitializeDefaultLinkerCtxIfNeeded(EtsRuntimeLinker *linker)
+{
+    os::memory::LockHolder lock(InteropCtx::SharedEtsVmState::mutex_);
+    // Only cache the first application class linker context
+    if (InteropCtx::SharedEtsVmState::linkerCtx_ != nullptr &&
+        !InteropCtx::SharedEtsVmState::linkerCtx_->IsBootContext()) {
+        return;
+    }
+    if (linker->GetClass() != PlatformTypes()->coreAbcRuntimeLinker) {
+        return;
+    }
+    InteropCtx::SharedEtsVmState::linkerCtx_ = linker->GetClassLinkerContext();
+    InteropCtx::SharedEtsVmState::refToDefaultLinker_ = PandaVM::GetCurrent()->GetGlobalObjectStorage()->Add(
+        linker->AsObject()->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
 }
 
 void InteropCtx::ForwardEtsException(EtsCoroutine *coro)
