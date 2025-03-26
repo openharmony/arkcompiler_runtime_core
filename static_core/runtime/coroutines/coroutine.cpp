@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,25 +22,26 @@
 namespace ark {
 
 Coroutine *Coroutine::Create(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *context,
-                             std::optional<EntrypointInfo> &&epInfo, Type type)
+                             std::optional<EntrypointInfo> &&epInfo, Type type, CoroutinePriority priority)
 {
     mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
     auto *co = allocator->New<Coroutine>(os::thread::GetCurrentThreadId(), allocator, vm,
                                          ark::panda_file::SourceLang::PANDA_ASSEMBLY, std::move(name), context,
-                                         std::move(epInfo), type);
+                                         std::move(epInfo), type, priority);
     co->Initialize();
     return co;
 }
 
 Coroutine::Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
                      ark::panda_file::SourceLang threadLang, PandaString name, CoroutineContext *context,
-                     std::optional<EntrypointInfo> &&epInfo, Type type)
+                     std::optional<EntrypointInfo> &&epInfo, Type type, CoroutinePriority priority)
     : ManagedThread(id, allocator, vm, Thread::ThreadType::THREAD_TYPE_TASK, threadLang),
       name_(std::move(name)),
       context_(context),
       manager_(static_cast<CoroutineManager *>(GetVM()->GetThreadManager())),
       startSuspended_(epInfo.has_value()),
-      type_(type)
+      type_(type),
+      priority_(priority)
 {
     ASSERT(vm != nullptr);
     ASSERT(context != nullptr);
@@ -54,7 +55,8 @@ Coroutine::~Coroutine()
     GetManager()->FreeCoroutineId(coroutineId_);
 }
 
-void Coroutine::ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo)
+void Coroutine::ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo,
+                             CoroutinePriority priority)
 {
     ASSERT(context != nullptr);
     name_ = std::move(name);
@@ -63,6 +65,7 @@ void Coroutine::ReInitialize(PandaString name, CoroutineContext *context, std::o
 
     SetEntrypointData(std::move(epInfo));
     context_->AttachToCoroutine(this);
+    priority_ = priority;
 }
 
 void Coroutine::SetEntrypointData(std::optional<EntrypointInfo> &&epInfo)
@@ -86,6 +89,7 @@ void Coroutine::CleanUp()
     name_ = "";
     entrypoint_ = std::monostate();
     startSuspended_ = false;
+    immediateLauncher_ = nullptr;
     worker_ = nullptr;
     context_->CleanUp();
 }

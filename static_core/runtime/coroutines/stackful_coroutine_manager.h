@@ -44,9 +44,9 @@ public:
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
     bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                CoroutineLaunchMode mode) override;
+                CoroutineLaunchMode mode, CoroutinePriority priority) override;
     bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                           CoroutineLaunchMode mode) override;
+                           CoroutineLaunchMode mode, CoroutinePriority priority) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
@@ -72,7 +72,7 @@ public:
      */
     Coroutine *CreateNativeCoroutine(Runtime *runtime, PandaVM *vm,
                                      Coroutine::NativeEntrypointInfo::NativeEntrypointFunc entry, void *param,
-                                     PandaString name, Coroutine::Type type);
+                                     PandaString name, Coroutine::Type type, CoroutinePriority priority);
     /// destroy the "native" coroutine created earlier
     void DestroyNativeCoroutine(Coroutine *co);
     void DestroyEntrypointfulCoroutine(Coroutine *co) override;
@@ -149,7 +149,7 @@ protected:
      * see Coroutine::ReInitialize for details
      */
     void ReuseCoroutineInstance(Coroutine *co, CompletionEvent *completionEvent, Method *entrypoint,
-                                PandaVector<Value> &&arguments, PandaString name);
+                                PandaVector<Value> &&arguments, PandaString name, CoroutinePriority priority);
 
 private:
     using WorkerId = uint32_t;
@@ -159,14 +159,14 @@ private:
     stackful_coroutines::AffinityMask CalcAffinityMaskFromLaunchMode(CoroutineLaunchMode mode);
 
     Coroutine *GetCoroutineInstanceForLaunch(CompletionEvent *completionEvent, Method *entrypoint,
-                                             PandaVector<Value> &&arguments,
+                                             PandaVector<Value> &&arguments, CoroutinePriority priority,
                                              stackful_coroutines::AffinityMask affinityMask);
     bool LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                    CoroutineLaunchMode mode);
+                    CoroutineLaunchMode mode, CoroutinePriority priority);
     bool LaunchImmediatelyImpl(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                               CoroutineLaunchMode mode);
+                               CoroutineLaunchMode mode, CoroutinePriority priority);
     bool LaunchWithMode(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                        CoroutineLaunchMode mode, bool launchImmediately);
+                        CoroutineLaunchMode mode, CoroutinePriority priority, bool launchImmediately);
     /**
      * Tries to extract a coroutine instance from the pool for further reuse, returns nullptr in case when it is not
      * possible.

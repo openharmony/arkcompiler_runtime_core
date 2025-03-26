@@ -64,7 +64,8 @@ void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, Corouti
     auto *method = EtsMethod::ToRuntimeMethod(etsmethod);
     ASSERT(method != nullptr);
     auto args = PandaVector<Value> {Value(callback->GetCoreType())};
-    [[maybe_unused]] bool launchResult = coroManager->Launch(event, method, std::move(args), launchMode);
+    [[maybe_unused]] bool launchResult =
+        coroManager->Launch(event, method, std::move(args), launchMode, EtsCoroutine::PROMISE_CALLBACK);
     ASSERT(launchResult);
 }
 

@@ -197,6 +197,11 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
     [[maybe_unused]] EtsHandleScope scope(currentCoro);
     EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
 
+    {
+        ScopedNativeCodeThread n(currentCoro);
+        currentCoro->GetManager()->Schedule();
+    }
+
     /* CASE 1. This is a converted JS promise */
     if (promiseHandle->IsProxy()) {
         return AwaitProxyPromise(currentCoro, promiseHandle);

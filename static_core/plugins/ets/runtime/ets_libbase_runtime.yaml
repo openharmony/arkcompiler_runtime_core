@@ -6200,3 +6200,14 @@ intrinsics:
         - std.core.Object
         - std.core.Object[]
     impl: ark::ets::intrinsics::EtsLaunchInternalJobNative
+
+  - name: EtsLaunchOnTheSameWorker
+    space: ets
+    class_name: std.concurrency.ETSGLOBAL
+    method_name: launchSameWorker
+    static: true
+    signature:
+      ret: void
+      args:
+        - std.core.Object
+    impl: ark::ets::intrinsics::EtsLaunchSameWorker

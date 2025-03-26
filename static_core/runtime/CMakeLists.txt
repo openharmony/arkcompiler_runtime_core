@@ -160,6 +160,7 @@ set(SOURCES
     coroutines/stackful_coroutine_worker.cpp
     coroutines/coroutine_events.cpp
     coroutines/coroutine_stats.cpp
+    coroutines/priority_queue.cpp
     fibers/fiber_context.cpp
     compiler_thread_pool_worker.cpp
     compiler_task_manager_worker.cpp

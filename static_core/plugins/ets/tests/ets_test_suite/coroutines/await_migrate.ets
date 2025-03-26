@@ -31,10 +31,10 @@ function delayWithYield(duration: int): void {
 }
 
 async function awaitee(): Promise<boolean> {
-    Coroutine.Schedule();
-    return true;
+    return new Promise<boolean>((resolve: (v: boolean) => void) => {
+        setTimeout(() => { resolve(true); }, 10);
+    });
 }
-
 
 function testLaunch(): void {
     let wId = CoroutineExtras.getWorkerId();

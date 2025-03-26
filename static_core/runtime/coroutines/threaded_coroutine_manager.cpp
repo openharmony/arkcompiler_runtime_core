@@ -179,11 +179,12 @@ bool ThreadedCoroutineManager::TerminateCoroutine(Coroutine *co)
 }
 
 bool ThreadedCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
-                                      PandaVector<Value> &&arguments, [[maybe_unused]] CoroutineLaunchMode mode)
+                                      PandaVector<Value> &&arguments, [[maybe_unused]] CoroutineLaunchMode mode,
+                                      CoroutinePriority priority)
 {
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Launch started";
 
-    bool result = LaunchImpl(completionEvent, entrypoint, std::move(arguments));
+    bool result = LaunchImpl(completionEvent, entrypoint, std::move(arguments), priority);
     if (!result) {
         ThrowOutOfMemoryError("Launch failed");
     }
@@ -195,7 +196,8 @@ bool ThreadedCoroutineManager::Launch(CompletionEvent *completionEvent, Method *
 bool ThreadedCoroutineManager::LaunchImmediately([[maybe_unused]] CompletionEvent *completionEvent,
                                                  [[maybe_unused]] Method *entrypoint,
                                                  [[maybe_unused]] PandaVector<Value> &&arguments,
-                                                 [[maybe_unused]] CoroutineLaunchMode mode)
+                                                 [[maybe_unused]] CoroutineLaunchMode mode,
+                                                 [[maybe_unused]] CoroutinePriority priority)
 {
     LOG(FATAL, COROUTINES) << "ThreadedCoroutineManager::LaunchImmediately not supported";
     return false;
@@ -211,7 +213,8 @@ bool ThreadedCoroutineManager::RegisterWaiter(Coroutine *waiter, CoroutineEvent 
 
     awaitee->Unlock();
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::RegisterAsAwaitee: " << waiter->GetName() << " AWAITS";
-    waiters_.insert({awaitee, waiter});
+    [[maybe_unused]] auto [_, inserted] = waiters_.insert({awaitee, waiter});
+    ASSERT(inserted);
     return true;
 }
 
@@ -260,11 +263,11 @@ void ThreadedCoroutineManager::UnblockWaitersImpl(CoroutineEvent *blocker)
     }
 #endif
     auto w = waiters_.find(blocker);
-    while (w != waiters_.end()) {
+    if (w != waiters_.end()) {
         auto *coro = w->second;
         waiters_.erase(w);
         coro->RequestUnblock();
-        PushToRunnableQueue(coro);
+        PushToRunnableQueue(coro, coro->GetPriority());
         w = waiters_.find(blocker);
     }
 }
@@ -322,27 +325,24 @@ void ThreadedCoroutineManager::WaitForDeregistration()
 void ThreadedCoroutineManager::PrintRunnableQueue(const PandaString &requester)
 {
     LOG(DEBUG, COROUTINES) << "[" << requester << "] ";
-    for (auto *co : runnablesQueue_) {
-        LOG(DEBUG, COROUTINES) << co->GetName() << " <";
-    }
+    runnablesQueue_.IterateOverCoroutines([](Coroutine *co) { LOG(DEBUG, COROUTINES) << co->GetName() << " <"; });
     LOG(DEBUG, COROUTINES) << "X";
 }
 #endif
 
-void ThreadedCoroutineManager::PushToRunnableQueue(Coroutine *co)
+void ThreadedCoroutineManager::PushToRunnableQueue(Coroutine *co, CoroutinePriority priority)
 {
-    runnablesQueue_.push_back(co);
+    runnablesQueue_.Push(co, priority);
 }
 
 bool ThreadedCoroutineManager::RunnableCoroutinesExist()
 {
-    return !runnablesQueue_.empty();
+    return !runnablesQueue_.Empty();
 }
 
 Coroutine *ThreadedCoroutineManager::PopFromRunnableQueue()
 {
-    auto *co = runnablesQueue_.front();
-    runnablesQueue_.pop_front();
+    auto [co, _] = runnablesQueue_.Pop();
     return co;
 }
 
@@ -361,7 +361,7 @@ void ThreadedCoroutineManager::ScheduleImpl()
     coroSwitchLock_.Lock();
     if (RunnableCoroutinesExist()) {
         currentCo->RequestSuspend(false);
-        PushToRunnableQueue(currentCo);
+        PushToRunnableQueue(currentCo, CoroutinePriority::LOW_PRIORITY);
         ScheduleNextCoroutine();
 
         coroSwitchLock_.Unlock();
@@ -381,7 +381,8 @@ CoroutineWorker *ThreadedCoroutineManager::ChooseWorkerForCoroutine([[maybe_unus
 }
 
 bool ThreadedCoroutineManager::LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint,
-                                          PandaVector<Value> &&arguments, bool startSuspended)
+                                          PandaVector<Value> &&arguments, CoroutinePriority priority,
+                                          bool startSuspended)
 {
     os::memory::LockHolder l(coroSwitchLock_);
 #ifndef NDEBUG
@@ -389,7 +390,7 @@ bool ThreadedCoroutineManager::LaunchImpl(CompletionEvent *completionEvent, Meth
 #endif
     auto coroName = entrypoint->GetFullName();
     Coroutine *co = CreateCoroutineInstance(completionEvent, entrypoint, std::move(arguments), std::move(coroName),
-                                            Coroutine::Type::MUTATOR);
+                                            Coroutine::Type::MUTATOR, priority);
     Runtime::GetCurrent()->GetNotificationManager()->ThreadStartEvent(co);
     if (co == nullptr) {
         LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::LaunchImpl: failed to create a coroutine!";
@@ -403,7 +404,7 @@ bool ThreadedCoroutineManager::LaunchImpl(CompletionEvent *completionEvent, Meth
     if (startSuspended) {
         ctx->WaitUntilInitialized();
         if (runningCorosCount_ >= GetActiveWorkersCount()) {
-            PushToRunnableQueue(co);
+            PushToRunnableQueue(co, co->GetPriority());
         } else {
             ++runningCorosCount_;
             ctx->RequestResume();

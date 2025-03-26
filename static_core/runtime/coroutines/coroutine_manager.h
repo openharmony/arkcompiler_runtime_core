@@ -106,7 +106,8 @@ public:
      * thing
      */
     using CoroutineFactory = Coroutine *(*)(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *ctx,
-                                            std::optional<Coroutine::EntrypointInfo> &&epInfo, Coroutine::Type type);
+                                            std::optional<Coroutine::EntrypointInfo> &&epInfo, Coroutine::Type type,
+                                            CoroutinePriority priority);
 
     NO_COPY_SEMANTIC(CoroutineManager);
     NO_MOVE_SEMANTIC(CoroutineManager);
@@ -141,7 +142,7 @@ public:
      * @param arguments array of coroutine's entrypoint arguments
      */
     virtual bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                        CoroutineLaunchMode mode) = 0;
+                        CoroutineLaunchMode mode, CoroutinePriority priority) = 0;
     /**
      * @brief The public coroutine creation and execution interface. Switching to the newly created coroutine occurs
      * immediately. Coroutine launch mode should correspond to the use of parent's worker.
@@ -152,7 +153,7 @@ public:
      * @param arguments array of coroutine's entrypoint arguments
      */
     virtual bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                                   CoroutineLaunchMode mode) = 0;
+                                   CoroutineLaunchMode mode, CoroutinePriority priority) = 0;
     /// Suspend the current coroutine and schedule the next ready one for execution
     virtual void Schedule() = 0;
     /**
@@ -186,7 +187,7 @@ public:
      * @return nullptr if resource limit reached or something went wrong; ptr to the coroutine otherwise
      */
     Coroutine *CreateEntrypointlessCoroutine(Runtime *runtime, PandaVM *vm, bool makeCurrent, PandaString name,
-                                             Coroutine::Type type);
+                                             Coroutine::Type type, CoroutinePriority priority);
     void DestroyEntrypointlessCoroutine(Coroutine *co);
 
     /// Destroy a coroutine with an entrypoint
@@ -278,7 +279,8 @@ protected:
      * @return nullptr if resource limit reached or something went wrong; ptr to the coroutine otherwise
      */
     Coroutine *CreateCoroutineInstance(CompletionEvent *completionEvent, Method *entrypoint,
-                                       PandaVector<Value> &&arguments, PandaString name, Coroutine::Type type);
+                                       PandaVector<Value> &&arguments, PandaString name, Coroutine::Type type,
+                                       CoroutinePriority priority);
     /// Returns number of existing coroutines
     virtual size_t GetCoroutineCount() = 0;
     /**

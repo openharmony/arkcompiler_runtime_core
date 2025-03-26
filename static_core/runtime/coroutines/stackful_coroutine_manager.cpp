@@ -94,7 +94,7 @@ void StackfulCoroutineManager::FinalizeWorkers(size_t howMany, Runtime *runtime,
     for (auto i = 0U; i < howMany; i++) {
         auto *finWorker = ChooseWorkerForFinalization();
         auto *co = CreateNativeCoroutine(runtime, vm, coroEntryPoint, &entrypointParam, "[finalize coro] ",
-                                         Coroutine::Type::FINALIZER);
+                                         Coroutine::Type::FINALIZER, CoroutinePriority::CRITICAL_PRIORITY);
         finWorker->AddRunnableCoroutine(co);
     }
     entrypointParam.workerFinalizationEvent.Lock();
@@ -430,15 +430,17 @@ size_t StackfulCoroutineManager::GetCoroutineCountLimit()
 }
 
 bool StackfulCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
-                                      PandaVector<Value> &&arguments, CoroutineLaunchMode mode)
+                                      PandaVector<Value> &&arguments, CoroutineLaunchMode mode,
+                                      CoroutinePriority priority)
 {
-    return LaunchWithMode(completionEvent, entrypoint, std::move(arguments), mode, false);
+    return LaunchWithMode(completionEvent, entrypoint, std::move(arguments), mode, priority, false);
 }
 
 bool StackfulCoroutineManager::LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint,
-                                                 PandaVector<Value> &&arguments, CoroutineLaunchMode mode)
+                                                 PandaVector<Value> &&arguments, CoroutineLaunchMode mode,
+                                                 CoroutinePriority priority)
 {
-    return LaunchWithMode(completionEvent, entrypoint, std::move(arguments), mode, true);
+    return LaunchWithMode(completionEvent, entrypoint, std::move(arguments), mode, priority, true);
 }
 
 void StackfulCoroutineManager::Await(CoroutineEvent *awaitee)
@@ -539,11 +541,11 @@ void StackfulCoroutineManager::WaitForDeregistration()
 
 void StackfulCoroutineManager::ReuseCoroutineInstance(Coroutine *co, CompletionEvent *completionEvent,
                                                       Method *entrypoint, PandaVector<Value> &&arguments,
-                                                      PandaString name)
+                                                      PandaString name, CoroutinePriority priority)
 {
     auto *ctx = co->GetContext<CoroutineContext>();
     co->ReInitialize(std::move(name), ctx,
-                     Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)});
+                     Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)}, priority);
 }
 
 Coroutine *StackfulCoroutineManager::TryGetCoroutineFromPool()
@@ -604,6 +606,7 @@ stackful_coroutines::AffinityMask StackfulCoroutineManager::CalcAffinityMaskFrom
 
 Coroutine *StackfulCoroutineManager::GetCoroutineInstanceForLaunch(CompletionEvent *completionEvent, Method *entrypoint,
                                                                    PandaVector<Value> &&arguments,
+                                                                   CoroutinePriority priority,
                                                                    stackful_coroutines::AffinityMask affinityMask)
 {
     auto coroName = entrypoint->GetFullName();
@@ -612,10 +615,10 @@ Coroutine *StackfulCoroutineManager::GetCoroutineInstanceForLaunch(CompletionEve
         co = TryGetCoroutineFromPool();
     }
     if (co != nullptr) {
-        ReuseCoroutineInstance(co, completionEvent, entrypoint, std::move(arguments), std::move(coroName));
+        ReuseCoroutineInstance(co, completionEvent, entrypoint, std::move(arguments), std::move(coroName), priority);
     } else {
         co = CreateCoroutineInstance(completionEvent, entrypoint, std::move(arguments), std::move(coroName),
-                                     Coroutine::Type::MUTATOR);
+                                     Coroutine::Type::MUTATOR, priority);
     }
     if (co == nullptr) {
         LOG(DEBUG, COROUTINES)
@@ -628,14 +631,15 @@ Coroutine *StackfulCoroutineManager::GetCoroutineInstanceForLaunch(CompletionEve
 }
 
 bool StackfulCoroutineManager::LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint,
-                                          PandaVector<Value> &&arguments, CoroutineLaunchMode mode)
+                                          PandaVector<Value> &&arguments, CoroutineLaunchMode mode,
+                                          CoroutinePriority priority)
 {
 #ifndef NDEBUG
     GetCurrentWorker()->PrintRunnables("LaunchImpl begin");
 #endif
     Coroutine *co = nullptr;
     auto affinityMask = CalcAffinityMaskFromLaunchMode(mode);
-    co = GetCoroutineInstanceForLaunch(completionEvent, entrypoint, std::move(arguments), affinityMask);
+    co = GetCoroutineInstanceForLaunch(completionEvent, entrypoint, std::move(arguments), priority, affinityMask);
     if (co == nullptr) {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchImpl: failed to create a coroutine!";
         return false;
@@ -652,14 +656,15 @@ bool StackfulCoroutineManager::LaunchImpl(CompletionEvent *completionEvent, Meth
 }
 
 bool StackfulCoroutineManager::LaunchImmediatelyImpl(CompletionEvent *completionEvent, Method *entrypoint,
-                                                     PandaVector<Value> &&arguments, CoroutineLaunchMode mode)
+                                                     PandaVector<Value> &&arguments, CoroutineLaunchMode mode,
+                                                     CoroutinePriority priority)
 {
     Coroutine *co = nullptr;
     auto affinityMask = CalcAffinityMaskFromLaunchMode(mode);
 
     ASSERT(affinityMask == CalcAffinityMaskFromLaunchMode(CoroutineLaunchMode::SAME_WORKER));
 
-    co = GetCoroutineInstanceForLaunch(completionEvent, entrypoint, std::move(arguments), affinityMask);
+    co = GetCoroutineInstanceForLaunch(completionEvent, entrypoint, std::move(arguments), priority, affinityMask);
     if (co == nullptr) {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchImmediatelyImpl: failed to create a coroutine!";
         return false;
@@ -671,6 +676,7 @@ bool StackfulCoroutineManager::LaunchImmediatelyImpl(CompletionEvent *completion
     }
     // since we are going to switch the context, we have to close the interval
     GetCurrentWorker()->GetPerfStats().FinishInterval(CoroutineTimeStats::LAUNCH);
+    co->SetImmediateLauncher(Coroutine::GetCurrent());
     w->AddCreatedCoroutineAndSwitchToIt(co);
     // resume the interval once we schedule the original coro again
     GetCurrentWorker()->GetPerfStats().StartInterval(CoroutineTimeStats::LAUNCH);
@@ -680,7 +686,7 @@ bool StackfulCoroutineManager::LaunchImmediatelyImpl(CompletionEvent *completion
 
 bool StackfulCoroutineManager::LaunchWithMode(CompletionEvent *completionEvent, Method *entrypoint,
                                               PandaVector<Value> &&arguments, CoroutineLaunchMode mode,
-                                              bool launchImmediately)
+                                              CoroutinePriority priority, bool launchImmediately)
 {
     // profiling: scheduler and launch time
     ScopedCoroutineStats sSch(&GetCurrentWorker()->GetPerfStats(), CoroutineTimeStats::SCH_ALL);
@@ -693,9 +699,9 @@ bool StackfulCoroutineManager::LaunchWithMode(CompletionEvent *completionEvent, 
     mode = (mode == CoroutineLaunchMode::DEFAULT && w->InExclusiveMode()) ? CoroutineLaunchMode::SAME_WORKER : mode;
     bool result = false;
     if (launchImmediately) {
-        result = LaunchImmediatelyImpl(completionEvent, entrypoint, std::move(arguments), mode);
+        result = LaunchImmediatelyImpl(completionEvent, entrypoint, std::move(arguments), mode, priority);
     } else {
-        result = LaunchImpl(completionEvent, entrypoint, std::move(arguments), mode);
+        result = LaunchImpl(completionEvent, entrypoint, std::move(arguments), mode, priority);
     }
     if (!result) {
         ThrowOutOfMemoryError("LaunchWithMode failed");
@@ -840,7 +846,8 @@ StackfulCoroutineContext *StackfulCoroutineManager::CreateCoroutineContextImpl(b
 
 Coroutine *StackfulCoroutineManager::CreateNativeCoroutine(Runtime *runtime, PandaVM *vm,
                                                            Coroutine::NativeEntrypointInfo::NativeEntrypointFunc entry,
-                                                           void *param, PandaString name, Coroutine::Type type)
+                                                           void *param, PandaString name, Coroutine::Type type,
+                                                           CoroutinePriority priority)
 {
     if (GetCoroutineCount() >= GetCoroutineCountLimit()) {
         // resource limit reached
@@ -851,8 +858,8 @@ Coroutine *StackfulCoroutineManager::CreateNativeCoroutine(Runtime *runtime, Pan
         // do not proceed if we cannot create a context for the new coroutine
         return nullptr;
     }
-    auto *co =
-        GetCoroutineFactory()(runtime, vm, std::move(name), ctx, Coroutine::NativeEntrypointInfo(entry, param), type);
+    auto *co = GetCoroutineFactory()(runtime, vm, std::move(name), ctx, Coroutine::NativeEntrypointInfo(entry, param),
+                                     type, priority);
     ASSERT(co != nullptr);
 
     // Let's assume that even the "native" coroutine can eventually try to execute some managed code.
@@ -939,8 +946,8 @@ Coroutine *StackfulCoroutineManager::CreateExclusiveWorkerForThread(Runtime *run
     auto *eWorker = CreateWorker(runtime, vm, StackfulCoroutineWorker::ScheduleLoopType::FIBER, "[e-worker] ");
     eWorker->SetExclusiveMode(true);
     eWorker->DisableForCrossWorkersLaunch();
-    auto *eCoro =
-        CreateEntrypointlessCoroutine(runtime, vm, true, "[ea_coro] " + eWorker->GetName(), Coroutine::Type::MUTATOR);
+    auto *eCoro = CreateEntrypointlessCoroutine(runtime, vm, true, "[ea_coro] " + eWorker->GetName(),
+                                                Coroutine::Type::MUTATOR, CoroutinePriority::MEDIUM_PRIORITY);
     ASSERT(eCoro != nullptr);
     eWorker->AddRunningCoroutine(eCoro);
     OnWorkerStartup(eWorker);
