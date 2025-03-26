@@ -197,6 +197,15 @@ public:
         inExclusiveMode_.store(inExclusiveMode, std::memory_order_relaxed);
     }
 
+    /// migrate coroutines from this to the 'to' worker
+    void MigrateTo(StackfulCoroutineWorker *to);
+    /// migrate coroutines from the 'from' worker to this
+    bool MigrateFrom(StackfulCoroutineWorker *from);
+    /// check whether the worker is idle
+    bool IsIdle();
+    /// migrate the coroutines of the blocked worker to other workers
+    void MigrateCorosOutwardsIfBlocked();
+
 private:
     /* schedule loop management */
     /// the EP for threaded schedule loops
@@ -251,6 +260,20 @@ private:
      */
     void EnsureCoroutineSwitchEnabled();
 
+    /// @return true if current method is called from another worker instance
+    bool IsCrossWorkerCall()
+    {
+        ASSERT(Coroutine::GetCurrent() != nullptr);
+        return (this != Coroutine::GetCurrent()->GetWorker());
+    }
+
+    /// check if this may have been blocked
+    bool IsPotentiallyBlocked();
+    void MigrateCoroutinesImpl(StackfulCoroutineWorker *to, size_t migrateCount) REQUIRES(runnablesLock_);
+
+    /// called when the coroutineContext is switched
+    void OnContextSwitch();
+
     StackfulCoroutineManager *coroManager_;
     Coroutine *scheduleLoopCtx_ = nullptr;
     bool active_ GUARDED_BY(runnablesLock_) = true;
@@ -268,6 +291,9 @@ private:
 
     /// the moving average number of coroutines in the runnable queue
     std::atomic<double> loadFactor_ = 0;
+
+    // the timestamp of the last coroutine context switch
+    std::atomic<uint64_t> lastCtxSwitchTimeMillis_ = 0;
 
     /**
      * If worker is in exclusive mode, it means that:
@@ -289,6 +315,9 @@ private:
 
     PandaString name_;
     stackful_coroutines::WorkerId id_ = stackful_coroutines::INVALID_WORKER_ID;
+
+    // the maximum continuous execution time of a coroutine
+    static constexpr uint32_t MAX_EXECUTION_DURATION = 6000;
 };
 
 }  // namespace ark

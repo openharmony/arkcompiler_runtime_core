@@ -16,14 +16,15 @@
 #include <algorithm>
 #include <limits>
 #include "coroutines/stackful_common.h"
+#include "libpandabase/macros.h"
+#include "libpandabase/os/time.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/stackful_coroutine.h"
-#include "runtime/include/thread_scopes.h"
-#include "libpandabase/macros.h"
+#include "runtime/coroutines/stackful_coroutine_manager.h"
+#include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_notification.h"
-#include "runtime/include/panda_vm.h"
-#include "runtime/coroutines/stackful_coroutine_manager.h"
+#include "runtime/include/thread_scopes.h"
 
 namespace ark {
 
@@ -230,6 +231,9 @@ void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
     ScopedCoroutineStats s(&stats_, CoroutineTimeStats::INIT);
     // set feature flags
     enableDrainQueueIface_ = config.enableDrainQueueIface;
+    enableMigration_ = config.enableMigration;
+    migrateAwakenedCoros_ = config.migrateAwakenedCoros;
+
     // set limits
     coroStackSizeBytes_ = Runtime::GetCurrent()->GetOptions().GetCoroutineStackSizePages() * os::mem::GetPageSize();
     if (coroStackSizeBytes_ != AlignUp(coroStackSizeBytes_, PANDA_POOL_ALIGNMENT_IN_BYTES)) {
@@ -257,12 +261,17 @@ void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
     }
     ASSERT(targetNumberOfCommonWorkers > 0);
     InitializeWorkerIdAllocator();
-    os::memory::LockHolder lock(workersLock_);
-    CreateMainCoroAndWorkers(targetNumberOfCommonWorkers - 1, runtime, vm);  // 1 is for MAIN here
-    commonWorkersCount_ = targetNumberOfCommonWorkers;
-    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): successfully created and activated " << workers_.size()
-                           << " coroutine workers";
-    programCompletionEvent_ = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(this);
+    {
+        os::memory::LockHolder lock(workersLock_);
+        CreateMainCoroAndWorkers(targetNumberOfCommonWorkers - 1, runtime, vm);  // 1 is for MAIN here
+        commonWorkersCount_ = targetNumberOfCommonWorkers;
+        LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): successfully created and activated " << workers_.size()
+                               << " coroutine workers";
+        programCompletionEvent_ = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(this);
+    }
+    if (enableMigration_) {
+        StartManagerThread();
+    }
 }
 
 void StackfulCoroutineManager::Finalize()
@@ -551,41 +560,8 @@ Coroutine *StackfulCoroutineManager::TryGetCoroutineFromPool()
 StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerForCoroutine(Coroutine *co)
 {
     ASSERT(co != nullptr);
-    // currently this function does only the initial worker appointment
-    // but eventually it will support coroutine migration too
-
     auto maskValue = co->GetContext<StackfulCoroutineContext>()->GetAffinityMask();
-    std::bitset<stackful_coroutines::MAX_WORKERS_COUNT> affinityBits(maskValue);
-    LOG(DEBUG, COROUTINES) << "Choosing worker for coro " << co->GetName() << " with affinity mask = " << affinityBits;
-
-    // choosing the least loaded worker from the allowed worker set
-    auto preferFirstOverSecond = [&affinityBits](const StackfulCoroutineWorker *first,
-                                                 const StackfulCoroutineWorker *second) {
-        if (!affinityBits.test(first->GetId())) {
-            return false;
-        }
-        if (!affinityBits.test(second->GetId())) {
-            return true;
-        }
-        return first->GetLoadFactor() < second->GetLoadFactor();
-    };
-
-#ifndef NDEBUG
-    LOG(DEBUG, COROUTINES) << "Evaluating load factors:";
-    for (auto *w : workers_) {
-        LOG(DEBUG, COROUTINES) << w->GetName() << ": LF = " << w->GetLoadFactor();
-    }
-#endif
-    std::vector<StackfulCoroutineWorker *> suitableWorkers;
-    // skip exclusive and finalizing workers
-    std::copy_if(workers_.begin(), workers_.end(), std::back_inserter(suitableWorkers), [affinityBits](auto *w) {
-        return !w->IsDisabledForCrossWorkersLaunch() || affinityBits.test(w->GetId());
-    });
-    ASSERT(!suitableWorkers.empty());
-
-    auto wIt = std::min_element(suitableWorkers.begin(), suitableWorkers.end(), preferFirstOverSecond);
-    LOG(DEBUG, COROUTINES) << "Chose worker: " << (*wIt)->GetName();
-    return *wIt;
+    return ChooseWorkerImpl(WorkerSelectionPolicy::LEAST_LOADED, maskValue);
 }
 
 stackful_coroutines::AffinityMask StackfulCoroutineManager::CalcAffinityMaskFromLaunchMode(CoroutineLaunchMode mode)
@@ -767,6 +743,10 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
     LOG(DEBUG, COROUTINES)
         << "StackfulCoroutineManager::MainCoroutineCompleted(): waiting for other coroutines to complete";
     WaitForNonMainCoroutinesCompletion();
+    if (enableMigration_) {
+        LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::MainCoroutineCompleted(): stop manager thread";
+        StopManagerThread();
+    }
 
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::MainCoroutineCompleted(): stopping workers";
     {
@@ -1000,6 +980,173 @@ bool StackfulCoroutineManager::IsExclusiveWorkersLimitReached() const
     bool limitIsReached = GetActiveWorkersCount() - commonWorkersCount_ >= exclusiveWorkersLimit_;
     LOG_IF(limitIsReached, DEBUG, COROUTINES) << "The programm reached the limit of exclusive workers";
     return limitIsReached;
+}
+
+void StackfulCoroutineManager::ManagerThreadProc()
+{
+    // calculate the time after 5 seconds.
+    auto nextCheckTime = ark::os::time::GetClockTimeInMilli() + DETECTION_INTERVAL_VALUE;
+    while (managerRunning_) {
+        {
+            os::memory::LockHolder lock(managerMutex_);
+            managerCv_.TimedWait(&managerMutex_, DETECTION_INTERVAL_VALUE);  // wait 5 seconds.
+            if (!managerRunning_) {
+                LOG(DEBUG, COROUTINES) << "The manager thread stops running.";
+                break;
+            }
+        }
+        uint32_t count = migrateCount_.exchange(0);
+        while (count > 0) {
+            MigrateCoroutinesInward(count);
+        }
+        auto now = ark::os::time::GetClockTimeInMilli();
+        if (now >= nextCheckTime) {
+            CheckForBlockedWorkers();
+            nextCheckTime = now + DETECTION_INTERVAL_VALUE;  // update to the next 5 second.
+        }
+    }
+}
+
+void StackfulCoroutineManager::CheckForBlockedWorkers()
+{
+    os::memory::LockHolder lock(workersLock_);
+    ASSERT(!workers_.empty());
+    for (auto *w : workers_) {
+        // skip main worker and exclusive workers
+        if (w->IsMainWorker() || w->InExclusiveMode()) {
+            continue;
+        }
+        w->MigrateCorosOutwardsIfBlocked();
+    }
+}
+
+void StackfulCoroutineManager::MigrateCoroutinesInward(uint32_t &count)
+{
+    auto affinityMask = CalcAffinityMaskFromLaunchMode(CoroutineLaunchMode::DEFAULT);
+    os::memory::LockHolder lkWorkers(workersLock_);
+    StackfulCoroutineWorker *from = ChooseWorkerImpl(WorkerSelectionPolicy::MOST_LOADED, affinityMask);
+    if (from == nullptr || from->IsIdle()) {
+        LOG(DEBUG, COROUTINES) << "no suitable worker.";
+        count = 0;
+        return;
+    }
+
+    for (auto *w : workers_) {
+        // skip main worker and exclusive workers
+        if (w->IsMainWorker() || w->InExclusiveMode()) {
+            continue;
+        }
+        if (w->MigrateFrom(from)) {
+            --count;
+            return;
+        }
+    }
+    count = 0;
+}
+
+bool StackfulCoroutineManager::MigrateCoroutinesOutward(StackfulCoroutineWorker *from)
+{
+    if (from->IsIdle()) {
+        LOG(DEBUG, COROUTINES) << "The worker is idle, stop migration outward.";
+        return false;
+    }
+    auto affinityMask = CalcAffinityMaskFromLaunchMode(CoroutineLaunchMode::DEFAULT);
+    os::memory::LockHolder lkWorkers(workersLock_);
+    StackfulCoroutineWorker *to = ChooseWorkerImpl(WorkerSelectionPolicy::LEAST_LOADED, affinityMask);
+    if (to == nullptr || to == from) {
+        LOG(DEBUG, COROUTINES) << "no suitable worker.";
+        return false;
+    }
+    from->MigrateTo(to);
+    return true;
+}
+
+StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerImpl(WorkerSelectionPolicy policy, size_t maskValue)
+{
+    std::bitset<stackful_coroutines::MAX_WORKERS_COUNT> affinityBits(maskValue);
+    auto preferFirstOverSecond = [&affinityBits, &policy](const StackfulCoroutineWorker *first,
+                                                          const StackfulCoroutineWorker *second) {
+        if (!affinityBits.test(first->GetId())) {
+            return false;
+        }
+        if (!affinityBits.test(second->GetId())) {
+            return true;
+        }
+        // choosing the least loaded worker from the allowed worker set
+        if (policy == WorkerSelectionPolicy::LEAST_LOADED) {
+            return first->GetLoadFactor() < second->GetLoadFactor();
+        }
+        // choosing the most loaded worker from the allowed worker set
+        return first->GetLoadFactor() > second->GetLoadFactor();
+    };
+
+    if (workers_.empty()) {
+        LOG(DEBUG, COROUTINES) << "workers is empty.";
+        return nullptr;
+    }
+#ifndef NDEBUG
+    LOG(DEBUG, COROUTINES) << "Evaluating load factors:";
+    for (auto w : workers_) {
+        LOG(DEBUG, COROUTINES) << w->GetName() << ": LF = " << w->GetLoadFactor();
+    }
+#endif
+    std::vector<StackfulCoroutineWorker *> suitableWorkers;
+    // skip exclusive and finalizing workers
+    std::copy_if(workers_.begin(), workers_.end(), std::back_inserter(suitableWorkers), [affinityBits](auto *w) {
+        return !w->IsDisabledForCrossWorkersLaunch() || affinityBits.test(w->GetId());
+    });
+    ASSERT(!suitableWorkers.empty());
+
+    auto wIt = std::min_element(suitableWorkers.begin(), suitableWorkers.end(), preferFirstOverSecond);
+    LOG(DEBUG, COROUTINES) << "Chose worker: " << (*wIt)->GetName();
+
+    return *wIt;
+}
+
+void StackfulCoroutineManager::TriggerMigration()
+{
+    auto *worker = GetCurrentWorker();
+    if (worker->IsMainWorker() || worker->InExclusiveMode()) {
+        return;
+    }
+    if (!IsMigrationEnabled()) {
+        LOG(DEBUG, COROUTINES) << "Migration is not supported.";
+        return;
+    }
+    ++migrateCount_;
+    LOG(DEBUG, COROUTINES) << "trigger migration.";
+    os::memory::LockHolder lock(managerMutex_);
+    managerCv_.Signal();
+}
+
+void StackfulCoroutineManager::MigrateAwakenedCoro(Coroutine *co)
+{
+    os::memory::LockHolder lkWorkers(workersLock_);
+    auto *w = ChooseWorkerForCoroutine(co);
+    w->AddRunnableCoroutine(co);
+}
+
+void StackfulCoroutineManager::StartManagerThread()
+{
+    // create a thread to detect worker blocking and perform coroutine migration
+    managerRunning_ = true;
+    managerThread_ = std::thread(&StackfulCoroutineManager::ManagerThreadProc, this);
+    os::thread::SetThreadName(managerThread_.native_handle(), "managerThread");
+}
+
+void StackfulCoroutineManager::StopManagerThread()
+{
+    if (!managerRunning_) {
+        return;
+    }
+    {
+        os::memory::LockHolder lock(managerMutex_);
+        managerRunning_ = false;
+        managerCv_.SignalAll();
+    }
+    if (managerThread_.joinable()) {
+        managerThread_.join();
+    }
 }
 
 }  // namespace ark

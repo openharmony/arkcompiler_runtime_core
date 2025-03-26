@@ -107,12 +107,30 @@ public:
     {
         return enableDrainQueueIface_;
     }
+    bool IsMigrationEnabled()
+    {
+        return enableMigration_;
+    }
+    bool IsMigrateAwakenedCorosEnabled()
+    {
+        return migrateAwakenedCoros_;
+    }
 
     /* profiling tools */
     CoroutineStats &GetPerfStats()
     {
         return stats_;
     }
+
+    /// migrate coroutines from the 'from' worker to other workers
+    bool MigrateCoroutinesOutward(StackfulCoroutineWorker *from);
+    /// trigger the managerThread to migrate
+    void TriggerMigration();
+    /**
+     * @brief migrate the awakened coroutine to the worker with the lowest load
+     * @param co the awakened coroutine
+     */
+    void MigrateAwakenedCoro(Coroutine *co);
 
 protected:
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
@@ -199,6 +217,19 @@ private:
     WorkerId AllocateWorkerId();
     void ReleaseWorkerId(WorkerId workerId);
 
+    /**
+     * The EP for manager thread. The manager thread can only be created when coroutine migration is supported.
+     * This function cannot be called directly, and can only be called once.
+     */
+    void ManagerThreadProc();
+    /// manage the lifecycle of the manager thread
+    void StartManagerThread();
+    void StopManagerThread();
+
+    void CheckForBlockedWorkers();
+    void MigrateCoroutinesInward(uint32_t &count);
+    StackfulCoroutineWorker *ChooseWorkerImpl(WorkerSelectionPolicy policy, size_t maskValue) REQUIRES(workersLock_);
+
     // for thread safety with GC
     mutable os::memory::Mutex coroListLock_;
     // all registered coros
@@ -246,6 +277,20 @@ private:
     // Feature flags, eventually will be refactored into some structure.
     // Should we just store the initial CoroutineConfig?..
     bool enableDrainQueueIface_ = false;
+    // coroutine migration feature
+    bool enableMigration_ = false;
+    bool migrateAwakenedCoros_ = false;
+
+    // the number of migration triggers
+    std::atomic_uint32_t migrateCount_ = 0;
+    // manager thread infos
+    std::atomic_bool managerRunning_ = false;
+    std::thread managerThread_;
+    os::memory::Mutex managerMutex_;
+    os::memory::ConditionVariable managerCv_;
+
+    // the time interval between detecting worker blocking
+    static constexpr uint32_t DETECTION_INTERVAL_VALUE = 5000;
 };
 
 }  // namespace ark

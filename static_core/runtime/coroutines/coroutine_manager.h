@@ -29,8 +29,10 @@ struct CoroutineManagerConfig {
 
     /// enable the experimental task execution interface
     bool enableDrainQueueIface = false;
-    /// Migration feature
-    bool migration = false;
+    /// enable migration
+    bool enableMigration = false;
+    /// migrate coroutines that resumed from wait
+    bool migrateAwakenedCoros = false;
     /// Number of coroutine workers for the N:M mode
     uint32_t workersCount = WORKERS_COUNT_AUTO;
     /// Limit on the number of exclusive coroutines workers
@@ -60,6 +62,14 @@ enum class CoroutineSchedulingPolicy {
      * disallow non_main -> main transitions on migration
      */
     NON_MAIN_WORKER
+};
+
+/// @brief defines the selection policy for a worker.
+enum class WorkerSelectionPolicy {
+    /// choose the least busy worker
+    LEAST_LOADED,
+    /// choose the busiest worker
+    MOST_LOADED
 };
 
 /**
@@ -284,7 +294,8 @@ protected:
 private:
     CoroutineFactory coFactory_ = nullptr;
 
-    CoroutineSchedulingPolicy schedulingPolicy_ = CoroutineSchedulingPolicy::DEFAULT;
+    mutable os::memory::Mutex policyLock_;
+    CoroutineSchedulingPolicy schedulingPolicy_ GUARDED_BY(policyLock_) = CoroutineSchedulingPolicy::DEFAULT;
 
     // coroutine id management
     os::memory::Mutex idsLock_;
