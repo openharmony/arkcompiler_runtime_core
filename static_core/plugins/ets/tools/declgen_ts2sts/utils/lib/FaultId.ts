@@ -124,6 +124,8 @@ export enum FaultID {
   LimitImport,
   NoInitializer,
   DuplicatedEnum,
+  NoPrivateMember,
+  NoETSKeyword,
   // this should always be last enum
   LAST_ID
 }

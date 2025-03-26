@@ -58,3 +58,24 @@ class C {
         return
     }
 }
+
+class Singleton {
+    private static instance: Singleton | null = null;
+
+    private constructor() {}
+
+    public static getInstance(): Singleton {
+        if (Singleton.instance === null) {
+            Singleton.instance = new Singleton();
+        }
+        return Singleton.instance;
+    }
+
+    public someMethod(): void {
+        console.log("This is a method of the Singleton class.");
+    }
+
+    private test(){
+        console.log("test");
+    }
+}

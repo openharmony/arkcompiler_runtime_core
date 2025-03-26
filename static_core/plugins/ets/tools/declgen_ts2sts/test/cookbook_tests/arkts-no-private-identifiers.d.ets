@@ -26,3 +26,7 @@ declare class C {
     protected o(): Map<JSValue, JSValue>;
     protected static p(): Map<string, string>;
 }
+declare class Singleton {
+    static getInstance(): Singleton;
+    someMethod(): void;
+}
