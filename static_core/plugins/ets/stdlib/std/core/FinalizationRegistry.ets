@@ -15,11 +15,26 @@
 
 package std.core;
 
+/**
+  * FinalizationRegistry provides a way to execute the provided callback when a
+  * registered object gets garbage collected.
+  * FinalizationRegistry is coroutine-safe class.
+  * - It is safe to pass an instance to another coroutines.
+  * - It is safe to call methods from several coroutines.
+  * 
+  * Notes:
+  * - Runtime doesn't provide any guarantees that the registered object will be
+  * garbage collected (even if its dead).
+  * - Even the object is garbage collected runtime doesn't guarantee that
+  * the callback will be called.
+  * - Runtime ignores any exceptions thrown in the callback.
+  * - User should avoid call await in the callback.
+  * - Runtime calls the callback after the object is garbage collected at some point
+  * during execution.
+  * - The callback may be called in any coroutine.
+  */
 export final class FinalizationRegistry<T> {
-
-    private callbackWithArg: (value: T) => void = (value: T) => { return };
-    private callbackWithoutArg: () => void = () => { return };
-    private isCallbackWithArg: boolean = true;
+    private callback: (value: T) => void;
     // Can be changed to local trimplet class when it will be implemented
     private obj_token_refs: (Object | undefined)[] = [];
     private callback_arguments: (T | undefined)[] = [];
@@ -92,8 +107,6 @@ export final class FinalizationRegistry<T> {
     }
 
     /**
-     * Returns size of the FinalizationRegistry
-     *
      * @returns size of the FinalizationRegistry
      */
     public getSize(): int {
@@ -107,53 +120,33 @@ export final class FinalizationRegistry<T> {
     }
 
     /**
-     * Creates FinalizationRegistry object with the specific callback function.
-     * One can register an object to this queue and after reclamation of this object
+     * Create FinalizationRegistry object with the specific callback function.
+     * One can register an object and after reclamation of the object
      * the callback function will be called.
      *
      * @param callback_value callback function which will be called
      * after registered object reclamation.
      */
-    public constructor(callback_value: (value: T) => void) {
+    public constructor(callback: (value: T) => void) {
         this.init_arrays(FinalizationRegistry.FIRST_SIZE);
-        this.callbackWithArg = callback_value;
-        this.isCallbackWithArg = true;
+        this.callback = callback;
         FinalizationRegistry.finalizationRegistryLock.lockGuard(() => {
             FinalizationRegistry.registerInstance(new WeakRef<Object>(this));
         });
     }
 
     /**
-     * Creates FinalizationRegistry object with the specific callback function,
-     * which doesn't have any argument
-     * One can register an object to this queue and after reclamation of this object
-     * the callback function will be called.
-     *
-     * @param callback_value callback function which will be called
-     * after registered object reclamation.
-     */
-    public constructor(callback_value: () => void) {
-        this.init_arrays(FinalizationRegistry.FIRST_SIZE);
-        this.callbackWithoutArg = callback_value;
-        this.isCallbackWithArg = false;
-        FinalizationRegistry.finalizationRegistryLock.lockGuard(() => {
-            FinalizationRegistry.registerInstance(new WeakRef<Object>(this));
-        });
-    }
-
-    /**
-     * Registers an object with specific callback argument and
-     * with token object - an object which can be used to remove
-     * this registred callback. @see unregister
-     * After the object will be removed, the callback method
-     * will be called with the specific argument.
+     * Registers an object with specific callback's argument and
+     * optional token - an object used to remove the entry from the registry.
+     * @see unregister
+     * After the object is garbage collected, runtime will call the callback
+     * with the specific argument.
      *
      * @param object a tracking object
      *
      * @param callbackArg callback argument for callback method
      *
-     * @param token an object which can be used to remove
-     * this registred callback if provided
+     * @param token an object used to remove the entry from the registry
      */
     public register(object: Object, callbackArg: T, token?: Object): void {
         this.mutex.lockGuard(() => {
@@ -169,9 +162,9 @@ export final class FinalizationRegistry<T> {
     }
 
     /**
-     * Removes all registered callbacks with the specific token value
+     * Removes all entries with the specific token
      *
-     * @param token all registered callbacks with this token will be removed
+     * @param token object specified which entries should be removed
      */
     public unregister(token: Object): void {
         this.mutex.lockGuard(() => {
@@ -200,13 +193,10 @@ export final class FinalizationRegistry<T> {
                     i = prev; // iterator rollback
                     try {
                         this.mutex.unlock();
-                        if (this.isCallbackWithArg) {
-                            this.callbackWithArg(arg!);
-                        } else {
-                            this.callbackWithoutArg();
-                        }
+                        this.callback(arg as T);
                     } catch (e) {
                         if (e instanceof Error) {
+                            console.log("Error: " + e.toString());
                             if (e.stack) {
                                 console.log(e.stack);
                             }
