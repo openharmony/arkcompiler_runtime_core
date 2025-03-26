@@ -278,7 +278,6 @@ void XGC::MarkFromObject([[maybe_unused]] void *data)
 {
     ASSERT(data != nullptr);
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
-    // NOTE(audovichenko): Find the corresponding ref
     auto *nativeRef = static_cast<NativeReference *>(data);
     auto *refRef = static_cast<ets_proxy::SharedReference **>(nativeRef->GetData());
     // Atomic with acquire order reason: load visibility after shared reference initialization in mutator thread

@@ -246,30 +246,29 @@ SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx, EtsHan
         ctx->ThrowJSError(ctx->GetJSEnv(), "no free space for SharedReference");
         return nullptr;
     }
-    SharedReference *startRef = sharedRef;
     SharedReference *lastRefInChain = nullptr;
     // If EtsObject has been already marked as interop object then add new created SharedReference for a new interop
     // context to chain of references with this EtsObject
     if (etsObject->HasInteropIndex()) {
         lastRefInChain = GetItemByIndex(etsObject->GetInteropIndex());
-        startRef = lastRefInChain;
-        ASSERT(!HasReferenceWithCtx(startRef, ctx));
+        ASSERT(!HasReferenceWithCtx(lastRefInChain, ctx));
         uint32_t index = lastRefInChain->flags_.GetNextIndex();
         while (index != 0U) {
             lastRefInChain = GetItemByIndex(index);
             index = lastRefInChain->flags_.GetNextIndex();
         }
     }
-    (sharedRef->*REF_INIT)(ctx, etsObject.GetPtr(), jsRef, GetIndexByItem(startRef));
+    auto newRefIndex = GetIndexByItem(sharedRef);
+    (sharedRef->*REF_INIT)(ctx, etsObject.GetPtr(), jsRef, newRefIndex);
     if (lastRefInChain != nullptr) {
-        lastRefInChain->flags_.SetNextIndex(GetIndexByItem(sharedRef));
+        lastRefInChain->flags_.SetNextIndex(newRefIndex);
     }
     // Ref allocated during XGC, so need to mark it on Remark to avoid removing
     if (isXGCinProgress_) {
         refsAllocatedDuringXGC_.insert(sharedRef);
     }
     LOG(DEBUG, ETS_INTEROP_JS) << "Alloc shared ref: " << sharedRef;
-    return startRef;
+    return sharedRef;
 }
 
 SharedReference *SharedReferenceStorage::CreateETSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject,
@@ -355,11 +354,8 @@ void SharedReferenceStorage::DeleteReferenceFromChain(EtsObject *etsObject, Shar
             // Chain contains only one reference, so no more references for this EtsObject
             etsObject->DropInteropIndex();
         } else {
-            auto *nextRef = GetItemByIndex(nextIndex);
-            // Copy content from next reference to head of chain, so we keep index in EtsObject header
-            [[maybe_unused]] auto res =
-                memcpy_s(removingRef, sizeof(SharedReference), nextRef, sizeof(SharedReference));
-            ASSERT(res == EOK);
+            // Update interop index to actual head
+            etsObject->SetInteropIndex(nextIndex);
         }
     } else {
         prevRef->flags_.SetNextIndex(nextIndex);
@@ -443,24 +439,19 @@ void SharedReferenceStorage::DeleteUnmarkedReferences(SharedReference *sharedRef
         prevRef->flags_.SetNextIndex(0U);
     }
     // -- Remove all unmarked refs except head: FINISH --
-    // Check mark state for headRef, we need to keep interop index in EtsObject header
+    // Check mark state for headRef, we need to exchange or drop interop index in the EtsObject header
     if (!headRef->IsMarked()) {
-        NAPI_CHECK_FATAL(napi_delete_reference(headRef->ctx_->GetJSEnv(), headRef->jsRef_));
         nextIndex = headRef->flags_.GetNextIndex();
+        DeleteJSRefAndRemoveReference(headRef);
         if (nextIndex == 0U) {
             // Head reference is alone reference in the chain, so need to drop interop index from EtsObject header
-            RemoveReference(headRef);
             etsObject->DropInteropIndex();
             return;
         }
         // All unmarked references were removed from the chain, so reference after head should marked
-        SharedReference *firstMarkedRef = GetItemByIndex(nextIndex);
-        ASSERT(firstMarkedRef->IsMarked());
-        // Copy content from first marked refs to head, so we keep index in EtsObject header
-        [[maybe_unused]] auto res = memcpy_s(headRef, sizeof(SharedReference), firstMarkedRef, sizeof(SharedReference));
-        ASSERT(res == EOK);
-        // Content of marked reference copied to headRef, so now we can remove old firstMarkedRef
-        RemoveReference(firstMarkedRef);
+        ASSERT(GetItemByIndex(nextIndex)->IsMarked());
+        // Update interop index to actual head
+        etsObject->SetInteropIndex(nextIndex);
     }
 }
 

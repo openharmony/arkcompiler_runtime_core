@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -157,14 +157,8 @@ bool EtsObjectStateInfo::TryResetInteropIndex(EtsObject *obj, uint32_t index)
     auto *info = table->LookupInfo(id);
     LOG_IF(info == nullptr || info->GetEtsObject() != obj, FATAL, RUNTIME)
         << "TryResetInteropIndex: info was concurrently deleted from table";
-    auto currentIndex = info->GetInteropIndex();
-    if (currentIndex != INVALID_INTEROP_INDEX) {
-        // Now we want to reset index that are already setted and isn't invalid
-        LOG(FATAL, RUNTIME) << "Reset of valid interop index";
-        return true;
-    }
     info->SetInteropIndex(index);
-    return false;
+    return true;
 }
 
 bool EtsObjectStateInfo::TryCheckIfInteropIndexIsValid(const EtsObject *obj, bool *isValid)
