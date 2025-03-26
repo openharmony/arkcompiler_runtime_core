@@ -226,6 +226,21 @@ napi_value CallJSHandler::HandleSpecialMethod(Span<napi_value> jsargs)
             NAPI_CHECK_FATAL(napi_get_value_int32(env, jsargs[0], &idx));
             NAPI_CHECK_FATAL(napi_set_element(env, jsThis_, idx, jsargs[1]));
             napi_get_undefined(env, &handlerResult);
+        } else if (std::strncmp(methodName, ITERATOR_METHOD, SETTER_GETTER_PREFIX_LENGTH) == 0) {
+            napi_value global;
+            NAPI_CHECK_FATAL(napi_get_global(env, &global));
+            napi_value symbol;
+            NAPI_CHECK_FATAL(napi_get_named_property(env, global, "Symbol", &symbol));
+            napi_value symbolIterator;
+            NAPI_CHECK_FATAL(napi_get_named_property(env, symbol, "iterator", &symbolIterator));
+            napi_value iteratorMethod;
+            NAPI_CHECK_FATAL(napi_get_property(env, jsThis_, symbolIterator, &iteratorMethod));
+            if (GetValueType(env, iteratorMethod) == napi_undefined) {
+                NAPI_CHECK_FATAL(napi_get_undefined(env, &handlerResult));
+                return handlerResult;
+            }
+            size_t jsArgc = 0;
+            NAPI_CHECK_FATAL(napi_call_function(env, jsThis_, iteratorMethod, jsArgc, nullptr, &handlerResult));
         }
     }
     return handlerResult;
