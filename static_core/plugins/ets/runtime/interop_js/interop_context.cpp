@@ -651,7 +651,7 @@ static bool CheckRuntimeOptions([[maybe_unused]] const ark::ets::EtsCoroutine *m
 {
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
     auto gcType = mainCoro->GetVM()->GetGC()->GetType();
-    if (gcType != mem::GCType::G1_GC || Runtime::GetOptions().IsNoAsyncJit()) {
+    if (Runtime::GetOptions().IsEnableXgc() && (gcType != mem::GCType::G1_GC || Runtime::GetOptions().IsNoAsyncJit())) {
         // XGC is not implemented for other GC types
         LOG(ERROR, RUNTIME) << "XGC requires GC type to be g1-gc and no-async-jit option must be false";
         return false;

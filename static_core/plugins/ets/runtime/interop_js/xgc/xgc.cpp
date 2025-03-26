@@ -57,6 +57,7 @@ XGC::XGC(PandaEtsVM *vm, STSVMInterfaceImpl *stsVmIface, ets_proxy::SharedRefere
     : vm_(vm),
       storage_(storage),
       stsVmIface_(stsVmIface),
+      enableXgc_(Runtime::GetCurrent()->GetOptions().IsEnableXgc()),
       minimalThresholdSize_(Runtime::GetCurrent()->GetOptions().GetXgcMinTriggerThreshold()),
       increaseThresholdPercent_(
           std::min(PERCENT_100_U32, Runtime::GetCurrent()->GetOptions().GetXgcTriggerPercentThreshold()))
@@ -355,6 +356,9 @@ size_t XGC::ComputeNewSize()
 bool XGC::Trigger(mem::GC *gc, PandaUniquePtr<GCTask> task)
 {
     ASSERT_MANAGED_CODE();
+    if (!enableXgc_) {
+        return false;
+    }
     LOG(DEBUG, GC_TRIGGER) << "Trigger XGC. Current storage size = " << storage_->Size();
     // NOTE(ipetrov, #20146): Iterate over all contexts
     auto *coro = EtsCoroutine::GetCurrent();

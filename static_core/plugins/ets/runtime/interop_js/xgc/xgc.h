@@ -157,6 +157,8 @@ private:
     std::atomic_bool isXGcInProgress_ {false};
     bool remarkFinished_ {false};  // GUARDED_BY(mutatorLock)
 
+    bool enableXgc_ {false};
+
     /// Trigger specific fields ///
 
     size_t beforeGCStorageSize_ {0U};
