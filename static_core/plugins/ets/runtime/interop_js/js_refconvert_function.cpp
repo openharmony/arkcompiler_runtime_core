@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "plugins/ets/runtime/interop_js/js_proxy/js_proxy.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_function.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/types/ets_type.h"
@@ -78,9 +78,49 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
     return jsValue->GetRefValue(env);
 }
 
-EtsObject *JSRefConvertFunction::UnwrapImpl([[maybe_unused]] InteropCtx *ctx, [[maybe_unused]] napi_value jsFun)
+EtsObject *JSRefConvertFunction::UnwrapImpl(InteropCtx *ctx, napi_value jsFun)
 {
-    UNREACHABLE();
+    // Check if object has SharedReference
+    ets_proxy::SharedReference *sharedRef = ctx->GetSharedRefStorage()->GetReference(ctx->GetJSEnv(), jsFun);
+    if (LIKELY(sharedRef != nullptr)) {
+        EtsObject *jsFunctionProxy = sharedRef->GetEtsObject();
+        return jsFunctionProxy;
+    }
+
+    return this->CreateJSFunctionProxy(ctx, jsFun);
 }
 
+void JSRefConvertFunction::LazyInitJsFunctionProxyWrapper(InteropCtx *ctx)
+{
+    // register the function interface
+    auto etsClass = EtsClass::FromRuntimeClass(this->klass_->GetRuntimeClass());
+
+    // create a JSProxy wrapper for the function
+    this->jsFunctionProxyWrapper_ = js_proxy::JSProxy::CreateFunctionProxy(etsClass);
+    ctx->SetJsProxyInstance(etsClass, this->jsFunctionProxyWrapper_);
+}
+
+EtsObject *JSRefConvertFunction::CreateJSFunctionProxy(InteropCtx *ctx, napi_value jsFun)
+{
+    // lazy init the function proxy wrapper
+    this->LazyInitJsFunctionProxyWrapper(ctx);
+
+    // JS Function => ETS Function Object
+    ASSERT(this->jsFunctionProxyWrapper_ != nullptr);
+    auto *storage = ctx->GetSharedRefStorage();
+    ASSERT(storage->GetReference(ctx->GetJSEnv(), jsFun) == nullptr);
+
+    EtsObject *etsObject = EtsObject::Create(jsFunctionProxyWrapper_->GetProxyClass());
+    if (UNLIKELY(etsObject == nullptr)) {
+        ctx->ForwardEtsException(EtsCoroutine::GetCurrent());
+        return nullptr;
+    }
+
+    auto *sharedRef = storage->CreateJSObjectRef(ctx, etsObject, jsFun);
+    if (UNLIKELY(sharedRef == nullptr)) {
+        ASSERT(InteropCtx::SanityJSExceptionPending());
+        return nullptr;
+    }
+    return sharedRef->GetEtsObject();  // fetch again after gc
+}
 }  // namespace ark::ets::interop::js

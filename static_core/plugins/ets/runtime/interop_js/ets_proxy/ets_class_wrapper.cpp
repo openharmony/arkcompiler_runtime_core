@@ -684,7 +684,7 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
         if (_this->jsproxyWrapper_ == nullptr) {
             // NOTE(konstanting): we assume that the method list stays the same for every proxied class
             _this->jsproxyWrapper_ =
-                js_proxy::JSProxy::Create(etsClass, {ungroupedMethods.data(), ungroupedMethods.size()});
+                js_proxy::JSProxy::CreateBuiltinProxy(etsClass, {ungroupedMethods.data(), ungroupedMethods.size()});
             ctx->SetJsProxyInstance(etsClass, _this->jsproxyWrapper_);
         }
     }

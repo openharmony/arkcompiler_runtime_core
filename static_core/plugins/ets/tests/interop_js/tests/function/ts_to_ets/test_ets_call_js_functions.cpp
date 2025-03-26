@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-#include "bridge/arch/arm/proxy_entrypoint_arm.S"
+#include <gtest/gtest.h>
+#include "ets_interop_js_gtest.h"
 
+namespace ark::ets::interop::js::testing {
 
-PROXY_ENTRYPOINT JSRuntimeCallJSBridge JSRuntimeCallJS
-PROXY_ENTRYPOINT JSRuntimeCallJSByValueBridge JSRuntimeCallJSByValue
-PROXY_ENTRYPOINT JSRuntimeNewCallJSBridge JSRuntimeNewCallJS
+class EtsFunctionEtsToTsTest : public EtsInteropTest {};
 
-PROXY_ENTRYPOINT JSRuntimeCallJSQNameBridge JSRuntimeCallJSQName
-PROXY_ENTRYPOINT JSRuntimeNewCallJSQNameBridge JSRuntimeNewCallJSQName
+TEST_F(EtsFunctionEtsToTsTest, test_ets_call_js_functions)
+{
+    ASSERT_TRUE(RunJsTestSuite("test_ets_call_js_functions.ts"));
+}
 
-PROXY_ENTRYPOINT CallJSProxyBridge CallJSProxy
-PROXY_ENTRYPOINT CallJSFunctionBridge CallJSFunction
+}  // namespace ark::ets::interop::js::testing

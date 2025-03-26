@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,24 @@
  * limitations under the License.
  */
 
-#include "bridge/arch/arm/proxy_entrypoint_arm.S"
+package ets_functions;
 
+let callback_ets_function_js: JSValue;
 
-PROXY_ENTRYPOINT JSRuntimeCallJSBridge JSRuntimeCallJS
-PROXY_ENTRYPOINT JSRuntimeCallJSByValueBridge JSRuntimeCallJSByValue
-PROXY_ENTRYPOINT JSRuntimeNewCallJSBridge JSRuntimeNewCallJS
+function testCallBackEtsFunctionLambda(): number {
+    return callback_ets_function_js((x: number) => x + 1);
+}
 
-PROXY_ENTRYPOINT JSRuntimeCallJSQNameBridge JSRuntimeCallJSQName
-PROXY_ENTRYPOINT JSRuntimeNewCallJSQNameBridge JSRuntimeNewCallJSQName
+function testCallBackEtsFunctionLambdaCapture(): number {
+    let bias = 1;
+    return callback_ets_function_js((x: number) => x + bias);
+}
 
-PROXY_ENTRYPOINT CallJSProxyBridge CallJSProxy
-PROXY_ENTRYPOINT CallJSFunctionBridge CallJSFunction
+function plus_one(x: number): number {
+    return x + 1;
+}
+
+function testCallBackEtsFunctionOuter(): number {
+    return callback_ets_function_js(plus_one);
+}
+
