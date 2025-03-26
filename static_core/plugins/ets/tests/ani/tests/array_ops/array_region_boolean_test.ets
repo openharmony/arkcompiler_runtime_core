@@ -37,7 +37,24 @@ function GetArray(): boolean[] {
     return a
 }
 
+function GetEscompatArray(): Array<boolean> {
+    let a : Array<boolean> = new Array<boolean>(5)
+    a[0] = true
+    a[1] = true
+    a[2] = true
+    a[3] = true
+    a[4] = true
+    return a
+}
+
 function CheckArray(a: boolean[]): boolean {
     return a[0] == true && a[1] == true && a[2] == true && a[3] == false && a[4] == true
 }
 
+function CheckEscompatArray(a: Array<boolean>): boolean {
+    return a[0] == true &&
+           a[1] == true &&
+           a[2] == true &&
+           a[3] == false &&
+           a[4] == true
+}

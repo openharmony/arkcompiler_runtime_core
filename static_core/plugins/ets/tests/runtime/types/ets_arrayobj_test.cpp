@@ -20,6 +20,7 @@
 #include "types/ets_class.h"
 #include "types/ets_arraybuffer.h"
 #include "tests/runtime/types/ets_test_mirror_classes.h"
+#include "types/ets_escompat_array.h"
 
 namespace ark::ets::test {
 

@@ -231,6 +231,47 @@ TEST_F(ArraySetGetRegionDoubleTest, SetGetStabilityToArrayTest)
     }
 }
 
+TEST_F(ArraySetGetRegionDoubleTest, EscompatGetRegionDoubleTest)
+{
+    const auto array =
+        static_cast<ani_array_double>(CallEtsFunction<ani_ref>("array_region_double_test", "GetEscompatArray"));
+
+    ani_double nativeBuffer[5U] = {0.0};
+    const ani_size offset3 = 0;
+    const ani_size len3 = 5;
+    const double epsilon = 1e-6;  // Define acceptable tolerance
+
+    ASSERT_EQ(env_->Array_GetRegion_Double(array, offset3, len3, nativeBuffer), ANI_OK);
+    ASSERT_NEAR(nativeBuffer[0U], TEST_VALUE_1, epsilon);
+    ASSERT_NEAR(nativeBuffer[1U], TEST_VALUE_2, epsilon);
+    ASSERT_NEAR(nativeBuffer[2U], TEST_VALUE_3, epsilon);
+    ASSERT_NEAR(nativeBuffer[3U], TEST_VALUE_4, epsilon);
+    ASSERT_NEAR(nativeBuffer[4U], TEST_VALUE_5, epsilon);
+}
+
+TEST_F(ArraySetGetRegionDoubleTest, EscompatSetRegionDoubleTest)
+{
+    const auto array =
+        static_cast<ani_array_double>(CallEtsFunction<ani_ref>("array_region_double_test", "GetEscompatArray"));
+    ani_double nativeBuffer1[5U] = {TEST_UPDATE_1, TEST_UPDATE_2, TEST_UPDATE_3};
+    const ani_size offset4 = 2;
+    const ani_size len4 = 3;
+    ASSERT_EQ(env_->Array_SetRegion_Double(array, offset4, len4, nativeBuffer1), ANI_OK);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_double_test", "CheckEscompatArray", array), ANI_TRUE);
+}
+
+TEST_F(ArraySetGetRegionDoubleTest, EscompatInvalidDoubleTest)
+{
+    const auto array =
+        static_cast<ani_array_double>(CallEtsFunction<ani_ref>("array_region_double_test", "GetEscompatArray"));
+    ani_double nativeBuffer1[5U] = {TEST_UPDATE_1, TEST_UPDATE_2, TEST_UPDATE_3};
+    const ani_size offset4 = 3;
+    const ani_size len4 = 3;
+    ASSERT_EQ(env_->Array_SetRegion_Double(array, offset4, len4, nativeBuffer1), ANI_OUT_OF_RANGE);
+    ani_double nativeBuffer[5U] = {0};
+    ASSERT_EQ(env_->Array_GetRegion_Double(array, offset4, len4, nativeBuffer), ANI_OUT_OF_RANGE);
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

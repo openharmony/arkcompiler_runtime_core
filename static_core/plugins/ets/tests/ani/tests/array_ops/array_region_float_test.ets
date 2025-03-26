@@ -38,6 +38,16 @@ function GetArray(): float[] {
     return a
 }
 
+function GetEscompatArray(): Array<float> {
+    let a : Array<float> = new Array<float>(5)
+    a[0] = 1.0 as float
+    a[1] = 2.0 as float
+    a[2] = 3.0 as float
+    a[3] = 4.0 as float
+    a[4] = 5.0 as float
+    return a
+}
+
 function CheckArray(a: float[]): boolean {
     return a[0] as int == 1 && a[1] as int == 2 && a[2] as int == 30 && a[3] as int == 40 && a[4] as int == 50
 }
@@ -48,4 +58,12 @@ function GetSpecialArray(): float[] {
 	let minus: float = new Float(-3.40282346638528860e+38)
     let a : float[] = [min, max, minus, 0.0, 0.0, 0.0]
     return a
+}
+
+function CheckEscompatArray(a: Array<float>): boolean {
+    return a[0] as int == 1 &&
+           a[1] as int == 2 &&
+           a[2] as int == 30 &&
+           a[3] as int == 40 &&
+           a[4] as int == 50
 }
