@@ -42,7 +42,9 @@ export class Autofixer {
       [
         this[FaultID.ImportAfterStatement].bind(this),
         this[FaultID.LimitImport].bind(this),
-        this[FaultID.DuplicatedDeclaration].bind(this)
+        this[FaultID.DuplicatedDeclaration].bind(this),
+        this[FaultID.DuplicatedEnum].bind(this),
+        this[FaultID.EnumWithMixedType].bind(this)
       ]
     ],
     [ts.SyntaxKind.LiteralType, [this[FaultID.NumbericLiteral].bind(this)]],
@@ -57,7 +59,11 @@ export class Autofixer {
     [ts.SyntaxKind.ModuleDeclaration, [this[FaultID.Module].bind(this)]],
     [
       ts.SyntaxKind.ModuleBlock,
-      [this[FaultID.ExportNamespace].bind(this), this[FaultID.DuplicatedDeclaration].bind(this)]
+      [
+        this[FaultID.ExportNamespace].bind(this),
+        this[FaultID.DuplicatedDeclaration].bind(this),
+        this[FaultID.DuplicatedEnum].bind(this)
+      ]
     ],
     [ts.SyntaxKind.TypeOperator, [this[FaultID.KeyofType].bind(this)]],
     [ts.SyntaxKind.TypeLiteral, [this[FaultID.TypeLiteral].bind(this)]],
@@ -739,6 +745,85 @@ export class Autofixer {
 
     return node;
   }
+  
+  /*
+   * Rule: `For enums with heterogeneous types, convert them to JSValue`
+   */
+  private [FaultID.EnumWithMixedType](node: ts.Node): ts.VisitResult<ts.Node> {
+    /**
+     * For enums with heterogeneous types, convert them to JSValue
+     */
+
+    if (ts.isSourceFile(node)) {
+      const { mixedEnumNames, firstPassStatements } = findMixedEnums(node as ts.SourceFile);
+      const firstPassSourceFile = ts.factory.updateSourceFile(node, firstPassStatements);
+      const visit = (typeNode: ts.Node): ts.VisitResult<ts.Node> => {
+        if (ts.isTypeReferenceNode(typeNode)) {
+          const typeName = typeNode.typeName;
+          if (ts.isIdentifier(typeName) && mixedEnumNames.includes(typeName.text)) {
+            return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier(JSValue), undefined);
+          }
+        }
+        return ts.visitEachChild(typeNode, visit, this.context);
+      };
+      let statements = firstPassSourceFile.statements.slice();
+      for (let i = 0; i < statements.length; i++) {
+        const stmt = statements[i];
+        const newStmt = visit(stmt);
+        if (newStmt) {
+          statements[i] = newStmt as ts.Statement;
+        }
+      }
+      return ts.factory.updateSourceFile(firstPassSourceFile, statements);
+    }
+    return node;
+  }
+
+  private [FaultID.DuplicatedEnum](node: ts.Node): ts.VisitResult<ts.Node> {
+    const statements: ts.Statement[] = [];
+    const interfaceDeclarations: ts.InterfaceDeclaration[] = [];
+    const classDeclarations: ts.ClassDeclaration[] = [];
+    const enumDeclarations: ts.EnumDeclaration[] = [];
+    if (ts.isSourceFile(node) || ts.isModuleBlock(node)) {
+      for (const stmt of node.statements) {
+        if (ts.isInterfaceDeclaration(stmt)) {
+          interfaceDeclarations.push(stmt);
+        } else if (ts.isClassDeclaration(stmt)) {
+          classDeclarations.push(stmt);
+        } else if (ts.isEnumDeclaration(stmt)) {
+          enumDeclarations.push(stmt);
+        } else {
+          statements.push(stmt);
+        }
+      }
+      if (ts.isModuleBlock(node)) {
+        const moduleBlockNode = this.context.factory.updateModuleBlock(node, [
+          ...statements,
+          ...findSameInterfaceOrClassOrEnumList(
+            interfaceDeclarations,
+            this.context,
+            ts.SyntaxKind.InterfaceDeclaration
+          ),
+          ...findSameInterfaceOrClassOrEnumList(classDeclarations, this.context, ts.SyntaxKind.ClassDeclaration),
+          ...findSameInterfaceOrClassOrEnumList(enumDeclarations, this.context, ts.SyntaxKind.EnumDeclaration)
+        ]);
+        return moduleBlockNode;
+      } else {
+        return this.context.factory.updateSourceFile(node, [
+          ...statements,
+          ...findSameInterfaceOrClassOrEnumList(
+            interfaceDeclarations,
+            this.context,
+            ts.SyntaxKind.InterfaceDeclaration
+          ),
+          ...findSameInterfaceOrClassOrEnumList(classDeclarations, this.context, ts.SyntaxKind.ClassDeclaration),
+          ...findSameInterfaceOrClassOrEnumList(enumDeclarations, this.context, ts.SyntaxKind.EnumDeclaration)
+        ]);
+      }
+    }
+
+    return node;
+  }
 }
 
 /**
@@ -747,7 +832,7 @@ export class Autofixer {
 function transModuleBlockformation(
   stmt: ts.Statement,
   context: ts.TransformationContext,
-  kindType: number
+  kindType: ts.SyntaxKind,
 ): ts.Statement {
   const exportToken = context.factory.createToken(ts.SyntaxKind.ExportKeyword);
   return updateNodetoAddExport(stmt, context, kindType, exportToken);
@@ -791,40 +876,6 @@ function extractClassMembers(item: ts.ClassDeclaration, classMethods: ts.ClassEl
       }
     }
   });
-}
-
-/**
- * Merge classes or interfaces with the same name
- */
-function createCombinedInterfaceAndClass(
-  list: ts.Statement[],
-  context: ts.TransformationContext,
-  kindType: number
-): ts.Statement {
-  const methods: ts.TypeElement[] = [];
-  const classMethods: ts.ClassElement[] = [];
-
-  list.forEach((item) => {
-    if (ts.isInterfaceDeclaration(item)) {
-      extractInterfaceMembers(item, methods);
-    } else if (ts.isClassDeclaration(item)) {
-      extractClassMembers(item, classMethods);
-    }
-  });
-
-  if (kindType === ts.SyntaxKind.ClassDeclaration) {
-    const classNode = list[0] as ts.ClassDeclaration;
-    return context.factory.createClassDeclaration(
-      classNode.modifiers,
-      classNode.name,
-      undefined,
-      undefined,
-      classMethods
-    );
-  } else {
-    const node = list[0] as ts.InterfaceDeclaration;
-    return context.factory.createInterfaceDeclaration(node.modifiers, node.name, undefined, undefined, methods);
-  }
 }
 
 function isSameFunction(m: ts.TypeElement, member: ts.TypeElement): boolean {
@@ -958,7 +1009,7 @@ function findSameInterfaceAndClassList(
 function updateNodetoAddExport(
   stmt: ts.Statement,
   context: ts.TransformationContext,
-  kindType: number,
+  kindType: ts.SyntaxKind,
   exportToken: ts.Modifier
 ): ts.Statement {
   switch (kindType) {
@@ -1303,7 +1354,6 @@ function processSourceFileStatements(
   typeAliasMap: Map<string, string>;
 } {
   const importDeclarations: ts.Statement[] = [];
-  // 把变量名改回 statements 以匹配返回类型
   const statementsResult: ts.Statement[] = [];
   const typeAliasMap = new Map<string, string>();
 
@@ -1420,4 +1470,149 @@ function inferNodeTypeFromInitializer(
   }
 
   return undefined;
+}
+
+function findMixedEnums(sourceFile: ts.SourceFile): { mixedEnumNames: string[]; firstPassStatements: ts.Statement[] } {
+  let mixedEnumNames: string[] = [];
+  const firstPassStatements: ts.Statement[] = [];
+
+  for (const stmt of sourceFile.statements) {
+    if (!ts.isEnumDeclaration(stmt)) {
+      firstPassStatements.push(stmt);
+      continue;
+    }
+
+    if (!hasMixedTypes(stmt)) {
+      firstPassStatements.push(stmt);
+      continue;
+    }
+
+    const enumName = stmt.name.text;
+    mixedEnumNames.push(enumName);
+
+    const jsValueType = ts.factory.createTypeReferenceNode(JSValue, undefined);
+    const variableDeclaration = ts.factory.createVariableDeclaration(enumName, undefined, jsValueType, undefined);
+    const variableDeclarationList = ts.factory.createVariableDeclarationList(
+      [variableDeclaration],
+      ts.NodeFlags.Const
+    );
+    const variableStatement = ts.factory.createVariableStatement(
+      [ts.factory.createToken(ts.SyntaxKind.ExportKeyword), ts.factory.createToken(ts.SyntaxKind.DeclareKeyword)],
+      variableDeclarationList
+    );
+
+    firstPassStatements.push(variableStatement);
+  }
+
+  return { mixedEnumNames, firstPassStatements };
+}
+
+function hasMixedTypes(enumDeclaration: ts.EnumDeclaration): boolean {
+  let firstKind: ts.SyntaxKind | null = null;
+  for (const member of enumDeclaration.members) {
+    if (member.initializer) {
+      const currentKind = member.initializer.kind;
+      if (firstKind === null) {
+        firstKind = currentKind;
+      } else if (currentKind !== firstKind) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * Extract enum members together.
+ */
+function extractEnumMembers(item: ts.EnumDeclaration, enumbers: ts.EnumMember[]): void {
+  item.members.forEach((member) => {
+    if (ts.isEnumMember(member) && member.name) {
+      const memberName = (member.name as ts.Identifier).text;
+      if (!enumbers.some((m) => ts.isEnumMember(m) && ts.isEnumMember(member) && m.name.getText() === memberName)) {
+        enumbers.push(member);
+      }
+    }
+  });
+}
+
+/**
+ * Merge classes or interfaces or enum with the same name
+ */
+function createCombinedInterfaceAndClass(
+  list: ts.Statement[],
+  context: ts.TransformationContext,
+  kindType: ts.SyntaxKind
+): ts.Statement {
+  const methods: ts.TypeElement[] = [];
+  const classMethods: ts.ClassElement[] = [];
+  const enumMembers: ts.EnumMember[] = [];
+
+  list.forEach((item) => {
+    if (ts.isInterfaceDeclaration(item)) {
+      extractInterfaceMembers(item, methods);
+    } else if (ts.isClassDeclaration(item)) {
+      extractClassMembers(item, classMethods);
+    } else if (ts.isEnumDeclaration(item)) {
+      extractEnumMembers(item, enumMembers);
+    }
+  });
+
+  if (kindType === ts.SyntaxKind.ClassDeclaration) {
+    const classNode = list[0] as ts.ClassDeclaration;
+    return context.factory.createClassDeclaration(
+      classNode.modifiers,
+      classNode.name,
+      undefined,
+      undefined,
+      classMethods
+    );
+  } else if (kindType === ts.SyntaxKind.EnumDeclaration) {
+    const enumNode = list[0] as ts.EnumDeclaration;
+    return context.factory.createEnumDeclaration(enumNode.modifiers, enumNode.name, enumMembers);
+  } else {
+    const node = list[0] as ts.InterfaceDeclaration;
+    return context.factory.createInterfaceDeclaration(node.modifiers, node.name, undefined, undefined, methods);
+  }
+}
+
+/**
+ * Find a list of interfaces or classes with the same name
+ */
+function findSameInterfaceOrClassOrEnumList(
+  statements: ts.Statement[],
+  context: ts.TransformationContext,
+  kindType: ts.SyntaxKind
+): ts.Statement[] {
+  const sameInterfaceMap = new Map<string, { count: number; nodes: ts.Statement[] }>();
+  statements.forEach((statement) => {
+    let name: string | undefined;
+    const isInterfaceDeclaration = ts.isInterfaceDeclaration(statement) && statement.name;
+    const isClassDeclaration = ts.isClassDeclaration(statement) && statement.name;
+    const isEnumDeclaration = ts.isEnumDeclaration(statement) && statement.name;
+    if (isInterfaceDeclaration || isClassDeclaration || isEnumDeclaration) {
+      name = statement.name.text;
+    }
+    if (name) {
+      if (!sameInterfaceMap.has(name)) {
+        sameInterfaceMap.set(name, { count: 0, nodes: [] });
+      }
+      const entry = sameInterfaceMap.get(name)!;
+      entry.count++;
+      entry.nodes.push(statement);
+    }
+  });
+  const uniqueNodes: ts.Statement[] = [];
+  const newNodes: ts.Statement[] = [];
+  sameInterfaceMap.forEach((entry) => {
+    if (entry.count === 1) {
+      uniqueNodes.push(...entry.nodes);
+    } else {
+      // Reorganize interface information
+      const newInterface = createCombinedInterfaceAndClass(entry.nodes, context, kindType);
+      newNodes.push(newInterface);
+    }
+  });
+
+  return [...uniqueNodes, ...newNodes];
 }
