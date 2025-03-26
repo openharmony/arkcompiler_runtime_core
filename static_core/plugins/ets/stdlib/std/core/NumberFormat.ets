@@ -101,4 +101,51 @@ export namespace Intl {
         source: "startRange" | "endRange" | "shared"
     }
 
+    export class NumberFormatPart {
+        type: NumberFormatPartTypes; // No default value in TS/JS, because of this class is only used as returned result for function Intl.NumberFormat.formatToParts(..)
+        value: string;
+
+        public constructor() {}
+    }
+
+    // NOTE(ilyakorobkov) replace class with interface after fix issue #22050, #24106
+    export class NumberFormatOptions {
+        compactDisplay?: "short" | "long";
+        currency?: string;   // ISO 4217 currencies (over 300 identifiers) like "USD", "EUR", ets. Used only if style is "currency"
+        currencyDisplay?: "code" | "symbol" | "narrowSymbol" | "name"
+        currencySign?: "standard" | "accounting"
+        localeMatcher?: "lookup" | "best fit"
+        maximumFractionDigits?: number
+        maximumSignificantDigits?: number
+        minimumFractionDigits?: number
+        minimumIntegerDigits?: number
+        minimumSignificantDigits?: number
+        notation?: "standard" | "scientific" | "engineering" | "compact"
+        signDisplay?: "auto" | "never" | "always" | "exceptZero" | "negative"
+        style?: "decimal" | "percent" | "currency" | "unit"
+        unit?: string
+        unitDisplay?: "short" | "long" | "narrow"
+        useGrouping?: "always" | "auto" | "min2" | "true" | "false" | boolean;
+    }
+
+    // NOTE(ilyakorobkov) replace class with interface after fix issues #22050, #24106
+    export class ResolvedNumberFormatOptions {
+        compactDisplay?: "short" | "long"
+        currencySign?: "standard" | "accounting"
+        currency?: string  // ISO 4217 currencies (over 300 identifiers) like "USD", "EUR", ets. Used only if style is "currency"
+        currencyDisplay?: "code" | "symbol" | "narrowSymbol" | "name"
+        locale: Intl.BCP47LanguageTag;
+        maximumFractionDigits: number
+        maximumSignificantDigits?: number
+        minimumFractionDigits: number
+        minimumIntegerDigits: number
+        minimumSignificantDigits?: number
+        notation?: "standard" | "scientific" | "engineering" | "compact"
+        numberingSystem: string
+        signDisplay?: "auto" | "never" | "always" | "exceptZero" | "negative"
+        style: "decimal" | "percent" | "currency" | "unit"
+        unit?: string
+        unitDisplay?: "short" | "long" | "narrow"
+        useGrouping: "always" | "auto" | "min2" | "true" | "false" | boolean
+    }
 }

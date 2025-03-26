@@ -253,4 +253,10 @@ ani_status RegisterIntlLocaleNativeMethods(ani_env *env)
     return env->Class_BindNativeMethods(localeClass, methods.data(), methods.size());
 }
 
+ani_string StdCoreIntlLocaleDefaultBaseName(ani_env *env, [[maybe_unused]] ani_class klass)
+{
+    const std::string name = icu::Locale::getDefault().getBaseName();
+    return StdStrToAni(env, name);
+}
+
 }  // namespace ark::ets::stdlib::intl
