@@ -97,7 +97,7 @@
                     return xNumber > yNumber ? 1 : -1;
                 }
             }
-            
+
             let xToCompare : string = x
             let yToCompare : string = y
 
@@ -109,7 +109,7 @@
             switch (this.options.sensitivity)
             {
                 case "base": {
-                    xToCompare = xToCompare.toLowerCase() 
+                    xToCompare = xToCompare.toLowerCase()
                     yToCompare = yToCompare.toLowerCase()
 
                     xToCompare = this.removeAccents(xToCompare)
@@ -117,7 +117,7 @@
                 }
                 break;
                 case "accent": {
-                    xToCompare = xToCompare.toLowerCase() 
+                    xToCompare = xToCompare.toLowerCase()
                     yToCompare = yToCompare.toLowerCase()
                 }
                 break;
