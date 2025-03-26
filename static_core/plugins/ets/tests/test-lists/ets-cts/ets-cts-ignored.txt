@@ -95,7 +95,6 @@
 03.types/19.union_types/02.access_to_common_union_members/cm_fld3_6.ets
 
 #23823
-03.types/19.union_types/02.access_to_common_union_members/cm_fld2_1.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_fld2_11.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_fld3_11.ets
 
