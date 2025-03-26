@@ -295,6 +295,18 @@ TEST_F(ModuleBindNativeFunctionsTest, module_bind_native_functions_003)
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, &NATIVE_FUNC_CONCAT, 1), ANI_OK);
     ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcat"), ANI_TRUE);
 }
+
+TEST_F(ModuleBindNativeFunctionsTest, module_bind_native_functions_004)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    std::array functions = {
+        ani_native_function {"undefined", "II:I", reinterpret_cast<void *>(Sum)},
+    };
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_NOT_FOUND);
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)

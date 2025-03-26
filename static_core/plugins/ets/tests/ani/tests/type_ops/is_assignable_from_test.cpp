@@ -73,6 +73,7 @@ TEST_F(IsAssignableFromTest, ani_invalid_args)
     ASSERT_EQ(env_->Type_IsAssignableFrom(nullptr, clsA, &result), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Type_IsAssignableFrom(clsA, nullptr, &result), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Type_IsAssignableFrom(clsA, clsA, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Type_IsAssignableFrom(nullptr, clsA, clsA, &result), ANI_INVALID_ARGS);
 }
 
 TEST_F(IsAssignableFromTest, is_assignable_combind_scenes_001)
@@ -92,6 +93,28 @@ TEST_F(IsAssignableFromTest, is_assignable_combind_scenes_001)
     CheckIsAssignableFrom<false>("Lis_assignable_from_test/SubB;", "Lis_assignable_from_test/D;");
     CheckIsAssignableFrom<false>("Lis_assignable_from_test/BaseA;", "Lis_assignable_from_test/D;");
 }
+
+TEST_F(IsAssignableFromTest, is_assignable_from_multiple_inheritance)
+{
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/InterfaceA;", "Lis_assignable_from_test/InterfaceA;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/InterfaceB;", "Lis_assignable_from_test/InterfaceB;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/InterfaceC;", "Lis_assignable_from_test/InterfaceC;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/MyClass;", "Lis_assignable_from_test/MyClass;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/MyClass;", "Lis_assignable_from_test/InterfaceC;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/MyClass;", "Lis_assignable_from_test/InterfaceB;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/MyClass;", "Lis_assignable_from_test/InterfaceA;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/InterfaceC;", "Lis_assignable_from_test/InterfaceA;");
+    CheckIsAssignableFrom<true>("Lis_assignable_from_test/InterfaceC;", "Lis_assignable_from_test/InterfaceB;");
+
+    CheckIsAssignableFrom<false>("Lis_assignable_from_test/InterfaceC;", "Lis_assignable_from_test/MyClass;");
+    CheckIsAssignableFrom<false>("Lis_assignable_from_test/InterfaceA;", "Lis_assignable_from_test/InterfaceB;");
+    CheckIsAssignableFrom<false>("Lis_assignable_from_test/InterfaceB;", "Lis_assignable_from_test/InterfaceA;");
+    CheckIsAssignableFrom<false>("Lis_assignable_from_test/InterfaceB;", "Lis_assignable_from_test/InterfaceC;");
+    CheckIsAssignableFrom<false>("Lis_assignable_from_test/InterfaceB;", "Lis_assignable_from_test/MyClass;");
+    CheckIsAssignableFrom<false>("Lis_assignable_from_test/InterfaceA;", "Lis_assignable_from_test/InterfaceC;");
+    CheckIsAssignableFrom<false>("Lis_assignable_from_test/InterfaceA;", "Lis_assignable_from_test/MyClass;");
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

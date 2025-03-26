@@ -33,3 +33,32 @@ function GetFnObjWithClosure(): Object {
     let x = (a : String) => { return y + a; }
     return x;
 }
+
+function GetFnObjNested(): Object {
+    let y = "hello ";
+    let x = (a : String) => {
+        let z = (b : String): String => {
+            return y + b;
+        }
+        return z(a);
+    }
+
+    return x;
+}
+
+
+function recursiveFunction(y: string, a: string): string {
+    if (y == a) {
+        return a;
+    } else {
+        return recursiveFunction(y, a + "1");
+    }
+}
+
+function GetFnObjRecursive(): Object {
+    let y = "hello1111111111";
+    let x = (a: string): string => {
+        return recursiveFunction(y, a);
+    };
+    return x;
+}

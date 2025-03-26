@@ -361,6 +361,30 @@ TEST_F(FunctionCallBooleanTest, function_call_boolean_009)
     ASSERT_EQ(env_->Function_Call_Boolean(fA, &value, value3, value4), ANI_OK);
     ASSERT_EQ(value, ANI_TRUE);
 }
+
+TEST_F(FunctionCallBooleanTest, function_call_boolean_010)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ani_value args[2U];
+    args[0U].z = ANI_TRUE;
+    args[1U].z = ANI_FALSE;
+
+    ani_boolean result = ANI_FALSE;
+    ASSERT_EQ(env_->c_api->Function_Call_Boolean(nullptr, fn, &result, ANI_TRUE, ANI_FALSE), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Function_Call_Boolean_A(nullptr, fn, &result, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Boolean(nullptr, &result, ANI_TRUE, ANI_FALSE), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Function_Call_Boolean_A(nullptr, &result, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Boolean(fn, nullptr, ANI_TRUE, ANI_FALSE), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Function_Call_Boolean_A(fn, nullptr, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Boolean(fn, &result, nullptr), ANI_OK);
+    ASSERT_EQ(env_->Function_Call_Boolean_A(fn, &result, nullptr), ANI_INVALID_ARGS);
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

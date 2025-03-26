@@ -3577,6 +3577,7 @@ NO_UB_SANITIZE static ani_status Object_InstanceOf(ani_env *env, ani_object obje
     CHECK_ENV(env);
     CHECK_PTR_ARG(type);
     CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
     EtsClass *internalClass = s.ToInternalType(type);

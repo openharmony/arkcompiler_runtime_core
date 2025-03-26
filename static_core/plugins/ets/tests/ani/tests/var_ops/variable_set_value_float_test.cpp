@@ -120,7 +120,7 @@ TEST_F(VariableSetValueFloatTest, composite_case_2)
     ASSERT_EQ(env_->Namespace_FindVariable(ns_, "floatValue", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
-    const ani_float values[] = {3.14F, 6.28F, 9.42F};
+    const ani_float values[] = {3.14F, 0, -9.42F};
     ani_float result = 0.0F;
     for (ani_float value : values) {
         ASSERT_EQ(env_->Variable_SetValue_Float(variable, value), ANI_OK);

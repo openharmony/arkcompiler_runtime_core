@@ -61,6 +61,11 @@ class TestA005 {
     }
 };
 
+class TestA006 {
+    public native foo(x: int, y: int): int;
+    public native foo(x: int, y: int, z: int): int;
+}
+
 interface Iface {
 }
 

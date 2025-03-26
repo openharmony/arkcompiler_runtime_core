@@ -87,6 +87,19 @@ public:
         ASSERT_NE(*tag, nullptr);
     }
 
+    void TestObjectNewV(ani_env *env, ani_class cls, ani_method method, ani_string tag, ani_ref animalRef)
+    {
+        ani_object object {};
+        ASSERT_EQ(TestFuncV(ParameterScence::NORMAL, cls, method, &object, VAL1, tag, animalRef), ANI_OK);
+
+        ani_method checkMethod {};
+        ASSERT_EQ(env->Class_FindMethod(cls, "checkValue", nullptr, &checkMethod), ANI_OK);
+        ASSERT_NE(checkMethod, nullptr);
+
+        ani_boolean result = ANI_FALSE;
+        ASSERT_EQ(env->Object_CallMethod_Boolean(object, checkMethod, &result), ANI_OK);
+        ASSERT_EQ(result, ANI_TRUE);
+    }
     static constexpr int32_t LOOP_COUNT = 3;
 };
 
@@ -533,6 +546,45 @@ TEST_F(ObjectNewTest, object_new_v_invalid_args)
               ANI_INVALID_ARGS);
     ASSERT_EQ(TestFuncV(ObjectNewTest::ParameterScence::INVALID_ARG3, cls, newTestMethod, &object, arg0, arg1, arg2),
               ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectNewTest, object_new_v_ctor)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lobject_new_test/Test;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_method ctor {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "ILstd/core/String;Lobject_new_test/Animal;:V", &ctor), ANI_OK);
+    ASSERT_NE(ctor, nullptr);
+
+    ani_string tag {};
+    GetTestString(&tag);
+    auto animalRef = CallEtsFunction<ani_ref>("object_new_test", "newAnimalObject");
+
+    TestObjectNewV(env_, cls, ctor, tag, animalRef);
+}
+
+TEST_F(ObjectNewTest, object_new_v_normal_method_loop)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lobject_new_test/Test;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_method newTestMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "newTestObject",
+                                     "ILstd/core/String;Lobject_new_test/Animal;:Lobject_new_test/Test;",
+                                     &newTestMethod),
+              ANI_OK);
+    ASSERT_NE(newTestMethod, nullptr);
+
+    ani_string tag {};
+    GetTestString(&tag);
+    auto animalRef = CallEtsFunction<ani_ref>("object_new_test", "newAnimalObject");
+
+    for (int32_t i = 0; i < LOOP_COUNT; i++) {
+        TestObjectNewV(env_, cls, newTestMethod, tag, animalRef);
+    }
 }
 }  // namespace ark::ets::ani::testing
 

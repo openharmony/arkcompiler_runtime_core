@@ -17,6 +17,8 @@ class A {}
 
 class B extends A {}
 
+class C extends B {}
+
 class Person {
     add_method(a0: int, a1: int): int {
         return a0 + a1;
@@ -36,3 +38,15 @@ class Child extends Student {
         return a0 * a1;
     }
 };
+
+namespace test001 {
+    class Parent {}
+    class Child extends Parent {}
+}
+
+namespace test002 {
+    namespace test003 {
+        class Parent {}
+        class Child extends Parent {}
+    }
+}
