@@ -1,4 +1,4 @@
-#FailKind.SEGFAULT_FAIL - 54 tests:
+#FailKind.SEGFAULT_FAIL - 55 tests:
 arkui/dollar_dollar_13.ets
 regression/11979-interface-attr-init-010.ets
 regression/11979-interface-attr-init-011.ets
@@ -37,6 +37,7 @@ spec/11.Enumerations/issue14636.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.import_path/import_path_03.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/non_linux_path_separators.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/02.export_type_directives/export_type_directive_01.ets
+spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_all_2.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_directive_04.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/reexport_from_incorrect_path.ets
 spec/16.Support_for_GUI_Programming/annotations/annotation_@Builder.ets
@@ -53,21 +54,14 @@ std/core/std_core_char_instance_Char_isWhiteSpace.ets
 std/core/std_core_char_static_Char_isWhiteSpace.ets
 std/core/std_core_typedarrays_bignum__BigInt64Array.ets
 std/core/std_core_typedarrays_bignum__BigUint64Array.ets
-
-#FailKind.ABORT_FAIL - 4 tests:
-spec/10.Interfaces/Interface_Methods_Declarations/method_overload6.ets
-spec/10.Interfaces/method_overload6.ets
-spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_all_2.ets
+#FailKind.ABORT_FAIL - 1 tests:
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_03.ets
-
-New failures at #FailKind.TSC_FAIL - 590 tests:
+#FailKind.TSC_FAIL - 584 tests:
 algorithms/SampleAppTest.ets
 escompat/ArrayProxyTest.ets
 escompat/JsonParseTest.ets
 escompat/ProcessTest.ets
 escompat/ProxyTest.ets
-escompat/WeakMapGCTest.ets
-escompat/WeakSetGCTest.ets
 escompat/escompat_BigInt_instance_BigInt_toString.ets
 escompat/escompat_BigInt_instance_BigInt_toString_001.ets
 escompat/escompat_BigInt_instance_BigInt_toString_002.ets
@@ -145,8 +139,6 @@ spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Param
 spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Parameter/RestParamsTest_PassSingleArg.ets
 spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Parameter/RestParamsTest_PassTwoArgs.ets
 spec/05.Generics/comparableClass.ets
-spec/07.expressions/7.32.Lambda_Expressions/issue15579_0.ets
-spec/07.expressions/7.32.Lambda_Expressions/issue15579_2.ets
 spec/07.expressions/7.32.Lambda_Expressions/issue15579_4.ets
 spec/07.expressions/7.5.Object_Literal/7.5.3.Object_Literal_of_Record_Type/record-boxable-types.ets
 spec/07.expressions/7.5.Object_Literal/7.5.3.Object_Literal_of_Record_Type/record-class-value-global.ets
@@ -186,9 +178,6 @@ spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Ex
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue_15669_03.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue_15669_04.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue_15669_05.ets
-spec/16.Support_for_GUI_Programming/annotations/annotation_@LocalStorageLink.ets
-spec/16.Support_for_GUI_Programming/annotations/annotation_@StorageLink.ets
-spec/16.Support_for_GUI_Programming/annotations/annotation_@StorageLink_2.ets
 spec/16.Support_for_GUI_Programming/struct-type/test-class-extends-struct.ets
 spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-as-name_1.ets
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_04.ets
@@ -253,6 +242,9 @@ std/containers/linked_blocking_queue/LinkedBlockingQueue_PopTest.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_PopTest_Stress.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_PushTest_Stress.ets
 std/core/CollatorTest.ets
+std/core/DateTimeFormatTest.ets
+std/core/IntlDateFormatTest.ets
+std/core/IntlDateTimeStyleFormatTest.ets
 std/core/IntlLocaleTest.ets
 std/core/IntlLocaleTest2.ets
 std/core/Object.ets
@@ -263,8 +255,6 @@ std/core/TypeCreatePrimitiveNameTest.ets
 std/core/TypeInterfaceTypeTest.ets
 std/core/TypeLambdaTypeTest.ets
 std/core/TypeMethodInvoke.ets
-std/core/TypeMethodResolveConstructor.ets
-std/core/TypeMethodResolveConstructorFew.ets
 std/core/TypeMethodTest.ets
 std/core/std_core_boolean_instance_Boolean_and.ets
 std/core/std_core_boolean_instance_Boolean_compareTo.ets
