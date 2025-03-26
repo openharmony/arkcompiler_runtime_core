@@ -310,21 +310,21 @@ inline bool CheckSecureMem(uintptr_t mem, size_t size)
     uintptr_t secure_mem_start;
     uintptr_t secure_mem_end;
     if (!has_open) {
-        int fd = open(PROC_SELF_XPM_REGION_PATH, O_RDONLY);
-        if (fd < 0) {
+        FILE *fp = fopen(PROC_SELF_XPM_REGION_PATH, "r");
+        if (fp == nullptr) {
             LOG(ERROR, PANDAFILE) << "Can not open xpm proc file, do not check secure memory anymore.";
             // No verification is performed when a file fails to be opened.
             has_open = true;
             return true;
         }
         char xpm_validate_region[XPM_PROC_LENGTH] = {0};
-        int ret = read(fd, xpm_validate_region, sizeof(xpm_validate_region));
+        size_t ret = fread(xpm_validate_region, 1, sizeof(xpm_validate_region), fp);
         if (ret <= 0) {
             LOG(ERROR, PANDAFILE) << "Read xpm proc file failed";
-            close(fd);
+            fclose(fp);
             return false;
         }
-        close(fd);
+        fclose(fp);
         if (sscanf_s(xpm_validate_region, "%lx-%lx", &secure_mem_start, &secure_mem_end) <= 0) {
             LOG(ERROR, PANDAFILE) << "sscanf_s xpm validate region failed";
             return false;
