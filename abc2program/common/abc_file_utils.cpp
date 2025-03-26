@@ -17,6 +17,34 @@
 
 namespace panda::abc2program {
 
+std::string GetPkgNameFromNormalizedImport(const std::string &normalizedImport)
+{
+    std::string pkgName {};
+    size_t pos = normalizedImport.find(SLASH_TAG);
+    if (pos != std::string::npos) {
+        pkgName = normalizedImport.substr(0, pos);
+    }
+    if (normalizedImport[0] == AT_SEPARATOR) {
+        pos = normalizedImport.find(SLASH_TAG, pos + 1);
+        if (pos != std::string::npos) {
+            pkgName = normalizedImport.substr(0, pos);
+        }
+    }
+    return pkgName;
+}
+
+std::string GetPkgNameFromRecordName(const std::string &recordName)
+{
+    std::string normalizedImport {};
+    std::string pkgName {};
+    auto items = Split(recordName, NORMALIZED_OHMURL_SEPARATOR);
+    if (items.size() <= NORMALIZED_IMPORT_POS) {
+        return pkgName;
+    }
+    normalizedImport = items[NORMALIZED_IMPORT_POS];
+    return GetPkgNameFromNormalizedImport(normalizedImport);
+}
+
 std::vector<std::string> Split(const std::string &str, const char delimiter)
 {
     std::vector<std::string> items;
