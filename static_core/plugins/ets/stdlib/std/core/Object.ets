@@ -70,7 +70,7 @@ export class Object {
     * @returns representation of this instance
     */
     public $_hashCode(): int {
-        return runtime.getHashCode(this);
+        return Runtime.getHashCode(this);
     }
 
     /**

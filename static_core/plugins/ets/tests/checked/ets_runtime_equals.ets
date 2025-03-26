@@ -36,10 +36,10 @@
 function main(): int {
     let obj1: Object = new Object();
     let obj2: Object = new Object();
-    if (runtime.isSameReference(obj1, null)) return 1;
-    if (runtime.isSameReference(obj1, obj2)) return 2;
-    if (!runtime.isSameReference(null, null)) return 3;
-    if (!runtime.isSameReference(obj1, obj1)) return 4;
+    if (Runtime.isSameReference(obj1, null)) return 1;
+    if (Runtime.isSameReference(obj1, obj2)) return 2;
+    if (!Runtime.isSameReference(null, null)) return 3;
+    if (!Runtime.isSameReference(obj1, obj1)) return 4;
     if (obj1 == null) return 5;
     if (obj1 == obj2) return 6;
 

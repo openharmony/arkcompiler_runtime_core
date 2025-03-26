@@ -11,21 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-Simple string message
-42
-true
-undefined
-null
 
-User: John Age: 30
-ConsoleLogTest.A {name: John, age: 30}
-Hello, Alice!
-color: blue; Styled text
-Error: Test error
-null undefined 11 123 std.core.Object {}
-,,
-%d
-1
-1 2
-37 37
-19.5 19.5
+Active connections: [ConsoleDebugTest.Connection {id: 1, user: user1}, ConsoleDebugTest.Connection {id: 2, user: user2}]
+[1, 2, 3, 4, 5]
+Active connections: [ConsoleDebugTest.Connection {id: 1, user: user1}, ConsoleDebugTest.Connection {id: 2, user: user2}]
+[1, 2, 3, 4, 5]
+Active connections: [ConsoleDebugTest.Connection {id: 1, user: user1}, ConsoleDebugTest.Connection {id: 2, user: user2}]
+[1, 2, 3, 4, 5]
+Active connections: [ConsoleDebugTest.Connection {id: 1, user: user1}, ConsoleDebugTest.Connection {id: 2, user: user2}]
+[1, 2, 3, 4, 5]

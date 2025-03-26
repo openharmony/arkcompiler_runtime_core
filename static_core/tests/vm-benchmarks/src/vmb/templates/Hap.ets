@@ -99,9 +99,11 @@ function runIters(phase: String, count: int, time: int): void throws {
 }
 
 let bench: $state_name;
+static {
+    bench = new $state_name();
+}
 
 function main(): void throws {
-    bench =  = new $state_name();
     log("Startup execution started: " + (Date.now() as long));
     $state_params
     $state_setup

@@ -13,8 +13,13 @@
  * limitations under the License.
  */
 
-function main(): void {
-    console.log(null, undefined, 11, "123", new Object())
-    let arr = new Array<string | null | undefined>(3)
-    console.log(arr)
-}
+console.assert(false, "assert should print if condition is false")
+console.assert(true, "assert should not print if condition is true")
+
+console.assert("count: %d", 1)
+console.assert("count: %d")
+console.assert("1")
+console.assert("count: %d", "str")
+console.assert("str")
+console.assert()
+console.assert(undefined)

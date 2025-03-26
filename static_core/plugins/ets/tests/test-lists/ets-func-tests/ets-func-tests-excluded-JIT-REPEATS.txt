@@ -106,3 +106,8 @@ escompat/ProcessTest.ets
 # 24811 thread-safe containers tests may cause failure on timeout or gc compatibility - see issue https://gitee.com/openharmony/arkcompiler_runtime_core/issues/IBUDOL
 std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
 # End issue https://gitee.com/openharmony/arkcompiler_runtime_core/issues/IBUDOL
+
+# 25934
+std/core/ConsoleInfoTest.ets
+std/core/ConsoleGroupTest.ets
+# End issue 25934

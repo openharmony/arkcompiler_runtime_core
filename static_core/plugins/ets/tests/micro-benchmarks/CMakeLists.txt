@@ -58,7 +58,7 @@ if(PANDA_WITH_BENCHMARKS)
             set(error_file "${CMAKE_CURRENT_BINARY_DIR}/run_${mode_arg}_${int_arg}.err")
             set(launcher
                 "${timeout_prefix}"
-                "python3 run_micro_benchmarks.py --bindir ${CMAKE_BINARY_DIR}/bin --interpreter-type=${int_arg} --mode=${mode_arg} --log-level=silence"
+                "python3 run_micro_benchmarks.py --bindir ${CMAKE_BINARY_DIR}/bin --interpreter-type=${int_arg} --mode=${mode_arg} --log-level=debug"
                 "${timeout_suffix}"
                 "2> ${error_file}"
             )

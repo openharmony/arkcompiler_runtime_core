@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,17 @@
  * limitations under the License.
  */
 
+package api
 
-function main(): void {
-    assertTrue(Runtime.sameValue(0.0, 0.0))
-    assertFalse(Runtime.sameValue(0.0, -0.0))
-    assertFalse(Runtime.sameValue(-0.0, 0.0))
-    assertTrue(Runtime.sameValue(-0.0, -0.0))
+export namespace util {
 
-    assertTrue(Runtime.sameValueZero(0.0, -0.0))
-    assertTrue(Runtime.sameValueZero(-0.0, 0.0))
-}
+class UtilHelper {
+
+    static {
+        loadLibrary("ets_sdk_native")
+    }
+
+    internal static native generateRandomUUID(entropyCache: boolean): string
+
+}  // class UtilHelper
+} // namespace util
