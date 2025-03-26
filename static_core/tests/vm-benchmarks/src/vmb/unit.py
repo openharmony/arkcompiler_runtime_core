@@ -54,6 +54,7 @@ class BenchUnit:
                  tags: Optional[Iterable[str]] = None,
                  bugs: Optional[Iterable[str]] = None) -> None:
         self.path: Path = Path(path)
+        # for further refactoring: BenchUnit should not be aware of particular Tool plugin existence
         self.src_for_es2panda_override: Optional[Path] = None
         self.__src: Optional[Path] = self.path.joinpath(src) if src else None
         self.__libs: List[Path] = [
@@ -125,7 +126,7 @@ class BenchUnit:
         if len(files) > 0:
             return files[0]
         if die_on_zero_matches:
-            raise FileNotFoundError()
+            raise RuntimeError(f'Files {self.path}/{BENCH_PREFIX}{self.name}*[{",".join(ext)}] not found!')
         # fallback: return unexistent
         return self.path.joinpath(f'{BENCH_PREFIX}{self.name}')
 

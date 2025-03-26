@@ -16,13 +16,9 @@
 #
 
 import logging
-import json
-import os
-from pathlib import Path
 from vmb.platform import PlatformBase
 from vmb.hook import HookBase
-from vmb.helpers import create_file
-from vmb.plugins.tools.es2panda import make_arktsconfig
+from vmb.plugins.tools.es2panda import fix_arktsconfig
 
 log = logging.getLogger('vmb')
 
@@ -40,29 +36,4 @@ class Hook(HookBase):
 
     # pylint: disable-next=unused-argument
     def before_suite(self, platform: PlatformBase) -> None:
-        ark_root_env = os.environ.get('PANDA_BUILD', '')
-        if not ark_root_env:
-            raise RuntimeError('PANDA_BUILD not set!')
-        ark_root = Path(ark_root_env).resolve()
-        if not ark_root.is_dir():
-            raise RuntimeError(f'PANDA_BUILD "{ark_root}" does not exist!')
-        ark_src_env = os.environ.get('PANDA_SRC', '')
-        if not ark_src_env:
-            raise RuntimeError('PANDA_SRC not set! Please point it to static_core dir.')
-        ark_src = Path(ark_src_env).resolve()
-        if not ark_src.is_dir():
-            raise RuntimeError(f'PANDA_SRC "{ark_src}" does not exist!')
-        config = ark_root.joinpath(
-            'tools', 'es2panda', 'generated', 'arktsconfig.json')
-        if config.is_file():
-            log.info('Updating %s with %s', config, ark_src)
-            with open(config, 'r', encoding="utf-8") as f:
-                t = f.read()
-                j = json.loads(t)
-            old_root = j.get('compilerOptions', {}).get('baseUrl', 'failed')
-            with create_file(config) as f:
-                f.write(t.replace(old_root, str(ark_src)))
-            return
-        log.warning('%s does not exist! Creating it "manually"!', config)
-        config.parent.mkdir(parents=True, exist_ok=True)
-        make_arktsconfig(config, ark_src, [])
+        fix_arktsconfig()
