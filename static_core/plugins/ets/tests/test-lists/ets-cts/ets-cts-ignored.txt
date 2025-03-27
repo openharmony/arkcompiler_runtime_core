@@ -1903,13 +1903,9 @@
 
 #14563 Verifier failure on unboxing in array dimension expression
 17.experimental_features/03.array_creation_expressions/expr_1.ets
-17.experimental_features/03.array_creation_expressions/expr_11.ets
 17.experimental_features/03.array_creation_expressions/expr_9.ets
+17.experimental_features/03.array_creation_expressions/expr_7.ets
 17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_7.ets
-
-#24027 es2panda fails: panda, cannot convert to int
-17.experimental_features/03.array_creation_expressions/expr_2.ets
-17.experimental_features/03.array_creation_expressions/expr_3.ets
 
 #18550 es2panda aborts on implicit number conversion
 17.experimental_features/04.indexable_types/ind_interface_7.ets
