@@ -82,6 +82,7 @@
   "plugins/ets/tests/integrational": "*",
   "plugins/ets/tests/interop_js/tests/constructor_as_arg/main.js": {"G.NAM.01": "*"},
   "plugins/ets/tests/interop_js/tests/optional_reference_type/optional_reference_type.ts": "*",
+  "plugins/ets/tests/interop_js/tests/scenarios/js_to_ets/js_suites/scenarios.js": "*",
   "plugins/ets/tests/interop_js/tests/test_callable/test_callable.ts": "*",
   "plugins/ets/tests/interop_js/tests/proxies/mem/proxy_reference_storage_2/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/interop_js/tests/timer/CMakeLists.txt": {"bc-40001": "*"},

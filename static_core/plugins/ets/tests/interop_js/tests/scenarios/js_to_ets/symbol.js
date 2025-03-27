@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +14,13 @@
  */
 'use strict';
 
-class ClassToCheckSymbol {
+export class ClassToCheckSymbol {
   constructor(p) {
       this.x = p;
   }
 }
 
-function functionArgTypeClassToCheckSymbol(classInstanceArg) {
+export function functionArgTypeClassToCheckSymbol(classInstanceArg) {
   let testProperty = Symbol.for('id');
   class ExtClassToCheckSymbol extends ClassToCheckSymbol {
     constructor(parentClassInstance) {
@@ -30,6 +30,3 @@ function functionArgTypeClassToCheckSymbol(classInstanceArg) {
   }
   return new ExtClassToCheckSymbol(classInstanceArg);
 }
-
-exports.ClassToCheckSymbol = ClassToCheckSymbol;
-exports.functionArgTypeClassToCheckSymbol = functionArgTypeClassToCheckSymbol;

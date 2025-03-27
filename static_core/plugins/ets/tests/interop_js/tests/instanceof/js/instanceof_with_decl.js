@@ -13,35 +13,24 @@
  * limitations under the License.
  */
 
-'use strict';
+const etsVm = globalThis.gtest.etsVm;
+let A = etsVm.getClass('LA;');
 
-let A = globalThis.gtest.etsVm.getClass('LA;');
+export class AValue {}
+export class ADeclared {}
+export class BDeclared {}
+export class CValue extends BDeclared {}
+export class CDeclared extends ADeclared {}
+export class DDeclared extends A {}
 
-class AValue {}
-class ADeclared {}
-class BDeclared {}
-class CValue extends BDeclared {}
-class CDeclared extends ADeclared {}
-class DDeclared extends A {}
-
-function asJsvalue(x) {
+export function asJsvalue(x) {
 	return x;
 }
 
-function jsFn() {
+export function jsFn() {
 	return new ADeclared();
 }
 
-module.exports = {
-	AValue,
-	CValue,
-	ADeclared,
-	BDeclared,
-	CDeclared,
-	DDeclared,
-	jsAvalue: new AValue(),
-	jsCvalue: new CValue(),
-	asJsvalue,
-	jsFn,
-	createError: Error
-};
+export const jsAvalue = new AValue();
+export const jsCvalue = new CValue();
+export const createError = (msg) => {return new Error(msg)};
