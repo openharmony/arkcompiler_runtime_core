@@ -13,7 +13,8 @@
 
 --- # List of valid access modifiers
 modifiers:
-  - {m1: "public", m2: "public"}
-  - {m1: "protected", m2: "protected"}
-  - {m1: "protected", m2: "public"}
-  - {m1: "internal", m2: "internal"}
+  - {m1: "public", m2: "public", tags: "[]"}
+  - {m1: "protected", m2: "protected", tags: "[]"}
+  - {m1: "protected", m2: "public", tags: "[]"}
+  - {m1: "internal", m2: "internal", tags: "[]"}
+  - {m1: "internal", m2: "private", tags: "[negative, compile-only]"}
