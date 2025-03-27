@@ -563,10 +563,6 @@
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_n_3.ets
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_n_3.ets
 
-#23069
-05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_6.ets
-05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_6.ets
-
 #20214 Generic lambda is not supported by compiler
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_0.ets
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_1.ets
