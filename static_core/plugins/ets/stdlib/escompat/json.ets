@@ -477,7 +477,12 @@ export class JSON {
         } else if (typ instanceof StringType
                     || typ instanceof DoubleType
                     || typ instanceof BooleanType
-                    || typ instanceof NullType) {
+                    || typ instanceof NullType
+                    || typ instanceof IntType
+                    || typ instanceof LongType
+                    || typ instanceof ByteType
+                    || typ instanceof ShortType
+                    || typ instanceof FloatType) {
             ok = true
         } else {
             ok = false
@@ -1135,6 +1140,16 @@ class JSONValueParser {
             return new BigInt(value.bigintValue)
         } else if (typ instanceof DoubleType && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
             return new Double(value.value)
+        } else if (typ instanceof IntType && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
+            return new Double(value.value).intValue()
+        } else if (typ instanceof LongType && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+            return new Long().createFromJSONValue(value)
+        } else if (typ instanceof ShortType && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+            return new Short().createFromJSONValue(value)
+        } else if (typ instanceof FloatType && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+            return new Float().createFromJSONValue(value)
+        } else if (typ instanceof ByteType && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+            return new Byte().createFromJSONValue(value)
         } else {
             throw new Error(typ + " is expected, but get " + Type.of(value.value) + " with bigIntMode=" + this.bigIntMode)
         }
@@ -1145,7 +1160,7 @@ class JSONValueParser {
             return this.parseObject(value as JSONObject, typ as ClassType)
         } else if (value instanceof JSONArray && typ instanceof ArrayType) {
             return this.parseArray(value as JSONArray, typ as ArrayType)
-        } else if (value instanceof JSONNumber && (typ instanceof DoubleType || typ.equals(BigIntType))) {
+        } else if (value instanceof JSONNumber && (typ instanceof DoubleType || typ.equals(BigIntType) || typ instanceof IntType || typ instanceof LongType || typ instanceof ByteType || typ instanceof ShortType || typ instanceof FloatType)) {
             return this.createNumber(value as JSONNumber, typ)
         } else if (value instanceof JSONString && typ instanceof StringType) {
             return (value as JSONString).value
