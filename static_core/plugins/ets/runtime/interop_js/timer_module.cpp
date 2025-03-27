@@ -14,6 +14,7 @@
  */
 
 #include <unistd.h>
+#include <string_view>
 #include "libpandabase/utils/logger.h"
 #include "plugins/ets/runtime/interop_js/logger.h"
 #include "plugins/ets/runtime/interop_js/timer_module.h"
@@ -75,37 +76,39 @@ __attribute__((weak)) int uv_run([[maybe_unused]] uv_loop_t *loop, [[maybe_unuse
 #endif /* !defined(PANDA_TARGET_OHOS) && !defined(PANDA_JS_ETS_HYBRID_MODE) */
 
 pid_t TimerModule::mainTid_ = 0;
-EtsEnv *TimerModule::mainEtsEnv_ = nullptr;
+ani_env *TimerModule::mainAniEnv_ = nullptr;
 napi_env TimerModule::jsEnv_ = nullptr;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 std::unordered_map<uint32_t, uv_timer_t *> TimerModule::timers_;
 uint32_t TimerModule::nextTimerId_ = 0;
 
-TimerModule::TimerInfo::TimerInfo(uint32_t id, ets_object funcObject, bool oneShotTimer)
+TimerModule::TimerInfo::TimerInfo(uint32_t id, ani_object funcObject, bool oneShotTimer)
     : id_(id), funcObject_(funcObject), oneShotTimer_(oneShotTimer)
 {
 }
 
-bool TimerModule::Init(EtsEnv *env, napi_env jsEnv)
+bool TimerModule::Init(ani_env *env, napi_env jsEnv)
 {
     mainTid_ = gettid();
-    mainEtsEnv_ = env;
+    mainAniEnv_ = env;
     jsEnv_ = jsEnv;
 
-    ets_class globalClass = env->FindClass("escompat/ETSGLOBAL");
-    if (globalClass == nullptr) {
-        INTEROP_LOG(ERROR) << "Cannot find GLOBAL class";
+    ani_module module {};
+    auto status = env->FindModule("Lescompat;", &module);
+    if (status != ANI_OK) {
+        INTEROP_LOG(ERROR) << "Cannot find ESCOMPAT module";
         return false;
     }
 
-    const std::array<EtsNativeMethod, 2> impls = {
-        {{"startTimerImpl", nullptr, reinterpret_cast<void *>(TimerModule::StartTimer)},
-         {"stopTimerImpl", nullptr, reinterpret_cast<void *>(TimerModule::StopTimer)}}};
-    return env->RegisterNatives(globalClass, impls.data(), impls.size()) == ETS_OK;
+    std::array methods = {
+        ani_native_function {"startTimerImpl", "Lstd/core/Object;IZ:I",
+                             reinterpret_cast<void *>(TimerModule::StartTimer)},
+        ani_native_function {"stopTimerImpl", "I:V", reinterpret_cast<void *>(TimerModule::StopTimer)},
+    };
+    return env->Module_BindNativeFunctions(module, methods.data(), methods.size()) == ANI_OK;
 }
 
-ets_int TimerModule::StartTimer(EtsEnv *env, [[maybe_unused]] ets_class klass, ets_object funcObject, ets_int delayMs,
-                                ets_boolean oneShotTimer)
+ets_int TimerModule::StartTimer(ani_env *env, ani_object funcObject, ani_int delayMs, ani_boolean oneShotTimer)
 {
     if (!CheckMainThread(env)) {
         return 0;
@@ -115,7 +118,12 @@ ets_int TimerModule::StartTimer(EtsEnv *env, [[maybe_unused]] ets_class klass, e
     uv_timer_init(loop, timer);
 
     uint32_t timerId = GetTimerId();
-    timer->data = new TimerInfo(timerId, env->NewGlobalRef(funcObject), static_cast<bool>(oneShotTimer));
+
+    ani_ref newRef {};
+    [[maybe_unused]] auto status = env->GlobalReference_Create(funcObject, &newRef);
+    ASSERT(status == ANI_OK);
+
+    timer->data = new TimerInfo(timerId, static_cast<ani_object>(newRef), static_cast<bool>(oneShotTimer));
     timers_[timerId] = timer;
 
     uv_update_time(loop);
@@ -124,7 +132,7 @@ ets_int TimerModule::StartTimer(EtsEnv *env, [[maybe_unused]] ets_class klass, e
     return timerId;
 }
 
-void TimerModule::StopTimer(EtsEnv *env, [[maybe_unused]] ets_class klass, ets_int timerId)
+void TimerModule::StopTimer(ani_env *env, ani_int timerId)
 {
     if (!CheckMainThread(env)) {
         return;
@@ -143,10 +151,18 @@ void TimerModule::TimerCallback(uv_timer_t *timer)
     if (oneShotTimer) {
         DisarmTimer(timer);
     }
-    ets_class cls = mainEtsEnv_->GetObjectClass(info->GetFuncObject());
-    ets_method invokeMethod = mainEtsEnv_->Getp_method(cls, ark::ets::INVOKE_METHOD_NAME, nullptr);
+    ani_type result {};
+    [[maybe_unused]] auto status = mainAniEnv_->Object_GetType(info->GetFuncObject(), &result);
+    ASSERT(status == ANI_OK);
+
+    ani_method invokeMethod {};
+    auto resultCls = static_cast<ani_class>(result);
+    status = mainAniEnv_->Class_FindMethod(resultCls, ark::ets::INVOKE_METHOD_NAME, nullptr, &invokeMethod);
+    ASSERT(status == ANI_OK);
+
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    mainEtsEnv_->CallVoidMethod(info->GetFuncObject(), invokeMethod);
+    status = mainAniEnv_->Object_CallMethod_Void(info->GetFuncObject(), invokeMethod);
+
     if (!oneShotTimer) {
         uv_timer_again(timer);
     }
@@ -163,7 +179,10 @@ void TimerModule::DisarmTimer(uv_timer_t *timer)
 void TimerModule::FreeTimer(uv_handle_t *timer)
 {
     auto *info = reinterpret_cast<TimerInfo *>(timer->data);
-    mainEtsEnv_->DeleteGlobalRef(info->GetFuncObject());
+
+    [[maybe_unused]] auto status = mainAniEnv_->GlobalReference_Delete(info->GetFuncObject());
+    ASSERT(status == ANI_OK);
+
     delete info;
     delete timer;
 }
@@ -185,13 +204,39 @@ uint32_t TimerModule::GetTimerId()
     return nextTimerId_++;
 }
 
-bool TimerModule::CheckMainThread(EtsEnv *env)
+bool TimerModule::CheckMainThread(ani_env *env)
 {
     if (gettid() == mainTid_) {
         return true;
     }
-    ets_class errorClass = env->FindClass("std/core/InternalError");
+    ani_class errorClass {};
+    [[maybe_unused]] auto status = env->FindClass("Lstd/core/InternalError;", &errorClass);
+    ASSERT(status == ANI_OK);
     ASSERT(errorClass != nullptr);
-    env->ThrowErrorNew(errorClass, "The function must be called from the main coroutine");
+
+    ani_method ctor {};
+    status = env->Class_FindMethod(errorClass, "<ctor>", "Lstd/core/String;Lescompat/ErrorOptions;:V", &ctor);
+    ASSERT(status == ANI_OK);
+    ani_string message {};
+    std::string_view errorMessage = "The function must be called from the main coroutine";
+    status = env->String_NewUTF8(errorMessage.data(), errorMessage.size(), &message);
+    if (status != ANI_OK) {
+        return false;
+    }
+
+    ani_object errorObj {};
+
+    ani_ref param {};
+    status = env->GetUndefined(&param);
+    ASSERT(status == ANI_OK);
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    status = env->Object_New(errorClass, ctor, &errorObj, message, param);
+    if (status != ANI_OK) {
+        return false;
+    }
+    auto error = static_cast<ani_error>(errorObj);
+    status = env->ThrowError(error);
+    ASSERT(status == ANI_OK);
     return false;
 }
