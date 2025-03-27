@@ -720,6 +720,38 @@ Received value is: ${value}`, TypeErrorCodeId);
         }
 
         /**
+        * Throws an error when a parameter value is outside allowed range bounds
+        *
+        * @param {string} param_name - Name of the parameter that caused the error
+        * @param {number} param_value - The value that is out of range
+        * @param {int} left_bound - Minimum allowed value (inclusive)
+        * @param {int} right_bound - Maximum allowed value (inclusive)
+        * @returns {void}
+        * @throws {Error} With a message indicating the parameter name, its value, and valid range
+        * @private
+        */
+        private static throwOutOfRangeError(param_name: string, param_value: number, left_bound: int, right_bound: int) {
+            let message = `The value of "${param_name}" is out of range.`;
+            message += `It must be >= ${left_bound} and <= ${right_bound}. Received value is: ${param_value}`;
+            // NOTE (templin.konstantin): must be changed to BusinessError later
+            throw new Error(message);
+        }
+
+        /**
+        * Checks if the byteLength parameter is within valid range
+        *
+        * @param {number} byteLength - Number of bytes to read or write
+        * @returns {void}
+        * @throws {Error} If byteLength is less than 1 or greater than 6
+        * @private
+        */
+        private static checkByteLengthConstraint(byteLength: number) {
+            if (byteLength < 1 || byteLength > 6) {
+                Buffer.throwOutOfRangeError("byteLength", byteLength, 1, 6);
+            }
+        }
+
+        /**
          * Creates and returns an iterator of buf keys (indices).
          *
          * @returns { IterableIterator<number> }
@@ -815,6 +847,600 @@ Received value is: ${value}`, TypeErrorCodeId);
             }
             return this;
         }
+
+                /**
+        * Creates a DataView of the buffer
+        *
+        * @returns {DataView} A DataView of the buffer
+        * @private
+        */
+        private getDataView(): DataView {
+            return new DataView(this.buffer, 0, this.length);
+        }
+
+        /**
+        * Writes a signed integer to the buffer at the specified offset using big-endian format
+        *
+        * @param {number} value - Value to write
+        * @param {number} offset - Number of bytes to skip before writing
+        * @param {number} byteLength - Number of bytes to write (maximum 6)
+        * @returns {number} Offset plus the number of bytes written
+        * @throws {Error} If byteLength is greater than 6
+        */
+        public writeIntBE(value: number, offset: number, byteLength: number): number {
+            Buffer.checkByteLengthConstraint(byteLength);
+            const view = this.getDataView();
+            let remaining = value;
+            for (let i = byteLength - 1; i >= 0; i--) {
+                view.setUint8(offset + i, remaining & 0xff);
+                remaining >>= 8;
+            }
+            return offset + byteLength;
+        }
+
+        /**
+        * Reads a signed integer from the buffer at the specified offset using big-endian format
+        *
+        * @param {number} offset - Number of bytes to skip before reading
+        * @param {number} byteLength - Number of bytes to read (maximum 6)
+        * @returns {number} The read value
+        * @throws {Error} If byteLength is greater than 6
+        */
+        public readIntBE(offset: number, byteLength: number): number {
+            Buffer.checkByteLengthConstraint(byteLength);
+            const view = this.getDataView();
+            let val: number = 0;
+            let multiplier = 1 << (8 * (byteLength - 1));
+            for (let i = 0; i < byteLength; i++) {
+                const byte = view.getUint8(offset + i);
+                val += byte * multiplier;
+                multiplier >>= 8;
+            }
+            const signBit = 1 << (8 * byteLength - 1);
+            if (val >= signBit) {
+                val -= (signBit * 2);
+            }
+            return val;
+        }
+
+        /**
+        * Writes a signed integer to the buffer at the specified offset using little-endian format
+        *
+        * @param {number} value - Value to write
+        * @param {number} offset - Number of bytes to skip before writing
+        * @param {number} byteLength - Number of bytes to write (maximum 6)
+        * @returns {number} Offset plus the number of bytes written
+        * @throws {Error} If byteLength is greater than 6
+        */
+        public writeIntLE(value: number, offset: number, byteLength: number): number {
+            Buffer.checkByteLengthConstraint(byteLength);
+            const view = this.getDataView();
+            let remaining = value;
+            for (let i = 0; i < byteLength; i++) {
+                view.setUint8(offset + i, remaining & 0xff);
+                remaining >>= 8;
+            }
+            return offset + byteLength;
+        }
+
+        /**
+        * Reads a signed integer from the buffer at the specified offset using little-endian format
+        *
+        * @param {number} offset - Number of bytes to skip before reading
+        * @param {number} byteLength - Number of bytes to read (maximum 6)
+        * @returns {number} The read value
+        * @throws {Error} If byteLength is greater than 6
+        */
+        public readIntLE(offset: number, byteLength: number): number {
+            Buffer.checkByteLengthConstraint(byteLength);
+            const view = this.getDataView();
+            let val: number = 0;
+            let multiplier = 1;
+            for (let i = 0; i < byteLength; i++) {
+                const byte = view.getUint8(offset + i);
+                val += byte * multiplier;
+                multiplier <<= 8;
+            }
+            if (val >= (1 << (8 * byteLength - 1))) {
+                val -= (1 << (8 * byteLength));
+            }
+            return val;
+        }
+
+        /**
+        * Writes an unsigned integer to the buffer at the specified offset using big-endian format
+        *
+        * @param {number} value - Value to write
+        * @param {number} offset - Number of bytes to skip before writing
+        * @param {number} byteLength - Number of bytes to write (maximum 6)
+        * @returns {number} Offset plus the number of bytes written
+        * @throws {Error} If byteLength is greater than 6
+        */
+        public writeUIntBE(value: number, offset: number, byteLength: number): number {
+            Buffer.checkByteLengthConstraint(byteLength);
+            const view = this.getDataView();
+            let remaining = value;
+            for (let i = byteLength - 1; i >= 0; i--) {
+                view.setUint8(offset + i, remaining & 0xFF);
+                remaining >>= 8;
+            }
+            return offset + byteLength;
+        }
+
+        /**
+        * Reads an unsigned integer from the buffer at the specified offset using big-endian format
+        *
+        * @param {number} offset - Number of bytes to skip before reading
+        * @param {number} byteLength - Number of bytes to read (maximum 6)
+        * @returns {number} The read value
+        * @throws {Error} If byteLength is greater than 6
+        */
+        public readUIntBE(offset: number, byteLength: number): number {
+            Buffer.checkByteLengthConstraint(byteLength);
+            let val: number = 0;
+            const view = this.getDataView();
+            for (let i = 0; i < byteLength; i++) {
+                val = (val * 256) + view.getUint8(offset + i);
+            }
+            return val;
+        }
+
+        /**
+        * Writes an unsigned integer to the buffer at the specified offset using little-endian format
+        *
+        * @param {number} value - Value to write
+        * @param {number} offset - Number of bytes to skip before writing
+        * @param {number} byteLength - Number of bytes to write (maximum 6)
+        * @returns {number} Offset plus the number of bytes written
+        * @throws {Error} If byteLength is greater than 6
+        */
+        public writeUIntLE(value: number, offset: number, byteLength: number): number {
+            Buffer.checkByteLengthConstraint(byteLength);
+            const view = this.getDataView();
+            let remaining = value;
+            for (let i = 0; i < byteLength; i++) {
+                view.setUint8(offset + i, remaining & 0xFF);
+                remaining >>= 8;
+            }
+            return offset + byteLength;
+        }
+
+        /**
+        * Reads an unsigned integer from the buffer at the specified offset using little-endian format
+        *
+        * @param {number} offset - Number of bytes to skip before reading
+        * @param {number} byteLength - Number of bytes to read (maximum 6)
+        * @returns {number} The read value
+        * @throws {Error} If byteLength is greater than 6
+        */
+        public readUIntLE(offset: number, byteLength: number): number {
+            Buffer.checkByteLengthConstraint(byteLength);
+            const view = this.getDataView();
+            let val: number = 0;
+            let multiplier = 1;
+            for (let i = 0; i < byteLength; i++) {
+                val += view.getUint8(offset + i) * multiplier;
+                multiplier <<= 8;
+            }
+            return val;
+        }
+
+        /**
+        * Writes a string to the buffer at the specified offset
+        *
+        * @param {string} str - String to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @param {number} [length] - Maximum number of bytes to write
+        * @param {string} [encoding='utf8'] - Character encoding of the string
+        * @returns {number} Number of bytes written
+        */
+        public write(str: string, offset: number = 0, length?: number, encoding: string = 'utf8'): number {
+            const resolvedEncoding = encoding as buffer.BufferEncoding;
+            const byteLen = buffer.byteLength(str, resolvedEncoding);
+            const resolvedLength = length ?? byteLen;
+            const strBuffer = buffer.from(str, resolvedEncoding);
+            for (let i = 0; i < resolvedLength && i < byteLen; i++) {
+                this.buffer.set((offset + i) as int, strBuffer.at(i));
+            }
+            return Math.min(resolvedLength, byteLen);
+        }
+
+        /**
+        * Reads a signed 64-bit integer from the buffer at the specified offset using big-endian format
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {bigint} The read value
+        */
+        public readBigInt64BE(offset: number = 0): bigint {
+            return this.getDataView().getBigInt64(offset, false);
+        }
+
+        /**
+        * Reads a signed 64-bit integer from the buffer at the specified offset using little-endian format
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {bigint} The read value
+        */
+        public readBigInt64LE(offset: number = 0): bigint {
+            return this.getDataView().getBigInt64(offset, true);
+        }
+
+        /**
+        * Reads an unsigned 64-bit integer from the buffer at the specified offset using big-endian format
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {bigint} The read value
+        */
+        public readBigUInt64BE(offset: number = 0): bigint {
+            return this.getDataView().getBigUint64(offset, false);
+        }
+
+        /**
+        * Reads an unsigned 64-bit integer from the buffer at the specified offset using little-endian format
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {bigint} The read value
+        */
+        public readBigUInt64LE(offset: number = 0): bigint {
+            return this.getDataView().getBigUint64(offset, true);
+        }
+
+        /**
+        * Reads a 64-bit double from the buffer at the specified offset using big-endian format
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {number} The read value
+        */
+        public readDoubleBE(offset: number = 0): number {
+            return this.getDataView().getFloat64(offset, false);
+        }
+
+        /**
+        * Reads a 64-bit double from the buffer at the specified offset using little-endian format
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {number} The read value
+        */
+        public readDoubleLE(offset: number = 0): number {
+            return this.getDataView().getFloat64(offset, true);
+        }
+
+        /**
+        * Reads a 32-bit float from the buffer at the specified offset using big-endian format
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {number} The read value
+        */
+        public readFloatBE(offset: number = 0): number {
+            return this.getDataView().getFloat32(offset, false);
+        }
+
+        /**
+        * Reads a 32-bit float from the buffer at the specified offset using little-endian format
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {number} The read value
+        */
+        public readFloatLE(offset: number = 0): number {
+            return this.getDataView().getFloat32(offset, true);
+        }
+
+        /**
+        * Reads a signed 8-bit integer from the buffer at the specified offset
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {number} The read value
+        */
+        public readInt8(offset: number = 0): number {
+            return this.getDataView().getInt8(offset);
+        }
+
+        /**
+        * Reads a signed 16-bit integer from the buffer at the specified offset using big-endian format
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {number} The read value
+        */
+        public readInt16BE(offset: number = 0): number {
+            return this.getDataView().getInt16(offset, false);
+        }
+
+        /**
+        * Reads a signed 16-bit integer from the buffer at the specified offset using little-endian format
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {number} The read value
+        */
+        public readInt16LE(offset: number = 0): number {
+            return this.getDataView().getInt16(offset, true);
+        }
+
+        /**
+        * Reads a signed 32-bit integer from the buffer at the specified offset using big-endian format
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {number} The read value
+        */
+        public readInt32BE(offset: number = 0): number {
+            return this.getDataView().getInt32(offset, false);
+        }
+
+        /**
+        * Reads a signed 32-bit integer from the buffer at the specified offset using little-endian format
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {number} The read value
+        */
+        public readInt32LE(offset: number = 0): number {
+            return this.getDataView().getInt32(offset, true);
+        }
+
+        /**
+        * Reads an unsigned 8-bit integer from the buffer at the specified offset
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {number} The read value
+        */
+        public readUInt8(offset: number = 0): number {
+            return this.getDataView().getUint8(offset);
+        }
+
+        /**
+        * Reads an unsigned 16-bit integer from the buffer at the specified offset using big-endian format
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {number} The read value
+        */
+        public readUInt16BE(offset: number = 0): number {
+            return this.getDataView().getUint16(offset, false);
+        }
+
+        /**
+        * Reads an unsigned 16-bit integer from the buffer at the specified offset using little-endian format
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {number} The read value
+        */
+        public readUInt16LE(offset: number = 0): number {
+            return this.getDataView().getUint16(offset, true);
+        }
+
+        /**
+        * Reads an unsigned 32-bit integer from the buffer at the specified offset using big-endian format
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {number} The read value
+        */
+        public readUInt32BE(offset: number = 0): number {
+            return this.getDataView().getUint32(offset, false);
+        }
+
+        /**
+        * Reads an unsigned 32-bit integer from the buffer at the specified offset using little-endian format
+        *
+        * @param {number} [offset=0] - Number of bytes to skip before reading
+        * @returns {number} The read value
+        */
+        public readUInt32LE(offset: number = 0): number {
+            return this.getDataView().getUint32(offset, true);
+        }
+
+        /**
+        * Writes a signed 64-bit integer to the buffer at the specified offset using big-endian format
+        *
+        * @param {bigint} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeBigInt64BE(value: bigint, offset: number = 0): number {
+            this.getDataView().setBigInt64(offset, value, false);
+            return offset + 8;
+        }
+
+        /**
+        * Writes a signed 64-bit integer to the buffer at the specified offset using little-endian format
+        *
+        * @param {bigint} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeBigInt64LE(value: bigint, offset: number = 0): number {
+            this.getDataView().setBigInt64(offset, value, true);
+            return offset + 8;
+        }
+
+        /**
+        * Writes an unsigned 64-bit integer to the buffer at the specified offset using big-endian format
+        *
+        * @param {bigint} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeBigUInt64BE(value: bigint, offset: number = 0): number {
+            this.getDataView().setBigUint64(offset, value, false);
+            return offset + 8;
+        }
+
+        /**
+        * Writes an unsigned 64-bit integer to the buffer at the specified offset using little-endian format
+        *
+        * @param {bigint} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeBigUInt64LE(value: bigint, offset: number = 0): number {
+            this.getDataView().setBigUint64(offset, value, true);
+            return offset + 8;
+        }
+
+        /**
+        * Writes a 64-bit double to the buffer at the specified offset using big-endian format
+        *
+        * @param {number} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeDoubleBE(value: number, offset: number = 0): number {
+            this.getDataView().setFloat64(offset, value, false);
+            return offset + 8;
+        }
+
+        /**
+        * Writes a 64-bit double to the buffer at the specified offset using little-endian format
+        *
+        * @param {number} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeDoubleLE(value: number, offset: number = 0): number {
+            this.getDataView().setFloat64(offset, value, true);
+            return offset + 8;
+        }
+
+        /**
+        * Writes a 32-bit float to the buffer at the specified offset using big-endian format
+        *
+        * @param {number} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeFloatBE(value: number, offset: number = 0): number {
+            this.getDataView().setFloat32(offset, value, false);
+            return offset + 4;
+        }
+
+        /**
+        * Writes a 32-bit float to the buffer at the specified offset using little-endian format
+        *
+        * @param {number} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeFloatLE(value: number, offset: number = 0): number {
+            this.getDataView().setFloat32(offset, value, true);
+            return offset + 4;
+        }
+
+        /**
+        * Writes a signed 8-bit integer to the buffer at the specified offset
+        *
+        * @param {number} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeInt8(value: number, offset: number = 0): number {
+            this.getDataView().setInt8(offset, value);
+            return offset + 1;
+        }
+
+        /**
+        * Writes a signed 16-bit integer to the buffer at the specified offset using big-endian format
+        *
+        * @param {number} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeInt16BE(value: number, offset: number = 0): number {
+            this.getDataView().setInt16(offset, value, false);
+            return offset + 2;
+        }
+
+        /**
+        * Writes a signed 16-bit integer to the buffer at the specified offset using little-endian format
+        *
+        * @param {number} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeInt16LE(value: number, offset: number = 0): number {
+            this.getDataView().setInt16(offset, value, true);
+            return offset + 2;
+        }
+
+        /**
+        * Writes a signed 32-bit integer to the buffer at the specified offset using big-endian format
+        *
+        * @param {number} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeInt32BE(value: number, offset: number = 0): number {
+            this.getDataView().setInt32(offset, value, false);
+            return offset + 4;
+        }
+
+        /**
+        * Writes a signed 32-bit integer to the buffer at the specified offset using little-endian format
+        *
+        * @param {number} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeInt32LE(value: number, offset: number = 0): number {
+            this.getDataView().setInt32(offset, value, true);
+            return offset + 4;
+        }
+
+        /**
+        * Writes an unsigned 8-bit integer to the buffer at the specified offset
+        *
+        * @param {number} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeUInt8(value: number, offset: number = 0): number {
+            this.getDataView().setUint8(offset, value);
+            return offset + 1;
+        }
+
+        /**
+        * Writes an unsigned 16-bit integer to the buffer at the specified offset using big-endian format
+        *
+        * @param {number} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeUInt16BE(value: number, offset: number = 0): number {
+            this.getDataView().setUint16(offset, value, false);
+            return offset + 2;
+        }
+
+        /**
+        * Writes an unsigned 16-bit integer to the buffer at the specified offset using little-endian format
+        *
+        * @param {number} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeUInt16LE(value: number, offset: number = 0): number {
+            this.getDataView().setUint16(offset, value, true);
+            return offset + 2;
+        }
+
+        /**
+        * Writes an unsigned 32-bit integer to the buffer at the specified offset using big-endian format
+        *
+        * @param {number} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeUInt32BE(value: number, offset: number = 0): number {
+            this.getDataView().setUint32(offset, value, false);
+            return offset + 4;
+        }
+
+        /**
+        * Writes an unsigned 32-bit integer to the buffer at the specified offset using little-endian format
+        *
+        * @param {number} value - Value to write
+        * @param {number} [offset=0] - Number of bytes to skip before writing
+        * @returns {number} Offset plus the number of bytes written
+        */
+        public writeUInt32LE(value: number, offset: number = 0): number {
+            this.getDataView().setUint32(offset, value, true);
+            return offset + 4;
+        }
+
     }
 
     export interface BlobOptions {
@@ -950,7 +1576,7 @@ Received value is: ${value}`, TypeErrorCodeId);
 
         /**
          * Creates and returns a new Blob containing a subset of this Blob objects data. The original Blob is not altered.
-         * 
+         *
          * @param {number} [start=0] - The starting index.
          * @param {number} [end=buffer.length] -  The ending index.
          * @param {string} [type] - The content-type for the new Blob
@@ -984,7 +1610,7 @@ Received value is: ${value}`, TypeErrorCodeId);
 
         /**
          * Returns a promise that fulfills with the contents of the Blob decoded as a UTF-8 string.
-         * 
+         *
          * @returns {Promise}
          */
         text(): Promise<string> {
@@ -993,14 +1619,14 @@ Received value is: ${value}`, TypeErrorCodeId);
 
         /**
          * Returns a promise that fulfills with an <ArrayBuffer> containing a copy of the Blob data.
-         * 
+         *
          * @returns {Promise}
          */
         arrayBuffer(): Promise<ArrayBuffer> {
             return Promise.resolve(this.toArrayBuffer())
         }
 
-        size: number 
+        size: number
 
         /**
          * The content-type of the Blob.
@@ -1037,6 +1663,6 @@ Received value is: ${value}`, TypeErrorCodeId);
             }
             return b.toString()
         }
+
     }
 }
-

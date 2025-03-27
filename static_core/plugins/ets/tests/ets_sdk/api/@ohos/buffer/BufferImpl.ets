@@ -59,6 +59,20 @@ function main(): int {
     suite.addTest("Test swap64", testSwap64)
     suite.addTest("Test values", testValues)
 
+    suite.addTest("Test Int8 read/write", testInt8ReadWrite)
+    suite.addTest("Test Int16 BE/LE read/write", testInt16ReadWrite)
+    suite.addTest("Test Int32 BE/LE read/write", testInt32ReadWrite)
+    suite.addTest("Test UInt8 read/write", testUInt8ReadWrite)
+    suite.addTest("Test UInt16 BE/LE read/write", testUInt16ReadWrite)
+    suite.addTest("Test UInt32 BE/LE read/write", testUInt32ReadWrite)
+    suite.addTest("Test Float BE/LE read/write", testFloatReadWrite)
+    suite.addTest("Test Double BE/LE read/write", testDoubleReadWrite)
+    suite.addTest("Test BigInt64 BE/LE read/write", testBigInt64ReadWrite)
+    suite.addTest("Test BigUInt64 BE/LE read/write", testBigUInt64ReadWrite)
+    suite.addTest("Test variable length Int BE/LE read/write", testVarLengthIntReadWrite)
+    suite.addTest("Test variable length UInt BE/LE read/write", testVarLengthUIntReadWrite)
+    suite.addTest("Test string write", testStringWrite)
+
     return suite.run()
 }
 
@@ -384,4 +398,213 @@ function testValues() {
     const values = Array.from(buf.values());
     assertEQ(values.length, 3);
     assertEQ(values[0], 97);
+}
+
+function testInt8ReadWrite() {
+    const buf = buffer.from(new Uint8Array(4))
+
+    // Test positive values
+    buf.writeInt8(127, 0)
+    assertEQ(buf.readInt8(0), 127)
+
+    // Test negative values
+    buf.writeInt8(-128, 1)
+    assertEQ(buf.readInt8(1), -128)
+
+    // Test zero
+    buf.writeInt8(0, 2)
+    assertEQ(buf.readInt8(2), 0)
+
+    // Test overflow
+    buf.writeInt8(255, 3) // 255 should be interpreted as -1
+    assertEQ(buf.readInt8(3), -1)
+}
+
+function testInt16ReadWrite() {
+    const buf = buffer.from(new Uint8Array(8))
+
+    // Test Big Endian
+    buf.writeInt16BE(32767, 0)
+    assertEQ(buf.readInt16BE(0), 32767)
+
+    buf.writeInt16BE(-32768, 2)
+    assertEQ(buf.readInt16BE(2), -32768)
+
+    // Test Little Endian
+    buf.writeInt16LE(32767, 4)
+    assertEQ(buf.readInt16LE(4), 32767)
+
+    buf.writeInt16LE(-32768, 6)
+    assertEQ(buf.readInt16LE(6), -32768)
+}
+
+function testInt32ReadWrite() {
+    const buf = buffer.from(new Uint8Array(8))
+
+    // Test Big Endian
+    buf.writeInt32BE(2147483647, 0)
+    assertEQ(buf.readInt32BE(0), 2147483647)
+
+    // Test Little Endian
+    buf.writeInt32LE(-2147483648, 4)
+    assertEQ(buf.readInt32LE(4), -2147483648)
+}
+
+function testUInt8ReadWrite() {
+    const buf = buffer.from(new Uint8Array(3))
+
+    // Test max value
+    buf.writeUInt8(255, 0)
+    assertEQ(buf.readUInt8(0), 255)
+
+    // Test zero
+    buf.writeUInt8(0, 1)
+    assertEQ(buf.readUInt8(1), 0)
+
+    // Test mid value
+    buf.writeUInt8(128, 2)
+    assertEQ(buf.readUInt8(2), 128)
+}
+
+function testUInt16ReadWrite() {
+    const buf = buffer.from(new Uint8Array(4))
+
+    // Test Big Endian
+    buf.writeUInt16BE(65535, 0)
+    assertEQ(buf.readUInt16BE(0), 65535)
+
+    // Test Little Endian
+    buf.writeUInt16LE(65535, 2)
+    assertEQ(buf.readUInt16LE(2), 65535)
+}
+
+function testUInt32ReadWrite() {
+    const buf = buffer.from(new Uint8Array(8))
+
+    // Test Big Endian
+    buf.writeUInt32BE(4294967295, 0)
+    assertEQ(buf.readUInt32BE(0), 4294967295)
+
+    // Test Little Endian
+    buf.writeUInt32LE(4294967295, 4)
+    assertEQ(buf.readUInt32LE(4), 4294967295)
+}
+
+function testFloatReadWrite() {
+    const buf = buffer.from(new Uint8Array(8))
+
+    // Test Big Endian
+    const testFloat = 3.14159
+    buf.writeFloatBE(testFloat, 0)
+    // Using approx comparison due to float precision
+    assertDoubleEQ(buf.readFloatBE(0), testFloat, 0.00001)
+
+    // Test Little Endian
+    buf.writeFloatLE(testFloat, 4)
+    assertDoubleEQ(buf.readFloatLE(4), testFloat, 0.00001)
+}
+
+function testDoubleReadWrite() {
+    const buf = buffer.from(new Uint8Array(16))
+
+    // Test Big Endian
+    const testDouble = Math.PI
+    buf.writeDoubleBE(testDouble, 0)
+    assertEQ(buf.readDoubleBE(0), testDouble)
+
+    // Test Little Endian
+    buf.writeDoubleLE(testDouble, 8)
+    assertEQ(buf.readDoubleLE(8), testDouble)
+}
+
+function testBigInt64ReadWrite() {
+    const buf = buffer.from(new Uint8Array(16))
+
+    // Test Big Endian
+    const max64 = new BigInt("9223372036854775807")
+    const min64 = new BigInt("-9223372036854775808")
+
+    buf.writeBigInt64BE(max64, 0)
+    assertEQ(buf.readBigInt64BE(0).toString(), max64.toString())
+
+    // Test Little Endian
+    buf.writeBigInt64LE(min64, 8)
+    assertEQ(buf.readBigInt64LE(8).toString(), min64.toString())
+}
+
+function testBigUInt64ReadWrite() {
+    const buf = buffer.from(new Uint8Array(16))
+
+    // Test Big Endian
+    const maxU64 = new BigInt("18446744073709551615")
+
+    buf.writeBigUInt64BE(maxU64, 0)
+    assertEQ(buf.readBigUInt64BE(0).toString(), maxU64.toString())
+
+    // Test Little Endian
+    buf.writeBigUInt64LE(maxU64, 8)
+    assertEQ(buf.readBigUInt64LE(8).toString(), maxU64.toString())
+}
+
+function testVarLengthIntReadWrite() {
+    const buf = buffer.from(new Uint8Array(12))
+
+    // Test 2-byte values
+    buf.writeIntBE(0x1234, 0, 2)
+    assertEQ(buf.readIntBE(0, 2), 0x1234)
+
+    buf.writeIntLE(0x1234, 2, 2)
+    assertEQ(buf.readIntLE(2, 2), 0x1234)
+
+    // Test 3-byte values
+    buf.writeIntBE(0x123456, 4, 3)
+    assertEQ(buf.readIntBE(4, 3), 0x123456)
+
+    buf.writeIntLE(0x123456, 7, 3)
+    assertEQ(buf.readIntLE(7, 3), 0x123456)
+
+    // Test negative values
+    const negValue = -0x1234;
+    buf.writeIntBE(negValue, 10, 2)
+    assertEQ(buf.readIntBE(10, 2), negValue)
+}
+
+function testVarLengthUIntReadWrite() {
+    const buf = buffer.from(new Uint8Array(12))
+
+    // Test 2-byte values
+    buf.writeUIntBE(0xFFFF, 0, 2)
+    assertEQ(buf.readUIntBE(0, 2), 0xFFFF)
+
+    buf.writeUIntLE(0xFFFF, 2, 2)
+    assertEQ(buf.readUIntLE(2, 2), 0xFFFF)
+
+    // Test 3-byte values
+    buf.writeUIntBE(0xFEDCBA, 4, 3)
+    assertEQ(buf.readUIntBE(4, 3), 0xFEDCBA)
+
+    buf.writeUIntLE(0xFEDCBA, 7, 3)
+    assertEQ(buf.readUIntLE(7, 3), 0xFEDCBA)
+}
+
+function testStringWrite() {
+    const buf = buffer.from(new Uint8Array(20))
+
+    // Test basic ASCII write
+    const str = "Hello"
+    const bytesWritten = buf.write(str, 0, str.length, 'utf8')
+    assertEQ(bytesWritten, str.length)
+    assertEQ(buf.toString('utf8', 0, str.length), str)
+
+    // Test write with offset
+    const str2 = "World"
+    const bytesWritten2 = buf.write(str2, 10, str2.length, 'utf8')
+    assertEQ(bytesWritten2, str2.length)
+    assertEQ(buf.toString('utf8', 10, 10 + str2.length), str2)
+
+    // Test partial write
+    const longStr = "ThisIsALongString"
+    const bytesWritten3 = buf.write(longStr, 0, 5, 'utf8')
+    assertEQ(bytesWritten3, 5)
+    assertEQ(buf.toString('utf8', 0, 5), "ThisI")
 }
