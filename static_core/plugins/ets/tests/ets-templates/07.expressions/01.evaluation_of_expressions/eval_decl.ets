@@ -25,7 +25,7 @@ let sg: int;
 let ig: int = new Int(1).unboxed();
 
 class A {
-  public fld: int = 42 + (sg = "abc".length);
+  public fld: int = 42 + (sg = "abc".length as int);
   private f: Incrementor;
 
   public constructor(f: Incrementor) {

@@ -855,9 +855,6 @@
 #24036
 07.expressions/01.evaluation_of_expressions/03.operator_precedence/typeof.ets
 
-#24037
-07.expressions/01.evaluation_of_expressions/eval_decl.ets
-
 #22791 FixedArray and Array<T> support is not implemented yet
 07.expressions/04.array_literal/01.type_inference_from_context/spec-ex9.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_assn_22.ets
