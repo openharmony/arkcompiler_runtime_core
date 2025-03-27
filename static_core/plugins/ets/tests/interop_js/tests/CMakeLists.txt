@@ -16,23 +16,11 @@ set(DISABLES_TESTS
 )
 
 set(TESTS_EXECUTED_WITH_NODEJS
-    # Blocked by #21277
-    class_composite
-    class_extension
-    class_operations
-    implement_interfaces
-    instanceof
-    interface
-    interfaces
-    setter
-    scenarios
-    generic
-    getter
 )
 
 # NOTE: Remove this condition after all tests have been migrated to ArkJSVM.
 list(LENGTH TESTS_EXECUTED_WITH_NODEJS INTEROP_NODEJS_TEST_NUM)
-if(NOT ${INTEROP_NODEJS_TEST_NUM} EQUAL 11)
+if(NOT ${INTEROP_NODEJS_TEST_NUM} EQUAL 0)
     message(FATAL_ERROR "All new interop tests should be executed on ArkJSVM.
                          INTEROP_NODEJS_TEST_NUM = ${INTEROP_NODEJS_TEST_NUM}")
 endif()

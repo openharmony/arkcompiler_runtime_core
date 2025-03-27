@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,138 +30,155 @@ let __assign = (this && this.__assign) || function (...args) {
 };
 
 let _a;
+export const STRING_VALUE = 'Panda';
+export const INT_VALUE = Number.MAX_SAFE_INTEGER;
 
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.testObject = exports.genericInterfaceImplementation = exports.GenericInterface = exports.ENUM_VALUE =
-    exports.UNDEFINED = exports.NULL_VALUE = exports.BOOLEAN_VALUE = exports.FLOAT_VALUE = exports.INT_VALUE =
-    exports.STRING_VALUE = void 0;
-exports.STRING_VALUE = 'Panda';
-exports.INT_VALUE = Number.MAX_SAFE_INTEGER;
-exports.FLOAT_VALUE = Math.PI;
-exports.BOOLEAN_VALUE = true;
-exports.NULL_VALUE = null;
-exports.UNDEFINED = (_a = {}) === null || _a === void 0 ? void 0 : _a.value;
+export const FLOAT_VALUE = Math.PI;
+export const BOOLEAN_VALUE = true;
+export const NULL_VALUE = null;
+export const UNDEFINED = (_a = {}) === null || _a === void 0 ? void 0 : _a.value;
 
-let ENUM_VALUE;
-(function (ENUM_VALUE) {
-    ENUM_VALUE[ENUM_VALUE.OPTION_ONE = 0] = 'OPTION_ONE';
-    ENUM_VALUE[ENUM_VALUE.OPTION_TWO = 1] = 'OPTION_TWO';
-    ENUM_VALUE[ENUM_VALUE.OPTION_THREE = 2] = 'OPTION_THREE';
-})(ENUM_VALUE || (exports.ENUM_VALUE = ENUM_VALUE = {}));
+export const ENUM_VALUE = {
+    OPTION_ONE: 0,
+    OPTION_TWO: 1,
+    OPTION_THREE: 2
+};
 
-let TUPLE_VALUE = ['abc', 123];
+const TUPLE_VALUE = ['abc', 123];
 
-let genericInterface = /** @class */ (function () {
-    function genericInterface() {
-        this.getInt = function () {
-            return Number(exports.INT_VALUE);
-        };
-        this.getNegativeInt = function () {
-            return Number(exports.INT_VALUE) * -1;
-        };
-        this.getInfinity = function () {
-            return Number.POSITIVE_INFINITY;
-        };
-        this.getNegativeInfinity = function () {
-            return Number.NEGATIVE_INFINITY;
-        };
-        this.getNanAsNumber = function () {
-            return Number.NaN;
-        };
-        this.getBigInt = function () {
-            return BigInt(exports.INT_VALUE);
-        };
-        this.getFloat = function () {
-            return exports.FLOAT_VALUE;
-        };
-        this.getString = function () {
-            return exports.STRING_VALUE;
-        };
-        this.getBoolean = function () {
-            return exports.BOOLEAN_VALUE;
-        };
-        this.getEnum = function () {
-            return ENUM_VALUE;
-        };
-        this.getNull = function () {
-            return exports.NULL_VALUE;
-        };
-        this.getUndefined = function () {
-            return exports.UNDEFINED;
-        };
-    }
-    genericInterface.prototype.getAny = function () {
-        let randomValues = [exports.STRING_VALUE, exports.INT_VALUE, exports.FLOAT_VALUE, exports.BOOLEAN_VALUE,
-            exports.NULL_VALUE, exports.UNDEFINED, new Array(2).fill(' '), {}];
-        let index = Math.round(Math.random() * randomValues.length);
+export class GenericInterface {
+    getAny() {
+        const randomValues = [STRING_VALUE, INT_VALUE, FLOAT_VALUE, BOOLEAN_VALUE, NULL_VALUE,
+            UNDEFINED, new Array(2).fill(' '), {}];
+        const index = Math.round(Math.random() * randomValues.length);
         return randomValues[index];
-    };
-    genericInterface.prototype.getTuple = function () {
+    }
+
+    getInt() {
+        return Number(INT_VALUE);
+    }
+
+    getNegativeInt() {
+        return Number(INT_VALUE) * -1;
+    }
+
+    getInfinity() {
+        return Number.POSITIVE_INFINITY;
+    }
+
+    getNegativeInfinity() {
+        return Number.NEGATIVE_INFINITY;
+    }
+
+    getNanAsNumber() {
+        return Number.NaN;
+    }
+
+    getBigInt() {
+        return BigInt(INT_VALUE);
+    }
+
+    getFloat() {
+        return FLOAT_VALUE;
+    }
+
+    getString() {
+        return STRING_VALUE;
+    }
+
+    getBoolean() {
+        return BOOLEAN_VALUE;
+    }
+
+    getTuple() {
         return ['tuple_item_0', 1];
-    };
-    genericInterface.prototype.getGeneric = function (arg) {
-        return __assign(__assign({}, arg), { extendingProperty: 0 });
-    };
-    genericInterface.prototype.getFunctionReturningType = function (arg) {
+    }
+
+    getGeneric(arg) {
+        return { ...arg, extendingProperty: 0 };
+    }
+
+    getFunctionReturningType(arg) {
         return function (arg) { return 0; };
-    };
-    return genericInterface;
-}());
+    }
 
-exports.GenericInterface = genericInterface;
+    getEnum() {
+        return ENUM_VALUE;
+    }
 
-exports.genericInterfaceImplementation = {
-    getAny: function () {
-        let randomValues = [
-            exports.STRING_VALUE,
-            exports.INT_VALUE,
-            exports.FLOAT_VALUE,
-            exports.BOOLEAN_VALUE,
-            exports.NULL_VALUE,
-            exports.UNDEFINED,
+    getNull() {
+        return NULL_VALUE;
+    }
+
+    getUndefined() {
+        return UNDEFINED;
+    }
+}
+
+export const genericInterfaceImplementation = {
+    getAny() {
+        const randomValues = [
+            STRING_VALUE,
+            INT_VALUE,
+            FLOAT_VALUE,
+            BOOLEAN_VALUE,
+            NULL_VALUE,
+            UNDEFINED,
             new Array(2).fill(' '),
             {}
         ];
-        let index = Math.round(Math.random() * randomValues.length);
+        const index = Math.round(Math.random() * randomValues.length);
         return randomValues[index];
     },
-    getInt: function () {
-        return Number(exports.INT_VALUE);
+
+    getInt() {
+        return Number(INT_VALUE);
     },
-    getBigInt: function () {
-        return BigInt(exports.INT_VALUE);
+
+    getBigInt() {
+        return BigInt(INT_VALUE);
     },
-    getFloat: function () {
-        return exports.FLOAT_VALUE;
+
+    getFloat() {
+        return FLOAT_VALUE;
     },
-    getNegativeInt: function () {
-        return Number(exports.INT_VALUE) * -1;
+
+    getNegativeInt() {
+        return Number(INT_VALUE) * -1;
     },
-    getInfinity: function () {
+
+    getInfinity() {
         return Number.POSITIVE_INFINITY;
     },
-    getNegativeInfinity: function () {
+
+    getNegativeInfinity() {
         return Number.NEGATIVE_INFINITY;
     },
-    getNanAsNumber: function () {
+
+    getNanAsNumber() {
         return Number.NaN;
     },
-    getString: function () {
-        return exports.STRING_VALUE;
+
+    getString() {
+        return STRING_VALUE;
     },
-    getBoolean: function () {
-        return exports.BOOLEAN_VALUE;
+
+    getBoolean() {
+        return BOOLEAN_VALUE;
     },
-    getTuple: function () {
+
+    getTuple() {
         return TUPLE_VALUE;
     },
+
     getGeneric: function (arg) {
         return __assign(__assign({}, arg),
             { extendingProperty: Object.keys(arg !== null && arg !== void 0 ? arg : {}).length * -1 });
     },
+
     getFunctionReturningType: function (arg) {
         return function () {
-            console.log('reached');
+            print('reached');
             switch (typeof arg) {
                 case 'string':
                     return arg.toLowerCase() + arg.toUpperCase();
@@ -174,17 +191,20 @@ exports.genericInterfaceImplementation = {
             }
         };
     },
-    getEnum: function () {
+
+    getEnum() {
         return ENUM_VALUE;
     },
-    getNull: function () {
-        return exports.NULL_VALUE;
+
+    getNull() {
+        return NULL_VALUE;
     },
-    getUndefined: function () {
-        return exports.UNDEFINED;
+
+    getUndefined() {
+        return UNDEFINED;
     }
 };
 
-exports.testObject = {
+export const testObject = {
     a: 1
 };

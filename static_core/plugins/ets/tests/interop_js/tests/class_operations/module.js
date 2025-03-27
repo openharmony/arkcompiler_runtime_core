@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,19 +14,19 @@
  */
 'use strict';
 
-function evaluateNumber(v0, v1) {
+export function evaluateNumber(v0, v1) {
 	return v0 + v1;
 }
 
-function doNothing() {
-	console.log('Hello from empty function');
+export function doNothing() {
+	print('Hello from empty function');
 }
 
-function evaluateObject(obj) {
+export function evaluateObject(obj) {
 	return new ExampleClass(obj.v0 + obj.v1, obj.v0 + obj.v1);
 }
 
-function evaluateArray(arr, size) {
+export function evaluateArray(arr, size) {
 	let result = [];
 	for (let i = 0; i < size; i++) {
 		result[i] = arr[i] + i * i;
@@ -34,7 +34,7 @@ function evaluateArray(arr, size) {
 	return result;
 }
 
-class ExampleClass {
+export class ExampleClass {
 	constructor(v0, v1) {
 		this.v0 = v0;
 		this.v1 = v1;
@@ -70,11 +70,11 @@ class ExampleClass {
 	}
 
 	static emptyMethod() {
-		console.log('Hello from empty method');
+		print('Hello from empty method');
 	}
 }
 
-class ClassWithEmptyConstructor {
+export class ClassWithEmptyConstructor {
 	constructor() {
 		this.v0 = 42;
 		this.v1 = 42;
@@ -97,25 +97,16 @@ class ClassWithEmptyConstructor {
 	}
 }
 
-let MyNamespace = {};
-(function (MyNamespace) {
-	const Kitten = /** @class */ (function () {
-		function Kitten(id, name) {
-			this.id = id;
-			this.name = name;
-		}
-		return Kitten;
-	})();
-	function createKitten(id, name) {
-		return new Kitten(id, name);
-	}
-	MyNamespace.createKitten = createKitten;
-})((MyNamespace = exports.MyNamespace ?? MyNamespace));
+export class Kitten {
+    constructor(id, name) {
+      this.id = id;
+      this.name = name;
+    }
+  }
 
-exports.MyNamespace = MyNamespace;
-exports.evaluateNumber = evaluateNumber;
-exports.ExampleClass = ExampleClass;
-exports.emptyFunction = doNothing;
-exports.evaluateObject = evaluateObject;
-exports.ClassWithEmptyConstructor = ClassWithEmptyConstructor;
-exports.evaluateArray = evaluateArray;
+export const createKitten = (id, name) => new Kitten(id, name);
+
+export const MyNamespace = {
+    Kitten,
+    createKitten
+};

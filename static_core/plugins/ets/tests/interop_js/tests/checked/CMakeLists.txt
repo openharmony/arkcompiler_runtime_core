@@ -28,7 +28,8 @@ panda_ets_interop_js_checked_test(
 
 panda_ets_interop_js_checked_test(
     FILE ${CMAKE_CURRENT_LIST_DIR}/../class_operations/class_operations_frontend.ets
-    JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/../class_operations/module.ts
+    TS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/../class_operations/module.ts
+    DYNAMIC_ABC_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/interop_class_operations_frontend.checked/
 )
 
 panda_ets_interop_js_checked_test(
@@ -50,7 +51,8 @@ set(INTEROP_TESTS_GENERATED_DIR "${PANDA_BINARY_ROOT}/plugins/ets/tests/ets_inte
 
 panda_ets_interop_js_checked_test(
     FILE ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes_frontend.ets
-    TS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/../class_operations/module.ts
+    TS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/../number_subtypes/ts_to_sts/module.ts
+    DYNAMIC_ABC_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/interop_number_subtypes_frontend.checked/
 )
 
 gen_file(TARGET test_convert_gen_ets

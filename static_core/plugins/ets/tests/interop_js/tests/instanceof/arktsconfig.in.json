@@ -8,11 +8,11 @@
 		"dynamicPaths": {
 			"js": {
 				"language": "js",
-				"ohmUrl": "${CMAKE_CURRENT_SOURCE_DIR}/js/instanceof_with_decl.js"
+				"ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/js/instanceof_with_decl"
 			},
 			"dynamic_import_with_decl": {
 				"language": "js",
-				"ohmUrl": "${CMAKE_CURRENT_SOURCE_DIR}/js/instanceof_with_decl.js",
+				"ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/js/instanceof_with_decl",
 				"declPath": "${CMAKE_CURRENT_SOURCE_DIR}/js/instanceof_partial_decl.ets"
 			}
 		}

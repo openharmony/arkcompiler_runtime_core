@@ -8,7 +8,7 @@
 		"dynamicPaths": {
 			"js/setter": {
 				"language": "js",
-				"ohmUrl": "${CMAKE_CURRENT_SOURCE_DIR}/setter.js"
+				"ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/setter"
 			}
 		}
 	}

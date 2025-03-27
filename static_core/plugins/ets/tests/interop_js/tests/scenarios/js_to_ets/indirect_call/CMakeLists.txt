@@ -15,45 +15,52 @@
 set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_any
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_any
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_any.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_any.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_call.js
     ETS_CONFIG ${ETS_CONFIG}
 )
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_literal
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_literal
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_literal.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_literal.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_call.js
     ETS_CONFIG ${ETS_CONFIG}
 )
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_extra
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_extra
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_extra.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_extra.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_call.js
     ETS_CONFIG ${ETS_CONFIG}
 )
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_ref
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_ref
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_ref.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_ref.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_call.js
     ETS_CONFIG ${ETS_CONFIG}
 )
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_value
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_value
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_value.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_value.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_call.js
     ETS_CONFIG ${ETS_CONFIG}
 )
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_user
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_user
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_user.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_user.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_call.js
     ETS_CONFIG ${ETS_CONFIG}
 )
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_union
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_scenarios_js_to_ets_indirect_union
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_union.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_union.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_call.js
     ETS_CONFIG ${ETS_CONFIG}
 )
 

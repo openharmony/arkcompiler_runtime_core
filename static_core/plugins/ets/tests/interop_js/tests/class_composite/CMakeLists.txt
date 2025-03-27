@@ -17,14 +17,16 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 set(ETS_CONFIG_DECL ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig_decl.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.decl.json ${ETS_CONFIG_DECL})
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_class_composite
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__class_composite
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_composite.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_composite.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/js/index.js
     ETS_CONFIG ${ETS_CONFIG}
 )
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_class_composite_decl
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__class_composite_decl
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_composite.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_composite_decl.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/js/index.js
     ETS_CONFIG ${ETS_CONFIG_DECL}
 )
