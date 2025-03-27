@@ -178,6 +178,7 @@ static_core/plugins/ets/tests/sts_ts_subset/std/core/Promise*                 ^a
 /abc2program/ @ctw-ian @chenqy930
 /assembler/ @ctw-ian
 /bytecode_optimizer/ @ctw-ian
+/common_interfaces/ @wuzhefengh @weng-changcheng @igelhaus @dmitriitr ^yingguofeng ^Prof1983
 /compiler/ @ctw-ian
 /disassembler/ @ctw-ian
 /isa/ @ctw-ian @chenqy930
