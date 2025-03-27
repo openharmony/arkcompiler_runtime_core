@@ -22,6 +22,10 @@ napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return nullptr;
+    }
     INTEROP_CODE_SCOPE_JS(coro);
 
     size_t argc;

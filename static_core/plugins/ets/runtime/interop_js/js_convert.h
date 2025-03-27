@@ -248,6 +248,10 @@ JSCONVERT_WRAP(ESError)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return {};
+    }
 
     auto klass = etsVal->GetClass();
     INTEROP_FATAL_IF(klass->GetRuntimeClass() != ctx->GetESErrorClass());
@@ -280,6 +284,10 @@ JSCONVERT_WRAP(Promise)
 {
     auto *coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return {};
+    }
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
     // SharedReferenceStorage uses object's MarkWord to store interop hash.
     // Also runtime may lock a Promise object (this operation also requires MarkWord modification).

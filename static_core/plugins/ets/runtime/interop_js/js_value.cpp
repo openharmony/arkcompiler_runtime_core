@@ -25,6 +25,10 @@ namespace ark::ets::interop::js {
     ASSERT(JSValue::IsFinalizableType(jsValue->GetType()));
 
     auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return nullptr;
+    }
 
     LocalObjectHandle<JSValue> handle(coro, jsValue);
 
