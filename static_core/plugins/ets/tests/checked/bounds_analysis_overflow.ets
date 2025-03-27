@@ -14,9 +14,9 @@
  */
 
 //! CHECKER      Check overflow check in BoundsAnalysis
-//! RUN          force_jit: true, options: "--compiler-inlining=false", entry: "ETSGLOBAL::main"
-//! EVENT        /Exception,ETSGLOBAL::crash,.*,ARITHMETIC/
-//! METHOD       "ETSGLOBAL::crash"
+//! RUN          force_jit: true, options: "--compiler-inlining=false", entry: "bounds_analysis_overflow.ETSGLOBAL::main"
+//! EVENT        /Exception,bounds_analysis_overflow.ETSGLOBAL::crash,.*,ARITHMETIC/
+//! METHOD       "bounds_analysis_overflow.ETSGLOBAL::crash"
 //! PASS_AFTER   "Codegen"
 //! INST         "ZeroCheck"
 

@@ -25,8 +25,8 @@ let GLOBAL_OFFS: int = 1;
 
 class TestSupported {
     //! CHECKER       Test1
-    //! RUN           force_jit: true, entry: "TestSupported::noAlias_locals"
-    //! METHOD        "TestSupported::noAlias_locals"
+    //! RUN           force_jit: true, entry: "memmove_supported.TestSupported::noAlias_locals"
+    //! METHOD        "memmove_supported.TestSupported::noAlias_locals"
     //! PASS_AFTER    "LoopIdioms"
     //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
     static noAlias_locals(): boolean
@@ -40,8 +40,8 @@ class TestSupported {
     }
 
     //! CHECKER       Test2
-    //! RUN           force_jit: true, entry: "TestSupported::noAlias_localAndParam"
-    //! METHOD        "TestSupported::__noinline__noAlias_localAndParam"
+    //! RUN           force_jit: true, entry: "memmove_supported.TestSupported::noAlias_localAndParam"
+    //! METHOD        "memmove_supported.TestSupported::__noinline__noAlias_localAndParam"
     //! PASS_AFTER    "LoopIdioms"
     //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
     static noAlias_localAndParam(): boolean
@@ -59,8 +59,8 @@ class TestSupported {
     }
 
     //! CHECKER       Test3
-    //! RUN           force_jit: true, entry: "TestSupported::patternMatch_offsets1"
-    //! METHOD        "TestSupported::patternMatch_offsets1"
+    //! RUN           force_jit: true, entry: "memmove_supported.TestSupported::patternMatch_offsets1"
+    //! METHOD        "memmove_supported.TestSupported::patternMatch_offsets1"
     //! PASS_AFTER    "LoopIdioms"
     //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
     static patternMatch_offsets1(): boolean
@@ -75,8 +75,8 @@ class TestSupported {
     }
 
     //! CHECKER       Test4
-    //! RUN           force_jit: true, entry: "TestSupported::patternMatch_offsets2"
-    //! METHOD        "TestSupported::patternMatch_offsets2"
+    //! RUN           force_jit: true, entry: "memmove_supported.TestSupported::patternMatch_offsets2"
+    //! METHOD        "memmove_supported.TestSupported::patternMatch_offsets2"
     //! PASS_AFTER    "LoopIdioms"
     //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
     static patternMatch_offsets2(): boolean
@@ -91,8 +91,8 @@ class TestSupported {
     }
 
     //! CHECKER       Test5
-    //! RUN           force_jit: true, entry: "TestSupported::patternMatch_offsets3"
-    //! METHOD        "TestSupported::patternMatch_offsets3"
+    //! RUN           force_jit: true, entry: "memmove_supported.TestSupported::patternMatch_offsets3"
+    //! METHOD        "memmove_supported.TestSupported::patternMatch_offsets3"
     //! PASS_AFTER    "LoopIdioms"
     //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
     static patternMatch_offsets3(): boolean
@@ -107,8 +107,8 @@ class TestSupported {
     }
 
     //! CHECKER       Test6
-    //! RUN           force_jit: true, entry: "TestSupported::patternMatch_offsets4"
-    //! METHOD        "TestSupported::patternMatch_offsets4"
+    //! RUN           force_jit: true, entry: "memmove_supported.TestSupported::patternMatch_offsets4"
+    //! METHOD        "memmove_supported.TestSupported::patternMatch_offsets4"
     //! PASS_AFTER    "LoopIdioms"
     //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
     static patternMatch_offsets4(): boolean
@@ -123,8 +123,8 @@ class TestSupported {
     }
     
     //! CHECKER       Test7
-    //! RUN           force_jit: true, entry: "TestSupported::patternMatch_offsets_sameNegOffset"
-    //! METHOD        "TestSupported::patternMatch_offsets_sameNegOffset"
+    //! RUN           force_jit: true, entry: "memmove_supported.TestSupported::patternMatch_offsets_sameNegOffset"
+    //! METHOD        "memmove_supported.TestSupported::patternMatch_offsets_sameNegOffset"
     //! PASS_AFTER    "LoopIdioms"
     //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
     static patternMatch_offsets_sameNegOffset(): boolean
@@ -138,8 +138,8 @@ class TestSupported {
     }
 
     //! CHECKER       Test8
-    //! RUN           force_jit: true, entry: "TestSupported::patternMatch_offsets_negOffsets"
-    //! METHOD        "TestSupported::patternMatch_offsets_negOffsets"
+    //! RUN           force_jit: true, entry: "memmove_supported.TestSupported::patternMatch_offsets_negOffsets"
+    //! METHOD        "memmove_supported.TestSupported::patternMatch_offsets_negOffsets"
     //! PASS_AFTER    "LoopIdioms"
     //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
     static patternMatch_offsets_negOffsets(): boolean
@@ -153,8 +153,8 @@ class TestSupported {
     }
 
     //! CHECKER       Test9
-    //! RUN           force_jit: true, entry: "TestSupported::backwardsClosed"
-    //! METHOD        "TestSupported::backwardsClosed"
+    //! RUN           force_jit: true, entry: "memmove_supported.TestSupported::backwardsClosed"
+    //! METHOD        "memmove_supported.TestSupported::backwardsClosed"
     //! PASS_AFTER    "LoopIdioms"
     //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
     static backwardsClosed(): boolean
@@ -170,8 +170,8 @@ class TestSupported {
     }
 
     //! CHECKER       Test10
-    //! RUN           force_jit: true, entry: "TestSupported::backwardsOpen"
-    //! METHOD        "TestSupported::backwardsOpen"
+    //! RUN           force_jit: true, entry: "memmove_supported.TestSupported::backwardsOpen"
+    //! METHOD        "memmove_supported.TestSupported::backwardsOpen"
     //! PASS_AFTER    "LoopIdioms"
     //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
     static backwardsOpen(): boolean
@@ -186,8 +186,8 @@ class TestSupported {
     }
 
     //! CHECKER       Test11
-    //! RUN           force_jit: true, entry: "TestSupported::forwardClosed"
-    //! METHOD        "TestSupported::forwardClosed"
+    //! RUN           force_jit: true, entry: "memmove_supported.TestSupported::forwardClosed"
+    //! METHOD        "memmove_supported.TestSupported::forwardClosed"
     //! PASS_AFTER    "LoopIdioms"
     //! INST          /Intrinsic.*CompilerMemmoveUnchecked/
     static forwardClosed(): boolean

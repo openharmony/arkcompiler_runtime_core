@@ -14,9 +14,9 @@
  */
 
 //! CHECKER      Check escape analysis create cast in different sign types char
-//! RUN          force_jit: true, options: "--compiler-regex=.*main_char.*", entry: "ETSGLOBAL::main_char"
-//! EVENT        /Compilation,ETSGLOBAL::main_char,.*,COMPILED/
-//! METHOD       "ETSGLOBAL::main_char"
+//! RUN          force_jit: true, options: "--compiler-regex=.*main_char.*", entry: "escape_analysis_casted.ETSGLOBAL::main_char"
+//! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::main_char,.*,COMPILED/
+//! METHOD       "escape_analysis_casted.ETSGLOBAL::main_char"
 //! PASS_BEFORE  "EscapeAnalysis"
 //! INST_COUNT   "Cast", 0
 //! PASS_AFTER   "EscapeAnalysis"
@@ -44,9 +44,9 @@ function main_char(): int {
 // -----------------------------------
 
 //! CHECKER      Check escape analysis create cast in different sign types cutted char
-//! RUN          force_jit: true, options: "--compiler-regex=.*main_long.*", entry: "ETSGLOBAL::main_long"
-//! EVENT        /Compilation,ETSGLOBAL::main_long,.*,COMPILED/
-//! METHOD       "ETSGLOBAL::main_long"
+//! RUN          force_jit: true, options: "--compiler-regex=.*main_long.*", entry: "escape_analysis_casted.ETSGLOBAL::main_long"
+//! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::main_long,.*,COMPILED/
+//! METHOD       "escape_analysis_casted.ETSGLOBAL::main_long"
 //! PASS_BEFORE  "EscapeAnalysis"
 //! INST_COUNT   "Cast", 1
 //! INST_COUNT   ".u16  Cast i8", 0

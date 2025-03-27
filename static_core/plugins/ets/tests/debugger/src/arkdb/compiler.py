@@ -63,7 +63,6 @@ class CompilerArguments:
     debugger_eval_source: Path | None = None
     debugger_eval_line: int | None = None
     log_level: str | None = None
-    ets_unnamed: bool = True
 
     @staticmethod
     def arg_to_str(arg: bool | list[Path] | Any) -> str:

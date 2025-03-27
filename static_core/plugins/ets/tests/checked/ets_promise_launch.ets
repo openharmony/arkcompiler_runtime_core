@@ -15,8 +15,8 @@
 
 //! CHECKER      Check for method->isStatic assert
 //! SKIP_IF      @architecture == "arm32"
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ETSGLOBAL::main"
-//! EVENT        /Compilation,ETSGLOBAL::main,.*,COMPILED/
+//! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ets_promise_launch.ETSGLOBAL::main"
+//! EVENT        /Compilation,ets_promise_launch.ETSGLOBAL::main,.*,COMPILED/
 
 //! CHECKER       AOT Check for method->isStatic assert
 //! SKIP_IF       @architecture == "arm32"

@@ -14,12 +14,12 @@
  */
 
 //! CHECKER      Try Catch Resolving JIT optimize with nested catches
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=5 --compiler-profiling-threshold=0 --compiler-inlining-max-insts=160 --compiler-enable-osr=false", entry: "ETSGLOBAL::main"
-//! EVENT        /Compilation,MultipleCatch::multipleCatch,.*,COMPILED/
-//! EVENT        /Compilation,MultipleCatch::wrapper,.*,COMPILED/
-//! EVENT        /Inline,ETSGLOBAL::main,MultipleCatch::wrapper,.*,SUCCESS/
-//! EVENT_NOT    /Inline,MultipleCatch::wrapper,MultipleCatch::multipleCatch,.*,SUCCESS/
-//! METHOD       "MultipleCatch::multipleCatch"
+//! RUN          force_jit: true, options: "--compiler-hotness-threshold=5 --compiler-profiling-threshold=0 --compiler-inlining-max-insts=160 --compiler-enable-osr=false", entry: "ets_try_catch8.ETSGLOBAL::main"
+//! EVENT        /Compilation,ets_try_catch8.MultipleCatch::multipleCatch,.*,COMPILED/
+//! EVENT        /Compilation,ets_try_catch8.MultipleCatch::wrapper,.*,COMPILED/
+//! EVENT        /Inline,ets_try_catch8.ETSGLOBAL::main,ets_try_catch8.MultipleCatch::wrapper,.*,SUCCESS/
+//! EVENT_NOT    /Inline,ets_try_catch8.MultipleCatch::wrapper,ets_try_catch8.MultipleCatch::multipleCatch,.*,SUCCESS/
+//! METHOD       "ets_try_catch8.MultipleCatch::multipleCatch"
 //! PASS_AFTER   "Inline"
 //! INST_COUNT   "Throw",2
 //! PASS_AFTER   "TryCatchResolving"
@@ -27,8 +27,8 @@
 
 //! CHECKER      Try Catch Resolving AOT with with exception instances as function parameters
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC     options: "--compiler-regex=MultipleCatch::multipleCatch"
-//! METHOD       "MultipleCatch::multipleCatch"
+//! RUN_PAOC     options: "--compiler-regex=ets_try_catch8.MultipleCatch::multipleCatch"
+//! METHOD       "ets_try_catch8.MultipleCatch::multipleCatch"
 //! PASS_AFTER   "Inline"
 //! INST_COUNT   "Throw",2
 //! PASS_AFTER   "TryCatchResolving"

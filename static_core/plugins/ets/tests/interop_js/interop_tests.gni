@@ -61,7 +61,6 @@ template("interop_test") {
     args = [
       "--extension=ets",
       "--opt-level=2",
-      "--ets-unnamed",
       "--output=" + rebase_path(stsabc_file),
       rebase_path(sts_file),
     ]

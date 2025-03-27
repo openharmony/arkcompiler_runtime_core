@@ -15,10 +15,10 @@
 
 //! CHECKER      Memory Coalescing checking may alias objects
 //! SKIP_IF      @architecture != "arm64"
-//! RUN          force_jit: true, options: "--compiler-loop-unroll=false", entry: "ETSGLOBAL::main"
-//! EVENT        /Compilation,ETSGLOBAL::main,.*,COMPILED/
-//! EVENT        /Compilation,Test::__noinline__fnSum,.*,COMPILED/
-//! METHOD        "Test::__noinline__fnSum"
+//! RUN          force_jit: true, options: "--compiler-loop-unroll=false", entry: "memory_coalescing4.ETSGLOBAL::main"
+//! EVENT        /Compilation,memory_coalescing4.ETSGLOBAL::main,.*,COMPILED/
+//! EVENT        /Compilation,memory_coalescing4.Test::__noinline__fnSum,.*,COMPILED/
+//! METHOD        "memory_coalescing4.Test::__noinline__fnSum"
 //! PASS_BEFORE  "MemoryCoalescing"
 //! INST_NOT     "StoreArrayPair"
 //! INST_NOT     "LoadObjectPair"

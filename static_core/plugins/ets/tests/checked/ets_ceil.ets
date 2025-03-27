@@ -14,21 +14,21 @@
  */
 
 //! CHECKER       Math.ceil JIT
-//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ETSGLOBAL::main"
-//! METHOD        "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ets_ceil.ETSGLOBAL::main"
+//! METHOD        "ets_ceil.ETSGLOBAL::main"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /Intrinsic.StdMathCeil/, 12
-//! ASM_METHOD    "ETSGLOBAL::main"
+//! ASM_METHOD    "ets_ceil.ETSGLOBAL::main"
 //! ASM_INST      "Intrinsic.StdMathCeil"
 //! ASM           x64: /roundsd.*2,/, arm64: "frintp", arm32: "vrintp"
 
 //! CHECKER       Math.ceil AOT
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*main.*'"
-//! METHOD        "ETSGLOBAL::main"
+//! METHOD        "ets_ceil.ETSGLOBAL::main"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /Intrinsic.StdMathCeil/, 12
-//! ASM_METHOD    "ETSGLOBAL::main"
+//! ASM_METHOD    "ets_ceil.ETSGLOBAL::main"
 //! ASM_INST      "Intrinsic.StdMathCeil"
 //! ASM           x64: /roundsd.*2,/, arm64: "frintp"
 

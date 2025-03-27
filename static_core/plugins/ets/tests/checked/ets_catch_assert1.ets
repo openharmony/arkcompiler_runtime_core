@@ -15,8 +15,8 @@
 
 //! CHECKER      Try Catch Resolving JIT Optimize with false assert to check correctness of LSE optimization
 //! SKIP_IF       @architecture == "arm32"
-//! RUN          options: " --compiler-enable-jit=true --compiler-check-final=true --gc-type=g1-gc --heap-verifier=fail_on_verification:pre:into:before_g1_concurrent:post --compiler-hotness-threshold=0 --no-async-jit=true --full-gc-bombing-frequency=0", entry: "ETSGLOBAL::main"
-//! EVENT        /Compilation,ETSGLOBAL::main,.*,COMPILED/
+//! RUN          options: " --compiler-enable-jit=true --compiler-check-final=true --gc-type=g1-gc --heap-verifier=fail_on_verification:pre:into:before_g1_concurrent:post --compiler-hotness-threshold=0 --no-async-jit=true --full-gc-bombing-frequency=0", entry: "ets_catch_assert1.ETSGLOBAL::main"
+//! EVENT        /Compilation,ets_catch_assert1.ETSGLOBAL::main,.*,COMPILED/
 
 let a = 12;
 let b = 11;

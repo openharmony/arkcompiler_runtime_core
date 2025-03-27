@@ -35,15 +35,12 @@ function(ani_add_gtest TARGET)
         "CPP_SOURCES;ETS_SOURCES;LIBRARIES"
         ${ARGN}
     )
-    # set named for all ani  ets_package.cmake
-    set(ETS_NAMED_MODE "ETS_NAMED_MODE")
     if(NOT DEFINED ARG_CPP_SOURCES)
         message(FATAL_ERROR "CPP_SOURCES is not defined")
     endif()
     if(DEFINED ARG_ETS_SOURCES)
         set(TARGET_GTEST_PACKAGE ${TARGET}_gtest_package)
         panda_ets_package_gtest(${TARGET_GTEST_PACKAGE}
-            ${ETS_NAMED_MODE}
             ETS_SOURCES ${ARG_ETS_SOURCES}
             ETS_CONFIG ${ARG_ETS_CONFIG}
         )

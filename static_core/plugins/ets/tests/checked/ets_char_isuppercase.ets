@@ -16,24 +16,24 @@
 //! CHECKER AOT IR Builder inlining Char.isUpperCase()
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_AOT    options: "--compiler-regex='.*main.*'"
-//! METHOD     "ETSGLOBAL::callIsUpperCase"
+//! METHOD     "ets_char_isuppercase.ETSGLOBAL::callIsUpperCase"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic/
 //! INST       /Sub/
 //! INST_NEXT  /Compare BE u16/
-//! METHOD     "ETSGLOBAL::callIsLowerCase"
+//! METHOD     "ets_char_isuppercase.ETSGLOBAL::callIsLowerCase"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic/
 //! INST       /Sub/
 //! INST_NEXT  /Compare BE u16/
-//! METHOD     "ETSGLOBAL::callToUpperCase"
+//! METHOD     "ets_char_isuppercase.ETSGLOBAL::callToUpperCase"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic/
 //! INST       /Sub/
 //! INST_NEXT  /Compare BE u16/
 //! INST_NEXT  /Mul/
 //! INST_NEXT  /Add/
-//! METHOD     "ETSGLOBAL::callToLowerCase"
+//! METHOD     "ets_char_isuppercase.ETSGLOBAL::callToLowerCase"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic/
 //! INST       /Sub/
@@ -42,25 +42,25 @@
 //! INST_NEXT  /Add/
 
 //! CHECKER    Char.isUpperCase() in JIT
-//! RUN        force_jit: true, options: "", entry: "ETSGLOBAL::main"
-//! METHOD     "ETSGLOBAL::callIsUpperCase"
+//! RUN        force_jit: true, options: "", entry: "ets_char_isuppercase.ETSGLOBAL::main"
+//! METHOD     "ets_char_isuppercase.ETSGLOBAL::callIsUpperCase"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic/
 //! INST       /Sub/
 //! INST_NEXT  /Compare BE u16/
-//! METHOD     "ETSGLOBAL::callIsLowerCase"
+//! METHOD     "ets_char_isuppercase.ETSGLOBAL::callIsLowerCase"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic/
 //! INST       /Sub/
 //! INST_NEXT  /Compare BE u16/
-//! METHOD     "ETSGLOBAL::callToUpperCase"
+//! METHOD     "ets_char_isuppercase.ETSGLOBAL::callToUpperCase"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic/
 //! INST       /Sub/
 //! INST_NEXT  /Compare BE u16/
 //! INST_NEXT  /Mul/
 //! INST_NEXT  /Add/
-//! METHOD     "ETSGLOBAL::callToLowerCase"
+//! METHOD     "ets_char_isuppercase.ETSGLOBAL::callToLowerCase"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic/
 //! INST       /Sub/

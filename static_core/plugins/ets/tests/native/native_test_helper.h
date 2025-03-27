@@ -26,9 +26,10 @@ namespace ark::ets::test {
 class EtsNapiTestBaseClass : public testing::Test {
 public:
     template <typename R, typename... Args>
-    void CallEtsFuntion(R *ret, std::string_view methodName, Args &&...args)
+    void CallEtsFuntion(R *ret, std::string_view className, std::string_view methodName, Args &&...args)
     {
-        ets_class cls = env_->FindClass("ETSGLOBAL");
+        std::string etsGlobalName(std::string(className) + "/ETSGLOBAL");
+        ets_class cls = env_->FindClass(etsGlobalName.data());
         ASSERT_NE(cls, nullptr);
         ets_method fn = env_->GetStaticp_method(cls, methodName.data(), nullptr);
 

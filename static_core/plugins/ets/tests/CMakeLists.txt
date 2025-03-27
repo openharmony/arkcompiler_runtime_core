@@ -556,7 +556,7 @@ function(panda_ets_napi_add_gtest)
 
     set(es2panda_target_test es2panda)
     set(es2panda_bin  $<TARGET_FILE:${es2panda_target_test}>)
-    set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=ets --ets-unnamed --opt-level=0)
+    set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=ets --opt-level=0)
 
     foreach(c ${ARG_ETS_SOURCE})
         STRING(REPLACE ".ets" "" CLEAR_NAME ${c})

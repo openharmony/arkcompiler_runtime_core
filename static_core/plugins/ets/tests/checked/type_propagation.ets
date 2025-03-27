@@ -16,17 +16,17 @@
 import { Runtime } from "std/core"
 
 //! CHECKER      Check type prop
-//! RUN          force_jit: true, options: "--compiler-regex='.*test.*'", entry: "ETSGLOBAL::main"
-//! METHOD       "ETSGLOBAL::test"
+//! RUN          force_jit: true, options: "--compiler-regex='.*test.*'", entry: "type_propagation.ETSGLOBAL::main"
+//! METHOD       "type_propagation.ETSGLOBAL::test"
 //! PASS_AFTER   "IrBuilder"
 
 // NOTE(schernykh): find a way to enable
 //! DISABLED_CHECKER      Check type prop (AOT)
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC     options: "--compiler-regex='.*test.*'"
-//! METHOD       "ETSGLOBAL::test"
+//! METHOD       "type_propagation.ETSGLOBAL::test"
 //! PASS_AFTER   "IrBuilder"
-//! RUN          options: "", entry: "ETSGLOBAL::main"
+//! RUN          options: "", entry: "type_propagation.ETSGLOBAL::main"
 
 class A {
     // NOTE: class literal is not yet supported

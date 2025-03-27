@@ -14,9 +14,9 @@
  */
 
 //! CHECKER      Check for typeof + compare peephole
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ETSGLOBAL::main"
-//! EVENT        /Compilation,ETSGLOBAL::__noinline__process_typeof,.*,COMPILED/
-//! METHOD       "ETSGLOBAL::__noinline__process_typeof"
+//! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ets_typeof_compare4.ETSGLOBAL::main"
+//! EVENT        /Compilation,ets_typeof_compare4.ETSGLOBAL::__noinline__process_typeof,.*,COMPILED/
+//! METHOD       "ets_typeof_compare4.ETSGLOBAL::__noinline__process_typeof"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.StdCoreRuntimeTypeof",1
 //! INST_NOT     "IsInstance"

@@ -14,43 +14,43 @@
  */
 
 //! CHECKER                 ets.istrue JIT
-//! RUN                     force_jit: true, options: "--compiler-regex='.*istrue.*'", entry: "ETSGLOBAL::main"
-//! METHOD                  "ETSGLOBAL::istrue"
+//! RUN                     force_jit: true, options: "--compiler-regex='.*check_istrue.*'", entry: "ets_istrue.ETSGLOBAL::main"
+//! METHOD                  "ets_istrue.ETSGLOBAL::check_istrue"
 //! PASS_AFTER              "Codegen"
 //! INST_COUNT              /Intrinsic.CompilerEtsIstrue/, 1
 
 //! CHECKER                 ets.istrue AOT
 //! SKIP_IF                 @architecture == "arm32"
-//! RUN_PAOC                options: "--compiler-regex='.*istrue.*'"
-//! METHOD                  "ETSGLOBAL::istrue"
+//! RUN_PAOC                options: "--compiler-regex='.*check_istrue.*'"
+//! METHOD                  "ets_istrue.ETSGLOBAL::check_istrue"
 //! PASS_AFTER              "Codegen"
 //! INST_COUNT              /Intrinsic.CompilerEtsIstrue/, 1
-//! RUN                     entry: "ETSGLOBAL::main"
+//! RUN                     entry: "ets_istrue.ETSGLOBAL::main"
 
 //! DISABLED_CHECKER        ets.istrue LLVM AOT
 //! SKIP_IF                 @architecture == "arm32"
-//! RUN_LLVM                options: "--compiler-regex='.*istrue.*'"
-//! RUN                     entry: "ETSGLOBAL::main"
+//! RUN_LLVM                options: "--compiler-regex='.*check_istrue.*'"
+//! RUN                     entry: "ets_istrue.ETSGLOBAL::main"
 
-function istrue(v: Object | null | undefined) { return !!v }
+function check_istrue(v: Object | null | undefined) { return !!v }
 
 function erase<T>(v: T): Object | null | undefined {
     return v;
 }
 
 function main(): int {
-    if (istrue(erase(new Byte(0 as byte)))) return 1;
-    if (!istrue(erase(new Byte(1 as byte)))) return 2;
-    if (istrue(erase(new Short(0 as short)))) return 3;
-    if (!istrue(erase(new Short(1 as short)))) return 4;
-    if (istrue(erase(new Int(0)))) return 5;
-    if (!istrue(erase(new Int(1)))) return 6;
-    if (istrue(erase(new Long(0)))) return 7;
-    if (!istrue(erase(new Long(1)))) return 8;
-    if (istrue(erase(new Float(0.0)))) return 9;
-    if (!istrue(erase(new Float(0.5)))) return 10;
-    if (istrue(erase(new Double(0.0)))) return 11;
-    if (!istrue(erase(new Double(0.5)))) return 12;
+    if (check_istrue(erase(new Byte(0 as byte)))) return 1;
+    if (!check_istrue(erase(new Byte(1 as byte)))) return 2;
+    if (check_istrue(erase(new Short(0 as short)))) return 3;
+    if (!check_istrue(erase(new Short(1 as short)))) return 4;
+    if (check_istrue(erase(new Int(0)))) return 5;
+    if (!check_istrue(erase(new Int(1)))) return 6;
+    if (check_istrue(erase(new Long(0)))) return 7;
+    if (!check_istrue(erase(new Long(1)))) return 8;
+    if (check_istrue(erase(new Float(0.0)))) return 9;
+    if (!check_istrue(erase(new Float(0.5)))) return 10;
+    if (check_istrue(erase(new Double(0.0)))) return 11;
+    if (!check_istrue(erase(new Double(0.5)))) return 12;
     
     return 0;
 }

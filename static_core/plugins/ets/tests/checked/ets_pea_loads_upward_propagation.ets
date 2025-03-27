@@ -14,8 +14,8 @@
  */
 
 //! CHECKER       PEA_propagate_load_objects_upwards JIT
-//! RUN           force_jit: true, entry: "ETSGLOBAL::test1"
-//! METHOD        "ETSGLOBAL::test1"
+//! RUN           force_jit: true, entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::test1"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test1"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 5
 //! INST_COUNT    /StoreObject.*res/, 4
@@ -28,7 +28,7 @@
 //! CHECKER       PEA_propagate_load_objects_upwards AOT
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*::test1.*'"
-//! METHOD        "ETSGLOBAL::test1"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test1"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 3
 //! INST_COUNT    /StoreObject.*res/, 4
@@ -37,11 +37,11 @@
 //! INST_COUNT    /NewObject/, 1
 //! INST_COUNT    /StoreObject.*res/, 0
 //! INST_COUNT    /LoadObject.*res/, 0
-//! RUN           entry: "ETSGLOBAL::test1"
+//! RUN           entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::test1"
 
 //! CHECKER       PEA_propagate_load_objects_upwards_two_loads JIT
-//! RUN           force_jit: true, entry: "ETSGLOBAL::test2"
-//! METHOD        "ETSGLOBAL::test2"
+//! RUN           force_jit: true, entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::test2"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test2"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 5
 //! INST_COUNT    /StoreObject.*res/, 4
@@ -54,7 +54,7 @@
 //! CHECKER       PEA_propagate_load_objects_upwards_two_loads AOT
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*test2.*'"
-//! METHOD        "ETSGLOBAL::test2"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test2"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 3
 //! INST_COUNT    /StoreObject.*res/, 4
@@ -63,11 +63,11 @@
 //! INST_COUNT    /NewObject/, 1
 //! INST_COUNT    /StoreObject.*res/, 0
 //! INST_COUNT    /LoadObject.*res/, 0
-//! RUN           entry: "ETSGLOBAL::test2"
+//! RUN           entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::test2"
 
 //! CHECKER       PEA_propagate_load_objects_upwards_two_branches_loads JIT
-//! RUN           force_jit: true, entry: "ETSGLOBAL::test3"
-//! METHOD        "ETSGLOBAL::test3"
+//! RUN           force_jit: true, entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::test3"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test3"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 6
 //! INST_COUNT    /StoreObject.*res/, 4
@@ -80,7 +80,7 @@
 //! CHECKER       PEA_propagate_load_objects_upwards_two_branches_loads AOT
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*::test3.*'"
-//! METHOD        "ETSGLOBAL::test3"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test3"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 3
 //! INST_COUNT    /StoreObject.*res/, 4
@@ -89,11 +89,11 @@
 //! INST_COUNT    /NewObject/, 1
 //! INST_COUNT    /StoreObject.*res/, 0
 //! INST_COUNT    /LoadObject.*res/, 0
-//! RUN           entry: "ETSGLOBAL::test3"
+//! RUN           entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::test3"
 
 //! CHECKER       PEA_propagate_load_objects_upwards_many_inputs_phi JIT
-//! RUN           force_jit: true, entry: "ETSGLOBAL::test4"
-//! METHOD        "ETSGLOBAL::test4"
+//! RUN           force_jit: true, entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::test4"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test4"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 6
 //! INST_COUNT    /StoreObject.*res/, 6
@@ -106,7 +106,7 @@
 //! CHECKER       PEA_propagate_load_objects_upwards_many_inputs_phi AOT
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*::test4.*'"
-//! METHOD        "ETSGLOBAL::test4"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test4"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 6
@@ -115,12 +115,12 @@
 //! INST_COUNT    /NewObject/, 1
 //! INST_COUNT    /StoreObject.*res/, 0
 //! INST_COUNT    /LoadObject.*res/, 0
-//! RUN           entry: "ETSGLOBAL::test4"
+//! RUN           entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::test4"
 
 /* partial elimination as the in-loop object will be materialized bc of SaveState */
 //! CHECKER       PEA_propagate_load_objects_upwards_many_inputs_phi_with_loop JIT
-//! RUN           force_jit: true, options: "--compiler-loop-unroll=false", entry: "ETSGLOBAL::test5"
-//! METHOD        "ETSGLOBAL::test5"
+//! RUN           force_jit: true, options: "--compiler-loop-unroll=false", entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::test5"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test5"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 5
 //! INST_COUNT    /StoreObject.*res/, 4
@@ -133,7 +133,7 @@
 //! CHECKER       PEA_propagate_load_objects_upwards_many_inputs_phi_with_loop AOT
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*::test5.*' --compiler-loop-unroll=false"
-//! METHOD        "ETSGLOBAL::test5"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test5"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 3
 //! INST_COUNT    /StoreObject.*res/, 4
@@ -142,11 +142,11 @@
 //! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject.*res/, 2
 //! INST_COUNT    /LoadObject.*res/, 1
-//! RUN           entry: "ETSGLOBAL::test5"
+//! RUN           entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::test5"
 
 //! CHECKER       PEA_propagate_load_objects_upwards_iterator JIT
-//! RUN           force_jit: true, entry: "ETSGLOBAL::test9"
-//! METHOD        "ETSGLOBAL::test9"
+//! RUN           force_jit: true, entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::test9"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test9"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 7
 //! INST_COUNT    /StoreObject.*done/, 2
@@ -155,8 +155,8 @@
 //! INST_COUNT    /StoreObject.*done/, 0
 
 //! CHECKER       PEA_propagate_load_objects_upwards_neg_no_ld_users JIT
-//! RUN           force_jit: true, options: "--compiler-inlining-blacklist=ETSGLOBAL::getRef", entry: "ETSGLOBAL::ntest1"
-//! METHOD        "ETSGLOBAL::ntest1"
+//! RUN           force_jit: true, options: "--compiler-inlining-blacklist=ETSGLOBAL::getRef", entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest1"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest1"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 5
 //! INST_COUNT    /StoreObject.*res/, 4
@@ -167,18 +167,18 @@
 //! CHECKER       PEA_propagate_load_objects_upwards_neg_no_ld_users AOT
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-inlining-blacklist=ETSGLOBAL::getRef --compiler-regex='.*::ntest1.*'"
-//! METHOD        "ETSGLOBAL::ntest1"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest1"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 3
 //! INST_COUNT    /StoreObject.*res/, 4
 //! PASS_AFTER    "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 3
 //! INST_COUNT    /StoreObject.*res/, 4
-//! RUN           entry: "ETSGLOBAL::ntest1"
+//! RUN           entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest1"
 
 //! CHECKER       PEA_propagate_load_objects_upwards_neg_mixed_users JIT
-//! RUN           force_jit: true, options: "--compiler-inlining-blacklist=ETSGLOBAL::getRef", entry: "ETSGLOBAL::ntest2"
-//! METHOD        "ETSGLOBAL::ntest2"
+//! RUN           force_jit: true, options: "--compiler-inlining-blacklist=ETSGLOBAL::getRef", entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest2"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest2"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 5
 //! INST_COUNT    /StoreObject.*res/, 4
@@ -191,7 +191,7 @@
 //! CHECKER       PEA_propagate_load_objects_upwards_neg_mixed_users AOT
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-inlining-blacklist=ETSGLOBAL::getRef --compiler-regex='.*::ntest2.*'"
-//! METHOD        "ETSGLOBAL::ntest2"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest2"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 3
 //! INST_COUNT    /StoreObject.*res/, 4
@@ -200,11 +200,11 @@
 //! INST_COUNT    /NewObject/, 3
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 1
-//! RUN           entry: "ETSGLOBAL::ntest2"
+//! RUN           entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest2"
 
 //! CHECKER       PEA_propagate_load_objects_upwards_neg_diff_types JIT
-//! RUN           force_jit: true, entry: "ETSGLOBAL::ntest3"
-//! METHOD        "ETSGLOBAL::ntest3"
+//! RUN           force_jit: true, entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest3"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest3"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 5
 //! INST_COUNT    /StoreObject.*res/, 4
@@ -217,7 +217,7 @@
 //! CHECKER       PEA_propagate_load_objects_upwards_neg_diff_types AOT
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*::ntest3.*'"
-//! METHOD        "ETSGLOBAL::ntest3"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest3"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 3
 //! INST_COUNT    /StoreObject.*res/, 4
@@ -226,11 +226,11 @@
 //! INST_COUNT    /NewObject/, 3
 //! INST_COUNT    /StoreObject.*res/, 4
 //! INST_COUNT    /LoadObject.*res/, 1
-//! RUN           entry: "ETSGLOBAL::ntest3"
+//! RUN           entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest3"
 
 //! CHECKER       PEA_propagate_load_objects_upwards_neg_many_inputs_phi_diff_types JIT
-//! RUN           force_jit: true, entry: "ETSGLOBAL::ntest4"
-//! METHOD        "ETSGLOBAL::ntest4"
+//! RUN           force_jit: true, entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest4"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest4"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 6
 //! INST_COUNT    /StoreObject.*res/, 6
@@ -243,7 +243,7 @@
 //! CHECKER       PEA_propagate_load_objects_upwards_neg_many_inputs_phi_diff_types AOT
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*::ntest4.*'"
-//! METHOD        "ETSGLOBAL::ntest4"
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest4"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 6
@@ -252,7 +252,7 @@
 //! INST_COUNT    /NewObject/, 4
 //! INST_COUNT    /StoreObject.*res/, 6
 //! INST_COUNT    /LoadObject.*res/, 1
-//! RUN           entry: "ETSGLOBAL::ntest4"
+//! RUN           entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest4"
 
 
 

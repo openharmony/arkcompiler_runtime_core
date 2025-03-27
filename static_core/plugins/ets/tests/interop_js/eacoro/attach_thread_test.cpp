@@ -54,7 +54,7 @@ public:
             event.Fire();
             std::function<void()> func = [etsEnv]() {
                 ani_class cls;
-                [[maybe_unused]] ani_status status = etsEnv->FindClass("LTestClass;", &cls);
+                [[maybe_unused]] ani_status status = etsEnv->FindClass("Lattach_test/TestClass;", &cls);
                 ASSERT(status == ETS_OK);
                 ani_static_method method;
                 status = etsEnv->Class_FindStaticMethod(cls, "sum", "II:I", &method);

@@ -14,8 +14,8 @@
  */
 
 //! CHECKER      IR Builder inlining max int
-//! RUN          force_jit: true, options: "--compiler-regex='.*test_i32.*'", entry: "ETSGLOBAL::test_i32"
-//! METHOD       "ETSGLOBAL::test_i32"
+//! RUN          force_jit: true, options: "--compiler-regex='.*test_i32.*'", entry: "ets_max.ETSGLOBAL::test_i32"
+//! METHOD       "ets_max.ETSGLOBAL::test_i32"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT    /Max/, 6
 //! INST_NEXT_NOT /Intrinsic/
@@ -23,15 +23,15 @@
 //! CHECKER       AOT IR Builder inlining max int
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_AOT       options: "--compiler-regex='.*test_i32.*'"
-//! METHOD        "ETSGLOBAL::test_i32"
+//! METHOD        "ets_max.ETSGLOBAL::test_i32"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Max/, 6
 //! INST_NEXT_NOT /Intrinsic/
-//! RUN           entry: "ETSGLOBAL::test_i32"
+//! RUN           entry: "ets_max.ETSGLOBAL::test_i32"
 
 //! CHECKER       IR Builder inlining max long
-//! RUN           force_jit: true, options: "--compiler-regex='.*test_i64.*'", entry: "ETSGLOBAL::test_i64"
-//! METHOD        "ETSGLOBAL::test_i64"
+//! RUN           force_jit: true, options: "--compiler-regex='.*test_i64.*'", entry: "ets_max.ETSGLOBAL::test_i64"
+//! METHOD        "ets_max.ETSGLOBAL::test_i64"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Max/, 6
 //! INST_NEXT_NOT /Intrinsic/
@@ -39,15 +39,15 @@
 //! CHECKER       AOT IR Builder inlining max long
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_AOT       options: "--compiler-regex='.*test_i64.*'"
-//! METHOD        "ETSGLOBAL::test_i64"
+//! METHOD        "ets_max.ETSGLOBAL::test_i64"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Max/, 6
 //! INST_NEXT_NOT /Intrinsic/
-//! RUN           entry: "ETSGLOBAL::test_i64"
+//! RUN           entry: "ets_max.ETSGLOBAL::test_i64"
 
 //! CHECKER       IR Builder inlining max float
-//! RUN           force_jit: true, options: "--compiler-regex='.*test_f32.*'", entry: "ETSGLOBAL::test_f32"
-//! METHOD        "ETSGLOBAL::test_f32"
+//! RUN           force_jit: true, options: "--compiler-regex='.*test_f32.*'", entry: "ets_max.ETSGLOBAL::test_f32"
+//! METHOD        "ets_max.ETSGLOBAL::test_f32"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Max/, 10
 //! INST_NEXT_NOT /Intrinsic/
@@ -55,15 +55,15 @@
 //! CHECKER       AOT IR Builder inlining max float
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_AOT       options: "--compiler-regex='.*test_f32.*'"
-//! METHOD        "ETSGLOBAL::test_f32"
+//! METHOD        "ets_max.ETSGLOBAL::test_f32"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Max/, 10
 //! INST_NEXT_NOT /Intrinsic/
-//! RUN           entry: "ETSGLOBAL::test_f32"
+//! RUN           entry: "ets_max.ETSGLOBAL::test_f32"
 
 //! CHECKER       IR Builder inlining max double
-//! RUN           force_jit: true, options: "--compiler-regex='.*test_f64.*'", entry: "ETSGLOBAL::test_f64"
-//! METHOD        "ETSGLOBAL::test_f64"
+//! RUN           force_jit: true, options: "--compiler-regex='.*test_f64.*'", entry: "ets_max.ETSGLOBAL::test_f64"
+//! METHOD        "ets_max.ETSGLOBAL::test_f64"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Max/, 20
 //! INST_NEXT_NOT /Intrinsic/
@@ -71,11 +71,11 @@
 //! CHECKER       AOT IR Builder inlining max double
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_AOT       options: "--compiler-regex='.*test_f64.*'"
-//! METHOD        "ETSGLOBAL::test_f64"
+//! METHOD        "ets_max.ETSGLOBAL::test_f64"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Max/, 20
 //! INST_NEXT_NOT /Intrinsic/
-//! RUN           entry: "ETSGLOBAL::test_f64"
+//! RUN           entry: "ets_max.ETSGLOBAL::test_f64"
 
 
 function test_i32() : int {

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,10 +24,14 @@ args = parser.parse_args()
 file_name = args.file
 
 trace_list = [
-    "LETSGLOBAL::execute_test; LETSGLOBAL::CallSlowFunction; LETSGLOBAL::SlowETSFunction;",
-    "LETSGLOBAL::execute_test; LETSGLOBAL::CallSlowFunction; LETSGLOBAL::SlowETSFunctionCopy1;",
-    "LETSGLOBAL::execute_test; LETSGLOBAL::CallSlowFunction; LETSGLOBAL::SlowETSFunctionCopy2;",
-    "LETSGLOBAL::execute_test; LETSGLOBAL::CallSlowFunction; LETSGLOBAL::SlowETSFunctionCopy3;"
+    "LSamplerTest/ETSGLOBAL::execute_test; LSamplerTest/ETSGLOBAL::CallSlowFunction; "
+    "LSamplerTest/ETSGLOBAL::SlowETSFunction;",
+    "LSamplerTest/ETSGLOBAL::execute_test; LSamplerTest/ETSGLOBAL::CallSlowFunction; "
+    "LSamplerTest/ETSGLOBAL::SlowETSFunctionCopy1;",
+    "LSamplerTest/ETSGLOBAL::execute_test; LSamplerTest/ETSGLOBAL::CallSlowFunction; "
+    "LSamplerTest/ETSGLOBAL::SlowETSFunctionCopy2;",
+    "LSamplerTest/ETSGLOBAL::execute_test; LSamplerTest/ETSGLOBAL::CallSlowFunction; "
+    "LSamplerTest/ETSGLOBAL::SlowETSFunctionCopy3;",
 ]
 
 ALL_TRACES_FOUND = True

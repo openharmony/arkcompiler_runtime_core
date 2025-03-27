@@ -17,34 +17,34 @@
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC     options: "--compiler-regex='.*test_null.*' --compiler-inlining=false"
 //!
-//! METHOD       "ETSGLOBAL::test_null"
+//! METHOD       "ets_nullish.ETSGLOBAL::test_null"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /LoadUniqueObject/
 //!
-//! METHOD       "ETSGLOBAL::test_null_dce"
+//! METHOD       "ets_nullish.ETSGLOBAL::test_null_dce"
 //! PASS_AFTER   "Codegen"
 //! INST_NOT     /LoadUniqueObject/
 //!  
-//! METHOD       "ETSGLOBAL::test_null_cse"
+//! METHOD       "ets_nullish.ETSGLOBAL::test_null_cse"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   /LoadUniqueObject/, 1
 //!
 
 //! CHECKER      Force JIT null
-//! RUN          force_jit: true, options: "--compiler-regex='.*test_null.*'", entry: "ETSGLOBAL::test_null"
-//! METHOD       "ETSGLOBAL::test_null"
+//! RUN          force_jit: true, options: "--compiler-regex='.*test_null.*'", entry: "ets_nullish.ETSGLOBAL::test_null"
+//! METHOD       "ets_nullish.ETSGLOBAL::test_null"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /LoadUniqueObject/
 
 //! CHECKER      Force JIT null dce
-//! RUN          force_jit: true, options: "--compiler-regex='.*test_null_dce.*'", entry: "ETSGLOBAL::test_null_dce"
-//! METHOD       "ETSGLOBAL::test_null_dce"
+//! RUN          force_jit: true, options: "--compiler-regex='.*test_null_dce.*'", entry: "ets_nullish.ETSGLOBAL::test_null_dce"
+//! METHOD       "ets_nullish.ETSGLOBAL::test_null_dce"
 //! PASS_AFTER   "Codegen"
 //! INST_NOT     /LoadUniqueObject/
 
 //! CHECKER      Force JIT null cse
-//! RUN          force_jit: true, options: "--compiler-regex='.*test_null_cse.*'", entry: "ETSGLOBAL::test_null_cse"
-//! METHOD       "ETSGLOBAL::test_null_cse"
+//! RUN          force_jit: true, options: "--compiler-regex='.*test_null_cse.*'", entry: "ets_nullish.ETSGLOBAL::test_null_cse"
+//! METHOD       "ets_nullish.ETSGLOBAL::test_null_cse"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   /LoadUniqueObject/, 1
 

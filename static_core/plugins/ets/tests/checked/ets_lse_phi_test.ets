@@ -14,18 +14,18 @@
  */
 
 //! CHECKER      Check LSE with PHI in JIT
-//! RUN          force_jit: true, options: "", entry: "ETSGLOBAL::main"
-//! METHOD        "ETSGLOBAL::main"
+//! RUN          force_jit: true, options: "", entry: "ets_lse_phi_test.ETSGLOBAL::main"
+//! METHOD        "ets_lse_phi_test.ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
-//! INST_COUNT    /StoreObject .* C0.x0/, 2
+//! INST_COUNT    /StoreObject .* ets_lse_phi_test.C0.x0/, 2
 
 //! CHECKER       Check LSE with PHI in AOT
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: ""
-//! METHOD        "ETSGLOBAL::main"
+//! METHOD        "ets_lse_phi_test.ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
-//! INST_COUNT    /StoreObject .* C0.x0/, 2
-//! RUN           entry: "ETSGLOBAL::main"
+//! INST_COUNT    /StoreObject .* ets_lse_phi_test.C0.x0/, 2
+//! RUN           entry: "ets_lse_phi_test.ETSGLOBAL::main"
 
 
 class C0 {

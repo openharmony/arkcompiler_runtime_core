@@ -23,7 +23,6 @@ add_custom_target(abc2program_gen)
 foreach(NAME ${abc2progTestFiles})
     add_custom_target(abc2program_gen_${NAME} COMMENT "Generating ${NAME} for abc2program"
         COMMAND ${PANDA_BINARY_ROOT}/bin/es2panda ${CMAKE_CURRENT_SOURCE_DIR}/ets/${NAME}.ets
-        --ets-unnamed
         --output=${CMAKE_CURRENT_BINARY_DIR}/ets/${NAME}.abc
         DEPENDS es2panda)
     add_dependencies(abc2program_gen abc2program_gen_${NAME})

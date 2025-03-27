@@ -14,29 +14,29 @@
  */
 
 //! CHECKER       Math.trunc JIT
-//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ETSGLOBAL::main"
-//! METHOD        "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ets_trunc.ETSGLOBAL::main"
+//! METHOD        "ets_trunc.ETSGLOBAL::main"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /Intrinsic.StdMathTrunc/, 12
-//! ASM_METHOD    "ETSGLOBAL::main"
+//! ASM_METHOD    "ets_trunc.ETSGLOBAL::main"
 //! ASM_INST      "Intrinsic.StdMathTrunc"
 //! ASM           x64: /roundsd.*3,/, arm64: "frintz", arm32: "vrintz"
 
 //! CHECKER       Math.trunc AOT
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*main.*'"
-//! METHOD        "ETSGLOBAL::main"
+//! METHOD        "ets_trunc.ETSGLOBAL::main"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /Intrinsic.StdMathTrunc/, 12
-//! ASM_METHOD    "ETSGLOBAL::main"
+//! ASM_METHOD    "ets_trunc.ETSGLOBAL::main"
 //! ASM_INST      "Intrinsic.StdMathTrunc"
 //! ASM           x64: /roundsd.*3,/, arm64: "frintz"
-//! RUN           entry: "ETSGLOBAL::main"
+//! RUN           entry: "ets_trunc.ETSGLOBAL::main"
 
 //! CHECKER       Math.trunc LLVM AOT
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_LLVM      options: "--compiler-regex='.*main.*'"
-//! RUN           entry: "ETSGLOBAL::main"
+//! RUN           entry: "ets_trunc.ETSGLOBAL::main"
 
 function main(): int {
     if (trunc(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) return 1;

@@ -14,10 +14,10 @@
  */
 
 //! CHECKER      Try Catch Resolving JIT Do not optimize inlined throws
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-inlining-max-insts=160", entry: "ETSGLOBAL::main"
-//! EVENT        /Compilation,MultipleCatch::__noinline__multipleCatch,.*,COMPILED/
-//! EVENT        /Inline,MultipleCatch::__noinline__multipleCatch,ETSGLOBAL::throw_exceptions,.*,STATIC,SUCCESS/
-//! METHOD       "MultipleCatch::__noinline__multipleCatch"
+//! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-inlining-max-insts=160", entry: "ets_try_catch4.ETSGLOBAL::main"
+//! EVENT        /Compilation,ets_try_catch4.MultipleCatch::__noinline__multipleCatch,.*,COMPILED/
+//! EVENT        /Inline,ets_try_catch4.MultipleCatch::__noinline__multipleCatch,ets_try_catch4.ETSGLOBAL::throw_exceptions,.*,STATIC,SUCCESS/
+//! METHOD       "ets_try_catch4.MultipleCatch::__noinline__multipleCatch"
 //! PASS_AFTER   "Inline"
 //! INST_COUNT   "Throw",2
 //! PASS_AFTER   "TryCatchResolving"
@@ -25,8 +25,8 @@
 
 //! CHECKER      Try Catch Resolving AOT with inlined throws
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC     options: "--compiler-regex=MultipleCatch::__noinline__multipleCatch"
-//! METHOD       "MultipleCatch::__noinline__multipleCatch"
+//! RUN_PAOC     options: "--compiler-regex=ets_try_catch4.MultipleCatch::__noinline__multipleCatch"
+//! METHOD       "ets_try_catch4.MultipleCatch::__noinline__multipleCatch"
 //! PASS_AFTER   "Inline"
 //! INST_COUNT   "Throw",2
 //! PASS_AFTER   "TryCatchResolving"

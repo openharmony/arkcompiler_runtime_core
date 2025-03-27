@@ -37,7 +37,6 @@ if (PANDA_TARGET_ARM32)
 endif()
 
 ani_add_gtest(ani_test_namespace_find_enum
-    ETS_NAMED_MODE
     ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_enum_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_enum_test.ets

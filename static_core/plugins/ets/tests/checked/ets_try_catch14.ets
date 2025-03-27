@@ -14,9 +14,9 @@
  */
 
 //! CHECKER      Try Catch Resolving JIT IfImm is replaced by DeoptimizeIf when the following try block is not executed
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=5 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-regex=IfCatch::__noinline__ifCatch", entry: "ETSGLOBAL::main"
-//! EVENT        /Compilation,IfCatch::__noinline__ifCatch,.*,COMPILED/
-//! METHOD       "IfCatch::__noinline__ifCatch"
+//! RUN          force_jit: true, options: "--compiler-hotness-threshold=5 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-regex=ets_try_catch14.IfCatch::__noinline__ifCatch", entry: "ets_try_catch14.ETSGLOBAL::main"
+//! EVENT        /Compilation,ets_try_catch14.IfCatch::__noinline__ifCatch,.*,COMPILED/
+//! METHOD       "ets_try_catch14.IfCatch::__noinline__ifCatch"
 //! PASS_AFTER   "Inline"
 //! INST_COUNT   "Throw",2
 //! PASS_AFTER   "TryCatchResolving"
@@ -25,8 +25,8 @@
 
 //! CHECKER      Try Catch Resolving AOT IfImm is not replaced by DeoptimizeIf
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC     options: "--compiler-regex=IfCatch::__noinline__ifCatch"
-//! METHOD       "IfCatch::__noinline__ifCatch"
+//! RUN_PAOC     options: "--compiler-regex=ets_try_catch14.IfCatch::__noinline__ifCatch"
+//! METHOD       "ets_try_catch14.IfCatch::__noinline__ifCatch"
 //! PASS_AFTER   "Inline"
 //! INST_COUNT   "Throw",2
 //! PASS_AFTER   "TryCatchResolving"

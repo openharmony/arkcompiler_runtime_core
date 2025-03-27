@@ -59,11 +59,11 @@ function getNotReadonlyX(b: NotReadonly): int {
 }
 
 //! CHECKER      LoadObject for readonly field, GVN applied or not, compare with interpreter
-//! RUN          options: "--compiler-enable-jit=false", entry: "ETSGLOBAL::checkGetBaseX"
+//! RUN          options: "--compiler-enable-jit=false", entry: "optimize_load_readonly_instance.ETSGLOBAL::checkGetBaseX"
 
 //! CHECKER      LoadObject for readonly field, GVN applied or not, JIT
-//! RUN          force_jit: true, options: "--compiler-regex='(ETSGLOBAL::checkGetBaseX|Base::<ctor>)' --compiler-inlining-blacklist='Base::<ctor>'", entry: "ETSGLOBAL::checkGetBaseX"
-//! METHOD       "ETSGLOBAL::checkGetBaseX"
+//! RUN          force_jit: true, options: "--compiler-regex='(optimize_load_readonly_instance.ETSGLOBAL::checkGetBaseX|Base::<ctor>)' --compiler-inlining-blacklist='Base::<ctor>'", entry: "optimize_load_readonly_instance.ETSGLOBAL::checkGetBaseX"
+//! METHOD       "optimize_load_readonly_instance.ETSGLOBAL::checkGetBaseX"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT      /LoadObject.*Base.x/
 //! INST_COUNT    /LoadObject.*Base.y/, 1
@@ -83,8 +83,8 @@ function getNotReadonlyX(b: NotReadonly): int {
 //! INST_COUNT   /LoadObject.*Base.x/, 2
 
 //! CHECKER      LoadObject for readonly field, GVN applied or not, AOT
-//! RUN_PAOC     options: "--compiler-regex='(ETSGLOBAL::checkGetBaseX|Base::<ctor>)' --compiler-inlining-blacklist='Base::<ctor>'", entry: "ETSGLOBAL::checkGetBaseX"
-//! METHOD       "ETSGLOBAL::checkGetBaseX"
+//! RUN_PAOC     options: "--compiler-regex='(optimize_load_readonly_instance.ETSGLOBAL::checkGetBaseX|Base::<ctor>)' --compiler-inlining-blacklist='Base::<ctor>'", entry: "optimize_load_readonly_instance.ETSGLOBAL::checkGetBaseX"
+//! METHOD       "optimize_load_readonly_instance.ETSGLOBAL::checkGetBaseX"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT      /LoadObject.*Base.x/
 //! INST_COUNT    /LoadObject.*Base.y/, 1
@@ -102,7 +102,7 @@ function getNotReadonlyX(b: NotReadonly): int {
 //! INST_COUNT   /LoadObject.*Base.x/, 2
 //! PASS_AFTER   "Codegen"
 //! INST_COUNT   /LoadObject.*Base.x/, 2
-//! RUN          options: "--compiler-enable-jit=false", entry: "ETSGLOBAL::checkGetBaseX"
+//! RUN          options: "--compiler-enable-jit=false", entry: "optimize_load_readonly_instance.ETSGLOBAL::checkGetBaseX"
 
 function checkGetBaseX(): int {
     let b = new Base(10)
@@ -117,11 +117,11 @@ function checkGetBaseX(): int {
 }
 
 //! CHECKER      LoadObject for NOT readonly field, GVN NOT applied, compare with interpreter
-//! RUN          options: "--compiler-enable-jit=false", entry: "ETSGLOBAL::checkGetNotReadonlyX"
+//! RUN          options: "--compiler-enable-jit=false", entry: "optimize_load_readonly_instance.ETSGLOBAL::checkGetNotReadonlyX"
 
 //! CHECKER      LoadObject for NOT readonly field, GVN NOT applied, JIT
-//! RUN          force_jit: true, options: "--compiler-regex='(ETSGLOBAL::checkGetNotReadonlyX|NotReadonly::<ctor>)' --compiler-inlining-blacklist='NotReadonly::<ctor>'", entry: "ETSGLOBAL::checkGetNotReadonlyX"
-//! METHOD       "ETSGLOBAL::checkGetNotReadonlyX"
+//! RUN          force_jit: true, options: "--compiler-regex='(optimize_load_readonly_instance.ETSGLOBAL::checkGetNotReadonlyX|NotReadonly::<ctor>)' --compiler-inlining-blacklist='NotReadonly::<ctor>'", entry: "optimize_load_readonly_instance.ETSGLOBAL::checkGetNotReadonlyX"
+//! METHOD       "optimize_load_readonly_instance.ETSGLOBAL::checkGetNotReadonlyX"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT      /LoadObject.*NotReadonly.x/
 //! PASS_AFTER   "Inline"
@@ -139,8 +139,8 @@ function checkGetBaseX(): int {
 //! INST_COUNT   /LoadObject.*NotReadonly.x/, 2
 
 //! CHECKER      LoadObject for NOT readonly field, GVN NOT applied, AOT
-//! RUN_PAOC     options: "--compiler-regex='(ETSGLOBAL::checkGetNotReadonlyX|NotReadonly::<ctor>)' --compiler-inlining-blacklist='NotReadonly::<ctor>'", entry: "ETSGLOBAL::checkGetNotReadonlyX"
-//! METHOD       "ETSGLOBAL::checkGetNotReadonlyX"
+//! RUN_PAOC     options: "--compiler-regex='(optimize_load_readonly_instance.ETSGLOBAL::checkGetNotReadonlyX|NotReadonly::<ctor>)' --compiler-inlining-blacklist='NotReadonly::<ctor>'", entry: "optimize_load_readonly_instance.ETSGLOBAL::checkGetNotReadonlyX"
+//! METHOD       "optimize_load_readonly_instance.ETSGLOBAL::checkGetNotReadonlyX"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT      /LoadObject.*NotReadonly.x/
 //! PASS_AFTER   "Inline"
@@ -152,7 +152,7 @@ function checkGetBaseX(): int {
 //! INST_COUNT   /LoadObject.*NotReadonly.x/, 3
 //! PASS_AFTER   "Codegen"
 //! INST_COUNT   /LoadObject.*NotReadonly.x/, 3
-//! RUN          options: "--compiler-enable-jit=false", entry: "ETSGLOBAL::checkGetNotReadonlyX"
+//! RUN          options: "--compiler-enable-jit=false", entry: "optimize_load_readonly_instance.ETSGLOBAL::checkGetNotReadonlyX"
 
 function checkGetNotReadonlyX(): int {
     let b = new NotReadonly(10)

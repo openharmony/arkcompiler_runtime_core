@@ -14,10 +14,10 @@
  */
 
 //! CHECKER      Forward gotos offsets in DISASM JIS
-//! RUN          force_jit: true, entry: "ETSGLOBAL::main"
-//! EVENT        /Compilation,ETSGLOBAL::main,.*,COMPILED/
-//! EVENT        /Compilation,ETSGLOBAL::__noinline__while,.*,COMPILED/
-//! ASM_METHOD   "ETSGLOBAL::__noinline__while"
+//! RUN          force_jit: true, entry: "gotos.ETSGLOBAL::main"
+//! EVENT        /Compilation,gotos.ETSGLOBAL::main,.*,COMPILED/
+//! EVENT        /Compilation,gotos.ETSGLOBAL::__noinline__while,.*,COMPILED/
+//! ASM_METHOD   "gotos.ETSGLOBAL::__noinline__while"
 //! ASM          arm64: "cbnz w16, #+0x30", x64: "jnz +0x39", arm: "bne 0x10000088"
 //! ASM          arm64: "b.ge #+0x14", x64: "jnl +0x14", arm: "bge 0x10000068"
 //! ASM          arm64: "b.eq #+0xc", x64: "jz +0x0C", arm: "beq 0x10000068"

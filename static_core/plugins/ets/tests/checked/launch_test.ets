@@ -14,118 +14,118 @@
  */
 
 //! CHECKER      Test check static launch inst in JIT
-//! RUN          force_jit: true, options: "", entry: "ETSGLOBAL::main"
-//! METHOD       "ETSGLOBAL::main"
+//! RUN          force_jit: true, options: "", entry: "launch_test.ETSGLOBAL::main"
+//! METHOD       "launch_test.ETSGLOBAL::main"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "LoadRuntimeClass"
 //! INST_NEXT    "NewObject"
 //! INST_NEXT    "CallLaunchStatic"
-//! EVENT        /Compilation,ETSGLOBAL::main,.*,COMPILED/
+//! EVENT        /Compilation,launch_test.ETSGLOBAL::main,.*,COMPILED/
 
 //! CHECKER      Test check unresolve static launch inst in JIT
-//! RUN          force_jit: true, options: "--compiler-force-unresolved=true", entry: "ETSGLOBAL::main"
-//! METHOD       "ETSGLOBAL::main"
+//! RUN          force_jit: true, options: "--compiler-force-unresolved=true", entry: "launch_test.ETSGLOBAL::main"
+//! METHOD       "launch_test.ETSGLOBAL::main"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "LoadRuntimeClass"
 //! INST_NEXT    "NewObject"
 //! INST_NEXT    "ResolveStatic"
 //! INST_NEXT    "CallResolvedLaunchStatic"
-//! EVENT        /Compilation,ETSGLOBAL::main,.*,COMPILED/
+//! EVENT        /Compilation,launch_test.ETSGLOBAL::main,.*,COMPILED/
 
 //! CHECKER      Test check static launch inst in AOT
 //! RUN_PAOC     options: ""
-//! METHOD       "ETSGLOBAL::main"
+//! METHOD       "launch_test.ETSGLOBAL::main"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "LoadRuntimeClass"
 //! INST_NEXT    "NewObject"
 //! INST_NEXT    "ResolveStatic"
 //! INST_NEXT    "CallResolvedLaunchStatic"
-//! EVENT        /Compilation,ETSGLOBAL::main,.*,COMPILED/
-//! RUN          entry: "ETSGLOBAL::main"
+//! EVENT        /Compilation,launch_test.ETSGLOBAL::main,.*,COMPILED/
+//! RUN          entry: "launch_test.ETSGLOBAL::main"
 
 //! CHECKER      Test check static launch inst in LLVM
 //! RUN_LLVM     options: ""
-//! METHOD       "ETSGLOBAL::main"
+//! METHOD       "launch_test.ETSGLOBAL::main"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "LoadRuntimeClass"
 //! INST_NEXT    "NewObject"
 //! INST_NEXT    "ResolveStatic"
 //! INST_NEXT    "CallResolvedLaunchStatic"
-//! RUN          entry: "ETSGLOBAL::main"
+//! RUN          entry: "launch_test.ETSGLOBAL::main"
 
 //! CHECKER      Test check virtual launch inst in JIT
-//! RUN          force_jit: true, options: "", entry: "ETSGLOBAL::main1"
-//! METHOD       "ETSGLOBAL::main1"
+//! RUN          force_jit: true, options: "", entry: "launch_test.ETSGLOBAL::main1"
+//! METHOD       "launch_test.ETSGLOBAL::main1"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "LoadRuntimeClass"
 //! INST_NEXT    "NewObject"
 //! INST_NEXT    "CallLaunchVirtual"
-//! EVENT        /Compilation,ETSGLOBAL::main1,.*,COMPILED/
+//! EVENT        /Compilation,launch_test.ETSGLOBAL::main1,.*,COMPILED/
 
 //! CHECKER      Test check virtual launch inst in AOT
 //! RUN_PAOC     options: ""
-//! METHOD       "ETSGLOBAL::main1"
+//! METHOD       "launch_test.ETSGLOBAL::main1"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "LoadRuntimeClass"
 //! INST_NEXT    "NewObject"
 //! INST_NEXT    "CallLaunchVirtual"
 //! INST_NOT     "ResolveVirtual"
-//! EVENT        /Compilation,ETSGLOBAL::main1,.*,COMPILED/
-//! RUN          entry: "ETSGLOBAL::main1"
+//! EVENT        /Compilation,launch_test.ETSGLOBAL::main1,.*,COMPILED/
+//! RUN          entry: "launch_test.ETSGLOBAL::main1"
 
 //! CHECKER      Test check virtual launch inst in LLVM
 //! RUN_LLVM     options: ""
-//! METHOD       "ETSGLOBAL::main1"
+//! METHOD       "launch_test.ETSGLOBAL::main1"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "LoadRuntimeClass"
 //! INST_NEXT    "NewObject"
 //! INST_NEXT    "CallLaunchVirtual"
 //! INST_NOT     "ResolveVirtual"
-//! RUN          entry: "ETSGLOBAL::main1"
+//! RUN          entry: "launch_test.ETSGLOBAL::main1"
 
 //! CHECKER      Test check unresolve virtual launch inst in JIT
-//! RUN          force_jit: true, options: "--compiler-force-unresolved=true", entry: "ETSGLOBAL::main1"
-//! METHOD       "ETSGLOBAL::main1"
+//! RUN          force_jit: true, options: "--compiler-force-unresolved=true", entry: "launch_test.ETSGLOBAL::main1"
+//! METHOD       "launch_test.ETSGLOBAL::main1"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "LoadRuntimeClass"
 //! INST_NEXT    "NewObject"
 //! INST_NEXT    "ResolveVirtual"
 //! INST_NEXT    "CallResolvedLaunchVirtual"
-//! EVENT        /Compilation,ETSGLOBAL::main1,.*,COMPILED/
+//! EVENT        /Compilation,launch_test.ETSGLOBAL::main1,.*,COMPILED/
 
 //! CHECKER      Test check unresolve virtual launch inst in AOT
 //! RUN_PAOC     options: "--compiler-force-unresolved=true"
-//! METHOD       "ETSGLOBAL::main1"
+//! METHOD       "launch_test.ETSGLOBAL::main1"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "LoadRuntimeClass"
 //! INST_NEXT    "NewObject"
 //! INST_NEXT    "ResolveVirtual"
 //! INST_NEXT    "CallResolvedLaunchVirtual"
-//! EVENT        /Compilation,ETSGLOBAL::main1,.*,COMPILED/
-//! RUN          entry: "ETSGLOBAL::main1"
+//! EVENT        /Compilation,launch_test.ETSGLOBAL::main1,.*,COMPILED/
+//! RUN          entry: "launch_test.ETSGLOBAL::main1"
 
 //! CHECKER      Test check unresolve virtual launch inst in LLVM
 //! RUN_LLVM     options: "--compiler-force-unresolved=true"
-//! METHOD       "ETSGLOBAL::main1"
+//! METHOD       "launch_test.ETSGLOBAL::main1"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "LoadRuntimeClass"
 //! INST_NEXT    "NewObject"
 //! INST_NEXT    "ResolveVirtual"
 //! INST_NEXT    "CallResolvedLaunchVirtual"
-//! RUN          entry: "ETSGLOBAL::main1"
+//! RUN          entry: "launch_test.ETSGLOBAL::main1"
 
 //! CHECKER      Test check static launch inst in JIT with 2 arguments
-//! RUN          force_jit: true, options: "", entry: "ETSGLOBAL::main2"
-//! METHOD       "ETSGLOBAL::main2"
+//! RUN          force_jit: true, options: "", entry: "launch_test.ETSGLOBAL::main2"
+//! METHOD       "launch_test.ETSGLOBAL::main2"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "LoadRuntimeClass"
 //! INST_NEXT    "NewObject"
 //! INST_NEXT    "CallLaunchStatic"
-//! EVENT        /Compilation,ETSGLOBAL::main2,.*,COMPILED/
+//! EVENT        /Compilation,launch_test.ETSGLOBAL::main2,.*,COMPILED/
 
 //! CHECKER      Test inline method with launch inst in JIT
-//! RUN          force_jit: true, options: "", entry: "ETSGLOBAL::main3"
-//! METHOD       "ETSGLOBAL::main3"
+//! RUN          force_jit: true, options: "", entry: "launch_test.ETSGLOBAL::main3"
+//! METHOD       "launch_test.ETSGLOBAL::main3"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     "LoadRuntimeClass"
 //! INST_NOT     "ResolveVirtual"
@@ -135,12 +135,12 @@
 //! INST_NEXT    "NewObject"
 //! INST_NEXT    "ResolveVirtual"
 //! INST_NEXT    "CallResolvedLaunchVirtual"
-//! EVENT        /Compilation,ETSGLOBAL::main3,.*,COMPILED/
-//! EVENT        /Inline,ETSGLOBAL::main3,ETSGLOBAL::launchF,.*STATIC,SUCCESS/
+//! EVENT        /Compilation,launch_test.ETSGLOBAL::main3,.*,COMPILED/
+//! EVENT        /Inline,launch_test.ETSGLOBAL::main3,launch_test.ETSGLOBAL::launchF,.*STATIC,SUCCESS/
 
 //! CHECKER      Test inline method with launch inst in AOT
 //! RUN_PAOC     options: ""
-//! METHOD       "ETSGLOBAL::main3"
+//! METHOD       "launch_test.ETSGLOBAL::main3"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     "LoadRuntimeClass"
 //! INST_NOT     "ResolveVirtual"
@@ -150,18 +150,18 @@
 //! INST_NEXT    "NewObject"
 //! INST_NEXT    "ResolveVirtual"
 //! INST_NEXT    "CallResolvedLaunchVirtual"
-//! EVENT        /Compilation,ETSGLOBAL::main3,.*,COMPILED/
-//! EVENT        /Inline,ETSGLOBAL::main3,ETSGLOBAL::launchF,.*STATIC,SUCCESS/
-//! RUN          entry: "ETSGLOBAL::main3"
+//! EVENT        /Compilation,launch_test.ETSGLOBAL::main3,.*,COMPILED/
+//! EVENT        /Inline,launch_test.ETSGLOBAL::main3,launch_test.ETSGLOBAL::launchF,.*STATIC,SUCCESS/
+//! RUN          entry: "launch_test.ETSGLOBAL::main3"
 
 //! CHECKER      Test inline method with launch inst in LLVM
 //! RUN_LLVM     options: ""
-//! METHOD       "ETSGLOBAL::main3"
+//! METHOD       "launch_test.ETSGLOBAL::main3"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     "LoadRuntimeClass"
 //! INST_NOT     "ResolveVirtual"
 //! INST_NOT     "CallResolvedLaunchVirtual"
-//! RUN          entry: "ETSGLOBAL::main3"
+//! RUN          entry: "launch_test.ETSGLOBAL::main3"
 
 let counter = 0
 

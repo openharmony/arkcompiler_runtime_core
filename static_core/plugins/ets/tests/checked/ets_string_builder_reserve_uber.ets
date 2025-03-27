@@ -17,7 +17,7 @@
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*reserve[0-9]*' --compiler-inlining=true"
 //!
-//! METHOD        "ETSGLOBAL::uber_reserve38"
+//! METHOD        "ets_string_builder_reserve_uber.ETSGLOBAL::uber_reserve38"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=78)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
@@ -25,9 +25,9 @@
 
 //! CHECKER       JIT IR Builder, check StringBuilder internal buffer reserve
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-regex='.*reserve[0-9]*' --compiler-inlining=true", entry: "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*reserve[0-9]*' --compiler-inlining=true", entry: "ets_string_builder_reserve_uber.ETSGLOBAL::main"
 //!
-//! METHOD        "ETSGLOBAL::uber_reserve38"
+//! METHOD        "ets_string_builder_reserve_uber.ETSGLOBAL::uber_reserve38"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=78)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
@@ -35,22 +35,22 @@
 
 // CHECKER       JIT IR Builder, check StringBuilder internal buffer reallocation events occured (uber_only)
 // SKIP_IF       @architecture == "arm32"
-// RUN           force_jit: true, options: "--compiler-reserve-string-builder-buffer=false --compiler-inlining=true", entry: "ETSGLOBAL::main"
+// RUN           force_jit: true, options: "--compiler-reserve-string-builder-buffer=false --compiler-inlining=true", entry: "ets_string_builder_reserve_uber.ETSGLOBAL::main"
 // EVENT_NEXT    /SbBufferRealloc,\d+,0x[0-9a-fA-F]+,32.*/
 // EVENT_NEXT    /SbBufferRealloc,\d+,0x[0-9a-fA-F]+,64.*/
 
 //! CHECKER       JIT IR Builder, check StringBuilder internal buffer reallocation events not occured (uber_only)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ets_string_builder_reserve_uber.ETSGLOBAL::main"
 //! EVENT_NOT     "SbBufferRealloc"
 
 //! CHECKER       JIT IR Builder, check StringBuilder internal buffer reallocation events not occured (uber_only, --gc-type=gen-gc)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--gc-type=gen-gc --no-async-jit=false --compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--gc-type=gen-gc --no-async-jit=false --compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ets_string_builder_reserve_uber.ETSGLOBAL::main"
 
 //! CHECKER       JIT IR Builder, check StringBuilder internal buffer reallocation events not occured (uber_only, --gc-type=g1-gc)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--gc-type=g1-gc --no-async-jit=false --compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--gc-type=g1-gc --no-async-jit=false --compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ets_string_builder_reserve_uber.ETSGLOBAL::main"
 
 function uber_reserve38(cond: boolean) : string
 {

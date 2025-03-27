@@ -16,8 +16,8 @@
 let original: String = new String("abcde");
 
 //! CHECKER       Equal Substring JIT
-//! RUN           force_jit: true, options: "", entry: "ETSGLOBAL::main"
-//! METHOD        "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "", entry: "ets_string_substring.ETSGLOBAL::main"
+//! METHOD        "ets_string_substring.ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.StdCoreStringSubstring"
 //! PASS_AFTER    "Codegen"
@@ -27,15 +27,15 @@ let original: String = new String("abcde");
 //! CHECKER       Equal Substring  AOT
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*main.*'"
-//! METHOD        "ETSGLOBAL::main"
+//! METHOD        "ets_string_substring.ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.StdCoreStringSubstring"
 //! PASS_AFTER    "Codegen"
 //! INST_NOT      "Intrinsic.StdCoreStringSubstring"
-//! RUN           entry: "ETSGLOBAL::main"
+//! RUN           entry: "ets_string_substring.ETSGLOBAL::main"
 
 //! CHECKER       Equal Substring INT
-//! RUN           options: "--compiler-enable-jit=false", entry: "ETSGLOBAL::main"
+//! RUN           options: "--compiler-enable-jit=false", entry: "ets_string_substring.ETSGLOBAL::main"
 
 
 function __noinline__SubString(str: String, begin: int, end: int): String {

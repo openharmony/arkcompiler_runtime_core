@@ -14,16 +14,16 @@
  */
 
 //! CHECKER      Check JIT for ZeroCheck after ChecksElimination
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=0 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ETSGLOBAL::main"
-//! EVENT        /Compilation,ETSGLOBAL::__noinline__overflow,.*,COMPILED/
-//! METHOD       "ETSGLOBAL::__noinline__overflow"
+//! RUN          force_jit: true, options: "--compiler-hotness-threshold=0 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ets_overflow.ETSGLOBAL::main"
+//! EVENT        /Compilation,ets_overflow.ETSGLOBAL::__noinline__overflow,.*,COMPILED/
+//! METHOD       "ets_overflow.ETSGLOBAL::__noinline__overflow"
 //! PASS_AFTER   "ChecksElimination"
 //! INST         "ZeroCheck"
 
 //! CHECKER      Check AOT for ZeroCheck after ChecksElimination
 //! SKIP_IF      @architecture == "arm32"
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::__noinline__overflow"
-//! METHOD       "ETSGLOBAL::__noinline__overflow"
+//! RUN_PAOC     options: "--compiler-regex=ets_overflow.ETSGLOBAL::__noinline__overflow"
+//! METHOD       "ets_overflow.ETSGLOBAL::__noinline__overflow"
 //! PASS_AFTER   "ChecksElimination"
 //! INST         "ZeroCheck"
 

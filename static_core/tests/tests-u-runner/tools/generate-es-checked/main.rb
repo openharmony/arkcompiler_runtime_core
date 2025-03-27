@@ -345,8 +345,8 @@ class Generator
             if $options[:"run-ets"]
                 panda_build = $options[:"run-ets"]
                 abc_path = File.join $options[:tmp], "#{k}#{chunk_id}.abc"
-                get_command_output("#{panda_build}/bin/es2panda", "--extension=ets", "--ets-unnamed", "--opt-level=2", "--output", abc_path, ets_path)
-                res = get_command_output("#{panda_build}/bin/ark", "--no-async-jit=true", "--gc-trigger-type=debug", "--boot-panda-files", "#{panda_build}/plugins/ets/etsstdlib.abc", "--load-runtimes=ets", abc_path, "ETSGLOBAL::main")
+                get_command_output("#{panda_build}/bin/es2panda", "--extension=ets", "--opt-level=2", "--output", abc_path, ets_path)
+                res = get_command_output("#{panda_build}/bin/ark", "--no-async-jit=true", "--gc-trigger-type=debug", "--boot-panda-files", "#{panda_build}/plugins/ets/etsstdlib.abc", "--load-runtimes=ets", abc_path, "#{k}#{chunk_id}.ETSGLOBAL::main")
                 res.strip!
                 puts "✔ executed ets #{k} #{chunk_id}"
                 if res.size != 0

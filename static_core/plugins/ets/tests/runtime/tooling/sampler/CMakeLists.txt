@@ -27,7 +27,7 @@ else()
     set(aspt_converter_bin  $<TARGET_FILE:${aspt_converter_target}>)
 endif()
 
-set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=ets --ets-unnamed --opt-level=0)
+set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=ets --opt-level=0)
 
 set(RUNTIME_ARGUMENTS
     --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
@@ -67,7 +67,7 @@ foreach(c_arg ${COMPILER_ARGUMENTS_LIST})
     foreach(i_arg ${INTERPRETER_ARGUMENTS_LIST})
         # Run tests
         add_custom_target(sampler_run_${c_arg}_${i_arg}
-            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --compiler-enable-jit=${c_arg} --interpreter-type=${i_arg} --sampling-profiler-output-file=${testing_dir}/stack_output_${c_arg}_${i_arg}.aspt ${testing_dir}/SamplerTest.abc ETSGLOBAL::${ETS_ENTRY_POINT}
+            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --compiler-enable-jit=${c_arg} --interpreter-type=${i_arg} --sampling-profiler-output-file=${testing_dir}/stack_output_${c_arg}_${i_arg}.aspt ${testing_dir}/SamplerTest.abc SamplerTest.ETSGLOBAL::${ETS_ENTRY_POINT}
             WORKING_DIRECTORY "${testing_dir}"
             DEPENDS ark etsstdlib sampler_es2panda
         )

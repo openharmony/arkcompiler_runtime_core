@@ -389,8 +389,8 @@ function testQuickVirtualFinalObj(): TestResult {
 
 //! DISABLED_CHECKER       General ANI call optimization, JIT
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-hotness-threshold=1 --compiler-regex='ETSGLOBAL::test.*'", entry: "ETSGLOBAL::runGeneralNative"
-//! METHOD        "ETSGLOBAL::testGeneralStaticPrim"
+//! RUN           force_jit: true, options: "--compiler-hotness-threshold=1 --compiler-regex='quick_native.ETSGLOBAL::test.*'", entry: "quick_native.ETSGLOBAL::runGeneralNative"
+//! METHOD        "quick_native.ETSGLOBAL::testGeneralStaticPrim"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic.*NativeModule.*Static/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -405,7 +405,7 @@ function testQuickVirtualFinalObj(): TestResult {
 //! INST_NEXT     /Intrinsic\.CompilerEndNativeMethodPrim/
 //! INST_NEXT     /ReturnInlined/
 //! INST_NEXT     /Intrinsic\.CompilerCheckNativeException/
-//! METHOD        "ETSGLOBAL::testGeneralStaticObj"
+//! METHOD        "quick_native.ETSGLOBAL::testGeneralStaticObj"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic.*NativeModule.*Static/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -420,7 +420,7 @@ function testQuickVirtualFinalObj(): TestResult {
 //! INST_NEXT     /Intrinsic\.CompilerEndNativeMethodObj/
 //! INST_NEXT     /ReturnInlined/
 //! INST_NEXT     /Intrinsic\.CompilerCheckNativeException/
-//! METHOD        "ETSGLOBAL::testGeneralVirtualFinalPrim"
+//! METHOD        "quick_native.ETSGLOBAL::testGeneralVirtualFinalPrim"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic.*NativeModule.*Virtual/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -434,7 +434,7 @@ function testQuickVirtualFinalObj(): TestResult {
 //! INST_NEXT     /Intrinsic\.CompilerEndNativeMethodPrim/
 //! INST_NEXT     /ReturnInlined/
 //! INST_NEXT     /Intrinsic\.CompilerCheckNativeException/
-//! METHOD        "ETSGLOBAL::testGeneralVirtualFinalObj"
+//! METHOD        "quick_native.ETSGLOBAL::testGeneralVirtualFinalObj"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic.*NativeModule.*Virtual/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -448,15 +448,15 @@ function testQuickVirtualFinalObj(): TestResult {
 //! INST_NEXT     /Intrinsic\.CompilerEndNativeMethodObj/
 //! INST_NEXT     /ReturnInlined/
 //! INST_NEXT     /Intrinsic\.CompilerCheckNativeException/
-//! EVENT_NOT     /DeoptimizationReason,ETSGLOBAL::testGeneralStaticPrim,NOT_SUPPORTED_NATIVE/
-//! EVENT_NOT     /DeoptimizationReason,ETSGLOBAL::testGeneralStaticObj,NOT_SUPPORTED_NATIVE/
-//! EVENT_NOT     /DeoptimizationReason,ETSGLOBAL::testGeneralVirtualFinalPrim,NOT_SUPPORTED_NATIVE/
-//! EVENT_NOT     /DeoptimizationReason,ETSGLOBAL::testGeneralVirtualFinalObj,NOT_SUPPORTED_NATIVE/
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testGeneralStaticPrim,NOT_SUPPORTED_NATIVE/
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testGeneralStaticObj,NOT_SUPPORTED_NATIVE/
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testGeneralVirtualFinalPrim,NOT_SUPPORTED_NATIVE/
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testGeneralVirtualFinalObj,NOT_SUPPORTED_NATIVE/
 
 //! CHECKER       Quick ANI call optimization, JIT
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-hotness-threshold=1 --compiler-regex='ETSGLOBAL::test.*'", entry: "ETSGLOBAL::runQuickNative"
-//! METHOD        "ETSGLOBAL::testQuickStaticPrim"
+//! RUN           force_jit: true, options: "--compiler-hotness-threshold=1 --compiler-regex='quick_native.ETSGLOBAL::test.*'", entry: "quick_native.ETSGLOBAL::runQuickNative"
+//! METHOD        "quick_native.ETSGLOBAL::testQuickStaticPrim"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic.*NativeModule.*Static/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -471,7 +471,7 @@ function testQuickVirtualFinalObj(): TestResult {
 //! INST_NEXT     /Intrinsic\.CompilerEndNativeMethodPrim/
 //! INST_NEXT     /ReturnInlined/
 //! INST_NEXT     /Intrinsic\.CompilerCheckNativeException/
-//! METHOD        "ETSGLOBAL::testQuickStaticObj"
+//! METHOD        "quick_native.ETSGLOBAL::testQuickStaticObj"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic.*NativeModule.*Static/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -486,7 +486,7 @@ function testQuickVirtualFinalObj(): TestResult {
 //! INST_NEXT     /Intrinsic\.CompilerEndNativeMethodObj/
 //! INST_NEXT     /ReturnInlined/
 //! INST_NEXT     /Intrinsic\.CompilerCheckNativeException/
-//! METHOD        "ETSGLOBAL::testQuickVirtualFinalPrim"
+//! METHOD        "quick_native.ETSGLOBAL::testQuickVirtualFinalPrim"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic.*NativeModule.*Virtual/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -500,7 +500,7 @@ function testQuickVirtualFinalObj(): TestResult {
 //! INST_NEXT     /Intrinsic\.CompilerEndNativeMethodPrim/
 //! INST_NEXT     /ReturnInlined/
 //! INST_NEXT     /Intrinsic\.CompilerCheckNativeException/
-//! METHOD        "ETSGLOBAL::testQuickVirtualFinalObj"
+//! METHOD        "quick_native.ETSGLOBAL::testQuickVirtualFinalObj"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic.*NativeModule.*Virtual/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -514,15 +514,15 @@ function testQuickVirtualFinalObj(): TestResult {
 //! INST_NEXT     /Intrinsic\.CompilerEndNativeMethodObj/
 //! INST_NEXT     /ReturnInlined/
 //! INST_NEXT     /Intrinsic\.CompilerCheckNativeException/
-//! EVENT_NOT     /DeoptimizationReason,ETSGLOBAL::testQuickStaticPrim,NOT_SUPPORTED_NATIVE/
-//! EVENT_NOT     /DeoptimizationReason,ETSGLOBAL::testQuickStaticObj,NOT_SUPPORTED_NATIVE/
-//! EVENT_NOT     /DeoptimizationReason,ETSGLOBAL::testQuickVirtualFinalPrim,NOT_SUPPORTED_NATIVE/
-//! EVENT_NOT     /DeoptimizationReason,ETSGLOBAL::testQuickVirtualFinalObj,NOT_SUPPORTED_NATIVE/
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testQuickStaticPrim,NOT_SUPPORTED_NATIVE/
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testQuickStaticObj,NOT_SUPPORTED_NATIVE/
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testQuickVirtualFinalPrim,NOT_SUPPORTED_NATIVE/
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testQuickVirtualFinalObj,NOT_SUPPORTED_NATIVE/
 
 //! DISABLED_CHECKER       General ANI call optimization, AOT
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='ETSGLOBAL::test.*'"
-//! METHOD        "ETSGLOBAL::testGeneralStaticPrim"
+//! RUN_PAOC      options: "--compiler-regex='quick_native.ETSGLOBAL::test.*'"
+//! METHOD        "quick_native.ETSGLOBAL::testGeneralStaticPrim"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic.*NativeModule.*Static/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -537,7 +537,7 @@ function testQuickVirtualFinalObj(): TestResult {
 //! INST_NEXT     /Intrinsic\.CompilerEndNativeMethodPrim/
 //! INST_NEXT     /ReturnInlined/
 //! INST_NEXT     /Intrinsic\.CompilerCheckNativeException/
-//! METHOD        "ETSGLOBAL::testGeneralStaticObj"
+//! METHOD        "quick_native.ETSGLOBAL::testGeneralStaticObj"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic.*NativeModule.*Static/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -552,7 +552,7 @@ function testQuickVirtualFinalObj(): TestResult {
 //! INST_NEXT     /Intrinsic\.CompilerEndNativeMethodObj/
 //! INST_NEXT     /ReturnInlined/
 //! INST_NEXT     /Intrinsic\.CompilerCheckNativeException/
-//! METHOD        "ETSGLOBAL::testGeneralVirtualFinalPrim"
+//! METHOD        "quick_native.ETSGLOBAL::testGeneralVirtualFinalPrim"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic.*NativeModule.*Virtual/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -566,7 +566,7 @@ function testQuickVirtualFinalObj(): TestResult {
 //! INST_NEXT     /Intrinsic\.CompilerEndNativeMethodPrim/
 //! INST_NEXT     /ReturnInlined/
 //! INST_NEXT     /Intrinsic\.CompilerCheckNativeException/
-//! METHOD        "ETSGLOBAL::testGeneralVirtualFinalObj"
+//! METHOD        "quick_native.ETSGLOBAL::testGeneralVirtualFinalObj"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic.*NativeModule.*Virtual/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -580,16 +580,16 @@ function testQuickVirtualFinalObj(): TestResult {
 //! INST_NEXT     /Intrinsic\.CompilerEndNativeMethodObj/
 //! INST_NEXT     /ReturnInlined/
 //! INST_NEXT     /Intrinsic\.CompilerCheckNativeException/
-//! RUN           entry: "ETSGLOBAL::runGeneralNative"
-//! EVENT_NOT     /DeoptimizationReason,ETSGLOBAL::testGeneralStaticPrim,NOT_SUPPORTED_NATIVE/
-//! EVENT_NOT     /DeoptimizationReason,ETSGLOBAL::testGeneralStaticObj,NOT_SUPPORTED_NATIVE/
-//! EVENT_NOT     /DeoptimizationReason,ETSGLOBAL::testGeneralVirtualFinalPrim,NOT_SUPPORTED_NATIVE/
-//! EVENT_NOT     /DeoptimizationReason,ETSGLOBAL::testGeneralVirtualFinalObj,NOT_SUPPORTED_NATIVE/
+//! RUN           entry: "quick_native.ETSGLOBAL::runGeneralNative"
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testGeneralStaticPrim,NOT_SUPPORTED_NATIVE/
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testGeneralStaticObj,NOT_SUPPORTED_NATIVE/
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testGeneralVirtualFinalPrim,NOT_SUPPORTED_NATIVE/
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testGeneralVirtualFinalObj,NOT_SUPPORTED_NATIVE/
 
 //! CHECKER       Quick ANI call optimization, AOT
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='ETSGLOBAL::test.*'"
-//! METHOD        "ETSGLOBAL::testQuickStaticPrim"
+//! RUN_PAOC      options: "--compiler-regex='quick_native.ETSGLOBAL::test.*'"
+//! METHOD        "quick_native.ETSGLOBAL::testQuickStaticPrim"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic.*NativeModule.*Static/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -604,7 +604,7 @@ function testQuickVirtualFinalObj(): TestResult {
 //! INST_NEXT     /Intrinsic\.CompilerEndNativeMethodPrim/
 //! INST_NEXT     /ReturnInlined/
 //! INST_NEXT     /Intrinsic\.CompilerCheckNativeException/
-//! METHOD        "ETSGLOBAL::testQuickStaticObj"
+//! METHOD        "quick_native.ETSGLOBAL::testQuickStaticObj"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic.*NativeModule.*Static/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -619,7 +619,7 @@ function testQuickVirtualFinalObj(): TestResult {
 //! INST_NEXT     /Intrinsic\.CompilerEndNativeMethodObj/
 //! INST_NEXT     /ReturnInlined/
 //! INST_NEXT     /Intrinsic\.CompilerCheckNativeException/
-//! METHOD        "ETSGLOBAL::testQuickVirtualFinalPrim"
+//! METHOD        "quick_native.ETSGLOBAL::testQuickVirtualFinalPrim"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic.*NativeModule.*Virtual/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -633,7 +633,7 @@ function testQuickVirtualFinalObj(): TestResult {
 //! INST_NEXT     /Intrinsic\.CompilerEndNativeMethodPrim/
 //! INST_NEXT     /ReturnInlined/
 //! INST_NEXT     /Intrinsic\.CompilerCheckNativeException/
-//! METHOD        "ETSGLOBAL::testQuickVirtualFinalObj"
+//! METHOD        "quick_native.ETSGLOBAL::testQuickVirtualFinalObj"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /CallStatic.*NativeModule.*Virtual/, 1
 //! PASS_AFTER    "NativeCallOptimization"
@@ -647,11 +647,11 @@ function testQuickVirtualFinalObj(): TestResult {
 //! INST_NEXT     /Intrinsic\.CompilerEndNativeMethodObj/
 //! INST_NEXT     /ReturnInlined/
 //! INST_NEXT     /Intrinsic\.CompilerCheckNativeException/
-//! RUN           entry: "ETSGLOBAL::runQuickNative"
-//! EVENT_NOT     /DeoptimizationReason,ETSGLOBAL::testQuickStaticPrim,NOT_SUPPORTED_NATIVE/
-//! EVENT_NOT     /DeoptimizationReason,ETSGLOBAL::testQuickStaticObj,NOT_SUPPORTED_NATIVE/
-//! EVENT_NOT     /DeoptimizationReason,ETSGLOBAL::testQuickVirtualFinalPrim,NOT_SUPPORTED_NATIVE/
-//! EVENT_NOT     /DeoptimizationReason,ETSGLOBAL::testQuickVirtualFinalObj,NOT_SUPPORTED_NATIVE/
+//! RUN           entry: "quick_native.ETSGLOBAL::runQuickNative"
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testQuickStaticPrim,NOT_SUPPORTED_NATIVE/
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testQuickStaticObj,NOT_SUPPORTED_NATIVE/
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testQuickVirtualFinalPrim,NOT_SUPPORTED_NATIVE/
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testQuickVirtualFinalObj,NOT_SUPPORTED_NATIVE/
 
 function runGeneralNative(): int {
     let res = 0;

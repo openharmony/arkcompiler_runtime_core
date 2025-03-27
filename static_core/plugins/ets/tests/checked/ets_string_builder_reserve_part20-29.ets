@@ -17,61 +17,61 @@
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*reserve[0-9]*' --compiler-inlining=true"
 //!
-//! METHOD        "ETSGLOBAL::multi_toString_reserve20"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multi_toString_reserve20"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ETSGLOBAL::multi_toString_if_reserve21"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multi_toString_if_reserve21"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ETSGLOBAL::multi_toString_if_reserve22"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multi_toString_if_reserve22"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ETSGLOBAL::multi_toString_loop_reserve23"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multi_toString_loop_reserve23"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=19)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=19)"
 //!
-//! METHOD        "ETSGLOBAL::types_reserve24"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::types_reserve24"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=10)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=10)"
 //!
-//! METHOD        "ETSGLOBAL::lenArray_reserve25"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArray_reserve25"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_COUNT    "NewArray (size=3)",1
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_COUNT    "NewArray (size=3)",2
 //!
-//! METHOD        "ETSGLOBAL::lenArray_reserve26"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArray_reserve26"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_COUNT    "NewArray (size=3)",1
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_COUNT    "NewArray (size=3)",2
 //!
-//! METHOD        "ETSGLOBAL::lenArray_reserve27"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArray_reserve27"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //!
-//! METHOD        "ETSGLOBAL::lenArray_reserve28"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArray_reserve28"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //!
-//! METHOD        "ETSGLOBAL::partially_uncountable_reserve29"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::partially_uncountable_reserve29"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=6)"
 //! INST_NOT      "NewArray (size=9)"
@@ -81,63 +81,63 @@
 
 //! CHECKER       JIT IR Builder, check StringBuilder internal buffer reserve
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-regex='.*reserve[0-9]*' --compiler-inlining=true", entry: "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*reserve[0-9]*' --compiler-inlining=true", entry: "ets_string_builder_reserve_part20-29.ETSGLOBAL::main"
 //!
-//! METHOD        "ETSGLOBAL::multi_toString_reserve20"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multi_toString_reserve20"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ETSGLOBAL::multi_toString_if_reserve21"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multi_toString_if_reserve21"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ETSGLOBAL::multi_toString_if_reserve22"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multi_toString_if_reserve22"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ETSGLOBAL::multi_toString_loop_reserve23"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multi_toString_loop_reserve23"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=19)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=19)"
 //!
-//! METHOD        "ETSGLOBAL::types_reserve24"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::types_reserve24"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=10)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=10)"
 //!
-//! METHOD        "ETSGLOBAL::lenArray_reserve25"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArray_reserve25"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_COUNT    "NewArray (size=3)",1
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_COUNT    "NewArray (size=3)",2
 //!
-//! METHOD        "ETSGLOBAL::lenArray_reserve26"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArray_reserve26"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_COUNT    "NewArray (size=3)",1
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_COUNT    "NewArray (size=3)",2
 //!
-//! METHOD        "ETSGLOBAL::lenArray_reserve27"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArray_reserve27"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //!
-//! METHOD        "ETSGLOBAL::lenArray_reserve28"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArray_reserve28"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //!
-//! METHOD        "ETSGLOBAL::partially_uncountable_reserve29"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::partially_uncountable_reserve29"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=6)"
 //! INST_NOT      "NewArray (size=9)"

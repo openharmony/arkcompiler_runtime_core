@@ -25,8 +25,8 @@ function foo(obj: A, cnt: int): int  {
 }
 
 //! CHECKER       Escape isn't applied
-//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ETSGLOBAL::main"
-//! METHOD        "ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "escape_deoptimization.ETSGLOBAL::main"
+//! METHOD        "escape_deoptimization.ETSGLOBAL::main"
 //! PASS_BEFORE   "ChecksElimination"
 //! INST_NOT      "DeoptimizeIf"
 //! INST_COUNT    "BoundsCheck", 11
@@ -42,7 +42,7 @@ function foo(obj: A, cnt: int): int  {
 //! CHECKER       AOT Escape isn't applied
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*main.*'"
-//! METHOD        "ETSGLOBAL::main"
+//! METHOD        "escape_deoptimization.ETSGLOBAL::main"
 //! PASS_BEFORE   "ChecksElimination"
 //! INST_NOT      "DeoptimizeIf"
 //! INST_COUNT    "BoundsCheck", 11
@@ -54,7 +54,7 @@ function foo(obj: A, cnt: int): int  {
 //! PASS_AFTER    "Escape"
 //! INST          "NewObject"
 //! INST_COUNT    "NewArray", 2
-//! RUN           options: "", entry: "ETSGLOBAL::main"
+//! RUN           options: "", entry: "escape_deoptimization.ETSGLOBAL::main"
 
 function __noinline__abort() {
     assertTrue(false);

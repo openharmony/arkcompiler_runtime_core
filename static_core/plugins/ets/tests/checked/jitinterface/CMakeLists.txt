@@ -13,3 +13,6 @@
 
 panda_add_library(jitinterface SHARED jit_interface.cpp)
 panda_target_link_libraries(jitinterface arkruntime)
+
+panda_add_library(string_tlab_repeat SHARED string_tlab_repeat.cpp)
+panda_target_link_libraries(string_tlab_repeat arkruntime)

@@ -14,10 +14,10 @@
  */
 
 //! CHECKER      Checks Elimination in OSR mode, when there is an OSR entry between 2 NullCheck-s
-//! RUN          options: "--no-async-jit --compiler-hotness-threshold=1 --compiler-enable-osr=true --compiler-ignore-failures=true", entry: "ETSGLOBAL::main"
-//! METHOD       "ETSGLOBAL::find"
-//! EVENT        /Compilation,ETSGLOBAL::find,0.*,COMPILED/
-//! EVENT_NOT    /OsrEntry,ETSGLOBAL::find,.*,AFTER_IFRAME,SUCCESS/
+//! RUN          options: "--no-async-jit --compiler-hotness-threshold=1 --compiler-enable-osr=true --compiler-ignore-failures=true", entry: "checks_elimination_osr.ETSGLOBAL::main"
+//! METHOD       "checks_elimination_osr.ETSGLOBAL::find"
+//! EVENT        /Compilation,checks_elimination_osr.ETSGLOBAL::find,0.*,COMPILED/
+//! EVENT_NOT    /OsrEntry,checks_elimination_osr.ETSGLOBAL::find,.*,AFTER_IFRAME,SUCCESS/
 // now try-catch doesn't work in osr mode. when it will be supported, there should be 3 NullCheck instructions
 // because NullCheck from try block do not dominate another one, which should not be deleted by ChecksElimination
 

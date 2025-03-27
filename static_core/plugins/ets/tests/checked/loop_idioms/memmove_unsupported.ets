@@ -25,8 +25,8 @@ let GLOBAL_OFFS: int = 1;
 
 class TestUnsupported {
     //! CHECKER       TestUnsupported1
-    //! RUN           force_jit: true, entry: "TestUnsupported::noAlias_underIf"
-    //! METHOD        "TestUnsupported::noAlias_underIf"
+    //! RUN           force_jit: true, entry: "memmove_unsupported.TestUnsupported::noAlias_underIf"
+    //! METHOD        "memmove_unsupported.TestUnsupported::noAlias_underIf"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
     static noAlias_underIf(): boolean
@@ -47,8 +47,8 @@ class TestUnsupported {
     }
     
     //! CHECKER       TestUnsupported2
-    //! RUN           force_jit: true, entry: "TestUnsupported::patternMissmatch_boundscheck"
-    //! METHOD        "TestUnsupported::patternMissmatch_boundscheck"
+    //! RUN           force_jit: true, entry: "memmove_unsupported.TestUnsupported::patternMissmatch_boundscheck"
+    //! METHOD        "memmove_unsupported.TestUnsupported::patternMissmatch_boundscheck"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
     static patternMissmatch_boundscheck(): boolean
@@ -64,8 +64,8 @@ class TestUnsupported {
     }
 
     //! CHECKER       TestUnsupported3
-    //! RUN           force_jit: true, entry: "TestUnsupported::subIdx"
-    //! METHOD        "TestUnsupported::subIdx"
+    //! RUN           force_jit: true, entry: "memmove_unsupported.TestUnsupported::subIdx"
+    //! METHOD        "memmove_unsupported.TestUnsupported::subIdx"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
     static subIdx(): boolean

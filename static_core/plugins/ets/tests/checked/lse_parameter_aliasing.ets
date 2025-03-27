@@ -14,8 +14,8 @@
  */
 
 //! CHECKER      Check that LSE and AA work correctly with aliased parameters
-//! RUN          force_jit: true, options: "--compiler-regex='.*test.*'", entry: "ETSGLOBAL::main"
-//! METHOD       "ETSGLOBAL::test"
+//! RUN          force_jit: true, options: "--compiler-regex='.*test.*'", entry: "lse_parameter_aliasing.ETSGLOBAL::main"
+//! METHOD       "lse_parameter_aliasing.ETSGLOBAL::test"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "LoadArray", 3
 //! PASS_BEFORE  "Lowering"
@@ -24,12 +24,12 @@
 //! CHECKER      Check that LSE and AA work correctly with aliased parameters (AOT)
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC     options: "--compiler-regex='.*test.*'"
-//! METHOD       "ETSGLOBAL::test"
+//! METHOD       "lse_parameter_aliasing.ETSGLOBAL::test"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "LoadArray", 3
 //! PASS_BEFORE  "Lowering"
 //! INST_COUNT   "LoadArray", 3
-//! RUN          options: "", entry: "ETSGLOBAL::main"
+//! RUN          options: "", entry: "lse_parameter_aliasing.ETSGLOBAL::main"
 
 function test(a: String[][], b: String[][]): String {
     let x = a[0]

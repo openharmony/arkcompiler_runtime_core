@@ -327,7 +327,6 @@ ani_add_gtest(ani_test_class_ops_call_set_static_field_by_name_ref
 )
 
 ani_add_gtest(ani_test_class_ops_find_combination_in_module
-    ETS_NAMED_MODE
     ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_method_in_module_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_method_in_module_test.ets

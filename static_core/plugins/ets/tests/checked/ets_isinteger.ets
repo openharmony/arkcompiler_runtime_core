@@ -14,8 +14,8 @@
  */
 
 //! CHECKER     Codegen inlining ETS Float.isInteger
-//! RUN         force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ETSGLOBAL::main"
-//! ASM_METHOD  "ETSGLOBAL::main"
+//! RUN         force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ets_isinteger.ETSGLOBAL::main"
+//! ASM_METHOD  "ets_isinteger.ETSGLOBAL::main"
 //! ASM_INST    "Intrinsic.StdFloatIsInteger"
 //! ASM      x64: /xor.*/,                 arm64: /frintz.*/,             arm32: /vrintz\.f32.*/
 //! ASM_NEXT x64: /roundss.*/,             arm64: /fsub.*/,               arm32: /vsub\.f32.*/

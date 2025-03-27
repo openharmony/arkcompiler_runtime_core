@@ -15,8 +15,8 @@
 
 //! CHECKER      Check for method->isStatic assert
 //! SKIP_IF      @architecture == "arm32"
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ETSGLOBAL::main"
-//! EVENT        /Compilation,Test::wrapper,.*,COMPILED/
+//! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ets_async_lock_callback1.ETSGLOBAL::main"
+//! EVENT        /Compilation,ets_async_lock_callback1.Test::wrapper,.*,COMPILED/
 
 type AsyncLockCallback<T> = () => T | Promise<T>;
 

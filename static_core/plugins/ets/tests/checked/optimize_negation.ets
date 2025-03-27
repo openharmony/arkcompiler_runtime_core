@@ -14,9 +14,9 @@
  */
 
 //! CHECKER         Test check optimize bool Negation
-//! RUN             force_jit: true, options: "--compiler-regex='.*func.*' --compiler-inlining=false", entry: "ETSGLOBAL::main"
-//! EVENT           /Compilation,ETSGLOBAL::func,.*,COMPILED/
-//! METHOD          "ETSGLOBAL::func"
+//! RUN             force_jit: true, options: "--compiler-regex='.*func.*' --compiler-inlining=false", entry: "optimize_negation.ETSGLOBAL::main"
+//! EVENT           /Compilation,optimize_negation.ETSGLOBAL::func,.*,COMPILED/
+//! METHOD          "optimize_negation.ETSGLOBAL::func"
 //!
 //! PASS_BEFORE     "Peepholes"
 //! INST            "Xor "

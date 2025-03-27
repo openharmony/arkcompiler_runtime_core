@@ -56,7 +56,7 @@ using CoroInCctorDeathTest = CoroInCctorTest;
  */
 TEST_F(CoroInCctorDeathTest, FatalOnCoroSwitchInCctor)
 {
-    const std::string mainFunc = "ETSGLOBAL::main";
+    const std::string mainFunc = "coroswitch_in_cctor.ETSGLOBAL::main";
     EXPECT_EXIT(Runtime::GetCurrent()->ExecutePandaFile(abcFile_.c_str(), mainFunc.c_str(), {}),
                 testing::KilledBySignal(SIGABRT), ".*");
 }

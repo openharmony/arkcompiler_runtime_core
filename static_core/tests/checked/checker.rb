@@ -130,7 +130,6 @@ class SearchScope
 
   def find(match)
     return if match.nil?
-
     @current_index = @lines.index { |line| contains?(line, match) }
     raise_error "#{@name} not found: #{match_str(match)}" if @current_index.nil?
     @current_index += 1
@@ -140,6 +139,7 @@ class SearchScope
     return if match.nil?
 
     index = @lines.drop(@current_index).index { |line| contains?(line, match) }
+
     raise_error "#{@name} not found: #{match_str(match)}" if index.nil?
     @current_index += index + 1
   end
@@ -501,7 +501,6 @@ class Checker
 
   def IR_COUNT(match)
     return 0 if @options.release
-
     @ir_scope.lines.count { |inst| contains?(inst, match) && !contains?(inst, /^Method:/) }
   end
 
@@ -653,9 +652,9 @@ class Checker
 
   def METHOD(method)
     return if @options.release
-    @ir_files = Dir["#{@cwd}/ir_dump/*#{method.gsub(/::|[<>]/, '_')}*.ir"]
+    @ir_files = Dir["#{@cwd}/ir_dump/*#{method.gsub(/::|[<>]|\.|-/, '_')}*.ir"]
     @ir_files.sort!
-    raise_error "IR dumps not found for method: #{method.gsub(/::|[<>]/, '_')}" if @ir_files.empty?
+    raise_error "IR dumps not found for method: #{method.gsub(/::|[<>]|\.|-/, '_')}" if @ir_files.empty?
     $current_method = method
     @current_file_index = 0
   end
@@ -717,7 +716,6 @@ class Checker
    $current_method = nil
    $current_pass = nil
    if !@options.keep_data
-      FileUtils.rm_rf("#{@cwd}/ir_dump")
       FileUtils.rm_rf("#{@cwd}/events.csv")
       FileUtils.rm_rf("#{@cwd}/disasm.txt")
       FileUtils.rm_rf("#{@cwd}/console.out")

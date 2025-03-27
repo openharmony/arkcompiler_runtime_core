@@ -14,30 +14,30 @@
  */
 
 //! CHECKER      Check for safepoints without placement
-//! RUN          force_jit: true, options: "--compiler-enforce-safepoint-placement=false --compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ETSGLOBAL::main"
-//! EVENT        /Compilation,ETSGLOBAL::__noinline__func,.*,COMPILED/
-//! METHOD       "ETSGLOBAL::__noinline__func"
+//! RUN          force_jit: true, options: "--compiler-enforce-safepoint-placement=false --compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ets_safepoints.ETSGLOBAL::main"
+//! EVENT        /Compilation,ets_safepoints.ETSGLOBAL::__noinline__func,.*,COMPILED/
+//! METHOD       "ets_safepoints.ETSGLOBAL::__noinline__func"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "SafePoint",1
 
 //! CHECKER      Check for safepoints with placement
-//! RUN          force_jit: true, options: "--compiler-enforce-safepoint-placement=true --compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ETSGLOBAL::main"
-//! EVENT        /Compilation,ETSGLOBAL::__noinline__func,.*,COMPILED/
-//! METHOD       "ETSGLOBAL::__noinline__func"
+//! RUN          force_jit: true, options: "--compiler-enforce-safepoint-placement=true --compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ets_safepoints.ETSGLOBAL::main"
+//! EVENT        /Compilation,ets_safepoints.ETSGLOBAL::__noinline__func,.*,COMPILED/
+//! METHOD       "ets_safepoints.ETSGLOBAL::__noinline__func"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "SafePoint",4
 
 //! CHECKER      Check for safepoints with placement for distance 0
-//! RUN          force_jit: true, options: "--compiler-enforce-safepoint-placement=true --compiler-safepoint-distance-limit=0 --compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ETSGLOBAL::main"
-//! EVENT        /Compilation,ETSGLOBAL::__noinline__func,.*,COMPILED/
-//! METHOD       "ETSGLOBAL::__noinline__func"
+//! RUN          force_jit: true, options: "--compiler-enforce-safepoint-placement=true --compiler-safepoint-distance-limit=0 --compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ets_safepoints.ETSGLOBAL::main"
+//! EVENT        /Compilation,ets_safepoints.ETSGLOBAL::__noinline__func,.*,COMPILED/
+//! METHOD       "ets_safepoints.ETSGLOBAL::__noinline__func"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "SafePoint",6
 
 //! CHECKER      Check for safepoints with placement for distance 1
-//! RUN          force_jit: true, options: "--compiler-enforce-safepoint-placement=true --compiler-safepoint-distance-limit=1 --compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ETSGLOBAL::main"
-//! EVENT        /Compilation,ETSGLOBAL::__noinline__func,.*,COMPILED/
-//! METHOD       "ETSGLOBAL::__noinline__func"
+//! RUN          force_jit: true, options: "--compiler-enforce-safepoint-placement=true --compiler-safepoint-distance-limit=1 --compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ets_safepoints.ETSGLOBAL::main"
+//! EVENT        /Compilation,ets_safepoints.ETSGLOBAL::__noinline__func,.*,COMPILED/
+//! METHOD       "ets_safepoints.ETSGLOBAL::__noinline__func"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "SafePoint",6
 
