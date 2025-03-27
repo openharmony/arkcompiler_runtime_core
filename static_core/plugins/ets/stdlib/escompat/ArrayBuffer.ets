@@ -122,7 +122,7 @@ export class ArrayBuffer extends Buffer
 
         if (resultLength == 0) return result
         result.setValues(this, startIndex)
-        
+
         return result
     }
 
@@ -389,7 +389,7 @@ export class ArrayBuffer extends Buffer
         return ArrayBuffer.from(obj as ArrayBuffer, byteOffsetOrEncoding as int, length as int);
     }
 
-    
+
     // Fields' order is important due to alignment
     private data: FixedArray<byte> | undefined
     // Length in bytes

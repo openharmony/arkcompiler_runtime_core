@@ -258,4 +258,29 @@ void EtsCoroutine::OnHostWorkerChanged()
     GetLocalStorage().Set<DataIdx::INTEROP_CTX_PTR>(ptr);
 }
 
+void EtsCoroutine::ListUnhandledJobs()
+{
+    auto *vm = GetPandaVM();
+    vm->ListUnhandledFailedJobs();
+}
+
+void EtsCoroutine::ListUnhandledPromises()
+{
+    auto *vm = GetPandaVM();
+    vm->ListUnhandledRejectedPromises();
+}
+
+void EtsCoroutine::ListUnhandledEventsOnProgramExit()
+{
+    if (Runtime::GetOptions().IsArkAot()) {
+        return;
+    }
+    if (Runtime::GetOptions().IsListUnhandledOnExitJobs(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
+        ListUnhandledJobs();
+    }
+    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
+        ListUnhandledPromises();
+    }
+}
+
 }  // namespace ark::ets

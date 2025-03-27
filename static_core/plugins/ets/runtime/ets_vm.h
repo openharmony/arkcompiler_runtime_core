@@ -390,6 +390,24 @@ public:
         objStateTable_->DeflateInfo();
     }
 
+    /// @brief Adds failed job to an internal storage
+    void AddUnhandledFailedJob(EtsJob *job);
+
+    /// @brief Removes failed job from internal storage
+    void RemoveUnhandledFailedJob(EtsJob *job);
+
+    /// @brief Invokes managed method to apply custom handler on stored failed jobs
+    void ListUnhandledFailedJobs();
+
+    /// @brief Adds rejected promise to an internal storage
+    void AddUnhandledRejectedPromise(EtsPromise *promise);
+
+    /// @brief Removes rejected promise from internal storage
+    void RemoveUnhandledRejectedPromise(EtsPromise *promise);
+
+    /// @brief Invokes managed method to apply custom handler on stored rejected promises
+    void ListUnhandledRejectedPromises();
+
     PANDA_PUBLIC_API void AddRootProvider(mem::RootProvider *provider);
     PANDA_PUBLIC_API void RemoveRootProvider(mem::RootProvider *provider);
 
@@ -422,6 +440,9 @@ private:
 
     explicit PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm);
 
+    void AddUnhandledObjectImpl(PandaUnorderedSet<EtsObject *> &unhandledObjects, EtsObject *object);
+    void RemoveUnhandledObjectImpl(PandaUnorderedSet<EtsObject *> &unhandledObjects, EtsObject *object);
+
     Runtime *runtime_ {nullptr};
     mem::MemoryManager *mm_ {nullptr};
     PandaUniquePtr<EtsClassLinker> classLinker_;
@@ -450,6 +471,9 @@ private:
     DoubleToStringCache *doubleToStringCache_ {nullptr};
     FloatToStringCache *floatToStringCache_ {nullptr};
     LongToStringCache *longToStringCache_ {nullptr};
+    os::memory::Mutex unhandledMutex_;
+    PandaUnorderedSet<EtsObject *> unhandledFailedJobs_;
+    PandaUnorderedSet<EtsObject *> unhandledRejectedPromises_;
 
     PandaUniquePtr<EtsObjectStateTable> objStateTable_ {nullptr};
     RunEventLoopFunction runEventLoop_ = nullptr;

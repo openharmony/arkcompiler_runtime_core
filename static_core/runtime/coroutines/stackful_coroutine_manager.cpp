@@ -720,20 +720,30 @@ void StackfulCoroutineManager::DumpCoroutineStats() const
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager: performance statistics dumped successfully.";
 }
 
+void StackfulCoroutineManager::ListUnhandledEventsOnProgramExit()
+{
+    auto *coro = Coroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    coro->ListUnhandledEventsOnProgramExit();
+}
+
 void StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion()
 {
     os::memory::LockHolder lkCompletion(programCompletionLock_);
     // It's neccessary to read activeWorkersCount before coroutineCount to avoid deadlock
-    while (GetActiveWorkersCount() + 1 < coroutineCount_) {  // 1 is for MAIN
-        programCompletionEvent_->SetNotHappened();
-        programCompletionEvent_->Lock();
-        programCompletionLock_.Unlock();
-        GetCurrentWorker()->WaitForEvent(programCompletionEvent_);
-        LOG(DEBUG, COROUTINES)
-            << "StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion(): possibly spurious wakeup from wait...";
-        // NOTE(konstanting, #IAD5MH): test for the spurious wakeup
-        programCompletionLock_.Lock();
-    }
+    do {
+        while (GetActiveWorkersCount() + 1 < coroutineCount_) {  // 1 is for MAIN
+            programCompletionEvent_->SetNotHappened();
+            programCompletionEvent_->Lock();
+            programCompletionLock_.Unlock();
+            GetCurrentWorker()->WaitForEvent(programCompletionEvent_);
+            LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion(): possibly "
+                                      "spurious wakeup from wait...";
+            // NOTE(konstanting, #IAD5MH): test for the spurious wakeup
+            programCompletionLock_.Lock();
+        }
+        ListUnhandledEventsOnProgramExit();
+    } while (GetActiveWorkersCount() + 1 < coroutineCount_);  // 1 is for MAIN
     // coroutineCount_ < 1 + GetActiveWorkersCount() in case of concurrent EWorker destroy
     // in this case coroutineCount_ >= 1 + GetActiveWorkersCount() - ExclusiveWorkersCount()
     ASSERT(!(GetActiveWorkersCount() + 1 < coroutineCount_));

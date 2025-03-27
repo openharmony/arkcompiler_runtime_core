@@ -211,6 +211,9 @@ private:
     void IncrementActiveCoroutines();
     void DecrementActiveCoroutines();
 
+    /// list unhandled language specific events on program exit
+    void ListUnhandledEventsOnProgramExit();
+
     StackfulCoroutineWorker *ChooseWorkerForFinalization();
 
     void InitializeWorkerIdAllocator();

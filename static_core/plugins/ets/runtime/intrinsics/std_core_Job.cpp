@@ -52,6 +52,11 @@ EtsObject *EtsAwaitJob(EtsJob *job)
         return jobHandle->GetValue(currentCoro);
     }
     LOG(DEBUG, COROUTINES) << "Job::await: job is failed!";
+
+    if (Runtime::GetOptions().IsListUnhandledOnExitJobs(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
+        currentCoro->GetPandaVM()->RemoveUnhandledFailedJob(jobHandle.GetPtr());
+    }
+
     auto *exc = jobHandle->GetValue(currentCoro);
     currentCoro->SetException(exc->GetCoreType());
     return nullptr;
@@ -86,6 +91,7 @@ void EtsFailJob(EtsJob *job, EtsObject *error)
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsJob> hjob(coro, job);
     EtsHandle<EtsObject> herror(coro, error);
+    EtsMutex::LockHolder lh(hjob);
 
     EtsClassLinker *classLinker = coro->GetPandaVM()->GetClassLinker();
     auto *errorClass = classLinker->GetClass(panda_file_items::class_descriptors::ERROR.data());
