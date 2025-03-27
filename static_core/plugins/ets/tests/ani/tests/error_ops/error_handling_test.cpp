@@ -83,6 +83,12 @@ TEST_F(ErrorHandlingTest, exist_unhandled_error_test)
     ASSERT_EQ(result, ANI_TRUE);
 }
 
+TEST_F(ErrorHandlingTest, exist_unhandled_error_invalid_env_test)
+{
+    ani_boolean result = ANI_TRUE;
+    ASSERT_EQ(env_->c_api->ExistUnhandledError(nullptr, &result), ANI_INVALID_ARGS);
+}
+
 TEST_F(ErrorHandlingTest, reset_error_test)
 {
     auto func = GetThrowErrorFunction();
@@ -359,6 +365,11 @@ TEST_F(ErrorHandlingTest, reset_multiple_call_test_4)
     }
 }
 
+TEST_F(ErrorHandlingTest, reset_env_invalid_test)
+{
+    ASSERT_EQ(env_->c_api->ResetError(nullptr), ANI_INVALID_ARGS);
+}
+
 TEST_F(ErrorHandlingTest, describe_multiple_call_test_1)
 {
     auto func = GetThrowErrorFunction();
@@ -410,6 +421,11 @@ TEST_F(ErrorHandlingTest, describe_multiple_call_test_5)
     for (int i = 0; i < LOOP_COUNT; i++) {
         ASSERT_EQ(env_->DescribeError(), ANI_OK);
     }
+}
+
+TEST_F(ErrorHandlingTest, describe_env_invalid_test)
+{
+    ASSERT_EQ(env_->c_api->DescribeError(nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(ErrorHandlingTest, throw_multiple_call_test)

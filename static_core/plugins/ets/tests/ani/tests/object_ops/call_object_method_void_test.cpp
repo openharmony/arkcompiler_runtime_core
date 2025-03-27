@@ -157,6 +157,18 @@ TEST_F(CallObjectMethodVoidTest, call_method_void_a_invalid_args)
 
     ASSERT_EQ(env_->Object_CallMethod_Void_A(object, voidMethod, nullptr), ANI_INVALID_ARGS);
 }
+
+TEST_F(CallObjectMethodVoidTest, call_method_void_invalid_env)
+{
+    ani_object object;
+    ani_method voidMethod;
+    ani_method getMethod;
+    GetMethodData(&object, &voidMethod, &getMethod);
+    ani_int arg1 = 2;
+    ani_int arg2 = 3;
+
+    ASSERT_EQ(env_->c_api->Object_CallMethod_Void(nullptr, object, voidMethod, arg1, arg2), ANI_INVALID_ARGS);
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
