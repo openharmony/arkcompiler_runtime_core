@@ -133,4 +133,17 @@ TEST_F(TupleOpsTest, identicalTuple)
     }
 }
 
+TEST_F(TupleOpsTest, incorrectElementType)
+{
+    auto tuple = GetTupleWithCheck("tuple", "getCharTuple");
+    ani_boolean booleanValue = ANI_FALSE;
+    ASSERT_EQ(env_->TupleValue_GetItem_Boolean(tuple, 0U, &booleanValue), ANI_INVALID_TYPE);
+    ASSERT_EQ(env_->TupleValue_SetItem_Boolean(tuple, 0U, booleanValue), ANI_INVALID_TYPE);
+
+    auto boxedPrimitivesTuple = GetTupleWithCheck("tuple", "getTestPrimitiveTuple");
+    ani_char charValue = ANI_FALSE;
+    ASSERT_EQ(env_->TupleValue_GetItem_Char(boxedPrimitivesTuple, 0U, &charValue), ANI_INVALID_TYPE);
+    ASSERT_EQ(env_->TupleValue_SetItem_Char(boxedPrimitivesTuple, 0U, charValue), ANI_INVALID_TYPE);
+}
+
 }  // namespace ark::ets::ani::testing
