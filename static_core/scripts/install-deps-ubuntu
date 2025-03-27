@@ -256,12 +256,37 @@ function install_cross_libs
     echo "Success"
 }
 
+function install_python3_10_ubuntu20_04
+{
+  echo "Installing python 3.10..."
+  apt install software-properties-common -y --no-install-recommends
+
+  local py310_repo=${PY310_REPO:-'ppa:deadsnakes/ppa'}
+  local pip_url=${PIP_REPO:-'https://bootstrap.pypa.io/get-pip.py'}
+
+  if [[ ${PY310_REPO} ]]; then
+    echo "Adding key for python3.10 repository"
+    curl --retry 5 --retry-delay 10 -k "${PY310_REPO_KEY}" | apt-key add -
+  fi
+
+  add-apt-repository "$py310_repo"
+  apt update
+  apt install -y python3.10 python3.10-venv python3.10-dev
+  echo "Installation python 3.10 complete"
+
+  echo "Set python3.10 higher priority"
+  update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+  update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
+  update-alternatives --set python3 /usr/bin/python3.10
+
+  echo "Installing pip for python3.10"
+  curl --retry 5 --retry-delay 10 -sS "$pip_url" | python3.10
+  echo "pip installation complete"
+
+}
+
 function install_python_dependencies
 {
-    if [[ $VERSION_ID == "18.04" ]]; then
-        echo "Install python 3.8"
-        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
-    fi
 
     local REQUIREMENTS_BASE_PYTHON3_NAME=$SCRIPT_DIR/dep-lists/requirements-base-python3
     local REQUIREMENTS_ALL_PYTHON3_NAME=$SCRIPT_DIR/dep-lists/requirements-python3
@@ -473,6 +498,10 @@ if [[ "x$ADD_TOOLCHAIN_REPOS" == "xyes" ]] ; then
 fi
 
 install_dep "$SCRIPT_DIR/dep-lists/$UBUNTU_NAME-build"
+
+if [[ $VERSION_ID == "20.04" ]]; then
+         install_python3_10_ubuntu20_04
+fi
 
 if [[ "x$INSTALL_DEV" == "xyes" ]] ; then
     install_dep "$SCRIPT_DIR/dep-lists/$UBUNTU_NAME-dev"
