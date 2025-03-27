@@ -18,7 +18,13 @@ cd $PANDA_ROOT/tests/vm-benchmarks
 # assume PANDA and VMB are built and installed per interop.readme.md
 export PANDA_BUILD=$PANDA_ROOT/build
 export PANDA_STDLIB_SRC=$PANDA_ROOT/plugins/ets/stdlib
-vmb all -p arkts_node_interop_host --aot-skip-libs -v debug $PANDA_ROOT/tests/vm-benchmarks/examples/benchmarks-interop-templates
+vmb all -p arkts_node_interop_host --aot-skip-libs -v debug \
+  --ark-custom-option=--gc-trigger-type=heap-trigger \
+  --ark-custom-option=--compiler-enable-jit=true \
+  --ark-custom-option=--run-gc-in-place=false \
+  --ark-custom-option=--log-components=ets_interop_js \
+  --ark-custom-option=--load-runtimes=ets \
+  $PANDA_ROOT/tests/vm-benchmarks/examples/benchmarks-interop-templates
 ```
 
 ## Example results output
@@ -34,4 +40,23 @@ BenchA2a_test | 4.02e-01 | 1.52e+05 | 5.97e+04 | Passed  |
 BenchA2j_test | 4.92e+08 | 1.52e+05 | 1.14e+05 | Passed  |
 benchJ2a_test | 2.86e+04 | 1.46e+05 | 4.52e+05 | Passed  |
 benchJ2j_test | 4.58e-01 | 0.00e+00 | 4.71e+04 | Passed  |
+```
+
+# How to run for ArkjsVM
+
+Along with [Prerequisites](#Prerequisites) above, ArkjsVM is built and installed per [tests/interop_js/README.MD](../../../../plugins/ets/tests/interop_js/README.MD)
+
+```
+cd $PANDA_ROOT/tests/vm-benchmarks
+# assume ArkjsVM built and installed per $PANDA_ROOT/plugins/ets/tests/interop_js/README.MD
+# assume PANDA and VMB are built and installed per $PANDA_ROOT/tests/vm-benchmarks/interop.readme.md
+export PANDA_BUILD=$PANDA_ROOT/build
+export PANDA_STDLIB_SRC=$PANDA_ROOT/plugins/ets/stdlib
+vmb all -p arkts_arkjs_interop_host --aot-skip-libs -v debug \
+  --ark-custom-option=--gc-trigger-type=heap-trigger \
+  --ark-custom-option=--compiler-enable-jit=true \
+  --ark-custom-option=--run-gc-in-place=false \
+  --ark-custom-option=--log-components=ets_interop_js \
+  --ark-custom-option=--load-runtimes=ets \
+  $PANDA_ROOT/tests/vm-benchmarks/examples/benchmarks-interop-templates
 ```

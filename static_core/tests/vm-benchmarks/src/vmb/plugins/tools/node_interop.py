@@ -48,6 +48,16 @@ class Tool(ToolBase):
             f'{self.node} --version').grep(r'v([0-9\.]+)')
 
     def exec(self, bu: BenchUnit) -> None:
+        def ets_vm_opts() -> str:
+            # convert to string for JSON parse: '{"name1": "value1", "name2": "value2"}'
+            # and names of the options should be without minus signs "name1" not "--name1"
+            if not self.custom_opts or not self.custom_opts.get('ark'):
+                return '{}'
+            ets_vm_opts: str = str(self.custom_opts.get('ark'))
+            return ((ets_vm_opts.replace('[\'', '{\"').replace('\']', '\"}')
+                    .replace('=', '\": \"').replace('\', \'', '\", \"'))
+                    .replace('\"--', '\"'))
+
         js = bu.src('.js')
         if not js.is_file():
             # for bu_a2j
@@ -56,6 +66,7 @@ class Tool(ToolBase):
         formatted_cmd = self.cmd.format(test_zip=test_zip,
                                         test_js=js
                                         )
-        res = self.x_run(formatted_cmd,
+        with_ets_vm_opts: str = f'ETS_VM_OPTS=\'{ets_vm_opts()}\' '
+        res = self.x_run(f'{with_ets_vm_opts} {formatted_cmd}',
                          measure_time=True)
         bu.parse_run_output(res)

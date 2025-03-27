@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -35,7 +35,7 @@ class Platform(PlatformBase):
         ensure_env_var('PANDA_BUILD')
         super().__init__(args)
         self.es2panda = self.tools_get('es2panda')
-        self.node = self.tools_get('node_interop')
+        self.node = self.tools_get('ark_js_vm')
         self.ark = self.tools_get('ark')
 
     @property
@@ -48,12 +48,13 @@ class Platform(PlatformBase):
 
     @property
     def required_tools(self) -> List[str]:
-        return ['es2panda', 'node_interop', 'ark']
+        # Note #23757 this needs to be further tested and possibly adjusted
+        return ['es2panda', 'ark_js_vm', 'ark']
 
     @property
     def langs(self) -> List[str]:
         """Use this lang plugins."""
-        return ['interop']
+        return ['interop_arkjs']
 
     @property
     def template(self) -> Optional[GenSettings]:

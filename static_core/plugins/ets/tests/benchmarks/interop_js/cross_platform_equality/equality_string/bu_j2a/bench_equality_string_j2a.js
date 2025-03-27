@@ -28,17 +28,7 @@ function equalityStringJ2a() {
      */
     this.setup = function () {
         console.log('Starting...');
-        let penv = process.env;
-        let stsVm = require(penv.MODULE_PATH + '/ets_interop_js_napi.node');
-        const stsRT = stsVm.createRuntime({
-            'boot-panda-files': penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-            'panda-files': penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-        });
-
-        if (!stsRT) {
-            console.error('Failed to create ETS runtime');
-            return 1;
-        }
+        let stsVm = initEtsVm();
 
         const State = stsVm.getClass('LEqualityStringJ2a;');
 
