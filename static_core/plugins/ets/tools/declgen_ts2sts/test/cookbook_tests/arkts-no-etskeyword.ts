@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 
-export const JSValue: string = 'JSValue';
-export const KitPrefix: string[] = ['@kit.', '@ohos.'];
-export const ETSKeyword: string[] = ['ESObject', 'Class', 'MethodType'];
-
+export interface Class<T>{
+    name:string;
+    age:number;    
+  }
+export class MyClass{
+    name:string;
+    ESObject: string;
+  }

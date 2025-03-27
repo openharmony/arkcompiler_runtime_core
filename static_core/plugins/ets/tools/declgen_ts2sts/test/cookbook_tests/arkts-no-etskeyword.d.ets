@@ -12,8 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export const JSValue: string = 'JSValue';
-export const KitPrefix: string[] = ['@kit.', '@ohos.'];
-export const ETSKeyword: string[] = ['ESObject', 'Class', 'MethodType'];
-
+export declare class MyClass {
+    name: string;
+}

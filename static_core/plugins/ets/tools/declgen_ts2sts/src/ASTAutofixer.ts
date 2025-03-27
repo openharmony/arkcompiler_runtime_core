@@ -17,7 +17,7 @@ import * as ts from 'typescript';
 
 import { FaultID } from '../utils/lib/FaultId';
 import { visitVisitResult } from './utils/ASTHelpers';
-import { JSValue, KitPrefix } from '../utils/lib/TypeUtils';
+import { JSValue, KitPrefix, ETSKeyword } from '../utils/lib/TypeUtils';
 
 export class Autofixer {
   private readonly typeChecker: ts.TypeChecker;
@@ -35,7 +35,11 @@ export class Autofixer {
     ],
     [
       ts.SyntaxKind.PropertyDeclaration,
-      [this[FaultID.PrivateIdentifier].bind(this), this[FaultID.NoInitializer].bind(this)]
+      [
+        this[FaultID.PrivateIdentifier].bind(this), 
+        this[FaultID.NoInitializer].bind(this),
+        this[FaultID.NoETSKeyword].bind(this)
+      ]
     ],
     [
       ts.SyntaxKind.SourceFile,
@@ -53,7 +57,8 @@ export class Autofixer {
       [
         this[FaultID.StringTypeAlias].bind(this),
         this[FaultID.IndexAccessType].bind(this),
-        this[FaultID.ConditionalTypes].bind(this)
+        this[FaultID.ConditionalTypes].bind(this),
+        this[FaultID.TypeQuery].bind(this)
       ]
     ],
     [ts.SyntaxKind.ModuleDeclaration, [this[FaultID.Module].bind(this)]],
@@ -69,10 +74,9 @@ export class Autofixer {
     [ts.SyntaxKind.TypeLiteral, [this[FaultID.TypeLiteral].bind(this)]],
     [ts.SyntaxKind.AnyKeyword, [this[FaultID.AnyToJSValue].bind(this)]],
     [ts.SyntaxKind.UnknownKeyword, [this[FaultID.UnknownToJSValue].bind(this)]],
-    [
-      ts.SyntaxKind.Identifier,
-      [this[FaultID.ESObjectToJSValue].bind(this), this[FaultID.WrapperToPrimitive].bind(this)]
-    ],
+    [ts.SyntaxKind.ClassDeclaration, [this[FaultID.NoETSKeyword].bind(this)]],
+    [ts.SyntaxKind.InterfaceDeclaration, [this[FaultID.NoETSKeyword].bind(this)]],
+    [ts.SyntaxKind.Identifier, [this[FaultID.WrapperToPrimitive].bind(this)]],
     [ts.SyntaxKind.SymbolKeyword, [this[FaultID.SymbolToJSValue].bind(this)]],
     [ts.SyntaxKind.IntersectionType, [this[FaultID.IntersectionTypeJSValue].bind(this)]],
     [ts.SyntaxKind.TypeReference, [this[FaultID.ObjectParametersToJSValue].bind(this)]],
@@ -81,8 +85,10 @@ export class Autofixer {
       ts.SyntaxKind.FunctionDeclaration,
       [this[FaultID.GeneratorFunction].bind(this), this[FaultID.ObjectBindingParams].bind(this)]
     ],
-    [ts.SyntaxKind.TypeQuery, [this[FaultID.ReflectQuery].bind(this)]],
-    [ts.SyntaxKind.TypeParameter, [this[FaultID.LiteralType].bind(this)]]
+    [ts.SyntaxKind.TypeQuery, [this[FaultID.TypeQuery].bind(this)]],
+    [ts.SyntaxKind.TypeParameter, [this[FaultID.LiteralType].bind(this)]],
+    [ts.SyntaxKind.ClassDeclaration, [this[FaultID.NoPrivateMember].bind(this)]],
+    [ts.SyntaxKind.MethodDeclaration, [this[FaultID.NoETSKeyword].bind(this)]]
   ]);
 
   fixNode(node: ts.Node): ts.VisitResult<ts.Node> {
@@ -417,23 +423,6 @@ export class Autofixer {
   }
 
   /**
-   * Rule: `arkts-no-ESObject`
-   */
-  private [FaultID.ESObjectToJSValue](node: ts.Node): ts.VisitResult<ts.Node> {
-    /**
-     * ESObject mapped to JSValue in arkts1.2
-     */
-
-    if (ts.isIdentifier(node)) {
-      if (node.text !== undefined && node.text === 'ESObject') {
-        return this.context.factory.createTypeReferenceNode(JSValue);
-      }
-    }
-
-    return node;
-  }
-
-  /**
    * Rule: `arkts-no-duplicated-declaration`
    */
   private [FaultID.DuplicatedDeclaration](node: ts.Node): ts.VisitResult<ts.Node> {
@@ -490,7 +479,7 @@ export class Autofixer {
         switch (typeName.text) {
           case 'Object':
           case 'Function':
-            return ts.factory.createTypeReferenceNode('JSValue', undefined);
+            return ts.factory.createTypeReferenceNode(JSValue, undefined);
           default:
             return node;
         }
@@ -647,7 +636,7 @@ export class Autofixer {
         parameters.forEach((parameter, index) => {
           if (ts.isObjectBindingPattern(parameter.name)) {
             const typeNode = this.context.factory.createTypeReferenceNode(
-              this.context.factory.createIdentifier('JSValue'),
+              this.context.factory.createIdentifier(JSValue),
               undefined
             );
             const currentParamter = this.context.factory.createParameterDeclaration(
@@ -680,18 +669,39 @@ export class Autofixer {
   }
 
   /**
-   * Rule: `arkts-no-reflect-query`
+   * Rule: `arkts-no-type-query`
    */
-  private [FaultID.ReflectQuery](node: ts.Node): ts.VisitResult<ts.Node> {
+  private [FaultID.TypeQuery](node: ts.Node): ts.VisitResult<ts.Node> {
     void this;
 
     /**
-     * ReflectQuery mapped to Reflect in arkts1.2
+     * TypeQuery mapped to Reflect in arkts1.2
      */
-
+    const identifiers = new Set(['Reflect', 'Promise']);
     if (ts.isTypeQueryNode(node) && ts.isIdentifier(node.exprName)) {
-      if (node.exprName.text === 'Reflect') {
-        return this.context.factory.createIdentifier('Reflect');
+      if (identifiers.has(node.exprName.text)) {
+        return this.context.factory.createTypeReferenceNode(node.exprName.text, undefined);
+      } else {
+        return this.context.factory.createTypeReferenceNode(JSValue, undefined);
+      }
+    } else if (ts.isTypeAliasDeclaration(node) && (node.type !== undefined && ts.isTypeReferenceNode(node.type))) {
+      const referenceNode = node.type as ts.TypeReferenceNode;
+      let updateReferenceNode = false;
+      referenceNode.forEachChild(child => {
+        if (ts.isTypeReferenceNode(child)) {
+          const identifier = child.typeName as ts.Identifier;
+          updateReferenceNode = (identifier !== undefined && identifier.text === JSValue);
+        }
+      });
+   
+      if (updateReferenceNode) {
+        updateReferenceNode = false;
+        return ts.factory.createTypeAliasDeclaration(
+          node.modifiers,
+          node.name,
+          undefined,
+          ts.factory.createTypeReferenceNode(JSValue)
+        );
       }
     }
 
@@ -822,6 +832,62 @@ export class Autofixer {
       }
     }
 
+    return node;
+  }
+
+    /**
+   * Rule: `arkts-no-private-members`
+   */
+  private [FaultID.NoPrivateMember](node: ts.Node): ts.VisitResult<ts.Node> {
+    void this;
+
+    /**
+     * For members modified by private, they do not appear in the declaration file.
+     */
+    if (ts.isClassDeclaration(node)) {
+      const newMembers = node.members.filter((member) => {
+        if (!ts.canHaveModifiers(member)) {
+          return true;
+        }
+        const modifiers = ts.getModifiers(member);
+        return !(modifiers === null || modifiers === void 0 ?
+          void 0 :
+          modifiers.some((modifier) => {
+            return modifier.kind === ts.SyntaxKind.PrivateKeyword;
+          }));
+      });
+      const nodeCanHaveModifiers = ts.canHaveModifiers(node);
+      const validModifiers = nodeCanHaveModifiers ? ts.getModifiers(node) : undefined;
+      return ts.factory.createClassDeclaration(
+        validModifiers,
+        node.name,
+        node.typeParameters,
+        node.heritageClauses,
+        newMembers
+      );
+    }
+
+    return node;
+  }
+
+  /**
+   * Rule: `arkts-no-etskeyword`
+   */
+  private [FaultID.NoETSKeyword](node: ts.Node): ts.VisitResult<ts.Node> {
+    void this;
+
+    /**
+     * Remove some ets keyword from the declaration.
+     */
+
+    if (
+      ts.isClassDeclaration(node) ||
+      ts.isInterfaceDeclaration(node) ||
+      ts.isMethodDeclaration(node) ||
+      ts.isPropertyDeclaration(node)
+    ) {
+      return restrictIdentifierName(node);
+    }
     return node;
   }
 }
@@ -1172,7 +1238,7 @@ function shouldReplaceTypeReference(typeName: ts.EntityName, typeAliasMap: Map<s
  * Replace the type reference
  */
 function replaceTypeReference(node: ts.TypeReferenceNode, context: ts.TransformationContext): ts.Node {
-  return context.factory.createTypeReferenceNode(context.factory.createIdentifier('JSValue'), undefined);
+  return context.factory.createTypeReferenceNode(context.factory.createIdentifier(JSValue), undefined);
 }
 
 /**
@@ -1615,4 +1681,17 @@ function findSameInterfaceOrClassOrEnumList(
   });
 
   return [...uniqueNodes, ...newNodes];
+}
+  
+function restrictIdentifierName(
+  node: ts.PropertyDeclaration | ts.MethodDeclaration | ts.ClassDeclaration | ts.InterfaceDeclaration
+): ts.VisitResult<ts.Node> {
+  const restrictedNames = ETSKeyword;
+  const name = node.name;
+
+  if (name && ts.isIdentifier(name) && restrictedNames.includes(name.text)) {
+    return undefined;
+  }
+
+  return node;
 }
