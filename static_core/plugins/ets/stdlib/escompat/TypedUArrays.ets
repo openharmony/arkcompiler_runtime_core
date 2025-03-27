@@ -89,6 +89,7 @@ class Uint8ClampedArrayIteratorEntries implements IterableIterator<[Number, Numb
  */
 export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 1
+    public readonly BYTES_PER_ELEMENT: number = Uint8ClampedArray.BYTES_PER_ELEMENT
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBufferLike
@@ -1364,7 +1365,8 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
             }
         if (compareFn != undefined) {
             cmp = (l: int, r: int): number => {
-                return compareFn!(l as number, r as number)
+                const result = compareFn!(l as number, r as number)
+                return result
             }
         }
         sort(arr, cmp)
@@ -2020,6 +2022,7 @@ class Uint8ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
  */
 export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 1
+    public readonly BYTES_PER_ELEMENT: number = Uint8Array.BYTES_PER_ELEMENT
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBufferLike
@@ -3318,7 +3321,8 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             }
         if (compareFn != undefined) {
             cmp = (l: int, r: int): number => {
-                return compareFn!(l as number, r as number)
+                const result = compareFn!(l as number, r as number)
+                return result
             }
         }
         sort(arr, cmp)
@@ -3968,6 +3972,7 @@ class Uint16ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
  */
 export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 2
+    public readonly BYTES_PER_ELEMENT: number = Uint16Array.BYTES_PER_ELEMENT
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBufferLike
@@ -5258,7 +5263,8 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             }
         if (compareFn != undefined) {
             cmp = (l: int, r: int): number => {
-                return compareFn!(l as number, r as number)
+                const result = compareFn!(l as number, r as number)
+                return result
             }
         }
         sort(arr, cmp)
@@ -5908,6 +5914,7 @@ class Uint32ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
  */
 export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 4
+    public readonly BYTES_PER_ELEMENT: number = Uint32Array.BYTES_PER_ELEMENT
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBufferLike
@@ -7240,7 +7247,8 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             }
         if (compareFn != undefined) {
             cmp = (l: long, r: long): number => {
-                return compareFn!(l as number, r as number)
+                const result = compareFn!(l as number, r as number)
+                return result
             }
         }
         sort(arr, cmp)
@@ -7890,6 +7898,7 @@ class BigUint64ArrayIteratorEntries implements IterableIterator<[Number, BigInt]
  */
 export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
     public static readonly BYTES_PER_ELEMENT: number = 8
+    public readonly BYTES_PER_ELEMENT: number = BigUint64Array.BYTES_PER_ELEMENT
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBufferLike
@@ -9232,7 +9241,7 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
      *
      * @returns sorted BigUint64Array
      */
-    public sort(compareFn?: (a: BigInt, b: BigInt) => number): this {
+    public sort(compareFn?: (a: BigInt, b: BigInt) => number | BigInt): this {
         let arr: long[] = new long[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
@@ -9242,7 +9251,12 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
             }
         if (compareFn != undefined) {
             cmp = (l: long, r: long): number => {
-                return compareFn!(new BigInt(l), new BigInt(r))
+                const result = compareFn!(new BigInt(l), new BigInt(r))
+                if (result instanceof BigInt) {
+                    return (result as BigInt).getLong()
+                } else {
+                    return result as number
+                }
             }
         }
         sort(arr, cmp)

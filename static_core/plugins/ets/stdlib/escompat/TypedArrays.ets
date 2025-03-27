@@ -85,6 +85,7 @@ class Int8ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
  */
 export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 1
+    public readonly BYTES_PER_ELEMENT: number = Int8Array.BYTES_PER_ELEMENT
     internal readonly lengthInt: int
 
     /**
@@ -1611,7 +1612,8 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
             }
         if (compareFn != undefined) {
             cmp = (l: byte, r: byte): number => {
-                return compareFn!(l as number, r as number)
+                const result = compareFn!(l as number, r as number)
+                return result
             }
         }
         sort(arr, cmp)
@@ -2045,6 +2047,7 @@ class Int16ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
  */
 export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 2
+    public readonly BYTES_PER_ELEMENT: number = Int16Array.BYTES_PER_ELEMENT
     internal readonly lengthInt: int
 
     /**
@@ -3578,7 +3581,8 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
             }
         if (compareFn != undefined) {
             cmp = (l: short, r: short): number => {
-                return compareFn!(l as number, r as number)
+                const result = compareFn!(l as number, r as number)
+                return result
             }
         }
         sort(arr, cmp)
@@ -4016,6 +4020,7 @@ class Int32ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
  */
 export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 4
+    public readonly BYTES_PER_ELEMENT: number = Int32Array.BYTES_PER_ELEMENT
     internal readonly lengthInt: int
 
     /**
@@ -5507,7 +5512,8 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
             }
         if (compareFn != undefined) {
             cmp = (l: int, r: int): number => {
-                return compareFn!(l as number, r as number)
+                const result = compareFn!(l as number, r as number)
+                return result
             }
         }
         sort(arr, cmp)
@@ -5945,6 +5951,7 @@ class BigInt64ArrayIteratorEntries implements IterableIterator<[Number, BigInt]>
  */
 export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
     public static readonly BYTES_PER_ELEMENT: number = 8
+    public readonly BYTES_PER_ELEMENT: number = BigInt64Array.BYTES_PER_ELEMENT
     internal readonly lengthInt: int
 
     /**
@@ -7485,7 +7492,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns sorted BigInt64Array
      */
-    public sort(compareFn?: (a: BigInt, b: BigInt) => number): this {
+    public sort(compareFn?: (a: BigInt, b: BigInt) => number | BigInt): this {
         let arr: long[] = new long[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
@@ -7495,7 +7502,12 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
             }
         if (compareFn != undefined) {
             cmp = (l: long, r: long): number => {
-                return compareFn!(new BigInt(l), new BigInt(r))
+                const result = compareFn!(new BigInt(l), new BigInt(r))
+                if (result instanceof BigInt) {
+                    return (result as BigInt).getLong()
+                } else {
+                    return result as number
+                }
             }
         }
         sort(arr, cmp)
@@ -7933,6 +7945,7 @@ class Float32ArrayIteratorEntries implements IterableIterator<[Number, Number]> 
  */
 export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 4
+    public readonly BYTES_PER_ELEMENT: number = Float32Array.BYTES_PER_ELEMENT
     internal readonly lengthInt: int
 
     /**
@@ -9447,7 +9460,8 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
             }
         if (compareFn != undefined) {
             cmp = (l: float, r: float): number => {
-                return compareFn!(l as number, r as number)
+                const result = compareFn!(l as number, r as number)
+                return result
             }
         }
         sort(arr, cmp)
@@ -9885,6 +9899,7 @@ class Float64ArrayIteratorEntries implements IterableIterator<[Number, Number]> 
  */
 export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 8
+    public readonly BYTES_PER_ELEMENT: number = Float64Array.BYTES_PER_ELEMENT
     internal readonly lengthInt: int
 
     /**
@@ -11263,7 +11278,8 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             }
         if (compareFn != undefined) {
             cmp = (l: double, r: double): number => {
-                return compareFn!(l as number, r as number)
+                const result = compareFn!(l as number, r as number)
+                return result
             }
         }
         sort(arr, cmp)

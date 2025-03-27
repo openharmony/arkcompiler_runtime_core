@@ -105,6 +105,7 @@ class {{element['name']}}ArrayIteratorEntries implements IterableIterator<{{subs
  */
 export class {{element['name']}}Array implements Iterable<{{element['subsetTypeValues']}}>, ArrayLike<{{element['subsetTypeValues']}}> {
     public static readonly BYTES_PER_ELEMENT: number = {{element['bytes']}}
+    public readonly BYTES_PER_ELEMENT: number = {{element['name']}}Array.BYTES_PER_ELEMENT
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBufferLike
@@ -1531,7 +1532,12 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @returns sorted {{element['name']}}Array
      */
-    public sort(compareFn?: (a: {{element['subsetType']}}, b: {{element['subsetType']}}) => number): this {
+    {%- if element['name'] == 'BigUint64' %}
+    {%- set sortCompareFnRetTy = 'number | BigInt' %}
+    {%- else %}
+    {%- set sortCompareFnRetTy = 'number' %}
+    {%- endif %}
+    public sort(compareFn?: (a: {{element['subsetType']}}, b: {{element['subsetType']}}) => {{sortCompareFnRetTy}}): this {
         let arr: {{element['primitiveType']}}[] = new {{element['primitiveType']}}[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
@@ -1541,7 +1547,16 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
             }
         if (compareFn != undefined) {
             cmp = (l: {{element['primitiveType']}}, r: {{element['primitiveType']}}): number => {
-                return compareFn!({{asElementCompat % 'l'}}, {{asElementCompat % 'r'}})
+                const result = compareFn!({{asElementCompat % 'l'}}, {{asElementCompat % 'r'}})
+                {%- if element['name'] == 'BigUint64' %}
+                if (result instanceof BigInt) {
+                    return (result as BigInt).getLong()
+                } else {
+                    return result as number
+                }
+                {%- else %}
+                return result
+                {%- endif %}
             }
         }
         sort(arr, cmp)
