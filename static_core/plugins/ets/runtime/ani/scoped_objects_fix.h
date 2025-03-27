@@ -266,18 +266,19 @@ public:
     ani_status EnsureLocalEnoughRefs(ani_size nrRefs)
     {
         ANI_CHECK_RETURN_IF_EQ(nrRefs, 0, ANI_INVALID_ARGS);
-        ANI_CHECK_RETURN_IF_GT(nrRefs, std::numeric_limits<size_t>::max(), ANI_INVALID_ARGS);
+        ANI_CHECK_RETURN_IF_GT(nrRefs, std::numeric_limits<uint32_t>::max(), ANI_OUT_OF_MEMORY);
 
-        auto etsNrRefs = static_cast<size_t>(nrRefs);
+        auto etsNrRefs = static_cast<uint32_t>(nrRefs);
         bool ret = GetRefStorage()->EnsureLocalEtsCapacity(etsNrRefs);
         ANI_CHECK_RETURN_IF_EQ(ret, false, ANI_OUT_OF_MEMORY);
+
         return ANI_OK;
     }
 
     ani_status CreateLocalScope(ani_size nrRefs)
     {
         ANI_CHECK_RETURN_IF_EQ(nrRefs, 0, ANI_INVALID_ARGS);
-        ANI_CHECK_RETURN_IF_GT(nrRefs, std::numeric_limits<uint32_t>::max(), ANI_INVALID_ARGS);
+        ANI_CHECK_RETURN_IF_GT(nrRefs, std::numeric_limits<uint32_t>::max(), ANI_OUT_OF_MEMORY);
 
         auto nrRefsU32 = static_cast<uint32_t>(nrRefs);
         bool ret = GetRefStorage()->PushLocalEtsFrame(nrRefsU32);
@@ -294,7 +295,7 @@ public:
     ani_status CreateEscapeLocalScope(ani_size nrRefs)
     {
         ANI_CHECK_RETURN_IF_EQ(nrRefs, 0, ANI_INVALID_ARGS);
-        ANI_CHECK_RETURN_IF_GT(nrRefs, std::numeric_limits<uint32_t>::max(), ANI_INVALID_ARGS);
+        ANI_CHECK_RETURN_IF_GT(nrRefs, std::numeric_limits<uint32_t>::max(), ANI_OUT_OF_MEMORY);
 
         auto nrRefsU32 = static_cast<uint32_t>(nrRefs);
         bool ret = GetRefStorage()->PushLocalEtsFrame(nrRefsU32);
