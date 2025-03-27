@@ -16,7 +16,9 @@
 package api;
 
 const TypeErrorCodeId: number = 401;
+export const OutOfBoundsErrorCodeId: number = 10200001;
 export const SyntaxErrorCodeId: number = 10200002;
+export const IncorrectBufferSizeId: number = 10200009;
 
 /**
  * Represents an error that occurs when using a function under the API package in an incorrect manner
