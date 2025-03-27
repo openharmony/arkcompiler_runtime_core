@@ -122,7 +122,6 @@ cases:
     - decl: |-
           type UT = `abc
 
-
               def\u0000` | undefined
       use: |-
           let v: UT[] = new UT[1]
