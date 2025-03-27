@@ -60,3 +60,24 @@ class TestA005 {
         return 50;
     }
 };
+
+interface Iface {
+}
+
+class Impl implements Iface {
+}
+
+class A {
+    public native method_A(): int;
+    public native method1(): Iface;
+    public native method2(arg: Impl): void;
+}
+
+class B extends A {
+    public native final method_B(): int;
+    public override native method1(): Impl;
+    public override native method2(arg: Iface): void;
+}
+
+class C extends B {
+}
