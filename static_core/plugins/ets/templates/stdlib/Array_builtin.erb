@@ -32,13 +32,15 @@ native function __alloc_array<T>(len: int, ofType: Object | null): T[]
 class BuiltinArrayKeysIterator implements IterableIterator<number> {
     private len: int
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(len: int) {
         this.len = len
     }
 
     override next(): IteratorResult<number> {
-        if (this.idx >= this.len) {
+        if (this.isDone || this.idx >= this.len) {
+            this.isDone = true
             return new IteratorResult<number>()
         }
         return new IteratorResult<number>(this.idx++ as number)
