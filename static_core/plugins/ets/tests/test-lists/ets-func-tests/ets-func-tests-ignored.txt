@@ -137,9 +137,6 @@ spec/03.types/References_Types/Type_undefined/undefined-union-array-type_3.ets
 ###### Issue 19947
 spec/03.types/References_Types/Type_undefined/array-and-undefined-union_3.ets
 spec/03.types/References_Types/Type_undefined/array-of-class-and-undefined_4.ets
-spec/03.types/References_Types/Type_undefined/define/define-class-member-as-question-and-assign.ets
-spec/03.types/References_Types/Type_undefined/define/define-class-member-as-undefined-and-assign-1.ets
-
 ###### Issue 19961
 spec/03.types/References_Types/Type_undefined/assign/assign-undefined-to-undefined_1.ets
 spec/03.types/References_Types/Type_undefined/assign/assign-undefined-to-untyped_1.ets
