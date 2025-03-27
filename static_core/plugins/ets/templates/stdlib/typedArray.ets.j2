@@ -138,6 +138,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
           this.buffer = x.buffer
           this.byteOffset = x.byteOffset
         }
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -160,6 +161,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         let intByteLength: int
         if (buf instanceof ArrayBuffer) {
             intByteLength = (buf as ArrayBuffer).getByteLength()
+            this.arrayBufferBacked = true
         } else if (buf instanceof SharedArrayBuffer) {
             intByteLength = (buf as SharedArrayBuffer).getByteLength()
         } else {
@@ -274,6 +276,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             }
             this.lengthInt = this.byteLength / {{N}}Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
+            this.arrayBufferBacked = true
             this.byteOffset = 0
         } else if (buf instanceof SharedArrayBuffer) {
             this.byteLength = (buf as SharedArrayBuffer).getByteLength()
@@ -290,6 +293,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             this.byteLength = arr.length as int * {{N}}Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).{{T}}Value())
@@ -321,6 +325,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         this.byteLength = this.lengthInt * {{N}}Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -331,6 +336,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     public constructor(other: {{N}}Array) {
         if (other.buffer instanceof ArrayBuffer) {
             this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
             this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
         } else {
@@ -918,9 +924,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         for (let i = 0; i < arr.length as int; ++i) {
         {%- if (N != 'Float32') and (N != 'Float64') %}
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(offset + i, v{{fromElementCompat}})
+            this.$_set(offset + i, v{{fromElementCompat}})
         {%- else %}
-            this.setUnsafe(offset + i, arr[i]{{fromElementCompat}})
+            this.$_set(offset + i, arr[i]{{fromElementCompat}})
         {%- endif %}
         }
     }
@@ -942,9 +948,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         for (let i = 0; i < arr.length as int; ++i) {
         {%- if (N != 'Float32') and (N != 'Float64') %}
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(offset + i, v)
+            this.$_set(offset + i, v)
         {%- else %}
-            this.setUnsafe(offset + i, arr[i])
+            this.$_set(offset + i, arr[i])
         {%- endif %}
         }
     }
@@ -984,9 +990,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         for (let i = 0; i < array.length as int; ++i) {
         {%- if (N != 'Float32') and (N != 'Float64') %}
             let v = this.zeroIfInfinity(array[i])
-            this.setUnsafe(insertPos + i, v{{fromElementCompat}})
+            this.$_set(insertPos + i, v{{fromElementCompat}})
         {%- else %}
-            this.setUnsafe(insertPos + i, array[i]{{fromElementCompat}})
+            this.$_set(insertPos + i, array[i]{{fromElementCompat}})
         {%- endif %}
         }
     }
@@ -2231,6 +2237,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
 
     /** Number of bytes used */
     public readonly byteLength: number
+
+    private readonly arrayBufferBacked: boolean
 
     /** String \"{{N}}Array\" */
     public readonly name = "{{N}}Array"

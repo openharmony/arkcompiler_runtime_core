@@ -352,6 +352,12 @@ instructions:
     modes: [jit_aot, irtoc]
     description: Load value from memory by offset. If Load is volatile, the address must have the normal alignment(by size of loaded value)
 
+  - opcode: LoadNative
+    base: LoadMemInst
+    signature: [d-real-any, ptr-ref, int]
+    flags: [native, load, no_hoist, no_cse]
+    description: the same as Load but to use in managed code
+
   - opcode: LoadI
     base: LoadMemInstI
     signature: [d-real-any, ptr-ref]
@@ -365,6 +371,12 @@ instructions:
     flags: [native, low_level, store, no_dce, no_hoist, no_cse]
     modes: [jit_aot, irtoc]
     description: Store value in memory by offset. If Store is volatile, the address must have the normal alignment(by size of stored value)
+
+  - opcode: StoreNative
+    base: StoreMemInst
+    signature: [ptr-ref-any, int, real-any]
+    flags: [native, store, no_dce, no_hoist, no_cse]
+    description: the same as Store but to use in managed code
 
   - opcode: StoreI
     base: StoreMemInstI

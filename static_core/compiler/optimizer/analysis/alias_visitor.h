@@ -353,7 +353,9 @@ public:
     static void VisitStoreObject(GraphVisitor *v, Inst *inst);
     static void VisitStoreResolvedObjectField(GraphVisitor *v, Inst *inst);
     static void VisitLoad(GraphVisitor *v, Inst *inst);
+    static void VisitLoadNative(GraphVisitor *v, Inst *inst);
     static void VisitStore(GraphVisitor *v, Inst *inst);
+    static void VisitStoreNative(GraphVisitor *v, Inst *inst);
     static void VisitLoadI(GraphVisitor *v, Inst *inst);
     static void VisitStoreI(GraphVisitor *v, Inst *inst);
     static void VisitCatchPhi(GraphVisitor *v, Inst *inst);

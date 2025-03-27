@@ -4901,8 +4901,10 @@ public:
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph);
-        ASSERT(clone->CastToLoad()->GetVolatile() == GetVolatile());
-        ASSERT(clone->CastToLoad()->GetScale() == GetScale());
+        ASSERT((clone->GetOpcode() == Opcode::Load && clone->CastToLoad()->GetVolatile() == GetVolatile()) ||
+               (clone->GetOpcode() == Opcode::LoadNative && clone->CastToLoadNative()->GetVolatile() == GetVolatile()));
+        ASSERT((clone->GetOpcode() == Opcode::Load && clone->CastToLoad()->GetScale() == GetScale()) ||
+               (clone->GetOpcode() == Opcode::LoadNative && clone->CastToLoadNative()->GetVolatile() == GetVolatile()));
         return clone;
     }
 
@@ -5163,8 +5165,12 @@ public:
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph);
-        ASSERT(clone->CastToStore()->GetVolatile() == GetVolatile());
-        ASSERT(clone->CastToStore()->GetScale() == GetScale());
+        ASSERT(
+            (clone->GetOpcode() == Opcode::Store && clone->CastToStore()->GetVolatile() == GetVolatile()) ||
+            (clone->GetOpcode() == Opcode::StoreNative && clone->CastToStoreNative()->GetVolatile() == GetVolatile()));
+        ASSERT(
+            (clone->GetOpcode() == Opcode::Store && clone->CastToStore()->GetScale() == GetScale()) ||
+            (clone->GetOpcode() == Opcode::StoreNative && clone->CastToStoreNative()->GetVolatile() == GetVolatile()));
         return clone;
     }
 };

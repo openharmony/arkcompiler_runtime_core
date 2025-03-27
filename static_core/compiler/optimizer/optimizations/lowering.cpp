@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -211,10 +211,24 @@ void Lowering::VisitLoad([[maybe_unused]] GraphVisitor *v, Inst *inst)
     LowerMemInstScale(inst);
 }
 
+void Lowering::VisitLoadNative([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    ASSERT(inst->GetOpcode() == Opcode::LoadNative);
+    inst->SetOpcode(Opcode::Load);
+    VisitLoad(v, inst);
+}
+
 void Lowering::VisitStore([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     ASSERT(inst->GetOpcode() == Opcode::Store);
     LowerMemInstScale(inst);
+}
+
+void Lowering::VisitStoreNative([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    ASSERT(inst->GetOpcode() == Opcode::StoreNative);
+    inst->SetOpcode(Opcode::Store);
+    VisitStore(v, inst);
 }
 
 void Lowering::VisitReturn([[maybe_unused]] GraphVisitor *v, Inst *inst)

@@ -20,4 +20,14 @@ DEFINE_VALUE(ETS_COROUTINE_ANI_ENV_OFFSET, ark::ets::EtsCoroutine::GetTlsNapiEnv
 DEFINE_VALUE(ETS_VM_DOUBLE_TO_STRING_CACHE_OFFSET, ark::ets::PandaEtsVM::GetDoubleToStringCacheOffset())
 
 DEFINE_VALUE(ETS_CLASS_RUNTIME_CLASS_OFFSET, ark::ets::EtsClass::GetRuntimeClassOffset())
+
+DEFINE_VALUE(INT8_ARRAY_BUFFER_OFFSET, ark::ets::EtsEscompatInt8Array::GetBufferOffset())
+DEFINE_VALUE(INT8_ARRAY_LENGTH_OFFSET, ark::ets::EtsEscompatInt8Array::GetLengthIntOffset())
+DEFINE_VALUE(INT8_ARRAY_BYTE_OFFSET_OFFSET, ark::ets::EtsEscompatInt8Array::GetByteOffsetOffset())
+DEFINE_VALUE(INT8_ARRAY_ARRAY_BUFFER_BACKED_OFFSET, ark::ets::EtsEscompatInt8Array::GetArrayBufferBackedOffset())
+
+DEFINE_VALUE(ARRAY_BUFFER_DATA_OFFSET, ark::ets::EtsEscompatArrayBuffer::GetManagedDataOffset())
+
+DEFINE_VALUE(SHARED_ARRAY_BUFFER_SHARED_MEMORY_OFFSET, ark::ets::EtsEscompatSharedArrayBuffer::GetSharedMemoryOffset())
+DEFINE_VALUE(SHARED_MEMORY_DATA_OFFSET, ark::ets::EtsEscompatSharedMemory::GetDataOffset())
 // NOLINTEND(readability-identifier-naming)

@@ -3725,6 +3725,12 @@ void LLVMIrConstructor::VisitLoad(GraphVisitor *v, Inst *inst)
     ctor->ValueMapAdd(inst, n);
 }
 
+void LLVMIrConstructor::VisitLoadNative(GraphVisitor *v, Inst *inst)
+{
+    inst->SetOpcode(Opcode::Load);
+    VisitLoad(v, inst);
+}
+
 void LLVMIrConstructor::VisitStore(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
@@ -3753,6 +3759,12 @@ void LLVMIrConstructor::VisitStore(GraphVisitor *v, Inst *inst)
     if (inst->CastToStore()->GetNeedBarrier()) {
         ctor->CreatePostWRB(inst, srcPtr, offset, value);
     }
+}
+
+void LLVMIrConstructor::VisitStoreNative(GraphVisitor *v, Inst *inst)
+{
+    inst->SetOpcode(Opcode::Store);
+    VisitStore(v, inst);
 }
 
 void LLVMIrConstructor::VisitLoadI(GraphVisitor *v, Inst *inst)
