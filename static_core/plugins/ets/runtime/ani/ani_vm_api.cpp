@@ -146,6 +146,7 @@ static ani_status DestroyVM(ani_vm *vm)
 NO_UB_SANITIZE static ani_status GetEnv(ani_vm *vm, uint32_t version, ani_env **result)
 {
     ANI_DEBUG_TRACE(env);
+    ANI_CHECK_RETURN_IF_EQ(vm, nullptr, ANI_INVALID_ARGS);
     ANI_CHECK_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
 
     if (!IsVersionSupported(version)) {
@@ -169,6 +170,11 @@ static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, ui
 
     ANI_CHECK_RETURN_IF_EQ(IsVersionSupported(version), false, ANI_INVALID_VERSION);
 
+    if (Thread::GetCurrent() != nullptr) {
+        LOG(ERROR, ANI) << "Cannot attach current thread, thread has already been attached";
+        return ANI_ERROR;
+    }
+
     bool interopEnabled = false;
     if (options != nullptr) {
         for (size_t i = 0; i < options->nr_options; ++i) {
@@ -182,10 +188,6 @@ static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, ui
         }
     }
 
-    if (Thread::GetCurrent() != nullptr) {
-        LOG(ERROR, ANI) << "Cannot attach current thread, thread has already been attached";
-        return ANI_ERROR;
-    }
     auto *runtime = Runtime::GetCurrent();
     auto *etsVM = PandaEtsVM::FromAniVM(vm);
     auto *coroMan = etsVM->GetCoroutineManager();
@@ -211,6 +213,10 @@ static ani_status DetachCurrentThread(ani_vm *vm)
 {
     ANI_DEBUG_TRACE(vm);
     ANI_CHECK_RETURN_IF_EQ(vm, nullptr, ANI_INVALID_ARGS);
+    if (Thread::GetCurrent() == nullptr) {
+        LOG(ERROR, ANI) << "Cannot detach current thread, thread is not attached";
+        return ANI_ERROR;
+    }
 
     auto *etsVM = PandaEtsVM::FromAniVM(vm);
     auto *coroMan = etsVM->GetCoroutineManager();
