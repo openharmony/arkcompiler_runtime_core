@@ -80,9 +80,6 @@
 #24032
 03.types/17.tuple_types/tt_7.ets
 
-#19950
-03.types/17.tuple_types/tt_10.ets
-
 #23581
 03.types/17.tuple_types/tt_16.ets
 
