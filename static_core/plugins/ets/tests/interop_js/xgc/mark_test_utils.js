@@ -27,6 +27,7 @@ function init(module, stsFile) {
         'compiler-enable-jit': 'false',
         'run-gc-in-place': 'true',
         'coroutine-workers-count': '1',
+        'xgc-min-trigger-threshold': '2048'
     });
     if (!etsVmRes) {
         throw new Error('Failed to create ETS runtime');

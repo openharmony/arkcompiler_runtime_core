@@ -39,6 +39,8 @@ panda_ets_interop_js_plugin(ets_interop_js_napi
     OUTPUT_SUFFIX ".node"
 )
 
+add_runtime_options(${CMAKE_CURRENT_SOURCE_DIR}/runtime_options.yaml)
+
 if (PANDA_JS_ETS_HYBRID_MODE)
     list(APPEND ETS_INTEROP_HYBRID_SOURCES
         ${ETS_EXT_SOURCES}/interop_js/handshake.cpp

@@ -160,7 +160,8 @@ private:
     /// Trigger specific fields ///
 
     size_t beforeGCStorageSize_ {0U};
-    const size_t minimalThreasholdSize_ {0U};
+    const size_t minimalThresholdSize_ {0U};
+    const size_t increaseThresholdPercent_ {0U};
     // We can load a value of the variable from several threads, so need to use atomic
     std::atomic<size_t> targetThreasholdSize_ {0U};
 };
