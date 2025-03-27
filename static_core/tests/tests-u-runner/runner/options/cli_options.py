@@ -140,6 +140,10 @@ def add_other_test_suite_args(parser: argparse.ArgumentParser) -> None:
         '--srcdumper', action='store_true', dest='srcdumper',
         default=None,
         help='run src dumper tests')
+    parser.add_argument(
+        '--recheck', action='store_true', dest='recheck',
+        default=None,
+        help='run recheck tests')
 
 
 def add_test_suite_args(parser: argparse.ArgumentParser) -> None:

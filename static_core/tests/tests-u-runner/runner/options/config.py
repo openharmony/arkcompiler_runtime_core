@@ -59,7 +59,7 @@ class Config:
         cli_name=["test_suites", "test262", "parser", "declgenparser", "hermes", "system", "astchecker", "srcdumper",
                   "ets_func_tests", "ets_runtime", "ets_cts", "ets_gc_stress", "ets_es_checked", "ets_custom",
                   "ets_ts_subset", "declgen_ets2ts_cts", "declgen_ets2ts_func_tests",
-                  "declgen_ets2ts_runtime", "ets_sdk", "declgen_ts2ets_cts"],
+                  "declgen_ets2ts_runtime", "ets_sdk", "declgen_ts2ets_cts", "recheck"],
         cast_to_type=_to_test_suites,
         required=True
     )
