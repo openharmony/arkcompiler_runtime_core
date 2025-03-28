@@ -139,3 +139,22 @@ final class CondVar {
     private waitersList: WaitersList;
     private waiters: int;
 }
+
+/// Queue spinlock allows to get exclusive access to the critical section without context switching
+final class QueueSpinlock {
+    public constructor() {
+        this.tail = 0;
+    }
+
+    /**
+     * The method provides exclusive access to the critical section if the lock is successfully acquired.
+     * Otherwise, blocks current coroutine without context switching until other coroutine will release lock.
+     */
+    public guard(callback: () => void) {
+        QueueSpinlock.guard(this, callback as Object);
+    }
+
+    private static native guard(spinlock: Object, callback: Object): void;
+
+    private tail: long;
+}

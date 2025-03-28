@@ -106,6 +106,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     coreMutex = findType(MUTEX);
     coreEvent = findType(EVENT);
     coreCondVar = findType(COND_VAR);
+    coreQueueSpinlock = findType(QUEUE_SPINLOCK);
 
     coreException = findType(EXCEPTION);
     escompatError = findType(ERROR);

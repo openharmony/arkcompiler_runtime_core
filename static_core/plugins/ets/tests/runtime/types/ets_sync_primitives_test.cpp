@@ -79,6 +79,11 @@ public:
                                              MIRROR_FIELD_INFO(EtsCondVar, waiters_, "waiters")};
     }
 
+    static std::vector<MirrorFieldInfo> GetQueueSpinlockMembers()
+    {
+        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsQueueSpinlock, tail_, "tail")};
+    }
+
 protected:
     PandaEtsVM *vm_ = nullptr;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
@@ -113,6 +118,14 @@ TEST_F(EtsSyncPrimitivesTest, CondVarMemoryLayout)
 {
     auto *condVarClass = PlatformTypes(vm_)->coreCondVar;
     MirrorFieldInfo::CompareMemberOffsets(condVarClass, GetCondVarMembers());
+}
+
+// Check both EtsQueueSpinlock and ark::Class<QueueSpinlock> has the same number of fields
+// and at the same offsets
+TEST_F(EtsSyncPrimitivesTest, QueueSpinlockMemoryLayout)
+{
+    auto *queueSpinlockClass = PlatformTypes(vm_)->coreQueueSpinlock;
+    MirrorFieldInfo::CompareMemberOffsets(queueSpinlockClass, GetQueueSpinlockMembers());
 }
 
 }  // namespace ark::ets::test
