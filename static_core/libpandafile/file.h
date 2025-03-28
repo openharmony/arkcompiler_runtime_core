@@ -436,7 +436,7 @@ std::unique_ptr<const File> OpenPandaFileFromMemory(const void *buffer, size_t s
 /*
  * OpenPandaFileFromMemory from secure buffer.
  */
-std::unique_ptr<const File> OpenPandaFileFromSecureMemory(uint8_t *buffer, size_t size);
+std::unique_ptr<const File> OpenPandaFileFromSecureMemory(uint8_t *buffer, size_t size, std::string filename = "");
 
 /*
  * OpenZipPandaFile from the location zip.
