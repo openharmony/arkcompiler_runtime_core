@@ -221,6 +221,65 @@ private:
     friend class test::EtsSyncPrimitivesTest;
 };
 
+class EtsQueueSpinlock : public EtsObject {
+public:
+    class Guard {
+    public:
+        explicit Guard(EtsHandle<EtsQueueSpinlock> &spinlock);
+        NO_COPY_SEMANTIC(Guard);
+        NO_MOVE_SEMANTIC(Guard);
+        ~Guard();
+
+    private:
+        friend class EtsQueueSpinlock;
+
+        EtsHandle<EtsQueueSpinlock> &spinlock_;
+        std::atomic<bool> isOwner_ {false};
+        std::atomic<Guard *> next_ {nullptr};
+    };
+
+    static EtsQueueSpinlock *FromCoreType(ObjectHeader *syncPrimitive)
+    {
+        return reinterpret_cast<EtsQueueSpinlock *>(syncPrimitive);
+    }
+
+    static EtsQueueSpinlock *FromEtsObject(EtsObject *syncPrimitive)
+    {
+        return reinterpret_cast<EtsQueueSpinlock *>(syncPrimitive);
+    }
+
+    EtsObject *AsObject()
+    {
+        return this;
+    }
+
+    const EtsObject *AsObject() const
+    {
+        return this;
+    }
+
+    static EtsQueueSpinlock *Create(EtsCoroutine *coro);
+
+    /// This method should be used to make sure that spinlock is acquired by current coroutine.
+    bool IsHeld() const;
+
+private:
+    class SpinWait {
+    public:
+        void operator()() {}
+    };
+
+    /// Acquires lock and allows to get exclusive access to the critical seciton
+    void Acquire(Guard *waiter);
+
+    /// Releases lock and unblocks waiter
+    void Release(Guard *owner);
+
+    alignas(alignof(EtsLong)) std::atomic<Guard *> tail_;
+
+    friend class test::EtsSyncPrimitivesTest;
+};
+
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_MUTEX_H

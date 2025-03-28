@@ -56,6 +56,7 @@ public:
     EtsClass *coreMutex;
     EtsClass *coreEvent;
     EtsClass *coreCondVar;
+    EtsClass *coreQueueSpinlock;
 
     EtsClass *escompatArray;
     EtsClass *escompatArrayBuffer;

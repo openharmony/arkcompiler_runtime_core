@@ -16,6 +16,7 @@
 #include "intrinsics.h"
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
+#include "plugins/ets/runtime/ets_utils.h"
 
 namespace ark::ets::intrinsics {
 
@@ -80,6 +81,22 @@ void EtsCondVarNotifyAll(EtsObject *condVar, EtsObject *mutex)
     ASSERT(condVar->GetClass() == PlatformTypes()->coreCondVar);
     ASSERT(mutex->GetClass() == PlatformTypes()->coreMutex);
     EtsCondVar::FromEtsObject(condVar)->NotifyAll(EtsMutex::FromEtsObject(mutex));
+}
+
+EtsObject *EtsQueueSpinlockCreate()
+{
+    return EtsQueueSpinlock::Create(EtsCoroutine::GetCurrent());
+}
+
+void EtsQueueSpinlockGuard(EtsObject *spinlock, EtsObject *callback)
+{
+    ASSERT(spinlock->GetClass() == PlatformTypes()->coreQueueSpinlock);
+    auto *coro = EtsCoroutine::GetCurrent();
+    EtsHandleScope scope(coro);
+    EtsHandle<EtsQueueSpinlock> hSpinlock(coro, EtsQueueSpinlock::FromEtsObject(spinlock));
+    EtsHandle<EtsObject> hCallback(coro, callback);
+    EtsQueueSpinlock::Guard guard(hSpinlock);
+    LambdaUtils::InvokeVoid(coro, hCallback.GetPtr());
 }
 
 }  // namespace ark::ets::intrinsics
