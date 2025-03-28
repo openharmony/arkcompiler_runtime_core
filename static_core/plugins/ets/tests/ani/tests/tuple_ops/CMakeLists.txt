@@ -15,3 +15,93 @@ ani_add_gtest(ani_test_tuple_ops_tuple_set_element
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuple.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuple.ets
 )
+
+ani_add_gtest(ani_test_tuplevalue_getitem_boolean
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_boolean_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_boolean_test.ets
+)
+
+ani_add_gtest(ani_test_tuplevalue_getitem_char
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_char_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_char_test.ets
+)
+
+ani_add_gtest(ani_test_tuplevalue_getitem_byte
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_byte_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_byte_test.ets
+)
+
+ani_add_gtest(ani_test_tuplevalue_getitem_short
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_short_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_short_test.ets
+)
+
+ani_add_gtest(ani_test_tuplevalue_getitem_int
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_int_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_int_test.ets
+)
+
+ani_add_gtest(ani_test_tuplevalue_getitem_long
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_long_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_long_test.ets
+)
+
+ani_add_gtest(ani_test_tuplevalue_getitem_float
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_float_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_float_test.ets
+)
+
+ani_add_gtest(ani_test_tuplevalue_getitem_double
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_double_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_double_test.ets
+)
+
+ani_add_gtest(ani_test_tuplevalue_getitem_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_ref_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getitem_ref_test.ets
+)
+
+ani_add_gtest(ani_test_tuplevalue_setitem_boolean
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_boolean_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_boolean_test.ets
+)
+
+ani_add_gtest(ani_test_tuplevalue_setitem_char
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_char_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_char_test.ets
+)
+
+ani_add_gtest(ani_test_tuplevalue_setitem_byte
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_byte_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_byte_test.ets
+)
+
+ani_add_gtest(ani_test_tuplevalue_setitem_short
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_short_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_short_test.ets
+)
+
+ani_add_gtest(ani_test_tuplevalue_setitem_int
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_int_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_int_test.ets
+)
+
+ani_add_gtest(ani_test_tuplevalue_setitem_long
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_long_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_long_test.ets
+)
+
+ani_add_gtest(ani_test_tuplevalue_setitem_float
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_float_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_float_test.ets
+)
+
+ani_add_gtest(ani_test_tuplevalue_setitem_double
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_double_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_double_test.ets
+)
+
+ani_add_gtest(ani_test_tuplevalue_setitem_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_ref_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_setitem_ref_test.ets
+)

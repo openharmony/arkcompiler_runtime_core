@@ -13,32 +13,15 @@
  * limitations under the License.
  */
 
-#include "ani_gtest.h"
+#include "ani_gtest_tuple_ops.h"
 
 namespace ark::ets::ani::testing {
 
-class TupleOpsTest : public AniTest {
-protected:
-    ani_tuple_value GetTupleWithCheck(std::string_view tupleGetterName)
-    {
-        ani_tuple_value tuple;
-        GetTupleWithCheckImpl(tupleGetterName, &tuple);
-        return tuple;
-    }
-
-private:
-    void GetTupleWithCheckImpl(std::string_view tupleGetterName, ani_tuple_value *tuple)
-    {
-        *tuple = CallEtsFunction<ani_tuple_value>("tuple", tupleGetterName.data());
-        ani_boolean isUndefined;
-        ASSERT_EQ(env_->Reference_IsUndefined(*tuple, &isUndefined), ANI_OK);
-        ASSERT_EQ(isUndefined, ANI_FALSE);
-    }
-};
+class TupleOpsTest : public AniGTestTupleOps {};
 
 TEST_F(TupleOpsTest, getLengthOfEmptyTuple)
 {
-    auto tuple = GetTupleWithCheck("getEmptyTuple");
+    auto tuple = GetTupleWithCheck("tuple", "getEmptyTuple");
 
     ani_size length;
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(tuple, &length), ANI_OK);
@@ -47,7 +30,7 @@ TEST_F(TupleOpsTest, getLengthOfEmptyTuple)
 
 TEST_F(TupleOpsTest, getLengthOfValidTuple)
 {
-    auto tuple = GetTupleWithCheck("getTestPrimitiveTuple");
+    auto tuple = GetTupleWithCheck("tuple", "getTestPrimitiveTuple");
 
     ani_size length;
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(tuple, &length), ANI_OK);
@@ -56,7 +39,7 @@ TEST_F(TupleOpsTest, getLengthOfValidTuple)
 
 TEST_F(TupleOpsTest, emptyTuple)
 {
-    auto tuple = GetTupleWithCheck("getEmptyTuple");
+    auto tuple = GetTupleWithCheck("tuple", "getEmptyTuple");
 
     ani_boolean result;
     ASSERT_EQ(env_->TupleValue_GetItem_Boolean(tuple, 0, &result), ANI_OUT_OF_RANGE);
@@ -77,7 +60,7 @@ TEST_F(TupleOpsTest, emptyTuple)
 
 TEST_F(TupleOpsTest, primitiveTuple)
 {
-    auto tuple = GetTupleWithCheck("getTestPrimitiveTuple");
+    auto tuple = GetTupleWithCheck("tuple", "getTestPrimitiveTuple");
 
     // clang-format off
     PRIMITIVE_GET_SET_TEST_CASE(Boolean, ani_boolean, 0U, true,    false);
@@ -93,7 +76,7 @@ TEST_F(TupleOpsTest, primitiveTuple)
 
 TEST_F(TupleOpsTest, referenceTuple)
 {
-    auto tuple = GetTupleWithCheck("getReferenceTuple");
+    auto tuple = GetTupleWithCheck("tuple", "getReferenceTuple");
 
     ani_ref result;
     ASSERT_EQ(env_->TupleValue_GetItem_Ref(tuple, 0U, &result), ANI_OK);
@@ -136,7 +119,7 @@ TEST_F(TupleOpsTest, referenceTuple)
 
 TEST_F(TupleOpsTest, identicalTuple)
 {
-    auto tuple = GetTupleWithCheck("getCharTuple");
+    auto tuple = GetTupleWithCheck("tuple", "getCharTuple");
 
     ani_size length;
     ASSERT_EQ(env_->TupleValue_GetNumberOfItems(tuple, &length), ANI_OK);
