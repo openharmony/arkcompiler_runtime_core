@@ -25,6 +25,7 @@
 #include "utils/logger.h"
 #include "utils/pandargs.h"
 
+// CC-OFFNXT(huge_method[C++]) solid logic
 extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version, ani_vm **result)
 {
     ANI_DEBUG_TRACE(env);
@@ -52,16 +53,17 @@ extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version,
     baseOptions.AddOptions(&paParser);
     aniOptions.AddOptions(&paParser);
 
-    ark::Logger::Initialize(baseOptions, aniParser.GetLoggerCallback());
     if (!paParser.Parse(aniParser.GetRuntimeOptions())) {
         std::string errorMessage = paParser.GetErrorString();
         if (!errorMessage.empty() && errorMessage.back() == '\n') {
             // Trim new line
             errorMessage = std::string(errorMessage.c_str(), errorMessage.length() - 1);
         }
+        ark::Logger::Initialize(baseOptions, aniParser.GetLoggerCallback());
         LOG(ERROR, ANI) << errorMessage;
         return ANI_ERROR;
     }
+    ark::Logger::Initialize(baseOptions, aniParser.GetLoggerCallback());
 
 #ifndef PANDA_ETS_INTEROP_JS
     if (aniParser.IsInteropMode()) {
@@ -71,7 +73,7 @@ extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version,
 #endif /* PANDA_ETS_INTEROP_JS */
 
     if (!ark::Runtime::Create(aniOptions)) {
-        LOG(ERROR, RUNTIME) << "Cannot create runtime";
+        LOG(ERROR, ANI) << "Cannot create runtime";
         return ANI_ERROR;
     }
 
@@ -81,7 +83,7 @@ extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version,
     if (aniParser.IsInteropMode()) {
         bool created = ark::ets::interop::js::CreateMainInteropContext(coroutine, aniParser.GetInteropEnv());
         if (!created) {
-            LOG(ERROR, RUNTIME) << "Cannot create interop context";
+            LOG(ERROR, ANI) << "Cannot create interop context";
             ark::Runtime::Destroy();
             return ANI_ERROR;
         }
@@ -91,6 +93,10 @@ extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version,
     *result = coroutine->GetPandaVM();
     ASSERT(*result != nullptr);
 
+    // NOTE:
+    //  Don't change the following log message, because it used for testing logger callback.
+    //  Or change log message at the same time as the ani_option_logger_parser_success_test.cpp test.
+    LOG(INFO, ANI) << "ani_vm has been created";
     return ANI_OK;
 }
 
@@ -128,7 +134,7 @@ static ani_status DestroyVM(ani_vm *vm)
 
     auto runtime = Runtime::GetCurrent();
     if (runtime == nullptr) {
-        LOG(ERROR, RUNTIME) << "Cannot destroy ANI VM, there is no current runtime";
+        LOG(ERROR, ANI) << "Cannot destroy ANI VM, there is no current runtime";
         return ANI_ERROR;
     }
 

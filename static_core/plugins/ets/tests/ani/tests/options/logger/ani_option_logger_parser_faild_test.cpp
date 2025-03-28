@@ -15,39 +15,27 @@
 
 #include <gtest/gtest.h>
 #include "ani.h"
+#include "ani_option_logger_callback.h"
 
 namespace ark::ets::ani::testing {
 
-static int g_count = 0;
-static int g_level = -1;
-static std::string g_component;  // NOLINT(fuchsia-statically-constructed-objects)
-static std::string g_message;    // NOLINT(fuchsia-statically-constructed-objects)
-
-static void LoggerCallback([[maybe_unused]] FILE *stream, int level, const char *component, const char *message)
+TEST(AniOptionLoggerTest, logger_options_parser_faild)
 {
-    ++g_count;
-    g_level = level;
-    g_component = component;
-    g_message = message;
-}
+    ASSERT_EQ(g_msgs.size(), 0);
 
-TEST(AniOptionLoggerTest, logger)
-{
-    // clang-format off
     std::array optionsArray {
         ani_option {"--ext:bla-bla-bla", nullptr},
-        ani_option {"--logger", reinterpret_cast<void *>(LoggerCallback)}
+        ani_option {"--logger", reinterpret_cast<void *>(LoggerCallback)},
     };
-    // clang-format on
 
     ani_options options = {optionsArray.size(), optionsArray.data()};
     ani_vm *vm;
     ASSERT_EQ(ANI_CreateVM(&options, ANI_VERSION_1, &vm), ANI_ERROR);
 
-    ASSERT_EQ(g_count, 1);
-    ASSERT_EQ(g_level, ANI_LOGLEVEL_ERROR);
-    ASSERT_STREQ(g_component.c_str(), "ani");
-    ASSERT_STREQ(g_message.c_str(), "pandargs: Invalid option \"bla-bla-bla\"");
+    ASSERT_EQ(g_msgs.size(), 1);
+    ASSERT_EQ(g_msgs[0].level, ANI_LOGLEVEL_ERROR);
+    ASSERT_STREQ(g_msgs[0].component.c_str(), "ani");
+    ASSERT_STREQ(g_msgs[0].message.c_str(), "pandargs: Invalid option \"bla-bla-bla\"");
 }
 
 }  // namespace ark::ets::ani::testing
