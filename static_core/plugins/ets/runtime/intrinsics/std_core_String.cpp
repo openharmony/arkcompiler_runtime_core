@@ -581,4 +581,9 @@ EtsString *StdCoreStringRepeat(EtsString *str, EtsInt count)
     return rep;
 }
 
+uint16_t StdCoreStringGet(EtsString *str, EtsInt index)
+{
+    return StdCoreStringCharAt(str, index);
+}
+
 }  // namespace ark::ets::intrinsics
