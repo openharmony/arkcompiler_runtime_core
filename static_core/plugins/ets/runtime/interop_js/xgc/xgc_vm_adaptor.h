@@ -53,6 +53,8 @@ public:
     /// @brief Method starts executing of cross reference marking in ecma vm
     virtual bool StartXRefMarking();
 
+    virtual void NotifyXGCInterruption();
+
 private:
     napi_env env_;
     arkplatform::EcmaVMInterface *ecmaVMIface_ = nullptr;

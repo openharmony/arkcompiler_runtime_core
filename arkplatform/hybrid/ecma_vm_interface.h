@@ -38,12 +38,14 @@ public:
         return VMInterface::VMInterfaceType::ECMA_VM_IFACE;
     }
 
+    virtual void NotifyXGCInterruption() {}
+
     virtual bool StartXRefMarking()
     {
         return true;
     }
 };
 
-} // namespace arkplatform
+}  // namespace arkplatform
 
-#endif // PANDA_VM_INTERFACE_H
+#endif  // PANDA_VM_INTERFACE_H

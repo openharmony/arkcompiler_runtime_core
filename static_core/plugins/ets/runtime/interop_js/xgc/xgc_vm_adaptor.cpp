@@ -36,6 +36,12 @@ bool XGCVmAdaptor::StartXRefMarking()
     return ecmaVMIface_->StartXRefMarking();
 }
 
+void XGCVmAdaptor::NotifyXGCInterruption()
+{
+    ASSERT(ecmaVMIface_ != nullptr);
+    ecmaVMIface_->NotifyXGCInterruption();
+}
+
 napi_status XGCVmAdaptor::NapiDeleteReference(napi_ref ref)
 {
     return napi_delete_reference(env_, ref);
