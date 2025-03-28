@@ -42,10 +42,14 @@ static napi_value ThenCallback(napi_env env, napi_callback_info info)
         napi_get_cb_info(env, info, nullptr, nullptr, nullptr, reinterpret_cast<void **>(&jsCallback));
     ASSERT(status == napi_ok);
 
-    jsCallback->Run();
-    Runtime::GetCurrent()->GetInternalAllocator()->Delete(jsCallback);
-
-    if (coro->HasPendingException()) {
+    bool hasException = false;
+    {
+        ScopedManagedCodeThread managedScope(coro);
+        jsCallback->Run();
+        Runtime::GetCurrent()->GetInternalAllocator()->Delete(jsCallback);
+        hasException = coro->HasPendingException();
+    }
+    if (hasException) {
         napi_throw_error(env, nullptr, "EtsVM internal error");
     }
     napi_value undefined;
@@ -110,16 +114,20 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
     }
     ASSERT(promiseRef != nullptr);
 
-    EtsHandleScope hScope(coro);
-    EtsHandle<EtsPromise> promiseHandle(coro, EtsPromise::FromCoreType(vm->GetGlobalObjectStorage()->Get(promiseRef)));
-    vm->GetGlobalObjectStorage()->Remove(promiseRef);
+    {
+        ScopedManagedCodeThread managedScope(coro);
+        EtsHandleScope hScope(coro);
+        EtsHandle<EtsPromise> promiseHandle(coro,
+                                            EtsPromise::FromCoreType(vm->GetGlobalObjectStorage()->Get(promiseRef)));
+        vm->GetGlobalObjectStorage()->Remove(promiseRef);
 
-    auto jsval = JSValue::Create(coro, ctx, value);
+        auto jsval = JSValue::Create(coro, ctx, value);
 
-    if (isResolved) {
-        ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), jsval->AsObject());
-    } else {
-        ark::ets::intrinsics::EtsPromiseReject(promiseHandle.GetPtr(), jsval->AsObject());
+        if (isResolved) {
+            ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), jsval->AsObject());
+        } else {
+            ark::ets::intrinsics::EtsPromiseReject(promiseHandle.GetPtr(), jsval->AsObject());
+        }
     }
 
     vm->GetCoroutineManager()->Schedule();
@@ -159,7 +167,7 @@ void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
     }
 
     mem::Reference *promiseRef = vm->GetGlobalObjectStorage()->Add(etsPromise, mem::Reference::ObjectType::GLOBAL);
-
+    ScopedNativeCodeThread nativeScope(coro);
     std::array<napi_value, 2U> thenCallback {};
 
     status = napi_create_function(env, nullptr, 0, OnJsPromiseResolved, promiseRef, &thenCallback[0]);

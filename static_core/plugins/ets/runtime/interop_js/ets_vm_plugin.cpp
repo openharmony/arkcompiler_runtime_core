@@ -47,7 +47,7 @@ static napi_value Version(napi_env env, [[maybe_unused]] napi_callback_info info
 
 static napi_value GetEtsFunction(napi_env env, napi_callback_info info)
 {
-    // Note(srokashevich, #23042): after fix assert `ASSERT_SCOPED_NATIVE_CODE()` should be here
+    ASSERT_SCOPED_NATIVE_CODE();
 
     size_t jsArgc = 0;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));

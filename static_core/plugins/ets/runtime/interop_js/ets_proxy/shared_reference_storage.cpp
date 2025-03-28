@@ -124,6 +124,7 @@ SharedReference *ExtractMaybeReference(napi_env env, napi_value jsObject)
 
 SharedReference *SharedReferenceStorage::GetReference(napi_env env, napi_value jsObject) const
 {
+    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
     void *data = ExtractMaybeReference(env, jsObject);
     if (UNLIKELY(data == nullptr)) {
         return nullptr;

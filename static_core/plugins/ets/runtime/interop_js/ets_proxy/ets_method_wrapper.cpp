@@ -129,6 +129,7 @@ napi_value EtsMethodWrapper::DoEtsMethodCall(napi_env env, napi_callback_info ci
     auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, jsArgs->data(), &jsThis, &data));
 
+    ScopedManagedCodeThread managedScope(coro);
     auto [etsMethod, errorMessage, etsClassWrapper] = findMethodFunc(data, argc);
 
     ASSERT(nullptr != etsMethod || nullptr != errorMessage || etsClassWrapper != nullptr);

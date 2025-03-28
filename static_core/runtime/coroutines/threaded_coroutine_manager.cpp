@@ -218,12 +218,12 @@ bool ThreadedCoroutineManager::RegisterWaiter(Coroutine *waiter, CoroutineEvent 
 void ThreadedCoroutineManager::Await(CoroutineEvent *awaitee)
 {
     ASSERT(awaitee != nullptr);
+    ASSERT_NATIVE_CODE();
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Await started";
 
     auto *waiter = Coroutine::GetCurrent();
     auto *waiterCtx = waiter->GetContext<ThreadedCoroutineContext>();
 
-    ScopedNativeCodeThread n(waiter);
     coroSwitchLock_.Lock();
 
     if (!RegisterWaiter(waiter, awaitee)) {
@@ -354,9 +354,9 @@ void ThreadedCoroutineManager::ScheduleNextCoroutine()
 
 void ThreadedCoroutineManager::ScheduleImpl()
 {
+    ASSERT_NATIVE_CODE();
     auto *currentCo = Coroutine::GetCurrent();
     auto *currentCtx = currentCo->GetContext<ThreadedCoroutineContext>();
-    ScopedNativeCodeThread n(currentCo);
 
     coroSwitchLock_.Lock();
     if (RunnableCoroutinesExist()) {

@@ -98,16 +98,15 @@ void StackfulCoroutineManager::FinalizeWorkers(size_t howMany, Runtime *runtime,
         finWorker->AddRunnableCoroutine(co);
     }
     entrypointParam.workerFinalizationEvent.Lock();
+
+    ScopedNativeCodeThread nativeCode(Coroutine::GetCurrent());
     Await(&entrypointParam.workerFinalizationEvent);
 
-    {
-        ScopedNativeCodeThread nativeCode(Coroutine::GetCurrent());
-        os::memory::LockHolder lh(workersLock_);
-        while (activeWorkersCount_ != wCountBeforeFinalization - howMany) {
-            workersCv_.Wait(&workersLock_);
-        }
-        ASSERT(activeWorkersCount_ > 0);
+    os::memory::LockHolder lh(workersLock_);
+    while (activeWorkersCount_ != wCountBeforeFinalization - howMany) {
+        workersCv_.Wait(&workersLock_);
     }
+    ASSERT(activeWorkersCount_ > 0);
 }
 
 StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerForFinalization()
@@ -444,6 +443,7 @@ bool StackfulCoroutineManager::LaunchImmediately(CompletionEvent *completionEven
 
 void StackfulCoroutineManager::Await(CoroutineEvent *awaitee)
 {
+    ASSERT_NATIVE_CODE();
     // profiling
     ScopedCoroutineStats s(&GetCurrentWorker()->GetPerfStats(), CoroutineTimeStats::SCH_ALL);
 
@@ -717,13 +717,11 @@ void StackfulCoroutineManager::DumpCoroutineStats() const
 void StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion()
 {
     os::memory::LockHolder lkCompletion(programCompletionLock_);
-    auto *main = Coroutine::GetCurrent();
     // It's neccessary to read activeWorkersCount before coroutineCount to avoid deadlock
     while (GetActiveWorkersCount() + 1 < coroutineCount_) {  // 1 is for MAIN
         programCompletionEvent_->SetNotHappened();
         programCompletionEvent_->Lock();
         programCompletionLock_.Unlock();
-        ScopedManagedCodeThread s(main);  // perf?
         GetCurrentWorker()->WaitForEvent(programCompletionEvent_);
         LOG(DEBUG, COROUTINES)
             << "StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion(): possibly spurious wakeup from wait...";
@@ -881,7 +879,7 @@ void StackfulCoroutineManager::OnCoroBecameNonActive([[maybe_unused]] Coroutine 
     DecrementActiveCoroutines();
 }
 
-void StackfulCoroutineManager::OnNativeCallExit([[maybe_unused]] Coroutine *co)
+void StackfulCoroutineManager::OnNativeCallExit(Coroutine *co)
 {
     if (IsDrainQueueInterfaceEnabled()) {
         // A temporary hack for draining the coroutine queue on the current worker.
@@ -895,6 +893,7 @@ void StackfulCoroutineManager::OnNativeCallExit([[maybe_unused]] Coroutine *co)
         if (!worker->IsMainWorker() && !worker->InExclusiveMode()) {
             return;
         }
+        ScopedNativeCodeThread nativeCode(co);
         while (worker->GetRunnablesCount(Coroutine::Type::MUTATOR) > 0) {
             GetCurrentWorker()->RequestSchedule();
         }
