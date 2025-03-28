@@ -16,27 +16,16 @@ if (PANDA_TARGET_ARM32)
     return()
 endif()
 
-ani_add_gtest(backtracetest_by_ani
-    CPP_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/backtrace_test.cpp
-        ${PANDA_ETS_PLUGIN_SOURCE}/runtime/interop_js/jsbacktrace/backtrace.cpp
+panda_ets_interop_js_nodevm_gtest(ets_interop_js_backtracetest
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/backtrace_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/backtrace_test.ets
 )
 
 # Build rules for call_backtrace native shared library
-panda_add_library(call_backtrace SHARED call_backtrace.cpp)
-panda_target_compile_options(call_backtrace PRIVATE -Wno-invalid-offsetof)
-panda_target_include_directories(call_backtrace PRIVATE
-    ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani
-    ${PANDA_ROOT}
-    ${PANDA_ROOT}/libpandabase
-    ${PANDA_ROOT}/libpandafile
-    ${PANDA_ROOT}/runtime
-    ${PANDA_BINARY_ROOT}
-    ${PANDA_BINARY_ROOT}/libpandabase/generated
-    ${PANDA_BINARY_ROOT}/libpandafile/include
-    ${PANDA_BINARY_ROOT}/panda_gen_options
-    ${PANDA_BINARY_ROOT}/runtime/include
+panda_add_library(call_backtrace SHARED
+    call_backtrace.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/runtime/interop_js/jsbacktrace/backtrace.cpp
 )
-panda_target_link_libraries(call_backtrace c_secshared)
-add_dependencies(backtracetest_by_ani call_backtrace)
+panda_target_compile_options(call_backtrace PRIVATE -Wno-invalid-offsetof)
+panda_target_link_libraries(call_backtrace arkruntime c_secshared)
+add_dependencies(ets_interop_js_backtracetest call_backtrace)

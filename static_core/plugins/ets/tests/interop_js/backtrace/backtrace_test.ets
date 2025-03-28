@@ -13,34 +13,33 @@
  * limitations under the License.
  */
 
+package Test;
+
 class TestBacktrace {
     static { loadLibrary("call_backtrace") }
-
     native callBacktrace(): int;
 }
 
-function new_TestBacktrace(): TestBacktrace {
-    return new TestBacktrace;
+function TestBacktrace_entry_simple(): int {
+    return TestBacktrace_func1();
 }
 
-function TestBacktrace_entry_simple(test: TestBacktrace): int {
-    return TestBacktrace_func1(test);
+function TestBacktrace_func1(): int {
+    return TestBacktrace_func2();
 }
 
-function TestBacktrace_func1(test: TestBacktrace): int {
-    return TestBacktrace_func2(test);
-}
-
-function TestBacktrace_func2(test: TestBacktrace): int {
+function TestBacktrace_func2(): int {
+    loadLibrary("call_backtrace");
+    let test = new TestBacktrace();
     return test.callBacktrace();
 }
 
-function TestBacktrace_entry_complex(test: TestBacktrace): int {
-    return TestBacktrace_entry_test_1_frame(test);
+function TestBacktrace_entry_complex(): int {
+    return TestBacktrace_entry_test_1_frame();
 }
 
-function TestBacktrace_entry_test_1_frame(test: TestBacktrace): int {
-    return getOperationFactory(test)
+function TestBacktrace_entry_test_1_frame(): int {
+    return getOperationFactory()
 }
 
 interface FileDataValue {
@@ -78,7 +77,7 @@ class OperationFactory {
   }
 }
 
-function getFileDate(test: TestBacktrace): int {
+function getFileDate(): int {
   let FileDataValues: FileDataValue[] = [{
     fileName: 'OperationFactoryFile',
     filePath: 'source/url/OperationFactoryFile',
@@ -88,16 +87,18 @@ function getFileDate(test: TestBacktrace): int {
       dataStr: 'This is a test data!'
     }
   }];
+  loadLibrary("call_backtrace");
+  let test = new TestBacktrace();
   return test.callBacktrace();
 }
 
-function getOperationFactory(test: TestBacktrace): int {
+function getOperationFactory(): int {
   const factory = new OperationFactory();
   factory.createOperation('add', 2, 3);
   factory.createOperation('subtract', 5, 5);
   factory.createOperation('multiply', 3, 6);
   factory.createOperation('divide', 2, 2);
-  return getFileDate(test);
+  return getFileDate();
 }
 
 
