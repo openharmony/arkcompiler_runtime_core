@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "plugins/ets/stdlib/native/core/IntlNumberFormat.h"
 #include "plugins/ets/stdlib/native/core/IntlLocaleMatch.h"
 #include "plugins/ets/stdlib/native/core/IntlCollator.h"
+#include "plugins/ets/stdlib/native/core/IntlSegmenter.h"
 #include "plugins/ets/stdlib/native/core/IntlCommon.h"
 #include "plugins/ets/stdlib/native/core/IntlLocale.h"
 #include "plugins/ets/stdlib/native/core/IntlPluralRules.h"
@@ -40,6 +41,7 @@ ani_status InitCoreIntl(ani_env *env)
     err = err == ANI_OK ? RegisterIntlLocaleNativeMethods(env) : err;
     err = err == ANI_OK ? RegisterIntlPluralRules(env) : err;
     err = err == ANI_OK ? RegisterIntlDateTimeFormatMethods(env) : err;
+    err = err == ANI_OK ? RegisterIntlSegmenter(env) : err;
     return err;
 }
 
