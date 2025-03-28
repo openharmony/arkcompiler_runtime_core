@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 export declare class C {
     public get x(): number;
-    public set x(a: number);
-    public val: number;
+    public set x(value: number);
+    public get val(): number;
+    public set val(value: number);
     constructor();
 }

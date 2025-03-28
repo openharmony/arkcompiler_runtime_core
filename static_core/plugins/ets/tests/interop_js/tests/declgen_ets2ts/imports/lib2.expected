@@ -12,13 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 export type IntAlias = number;
 export declare class Lib2Class {
-    public val: number;
+    public get val(): number;
+    public set val(value: number);
     constructor();
 }
 export declare class Lib2Class2 {
-    public val: number;
+    public get val(): number;
+    public set val(value: number);
     constructor();
 }

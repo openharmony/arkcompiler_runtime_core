@@ -12,12 +12,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 export declare function SumDouble(a: number, b: number): number;
 export declare function SumBoxedDouble(a: number, b: number): number;
 export declare function SumString(a: string, b: string): string;
 export declare function ReplaceFirst(arr: Simple[], e: Simple): Simple[];
+export declare function error(msg: string): never;
+export declare function foo(x: string): void;
+export declare function foo1(arg: X): void;
+export declare function foo2(a?: number): void;
+export declare function foo3(...nums: number[]): void;
+export declare function foo4(a: number): void;
+export declare function foo5(a: number): number;
+export declare function foo6(): Promise<void>;
+export declare function foo7(this: A): void;
+export declare function foo8(cb: Callback): void;
+export declare function foo9(cb: () => void): void;
 export declare class Simple {
     public constructor(x: number);
-    public val: number;
+    public get val(): number;
+    public set val(value: number);
 }
+export declare class X {
+    public get data(): number;
+    public set data(value: number);
+    constructor();
+}
+export declare class A {
+    constructor();
+}
+export type Callback = (arg: number) => void;
