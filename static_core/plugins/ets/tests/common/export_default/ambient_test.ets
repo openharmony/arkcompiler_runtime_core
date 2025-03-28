@@ -13,15 +13,9 @@
  * limitations under the License.
  */
 
-/*---
-desc: Top-level declarations can be made exported by using a selective export directive.
-files: ['./ambient04/file.ets']
-tags: [compile-only, negative]
----*/
-
-import { default as ns, foo } from './ambient04/file.d.ets'
+import { default as ns } from './file.d.ets'
 
 function main() {
     assertEQ(ns.foo(), 142)
-    assertEQ(foo(), 142)
 }
+
