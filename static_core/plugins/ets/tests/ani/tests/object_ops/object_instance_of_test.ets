@@ -18,6 +18,10 @@ class A {
         return new A();
     }
 
+    public static new_A_array(): Array<A> {
+        return new Array<A>();
+    }
+
     boolean_method(a0: int, a1: int): boolean {
         if (a0 + a1 > 10) {
             return true;
@@ -66,5 +70,33 @@ class D {
         } else {
             return false;
         }
+    }
+
+    public static new_Union(): D | F {
+        return new D();
+    }
+}
+
+interface I {}
+
+class F implements I {
+    public static new_I(): I {
+        return new F();
+    }
+
+    public static new_F(): F {
+        return new F();
+    }
+
+    public static new_Union(): D | F {
+        return new F();
+    }
+
+    public static new_Object(): Object {
+        return new Object();
+    }
+
+    public static new_Boxed_Primitive(): Int {
+        return 5;
     }
 }
