@@ -55,13 +55,17 @@ std/core/std_core_char_static_Char_isWhiteSpace.ets
 std/core/std_core_typedarrays_bignum__BigInt64Array.ets
 std/core/std_core_typedarrays_bignum__BigUint64Array.ets
 #FailKind.ABORT_FAIL - 1 tests:
+spec/10.Interfaces/Interface_Methods_Declarations/method_overload6.ets
+spec/10.Interfaces/method_overload6.ets
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_03.ets
-#FailKind.TSC_FAIL - 584 tests:
+#FailKind.TSC_FAIL - 582 tests:
 algorithms/SampleAppTest.ets
 escompat/ArrayProxyTest.ets
 escompat/JsonParseTest.ets
 escompat/ProcessTest.ets
 escompat/ProxyTest.ets
+escompat/WeakMapGCTest.ets
+escompat/WeakSetGCTest.ets
 escompat/escompat_BigInt_instance_BigInt_toString.ets
 escompat/escompat_BigInt_instance_BigInt_toString_001.ets
 escompat/escompat_BigInt_instance_BigInt_toString_002.ets
@@ -139,11 +143,9 @@ spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Param
 spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Parameter/RestParamsTest_PassSingleArg.ets
 spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Parameter/RestParamsTest_PassTwoArgs.ets
 spec/05.Generics/comparableClass.ets
+spec/07.expressions/7.32.Lambda_Expressions/issue15579_0.ets
+spec/07.expressions/7.32.Lambda_Expressions/issue15579_2.ets
 spec/07.expressions/7.32.Lambda_Expressions/issue15579_4.ets
-spec/07.expressions/7.5.Object_Literal/7.5.3.Object_Literal_of_Record_Type/record-boxable-types.ets
-spec/07.expressions/7.5.Object_Literal/7.5.3.Object_Literal_of_Record_Type/record-class-value-global.ets
-spec/07.expressions/7.5.Object_Literal/7.5.3.Object_Literal_of_Record_Type/record-number-string-global.ets
-spec/07.expressions/7.5.Object_Literal/7.5.3.Object_Literal_of_Record_Type/record-string-number-global.ets
 spec/09.classes/Accessor_Declarations/issue-15142_0.ets
 spec/09.classes/Accessor_Declarations/issue-15142_1.ets
 spec/09.classes/Accessor_Declarations/issue-15142_10.ets
@@ -159,15 +161,8 @@ spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_000
 spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0004.ets
 spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0005.ets
 spec/10.Interfaces/method_overiding_0001.ets
-spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.type_binding/type_binding_01.ets
-spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.type_binding/type_binding_02.ets
-spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.type_binding/type_binding_03.ets
-spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.type_binding/type_binding_04.ets
-spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/import_interface_with_binding_alias/test0.ets
-spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/issue15182/issue_15182_04.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_is_proxed_through_chain_of_files.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_is_proxed_through_chain_of_files_2.ets
-spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/02.export_type_directives/import_type_alias_with_qualified_access.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/clashing_reexports.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_directive_03.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/reexport_incorrect.ets
@@ -178,6 +173,9 @@ spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Ex
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue_15669_03.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue_15669_04.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue_15669_05.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@LocalStorageLink.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@StorageLink.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@StorageLink_2.ets
 spec/16.Support_for_GUI_Programming/struct-type/test-class-extends-struct.ets
 spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-as-name_1.ets
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_04.ets
@@ -255,6 +253,8 @@ std/core/TypeCreatePrimitiveNameTest.ets
 std/core/TypeInterfaceTypeTest.ets
 std/core/TypeLambdaTypeTest.ets
 std/core/TypeMethodInvoke.ets
+std/core/TypeMethodResolveConstructor.ets
+std/core/TypeMethodResolveConstructorFew.ets
 std/core/TypeMethodTest.ets
 std/core/std_core_boolean_instance_Boolean_and.ets
 std/core/std_core_boolean_instance_Boolean_compareTo.ets
