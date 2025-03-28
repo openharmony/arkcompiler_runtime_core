@@ -17,3 +17,11 @@ class ShortStatic {
     static short_value: short = 0;
     static string_value: String = "";
 }
+
+class ShortStaticA extends ShortStatic {
+    static short_value: short = 0;
+}
+
+final class ShortStaticFinal extends ShortStatic {
+    static short_value: short = 0;
+}

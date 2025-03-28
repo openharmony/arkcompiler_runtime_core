@@ -17,3 +17,11 @@ class DoubleStatic {
     static double_value: double = 0.0;
     static string_value: String = "";
 }
+
+class DoubleStaticA extends DoubleStatic {
+    static double_value: double = 0.0;
+}
+
+final class DoubleStaticFinal extends DoubleStatic {
+    static double_value: double = 0.0;
+}

@@ -17,3 +17,11 @@ class ByteStatic {
     static byte_value: byte = 0;
     static string_value: String = "";
 }
+
+class ByteStaticA extends ByteStatic {
+    static byte_value: byte = 0;
+}
+
+final class ByteStaticFinal extends ByteStatic {
+    static byte_value: byte = 0;
+}

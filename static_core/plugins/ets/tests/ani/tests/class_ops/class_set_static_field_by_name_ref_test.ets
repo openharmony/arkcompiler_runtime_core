@@ -17,3 +17,13 @@ class BoxStatic {
     static int_value: int = 0;
     static string_value: String = "";
 }
+
+class BoxStaticA extends BoxStatic {
+    static int_value: int = 0;
+    static string_value: String = "";
+}
+
+final class BoxStaticFinal extends BoxStatic {
+    static int_value: int = 0;
+    static string_value: String = "";
+}

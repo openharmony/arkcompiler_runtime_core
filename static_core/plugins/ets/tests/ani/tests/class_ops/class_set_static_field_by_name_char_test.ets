@@ -17,3 +17,11 @@ class CharStatic {
     static char_value: char = 'a';
     static string_value: String = "";
 }
+
+class CharStaticA extends CharStatic {
+    static char_value: char = 'a';
+}
+
+final class CharStaticFinal extends CharStatic {
+    static char_value: char = 'a';
+}

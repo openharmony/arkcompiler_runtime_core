@@ -17,3 +17,11 @@ class Packstatic {
     static int_value: int = 0;
     static string_value: String = "";
 }
+
+class PackstaticA extends Packstatic {
+    static int_value: int = 0;
+}
+
+final class PackstaticFinal extends Packstatic {
+    static int_value: int = 0;
+}
