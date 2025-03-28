@@ -59,7 +59,8 @@ XGC::XGC(PandaEtsVM *vm, STSVMInterfaceImpl *stsVmIface, ets_proxy::SharedRefere
       stsVmIface_(stsVmIface),
       minimalThresholdSize_(Runtime::GetCurrent()->GetOptions().GetXgcMinTriggerThreshold()),
       increaseThresholdPercent_(
-          std::min(PERCENT_100_U32, Runtime::GetCurrent()->GetOptions().GetXgcTriggerPercentThreshold()))
+          std::min(PERCENT_100_U32, Runtime::GetCurrent()->GetOptions().GetXgcTriggerPercentThreshold())),
+      gcForceXgcEnabled_(Runtime::GetCurrent()->GetOptions().IsGcForceXgcEnabled())
 {
     ASSERT(minimalThresholdSize_ <= storage->MaxSize());
     // Atomic with relaxed order reason: data race with targetThreasholdSize_ with no synchronization or ordering
@@ -371,6 +372,11 @@ bool XGC::Trigger(mem::GC *gc, PandaUniquePtr<GCTask> task)
 
 void XGC::TriggerGcIfNeeded(mem::GC *gc)
 {
+    if (gcForceXgcEnabled_) {
+        LOG(DEBUG, ETS_INTEROP_JS) << "force Xgc when create Ets And Js object";
+        Trigger(gc, MakePandaUnique<GCTask>(GCTaskCause::CROSSREF_CAUSE, time::GetCurrentTimeInNanos()));
+        return;
+    }
     // Atomic with relaxed order reason: data race with isXGcInProgress_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     if (isXGcInProgress_.load(std::memory_order_relaxed)) {
