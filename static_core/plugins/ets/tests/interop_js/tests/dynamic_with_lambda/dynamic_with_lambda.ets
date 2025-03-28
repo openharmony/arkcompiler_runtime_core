@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { A } from "."
+import { A } from "js_code"
 
 function TestArgs0(): int {
     let a = new A();

@@ -10,9 +10,9 @@
                 "$ROOT/tools/es2panda/test/parser/ets/dynamic_import_tests"]
         },
         "dynamicPaths": {
-            "dynamic_js_import_tests": {"language": "js", "hasDecl": false},
+            "dynamic_js_import_tests": {"language": "js"},
             "$ROOT/tools/es2panda/test/parser/ets/dynamic_import_tests": {
-                "language": "js", "hasDecl": true}
+                "language": "js", "declPath": "abc.ets"}
         }
     }
 }

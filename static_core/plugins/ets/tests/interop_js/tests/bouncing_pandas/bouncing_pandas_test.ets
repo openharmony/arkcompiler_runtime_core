@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { bouncingPandas } from "."
+import { bouncingPandas } from "bouncing_pandas"
 
 function Test1(): boolean {
   let ret = bouncingPandas();

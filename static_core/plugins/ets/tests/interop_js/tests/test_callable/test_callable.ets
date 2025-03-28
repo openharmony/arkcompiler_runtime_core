@@ -19,7 +19,7 @@ import {
     callArrowFunction,
     callConstructedFunction,
     callBoundFunction
-} from '.';
+} from 'js_code';
 
 const FIRST_VALUE = 5
 const SECONT_VALUE = 5

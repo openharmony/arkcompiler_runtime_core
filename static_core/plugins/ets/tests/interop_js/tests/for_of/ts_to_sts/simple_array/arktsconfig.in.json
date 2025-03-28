@@ -7,15 +7,12 @@
             ],
             "std": [
                 "${PANDA_ROOT}/plugins/ets/stdlib/std"
-            ],
-            "simple_array_js": [
-                "${CMAKE_CURRENT_BINARY_DIR}/simple_array.abc"
             ]
         },
         "dynamicPaths": {
-            "${CMAKE_CURRENT_BINARY_DIR}/simple_array.abc": {
+            "simple_array_js": {
                 "language": "js",
-                "hasDecl": false
+                "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/simple_array"
             }
         }
     }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,20 +17,19 @@
 
 let A = globalThis.gtest.etsVm.getClass('LA;');
 
+class AValue {}
 class ADeclared {}
 class BDeclared {}
+class CValue extends BDeclared {}
 class CDeclared extends ADeclared {}
 class DDeclared extends A {}
 
-class AValue {}
-class CValue extends BDeclared {}
+function asJsvalue(x) {
+	return x;
+}
 
 function jsFn() {
 	return new ADeclared();
-}
-
-function asJsvalue(x) {
-	return x;
 }
 
 module.exports = {
@@ -44,5 +43,5 @@ module.exports = {
 	jsCvalue: new CValue(),
 	asJsvalue,
 	jsFn,
-	createError: Error,
+	createError: Error
 };

@@ -41,7 +41,7 @@ import {
     SubsetByValueClass,
     createSubsetByValueGetterClassFromTs,
     subsetByValueInstanceClass,
-} from '/plugins/ets/tests/interop_js/tests/getter/ts_to_ets/getter.js';
+} from 'dynamic_import';
 
 
 const tupleArr: TupleType = [tsNumber, tsString];

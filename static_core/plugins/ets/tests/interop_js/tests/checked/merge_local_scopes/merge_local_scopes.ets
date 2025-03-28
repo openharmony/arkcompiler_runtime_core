@@ -15,7 +15,7 @@
 
 // NOTE: using `undefined` directly gives "Failed to emit binary data: Argument 3 of function $jscall.invoke has undefined type" (#14501)
 import { cons, car, cdr, vundefined }
-    from "/plugins/ets/tests/interop_js/tests/checked/js_call/js_call.js"
+    from "checked/js_call/js_call.js"
 
 //! CHECKER      Tree of js function calls JIT
 //! RUN          force_jit: true, entry: "test_call_tree", options: "--compiler-regex=ETSGLOBAL::call_tree --compiler-interop-try-single-scope=false"

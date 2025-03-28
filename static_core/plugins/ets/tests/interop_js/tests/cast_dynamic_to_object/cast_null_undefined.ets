@@ -17,7 +17,7 @@ import {
   funcReturnTypeNull,
   funcReturnTypeUndefined,
   funcArgType
-} from "."
+} from "js_code"
 
 function TestFuncCallArg(): boolean{
   if (funcReturnTypeNull() as null !== null) {

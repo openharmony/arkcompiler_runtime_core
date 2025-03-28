@@ -60,8 +60,8 @@ Which paths included in this list are stored in a vector that can be retrieved v
       ...
     },
     "dynamicPaths": {
-      "dynamic_js_import_tests": {"language": "js", "hasDecl": false},
-      "path/to/runtime_core/static_core/tools/es2panda/test/parser/ets/dynamic_import_tests": {"language": "js", "hasDecl": true}
+      "dynamic_js_import_tests": {"language": "js"},
+      "path/to/runtime_core/static_core/tools/es2panda/test/parser/ets/dynamic_import_tests": {"language": "js", "declPath": "path/to/ets/declaration"}
     }
   }
 }

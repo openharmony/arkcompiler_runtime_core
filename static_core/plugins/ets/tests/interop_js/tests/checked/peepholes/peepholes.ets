@@ -14,7 +14,7 @@
  */
 
 import { cons, car, cdr, sum, TreeNode, makeDynObject, doNothing, makeSwappable, StaticClass, extractSquaredInt, ObjectWithPrototype, vundefined, dynStorage }
-    from "/plugins/ets/tests/interop_js/tests/checked/js_call/js_call.js"
+    from "checked/js_call/js_call.js"
 
 //! CHECKER         Fuse getProperty and cast to string in BCO
 //! RUN_BCO         method: "ETSGLOBAL.jsLoadAndCastStr"

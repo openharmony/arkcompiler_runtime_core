@@ -87,8 +87,9 @@ function(create_declgen_ets2ts_test TARGET)
     )
     set(COMMA "")
     foreach(JS_SOURCE ${ARG_JS_SOURCES})
+        get_filename_component(JS_SRC_WE ${JS_SOURCE} NAME_WE)
         set(ARKTSCONFIG_CONTENT
-            "      \"${JS_SOURCE}\": {\"language\": \"js\", \"hasDecl\": false}${COMMA}\n"
+            "      \"${JS_SRC_WE}\": {\"language\": \"js\", \"ohmUrl\":\"${JS_SOURCE}\"}${COMMA}\n"
             "${ARKTSCONFIG_CONTENT}"
         )
         if(COMMA STREQUAL "")

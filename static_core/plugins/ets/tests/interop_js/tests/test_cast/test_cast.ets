@@ -15,7 +15,7 @@
 
 import {
   funcArgType
-} from "."
+} from "js_code"
 
 function TestFuncCallArg_Pos(): boolean {
   let arg12: "literal" = "literal";

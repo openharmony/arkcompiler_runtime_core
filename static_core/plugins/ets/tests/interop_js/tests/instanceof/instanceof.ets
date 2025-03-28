@@ -19,7 +19,7 @@ import {
     jsAvalue,
     jsCvalue,
     jsFn,
-} from "/plugins/ets/tests/interop_js/tests/instanceof/js/instanceof.js"
+} from "js"
 import {
     ADeclared,
     BDeclared,
@@ -27,7 +27,7 @@ import {
     DDeclared,
     asJsvalue,
     createError,
-} from "dynamic_import"
+} from "dynamic_import_with_decl"
 
 
 class A {}

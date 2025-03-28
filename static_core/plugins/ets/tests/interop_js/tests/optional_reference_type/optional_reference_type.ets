@@ -16,7 +16,7 @@
   fnWithAnyParamObject, ObjectTypeWithArr, TestUserType, fnWithUserInterface, fnWithUserClass, TestUserClass,
   UnionArrOrObj, fnWithUnionParam, UserPartial, UserOmit, fnWithSubsetPick, UserPick, AddressType,
   fnWithExtraSetParam, fnWithLiteralParam, fnWithAnyParams
-  } from "."
+  } from "js_code"
 
  function referenceAnyParam(): boolean {
     return fnWithAnyParams(['one', 'two']) == 'one';

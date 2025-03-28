@@ -15,7 +15,7 @@
 
 import {
     DynProperties, setPropertyExternal, getPropertyExternal
-} from '/plugins/ets/tests/interop_js/tests/declgen_ets2ts/properties/lib2.js'
+} from 'lib2'
 
 export class DynPropertiesWrapper {
     dynProps_: DynProperties = new DynProperties();

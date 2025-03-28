@@ -8,9 +8,9 @@
             ]
         },
         "dependencies": [
-            "../C/arktsconfig.json"
+            "../../../../C/arktsconfig.json"
         ],
-        "entry": "./indexB.ets"
+        "entry": "../../../indexB.ets"
         
     }
 }

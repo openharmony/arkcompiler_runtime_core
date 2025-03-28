@@ -56,7 +56,7 @@ import {
     returnUnion,
     returnClass,
     returnInterface
-} from '.';
+} from 'js_code';
 
 const SAMPLE_STRING = 'This is a test string'
 const TEST_LONG_INT = 9007199254740991

@@ -14,7 +14,7 @@
  */
 
 import { Outer, outerObj }
-    from "/plugins/ets/tests/interop_js/tests/checked/qualified_call/qualified_call.js"
+    from "checked/qualified_call/qualified_call.js"
 
 //! CHECKER      Call method of class member INT
 //! RUN          entry: "callInner", options: "--compiler-enable-jit=false"

@@ -17,7 +17,7 @@ package Test;
 
 import {
     Car, foo, A
-} from ".";
+} from "js_code";
 
 
 function test_newcall(): boolean {

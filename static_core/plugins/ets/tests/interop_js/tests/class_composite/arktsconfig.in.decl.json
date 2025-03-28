@@ -6,7 +6,7 @@
                         "std": ["${PANDA_ROOT}/plugins/ets/stdlib/std"]
 		},
 		"dynamicPaths": {
-			"${CMAKE_CURRENT_SOURCE_DIR}/js/index": { "language": "js", "hasDecl": true }
+			"js": { "language": "js", "declPath": "${CMAKE_CURRENT_SOURCE_DIR}/js/index.ets", "ohmUrl": "${CMAKE_CURRENT_SOURCE_DIR}/js/index" }
 		}
 	}
 }

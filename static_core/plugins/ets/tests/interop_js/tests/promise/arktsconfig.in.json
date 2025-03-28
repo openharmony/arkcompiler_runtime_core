@@ -8,16 +8,10 @@
             ],
             "std": [
                 "${PANDA_ROOT}/plugins/ets/stdlib/std"
-            ],
-            "promiseProxy": [
-                "${CMAKE_CURRENT_BINARY_DIR}/promise_proxy_test_exports.abc"
             ]
         },
         "dynamicPaths": {
-            "${CMAKE_CURRENT_BINARY_DIR}/promise_proxy_test_exports.abc": {
-                "language": "js",
-                "hasDecl": false
-            }
+			"promiseProxy": { "language": "js", "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/promise_proxy_test_exports" }
         }
     }
 }

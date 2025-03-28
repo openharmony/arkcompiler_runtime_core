@@ -14,7 +14,7 @@
  */
 
 import { cons, car, cdr, sum, TreeNode, makeDynObject, doNothing, makeSwappable, StaticClass, extractSquaredInt, ObjectWithPrototype, vundefined}
-    from "/plugins/ets/tests/interop_js/tests/checked/js_call/js_call.js"
+    from "checked/js_call/js_call.js"
 
 //! CHECKER      Several js function calls JIT (slow)
 //! RUN          force_jit: true, entry: "callSequence", options: "--compiler-regex=ETSGLOBAL::callSequence --compiler-enable-fast-interop=false"

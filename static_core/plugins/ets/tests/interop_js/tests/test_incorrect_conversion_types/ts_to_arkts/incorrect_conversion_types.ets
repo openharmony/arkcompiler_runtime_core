@@ -33,7 +33,7 @@ import {
     tsBigInt,
     tsArrayNum, 
     tsArrayStr
-} from '.';
+} from 'js_code';
 
 function isTypeError(error: Error): boolean{
     const errorStr: string = '' + error.cause;

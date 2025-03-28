@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { etsUndefinedProduce, etsUndefinedConsume, etsNullProduce, etsNullConsume } from "."
+import { etsUndefinedProduce, etsUndefinedConsume, etsNullProduce, etsNullConsume } from "js_code"
 
 function TestPassUndefinedToEts(): boolean {
     let a: NullishType = etsUndefinedProduce()
