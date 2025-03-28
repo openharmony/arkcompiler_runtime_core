@@ -19,7 +19,7 @@ import { RegularFunc, Foo, MultipleCall, Lambda, ArrayOfFoo, DoubleArrayOfFoo, A
 function regularFunc(): int {
     let x = RegularFunc() as Int;
     let callee = RegularFunc;
-    assert(x == callee() as Int)
+    assertTrue(x == callee() as Int)
     return x
 }
 
@@ -34,7 +34,7 @@ class DynFieldHelper {
         let x = new DynamicField();
         x.foo();
         let callee = x.foo;
-        assert(x.foo() == callee() as Int)
+        assertTrue(x.foo() == callee() as Int)
         // return x.foo()
         this.x = x.foo();
     }
@@ -47,41 +47,41 @@ function dynamicField(): Int {
 function methodCall(): int {
     let x = Foo.foo().foo() as Int;
     let callee = Foo;
-    assert(x == callee.foo().foo() as Int)
+    assertTrue(x == callee.foo().foo() as Int)
     return x
 }
 
 function multipleCall(): int {
     let x = MultipleCall()() as Int;
     let callee = MultipleCall;
-    assert(x == callee()() as Int)
+    assertTrue(x == callee()() as Int)
     return x
 }
 
 function lambda(): int {
     let callee = Lambda;
     let x = Lambda() as Int;
-    assert(x == callee() as Int) // through variable is different, because we don't need to load module
+    assertTrue(x == callee() as Int) // through variable is different, because we don't need to load module
     return x;
 }
 
 function simpleArr(): int {
     let x = ArrayOfFoo[0].foo() as Int;
     let callee = ArrayOfFoo
-    assert(x == callee[0].foo() as Int)
+    assertTrue(x == callee[0].foo() as Int)
     return x;
 }
 
 function multidimArray(): int {
     let x = DoubleArrayOfFoo[0][0].foo() as Int;
     let callee = DoubleArrayOfFoo
-    assert(x == callee[0][0].foo() as Int)
+    assertTrue(x == callee[0][0].foo() as Int)
     return x;
 }
 
 function lambdaArrCall(): int {
     let x = ArrayOfLambda[0]() as Int;
     let callee = ArrayOfLambda
-    assert(x == callee[0]() as Int)
+    assertTrue(x == callee[0]() as Int)
     return x;
 }

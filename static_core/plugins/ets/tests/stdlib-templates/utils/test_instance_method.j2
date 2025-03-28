@@ -159,6 +159,6 @@ function main(): int {
         console.println();
       {% if item.method_throws == true %}}{%- endif %}
     }
-  assert passed_counter == max_test;
+  assertEQ(passed_counter, max_test)
   return 0;
   }

@@ -55,7 +55,7 @@ function jsvalObjectToStr(): String {
     let x: JSValue = Curry(123);
     try {
         let z: String = x.toString();
-        assert(false);
+        assertTrue(false);
     } catch (z: ESError) {
         let y = castToObject(x);
         return y + "A";
@@ -66,7 +66,7 @@ function jsvalObjectToStr(): String {
 function implicitToString(): String {
     let x = Optional(false);
     console.log(123, x)
-    assert(vstringify(x) == "string:optionalVal")
+    assertTrue(vstringify(x) == "string:optionalVal")
     return x + "A";
 }
 
