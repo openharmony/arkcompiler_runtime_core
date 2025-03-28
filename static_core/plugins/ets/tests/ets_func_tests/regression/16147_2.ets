@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,18 +14,22 @@
  */
 
 /*---
-desc: >-
-    11 Enumeration
-name: 11.enumeration
+desc: Issue 16147. Private member is not visible
 tags: []
 ---*/
 
-enum ConstExpr {
-    A = Int.MAX_VALUE + 1,
-    B = 1 - 100,
+
+class RenderNode<T> {
+    private data: T|null
+
+    static build<T>(target: RenderNode<T>, val: T|null) {
+        target.data = val
+    }
 }
 
+class ExtendedNode<T> extends RenderNode<T> {}
+
 function main(): void {
-    assertEQ( ConstExpr.A.getValue(), Int.MAX_VALUE + 1)
-    assertEQ( ConstExpr.B.getValue(), -99)
+    let item = new ExtendedNode<String>();
+    ExtendedNode.build<String>(item, "null");
 }

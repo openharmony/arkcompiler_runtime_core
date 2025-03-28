@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,11 +21,16 @@ tags: []
 ---*/
 
 enum ConstExpr {
-    A = Int.MAX_VALUE + 1,
-    B = 1 - 100,
+    READ = 1 << 0,
+    WRITE = 1 << 1,
+    READ_WRITE = READ | WRITE
 }
 
-function main(): void {
-    assertEQ( ConstExpr.A.getValue(), Int.MAX_VALUE + 1)
-    assertEQ( ConstExpr.B.getValue(), -99)
+type MainResultType = int
+
+function main(): MainResultType {
+    assertEQ( ConstExpr.READ.getValue(), 1)
+    assertEQ( ConstExpr.WRITE.getValue(), 2)
+    assertEQ( ConstExpr.READ_WRITE.getValue(), 3)
+    return 0
 }

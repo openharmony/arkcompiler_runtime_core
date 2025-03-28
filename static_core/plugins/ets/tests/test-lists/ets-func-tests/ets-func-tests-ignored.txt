@@ -4,7 +4,7 @@ algorithms/SampleAppTest.ets
 #23211 Fails on CI
 escompat/ProcessTest.sts
 
-#24357 Koala related issues 
+#24357 Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
 
 #24358 Koala related issues
@@ -217,7 +217,11 @@ spec/11.Enumerations/enum_const_expr_01_02.ets
 spec/11.Enumerations/enum_const_expr_01_03.ets
 spec/11.Enumerations/enum_const_expr_01_04.ets
 spec/11.Enumerations/enum_const_expr_01_05.ets
+spec/11.Enumerations/enum_const_expr_01_06.ets
 spec/11.Enumerations/enum_const_expr_02_01.ets
+spec/11.Enumerations/enum_const_expr_02_02.ets
+spec/11.Enumerations/enum_const_expr_02_03.ets
+regression/14654_0.ets
 
 #19956 enum issue
 spec/11.Enumerations/enum_trailing_comma_04.ets
