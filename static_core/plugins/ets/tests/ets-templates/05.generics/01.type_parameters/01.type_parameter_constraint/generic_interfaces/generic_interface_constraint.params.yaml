@@ -13,40 +13,10 @@
 
 --- # Type constraints for generic parameters
 constraints:
-  - type: Int
-    use: Int
-    tags: negative
   - type: Int | Double
     use: Int
   - type: Int | Double
     use: Double
-  - type: Byte
-    use: Byte
-    tags: negative
-  - type: Short
-    use: Short
-    tags: negative
-  - type: Long
-    use: Long
-    tags: negative
-  - type: Float
-    use: Float
-    tags: negative
-  - type: Double
-    use: Double
-    tags: negative
-  - type: Boolean
-    use: Boolean
-    tags: negative
-  - type: Char
-    use: Char
-    tags: negative
-  - type: Number
-    use: Number
-    tags: negative
-  - type: String
-    use: String
-    tags: negative
   - type: '"a" | "b"'
     use: '"a"'
   - type: I1

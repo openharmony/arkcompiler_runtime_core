@@ -20,50 +20,10 @@ top_level_class_modifiers:
 
 # Type constraints for generic parameters
 constraints:
-  - type: Int
-    use: Int
-    tags: negative
-    doc: cannot extend final class
   - type: Int | Double
     use: Int
   - type: Int | Double
     use: Double
-  - type: Byte
-    use: Byte
-    tags: negative
-    doc: cannot extend final class
-  - type: Short
-    use: Short
-    tags: negative
-    doc: cannot extend final class
-  - type: Long
-    use: Long
-    tags: negative
-    doc: cannot extend final class
-  - type: Float
-    use: Float
-    tags: negative
-    doc: cannot extend final class
-  - type: Double
-    use: Double
-    tags: negative
-    doc: cannot extend final class
-  - type: Boolean
-    use: Boolean
-    tags: negative
-    doc: cannot extend final class
-  - type: Char
-    use: Char
-    tags: negative
-    doc: cannot extend final class
-  - type: Number
-    use: Number
-    tags: negative
-    doc: cannot extend final class
-  - type: String
-    use: String
-    tags: negative
-    doc: cannot extend final class
   - type: '"a" | "b"'
     use: '"a"'
   - type: byte

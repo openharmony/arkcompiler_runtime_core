@@ -20,22 +20,23 @@ abstr_or_native_method_modifiers:
 
 # Type constraints for generic parameters
 constraints:
-  - type: Int | Double
-  - type: '"a" | "b"'
-  - type: byte
-  - type: short
-  - type: int
-  - type: long
-  - type: float
-  - type: double
-  - type: number
-  - type: boolean
-  - type: void
-  - type: char
-  - type: 'null'
-  - type: 'undefined'
-  - type: Int[]
-  - type: int[]
-  - type: Color
-  - type: Object, Z extends int
-  - type: int, Z extends Object
+  - type: Int
+    tags: negative
+  - type: Byte
+    tags: negative
+  - type: Short
+    tags: negative
+  - type: Long
+    tags: negative
+  - type: Float
+    tags: negative
+  - type: Double
+    tags: negative
+  - type: Boolean
+    tags: negative
+  - type: Char
+    tags: negative
+  - type: Number
+    tags: negative
+  - type: String
+    tags: negative
