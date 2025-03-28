@@ -32,3 +32,96 @@ export class Derived extends Base implements I0, I1 {
     b: double = 2;
     constructor(a: double, b: double) {super(a); this.b = b;}
 }
+
+export class X {
+    a: number = 0
+    protected b: number = 0
+    private c: number = 0
+}
+
+export class X1 {
+  foo() {}
+}
+export let cb: (this: X1) => void = (this: X1) => { this.foo() }
+
+export class X2 {
+ foo2(): this { return this }
+}
+
+export class C {
+  foo() { console.log("this.s") }
+}
+
+export class C1 {
+  foo1(n : number = 1) { console.log(n) }
+}
+
+export class C2 {
+  foo2(...nums: number[]) {}
+}
+
+export class C3 {
+  native foo3() : void
+}
+
+export class C4 {
+    async foo4() {}
+}
+
+export class C5 {
+  static foo5() : void {}
+}
+
+export class C6 {
+  static foo6(n : number = 1) { console.log(n) }
+}
+
+export class C7 {
+  static foo7(...nums: number[]) {}
+}
+
+export class C8 {
+  native foo8() : void
+}
+
+export class C9 {
+  static async foo9() {}
+}
+
+export class C10 {
+  s : string = 'Hi'
+}
+
+export class C11 {
+  static foo11 : number = 0
+}
+
+export class Person {
+    private name_: string = ""
+    constructor(name: string) {
+        this.name_ = name
+    }
+    get name(): string {
+        console.log(this.name_)
+        return this.name_
+    }
+    set name(name: string) {
+        this.name_ = name
+        console.log(this.name_)
+    }
+}
+
+export class A {}
+get fullName(this: A): string {return '123'}
+set fullName(this: A, val: string) {}
+
+export abstract class Animal {
+  abstract move(): void
+}
+
+class B {
+  foo() : void {}
+}
+export class D extends B {
+  override foo() : void { console.log("D.foo") }
+}

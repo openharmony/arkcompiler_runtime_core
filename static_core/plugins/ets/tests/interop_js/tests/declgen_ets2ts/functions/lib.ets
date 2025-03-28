@@ -36,3 +36,34 @@ export function ReplaceFirst(arr: Simple[], e: Simple): Simple[] {
     arr[0] = e;
     return arr;
 }
+
+export function error(msg: string): never {
+  throw new Error(msg)
+}
+
+export function foo(x: string) {
+  console.log(x)
+}
+
+export class X { data: number = 0 }
+export function foo1(arg: X) {}
+
+export function foo2(a: number = 1) {}
+
+export function foo3(...nums: number[]) {}
+
+export function foo4(a: number) {}
+
+export native function foo5(a: number): int
+
+export async function foo6() {}
+
+export class A {}
+export function foo7(this: A) {}
+
+export type Callback = (arg: number) => void
+export function foo8(cb : Callback) {
+   cb(42)
+}
+
+export function foo9(cb: () => void) {}

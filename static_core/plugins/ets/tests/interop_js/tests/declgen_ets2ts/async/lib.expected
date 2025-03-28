@@ -12,10 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 export declare function AsyncIdentity(param: number): Promise<number>;
-export declare function AsyncIdentity$asyncimpl(param: number): any;
+export declare const myPromise: Promise<number>;
+export declare let cb: (arg: number) => void;
+export declare let foo: () => Promise<void>;
 export declare class PromiseWrapper {
-    public promise_: Promise<string>;
+    public get promise_(): Promise<string>;
+    public set promise_(value: Promise<string>);
     constructor();
 }

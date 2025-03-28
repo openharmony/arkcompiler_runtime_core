@@ -16,3 +16,6 @@
 export function NumberOrStringEquality(a: Number | String, b: Number | String): boolean {
     return a == b;
 }
+
+export type union = int | double | string
+export let u: union = 123

@@ -13,24 +13,23 @@
  * limitations under the License.
  */
 
-export namespace A {
-  export let v1 = 1;
-  export namespace B {
-    export let v2 = 2;
-    export namespace C {
-      export let v3 = 3;
-    }
-  }
+import { C } from './lib';
+
+function assertEq<T>(a: T, b: T): void {
+	// @ts-ignore
+	print(`assertEq: '${a}' === '${b}'`);
+	if (a !== b) {
+		throw new Error(`assertEq failed: '${a}' === '${b}'`);
+	}
 }
 
-export declare namespace X1 {
-    function foo1(): void;
+export function main(): void {
+	testInterface();
 }
 
-export namespace X {
-  export function foo(): void { console.log("Hi") }
-}
-
-export namespace myNamespace {
-  export enum nsEnum { White, Blue = 2, Red = 2 }
+function testInterface(): void {
+	const input = ["hello"];
+	const classC = new C();
+	classC.bar(input);
+	assertEq(input[0], "hello");
 }

@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
 declare interface I0 {
     I0Method(a: string): string;
 }
@@ -20,12 +19,14 @@ declare interface I1 {
     I1Method(a: number): number;
 }
 declare class Base {
-    public a: number;
+    public get a(): number;
+    public set a(value: number);
     public constructor(a: number);
 }
 export declare class Derived extends Base implements I0, I1 {
     public I0Method(a: string): string;
     public I1Method(a: number): number;
-    public b: number;
+    public get b(): number;
+    public set b(value: number);
     public constructor(a: number, b: number);
 }

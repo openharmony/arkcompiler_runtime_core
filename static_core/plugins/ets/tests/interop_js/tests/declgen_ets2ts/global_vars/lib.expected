@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 export declare const CONSTANT: number;
 export declare class Bibka {
-    public readonly static NOT_GLOBAL: number;
+    public static get NOT_GLOBAL(): number;
     constructor();
 }

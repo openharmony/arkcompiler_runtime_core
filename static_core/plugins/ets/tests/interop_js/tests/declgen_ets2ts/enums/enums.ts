@@ -25,7 +25,7 @@ const FIX_TODO = false;
 
 import * as imported from './lib';
 
-const { Color, Letter } = imported;
+const { Color, Letter, Color1, UserRole } = imported;
 
 function assertEq<T>(a: T, b: T): void {
 	// @ts-ignore
@@ -50,6 +50,15 @@ function testClasses(): void {
 		assertEq(Color.Green, -ONE_HUNDRED);
 		assertEq(Color.Blue, -NINETY_NINE);
 		assertEq(Color.White, ZERO);
+
+		assertEq(Color1.Red, ZERO);
+		assertEq(Color1.Green, ONE);
+		assertEq(Color1.Blue, TWO);
+
+		assertEq(UserRole.Admin, 'admin');
+		assertEq(UserRole.Editor, 'editor');
+		assertEq(UserRole.Viewer, 'viewer');
+		assertEq(UserRole.Guest, 'guest');
 	}
 	if (FIX_12808) {
 		const workaroundImport = { Ivan: 'John', Li: 'Yuan', ...imported };
