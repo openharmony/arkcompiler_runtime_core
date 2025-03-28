@@ -15,7 +15,6 @@
 
 /*---
 desc: Casting conversions char to long.
-tags: [compile-only, negative]
 ---*/
 
 let char: string = 'A';

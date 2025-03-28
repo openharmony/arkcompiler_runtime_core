@@ -108,13 +108,18 @@ export final class BigInt {
     }
 
     constructor(d: string) {
-        let a = BigInt.parseFromString(d)
+        let trimmed = d.trim()
+        let a = BigInt.parseFromString(trimmed)
         this.bytes = a[0]
         this.sign = a[1]
     }
 
     constructor(d: boolean) {
-        throw new Error("BigInt.constructor(boolean): not implemented")
+        const oz = d ? 1 : 0
+        this.sign = oz
+        this.bytes = this.sign == 0
+            ? [] as int[]
+            : BigInt.fromLongHelper(oz as long, 1, this.sign)
     }
 
     constructor(d: BigInt) {
@@ -1071,6 +1076,70 @@ export final class BigInt {
      */
     public getULong(): long {
         return BigInt.asUint64(this).getLong()
+    }
+
+     /**
+     * Creates a new instance of BigInt from existing BigInt number
+     *
+     * @param value BigInt value
+     *
+     * @returns A new BigInt instance from existing BigInt
+     */
+    static $_invoke(value: BigInt): BigInt {
+        return new BigInt(value)
+    }
+
+    /**
+     * Creates a new instance of BigInt from number instance
+     *
+     * @param value number value
+     *
+     * @returns A new BigInt instance from number
+     */
+    static $_invoke(value: number): BigInt {
+        return new BigInt(value)
+    }
+
+    /**
+     * Creates a new instance of BigInt from string
+     *
+     * @param value string value
+     *
+     * @returns A new BigInt instance from string
+     */
+    static $_invoke(value: string): BigInt {
+        return new BigInt(value)
+    }
+
+    /**
+     * Creates a new instance of BigInt from boolean
+     *
+     * @param value boolean value
+     *
+     * @returns A new BigInt instance from boolean
+     */
+    static $_invoke(value: boolean): BigInt {
+        return new BigInt(value)
+    }
+
+    /**
+     * Creates a new instance of BigInt from union of bigint/number/string/boolean
+     *
+     * @param value source value
+     *
+     * @returns A new BigInt instance from union of bigint/number/string/boolean
+     */
+    static $_invoke(value: BigInt | Number | String | Boolean): BigInt {
+        if (value instanceof BigInt) {
+            return new BigInt(value as BigInt)
+        } else if (value instanceof Number) {
+            return new BigInt(value as Number)
+        } else if (value instanceof String) {
+            return new BigInt(value as String)
+        } else if (value instanceof Boolean) {
+            return new BigInt(value as Boolean)
+        }
+        return new BigInt(0)
     }
 
 }

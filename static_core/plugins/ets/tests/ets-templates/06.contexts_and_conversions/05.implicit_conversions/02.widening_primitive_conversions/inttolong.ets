@@ -15,7 +15,6 @@
 
 /*---
 desc: Casting conversions int to long.
-tags: [compile-only, negative]
 ---*/
 
 function isInt(value: number): boolean {

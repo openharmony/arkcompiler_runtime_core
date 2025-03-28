@@ -15,7 +15,6 @@
 
 /*---
 desc: Casting conversions short to long.
-tags: [compile-only, negative]
 ---*/
 
 function isShort(value: number): boolean {

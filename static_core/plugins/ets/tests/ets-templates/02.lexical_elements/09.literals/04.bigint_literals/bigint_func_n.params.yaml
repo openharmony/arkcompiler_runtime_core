@@ -14,10 +14,9 @@
 --- # List of valid bigint functions
 bigint_functions:
     - 'BigInt()    // missing argument'
-    - 'BigInt(123 as byte)  // wrong argument type'
-    - 'BigInt(new Int(1))   // wrong argument type'
     - 'BigInt(new Object())  // wrong argument type'
     - 'BigInt(null)  // wrong argument type'
+    - 'BigInt(undefined) // wrong argument type'
 
     - 'BigInt.asIntN()  // missing arguments'
     - 'BigInt.asIntN(1n, 0n)  // wrong 1st argument type'
