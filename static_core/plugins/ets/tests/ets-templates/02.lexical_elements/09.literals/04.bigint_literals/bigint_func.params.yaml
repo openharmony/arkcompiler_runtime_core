@@ -18,9 +18,13 @@ bigint_functions:
 
     - { func: 'BigInt("1")', res: 1n }
     - { func: 'BigInt("1234567890")', res: 1234567890n }
-
+    - { func: 'BigInt("               123                  ")', res: 123n }
     - { func: 'BigInt(1 as long)', res: 1n }
     - { func: 'BigInt(1234567890 as long)', res: 1234567890n }
+
+    - { func: 'BigInt(123 as byte)', res: 123n }
+    - { func: 'BigInt(1 as int)', res: "1n" }
+    - { func: 'BigInt(1 as bigint | number | string | boolean)', res: "1n" }
 
     - { func: 'BigInt.asIntN(32, 0n)', res: 0n }
     - { func: 'BigInt.asIntN(0, 12345678901234567890n)', res: 0n }

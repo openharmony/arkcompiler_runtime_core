@@ -15,7 +15,6 @@
 
 /*---
 desc: Casting conversions byte to long.
-tags: [compile-only, negative]
 ---*/
 
 function bytesToLong(bytes: Uint8Array): bigint {
@@ -39,6 +38,6 @@ function main(): void {
         const result = bytesToLong(bytes);
         console.log(result.toString());
     } catch (error) {
-        console.error(error.message);
+        console.error(error);
     }
 }

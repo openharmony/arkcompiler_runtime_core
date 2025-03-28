@@ -15,7 +15,6 @@
 
 /*---
 desc: Casting conversions long to float.
-tags: [compile-only, negative]
 ---*/
 
 function isLong(value: bigint): boolean {

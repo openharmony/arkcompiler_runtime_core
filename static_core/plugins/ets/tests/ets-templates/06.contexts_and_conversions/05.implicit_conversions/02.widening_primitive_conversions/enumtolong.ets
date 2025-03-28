@@ -15,7 +15,6 @@
 
 /*---
 desc: Casting conversions enum to long.
-tags: [compile-only, negative]
 ---*/
 
 enum Color {
