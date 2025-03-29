@@ -635,14 +635,6 @@
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/spec2.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/spec5b.ets
 
-#19809
-06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/comp_obj/comp-intf_21.ets
-06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/decl_field/decl-field_21.ets
-06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/comp_obj/comp-clss_21.ets
-06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/decl_var/decl-var_21.ets
-06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/assn_var/assn-var_21.ets
-06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/decl_const/decl-const_21.ets
-
 #enum cannot be assigned to type Object - not yet implemented
 06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/call_func/call-func_21.ets
 06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/comp_arr/comp-arr_21.ets
