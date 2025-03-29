@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,10 @@
 #include "runtime/coroutines/stackful_coroutine.h"
 #include "runtime/coroutines/stackful_coroutine_manager.h"
 
+#if defined(PANDA_TSAN_ON)
+#include <sanitizer/tsan_interface.h>
+#endif /* PANDA_TSAN_ON */
+
 namespace ark {
 
 // clang-tidy cannot detect that we are going to initialize context_ via getcontext()
@@ -27,6 +31,26 @@ StackfulCoroutineContext::StackfulCoroutineContext(uint8_t *stack, size_t stackS
     : stack_(stack), stackSizeBytes_(stackSizeBytes)
 {
     fibers::GetCurrentContext(&context_);
+#if defined(PANDA_TSAN_ON)
+    if (stack == nullptr) {
+        // entrypointless coroutine uses the current thread context
+        tsanFiberCtx_ = __tsan_get_current_fiber();
+    } else {
+        tsanFiberCtx_ = __tsan_create_fiber(0);
+    }
+#endif /* PANDA_TSAN_ON */
+}
+
+StackfulCoroutineContext::~StackfulCoroutineContext()
+{
+#if defined(PANDA_TSAN_ON)
+    if (stack_ != nullptr) {
+        __tsan_destroy_fiber(tsanFiberCtx_);
+    }
+#else
+    // make clang-tidy happy! this is not a trivial dtor!
+    ;
+#endif /* PANDA_TSAN_ON */
 }
 
 void StackfulCoroutineContext::AttachToCoroutine(Coroutine *co)
@@ -135,6 +159,9 @@ void StackfulCoroutineContext::ThreadProcImpl()
 bool StackfulCoroutineContext::SwitchTo(StackfulCoroutineContext *target)
 {
     ASSERT(target != nullptr);
+#if defined(PANDA_TSAN_ON)
+    __tsan_switch_to_fiber(target->tsanFiberCtx_, 0);
+#endif /* PANDA_TSAN_ON */
     fibers::SwitchContext(&context_, &target->context_);
     // maybe eventually we will check the return value of SwitchContext() and return false in case of error...
     return true;

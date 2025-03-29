@@ -40,7 +40,7 @@ public:
      * (stack + stack_size_bytes)
      */
     explicit StackfulCoroutineContext(uint8_t *stack, size_t stackSizeBytes);
-    ~StackfulCoroutineContext() override = default;
+    ~StackfulCoroutineContext() override;
 
     /**
      * Prepares the context for execution, links it to the managed context part (Coroutine instance) and registers the
@@ -176,6 +176,9 @@ private:
     fibers::FiberContext context_;
     Coroutine::Status status_ {Coroutine::Status::CREATED};
     stackful_coroutines::AffinityMask affinityMask_ = stackful_coroutines::AFFINITY_MASK_NONE;
+#if defined(PANDA_TSAN_ON)
+    void *tsanFiberCtx_ {nullptr};
+#endif /* PANDA_TSAN_ON */
 };
 
 }  // namespace ark
