@@ -1,0 +1,38 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+@!namespace("void_func", "mytest")
+
+enum BarTest: u8 {
+  A = 1,
+  B = 2,
+  C = 3,
+}
+
+function myfunc1(): void;
+function myfunc2(option1:i8,option2:i16): void;
+function myfunc3(option1:i32,option2:bool):void;
+function myfunc4(option1:i32,option2:i64):void;
+function myfunc5(option1:i32,option2:String):void;
+function myfunc6(option1:i64,option2:bool):void;
+function myfunc7(option1:i64,option2:f32):void;
+function myfunc8(option1:i64,option2:f64):void;
+function myfunc9(option1:f32,option2:bool):void;
+function myfunc10(option1:f32,option2:String):void;
+function myfunc11(option1:f64,option2:String):void;
+function myfunc12(option1:Optional<i32>,option2:Optional<i64>):void;
+function myfunc13(option1:Optional<f32>,option2:Optional<f64>):void;
+function myfunc14(option1:Optional<String>,option2:Optional<bool>):void;
+function myfunc15(option1:Optional<i16>,option2:Optional<i64>):void;
+function myfunc16(option1:Optional<i16>,option2:BarTest):void;
