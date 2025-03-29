@@ -596,12 +596,6 @@
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_5.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_6.ets
 
-#23985
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_2.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_3.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_4.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-lit_7.ets
-
 #23987
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/spec2.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/spec5b.ets
