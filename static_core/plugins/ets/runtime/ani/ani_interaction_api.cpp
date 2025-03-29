@@ -5007,10 +5007,12 @@ NO_UB_SANITIZE static ani_status TupleValue_GetNumberOfItems(ani_env *env, ani_t
 }
 
 template <typename PrimitiveArrayType>
-static bool IsPrimitiveArray(EtsArray *array)
+static bool IsCorrectBoxType(EtsCoroutine *coro, EtsObject *element)
 {
-    ASSERT(array != nullptr);
-    return array->GetClass() == PrimitiveArrayType::GetComponentClass();
+    ASSERT(element != nullptr);
+    ASSERT(element->GetClass() != nullptr);
+    auto *boxPrimitiveClass = EtsBoxPrimitive<typename PrimitiveArrayType::ValueType>::GetBoxClass(coro);
+    return element->GetClass()->GetRuntimeClass() == boxPrimitiveClass;
 }
 
 template <typename PrimitiveArrayType>
@@ -5025,16 +5027,19 @@ static ani_status TupleValueGetItem(ani_env *env, ani_tuple_value tupleValue, an
     auto *internalTuple = s.ToInternalType(tupleValue);
     ANI_CHECK_RETURN_IF_GE(index, internalTuple->GetLength(), ANI_OUT_OF_RANGE);
 
-    if (IsPrimitiveArray<PrimitiveArrayType>(internalTuple)) {
+    const auto *arrayCls = internalTuple->GetClass();
+    ASSERT(arrayCls->IsArrayClass());
+    const auto *elementCls = arrayCls->GetComponentType();
+    ASSERT(elementCls != nullptr);
+    if (elementCls->IsPrimitive()) {
+        ANI_CHECK_RETURN_IF_NE(arrayCls, PrimitiveArrayType::GetComponentClass(), ANI_INVALID_TYPE);
         *result = static_cast<PrimitiveArrayType *>(internalTuple)->Get(index);
     } else {
         // Case of boxing of tuple types to the least upper bound type.
         auto *element = static_cast<EtsObjectArray *>(internalTuple)->Get(index);
         ANI_CHECK_RETURN_IF_EQ(element, nullptr, ANI_ERROR);
-
-        auto *boxPrimitiveClass =
-            EtsBoxPrimitive<typename PrimitiveArrayType::ValueType>::GetBoxClass(s.GetCoroutine());
-        ANI_CHECK_RETURN_IF_NE(element->GetClass()->GetRuntimeClass(), boxPrimitiveClass, ANI_INVALID_TYPE);
+        ANI_CHECK_RETURN_IF_EQ(IsCorrectBoxType<PrimitiveArrayType>(s.GetCoroutine(), element), false,
+                               ANI_INVALID_TYPE);
         *result = EtsBoxPrimitive<typename PrimitiveArrayType::ValueType>::FromCoreType(element)->GetValue();
     }
 
@@ -5133,16 +5138,28 @@ static ani_status TupleValueSetItem(ani_env *env, ani_tuple_value tupleValue, an
     auto *internalTuple = s.ToInternalType(tupleValue);
     ANI_CHECK_RETURN_IF_GE(index, internalTuple->GetLength(), ANI_OUT_OF_RANGE);
 
-    if (IsPrimitiveArray<PrimitiveArrayType>(internalTuple)) {
+    const auto *arrayCls = internalTuple->GetClass();
+    ASSERT(arrayCls->IsArrayClass());
+    const auto *elementCls = arrayCls->GetComponentType();
+    ASSERT(elementCls != nullptr);
+    if (elementCls->IsPrimitive()) {
+        ANI_CHECK_RETURN_IF_NE(arrayCls, PrimitiveArrayType::GetComponentClass(), ANI_INVALID_TYPE);
         static_cast<PrimitiveArrayType *>(internalTuple)->Set(index, value);
     } else {
         auto coro = s.GetCoroutine();
         EtsHandleScope scope(coro);
-        EtsHandle<EtsArray> etsArray(coro, internalTuple);
+        EtsHandle etsArray(coro, static_cast<EtsObjectArray *>(internalTuple));
+
+        // Can check element type only if it was set before
+        auto *element = etsArray->Get(index);
+        if (element != nullptr) {
+            ANI_CHECK_RETURN_IF_EQ(IsCorrectBoxType<PrimitiveArrayType>(s.GetCoroutine(), element), false,
+                                   ANI_INVALID_TYPE);
+        }
 
         auto *boxed = EtsBoxPrimitive<typename PrimitiveArrayType::ValueType>::Create(coro, value);
         ANI_CHECK_RETURN_IF_EQ(boxed, nullptr, ANI_OUT_OF_MEMORY);
-        static_cast<EtsObjectArray *>(etsArray.GetPtr())->Set(index, boxed);
+        etsArray->Set(index, boxed);
     }
 
     return ANI_OK;

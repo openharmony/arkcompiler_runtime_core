@@ -17,7 +17,7 @@ function getEmptyTuple(): [] {
     return [];
 }
 
-function getTestPrimitiveTuple(): [boolean, char,  byte, short, int, long, float, double] {
+function getTestPrimitiveTuple(): [boolean, char, byte, short, int, long, float, double] {
     return [true, 'x', 127, 300, 500, 600, 100.0, 400.0];
 }
 
