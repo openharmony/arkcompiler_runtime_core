@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+tags: [not-a-test]
+---*/
+
 export function foo(p: string): string {
     return p + p
 }

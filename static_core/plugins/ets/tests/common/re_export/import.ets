@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  files: [re_export.ets]
+---*/
+
 import * as A from "./re_export"
 
 function main() : void

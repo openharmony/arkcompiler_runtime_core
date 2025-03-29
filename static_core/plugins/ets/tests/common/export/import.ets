@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+files:
+- ./selective_export.ets
+---*/
+
 import { a, foo, bar, COPT} from "./selective_export"
 
 function foo(i: Required<COPT>) {

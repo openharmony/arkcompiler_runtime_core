@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+files:
+- ./export.ets
+---*/
+
 import c from "./export.ets";
 
 function main(){

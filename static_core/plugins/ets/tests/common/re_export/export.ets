@@ -13,4 +13,8 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+---*/
+
 export function bar():void{}

@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  files: [class_module.ets]
+---*/
+
 import * as A from "./class_module.ets"
 
 class ThisFile {

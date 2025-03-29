@@ -13,6 +13,17 @@
  * limitations under the License.
  */
 
+
+/*---
+desc: Default import binding allows importing a declaration exported from some module as default export.
+files:
+  - ./default_export/default_export_class.ets
+  - ./default_export/default_export_function.ets
+  - ./default_export/default_export_interface.ets
+  - ./default_export/default_export_variable.ets
+---*/
+
+
 import default_class from "./default_export/default_export_class"
 import default_func from "./default_export/default_export_function"
 import default_interface from "./default_export/default_export_interface"

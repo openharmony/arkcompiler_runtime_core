@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  files: [re-export.ets]
+---*/
+
 import * as all from "./re-export"
 
 all.foo()

@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+    tags: [not-a-test]
+---*/
+
 import {C} from "HarC/pages/c"
 export class B {
     x: C = new C()

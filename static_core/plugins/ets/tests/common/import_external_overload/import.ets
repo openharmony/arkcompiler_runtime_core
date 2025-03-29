@@ -14,6 +14,12 @@
  */
 
 
+/*---
+files:
+- ./source1.ets
+- ./source2.ets
+---*/
+
 import { foo } from './source1.ets'
 import { foo } from './source2.ets'
 

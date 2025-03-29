@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+files:
+tags: [not-a-test]
+---*/
+
 import {A} from "./foo1"
 
 export function foo_in_2(): int {

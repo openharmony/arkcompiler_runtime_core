@@ -12,7 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
+/*---
+files:
+- ./source2.ets
+tags: [not-a-test]
+---*/
+
 import {foo} from "./source2"
 
 export class A{

@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+tags: [not-a-test]
+---*/
+
 package packages.recursive.subpackage;
 
 import * as all from "../../recursive";

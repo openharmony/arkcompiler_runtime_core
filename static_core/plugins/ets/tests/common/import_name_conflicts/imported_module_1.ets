@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+---*/
+
 export const dbl: double = 1.23456789;
 
 export let b: int = 2;

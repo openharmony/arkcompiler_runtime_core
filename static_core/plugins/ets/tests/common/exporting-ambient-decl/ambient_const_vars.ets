@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+---*/
+
 export declare const int_1 = 3;
 export declare const int_2 = 0, int_3 = 9007199254740991;
 declare const int_04 = -0.0, int_5 = 9007199254740991;

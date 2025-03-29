@@ -13,6 +13,10 @@
  * limitations under the License.
 */
 
+/*---
+  files: [AnnotationsSrc.ets]
+---*/
+
 import {ClassAuthor} from "./AnnotationsSrc"
 
 @ClassAuthor()

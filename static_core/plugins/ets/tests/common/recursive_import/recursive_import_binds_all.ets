@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+files:
+- ./packages/recursive/package_module_1.ets
+---*/
+
 import * as all from "./packages/recursive";
 
 function main(): void {

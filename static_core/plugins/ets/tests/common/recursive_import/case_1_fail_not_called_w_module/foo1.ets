@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/*---
+files:
+- ./foo2.ets
+tags: [not-a-test]
+---*/
+
 import {foo} from "./foo2"
 
 export class A {

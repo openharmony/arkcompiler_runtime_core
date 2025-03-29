@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+    tags: [not-a-test]
+---*/
+
 export function bar() {
     assertEQ(1, 1);
 }

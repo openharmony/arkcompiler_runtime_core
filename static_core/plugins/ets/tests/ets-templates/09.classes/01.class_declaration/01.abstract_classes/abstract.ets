@@ -15,6 +15,7 @@
 
 /*---
 desc: Abstract class
+tags: [compile-only]
 ---*/
 
 abstract class A {}

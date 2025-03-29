@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/*---
+files:
+- ./subpackage/subpackage_module_1.ets
+tags: [not-a-test]
+---*/
+
 package packages.recursive;
 
 import * as all from "./subpackage";
