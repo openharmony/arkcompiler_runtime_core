@@ -141,7 +141,9 @@ bool EtsObject::TrySetInteropIndex(uint32_t index)
     //  mark word with acquire order to mark future relaxed read from EtsObjectStateInfo visible for us.
     EtsMarkWord currentMarkWord = AtomicGetMark(std::memory_order_relaxed);
     switch (currentMarkWord.GetState()) {
-        case EtsMarkWord::STATE_UNLOCKED: {
+        case EtsMarkWord::STATE_UNLOCKED:
+            [[fallthrough]];
+        case EtsMarkWord::STATE_HAS_INTEROP_INDEX: {
             auto newMarkWord = currentMarkWord.DecodeFromInteropIndex(index);
             // Atomic with relaxed order reason: AtomicSetMark is CAS operation so if 'currentMarkWord' is not actual
             // this commend will find actual one and next load will read it. In this execution branch we have no relaxed
