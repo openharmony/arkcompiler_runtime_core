@@ -660,6 +660,49 @@ static bool CheckRuntimeOptions([[maybe_unused]] const ark::ets::EtsCoroutine *m
     return true;
 }
 
+// NOTE(wupengyong, #24099): load interop module need formal plan.
+bool TryInitInteropInJsEnv(void *napiEnv)
+{
+    auto env = static_cast<napi_env>(napiEnv);
+    // NOLINTBEGIN(modernize-avoid-c-arrays,readability-identifier-naming)
+    constexpr char requireNapi[] = "requireNapi";
+    constexpr char interopSo[] = "ets_interop_js_napi";
+    constexpr char panda[] = "Panda";
+    // NOLINTEND(modernize-avoid-c-arrays,readability-identifier-naming)
+    napi_value modObj;
+    {
+        NapiEscapableScope jsHandleScope(env);
+        napi_value pandaObj;
+        NAPI_CHECK_RETURN(napi_get_named_property(env, GetGlobal(env), panda, &pandaObj));
+        if (!IsUndefined(env, pandaObj)) {
+            return true;
+        }
+        napi_value requireFn;
+        NAPI_CHECK_RETURN(napi_get_named_property(env, GetGlobal(env), requireNapi, &requireFn));
+
+        INTEROP_RETURN_IF(GetValueType(env, requireFn) != napi_function);
+        {
+            napi_value jsName;
+            NAPI_CHECK_RETURN(napi_create_string_utf8(env, interopSo, NAPI_AUTO_LENGTH, &jsName));
+            std::array<napi_value, 1> args = {jsName};
+            napi_value recv;
+            NAPI_CHECK_RETURN(napi_get_undefined(env, &recv));
+            auto status = (napi_call_function(env, recv, requireFn, args.size(), args.data(), &modObj));
+            if (status == napi_pending_exception) {
+                INTEROP_LOG(ERROR) << "Unable to load module due to exception";
+                return false;
+            }
+            INTEROP_RETURN_IF(status != napi_ok);
+        }
+        INTEROP_RETURN_IF(IsNull(env, modObj));
+        napi_value key;
+        NAPI_CHECK_RETURN(napi_create_string_utf8(env, panda, NAPI_AUTO_LENGTH, &key));
+        NAPI_CHECK_RETURN(napi_set_property(env, GetGlobal(env), key, modObj));
+        jsHandleScope.Escape(modObj);
+    }
+    return true;
+}
+
 // The external interface for ANI
 bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
 {
@@ -681,7 +724,11 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
     // In the hybrid mode with JSVM=leading VM, we are binding the EtsVM lifetime to the JSVM's env lifetime
     napi_add_env_cleanup_hook(
         InteropCtx::Current()->GetJSEnv(), [](void *) { ark::Runtime::Destroy(); }, nullptr);
+#if defined(PANDA_TARGET_OHOS)
+    return TryInitInteropInJsEnv(napiEnv);
+#else
     return true;
+#endif
 }
 
 }  // namespace ark::ets::interop::js
