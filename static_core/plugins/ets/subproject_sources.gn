@@ -190,6 +190,10 @@ srcs_runtime = [
   "stdlib/native/core/IntlDateTimeFormat.cpp",
 ]
 
+if (is_ohos) {
+  srcs_runtime += [ "runtime/platform/ohos/logger.cpp" ]
+}
+
 configs_runtime = []
 
 if (ark_ets_interop_js) {

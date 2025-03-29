@@ -138,6 +138,11 @@ elseif (PANDA_TARGET_AMD64)
         ${ETS_EXT_SOURCES}/napi/arch/amd64/ets_napi_entry_point_amd64.S)
 endif()
 
+if (PANDA_TARGET_OHOS)
+    list (APPEND ETS_RUNTIME_SOURCES
+        ${ETS_EXT_SOURCES}/platform/ohos/logger.cpp)
+endif()
+
 panda_target_sources(arkruntime_obj PRIVATE ${ETS_RUNTIME_SOURCES})
 panda_target_include_directories(arkruntime_obj PUBLIC
     ${PANDA_BINARY_ROOT}/cross_values
