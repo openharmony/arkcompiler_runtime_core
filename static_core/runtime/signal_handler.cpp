@@ -187,9 +187,8 @@ bool IsInvalidPointer(uintptr_t addr)
     if (addr == 0) {
         return true;
     }
-    // address is at least 8-byte aligned
-    uintptr_t mask = 0x7;
-    return ((addr & mask) != 0);
+
+    return !IsAligned(addr, alignof(uintptr_t));
 }
 
 // This is the way to get compiled method entry point
