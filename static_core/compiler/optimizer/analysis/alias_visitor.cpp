@@ -178,6 +178,7 @@ bool Pointer::IsEscapingAlias(const Inst *inst)
                 break;
             // Currently unhandled
             case Opcode::Store:
+            case Opcode::StoreNative:
             case Opcode::StoreI:
                 if (user.GetIndex() != 0) {
                     return true;
@@ -1096,6 +1097,11 @@ void AliasVisitor::VisitLoad(GraphVisitor *v, Inst *inst)
     visitor->AddCopyEdge(elem, val);
 }
 
+void AliasVisitor::VisitLoadNative(GraphVisitor *v, Inst *inst)
+{
+    VisitLoad(v, inst);
+}
+
 void AliasVisitor::VisitStore(GraphVisitor *v, Inst *inst)
 {
     if (!inst->IsReferenceOrAny()) {
@@ -1116,6 +1122,11 @@ void AliasVisitor::VisitStore(GraphVisitor *v, Inst *inst)
 
     visitor->AddPseudoCopyEdge(obj, elem);
     visitor->AddCopyEdge(val, elem);
+}
+
+void AliasVisitor::VisitStoreNative(GraphVisitor *v, Inst *inst)
+{
+    VisitStore(v, inst);
 }
 
 void AliasVisitor::VisitLoadI(GraphVisitor *v, Inst *inst)

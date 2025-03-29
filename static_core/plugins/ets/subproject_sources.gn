@@ -109,6 +109,7 @@ srcs_runtime = [
   "runtime/ets_vm_api.cpp",  # TODO(nsizov): Take into account PR640, if needed
   "runtime/ets_vtable_builder.cpp",
   "runtime/intrinsics/escompat_ArrayBuffer.cpp",
+  "runtime/intrinsics/escompat_TypedArrays.cpp",
   "runtime/intrinsics/compiler_intrinsics.cpp",
   "runtime/intrinsics/debugger_api.cpp",
   "runtime/intrinsics/escompat_Date.cpp",

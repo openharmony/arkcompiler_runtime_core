@@ -116,6 +116,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
           this.buffer = x.buffer
           this.byteOffset = x.byteOffset
         }
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -138,6 +139,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         let intByteLength: int
         if (buf instanceof ArrayBuffer) {
             intByteLength = (buf as ArrayBuffer).getByteLength()
+            this.arrayBufferBacked = true
         } else if (buf instanceof SharedArrayBuffer) {
             intByteLength = (buf as SharedArrayBuffer).getByteLength()
         } else {
@@ -245,6 +247,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
             }
             this.lengthInt = this.byteLength / Int8Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
+            this.arrayBufferBacked = true
             this.byteOffset = 0
         } else if (buf instanceof SharedArrayBuffer) {
             this.byteLength = (buf as SharedArrayBuffer).getByteLength()
@@ -261,6 +264,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLength = arr.length as int * Int8Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).byteValue())
@@ -292,6 +296,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLength = this.lengthInt * Int8Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -302,6 +307,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(other: Int8Array) {
         if (other.buffer instanceof ArrayBuffer) {
             this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
             this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
         } else {
@@ -785,7 +791,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         }
         for (let i = 0; i < arr.length as int; ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(offset + i, v as byte)
+            this.$_set(offset + i, v as byte)
         }
     }
 
@@ -805,7 +811,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         }
         for (let i = 0; i < arr.length as int; ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(offset + i, v)
+            this.$_set(offset + i, v)
         }
     }
 
@@ -841,7 +847,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         }
         for (let i = 0; i < array.length as int; ++i) {
             let v = this.zeroIfInfinity(array[i])
-            this.setUnsafe(insertPos + i, v as byte)
+            this.$_set(insertPos + i, v as byte)
         }
     }
 
@@ -1975,6 +1981,8 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     /** Number of bytes used */
     public readonly byteLength: number
 
+    private readonly arrayBufferBacked: boolean
+
     /** String \"Int8Array\" */
     public readonly name = "Int8Array"
 }
@@ -2078,6 +2086,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
           this.buffer = x.buffer
           this.byteOffset = x.byteOffset
         }
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -2100,6 +2109,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         let intByteLength: int
         if (buf instanceof ArrayBuffer) {
             intByteLength = (buf as ArrayBuffer).getByteLength()
+            this.arrayBufferBacked = true
         } else if (buf instanceof SharedArrayBuffer) {
             intByteLength = (buf as SharedArrayBuffer).getByteLength()
         } else {
@@ -2214,6 +2224,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
             }
             this.lengthInt = this.byteLength / Int16Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
+            this.arrayBufferBacked = true
             this.byteOffset = 0
         } else if (buf instanceof SharedArrayBuffer) {
             this.byteLength = (buf as SharedArrayBuffer).getByteLength()
@@ -2230,6 +2241,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLength = arr.length as int * Int16Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).shortValue())
@@ -2261,6 +2273,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLength = this.lengthInt * Int16Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -2271,6 +2284,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(other: Int16Array) {
         if (other.buffer instanceof ArrayBuffer) {
             this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
             this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
         } else {
@@ -2754,7 +2768,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         }
         for (let i = 0; i < arr.length as int; ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(offset + i, v as short)
+            this.$_set(offset + i, v as short)
         }
     }
 
@@ -2774,7 +2788,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         }
         for (let i = 0; i < arr.length as int; ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(offset + i, v)
+            this.$_set(offset + i, v)
         }
     }
 
@@ -2810,7 +2824,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         }
         for (let i = 0; i < array.length as int; ++i) {
             let v = this.zeroIfInfinity(array[i])
-            this.setUnsafe(insertPos + i, v as short)
+            this.$_set(insertPos + i, v as short)
         }
     }
 
@@ -3948,6 +3962,8 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     /** Number of bytes used */
     public readonly byteLength: number
 
+    private readonly arrayBufferBacked: boolean
+
     /** String \"Int16Array\" */
     public readonly name = "Int16Array"
 }
@@ -4051,6 +4067,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
           this.buffer = x.buffer
           this.byteOffset = x.byteOffset
         }
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -4073,6 +4090,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         let intByteLength: int
         if (buf instanceof ArrayBuffer) {
             intByteLength = (buf as ArrayBuffer).getByteLength()
+            this.arrayBufferBacked = true
         } else if (buf instanceof SharedArrayBuffer) {
             intByteLength = (buf as SharedArrayBuffer).getByteLength()
         } else {
@@ -4187,6 +4205,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
             }
             this.lengthInt = this.byteLength / Int32Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
+            this.arrayBufferBacked = true
             this.byteOffset = 0
         } else if (buf instanceof SharedArrayBuffer) {
             this.byteLength = (buf as SharedArrayBuffer).getByteLength()
@@ -4203,6 +4222,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLength = arr.length as int * Int32Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).intValue())
@@ -4234,6 +4254,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLength = this.lengthInt * Int32Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -4244,6 +4265,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(other: Int32Array) {
         if (other.buffer instanceof ArrayBuffer) {
             this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
             this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
         } else {
@@ -4700,7 +4722,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         }
         for (let i = 0; i < arr.length as int; ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(offset + i, v as int)
+            this.$_set(offset + i, v as int)
         }
     }
 
@@ -4720,7 +4742,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         }
         for (let i = 0; i < arr.length as int; ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(offset + i, v)
+            this.$_set(offset + i, v)
         }
     }
 
@@ -4756,7 +4778,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         }
         for (let i = 0; i < array.length as int; ++i) {
             let v = this.zeroIfInfinity(array[i])
-            this.setUnsafe(insertPos + i, v as int)
+            this.$_set(insertPos + i, v as int)
         }
     }
 
@@ -5879,6 +5901,8 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     /** Number of bytes used */
     public readonly byteLength: number
 
+    private readonly arrayBufferBacked: boolean
+
     /** String \"Int32Array\" */
     public readonly name = "Int32Array"
 }
@@ -5982,6 +6006,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
           this.buffer = x.buffer
           this.byteOffset = x.byteOffset
         }
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -6004,6 +6029,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         let intByteLength: int
         if (buf instanceof ArrayBuffer) {
             intByteLength = (buf as ArrayBuffer).getByteLength()
+            this.arrayBufferBacked = true
         } else if (buf instanceof SharedArrayBuffer) {
             intByteLength = (buf as SharedArrayBuffer).getByteLength()
         } else {
@@ -6118,6 +6144,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
             }
             this.lengthInt = this.byteLength / BigInt64Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
+            this.arrayBufferBacked = true
             this.byteOffset = 0
         } else if (buf instanceof SharedArrayBuffer) {
             this.byteLength = (buf as SharedArrayBuffer).getByteLength()
@@ -6134,6 +6161,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
             this.byteLength = arr.length as int * BigInt64Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).longValue())
@@ -6165,6 +6193,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         this.byteLength = this.lengthInt * BigInt64Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -6175,6 +6204,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public constructor(other: BigInt64Array) {
         if (other.buffer instanceof ArrayBuffer) {
             this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
             this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
         } else {
@@ -6668,7 +6698,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         }
         for (let i = 0; i < arr.length as int; ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(offset + i, v.getLong())
+            this.$_set(offset + i, v.getLong())
         }
     }
 
@@ -6688,7 +6718,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         }
         for (let i = 0; i < arr.length as int; ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(offset + i, v)
+            this.$_set(offset + i, v)
         }
     }
 
@@ -6724,7 +6754,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         }
         for (let i = 0; i < array.length as int; ++i) {
             let v = this.zeroIfInfinity(array[i])
-            this.setUnsafe(insertPos + i, v.getLong())
+            this.$_set(insertPos + i, v.getLong())
         }
     }
 
@@ -7873,6 +7903,8 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     /** Number of bytes used */
     public readonly byteLength: number
 
+    private readonly arrayBufferBacked: boolean
+
     /** String \"BigInt64Array\" */
     public readonly name = "BigInt64Array"
 }
@@ -7976,6 +8008,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
           this.buffer = x.buffer
           this.byteOffset = x.byteOffset
         }
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -7998,6 +8031,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         let intByteLength: int
         if (buf instanceof ArrayBuffer) {
             intByteLength = (buf as ArrayBuffer).getByteLength()
+            this.arrayBufferBacked = true
         } else if (buf instanceof SharedArrayBuffer) {
             intByteLength = (buf as SharedArrayBuffer).getByteLength()
         } else {
@@ -8112,6 +8146,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
             }
             this.lengthInt = this.byteLength / Float32Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
+            this.arrayBufferBacked = true
             this.byteOffset = 0
         } else if (buf instanceof SharedArrayBuffer) {
             this.byteLength = (buf as SharedArrayBuffer).getByteLength()
@@ -8128,6 +8163,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLength = arr.length as int * Float32Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).floatValue())
@@ -8159,6 +8195,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLength = this.lengthInt * Float32Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -8169,6 +8206,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(other: Float32Array) {
         if (other.buffer instanceof ArrayBuffer) {
             this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
             this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
         } else {
@@ -8629,7 +8667,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
             throw new RangeError("offset is out of bounds")
         }
         for (let i = 0; i < arr.length as int; ++i) {
-            this.setUnsafe(offset + i, arr[i] as float)
+            this.$_set(offset + i, arr[i] as float)
         }
     }
 
@@ -8648,7 +8686,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
             throw new RangeError("offset is out of bounds")
         }
         for (let i = 0; i < arr.length as int; ++i) {
-            this.setUnsafe(offset + i, arr[i])
+            this.$_set(offset + i, arr[i])
         }
     }
 
@@ -8683,7 +8721,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
             throw new RangeError("offset is out of bounds")
         }
         for (let i = 0; i < array.length as int; ++i) {
-            this.setUnsafe(insertPos + i, array[i] as float)
+            this.$_set(insertPos + i, array[i] as float)
         }
     }
 
@@ -9827,6 +9865,8 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     /** Number of bytes used */
     public readonly byteLength: number
 
+    private readonly arrayBufferBacked: boolean
+
     /** String \"Float32Array\" */
     public readonly name = "Float32Array"
 }
@@ -9930,6 +9970,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
           this.buffer = x.buffer
           this.byteOffset = x.byteOffset
         }
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -9952,6 +9993,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         let intByteLength: int
         if (buf instanceof ArrayBuffer) {
             intByteLength = (buf as ArrayBuffer).getByteLength()
+            this.arrayBufferBacked = true
         } else if (buf instanceof SharedArrayBuffer) {
             intByteLength = (buf as SharedArrayBuffer).getByteLength()
         } else {
@@ -10066,6 +10108,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             }
             this.lengthInt = this.byteLength / Float64Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
+            this.arrayBufferBacked = true
             this.byteOffset = 0
         } else if (buf instanceof SharedArrayBuffer) {
             this.byteLength = (buf as SharedArrayBuffer).getByteLength()
@@ -10082,6 +10125,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLength = arr.length as int * Float64Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).doubleValue())
@@ -10113,6 +10157,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLength = this.lengthInt * Float64Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -10123,6 +10168,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(other: Float64Array) {
         if (other.buffer instanceof ArrayBuffer) {
             this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
             this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
         } else {
@@ -10497,7 +10543,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             throw new RangeError("offset is out of bounds")
         }
         for (let i = 0; i < arr.length as int; ++i) {
-            this.setUnsafe(offset + i, arr[i] as double)
+            this.$_set(offset + i, arr[i] as double)
         }
     }
 
@@ -10516,7 +10562,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             throw new RangeError("offset is out of bounds")
         }
         for (let i = 0; i < arr.length as int; ++i) {
-            this.setUnsafe(offset + i, arr[i])
+            this.$_set(offset + i, arr[i])
         }
     }
 
@@ -10542,7 +10588,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             throw new RangeError("offset is out of bounds")
         }
         for (let i = 0; i < array.length as int; ++i) {
-            this.setUnsafe(insertPos + i, array[i] as double)
+            this.$_set(insertPos + i, array[i] as double)
         }
     }
 
@@ -11644,6 +11690,8 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
 
     /** Number of bytes used */
     public readonly byteLength: number
+
+    private readonly arrayBufferBacked: boolean
 
     /** String \"Float64Array\" */
     public readonly name = "Float64Array"

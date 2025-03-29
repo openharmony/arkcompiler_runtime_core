@@ -45,10 +45,12 @@ public:
         return offset_;
     }
 
-    static void CompareMemberOffsets(EtsClass *klass, const std::vector<MirrorFieldInfo> &members)
+    static void CompareMemberOffsets(EtsClass *klass, const std::vector<MirrorFieldInfo> &members, bool checkAll = true)
     {
         ASSERT_NE(nullptr, klass);
-        ASSERT_EQ(members.size(), klass->GetInstanceFieldsNumber());
+        if (checkAll) {
+            ASSERT_EQ(members.size(), klass->GetInstanceFieldsNumber());
+        }
 
         for (const MirrorFieldInfo &memb : members) {
             EtsField *field = klass->GetFieldIDByName(memb.Name());

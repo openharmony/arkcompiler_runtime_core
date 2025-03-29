@@ -179,6 +179,11 @@ public:
         ASSERT(res == 0);
     }
 
+    static constexpr size_t GetManagedDataOffset()
+    {
+        return MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_);
+    }
+
 private:
     struct FinalizationInfo final {
         // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
@@ -286,6 +291,55 @@ private:
     friend class test::EtsEscompatArrayBufferMembers;
 };
 
+class EtsEscompatSharedMemory : public EtsObject {
+public:
+    EtsEscompatSharedMemory() = delete;
+    ~EtsEscompatSharedMemory() = delete;
+
+    NO_COPY_SEMANTIC(EtsEscompatSharedMemory);
+    NO_MOVE_SEMANTIC(EtsEscompatSharedMemory);
+
+    static constexpr size_t GetDataOffset()
+    {
+        return MEMBER_OFFSET(EtsEscompatSharedMemory, data_);
+    }
+
+    ObjectPointer<EtsByteArray> GetData()
+    {
+        return data_;
+    }
+
+    EtsLong GetWaiterPtr()
+    {
+        return waiterPtr_;
+    }
+
+private:
+    ObjectPointer<EtsByteArray> data_;
+    EtsLong waiterPtr_;
+};
+
+class EtsEscompatSharedArrayBuffer : public EtsObject {
+public:
+    EtsEscompatSharedArrayBuffer() = delete;
+    ~EtsEscompatSharedArrayBuffer() = delete;
+
+    NO_COPY_SEMANTIC(EtsEscompatSharedArrayBuffer);
+    NO_MOVE_SEMANTIC(EtsEscompatSharedArrayBuffer);
+
+    static constexpr size_t GetSharedMemoryOffset()
+    {
+        return MEMBER_OFFSET(EtsEscompatSharedArrayBuffer, sharedMemory_);
+    }
+
+    ObjectPointer<EtsEscompatSharedMemory> GetSharedMemory()
+    {
+        return sharedMemory_;
+    }
+
+private:
+    ObjectPointer<EtsEscompatSharedMemory> sharedMemory_;
+};
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ARRAYBUFFER_H

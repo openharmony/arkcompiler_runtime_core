@@ -1599,6 +1599,36 @@ intrinsics:
       args: [escompat.ArrayBuffer, std.core.String, i32, i32]
     impl: ark::ets::intrinsics::EtsArrayBufferToString
 
+  - name: Int8ArraySetInt
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArraySetInt
+
+  - name: Int8ArraySetByte
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i8]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArraySetByte
+
+  - name: Int8ArrayGet
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayGet
+
 ########################
 # escompat.taskpool #
 ########################
