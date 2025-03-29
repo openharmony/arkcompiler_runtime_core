@@ -1,0 +1,142 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function multiply(a: i32, b: i32): i32;
+function baseCFunc(testBoolean : i32): bool;
+function baseAFunc(testBoolean : bool): void;
+function baseBFunc(testBoolean : bool): bool;
+
+// String
+struct Foo {
+  testNum: i32;
+  testStr: String;
+}
+
+function baseDFunc(testBoolean : String): bool;
+function baseEFunc(b:Foo):String;
+function baseHFunc(a:i32,b:i64):String;
+function baseIFunc(a:f64,b:f32):String;
+function baseFFunc(a:i16,b:f32):String;
+function baseFunc1(b:f32):f32;
+function baseFunc2(b:f32):void;
+function baseFunc3(a:f32,b:f64):f64;
+function baseFunc4(b:f64):f64;
+function baseFunc5(b:f64):void;
+function baseFunc6(a:String):void;
+function baseFunc7(a:String):String;
+function baseFunc8(a:String,b:i32):String;
+function baseFunc9(a:String,b:i32,c:i64,d:bool,e:f32):void;
+
+// void
+function baseFunc10():void;
+function baseFunc11(a:i32,b:bool):void;
+function baseFunc12(a:i32,b:i64):void;
+function baseFunc13(a:i32,b:String):void;
+function baseFunc14(a:i64,b:bool):void;
+function baseFunc15(a:i64,b:f32):void;
+function baseFunc16(a:i64,b:f64):void;
+function baseFunc17(a:f32,b:bool):void;
+function baseFunc18(a:f32,b:String):void;
+function baseFunc19(a:f64,b:String):void;
+function baseFunc20(a:f64,b:bool):void;
+function baseFunc21(option1:Optional<i32>,option2:Optional<i64>):void;
+function baseFunc22(option1:Optional<f32>,option2:Optional<f64>):void;
+function baseFunc23(option1:Optional<String>,option2:Optional<bool>):void;
+function baseFunc24(option1:Optional<i16>,option2:Optional<i64>):void;
+
+enum Bar:i8 {
+  RED = 0,
+  GREEN = 1,
+  BLUE = 2,
+}
+
+function baseFunc25(option1:Optional<i16>,option2:Bar):void;
+
+interface primitivesVoid {
+  testBaseFunc1():void;
+  testBaseFunc2(option1:i32,option2:bool):void;
+  testBaseFunc3(option1:i32,option2:i64):void;
+  testBaseFunc4(option1:i32,option2:String):void;
+  testBaseFunc5(option1:i64,option2:bool):void;
+  testBaseFunc6(option1:i64,option2:f32):void;
+  testBaseFunc7(option1:i64,option2:f64):void;
+  testBaseFunc8(option1:f32,option2:bool):void;
+  testBaseFunc9(option1:f32,option2:String):void;
+  testBaseFunc10(option1:f64,option2:String):void;
+  testBaseFunc11(option1:f64,option2:bool):void;
+  testBaseFunc12(option1:Optional<i32>,option2:Optional<i64>):void;
+  testBaseFunc13(option1:Optional<f32>,option2:Optional<f64>):void;
+  testBaseFunc14(option1:Optional<String>,option2:Optional<bool>):void;
+  testBaseFunc15(option1:Optional<i16>,option2:Optional<i64>):void;
+  testBaseFunc16(option1:i8,option2:i16):void;
+  testBaseFunc17(option1:Array<i32>,option2:Array<i8>):void;
+  testBaseFunc18(option1:Array<i16>,option2:Array<i64>):void;
+  testBaseFunc19(option1:Array<f32>,option2:Array<f64>):void;
+  testBaseFunc20(option1:Array<bool>,option2:Array<String>):void;
+}
+
+function get_interface(): primitivesVoid;
+
+interface primitivesBoolean {
+  testBaseBoolFunc1(option1:bool):void;
+  testBaseBoolFunc2(option1:bool):i32;
+  testBaseBoolFunc3(option1:bool):bool;
+  testBaseBoolFunc4(option1:Optional<bool>):bool;
+
+  @gen_async("testBaseBoolFunc5Async")
+  @gen_promise("testBaseBoolFunc5Promise")
+  testBaseBoolFunc5(option1:bool):bool;
+}
+
+function get_interface_bool(): primitivesBoolean;
+
+interface primitivesInteger {
+  testBaseIntegerFunc1(option1:i8):i8;
+  testBaseIntegerFunc2(option1:i8,option2:i16):i8;
+  testBaseIntegerFunc3(option1:i8,option2:i16):void;
+  testBaseIntegerFunc4(option1:i8,option2:i16):i16;
+  testBaseIntegerFunc5(option1:i8,option2:i32):i8;
+  testBaseIntegerFunc6(option1:i8,option2:i32):i32;
+  testBaseIntegerFunc7(option1:i8,option2:i32):void;
+  testBaseIntegerFunc8(option1:i8,option2:i64):i64;
+  testBaseIntegerFunc9(option1:i8,option2:i64):i8;
+  testBaseIntegerFunc10(option1:i8,option2:f32):f32;
+  testBaseIntegerFunc11(option1:i8,option2:f32):i8;
+  testBaseIntegerFunc12(option1:i8,option2:f64):f64;
+  testBaseIntegerFunc13(option1:i8,option2:i64):i8;
+  testBaseIntegerFunc14(option1:i8,option2:String):String;
+  testBaseIntegerFunc15(option1:i8,option2:String):i8;
+  testBaseIntegerFunc16(option1:i8,option2:bool):bool;
+  testBaseIntegerFunc17(option1:i8,option2:bool):i8;
+  testBaseIntegerFunc18(option1:i16):i16;
+  testBaseIntegerFunc19(option1:i16):void;
+  testBaseIntegerFunc20(option1:i16,option2:i32):i16;
+  testBaseIntegerFunc21(option1:i16,option2:i64):i16;
+  testBaseIntegerFunc22(option1:i32):i32;
+  testBaseIntegerFunc23(option1:i32):void;
+  testBaseIntegerFunc24(option1:i32,option2:i64):i32;
+  testBaseIntegerFunc25(option1:i32,option2:i8):i32;
+  testBaseIntegerFunc26(option1:i64):i64;
+  testBaseIntegerFunc27(option1:i64):void;
+  testBaseIntegerFunc28(option1:i64,option2:String):String;
+  testBaseIntegerFunc29(option1:i64,option2:String):i64;
+  testBaseIntegerFunc30(option1:f32):f32;
+  testBaseIntegerFunc31(option1:f32):void;
+  testBaseIntegerFunc32(option1:f32,option2:f64):f32;
+  testBaseIntegerFunc33(option1:f32,option2:f64):f64;
+  testBaseIntegerFunc34(option1:f64):f64;
+  testBaseIntegerFunc35(option1:f64):void;
+}
+
+function get_interface_interger(): primitivesInteger;

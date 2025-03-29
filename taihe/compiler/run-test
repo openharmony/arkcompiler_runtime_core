@@ -1,0 +1,467 @@
+#!/usr/bin/env python3
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+import argparse
+import json
+import os
+import shutil
+import subprocess
+import sys
+import tarfile
+from pathlib import Path
+
+from taihe.driver import CompilerInstance, CompilerInvocation
+
+CXX = os.getenv("CXX", "clang++")
+C = os.getenv("C", "clang")
+
+BASEDIR = Path(__file__).resolve().parent
+
+
+def run_command(command):
+    print(f"+ {command}")
+    result = subprocess.run(command, shell=True, check=True, text=True)
+    return result
+
+
+def clean_directory(directory):
+    if directory.exists():
+        shutil.rmtree(directory)
+
+
+def create_directory(directory):
+    directory.mkdir(parents=True, exist_ok=True)
+
+
+def copy_directory(src_directory, dst_directory):
+    if src_directory.exists():
+        shutil.copytree(src_directory, dst_directory, dirs_exist_ok=True)
+
+
+def compile(output_dir, input_dir, *include_dirs, opt_level):
+    output_files = []
+    for input_file in input_dir.iterdir():
+        name = input_file.name
+        output_file = output_dir / f"{name}.o"
+        if name.endswith(".c"):
+            compiler = C
+            std = "gnu11"
+        else:
+            compiler = CXX
+            std = "gnu++17"
+        command = f"{compiler} -c -fvisibility=hidden -fPIC -O{opt_level} -std={std} -o {output_file} {input_file}"
+        for include_dir in include_dirs:
+            command += f" -I {include_dir}"
+        run_command(command)
+        output_files.append(output_file)
+    return output_files
+
+
+def link(output_file, *input_files, shared, link_options):
+    command = f"{CXX} -fPIC -o {output_file}"
+    for input_file in input_files:
+        command += f" {input_file}"
+    for link_option in link_options:
+        command += f" {link_option}"
+    if shared:
+        command += " -shared"
+    run_command(command)
+
+
+def compile_abc(output_dir, input_dir, panda_home):
+    output_files = []
+    for input_file in input_dir.iterdir():
+        name = input_file.name
+        if name.endswith(".ets"):
+            output_file = output_dir / f"{name}.abc"
+            command = f"{panda_home}/bin/es2panda {input_file} --output {output_file} --extension ets --arktsconfig {output_dir}/arktsconfig.json"
+            run_command(command)
+            command_dump = (
+                f"{panda_home}/bin/ark_disasm {output_file} {output_file}.dump"
+            )
+            run_command(command_dump)
+            output_files.append(output_file)
+    return output_files
+
+
+def link_abc(output_dir, *input_files, panda_home):
+    command = f"{panda_home}/bin/ark_link --output {output_dir}/main.abc -- "
+    for input_file in input_files:
+        command += f" {input_file}"
+    run_command(command)
+
+
+def check_local_version(version_file: Path, version: str):
+    if version_file.exists():
+        with open(version_file) as vf:
+            local_version = vf.read().strip()
+            return local_version == version
+    return False
+
+
+def download_file(target_file: Path, username: str, password: str, url: str):
+    if target_file.exists():
+        print(f"already found {target_file}, skipping download")
+        return
+
+    try:
+        command = [
+            "wget",
+            "--user",
+            username,
+            "--password",
+            password,
+            "--progress=bar:force:noscroll",
+            url,
+            "-O",
+            str(target_file),
+        ]
+        subprocess.run(command, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"download error: {e}")
+        sys.exit(1)
+
+
+def extract_file(target_file, extract_dir, version_file, version):
+    try:
+        shutil.rmtree(extract_dir / "package", ignore_errors=True)
+        os.makedirs(extract_dir, exist_ok=True)
+        with tarfile.open(target_file, "r:gz") as tar:
+            tar.extractall(path=extract_dir)
+        with open(version_file, "w") as vf:
+            vf.write(version)
+    except Exception as e:
+        print(f"extract error: {e}")
+        sys.exit(1)
+
+
+def download_panda_vm(extract_dir: Path):
+    username = "koala-pub"
+    password = "y3t!n0therP"
+
+    url = "https://nexus.bz-openlab.ru:10443/repository/koala-npm/%40panda/sdk/-/sdk-1.5.0-dev.25175.tgz"
+    target_file = extract_dir / url.split("/")[-1]
+    version_file = extract_dir / "version.txt"
+    version = target_file.stem
+
+    if not check_local_version(version_file, version):
+        download_file(target_file, username, password, url)
+        extract_file(target_file, extract_dir, version_file, version)
+        print("Complete the download and extract.")
+
+
+def create_arktsconfig(panda_home, build_author_generated_dir):
+    config_content = {
+        "compilerOptions": {
+            "baseUrl": str(panda_home),
+            "paths": {
+                "std": [str(panda_home / "../ets/stdlib/std")],
+                "escompat": [str(panda_home / "../ets/stdlib/escompat")],
+            },
+        }
+    }
+    config_file_path = build_author_generated_dir / "arktsconfig.json"
+    with open(config_file_path, "w") as json_file:
+        json.dump(config_content, json_file, indent=2)
+
+    print(f"A configuration file was created in this path: {config_file_path}")
+
+
+def main(
+    target_dir: str,
+    generate_and_compile_ani: bool,
+    generate_only: bool,
+    generate_and_compile: bool,
+    generate_c_impl: bool,
+    opt_level: str,
+    author_link_options: list[str],
+    user_link_options: list[str],
+    run_args: list[str],
+):
+    target_path = Path(target_dir)
+
+    idl_dir = target_path / "idl"
+
+    author_dir = target_path / "author"
+    author_include_dir = author_dir / "include"
+    author_src_dir = author_dir / "src"
+    author_generated_dir = target_path / "author_generated"
+    author_generated_include_dir = author_generated_dir / "include"
+    author_generated_src_dir = author_generated_dir / "src"
+
+    user_dir = target_path / "user"
+    user_include_dir = user_dir / "include"
+    user_src_dir = user_dir / "src"
+    user_generated_dir = target_path / "user_generated"
+    user_generated_include_dir = user_generated_dir / "include"
+    user_generated_src_dir = user_generated_dir / "src"
+
+    runtime_dir = BASEDIR / ".." / "runtime"
+    runtime_include_dir = runtime_dir / "include"
+    runtime_src_dir = runtime_dir / "src"
+
+    build_dir = target_path / "build"
+    build_runtime_dir = build_dir / "runtime"
+    build_author_dir = build_dir / "author"
+    build_author_generated_dir = build_dir / "author_generated"
+    build_user_dir = build_dir / "user"
+    build_user_generated_dir = build_dir / "user_generated"
+
+    so_file = build_dir / "libtest.so"
+    elf_file = build_dir / "test"
+
+    if not idl_dir.is_dir():
+        raise FileNotFoundError(f"'{idl_dir}' is not an valid directory.")
+
+    clean_directory(author_generated_dir)
+    clean_directory(user_generated_dir)
+    clean_directory(build_dir)
+
+    create_directory(author_generated_src_dir)
+    create_directory(author_generated_include_dir)
+
+    print("Generating author and ani codes...")
+    CompilerInstance(
+        CompilerInvocation(
+            src_dirs=[idl_dir],
+            out_dir=author_generated_dir,
+            gen_ani=True,
+            gen_author=True,
+            gen_c_impl=generate_c_impl,
+        )
+    ).run()
+    print("Done.")
+
+    if generate_and_compile_ani:
+        extract_dir = BASEDIR / ".panda_vm"
+        extract_dir.mkdir(exist_ok=True)
+        download_panda_vm(extract_dir)
+
+        panda_home = extract_dir / "package/linux_host_tools"
+        create_directory(build_author_generated_dir)
+
+        create_arktsconfig(panda_home, build_author_generated_dir)
+
+        panda_include = panda_home / "../ohos_arm64/include/plugins/ets/runtime/ani"
+        lib_name = target_path.absolute().name
+
+        link(
+            f"{build_author_generated_dir}/lib{lib_name}.so",
+            *compile(
+                build_author_generated_dir,
+                runtime_src_dir,
+                panda_include,
+                runtime_include_dir,
+                opt_level=opt_level,
+            ),
+            *compile(
+                build_author_generated_dir,
+                author_src_dir,
+                panda_include,
+                runtime_include_dir,
+                author_generated_include_dir,
+                author_include_dir,
+                opt_level=opt_level,
+            ),
+            *compile(
+                build_author_generated_dir,
+                author_generated_src_dir,
+                panda_include,
+                runtime_include_dir,
+                author_generated_include_dir,
+                opt_level=opt_level,
+            ),
+            shared=True,
+            link_options=["-Wl"],
+        )
+        link_abc(
+            build_author_generated_dir,
+            *compile_abc(
+                build_author_generated_dir,
+                author_generated_dir,
+                panda_home,
+            ),
+            *compile_abc(build_author_generated_dir, user_dir, panda_home),
+            panda_home=panda_home,
+        )
+
+        # TODO Ugly hack. Refactor me.
+        if not generate_and_compile:
+            run_command(
+                f"LD_LIBRARY_PATH={build_author_generated_dir} "
+                f"{panda_home}/bin/ark "
+                f"--boot-panda-files={panda_home}/../ets/etsstdlib.abc "
+                f"--load-runtimes=ets "
+                f"{build_author_generated_dir}/main.abc "
+                "main.ETSGLOBAL::main"
+            )
+        return
+
+    create_directory(user_generated_src_dir)
+    create_directory(user_generated_include_dir)
+
+    print("Generating user codes...")
+    CompilerInstance(
+        CompilerInvocation(
+            src_dirs=[idl_dir],
+            out_dir=user_generated_dir,
+            gen_user=True,
+        )
+    ).run()
+    print("Done.")
+
+    if generate_only:
+        return
+
+    create_directory(build_runtime_dir)
+    create_directory(build_author_dir)
+    create_directory(build_user_dir)
+    create_directory(build_author_generated_dir)
+    create_directory(build_user_generated_dir)
+
+    print("Compiling to dynamic link library...")
+    link(
+        so_file,
+        *compile(
+            build_runtime_dir,
+            runtime_src_dir,
+            runtime_include_dir,
+            opt_level=opt_level,
+        ),
+        *compile(
+            build_author_dir,
+            author_generated_src_dir,
+            runtime_include_dir,
+            author_generated_include_dir,
+            opt_level=opt_level,
+        ),
+        *compile(
+            build_author_dir,
+            author_src_dir,
+            runtime_include_dir,
+            author_generated_include_dir,
+            author_include_dir,
+            opt_level=opt_level,
+        ),
+        shared=True,
+        link_options=author_link_options,
+    )
+    print("Done.")
+
+    print("Compiling to executable file...")
+    link(
+        elf_file,
+        so_file,
+        *compile(
+            build_user_dir,
+            user_src_dir,
+            runtime_include_dir,
+            user_generated_include_dir,
+            user_include_dir,
+            opt_level=opt_level,
+        ),
+        shared=False,
+        link_options=user_link_options,
+    )
+    print("Done.")
+
+    if generate_and_compile:
+        return
+
+    print("Done. Running...")
+    run_command(" ".join([str(elf_file), *run_args]))
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Build and run project from a target directory",
+    )
+    parser.add_argument(
+        "target_directory",
+        type=str,
+        help="The target directory containing source files for the project",
+    )
+    parser.add_argument(
+        "-ani",
+        "--generate-and-compile-ani",
+        action="store_true",
+        help="To generate and compile ani files and ets files",
+    )
+    parser.add_argument(
+        "-g",
+        "--generate-only",
+        action="store_true",
+        help="To generate source and header files and not to compile them",
+    )
+    parser.add_argument(
+        "-c",
+        "--generate-and-compile",
+        action="store_true",
+        help="Generate source and header files and Compile them",
+    )
+    parser.add_argument(
+        "-cimpl",
+        "--generate-c-impl",
+        action="store_true",
+        help="Generate C implement header and C implement template",
+    )
+    parser.add_argument(
+        "-a",
+        "--author-link-options",
+        type=str,
+        nargs="+",
+        default=[],
+    )
+    parser.add_argument(
+        "-u",
+        "--user-link-options",
+        type=str,
+        nargs="+",
+        default=[],
+    )
+    parser.add_argument(
+        "-r",
+        "--run-args",
+        type=str,
+        nargs="+",
+        default=[],
+    )
+    parser.add_argument(
+        "-O",
+        "--optimization",
+        type=str,
+        nargs="?",
+        default="0",
+        const="",
+        help="Optimization level for compilation",
+    )
+
+    args = parser.parse_args()
+
+    try:
+        main(
+            args.target_directory,
+            args.generate_and_compile_ani,
+            args.generate_only,
+            args.generate_and_compile,
+            args.generate_c_impl,
+            args.optimization,
+            args.author_link_options,
+            args.user_link_options,
+            args.run_args,
+        )
+    except KeyboardInterrupt:
+        print("Interrupted. Bye-bye!", file=sys.stderr)
+        sys.exit(1)

@@ -1,0 +1,84 @@
+#!/usr/bin/bash
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+# Build the project and package into "dist/"
+
+source "$(dirname "$0")/common_lib.sh"
+
+copy-runtime() {
+    echo "Copying the runtime files"
+    cp -r runtime/include/* "$INCLUDE_DIR"
+    cp -r runtime/src/* "$SRC_DIR"
+}
+
+build-compiler() {
+    echo "Building the compiler"
+    local compiler_dir="$LIB_DIR/compiler"
+    pushd compiler
+
+    ./generate-grammar && poetry build
+    cd dist
+    tar xf taihe-*.gz
+    echo "Copying the compiler"
+    mkdir -p "$compiler_dir/taihe" && cp -r taihe-*/taihe "$compiler_dir"
+
+    site_packages_dir=$(python3 -c "import site; print(site.getsitepackages()[0])")
+    mkdir -p "$compiler_dir/lib"
+    cp -r "$site_packages_dir/antlr4" "$compiler_dir/lib/"
+    cp -r "$site_packages_dir/typing_extensions.py" "$compiler_dir/lib/"
+
+    popd 2>/dev/null
+
+    echo "Copying the compiler wrapper"
+    local taihec="$BIN_DIR/taihec"
+    cat >"$taihec" <<'EOF'
+#!/usr/bin/bash -eu
+
+export TAIHE_ROOT="$(realpath $(dirname "$0")/..)"
+export PYTHONPATH="${TAIHE_ROOT}/lib/taihe/compiler:${TAIHE_ROOT}/lib/taihe/compiler/lib:${PYTHONPATH:-}"
+
+exec python3 -m taihe "$@"
+EOF
+    chmod 0755 "$taihec"
+}
+
+main() {
+    init_shell_options
+    chdir_root
+
+    # Use clang by default. Will be picked by other build tools.
+    export CC="${CC:-clang}"
+    export CXX="${CXX:-clang++}"
+    echo "Toolchain: CC=$CC CXX=$CXX"
+
+    echo "Setting up the directories"
+    DIST="$PWD/dist"
+    LIB_DIR="$DIST/lib/taihe"
+    BIN_DIR="$DIST/bin"
+    INCLUDE_DIR="$DIST/include"
+    SRC_DIR="$DIST/src/taihe/runtime"
+    mkdir -p "$DIST" "$LIB_DIR" "$BIN_DIR" "$INCLUDE_DIR" "$SRC_DIR"
+
+    GIT_COMMIT=$(git rev-parse HEAD)
+    BUILD_DATE=$(date +"%Y-%m-%d %H:%M:%S")
+    echo "Version: $GIT_COMMIT" > "$DIST/version.txt"
+    echo "Build Date: $BUILD_DATE" >> "$DIST/version.txt"
+
+    # Do the job
+    copy-runtime
+    build-compiler
+}
+
+main

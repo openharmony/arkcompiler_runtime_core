@@ -1,0 +1,223 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+@!namespace("ns_alltest", "functiontest")
+
+enum Color: String {
+    RED = "Red",
+    GREEN = "Green",
+    BLUE = "Blue",
+}
+struct Data {
+  data1: String;
+  data2: bool;
+  data3: i32;
+}
+
+function baseFunctionTest1():void;
+function baseFunctionTest2(param1:i8):void;
+function baseFunctionTest3(param1:i16):void;
+function baseFunctionTest4(param1:i32):void;
+function baseFunctionTest5(param1:i64):void;
+function baseFunctionTest6(param1:f32):void;
+function baseFunctionTest7(param1:f64):void;
+function baseFunctionTest8(param1:String):void;
+function baseFunctionTest9(param1:bool):void;
+function baseFunctionTest10(param1:Array<i8>):void;
+function baseFunctionTest11(param1:Array<i16>):void;
+function baseFunctionTest12(param1:Optional<i16>):void;
+function baseFunctionTest13(param1:Optional<i64>):void;
+function baseFunctionTest14(param1:Array<u8>):void;
+function baseFunctionTest15(param1:Map<String, i32>):void;
+function baseFunctionTest16(param1:i8):i8;
+function baseFunctionTest17(param1:i16):i16;
+function baseFunctionTest18(param1:i32):i32;
+function baseFunctionTest19(param1:i64):i64;
+function baseFunctionTest20(param1:f32):f32;
+function baseFunctionTest21(param1:f64):f64;
+function baseFunctionTest22(param1:String):String;
+function baseFunctionTest23(param1:bool):bool;
+function baseFunctionTest24(param1:Array<i8>):Array<i8>;
+function baseFunctionTest25(param1:Array<i16>):Array<i16>;
+function baseFunctionTest26(param1:Optional<i16>):Optional<i16>;
+function baseFunctionTest27(param1:Optional<i64>):Optional<i64>;
+function baseFunctionTest28(param1:Array<u8>):Array<u8>;
+function baseFunctionTest29(param1:Map<String, i32>):Map<String, i32>;
+function baseFunctionTest30(param1:Color):Color;
+function baseFunctionTest31(param1:Color):void;
+function baseFunctionTest32(param1:i8,param2:i16,param3:i32,param4:i64,param5:f32,param6:f64,param7:String,param8:bool,param9:Array<i16>,param10:Array<i64>):i16;
+function baseFunctionTest33(param1:i8,param2:i16,param3:i32,param4:i64,param5:f32,param6:f64,param7:String,param8:bool,param9:Array<i8>,param10:Array<i32>):i32;
+function baseFunctionTest34(param1:i8,param2:i16,param3:i32,param4:i64,param5:f32,param6:f64,param7:String,param8:bool,param9:Array<String>,param10:Array<i64>):i64;
+function baseFunctionTest35(param1:i8,param2:i16,param3:i32,param4:i64,param5:f32,param6:f64,param7:String,param8:bool,param9:Array<bool>,param10:Array<i64>):i8;
+function baseFunctionTest36(param1:i8,param2:i16,param3:i32,param4:i64,param5:f32,param6:f64,param7:String,param8:bool,param9:Array<i8>,param10:Array<i64>):Array<i32>;
+function baseFunctionTest37(param1:i8,param2:i16,param3:i32,param4:i64,param5:f32,param6:f64,param7:String,param8:bool,param9:Array<i32>,param10:Array<i64>):Array<i64>;
+function baseFunctionTest38(param1:i8,param2:i16,param3:i32,param4:i64,param5:f32,param6:f64,param7:String,param8:bool,param9:Array<i8>,param10:Array<i16>):String;
+function baseFunctionTest39(param1:i8,param2:i16,param3:i32,param4:i64,param5:f32,param6:f64,param7:String,param8:bool,param9:Array<bool>,param10:Array<i32>):bool;
+function baseFunctionTest40(param1:i8,param2:i16,param3:i32,param4:i64,param5:f32,param6:f64,param7:String,param8:bool,param9:Array<i8>,param10:Array<u8>):Array<i8>;
+function baseFunctionTest41(param1:i8,param2:i16,param3:i32,param4:i64,param5:f32,param6:f64,param7:String,param8:bool,param9:Array<i16>,param10:Array<i64>):void;
+@overload("baseFunctionTest42")
+function baseFunctionTest42_int(param1: i32, param2: i16): i32;
+@overload("baseFunctionTest42")
+function baseFunctionTest42_container(param1: Optional<i32>,param2: Map<String,i32>): i32;
+@overload("baseFunctionTest42")
+function baseFunctionTest42_void(): i32;
+@overload("baseFunctionTest42")
+function baseFunctionTest42_struct(param1: Data): void;
+
+struct ErrorResponse {
+    success: bool; 
+    errorCode: i16; 
+    errorMessage: String;
+}
+
+interface testNameSpace {
+    baseFunctionTest43():void;
+    baseFunctionTest44(param1:i8):i8;
+    baseFunctionTest45(param1:i16):i16;
+    baseFunctionTest46(param1:i32):i32;
+    baseFunctionTest47(param1:i64):i64;
+    baseFunctionTest48(param1:f32):f32;
+    baseFunctionTest49(param1:f64):f64;
+    baseFunctionTest50(param1:String):String;
+    baseFunctionTest51(param1:bool):bool;
+    baseFunctionTest52(param1:Array<u8>):Array<u8>;
+    baseFunctionTest53(param1:Optional<i8>):Optional<i8>;
+    baseFunctionTest54(param1:Optional<i32>):Optional<i32>;
+    baseFunctionTest55(param1:Map<i16,Data>):Map<i16,Data>;
+    baseFunctionTest56(param1:i32):i64;
+    baseFunctionTest57(param1:i8):i32;
+    @get getTestStr(): String;
+    baseFunctionTest58(param1:bool):ErrorResponse;
+}
+function get_interface_NameSpace(): testNameSpace;
+
+interface testInterfacePerformance1 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance1(): testInterfacePerformance1;
+
+interface testInterfacePerformance2 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance2(): testInterfacePerformance2;
+
+interface testInterfacePerformance3 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance3(): testInterfacePerformance3;
+
+interface testInterfacePerformance4{
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance4(): testInterfacePerformance4;
+
+interface testInterfacePerformance5 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance5(): testInterfacePerformance5;
+
+interface testInterfacePerformance6 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance6(): testInterfacePerformance6;
+
+interface testInterfacePerformance7 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance7(): testInterfacePerformance7;
+
+interface testInterfacePerformance8 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance8(): testInterfacePerformance8;
+
+interface testInterfacePerformance9 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance9(): testInterfacePerformance9;
+
+interface testInterfacePerformance10 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance10(): testInterfacePerformance10;
+
+interface testInterfacePerformance11 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance11(): testInterfacePerformance11;
+
+interface testInterfacePerformance12 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance12(): testInterfacePerformance12;
+
+interface testInterfacePerformance13 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance13(): testInterfacePerformance13;
+
+interface testInterfacePerformance14 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance14(): testInterfacePerformance14;
+
+interface testInterfacePerformance15 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance15(): testInterfacePerformance15;
+
+interface testInterfacePerformance16 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance16(): testInterfacePerformance16;
+
+interface testInterfacePerformance17 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance17(): testInterfacePerformance17;
+
+interface testInterfacePerformance18 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance18(): testInterfacePerformance18;
+
+interface testInterfacePerformance19 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance19(): testInterfacePerformance19;
+
+interface testInterfacePerformance20 {
+  basePerformanceFunctionTest1():void;
+  basePerformanceFunctionTest2(param1:i8):i8;
+}
+function get_interface_performance20(): testInterfacePerformance20;
