@@ -24,8 +24,7 @@
 extern "C" {
 namespace ark::ets::ani {
 // NOLINTNEXTLINE(readability-identifier-naming)
-ANI_EXPORT ani_int CompileMethodImpl([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class cls,
-                                     [[maybe_unused]] ani_string name)
+ANI_EXPORT ani_int CompileMethodImpl([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_string name)
 {
     if (!Runtime::GetCurrent()->IsJitEnabled()) {
         return 1;
@@ -43,19 +42,19 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    static const char *className = "Lstring_tlab_repeat/ETSGLOBAL;";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        auto msg = std::string("Cannot find \"") + className + std::string("\" class!");
+    static const char *moduleName = "Lstring_tlab_repeat;";
+    ani_module md;
+    if (ANI_OK != env->FindModule(moduleName, &md)) {
+        auto msg = std::string("Cannot find \"") + moduleName + std::string("\" module!");
         ark::ets::stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", msg.data(), "Lstd/core/String;:V");
         return ANI_ERROR;
     }
 
-    const auto methods = std::array {
+    const auto functions = std::array {
         ani_native_function {"compileMethod", "Lstd/core/String;:I", reinterpret_cast<void *>(CompileMethodImpl)}};
 
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
-        std::cerr << "Cannot bind native methods to '" << className << "'" << std::endl;
+    if (ANI_OK != env->Module_BindNativeFunctions(md, functions.data(), functions.size())) {
+        std::cerr << "Cannot bind native methods to '" << moduleName << "'" << std::endl;
         return ANI_ERROR;
     };
 

@@ -43,11 +43,16 @@ TEST_F(FindClassTest, invalid_argument_2)
     ASSERT_EQ(env_->FindClass("Lfind_class_test/Point;", nullptr), ANI_INVALID_ARGS);
 }
 
-// Enable when #22400 is resolved.
-TEST_F(FindClassTest, DISABLED_class_is_not_namespace)
+TEST_F(FindClassTest, class_is_not_namespace)
 {
     ani_namespace ns {};
     ASSERT_EQ(env_->FindNamespace("Lfind_class_test/Point;", &ns), ANI_NOT_FOUND);
+}
+
+TEST_F(FindClassTest, class_is_not_module)
+{
+    ani_module md {};
+    ASSERT_EQ(env_->FindModule("LPoint;", &md), ANI_NOT_FOUND);
 }
 
 }  // namespace ark::ets::ani::testing

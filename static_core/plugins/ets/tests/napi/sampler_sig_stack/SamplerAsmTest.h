@@ -24,7 +24,7 @@ extern "C" {
 
 //  NOLINTBEGIN(readability-identifier-naming, readability-named-parameter)
 
-ANI_EXPORT ani_int NativeSumEightElements(ani_env *, ani_class);
+ANI_EXPORT ani_int NativeSumEightElements(ani_env *);
 
 //  NOLINTEND(readability-identifier-naming, readability-named-parameter)
 

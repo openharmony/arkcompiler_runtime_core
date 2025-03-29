@@ -491,7 +491,7 @@ static ani_status ClassSetStaticFieldByName(ani_env *env, ani_class cls, const c
     return ANI_OK;
 }
 
-template <typename T>
+template <bool IS_MODULE, typename T>
 static ani_status DoFind(PandaEnv *pandaEnv, const char *name, ScopedManagedCodeFix &s, T *result)
 {
     EtsClassLinker *classLinker = pandaEnv->GetEtsVM()->GetClassLinker();
@@ -508,17 +508,18 @@ static ani_status DoFind(PandaEnv *pandaEnv, const char *name, ScopedManagedCode
         return ANI_PENDING_ERROR;
     }
     ANI_CHECK_RETURN_IF_EQ(klass, nullptr, ANI_NOT_FOUND);
+    ANI_CHECK_RETURN_IF_NE(klass->IsModule(), IS_MODULE, ANI_NOT_FOUND);
 
     ASSERT_MANAGED_CODE();
     return s.AddLocalRef(reinterpret_cast<EtsObject *>(klass), reinterpret_cast<ani_ref *>(result));
 }
 
-template <typename T>
+template <bool IS_MODULE, typename T>
 static ani_status DoFind(ani_env *env, const char *name, T *result)
 {
     PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
     ScopedManagedCodeFix s(pandaEnv);
-    return DoFind(pandaEnv, name, s, result);
+    return DoFind<IS_MODULE>(pandaEnv, name, s, result);
 }
 
 static bool CheckUniqueMethod(EtsClass *klass, const char *name)
@@ -623,7 +624,7 @@ static ani_status ClassCallMethodByName(ani_env *env, ani_class cls, const char 
     return GeneralMethodCall<ReturnType>(env, nullptr, staticMethod, result, args);
 }
 
-template <typename T>
+template <bool IS_MODULE, typename T>
 static ani_status FindInModule(ani_env *env, ani_module module, const char *targetDescriptor, T *result)
 {
     CHECK_ENV(env);
@@ -646,7 +647,7 @@ static ani_status FindInModule(ani_env *env, ani_module module, const char *targ
     className[0] = '/';
     descriptor += className;
 
-    return DoFind(pandaEnv, descriptor.c_str(), s, result);
+    return DoFind<IS_MODULE>(pandaEnv, descriptor.c_str(), s, result);
 }
 
 NO_UB_SANITIZE static ani_status GetVersion(ani_env *env, uint32_t *result)
@@ -816,7 +817,7 @@ NO_UB_SANITIZE static ani_status FindModule(ani_env *env, const char *moduleDesc
     descriptor += "/ETSGLOBAL;";
 
     // NOTE: Check that results is namespace, #22400
-    return DoFind(env, descriptor.c_str(), result);
+    return DoFind<true>(env, descriptor.c_str(), result);
 }
 
 NO_UB_SANITIZE static ani_status FindNamespace(ani_env *env, const char *namespaceDescriptor, ani_namespace *result)
@@ -827,7 +828,7 @@ NO_UB_SANITIZE static ani_status FindNamespace(ani_env *env, const char *namespa
     CHECK_PTR_ARG(result);
 
     // NOTE: Check that results is namespace, #22400
-    return DoFind(env, namespaceDescriptor, result);
+    return DoFind<true>(env, namespaceDescriptor, result);
 }
 
 NO_UB_SANITIZE static ani_status FindClass(ani_env *env, const char *classDescriptor, ani_class *result)
@@ -838,7 +839,7 @@ NO_UB_SANITIZE static ani_status FindClass(ani_env *env, const char *classDescri
     CHECK_PTR_ARG(result);
 
     // NOTE: Check that results is class, #22400
-    return DoFind(env, classDescriptor, result);
+    return DoFind<false>(env, classDescriptor, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -889,7 +890,7 @@ NO_UB_SANITIZE static ani_status Namespace_FindNamespace(ani_env *env, ani_names
     descriptor += nameDescriptor;
 
     // NOTE: Check that results is namespace, #22400
-    return DoFind(pandaEnv, descriptor.c_str(), s, result);
+    return DoFind<true>(pandaEnv, descriptor.c_str(), s, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -923,7 +924,7 @@ NO_UB_SANITIZE static ani_status Namespace_FindClass(ani_env *env, ani_namespace
     descriptor += clDescriptor;
 
     // NOTE: Check that results is class, #22400
-    return DoFind(pandaEnv, descriptor.c_str(), s, result);
+    return DoFind<false>(pandaEnv, descriptor.c_str(), s, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -990,7 +991,7 @@ NO_UB_SANITIZE static ani_status Module_FindClass(ani_env *env, ani_module modul
                                                   ani_class *result)
 {
     ANI_DEBUG_TRACE(env);
-    return FindInModule(env, module, classDescriptor, result);
+    return FindInModule<false>(env, module, classDescriptor, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -998,7 +999,7 @@ NO_UB_SANITIZE static ani_status Module_FindNamespace(ani_env *env, ani_module m
                                                       ani_namespace *result)
 {
     ANI_DEBUG_TRACE(env);
-    return FindInModule(env, module, namespaceDescriptor, result);
+    return FindInModule<true>(env, module, namespaceDescriptor, result);
 }
 
 template <typename InternalType, typename AniFixedArrayType>
@@ -5783,7 +5784,7 @@ NO_UB_SANITIZE static ani_status FindEnum(ani_env *env, const char *enum_descrip
     CHECK_PTR_ARG(result);
 
     // NOTE: Check that result is enum, #22400
-    return DoFind(env, enum_descriptor, result);
+    return DoFind<false>(env, enum_descriptor, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5815,7 +5816,7 @@ NO_UB_SANITIZE static ani_status Namespace_FindEnum(ani_env *env, ani_namespace 
     etsNsDescriptorPandStr.pop_back();
     etsNsDescriptorPandStr += enumDescriptorPandStr;
 
-    return DoFind(pandaEnv, etsNsDescriptorPandStr.c_str(), s, result);
+    return DoFind<false>(pandaEnv, etsNsDescriptorPandStr.c_str(), s, result);
 }
 
 template <typename T>
@@ -5841,7 +5842,7 @@ static ani_status ModuleDoFind(ani_env *env, ani_module module, const char *enum
     etsModuleDescriptorPandStr.replace(etsModuleDescriptorPandStr.find(global), global.size(), "");
     etsModuleDescriptorPandStr += enumDescriptorPandStr;
 
-    return DoFind(pandaEnv, etsModuleDescriptorPandStr.c_str(), s, result);
+    return DoFind<false>(pandaEnv, etsModuleDescriptorPandStr.c_str(), s, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)

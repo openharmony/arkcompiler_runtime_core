@@ -470,6 +470,19 @@ void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPri
     if (UNLIKELY(HasFunctionTypeInSuperClasses(this))) {
         flags |= IS_FUNCTION;
     }
+
+    auto *runtimeClass = GetRuntimeClass();
+    auto *pfile = runtimeClass->GetPandaFile();
+    if (pfile != nullptr) {
+        panda_file::ClassDataAccessor cda(*pfile, runtimeClass->GetFileId());
+
+        cda.EnumerateAnnotation(panda_file_items::class_descriptors::ANNOTATION_MODULE.data(),
+                                [&flags](panda_file::AnnotationDataAccessor &) {
+                                    flags |= IS_MODULE;
+                                    return true;
+                                });
+    }
+
     SetFlags(flags);
 }
 

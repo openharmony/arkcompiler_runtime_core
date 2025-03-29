@@ -48,8 +48,7 @@ TEST_F(FindNamespaceTest, invalid_argument_2)
     ASSERT_EQ(env_->FindNamespace("Lfind_namespace_test/geometry;", nullptr), ANI_INVALID_ARGS);
 }
 
-// Enable when #22400 is resolved.
-TEST_F(FindNamespaceTest, DISABLED_namespace_is_not_class)
+TEST_F(FindNamespaceTest, namespace_is_not_class)
 {
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lfind_namespace_test/geometry;", &cls), ANI_NOT_FOUND);
