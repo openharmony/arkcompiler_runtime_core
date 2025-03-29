@@ -267,6 +267,9 @@
 #19720
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_8.ets
 
+#23065
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_7.ets
+
 #21833 null-safety violations, value was not initialized
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/02.constant_declarations/const_decl_5.ets
 
@@ -274,7 +277,6 @@
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_3.ets
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_7.ets
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.assignability_with_initializer/initializer_compatibility_n_8.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_custom_neg_6.ets
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_n_0.ets
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_n_1.ets
 
@@ -292,31 +294,6 @@
 
 #23134
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_15.ets
-
-#23065
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_0.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_1.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_10.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_11.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_12.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_13.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_14.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_15.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_16.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_18.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_19.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_2.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_3.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_5.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_7.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_8.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_9.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_context_and_conversion_0.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_context_and_conversion_10.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_context_and_conversion_2.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_context_and_conversion_4.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_context_and_conversion_6.ets
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_context_and_conversion_8.ets
 
 #22791 - Array, FixedArray not implemented yet
 04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_12.ets
