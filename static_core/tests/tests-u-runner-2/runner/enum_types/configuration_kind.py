@@ -20,7 +20,6 @@ from runner.enum_types.base_enum import BaseEnum
 
 class ConfigurationKind(BaseEnum):
     INT = "INT"
-    OTHER_INT = "INT-OTHER"
     AOT = "AOT"
     AOT_FULL = "AOT-FULL"
     JIT = "JIT"

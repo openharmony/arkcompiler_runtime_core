@@ -149,3 +149,6 @@ class TestMetadata:
         if (stmt := match.group("package_name")) is not None:
             return stmt
         return path.stem
+
+    def get_package_name(self) -> str:
+        return self.package if self.package is not None else ""

@@ -23,6 +23,7 @@ parameters:
     opt-level: 2
     es2panda-timeout: 30
     verifier-timeout: 30
+    enable-es2panda: True
     enable-verifier: True
     extension: ${parameters.extension}
     # ark
@@ -45,6 +46,7 @@ steps:
             work-dir: ${parameters.work-dir}
             extension: ${parameters.extension}
             load-runtimes: ${parameters.load-runtimes}
+            enable-es2panda: ${parameters.enable-es2panda}
             enable-verifier: ${parameters.enable-verifier}
             es2panda-timeout: ${parameters.es2panda-timeout}
             verifier-timeout: ${parameters.verifier-timeout}

@@ -44,6 +44,7 @@ class GeneralOptions(IOptions):
     __DEFAULT_QEMU = QemuKind.NONE
     __DEFAULT_SHOW_PROGRESS = False
     __DEFAULT_DETAILED_REPORT = False
+    __DEFAULT_REPORT_DIR = "report"
     __CFG_RUNNER = "runner"
 
     __VERBOSE = "verbose"
@@ -54,6 +55,7 @@ class GeneralOptions(IOptions):
     __DETAILED_REPORT_FILE = "detailed-report-file"
     __SHOW_PROGRESS = "show-progress"
     __QEMU = "qemu"
+    __REPORT_DIR = "report-dir"
 
     def __init__(self, data: dict[str, Any], parent: IOptions):
         super().__init__(data)
@@ -84,6 +86,12 @@ class GeneralOptions(IOptions):
             default=GeneralOptions.__DEFAULT_DETAILED_REPORT_FILE,
             help='Name of additional detailed report. By default, the report is created at '
                  '$WorkDir/<suite-name>/report/<suite-name>_detailed-report-file.md , '
+                 'where $WorkDir is the folder specified by the environment variable WORK_DIR')
+        parser.add_argument(
+            f'--{GeneralOptions.__REPORT_DIR}', action='store',
+            default=GeneralOptions.__DEFAULT_REPORT_DIR,
+            help='Name of report folder under $WorkDir. By default, the name is "report".'
+                 'The location is "$WorkDir/<suite-name>/<report-dir>", '
                  'where $WorkDir is the folder specified by the environment variable WORK_DIR')
         parser.add_argument(
             f'--{GeneralOptions.__SHOW_PROGRESS}', action='store_true',
@@ -158,6 +166,10 @@ class GeneralOptions(IOptions):
         if path_str:
             return Path(cast(str, path_str))
         return None
+
+    @cached_property
+    def report_dir_name(self) -> str:
+        return cast(str, self.__parameters.get(self.__REPORT_DIR, self.__DEFAULT_REPORT_DIR))
 
     @cached_property
     def verbose(self) -> VerboseKind:

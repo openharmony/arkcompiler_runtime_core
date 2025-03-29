@@ -17,11 +17,13 @@ workflow-name: es2panda
 parameters:
     arktsconfig: "${parameters.build}/tools/es2panda/generated/arktsconfig.json"
     build: ${PANDA_BUILD}
+    enable-es2panda: True
     enable-verifier: True
     es2panda-extra-args: []
     es2panda-full-args:
         - "--arktsconfig=${parameters.arktsconfig}"
         - "--gen-stdlib=false"
+        - "--ets-module"
         - "--extension=${parameters.extension}"
         - "--opt-level=${parameters.opt-level}"
         - "--output=${parameters.output-file}"
@@ -40,6 +42,7 @@ steps:
     es2panda:
         executable-path: ${parameters.build}/bin/es2panda
         timeout: ${parameters.es2panda-timeout}
+        enabled: ${parameters.enable-es2panda}
         step-type: compiler
         args:
             - "${parameters.es2panda-full-args}"

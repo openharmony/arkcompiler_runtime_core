@@ -35,6 +35,7 @@ class CollectionsOptions(IOptions):
     __GENERATOR_CLASS = "generator-class"
     __GENERATOR_SCRIPT = "generator-script"
     __GENERATOR_OPTIONS = "generator-options"
+    __EXCLUDE = "exclude"
 
     def __init__(self, name: str, args: dict[str, Any], parent: IOptions):
         super().__init__(None)
@@ -43,6 +44,7 @@ class CollectionsOptions(IOptions):
         self.__args: dict[str, Any] = args
         self.__test_root = self.__get_arg(self.__TEST_ROOT)
         self.__list_root = self.__get_arg(self.__LIST_ROOT)
+        self.__exclude: list[str] = args[self.__EXCLUDE] if args and self.__EXCLUDE in args else []
         self.__parameters: dict[str, Any] = args[self.__PARAMETERS] if args and self.__PARAMETERS in args else {}
         self.__expand_macros_in_parameters()
 
@@ -73,6 +75,10 @@ class CollectionsOptions(IOptions):
     def generator_options(self) -> list[str]:
         default_options: list[str] = []
         return cast(list[str], self.__get_from_args(self.__GENERATOR_CLASS, default_options))
+
+    @cached_property
+    def exclude(self) -> list[str]:
+        return self.__exclude
 
     @cached_property
     def parameters(self) -> dict[str, Any]:

@@ -17,7 +17,7 @@
 
 import argparse
 from functools import cached_property
-from typing import Any
+from typing import Any, cast
 
 from runner.enum_types.configuration_kind import ArchitectureKind, BuildTypeKind, OSKind, SanitizerKind
 from runner.options.options import IOptions
@@ -94,19 +94,19 @@ class TestListsOptions(IOptions):
 
     @cached_property
     def architecture(self) -> ArchitectureKind:
-        return ArchitectureKind(self.__parameters[self.__TEST_LIST_ARCH])
-
-    @cached_property
-    def sanitizer(self) -> SanitizerKind:
-        return SanitizerKind(self.__parameters[self.__TEST_LIST_SAN])
-
-    @cached_property
-    def operating_system(self) -> OSKind:
-        return OSKind(self.__parameters[self.__TEST_LIST_OS])
+        if isinstance(self.__parameters[self.__TEST_LIST_ARCH], str):
+            self.__parameters[self.__TEST_LIST_ARCH] = ArchitectureKind.is_value(
+                value=self.__parameters[self.__TEST_LIST_ARCH],
+                option_name=f"--{self.__TEST_LIST_ARCH}")
+        return cast(ArchitectureKind, self.__parameters[self.__TEST_LIST_ARCH])
 
     @cached_property
     def build_type(self) -> BuildTypeKind:
-        return BuildTypeKind(self.__parameters[self.__TEST_LIST_BUILD])
+        if isinstance(self.__parameters[self.__TEST_LIST_BUILD], str):
+            self.__parameters[self.__TEST_LIST_BUILD] = BuildTypeKind.is_value(
+                value=self.__parameters[self.__TEST_LIST_BUILD],
+                option_name=f"--{self.__TEST_LIST_BUILD}")
+        return cast(BuildTypeKind, self.__parameters[self.__TEST_LIST_BUILD])
 
     @cached_property
     def explicit_file(self) -> str | None:

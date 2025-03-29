@@ -30,6 +30,7 @@ from runner.common_exceptions import FileNotFoundException, InvalidConfiguration
 from runner.enum_types.params import TestEnv
 from runner.logger import Log
 from runner.options.options import IOptions
+from runner.options.options_collections import CollectionsOptions
 from runner.suites.preparation_step import CopyStep, CustomGeneratorTestPreparationStep, TestPreparationStep
 from runner.suites.step_utils import StepUtils
 from runner.suites.test_lists import TestLists
@@ -99,9 +100,13 @@ class TestSuite:
     @staticmethod
     def __load_line_with_prefix(test_root: Path, prefixes: list[str], test: str) -> tuple[bool, Path | None]:
         for prefix in prefixes:
-            test_path = test_root / prefix / test
-            if test_path.exists():
+            test_path = test_root / prefix
+            if test_path.is_file() and test_path.name == test:
                 return True, test_path
+            if test_path.is_dir():
+                test_path = test_path / test
+                if test_path.exists():
+                    return True, test_path
         return False, None
 
     @staticmethod
@@ -121,6 +126,11 @@ class TestSuite:
                 Log.short(_LOGGER, f"\t{test}")
         elif len(original) > 0:
             _LOGGER.summary(f"No duplicates found in {kind} lists.")
+
+    @staticmethod
+    def __is_path_excluded(collection: CollectionsOptions, tested_path: Path) -> bool:
+        excluded = [excl for excl in collection.exclude if tested_path.as_posix().endswith(excl)]
+        return len(excluded) > 0
 
     @cached_property
     def name(self) -> str:
@@ -172,13 +182,31 @@ class TestSuite:
             extension = self.config.test_suite.extension(collection)
             with_js = self.config.test_suite.with_js(collection)
             if (extension == "js" and with_js) or extension != "js":
+                steps.extend(self.__add_copy_steps(collection, copy_source_path, extension))
+        return steps
+
+    def __add_copy_steps(self, collection: CollectionsOptions, copy_source_path: Path, extension: str) \
+            -> list[TestPreparationStep]:
+        steps: list[TestPreparationStep] = []
+        if collection.exclude:
+            for file_path in copy_source_path.iterdir():
+                if self.__is_path_excluded(collection, file_path):
+                    continue
                 steps.append(CopyStep(
-                    test_source_path=copy_source_path,
-                    test_gen_path=self.test_root / collection.name,
+                    test_source_path=file_path,
+                    test_gen_path=self.test_root / collection.name / file_path.name,
                     config=self.config,
                     collection=collection,
                     extension=extension
                 ))
+        else:
+            steps.append(CopyStep(
+                test_source_path=copy_source_path,
+                test_gen_path=self.test_root / collection.name,
+                config=self.config,
+                collection=collection,
+                extension=extension
+            ))
         return steps
 
     def __get_raw_set(self, force_generate: bool) -> list[Path]:
@@ -213,7 +241,7 @@ class TestSuite:
                 glob(glob_expression, recursive=True),
                 path.join(self.test_root, self.config.test_suite.filter)
             ))
-        return [Path(test) for test in tests]
+        return [Path(test) for test in set(tests)]
 
     def __get_explicit_test_path(self, test_id: str) -> Path | None:
         for collection in self.config.test_suite.collections:
@@ -263,8 +291,8 @@ class TestSuite:
 
     def __create_test(self, test_file: Path, is_ignored: bool) -> TestStandardFlow:
         test_id = get_test_id(test_file, self.test_root)
-        coll_names = [name for name in self.__collections_parameters if test_id.startswith(name)]
-        params = self.__collections_parameters.get(coll_names[0], {}) if coll_names else {}
+        coll_name = self.__get_coll_name(test_id)
+        params = self.__collections_parameters.get(coll_name, {}) if coll_name is not None else {}
         test = TestStandardFlow(
             test_env=self.__test_env,
             test_path=test_file,
@@ -272,6 +300,16 @@ class TestSuite:
             test_id=test_id)
         test.ignored = is_ignored
         return test
+
+    def __get_coll_name(self, test_id: str) -> str | None:
+        coll_names = [name for name in self.__collections_parameters if test_id.startswith(name)]
+        if len(coll_names) == 1:
+            return coll_names[0]
+        weights = {len(name): name for name in coll_names}
+        if weights:
+            name = max(weights.keys())
+            return weights[name]
+        return None
 
     def __create_tests(self, raw_test_files: list[Path]) -> list[TestStandardFlow]:
         all_tests = {self.__create_test(test, test in self.ignored_tests) for test in raw_test_files}
@@ -335,7 +373,7 @@ class TestSuite:
         any_not_found = False
         report = []
         for list_path in lists:
-            _LOGGER.summary(f"Loading tests from the list {list_path}")
+            _LOGGER.default(f"Loading tests from the list {list_path}")
             prefixes: list[str] = []
             if len(self.config.test_suite.collections) > 1:
                 prefixes = [coll.name for coll in self.config.test_suite.collections]
