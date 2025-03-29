@@ -18,7 +18,7 @@ class PoisonedIterator<T> implements Iterator<T> {
     }
 
     next(): IteratorResult<T> {
-        throw new Error("error");
+        throw this.error;
     }
 
     error: Error;

@@ -59,10 +59,10 @@ export final class Promise<out T> implements PromiseLike<T> {
             callback((value: T|PromiseLike<T>): void => {
                 this.doResolve<T>(value);
             }, (error: NullishType): void => {
-                this.rejectImpl(error);
+                this.rejectImpl(error, false);
             });
         } catch (error) {
-            this.rejectImpl(error);
+            this.rejectImpl(error, false);
         }
     }
 
@@ -73,10 +73,10 @@ export final class Promise<out T> implements PromiseLike<T> {
                 if (this.state == Promise.STATE_RESOLVED) {
                     promise.doResolve<U>(onFulfilled());
                 } else {
-                    promise.rejectImpl(this.value);
+                    promise.rejectImpl(this.value, false);
                 }
             } catch (error) {
-                promise.rejectImpl(error);
+                promise.rejectImpl(error, false);
             }
         }
         this.submitCallback(fn as Object);
@@ -92,13 +92,13 @@ export final class Promise<out T> implements PromiseLike<T> {
                     promise.doResolve<U>(onFulfilled(this.value as T));
                 } else {
                     if (onRejected) {
-                        promise.rejectImpl(onRejected(this.value));
+                        promise.doResolve<E>(onRejected(this.value));
                     } else {
-                        promise.rejectImpl(this.value);
+                        promise.rejectImpl(this.value, false);
                     }
                 }
             } catch (e) {
-                promise.rejectImpl(e);
+                promise.rejectImpl(e, false);
             }
         }
         this.submitCallback(fn as Object);
@@ -117,7 +117,7 @@ export final class Promise<out T> implements PromiseLike<T> {
                     promise.doResolve<T>(this.value as T);
                 }
             } catch (e) {
-                promise.rejectImpl(e);
+                promise.rejectImpl(e, false);
             }
         }
         this.submitCallback(fn as Object);
@@ -133,13 +133,13 @@ export final class Promise<out T> implements PromiseLike<T> {
                         let res: U|PromiseLike<U> = onRejected(this.value);
                         promise.doResolve<U>(res);
                     } else {
-                        promise.rejectImpl(this.value);
+                        promise.rejectImpl(this.value, false);
                     }
                 } else {
                     promise.doResolve<T>(this.value as T);
                 }
             } catch (e) {
-                promise.rejectImpl(e);
+                promise.rejectImpl(e, false);
             }
         }
         this.submitCallback(fn as Object);
@@ -154,16 +154,16 @@ export final class Promise<out T> implements PromiseLike<T> {
                     try {
                         onFinally();
                     } catch(error) {
-                        promise.rejectImpl(error);
+                        promise.rejectImpl(error, false);
                     }
                 }
                 if (this.state == Promise.STATE_RESOLVED) {
-                    promise.resolveImpl(this.value as T);
+                    promise.resolveImpl(this.value as T, false);
                 } else {
-                    promise.rejectImpl(this.value);
+                    promise.rejectImpl(this.value, false);
                 }
             } catch (e) {
-                promise.rejectImpl(e);
+                promise.rejectImpl(e, false);
             }
         }
         this.submitCallback(fn as Object);
@@ -172,7 +172,7 @@ export final class Promise<out T> implements PromiseLike<T> {
 
     static resolve(): Promise<void> {
         let p = new Promise<void>();
-        p.resolveImpl(undefined);
+        p.resolveImpl(undefined, false);
         return p;
     }
 
@@ -187,13 +187,13 @@ export final class Promise<out T> implements PromiseLike<T> {
 
     static reject(): Promise<void> {
         let p = new Promise<void>();
-        p.rejectImpl(undefined);
+        p.rejectImpl(undefined, false);
         return p;
     }
 
     static reject<U = never>(value: NullishType): Promise<U> {
         let p = new Promise<U>();
-        p.rejectImpl(value);
+        p.rejectImpl(value, false);
         return p;
     }
 
@@ -299,34 +299,54 @@ export final class Promise<out T> implements PromiseLike<T> {
     }
 
     private subscribeOnAnotherPromise<U>(internalPromise: PromiseLike<U>): void {
+        this.mutex.lock();
+        if(this.state != Promise.STATE_PENDING) {
+            this.mutex.unlock();
+            return;
+        }
+        this.state = Promise.STATE_LINKED;
+        this.mutex.unlock();
         let thisPromise = this;
-        internalPromise.then<void, void>((value: U): void => {
-            thisPromise.resolveImpl(value);
-        }, (error: NullishType): void => {
-            thisPromise.rejectImpl(error);
-        });
+        let fn: () => void = ():void => {
+            try{
+                internalPromise.then<void, void>((value: U): void => {
+                    thisPromise.resolveImpl(value, true);
+                }, (error: NullishType): void => {
+                    thisPromise.rejectImpl(error, true);
+                });
+            } catch(error) {
+                thisPromise.rejectImpl(error, true);
+            }
+        }
+        if(internalPromise instanceof Promise) {
+            fn();
+        } else {
+            // To guarantee that the then method of a thenable executes asynchronously.
+            Promise.resolve().then(fn);
+        }
     }
 
     private doResolve<U>(value: U|PromiseLike<U>): void {
         if (value instanceof PromiseLike) {
             if (value === this) {
-                this.rejectImpl(new TypeError("Cannot reolve the promise by self"));
+                this.rejectImpl(new TypeError("Cannot reolve the promise by self"), false);
             }
             this.subscribeOnAnotherPromise<U>(value as PromiseLike<U>);
         } else {
-            this.resolveImpl(value);
+            this.resolveImpl(value, false);
         }
     }
 
     public native awaitResolution(): T;
 
-    private native resolveImpl<U>(value: U): void;
-    private native rejectImpl(error: NullishType): void;
+    private native resolveImpl<U>(value: U, wasLinked: boolean): void;
+    private native rejectImpl(error: NullishType, wasLinked: boolean): void;
     private native submitCallback(callback: Object): void;
 
     private static STATE_PENDING = 0;
-    private static STATE_RESOLVED = 1;
-    private static STATE_REJECTED = 2;
+    private static STATE_LINKED = 1;
+    private static STATE_RESOLVED = 2;
+    private static STATE_REJECTED = 3;
     private static EMPTY_QUEUE = new Object[0];
 
     // Order of fields should be the following
@@ -346,8 +366,8 @@ export final class Promise<out T> implements PromiseLike<T> {
 
 class PromiseConcurrencyBase<T> {
     toPromiseLike(value: T|PromiseLike<T>): PromiseLike<T> {
-        if (value instanceof PromiseLike) {
-            let p = value as PromiseLike<T>;
+        if (value instanceof Promise) {
+            let p = value as Promise<T>;
             return p;
         } else {
             let p = Promise.resolve<T>(value as T);

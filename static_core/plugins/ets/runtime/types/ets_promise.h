@@ -36,8 +36,9 @@ class EtsPromise : public ObjectHeader {
 public:
     // temp
     static constexpr EtsInt STATE_PENDING = 0;
-    static constexpr EtsInt STATE_RESOLVED = 1;
-    static constexpr EtsInt STATE_REJECTED = 2;
+    static constexpr EtsInt STATE_LINKED = 1;
+    static constexpr EtsInt STATE_RESOLVED = 2;
+    static constexpr EtsInt STATE_REJECTED = 3;
 
     EtsPromise() = delete;
     ~EtsPromise() = delete;
@@ -115,6 +116,11 @@ public:
         return (state_ == STATE_PENDING);
     }
 
+    bool IsLinked() const
+    {
+        return (state_ == STATE_LINKED);
+    }
+
     bool IsProxy()
     {
         return GetLinkedPromise(EtsCoroutine::GetCurrent()) != nullptr;
@@ -175,7 +181,7 @@ public:
 
     void Resolve(EtsCoroutine *coro, EtsObject *value)
     {
-        ASSERT(state_ == STATE_PENDING);
+        ASSERT(IsPending() || IsLinked());
         auto coreValue = (value == nullptr) ? nullptr : value->GetCoreType();
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_), coreValue);
         state_ = STATE_RESOLVED;
@@ -184,7 +190,7 @@ public:
 
     void Reject(EtsCoroutine *coro, EtsObject *error)
     {
-        ASSERT(state_ == STATE_PENDING);
+        ASSERT(IsPending() || IsLinked());
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_), error->GetCoreType());
         state_ = STATE_REJECTED;
         OnPromiseCompletion(coro);
@@ -245,6 +251,12 @@ public:
         auto *event = GetEvent(EtsCoroutine::GetCurrent());
         ASSERT(event != nullptr);
         event->Wait();
+    }
+
+    void ChangeStateToPendingFromLinked()
+    {
+        ASSERT(IsLinked());
+        state_ = STATE_PENDING;
     }
 
     // launch promise then/catch callback: void()
