@@ -23,7 +23,7 @@ interface I {
 
 class A implements I {
   j: string = "";
-  i = 1;
+  i: number = 1;
 }
 
 class B extends A {
@@ -61,7 +61,7 @@ function main() {
   assertTrue( f.j == "some str" )
 
   f = { k: true , i: 5, j: "some str" }
-  assertTrue( f.k )
+  assertTrue( f.k == true )
   assertTrue( f.i == 5 )
   assertTrue( f.j == "some str" )
 

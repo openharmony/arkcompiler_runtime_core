@@ -437,9 +437,6 @@
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_6.ets
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_7.ets
 
-#22852
-05.generics/03.utility_types/01.partial_utility_type/partial_inherit3.ets
-
 #24056
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_0.ets
 
