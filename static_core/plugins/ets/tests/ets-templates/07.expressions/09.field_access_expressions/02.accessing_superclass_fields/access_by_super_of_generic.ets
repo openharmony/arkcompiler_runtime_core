@@ -30,7 +30,7 @@ class B extends A{
 
 final class C<T> extends A {
   public bar(): int {
-    return T.super.x;
+    return super.x;
   }
 }
 

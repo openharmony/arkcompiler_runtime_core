@@ -1401,7 +1401,6 @@
 07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_by_super_in_main_1.ets
 07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_by_super_of_generic.ets
 07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_to_super_through_this.ets
-07.expressions/09.field_access_expressions/02.accessing_superclass_fields/super_in_object.ets
 07.expressions/09.field_access_expressions/access_through_interface_type.ets
 07.expressions/09.field_access_expressions/safe_field_access_2.ets
 07.expressions/10.method_call_expression/03.step_3_checking_method_modifiers/step3a_n_5.ets
