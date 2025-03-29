@@ -82,8 +82,8 @@ cases:
           let v4: IAN2 = [null, [1, 2, 3]]
           let ok = v1 == null &&
               v2[0] == null && v2[1] == null &&
-              v3[0].length == 2 && v3[1].length == 2 && v3[1][1] == 4 &&
-              v4.length == 2 && v4[0] == null && v4[1].length == 3
+              v3[0]!.length == 2 && v3[1]!.length == 2 && v3[1]![1] == 4 &&
+              v4.length == 2 && v4[0] == null && v4[1]!.length == 3
 
     # functions
     - defs: |-
