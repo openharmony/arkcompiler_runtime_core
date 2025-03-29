@@ -22,7 +22,7 @@ params: NaN conversion from {{c.from_type}} to {{c.to_type}}
 function main(): int {
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    if (! {{c.to_type|capitalize}}.isNaN(((p: {{c.to_type}}): {{c.to_type}} => { return p })(s{{loop.index}}))) {
+    if (! {{c.to_type|capitalize}}.isNaN(((p: {{c.from_type}}): {{c.to_type}} => { return p })(s{{loop.index}}))) {
         return 1
     }
 {%- endfor %}
