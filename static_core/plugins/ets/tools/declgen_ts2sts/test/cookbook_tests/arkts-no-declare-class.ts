@@ -13,15 +13,7 @@
  * limitations under the License.
  */
 
-export interface Class<T>{
-    name:string;
-    age:number;    
+class Test {
+    name: string;
 }
-export class MyClass{
-    name:string;
-    ESObject: string;
-}
-export class MethodType{
-    name:string;
-    age:number;
-}
+export default Test;

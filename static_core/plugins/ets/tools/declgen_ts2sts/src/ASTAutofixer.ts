@@ -74,8 +74,10 @@ export class Autofixer {
     [ts.SyntaxKind.TypeLiteral, [this[FaultID.TypeLiteral].bind(this)]],
     [ts.SyntaxKind.AnyKeyword, [this[FaultID.AnyToJSValue].bind(this)]],
     [ts.SyntaxKind.UnknownKeyword, [this[FaultID.UnknownToJSValue].bind(this)]],
-    [ts.SyntaxKind.ClassDeclaration, [this[FaultID.NoETSKeyword].bind(this)]],
-    [ts.SyntaxKind.InterfaceDeclaration, [this[FaultID.NoETSKeyword].bind(this)]],
+    [
+      ts.SyntaxKind.InterfaceDeclaration, 
+      [this[FaultID.NoETSKeyword].bind(this), this[FaultID.DefaultImport].bind(this)]
+    ],
     [ts.SyntaxKind.Identifier, [this[FaultID.WrapperToPrimitive].bind(this)]],
     [ts.SyntaxKind.SymbolKeyword, [this[FaultID.SymbolToJSValue].bind(this)]],
     [ts.SyntaxKind.IntersectionType, [this[FaultID.IntersectionTypeJSValue].bind(this)]],
@@ -83,11 +85,22 @@ export class Autofixer {
     [ts.SyntaxKind.VariableStatement, [this[FaultID.StringLiteralType].bind(this)]],
     [
       ts.SyntaxKind.FunctionDeclaration,
-      [this[FaultID.GeneratorFunction].bind(this), this[FaultID.ObjectBindingParams].bind(this)]
+      [
+        this[FaultID.GeneratorFunction].bind(this), 
+        this[FaultID.ObjectBindingParams].bind(this),
+        this[FaultID.DefaultImport].bind(this)
+      ]
     ],
     [ts.SyntaxKind.TypeQuery, [this[FaultID.TypeQuery].bind(this)]],
     [ts.SyntaxKind.TypeParameter, [this[FaultID.LiteralType].bind(this)]],
-    [ts.SyntaxKind.ClassDeclaration, [this[FaultID.NoPrivateMember].bind(this)]],
+    [
+      ts.SyntaxKind.ClassDeclaration, 
+      [
+        this[FaultID.NoPrivateMember].bind(this), 
+        this[FaultID.DefaultImport].bind(this),
+        this[FaultID.NoETSKeyword].bind(this)
+      ]
+    ],
     [ts.SyntaxKind.MethodDeclaration, [this[FaultID.NoETSKeyword].bind(this)]]
   ]);
 
@@ -890,6 +903,17 @@ export class Autofixer {
     }
     return node;
   }
+
+  /**
+   * Rule: `arkts-ESObject-to-object-type`
+   */
+    private [FaultID.DefaultImport](node: ts.Node): ts.VisitResult<ts.Node> {
+      if (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node)) {
+        return exportDefaultAssignment(node,this.context);
+      }
+  
+      return node;
+    }
 }
 
 /**
@@ -1682,7 +1706,7 @@ function findSameInterfaceOrClassOrEnumList(
 
   return [...uniqueNodes, ...newNodes];
 }
-  
+
 function restrictIdentifierName(
   node: ts.PropertyDeclaration | ts.MethodDeclaration | ts.ClassDeclaration | ts.InterfaceDeclaration
 ): ts.VisitResult<ts.Node> {
@@ -1695,3 +1719,90 @@ function restrictIdentifierName(
 
   return node;
 }
+
+function exportDefaultAssignment(
+  node: ts.FunctionDeclaration | ts.ClassDeclaration | ts.InterfaceDeclaration,
+  context: ts.TransformationContext
+): ts.VisitResult<ts.Node> {
+  const modifiers = node.modifiers;
+
+  if (modifiers === undefined) {
+    return node;
+  }
+
+  if (modifiers.some(modifier => modifier.kind === ts.SyntaxKind.DefaultKeyword)) {
+    const newModifiers = modifiers.filter(modifier =>
+      ts.isModifier(modifier)
+    ).concat(context.factory.createModifier(ts.SyntaxKind.DeclareKeyword));
+
+    const safeModifiers = newModifiers as ts.Modifier[];
+
+    return updateNodeWithModifiers(node, safeModifiers, context);
+  }
+
+  return node;
+}
+
+function updateNodeWithModifiers(
+  node: ts.FunctionDeclaration | ts.ClassDeclaration | ts.InterfaceDeclaration,
+  modifiers: ts.Modifier[],
+  context: ts.TransformationContext
+): ts.VisitResult<ts.Node> {
+  if (ts.isFunctionDeclaration(node)) {
+    return updateFunctionDeclarationWithModifiers(node, modifiers, context);
+  } else if (ts.isClassDeclaration(node)) {
+    return updateClassDeclarationWithModifiers(node, modifiers, context);
+  } else if (ts.isInterfaceDeclaration(node)) {
+    return updateInterfaceDeclarationWithModifiers(node, modifiers, context);
+  }
+
+  return node;
+}
+
+function updateFunctionDeclarationWithModifiers(
+  node: ts.FunctionDeclaration,
+  modifiers: ts.Modifier[],
+  context: ts.TransformationContext
+): ts.FunctionDeclaration {
+  return context.factory.updateFunctionDeclaration(
+    node,
+    modifiers,
+    node.asteriskToken,
+    node.name,
+    node.typeParameters,
+    node.parameters,
+    node.type,
+    node.body
+  );
+}
+
+function updateClassDeclarationWithModifiers(
+  node: ts.ClassDeclaration,
+  modifiers: ts.Modifier[],
+  context: ts.TransformationContext
+): ts.ClassDeclaration {
+  return context.factory.updateClassDeclaration(
+    node,
+    modifiers,
+    node.name,
+    node.typeParameters,
+    node.heritageClauses,
+    node.members
+  );
+}
+
+function updateInterfaceDeclarationWithModifiers(
+  node: ts.InterfaceDeclaration,
+  modifiers: ts.Modifier[],
+  context: ts.TransformationContext
+): ts.InterfaceDeclaration {
+  return context.factory.updateInterfaceDeclaration(
+    node,
+    modifiers,
+    node.name,
+    node.typeParameters,
+    node.heritageClauses,
+    node.members
+  );
+}
+
