@@ -63,7 +63,7 @@ static void EnsureCapacity(EtsCoroutine *coro, EtsHandle<EtsPromise> &hpromise)
     hpromise->SetLaunchModeQueue(coro, newLaunchModeQueue);
 }
 
-void EtsPromiseResolve(EtsPromise *promise, EtsObject *value)
+void EtsPromiseResolve(EtsPromise *promise, EtsObject *value, EtsBoolean wasLinked)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     if (promise == nullptr) {
@@ -74,20 +74,44 @@ void EtsPromiseResolve(EtsPromise *promise, EtsObject *value)
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsPromise> hpromise(coro, promise);
     EtsHandle<EtsObject> hvalue(coro, value);
-    EtsMutex::LockHolder lh(hpromise);
-    if (hpromise->GetState() != EtsPromise::STATE_PENDING) {
-        return;
+
+    if (wasLinked == 0) {
+        /* When the value is still a Promise, the lock must be unlocked first. */
+        hpromise->Lock();
+        if (!hpromise->IsPending()) {
+            hpromise->Unlock();
+            return;
+        }
+        if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(PlatformTypes(coro)->corePromise)) {
+            auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
+            EtsHandle<EtsPromise> hInternalPromise(coro, internalPromise);
+            hpromise->Unlock();
+            SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
+            return;
+        }
+        hpromise->Resolve(coro, hvalue.GetPtr());
+        hpromise->Unlock();
+    } else {
+        /* When the value is still a Promise, the lock must be unlocked first. */
+        hpromise->Lock();
+        if (!hpromise->IsLinked()) {
+            hpromise->Unlock();
+            return;
+        }
+        if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(PlatformTypes(coro)->corePromise)) {
+            auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
+            EtsHandle<EtsPromise> hInternalPromise(coro, internalPromise);
+            hpromise->ChangeStateToPendingFromLinked();
+            hpromise->Unlock();
+            SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
+            return;
+        }
+        hpromise->Resolve(coro, hvalue.GetPtr());
+        hpromise->Unlock();
     }
-    if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(PlatformTypes(coro)->corePromise)) {
-        auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
-        EtsHandle<EtsPromise> hInternalPromise(coro, internalPromise);
-        SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
-        return;
-    }
-    hpromise->Resolve(coro, hvalue.GetPtr());
 }
 
-void EtsPromiseReject(EtsPromise *promise, EtsObject *error)
+void EtsPromiseReject(EtsPromise *promise, EtsObject *error, EtsBoolean wasLinked)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     if (promise == nullptr) {
@@ -99,7 +123,7 @@ void EtsPromiseReject(EtsPromise *promise, EtsObject *error)
     EtsHandle<EtsPromise> hpromise(coro, promise);
     EtsHandle<EtsObject> herror(coro, error);
     EtsMutex::LockHolder lh(hpromise);
-    if (hpromise->GetState() != EtsPromise::STATE_PENDING) {
+    if ((!hpromise->IsPending() && wasLinked == 0) || (!hpromise->IsLinked() && wasLinked != 0)) {
         return;
     }
     hpromise->Reject(coro, herror.GetPtr());
@@ -114,7 +138,7 @@ void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
     EtsHandle<EtsPromise> hpromise(coro, promise);
     EtsHandle<EtsObject> hcallback(coro, callback);
     EtsMutex::LockHolder lh(hpromise);
-    if (hpromise->GetState() == EtsPromise::STATE_PENDING) {
+    if (hpromise->IsPending() || hpromise->IsLinked()) {
         EnsureCapacity(coro, hpromise);
         hpromise->SubmitCallback(coro, hcallback.GetPtr(), launchMode);
         return;
@@ -143,7 +167,7 @@ static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsProm
      */
 
     promiseHandle->Wait();
-    ASSERT(!promiseHandle->IsPending());
+    ASSERT(!promiseHandle->IsPending() && !promiseHandle->IsLinked());
 
     // will get here after the JS callback is called
     if (promiseHandle->IsResolved()) {
@@ -176,7 +200,7 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
     /* CASE 2. This is a native ETS promise */
     LOG(DEBUG, COROUTINES) << "Promise::await: starting await() for a promise...";
     promiseHandle->Wait();
-    ASSERT(!promiseHandle->IsPending());
+    ASSERT(!promiseHandle->IsPending() && !promiseHandle->IsLinked());
     LOG(DEBUG, COROUTINES) << "Promise::await: await() finished.";
 
     /**
