@@ -1407,10 +1407,6 @@
 09.classes/06.method_declarations/03.abstract_methods/instance_method_overridden_by_abstract.ets
 09.classes/06.method_declarations/06.overriding_methods/overriding_by_instance_methods/abstract_method_overridden_by_instance.ets
 
-#23726
-09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_2.ets
-09.classes/06.method_declarations/06.overriding_methods/requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_3.ets
-
 #22252
 09.classes/06.method_declarations/09.methods_returning_this/methods_returning_this_08.ets
 
