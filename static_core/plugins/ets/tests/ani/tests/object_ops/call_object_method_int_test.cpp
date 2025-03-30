@@ -124,7 +124,54 @@ TEST_F(CallObjectMethodIntTest, call_method_int_a_invalid_args)
     GetMethodData(&object, &method);
 
     ani_int sum;
-    ASSERT_EQ(env_->Object_CallMethod_Int_A(nullptr, method, &sum, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethod_Int_A(object, method, &sum, nullptr), ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodIntTest, call_method_int_a_invalid_object)
+{
+    ani_object object;
+    ani_method method;
+    GetMethodData(&object, &method);
+
+    ani_value args[2U];
+    ani_int arg1 = 2U;
+    ani_int arg2 = 3U;
+    args[0U].i = arg1;
+    args[1U].i = arg2;
+
+    ani_int sum;
+    ASSERT_EQ(env_->Object_CallMethod_Int_A(nullptr, method, &sum, args), ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodIntTest, call_method_int_a_invalid_method)
+{
+    ani_object object;
+    ani_method method;
+    GetMethodData(&object, &method);
+
+    ani_value args[2U];
+    ani_int arg1 = 2U;
+    ani_int arg2 = 3U;
+    args[0U].i = arg1;
+    args[1U].i = arg2;
+
+    ani_int sum;
+    ASSERT_EQ(env_->Object_CallMethod_Int_A(object, nullptr, &sum, args), ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodIntTest, call_method_int_a_invalid_result)
+{
+    ani_object object;
+    ani_method method;
+    GetMethodData(&object, &method);
+
+    ani_value args[2U];
+    ani_int arg1 = 2U;
+    ani_int arg2 = 3U;
+    args[0U].i = arg1;
+    args[1U].i = arg2;
+
+    ASSERT_EQ(env_->Object_CallMethod_Int_A(object, method, nullptr, args), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing
