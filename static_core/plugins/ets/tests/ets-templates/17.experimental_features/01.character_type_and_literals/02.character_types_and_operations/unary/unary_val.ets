@@ -20,11 +20,13 @@ desc: >-
 ---*/
 
 function minus(p: char): char {
-    return -p
+    // Widening to int happens
+    return -p as Char
 }
 
 function plus(p: char): char {
-    return +p
+    // Widening to int happens
+    return +p as Char
 }
 
 function main() {

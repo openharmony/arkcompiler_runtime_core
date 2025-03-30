@@ -15,6 +15,7 @@
 
 /*---
 desc: Keyword 'struct' can be used as a replacement for the keyword 'class'. Check stuct as class implements an interface.
+tags: [compile-only, negative]
 ---*/
 
 interface Test {

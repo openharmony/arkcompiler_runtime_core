@@ -280,7 +280,7 @@
 04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_12.ets
 04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_13.ets
 
-#24418 
+#24418
 04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_14.ets
 
 #23983
@@ -1499,11 +1499,6 @@
 
 #24428
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc2.ets
-
-#24433
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_func_val_4.ets
-
-#24428
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_exp_val_0.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_exp_val_1.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_exp_val_2.ets
@@ -1511,7 +1506,6 @@
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_func_ref_1.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_func_ref_3.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_func_ref_4.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_func_val_3.ets
 
 #24002 ES2PANDA_NEG_FAIL
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_0.ets
@@ -1524,22 +1518,6 @@
 17.experimental_features/03.array_creation_expressions/expr_n_10.ets
 17.experimental_features/03.array_creation_expressions/expr_n_11.ets
 17.experimental_features/03.array_creation_expressions/expr_n_12.ets
-
-#24429
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_ref_0.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_ref_1.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_ref_2.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_ref_3.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_ref_4.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_ref_5.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_ref_6.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_val_0.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_val_1.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_val_2.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_val_3.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_val_4.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_val_5.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_val_6.ets
 
 #24221
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_7.ets
@@ -1573,7 +1551,6 @@
 17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading_30.ets
 
 #15767 Cannot select the right method among overloaded ones
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over3_1.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over3_3.ets
 
 #15817 Tests failing on the latest dev branch status
@@ -1717,10 +1694,3 @@
 
 #22969
 18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_6.ets
-
-#23111
-20.implementation_details/05.keyword_struct_and_arkui/struct_class_test.ets
-20.implementation_details/05.keyword_struct_and_arkui/struct_empty_class.ets
-20.implementation_details/05.keyword_struct_and_arkui/struct_extends_class.ets
-20.implementation_details/05.keyword_struct_and_arkui/struct_implements_interface.ets
-20.implementation_details/05.keyword_struct_and_arkui/struct_simple_class.ets

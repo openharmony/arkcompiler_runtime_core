@@ -12,16 +12,19 @@
 # limitations under the License.
 ---
 vals:
+    # 0.
     - v1: c'\u0020'
       v2: c'\u0021'
       b: 'true'
       r: c' '
 
+    # 1.
     - v1: c'\u0020'
       v2: c'\uF041'
       b: 'false'
       r: c'A' + c'\uF000'
 
+    # 2.
     - v1: (c'\uFFFE' + c'\u0023') as char
       v2: (c'\u0021' + c'\u0001') as char
       b: 'true'
