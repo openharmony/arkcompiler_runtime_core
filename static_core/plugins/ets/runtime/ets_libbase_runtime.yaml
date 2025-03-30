@@ -7660,6 +7660,24 @@ intrinsics:
       args: [std.core.Object, u1]
     impl: ark::ets::intrinsics::ExclusiveLaunch
 
+###################
+# std.core.EAWorker #
+###################
+
+  - name: EtsEAWorkerPostToMain
+    space: ets
+    class_name: std.core.EAWorker
+    method_name: postTaskToMain
+    static: true
+    signature:
+      ret: std.core.Job
+      args:
+        - std.core.Object
+        - std.core.Object[]
+    impl: ark::ets::intrinsics::PostToMainThread
+
+
+
 ###############################
 # std.core.TaskPoster #
 ###############################
