@@ -21,6 +21,7 @@ export class StackTraceElement {
     private methodName: String = ""
     private sourceFileName: String = ""
     private lineNumber: int
+    private colNumber: int = 0
 
     private constructor () {}
 
@@ -31,7 +32,8 @@ export class StackTraceElement {
     */
     public override toString(): String {
         return "\tat " + this.className + "." + this.methodName +
-             " (" + this.sourceFileName + ":" + this.lineNumber + ")"
+             // NOTE(@sandee, #24492): Extraction of column number is not implemented  
+             " (" + this.sourceFileName + ":" + this.lineNumber + ":" + this.colNumber + ")"
     }
 }
 

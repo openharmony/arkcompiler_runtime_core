@@ -155,11 +155,6 @@ export class Error {
         }
         let builder = new StringBuilder("")
 
-        if (this.message != "") {
-            let val = this.name + ": " + this.message + "\n"
-            builder.append(val)
-        }
-
         // NOTE(kparshukov): find a better way to erase Error's ctors lines
         const provisionStackTraceLevel = 2
         const realStackStart = (this.stackLines.length > provisionStackTraceLevel ? provisionStackTraceLevel : 0)

@@ -14,6 +14,7 @@
  */
 
 #include "ani_gtest.h"
+#include <regex>
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
@@ -527,6 +528,55 @@ TEST_F(ErrorHandlingTest, combined_scenes_test_3)
     ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
     ASSERT_EQ(env_->GetUnhandledError(&error), ANI_OK);
     ASSERT_EQ(env_->ThrowError(error), ANI_OK);
+}
+
+static std::string GetErrorProperty(ani_env *aniEnv, ani_error aniError, const char *property)
+{
+    std::string propertyValue;
+    ani_type errorType = nullptr;
+    if ((aniEnv->Object_GetType(aniError, &errorType)) != ANI_OK) {
+        return propertyValue;
+    }
+    ani_method getterMethod = nullptr;
+    if ((aniEnv->Class_FindGetter(static_cast<ani_class>(errorType), property, &getterMethod)) != ANI_OK) {
+        return propertyValue;
+    }
+    ani_ref aniRef = nullptr;
+    if ((aniEnv->Object_CallMethod_Ref(aniError, getterMethod, &aniRef)) != ANI_OK) {
+        return propertyValue;
+    }
+    auto aniString = reinterpret_cast<ani_string>(aniRef);
+    ani_size sz {};
+    if ((aniEnv->String_GetUTF8Size(aniString, &sz)) != ANI_OK) {
+        return propertyValue;
+    }
+    propertyValue.resize(sz + 1);
+    if ((aniEnv->String_GetUTF8SubString(aniString, 0, sz, propertyValue.data(), propertyValue.size(), &sz)) !=
+        ANI_OK) {
+        return propertyValue;
+    }
+    propertyValue.resize(sz);
+    return propertyValue;
+}
+
+TEST_F(ErrorHandlingTest, call_error_stack)
+{
+    auto func = GetThrowErrorFunction();
+
+    ani_int errorResult = 0;
+    ani_error error {};
+    ASSERT_EQ(env_->Function_Call_Int(func, &errorResult, MAGIC_NUMBER), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->GetUnhandledError(&error), ANI_OK);
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
+
+    std::string stack = GetErrorProperty(env_, error, "stack");
+    std::stringstream ss(stack);
+    std::regex pattern(R"(\s*at .*(\d+):(\d+)\))");
+    std::string token;
+
+    while (std::getline(ss, token, '\n')) {
+        ASSERT_TRUE(std::regex_match(token, pattern));
+    }
 }
 
 }  // namespace ark::ets::ani::testing
